@@ -225,6 +225,17 @@ def flag_work_expenses(assignments: list[dict]) -> str:
     return _answer(lambda: _api.flag_work_expenses(assignments))
 
 
+@mcp.tool()
+def split_transactions(splits: list[dict]) -> str:
+    """Split rows into 2-5 parts that add up to them, e.g. the work and personal
+    shares of a partial claim: [{"transaction_id": ..., "parts": [{"amount":
+    "-30.00"}, {"amount": "-12.50", "reimbursement": "clear"}]}]. Amounts are
+    decimal STRINGS in the account's currency. Needs a key with may_commit (a
+    split replaces the row). Refused rows come back with the reason; the rest
+    still split, as one undo for a person."""
+    return _answer(lambda: _api.split(splits))
+
+
 # --------------------------------------------------------------------------- #
 # Transfers the matcher missed (README, job 5)
 # --------------------------------------------------------------------------- #

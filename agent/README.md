@@ -44,6 +44,7 @@ shell history and in `ps`.
 | Analysis, reports, reviewing categories and reading findings | `read` |
 | Attaching receipts, categorising, flagging work expenses, linking transfers | `write` |
 | Committing a staged import without a person reviewing it first | `write` + `may_commit` |
+| Splitting a row into parts (it replaces the row) | `write` + `may_commit` |
 
 ## 2. Ask what you can reach
 
@@ -292,6 +293,32 @@ all refused. That is unlinking, and it is a person's.
 `GET $H/reports/reimbursements?currency=EUR` then shows what is outstanding,
 oldest first — the list to chase.
 
+**c. When a claim covers only part of a row, split it.** A shared booking, a
+share of a phone bill, three rides on one charge where one was personal: the
+row is split, and the work flag stays on the work part only.
+
+```bash
+curl -s "${auth[@]}" "${json[@]}" -X POST "$H/transactions/split" -d '{
+  "splits": [{"transaction_id": "…", "parts": [
+    {"amount": "-30.00"},
+    {"amount": "-12.50", "reimbursement": "clear"}]}]}'
+```
+
+**This needs a key with `may_commit`.** A split *replaces* the row it divides,
+and no key deletes — it is allowed only because nothing is lost (the parts must
+add up to the row, the receipts go on every part, and one undo puts the
+original back) and only for a key a person has trusted further. An ordinary
+write key is refused with a sentence saying so: hand the parts to a person.
+
+Each row takes 2–5 parts, as a decimal **string** in the account's own
+currency or as `amount_minor`. Every part of a work expense stays one;
+`"reimbursement": "clear"` takes the flag off that part in the same act, and is
+refused on a row already paid back — that would take the repayment link apart,
+which is a person's. A row that cannot be split (does not add up, a transfer
+leg, a repayment, reconciled, more decimals than its currency) comes back in
+`refused[]` with the register's own reason; the others still split. The whole
+request is one batch.
+
 ### 4. The combined position, across countries and currencies
 
 The household has accounts in more than one country and currency. You are
@@ -439,7 +466,8 @@ fifty receipts is three calls, not fifty.
 
 Keys expire: 90 days by default, 365 at most, and the expiry does not slide.
 
-**No key can ever** delete anything, undo anything, unlink a transfer or a
+**No key can ever** delete anything (the one exception is the row a split
+replaces, and only with `may_commit` — see job 3), undo anything, unlink a transfer or a
 repayment, create or revoke a key, touch passwords, authenticators, devices or
 household membership, or reach the database browser. That is not a scope you
 were not given — those routes ask for a signed-in person and always will.
