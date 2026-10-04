@@ -26,6 +26,16 @@ this repository.
 
 ## Unreleased
 
+### Fixed
+
+- **The upgrade rehearsal runs on a repository's first commit.** On a push it
+  rehearsed from `HEAD^`, falling back to `HEAD` when there is no parent -- but
+  on a root commit `git rev-parse HEAD^` fails *and* prints `HEAD^`, so the step
+  wrote two lines where GitHub expects one value and `rehearsal` failed with
+  "Invalid format". This repository starts from one commit, so `main` could not
+  go green and `release.yml` had no tree it would publish. A root commit now
+  rehearses from itself. No application code changed.
+
 ## 0.6.1 — 2026-10-02
 
 **Reversible: none** — no migration in this release. Check out `v0.6.0` and
