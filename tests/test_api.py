@@ -167,6 +167,52 @@ def test_a_household_and_an_account_round_trip(client):
     assert [a["name"] for a in listed] == ["Checking"]
 
 
+def test_an_account_is_created_with_its_bank_and_a_note(client):
+    """The new-account panel sends both (#12); one account says, one does not."""
+    _setup_owner(client)
+    house = client.post("/api/households", json={"name": "Doe-Smith"}, headers=HEADERS).json()
+
+    banked = client.post(
+        f"/api/households/{house['id']}/accounts",
+        json={
+            "name": "Joint current",
+            "type": "checking",
+            "currency": "EUR",
+            "institution": "Example Bank",
+            "note": "The one the salaries land in",
+        },
+        headers=HEADERS,
+    )
+    assert banked.status_code in (200, 201), banked.text
+    plain = client.post(
+        f"/api/households/{house['id']}/accounts",
+        json={
+            "name": "Pounds",
+            "type": "savings",
+            "currency": "GBP",
+            "institution": None,
+            "note": None,
+        },
+        headers=HEADERS,
+    )
+    assert plain.status_code in (200, 201), plain.text
+    assert (banked.json()["institution"], banked.json()["note"]) == (
+        "Example Bank",
+        "The one the salaries land in",
+    )
+    assert (plain.json()["institution"], plain.json()["note"]) == (None, None)
+
+    # Read back, not echoed: what the list and the account itself now hold.
+    listed = {a["name"]: a for a in client.get(f"/api/households/{house['id']}/accounts").json()}
+    assert {name: (a["currency"], a["institution"]) for name, a in listed.items()} == {
+        "Joint current": ("EUR", "Example Bank"),
+        "Pounds": ("GBP", None),
+    }
+    stored = client.get(f"/api/accounts/{banked.json()['id']}").json()
+    assert (stored["institution"], stored["note"]) == ("Example Bank", "The one the salaries land in")
+    assert client.get(f"/api/accounts/{plain.json()['id']}").json()["note"] is None
+
+
 @pytest.mark.parametrize("code", ["€€€", "12A", "E1R"])
 def test_a_currency_code_that_is_not_three_letters_is_refused(client, code):
     """Three characters is not enough: `Intl` throws on these and blanks every screen (#193)."""

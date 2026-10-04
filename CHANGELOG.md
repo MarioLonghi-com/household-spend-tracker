@@ -26,6 +26,16 @@ this repository.
 
 ## Unreleased
 
+### Added
+
+- **The New account panel asks for the bank and a note** (#12). The API
+  always took `institution` and `note` on create, but the panel never
+  collected them, so the only way to record the bank was to make the account
+  and open it again. Both are sent trimmed, and a blank one as null. The edit
+  panel now asks in the same order -- country, then bank, then note -- and
+  both hold the bank to 120 characters and the note to 2,000, the API's own
+  limits.
+
 ## 0.6.2 — 2026-10-04
 
 **Reversible: none** — no migration in this release. To go back, check out
