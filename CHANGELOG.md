@@ -26,6 +26,16 @@ this repository.
 
 ## Unreleased
 
+### Changed
+
+- **The memory the app needs is written down, and it is more than the docs
+  said.** `deploy/DOCKER.md` said "about 1 GB of RAM". The app container needs
+  `mem_limit: 768m` as a floor (it peaks near 500 MiB and keeps its high-water
+  mark), and a machine that runs only this needs 1.5 GB. Below that the kernel
+  kills the app mid-request and the browser shows a 502 for a second.
+  `deploy/TROUBLESHOOTING.md` has a new section saying how to recognise it and
+  what to change. Measurements in #14.
+
 ## 0.6.2 — 2026-10-04
 
 **Reversible: none** — no migration in this release. To go back, check out

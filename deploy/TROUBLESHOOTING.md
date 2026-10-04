@@ -29,6 +29,7 @@ page is for the moment something is not what you expected.
 - [Getting back into an account (TOTP)](#getting-back-into-an-account-totp)
 - [The node came up as `spend-tracker-1`](#the-node-came-up-as-spend-tracker-1)
 - [`database is locked`, or two apps on one ledger](#database-is-locked-or-two-apps-on-one-ledger)
+- [A 502 for a second, then it carries on](#a-502-for-a-second-then-it-carries-on)
 - [It will not start](#it-will-not-start)
 - [Backups, by route](#backups-by-route)
 - [Asking for help](#asking-for-help)
@@ -624,6 +625,51 @@ SQLite allows one writer at a time. Two causes in practice:
   One line is right. Two: stop the one you did not mean, from its own
   directory (`docker compose stop app` at the top of the checkout, for the
   stray one in this example), and remove it with `docker compose rm app`.
+
+---
+
+## A 502 for a second, then it carries on
+
+**What you see.** A request fails with a 502 (from `tailscale serve`, or
+from your reverse proxy), the page says something went wrong, and a moment
+later everything works again. Nothing in the app's own log explains it,
+because the app never got to log anything.
+
+**The usual cause is memory.** The kernel killed the app for going over the
+container's memory limit, Docker started it again (`restart:
+unless-stopped`), and the proxy answered 502 for the two or three seconds
+nothing was listening. Check:
+
+```bash
+journalctl -k | grep -i "memory cgroup out of memory"
+docker inspect spend-tracker-app-1 --format '{{.RestartCount}} restarts, OOMKilled={{.State.OOMKilled}}'
+```
+
+A kill line naming `python` and a `RestartCount` above zero settle it.
+`OOMKilled` is often `false` even then: it describes only the *last* exit,
+and the container has restarted cleanly since. The sidecar's log says the
+same thing from the other side: `proxy error: … connection refused` or
+`connection reset by peer`.
+
+**The fix is the limit, not the app.** The app's working set is about 140 MiB
+at rest and reaches about 500 MiB when two receipts are decoding while the
+register reloads: the receipt pool is two wide on purpose, and the register
+is fetched whole on purpose. Freed memory isn't handed back to the system, so
+whatever the process peaked at becomes its new floor. `mem_limit: 768m` is
+the minimum, and the machine needs room for it on top of everything else
+([DOCKER.md, Before you start](DOCKER.md#before-you-start)). Raise the limit
+in a `compose.override.yaml` beside the compose file, not by editing the file
+itself, so a `git pull` doesn't take it back:
+
+```yaml
+services:
+  app:
+    mem_limit: 768m
+```
+
+If the machine cannot give it 768 MiB, `MALLOC_ARENA_MAX: "2"` in the app's
+`environment:` trims about a tenth off the high-water mark. It makes a kill
+less likely; it doesn't make a small limit safe. Measurements: #14.
 
 ---
 

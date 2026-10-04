@@ -55,8 +55,20 @@ authenticator: [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
   git checkout v0.5.1
   ```
 
-- **About 1 GB of RAM and 1 GB of disk** for the image and a household's
-  ledger. The database for five years of receipts measures under 2 GB.
+- **Memory: 768 MiB for the app container, and at least 1.5 GB for a
+  machine that runs only this.** The app peaks at about 500 MiB on a busy
+  evening (attaching receipts while the register reloads) and keeps what it
+  peaked at, so `mem_limit: 768m` in the sidecar compose file is a floor:
+  **do not lower it.** Below it the kernel kills the app mid-request, Docker
+  restarts it, and the browser shows a 502 for a second or two
+  ([TROUBLESHOOTING.md](TROUBLESHOOTING.md#a-502-for-a-second-then-it-carries-on)).
+  On top of the app come the Tailscale sidecar (about 50 MiB) and the
+  operating system with Docker (about 250 MiB on a minimal Debian), which is
+  why a 1 GB virtual machine is too small.
+- **Disk: about 1 GB** for the image and a household's ledger. The database
+  for five years of receipts measures under 2 GB. Building the image on the
+  box needs about 2.5 GB more while it runs; `docker builder prune -af`
+  gives it back.
 
 ---
 
