@@ -26,6 +26,17 @@ this repository.
 
 ## Unreleased
 
+### Added
+
+- **A key can write a row's memo.** `PATCH /api/agent/v1/households/{id}/transactions/memo`
+  takes `[{transaction_id, memo}]` and applies them as one batch, so one undo.
+  Until now categorising was the only edit a key could make to a row already in
+  the ledger, so what an agent read off a ticket or an invoice could go on a
+  receipt's note but not on the row a person reads. The memo is replaced, null
+  or blank empties it, and a reconciled row is skipped and listed in `locked`,
+  as the register would refuse it. Listed in the manifest, in the sample client
+  and as the `write_memos` MCP tool.
+
 ## 0.6.2 — 2026-10-04
 
 **Reversible: none** — no migration in this release. To go back, check out

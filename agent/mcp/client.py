@@ -251,6 +251,10 @@ class SpendTracker:
         """[{transaction_id, category_id}], one act and one undo."""
         return self._write("PATCH", self._house("transactions"), {"assignments": assignments})
 
+    def write_memos(self, assignments: list[dict]) -> dict:
+        """[{transaction_id, memo}], one act and one undo. Replaces the memo."""
+        return self._write("PATCH", self._house("transactions/memo"), {"assignments": assignments})
+
     def flag_work_expenses(self, assignments: list[dict]) -> dict:
         """[{transaction_id, state: expected|written_off|null, settled_by?}]."""
         return self._write("PATCH", self._house("transactions/reimbursement"), {"assignments": assignments})
