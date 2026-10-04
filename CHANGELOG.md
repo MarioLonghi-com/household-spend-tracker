@@ -26,6 +26,14 @@ this repository.
 
 ## Unreleased
 
+## 0.6.2 — 2026-10-04
+
+**Reversible: none** — no migration in this release. To go back, check out
+this repository's first commit, which is 0.6.1, and restart.
+
+The first release published from this repository; 0.6.1 was its starting
+point and was not tagged here.
+
 ### Fixed
 
 - **The upgrade rehearsal runs on a repository's first commit.** On a push it
