@@ -1,0 +1,4 @@
+Type,Product,Started Date,Completed Date,Description,Amount,Fee,Currency,State,Balance
+Card Payment,Current,2026-09-02 19:14:20,,Aardvark Cafe,-34.00,0.00,EUR,REVERTED,
+Card Payment,Current,2026-09-03 08:01:00,2026-09-03 08:01:02,Bookshop,-24.00,0.00,EUR,COMPLETED,976.00
+Topup,Current,2026-09-03 09:00:00,2026-09-03 09:00:01,Payment from Someone,1000.00,0.00,EUR,COMPLETED,1976.00

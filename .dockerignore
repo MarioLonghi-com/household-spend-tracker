@@ -1,0 +1,27 @@
+# What the build context is allowed to carry.
+#
+# The COPY lines in the Dockerfile are selective, so none of this would reach
+# the image anyway. It is excluded because the **context** is sent to the
+# daemon and cached, and `data/` is somebody's actual ledger and `secret.key`.
+# A build context is not a place to put those, even in transit.
+.git
+.github
+data
+backups
+ci-data
+e2e-data
+.venv
+client/node_modules
+client/dist
+app/static/dist
+**/__pycache__
+*.sqlite3
+*.sqlite3-*
+.pytest_cache
+.ruff_cache
+.coverage
+.temp
+**/.DS_Store
+
+# The client is built inside the image, from source. Shipping a local build in
+# would mean the image's UI depends on whatever was last on somebody's laptop.

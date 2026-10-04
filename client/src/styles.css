@@ -1,0 +1,1642 @@
+/* One stylesheet, tokens first. Light and dark both defined.
+
+   The app follows the system by default, because a household ledger is opened
+   at all hours -- and `data-theme` on <html> overrides it when somebody has
+   chosen a side in Your account. The dark tokens are therefore written twice,
+   under two selectors of equal specificity:
+
+     @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }
+     :root[data-theme="dark"]
+
+   The `:not()` is what lets a person hold the app in light while their laptop
+   is dark; the attribute rule comes second so it wins the tie when both match.
+   It is deliberately not resolved in JavaScript instead: `main.py` sends
+   `script-src 'self'` with no `'unsafe-inline'`, so the pre-paint script that
+   would stop the first frame flashing the wrong scheme cannot exist here.
+
+   Two blocks saying one thing can drift, so `tests/styles-agree.test.ts`
+   asserts they declare exactly the same tokens with the same values. Change one
+   and that test tells you about the other. See `lib/appearance.ts`. */
+
+:root {
+  --ink: #16222a;
+  --muted: #5b6b65;
+  --paper: #f4f7f4;
+  --surface: #ffffff;
+  --surface-2: #edf1ec;
+  --line: #d7e0d9;
+  --accent: #15705c;
+  --accent-ink: #ffffff;
+  --danger: #a3341f;
+  --warn: #94600f;
+  --positive: #15705c;
+  --info: #1f5fa8;
+  /* The alternating column wash. Barely there on purpose: it has to separate
+     eight columns without competing with the figures sitting on it, so it is
+     a tint of the page rather than a colour of its own. */
+  --stripe: #00000008;
+  --stripe-head: #0000000f;
+
+  --radius: 4px;
+  --gap: 12px;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Dark, when the system says so and nobody has overridden it. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #e6ede9;
+    --muted: #97a59f;
+    --paper: #0f1715;
+    --surface: #17201e;
+    --surface-2: #1d2724;
+    --line: #2a3733;
+    --accent: #5ac3a6;
+    --accent-ink: #0f1715;
+    --danger: #e08a72;
+    --warn: #dca85c;
+    --positive: #5ac3a6;
+    --info: #7fb0ea;
+    /* Light on dark rather than the same dark wash, which would vanish. */
+    --stripe: #ffffff08;
+    --stripe-head: #ffffff12;
+  }
+}
+
+/* Dark, because somebody asked for it. Same values; the test says so. */
+:root[data-theme="dark"] {
+  --ink: #e6ede9;
+  --muted: #97a59f;
+  --paper: #0f1715;
+  --surface: #17201e;
+  --surface-2: #1d2724;
+  --line: #2a3733;
+  --accent: #5ac3a6;
+  --accent-ink: #0f1715;
+  --danger: #e08a72;
+  --warn: #dca85c;
+  --positive: #5ac3a6;
+  --info: #7fb0ea;
+  --stripe: #ffffff08;
+  --stripe-head: #ffffff12;
+}
+
+/* The browser's own furniture -- form controls, scrollbars, the canvas behind
+   a rubber-band scroll -- reads this and nothing else. Without it a forced
+   theme leaves white select menus on a dark page. */
+:root { color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 { margin: 0 0 8px; line-height: 1.2; }
+h1 { font-size: 24px; }
+h2 { font-size: 19px; }
+h3 { font-size: 16px; }
+p { margin: 0 0 12px; }
+a { color: var(--accent); }
+
+button {
+  font: inherit;
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+button:hover:not(:disabled) { background: var(--surface-2); }
+/* The generic hover outranks .primary on specificity, which left white text
+   on a pale background. Keep the accent and lift it instead. */
+button.primary:hover:not(:disabled) { background: var(--accent); opacity: 0.88; }
+button:disabled { opacity: 0.5; cursor: default; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.danger { color: var(--danger); }
+button.link { border: 0; background: none; padding: 2px 4px; color: var(--accent); text-decoration: underline; }
+
+input, select, textarea {
+  font: inherit;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  width: 100%;
+}
+input:focus-visible, select:focus-visible, button:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+label.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+label.field > span { font-weight: 600; }
+
+.row { display: flex; gap: var(--gap); flex-wrap: wrap; align-items: flex-end; }
+.row > * { flex: 1 1 140px; }
+/* Things that are as wide as their contents must not be stretched by the row. */
+.row > button,
+.row > .pill,
+.row > h1 { flex: 0 0 auto; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.mono { font-family: var(--mono); }
+.amount { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.neg { color: var(--danger); }
+.pos { color: var(--positive); }
+
+/* ---- shell ---- */
+/* The shell is exactly the window, and it does not scroll. The nav is a fixed
+   frame -- where you are and who you are stay on screen however far down the
+   register you have read -- and the one thing that scrolls is the content. */
+.shell { display: flex; height: 100vh; height: 100dvh; overflow: hidden; }
+nav.side {
+  width: 190px;
+  flex: none;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  /* Its own scrollbar, for a short window or a long household list: the nav
+     staying put must not mean its own last item becomes unreachable. */
+  overflow-y: auto;
+}
+nav.side .brand { font-weight: 700; padding: 4px 8px 14px; }
+nav.side button {
+  border: 0;
+  background: none;
+  text-align: left;
+  padding: 7px 8px;
+  border-radius: var(--radius);
+}
+nav.side button[aria-current="page"] { background: var(--surface-2); font-weight: 600; }
+main.content { flex: 1; padding: 20px; min-width: 0; overflow-y: auto; height: 100%; }
+
+.presence {
+  margin-top: auto;
+  padding: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+.presence .dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--positive);
+  margin-right: 6px;
+}
+
+/* ---- tables ---- */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 7px 9px; text-align: left; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
+tbody tr:hover { background: var(--surface-2); }
+tbody tr.selected { background: var(--surface-2); }
+.table-scroll { overflow-x: auto; }
+
+/* The per-row actions stay put while the middle columns scroll under them.
+   At 1024px the accounts table is 806px wide inside a 760px card, and what
+   falls off the right-hand edge is the last cell -- the one holding Reconcile
+   and Settings. So the two primary actions on the screen were the least
+   reachable thing on it, and reaching them meant discovering a horizontal
+   scrollbar inside a card. Reported in #16.
+
+   Pinned rather than hidden, because the columns doing the pushing (Bank,
+   Country) are usually empty and the actions never are.
+
+   `background` is not decoration: without it the scrolled cells show through.
+   It has to be restated for the hover and selected rows, which set their
+   background on the <tr> -- a sticky cell paints over it. And the separator
+   is a box-shadow rather than a border-left, because the table is
+   `border-collapse: collapse`, where borders belong to the table and do not
+   travel with a sticky cell. */
+th.row-actions,
+td.row-actions {
+  position: sticky;
+  right: 0;
+  background: var(--surface);
+  box-shadow: inset 1px 0 0 var(--line);
+}
+td.row-actions { z-index: 2; }
+/* Above the body cells, and above a sticky thead that sets its own z-index. */
+th.row-actions { z-index: 5; }
+tbody tr:hover td.row-actions,
+tbody tr.selected td.row-actions { background: var(--surface-2); }
+.card-title { font-size: 15px; margin: 0; }
+/* A heading that opens its own settings (a category group, #184): reads as the
+   heading, with a dotted underline saying it can be pressed. */
+button.link.heading-link { font: inherit; color: inherit; padding: 0; text-decoration: underline dotted; text-underline-offset: 3px; }
+.section-title { font-size: 14px; margin: 0 0 10px; }
+.rule { border: 0; border-top: 1px solid var(--line); margin: 22px 0; }
+.secret-box {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px;
+  word-break: break-all;
+  letter-spacing: 0.06em;
+}
+
+/* ---- keys given to programs ---- */
+/* A list of things rather than a list of prose, so it loses the bullets and
+   the indent but keeps being a <ul> for anything reading the page aloud. */
+.plain-list { list-style: none; margin: 12px 0 0; padding: 0; }
+.key-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.key-row:first-child { border-top: 0; }
+/* The label is the hit target as well as the words, which is what makes a
+   checkbox usable on a phone. */
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13px;
+  cursor: pointer;
+}
+/* The stylesheet stretches every input to the full width of its field, which
+   is right for a text box and makes a checkbox 156px wide -- the label's words
+   then wrap into a column three of them across. Only running the page shows
+   this: it typechecks and it builds. */
+.check input[type="checkbox"] {
+  width: auto;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+@media (max-width: 767px) {
+  /* The button drops under the description rather than squeezing it into a
+     column two words wide. */
+  .key-row { flex-direction: column; align-items: stretch; }
+}
+
+/* ---- side panel ---- */
+.panel-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex; justify-content: flex-end;
+  z-index: 10;
+}
+.panel {
+  width: min(420px, 100%);
+  background: var(--surface);
+  border-left: 1px solid var(--line);
+  padding: 20px;
+  overflow-y: auto;
+}
+/* A panel you tick rows in needs room for the rows. */
+.panel-wide { width: min(760px, 100%); }
+.panel header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 14px; }
+
+/* A config panel must not be mistaken for the ledger itself. */
+.config-panel { border-left: 3px solid var(--warn); }
+.config-badge {
+  display: inline-block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--warn);
+  border: 1px solid var(--warn);
+  border-radius: 99px;
+  padding: 1px 8px;
+  margin-bottom: 10px;
+}
+
+/* ---- misc ---- */
+.pill {
+  display: inline-block;
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+/* A tag is a pill that has to be *seen* rather than merely available -- filled
+   rather than outlined, because an outline at 11px next to an account name is
+   decoration and reads as part of the name. */
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 1px 8px;
+  margin-left: 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.tag.closed { background: var(--warn); color: var(--surface); }
+
+/* A flag is one glyph wide and carries no figures, so the column is sized to
+   the glyph rather than to its heading. The emoji stack is named explicitly:
+   a regional-indicator pair falls back to the two letters when no emoji font
+   has the flag, which is a legible answer rather than tofu, but only if the
+   colour font is actually reached first. */
+.flag-col { width: 1px; white-space: nowrap; text-align: center; }
+.flag {
+  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji",
+    "Twemoji Mozilla", var(--sans);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+/* One letter per source, so the column scans. Colour carries no meaning on its
+   own -- the letter does, and the title and aria-label carry the word. */
+.tag.source-T, .tag.source-S, .tag.source-I, .tag.source-M {
+  margin-left: 0;
+  min-width: 1.6em;
+  text-align: center;
+  font-family: var(--mono);
+}
+.tag.source-T { background: var(--accent); color: var(--accent-ink); }
+.tag.source-S { background: var(--warn); color: var(--surface); }
+.tag.source-I { background: var(--surface-2); color: var(--ink); border-color: var(--line); }
+.tag.source-M { background: none; color: var(--muted); border-color: var(--line); }
+
+/* A work expense, as one letter (at the end of the register's memo since
+   #143, where register.css also makes it smaller). The same letter in all
+   three -- "W" -- because the state is what differs, and the title and
+   aria-label carry it in words. Three of the eleven tokens a household
+   already has: a household overrides one colour, the accent, so a twelfth
+   could never follow its palette. Owed is --warn because it is the one that
+   wants doing something about; repaid is --positive; written off is muted
+   and outlined, because it is finished and nobody is chasing it. */
+.tag.work-owed, .tag.work-paid, .tag.work-off {
+  margin-left: 4px;
+  min-width: 1.6em;
+  text-align: center;
+  font-family: var(--mono);
+}
+.tag.work-owed { background: var(--warn); color: var(--surface); }
+.tag.work-paid { background: var(--positive); color: var(--surface); }
+.tag.work-off { background: none; color: var(--muted); border-color: var(--line); }
+
+/* A cell you can edit in place. It has to look touchable without turning the
+   register into a grid of boxes, so it is plain until the pointer is on it. */
+td.editable { padding: 0; }
+.cell-edit {
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 7px 9px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  border-radius: var(--radius);
+}
+.cell-edit:hover:not(:disabled) {
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+/* What a locked row shows instead of the button. The padding is the button's,
+   because `td.editable` has none: it belongs to the control so the whole cell
+   is the hit area. Same box, minus the affordance. */
+.cell-static {
+  display: block;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: var(--radius);
+}
+td.editing { padding: 2px 4px; }
+td.editing input { padding: 4px 6px; }
+/* The row must not clip the suggestions that drop out of the cell. */
+tr:has(td.editing) { position: relative; }
+
+/* The one log file that is not safe to hand to somebody. `sql.log` at the
+   "with SQL" style holds every statement and every row it returned. */
+.pill.danger { color: var(--danger); border-color: var(--danger); }
+
+/* The three log streams, as name + what is in it. A definition list because
+   that is what it is, and it keeps the filename and its description tied
+   together when the card narrows on a phone. */
+.log-streams { margin: 10px 0; display: grid; gap: 8px; }
+.log-streams > div { display: grid; gap: 2px; }
+.log-streams dt { font-weight: 600; }
+.log-streams dd { margin: 0; }
+
+.pill.created { color: var(--positive); border-color: var(--positive); }
+.pill.matched_existing { color: var(--warn); border-color: var(--warn); }
+.pill.duplicate_skipped, .pill.rejected, .pill.skipped { color: var(--muted); }
+
+.banner {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  background: var(--surface);
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.banner.info { border-color: var(--line); color: var(--ink); }
+.banner.warn { border-color: var(--warn); color: var(--warn); }
+
+.empty { padding: 28px; text-align: center; color: var(--muted); }
+.centred { max-width: 460px; margin: 60px auto; }
+.codes { font-family: var(--mono); display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 12px 0; }
+
+/* Bubble help ------------------------------------------------------------- */
+.hint { position: relative; display: inline-block; vertical-align: middle; }
+.hint-open {
+  width: 16px; height: 16px; padding: 0; border-radius: 50%;
+  font-size: 11px; font-weight: 700; line-height: 1;
+  color: var(--muted); border: 1px solid var(--line); background: var(--surface-2);
+}
+.hint-open[aria-expanded="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.bubble {
+  position: absolute; z-index: 20; top: calc(100% + 8px); left: -8px;
+  display: block; width: max-content; max-width: min(340px, calc(100vw - 32px));
+  padding: 12px 14px; font-size: 13px; line-height: 1.45; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.16);
+  /* A long explanation scrolls inside the bubble rather than off the screen. */
+  max-height: min(60vh, 440px); overflow-y: auto;
+}
+.bubble::before {
+  content: ""; position: absolute; top: -5px; left: 10px; width: 8px; height: 8px;
+  background: var(--surface); border-left: 1px solid var(--line); border-top: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+.bubble dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; }
+.bubble dt { font-weight: 600; white-space: nowrap; }
+.bubble dd { margin: 0; color: var(--muted); }
+.bubble p:last-child { margin-bottom: 0; }
+.field-head { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* The program behind an act, beside the person whose authority it borrowed.
+   Quieter than the name on purpose: the human is who did it, and the key is
+   how. See `Actor` in components/bits.tsx. */
+.via { color: var(--muted); font-style: italic; }
+
+/* Out of the way until it is the thing you are on, and then unmissable. Not
+   `.sr-only` with a focus override, because a skip link that stays clipped
+   when focused is the failure mode of every skip link that does not work. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 8px 14px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 600;
+}
+.skip-link:focus { left: 8px; top: 8px; }
+
+
+
+/* Type-ahead ------------------------------------------------------------- */
+.combo { position: relative; display: block; }
+.combo > input { width: 100%; }
+.combo-list {
+  position: absolute; z-index: 30; top: calc(100% + 2px); left: 0;
+  /* Wider than the field when it needs to be. In a register cell the field is
+     narrow, and "Quality of Life: Subscriptions" ellipsised to "Quality of…"
+     is a list of suggestions you cannot tell apart. It grows to the right and
+     is capped so it never runs off the page. */
+  min-width: 100%; width: max-content; max-width: min(340px, 80vw);
+  margin: 0; padding: 4px; list-style: none;
+  max-height: 240px; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.16);
+}
+.combo-option {
+  padding: 6px 8px; border-radius: var(--radius); cursor: pointer;
+  font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.combo-option.active { background: var(--accent); color: var(--accent-ink); }
+.combo-option strong { font-weight: 700; }
+
+/* Quick filters and sortable headings ------------------------------------- */
+.filters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.filters .row { align-items: flex-end; }
+/* Right-aligned: it sits above a table whose right-hand columns are the money,
+   and a filter reads better anchored to the edge it filters toward. */
+.daterange { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.daterange-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 4px 10px; border-radius: 999px; font-size: 13px;
+  border: 1px solid var(--line); background: var(--surface);
+}
+.chip.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip.active:hover:not(:disabled) { background: var(--accent); opacity: 0.88; }
+.daterange-exact { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.daterange-exact select { width: auto; min-width: 7.5em; }
+.daterange-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+th.sortable { padding: 0; }
+th.sortable > button {
+  width: 100%; border: 0; background: none; padding: 7px 9px;
+  font: inherit; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--muted); font-weight: 600; text-align: inherit;
+  display: inline-flex; gap: 4px; align-items: center;
+}
+th.sortable.amount > button { justify-content: flex-end; }
+th.sortable > button:hover { color: var(--ink); background: var(--surface-2); }
+.arrow { opacity: 0.25; font-size: 10px; }
+.arrow.on { opacity: 1; color: var(--accent); }
+
+/* Where an imported transaction came from */
+.origin { margin: 0 0 8px; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 12px; }
+.origin dt { font-weight: 600; color: var(--muted); white-space: nowrap; }
+.origin dd { margin: 0; word-break: break-all; }
+
+/* Household colour picker ------------------------------------------------- */
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.swatch {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px 6px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 13px;
+}
+/* Two marks, not one: a ring alone is a colour difference, and telling which
+   palette is selected should not itself depend on seeing colour. */
+.swatch.chosen { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 700; }
+.swatch-chips { display: inline-flex; border-radius: 999px; overflow: hidden; flex: none; }
+.swatch-chips > span { width: 14px; height: 14px; display: block; }
+
+
+/* Reconciling ------------------------------------------------------------- */
+/* The difference is the one thing on the screen you act on, so it is a block
+   you cannot miss rather than a sentence you have to find. */
+.difference {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  margin: 14px 0;
+}
+.difference strong { display: block; font-size: 17px; }
+.difference span { display: block; margin-top: 2px; }
+/* Colour is never the only signal: the words change too, because a red and a
+   green block that both say a number are the same block to a lot of people. */
+.difference.agreed { border-color: var(--positive); color: var(--positive); }
+.difference.apart { border-color: var(--warn); color: var(--warn); }
+.difference.waiting { color: var(--muted); }
+.difference-sum {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 2px 12px;
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.difference-sum dt { white-space: nowrap; }
+.difference-sum dd { margin: 0; }
+
+/* Categorisation modes ---------------------------------------------------- */
+.modes { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+.mode { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
+.mode input[type="radio"] { width: auto; margin-top: 3px; accent-color: var(--accent); }
+.mode > span { display: flex; flex-direction: column; gap: 2px; }
+.mode strong { font-size: 14px; }
+.mode select { width: 100%; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+
+/* Undoing ----------------------------------------------------------------- */
+.undo-lines { max-height: 260px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 10px 10px 28px; }
+.undo-lines ol { margin: 0; padding: 0 0 0 8px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.undo-lines li { padding-left: 2px; }
+/* The second step reads as a different moment, not the same button again. */
+.confirm-again {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+
+/* Long lists -------------------------------------------------------------- */
+/* Rows that have been handed to the DOM but are not on screen skip layout and
+   paint. It does nothing for the cost of creating them -- that is what the
+   windowing is for -- but it keeps scrolling a long register smooth.
+   `contain-intrinsic-size` is the row height, so the scrollbar stays honest
+   instead of jumping as rows come into view. */
+tbody tr { content-visibility: auto; contain-intrinsic-size: auto 37px; }
+/* The row being edited must not be skipped: a dropdown that escapes the cell
+   is painted outside the row's own box. */
+tbody tr:has(td.editing), tbody tr:focus-within { content-visibility: visible; }
+
+.more-rows {
+  display: block;
+  width: 100%;
+  padding: 12px 4px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.more-rows:hover:not(:disabled) { color: var(--ink); background: var(--surface-2); }
+
+
+/* Tables that have to agree with each other ------------------------------- */
+/* Several small tables stacked down a screen -- one per category group -- only
+   line up if they stop sizing themselves to their own contents.
+   
+   Above a width where more than one card is on screen at a time. Below it the
+   alignment is invisible anyway, and a fixed layout is actively harmful: the
+   two fixed columns take everything a phone has and the name column collapses
+   to nothing, so the thing you came to read is the thing that disappears. */
+@media (min-width: 640px) {
+  table.fixed-columns { table-layout: fixed; }
+  table.fixed-columns .col-usage { width: 10em; }
+  table.fixed-columns .col-action { width: 4em; }
+  /* Fixed layout clips rather than wraps, so a long name is told what to do
+     with the overflow. */
+  table.fixed-columns td:first-child { overflow-wrap: anywhere; }
+}
+
+
+/* One row's own history ---------------------------------------------------- */
+.row-history {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* A line down the left so a run of edits reads as one thread rather than as
+     a stack of unrelated notes. */
+  border-left: 2px solid var(--line);
+}
+.row-history li { position: relative; }
+.row-history li::before {
+  content: "";
+  position: absolute;
+  left: -19px;
+  top: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line);
+}
+/* The newest is the one you came to read. */
+.row-history li:first-child::before { background: var(--accent); }
+
+
+/* Splitting ---------------------------------------------------------------- */
+.split-parts { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.split-part {
+  display: grid;
+  grid-template-columns: 9em 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule, var(--line));
+}
+.split-part:last-child { border-bottom: 0; }
+@media (max-width: 620px) {
+  .split-part { grid-template-columns: 1fr 1fr; }
+}
+
+
+/* One act, spelled out ----------------------------------------------------- */
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; font-size: 13px; }
+.facts dt { color: var(--muted); white-space: nowrap; }
+.facts dd { margin: 0; }
+
+.changes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.changes > li {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.change-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+/* The three operations are three different things, and colour alone does not
+   say which -- the word is on the tag. */
+.tag.op-insert { background: var(--positive); color: var(--surface); margin-left: 0; }
+.tag.op-update { background: var(--accent); color: var(--accent-ink); margin-left: 0; }
+.tag.op-delete { background: var(--danger); color: var(--surface); margin-left: 0; }
+
+.change-fields { width: 100%; margin-top: 8px; font-size: 13px; }
+.change-fields th, .change-fields td { padding: 3px 6px; border: 0; }
+/* The global `th` rule uppercases and letter-spaces headings, which is right
+   for a column heading and wrong for a field name in a sentence. */
+.change-fields th {
+  color: var(--muted); font-weight: 400; text-align: left;
+  white-space: nowrap; width: 1%;
+  text-transform: none; letter-spacing: 0; font-size: 13px;
+}
+.change-fields td[aria-hidden] { color: var(--muted); width: 1%; }
+
+
+/* A dialog, and messages that go away on their own --------------------------- */
+.dialog-backdrop {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgb(0 0 0 / 0.3);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.dialog {
+  width: min(560px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.22);
+  padding: 20px;
+}
+.dialog header { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 12px; }
+.dialog header h2 { font-size: 17px; }
+
+.toasts {
+  position: fixed;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  right: 16px;
+  z-index: 40;
+  display: flex; flex-direction: column; gap: 8px;
+  max-width: min(360px, calc(100vw - 32px));
+}
+.toast {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.22);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: toast-in 160ms ease-out; }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+
+/* The register's filters stay put ------------------------------------------ */
+/* The rows move and the controls that filter them do not. `main.content` is the
+   scroll container, so sticky is measured against that -- no fixed heights, no
+   second scrollbar, and the table keeps being an ordinary table.
+
+   Scoped to `.register-card`: the entry card below has its own filters-shaped
+   rows, and a rule that caught those would pin the wrong thing. */
+/* A screen that fills the window, where one region scrolls and the rest does
+   not. `main.content` normally scrolls the whole page; a screen that asks to
+   own its own scrolling turns that off and takes the height instead. */
+main.content:has(> .screen-fill) { overflow: hidden; display: flex; flex-direction: column; }
+.screen-fill { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+/* The register's card is the part that stretches. `min-height: 0` on both is
+   what lets a flex child actually shrink -- without it the table pushes the
+   card past the window and the scrollbar comes back on the page. */
+.register-card { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.register-card > .table-scroll { flex: 1; min-height: 0; overflow: auto; }
+
+/* Sticky inside the table's own scroller, which is what makes it work at all:
+   `overflow-x: auto` already made `.table-scroll` the scroll container, so a
+   heading sticking to `main.content` was sticking to something that no longer
+   scrolled past it. */
+.register-card thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--surface);
+}
+.register-card thead th.sortable > button { background: var(--surface); }
+
+/* Answers to a dialog's question, wrapping rather than squeezing. */
+.dialog-choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+
+/* A register row is a selection target ------------------------------------- */
+/* The whole row picks it, so the pointer says so -- but the cells that are
+   their own controls keep their own cursor, because they do something else. */
+tr.row-pick { cursor: pointer; }
+tr.row-pick :where(button, a, input, select, textarea, label) { cursor: revert; }
+
+/* ---------------------------------------------------------------------------
+   Receipts
+   ------------------------------------------------------------------------ */
+
+/* The paperclip sits beside the source letter rather than in a column of its
+   own. The register has ten columns already and the screen is the thing being
+   protected; a receipt marker is the same kind of fact as "how this row got
+   here", so it belongs in the same cell. */
+.receipt-mark { margin-left: 6px; font-size: 13px; line-height: 1; }
+
+.receipt-section { margin: 18px 0; }
+
+/* Fixed aspect, so the panel does not reflow as thumbnails arrive -- the same
+   reasoning as the register holding still while its rows move. 3:4, because a
+   receipt is taller than it is wide and a photograph of one is portrait. */
+.receipt-frame {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  max-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.receipt-frame img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.receipt-frame img.can-enlarge { cursor: zoom-in; }
+.receipt-frame .frame-working {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+.tag.pdf-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  margin-left: 0;
+  background: var(--surface);
+  color: var(--muted);
+  border-color: var(--line);
+}
+
+/* A strip, not a carousel: four thumbnails you can see at once beat one you
+   have to page through to find. */
+.thumb-strip { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.thumb {
+  padding: 0;
+  width: 48px;
+  height: 64px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.thumb.chosen { border-color: var(--accent); border-width: 2px; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.receipt-drop { display: inline-block; }
+
+/* Collapsed by default: the frame is what the panel is for, and a wall of
+   exposure settings under it is furniture. <details> rather than a React
+   toggle -- keyboard-accessible and screen-reader-correct for free. */
+.more-info { margin-top: 10px; font-size: 13px; }
+.more-info summary { cursor: pointer; color: var(--muted); }
+.more-info dl { margin: 8px 0 0; }
+.more-info dl > div { display: flex; gap: 10px; padding: 3px 0; align-items: baseline; }
+.more-info dt { flex: 0 0 88px; color: var(--muted); }
+.more-info dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+/* In the panel, not a new tab -- so the `attachment` disposition on the bytes
+   route never comes into play. */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: zoom-out;
+}
+.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.lightbox-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 26px;
+  line-height: 1;
+  padding: 2px 12px;
+}
+
+/* A grid of thumbnails, windowed the same way the register is: the browser is
+   handed a few hundred at a time as you scroll toward them. */
+.receipt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--gap);
+  margin-top: 12px;
+}
+.receipt-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  align-items: stretch;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.receipt-card img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 2px;
+  background: var(--surface);
+}
+
+/* Only while the inbox has something in it. */
+.nav-badge {
+  margin-left: 8px;
+  padding: 0 7px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* One row per file being uploaded. Per file, because the endpoint takes one
+   file per request and the client issues three at a time -- so each has its
+   own progress, its own error and its own retry, and one failure does not
+   abandon the other twenty-nine. */
+.upload-queue { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+.upload-queue li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.upload-queue li.failed { border-color: var(--danger); }
+.upload-queue img { width: 32px; height: 42px; object-fit: cover; border-radius: 2px; }
+.upload-queue .grow { flex: 1; min-width: 0; display: grid; }
+.upload-queue .name {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ===========================================================================
+   Short windows: the register must not size itself to one
+   ===========================================================================
+
+   `.screen-fill` is a flex column sized to the window, and inside it
+   `.register-card` is `flex: 1` with the scroller `flex: 1` again. That is
+   right on a desktop, where the rows scroll inside a frame that stays put.
+
+   It is wrong the moment the window is shorter than the controls above the
+   rows. The filters take a fixed 225px; at 375px of viewport -- a phone held
+   sideways -- there is nothing left, the table's flex child resolves to
+   **zero**, and `main.content:has(> .screen-fill)` hides the overflow. The
+   register does not scroll badly, it is not there at all.
+
+   So this is a query about *height*, not about phones, and it is separate from
+   the card layout below for that reason: a phone in landscape is 812px wide
+   and gets a perfectly good table, it just cannot afford a fixed frame. The
+   width arm keeps portrait working, where the same thing happens for the same
+   reason.
+
+   `display: block` rather than a taller flex: while `.screen-fill` is a flex
+   container its children are flex items, and every fix that keeps it one is a
+   fight with the same sizing algorithm. */
+@media (max-width: 768px), (max-height: 600px) {
+  main.content:has(> .screen-fill) { overflow-y: auto; }
+  .screen-fill {
+    display: block;
+    height: auto;
+    min-height: 0;
+  }
+  .register-card {
+    display: block;
+    flex: none;
+    min-height: 0;
+  }
+  .register-card > .table-scroll {
+    flex: none;
+    min-height: 0;
+    overflow-y: visible;
+  }
+  /* The heading sticks to the scroller it is inside, and that scroller is now
+     the page -- so it would stick to nothing and simply scroll away. */
+  .register-card thead th { position: static; }
+}
+
+
+/* ===========================================================================
+   Phones
+   ===========================================================================
+
+   The shell was a flex row with a 190px nav and no responsive rules at all, so
+   at 375px the nav took half the window and the register -- the thing the app
+   is for -- was off-screen. Everything below is one breakpoint and no component
+   rewrites: the nav becomes a drawer, the panels become sheets, and the desktop
+   layout is untouched above 768px.
+
+   768 rather than 620: the existing 620 query is for one grid inside the split
+   panel. The shell stops working long before that, because 190px of nav out of
+   768 is already a quarter of the window spent on navigation. */
+
+/* Off on desktop. They only exist inside the query below. */
+.topbar { display: none; }
+.nav-backdrop { display: none; }
+.filters-toggle { display: none; }
+
+/* The `/snap` link is an anchor, not a button, because it leaves the SPA.
+   Made to match the buttons beside it so the nav does not look assembled from
+   two different kits. */
+.nav-link {
+  display: block;
+  padding: 7px 8px;
+  border-radius: var(--radius);
+  color: inherit;
+  text-decoration: none;
+}
+.nav-link:hover { background: var(--surface-2); }
+
+@media (max-width: 768px) {
+  /* Column, so the bar sits above the content and the nav can leave the flow. */
+  .shell { flex-direction: column; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: none;
+    padding: 8px 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar .brand { font-weight: 700; }
+
+  .menu-button {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: var(--radius);
+    /* 44px is the smallest target that is reliably hittable with a thumb.
+       Below that people miss it and blame themselves. */
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  /* Out of the flow and off the left edge. `fixed` rather than `absolute` so it
+     is the window it covers, not the shell -- which scrolls. */
+  nav.side {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 40;
+    width: 80vw;
+    max-width: 280px;
+    transform: translateX(-100%);
+    border-right: 1px solid var(--line);
+  }
+  nav.side.open { transform: translateX(0); }
+
+  /* Only when the user has not asked for stillness. */
+  @media (prefers-reduced-motion: no-preference) {
+    nav.side { transition: transform 180ms ease; }
+  }
+
+  /* The drawer carries its own brand for the desktop layout; in the drawer it
+     is a second copy of the one in the bar above. */
+  nav.side .brand { display: none; }
+
+  .nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: rgb(0 0 0 / 0.4);
+  }
+
+  /* Every nav target gets a thumb-sized row. */
+  nav.side button,
+  nav.side .nav-link { min-height: 44px; }
+
+  main.content { padding: 12px; }
+
+  /* A side panel on a phone is a sheet: the full window, because 420px of
+     panel beside 375px of window is a panel with no window left. */
+  .panel,
+  .panel-wide {
+    width: 100%;
+    max-width: 100%;
+    border-left: 0;
+    padding: 16px 14px;
+  }
+
+  /* The register's own header wraps rather than pushing Add and Transfer off
+     the right edge -- which is the bug this batch just fixed on the accounts
+     table, and it would have arrived here the moment the buttons moved up. */
+  .screen-fill > .row { flex-wrap: wrap; gap: 8px; }
+
+  /* Filters stack instead of being squeezed to unreadable widths. */
+  .filters .row { flex-wrap: wrap; }
+
+  /* And they start put away. 225px of controls before the first transaction
+     is a quarter of a phone screen spent on something set once a session. */
+  .filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    padding: 6px 12px;
+    min-height: 40px;
+  }
+  .filters.collapsed { display: none; }
+
+  /* Typing into anything under 16px makes iOS Safari zoom the page and then
+     leave it zoomed, which breaks every layout underneath it. */
+  input, select, textarea { font-size: 16px; }
+
+  h1 { font-size: 22px; }
+}
+
+
+/* A button that sits beside a heading rather than under one. The default is
+   sized for a form's primary action; next to an <h1> that reads as the page's
+   subject rather than as something you can do to it. */
+.small-button {
+  padding: 5px 10px;
+  font-size: 13px;
+}
+
+/* The two fields that move money: shown, not presented for editing. See the
+   `Guarded` component for why. Laid out like an input so the panel does not
+   change shape when one is opened. */
+.guarded {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 7px 9px;
+}
+.guarded:disabled { opacity: 0.6; }
+.guarded:hover:not(:disabled) { border-style: solid; }
+
+
+/* ---------------------------------------------------------------------------
+   Tables on a phone: a card per row, not a scroller
+   ---------------------------------------------------------------------------
+
+   The register is ten columns wide. At 375px that is a horizontal scrollbar
+   inside a card, which means reading one transaction takes two gestures and
+   comparing two of them takes four. Worse, the columns that scroll out of
+   reach are arbitrary -- whichever happen to be last.
+
+   So below the breakpoint the table stops being a table: every row becomes a
+   block, every cell a line of `LABEL   value`, and nothing scrolls sideways.
+   The labels come from `data-label`, which is why the cells carry it; a table
+   without them still stacks, it just stacks unlabelled.
+   --------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .table-scroll table,
+  .table-scroll tbody,
+  .table-scroll tr,
+  .table-scroll td {
+    display: block;
+    width: auto;
+  }
+
+  /* The headings are the labels now, and repeating them once per row is what
+     `data-label` does. */
+  .table-scroll thead { display: none; }
+
+  /* Three columns, and only the first line uses all of them: a tick to select
+     with, who it was, and how much. Everything after that is a full-width
+     line of `LABEL   value` underneath.
+
+     That ordering is the whole point. Scrolling a register is looking for a
+     payee and an amount; date, account and category are what you read once you
+     have found it. A uniform list of eight labelled lines per row made every
+     transaction the same shape and the same weight, so finding one meant
+     reading all of them. */
+  .table-scroll tr {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    column-gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: var(--surface);
+  }
+  .table-scroll tr:hover { background: var(--surface); }
+  .table-scroll tr.selected { background: var(--surface-2); }
+
+  /* The default for everything that is not on the headline row. */
+  .table-scroll td {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    border-bottom: 0;
+    padding: 2px 0;
+    text-align: left;
+    /* A grid item's floor is its content, so a long sentence or an unbroken
+       reference would push the card wider than the screen and be clipped at
+       the edge rather than wrapping. */
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* The headline.
+
+     `data-select` and not `:first-child`: the register's first cell is a
+     checkbox and narrow, but History's is a timestamp and Receipts' is a
+     date. Pinning whatever came first into a shared `auto` column gave those
+     screens a wide first column and squeezed the sentence beside it into a
+     ribbon. Only a cell that says it is a tick box gets that slot. */
+  .table-scroll td[data-select] {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 0;
+  }
+  /* `data-primary` is what the row is about; `data-figure` is its number.
+     Two markers, set by whichever screen has them, so every table in the app
+     makes the same shape of card without the stylesheet knowing the column
+     names of any of them. */
+  .table-scroll td[data-primary] {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 0;
+  }
+  .table-scroll td[data-figure] {
+    grid-column: 3;
+    grid-row: 1;
+    padding: 0;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: right;
+  }
+  /* The label would repeat what the colour and the column already say, and on
+     the headline row there is no width to spend on it. */
+  .table-scroll td[data-primary]::before,
+  .table-scroll td[data-figure]::before,
+  .table-scroll td[data-select]::before { content: ""; }
+
+  /* A rule under the headline, so the detail below reads as belonging to it
+     rather than as more of the same list. */
+  .table-scroll td[data-detail-first] {
+    border-top: 1px solid var(--line);
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+
+  /* The detail lines are reference, not the thing being scanned, so they are
+     set smaller and tighter than the headline. At one 35px line per cell a
+     single transaction was 248px tall and three filled the screen; a register
+     you can only see three of is a list you navigate by memory. */
+  .table-scroll td:not([data-select]):not([data-primary]):not([data-figure]) {
+    font-size: 13px;
+    line-height: 1.3;
+    padding: 1px 0;
+  }
+  .table-scroll td::before { font-size: 10px; }
+
+  /* Nothing is worth a line of its own. An empty memo is the em dash saying
+     so, and the import marker is a badge nobody opens a register to read --
+     both are one tap away in the panel. */
+  .table-scroll td[data-empty="true"],
+  .table-scroll td[data-label="Source"] {
+    display: none;
+  }
+  .table-scroll td::before {
+    content: attr(data-label);
+    flex: none;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* An outflow row has an empty In cell and vice versa. A pseudo-element does
+     not make an element non-empty, so the blank ones -- and their labels --
+     disappear rather than printing a row of headings with nothing after them. */
+  .table-scroll td:empty { display: none; }
+
+  /* Amounts keep their alignment against the right edge of the card. */
+  .table-scroll td.amount { justify-content: space-between; }
+
+
+
+  /* The pinned actions column is meaningless once nothing scrolls sideways. */
+  .table-scroll th.row-actions,
+  .table-scroll td.row-actions {
+    position: static;
+    box-shadow: none;
+  }
+
+  .table-scroll { overflow-x: visible; }
+}
+
+/* --------------------------------------------------------------------------
+   Reports
+
+   The table is the report. No chart library, no canvas: a month-by-month
+   grid of figures is a table, and making it one means it prints, copies into
+   a spreadsheet, and reads correctly to a screen reader for free.
+   -------------------------------------------------------------------------- */
+
+.report-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.report-filters { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+.currency-toggle { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+
+/* A report scrolls sideways at every width and never becomes cards -- see
+   the note in IncomeExpense.tsx. Deliberately not `.table-scroll`, whose
+   mobile rules are built for one-row-per-thing lists. */
+.matrix-scroll { overflow-x: auto; }
+
+table.report { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.report th,
+table.report td { padding: 6px 10px; border-bottom: 1px solid var(--line); }
+
+/* The label column stays put while the months scroll under it. A report wider
+   than the screen is the normal case at twelve months, and a row whose name
+   has scrolled away is a row of numbers about nothing. */
+table.report .report-label,
+table.report tfoot th,
+table.report .report-total th,
+table.report .report-heading th {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  text-align: left;
+  font-weight: 400;
+  z-index: 1;
+  min-width: 190px;
+}
+table.report thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 2;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+table.report thead th.report-label { z-index: 3; }
+
+table.report .amount {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.report-heading th,
+.report-heading td {
+  font-weight: 600;
+  font-size: 14px;
+  padding-top: 16px;
+  background: var(--surface);
+}
+.report-in .report-heading th { color: var(--positive); }
+.report-out .report-heading th { color: var(--danger); }
+
+.report-total th,
+.report-total td {
+  border-top: 1px solid var(--line);
+  border-bottom: 2px solid var(--line);
+  font-weight: 600;
+}
+.report-total th { font-weight: 600; }
+
+.report-net th,
+.report-net td {
+  border-top: 2px solid var(--line);
+  border-bottom: 0;
+  font-weight: 600;
+  padding-top: 10px;
+}
+
+.report-strong { font-weight: 600; }
+
+/* Uncategorised is a real row and always shown, but it is the *absence* of an
+   identity -- so it is set in the muted ink rather than given a colour of its
+   own, which would make "we have not said yet" look like a category. */
+.report-unset .report-label { font-style: italic; color: var(--muted); }
+
+.report-notes { margin-top: 12px; max-width: 70ch; }
+
+@media (max-width: 720px) {
+  table.report .report-label,
+  table.report tfoot th,
+  table.report .report-total th,
+  table.report .report-heading th { min-width: 140px; }
+  .report-bar { flex-direction: column; }
+  .report-filters { align-items: stretch; }
+}
+
+/* --------------------------------------------------------------------------
+   The grouped filter popover
+   -------------------------------------------------------------------------- */
+
+.picker { position: relative; flex: 0 0 auto; }
+.picker-with-mode { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.picker-with-mode select { width: auto; font-size: 12px; padding: 4px 6px; }
+
+/* Hung off the left edge of its button. Every picker sits at the left of its
+   bar, and one anchored on the right opened leftwards out of the content --
+   under the sidebar on a desktop (#160), off the screen on a phone. */
+.picker-pop {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  width: min(340px, 90vw);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 18%);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+/* Unless that runs it off the right of the screen, which a picker at the end
+   of a filter line would (#188). `GroupedPicker` measures, and only flips
+   when hanging leftwards stays clear of the sidebar. */
+.picker-pop.hang-right { left: auto; right: 0; }
+.picker-extra .nav-badge { margin-left: auto; }
+.picker-search { width: 100%; }
+.picker-list { max-height: 46vh; overflow-y: auto; display: flex; flex-direction: column; }
+.picker-group { padding-bottom: 6px; }
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.picker-item:hover { background: var(--surface-2); }
+.picker-item input[type="checkbox"] { width: auto; flex: 0 0 auto; margin: 0; }
+.picker-head { font-weight: 600; }
+.picker-group .picker-item:not(.picker-head) { padding-left: 22px; }
+.picker-extra { border-bottom: 1px solid var(--line); margin-bottom: 6px; padding-bottom: 8px; }
+
+.picker-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+.picker-foot .primary { margin-left: auto; }
+
+/* --------------------------------------------------------------------------
+   Alternating columns
+
+   A wide grid of figures is read *along a row*, and by the eighth column the
+   eye has no idea which month it is in. Striping the columns rather than the
+   rows is what keeps a value under its heading -- row striping helps you find
+   the row you are already on, which in a matrix is the half of the problem
+   you do not have.
+
+   Set with `nth-child` over the month columns. The label column is sticky and
+   paints its own background, so it never joins the stripe.
+
+   This comment used to claim the two summary columns did not join it either.
+   They did, whenever their index happened to be even -- `nth-child(even)` has
+   no idea which column is a month. It went unnoticed because the stripe is a
+   3% wash. `client/src/styles/report-ie.css` now paints Average and Total
+   deliberately, inverted, so they read as summary rather than as data, which
+   settles it by covering them rather than by hoping.
+
+   The same file also re-wins `.report-heading td`, which loses to the stripe
+   above on specificity -- one element fewer in the selector -- and so has
+   always been striped against the intent of the rule below.
+   -------------------------------------------------------------------------- */
+
+table.report tbody td:nth-child(even),
+table.report tfoot td:nth-child(even) {
+  background: var(--stripe);
+}
+table.report thead th:nth-child(even) { background: var(--stripe-head); }
+
+/* Above the stripe, because both are backgrounds on the same cell and the
+   sticky column has to stay opaque as the figures pass under it. */
+table.report .report-label,
+table.report tfoot th,
+table.report .report-total th,
+table.report .report-heading th,
+table.report .report-heading td { background: var(--surface); }
+
+table.report tbody tr:hover td { background: var(--surface-2); }
+
+/* --------------------------------------------------------------------------
+   The bubble behind a figure
+   -------------------------------------------------------------------------- */
+
+/* The figure is a button, but it has to read as a number in a table -- so it
+   carries no chrome until you are on it, and then says it is a target. */
+.figure-open {
+  all: unset;
+  cursor: pointer;
+  border-bottom: 1px dotted var(--line);
+}
+.figure-open:hover,
+.figure-open:focus-visible {
+  border-bottom-color: currentColor;
+  background: var(--surface-2);
+}
+.figure-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.behind-scroll { max-height: 52vh; overflow-y: auto; margin-bottom: 10px; }
+table.behind { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.behind th,
+table.behind td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+table.behind thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+table.behind tbody tr:nth-child(even) td { background: var(--stripe); }
+table.behind .amount {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+table.behind tfoot th,
+table.behind tfoot td {
+  border-top: 2px solid var(--line);
+  border-bottom: 0;
+  font-weight: 600;
+  background: var(--surface);
+}

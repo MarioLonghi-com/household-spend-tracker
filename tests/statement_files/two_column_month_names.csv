@@ -1,0 +1,4 @@
+Transaction/Value date,Description,AER,NIR,Money in,Money out,Balance
+"Dec 24, 2025","Deposit to ""Savings""",,,€10.00,,€10.00
+"Jan 23, 2026","Net interest paid",1.29%,1.28%,€0.01,,€10.01
+"Mar 02, 2026","Withdrawal from ""Savings""",,,,€10.00,€0.01

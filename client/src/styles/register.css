@@ -1,0 +1,804 @@
+/*
+ * register — UXGmko layout work, 2026-09-21.
+ *
+ * A file of its own rather than more of styles.css: six sessions were editing
+ * that one file at once. Loaded after styles.css from main.tsx, so a rule here
+ * wins a tie with the same selector there.
+ */
+
+/* ---------------------------------------------------------------------------
+   The heading and the three ways in
+   ---------------------------------------------------------------------------
+
+   Add transaction (a single row or a transfer, from its menu) and Import
+   belong to this screen, but they are acts rather than its subject -- so they
+   sit at the far end of the line the heading starts, where the eye lands after
+   reading it, and not wedged against the last letter of the heading.
+   --------------------------------------------------------------------------- */
+.register-title {
+  gap: 10px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+/* `.row > *` stretches its children; a group of buttons is as wide as its
+   buttons. `margin-left: auto` is what pushes it to the right-hand edge. */
+.register-title > .register-actions {
+  flex: 0 0 auto;
+  margin-left: auto;
+  gap: 6px;
+  align-items: center;
+}
+/* The same stretch one level down: the text-size pair and the Add menu are
+   wrappers now (#143), not buttons, and `.row > *` would give each 140px. */
+.register-actions > * { flex: 0 0 auto; }
+/* The currency chips sit straight after the heading (#143) and are as wide as
+   their chips -- `.row > *` would otherwise stretch them to fill the line and
+   push the buttons off it. */
+.register-title > .currency-toggle {
+  flex: 0 0 auto;
+  margin-left: 8px;
+}
+
+/* The emoji is a signpost, not a picture: it sits at the size of the text it
+   is in and never drags the button's line-height around. */
+.register-actions button > span[aria-hidden="true"] {
+  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji",
+    "Twemoji Mozilla", var(--sans);
+  font-size: 1em;
+  line-height: 1;
+}
+
+/* The Add button's two choices (#143), dropped under it and anchored to its
+   right-hand edge, because the button is at the right of the screen and a
+   menu growing rightwards from it would run off the page. */
+.add-menu { position: relative; display: inline-flex; }
+.add-menu-list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 100%;
+  width: max-content;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 18%);
+}
+.add-menu-list > button {
+  border: 0;
+  background: none;
+  text-align: left;
+  padding: 7px 12px;
+  font-size: 14px;
+  border-radius: var(--radius);
+}
+.add-menu-list > button:hover,
+.add-menu-list > button:focus-visible {
+  background: var(--surface-2);
+}
+
+/* The table's text size (#143). One group, the two buttons touching, so it
+   reads as one control with two ends rather than as two more actions. */
+.text-steps { display: inline-flex; }
+.text-steps > button { min-width: 2.2em; }
+.text-steps > button:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.text-steps > button:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; margin-left: -1px; }
+
+/* ---------------------------------------------------------------------------
+   The filter bar, on one line
+   ---------------------------------------------------------------------------
+
+   `.daterange` is a column elsewhere -- the report stacks the presets above
+   the exact months against its right-hand edge. Above a register it is two
+   lines of controls costing two lines of transactions, and the two halves want
+   opposite edges anyway: the presets are the common answer and belong where
+   reading starts, the exact months are the fallback and belong out of the way.
+
+   Scoped to `.register-card` on purpose. The report's own stacking is right
+   for the report and this must not reach it.
+   --------------------------------------------------------------------------- */
+.register-card .daterange {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+/* `0 1 auto`, and the `1 1 auto` it replaced is the whole reason this did not
+   work. Allowed to *grow*, seven preset buttons took the full 1016px of the
+   card and pushed the exact months onto a second line -- which is the line
+   this rule exists to remove. They may shrink; they may not spread. */
+.register-card .daterange-presets {
+  flex: 0 1 auto;
+  justify-content: flex-start;
+}
+.register-card .daterange-exact {
+  flex: 0 0 auto;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+/* Compact enough that both halves fit, measured rather than guessed: the
+   presets come to 672px and the exact months to 305px, against a 1016px card
+   at a 1280px window. Month numbers instead of names do part of it; the rest
+   is that neither half is padded for a screen of its own.
+
+   `flex-wrap: wrap` is deliberately left in place above. It is the graceful
+   answer on a narrower window -- the two halves take a line each again, which
+   is what they did before and is better than either one clipped. */
+.register-card .daterange-presets button {
+  padding: 4px 9px;
+  font-size: 12px;
+}
+.register-card .daterange-exact select {
+  min-width: 0;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+.register-card .daterange-exact select[aria-label$="year"] { min-width: 0; }
+
+/* The second line: what narrows the rows, left to right in the order the
+   questions get asked -- which accounts, what words. (Which currency was the
+   first question here until #143 moved the chips up beside the heading.) */
+.register-card .filters .filter-line {
+  /* The bottoms line up, not the middles: since #143 every control on this
+     line has a label above it, the accounts picker included, so the boxes
+     themselves form the line and the labels sit on top of it. */
+  align-items: flex-end;
+  gap: 10px;
+}
+.register-card .filters .filter-line > .field { flex: 1 1 200px; }
+.register-card .filters .filter-line > .picker-with-mode,
+.register-card .filters .filter-line > .category-filter { flex: 0 0 auto; }
+
+/* One box and one label for every filter on the line (#145).
+
+   Bottom alignment only lines the labels up if every box under them is the
+   same height, and after #143 they were not: the accounts pill was a button
+   sized by its own `padding: 7px 16px; font-size: 15px; line-height: 1.5`,
+   38.5px, while Search and Amount were inputs that inherit 13px from their
+   `label.field` and came to 35.5px, and the three selects -- `line-height:
+   normal` -- to 34px. Three heights sat on one bottom edge, so three label
+   rows stood at three heights, and "Accounts (Country/Type)" was 3px above
+   "Search" beside it. Padding tuned until the pixels agree would have agreed
+   at one font and one zoom, and parted again at the next.
+
+   So the height is stated, not arrived at: `--filter-box` is the outside
+   height of every box, border included (`box-sizing` is border-box
+   app-wide), with no vertical padding for the text to push against -- an
+   input and a select centre their text in whatever height they are given,
+   and the pill is a flex box that does the same. `--filter-text` is the one
+   size for what is typed, what is chosen and the placeholder, which
+   inherits it. The label row is pinned the same way, so a label with
+   buttons in it and a label with only words in it have one line box.
+
+   13px on a desktop, which is the size the label above it already is, so
+   the line reads as small print set once. On a phone both go up: iOS Safari
+   zooms the page into any input under 16px when it is focused and leaves it
+   zoomed, and the global 16px rule for phones (styles.css) loses to the
+   selects' own `.small` and to these rules on specificity, so the phone
+   size has to be said here, where it wins. */
+.register-card .filters {
+  --filter-box: 32px;
+  --filter-text: 13px;
+  --filter-label: 13px;
+  --filter-label-line: 18px;
+}
+.register-card .filters .filter-line > .field > span,
+.register-card .filters .filter-line > .field > .field-head {
+  font-size: var(--filter-label);
+  line-height: var(--filter-label-line);
+  font-weight: 600;
+}
+/* Child combinators throughout: the picker's own popover sits inside its
+   `.field` and holds a search box and checkboxes, which are not boxes on
+   this line and must not be given its height. */
+.register-card .filters .filter-line > .field > input,
+.register-card .filters .filter-line > .field > select,
+.register-card .filters .filter-line > .picker-with-mode > .picker > .chip,
+.register-card .filters .filter-line > .category-filter > .picker > .chip {
+  height: var(--filter-box);
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: var(--filter-text);
+  line-height: normal;
+}
+/* The one thing on the line with no label -- Clear filters -- stands on the
+   same bottom edge, so it takes the box's height too and centres in it
+   rather than being nudged up by a padding guess. */
+.register-card .filters .filter-line > button {
+  height: var(--filter-box);
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: var(--filter-text);
+}
+
+/* The accounts picker, labelled like its neighbours (#143): a label on top,
+   "Accounts (Country/Type)", with the two grouping words in it as toggles,
+   and the picker's pill below. The pill's height and text are the filter
+   line's (#145, above), not its own: it used to carry a button's padding and
+   the body's 15px, and that is exactly what stood it taller than Search.
+   `inline-flex` is what centres the words in the fixed height.
+   `.picker-with-mode` was a row of picker-then-select and still is on the
+   income-and-expense report, so the column is this screen's alone. */
+.register-card .filters .picker-with-mode.field,
+.register-card .filters .category-filter.field {
+  /* The categories field is a div, not a label -- a label around a picker
+     full of labels is not valid -- so it needs the flex `label.field` gets. */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  font-size: var(--filter-label);
+  color: var(--muted);
+}
+.register-card .filters .picker-with-mode > .picker > .chip,
+.register-card .filters .category-filter > .picker > .chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  padding-left: 16px;
+  padding-right: 16px;
+  min-width: 11em;
+}
+/* The grouping words are text in a label until they are pointed at: no box,
+   the label's own size, weight and line height. `font: inherit` carries the
+   line height down with the size, and a button that is inline-block by
+   default would otherwise add a box of its own to the label's line -- so
+   these add no padding, no border and no line of their own, and the Accounts
+   label is the same height as "Search" beside it (#145). The one in use is
+   ink and underlined, the other muted and dotted, so which is on reads
+   without a second control. */
+.grouping-toggle {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  vertical-align: baseline;
+  font: inherit;
+  color: var(--muted);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+.grouping-toggle:hover:not(:disabled) { background: none; color: var(--ink); }
+.grouping-toggle[aria-pressed="true"] {
+  color: var(--ink);
+  text-decoration: underline solid;
+}
+
+/* ---------------------------------------------------------------------------
+   A memo is one line
+   ---------------------------------------------------------------------------
+
+   Free text, and the panel's box takes newlines. Left to wrap, one three-line
+   memo made its whole row three lines tall and every row around it read as
+   ragged -- the register is scanned down a column of payees and amounts, and a
+   row whose height depends on somebody's note is a row that moves the ones
+   after it.
+
+   Truncated, not hidden: the full text is the cell's `title`, is in its
+   accessible name, and is in the panel the date opens.
+   --------------------------------------------------------------------------- */
+.register-card td.memo-cell .cell-edit,
+.register-card td.memo-cell .cell-static {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+@media (min-width: 769px) {
+  /* A width the column keeps whatever is in it, so the memo can never push the
+     money columns off the right-hand edge. */
+  .register-card td.memo-cell { max-width: 24ch; }
+  .register-card td.memo-cell .cell-edit,
+  .register-card td.memo-cell .cell-static { max-width: 24ch; }
+  /* The cap is on the line, text and W together, so a flagged memo is the
+     same width as any other and its text is what gives way (#143). */
+  .register-card td.memo-cell .memo-line { max-width: 24ch; }
+  .register-card td.memo-cell .memo-line > .cell-edit,
+  .register-card td.memo-cell .memo-line > .cell-static { max-width: none; }
+
+  /* The payee and the category want the same bargain the memo already struck,
+     and for the same reason: `COMPRA INTERNET WWW.AMAZON*MM15J0RH5` is the shape of a
+     real payee in a ledger, and it made its row two lines tall. Wider than the
+     memo, because these two are what the row is *about* -- a memo is a note
+     and a payee is the fact you are scanning for.
+
+     The cap is on the control rather than on the cell. `table-layout: auto`
+     does not honour a width on a `td`, but it does size the column to a child
+     that has stopped growing. The full text is already in `title` and in the
+     accessible name, so nothing is lost but the height. */
+  .register-card td.editable:not(.memo-cell) .cell-edit,
+  .register-card td.editable:not(.memo-cell) .cell-static {
+    max-width: 34ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The same defect from the other side, found while measuring the above. The
+     Date column is sized by its *heading*, which is shorter than every value
+     in it, so `2026-07-27` wrapped and every row in the register was 61px
+     where 35px would do. Uniformly two lines is still uniform; it just costs a
+     third of the rows on screen. An ISO date has nowhere useful to break. */
+  .register-card td[data-label="Date"] > .link { white-space: nowrap; }
+}
+
+/* ---------------------------------------------------------------------------
+   Cleared, as one letter
+   ---------------------------------------------------------------------------
+
+   The same bargain the source column makes one cell to the right: a letter in
+   the cell, the word on hover and in the accessible name. Colour carries no
+   meaning on its own -- the letter does -- so a screen that renders these grey
+   loses nothing.
+   --------------------------------------------------------------------------- */
+.tag.cleared-C,
+.tag.cleared-U,
+.tag.cleared-L {
+  margin-left: 0;
+  min-width: 1.6em;
+  text-align: center;
+  font-family: var(--mono);
+}
+.tag.cleared-C { background: var(--positive); color: var(--surface); }
+.tag.cleared-U { background: none; color: var(--muted); border-color: var(--line); }
+.tag.cleared-L { background: var(--surface-2); color: var(--ink); border-color: var(--line); }
+/* The column is as wide as the pill. It was as wide as the word "cleared". */
+.register-card td.cleared-cell { white-space: nowrap; }
+
+/* ---------------------------------------------------------------------------
+   The table's text size (#143)
+   ---------------------------------------------------------------------------
+
+   `--register-text` and `--register-pad` are set on the table by the (−)/(+)
+   beside Add transaction. The size is the table's; everything in a row that
+   was a fixed 13px (`.small`: the account, category and memo) becomes a
+   proportion of it, so the whole row steps together. The padding is the
+   vertical padding of every cell and of the buttons that carry an editable
+   cell's padding for it -- that is what makes a smaller step fit more rows
+   rather than the same rows with more white round the letters.
+
+   Above the phone breakpoint only: there every row is a card with sizes of
+   its own, and the buttons are hidden.
+   --------------------------------------------------------------------------- */
+@media (min-width: 769px) {
+  .register-card table { font-size: var(--register-text, 14px); }
+  .register-card tbody td.small,
+  .register-card tbody td .small { font-size: 0.93em; }
+  .register-card tbody td:not(.editable):not(.editing) {
+    padding-top: var(--register-pad, 7px);
+    padding-bottom: var(--register-pad, 7px);
+  }
+  .register-card tbody td .cell-edit,
+  .register-card tbody td .cell-static {
+    padding-top: var(--register-pad, 7px);
+    padding-bottom: var(--register-pad, 7px);
+  }
+}
+@media (max-width: 768px) {
+  .text-steps { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   The pills in a row, minimal (#143)
+   ---------------------------------------------------------------------------
+
+   Cleared, Source and the W are one letter each and were drawn at the size
+   of a tag elsewhere in the app -- 11px bold capitals in a pill padded for a
+   word, which made them the loudest thing on a row whose point is the payee
+   and the amount. Smaller and tighter here, and still a filled shape with a
+   monospaced letter in it, so they read at a glance and scan down a column.
+
+   `em` rather than pixels so they follow the table's text size, with a floor
+   so the smallest step never takes a letter below what can be read. Scoped
+   to the register's rows: the same classes are drawn elsewhere at their own
+   size.
+   --------------------------------------------------------------------------- */
+.register-card td .tag {
+  font-size: max(9px, 0.72em);
+  padding: 0 3px;
+  min-width: 1.35em;
+  line-height: 1.45;
+  letter-spacing: 0;
+  border-radius: 3px;
+}
+/* The W at the memo's right-hand edge. The memo truncates to make room; the
+   pill never shrinks. `.memo-line` is a flex row inside the cell rather than
+   the cell itself, because a table cell that is a flex container stops being
+   a table cell. */
+.register-card td.memo-cell .memo-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.register-card td.memo-cell .memo-line > .cell-edit,
+.register-card td.memo-cell .memo-line > .cell-static {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.register-card td.memo-cell .memo-line > .tag {
+  flex: none;
+  margin: 0 6px 0 0;
+}
+
+/* ---------------------------------------------------------------------------
+   The transfer mark (#143)
+   ---------------------------------------------------------------------------
+
+   A column one glyph wide between the tick box and the date, present on every
+   row whether or not it has anything to show, so the columns after it never
+   move when a filter adds or removes the only transfer in view. The padding
+   is taken down to almost nothing on both sides: the tick box already has
+   its own, and a mark column as wide as a word would cost the payee.
+   --------------------------------------------------------------------------- */
+.register-card th.transfer-col,
+.register-card td.transfer-col {
+  width: 1px;
+  padding-left: 0;
+  padding-right: 2px;
+  text-align: center;
+  white-space: nowrap;
+}
+.transfer-mark {
+  color: var(--accent);
+  font-size: 0.9em;
+  line-height: 1;
+}
+
+/* The count line above the rows, and the selection banner under it (#143). */
+.register-card .register-count { margin: 0 0 8px; }
+
+/* ---------------------------------------------------------------------------
+   What the selected rows come to
+   ---------------------------------------------------------------------------
+
+   One line per currency, and no line adding them: there is no exchange rate
+   anywhere in this schema, so a total across two currencies would be a number
+   with nothing behind it. The layout says so by having nowhere to put one.
+   --------------------------------------------------------------------------- */
+.selection-sums { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.sum-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  font-size: 15px;
+}
+.sum-line .sum-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* `.amount` is right-aligned for a table cell; in a sentence it is just a
+   figure, and the alignment would leave gaps between the terms. */
+.sum-line .amount { text-align: left; }
+
+/* ---------------------------------------------------------------------------
+   Phones
+   ---------------------------------------------------------------------------
+
+   Everything above assumes a line wide enough to have two ends. Below the
+   shell's breakpoint there is one column and the filters are behind a button
+   anyway, so the bar goes back to stacking.
+   --------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* The filter line's box and text at a size iOS will not zoom into (#145),
+     and a box a thumb can find. The labels stay small print. */
+  .register-card .filters {
+    --filter-box: 40px;
+    --filter-text: 16px;
+  }
+  /* The date range's exact months are selects too, and their desktop 12px
+     (above) outranks the global phone rule the same way. */
+  .register-card .filters .daterange-exact select { font-size: 16px; }
+  .register-card .daterange { flex-direction: column; align-items: stretch; }
+  .register-card .daterange-exact { margin-left: 0; justify-content: flex-start; }
+  .register-title > .register-actions { margin-left: 0; flex-wrap: wrap; }
+  /* On a phone the actions wrap to the left edge, so the menu hangs from the
+     button's left instead. */
+  .add-menu-list { right: auto; left: 0; }
+  .register-title > .currency-toggle { margin-left: 0; flex-wrap: wrap; row-gap: 6px; }
+  /* The card's money line is one currency's figure; the empty cells of the
+     other currencies are already gone (`td:empty`), and the label the visible
+     one carries says which currency it is. */
+  .register-card td.memo-cell .cell-edit,
+  .register-card td.memo-cell .cell-static { max-width: 60vw; }
+  /* A card's payee already says "Transfer : Savings", and a line reading
+     TRANSFER ⇄ under it would say it twice. Hidden the way the Source line
+     is. */
+  .register-card td.transfer-col { display: none; }
+
+  /* Category and Memo are the two detail lines whose content is a *button*
+     rather than a text node, and `.cell-edit` is `width: 100%; text-align:
+     left` -- deliberately, so that on a desktop the whole cell is the hit
+     area. As a flex item it therefore stretched across everything
+     `space-between` would have distributed, so its value hugged its label
+     instead of sitting at the right edge Date, Account and Cleared share. The
+     rule was never revisited when the table started becoming cards.
+
+     `width: auto` gives `space-between` something to distribute again, and
+     the padding is desktop cell padding that pushes the value in from the
+     edge the other lines sit flush against. `text-align: right` is for the
+     case where a long category still wraps to two lines.
+
+     Not `[data-primary]`: the payee is the card's headline and belongs on the
+     left, where it also keeps wrapping rather than truncating -- there is no
+     hover on a phone to recover what an ellipsis took. */
+  .register-card td:not([data-primary]):not([data-figure]):not([data-select]) > .cell-edit,
+  .register-card td:not([data-primary]):not([data-figure]):not([data-select]) > .cell-static,
+  .register-card td.memo-cell .memo-line > .cell-edit,
+  .register-card td.memo-cell .memo-line > .cell-static {
+    width: auto;
+    padding: 0;
+    text-align: right;
+  }
+  /* The memo's value is its text and its W, together at the right edge the
+     other detail lines share. On a phone this is the first place the W is
+     seen at all: the Source line it used to sit on is hidden here. */
+  .register-card td.memo-cell .memo-line {
+    justify-content: flex-end;
+    max-width: 60vw;
+  }
+  .register-card td.memo-cell .memo-line > .tag { margin-right: 0; }
+}
+
+/* ---------------------------------------------------------------------------
+   The money columns are a block, and the block has edges
+   ---------------------------------------------------------------------------
+
+   Eleven columns of text with four columns of figures among them reads as one
+   run, and the eye has to find where the money starts by reading the headings
+   every time. A hairline down each side of the money block is what says "these
+   are the figures" without a heading, a colour or a weight change -- and with
+   more than one currency the same rule falls between one currency's pair and
+   the next, which is the boundary that actually matters: no reader should ever
+   carry a sum across it.
+
+   `--line` rather than a grey of its own. It is the same hairline the table's
+   own rows use, so the block is bracketed at the weight the table is already
+   drawn at rather than by a second, louder grey.
+
+   Above the phone breakpoint only. Below it every row is a card and the cells
+   are stacked lines with their own labels -- a vertical rule between two of
+   them would be a rule across the middle of a card.
+   --------------------------------------------------------------------------- */
+@media (min-width: 769px) {
+  .register-card th.money-open,
+  .register-card td.money-open {
+    border-left: 1px solid var(--line);
+  }
+  .register-card th.money-close,
+  .register-card td.money-close {
+    border-right: 1px solid var(--line);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Columns you can drag (#74)
+   ---------------------------------------------------------------------------
+
+   Each heading's right-hand edge is a handle. Until one is dragged nothing
+   here applies and the table is laid out as above. After the first drag the
+   table is `sized`: fixed layout, a `<col>` per column, and exactly as wide as
+   its columns add up to -- which may be wider than the card, and then the
+   card scrolls sideways, or narrower, and then it is narrower.
+
+   One line per row is the rule the drag must not break. So a sized table
+   truncates *every* cell to its column, not only the payee, category and memo
+   the caps above were written for -- and lifts those caps, because a payee
+   column dragged to 400px should show 400px of payee, not 34ch of it.
+
+   `td.editing` is the exception: the payee and category comboboxes open a
+   list below the cell, and `overflow: hidden` would cut it off at the row.
+
+   Above the phone breakpoint only. Below it there are no headings to drag
+   and every row is a card with its own idea of width.
+   --------------------------------------------------------------------------- */
+@media (min-width: 769px) {
+  .register-card table.sized {
+    table-layout: fixed;
+    width: var(--table-width);
+  }
+  .register-card table.sized th,
+  .register-card table.sized td:not(.editing) {
+    max-width: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .register-card table.sized td.memo-cell .memo-line { max-width: none; }
+  .register-card table.sized td .cell-edit,
+  .register-card table.sized td .cell-static {
+    display: block;
+    max-width: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .register-card table.sized td[data-label="Date"] > .link {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* The heading keeps its sort button; the label clips before the arrow is
+     pushed out of the cell. */
+  .register-card table.sized th.sortable > button { overflow: hidden; }
+
+  /* The handle. A heading is `position: sticky` in this card, which makes it
+     the containing block, so the handle sits inside its own heading and is
+     never painted over by the next one. */
+  .col-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    touch-action: none;
+    z-index: 1;
+  }
+  .col-resizer::after {
+    content: "";
+    position: absolute;
+    top: 22%;
+    bottom: 22%;
+    right: 2px;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--line);
+  }
+  .col-resizer:hover::after,
+  .col-resizer.dragging::after,
+  .col-resizer:focus-visible::after {
+    background: var(--accent);
+  }
+  .col-resizer:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  /* While dragging, the pointer is the resize arrow wherever it wanders, and
+     sliding across a payee does not select it. */
+  body.resizing-columns,
+  body.resizing-columns * {
+    cursor: col-resize !important;
+    user-select: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .col-resizer { display: none; }
+  .register-card colgroup { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   A transfer leg's category (#124)
+   ---------------------------------------------------------------------------
+
+   Greyed rather than hidden: the panel keeps its shape, and the field says why
+   there is nothing to choose. A transfer is not spending, so it has none. */
+input.no-category:disabled {
+  color: var(--muted);
+  background: var(--surface-2);
+  cursor: not-allowed;
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+   The filter line's newer members (#123)
+   --------------------------------------------------------------------------- */
+
+/* A figure, not a sentence: the amount box is as wide as an amount. The two
+   selects hold one letter and a word. Neither grows the way Search does. */
+.register-card .filters .filter-line > .amount-lookup { flex: 0 1 11em; }
+.register-card .filters .filter-line > .narrow-filter { flex: 0 0 auto; }
+.register-card .filters .filter-line > .narrow-filter select { width: auto; }
+.amount-lookup input[aria-invalid="true"] { border-color: var(--danger); }
+
+/* Past four currencies the rest sit behind a "+", in a small tray under it. */
+.currency-more { position: relative; display: inline-flex; }
+.currency-more-list {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: max-content;
+  max-width: min(260px, 80vw);
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 18%);
+}
+
+/* The date steppers are one glyph each. */
+.daterange-step { min-width: 2em; padding-left: 6px; padding-right: 6px; }
+
+/* ---------------------------------------------------------------------------
+   A payment from work, and what it repaid
+   ---------------------------------------------------------------------------
+
+   Under the two Work expenses views that bring payments along, each expense
+   a payment repaid sits under it with a ↳ -- an arrow in the date cell rather
+   than an indent of the payee, because the payee cell is an editor and an
+   indent there moves the box you type into. The arrow is muted: it is a
+   relation between two rows, not a fact that wants colour.
+   --------------------------------------------------------------------------- */
+.work-child { color: var(--muted); margin-right: 6px; }
+
+/* The side panel's Reimbursement block. Spaced like the receipt above it,
+   and the "waiting" words take --warn, the same token the owed pill wears,
+   so the two read as one fact in two places. */
+.reimbursement-section { margin: 14px 0; }
+.reimbursement-section .row { gap: 8px; }
+.work-waiting { color: var(--warn); }
+.work-repays { width: 100%; margin: 0 0 8px; font-size: 13px; }
+.work-repays td { padding: 3px 6px 3px 0; }
+.work-sum { margin-bottom: 6px; }
+
+/* ---------------------------------------------------------------------------
+   The selection dock (#144)
+   ---------------------------------------------------------------------------
+
+   The banner with the sums and the bulk acts, and the note or refusal a bulk
+   act leaves, pinned to the bottom of the screen while there is a selection.
+   It is the card's last child, and that one position does the work in both
+   of the register's layouts:
+
+   - A tall window. The card is a flex column the height of the window and
+     `.table-scroll` is the part that scrolls, so the dock is the item under
+     it and `flex: none` keeps it from being squeezed. The scroller gives up
+     the height instead; no row is ever behind the dock. `sticky` does
+     nothing here, because nothing around it scrolls.
+   - A phone, or any window under 600px tall. The card is a block and the
+     page (`main.content`) scrolls, so `sticky; bottom: 0` holds it to the
+     bottom edge. Still in the flow, it has its own space after the last
+     row: scroll to the end and the last rows come out from under it. There
+     is no bottom bar on a phone to clear -- the nav is a drawer from the
+     top bar, and it and its backdrop (z-index 30 and 40) still cover this.
+
+   Capped at 45% of the window and scrolling inside itself past that: three
+   currencies of sums, the note about the other currencies and a wrapped row
+   of acts is a lot of a phone, and the rows the sums are about must stay in
+   view above it. The border and the shadow say it sits over the rows rather
+   than being one of them.
+   --------------------------------------------------------------------------- */
+.register-card > .selection-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  flex: none;
+  max-height: 45vh;
+  max-height: 45dvh;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding: 10px 0 env(safe-area-inset-bottom, 0px);
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -8px 12px -10px rgb(0 0 0 / 0.3);
+}
+/* Sticky measures `bottom` from inside the scroller's padding, and
+   `main.content` has 12px of it on a phone and 20px above that -- so at
+   `bottom: 0` the dock stopped short of the edge and rows showed through the
+   strip under it. Pulled down by exactly that padding, it meets the edge.
+   Only where the page scrolls; in the tall desktop frame nothing sticks. */
+@media (max-width: 768px) {
+  .register-card > .selection-dock { bottom: -12px; }
+}
+@media (min-width: 769px) and (max-height: 600px) {
+  .register-card > .selection-dock { bottom: -20px; }
+}
+.register-card > .selection-dock > .banner { margin-bottom: 8px; }
+.register-card > .selection-dock > .banner:last-child { margin-bottom: 0; }

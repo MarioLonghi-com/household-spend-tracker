@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#15705c" />
+    <title>Spend Tracker - Snap a Receipt</title>
+    <link rel="manifest" href="/snap/manifest.json" />
+    <!-- The same mark the SPA carries. The files sit at the root of the
+         client build and are served by the catch-all in `main.py`, so this
+         page reaches them without a second copy under /snap. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!--
+      One page, one job: photograph the receipt at the till, compress it on the
+      phone, send it to the inbox, take another.
+
+      Deliberately not a screen in the SPA. That bundle loads a register, a
+      household picker, a category tree and a payee list before it shows
+      anything, which on a phone on a slow connection is a hostile experience
+      for a five-second task. This is one HTML file and one JavaScript file and
+      shares nothing but the session cookie, the origin, the CSP and the upload
+      endpoint.
+
+      The script is a separate file and cannot be inlined: main.py's CSP is
+      `script-src 'self'` with no 'unsafe-inline', so a single-file page renders
+      blank with nothing but a console violation -- on a phone, at a till,
+      which nobody is reading. There is a test for that, because the failure is
+      invisible and the fix looks like a regression in tidiness.
+    -->
+    <style>
+      :root {
+        --ink: #16222a;
+        --muted: #5b6b65;
+        --paper: #f4f7f4;
+        --surface: #ffffff;
+        --line: #d7e0d9;
+        --accent: #15705c;
+        --accent-ink: #ffffff;
+        --danger: #a3341f;
+      }
+      /* Dark when the system says so and nobody chose otherwise in the app,
+         then dark because they did. Same contract as `client/src/styles.css`:
+         equal specificity, later rule wins, and the `:not()` is what lets
+         somebody hold this page in light on a dark phone. The choice is made
+         in Your account and read here off `localStorage`, because it is a fact
+         about this device and this page is on the same device. */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --ink: #e6ede9;
+          --muted: #97a59f;
+          --paper: #0f1715;
+          --surface: #17201e;
+          --line: #2a3733;
+          --accent: #5ac3a6;
+          --accent-ink: #0f1715;
+          --danger: #e08a72;
+        }
+      }
+      :root[data-theme="dark"] {
+        --ink: #e6ede9;
+        --muted: #97a59f;
+        --paper: #0f1715;
+        --surface: #17201e;
+        --line: #2a3733;
+        --accent: #5ac3a6;
+        --accent-ink: #0f1715;
+        --danger: #e08a72;
+      }
+      :root { color-scheme: light; }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) { color-scheme: dark; }
+      }
+      :root[data-theme="dark"] { color-scheme: dark; }
+      :root[data-theme="light"] { color-scheme: light; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--paper);
+        color: var(--ink);
+        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+      /* The household's own accent, because two households in one browser look
+         identical otherwise and that is how a receipt lands in the wrong
+         ledger. The palette exists for exactly this and this is a new surface
+         for it, not a new mechanism. */
+      header {
+        background: var(--accent);
+        color: var(--accent-ink);
+        padding: env(safe-area-inset-top) 16px 14px;
+        padding-top: calc(env(safe-area-inset-top) + 14px);
+      }
+      /* The way out on the left, who and which ledger on the right. Two edges
+         rather than a row of three things in the middle: the back link is the
+         only control here that leaves the page, and the household is the one
+         fact that decides whether a receipt lands in the right ledger. */
+      .bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .tools {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+      }
+      /* A pill, not a heading. It was two stacked lines at 18px/600 and took a
+         fifth of the first screen to say something that changes about twice a
+         year; the camera button is what this page is for. */
+      #house {
+        background: none;
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        color: inherit;
+        padding: 5px 10px;
+        font-family: inherit;
+        font-size: 13px;
+        line-height: 1.2;
+        max-width: 42vw;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        opacity: 0.9;
+      }
+      #who { font-size: 14px; opacity: 0.9; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      #where { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      #caret { font-size: 10px; opacity: 0.8; }
+      /* Back to the ledger. A link rather than a button: it leaves this page,
+         and a phone's own back gesture does not exist once this is installed
+         to a home screen. */
+      #toapp {
+        font: inherit;
+        font-size: 14px;
+        white-space: nowrap;
+        color: inherit;
+        text-decoration: none;
+        border: 1px solid currentColor;
+        border-radius: 6px;
+        padding: 6px 10px;
+        opacity: 0.9;
+      }
+      /* The second way in: the library, where several can be chosen at once. */
+      #several {
+        font: inherit;
+        font-size: 15px;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+      }
+      .note-field {
+        font: inherit;
+        font-size: 14px;
+        width: 100%;
+        margin-top: 6px;
+        padding: 6px 8px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--paper);
+        color: var(--ink);
+      }
+      .landed { border-color: var(--accent); }
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 16px calc(env(safe-area-inset-bottom) + 20px);
+      }
+      /* Thumb-reachable: one big target, nothing else to hit by accident. */
+      #shoot {
+        flex: 0 0 auto;
+        min-height: 180px;
+        border: 2px dashed var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+        color: var(--ink);
+        font: inherit;
+        font-size: 19px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      #shoot:disabled { opacity: 0.6; }
+      .camera { font-size: 34px; }
+      ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+      li {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      li img { width: 44px; height: 58px; object-fit: cover; border-radius: 4px; }
+      /* The picture, on the left of every row that reached the inbox. It is
+         the local blob this page already holds, not a fetch of the server's
+         thumbnail: at a till the cheapest round trip is the one not made. */
+      .shot { position: relative; flex: 0 0 auto; line-height: 0; }
+      .shot .peek {
+        position: absolute;
+        left: 0;
+        top: -8px;
+        z-index: 5;
+        display: none;
+        width: 210px;
+        height: auto;
+        max-height: 70vh;
+        object-fit: contain;
+        padding: 4px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+      }
+      /* Only where there is a pointer that can hover. On a phone the picture
+         is already there at 44px and a tap has somewhere better to go. */
+      @media (hover: hover) {
+        .shot:hover .peek, .shot:focus-within .peek { display: block; }
+      }
+      /* Off by default and said out loud, in both states. */
+      .gps {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font: inherit;
+        font-size: 15px;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+      }
+      .gps[aria-pressed="true"] {
+        background: var(--accent);
+        color: var(--accent-ink);
+        border-color: var(--accent);
+      }
+      /* There is nothing behind it on a page the browser will not offer
+         location to. Dimmed and not-allowed, with the reason in the paragraph
+         below that is already this button's `aria-describedby`. */
+      .gps:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      #gpswhy { margin-top: -8px; }
+      .grow { flex: 1; min-width: 0; }
+      .name { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .state { font-size: 13px; color: var(--muted); }
+      .failed .state { color: var(--danger); white-space: normal; }
+      .retry, .switcher button {
+        font: inherit;
+        font-size: 14px;
+        padding: 6px 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--ink);
+      }
+      /* Under the pill it belongs to, which is now on the right. */
+      .switcher { display: grid; gap: 8px; margin-top: 10px; justify-content: end; justify-items: stretch; }
+      /* `display: grid` above beats the user agent's `[hidden] { display: none }`
+         because an author rule wins -- so the list of households was on screen
+         from the moment the page loaded, permanently, rather than appearing
+         when the header was tapped. It is a popup or it is not; this is what
+         makes the `hidden` attribute mean something. */
+      .switcher[hidden] { display: none; }
+      .note { color: var(--muted); font-size: 14px; margin: 0; }
+      .sr-only {
+        position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="bar">
+        <!-- Back to the ledger, hard left: it is the way out of this page, and
+             a chevron pointing that way is the one thing on a phone that reads
+             as "back" without being labelled twice. -->
+        <a id="toapp" href="/">&lsaquo; Go to app</a>
+        <!-- Who and where, hard right, in one compact group: they answer the
+             same question -- which ledger is this receipt about to land in,
+             under whose name -- and a receipt in the wrong one is the failure
+             the whole colour scheme exists to prevent. -->
+        <div class="tools">
+          <span id="who"></span>
+          <button id="house" type="button">
+            <span id="where">…</span>
+            <span id="caret" aria-hidden="true" hidden>▾</span>
+          </button>
+        </div>
+      </div>
+      <div class="switcher" id="switcher" hidden></div>
+    </header>
+
+    <main>
+      <!--
+        The location toggle, off until somebody switches it on.
+
+        It exists because a photograph that reaches this page through a share
+        sheet, or from an Android browser that strips metadata, has no GPS of
+        its own -- and where a receipt was bought is very often the only thing
+        that identifies it before the statement arrives.
+
+        What it is *not*: a second notion of location. A coordinate from here
+        fills the same columns EXIF does and only where the photograph carried
+        none, so there is one answer to "where was this taken" and the row
+        records which kind of answer it is. See `DeviceFix` in
+        `app/services/receipts.py`.
+
+        Nothing is asked of the browser until this is pressed, and the
+        paragraph below says what pressing it will record, before it records
+        anything.
+      -->
+      <button id="gps" class="gps" type="button" aria-pressed="false" aria-describedby="gpswhy">
+        <span aria-hidden="true">📍</span>
+        <span id="gpslabel">Location off</span>
+      </button>
+      <p class="note" id="gpswhy" role="status" aria-live="polite">
+        Off. A photo records only what the camera wrote. Switch this on and
+        every picture you send — taken here, or added from your library — also
+        records where this phone is now, asked of the browser when you switch
+        it on and sent to this household's own server and nowhere else.
+      </p>
+      <button id="shoot" type="button">
+        <span class="camera" aria-hidden="true">📷</span>
+        <span>Take a photo</span>
+      </button>
+      <!--
+        `<input capture>` and never getUserMedia. A video frame grab is a
+        couple of megapixels with no autofocus, no HDR and -- the row that
+        actually decides it -- no EXIF at all, so the location and the capture
+        time would be gone on the one page where they are most likely to exist.
+        `capture="environment"` is a hint, and a browser that shows the full
+        picker instead is fine: "the photo I already took" is a real case.
+      -->
+      <input
+        id="file"
+        class="sr-only"
+        type="file"
+        accept="image/*,application/pdf"
+        capture="environment"
+        multiple
+      />
+      <!--
+        The second way in. `capture` above asks for the camera and browsers
+        that honour it take exactly one photo, `multiple` or not -- so a person
+        with four receipts on the table takes four trips through the shutter.
+        This input drops `capture`, which opens the picker, where several can
+        be chosen at once.
+      -->
+      <button id="several" type="button">Add several from the library</button>
+
+      <input
+        id="files"
+        class="sr-only"
+        type="file"
+        accept="image/*,application/pdf"
+        multiple
+      />
+      <p class="note" id="summary" role="status" aria-live="polite"></p>
+      <ul id="landed"></ul>
+      <ul id="queue"></ul>
+      <p class="note">
+        Goes to the inbox. Match it to a transaction later, when the statement
+        arrives.
+      </p>
+    </main>
+
+    <script type="module" src="/snap/snap.js"></script>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 338 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 60 780 Tm (Resumo da fatura em R$) Tj
+1 0 0 1 60 760 Tm (Encargos) Tj
+1 0 0 1 200 760 Tm (R$ 119,74) Tj
+1 0 0 1 300 760 Tm (Valor solicitado) Tj
+1 0 0 1 430 760 Tm (R$ 1.098,90) Tj
+1 0 0 1 60 740 Tm (Total a pagar) Tj
+1 0 0 1 200 740 Tm (R$ 1.225,52) Tj
+1 0 0 1 300 740 Tm (Juros) Tj
+1 0 0 1 430 740 Tm (11,47 %) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000630 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+700
+%%EOF

@@ -1,0 +1,27 @@
+/*
+ * accounts — the ewtEPh review, 2026-09-22.
+ *
+ * A sheet of its own, following the per-area split the UXGmko round settled
+ * on: `styles.css` holds what every screen shares and a screen's own layout
+ * lives beside the screen. Loaded after it from `main.tsx`, so a rule here
+ * wins a tie.
+ */
+
+/* ---------------------------------------------------------------------------
+   Oldest and newest, as dates that do not wrap
+   ---------------------------------------------------------------------------
+
+   `YYYY-MM-DD` is ten monospaced characters and it has to stay on one line: a
+   date broken across two makes the row taller than every other row in the
+   table, and the eye reads that as a change of section. `1%` is the width
+   trick the rest of this codebase uses for a column that should take exactly
+   what it needs -- a percentage smaller than the content forces the table
+   layout to give it its minimum and spend the remainder on the name.
+   --------------------------------------------------------------------------- */
+@media (min-width: 769px) {
+  th.span-col,
+  td.span-col {
+    white-space: nowrap;
+    width: 1%;
+  }
+}

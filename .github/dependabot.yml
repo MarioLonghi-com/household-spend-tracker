@@ -1,0 +1,112 @@
+# Nobody was watching the dependencies.
+#
+# The vite advisories in the 2026-09-19 review were found by running `npm audit`
+# by hand; no automation would have said anything. Dependabot alerts also have
+# to be switched on in the repository's own settings -- this file only says what
+# to watch and how often, and is inert without that.
+#
+# **One pull request per ecosystem per week**, Monday morning, since #242.
+# Eleven separate pull requests for one week's patch releases is how a bot gets
+# muted, and a muted bot is worse than no bot.
+#
+# - **Groups with no `update-types` filter.** The groups used to say
+#   `update-types: ["minor", "patch"]`, which only works when Dependabot can
+#   classify the bump -- and for a `>=` floor in requirements.txt it cannot, so
+#   every pip bump fell out of the group and opened on its own: eight separate
+#   pull requests on 2026-09-29 and five on 2026-09-30, each a full CI run.
+#   `patterns: ["*"]` alone puts everything in one pull request. (Exact pins --
+#   the lockfile with hashes issue #96 plans -- would let a minor/patch split
+#   come back; until then, one.)
+# - **`cooldown`.** A release that is seven days old has had a week for its own
+#   regressions and any hijacked-package advisory to surface. The cheapest
+#   supply-chain control there is. Security updates ignore it, and open on
+#   their own regardless of the schedule.
+# - **`open-pull-requests-limit`** of two, not five: with everything in one
+#   group the weekly pull request is the only one expected, and the limit is a
+#   ceiling on surprises. It counts version updates only; security updates
+#   have a separate allowance and are never held back by it.
+#
+# Every update targets `dev`, not `main`. Work lands on `dev` and reaches `main`
+# only through a release merge; a bump opened against `main` is written against
+# code that is days behind and has to be redone by hand. Dependabot reads this
+# file from the default branch, so a change here takes effect from the next
+# `dev` -> `main` merge.
+#
+# **No automatic rebases.** Dependabot rebases every open pull request each
+# time something lands on the target branch, and each rebase is a full CI run
+# on a change nobody asked to re-test -- one merge into `dev` with five bumps
+# open was five more runs. With it off, a bump goes stale against `dev` until
+# somebody wants it: comment `@dependabot rebase` on it then, and it catches up
+# and re-runs once. A conflicting one still says so on the pull request.
+#
+# tests.yml's path gate runs only the affected tier for each: a pip pull
+# request runs lint, the suite, the rehearsal and the audit; an npm one the
+# client, e2e and the audit; an actions one everything, since a workflow file
+# changed.
+
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    target-branch: dev
+    rebase-strategy: disabled
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 2
+    groups:
+      python:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /client
+    target-branch: dev
+    rebase-strategy: disabled
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 2
+    groups:
+      client:
+        patterns: ["*"]
+
+  # The workflows pin every action to a commit SHA, which is the point -- a tag
+  # is mutable. Dependabot understands the `# vX.Y.Z` comment beside the pin
+  # and moves both together, so pinning does not mean going stale.
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    rebase-strategy: disabled
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 1
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # The Dockerfile's Node stage is pinned by digest, which only stays a
+  # discipline rather than a fossil if something moves it. This is what does.
+  # It watches literal `FROM` lines; the Chainguard bases are `ARG` defaults
+  # and are not pinned yet (issue #63).
+  - package-ecosystem: docker
+    directory: /
+    target-branch: dev
+    rebase-strategy: disabled
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 1

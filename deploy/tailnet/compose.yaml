@@ -1,0 +1,103 @@
+# The app behind its own Tailscale node.
+#
+#   cd deploy/tailnet && cp .env.example .env && chmod 600 .env   # fill in TS_AUTHKEY
+#   docker compose build
+#   SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d                 # first run only
+#
+# Two containers, one network namespace. The sidecar joins the tailnet as
+# `spend-tracker.<tailnet>.ts.net`, holds a real certificate for it, and
+# `tailscale serve` proxies 443 to the app on loopback *inside the same
+# namespace*. The app publishes no port anywhere: the only way in is over the
+# tailnet, through the thing holding the certificate. deploy/DOCKER.md,
+# "Behind a Tailscale sidecar", has the words; the root compose.yaml has the
+# single-host version where `tailscale serve` runs on the host instead.
+#
+# Never add AllowFunnel to serve.json. That is the public internet.
+
+# The same project name as the root compose.yaml, so both files share the
+# `spend-tracker_ledger` volume and a move from one to the other is a
+# `docker compose down` here and an `up` there. deploy/UPGRADING.md says why
+# the name is pinned at all.
+name: spend-tracker
+
+services:
+  tailscale:
+    # Pinned. `:latest` moves underneath a restart; Dependabot's docker entry
+    # moves this one with a pull request.
+    image: tailscale/tailscale:v1.102.5
+    # The node's name on the tailnet, and so its MagicDNS name and certificate.
+    hostname: spend-tracker
+    environment:
+      # A reusable, pre-tagged, non-ephemeral key from the admin console, kept
+      # in .env (chmod 600), never here. Tagged nodes do not expire.
+      TS_AUTHKEY: ${TS_AUTHKEY:?put a tagged Tailscale auth key in deploy/tailnet/.env}
+      # Must persist, or the node re-registers as a new machine on every start.
+      TS_STATE_DIR: /var/lib/tailscale
+      # The tag is the ACL subject: "the household may reach tag:spend-tracker
+      # on tcp:443" is a rule, not a hope about port numbers.
+      TS_EXTRA_ARGS: --advertise-tags=tag:spend-tracker
+      # Applied at startup; ${TS_CERT_DOMAIN} inside it is filled in by the
+      # image with the node's real name.
+      TS_SERVE_CONFIG: /config/serve.json
+      # Kernel networking, which needs the TUN device and NET_ADMIN below.
+      # Set "true" and drop both if the host cannot pass /dev/net/tun through
+      # (an unprivileged LXC without the passthrough, or rootless Podman).
+      TS_USERSPACE: "false"
+    volumes:
+      - ts-state:/var/lib/tailscale
+      - ./serve.json:/config/serve.json:ro
+    devices:
+      - /dev/net/tun
+    cap_add:
+      - net_admin
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    # Build from a checkout of a tag and name the version, so `docker image ls`
+    # on the box says what is running:  SPENDTRACKER_VERSION=0.5.1 in .env.
+    image: household-spend-tracker:${SPENDTRACKER_VERSION:-local}
+    # The whole design in one line: the app lives inside the sidecar's network
+    # namespace. No `ports:` anywhere in this file, and the test suite checks.
+    network_mode: service:tailscale
+    depends_on:
+      - tailscale
+    restart: unless-stopped
+    environment:
+      # **Loopback, not 0.0.0.0.** In this namespace 0.0.0.0 would put plain
+      # HTTP on spend-tracker.<tailnet>.ts.net:8848 next to the HTTPS on 443.
+      # `tailscale serve` proxies to 127.0.0.1:8848 from inside the same
+      # namespace, so loopback is the only listener it needs.
+      SPENDTRACKER_HOST: "127.0.0.1"
+      # Off after the first run; see the root compose.yaml.
+      SPENDTRACKER_AUTO_MIGRATE: "${SPENDTRACKER_AUTO_MIGRATE:-0}"
+      # `tailscale serve` terminates real TLS. This stays on.
+      SPENDTRACKER_COOKIE_SECURE: "on"
+      SPENDTRACKER_ENV: "${SPENDTRACKER_ENV:-production}"
+      # The default (loopback, IP literals, *.ts.net) is exactly what the
+      # sidecar and the healthcheck send. Leave unset.
+      SPENDTRACKER_ALLOWED_HOSTS: "${SPENDTRACKER_ALLOWED_HOSTS:-}"
+      # The proxy connects from loopback inside the shared namespace, so this
+      # is uvicorn's own default, written down. Not the Docker bridge range the
+      # root compose.yaml needs: nothing arrives from a bridge here.
+      FORWARDED_ALLOW_IPS: "127.0.0.1"
+      # https://spend-tracker.<tailnet>.ts.net -- invitation links and
+      # /llms.txt are built from it. Set in .env.
+      SPENDTRACKER_PUBLIC_URL: "${SPENDTRACKER_PUBLIC_URL:?set SPENDTRACKER_PUBLIC_URL in deploy/tailnet/.env}"
+    volumes:
+      - ledger:/var/lib/spend-tracker
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # So one tenant of a shared box cannot starve the rest.
+    mem_limit: 768m
+
+volumes:
+  ledger:
+  ts-state:

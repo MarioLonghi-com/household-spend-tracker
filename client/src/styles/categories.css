@@ -1,0 +1,85 @@
+/*
+ * categories — UXGmko layout work, 2026-09-21.
+ *
+ * A file of its own rather than more of styles.css: six sessions were editing
+ * that one file at once. Loaded after styles.css from main.tsx, so a rule here
+ * wins a tie with the same selector there.
+ *
+ * Two screens are dressed here: the category list and the payee categorisation
+ * list.
+ * They share the pieces because they show the same shape of fact -- a count,
+ * and the few names behind it.
+ */
+
+
+/* The stat columns on the category list ------------------------------------ */
+/* `styles.css` sizes `.col-usage` at 10em for a cell that read "142
+   transactions". The word is in the column heading now, so the cell holds a
+   figure and the width comes back down -- and the payee count gets a column of
+   its own beside it. Same selectors and the same breakpoint as the rules they
+   replace, so the two agree rather than fight. */
+@media (min-width: 640px) {
+  table.fixed-columns .col-usage { width: 8em; }
+  table.fixed-columns .col-payees { width: 6em; }
+}
+
+
+/* What is behind a figure -------------------------------------------------- */
+/* One line per payee or per category: the name, then how many transactions.
+   Used in the category panel and in the payee's full list, because they are
+   the same list read from either end. */
+.breakdown {
+  list-style: none;
+  margin: 0 0 4px;
+  padding: 0;
+}
+
+.breakdown li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.breakdown li:last-child { border-bottom: 0; }
+
+/* The count is a figure in a column, so it is not allowed to wrap away from
+   the name it belongs to. */
+.breakdown li > span:last-child { flex: 0 0 auto; white-space: nowrap; }
+
+
+/* The payee categorisation screen's quick search --------------------------- */
+.payee-search-row {
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+/* Wide enough for a payee name, and it gives way to the heading first when
+   there is no room for both. */
+.payee-search { flex: 0 1 18em; }
+.payee-search input { width: 100%; }
+
+
+/* "Groceries 12 · Eating out 5 · Fuel 3 · +4 more" -------------------------- */
+/* One line, because it is a cell in a table and not a list. The names are
+   allowed to wrap at the separators on a narrow screen rather than pushing the
+   table sideways. */
+.col-tallies { width: 24em; }
+
+.tallies { display: inline; }
+.tally { white-space: nowrap; }
+.tally-gap { color: var(--muted); }
+
+/* Set off from the names so it reads as the way to the rest of them rather
+   than as another category called "+4 more". */
+.tally-more { margin-left: 6px; white-space: nowrap; }
+
+@media (max-width: 768px) {
+  /* The phone card lays a cell out as `LABEL   value`, and this value is a
+     sentence -- so it gets the width rather than being squeezed against the
+     label. */
+  .col-tallies { width: auto; }
+  .tallies { display: block; margin-top: 2px; }
+}

@@ -1,0 +1,53 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 692 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 60 780 Tm (Datum) Tj
+1 0 0 1 130 780 Tm (Beskrivning) Tj
+1 0 0 1 380 780 Tm (Belopp) Tj
+1 0 0 1 470 780 Tm (Saldo) Tj
+1 0 0 1 60 760 Tm (2026-08-30) Tj
+1 0 0 1 130 760 Tm (Uttag) Tj
+1 0 0 1 380 760 Tm (-5 000,00 kr) Tj
+1 0 0 1 470 760 Tm (51 491,52 kr) Tj
+1 0 0 1 60 740 Tm (2026-05-08) Tj
+1 0 0 1 130 740 Tm (PAG BOLETO PLANO DE APOSENTADORIA EXEMPLO) Tj
+1 0 0 1 380 740 Tm (-930,00) Tj
+1 0 0 1 470 740 Tm (56 491,52 kr) Tj
+1 0 0 1 60 720 Tm (2025-12-31) Tj
+1 0 0 1 130 720 Tm (SALDO DO DIA) Tj
+1 0 0 1 470 720 Tm (57 421,52 kr) Tj
+1 0 0 1 60 700 Tm (2025-12-31) Tj
+1 0 0 1 130 700 Tm (Ranta) Tj
+1 0 0 1 380 700 Tm (1 421,53 kr) Tj
+1 0 0 1 470 700 Tm (57 421,52 kr) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000984 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1054
+%%EOF

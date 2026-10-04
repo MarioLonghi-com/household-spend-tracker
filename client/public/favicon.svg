@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Spend Tracker">
+  <!--
+    The tab mark. One file, both schemes: a favicon is drawn by the browser
+    chrome rather than by the page, so it cannot inherit the household's
+    palette -- it gets the default accent, which is the colour the app is
+    recognised by before anyone has chosen one.
+
+    Drawn to survive 16px. The slip is a solid white block, the rules on it are
+    two pixels apiece and the notches at its foot are a third of its width, so
+    at the size a tab actually renders this reads as a paper slip rather than
+    as texture. `scripts/make_icons.py` rasterises exactly this geometry for
+    the browsers that will not take an SVG.
+  -->
+  <style>
+    .bg { fill: #15705c }
+    @media (prefers-color-scheme: dark) { .bg { fill: #5ac3a6 } }
+  </style>
+  <rect class="bg" width="32" height="32" rx="7" />
+  <path
+    fill="#ffffff"
+    d="M9 7h14v18l-2.33-2-2.34 2-2.33-2-2.34 2-2.33-2L9 25z"
+  />
+  <g fill="#15705c">
+    <rect x="12" y="11" width="8" height="2" rx="1" />
+    <rect x="12" y="15" width="5" height="2" rx="1" />
+  </g>
+</svg>

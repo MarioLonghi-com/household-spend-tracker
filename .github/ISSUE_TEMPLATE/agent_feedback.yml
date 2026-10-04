@@ -1,0 +1,34 @@
+name: Agent API feedback
+description: Raised by, or on behalf of, a program using the /api/agent/v1 surface.
+labels: [agent-feedback, agent-api]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For programs using an agent key. Never paste the key itself, and
+        replace any real payee, name or amount in a request or response.
+  - type: input
+    id: api-version
+    attributes:
+      label: api_version
+      description: From `/api/agent/v1/manifest`.
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What the key tried
+      description: The request (method, path, body shape), with the token removed.
+    validations:
+      required: true
+  - type: textarea
+    id: answer
+    attributes:
+      label: What came back
+      description: The status and the refusal or error text, verbatim.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What the agent expected, and why

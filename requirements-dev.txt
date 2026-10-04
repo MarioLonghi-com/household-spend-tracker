@@ -1,0 +1,19 @@
+-r requirements.txt
+pytest>=9.1.1
+pytest-cov>=7.1.0
+# `pytest -n auto --dist loadfile` in CI; tests/conftest.py gives each worker
+# its own data directory (#241).
+pytest-xdist>=3.8
+httpx>=0.28.1
+ruff>=0.16.9
+
+# Known advisories against what is actually pinned -- `make audit`, and a CI
+# job on every change and weekly. The vite advisories in the 2026-09-19 review
+# were found by running `npm audit` by hand; nothing would have said anything.
+pip-audit>=2.10.1
+
+# Read-only browser view of a redacted snapshot: scripts/db_view.py + `make db-view`.
+datasette>=0.65.5
+
+# Writing the .xls test fixture only; the app never writes spreadsheets.
+xlwt>=1.3

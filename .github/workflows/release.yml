@@ -1,0 +1,391 @@
+name: release
+
+# A tag is the only thing that publishes anything from this repository.
+#
+# The point of Route B in the production plan: **a user should need Python and
+# nothing else.** `app/static/dist` is gitignored, so a fresh clone has no UI
+# at all until somebody runs `npm ci && npm run build` -- which is a second
+# toolchain to install to run an app whose server does not need it, and the
+# single biggest piece of friction for a stranger. This job runs that build
+# once, here, and ships the result inside the tarball.
+#
+#     curl -L .../releases/latest/download/household-spend-tracker.tar.gz | tar xz
+#     cd household-spend-tracker-*
+#     make install-prod && make migrate && make serve
+#
+# Each release carries the tarball twice, byte for byte the same:
+# `household-spend-tracker-<version>.tar.gz`, and the unversioned
+# `household-spend-tracker.tar.gz`, which is what the README's
+# `releases/latest/download/` link names -- a link that has to work for every
+# future release cannot carry a version. Both unpack to
+# `household-spend-tracker-<version>/`.
+#
+# `make install-prod` installs the runtime requirements and nothing else; the
+# Python half standing alone is what makes that possible.
+#
+# **The jobs that write are separate from the jobs that build, and the split
+# is the point.** `build` and `image` run `npm ci` -- every install script of
+# every package in the client's tree -- and hold a read-only token. `publish`
+# holds `contents: write` and `publish-image` holds `packages: write`, and
+# neither runs anything but a download, a check and GitHub's or Docker's own
+# actions. When building and publishing were one job, anything a compromised
+# dependency ran during `npm ci` ran next to a token that can rewrite this
+# repository's releases.
+#
+# Added for the public repository (#242):
+#
+#   - `verify`: the tagged tree must be one tests.yml already passed (the
+#     `green-<tree>` artifact its `ci-ok` job records). A tag on a tree CI never
+#     saw is refused rather than shipped.
+#   - Provenance attestations for the tarball and the image, so
+#     `gh attestation verify <file> --repo MarioLonghi-com/household-spend-tracker`
+#     proves what was built, from which commit, by which workflow.
+#   - The container, published to ghcr.io. It was built and started in CI but
+#     never shipped.
+#
+# Started by hand (`workflow_dispatch`) from a branch it is a dry run: it
+# builds and smoke-tests both artefacts and publishes nothing.
+#
+# The Python lockfile with hashes is still to come: it is the Phase 4 release
+# artefact, as decided earlier, and issue #96 records it.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+# Every job says what it needs; the default is read-only.
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
+  # Lower case: ghcr.io refuses an upper-case repository name, and the
+  # organisation's is not.
+  IMAGE: ghcr.io/mariolonghi-com/household-spend-tracker
+
+jobs:
+  # Did CI pass on exactly this tree? Looked up the same way tests.yml's
+  # `changes` job looks it up: an unexpired `green-<tree>` artifact, from a run
+  # of tests.yml on this repository's own branches, that concluded `success`.
+  # The release pull request records it, or the pull request into `dev` whose
+  # tree the release carries unchanged.
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: this tree passed CI
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tree="$(git rev-parse 'HEAD^{tree}')"
+          ok=""
+          for run_id in $(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=green-${tree}&per_page=20" \
+              --jq '.artifacts[] | select(.expired == false)
+                    | select(.workflow_run.head_repository_id == .workflow_run.repository_id)
+                    | .workflow_run.id'); do
+            said="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}" --jq '[.conclusion, .path] | join(" ")')"
+            if [ "$said" = "success .github/workflows/tests.yml" ]; then
+              ok="$run_id"; break
+            fi
+          done
+          if [ -z "$ok" ]; then
+            echo "tree $tree has no green record from tests.yml."
+            echo "Run it on this tree -- the release pull request does -- and re-tag."
+            exit 1
+          fi
+          echo "tree $tree passed in run $ok"
+
+  build:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+        working-directory: client
+      - run: npm run build
+        working-directory: client
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # The PR into main ran the full release check; this is the last word on
+      # the tag itself -- that it matches, and the CHANGELOG has its section.
+      # Skipped when started by hand from a branch, which has no tag to check.
+      - name: the CHANGELOG has a dated section for this tag
+        if: github.ref_type == 'tag'
+        run: python -m scripts.release_check --tagged "${GITHUB_REF_NAME}"
+
+      # The tag and the three version files have to agree, or `/api/health`
+      # reports one number while the release is named another -- and
+      # `/api/health` is what an operator curls to confirm what is running.
+      - name: the tag matches the version
+        if: github.ref_type == 'tag'
+        run: |
+          tagged="${GITHUB_REF_NAME#v}"
+          python - "$tagged" <<'PY'
+          import sys
+          from scripts.version import declared
+          tagged = sys.argv[1]
+          wrong = {where: v for where, v in declared().items() if v != tagged}
+          if wrong:
+              print(f"the tag says {tagged}, but:")
+              for where, version in wrong.items():
+                  print(f"  {where} says {version}")
+              print("Run `make version BUMP=...` and re-tag.")
+              raise SystemExit(1)
+          print(f"tag and all three files agree at {tagged}")
+          PY
+
+      # The tag's version, or on a dry run from a branch the commit -- a branch
+      # name can hold a `/`, which a file name cannot.
+      - name: the version this build is named for
+        id: version
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="snapshot-${GITHUB_SHA::12}"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "building $version"
+
+      # The tarball ships without .git, so the app would have nobody to ask
+      # which commit it is. Stamped here, while there is one; see app/build.py.
+      - name: stamp the commit
+        run: python -m scripts.build_stamp
+
+      # `git archive` would leave the built client out -- it is gitignored, and
+      # shipping it is the entire point of this job. So the tree is assembled
+      # by hand, and what is excluded is listed rather than implied.
+      - name: build the tarball
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          staging="household-spend-tracker-${VERSION}"
+          mkdir -p "dist/${staging}"
+          cp -R app statements scripts migrations \
+                Makefile alembic.ini pyproject.toml requirements.txt \
+                requirements-dev.txt README.md LICENSE SECURITY.md \
+                CHANGELOG.md CONTRIBUTING.md deploy Dockerfile compose.yaml \
+                "dist/${staging}/"
+          # No tests, no client sources, no node_modules, no .git. Somebody who
+          # wants those clones the repository; this is the run-it path.
+          find "dist/${staging}" -name '__pycache__' -type d -prune -exec rm -rf {} +
+          test -f "dist/${staging}/app/static/dist/index.html" \
+            || { echo "the client is not in the tarball, which is the one thing it is for"; exit 1; }
+          test -f "dist/${staging}/app/build.json" \
+            || { echo "the commit stamp is not in the tarball"; exit 1; }
+          tar -C dist -czf "dist/${staging}.tar.gz" "${staging}"
+          # The unversioned alias the README links to: the same bytes.
+          cp "dist/${staging}.tar.gz" "dist/household-spend-tracker.tar.gz"
+          # From inside dist/, so each file names its tarball as a user who
+          # downloaded both beside each other will have it: `sha256sum -c`.
+          for tarball in "${staging}.tar.gz" "household-spend-tracker.tar.gz"; do
+            (cd dist && sha256sum "$tarball") | tee "dist/${tarball}.sha256"
+          done
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: tarball
+          path: dist/*.tar.gz*
+          if-no-files-found: error
+
+  # The default (Chainguard) image, built from nothing -- no layer cache, so a
+  # release carries no layer an earlier build on another ref put there --
+  # started the way tests.yml's `image` job starts it, then saved as a file
+  # for `publish-image`. Read-only token: `npm ci` runs inside this build.
+  image:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      # The image is built without .git (.dockerignore); see app/build.py.
+      - name: stamp the commit
+        run: python3 -m scripts.build_stamp
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          context: .
+          push: false
+          load: true
+          tags: spend-tracker:release
+          # `source` is what links the ghcr.io package to this repository.
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ github.ref_name }}
+            org.opencontainers.image.licenses=AGPL-3.0-or-later
+
+      - name: it starts against a fresh volume, answers, and is not root
+        run: |
+          set -eu
+          docker volume create st-release > /dev/null
+          docker run -d --name st-release -e SPENDTRACKER_AUTO_MIGRATE=1 \
+            -v st-release:/var/lib/spend-tracker -p 18848:8848 spend-tracker:release
+          for _ in $(seq 1 60); do
+            sleep 2
+            if curl -fsS http://127.0.0.1:18848/api/health > health.json 2>/dev/null; then break; fi
+            if [ "$(docker inspect -f '{{.State.Running}}' st-release)" != "true" ]; then
+              echo "the container exited:"; docker logs st-release; exit 1
+            fi
+          done
+          cat health.json
+          python3 -c "
+          import json
+          body = json.load(open('health.json'))
+          assert body['status'] == 'ok', body
+          assert body['commit'], 'the image does not know its commit: ' + str(body)
+          print('version', body['version'], '- commit', body['commit'])
+          "
+          docker exec st-release python -c "
+          import pathlib, sys
+          found = sorted(p.name for p in pathlib.Path('/var/lib/spend-tracker').iterdir())
+          missing = [n for n in ('spendtracker.sqlite3', 'secret.key') if n not in found]
+          sys.exit(f'the volume is missing {missing}' if missing else 0)
+          "
+          uid=$(docker exec st-release python -c "import os; print(os.getuid())")
+          echo "running as uid $uid"
+          test "$uid" = "65532"
+      - name: logs
+        if: always()
+        run: docker logs st-release || true
+
+      - run: docker save spend-tracker:release | gzip > image.tar.gz
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: image
+          path: image.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The one job that can write to the repository, and it checks out nothing
+    # and installs nothing: it takes the tarball `build` made, attests it and
+    # attaches it to a release.
+    permissions:
+      contents: write
+      id-token: write       # the Sigstore certificate behind the attestation
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: tarball
+          path: dist
+
+      # Checked again here, against the digests written beside them in
+      # `build`: what is published is exactly what was built, byte for byte.
+      - name: the tarballs match their checksums
+        run: cd dist && sha256sum -c ./*.tar.gz.sha256
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-path: dist/*.tar.gz
+
+      - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # v3.0.3
+        with:
+          files: |
+            dist/*.tar.gz
+            dist/*.tar.gz.sha256
+          body: |
+            Needs Python 3.12+ and nothing else — the client is prebuilt inside.
+
+                tar xzf household-spend-tracker.tar.gz && cd household-spend-tracker-*
+                make install-prod && make migrate && make serve
+
+            Or the container: `docker pull ${{ env.IMAGE }}:${{ needs.build.outputs.version }}`
+
+            Check where either came from with
+            `gh attestation verify <file or oci://image> --repo ${{ github.repository }}`.
+
+            **Upgrading an instance that already has a ledger: read
+            `deploy/UPGRADING.md` first, and run `make upgrade-check`.** It
+            names every migration between your database and this release and
+            says which of them cannot be undone.
+          generate_release_notes: true
+
+  # The image `image` built and started, pushed. After `publish`, so a release
+  # that failed to publish leaves no image behind it.
+  publish-image:
+    needs: [image, publish]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: image
+      - run: gunzip -c image.tar.gz | docker load
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # `1.2.3`, `1.2` and `latest` from a `v1.2.3` tag.
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302  # v6.2.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+      - name: push
+        id: push
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -eu
+          first=""
+          for tag in $TAGS; do
+            docker tag spend-tracker:release "$tag"
+            docker push "$tag"
+            first="${first:-$tag}"
+          done
+          digest="$(docker inspect --format='{{index .RepoDigests 0}}' "$first" | cut -d@ -f2)"
+          test -n "$digest"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "pushed $digest"
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+          # A storage record also wants `artifact-metadata: write`; the
+          # attestation is what verification reads, and this keeps the grant
+          # to what is used.
+          create-storage-record: false

@@ -1,0 +1,140 @@
+/*
+ * receipts — UXGmko layout work, 2026-09-21.
+ *
+ * A file of its own rather than more of styles.css: six sessions were editing
+ * that one file at once. Loaded after styles.css from main.tsx, so a rule here
+ * wins a tie with the same selector there.
+ */
+
+/* The toolbar -----------------------------------------------------------
+   Filters, then the views they are shown in, then the way in -- pushed to
+   the right edge by `margin-left: auto` rather than by a `space-between`
+   that moves as the filter row changes width. */
+.receipts-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.receipts-bar > .receipt-drop { margin-left: auto; }
+/* The glyph is decoration: the label beside it is already the control's
+   name, and "plus add receipts" is not a better one. */
+.btn-icon { margin-right: 6px; font-weight: 700; }
+
+/* Picking several ---------------------------------------------------------
+   A card is no longer one big button -- it holds a tick box as well as a way
+   in, and a button inside a button is neither. */
+.receipt-card { position: relative; }
+.receipt-card.chosen { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.receipt-card .card-pick {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  margin: 0;
+  padding: 2px;
+  border-radius: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  line-height: 0;
+}
+.receipt-card .card-pick input { width: auto; margin: 0; }
+.receipt-card .card-open {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  width: 100%;
+  cursor: zoom-in;
+}
+
+/* The list ---------------------------------------------------------------
+   The same table furniture as every other list on the site, plus two columns
+   of its own: the tick box and the picture. Neither sorts -- one is a control
+   and the other *is* the row; what the picture knows (when it was taken, how
+   big it is) sorts at the headings after it. */
+.receipt-list .pick-column { width: 1%; }
+.receipt-list .pick-column input { width: auto; }
+.receipt-list .thumb-column { width: 1%; white-space: nowrap; }
+
+/* A larger copy while the pointer is on it, or while it has focus.
+   `position: relative` on the cell rather than the table, so the popup is
+   placed against the thumbnail it belongs to. */
+.peek-host { position: relative; display: inline-flex; }
+.peek-host .thumb { cursor: zoom-in; }
+.peek {
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  top: -10px;
+  width: 260px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
+  /* It is a preview, not a target: the pointer has to be able to travel
+     across it to the rows underneath. */
+  pointer-events: none;
+}
+.peek img { display: block; width: 100%; max-height: 60vh; object-fit: contain; }
+
+/* The note, edited where it is read -------------------------------------- */
+.note-cell { display: flex; flex-direction: column; gap: 2px; }
+.note-cell input { width: 100%; min-width: 12em; }
+.danger-text { color: var(--danger); }
+
+@media (max-width: 768px) {
+  /* The row is a card down here and the picture is the way into the panel,
+     so it keeps a line of its own -- without a label, because a photograph
+     of a till slip does not need to be told what it is. */
+  .table-scroll .receipt-list .thumb-column::before { content: ""; }
+  .table-scroll .receipt-list .thumb-column { width: auto; }
+  /* There is no pointer to hover with, and a popup that a tap triggers would
+     cover the row it was tapped from. Tapping opens the receipt instead. */
+  .peek { display: none; }
+}
+
+/* How receipts are stored (Household page, #162) ----------------------------
+   Two cards side by side instead of a checkbox under a label. Each card
+   carries its size, so the cost is read before the choice rather than after
+   it. The whole card is the radio's label, so anywhere on it picks it; the
+   chosen one gets the accent border, and the dot inside the native radio
+   says the same thing for anyone who cannot tell the border colours apart.
+   Stacked below 560px, where two columns would leave each about three words
+   a line. */
+.storage-choices {
+  border: 0;
+  padding: 0;
+  margin: 0 0 10px;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (max-width: 560px) {
+  .storage-choices { grid-template-columns: 1fr; }
+}
+.storage-choice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+}
+.storage-choice:hover { background: var(--surface-2); }
+.storage-choice.chosen { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.storage-choice:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.storage-choice input[type="radio"] { width: auto; margin: 3px 0 0; accent-color: var(--accent); }
+.storage-choice > span { display: flex; flex-direction: column; gap: 4px; }
+.storage-choice > span > strong { font-size: 14px; color: var(--ink); }
+.storage-recommended { margin-left: 6px; font-weight: 600; color: var(--accent); border-color: var(--accent); }
+/* Forced on by the operator: still legible, plainly not a control. */
+.storage-choice:has(input:disabled) { cursor: not-allowed; }
+.storage-choice:has(input:disabled):hover { background: var(--surface); }
+.storage-choice:has(input:disabled):not(.chosen) { opacity: 0.6; }

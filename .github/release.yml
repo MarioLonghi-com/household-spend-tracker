@@ -1,0 +1,31 @@
+# Categories for the notes `generate_release_notes: true` writes on a release.
+# A pull request lands in the first category whose labels it carries.
+changelog:
+  exclude:
+    labels:
+      - invalid
+      - duplicate
+      - wontfix
+  categories:
+    - title: Security
+      labels:
+        - security
+    - title: Added
+      labels:
+        - enhancement
+        - agent-api
+    - title: Fixed
+      labels:
+        - bug
+    - title: Performance
+      labels:
+        - performance
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Dependencies
+      labels:
+        - dependencies
+    - title: Other changes
+      labels:
+        - "*"

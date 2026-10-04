@@ -1,0 +1,55 @@
+"""Password hashing, and the rule that an unknown email costs the same as a
+wrong password.
+
+An early return on "no such user" is a timing oracle that tells an attacker
+which addresses exist. The verify below does the same work either way, and the
+caller must answer with the same sentence in both cases.
+"""
+
+from __future__ import annotations
+
+import secrets
+
+from argon2 import PasswordHasher
+from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
+
+#: argon2-cffi's defaults are argon2id, and current.
+_hasher = PasswordHasher()
+
+#: Hashed once at import, so verifying against a user who does not exist costs
+#: the same as verifying against one who does.
+_DUMMY_HASH = _hasher.hash(secrets.token_urlsafe(32))
+
+MIN_LENGTH = 12
+
+
+def hash_password(password: str) -> str:
+    return _hasher.hash(password)
+
+
+def verify_password(stored_hash: str | None, password: str) -> bool:
+    """True only if the hash exists and matches. Constant work either way."""
+    try:
+        _hasher.verify(stored_hash if stored_hash is not None else _DUMMY_HASH, password)
+    except (VerifyMismatchError, VerificationError, InvalidHashError):
+        return False
+    return stored_hash is not None
+
+
+def needs_rehash(stored_hash: str) -> bool:
+    return _hasher.check_needs_rehash(stored_hash)
+
+
+def complaints(password: str, *, email: str = "") -> list[str]:
+    """What is wrong with this password, in words the user can act on.
+
+    Length is the rule that works. Composition rules ("one capital, one digit")
+    were retired by NIST 800-63B because they push people toward Passw0rd! and
+    nothing else.
+    """
+    problems: list[str] = []
+    if len(password) < MIN_LENGTH:
+        problems.append(f"it needs at least {MIN_LENGTH} characters")
+    if email and password.strip().lower() == email.strip().lower():
+        problems.append("it cannot be your email address")
+    return problems

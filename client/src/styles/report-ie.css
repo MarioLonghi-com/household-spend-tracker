@@ -1,0 +1,196 @@
+/*
+ * report-ie — UXGmko layout work, 2026-09-21.
+ *
+ * A file of its own rather than more of styles.css: six sessions were editing
+ * that one file at once. Loaded after styles.css from main.tsx, so a rule here
+ * wins a tie with the same selector there.
+ */
+
+/* --------------------------------------------------------------------------
+   The head of the report
+
+   The currency toggle sits at the top left, on the `<h1>`'s own line, because
+   it says what every figure below is denominated in -- that is part of the
+   title of the thing you are looking at, not one filter among several. The
+   heading is rendered a level up in `Reports.tsx`, which leaves a slot in
+   front of it; `HeadSlot` portals the toggle in there, and draws `.report-head`
+   instead wherever there is no slot.
+
+   The two pickers then take the place the toggle used to hold, at the left of
+   the filter bar, and `.report-filters` carries the date range alone at the
+   right.
+   -------------------------------------------------------------------------- */
+
+/* The slot `Reports.tsx` leaves in front of the `<h1>`, which is where the
+   toggle actually lands. It is a child of `.row`, and `.row > *` in styles.css
+   gives every child `flex: 1 1 140px` -- so a filled slot would grow into all
+   the free space and push the heading across to the right margin. The id wins
+   that outright, and the toggle keeps its own `flex: 0 0 auto`. */
+#report-head-slot { flex: 0 0 auto; }
+
+/* The fallback line, for the report rendered outside that shell: same left
+   edge, one line down. `HeadSlot` draws this one only when there is no slot,
+   so the two can never both be on screen. */
+.report-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: var(--gap);
+  margin: 0 0 10px;
+}
+
+/* Wrapping, in both homes. `.currency-toggle` is `align-items: center` and no
+   wrap: on a narrow heading row the label, the chips and the Hint have to be
+   allowed onto a second line rather than squeezing the chips, and a wrapped
+   Hint should not drag the rest down with it. */
+.report-head .currency-toggle,
+#report-head-slot .currency-toggle { flex-wrap: wrap; row-gap: 6px; }
+
+.report-choices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   Category group headings
+
+   "Line breaks between categories": the group is a band across the row, not an
+   indent. A reader going down twenty category names has to see where Housing
+   stops and Transport starts, and an indent does not say that at a glance.
+
+   Both cells repaint the surface, because the month columns are striped by
+   `nth-child` and a separator that picked up the stripe on every second column
+   would read as a row of empty figures rather than as a rule across the table.
+   -------------------------------------------------------------------------- */
+
+/* `tr.` rather than `.` on purpose. The column stripe is set by
+   `table.report tbody td:nth-child(even)`, which carries one more element in
+   its selector than `table.report .report-heading td` does -- so the existing
+   rule meant to keep the band heading's wide cell plain has been losing to the
+   stripe since it was written. It is invisible at a 3% wash, and it would stop
+   being invisible on a separator band. Naming the row wins it back, for the
+   new heading and the band heading both. */
+table.report tbody tr.report-group th,
+table.report tbody tr.report-group td,
+table.report tbody tr.report-heading td {
+  background: var(--surface);
+}
+
+table.report tbody tr.report-group th,
+table.report tbody tr.report-group td {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding-top: 10px;
+  padding-bottom: 5px;
+}
+
+table.report tbody tr.report-group .report-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+   Folding
+
+   A real button carrying `aria-expanded`, so the state is announced and
+   reachable from the keyboard. The caret is decoration and is hidden from the
+   accessibility tree; the button's own state is what says open or shut, which
+   is why there is no colour in this at all.
+   -------------------------------------------------------------------------- */
+
+.fold {
+  all: unset;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+}
+.fold:hover { color: var(--accent); }
+.fold:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fold-caret {
+  display: inline-block;
+  width: 0.8em;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+   Average and Total: the banding, inverted
+
+   The month columns alternate a wash of the page so the eye stays in one month
+   along a wide row. These two are not months and are not data -- they are the
+   report's own arithmetic about the row -- so they take the opposite of that
+   pattern: washed in the body where a month column may not be, plain in the
+   head where the months are washed, and fenced off with a rule down their
+   left edge.
+
+   Written against `td.amount` / `th.amount` rather than `:last-child` alone,
+   because the widest cell in a heading row is also a last child and would
+   otherwise be painted as a summary column.
+   -------------------------------------------------------------------------- */
+
+table.report thead th.amount:nth-last-child(2),
+table.report thead th.amount:last-child {
+  background: var(--surface);
+}
+
+table.report tbody td.amount:nth-last-child(2),
+table.report tbody td.amount:last-child,
+table.report tfoot td.amount:nth-last-child(2),
+table.report tfoot td.amount:last-child {
+  background: var(--stripe-head);
+}
+
+/* The row highlight still wins, so hovering a row highlights all of it rather
+   than all of it but two cells. */
+table.report tbody tr:hover td.amount:nth-last-child(2),
+table.report tbody tr:hover td.amount:last-child {
+  background: var(--surface-2);
+}
+
+table.report th.amount:nth-last-child(2),
+table.report td.amount:nth-last-child(2) {
+  border-left: 1px solid var(--line);
+}
+
+/* --------------------------------------------------------------------------
+   The bottom line
+
+   Green when the household kept money, red when it did not. The only line on
+   the report coloured by its sign: everywhere else the sign is arithmetic --
+   expense is negative by construction -- so colouring it would paint a whole
+   band red and say nothing.
+
+   Colour is never the only carrier. The "-" stays on a negative (the figure is
+   formatted, never stripped), the weight is already heavier on this row, and
+   `Figure` puts the word "surplus" or "shortfall" beside it for a screen
+   reader. Both hues come from the shared tokens, so dark mode gets its own
+   pair rather than these two.
+   -------------------------------------------------------------------------- */
+
+.report-net .net-up { color: var(--positive); }
+.report-net .net-down { color: var(--danger); }
+
+/* --------------------------------------------------------------------------
+   Phone width
+
+   Same stacking `.report-bar` already does, extended to the two new rows. The
+   report itself stays a grid and scrolls sideways at every width -- see the
+   note in IncomeExpense.tsx.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 720px) {
+  .report-head { margin-bottom: 12px; }
+  .report-choices { justify-content: flex-start; }
+  /* Room for the caret and the group name inside the pinned label column,
+     which is narrower here. */
+  table.report tbody tr.report-group .report-label { min-width: 140px; }
+}

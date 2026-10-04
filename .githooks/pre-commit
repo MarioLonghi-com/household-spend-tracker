@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# The fast half of what CI does, on every commit.
+#
+# Fast is the whole design. A hook that takes seven minutes gets bypassed with
+# `--no-verify` inside a day and then guards nothing, so the long-running tests
+# live in CI instead -- `.github/workflows/tests.yml`, on a pull request into
+# `dev` or `main`. There is no `pre-push` hook any more, and pytest does not
+# run here.
+#
+# Everything here should finish in a few seconds. If something slow ends up in
+# this file, it belongs in the workflow.
+set -uo pipefail
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root" || exit 1
+
+fail() { printf '\n\033[31m%s\033[0m\n' "$1"; echo "To commit anyway: git commit --no-verify"; exit 1; }
+
+if [ -x .venv/bin/ruff ]; then
+  .venv/bin/ruff check app/ statements/ tests/ scripts/ || fail "ruff found something."
+else
+  echo "no .venv -- skipping ruff (run: make install-py)"
+fi
+
+./scripts/no-bulk-statements.sh >/dev/null || fail "A bulk statement would bypass the audit log."
+
+# A node that RUNS, which is not the same as a node that exists.
+#
+# git runs this hook with its own environment, not a login shell, so a version
+# manager whose shims are installed by `eval "$(fnm env)"` in ~/.zshrc is not on
+# PATH here. What IS on PATH is whatever sits in /usr/local/bin -- on a machine
+# where that holds a node binary built for another architecture, it fails with
+# "Bad CPU type in executable". `command -v node` finds it happily, so looking
+# for node is not enough: the probe has to try it.
+usable_node() {
+  "$1" -v >/dev/null 2>&1
+}
+
+resolve_node() {
+  if usable_node node; then
+    command -v node
+    return 0
+  fi
+  # A managed install instead. Covers fnm and nvm in their default locations;
+  # anything else can say so with NODE_BIN. Sorted descending first, so the
+  # newest version wins rather than whichever the glob happened to list first
+  # -- two installs is the normal state for a version manager, and the older
+  # one is the one that may no longer satisfy .nvmrc.
+  local candidate
+  while IFS= read -r candidate; do
+    [ -n "$candidate" ] || continue
+    if [ -x "$candidate" ] && usable_node "$candidate"; then
+      echo "$candidate"
+      return 0
+    fi
+  done <<EOF
+$(
+  printf '%s\n' \
+    "${NODE_BIN:-}/node" \
+    "$HOME"/.local/share/fnm/node-versions/*/installation/bin/node \
+    "$HOME"/.nvm/versions/node/*/bin/node 2>/dev/null | sort -rV
+)
+EOF
+  return 1
+}
+
+# Only when the client actually changed: a Python-only commit should not wait
+# for tsc, and tsc is most of this hook's runtime.
+if git diff --cached --name-only | grep -q '^client/'; then
+  node_path="$(resolve_node 2>/dev/null)"
+  if [ -n "$node_path" ]; then
+    PATH="$(cd "$(dirname "$node_path")" && pwd):$PATH"
+    export PATH
+  fi
+
+  if [ -z "$node_path" ]; then
+    echo "no working node -- skipping the client checks (run: make preflight)"
+  elif [ -d client/node_modules ]; then
+    (cd client && npx tsc -b --noEmit) || fail "The client does not typecheck."
+    # Half a second, and it covers the one piece of client logic with a
+    # contract rather than a shape: the table sort every screen goes through.
+    (cd client && npx vitest run --silent) || fail "The client tests failed."
+  else
+    echo "no client/node_modules -- skipping tsc (run: make install)"
+  fi
+fi
+
+echo "pre-commit: lint, audit guard, client types and tests — all clear"

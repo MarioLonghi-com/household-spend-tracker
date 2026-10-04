@@ -1,0 +1,187 @@
+/*
+ * One-time Import (#183): the wizard at the bottom of the household page.
+ *
+ * A file of its own, loaded after styles.css from main.tsx. Everything else it
+ * wears -- the radio cards, the tables that stack on a phone, the banners -- is
+ * borrowed from the rest of the app.
+ */
+
+/* The steps, as a stepper: numbered circles joined by a line, the finished
+   ones ticked, the current one filled, the rest muted. Each step is an equal
+   share of the width, so nine of them fit the panel without scrolling; the
+   wizard is its own container so the phone layout follows the panel's width,
+   not the window's. */
+.ynab-wizard { container: ynab-wizard / inline-size; }
+.ynab-stepper { margin: 0 0 16px; }
+.ynab-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  font-size: 12px;
+}
+.ynab-step {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  color: var(--muted);
+}
+/* The connector: from the previous circle's centre to this one's. */
+.ynab-step + .ynab-step::before {
+  content: "";
+  position: absolute;
+  top: 11px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--line);
+  z-index: 0;
+}
+.ynab-step.done + .ynab-step::before { background: var(--accent); }
+.ynab-step-number {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  line-height: 20px;
+  border-radius: 99px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  font-weight: 600;
+}
+.ynab-step-label { overflow-wrap: anywhere; line-height: 1.25; padding: 0 2px; }
+.ynab-step.done { color: var(--ink); }
+.ynab-step.done .ynab-step-number { border-color: var(--accent); color: var(--accent); }
+.ynab-step.current { color: var(--ink); font-weight: 600; }
+.ynab-step.current .ynab-step-number {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+/* Narrow: one line, "Step n of N -- Name", over a thin bar. The list is
+   clipped rather than removed so a screen reader still has it. */
+.ynab-stepper-compact { display: none; }
+.ynab-stepper-bar {
+  display: block;
+  height: 4px;
+  margin-top: 6px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.ynab-stepper-bar > span { display: block; height: 100%; background: var(--accent); }
+@container ynab-wizard (max-width: 560px) {
+  .ynab-stepper-compact { display: block; }
+  .ynab-steps {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+}
+
+/* Match state on the Accounts and Categories tables. A tint of the page's own
+   tokens, never a colour of its own, and never alone: every row also says its
+   state in a word. */
+.ynab-wizard {
+  --ynab-matched: var(--positive);
+  --ynab-create: var(--info);
+  --ynab-unmatched: var(--warn);
+  --ynab-fixed: var(--muted);
+}
+.ynab-row-matched { --ynab-state: var(--ynab-matched); }
+.ynab-row-create { --ynab-state: var(--ynab-create); }
+.ynab-row-unmatched { --ynab-state: var(--ynab-unmatched); }
+.ynab-row-fixed { --ynab-state: var(--ynab-fixed); }
+
+.ynab-map tbody tr[data-state],
+.ynab-map tbody tr[data-state]:hover {
+  background: color-mix(in srgb, var(--ynab-state) 12%, var(--surface));
+}
+.ynab-map tbody tr.ynab-row-fixed,
+.ynab-map tbody tr.ynab-row-fixed:hover { background: var(--surface-2); }
+.ynab-map tbody tr[data-state] > td:first-child { box-shadow: inset 3px 0 0 var(--ynab-state); }
+
+.ynab-state {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid var(--ynab-state);
+  border-radius: 99px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.ynab-state > span[aria-hidden] { color: var(--ynab-state); font-weight: 700; }
+.ynab-row-fixed .ynab-state > span[aria-hidden] { color: var(--muted); }
+
+.ynab-legend {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+.ynab-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 2px 2px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--ynab-state) 12%, var(--surface));
+}
+.ynab-legend-item.ynab-row-fixed { background: var(--surface-2); }
+.ynab-legend-item .ynab-state { margin-left: 0; }
+
+.ynab-sub { font-size: 13px; margin: 16px 0 8px; }
+.ynab-token-note { margin-top: 10px; }
+.ynab-ack { margin-top: 16px; font-size: 14px; }
+
+/* Back on the left, the step's own action on the right. */
+.ynab-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.ynab-nav:has(> :only-child) { justify-content: flex-end; }
+
+/* The target cell holds a select, its detail line and the new-thing fields.
+   The option text is long on purpose (everything known about the account), so
+   the select is allowed to shrink below it rather than widen the panel. */
+.ynab-map td.ynab-target { min-width: 220px; }
+.ynab-target-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; width: 100%; }
+.ynab-target-pick { display: flex; gap: 6px; align-items: center; min-width: 0; }
+.ynab-target-pick select { flex: 1 1 auto; min-width: 0; max-width: 100%; }
+.ynab-target-pick .pill { flex: none; }
+.ynab-detail { overflow-wrap: anywhere; }
+.ynab-create { display: flex; flex-direction: column; gap: 4px; }
+
+.ynab-not-imported { margin-top: 14px; }
+.ynab-not-imported summary { cursor: pointer; font-size: 13px; }
+
+@media (max-width: 768px) {
+  .ynab-map td.ynab-target { min-width: 0; display: block; }
+  .ynab-map td.ynab-target::before { display: block; margin-bottom: 2px; }
+  /* A row is a card here, so the state's edge goes on the card. */
+  .ynab-map tbody tr[data-state] > td:first-child { box-shadow: none; }
+  .ynab-map tbody tr[data-state] { border-left: 4px solid var(--ynab-state); }
+  /* The headline cell is a spread-out flex row on a card; keep the name and
+     its state word together on the left. */
+  .ynab-map td[data-primary] { justify-content: flex-start; flex-wrap: wrap; gap: 4px 6px; }
+  .ynab-map td[data-primary]::before { display: none; }
+  .ynab-map td[data-primary] .ynab-state { margin-left: 0; }
+}

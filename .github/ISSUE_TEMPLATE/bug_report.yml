@@ -1,0 +1,55 @@
+name: Bug report
+description: Something does not work the way the docs or the screen say it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Please **describe** your data rather than paste it: this
+        tracker holds financial records, and an issue is public forever.
+  - type: checkboxes
+    id: no-real-data
+    attributes:
+      label: Before you file
+      options:
+        - label: This report contains no real names, IBANs, card or account numbers, and no real statement file.
+          required: true
+        - label: If a statement file is involved, I describe its shape (bank, format, columns) or attach a synthetic file of the same shape.
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The `version` and `commit` from `/api/health` on your instance, or the Application screen.
+      placeholder: "0.4.0, commit abc1234"
+    validations:
+      required: true
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: How it runs
+      options:
+        - Container (compose.yaml)
+        - Release tarball
+        - A clone of this repository
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead. Any error text, verbatim.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: From a fresh `make seed` if you can -- its demo household is invented, so it is safe to quote.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: The relevant lines of `app.log`, with any names, emails or amounts replaced.
+      render: text

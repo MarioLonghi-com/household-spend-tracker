@@ -1,0 +1,84 @@
+/*
+ * The Reimbursements report.
+ *
+ * A file of its own, like report-ie.css, rather than more of styles.css.
+ * No colour here that a household does not already have: the owed figure
+ * wears --warn, the same token as the owed W pill in the register, so the two
+ * read as one fact in two places.
+ */
+
+/* Four figures in a row, wrapping to two and then one on a narrow window. */
+.reimb-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin: 12px 0 18px;
+}
+.reimb-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.reimb-figure-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.reimb-figure strong { font-size: 20px; text-align: left; }
+.reimb-figure.owed { border-color: var(--warn); }
+/* A line per ticked currency (#142). Only a line that owes something wears
+   the warning, so a zero beside it reads as the zero it is. */
+.reimb-figure-line { display: flex; flex-direction: column; gap: 2px; }
+.reimb-figure-line + .reimb-figure-line { margin-top: 6px; }
+.reimb-figure-line.owed strong { color: var(--warn); }
+
+/* The currencies are checkboxes worn as chips: the box stays visible, since
+   "tick several" is the whole difference from Income v Expense's toggle. */
+.reimb-currencies label.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.reimb-currencies label.chip input { margin: 0; width: auto; accent-color: currentColor; }
+.reimb-currencies label.chip:has(input:disabled) { cursor: default; }
+
+.reimb-section { margin: 0 0 22px; }
+.reimb-section .section-title .small { font-weight: 400; margin-left: 6px; }
+
+/* A payment's expenses sit under it: smaller, muted, and no rule between
+   them and their payment, so a claim reads as one block. */
+.reimb-claims tr.reimb-claim-expense td {
+  font-size: 13px;
+  color: var(--muted);
+  border-top: 0;
+  padding-top: 2px;
+}
+
+/* A memo is the one free-text column: let it wrap rather than widen the
+   table past the figures a person came for. */
+.reimb-section td.reimb-memo { max-width: 22ch; white-space: normal; overflow-wrap: anywhere; }
+
+/* A row that opens its details is a Tab stop; say where focus is. */
+.reimb-section tr.row-pick:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* The details dialog: label beside value, stacking on a phone. */
+.reimb-detail {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 14px;
+  margin: 0 0 14px;
+}
+.reimb-detail dt { color: var(--muted); font-size: 13px; }
+.reimb-detail dd { margin: 0; overflow-wrap: anywhere; }
+.reimb-detail dd.amount { text-align: left; }
+.reimb-detail-list { margin: 0 0 4px; padding-left: 18px; }
+@media (max-width: 480px) {
+  .reimb-detail { grid-template-columns: 1fr; gap: 2px; }
+  .reimb-detail dd { margin-bottom: 8px; }
+}

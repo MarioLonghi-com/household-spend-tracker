@@ -1,0 +1,61 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 1017 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 60 800 Tm (Fatura do cartao) Tj
+1 0 0 1 380 800 Tm (Compras parceladas - proximas faturas) Tj
+1 0 0 1 60 780 Tm (Emissao: 22/02/2026) Tj
+1 0 0 1 60 760 Tm (A CARDHOLDER NAME \(final 0000\)) Tj
+1 0 0 1 60 740 Tm (DATA) Tj
+1 0 0 1 110 740 Tm (ESTABELECIMENTO) Tj
+1 0 0 1 260 740 Tm (VALOR EM) Tj
+1 0 0 1 325 740 Tm (R$) Tj
+1 0 0 1 380 740 Tm (DATA) Tj
+1 0 0 1 430 740 Tm (ESTABELECIMENTO) Tj
+1 0 0 1 530 740 Tm (VALOR EM R$) Tj
+1 0 0 1 60 720 Tm (20/02) Tj
+1 0 0 1 110 720 Tm (PROGRAMA DE CASHBACK) Tj
+1 0 0 1 290 720 Tm (- 8,00) Tj
+1 0 0 1 380 720 Tm (26/01) Tj
+1 0 0 1 430 720 Tm (ANUIDADE 03/12) Tj
+1 0 0 1 560 720 Tm (88,00) Tj
+1 0 0 1 60 700 Tm (01/02) Tj
+1 0 0 1 110 700 Tm (Uber UBER *TRIP) Tj
+1 0 0 1 290 700 Tm (178,98) Tj
+1 0 0 1 380 700 Tm (26/01) Tj
+1 0 0 1 430 700 Tm (ANUIDADE 03/12) Tj
+1 0 0 1 560 700 Tm (88,00) Tj
+1 0 0 1 60 660 Tm (Total dos lancamentos atuais) Tj
+1 0 0 1 290 660 Tm (258,98) Tj
+1 0 0 1 380 640 Tm (Total para proximas faturas) Tj
+1 0 0 1 560 640 Tm (880,00) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001310 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1380
+%%EOF

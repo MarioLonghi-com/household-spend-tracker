@@ -1,0 +1,55 @@
+.venv/
+__pycache__/
+*.py[cod]
+data/
+app/static/dist/
+client/node_modules/
+client/dist/
+.env
+.coverage
+.pytest_cache/
+.ruff_cache/
+*.sqlite3
+*.sqlite3-*
+.temp/
+
+# tsc -b incremental state; committing it can mask a stale typecheck
+*.tsbuildinfo
+
+# A scratch dev-server config for whatever tool is driving a preview. It names
+# a port and a command, which the Makefile already owns -- two ways to start
+# the app is how one of them drifts. Not the whole .claude/ directory: a
+# settings file there is a decision somebody may want to commit.
+.claude/launch.json
+
+# Throwaway redacted copy for `make db-view`
+data/snapshot.sqlite3
+
+# What CI points SPENDTRACKER_DATA_DIR at, and what a local `make test` run
+# does too if it copies the CI invocation. It holds a database and a
+# `secret.key`, and `git add -A` after a test run will take both -- which is
+# how a generated key reached a commit once and had to be pulled back out.
+ci-data/
+
+# `make backup` and `make upgrade` write here: a VACUUM INTO copy of the
+# ledger and a copy of secret.key. Never committed, for the obvious reason.
+backups/
+
+# End-to-end: a throwaway instance, its credentials, and Playwright's output.
+# The credentials file is regenerated on every run and names a demo account on
+# a database that is deleted at the start of the next one -- but it is still a
+# password on disk, and nothing that looks like one belongs in a public repo.
+e2e-data/
+client/e2e/.credentials.json
+client/test-results/
+client/playwright-report/
+client/blob-report/
+
+# Finder's per-directory metadata. Six of these were tracked, and since they
+# record a directory's listing they changed whenever a test made a temporary
+# one -- binary noise in a diff that had nothing to do with the work.
+.DS_Store
+
+# Which commit a build without .git is. Written by `python -m scripts.build_stamp`
+# at release and image time; committed, it would describe the wrong commit.
+app/build.json

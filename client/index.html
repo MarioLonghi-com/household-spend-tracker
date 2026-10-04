@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Four lines for one icon, and each of them earns its place. A browser
+      asks for `/favicon.ico` whether or not it is told to, and the SPA
+      catch-all in `app/main.py` answers every unknown path with this file --
+      so without a real one at that path the tab's icon was an HTML document,
+      which renders as the blank page glyph. Chrome and Firefox take the SVG
+      and get both colour schemes from it; Safari and the ICO fallback take
+      the raster, which `scripts/make_icons.py` draws from the same geometry.
+    -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#15705c" />
+    <title>Spend Tracker</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

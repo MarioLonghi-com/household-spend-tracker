@@ -1,0 +1,896 @@
+name: tests
+
+# Live again, 2026-09-20, on pushes to `main`. Extended 2026-09-21 to the
+# `dev` -> `main` pull request. Reshaped 2026-10-01 for the public repository
+# (#242): tiered jobs, one full run per tree, and one required check.
+#
+# This replaces the `pre-push` hook, which ran the same suite on every push to
+# every branch and cost minutes each time. That gate is gone: `.githooks/` now
+# holds only `pre-commit`, which is ruff, the audit grep and the client
+# typecheck, and takes seconds.
+#
+# **`push: [main]` reports; `pull_request: [main]` protects.** The push trigger
+# fires *after* a merge, so on its own it catches a broken `main` having already
+# broken it. The pull request triggers are what protect: a pull request nobody
+# can see the checks on is not a review.
+#
+# The shape, since #242:
+#
+#   1. Tiers. `changes`, `lint`, `repo-wide`, `release-ready` and
+#      `dependency-review` answer in about a minute; `pytest`, `client`, `e2e`
+#      and `rehearsal` run in parallel behind `changes`; `image` and `audit`
+#      only when what they check moved, or weekly.
+#   2. The suite runs under pytest-xdist (`-n auto --dist loadfile`), with the
+#      test-grade argon2 and per-worker data directory in tests/conftest.py
+#      (#241).
+#   3. **One tree, one full run.** `ci-ok` records a green tree as an artifact
+#      named `green-<tree sha>`, and `changes` looks that name up before
+#      anything heavy starts. The same tree used to run in full three times per
+#      release -- the branch into `dev`, `dev` into `main`, the push to `main`
+#      -- about seventy minutes of pytest for one tree. The release pull
+#      request and the push that lands it now cost about a minute each, apart
+#      from the rehearsal against the last release.
+#   4. **One required check, `ci-ok`.** A ruleset that requires it and nothing
+#      else never waits forever for a job that was renamed or gated off.
+#
+# Every job has a timeout and asks for exactly the permissions it uses.
+on:
+  push:
+    branches: [main]
+  # `dev` as well as `main`, since 2026-09-23. `dev` is where work actually
+  # lands: a PR into it that nobody can see the checks on is the same "review"
+  # problem the main trigger was added to fix, one branch earlier.
+  pull_request:
+    branches: [main, dev]
+  # Monday, early: the audit against advisories published since the last push
+  # (an advisory is published against code nobody touched that week), the
+  # image against a Chainguard base that moves underneath it, and a full run of
+  # everything to notice bit-rot no pull request would.
+  schedule:
+    - cron: "17 6 * * 1"
+  # Started by hand from the Actions tab, against any branch. Like the
+  # schedule, it ignores both the path gate and the green-tree record: whoever
+  # starts it by hand wants the answer, not a cached one.
+  workflow_dispatch:
+
+# Nothing here writes to the repository: no comment, no commit, no release. The
+# default grant is wider than that, and a workflow that runs on pull_request
+# from a public repo should ask for exactly what it uses.
+permissions:
+  contents: read
+
+# One run per pull request at a time. A new push to a pull request -- including
+# Dependabot rebasing it after something lands on `dev` -- makes the run already
+# going on the old head worthless, and it used to finish anyway, eleven minutes
+# of pytest nobody would read. Pushes to `main` and the schedule are never
+# cancelled: each of those reports on a commit that stays, so each gets a group
+# of its own (`run_id`) -- a shared group would still queue them and drop all
+# but the newest waiting one, `cancel-in-progress` or not.
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
+
+jobs:
+  # --------------------------------------------------------------------------- #
+  # Which jobs does this change owe, and has this exact tree already passed?
+  # --------------------------------------------------------------------------- #
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read  # to list artifacts and read a run's conclusion
+    outputs:
+      python: ${{ steps.diff.outputs.python }}
+      client: ${{ steps.diff.outputs.client }}
+      code: ${{ steps.diff.outputs.code }}
+      image: ${{ steps.diff.outputs.image }}
+      rehearsal: ${{ steps.diff.outputs.rehearsal }}
+      audit: ${{ steps.diff.outputs.audit }}
+      tree: ${{ steps.green.outputs.tree }}
+      # The id of an earlier successful run of this workflow on the identical
+      # tree, or empty. The heavy jobs skip when it is set.
+      green: ${{ steps.green.outputs.green }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+
+      # The tree, not the commit. The pull request's merge commit that was
+      # tested, the `dev` tip it became, the `dev` -> `main` merge ref and the
+      # merge commit on `main` are four commits with one tree whenever nothing
+      # moved in between -- which, with `main` moving only at a release, is
+      # every time.
+      #
+      # Artifacts rather than actions/cache: a cache entry made on a pull
+      # request's ref cannot be restored from `main`, and an artifact's name
+      # can be looked up from anywhere in the repository.
+      #
+      # What counts as a record: an unexpired artifact of that name, from a
+      # run whose head repository is this one (a fork can run a modified
+      # workflow and name an artifact anything), of this workflow file, that
+      # concluded `success`. Any error in the lookup means "not green", which
+      # is the safe direction: the full run happens.
+      - id: green
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          tree="$(git rev-parse 'HEAD^{tree}')"
+          echo "tree=$tree" >> "$GITHUB_OUTPUT"
+          echo "tree $tree"
+          green=""
+          if [ "$EVENT" = "pull_request" ] || [ "$EVENT" = "push" ]; then
+            runs="$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=green-${tree}&per_page=20" \
+                --jq '.artifacts[]
+                      | select(.expired == false)
+                      | select(.workflow_run.head_repository_id == .workflow_run.repository_id)
+                      | .workflow_run.id' 2>/dev/null || true)"
+            for run_id in $runs; do
+              said="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}" \
+                --jq '[.conclusion, .path] | join(" ")' 2>/dev/null || true)"
+              if [ "$said" = "success .github/workflows/tests.yml" ]; then
+                green="$run_id"; break
+              fi
+            done
+          fi
+          if [ -n "$green" ]; then
+            echo "this tree already passed in run $green -- the suite, e2e and the image are skipped"
+            {
+              echo "### Already green"
+              echo "Tree \`$tree\` passed in [run $green](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/$green)."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "green=$green" >> "$GITHUB_OUTPUT"
+
+      # A full run bills about twenty-four minutes, eleven of them pytest, and it
+      # ran on every pull request -- a one-line Dependabot bump to the dev
+      # requirements paid for two container builds. This decides, per job,
+      # whether the pull request touched anything that job is the check for
+      # (#174). `repo-wide` is not gated: it looks at the whole repository.
+      # Nor is `release-ready`, which has its own condition -- a pull request
+      # into `main` -- takes seconds, and is what checks a CHANGELOG-only
+      # release that no job here would otherwise look at.
+      #
+      # **Each list is what that job checks that no other job does,** not every
+      # file it happens to read. The image copies all of `app/`, but a change
+      # to `app/` is pytest's to catch, and whether it boots on the runtime
+      # requirements alone is the rehearsal's; what only the image catches is
+      # the Dockerfile, what it installs, and what the entrypoint boots.
+      #
+      # "Python files" is not the rule for the suite, because it reads more
+      # than Python -- money.ts, styles.css, three screens, the Dockerfile,
+      # every tracked file. A test that does is marked `repo_wide` and runs in
+      # `repo-wide` on every pull request, so its files need no entry here.
+      # The one exception is `test_snap`, which reads appearance.ts but needs
+      # the full app: that file is listed. A test that starts reading a file
+      # outside these lists needs the mark or an entry, or a change to that
+      # file skips the test that guards it.
+      #
+      # Anything that is not a pull request -- the push to main, the Monday
+      # schedule, a hand-started run -- runs everything, and so does a pull
+      # request that changes this file, which should have to prove itself.
+      #
+      # Plain git rather than a paths-filter action: `fetch-depth: 2` on a pull
+      # request checks out GitHub's merge commit and both its parents, so HEAD^1
+      # is the target branch's tip and the diff is exactly what the PR changes.
+      # One less third-party action to pin.
+      - id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          jobs="python client code image rehearsal audit"
+          everything() {
+            echo "$1: everything runs"
+            for job in $jobs; do echo "$job=true" >> "$GITHUB_OUTPUT"; done
+            exit 0
+          }
+          [ "$EVENT" = "pull_request" ] || everything "not a pull request"
+
+          # --no-renames: a moved file lists its old path too, so moving a fixture
+          # or a migration out of a gated directory still runs that job.
+          git diff --name-only --no-renames HEAD^1 HEAD > changed.txt
+          echo "changed:"; sed 's/^/  /' changed.txt
+          grep -qx '.github/workflows/tests.yml' changed.txt && everything "the workflow changed"
+
+          # decide <job>, with that job's path patterns on stdin
+          decide() {
+            if grep -qE -f - changed.txt; then result=true; else result=false; fi
+            echo "$1=$result" >> "$GITHUB_OUTPUT"
+            echo "$1: $result"
+          }
+
+          # lint and the suite.
+          decide python <<'PATHS'
+          \.py$
+          ^requirements[^/]*\.txt$
+          ^(pyproject\.toml|alembic\.ini|Makefile)$
+          ^(app|statements|tests|migrations|scripts)/
+          ^client/src/lib/appearance\.ts$
+          PATHS
+
+          decide client <<'PATHS'
+          ^client/
+          PATHS
+
+          # e2e: anything that changes what a browser sees or what serves it.
+          # A docs-only or workflow-only change skips it.
+          decide code <<'PATHS'
+          ^(app|statements|migrations|scripts|client|deploy)/
+          ^requirements\.txt$
+          ^(pyproject\.toml|alembic\.ini)$
+          PATHS
+
+          # What the image installs and boots: its own recipe, both dependency
+          # manifests (npm ci runs inside it), the entrypoint and the build
+          # stamp its smoke test reads. Backend code and migrations left this
+          # list in #242: the "a dev-only import in app/ passes pytest and
+          # crashes the container" case (pytest installs requirements-dev.txt,
+          # the image only requirements.txt) is caught by `rehearsal`, which
+          # installs requirements.txt alone, migrates and boots the app -- in
+          # half a minute instead of two image builds.
+          decide image <<'PATHS'
+          ^(Dockerfile|\.dockerignore|compose\.yaml|requirements\.txt|alembic\.ini|pyproject\.toml)$
+          ^client/package(-lock)?\.json$
+          ^deploy/
+          ^scripts/build_stamp\.py$
+          PATHS
+
+          # The rehearsal asks whether an upgrade keeps the rows, and since
+          # #242 also whether the app boots on the runtime requirements alone
+          # (see `image`), so it owes a run for any backend code rather than
+          # only the schema and the startup path.
+          decide rehearsal <<'PATHS'
+          ^(app|statements|scripts|migrations)/
+          ^(requirements\.txt|alembic\.ini)$
+          PATHS
+
+          # A new advisory arrives without anybody pushing, which is what the
+          # Monday schedule is for. On a pull request the audit has only one
+          # thing to say: whether this change pinned something known to be bad.
+          decide audit <<'PATHS'
+          ^requirements[^/]*\.txt$
+          ^client/package(-lock)?\.json$
+          PATHS
+
+  # --------------------------------------------------------------------------- #
+  # Tier 0: about a minute each
+  # --------------------------------------------------------------------------- #
+
+  # A pull request into `main` is a release: `main` only moves at one. This is
+  # what says the version moved, the CHANGELOG has a dated section for it with
+  # nothing left under Unreleased, and every migration the release adds is
+  # named with what rolling it back loses. `0.1.0` sat untagged for 187
+  # commits before this existed. See scripts/release_check.py.
+  release-ready:
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          # Every tag, to say whether this version is taken, and origin/main,
+          # to say which migrations are new since the last release.
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      # Standard library only: no install step, nothing third-party runs here.
+      - run: python -m scripts.release_check --since origin/main
+
+  # Lint actually runs here. The previous build configured ruff in
+  # pyproject.toml and never installed it, so it never gated a commit. On its
+  # own since #242, so a lint failure is reported in under a minute rather than
+  # after the suite. Only ruff is installed, at the floor requirements-dev.txt
+  # names.
+  lint:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install "$(grep -E '^ruff' requirements-dev.txt)"
+      - name: ruff
+        run: ruff check app/ statements/ tests/ scripts/
+      - name: no bulk statements against audited tables
+        run: ./scripts/no-bulk-statements.sh
+
+  # The part of the suite that reads the whole repository rather than the
+  # backend, so a client-only or docs-only pull request still owes it: a real
+  # name in a committed PDF, a pasted-in secret in a .md, a currency exponent
+  # changed in money.ts and not in app/money.py, a version bumped in
+  # package.json and not in its lockfile. On every pull request, whatever it
+  # touches.
+  #
+  # Selected by the `repo_wide` marker (pyproject.toml) rather than a list of
+  # file names here: the first list missed test_version.py before it had ever
+  # run, and a mark sits in the file it describes.
+  #
+  # Node and the client's dependencies are installed here for one test:
+  # `test_the_client_rounds_exactly_as_the_server_does` runs money.ts against
+  # app/money.py, and it is the only check that the two round money the same
+  # way. No job used to install client/node_modules next to pytest, so it was
+  # one of the skips in every log (#241).
+  #
+  # `--no-cov` because the 85% floor in pyproject.toml is a floor for the whole
+  # suite, and a fraction of it would fail it by construction.
+  repo-wide:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+        working-directory: client
+      - name: the checks that read every file
+        run: python -m pytest -q --no-cov -m repo_wide --durations=10 -ra
+        env:
+          SPENDTRACKER_DATA_DIR: ./ci-data
+
+  # --------------------------------------------------------------------------- #
+  # Tier 1: the suite, the client, the browser, the upgrade
+  # --------------------------------------------------------------------------- #
+
+  # The whole suite with the coverage gate, across the runner's cores.
+  # `--dist loadfile` keeps a file's tests on one worker; pytest-cov combines
+  # the workers' data itself, and the 85% floor applies to the combined figure.
+  # `--durations=20` so the slowest tests are in every log, and `-ra` so every
+  # skip and failure is named in the summary.
+  #
+  # Skipped rather than absent when nothing it reads changed or the tree has
+  # already passed; `ci-ok` reads a skip as "not owed".
+  pytest:
+    needs: changes
+    if: needs.changes.outputs.python == 'true' && needs.changes.outputs.green == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          # checkout leaves a usable token in .git/config for every later
+          # step by default. Nothing in this workflow pushes, so nothing
+          # needs it, and a step that runs third-party code -- npm's
+          # install scripts, say -- can read it.
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+
+      # tests/test_migrations.py -- the check that a model change shipped with
+      # its migration -- is part of this run. It used to run a second time as
+      # a step of its own for legibility; `-ra` names a failing test in the
+      # summary, so the second run is gone.
+      - name: pytest
+        run: python -m pytest -n auto --dist loadfile --durations=20 -ra
+        env:
+          SPENDTRACKER_DATA_DIR: ./ci-data
+
+      # The seed builds months of activity through the real services, so it
+      # exercises in one run everything the unit tests reach in isolation.
+      - name: the demo seed still builds
+        run: python -m scripts.seed_demo --reset --months 3
+        env:
+          SPENDTRACKER_DATA_DIR: ./ci-data
+          DATABASE_URL: sqlite:///./ci-data/seed.sqlite3
+
+  # The type check, the client's unit tests (vitest: the pre-commit hook ran
+  # them and CI never did) and the build. `npm run build` is the client check,
+  # not `tsc --noEmit` alone -- the latter has passed a file containing an
+  # undefined name.
+  client:
+    needs: changes
+    if: needs.changes.outputs.client == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+        working-directory: client
+      # The type check is what catches a server field being renamed out from
+      # under a screen.
+      - run: npx tsc -b --noEmit
+        working-directory: client
+      - run: npm test
+        working-directory: client
+      - run: npm run build
+        working-directory: client
+
+  # The only job that looks at the phone layout, and the only one that exercises
+  # the app the way somebody uses it: a real browser, against a real server,
+  # with a real ledger seeded behind it. Every spec runs twice, desktop and
+  # phone -- see client/playwright.config.ts.
+  #
+  # Separate from `client` rather than appended to it because it needs Python
+  # as well: e2e/serve.sh seeds a throwaway instance and serves it. Skipped
+  # when nothing a browser could see changed, and when the tree already passed.
+  e2e:
+    needs: changes
+    if: needs.changes.outputs.code == 'true' && needs.changes.outputs.green == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      # The server's own dependencies only. The dev extras are for pytest, and
+      # this job does not run it.
+      - run: pip install -r requirements.txt
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+        working-directory: client
+
+      # The Chromium download is cached, keyed on the Playwright version the
+      # lockfile installed. The system libraries it needs are apt packages the
+      # runner image does not carry, so they are installed every time: without
+      # them the browser fails to launch with an error about a missing .so
+      # rather than about a test.
+      - id: playwright
+        run: echo "version=$(node -p "require('./client/node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        id: browsers
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - if: steps.browsers.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+        working-directory: client
+      - if: steps.browsers.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+        working-directory: client
+
+      - name: end to end, desktop and phone
+        run: npm run e2e
+        working-directory: client
+        env:
+          # There is no venv here; serve.sh defaults to one and takes this
+          # instead.
+          PYTHON: python
+
+      # Only when something failed, and only then worth the upload. The trace
+      # is what makes a red E2E on a machine you cannot see into diagnosable.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            client/playwright-report/
+            client/test-results/
+          retention-days: 7
+
+  # --------------------------------------------------------------------------- #
+  # Can a deployed version be updated without damaging its data?
+  # --------------------------------------------------------------------------- #
+  #
+  # The best available answer is to stop asserting it and test it. This builds a
+  # real database with the *previous* code, records what is in it, then
+  # upgrades to this change and asserts the rows are still there.
+  #
+  # "The rows are still there" is the whole job. `alembic upgrade head` exiting
+  # 0 says the migration ran; it says nothing about whether the ledger survived
+  # it, and this project's standing rule is that a test which does not assert a
+  # changed value is not a test. The counts are the value.
+  #
+  # It installs requirements.txt alone and boots the app on the upgraded
+  # ledger, which since #242 is also the check that backend code does not
+  # import a dev-only dependency (see `image` in the gate above).
+  #
+  # `fetch-depth: 0` because it checks out a second commit. The base is the
+  # merge-base with the PR's target branch, or the previous commit on a push.
+  # On a pull request into `main` that base is the last release -- the
+  # comparison that matters most -- so this job runs there even when the tree
+  # already passed on its way into `dev`, against a different base.
+  rehearsal:
+    needs: changes
+    if: >-
+      needs.changes.outputs.rehearsal == 'true'
+      && (needs.changes.outputs.green == '' || github.base_ref == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: work out what "before" is
+        id: before
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -n "$BASE_REF" ]; then
+            base="$(git merge-base HEAD "origin/${BASE_REF}")"
+          else
+            base="$(git rev-parse HEAD^ 2>/dev/null || git rev-parse HEAD)"
+          fi
+          echo "sha=$base" >> "$GITHUB_OUTPUT"
+          echo "the previous state is $base"
+
+      # A real ledger, built through the real services rather than inserted.
+      - name: build a database with the previous code
+        env:
+          BEFORE: ${{ steps.before.outputs.sha }}
+          SPENDTRACKER_DATA_DIR: ./ci-data
+          DATABASE_URL: sqlite:///./ci-data/rehearsal.sqlite3
+        run: |
+          git checkout --detach "$BEFORE"
+          python -m alembic upgrade head
+          python -m scripts.seed_demo --reset --months 3
+
+      - name: record what is in it
+        run: |
+          python - <<'PY' > before.json
+          import json, sqlite3
+          conn = sqlite3.connect("ci-data/rehearsal.sqlite3")
+          tables = [r[0] for r in conn.execute(
+              "SELECT name FROM sqlite_master WHERE type='table' AND name != 'alembic_version'"
+          )]
+          print(json.dumps({t: conn.execute(f"SELECT count(*) FROM {t}").fetchone()[0]
+                            for t in sorted(tables)}, indent=2))
+          PY
+          cat before.json
+
+      - name: upgrade to this change
+        env:
+          SPENDTRACKER_DATA_DIR: ./ci-data
+          DATABASE_URL: sqlite:///./ci-data/rehearsal.sqlite3
+        run: |
+          git checkout --detach "$GITHUB_SHA"
+          pip install -r requirements.txt
+          python -m alembic upgrade head
+
+      # The assertion this job exists for. A table that existed before and has
+      # fewer rows after is a migration that dropped somebody's ledger, and it
+      # is invisible to every other check in this workflow.
+      - name: the rows are still there
+        run: |
+          python - <<'PY'
+          import json, sqlite3, sys
+          before = json.load(open("before.json"))
+          conn = sqlite3.connect("ci-data/rehearsal.sqlite3")
+          now = {r[0] for r in conn.execute(
+              "SELECT name FROM sqlite_master WHERE type='table'"
+          )}
+          lost = []
+          for table, was in before.items():
+              if table not in now:
+                  lost.append(f"{table}: the table is gone; it held {was} rows")
+                  continue
+              has = conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+              if has < was:
+                  lost.append(f"{table}: {was} rows before, {has} after")
+          if lost:
+              print("THE UPGRADE LOST DATA:", *lost, sep="\n  ")
+              sys.exit(1)
+          print(f"{len(before)} tables, every row still present")
+          PY
+
+      # `schema_check` refuses to boot against a database that is behind or
+      # ahead. Reaching /api/health at all is therefore the proof that the code
+      # and the upgraded database agree -- and that the app imports with the
+      # runtime requirements alone.
+      - name: it boots against the upgraded database, and answers
+        env:
+          SPENDTRACKER_DATA_DIR: ./ci-data
+          DATABASE_URL: sqlite:///./ci-data/rehearsal.sqlite3
+        run: |
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8848 &
+          for _ in $(seq 1 40); do
+            sleep 1
+            if curl -fsS http://127.0.0.1:8848/api/health > health.json; then break; fi
+          done
+          cat health.json
+          python -c "
+          import json; body = json.load(open('health.json'))
+          assert body['status'] == 'ok', body
+          print('running version', body['version'])
+          "
+
+  # --------------------------------------------------------------------------- #
+  # Dependencies: advisories weekly and when a manifest moves; review on PRs
+  # --------------------------------------------------------------------------- #
+  #
+  # The vite advisories in the 2026-09-19 review were found by running
+  # `npm audit` by hand. Nothing would have said anything otherwise --
+  # `.github/dependabot.yml` describes what to watch and is inert until
+  # Dependabot alerts are switched on in the repository's own settings, which
+  # is an owner action rather than a commit.
+  #
+  # `continue-on-error` on purpose. This reports; it does not gate. A transitive
+  # advisory with no fixed version available would otherwise block every
+  # unrelated pull request until somebody upstream cut a release, which is how a
+  # check gets deleted rather than fixed. The output is in the log and the
+  # summary either way.
+  audit:
+    needs: changes
+    if: needs.changes.outputs.audit == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      # Pinned: this job exists to distrust what gets installed, and an
+      # unpinned auditor is the one package it would install on faith.
+      # Dependabot does not read `run:` lines, so this moves by hand -- with
+      # the `pip-audit>=` floor in requirements-dev.txt as the reminder.
+      - run: pip install pip-audit==2.10.1
+      - name: python dependencies
+        continue-on-error: true
+        run: pip-audit -r requirements.txt -r requirements-dev.txt
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - name: client dependencies
+        continue-on-error: true
+        run: npm audit --audit-level=high
+        working-directory: client
+
+  # What this pull request *adds*: a new or bumped dependency (pip, npm or a
+  # workflow's action) with a known high-severity advisory fails here, from
+  # GitHub's own advisory database, in about twenty seconds. Unlike `audit`
+  # this one gates, because it only ever speaks about the change in front of
+  # it. Needs the dependency graph switched on in the repository's settings.
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294  # v5.0.0
+        with:
+          fail-on-severity: high
+
+  # --------------------------------------------------------------------------- #
+  # The container, on both bases
+  # --------------------------------------------------------------------------- #
+  #
+  # Two builds, because the Dockerfile offers a bypass for the Chainguard base
+  # and a bypass that is never exercised is a promise rather than an option.
+  #
+  # **And then runs it.** Building is not the check.
+  #
+  # The first version of this job only built, and two bugs walked straight past
+  # it into somebody's terminal on a Linux box: Chainguard's `-dev` variant runs
+  # as nonroot, so `python -m venv /venv` was denied; and `/var/lib/spend-tracker`
+  # did not exist in the image, so Docker would have created the named volume
+  # root-owned and the first boot would have died writing `secret.key`.
+  #
+  # Neither is visible to `docker build`. Both are visible the moment the
+  # container is started against a **named volume** -- which is why the smoke
+  # test below uses one rather than a bind mount or nothing.
+  #
+  # On a pull request only when its recipe moved and the tree has not already
+  # passed; weekly, because the Chainguard base moves underneath it (issue
+  # #63); and by hand. Not on the push to `main`: release.yml builds,
+  # smoke-tests and publishes the same image from the tag.
+  image:
+    needs: changes
+    if: >-
+      github.event_name == 'schedule'
+      || github.event_name == 'workflow_dispatch'
+      || (github.event_name == 'pull_request'
+          && needs.changes.outputs.image == 'true'
+          && needs.changes.outputs.green == '')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: chainguard
+            args: ""
+          - name: bypass
+            args: |
+              PY_BASE=python:3.12-slim
+              PY_RUN=python:3.12-slim
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      # The image is built without .git (.dockerignore), so the commit goes in
+      # as app/build.json, which `COPY app/` carries. See app/build.py.
+      - name: stamp the commit
+        run: python3 -m scripts.build_stamp
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          context: .
+          push: false
+          # Into the local daemon, so the next step can start it.
+          load: true
+          tags: spend-tracker:${{ matrix.name }}
+          build-args: ${{ matrix.args }}
+          # One cache scope per base: with one shared scope the two builds
+          # overwrote each other's layers on every run.
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+      # A fresh named volume, every time. This is the step that would have
+      # caught the root-owned-volume bug: Docker initialises a new volume from
+      # the image's content at that path, ownership included, and there is no
+      # other way to exercise that.
+      - name: it starts against a fresh volume and answers
+        env:
+          NAME: ${{ matrix.name }}
+        run: |
+          set -eu
+          docker volume create "st-$NAME" > /dev/null
+          docker run -d --name "st-$NAME" \
+            -e SPENDTRACKER_AUTO_MIGRATE=1 \
+            -v "st-$NAME:/var/lib/spend-tracker" \
+            -p 18848:8848 \
+            "spend-tracker:$NAME"
+
+          for _ in $(seq 1 60); do
+            sleep 2
+            if curl -fsS http://127.0.0.1:18848/api/health > health.json 2>/dev/null; then
+              break
+            fi
+            # A container that has already exited will never answer, so stop
+            # waiting for it and show why rather than timing out in silence.
+            if [ "$(docker inspect -f '{{.State.Running}}' "st-$NAME")" != "true" ]; then
+              echo "the container exited:"
+              docker logs "st-$NAME"
+              exit 1
+            fi
+          done
+
+          cat health.json
+          python3 -c "
+          import json
+          body = json.load(open('health.json'))
+          assert body['status'] == 'ok', body
+          # No .git in the image: this is the stamp, or nothing.
+          assert body['commit'], 'the image does not know its commit: ' + str(body)
+          print('version', body['version'], '- commit', body['commit'], '- setup_required', body['setup_required'])
+          "
+
+      # The app wrote its ledger and its key into the volume. If the volume had
+      # been root-owned this is what would have been empty.
+      - name: it wrote its ledger and its key into the volume
+        env:
+          NAME: ${{ matrix.name }}
+        run: |
+          set -eu
+          docker exec "st-$NAME" python -c "
+          import pathlib, sys
+          where = pathlib.Path('/var/lib/spend-tracker')
+          found = sorted(p.name for p in where.iterdir())
+          print('in the volume:', found)
+          missing = [n for n in ('spendtracker.sqlite3', 'secret.key') if n not in found]
+          if missing:
+              sys.exit(f'the volume is missing {missing}')
+          "
+
+      # Not root. The Dockerfile says `USER 65532:65532`; this is what makes
+      # that a fact rather than a line in a file, including under the bypass
+      # base where the uid has no named user.
+      - name: it is not running as root
+        env:
+          NAME: ${{ matrix.name }}
+        run: |
+          uid=$(docker exec "st-$NAME" python -c "import os; print(os.getuid())")
+          echo "running as uid $uid"
+          test "$uid" = "65532"
+
+      - name: logs
+        if: always()
+        env:
+          NAME: ${{ matrix.name }}
+        run: docker logs "st-$NAME" || true
+
+  # --------------------------------------------------------------------------- #
+  # The one check a ruleset requires
+  # --------------------------------------------------------------------------- #
+  #
+  # `if: always()` so it reports even when something upstream failed or was
+  # skipped. A skipped job is a pass -- the gate decided it was not owed. A
+  # failed or cancelled one fails this. Then, on success, the tree is recorded
+  # as green so the same tree is never run in full twice.
+  ci-ok:
+    needs:
+      - changes
+      - release-ready
+      - lint
+      - repo-wide
+      - pytest
+      - client
+      - e2e
+      - rehearsal
+      - audit
+      - dependency-review
+      - image
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: every job passed or was not owed
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          bad=$(echo "$NEEDS" | jq -r '[to_entries[] | select(.value.result == "failure" or .value.result == "cancelled") | .key] | join(", ")')
+          if [ -n "$bad" ]; then
+            echo "not ok: $bad"
+            exit 1
+          fi
+          echo "ok"
+
+      # Only a run that did the work records the tree, and only from this
+      # repository's own branches: a fork's run cannot mint one. The artifact
+      # holds nothing but this run's id; its name is the record. Ninety days,
+      # the longest a public repository keeps one, covers any release cadence
+      # here -- and an expired record only costs a full run.
+      - name: record this tree as green
+        if: >-
+          needs.changes.outputs.tree != ''
+          && needs.changes.outputs.green == ''
+          && (github.event_name != 'pull_request'
+              || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          TREE: ${{ needs.changes.outputs.tree }}
+        run: |
+          mkdir -p green
+          echo "$GITHUB_RUN_ID" > green/run
+          echo "GREEN_NAME=green-$TREE" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: env.GREEN_NAME != ''
+        with:
+          name: ${{ env.GREEN_NAME }}
+          path: green/run
+          retention-days: 90
+          if-no-files-found: error

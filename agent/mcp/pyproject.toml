@@ -1,0 +1,14 @@
+# Its own project on purpose. This directory is a CLIENT of the HTTP API and is
+# installed separately, or not at all -- the app has no dependency on it, and
+# deleting the directory changes nothing about the app.
+[project]
+name = "household-spend-tracker-mcp"
+version = "0.1.0"
+description = "A sample MCP server for the Spend Tracker agent API"
+requires-python = ">=3.12"
+# `client.py` needs nothing. Only the MCP wrapper has a dependency, which is
+# why the two are separate files.
+dependencies = ["mcp[cli]>=1.2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]

@@ -1,0 +1,77 @@
+# docker compose up -d
+#
+# One household, one instance, on a tailnet. Everything here follows from that.
+
+# The project name, pinned. Compose otherwise derives it from the directory,
+# and the volume below is named after the project: a checkout cloned into a
+# differently named directory would start with a new, empty volume and show
+# the setup wizard, which looks exactly like data loss. deploy/UPGRADING.md.
+name: spend-tracker
+
+services:
+  app:
+    build:
+      context: .
+      # Both bases build in CI, so the bypass is tested rather than promised:
+      #   docker compose build --build-arg PY_BASE=python:3.12-slim \
+      #                        --build-arg PY_RUN=python:3.12-slim
+      dockerfile: Dockerfile
+    image: household-spend-tracker:local
+    restart: unless-stopped
+    ports:
+      # **127.0.0.1 on purpose.** `tailscale serve` proxies from the tailnet
+      # into loopback and terminates TLS there, so publishing to loopback is
+      # what makes this unreachable except through the thing holding the
+      # certificate. Publishing `8848:8848` would put the ledger on every
+      # interface, in plain HTTP, with `Secure` cookies that the browser then
+      # refuses to store -- which fails as a silent sign-in loop rather than as
+      # an error. Never Funnel.
+      - "127.0.0.1:8848:8848"
+    environment:
+      # Off. A restart is not a decision to change a schema; `schema_check`
+      # refuses to boot against a mismatch and says which revision it wanted,
+      # which is the right behaviour for a container that came back at 04:00.
+      # Turn it on for a first run against an empty volume.
+      SPENDTRACKER_AUTO_MIGRATE: "${SPENDTRACKER_AUTO_MIGRATE:-0}"
+      # The reverse proxy terminates TLS, so the cookie stays Secure.
+      SPENDTRACKER_COOKIE_SECURE: "on"
+      # Leave unset for production. Setting it to development serves the
+      # OpenAPI schema and both doc viewers to anyone who can reach the port.
+      SPENDTRACKER_ENV: "${SPENDTRACKER_ENV:-production}"
+      # Which Host names get an answer; anything else is a 400. The default
+      # (loopback, any IP literal, *.ts.net) is right for `tailscale serve`.
+      # Set it -- it replaces the default, it does not add to it -- if a
+      # reverse proxy reaches this under a name of its own. See the README.
+      SPENDTRACKER_ALLOWED_HOSTS: "${SPENDTRACKER_ALLOWED_HOSTS:-}"
+      # Which peer uvicorn believes about X-Forwarded-For / -Proto. The
+      # published port arrives from the bridge gateway, not loopback, so
+      # uvicorn's default trust (127.0.0.1) never fires and every tailnet peer
+      # looks like one address -- which makes the per-address sign-in limits
+      # instance-wide, one stranger's spray away from locking everybody out.
+      # Trusting the Docker bridge range makes them per tailnet peer again:
+      # `tailscale serve` sets X-Forwarded-For, and uvicorn reads the list from
+      # the right, so a value a client prepends cannot win. Narrow it to your
+      # bridge's gateway if you know it; never set it to "*", which lets any
+      # caller name its own address.
+      FORWARDED_ALLOW_IPS: "${FORWARDED_ALLOW_IPS:-172.16.0.0/12}"
+      # Where people reach this, as an origin: https://spend.<tailnet>.ts.net.
+      # Invitation links and /llms.txt are built from it; unset, they are built
+      # from the request, which is right only when the proxy is trusted above.
+      SPENDTRACKER_PUBLIC_URL: "${SPENDTRACKER_PUBLIC_URL:-}"
+    volumes:
+      # The ledger and secret.key. Named rather than a bind mount so nothing
+      # in a working tree can be `git clean -xdf`'d out from under it -- which
+      # is the hazard the old `./data` default carried.
+      - ledger:/var/lib/spend-tracker
+    # No new privileges, read-only root, and the one writable path named.
+    # The app writes to the volume and to nothing else.
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  ledger:

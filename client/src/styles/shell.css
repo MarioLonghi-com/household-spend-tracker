@@ -1,0 +1,249 @@
+/*
+ * shell — UXGmko layout work, 2026-09-21.
+ *
+ * A file of its own rather than more of styles.css: six sessions were editing
+ * that one file at once. Loaded after styles.css from main.tsx, so a rule here
+ * wins a tie with the same selector there.
+ */
+
+/* ---- the menu, as sections ---- */
+/*
+ * Four groups, each with a header and its items. The header is the section's
+ * name and, for three of the four, a page of its own -- so it has to read as a
+ * heading while still being pressable. It gets the weight and the letter
+ * spacing of a label, and the items are indented under it: the indent is what
+ * says "these belong to that", without a box or a rule to draw it.
+ */
+.nav-section { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+
+nav.side .nav-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 6px 8px 2px;
+  /* Width to the edge and text to the left, so the pressable header and the
+     unpressable one are the same shape. */
+  text-align: left;
+  border: 0;
+  background: none;
+  border-radius: var(--radius);
+  /* The household's name can be long, and a nav that grows a horizontal
+     scrollbar to fit one is a nav that fits nothing. */
+  overflow-wrap: anywhere;
+}
+/* A header that opens a page still shows it is the page you are on. */
+nav.side .nav-head[aria-current="page"] {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+/* And one that opens nothing does not pretend to. */
+nav.side .nav-head-plain { cursor: default; }
+
+nav.side .nav-child { padding-left: 18px; }
+
+/* ---- the reports index ---- */
+.report-index { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.report-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.report-card:hover { border-color: var(--accent); }
+.report-card-name { font-size: 15px; font-weight: 600; }
+
+/* The way back out of an open report. */
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+/* ---- the household page ---- */
+/* The settings half of the page carries the same warning stripe the settings
+   panel used to, for the same reason: what is set up here must not be mistaken
+   for what is recorded in the ledger. */
+.config-card { border-left: 3px solid var(--warn); }
+
+/*
+ * The figures. `auto-fill` rather than a fixed column count: this reads as one
+ * row of ten on a wide screen and two columns on a phone, with no breakpoint
+ * of its own to keep in step with the rest of the stylesheet.
+ */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.stat { min-width: 0; }
+.stat dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 600;
+}
+.stat dd { margin: 2px 0 0; display: flex; flex-direction: column; gap: 1px; }
+.stat-figure {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+/*
+ * The slot beside an open report's heading (`screens/Reports.tsx`). A report
+ * portals its own controls in; most portal nothing, and a zero-width flex item
+ * would still take the row's 16px gap and push the heading sideways. `:empty`
+ * is exactly the condition -- it stops applying the moment anything is
+ * portalled in, with no flag for the two files to keep in step.
+ */
+#report-head-slot:empty { display: none; }
+
+/* ---------------------------------------------------------------------------
+   Light / Dark / System, in Your account
+   ---------------------------------------------------------------------------
+
+   Three buttons rather than a select: there are exactly three answers, they are
+   not going to grow, and the chosen one should be readable without opening
+   anything. The same shape as the palette swatches further down the app, so the
+   two settings that change how it looks are recognisably the same kind of
+   control.
+   --------------------------------------------------------------------------- */
+.appearance-choices {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.appearance {
+  flex: 1 1 auto;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+}
+.appearance:hover { border-color: var(--accent); }
+/* The chosen one carries the accent as a fill, not only a border: a 1px
+   difference is not an answer to "which of these am I on". */
+.appearance.chosen {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+/* ---- the menu, folded (#161) ---- */
+/*
+ * On a desktop the menu can fold away to a 14px rail, and the page takes the
+ * width it gave up. The rail is one button the height of the window: that is
+ * what makes something 14px wide easy to hit. It sits in the flow rather than
+ * over the content, so it never covers the first column of a table.
+ */
+.nav-rail {
+  flex: none;
+  width: 14px;
+  height: 100%;
+  padding: 12px 0 0;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--muted);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-size: 16px;
+  line-height: 1;
+}
+.nav-rail:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+.nav-rail:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.shell.nav-collapsed nav.side { display: none; }
+
+@media (max-width: 768px) {
+  /* The phone has its drawer, and a drawer folded on a desktop is still a
+     drawer once the window narrows. */
+  .nav-rail { display: none; }
+  .shell.nav-collapsed nav.side { display: flex; }
+}
+
+/* ---- the menu, compact, with a pinned footer ---- */
+/*
+ * The frame no longer scrolls; the list of pages inside it does, and the
+ * presence line with Sign out sits under it, always in view. The scrollbar is
+ * thin and only drawn while the pointer is over the menu or focus is in it:
+ * the browser's default one stood right beside the fold rail and read as a
+ * second rail.
+ *
+ * Rows are a little tighter than the rest of the app's buttons so the menu
+ * fits a laptop window, and headers and pages share one size: the headers
+ * are set apart by weight, case and colour rather than by size.
+ */
+/* No border of its own: the fold rail beside it already draws the line. */
+nav.side { overflow: hidden; gap: 0; border-right: 0; }
+.nav-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+nav.side:hover .nav-scroll,
+.nav-scroll:focus-within { scrollbar-color: var(--line) transparent; }
+.nav-scroll::-webkit-scrollbar { width: 6px; }
+.nav-scroll::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; }
+nav.side:hover .nav-scroll::-webkit-scrollbar-thumb { background: var(--line); }
+
+nav.side .brand { padding: 2px 8px 8px; }
+.nav-section { gap: 0; margin-bottom: 6px; }
+nav.side .nav-head {
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  padding: 4px 8px 1px;
+}
+nav.side .nav-child,
+nav.side .nav-link {
+  font-size: 14px;
+  line-height: 1.5;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+nav.side .presence { flex: none; margin-top: 0; padding: 6px 8px 0; }
+
+/* ---- a heading inside a section (#185) ---- */
+/*
+ * "Payee" under the household: a second-level header over three pages. It
+ * opens nothing, so it is text rather than a button -- sentence case and the
+ * muted colour to read as a label, a notch below the section header's
+ * capitals, at the indent of the pages beside it. The pages under it take one
+ * more step of indent, which is the whole of what says they belong to it.
+ */
+.nav-subgroup { display: flex; flex-direction: column; }
+nav.side .nav-subhead {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 6px 8px 1px 18px;
+  cursor: default;
+  overflow-wrap: anywhere;
+}
+nav.side .nav-grandchild { padding-left: 30px; }

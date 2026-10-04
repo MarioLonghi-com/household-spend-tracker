@@ -1,0 +1,30 @@
+fastapi>=0.141.1
+uvicorn[standard]>=0.54.0
+SQLAlchemy>=2.0.54
+alembic>=1.20.0
+pydantic>=2.13.5
+python-multipart>=0.0.32
+argon2-cffi>=25.1.0
+pyotp>=2.10.0
+cryptography>=50.0.1
+qrcode>=8.2
+regex>=2026.9.10
+
+# Reading a bank .xls export; see app/services/spreadsheet.py
+xlrd>=2.0.2
+
+# Reading a statement out of a PDF; see app/services/pdf_statement.py
+pdfplumber>=0.11.10
+
+# Receipts: decode, downscale and encode to AVIF, and rasterise page 1 of a PDF
+# for the preview. Pillow and pypdfium2 were present for the life of the build
+# only because pdfplumber happens to require them -- a pdfplumber release that
+# dropped pypdfium2 would have removed PDF previews with no failing test and no
+# error until somebody uploaded one. A dependency you rely on directly is one
+# you declare directly.
+Pillow>=12.3.0
+pypdfium2>=5.13.0
+# iPhone's default format. A manylinux wheel with libheif bundled, so this is a
+# pip install and not an apt-get -- and it is imported inside a try, so an
+# install without it refuses HEIC with a sentence instead of failing at startup.
+pillow-heif>=1.8.0

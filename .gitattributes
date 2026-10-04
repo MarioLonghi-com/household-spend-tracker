@@ -1,0 +1,22 @@
+# Line endings are LF everywhere, whatever the checkout's platform.
+* text=auto eol=lf
+
+# Generated, and noise in a diff.
+client/package-lock.json linguist-generated=true -diff
+
+# Binaries: never normalised, never diffed as text.
+*.pdf binary
+*.xls binary
+*.png binary
+*.ico binary
+
+# Statement fixtures keep the exact bytes and encoding a bank wrote.
+tests/statement_files/** -text
+
+# Left out of GitHub's automatic source archives ("Download ZIP" and the
+# per-tag zips). The release tarball is assembled by hand in
+# .github/workflows/release.yml and is not affected by these.
+tests/ export-ignore
+client/e2e/ export-ignore
+.github/ export-ignore
+.githooks/ export-ignore

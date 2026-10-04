@@ -1,0 +1,138 @@
+/*
+ * application management — the ewtEPh review, 2026-09-22.
+ *
+ * Its own sheet, following the per-screen split the UXGmko round settled on.
+ * Loaded after styles.css from main.tsx, so a rule here wins a tie.
+ */
+
+/* ---------------------------------------------------------------------------
+   A fact that is words, in a grid built for figures
+   ---------------------------------------------------------------------------
+
+   `.stat-figure` is 22px monospace, which is right for "1,043" and wrong for
+   "Darwin 27.0.0 (arm64)" or a migration hash -- at that size a machine
+   description wraps to three lines and the grid turns ragged. Same slot, same
+   weight, read at the size of a sentence.
+   --------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   Wider cells, because these facts are strings
+   ---------------------------------------------------------------------------
+
+   The shared grid is sized for figures -- `1,043`, `117`, `3` -- and 150px is
+   generous for those. Here the cells hold a twelve-character migration hash, a
+   machine description and a formatted timestamp, and at 150px the hash broke
+   after eleven characters and left a lone `3` on the next line, which reads as
+   a rendering fault on the one screen whose whole job is exact facts.
+   --------------------------------------------------------------------------- */
+/* `.stat-grid.application-facts`, both classes. `styles/shell.css` owns
+   `.stat-grid` and is imported *after* this file, so at equal specificity it
+   wins the tie and a bare `.application-facts` did nothing at all. */
+.stat-grid.application-facts {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+
+.stat-figure-text {
+  font-size: 15px;
+  line-height: 1.35;
+  /* `overflow-wrap`, not `word-break: break-word`. The latter is free to split
+     a word that would have fitted, which turned a twelve-character migration
+     hash into eleven characters and a stray `3` on the next line. This breaks
+     only what genuinely will not fit -- a long absolute path. */
+  overflow-wrap: break-word;
+}
+
+/* ---------------------------------------------------------------------------
+   The log
+   ---------------------------------------------------------------------------
+
+   A log line is long and must not be re-wrapped into something that reads like
+   two records, so the block scrolls sideways rather than folding. Bounded in
+   height for the same reason the server bounds what it sends: this is the end
+   of a file, read in place, not a document.
+   --------------------------------------------------------------------------- */
+.log-dump {
+  margin: 0;
+  max-height: 22rem;
+  overflow: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+  tab-size: 2;
+}
+
+/* The four styles, as one row of buttons that wraps on a narrow window. */
+.logging-styles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+/* ---------------------------------------------------------------------------
+   Sixty-odd packages
+   ---------------------------------------------------------------------------
+
+   A column each of name and version would be a table of two short cells and a
+   great deal of white space. Laid out as columns that fill the card, the list
+   reads at a glance and costs six lines instead of sixty.
+   --------------------------------------------------------------------------- */
+.package-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  columns: 3 14rem;
+  column-gap: 24px;
+}
+.package-list li {
+  break-inside: avoid;
+  padding: 1px 0;
+}
+
+/* ---------------------------------------------------------------------------
+   A backup's three actions (#133)
+   ---------------------------------------------------------------------------
+
+   On one line where there is room, because a row whose buttons wrap under one
+   another is three rows tall for one file. Delete is last and set apart, so
+   the reach for Download is never a reach past it.
+   --------------------------------------------------------------------------- */
+.backup-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+/* `button.link` paints every link-button the accent colour, and it is later
+   in the cascade than `button.danger`; Delete is the one that must not look
+   like the other two. */
+.backup-actions button.link.danger {
+  color: var(--danger);
+}
+.backup-actions > * + * {
+  margin-left: 10px;
+}
+.backup-actions > .danger {
+  margin-left: 18px;
+}
+.save-route + .save-route {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 14px;
+}
+/* On a phone the cell is one line of a card, already a flex row with a gap:
+   let it wrap there rather than push the card past the screen's edge. */
+@media (max-width: 768px) {
+  .table-scroll td.backup-actions {
+    white-space: normal;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    column-gap: 16px;
+  }
+  .table-scroll td.backup-actions > * {
+    margin-left: 0;
+  }
+}

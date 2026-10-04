@@ -1,0 +1,88 @@
+/*
+ * import — UXGmko layout work, 2026-09-21.
+ *
+ * A file of its own rather than more of styles.css: six sessions were editing
+ * that one file at once. Loaded after styles.css from main.tsx, so a rule here
+ * wins a tie with the same selector there.
+ */
+
+/* ---------------------------------------------------------------------------
+   The queue of staged imports
+   ------------------------------------------------------------------------ */
+
+/* Set apart from the upload card underneath it: this is unfinished work
+   somebody left behind, and it is the first thing worth seeing on the screen
+   rather than another form to fill in. */
+.import-queue {
+  border-left: 3px solid var(--warn);
+}
+
+/* Buttons, not a fact about the row -- the one cell exempt from sorting, and
+   the one that should not stretch to the width of a filename. */
+.queue-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* The refusal to stage a file twice now offers a way into the import it is
+   talking about, so its buttons need the same row treatment the dialog's
+   choices get. */
+.banner-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+/* ---------------------------------------------------------------------------
+   The memo, typed on the preview
+   ------------------------------------------------------------------------ */
+
+/* What the bank sent, underneath what somebody typed instead -- the same shape
+   the payee cell uses to show a raw descriptor under a resolved name, so the
+   two edited columns read the same way. */
+.memo-was {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------------------
+   The file itself
+   ------------------------------------------------------------------------ */
+
+/* Scrolls in both directions rather than wrapping: a statement line is a
+   record, and a wrapped one stops looking like the line it is. Capped in
+   height so the card underneath the preview stays a box you can read past. */
+.raw-file {
+  margin: 0;
+  max-height: 340px;
+  overflow: auto;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  white-space: pre;
+  tab-size: 4;
+  line-height: 1.5;
+}
+
+/* The gutter: the preview's Line numbers, down the left of the file (#128).
+   Drawn from `data-line` by CSS rather than written into the text, so a
+   selection copied out of the view is the file and nothing else -- generated
+   content is never part of a copy, and `user-select: none` keeps it out of
+   the highlight too. A blank line has no `data-line` and keeps the width, so
+   the text stays in one column. */
+.raw-file.numbered .raw-line::before {
+  content: attr(data-line);
+  display: inline-block;
+  width: var(--gutter, 2ch);
+  margin-right: 1.5ch;
+  text-align: right;
+  color: var(--muted);
+  user-select: none;
+  -webkit-user-select: none;
+}
