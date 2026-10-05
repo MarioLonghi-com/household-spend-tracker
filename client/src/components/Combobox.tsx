@@ -17,18 +17,24 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 const MAX_SUGGESTIONS = 8;
 
-/** Prefix matches first, then anything containing it; case- and accent-insensitive. */
-function rank(options: string[], typed: string, limit: number = MAX_SUGGESTIONS): string[] {
+/**
+ * Prefix matches first, then anything containing it; case- and accent-insensitive.
+ *
+ * Returns positions in `options`, not the strings, so two options that read
+ * alike are still two options and the one taken can be told apart (#19).
+ */
+function rank(options: string[], typed: string, limit: number = MAX_SUGGESTIONS): number[] {
+  const every = options.map((_, at) => at);
   const needle = fold(typed);
-  if (!needle) return options.slice(0, limit);
+  if (!needle) return every.slice(0, limit);
 
-  const starts: string[] = [];
-  const contains: string[] = [];
-  for (const option of options) {
-    const folded = fold(option);
+  const starts: number[] = [];
+  const contains: number[] = [];
+  for (const at of every) {
+    const folded = fold(options[at]);
     if (folded === needle) continue; // already typed in full; nothing to offer
-    if (folded.startsWith(needle)) starts.push(option);
-    else if (folded.includes(needle)) contains.push(option);
+    if (folded.startsWith(needle)) starts.push(at);
+    else if (folded.includes(needle)) contains.push(at);
   }
   return [...starts, ...contains].slice(0, limit);
 }
@@ -67,8 +73,15 @@ export function Combobox({
    * own state: taking a suggestion with Tab calls `onChange` and then blurs in
    * the same tick, so the caller's state has not re-rendered yet and reading it
    * would commit the half-typed text instead of the option just chosen.
+   *
+   * `taken` is the position in `options` of the suggestion the field holds,
+   * when it holds one because it was picked from the list (by keyboard or
+   * mouse) and nothing has been typed since; otherwise `undefined`. A caller
+   * whose options can read alike -- a sentinel such as "Uncategorised" beside
+   * a real category of that name -- uses it to commit the option chosen rather
+   * than guess from the label (#19). Callers that only want the text ignore it.
    */
-  onCommit?: (value: string) => void;
+  onCommit?: (value: string, taken?: number) => void;
   /** Escape with the list already shut. */
   onCancel?: () => void;
   /**
@@ -99,7 +112,7 @@ export function Combobox({
 
   const browsing = browse && !typedSinceOpen;
   const matches = useMemo(
-    () => (browsing ? options.slice(0, limit) : rank(options, value, limit)),
+    () => (browsing ? options.map((_, at) => at).slice(0, limit) : rank(options, value, limit)),
     [browsing, options, value, limit],
   );
   const showing = open && matches.length > 0;
@@ -115,9 +128,15 @@ export function Combobox({
 
   //: The value taken by keyboard this tick, for the blur that follows it.
   const justTaken = useRef<string | null>(null);
+  //: Which option the field holds because it was picked, until typing
+  //: replaces it. Handed to `onCommit` so the caller learns *which* option,
+  //: not only its words.
+  const picked = useRef<number | undefined>(undefined);
 
-  const take = (option: string) => {
+  const take = (at: number) => {
+    const option = options[at];
     justTaken.current = option;
+    picked.current = at;
     onChange(option);
     setOpen(false);
     setActive(-1);
@@ -174,7 +193,7 @@ export function Combobox({
       if (onCommit) {
         event.preventDefault();
         event.stopPropagation();
-        onCommit(value);
+        onCommit(value, picked.current);
       }
       return;
     }
@@ -200,6 +219,7 @@ export function Combobox({
         autoFocus={autoFocus}
         value={value}
         onChange={(event) => {
+          picked.current = undefined;
           onChange(event.target.value);
           setOpen(true);
           setActive(-1);
@@ -217,15 +237,15 @@ export function Combobox({
           setOpen(false);
           const taken = justTaken.current;
           justTaken.current = null;
-          onCommit?.(taken ?? value);
+          onCommit?.(taken ?? value, picked.current);
         }}
         onKeyDown={onKeyDown}
       />
       {showing && (
         <ul className="combo-list" id={listId} role="listbox">
-          {matches.map((option, index) => (
+          {matches.map((at, index) => (
             <li
-              key={option}
+              key={at}
               id={`${listId}-${index}`}
               role="option"
               aria-selected={index === active}
@@ -234,11 +254,11 @@ export function Combobox({
               // list has closed and there is nothing left to click.
               onMouseDown={(event) => {
                 event.preventDefault();
-                take(option);
+                take(at);
               }}
               onMouseEnter={() => setActive(index)}
             >
-              {browsing ? option : highlight(option, value)}
+              {browsing ? options[at] : highlight(options[at], value)}
             </li>
           ))}
         </ul>

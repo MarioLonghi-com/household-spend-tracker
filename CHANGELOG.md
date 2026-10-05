@@ -88,6 +88,19 @@ this repository.
   `deploy/TROUBLESHOOTING.md` has a new section saying how to recognise it and
   what to change. Measurements in #14.
 
+### Fixed
+
+- **Picking *Uncategorised* on a staged line means uncategorised** (#19). In a
+  household with a category of its own called, say, *Other: Uncategorised*,
+  the import preview's category cell read the words in the box and matched
+  that category first: choosing *Uncategorised* sent the category instead, and
+  merely opening a line already marked uncategorised and leaving it replaced
+  the decision with that category. The cell now commits the option picked from
+  the list rather than its label, sends nothing when the box is left as it
+  opened, and reads the words *Uncategorised* typed in full as the
+  no-category answer. The household's own category is still a pick from the
+  list away, or typed by its full name.
+
 ## 0.6.2 — 2026-10-04
 
 **Reversible: none** — no migration in this release. To go back, check out
