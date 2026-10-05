@@ -32,6 +32,7 @@ import { format } from "../../lib/money";
 import { ageInDays } from "../../lib/reimbursement";
 import { fixed, moneyKey, sortRows } from "../../lib/sorting";
 import { useSticky } from "../../lib/sticky";
+import { localToday } from "../../lib/time";
 import type {
   Household,
   ReimbursementClaim,
@@ -43,8 +44,6 @@ import type {
 } from "../../lib/types";
 import type { RegisterPreset } from "../Register";
 import { HeadSlot } from "./IncomeExpense";
-
-const today = () => new Date().toISOString().slice(0, 10);
 
 const MONTH_NAMES = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -410,7 +409,7 @@ export function ReimbursementsBody({
   reports,
   onOpen,
   baseCurrency = reports[0]?.currency ?? "",
-  asOf = today(),
+  asOf = localToday(),
 }: {
   /** Whose remembered table orders to read and write. */
   household: string;

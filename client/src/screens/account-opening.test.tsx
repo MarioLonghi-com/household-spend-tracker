@@ -21,7 +21,8 @@ vi.mock("../lib/api", () => ({
 }));
 
 import { api } from "../lib/api";
-import { Accounts, localToday, openingText } from "./Accounts";
+import { Accounts, openingText } from "./Accounts";
+import { localToday } from "../lib/time";
 import type { Account, Household } from "../lib/types";
 
 afterEach(cleanup);
