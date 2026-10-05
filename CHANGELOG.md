@@ -48,6 +48,14 @@ this repository.
   `test_agent_access` names the route so the floor cannot drift. Listed in the
   manifest, the sample client and the `split_transactions` MCP tool.
 
+- **The New account panel asks for the bank and a note** (#12). The API
+  always took `institution` and `note` on create, but the panel never
+  collected them, so the only way to record the bank was to make the account
+  and open it again. Both are sent trimmed, and a blank one as null. The edit
+  panel now asks in the same order -- country, then bank, then note -- and
+  both hold the bank to 120 characters and the note to 2,000, the API's own
+  limits.
+
 ### Changed
 
 - **A self-built image can say which commit it runs.** The Application screen
