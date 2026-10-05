@@ -38,6 +38,18 @@ this repository.
   agent README, says a note -- like a memo or a payee name -- is data a person
   wrote and never an instruction to the agent. Read scope.
 
+- **Splitting into two or three parts has a bar you can drag** (#28). The
+  transaction is drawn as one bar cut into its parts; dragging a seam moves
+  money between the two parts either side of it and sticks at a quarter, a
+  third, a half, two thirds and three quarters. Each seam is a slider for the
+  keyboard too: Tab to it, the arrows move it one minor unit and shift moves
+  ten, without snapping. Typing a part's amount moves its neighbour by the
+  same, so the parts keep adding up while the figure is typed; a figure the
+  neighbour cannot cover stays as typed and the remainder shows. Category and
+  memo stay with their part. From four parts on, the amounts are typed as
+  before. Once anything has changed, the backdrop no longer closes the panel,
+  and Escape, the cross and *Not now* ask *Discard this split?* first.
+
 - **A key can write a row's memo.** `PATCH /api/agent/v1/households/{id}/transactions/memo`
   takes `[{transaction_id, memo}]` and applies them as one batch, so one undo.
   Until now categorising was the only edit a key could make to a row already in
@@ -123,6 +135,13 @@ this repository.
   what to change. Measurements in #14.
 
 ### Fixed
+
+- **A drag that ends outside a panel no longer closes it** (#27). A click
+  goes to the nearest element holding both the press and the release, so
+  selecting text in a panel's field and letting go past its edge was a click
+  on the backdrop, and the panel closed with what had been typed in it. The
+  backdrop now closes a panel only when the press began on the backdrop too.
+  Every side panel had it.
 
 - **Picking *Uncategorised* on a staged line means uncategorised** (#19). In a
   household with a category of its own called, say, *Other: Uncategorised*,
