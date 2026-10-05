@@ -55,6 +55,9 @@ authenticator: [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
   git checkout v0.5.1
   ```
 
+- **A `python3` on the machine that builds** (3.10 or newer; the system one
+  is fine, nothing to install). It writes down which commit the image is built
+  from: see [Naming what runs](#naming-what-runs).
 - **Memory: 768 MiB for the app container, and at least 1.5 GB for a
   machine that runs only this.** The app peaks at about 500 MiB on a busy
   evening (attaching receipts while the register reloads) and keeps what it
@@ -78,6 +81,7 @@ The app answers on this machine only, at `http://localhost:8848`. Nothing on
 your network can reach it, and no Tailscale is involved.
 
 ```bash
+(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
 docker compose build
 SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
 curl -s localhost:8848/api/health
@@ -116,6 +120,7 @@ Every device on your tailnet reaches the app at
 the tailnet in the admin console (DNS → HTTPS Certificates).
 
 ```bash
+(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
 docker compose build
 SPENDTRACKER_PUBLIC_URL=https://<server>.<tailnet>.ts.net \
 SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
@@ -377,9 +382,14 @@ deploy/tailnet/.env"*.
 #### 4. Build the image
 
 ```bash
+(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
 docker compose build
 docker image ls household-spend-tracker
 ```
+
+The first line is not optional, though nothing fails without it: it is what
+lets the Application screen and `/api/health` name the commit instead of
+saying *unknown*. [Naming what runs](#naming-what-runs) says why.
 
 Builds the app's image from the checkout (two levels up). It takes a few
 minutes the first time. The listing should show a tag equal to
@@ -606,7 +616,7 @@ collector or a persistent logging driver at this container.
 
 > **If the log shows uvicorn starting but nothing from the app**, the image
 > predates 2026-09-23 and wrote its output to a file in the volume instead.
-> `git pull && docker compose build`.
+> `git pull && (cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp) && docker compose build`.
 
 ---
 
@@ -806,6 +816,7 @@ docker compose run --rm -T -v "$PWD/backups:/backups" \
 # 2. Get the new code and build it.
 #    On a server built from a tag:  git fetch --tags && git checkout v0.5.2
 git pull
+(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
 docker compose build
 
 # 3. Ask the NEW image what it would do to your CURRENT volume.
@@ -838,6 +849,7 @@ changing the pinned tag and running `docker compose up -d`; it owns no data.
 ```bash
 docker compose stop app
 git checkout <the previous tag>
+(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
 docker compose build
 docker compose run --rm -T -v "$PWD/backups:/backups:ro" \
   --entrypoint python app -m scripts.restore /backups/<the stamp from step 1>
@@ -959,12 +971,46 @@ Add `-T`. See the demo section.
 
 ---
 
+## Naming what runs
+
+The Application screen (owners only) and `/api/health` say which version,
+which commit and which environment the process is running. Two settings
+feed them, and a self-built image gets neither unless you give it them.
+
+- **The commit comes from `app/build.json`**, which
+  `python3 -m scripts.build_stamp` writes from git. The image can't ask git
+  itself: `.dockerignore` keeps `.git` out of the build context on purpose. So
+  run the stamp, from the top of the checkout, before every
+  `docker compose build`. The commands on this page do, as
+  `(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)`,
+  which works from any directory in the checkout. Without it the screen says
+  *unknown*, and "is the server running what I just merged" goes back to being
+  a guess. The file is gitignored, so it can never be committed with the wrong
+  commit in it, and the release images CI builds carry one already.
+- **The environment is `SPENDTRACKER_ENV`**, `production` when unset. Only one
+  other value changes behaviour: `development` serves the OpenAPI schema and
+  the two API doc viewers (`/api/docs`, `/api/redoc`) to anyone who can reach
+  the port, and stops sending HSTS. Any other value, `staging` for example, is
+  only a label on the Application screen. For a second instance used for
+  testing, put it in that instance's `.env`, so nobody mistakes it for the
+  real one:
+
+  ```bash
+  SPENDTRACKER_ENV=development   # or: staging
+  ```
+
+  `development` on anything reachable beyond the people testing it hands out
+  the whole route inventory; `staging` doesn't.
+
+---
+
 ## Not using Chainguard
 
 The default base is Chainguard's Wolfi Python: minimal, and the runtime variant
 carries no shell and no package manager. If you would rather not:
 
 ```bash
+(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
 docker compose build \
   --build-arg PY_BASE=python:3.12-slim \
   --build-arg PY_RUN=python:3.12-slim

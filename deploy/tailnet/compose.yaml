@@ -1,6 +1,7 @@
 # The app behind its own Tailscale node.
 #
 #   cd deploy/tailnet && cp .env.example .env && chmod 600 .env   # fill in TS_AUTHKEY
+#   (cd ../.. && python3 -m scripts.build_stamp)                     # names the commit
 #   docker compose build
 #   SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d                 # first run only
 #
