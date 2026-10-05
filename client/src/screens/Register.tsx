@@ -332,6 +332,8 @@ export function WorkMark({ txn }: { txn: Pick<Transaction, "reimbursement" | "re
  */
 export type RegisterPreset = {
   reimbursement?: ReimbursementView;
+  /** Only these accounts, so the row in `open` is among the rows that arrive. */
+  accounts?: string[];
   /** A transaction to open in the side panel once the rows arrive. */
   open?: string;
 };
@@ -505,7 +507,7 @@ export function Register({
   const h = household.id;
   const sent = <T,>(value: T) => (preset ? { value } : undefined);
   const [accountIds, setAccountIds] = useFilter<Selection>(
-    h, "accounts", null, isIdsOrEverything, sent(null),
+    h, "accounts", null, isIdsOrEverything, sent(preset?.accounts ?? null),
   );
   //: How the picker gathers accounts. Not a filter -- it changes the headings
   //: you tick, not the rows -- so a preset leaves it alone too.

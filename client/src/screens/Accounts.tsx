@@ -3,7 +3,7 @@
 import { useId, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
-import { format, parse } from "../lib/money";
+import { format, parse, toInput } from "../lib/money";
 import {
   Empty,
   Field,
@@ -18,6 +18,7 @@ import {
 } from "../components/bits";
 import { AccountImport } from "./AccountImport";
 import { Reconcile } from "./Reconcile";
+import type { RegisterPreset } from "./Register";
 import type {
   Account,
   AccountIdentifier,
@@ -315,7 +316,14 @@ export function typeLabel(type: AccountType): string {
   return TYPES.find((one) => one.value === type)?.label ?? type;
 }
 
-export function Accounts({ household }: { household: Household }) {
+export function Accounts({
+  household,
+  onOpenRegister,
+}: {
+  household: Household;
+  /** Opens the register at a row, as a report does. Absent, the link is not drawn. */
+  onOpenRegister?: (preset: RegisterPreset) => void;
+}) {
   const client = useQueryClient();
   const [editing, setEditing] = useState<Account | null>(null);
   const [adding, setAdding] = useState(false);
@@ -652,9 +660,14 @@ export function Accounts({ household }: { household: Household }) {
         <AccountSettings
           household={household}
           account={editing}
+          onOpenRegister={onOpenRegister}
           onClose={() => setEditing(null)}
-          onSaved={() => {
-            setEditing(null);
+          onSaved={(saved) => {
+            // A save that came back with a warning stays open to show it:
+            // closing the panel would be the one way to make sure nobody
+            // reads it. The panel is handed the saved account so it compares
+            // the next edit with what is stored now.
+            setEditing(saved.warnings.length ? saved : null);
             refresh();
           }}
         />
@@ -788,16 +801,28 @@ function AccountForm({
   );
 }
 
+/**
+ * What the opening-balance box starts with: the stored figure, signed, or
+ * nothing for an account opened empty -- blank reads as zero, as it does on
+ * the New account panel, and an empty box says "none" better than a 0.00.
+ */
+export function openingText(minor: number, currency: string): string {
+  if (minor === 0) return "";
+  return `${minor < 0 ? "-" : ""}${toInput(minor, currency)}`;
+}
+
 function AccountSettings({
   household,
   account,
+  onOpenRegister,
   onClose,
   onSaved,
 }: {
   household: Household;
   account: Account;
+  onOpenRegister?: (preset: RegisterPreset) => void;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (saved: Account) => void;
 }) {
   const [name, setName] = useState(account.name);
   const [institution, setInstitution] = useState(account.institution ?? "");
@@ -805,6 +830,17 @@ function AccountSettings({
   const [note, setNote] = useState(account.note ?? "");
   const [closed, setClosed] = useState(account.closed);
   const [product, setProduct] = useState(account.statement_product ?? "");
+  const [opening, setOpening] = useState(() =>
+    openingText(account.opening_balance, account.currency),
+  );
+  const [openingDate, setOpeningDate] = useState(account.opening_date ?? "");
+
+  // The same reading as the New account panel: blank is zero, and anything
+  // else has to parse in this account's currency or nothing is sent.
+  const openingMinor = opening.trim() === "" ? 0 : parse(opening, account.currency);
+  const openingBad = openingMinor === null;
+  const today = new Date().toISOString().slice(0, 10);
+  const openingFuture = openingDate > today;
 
   const save = useMutation({
     mutationFn: () =>
@@ -819,6 +855,11 @@ function AccountSettings({
         clear_country: country === "" && account.country !== null,
         statement_product: product.trim() || null,
         clear_statement_product: product.trim() === "" && account.statement_product !== null,
+        // Only what changed, null being "leave it alone". Both are written to
+        // the opening-balance row, so sending them unchanged would still be
+        // an edit to a reconciled transaction on every save of a name.
+        opening_balance: openingMinor !== account.opening_balance ? openingMinor : null,
+        opening_date: openingDate && openingDate !== account.opening_date ? openingDate : null,
       }),
     onSuccess: onSaved,
   });
@@ -855,6 +896,66 @@ function AccountSettings({
         value; the others are skipped. A current account takes the Current rows unless you
         say otherwise.
       </p>
+      <Field label="Opening balance">
+        <input
+          value={opening}
+          onChange={(e) => setOpening(e.target.value)}
+          inputMode="decimal"
+          placeholder={toInput(0, account.currency)}
+        />
+      </Field>
+      {openingBad && <p className="small neg">That isn't an amount in {account.currency}.</p>}
+      <Field label="Opening date">
+        <input
+          type="date"
+          value={openingDate}
+          max={today}
+          onChange={(e) => setOpeningDate(e.target.value)}
+        />
+      </Field>
+      {openingFuture && (
+        <p className="small neg">An account cannot have been opened in the future.</p>
+      )}
+      <p className="muted small" style={{ marginTop: 4 }}>
+        {account.opening_transaction_id ? (
+          <>
+            Both are a real transaction in the register, reconciled, dated the day tracking
+            started. Changing them here edits that row and keeps it reconciled
+            {onOpenRegister ? (
+              <>
+                {" — "}
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() =>
+                    onOpenRegister({
+                      accounts: [account.id],
+                      open: account.opening_transaction_id ?? undefined,
+                    })
+                  }
+                >
+                  show it in the register
+                </button>
+              </>
+            ) : null}
+            . Zero removes it.
+          </>
+        ) : (
+          <>
+            This account started empty, so there is no opening balance row. Type a figure to add
+            one; without a date it is dated at the account's oldest transaction.
+          </>
+        )}
+      </p>
+      {account.warnings.length > 0 && (
+        <div className="banner warn" role="status">
+          {account.warnings.map((one) => (
+            <p key={one} style={{ margin: 0 }}>
+              {one.charAt(0).toUpperCase() + one.slice(1)}.
+            </p>
+          ))}
+        </div>
+      )}
       <label className="small">
         <input
           type="checkbox"
@@ -868,7 +969,11 @@ function AccountSettings({
         The type and currency are fixed once an account exists, because every transaction on it is
         recorded in that currency.
       </p>
-      <button className="primary" disabled={save.isPending} onClick={() => save.mutate()}>
+      <button
+        className="primary"
+        disabled={save.isPending || openingBad || openingFuture}
+        onClick={() => save.mutate()}
+      >
         Save
       </button>
       <hr />

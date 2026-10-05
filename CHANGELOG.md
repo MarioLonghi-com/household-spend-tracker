@@ -26,6 +26,25 @@ this repository.
 
 ## Unreleased
 
+### Added
+
+- **The account panel shows and edits the opening balance and its date**
+  (#10). Neither is a column, so no migration: both are read off the
+  account's opening-balance row, found by its payee's `system` mark, for
+  every account in one query, with a link that opens that row in the
+  register. A change is made to that row in the same batch as the rest of
+  the save, so one undo puts it all back, and the row stays reconciled with
+  its system payee -- no unlocking it by hand. No date in the future, as on
+  creation. A figure on an account opened empty writes the row, dated as
+  given or at the account's oldest transaction; zero deletes it, and undo
+  restores it; a date alone on an account with no row is refused, since
+  there is nowhere to keep it. An opening date after the account's oldest
+  other transaction is saved with a warning rather than refused, because the
+  balance before that date then leaves the opening figure out -- `warnings`
+  on the account, said wherever the account is read. With two
+  opening-balance rows on one account, the earliest is the one shown and
+  edited.
+
 ## 0.6.2 — 2026-10-04
 
 **Reversible: none** — no migration in this release. To go back, check out

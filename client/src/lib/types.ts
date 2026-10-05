@@ -147,6 +147,15 @@ export interface Account {
   /** The span those rows cover, ISO dates. Both null when there are none. */
   oldest_transaction: string | null;
   newest_transaction: string | null;
+  /**
+   * Read off the opening-balance row, which is where they live (#10): 0 and
+   * nulls for an account opened empty, which has no such row.
+   */
+  opening_balance: number;
+  opening_date: string | null;
+  opening_transaction_id: string | null;
+  /** Worth saying, never a refusal: today, an opening date after older rows. */
+  warnings: string[];
 }
 
 /**

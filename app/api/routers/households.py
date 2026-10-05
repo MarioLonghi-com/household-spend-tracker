@@ -14,6 +14,7 @@ from fastapi import APIRouter, File, Form, Response, UploadFile
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from ... import countries, theming
@@ -312,6 +313,7 @@ def _account_out(
     account: Account,
     figures: dict[str, int] | None = None,
     activity: account_service.Activity | None = None,
+    opening: account_service.Opening | None = None,
 ) -> AccountOut:
     out = AccountOut.model_validate(account)
     out.flag = countries.flag(account.country)
@@ -324,7 +326,24 @@ def _account_out(
         out.transaction_count = activity.transactions
         out.oldest_transaction = activity.oldest
         out.newest_transaction = activity.newest
+    if opening is not None:
+        out.opening_balance = opening.amount
+        out.opening_date = opening.date
+        out.opening_transaction_id = opening.transaction_id
+    out.warnings = account_service.opening_warnings(
+        opening, activity.oldest if activity is not None else None
+    )
     return out
+
+
+def _one_account_out(session: Session, account: Account) -> AccountOut:
+    """Everything `_account_out` takes, read for one account."""
+    return _account_out(
+        account,
+        account_service.balances(session, account.id),
+        account_service.activity(session, account.id),
+        account_service.opening(session, account.id),
+    )
 
 
 @router.get("/households/{household_id}/accounts", response_model=list[AccountOut])
@@ -334,8 +353,11 @@ def list_accounts(
     rows = account_service.list_for_household(session, household.id, include_closed=include_closed)
     figures = account_service.balances_for_household(session, household.id)
     activity = account_service.activity_for_household(session, household.id)
+    openings = account_service.opening_for_household(session, household.id)
     return [
-        _account_out(account, figures.get(account.id), activity.get(account.id))
+        _account_out(
+            account, figures.get(account.id), activity.get(account.id), openings.get(account.id)
+        )
         for account in rows
     ]
 
@@ -357,11 +379,7 @@ def create_account(
             opening_balance=body.opening_balance,
             opening_date=body.opening_date,
         )
-    return _account_out(
-        account,
-        account_service.balances(session, account.id),
-        account_service.activity(session, account.id),
-    )
+    return _one_account_out(session, account)
 
 
 #: One sentence for both size checks, so they cannot drift apart.
@@ -427,11 +445,7 @@ async def import_accounts(
 @router.get("/accounts/{account_id}", response_model=AccountOut)
 def get_account(account_id: str, session: SessionDep, user: CurrentUser) -> AccountOut:
     account = load_for(session, user, Account, account_id)
-    return _account_out(
-        account,
-        account_service.balances(session, account.id),
-        account_service.activity(session, account.id),
-    )
+    return _one_account_out(session, account)
 
 
 @router.patch("/accounts/{account_id}", response_model=AccountOut)
@@ -460,12 +474,11 @@ def update_account(
             account.statement_product = None
         elif body.statement_product is not None:
             account.statement_product = body.statement_product.strip()
+        account_service.set_opening(
+            session, account, amount=body.opening_balance, when=body.opening_date
+        )
         session.flush()
-    return _account_out(
-        account,
-        account_service.balances(session, account.id),
-        account_service.activity(session, account.id),
-    )
+    return _one_account_out(session, account)
 
 
 # --------------------------------------------------------------------------- #

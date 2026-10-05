@@ -757,7 +757,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
             onGo={(to) => go(to as Screen)}
           />
         )}
-        {screen === "accounts" && <Accounts household={household} />}
+        {screen === "accounts" && <Accounts household={household} onOpenRegister={openRegister} />}
         {screen === "payees" && <Payees household={household} />}
         {screen === "categories" && <Categories household={household} />}
         {screen === "receipts" && <Receipts household={household} />}
