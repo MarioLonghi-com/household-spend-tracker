@@ -52,6 +52,18 @@ services:
     cap_add:
       - net_admin
     restart: unless-stopped
+    # The app's own healthcheck runs in the app's namespace, so it stays green
+    # when the sidecar has restarted and left the app behind in the old one:
+    # every request is a 502 and `docker ps` says healthy (#37). This asks the
+    # question `tailscale serve` asks, from where it asks it. Docker only
+    # reports "unhealthy"; it does not act on it. TROUBLESHOOTING.md, "A 502
+    # that does not go away", has the fix.
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "-T", "5", "http://127.0.0.1:8848/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   app:
     build:

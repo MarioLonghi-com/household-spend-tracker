@@ -30,6 +30,7 @@ page is for the moment something is not what you expected.
 - [The node came up as `spend-tracker-1`](#the-node-came-up-as-spend-tracker-1)
 - [`database is locked`, or two apps on one ledger](#database-is-locked-or-two-apps-on-one-ledger)
 - [A 502 for a second, then it carries on](#a-502-for-a-second-then-it-carries-on)
+- [A 502 that does not go away](#a-502-that-does-not-go-away)
 - [It will not start](#it-will-not-start)
 - [Backups, by route](#backups-by-route)
 - [Asking for help](#asking-for-help)
@@ -595,10 +596,13 @@ The symptom, if you do not check: invitation links point at
 To fix: in the admin console's **Machines** page, remove the old
 `spend-tracker` machine, then rename the new one to `spend-tracker` (its
 **⋯ → Edit machine name**). Restart the sidecar so it picks up the
-certificate for its new name:
+certificate for its new name, then the app, so it follows the sidecar into
+its new network namespace
+([A 502 that does not go away](#a-502-that-does-not-go-away)):
 
 ```bash
 docker compose restart tailscale
+docker compose restart app
 docker compose exec tailscale tailscale serve status
 ```
 
@@ -670,6 +674,52 @@ services:
 If the machine cannot give it 768 MiB, `MALLOC_ARENA_MAX: "2"` in the app's
 `environment:` trims about a tenth off the high-water mark. It makes a kill
 less likely; it doesn't make a small limit safe. Measurements: #14.
+
+---
+
+## A 502 that does not go away
+
+Section 3 only (the Tailscale sidecar).
+
+**What you see.** Every request on `https://spend-tracker.<tailnet>.ts.net`
+gets a 502. The sidecar is on the tailnet, and `docker ps` shows the app up
+and `(healthy)`. The sidecar shows `(unhealthy)`.
+
+**The cause is a restart of the sidecar on its own.** For example, the
+internet was down when the server booted, so `tailscale up` timed out and
+`restart: unless-stopped` brought the sidecar back over and over. The app
+joins the sidecar's network namespace *as it was when the app started*. A
+restarted sidecar gets a new namespace, and the app stays in the old one:
+`tailscale serve` proxies to `127.0.0.1:8848` where nothing listens. The
+app's own healthcheck runs in the old namespace, where everything is fine,
+so it stays green. Check:
+
+```bash
+docker exec spend-tracker-tailscale-1 wget -qO- -T 5 http://127.0.0.1:8848/api/health
+```
+
+`Connection refused` settles it.
+
+**The fix is to restart the app**, so that it joins the sidecar's current
+namespace. Run this from `deploy/tailnet`:
+
+```bash
+docker compose restart app
+```
+
+The sidecar turns `(healthy)` again within 30 seconds. The same thing happens
+whenever the sidecar is restarted by hand (`docker compose restart
+tailscale`, as in [The node came up as
+`spend-tracker-1`](#the-node-came-up-as-spend-tracker-1)), so restart the
+app after it.
+
+**Docker does not do this for you.** "Unhealthy" is a status, not an action:
+nothing restarts a container because its healthcheck fails. If you want it
+automatic, run a small job every minute on the server. It should read
+`docker inspect -f '{{.State.Health.Status}}' spend-tracker-tailscale-1`,
+restart the app when that says `unhealthy`, and not restart it again for
+ten minutes. Have it tell you when it acts, because an app that keeps
+failing needs a person. #37.
 
 ---
 
