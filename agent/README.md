@@ -42,7 +42,7 @@ shell history and in `ps`.
 | The job | Scope the key needs |
 |---|---|
 | Analysis, reports, reviewing categories and reading findings | `read` |
-| Attaching receipts, categorising, flagging work expenses, linking transfers | `write` |
+| Attaching receipts, categorising, writing memos, flagging work expenses, linking transfers | `write` |
 | Committing a staged import without a person reviewing it first | `write` + `may_commit` |
 
 ## 2. Ask what you can reach
@@ -244,6 +244,20 @@ curl -s "${auth[@]}" "${json[@]}" -X PATCH "$H/transactions" -d '{
 alone and listed in `transfer_legs`. When the change is a judgement call rather
 than an obvious fix, show the person the list before you send it — it is one
 undo either way, but it is their ledger.
+
+**d. Say what a row was.** What you read off a ticket or an invoice — the
+flight, the booking code, who travelled — can go on the row itself:
+
+```bash
+curl -s "${auth[@]}" "${json[@]}" -X PATCH "$H/transactions/memo" -d '{
+  "assignments": [{"transaction_id": "…",
+                   "memo": "IB0739 MAD→AMS 26 May · booking QX7RT · Alex"}]}'
+```
+
+The memo is **replaced**, up to 500 characters, so read the row first if the
+bank's words should stay and send them back as part of the new text. `null`
+empties it. A reconciled row is left alone and listed in `locked`. Like every
+write, it is one batch and one undo.
 
 ### 3. Work expenses read off a corporate portal
 
