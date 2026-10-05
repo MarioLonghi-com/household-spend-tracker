@@ -412,8 +412,13 @@ export function Import({
   //: After a category is set by hand, the server says how many other lines in
   //: this file have the same payee and no choice of their own. That is the
   //: offer: you corrected one, there are eleven more.
+  //: `uncategorised` when the decision being offered is "no category" (#9).
+  //: It spreads within this file like a category does, but there is no rule
+  //: to set from it: a payee told never to categorise still takes the bank's
+  //: wording for interest and fees, so "every future statement follows" would
+  //: be a promise the commit does not keep.
   const [offer, setOffer] = useState<
-    { lineId: string; count: number; name: string; payee: string } | null
+    { lineId: string; count: number; name: string; payee: string; uncategorised: boolean } | null
   >(null);
   const toasts = useToasts();
   const markBusy = useCallback((id: string, busy: boolean) => {
@@ -925,7 +930,16 @@ export function Import({
             <strong>
               {offer.count} other {offer.count === 1 ? "line has" : "lines have"} the same payee
             </strong>{" "}
-            and no category of their own. Put them in <strong>{offer.name}</strong> too?
+            and no category of their own.{" "}
+            {offer.uncategorised ? (
+              <>
+                Leave them <strong>uncategorised</strong> too?
+              </>
+            ) : (
+              <>
+                Put them in <strong>{offer.name}</strong> too?
+              </>
+            )}
           </p>
           {/* Three answers, and the middle one is the one people actually want
               the second time they see this dialog. It was a link inside the
@@ -941,21 +955,31 @@ export function Import({
                 ? "Applying…"
                 : `Yes, all ${offer.count + 1} of them`}
             </button>
-            <button className="primary" disabled={busy} onClick={() => void alsoTheRule(offer.lineId)}>
-              {rule.isPending
-                ? "Setting the rule…"
-                : `Yes, all of them and set the rule`}
-            </button>
+            {offer.uncategorised ? null : (
+              <button
+                className="primary"
+                disabled={busy}
+                onClick={() => void alsoTheRule(offer.lineId)}
+              >
+                {rule.isPending ? "Setting the rule…" : `Yes, all of them and set the rule`}
+              </button>
+            )}
             <button disabled={busy} onClick={() => setOffer(null)}>
               No, just this one
             </button>
           </div>
 
-          <p className="small muted" style={{ margin: "12px 0 0" }}>
-            The first is this file only. The second also makes{" "}
-            <strong>{offer.name}</strong> the rule for <strong>{offer.payee}</strong>, so every
-            future statement follows without asking.
-          </p>
+          {offer.uncategorised ? (
+            <p className="small muted" style={{ margin: "12px 0 0" }}>
+              This file only. The payee&rsquo;s rule is left as it is for future statements.
+            </p>
+          ) : (
+            <p className="small muted" style={{ margin: "12px 0 0" }}>
+              The first is this file only. The second also makes{" "}
+              <strong>{offer.name}</strong> the rule for <strong>{offer.payee}</strong>, so every
+              future statement follows without asking.
+            </p>
+          )}
         </Dialog>
       )}
 
@@ -1081,14 +1105,16 @@ export function Import({
                           ),
                         });
                         setOffer(
-                          updated.similar_lines > 0 && updated.category_name
+                          updated.similar_lines > 0 &&
+                            (updated.category_name || updated.category_uncategorised)
                             ? {
                                 lineId: updated.id,
                                 count: updated.similar_lines,
-                                name: updated.category_name,
+                                name: updated.category_name ?? "uncategorised",
                                 payee:
                                   ((updated.parsed ?? {}) as Record<string, string>).payee ??
                                   "this payee",
+                                uncategorised: updated.category_uncategorised,
                               }
                             : null,
                         );
@@ -1463,6 +1489,11 @@ function MemoCell({
  * headings means scrolling to find one you already know the name of, and
  * "mortgage" finds "Bills: Rent / Mortgage" from any part of either half.
  *
+ * Three answers, the way the memo has them: a category, an empty box for "back
+ * to the suggestion", and *Uncategorised* for "no category, whatever the rule
+ * says" (#9). Before the third existed, emptying the box on a line the payee's
+ * rule or the bank's wording had categorised simply brought the guess back.
+ *
  * The choice is saved to the staged line straight away rather than held here
  * and sent at commit. It costs one small request and it means the decision
  * survives a reload, which the skip and absorb ticks -- held in the browser --
@@ -1487,16 +1518,26 @@ function CategoryCell({
 }) {
   const [editing, setEditing] = useState(false);
   const [typed, setTyped] = useState("");
+  //: What the box held when it opened. Committing that, untouched, is no
+  //: decision at all and sends nothing -- the line keeps whatever it had,
+  //: whichever category its words also happen to spell (#19).
+  const [opened, setOpened] = useState("");
   const [unmatched, setUnmatched] = useState(false);
 
   const all = useMemo(() => groups.flatMap((group) => group.categories), [groups]);
-  const labels = useMemo(() => all.map((one) => one.full_name), [all]);
+  // "Uncategorised" first, as an option like any other, so it is reached the
+  // same way a category is -- by typing or with the arrows -- rather than by a
+  // link the keyboard cannot get to before the field's blur has saved.
+  const labels = useMemo(() => [UNCATEGORISED, ...all.map((one) => one.full_name)], [all]);
+  const shown = categoryOf(line);
 
   const save = useMutation({
-    mutationFn: (categoryId: string | null) =>
+    mutationFn: (choice: CategoryChoice) =>
       api.patch<ImportLine>(
         `/households/${household.id}/imports/${batchId}/lines/${line.id}`,
-        { category_id: categoryId, clear_category: categoryId === null },
+        choice === "uncategorised"
+          ? { uncategorised: true }
+          : { category_id: choice, clear_category: choice === null },
       ),
     onSuccess: (updated) => {
       setEditing(false);
@@ -1513,29 +1554,60 @@ function CategoryCell({
     return () => onBusy(line.id, false);
   }, [editing, line.id, onBusy]);
 
-  function resolve(text: string): { id: string | null } | "ambiguous" {
-    const needle = fold(text);
-    if (!needle) return { id: null };
-    for (const one of all) {
-      if (fold(one.full_name) === needle || fold(one.name) === needle) return { id: one.id };
-    }
-    const hits = all.filter(
-      (one) => fold(one.full_name).includes(needle) || fold(one.name).includes(needle),
-    );
-    return hits.length === 1 ? { id: hits[0].id } : "ambiguous";
+  /** The answer an option picked from the list stands for: its position in `labels`. */
+  function picked(at: number): CategoryChoice | undefined {
+    if (at === 0) return "uncategorised";
+    return all[at - 1]?.id;
   }
 
-  function commit(next: string = typed) {
-    const answer = resolve(next);
+  function resolve(text: string): { choice: CategoryChoice } | "ambiguous" {
+    const needle = fold(text);
+    // An empty box hands the line back to the suggestion, as it always has.
+    if (!needle) return { choice: null };
+    // Typed text that is exactly the sentinel's label means the sentinel, and
+    // is checked before the categories (#19). The other order let a household
+    // category called "Other: Uncategorised" (short name "Uncategorised")
+    // swallow it, so the option could not be chosen at all. That category is
+    // still reached by its full name, or by picking it from the list, which
+    // commits the option itself rather than its words.
+    const none = fold(UNCATEGORISED);
+    if (needle === none) return { choice: "uncategorised" };
+    for (const one of all) {
+      if (fold(one.full_name) === needle || fold(one.name) === needle) return { choice: one.id };
+    }
+    const hits: CategoryChoice[] = all
+      .filter((one) => fold(one.full_name).includes(needle) || fold(one.name).includes(needle))
+      .map((one) => one.id);
+    if (none.includes(needle)) hits.push("uncategorised");
+    return hits.length === 1 ? { choice: hits[0] } : "ambiguous";
+  }
+
+  function commit(next: string = typed, taken?: number) {
+    const fromList = taken === undefined ? undefined : picked(taken);
+    // Nothing picked and nothing changed: no decision, so nothing to send.
+    // Without this, a line marked uncategorised reopened in a household with a
+    // category whose name is "Uncategorised" resolved to that category on blur.
+    if (fromList === undefined && fold(next) === fold(opened)) {
+      setEditing(false);
+      setUnmatched(false);
+      return;
+    }
+    const answer = fromList === undefined ? resolve(next) : { choice: fromList };
     if (answer === "ambiguous") {
       setUnmatched(true);
       return;
     }
-    if (answer.id === (line.category_id ?? null) && !line.category_chosen) {
+    const unchanged =
+      answer.choice === "uncategorised"
+        ? line.category_uncategorised
+        : !line.category_uncategorised &&
+          answer.choice === (line.category_id ?? null) &&
+          !line.category_chosen;
+    if (unchanged) {
       setEditing(false);
       return;
     }
-    save.mutate(answer.id);
+    save.mutate(answer.choice);
   }
 
   if (!editing) {
@@ -1547,18 +1619,16 @@ function CategoryCell({
             className="cell-edit"
             title="Where this line will land"
             onClick={() => {
-              setTyped(line.category_name ?? "");
+              const start = line.category_uncategorised
+                ? UNCATEGORISED
+                : (line.category_name ?? "");
+              setTyped(start);
+              setOpened(start);
               setUnmatched(false);
               setEditing(true);
             }}
           >
-            {line.category_name ? (
-              <span className={line.category_chosen ? undefined : "muted"}>
-                {line.category_name}
-              </span>
-            ) : (
-              <span className="muted">uncategorised</span>
-            )}
+            <span className={shown.muted ? "muted" : undefined}>{shown.text}</span>
           </button>
         ) : (
           /* A rejected or already-imported line writes nothing, so there is
@@ -1591,10 +1661,41 @@ function CategoryCell({
       />
       {unmatched ? (
         <div className="small neg">No single category matches that.</div>
+      ) : line.category_chosen ? (
+        // Said once somebody has chosen, because only then is there a
+        // suggestion to go back to -- and it is not "Uncategorised", which is
+        // the other thing an empty-looking cell can mean.
+        <div className="small muted">Empty it to go back to the suggestion.</div>
       ) : null}
       {save.error ? <div className="small neg">{(save.error as Error).message}</div> : null}
     </td>
   );
+}
+
+/**
+ * The option that means "no category, and do not ask the rule" (#9).
+ *
+ * Emptying the box cannot mean that: it already means "back to the
+ * suggestion", which for a payee with a usual category or a line the bank
+ * labelled as interest or a fee is a category again.
+ */
+export const UNCATEGORISED = "Uncategorised";
+
+/** What the category cell sends: a category id, null for "back to the rule", or none at all. */
+type CategoryChoice = string | null | "uncategorised";
+
+/**
+ * The category cell's four states, in words.
+ *
+ * A category somebody chose, the suggestion (muted, because it is a guess),
+ * uncategorised because somebody said so, and uncategorised because nothing
+ * suggested anything. The last two look alike in the register afterwards, and
+ * are different promises here: one is a decision, the other a gap.
+ */
+export function categoryOf(line: ImportLine): { text: string; muted: boolean } {
+  if (line.category_uncategorised) return { text: "uncategorised (chosen)", muted: false };
+  if (line.category_name) return { text: line.category_name, muted: !line.category_chosen };
+  return { text: "uncategorised", muted: true };
 }
 
 /** Same folding the Combobox ranks with, so what matches is what was offered. */

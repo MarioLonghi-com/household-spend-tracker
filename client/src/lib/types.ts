@@ -147,6 +147,15 @@ export interface Account {
   /** The span those rows cover, ISO dates. Both null when there are none. */
   oldest_transaction: string | null;
   newest_transaction: string | null;
+  /**
+   * Read off the opening-balance row, which is where they live (#10): 0 and
+   * nulls for an account opened empty, which has no such row.
+   */
+  opening_balance: number;
+  opening_date: string | null;
+  opening_transaction_id: string | null;
+  /** Worth saying, never a refusal: today, an opening date after older rows. */
+  warnings: string[];
 }
 
 /**
@@ -438,6 +447,12 @@ export interface ImportLine {
   category_name: string | null;
   /** True when a person picked it, false when it is the rule's guess. */
   category_chosen: boolean;
+  /**
+   * True when a person chose "no category" (#9): it commits uncategorised
+   * whatever the payee's rule or the bank's wording would say. `category_chosen`
+   * is true with it and `category_id` null.
+   */
+  category_uncategorised: boolean;
   /** Other lines in this import with the same payee and no choice of their own. */
   similar_lines: number;
 }

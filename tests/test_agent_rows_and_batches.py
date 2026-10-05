@@ -206,6 +206,54 @@ def test_a_row_can_say_what_it_is_for(world):
     assert rows["c-2"].category_id is None
 
 
+def test_a_row_can_say_it_has_no_category_even_when_a_rule_would_give_it_one(world):
+    """Issue #9. Leaving `category_id` out hands the row to the payee's rule,
+    so "uncategorised" needed a way of its own to be said."""
+    groceries = world["cat"]["Groceries"]["id"]
+    # Teach Corner Shop a usual category through the euro account first.
+    _commit(world, _stage(world, [
+        _row("2026-08-01", -4_500, "Corner Shop", "u-1", category_id=groceries),
+    ]))
+
+    # Then a yen import, so the rule is shown crossing accounts and currencies.
+    staged = _stage(world, [
+        _row("2026-08-02", -1_200, "Corner Shop", "u-2", uncategorised=True),
+        _row("2026-08-03", -800, "Corner Shop", "u-3"),
+        _row("2026-08-04", 40, "Interest earned - Rainy Day", "u-4", uncategorised=True),
+        _row("2026-08-05", -2_000, "Market Hall", "u-5"),
+    ], account=world["other"]["id"], key="yen", query="?include_lines=all")
+
+    marked = {line["parsed"]["import_id"]: line for line in staged["lines"]}
+    assert marked["u-2"]["category_uncategorised"] is True
+    assert marked["u-3"]["category_uncategorised"] is False
+    assert staged["decision"]["uncategorised"] == 3, "u-2, u-4 and Market Hall"
+
+    _commit(world, staged)
+    with Session(world["client"].app_module.db_engine) as own:
+        rows = {r.import_id: r for r in own.execute(select(Transaction)).scalars()}
+    assert rows["u-2"].category_id is None, "the payee's rule won over the agent's choice"
+    assert rows["u-3"].category_id == groceries, "the row that said nothing lost its rule"
+    assert rows["u-4"].category_id is None, "the bank's wording won over the agent's choice"
+    assert rows["u-5"].category_id is None
+
+
+def test_a_row_cannot_be_both_categorised_and_uncategorised(world):
+    answer = world["client"].post(
+        f"{V1}/households/{world['house']['id']}/imports",
+        json={
+            "account_id": world["account"]["id"],
+            "source": "x",
+            "rows": [_row("2026-08-01", -1_000, "A", "c-1",
+                          category_id=world["cat"]["Groceries"]["id"], uncategorised=True)],
+        },
+        headers=_auth(world),
+    )
+    assert answer.status_code == 422, answer.text
+    assert "not both" in answer.text
+    with Session(world["client"].app_module.db_engine) as own:
+        assert own.execute(select(ImportLine)).first() is None, "a refused row was staged"
+
+
 def test_a_prefix_with_an_underscore_or_percent_is_a_prefix(world):
     """Issue #239. `startswith` does not escape unless asked, so "%" matched
     every id and an agent's "ord_" matched "ord-" and "ordX" too."""

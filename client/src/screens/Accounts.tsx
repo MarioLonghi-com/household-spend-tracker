@@ -3,7 +3,8 @@
 import { useId, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
-import { format, parse } from "../lib/money";
+import { format, parse, toInput } from "../lib/money";
+import { localToday } from "../lib/time";
 import {
   Empty,
   Field,
@@ -18,6 +19,7 @@ import {
 } from "../components/bits";
 import { AccountImport } from "./AccountImport";
 import { Reconcile } from "./Reconcile";
+import type { RegisterPreset } from "./Register";
 import type {
   Account,
   AccountIdentifier,
@@ -315,9 +317,20 @@ export function typeLabel(type: AccountType): string {
   return TYPES.find((one) => one.value === type)?.label ?? type;
 }
 
-export function Accounts({ household }: { household: Household }) {
+export function Accounts({
+  household,
+  onOpenRegister,
+}: {
+  household: Household;
+  /** Opens the register at a row, as a report does. Absent, the link is not drawn. */
+  onOpenRegister?: (preset: RegisterPreset) => void;
+}) {
   const client = useQueryClient();
   const [editing, setEditing] = useState<Account | null>(null);
+  // Bumped on every save, so a panel that stays open is mounted afresh from
+  // the saved account and shows what was stored -- trimmed -- not what was
+  // typed (#20).
+  const [saves, setSaves] = useState(0);
   const [adding, setAdding] = useState(false);
   const [importing, setImporting] = useState(false);
   const [reconciling, setReconciling] = useState<Account | null>(null);
@@ -650,11 +663,23 @@ export function Accounts({ household }: { household: Household }) {
       )}
       {editing && (
         <AccountSettings
+          key={`${editing.id}:${saves}`}
           household={household}
           account={editing}
+          onOpenRegister={onOpenRegister}
           onClose={() => setEditing(null)}
-          onSaved={() => {
-            setEditing(null);
+          onSaved={(saved, sentOpening) => {
+            // A save that came back with a warning stays open to show it:
+            // closing the panel would be the one way to make sure nobody
+            // reads it. But a warning is a standing fact about the account,
+            // so only a save that could have caused it -- one that sent the
+            // opening figure or date, or that changed what the warnings say
+            // -- keeps the panel open; renaming such an account still closes
+            // it. The panel is handed the saved account so it compares the
+            // next edit with what is stored now.
+            const changed = saved.warnings.join("\n") !== editing.warnings.join("\n");
+            setEditing(saved.warnings.length && (sentOpening || changed) ? saved : null);
+            setSaves((n) => n + 1);
             refresh();
           }}
         />
@@ -662,6 +687,13 @@ export function Accounts({ household }: { household: Household }) {
     </>
   );
 }
+
+// The API's own limits (`Institution` and `Note` in app/schemas.py), so a long
+// paste stops at the field rather than coming back as a 422. Both panels ask
+// for these in the same order: country, then bank, then note.
+const INSTITUTION_MAX = 120;
+
+const NOTE_MAX = 2000;
 
 function AccountForm({
   household,
@@ -676,8 +708,10 @@ function AccountForm({
   const [type, setType] = useState<AccountType>("checking");
   const [currency, setCurrency] = useState(household.base_currency);
   const [country, setCountry] = useState("");
+  const [institution, setInstitution] = useState("");
+  const [note, setNote] = useState("");
   const [opening, setOpening] = useState("");
-  const [openingDate, setOpeningDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [openingDate, setOpeningDate] = useState(localToday);
 
   // Blank means zero; anything else has to parse, or the account would be
   // created with a balance the typist did not intend.
@@ -691,6 +725,8 @@ function AccountForm({
         type,
         currency,
         country: country || null,
+        institution: institution.trim() || null,
+        note: note.trim() || null,
         opening_balance: openingMinor ?? 0,
         opening_date: openingDate,
       }),
@@ -734,6 +770,23 @@ function AccountForm({
         Where the account is held. Optional, and separate from the currency — a euro account can
         sit in any number of countries.
       </p>
+      <Field label="Bank or institution">
+        <input
+          value={institution}
+          onChange={(e) => setInstitution(e.target.value)}
+          maxLength={INSTITUTION_MAX}
+        />
+      </Field>
+      <p />
+      <Field label="Note">
+        <textarea
+          value={note}
+          rows={3}
+          onChange={(e) => setNote(e.target.value)}
+          maxLength={NOTE_MAX}
+        />
+      </Field>
+      <p />
 
       <Field
         label="Opening balance"
@@ -788,16 +841,29 @@ function AccountForm({
   );
 }
 
+/**
+ * What the opening-balance box starts with: the stored figure, signed, or
+ * nothing for an account opened empty -- blank reads as zero, as it does on
+ * the New account panel, and an empty box says "none" better than a 0.00.
+ */
+export function openingText(minor: number, currency: string): string {
+  if (minor === 0) return "";
+  return `${minor < 0 ? "-" : ""}${toInput(minor, currency)}`;
+}
+
 function AccountSettings({
   household,
   account,
+  onOpenRegister,
   onClose,
   onSaved,
 }: {
   household: Household;
   account: Account;
+  onOpenRegister?: (preset: RegisterPreset) => void;
   onClose: () => void;
-  onSaved: () => void;
+  /** `sentOpening`: whether the save sent the opening figure or date. */
+  onSaved: (saved: Account, sentOpening: boolean) => void;
 }) {
   const [name, setName] = useState(account.name);
   const [institution, setInstitution] = useState(account.institution ?? "");
@@ -805,22 +871,44 @@ function AccountSettings({
   const [note, setNote] = useState(account.note ?? "");
   const [closed, setClosed] = useState(account.closed);
   const [product, setProduct] = useState(account.statement_product ?? "");
+  const [opening, setOpening] = useState(() =>
+    openingText(account.opening_balance, account.currency),
+  );
+  const [openingDate, setOpeningDate] = useState(account.opening_date ?? "");
 
+  // The same reading as the New account panel: blank is zero, and anything
+  // else has to parse in this account's currency or nothing is sent.
+  const openingMinor = opening.trim() === "" ? 0 : parse(opening, account.currency);
+  const openingBad = openingMinor === null;
+  const today = localToday();
+  const openingFuture = openingDate > today;
+
+  const body = () => ({
+    name,
+    closed,
+    // Null means "leave it alone" on a PATCH, so clearing a country that
+    // was set needs to say so explicitly rather than send nothing.
+    country: country || null,
+    clear_country: country === "" && account.country !== null,
+    // Trimmed, as the New account panel sends them, and an emptied one
+    // cleared the same way as the country -- never stored as "" (#20).
+    institution: institution.trim() || null,
+    clear_institution: institution.trim() === "" && account.institution !== null,
+    note: note.trim() || null,
+    clear_note: note.trim() === "" && account.note !== null,
+    statement_product: product.trim() || null,
+    clear_statement_product: product.trim() === "" && account.statement_product !== null,
+    // Only what changed, null being "leave it alone". Both are written to
+    // the opening-balance row, so sending them unchanged would still be
+    // an edit to a reconciled transaction on every save of a name.
+    opening_balance: openingMinor !== account.opening_balance ? openingMinor : null,
+    opening_date: openingDate && openingDate !== account.opening_date ? openingDate : null,
+  });
   const save = useMutation({
-    mutationFn: () =>
-      api.patch<Account>(`/accounts/${account.id}`, {
-        name,
-        institution,
-        note,
-        closed,
-        // Null means "leave it alone" on a PATCH, so clearing a country that
-        // was set needs to say so explicitly rather than send nothing.
-        country: country || null,
-        clear_country: country === "" && account.country !== null,
-        statement_product: product.trim() || null,
-        clear_statement_product: product.trim() === "" && account.statement_product !== null,
-      }),
-    onSuccess: onSaved,
+    mutationFn: (sending: ReturnType<typeof body>) =>
+      api.patch<Account>(`/accounts/${account.id}`, sending),
+    onSuccess: (saved, sending) =>
+      onSaved(saved, sending.opening_balance !== null || sending.opening_date !== null),
   });
 
   return (
@@ -830,16 +918,25 @@ function AccountSettings({
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p />
-      <Field label="Bank or institution">
-        <input value={institution} onChange={(e) => setInstitution(e.target.value)} />
-      </Field>
-      <p />
       <Field label="Country">
         <CountryPicker value={country} onChange={setCountry} />
       </Field>
       <p />
+      <Field label="Bank or institution">
+        <input
+          value={institution}
+          onChange={(e) => setInstitution(e.target.value)}
+          maxLength={INSTITUTION_MAX}
+        />
+      </Field>
+      <p />
       <Field label="Note">
-        <textarea value={note} rows={3} onChange={(e) => setNote(e.target.value)} />
+        <textarea
+          value={note}
+          rows={3}
+          onChange={(e) => setNote(e.target.value)}
+          maxLength={NOTE_MAX}
+        />
       </Field>
       <p />
       <Field label="Statement product">
@@ -855,6 +952,66 @@ function AccountSettings({
         value; the others are skipped. A current account takes the Current rows unless you
         say otherwise.
       </p>
+      <Field label="Opening balance">
+        <input
+          value={opening}
+          onChange={(e) => setOpening(e.target.value)}
+          inputMode="decimal"
+          placeholder={toInput(0, account.currency)}
+        />
+      </Field>
+      {openingBad && <p className="small neg">That isn't an amount in {account.currency}.</p>}
+      <Field label="Opening date">
+        <input
+          type="date"
+          value={openingDate}
+          max={today}
+          onChange={(e) => setOpeningDate(e.target.value)}
+        />
+      </Field>
+      {openingFuture && (
+        <p className="small neg">An account cannot have been opened in the future.</p>
+      )}
+      <p className="muted small" style={{ marginTop: 4 }}>
+        {account.opening_transaction_id ? (
+          <>
+            Both are a real transaction in the register, reconciled, dated the day tracking
+            started. Changing them here edits that row and keeps it reconciled
+            {onOpenRegister ? (
+              <>
+                {" — "}
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() =>
+                    onOpenRegister({
+                      accounts: [account.id],
+                      open: account.opening_transaction_id ?? undefined,
+                    })
+                  }
+                >
+                  show it in the register
+                </button>
+              </>
+            ) : null}
+            . Zero removes it.
+          </>
+        ) : (
+          <>
+            This account started empty, so there is no opening balance row. Type a figure to add
+            one; without a date it is dated at the account's oldest transaction.
+          </>
+        )}
+      </p>
+      {account.warnings.length > 0 && (
+        <div className="banner warn" role="status">
+          {account.warnings.map((one) => (
+            <p key={one} style={{ margin: 0 }}>
+              {one.charAt(0).toUpperCase() + one.slice(1)}.
+            </p>
+          ))}
+        </div>
+      )}
       <label className="small">
         <input
           type="checkbox"
@@ -868,7 +1025,11 @@ function AccountSettings({
         The type and currency are fixed once an account exists, because every transaction on it is
         recorded in that currency.
       </p>
-      <button className="primary" disabled={save.isPending} onClick={() => save.mutate()}>
+      <button
+        className="primary"
+        disabled={save.isPending || openingBad || openingFuture}
+        onClick={() => save.mutate(body())}
+      >
         Save
       </button>
       <hr />

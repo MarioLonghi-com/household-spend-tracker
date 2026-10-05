@@ -12,7 +12,7 @@ export function Field({
   hint,
   children,
 }: {
-  label: string;
+  label: ReactNode;
   hint?: ReactNode;
   children: ReactNode;
 }) {
@@ -69,6 +69,7 @@ export function Panel({
   onClose,
   config = false,
   wide = false,
+  dirty = false,
   children,
 }: {
   title: string;
@@ -76,9 +77,22 @@ export function Panel({
   config?: boolean;
   /** For a panel that holds a table you have to read row by row. */
   wide?: boolean;
+  /**
+   * Holds work that closing would throw away. The backdrop stops closing it;
+   * Escape and the cross still call `onClose`, which is where the caller asks
+   * whether to discard.
+   */
+  dirty?: boolean;
   children: ReactNode;
 }) {
   const panel = useRef<HTMLElement>(null);
+
+  // A click goes to the nearest element holding both the press and the
+  // release, so a drag that starts in the panel and ends on the backdrop is a
+  // click on the backdrop -- and `stopPropagation` on the aside never sees it.
+  // Selecting text in a field and overshooting the edge closed the panel (#27).
+  // Only a press that began on the backdrop may close it.
+  const pressedOutside = useRef(false);
 
   // Every caller passes an inline arrow, so `onClose` is a new function each
   // render. Read it through a ref and run the effect once, or the panel
@@ -127,7 +141,18 @@ export function Panel({
   }, []);
 
   return (
-    <div className="panel-backdrop" onClick={onClose} role="presentation">
+    <div
+      className="panel-backdrop"
+      onPointerDown={(event) => {
+        pressedOutside.current = event.target === event.currentTarget;
+      }}
+      onClick={(event) => {
+        const outside = pressedOutside.current && event.target === event.currentTarget;
+        pressedOutside.current = false;
+        if (outside && !dirty) onClose();
+      }}
+      role="presentation"
+    >
       <aside
         ref={panel}
         tabIndex={-1}
@@ -372,6 +397,11 @@ export function Dialog({
   children: ReactNode;
 }) {
   const box = useRef<HTMLDivElement>(null);
+  // The same rule as `Panel`'s backdrop (#27): a drag that starts in the box
+  // and ends on the backdrop is a click on the backdrop, and must not close a
+  // confirmation half-read or half-typed. Only a press that began on the
+  // backdrop may close it.
+  const pressedOutside = useRef(false);
   const close = useRef(onClose);
   close.current = onClose;
 
@@ -409,7 +439,18 @@ export function Dialog({
   }, []);
 
   return (
-    <div className="dialog-backdrop" onClick={onClose} role="presentation">
+    <div
+      className="dialog-backdrop"
+      onPointerDown={(event) => {
+        pressedOutside.current = event.target === event.currentTarget;
+      }}
+      onClick={(event) => {
+        const outside = pressedOutside.current && event.target === event.currentTarget;
+        pressedOutside.current = false;
+        if (outside) onClose();
+      }}
+      role="presentation"
+    >
       <div
         ref={box}
         tabIndex={-1}

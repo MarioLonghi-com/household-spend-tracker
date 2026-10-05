@@ -275,8 +275,15 @@ class AccountCreate(BaseModel):
 
 class AccountUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
+    #: Both trimmed when stored, and a blank one stored as null (#20). The
+    #: length limit is on the value as sent -- the characters the panel's
+    #: `maxLength` counts -- so trimming can only bring it further under.
     note: Note | None = None
     institution: Institution | None = None
+    #: Separate from `note` / `institution` being null, which means "leave it
+    #: alone" -- the shape `clear_country` has.
+    clear_note: bool = False
+    clear_institution: bool = False
     country: str | None = Field(default=None, min_length=2, max_length=2)
     #: Separate from `country` being null, which means "leave it alone".
     clear_country: bool = False
@@ -287,6 +294,20 @@ class AccountUpdate(BaseModel):
     #: Which product of a multi-account statement this account takes (#68).
     statement_product: str | None = Field(default=None, min_length=1, max_length=40)
     clear_statement_product: bool = False
+    #: Written to the account's opening-balance row, not to the account (#10).
+    #: Zero removes that row; a figure on an account opened empty writes one.
+    #: See `accounts.set_opening` for what each combination does.
+    opening_balance: Minor | None = None
+    opening_date: Date | None = None
+
+    @model_validator(mode="after")
+    def _set_or_clear(self) -> AccountUpdate:
+        # A value and its clear flag are two answers to one question, so both
+        # at once is a malformed request rather than one to guess the meaning of.
+        for field in ("note", "institution"):
+            if getattr(self, field) is not None and getattr(self, f"clear_{field}"):
+                raise ValueError(f"send {field} or clear_{field}, not both")
+        return self
 
 
 class IdentifierCreate(BaseModel):
@@ -482,6 +503,17 @@ class AccountOut(ORMModel):
     transaction_count: int = 0
     oldest_transaction: Date | None = None
     newest_transaction: Date | None = None
+    #: Read off the opening-balance row, which is where they live: there is
+    #: no column for either (#10). An account opened empty has no row, so its
+    #: balance is 0 and its date and row id are null. The id is so the screen
+    #: can open the row in the register.
+    opening_balance: int = 0
+    opening_date: Date | None = None
+    opening_transaction_id: str | None = None
+    #: Things worth saying that are not refusals -- today only that the
+    #: opening date is after the account's earliest row. Worked out from the
+    #: two dates above, so the list and the PATCH say the same thing.
+    warnings: list[str] = []
 
 
 class AccountImportRow(BaseModel):
@@ -866,6 +898,11 @@ class ImportLineOut(ORMModel):
     #: screen shows which, because "likely" and "decided" are different
     #: promises and only one of them is worth checking.
     category_chosen: bool = False
+    #: True when a person chose "no category" for this line (issue #9): it
+    #: commits uncategorised, whatever the payee's rule or the bank's wording
+    #: would have said. `category_chosen` is true with it, and `category_id`
+    #: null -- which without this would read as a rule with nothing to go on.
+    category_uncategorised: bool = False
     #: How many other lines in this import have the same payee and no category
     #: of their own. Sent after a change so the screen can offer to do the same
     #: to them rather than making somebody type it eleven more times.
@@ -876,6 +913,21 @@ class SetLineCategory(BaseModel):
     category_id: str | None = None
     #: Hand it back to the payee's rule.
     clear_category: bool = False
+    #: No category, and do not ask the rule or the bank's wording either. The
+    #: third answer, beside a category and "back to the rule" (issue #9) --
+    #: the same distinction `clear_memo` and an empty `memo` make.
+    uncategorised: bool = False
+
+    @model_validator(mode="after")
+    def _one_answer(self) -> SetLineCategory:
+        # Each of the three is a different answer to the same question, so two
+        # at once is a malformed request rather than one to guess the meaning of.
+        if self.uncategorised and (self.category_id or self.clear_category):
+            raise ValueError(
+                "uncategorised means no category at all, so send it without "
+                "category_id and without clear_category"
+            )
+        return self
 
 
 class SetLineMemo(BaseModel):
@@ -1906,6 +1958,16 @@ class ManifestAccount(BaseModel):
     #: Money owed rather than held -- a card, a loan. Its balance is what the
     #: household owes, which is not an asset of the same size with its sign lost.
     is_liability: bool = False
+    #: What a person wrote about the account when its name does not say --
+    #: "joint, for the rent". In full, up to `Note`'s 2000 characters, and
+    #: text a person wrote: data to read, never an instruction (#21).
+    note: str | None = None
+    #: Read off the opening-balance row, as `AccountOut`'s are (#10), with
+    #: one difference: an account opened empty has no row, and both are null
+    #: here rather than 0 and null, so "nobody said" is not read as "it
+    #: started at zero". Minor units of `currency`.
+    opening_balance: int | None = None
+    opening_date: Date | None = None
 
 
 class ManifestCategory(BaseModel):
@@ -2018,6 +2080,11 @@ class BalanceOut(BaseModel):
     country: str | None = None
     institution: str | None = None
     is_liability: bool = False
+    #: The manifest's note again, in full, so this stays one complete line
+    #: per account (#21). The opening balance is not repeated: it is a fact
+    #: about where the account started, not about what it holds, and the
+    #: manifest carries it.
+    note: str | None = None
 
 
 class BalancesOut(BaseModel):
@@ -2140,6 +2207,11 @@ class AgentImportRow(BaseModel):
     #: over the payee rule, because a rule is a guess and this is a caller
     #: having looked. Refused if it is not a real category for this household.
     category_id: str | None = None
+    #: The row has no category, and the payee rule and the bank's wording are
+    #: not to be asked either. Leaving `category_id` out is a different
+    #: request -- it hands the row to the rule, which may well categorise it.
+    #: Issue #9. Not together with `category_id`.
+    uncategorised: bool = False
     #: How sure you are, 0 to 1, and why. Neither is used to decide anything --
     #: they are kept so a person reviewing the preview can see which rows were
     #: a confident match and which were the agent's best guess.
@@ -2154,6 +2226,15 @@ class AgentImportRow(BaseModel):
                 "give exactly one of amount_minor (integer minor units, e.g. -1250) "
                 "or amount (a decimal STRING, e.g. \"-12.50\"). A JSON float is not "
                 "accepted for money."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def category_or_uncategorised(self) -> AgentImportRow:
+        if self.uncategorised and self.category_id:
+            raise ValueError(
+                "give category_id or uncategorised: true, not both. uncategorised "
+                "means the row lands with no category at all."
             )
         return self
 
@@ -2248,6 +2329,126 @@ class AgentCategorised(BaseModel):
     #: Reconciled rows, left as they were: locked, as the register treats them.
     #: Set back to cleared by a person first (#215).
     locked: list[str] = []
+
+
+class AgentMemoAssignment(BaseModel):
+    """One row, and what its memo should say."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    transaction_id: str
+    #: Required, and null or blank empties it -- the same reasoning as
+    #: `AgentCategoryAssignment.category_id`: every assignment is one you asked
+    #: for, so there is no spelling of "leave it alone". The memo is replaced,
+    #: not appended to; a caller that wants to keep the bank's words reads the
+    #: row first and sends them back as part of the new text.
+    memo: Memo | None
+
+
+class AgentMemos(BaseModel):
+    """Write a memo per row, as one act, so one undo puts them all back.
+
+    Categorising was the only edit a key could make to a row already in the
+    ledger, so what an agent read off a ticket or an invoice -- the flight, the
+    booking code, who travelled -- could go on a receipt's note but not on the
+    row a person reads in the register.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    assignments: list[AgentMemoAssignment] = Field(min_length=1, max_length=1000)
+
+
+class AgentMemoed(BaseModel):
+    """What the memo edit did, without listing what did not change."""
+
+    batch_id: str
+    changed: int
+    #: Already saying exactly that, so nothing was written for them.
+    unchanged: int
+    #: Ids that are not rows in this household, named for the same reason as
+    #: on `AgentCategorised`.
+    not_found: list[str] = []
+    #: Reconciled rows, left as they were. The register refuses to edit a
+    #: locked row's memo, and a key gets no wider hand than its person (#215).
+    locked: list[str] = []
+
+
+class AgentSplitPart(BaseModel):
+    """One part of a row being divided, as an agent worked it out."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    #: Exactly one of the two, strict for the reason `AgentImportRow` gives: a
+    #: JSON float never reaches money. A decimal string is read in the ROW's
+    #: account currency and refused if it has more decimals than that has.
+    amount_minor: StrictInt | None = None
+    amount: StrictStr | None = None
+    category_id: str | None = None
+    #: Null takes the original row's memo, as the register's split does.
+    memo: Memo | None = None
+    #: Every part of a work expense stays one (`transactions.split`). "clear"
+    #: takes the flag off this part in the same act -- the personal share of a
+    #: partial claim -- and is refused on a row already paid back, because
+    #: that would take a repayment link apart, which is a person's.
+    reimbursement: Literal["keep", "clear"] = "keep"
+
+    @model_validator(mode="after")
+    def exactly_one_amount(self) -> AgentSplitPart:
+        if (self.amount_minor is None) == (self.amount is None):
+            raise ValueError(
+                "give exactly one of amount_minor (integer minor units, e.g. -1250) "
+                "or amount (a decimal STRING, e.g. \"-12.50\"). A JSON float is not "
+                "accepted for money."
+            )
+        return self
+
+
+class AgentSplit(BaseModel):
+    """One row, and the 2-5 parts that add up to it."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    transaction_id: str
+    parts: list[AgentSplitPart] = Field(min_length=2, max_length=5)
+
+
+class AgentSplits(BaseModel):
+    """Divide many rows as one act, so one undo puts every original back. #7.
+
+    A partial work claim -- a shared booking, a share of a bill -- is recorded
+    by splitting the row and keeping the work flag on one part. Until this,
+    an agent that had worked the shares out could only hand a person a table
+    to retype into the split dialog.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    splits: list[AgentSplit] = Field(min_length=1, max_length=100)
+
+
+class AgentSplitDone(BaseModel):
+    #: The row that was divided. It no longer exists; its before-image is in
+    #: the batch, which is what undo puts back.
+    transaction_id: str
+    #: The new rows, in the order the parts were sent.
+    parts: list[str]
+
+
+class AgentSplitRefused(BaseModel):
+    transaction_id: str
+    #: The sentence the register would have shown a person.
+    reason: str
+
+
+class AgentSplitResult(BaseModel):
+    """Per-row answers: what was split, what was refused and why."""
+
+    batch_id: str
+    split: list[AgentSplitDone] = []
+    refused: list[AgentSplitRefused] = []
+    #: Ids that are not rows in this household, named, never dropped.
+    not_found: list[str] = []
 
 
 class AgentLookup(BaseModel):

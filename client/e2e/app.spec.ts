@@ -89,6 +89,47 @@ test("the split panel offers real categories", async ({ page }) => {
   await expect(category.locator("option", { hasText: "Groceries" })).toHaveCount(1);
 });
 
+test("the split bar moves money by drag and by key, and a split in progress is not lost", async ({
+  page,
+}) => {
+  await openSplit(page);
+  const seam = page.getByRole("slider", { name: "Between part 1 and part 2" });
+  await expect(seam).toBeVisible();
+  const total = (await amounts(page)).map(Number).reduce((a, b) => a + b, 0);
+
+  // A real drag, released well past the panel's left edge -- on a desktop that
+  // is the backdrop, and a release there used to close the panel (#27). The
+  // seam stops at one minor unit; the second part holds the rest.
+  const box = (await seam.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(2, box.y + box.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.getByRole("heading", { name: "Split this transaction" })).toBeVisible();
+  let values = (await amounts(page)).map(Number);
+  expect(values[0]).toBe(0.01);
+  expect(values[0] + values[1]).toBeCloseTo(total, 2);
+
+  // The keyboard: shift moves ten minor units, a bare arrow one.
+  await seam.focus();
+  await page.keyboard.press("Shift+ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  values = (await amounts(page)).map(Number);
+  expect(values[0]).toBe(0.12);
+  expect(values[0] + values[1]).toBeCloseTo(total, 2);
+  await expect(page.getByText("It adds up")).toBeVisible();
+
+  // Changed, so Escape asks rather than closes, and keeping on keeps it all.
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Discard this split?" })).toBeVisible();
+  await page.getByRole("button", { name: "Keep editing" }).click();
+  expect((await amounts(page)).map(Number)[0]).toBe(0.12);
+
+  await page.getByRole("button", { name: "Not now" }).click();
+  await page.getByRole("button", { name: "Discard" }).click();
+  await expect(page.getByRole("heading", { name: "Split this transaction" })).toHaveCount(0);
+});
+
 test("splitting a transaction shows up in History, naming what was split", async ({ page }) => {
   const before = await openSplit(page);
 
@@ -254,9 +295,18 @@ test("the detail panel saves on the way out of a field", async ({ page }) => {
   const memo = panel.getByLabel("Memo");
   const written = `checked ${Date.now()}`;
   await memo.fill(written);
-  // Leaving the field is the save. There is no Save button any more.
+  // Leaving the field is the save. There is no Save button any more. Wait for
+  // the server's answer to it, not for the button: on the phone run the row
+  // was reopened before the PATCH had landed and showed the memo from before
+  // (#29). Set up before the blur, or a fast answer is missed.
+  const saved = page.waitForResponse(
+    (response) =>
+      response.request().method() === "PATCH" &&
+      /\/transactions\/[^/?]+$/.test(new URL(response.url()).pathname),
+  );
   await panel.getByLabel("Payee").click();
-  await expect(page.getByRole("button", { name: "Done" })).toBeVisible();
+  expect((await saved).ok()).toBe(true);
+  await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
 
   // Prove it reached the server rather than only the input: close, reopen.
   await page.getByRole("button", { name: "Done" }).click();
@@ -1087,6 +1137,28 @@ test("accounts import from a file, after a preview, from the template's columns"
   const table = page.locator(".card table").first();
   await expect(table.locator("tbody tr", { hasText: current })).toContainText("1,234.56");
   await expect(table.locator("tbody tr", { hasText: savings })).toContainText("GBP");
+});
+
+/**
+ * The New account panel asks for the bank (#12), rather than leaving it to be
+ * filled in by opening the account again afterwards.
+ */
+test("a new account is made with its bank, and the list shows it", async ({ page }, testInfo) => {
+  const width = testInfo.project.name;
+  const name = `Made with a bank ${width}`;
+  const bank = width === "desktop" ? "Example Bank" : "Harbour Savings";
+
+  await go(page, "Accounts");
+  await page.getByRole("button", { name: "Add an account" }).click();
+  const panel = page.getByRole("dialog", { name: "New account" });
+  await panel.getByLabel("Name", { exact: true }).fill(name);
+  await panel.getByLabel("Bank or institution", { exact: true }).fill(bank);
+  await panel.getByLabel("Note", { exact: true }).fill("Opened for the test");
+  await panel.getByRole("button", { name: "Create" }).click();
+  await expect(panel).toHaveCount(0);
+
+  const table = page.locator(".card table").first();
+  await expect(table.locator("tbody tr", { hasText: name })).toContainText(bank);
 });
 
 test("a YNAB export comes in through the household page's one-time import, as one History entry", async ({

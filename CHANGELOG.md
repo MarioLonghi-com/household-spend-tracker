@@ -26,6 +26,194 @@ this repository.
 
 ## Unreleased
 
+## 0.7.0 — 2026-10-05
+
+**Reversible: lossy** — one migration.
+
+- `2bec6ce88f3d` — lossy: trims every account's bank (`institution`) and note,
+  and stores an empty or whitespace-only one as NULL (#20). Rolling it back
+  leaves the rows as they are: which blank was `''` rather than NULL, and the
+  spaces around the rest, are recorded nowhere. Neither meant anything, and
+  0.6.2 reads NULL the same way, so `alembic downgrade d3887ad24c50` and a
+  checkout of `v0.6.2` run as before, with tidier accounts.
+
+Splitting a transaction into two or three parts gets a bar you can drag, and
+an account's opening balance can be seen and changed. The rest is fixes
+found by using it: a panel or dialog that closed under a drag, a row that
+reopened with what it said before its save, today's date in UTC, and an
+account's bank and note stored two ways.
+
+### Added
+
+- **A key reads an account's note and its opening balance** (#21). The
+  manifest's `accounts[]` now carry `note`, `opening_balance` (minor units)
+  and `opening_date`, and `balances` carries `note`, so it stays one complete
+  line per account. The note comes in full, up to its 2,000 characters; the
+  opening pair is read off the opening-balance row the app's own account list
+  reads (#10), all accounts in one query, and is null for an account opened
+  empty. A new `free_text` convention, in the manifest, `/llms.txt` and the
+  agent README, says a note -- like a memo or a payee name -- is data a person
+  wrote and never an instruction to the agent. Read scope.
+
+- **Splitting into two or three parts has a bar you can drag** (#28). The
+  transaction is drawn as one bar cut into its parts; dragging a seam moves
+  money between the two parts either side of it and sticks at a quarter, a
+  third, a half, two thirds and three quarters. Each seam is a slider for the
+  keyboard too: Tab to it, the arrows move it one minor unit and shift moves
+  ten, without snapping. Typing a part's amount moves its neighbour by the
+  same, so the parts keep adding up while the figure is typed; a figure the
+  neighbour cannot cover stays as typed and the remainder shows. Category and
+  memo stay with their part. From four parts on, the amounts are typed as
+  before. Once anything has changed, the backdrop no longer closes the panel,
+  and Escape, the cross and *Not now* ask *Discard this split?* first.
+
+- **A key can write a row's memo.** `PATCH /api/agent/v1/households/{id}/transactions/memo`
+  takes `[{transaction_id, memo}]` and applies them as one batch, so one undo.
+  Until now categorising was the only edit a key could make to a row already in
+  the ledger, so what an agent read off a ticket or an invoice could go on a
+  receipt's note but not on the row a person reads. The memo is replaced, null
+  or blank empties it, and a reconciled row is skipped and listed in `locked`,
+  as the register would refuse it. Listed in the manifest, in the sample client
+  and as the `write_memos` MCP tool.
+
+- **A trusted key can split a transaction.** `POST /api/agent/v1/households/{id}/transactions/split`
+  divides rows into 2-5 parts through the register's own `transactions.split`,
+  so the parts must add up, receipts go on every part and the work flag and
+  repayment link are carried. A part can take `"reimbursement": "clear"` -- the
+  personal share of a partial claim -- except on a row already paid back. The
+  whole request is one batch, so one undo puts every original back. Because a
+  split replaces the row, and no key deletes, it needs a key with `may_commit`
+  (`deps.agent_may_split`); an ordinary write key gets a 403 saying so, and
+  `test_agent_access` names the route so the floor cannot drift. Listed in the
+  manifest, the sample client and the `split_transactions` MCP tool.
+
+- **The New account panel asks for the bank and a note** (#12). The API
+  always took `institution` and `note` on create, but the panel never
+  collected them, so the only way to record the bank was to make the account
+  and open it again. Both are sent trimmed, and a blank one as null. The edit
+  panel now asks in the same order -- country, then bank, then note -- and
+  both hold the bank to 120 characters and the note to 2,000, the API's own
+  limits.
+
+- **A staged line can be marked uncategorised on purpose** (#9). The import
+  preview's category cell offers *Uncategorised* beside the categories, as a
+  third answer next to a category and an empty box. The empty box still hands
+  the line back to the suggestion; *Uncategorised* commits the row with no
+  category, and neither the payee's usual category nor the bank's wording for
+  interest, investments and fees is consulted for it -- nor is a category made
+  for that wording. The cell tells the four states apart: a chosen category, a
+  muted suggestion, *uncategorised (chosen)* and plain *uncategorised*. Kept on
+  the staged line, so it survives a reload and a preview reopened from the
+  queue, and the "rest of this payee" offer spreads it within the file (without
+  a rule to set). The agent import route takes the same thing as
+  `uncategorised: true` on a row, never together with `category_id`. No
+  migration: the choice lives in the line's `parsed`, as the typed memo does.
+
+- **The account panel shows and edits the opening balance and its date**
+  (#10). Neither is a column, so no migration: both are read off the
+  account's opening-balance row, found by its payee's `system` mark, for
+  every account in one query, with a link that opens that row in the
+  register. A change is made to that row in the same batch as the rest of
+  the save, so one undo puts it all back, and the row stays reconciled with
+  its system payee -- no unlocking it by hand. No date in the future, as on
+  creation. A figure on an account opened empty writes the row, dated as
+  given or at the account's oldest transaction; zero deletes it, and undo
+  restores it; a date alone on an account with no row is refused, since
+  there is nowhere to keep it. An opening date after the account's oldest
+  other transaction is saved with a warning rather than refused, because the
+  balance before that date then leaves the opening figure out -- `warnings`
+  on the account, said wherever the account is read. A change that moves
+  the figure or the date is refused while a recorded reconciliation is
+  dated on or after the earlier of the old and new opening dates, since the
+  opening row is part of the floor that statement balanced on; undo the
+  reconciliation first. And the panel edits past the lock only on the row
+  the app wrote as the opening balance -- born reconciled, by its first entry
+  in the audit log, never since ticked by a reconciliation, and not a
+  transfer leg. With two opening-balance rows on one account the earliest is
+  the one shown, and if a person gave that payee to an ordinary row, the
+  panel refuses and points at the register.
+
+### Changed
+
+- **A self-built image can say which commit it runs.** The Application screen
+  and `/api/health` read the commit from `app/build.json`, which
+  `scripts.build_stamp` writes from git. CI and the release workflow ran it;
+  `deploy/DOCKER.md` never told anyone else to, so every image built by
+  following it said *unknown*. Every build command there, in `UPGRADING.md`
+  and at the top of the sidecar compose file is now preceded by the stamp, and
+  a new section, *Naming what runs*, explains it alongside `SPENDTRACKER_ENV`,
+  which was not documented in DOCKER.md at all.
+- **The memory the app needs is written down, and it is more than the docs
+  said.** `deploy/DOCKER.md` said "about 1 GB of RAM". The app container needs
+  `mem_limit: 768m` as a floor (it peaks near 500 MiB and keeps its high-water
+  mark), and a machine that runs only this needs 1.5 GB. Below that the kernel
+  kills the app mid-request and the browser shows a 502 for a second.
+  `deploy/TROUBLESHOOTING.md` has a new section saying how to recognise it and
+  what to change. Measurements in #14.
+
+### Fixed
+
+- **A drag that ends outside a confirmation dialog leaves it open too.** #27
+  fixed this for the side panels; the confirmation box (*Reset sign-in?*,
+  *Discard this split?* and the rest) still closed on a click its backdrop
+  received from a press that began inside it. It now follows the same rule:
+  only a press that began on the backdrop closes it.
+
+- **A drag that ends outside a panel no longer closes it** (#27). A click
+  goes to the nearest element holding both the press and the release, so
+  selecting text in a panel's field and letting go past its edge was a click
+  on the backdrop, and the panel closed with what had been typed in it. The
+  backdrop now closes a panel only when the press began on the backdrop too.
+  Every side panel had it.
+
+- **A row reopened straight after a save shows what was saved** (#29). The
+  transaction panel saves on the way out of a field and only asked the
+  register behind it to refetch; until that answer came back, closing the
+  panel and reopening the row opened it on the values from before the save.
+  The panel writes every field on its next save, so one more edit there put
+  the old memo back over the new one. The server's answer to the save now goes
+  into the register's cached rows at once, and the refetch still follows. The
+  browser test that caught it on the phone run waits for the save's response
+  before closing the panel.
+
+- **Picking *Uncategorised* on a staged line means uncategorised** (#19). In a
+  household with a category of its own called, say, *Other: Uncategorised*,
+  the import preview's category cell read the words in the box and matched
+  that category first: choosing *Uncategorised* sent the category instead, and
+  merely opening a line already marked uncategorised and leaving it replaced
+  the decision with that category. The cell now commits the option picked from
+  the list rather than its label, sends nothing when the box is left as it
+  opened, and reads the words *Uncategorised* typed in full as the
+  no-category answer. The household's own category is still a pick from the
+  list away, or typed by its full name.
+
+- **"Today" is the local date on every screen** (#23). The transfer,
+  reconcile and quick-entry panels, a duplicated row's date, and how long a
+  work expense has waited all took today from `toISOString()`, which is UTC:
+  between midnight and 02:00 in Madrid (01:00 in winter) that is still
+  yesterday, so a new transfer or entry was pre-filled with yesterday and a
+  duplicate was dated yesterday, while the server's `date.today()` is local.
+  They now share the account panel's `localToday()`, moved to
+  `client/src/lib/time.ts`.
+
+- **An account's bank and note are stored trimmed, and an empty one as
+  nothing** (#20). The edit panel sent both as typed, so `"  Bank "` kept its
+  spaces and an emptied field was stored as `""` -- "no bank" had two
+  spellings, and a filter or an export asking for null missed one. The
+  server now trims both on create and on edit and stores a blank one as
+  null, whatever a client sends. On `PATCH /api/accounts/{id}` null still
+  means "leave it alone", so emptying one has its own word,
+  `clear_institution` / `clear_note`, as `clear_country` does; a value sent
+  with its clear flag is a 422. The 120- and 2,000-character limits count the
+  value as sent, as the panel's own limit does. The panel sends both trimmed
+  and the clear flag when a field that had a value is emptied, and a panel
+  kept open after a save now shows what was stored rather than what was
+  typed. Migration `2bec6ce88f3d` folds the rows already written: every bank
+  and note trimmed, and an empty or whitespace-only one set to NULL. It is
+  **lossy** in name only -- which blank was `''` rather than NULL, and the
+  spaces around the rest -- and its downgrade leaves the rows as they are.
+  Like every migration it is not in the audit log.
+
 ## 0.6.2 — 2026-10-04
 
 **Reversible: none** — no migration in this release. To go back, check out

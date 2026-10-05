@@ -802,3 +802,45 @@ input.no-category:disabled {
 }
 .register-card > .selection-dock > .banner { margin-bottom: 8px; }
 .register-card > .selection-dock > .banner:last-child { margin-bottom: 0; }
+
+/* The split bar (#28) -------------------------------------------------------
+   Part colours are mixed from tokens that already have a dark value, so the
+   bar follows the theme without a token of its own to keep in step. */
+.split-seg-1 { --part: var(--accent); }
+.split-seg-2 { --part: var(--info); }
+.split-seg-3 { --part: var(--warn); }
+
+.split-bar-holder { margin-top: 14px; }
+.split-bar {
+  position: relative;
+  height: 40px;
+  border-radius: var(--radius);
+  touch-action: none;
+}
+.split-seg {
+  position: absolute; top: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; white-space: nowrap;
+  font-size: 13px; font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, var(--part) 22%, var(--surface));
+  color: color-mix(in srgb, var(--part) 75%, var(--ink));
+  pointer-events: none;
+}
+.split-seg:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.split-seg:nth-last-child(1 of .split-seg) { border-radius: 0 var(--radius) var(--radius) 0; }
+.split-seam {
+  position: absolute; top: -6px; bottom: -6px;
+  width: 22px; margin-left: -11px;
+  display: flex; justify-content: center;
+  cursor: ew-resize; touch-action: none;
+  border-radius: var(--radius);
+}
+.split-seam span { width: 4px; border-radius: 2px; background: var(--ink); }
+.split-seam:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.split-ticks { position: relative; height: 16px; font-size: 11px; color: var(--muted); }
+.split-ticks span { position: absolute; transform: translateX(-50%); }
+.split-bar-help { margin: 2px 0 0; }
+.split-swatch {
+  display: inline-block; width: 10px; height: 10px; margin-right: 6px;
+  border-radius: 2px; background: var(--part);
+}

@@ -17,9 +17,8 @@ import { useMutation } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { Field, Panel, Problem } from "../components/bits";
 import { exponent, format, parse } from "../lib/money";
+import { localToday } from "../lib/time";
 import type { Account, Household } from "../lib/types";
-
-const today = () => new Date().toISOString().slice(0, 10);
 
 export function Transfer({
   household,
@@ -36,7 +35,7 @@ export function Transfer({
 
   const [fromId, setFromId] = useState(open[0]?.id ?? "");
   const [toId, setToId] = useState(open[1]?.id ?? "");
-  const [date, setDate] = useState(today());
+  const [date, setDate] = useState(localToday());
   const [leaving, setLeaving] = useState("");
   const [arriving, setArriving] = useState("");
   const [memo, setMemo] = useState("");

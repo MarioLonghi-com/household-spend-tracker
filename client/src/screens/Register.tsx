@@ -10,8 +10,9 @@
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
-import { equalParts } from "../lib/splitting";
+import { equalParts, retype } from "../lib/splitting";
 import { amountLookup, format, parse, toInput } from "../lib/money";
 import { Actor, Dialog, Empty, Field, Hint, Panel, Problem, SortHeading } from "../components/bits";
 import type { SortDirection, SortKey } from "../components/bits";
@@ -33,7 +34,7 @@ import { useWindowed } from "../lib/useWindowed";
 import { useSticky } from "../lib/sticky";
 import { useDebounced } from "../lib/useDebounced";
 import { MIN_WIDTH, tableWidth, useColumnWidths } from "../lib/columnWidths";
-import { formatInstant } from "../lib/time";
+import { formatInstant, localToday } from "../lib/time";
 import {
   REIMBURSEMENT_LABELS,
   WORK_PILLS,
@@ -42,6 +43,7 @@ import {
   workState,
 } from "../lib/reimbursement";
 import { RowPicker } from "../components/RowPicker";
+import { SplitBar } from "../components/SplitBar";
 import { Transfer } from "./Transfer";
 import type {
   Account,
@@ -57,8 +59,6 @@ import type {
   Transaction,
   TransactionOrigin,
 } from "../lib/types";
-
-const today = () => new Date().toISOString().slice(0, 10);
 
 /**
  * A register row, with the currency its amount is in.
@@ -332,6 +332,8 @@ export function WorkMark({ txn }: { txn: Pick<Transaction, "reimbursement" | "re
  */
 export type RegisterPreset = {
   reimbursement?: ReimbursementView;
+  /** Only these accounts, so the row in `open` is among the rows that arrive. */
+  accounts?: string[];
   /** A transaction to open in the side panel once the rows arrive. */
   open?: string;
 };
@@ -345,6 +347,41 @@ export type RegisterPreset = {
  */
 export function isTransferLeg(txn: Pick<Transaction, "transfer_account_id" | "transfer_transaction_id">): boolean {
   return Boolean(txn.transfer_account_id || txn.transfer_transaction_id);
+}
+
+/**
+ * Put a saved row into every register list already in the cache (#29).
+ *
+ * The panel saves on blur and stays open, and the register behind it is only
+ * invalidated: until that refetch lands, the cached row is the one from before
+ * the save. Closing the panel and reopening the row in that window opened it
+ * on the old values -- and the panel writes every field on its next save, so
+ * one more edit there would have put the old memo back over the new one. The
+ * server's answer to the PATCH is the row as it now stands, so it goes in
+ * straight away; the refetch still follows, for balances and filters.
+ *
+ * Every query under `["register", household]` whose data is a page of rows --
+ * the list under any filter, and the backlog count -- and nothing else there.
+ */
+export function rememberSavedRow(
+  client: QueryClient,
+  householdId: string,
+  saved: Transaction,
+): void {
+  client.setQueriesData<unknown>({ queryKey: ["register", householdId] }, (data: unknown) => {
+    if (!data || typeof data !== "object" || !Array.isArray((data as RegisterRows).transactions))
+      return data;
+    const page = data as RegisterRows;
+    if (!page.transactions.some((one) => one.id === saved.id)) return data;
+    return {
+      ...page,
+      transactions: page.transactions.map((one) =>
+        // The register's own fields (the currency) survive; the server's
+        // answer wins on everything it sent.
+        one.id === saved.id ? { ...one, ...saved } : one,
+      ),
+    };
+  });
 }
 
 
@@ -505,7 +542,7 @@ export function Register({
   const h = household.id;
   const sent = <T,>(value: T) => (preset ? { value } : undefined);
   const [accountIds, setAccountIds] = useFilter<Selection>(
-    h, "accounts", null, isIdsOrEverything, sent(null),
+    h, "accounts", null, isIdsOrEverything, sent(preset?.accounts ?? null),
   );
   //: How the picker gathers accounts. Not a filter -- it changes the headings
   //: you tick, not the rows -- so a preset leaves it alone too.
@@ -2654,7 +2691,7 @@ function QuickEntry({
   onAdded: () => void;
 }) {
   const [accountId, setAccountId] = useState(defaultAccountId || accounts[0]?.id || "");
-  const [date, setDate] = useState(today());
+  const [date, setDate] = useState(localToday());
   const [payee, setPayee] = useState("");
   const [outflow, setOutflow] = useState("");
   const [inflow, setInflow] = useState("");
@@ -2972,7 +3009,7 @@ function TransactionHistory({
  * report has to know a split happened -- which is exactly what the previous
  * build got wrong by keeping a parent row that was itself a transaction.
  */
-function SplitPanel({
+export function SplitPanel({
   txn,
   currency,
   groups,
@@ -3004,6 +3041,13 @@ function SplitPanel({
   };
 
   const [parts, setParts] = useState<Part[]>(() => spread(2));
+  // What the panel opened with. Anything else is work that closing would throw
+  // away, so the backdrop stops closing it and Escape, the cross and "Not now"
+  // ask first (#28).
+  const [opened] = useState(() => JSON.stringify(parts));
+  const dirty = JSON.stringify(parts) !== opened;
+  const [asking, setAsking] = useState(false);
+  const leave = () => (dirty ? setAsking(true) : onClose());
 
   const save = useMutation({
     mutationFn: () =>
@@ -3046,8 +3090,38 @@ function SplitPanel({
     setParts(parts.map((part, at) => (at === index ? { ...part, ...patch } : part)));
   }
 
+  // Two or three parts get the bar. Past that the segments are too thin to
+  // grab, and the typed amounts work the way they always have.
+  const barred = parts.length <= 3;
+  const magnitudes = amounts.map((one) => (one === null ? null : Math.abs(one)));
+  const drawable = balanced ? magnitudes.map((one) => one ?? 0) : null;
+
+  // With the bar, typing one part moves its neighbour by the same amount, so
+  // the parts keep adding up while the figure is still being typed. When the
+  // neighbour cannot cover it, what was typed stays and the remainder shows.
+  function typeAmount(index: number, text: string) {
+    const typed = text.trim() === "" ? null : parse(text, currency);
+    const moved =
+      barred && typed !== null
+        ? retype(magnitudes, Math.abs(txn.amount), index, Math.abs(typed))
+        : null;
+    setParts(
+      parts.map((part, at) =>
+        at === index
+          ? { ...part, amount: text }
+          : moved && moved[at] !== magnitudes[at]
+            ? { ...part, amount: toInput(moved[at], currency) }
+            : part,
+      ),
+    );
+  }
+
+  function drag(sizes: number[]) {
+    setParts(parts.map((part, at) => ({ ...part, amount: toInput(sizes[at], currency) })));
+  }
+
   return (
-    <Panel title="Split this transaction" onClose={onClose} wide>
+    <Panel title="Split this transaction" onClose={leave} dirty={dirty} wide>
       <Problem error={save.error} />
       <p className="muted small" style={{ marginTop: 0 }}>
         {format(txn.amount, currency)}
@@ -3075,15 +3149,34 @@ function SplitPanel({
         </div>
       </div>
 
+      {barred ? (
+        drawable ? (
+          <SplitBar magnitudes={drawable} currency={currency} onChange={drag} />
+        ) : (
+          <p className="small muted split-bar-help">
+            The bar comes back once the parts add up.
+          </p>
+        )
+      ) : null}
+
       <div className="split-parts">
         {parts.map((part, index) => (
           <div className="split-part" key={index}>
-            <Field label={`Part ${index + 1} (${currency})`}>
+            <Field
+              label={
+                <>
+                  {barred ? (
+                    <span className={`split-swatch split-seg-${index + 1}`} aria-hidden="true" />
+                  ) : null}
+                  {`Part ${index + 1} (${currency})`}
+                </>
+              }
+            >
               <input
                 value={part.amount}
                 inputMode="decimal"
                 autoFocus={index === 1}
-                onChange={(e) => change(index, { amount: e.target.value })}
+                onChange={(e) => typeAmount(index, e.target.value)}
               />
             </Field>
             <Field label="Category">
@@ -3161,12 +3254,29 @@ function SplitPanel({
         <button className="primary" disabled={!balanced || save.isPending} onClick={() => save.mutate()}>
           {save.isPending ? "Splitting…" : `Split into ${parts.length}`}
         </button>
-        <button onClick={onClose}>Not now</button>
+        <button onClick={leave}>Not now</button>
       </div>
       <p className="small muted" style={{ marginTop: 10 }}>
         This is one act: the original goes, the parts arrive, and History undoes the whole thing
         in one click. The parts stay marked as belonging together.
       </p>
+
+      {asking ? (
+        <Dialog title="Discard this split?" onClose={() => setAsking(false)}>
+          <p className="small">
+            The parts you have set up have not been saved. Discarding leaves the transaction as it
+            was.
+          </p>
+          <div className="dialog-choices">
+            <button className="primary" autoFocus onClick={() => setAsking(false)}>
+              Keep editing
+            </button>
+            <button className="danger" onClick={onClose}>
+              Discard
+            </button>
+          </div>
+        </Dialog>
+      ) : null}
     </Panel>
   );
 }
@@ -3312,6 +3422,7 @@ function TransactionPanel({
   //: One side of a transfer: no category, and the amount moves both legs.
   const isTransfer = isTransferLeg(txn);
 
+  const client = useQueryClient();
   const save = useMutation({
     mutationFn: () =>
       api.patch<Transaction>(`/transactions/${txn.id}`, {
@@ -3330,6 +3441,7 @@ function TransactionPanel({
       }),
     onSuccess: (updated) => {
       setRow(updated);
+      rememberSavedRow(client, householdId, updated);
       onSaved();
     },
   });
@@ -3344,7 +3456,7 @@ function TransactionPanel({
   const [confirming, setConfirming] = useState(false);
 
   const copy = useMutation({
-    mutationFn: () => api.post(`/transactions/${txn.id}/duplicate`, { date: today() }),
+    mutationFn: () => api.post(`/transactions/${txn.id}/duplicate`, { date: localToday() }),
     onSuccess: onChanged,
   });
 
@@ -3752,7 +3864,7 @@ function ReimbursementSection({
   if (!expense) return null;
 
   const payment = linked.find((one) => one.id === current.reimbursed_by_id);
-  const waited = Math.max(0, ageInDays(current.date, today()));
+  const waited = Math.max(0, ageInDays(current.date, localToday()));
 
   return (
     <div className="reimbursement-section">
