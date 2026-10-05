@@ -397,6 +397,11 @@ export function Dialog({
   children: ReactNode;
 }) {
   const box = useRef<HTMLDivElement>(null);
+  // The same rule as `Panel`'s backdrop (#27): a drag that starts in the box
+  // and ends on the backdrop is a click on the backdrop, and must not close a
+  // confirmation half-read or half-typed. Only a press that began on the
+  // backdrop may close it.
+  const pressedOutside = useRef(false);
   const close = useRef(onClose);
   close.current = onClose;
 
@@ -434,7 +439,18 @@ export function Dialog({
   }, []);
 
   return (
-    <div className="dialog-backdrop" onClick={onClose} role="presentation">
+    <div
+      className="dialog-backdrop"
+      onPointerDown={(event) => {
+        pressedOutside.current = event.target === event.currentTarget;
+      }}
+      onClick={(event) => {
+        const outside = pressedOutside.current && event.target === event.currentTarget;
+        pressedOutside.current = false;
+        if (outside) onClose();
+      }}
+      role="presentation"
+    >
       <div
         ref={box}
         tabIndex={-1}
