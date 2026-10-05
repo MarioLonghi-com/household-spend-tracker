@@ -26,6 +26,23 @@ this repository.
 
 ## Unreleased
 
+## 0.7.0 — 2026-10-05
+
+**Reversible: lossy** — one migration.
+
+- `2bec6ce88f3d` — lossy: trims every account's bank (`institution`) and note,
+  and stores an empty or whitespace-only one as NULL (#20). Rolling it back
+  leaves the rows as they are: which blank was `''` rather than NULL, and the
+  spaces around the rest, are recorded nowhere. Neither meant anything, and
+  0.6.2 reads NULL the same way, so `alembic downgrade d3887ad24c50` and a
+  checkout of `v0.6.2` run as before, with tidier accounts.
+
+Splitting a transaction into two or three parts gets a bar you can drag, and
+an account's opening balance can be seen and changed. The rest is fixes
+found by using it: a panel or dialog that closed under a drag, a row that
+reopened with what it said before its save, today's date in UTC, and an
+account's bank and note stored two ways.
+
 ### Added
 
 - **A key reads an account's note and its opening balance** (#21). The
