@@ -50,6 +50,14 @@ this repository.
 
 ### Changed
 
+- **A self-built image can say which commit it runs.** The Application screen
+  and `/api/health` read the commit from `app/build.json`, which
+  `scripts.build_stamp` writes from git. CI and the release workflow ran it;
+  `deploy/DOCKER.md` never told anyone else to, so every image built by
+  following it said *unknown*. Every build command there, in `UPGRADING.md`
+  and at the top of the sidecar compose file is now preceded by the stamp, and
+  a new section, *Naming what runs*, explains it alongside `SPENDTRACKER_ENV`,
+  which was not documented in DOCKER.md at all.
 - **The memory the app needs is written down, and it is more than the docs
   said.** `deploy/DOCKER.md` said "about 1 GB of RAM". The app container needs
   `mem_limit: 768m` as a floor (it peaks near 500 MiB and keeps its high-water
