@@ -33,7 +33,7 @@ import { useWindowed } from "../lib/useWindowed";
 import { useSticky } from "../lib/sticky";
 import { useDebounced } from "../lib/useDebounced";
 import { MIN_WIDTH, tableWidth, useColumnWidths } from "../lib/columnWidths";
-import { formatInstant } from "../lib/time";
+import { formatInstant, localToday } from "../lib/time";
 import {
   REIMBURSEMENT_LABELS,
   WORK_PILLS,
@@ -57,8 +57,6 @@ import type {
   Transaction,
   TransactionOrigin,
 } from "../lib/types";
-
-const today = () => new Date().toISOString().slice(0, 10);
 
 /**
  * A register row, with the currency its amount is in.
@@ -2656,7 +2654,7 @@ function QuickEntry({
   onAdded: () => void;
 }) {
   const [accountId, setAccountId] = useState(defaultAccountId || accounts[0]?.id || "");
-  const [date, setDate] = useState(today());
+  const [date, setDate] = useState(localToday());
   const [payee, setPayee] = useState("");
   const [outflow, setOutflow] = useState("");
   const [inflow, setInflow] = useState("");
@@ -3346,7 +3344,7 @@ function TransactionPanel({
   const [confirming, setConfirming] = useState(false);
 
   const copy = useMutation({
-    mutationFn: () => api.post(`/transactions/${txn.id}/duplicate`, { date: today() }),
+    mutationFn: () => api.post(`/transactions/${txn.id}/duplicate`, { date: localToday() }),
     onSuccess: onChanged,
   });
 
@@ -3754,7 +3752,7 @@ function ReimbursementSection({
   if (!expense) return null;
 
   const payment = linked.find((one) => one.id === current.reimbursed_by_id);
-  const waited = Math.max(0, ageInDays(current.date, today()));
+  const waited = Math.max(0, ageInDays(current.date, localToday()));
 
   return (
     <div className="reimbursement-section">

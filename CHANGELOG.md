@@ -135,6 +135,15 @@ this repository.
   no-category answer. The household's own category is still a pick from the
   list away, or typed by its full name.
 
+- **"Today" is the local date on every screen** (#23). The transfer,
+  reconcile and quick-entry panels, a duplicated row's date, and how long a
+  work expense has waited all took today from `toISOString()`, which is UTC:
+  between midnight and 02:00 in Madrid (01:00 in winter) that is still
+  yesterday, so a new transfer or entry was pre-filled with yesterday and a
+  duplicate was dated yesterday, while the server's `date.today()` is local.
+  They now share the account panel's `localToday()`, moved to
+  `client/src/lib/time.ts`.
+
 ## 0.6.2 — 2026-10-04
 
 **Reversible: none** — no migration in this release. To go back, check out
