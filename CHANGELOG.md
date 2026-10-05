@@ -136,6 +136,12 @@ this repository.
 
 ### Fixed
 
+- **A drag that ends outside a confirmation dialog leaves it open too.** #27
+  fixed this for the side panels; the confirmation box (*Reset sign-in?*,
+  *Discard this split?* and the rest) still closed on a click its backdrop
+  received from a press that began inside it. It now follows the same rule:
+  only a press that began on the backdrop closes it.
+
 - **A drag that ends outside a panel no longer closes it** (#27). A click
   goes to the nearest element holding both the press and the release, so
   selecting text in a panel's field and letting go past its edge was a click
