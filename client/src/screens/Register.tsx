@@ -346,6 +346,10 @@ export type RegisterPreset = {
  * spending, so it has no category, and every place this screen offers one --
  * the cell, the panel, the bulk picker -- asks this first.
  */
+export function isTransferLeg(txn: Pick<Transaction, "transfer_account_id" | "transfer_transaction_id">): boolean {
+  return Boolean(txn.transfer_account_id || txn.transfer_transaction_id);
+}
+
 /**
  * Put a saved row into every register list already in the cache (#29).
  *
@@ -379,10 +383,6 @@ export function rememberSavedRow(
       ),
     };
   });
-}
-
-export function isTransferLeg(txn: Pick<Transaction, "transfer_account_id" | "transfer_transaction_id">): boolean {
-  return Boolean(txn.transfer_account_id || txn.transfer_transaction_id);
 }
 
 
