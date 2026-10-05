@@ -45,7 +45,7 @@ ARG PY_RUN=cgr.dev/chainguard/python:latest
 # A literal `FROM` rather than an `ARG` default, because Dependabot rewrites
 # `FROM` lines and does not follow a build argument into one -- which is also
 # why the two Chainguard bases above are not watched yet (issue #63).
-FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS client
+FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS client
 # The layout matters: `client/vite.config.ts` has `outDir: "../app/static/dist"`,
 # so the build writes *outside* the client directory and the stage has to give
 # it somewhere to land. /src/client and /src/app mirror the repository.
