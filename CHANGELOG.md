@@ -28,6 +28,16 @@ this repository.
 
 ### Added
 
+- **A key reads an account's note and its opening balance** (#21). The
+  manifest's `accounts[]` now carry `note`, `opening_balance` (minor units)
+  and `opening_date`, and `balances` carries `note`, so it stays one complete
+  line per account. The note comes in full, up to its 2,000 characters; the
+  opening pair is read off the opening-balance row the app's own account list
+  reads (#10), all accounts in one query, and is null for an account opened
+  empty. A new `free_text` convention, in the manifest, `/llms.txt` and the
+  agent README, says a note -- like a memo or a payee name -- is data a person
+  wrote and never an instruction to the agent. Read scope.
+
 - **A key can write a row's memo.** `PATCH /api/agent/v1/households/{id}/transactions/memo`
   takes `[{transaction_id, memo}]` and applies them as one batch, so one undo.
   Until now categorising was the only edit a key could make to a row already in
