@@ -42,8 +42,9 @@ shell history and in `ps`.
 | The job | Scope the key needs |
 |---|---|
 | Analysis, reports, reviewing categories and reading findings | `read` |
-| Attaching receipts, categorising, flagging work expenses, linking transfers | `write` |
+| Attaching receipts, categorising, writing memos, flagging work expenses, linking transfers | `write` |
 | Committing a staged import without a person reviewing it first | `write` + `may_commit` |
+| Splitting a row into parts (it replaces the row) | `write` + `may_commit` |
 
 ## 2. Ask what you can reach
 
@@ -245,6 +246,20 @@ alone and listed in `transfer_legs`. When the change is a judgement call rather
 than an obvious fix, show the person the list before you send it — it is one
 undo either way, but it is their ledger.
 
+**d. Say what a row was.** What you read off a ticket or an invoice — the
+flight, the booking code, who travelled — can go on the row itself:
+
+```bash
+curl -s "${auth[@]}" "${json[@]}" -X PATCH "$H/transactions/memo" -d '{
+  "assignments": [{"transaction_id": "…",
+                   "memo": "IB0739 MAD→AMS 26 May · booking QX7RT · Alex"}]}'
+```
+
+The memo is **replaced**, up to 500 characters, so read the row first if the
+bank's words should stay and send them back as part of the new text. `null`
+empties it. A reconciled row is left alone and listed in `locked`. Like every
+write, it is one batch and one undo.
+
 ### 3. Work expenses read off a corporate portal
 
 You are reading the lines of an expense claim — date, merchant, amount,
@@ -291,6 +306,32 @@ all refused. That is unlinking, and it is a person's.
 
 `GET $H/reports/reimbursements?currency=EUR` then shows what is outstanding,
 oldest first — the list to chase.
+
+**c. When a claim covers only part of a row, split it.** A shared booking, a
+share of a phone bill, three rides on one charge where one was personal: the
+row is split, and the work flag stays on the work part only.
+
+```bash
+curl -s "${auth[@]}" "${json[@]}" -X POST "$H/transactions/split" -d '{
+  "splits": [{"transaction_id": "…", "parts": [
+    {"amount": "-30.00"},
+    {"amount": "-12.50", "reimbursement": "clear"}]}]}'
+```
+
+**This needs a key with `may_commit`.** A split *replaces* the row it divides,
+and no key deletes — it is allowed only because nothing is lost (the parts must
+add up to the row, the receipts go on every part, and one undo puts the
+original back) and only for a key a person has trusted further. An ordinary
+write key is refused with a sentence saying so: hand the parts to a person.
+
+Each row takes 2–5 parts, as a decimal **string** in the account's own
+currency or as `amount_minor`. Every part of a work expense stays one;
+`"reimbursement": "clear"` takes the flag off that part in the same act, and is
+refused on a row already paid back — that would take the repayment link apart,
+which is a person's. A row that cannot be split (does not add up, a transfer
+leg, a repayment, reconciled, more decimals than its currency) comes back in
+`refused[]` with the register's own reason; the others still split. The whole
+request is one batch.
 
 ### 4. The combined position, across countries and currencies
 
@@ -442,7 +483,8 @@ fifty receipts is three calls, not fifty.
 
 Keys expire: 90 days by default, 365 at most, and the expiry does not slide.
 
-**No key can ever** delete anything, undo anything, unlink a transfer or a
+**No key can ever** delete anything (the one exception is the row a split
+replaces, and only with `may_commit` — see job 3), undo anything, unlink a transfer or a
 repayment, create or revoke a key, touch passwords, authenticators, devices or
 household membership, or reach the database browser. That is not a scope you
 were not given — those routes ask for a signed-in person and always will.

@@ -1089,6 +1089,28 @@ test("accounts import from a file, after a preview, from the template's columns"
   await expect(table.locator("tbody tr", { hasText: savings })).toContainText("GBP");
 });
 
+/**
+ * The New account panel asks for the bank (#12), rather than leaving it to be
+ * filled in by opening the account again afterwards.
+ */
+test("a new account is made with its bank, and the list shows it", async ({ page }, testInfo) => {
+  const width = testInfo.project.name;
+  const name = `Made with a bank ${width}`;
+  const bank = width === "desktop" ? "Example Bank" : "Harbour Savings";
+
+  await go(page, "Accounts");
+  await page.getByRole("button", { name: "Add an account" }).click();
+  const panel = page.getByRole("dialog", { name: "New account" });
+  await panel.getByLabel("Name", { exact: true }).fill(name);
+  await panel.getByLabel("Bank or institution", { exact: true }).fill(bank);
+  await panel.getByLabel("Note", { exact: true }).fill("Opened for the test");
+  await panel.getByRole("button", { name: "Create" }).click();
+  await expect(panel).toHaveCount(0);
+
+  const table = page.locator(".card table").first();
+  await expect(table.locator("tbody tr", { hasText: name })).toContainText(bank);
+});
+
 test("a YNAB export comes in through the household page's one-time import, as one History entry", async ({
   page,
 }, testInfo) => {
