@@ -237,3 +237,16 @@ def test_the_sidecar_compose_file_keeps_the_app_on_loopback():
     # A real `ports:` key, not the comment that says there is none.
     assert re.search(r"^\s*ports:", compose, re.M) is None, "a published port would bypass the sidecar"
     assert "AllowFunnel" not in (root / "deploy" / "tailnet" / "serve.json").read_text()
+
+
+def test_the_sidecar_checks_it_can_reach_the_app():
+    """A restarted sidecar leaves the app in its old namespace: a 502 for
+    every request while the app's own healthcheck stays green (#37). Only a
+    check run *from the sidecar*, on the loopback `tailscale serve` proxies
+    to, sees it."""
+    root = pathlib.Path(__file__).resolve().parent.parent
+    compose = (root / "deploy" / "tailnet" / "compose.yaml").read_text()
+    sidecar = compose.split("\n  app:\n")[0].split("\n  tailscale:\n")[1]
+    assert re.search(
+        r"^    healthcheck:\n      test: .*http://127\.0\.0\.1:8848/api/health", sidecar, re.M
+    ), "the sidecar's healthcheck must fetch the app on loopback"

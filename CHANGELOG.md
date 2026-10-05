@@ -26,6 +26,18 @@ this repository.
 
 ## Unreleased
 
+### Fixed
+
+- **A 502 that never ends after the Tailscale sidecar restarts is now
+  visible.** The app joins the sidecar's network namespace as it was at
+  start-up. A sidecar that restarts, for example while the internet is down
+  at boot, gets a new namespace and leaves the app behind: every request is
+  a 502, and `docker ps` said the app was healthy. The sidecar in
+  `deploy/tailnet/compose.yaml` now has a healthcheck that fetches the app
+  from inside its own namespace, so it shows `(unhealthy)`.
+  TROUBLESHOOTING.md has the fix (`docker compose restart app`) and how to
+  automate it. DOCKER.md no longer calls a sidecar restart harmless (#37).
+
 ## 0.7.0 — 2026-10-05
 
 **Reversible: lossy** — one migration.
