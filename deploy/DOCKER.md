@@ -584,8 +584,13 @@ Never copy the database out of that mountpoint by hand; take a backup (see
   that the node's identity lives in the volume. `docker compose down -v`
   deletes it **and the ledger with it**, and the node registers again as a
   new machine (and the old one has to be removed in the console).
-- **Recreating the sidecar takes the app's network with it.** A restart
-  (`docker compose restart tailscale`) keeps the container and is harmless.
+- **Restarting or recreating the sidecar takes the app's network with it.**
+  Even a plain restart (`docker compose restart tailscale`, or Docker
+  bringing it back after it exited) gives the sidecar a new network
+  namespace. The app stays in the old one and every request is a 502 until
+  you run `docker compose restart app`. The sidecar's healthcheck shows this
+  as `(unhealthy)`
+  ([TROUBLESHOOTING.md](TROUBLESHOOTING.md#a-502-that-does-not-go-away)).
   A recreate, after changing its image or configuration, needs
   `docker compose up -d`, which recreates both in order.
 - **`serve.json`** is the whole proxy configuration. **Never add
