@@ -255,3 +255,180 @@ describe("the category cell's answers", () => {
     expect(screen.queryByRole("button", { name: /set the rule/ })).toBeNull();
   });
 });
+
+/**
+ * A household with a category of its own whose short name is "Uncategorised"
+ * (#19). The sentinel used to be resolved from its words *after* the
+ * categories, so picking it, or merely reopening a line marked uncategorised
+ * and leaving, sent that category's id instead.
+ */
+describe("beside a real category called Uncategorised", () => {
+  const LOOKALIKE = { id: "cat-other-uncat", name: "Uncategorised", full_name: "Other: Uncategorised" };
+
+  beforeEach(() => {
+    const plain = vi.mocked(api.get).getMockImplementation()!;
+    vi.mocked(api.get).mockImplementation(((path: string) => {
+      if (path.includes("/categories"))
+        return Promise.resolve([
+          { id: "g1", name: "Everyday", categories: [GROCERIES] },
+          { id: "g3", name: "Other", categories: [LOOKALIKE] },
+        ]);
+      return plain(path);
+    }) as typeof api.get);
+  });
+
+  it("sends the sentinel as uncategorised when it is picked from the list", async () => {
+    vi.mocked(api.patch).mockResolvedValue({
+      ...SUGGESTED,
+      category_id: null,
+      category_name: null,
+      category_chosen: true,
+      category_uncategorised: true,
+    });
+    await openPreview();
+
+    fireEvent.click(cell(2));
+    const box = screen.getByRole("combobox", { name: "Category" });
+    fireEvent.mouseDown(screen.getByRole("option", { name: UNCATEGORISED }));
+    expect((box as HTMLInputElement).value).toBe(UNCATEGORISED);
+    fireEvent.blur(box);
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(api.patch).mock.calls[0]).toEqual([
+      "/households/house-1/imports/batch-1/lines/line-2",
+      { uncategorised: true },
+    ]);
+    await waitFor(() => expect(cell(2).textContent).toBe("uncategorised (chosen)"));
+  });
+
+  it("sends the sentinel when its label is typed in full", async () => {
+    vi.mocked(api.patch).mockResolvedValue({
+      ...SUGGESTED,
+      category_id: null,
+      category_name: null,
+      category_chosen: true,
+      category_uncategorised: true,
+    });
+    await openPreview();
+
+    fireEvent.click(cell(2));
+    const box = screen.getByRole("combobox", { name: "Category" });
+    fireEvent.change(box, { target: { value: "uncategorised" } });
+    fireEvent.keyDown(box, { key: "Enter" });
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(api.patch).mock.calls[0][1]).toEqual({ uncategorised: true });
+  });
+
+  it("sends the real category's id when that is the one picked", async () => {
+    vi.mocked(api.patch).mockResolvedValue({
+      ...MARKED,
+      category_id: LOOKALIKE.id,
+      category_name: LOOKALIKE.full_name,
+      category_chosen: true,
+      category_uncategorised: false,
+    });
+    await openPreview();
+
+    fireEvent.click(cell(3));
+    const box = screen.getByRole("combobox", { name: "Category" });
+    fireEvent.mouseDown(screen.getByRole("option", { name: LOOKALIKE.full_name }));
+    fireEvent.keyDown(box, { key: "Enter" });
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(api.patch).mock.calls[0][1]).toEqual({
+      category_id: LOOKALIKE.id,
+      clear_category: false,
+    });
+    await waitFor(() => expect(cell(3).textContent).toBe(LOOKALIKE.full_name));
+  });
+
+  it("reaches either one by keyboard, the sentinel first", async () => {
+    vi.mocked(api.patch).mockResolvedValue({
+      ...SUGGESTED,
+      category_id: LOOKALIKE.id,
+      category_name: LOOKALIKE.full_name,
+      category_chosen: true,
+    });
+    await openPreview();
+
+    fireEvent.click(cell(2));
+    const box = screen.getByRole("combobox", { name: "Category" });
+    fireEvent.change(box, { target: { value: "uncat" } });
+    fireEvent.keyDown(box, { key: "ArrowDown" });
+    fireEvent.keyDown(box, { key: "ArrowDown" });
+    fireEvent.keyDown(box, { key: "Enter" }); // takes the second: the real one
+    expect((box as HTMLInputElement).value).toBe(LOOKALIKE.full_name);
+    fireEvent.keyDown(box, { key: "Enter" }); // commits it
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(api.patch).mock.calls[0][1]).toEqual({
+      category_id: LOOKALIKE.id,
+      clear_category: false,
+    });
+  });
+
+  it("leaves a line marked uncategorised alone when it is opened and left", async () => {
+    await openPreview();
+
+    fireEvent.click(cell(3));
+    const box = screen.getByRole("combobox", { name: "Category" });
+    expect((box as HTMLInputElement).value).toBe(UNCATEGORISED);
+    fireEvent.blur(box);
+
+    await waitFor(() =>
+      expect(screen.queryByRole("combobox", { name: "Category" })).toBeNull(),
+    );
+    expect(api.patch).not.toHaveBeenCalled();
+    expect(cell(3).textContent).toBe("uncategorised (chosen)");
+  });
+
+  it("leaves it alone on Enter too", async () => {
+    await openPreview();
+
+    fireEvent.click(cell(3));
+    fireEvent.keyDown(screen.getByRole("combobox", { name: "Category" }), { key: "Enter" });
+
+    await waitFor(() =>
+      expect(screen.queryByRole("combobox", { name: "Category" })).toBeNull(),
+    );
+    expect(api.patch).not.toHaveBeenCalled();
+    expect(cell(3).textContent).toBe("uncategorised (chosen)");
+  });
+});
+
+describe("beside a real category whose full name is exactly Uncategorised", () => {
+  const TWIN = { id: "cat-twin", name: "Uncategorised", full_name: "Uncategorised" };
+
+  beforeEach(() => {
+    const plain = vi.mocked(api.get).getMockImplementation()!;
+    vi.mocked(api.get).mockImplementation(((path: string) => {
+      if (path.includes("/categories"))
+        return Promise.resolve([{ id: "g4", name: "Loose", categories: [GROCERIES, TWIN] }]);
+      return plain(path);
+    }) as typeof api.get);
+  });
+
+  it("lists both, and each one picked sends what it is", async () => {
+    vi.mocked(api.patch).mockResolvedValue({
+      ...SUGGESTED,
+      category_id: TWIN.id,
+      category_name: TWIN.full_name,
+      category_chosen: true,
+    });
+    await openPreview();
+
+    fireEvent.click(cell(2));
+    const both = screen.getAllByRole("option", { name: UNCATEGORISED });
+    expect(both).toHaveLength(2);
+    // The sentinel is listed first; the second reads the same and is the category.
+    fireEvent.mouseDown(both[1]);
+    fireEvent.blur(screen.getByRole("combobox", { name: "Category" }));
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(api.patch).mock.calls[0][1]).toEqual({
+      category_id: TWIN.id,
+      clear_category: false,
+    });
+  });
+});
