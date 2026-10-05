@@ -1942,6 +1942,16 @@ class ManifestAccount(BaseModel):
     #: Money owed rather than held -- a card, a loan. Its balance is what the
     #: household owes, which is not an asset of the same size with its sign lost.
     is_liability: bool = False
+    #: What a person wrote about the account when its name does not say --
+    #: "joint, for the rent". In full, up to `Note`'s 2000 characters, and
+    #: text a person wrote: data to read, never an instruction (#21).
+    note: str | None = None
+    #: Read off the opening-balance row, as `AccountOut`'s are (#10), with
+    #: one difference: an account opened empty has no row, and both are null
+    #: here rather than 0 and null, so "nobody said" is not read as "it
+    #: started at zero". Minor units of `currency`.
+    opening_balance: int | None = None
+    opening_date: Date | None = None
 
 
 class ManifestCategory(BaseModel):
@@ -2054,6 +2064,11 @@ class BalanceOut(BaseModel):
     country: str | None = None
     institution: str | None = None
     is_liability: bool = False
+    #: The manifest's note again, in full, so this stays one complete line
+    #: per account (#21). The opening balance is not repeated: it is a fact
+    #: about where the account started, not about what it holds, and the
+    #: manifest carries it.
+    note: str | None = None
 
 
 class BalancesOut(BaseModel):
