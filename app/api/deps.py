@@ -354,6 +354,29 @@ def agent_may_commit(agent: AgentWriter) -> AgentContext:
 AgentCommitter = Annotated[AgentContext, Depends(agent_may_commit)]
 
 
+def agent_may_split(agent: AgentWriter) -> AgentContext:
+    """Whether this key may divide a row into parts.
+
+    A split replaces the row it divides (`transactions.split` ends by deleting
+    it), and §1.2 says no key deletes. It is allowed here only because nothing
+    is lost -- the parts add up to the row, the before-image is in the audit
+    log and one undo puts the original back -- and only for a key a person has
+    trusted further: the same `may_commit` that lets a key apply an import
+    nobody reviewed (#7, option B). An ordinary write key is told what to hand
+    a person instead.
+    """
+    if not agent.key.may_commit:
+        raise Forbidden(
+            "that key may not split a transaction: a split replaces the row, so it "
+            "needs a key a person has trusted to apply changes without review. Hand "
+            "the parts to a person to split in the register instead."
+        )
+    return agent
+
+
+AgentSplitter = Annotated[AgentContext, Depends(agent_may_split)]
+
+
 class _Attributed:
     """`batch()` with the key stamped on the row it opens.
 

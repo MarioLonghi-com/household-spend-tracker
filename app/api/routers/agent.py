@@ -24,7 +24,7 @@ from sqlalchemy import func, select
 
 from ... import __version__, money
 from ...audit.batch import resume
-from ...errors import Conflict, NotFound, TooLarge, ValidationError
+from ...errors import Conflict, DomainError, NotFound, TooLarge, ValidationError
 from ...models import (
     Account,
     BatchKind,
@@ -46,11 +46,17 @@ from ...schemas import (
     AgentLinkReceipt,
     AgentLookup,
     AgentLookupResult,
+    AgentMemoed,
+    AgentMemos,
     AgentReceiptBatch,
     AgentReceiptOut,
     AgentReceiptsStored,
     AgentReceiptStored,
     AgentReceiptUpload,
+    AgentSplitDone,
+    AgentSplitRefused,
+    AgentSplitResult,
+    AgentSplits,
     BalanceOut,
     BalancesOut,
     CurrencyTotalsOut,
@@ -81,7 +87,7 @@ from ...services import (
 from ...services import identifiers as identifier_service
 from ...services import receipts as receipt_service
 from ...services import transactions as txn_service
-from ..deps import AgentCommitter, AgentWriter, CurrentAgent
+from ..deps import AgentCommitter, AgentSplitter, AgentWriter, CurrentAgent
 from ..offload import run_cpu, run_cpu_sync
 from ..uploads import read_body_capped
 
@@ -383,6 +389,37 @@ ENDPOINTS = [
             "reconciled row is locked: it is left alone and listed in locked."
         ),
         returns="{batch_id, changed, unchanged, not_found[], transfer_legs[], locked[]}",
+        scope="write",
+    ),
+    ManifestEndpoint(
+        method="PATCH",
+        path=f"{_BASE}/households/{{household_id}}/transactions/memo",
+        says=(
+            "Write a memo per row, as one act with one undo. Send assignments: "
+            "[{transaction_id, memo}], memo at most 500 characters. It replaces the "
+            "memo: read the row first if the bank's words should stay. null or blank "
+            "empties it. A reconciled row is locked: it is left alone and listed in "
+            "locked."
+        ),
+        returns="{batch_id, changed, unchanged, not_found[], locked[]}",
+        scope="write",
+    ),
+    ManifestEndpoint(
+        method="POST",
+        path=f"{_BASE}/households/{{household_id}}/transactions/split",
+        says=(
+            "Divide rows into 2-5 parts that add up to them, as one act with one undo. "
+            "Needs a key with may_commit: a split replaces the row. Send splits: "
+            "[{transaction_id, parts: [{amount | amount_minor, category_id?, memo?, "
+            "reimbursement: keep|clear}]}]. Every part of a work expense stays one "
+            "unless its reimbursement is clear, which is refused on a row already paid "
+            "back. Receipts go on every part. A row that cannot be split (does not add "
+            "up, transfer leg, a repayment, reconciled) is named in refused with the "
+            "reason, and the others still split. Each split entry is {transaction_id, "
+            "parts[]} (the new row ids, in the order sent); each refused entry is "
+            "{transaction_id, reason}."
+        ),
+        returns="{batch_id, split[], refused[], not_found[]}",
         scope="write",
     ),
     ManifestEndpoint(
@@ -1179,6 +1216,64 @@ def categorise(
     )
 
 
+@router.patch("/households/{household_id}/transactions/memo", response_model=AgentMemoed)
+def write_memos(
+    household_id: str, body: AgentMemos, agent: AgentWriter, request: Request
+) -> AgentMemoed:
+    """Set a memo per row, as one act.
+
+    What an agent reads off a ticket or an invoice -- the flight, the booking
+    code, who travelled -- belongs on the row a person reads in the register,
+    and until this route it could only go on a receipt's note.
+
+    The same shape and the same floor as `categorise`: one batch so one undo,
+    rows loaded and changed one at a time so the audit sees each of them, and
+    a reconciled row skipped and named rather than refused. A transfer leg is
+    *not* skipped: a memo says what something was, and a leg has one as much
+    as any row does.
+    """
+    house = _house(agent, household_id)
+    session = agent.session
+    # Blank is the same request as null. Two spellings of "no memo" that store
+    # differently would make `unchanged` lie about one of them.
+    wanted = {
+        one.transaction_id: (one.memo.strip() or None) if one.memo is not None else None
+        for one in body.assignments
+    }
+
+    rows = list(
+        session.execute(
+            select(Transaction).where(
+                Transaction.household_id == house.id, Transaction.id.in_(wanted)
+            )
+        ).scalars()
+    )
+    changed = unchanged = 0
+    locked: list[str] = []
+    with agent.batch(kind=BatchKind.bulk_update) as acting:
+        for row in rows:
+            if row.memo == wanted[row.id]:
+                unchanged += 1
+                continue
+            if row.cleared is ClearedState.reconciled:
+                locked.append(row.id)
+                continue
+            txn_service.update(session, row, memo=wanted[row.id], flush=False)
+            changed += 1
+        session.flush()
+        batch_id = acting.id
+
+    request.state.agent_rows = changed
+    request.state.agent_batch_id = batch_id
+    return AgentMemoed(
+        batch_id=batch_id,
+        changed=changed,
+        unchanged=unchanged,
+        not_found=sorted(set(wanted) - {row.id for row in rows}),
+        locked=sorted(locked),
+    )
+
+
 # --------------------------------------------------------------------------- #
 # Receipts: the three pieces the build left for an agent
 # --------------------------------------------------------------------------- #
@@ -1592,3 +1687,120 @@ def link_receipt(
     request.state.agent_rows = 1
     request.state.agent_batch_id = opened.id
     return _receipt_out(receipt)
+
+
+@router.post("/households/{household_id}/transactions/split", response_model=AgentSplitResult)
+def split_transactions(
+    household_id: str, body: AgentSplits, agent: AgentSplitter, request: Request
+) -> AgentSplitResult:
+    """Divide rows into the parts they were really made of, as one act. #7.
+
+    Through `transactions.split`, the register's own writer, so the rules and
+    the refusal sentences are the ones a person sees: the parts must add up,
+    a transfer leg or a repayment cannot be split, a reconciled row is locked,
+    every part keeps the work flag and the repayment link, and the receipts
+    go on every part.
+
+    **One batch for the whole request, so one undo** puts every original row
+    back. Each row is tried inside its own savepoint, so a row the service
+    refuses is named in `refused` and leaves nothing half-done behind, while
+    the others still split -- the same per-row answer as every batch write.
+
+    Only for a key with `may_commit` (`AgentSplitter`): a split replaces the
+    row, and §1.2 keeps deletes from keys. See `deps.agent_may_split`.
+    """
+    house = _house(agent, household_id)
+    session = agent.session
+
+    # An invented category refuses the whole request before anything is
+    # written, as on `categorise`: it is a caller's mistake about the
+    # household, not a fact about one row.
+    wanted_cats = {p.category_id for s in body.splits for p in s.parts if p.category_id}
+    cats = {
+        row.id: row
+        for row in session.execute(
+            select(Category).where(
+                Category.household_id == house.id, Category.id.in_(wanted_cats or {""})
+            )
+        ).scalars()
+    }
+    invented = sorted(wanted_cats - set(cats))
+    if invented:
+        raise ValidationError(
+            f"these are not categories in this household: {', '.join(invented)}. "
+            "The manifest lists every id you can use."
+        )
+
+    ids = [one.transaction_id for one in body.splits]
+    rows = {
+        row.id: row
+        for row in session.execute(
+            select(Transaction).where(
+                Transaction.household_id == house.id, Transaction.id.in_(ids)
+            )
+        ).scalars()
+    }
+    accounts = {
+        row.id: row
+        for row in session.execute(
+            select(Account).where(Account.id.in_({t.account_id for t in rows.values()} or {""}))
+        ).scalars()
+    }
+
+    done: list[AgentSplitDone] = []
+    refused: list[AgentSplitRefused] = []
+    seen: set[str] = set()
+    with agent.batch(kind=BatchKind.split) as acting:
+        for one in body.splits:
+            txn = rows.get(one.transaction_id)
+            if txn is None:
+                continue
+            if one.transaction_id in seen:
+                refused.append(AgentSplitRefused(
+                    transaction_id=one.transaction_id,
+                    reason="that row is named twice in this request; it was split the first time.",
+                ))
+                continue
+            seen.add(one.transaction_id)
+            currency = accounts[txn.account_id].currency
+            try:
+                parts = [
+                    txn_service.SplitPart(
+                        amount=(
+                            part.amount_minor
+                            if part.amount_minor is not None
+                            else money.parse_exact(part.amount, currency)
+                        ),
+                        category=cats[part.category_id] if part.category_id else None,
+                        memo=part.memo,
+                    )
+                    for part in one.parts
+                ]
+                clearing = [i for i, part in enumerate(one.parts) if part.reimbursement == "clear"]
+                if clearing and txn.reimbursed_by_id is not None:
+                    raise Conflict(
+                        "that row has already been paid back, so the work flag cannot be "
+                        "taken off a part: that would take the repayment link apart, which "
+                        "is a person's. Split it keeping the flag, or ask a person."
+                    )
+                with session.begin_nested():
+                    made = txn_service.split(session, txn, parts)
+                    for i in clearing:
+                        if made[i].reimbursement is not None:
+                            txn_service.set_reimbursement(session, made[i], state=None)
+                    session.flush()
+            except DomainError as refusal:
+                refused.append(AgentSplitRefused(transaction_id=one.transaction_id, reason=str(refusal)))
+                continue
+            done.append(AgentSplitDone(transaction_id=one.transaction_id, parts=[r.id for r in made]))
+        session.flush()
+        batch_id = acting.id
+
+    request.state.agent_rows = sum(len(one.parts) for one in done)
+    request.state.agent_batch_id = batch_id
+    return AgentSplitResult(
+        batch_id=batch_id,
+        split=done,
+        refused=refused,
+        not_found=sorted(set(ids) - set(rows)),
+    )
