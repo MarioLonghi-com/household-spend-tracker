@@ -46,6 +46,8 @@ from ...schemas import (
     AgentLinkReceipt,
     AgentLookup,
     AgentLookupResult,
+    AgentMemoed,
+    AgentMemos,
     AgentReceiptBatch,
     AgentReceiptOut,
     AgentReceiptsStored,
@@ -387,6 +389,19 @@ ENDPOINTS = [
             "reconciled row is locked: it is left alone and listed in locked."
         ),
         returns="{batch_id, changed, unchanged, not_found[], transfer_legs[], locked[]}",
+        scope="write",
+    ),
+    ManifestEndpoint(
+        method="PATCH",
+        path=f"{_BASE}/households/{{household_id}}/transactions/memo",
+        says=(
+            "Write a memo per row, as one act with one undo. Send assignments: "
+            "[{transaction_id, memo}], memo at most 500 characters. It replaces the "
+            "memo: read the row first if the bank's words should stay. null or blank "
+            "empties it. A reconciled row is locked: it is left alone and listed in "
+            "locked."
+        ),
+        returns="{batch_id, changed, unchanged, not_found[], locked[]}",
         scope="write",
     ),
     ManifestEndpoint(
@@ -1197,6 +1212,64 @@ def categorise(
         # hundred rows and categorised three hundred has no way to find out.
         not_found=sorted(set(wanted) - {row.id for row in rows}),
         transfer_legs=sorted(legs),
+        locked=sorted(locked),
+    )
+
+
+@router.patch("/households/{household_id}/transactions/memo", response_model=AgentMemoed)
+def write_memos(
+    household_id: str, body: AgentMemos, agent: AgentWriter, request: Request
+) -> AgentMemoed:
+    """Set a memo per row, as one act.
+
+    What an agent reads off a ticket or an invoice -- the flight, the booking
+    code, who travelled -- belongs on the row a person reads in the register,
+    and until this route it could only go on a receipt's note.
+
+    The same shape and the same floor as `categorise`: one batch so one undo,
+    rows loaded and changed one at a time so the audit sees each of them, and
+    a reconciled row skipped and named rather than refused. A transfer leg is
+    *not* skipped: a memo says what something was, and a leg has one as much
+    as any row does.
+    """
+    house = _house(agent, household_id)
+    session = agent.session
+    # Blank is the same request as null. Two spellings of "no memo" that store
+    # differently would make `unchanged` lie about one of them.
+    wanted = {
+        one.transaction_id: (one.memo.strip() or None) if one.memo is not None else None
+        for one in body.assignments
+    }
+
+    rows = list(
+        session.execute(
+            select(Transaction).where(
+                Transaction.household_id == house.id, Transaction.id.in_(wanted)
+            )
+        ).scalars()
+    )
+    changed = unchanged = 0
+    locked: list[str] = []
+    with agent.batch(kind=BatchKind.bulk_update) as acting:
+        for row in rows:
+            if row.memo == wanted[row.id]:
+                unchanged += 1
+                continue
+            if row.cleared is ClearedState.reconciled:
+                locked.append(row.id)
+                continue
+            txn_service.update(session, row, memo=wanted[row.id], flush=False)
+            changed += 1
+        session.flush()
+        batch_id = acting.id
+
+    request.state.agent_rows = changed
+    request.state.agent_batch_id = batch_id
+    return AgentMemoed(
+        batch_id=batch_id,
+        changed=changed,
+        unchanged=unchanged,
+        not_found=sorted(set(wanted) - {row.id for row in rows}),
         locked=sorted(locked),
     )
 

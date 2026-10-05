@@ -28,6 +28,15 @@ this repository.
 
 ### Added
 
+- **A key can write a row's memo.** `PATCH /api/agent/v1/households/{id}/transactions/memo`
+  takes `[{transaction_id, memo}]` and applies them as one batch, so one undo.
+  Until now categorising was the only edit a key could make to a row already in
+  the ledger, so what an agent read off a ticket or an invoice could go on a
+  receipt's note but not on the row a person reads. The memo is replaced, null
+  or blank empties it, and a reconciled row is skipped and listed in `locked`,
+  as the register would refuse it. Listed in the manifest, in the sample client
+  and as the `write_memos` MCP tool.
+
 - **A trusted key can split a transaction.** `POST /api/agent/v1/households/{id}/transactions/split`
   divides rows into 2-5 parts through the register's own `transactions.split`,
   so the parts must add up, receipts go on every part and the work flag and

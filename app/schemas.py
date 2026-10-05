@@ -2250,6 +2250,49 @@ class AgentCategorised(BaseModel):
     locked: list[str] = []
 
 
+class AgentMemoAssignment(BaseModel):
+    """One row, and what its memo should say."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    transaction_id: str
+    #: Required, and null or blank empties it -- the same reasoning as
+    #: `AgentCategoryAssignment.category_id`: every assignment is one you asked
+    #: for, so there is no spelling of "leave it alone". The memo is replaced,
+    #: not appended to; a caller that wants to keep the bank's words reads the
+    #: row first and sends them back as part of the new text.
+    memo: Memo | None
+
+
+class AgentMemos(BaseModel):
+    """Write a memo per row, as one act, so one undo puts them all back.
+
+    Categorising was the only edit a key could make to a row already in the
+    ledger, so what an agent read off a ticket or an invoice -- the flight, the
+    booking code, who travelled -- could go on a receipt's note but not on the
+    row a person reads in the register.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    assignments: list[AgentMemoAssignment] = Field(min_length=1, max_length=1000)
+
+
+class AgentMemoed(BaseModel):
+    """What the memo edit did, without listing what did not change."""
+
+    batch_id: str
+    changed: int
+    #: Already saying exactly that, so nothing was written for them.
+    unchanged: int
+    #: Ids that are not rows in this household, named for the same reason as
+    #: on `AgentCategorised`.
+    not_found: list[str] = []
+    #: Reconciled rows, left as they were. The register refuses to edit a
+    #: locked row's memo, and a key gets no wider hand than its person (#215).
+    locked: list[str] = []
+
+
 class AgentSplitPart(BaseModel):
     """One part of a row being divided, as an agent worked it out."""
 

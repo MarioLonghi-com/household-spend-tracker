@@ -163,6 +163,14 @@ def categorise(assignments: list[dict]) -> str:
     return _answer(lambda: _api.categorise(assignments))
 
 
+@mcp.tool()
+def write_memos(assignments: list[dict]) -> str:
+    """Set memos: [{"transaction_id": ..., "memo": ...}]. One act, one undo for
+    a person. Replaces the memo (read the row first to keep the bank's words);
+    null empties it. Reconciled rows are skipped and listed. Needs a write key."""
+    return _answer(lambda: _api.write_memos(assignments))
+
+
 # --------------------------------------------------------------------------- #
 # Receipts and expense-portal lines: finding the row (README, jobs 1 and 3)
 # --------------------------------------------------------------------------- #
