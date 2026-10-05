@@ -22,9 +22,15 @@ from ..errors import Conflict, NotFound, ValidationError
 from ..models import (
     Account,
     AccountType,
+    Batch,
+    BatchKind,
+    BatchStatus,
+    Change,
+    ChangeOp,
     ClearedState,
     Household,
     Payee,
+    Reconciliation,
     SystemPayee,
     Transaction,
 )
@@ -131,6 +137,36 @@ OPENS_AFTER_ITS_ROWS = (
 )
 
 
+#: A recorded reconciliation is a balance the bank confirmed, and the opening
+#: row is part of what it summed: `reconciling.locked_balance` is the floor the
+#: next statement is measured from, and the opening row is in it. Moving its
+#: figure, or its date across a statement's, would leave that statement no
+#: longer matching the ledger and the next one refused as out by the
+#: difference, with nothing pointing at why. Unlocking a row in the register is
+#: a deliberate act; this panel skips that step, so it refuses instead.
+OPENING_ALREADY_PROVED = (
+    "this account was reconciled against a statement dated {latest}, on or after "
+    "the opening date, so changing the opening balance or its date would move a "
+    "balance the bank has already confirmed. Undo {which} in History first, then "
+    "change the opening balance"
+)
+
+#: The panel edits the opening balance past its lock, and that is only safe on
+#: the row the app wrote as one. These say which other row it found instead.
+OPENING_IS_A_TRANSFER = (
+    "the opening-balance row dated {date} is linked as one side of a transfer; "
+    "unlink it in the register before changing the opening balance here"
+)
+OPENING_RELOCKED = (
+    "the opening-balance row dated {date} has since been locked by a reconciliation; "
+    "undo that reconciliation in History before changing it here"
+)
+OPENING_NOT_WRITTEN_AS_ONE = (
+    "the row dated {date} carries the opening-balance payee but was not written as "
+    "this account's opening balance; change it, or its payee, in the register instead"
+)
+
+
 @dataclass(frozen=True, slots=True)
 class Opening:
     """An account's opening-balance row: which one, when, and how much."""
@@ -151,7 +187,9 @@ def _opening_rows():
     or a person can choose the payee on a new one. The earliest, by date and
     then by when it was written, is *the* opening balance: it is the one that
     marks where the account's history starts, and the others are ordinary
-    rows that share its payee. Ordered here so every reader agrees.
+    rows that share its payee. Ordered here so every reader agrees. Being
+    found here is enough to be *shown* as the opening balance; `set_opening`
+    asks more before it edits one (`_refuse_unless_written_as_opening`).
     """
     return (
         select(Transaction)
@@ -233,6 +271,13 @@ def set_opening(
       failing that, the account's earliest transaction or today. The earliest
       row rather than today, because a starting figure dated after the history
       it started is exactly what `OPENS_AFTER_ITS_ROWS` warns about.
+    - **A figure or date that moves anything is refused** (`Conflict`) while a
+      recorded reconciliation is dated on or after the earlier of the old and
+      the new opening dates -- `OPENING_ALREADY_PROVED`. The lock is skipped
+      here, so this is what stands in for the person unlocking it on purpose.
+    - **Only the row the app wrote as the opening balance is edited.** A row a
+      person gave the opening-balance payee, one relocked by a reconciliation
+      and a transfer leg are each refused: see `_refuse_unless_written_as_opening`.
     - **A row and a zero figure** deletes the row, through the service's own
       hard delete, so the batch's before-image is what an undo restores. A
       zero row would keep a date, but it would be a line in the register that
@@ -254,13 +299,104 @@ def set_opening(
                 raise ValidationError(NO_OPENING_TO_DATE)
             return
         oldest = activity(session, account.id).oldest
-        _write_opening_balance(session, account, amount, when or oldest or date.today())
+        written = when or oldest or date.today()
+        _refuse_if_proved(session, account, written)
+        _write_opening_balance(session, account, amount, written)
         return
+
+    moves_amount = amount is not None and amount != row.amount
+    moves_date = when is not None and when != row.date
+    if not moves_amount and not moves_date:
+        return
+    _refuse_unless_written_as_opening(session, row)
+    _refuse_if_proved(session, account, min(row.date, when or row.date))
 
     if amount == 0:
         transaction_service.delete(session, row, allow_locked=True)
         return
     transaction_service.update(session, row, date=when, amount=amount, allow_locked=True)
+
+
+def _refuse_if_proved(session: Session, account: Account, since: date) -> None:
+    """Conflict if a recorded reconciliation is dated on or after `since`.
+
+    `since` is the earlier of the old and the new opening dates: a statement
+    before both never counted the opening row and still will not, so it is
+    left alone, and anything from there on did or will. A reconciliation that
+    was undone is gone -- its row is in the batch undo deleted -- so only one
+    that still stands refuses.
+    """
+    count, latest = session.execute(
+        select(func.count(Reconciliation.id), func.max(Reconciliation.statement_date)).where(
+            Reconciliation.account_id == account.id,
+            Reconciliation.statement_date >= since,
+        )
+    ).one()
+    if count:
+        raise Conflict(
+            OPENING_ALREADY_PROVED.format(
+                latest=latest.isoformat(),
+                which="that reconciliation" if count == 1 else f"those {count} reconciliations",
+            )
+        )
+
+
+def _refuse_unless_written_as_opening(session: Session, row: Transaction) -> None:
+    """Conflict unless `row` is the opening balance the app itself wrote.
+
+    `_opening_row` finds the earliest row with the opening-balance payee, and
+    a person can put that payee on any row. `set_opening` edits past the lock,
+    so it must only ever reach the row `_write_opening_balance` (or the demo
+    seed, by hand) wrote. No column says so, and none is added: the audit log
+    already does. That row's first entry is an insert that was **born
+    reconciled** with the system payee on it -- an imported or typed row
+    starts uncleared, and one locked later, by hand or by a statement, shows
+    up as an update. (A row typed in the register as locked from the start,
+    against that payee, passes: that is a person saying it is an opening
+    balance, in as many words.) The log carries every insert from the first
+    commit, as `households.transactions_logged` relies on, so a row with no
+    insert in it is refused rather than guessed at.
+
+    Two more ways the born-locked row stops being safe to edit here:
+
+    - it has been through a `reconcile` batch since -- unlocked by hand, then
+      ticked against a statement -- so its lock is now a statement's proof;
+    - it is a transfer leg, and `transactions.delete(..., allow_locked=True)`
+      would take the other leg, in another account, with it.
+    """
+    when = row.date.isoformat()
+    if row.transfer_transaction_id or row.transfer_account_id:
+        raise Conflict(OPENING_IS_A_TRANSFER.format(date=when))
+
+    first = session.execute(
+        select(Change.op, Change.after)
+        .where(Change.table_name == Transaction.__tablename__, Change.row_id == row.id)
+        .order_by(Change.seq)
+        .limit(1)
+    ).first()
+    born_locked = (
+        first is not None
+        and first.op is ChangeOp.insert
+        and (first.after or {}).get("cleared") == ClearedState.reconciled.value
+        and (first.after or {}).get("payee_id") == row.payee_id
+    )
+    if not born_locked:
+        raise Conflict(OPENING_NOT_WRITTEN_AS_ONE.format(date=when))
+
+    relocked = session.execute(
+        select(Change.seq)
+        .join(Batch, Batch.id == Change.batch_id)
+        .where(
+            Change.table_name == Transaction.__tablename__,
+            Change.row_id == row.id,
+            Batch.kind == BatchKind.reconciled,
+            # An undone reconciliation took its lock back with it.
+            Batch.status != BatchStatus.undone,
+        )
+        .limit(1)
+    ).first()
+    if relocked is not None:
+        raise Conflict(OPENING_RELOCKED.format(date=when))
 
 
 def get_for_household(session: Session, account_id: str, household_id: str) -> Account:

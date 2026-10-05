@@ -176,7 +176,7 @@ def test_the_opening_row_is_found_by_its_mark_not_its_name(client, world):
     assert _accounts(client, world)["EUR"]["opening_balance"] == 1234_56
 
 
-def test_with_two_opening_rows_the_earliest_is_the_opening_balance(client, world):
+def test_with_two_opening_rows_the_earliest_is_shown_and_not_edited(client, world):
     """Nothing stops a second; the earlier one is where the history starts."""
     eur = _accounts(client, world)["EUR"]
     original = _row(client, eur["opening_transaction_id"])
@@ -201,9 +201,14 @@ def test_with_two_opening_rows_the_earliest_is_the_opening_balance(client, world
     assert eur["opening_date"] == "2026-02-01"
     assert eur["opening_balance"] == 5_00
 
-    # An edit reaches that one and leaves the other where it was.
-    assert _patch(client, world, "EUR", opening_balance=6_00).status_code == 200
-    assert _row(client, earlier.id).amount == 6_00
+    # But it is shown, not edited: a person put the payee on it, and the panel
+    # edits past the lock, so it only ever touches the row the app wrote.
+    refused = _patch(client, world, "EUR", opening_balance=6_00)
+    assert refused.status_code == 409, refused.text
+    assert refused.json()["detail"] == account_service.OPENING_NOT_WRITTEN_AS_ONE.format(
+        date="2026-02-01"
+    )
+    assert _row(client, earlier.id).amount == 5_00
     assert _row(client, original.id).amount == 1234_56
 
 
@@ -411,3 +416,198 @@ def test_every_accounts_opening_balance_is_one_query(engine, session, owner, hou
         accounts["checking"].id: (150_00, date(2026, 3, 1)),
         accounts["pounds"].id: (-80_00, date(2026, 3, 2)),
     }
+
+
+# --------------------------------------------------------------------------- #
+# What the panel will not do
+# --------------------------------------------------------------------------- #
+
+
+def _add_row(client, world, currency: str, when: str, amount: int, **extra) -> str:
+    made = client.post(
+        f"/api/households/{world['house']['id']}/transactions",
+        json={
+            "account_id": world[currency.lower()]["id"], "date": when, "amount": amount,
+            **extra,
+        },
+        headers=HEADERS,
+    )
+    assert made.status_code == 201, made.text
+    return made.json()["id"]
+
+
+def _reconcile(client, world, currency: str, when: str, balance: int, ids: list[str]) -> None:
+    done = client.post(
+        f"/api/accounts/{world[currency.lower()]['id']}/reconciliation",
+        json={"statement_date": when, "statement_balance": balance, "transaction_ids": ids},
+        headers=HEADERS,
+    )
+    assert done.status_code == 201, done.text
+
+
+def _groceries(client, world, currency: str) -> list[str]:
+    """The fixture's one later row on the account, unlocked."""
+    with Session(client.app_module.db_engine) as own:
+        return list(
+            own.execute(
+                select(Transaction.id).where(
+                    Transaction.account_id == world[currency.lower()]["id"],
+                    Transaction.memo == "groceries",
+                )
+            ).scalars()
+        )
+
+
+def _proved(latest: str, which: str = "that reconciliation") -> str:
+    return account_service.OPENING_ALREADY_PROVED.format(latest=latest, which=which)
+
+
+def test_a_reconciled_account_refuses_a_new_opening_figure(client, world):
+    """The reviewer's case: the opening is in the floor the statement balanced on."""
+    _reconcile(client, world, "EUR", "2026-04-30", 1234_56 - 20_00, _groceries(client, world, "EUR"))
+    before = _accounts(client, world)["EUR"]
+
+    for body in ({"opening_balance": 1100_00}, {"opening_balance": 0}):
+        refused = _patch(client, world, "EUR", name="Renamed", **body)
+        assert refused.status_code == 409, refused.text
+        assert refused.json()["detail"] == _proved("2026-04-30")
+
+    after = _accounts(client, world)["EUR"]
+    assert (after["opening_balance"], after["opening_date"]) == (1234_56, "2026-03-01")
+    assert after["name"] == "Current", "the batch is all or nothing"
+    row = _row(client, before["opening_transaction_id"])
+    assert (row.amount, row.cleared) == (1234_56, ClearedState.reconciled)
+    # The statement still matches the ledger on its own date.
+    assert _balance_on(client, world, "EUR", "2026-04-30") == 1234_56 - 20_00
+
+
+def test_a_date_moved_across_a_statement_is_refused_either_way(client, world):
+    jpy = _accounts(client, world)["JPY"]
+    spent = _add_row(client, world, "JPY", "2026-03-20", -500)
+    _reconcile(client, world, "JPY", "2026-03-31", 50_000 - 500, [spent])
+
+    # Later than the statement, and earlier than the opening: both cross 31 March.
+    for moved_to in ("2026-04-05", "2026-02-01"):
+        refused = _patch(client, world, "JPY", opening_date=moved_to)
+        assert refused.status_code == 409, refused.text
+        assert refused.json()["detail"] == _proved("2026-03-31")
+
+    assert _row(client, jpy["opening_transaction_id"]).date == date(2026, 3, 1)
+    assert _balance_on(client, world, "JPY", "2026-03-31") == 50_000 - 500
+
+
+def test_a_figure_on_an_account_opened_empty_and_reconciled_is_refused(client, world):
+    _reconcile(client, world, "GBP", "2026-05-31", -7_50, _groceries(client, world, "GBP"))
+
+    refused = _patch(client, world, "GBP", opening_balance=300_00)
+    assert refused.status_code == 409, refused.text
+    assert refused.json()["detail"] == _proved("2026-05-31")
+    assert _accounts(client, world)["GBP"]["opening_transaction_id"] is None
+
+
+def test_a_reconciliation_before_both_dates_does_not_stand_in_the_way(client, world):
+    """A statement older than the opening never counted it and never will."""
+    eur = _accounts(client, world)["EUR"]
+    older = _add_row(client, world, "EUR", "2026-02-10", 10_00)
+    # `locked_balance` sums every locked row, the opening included.
+    _reconcile(client, world, "EUR", "2026-02-28", 1234_56 + 10_00, [older])
+
+    moved = _patch(client, world, "EUR", opening_balance=1300_00, opening_date="2026-03-05")
+    assert moved.status_code == 200, moved.text
+
+    row = _row(client, eur["opening_transaction_id"])
+    assert (row.amount, row.date, row.cleared) == (
+        1300_00, date(2026, 3, 5), ClearedState.reconciled,
+    )
+    # And the JPY account, never reconciled, edits as before.
+    assert _patch(client, world, "JPY", opening_balance=60_000).json()["opening_balance"] == 60_000
+
+
+def test_an_ordinary_row_given_the_opening_payee_is_not_the_panels_to_edit(client, world):
+    """Earlier than the real opening, locked by a statement: the register's, not this."""
+    eur = _accounts(client, world)["EUR"]
+    original = _row(client, eur["opening_transaction_id"])
+    imposter = _add_row(
+        client, world, "EUR", "2026-02-01", 5_00, payee_id=original.payee_id, memo="old statement"
+    )
+    _reconcile(client, world, "EUR", "2026-02-28", 1234_56 + 5_00, [imposter])
+    assert _accounts(client, world)["EUR"]["opening_transaction_id"] == imposter
+
+    for body in ({"opening_balance": 6_00}, {"opening_balance": 0}, {"opening_date": "2026-01-15"}):
+        refused = _patch(client, world, "EUR", **body)
+        assert refused.status_code == 409, refused.text
+        assert refused.json()["detail"] == account_service.OPENING_NOT_WRITTEN_AS_ONE.format(
+            date="2026-02-01"
+        )
+
+    row = _row(client, imposter)
+    assert (row.amount, row.date, row.cleared) == (5_00, date(2026, 2, 1), ClearedState.reconciled)
+    assert _row(client, original.id).amount == 1234_56
+
+
+def test_a_row_locked_by_hand_is_not_the_opening_balance_either(client, world):
+    """No reconciliation behind the lock, so only the row's origin can refuse it."""
+    jpy = _accounts(client, world)["JPY"]
+    payee_id = _row(client, jpy["opening_transaction_id"]).payee_id
+    imposter = _add_row(client, world, "JPY", "2026-02-01", 700, payee_id=payee_id)
+    locked = client.patch(f"/api/transactions/{imposter}", json={"cleared": "reconciled"}, headers=HEADERS)
+    assert locked.status_code == 200, locked.text
+
+    refused = _patch(client, world, "JPY", opening_balance=0)
+    assert refused.status_code == 409, refused.text
+    assert refused.json()["detail"] == account_service.OPENING_NOT_WRITTEN_AS_ONE.format(
+        date="2026-02-01"
+    )
+    assert _row(client, imposter).amount == 700
+
+
+def test_the_opening_row_relocked_by_a_statement_is_refused(client, world):
+    """Unlocked by hand, then ticked: its lock is now a statement's proof."""
+    eur = _accounts(client, world)["EUR"]
+    opening_id = eur["opening_transaction_id"]
+    unlocked = client.patch(f"/api/transactions/{opening_id}", json={"cleared": "cleared"}, headers=HEADERS)
+    assert unlocked.status_code == 200, unlocked.text
+    _reconcile(client, world, "EUR", "2026-03-31", 1234_56, [opening_id])
+
+    refused = _patch(client, world, "EUR", opening_balance=1000_00)
+    assert refused.status_code == 409, refused.text
+    assert refused.json()["detail"] == account_service.OPENING_RELOCKED.format(date="2026-03-01")
+    assert _row(client, opening_id).amount == 1234_56
+
+
+def test_an_opening_row_linked_as_a_transfer_is_refused(client, world):
+    """`delete(allow_locked=True)` would take the other account's leg with it."""
+    eur = _accounts(client, world)["EUR"]
+    opening_id = eur["opening_transaction_id"]
+    with Session(client.app_module.db_engine, expire_on_commit=False) as own:
+        with batch(
+            own, kind=BatchKind.manual, actor_id=_owner_id(own),
+            household_id=world["house"]["id"],
+        ):
+            opening_row = own.get(Transaction, opening_id)
+            other = Transaction(
+                household_id=world["house"]["id"],
+                account_id=world["gbp"]["id"],
+                date=date(2026, 3, 1),
+                amount=-1000_00,
+                cleared=ClearedState.reconciled,
+            )
+            own.add(other)
+            own.flush()
+            other.transfer_account_id = eur["id"]
+            other.transfer_transaction_id = opening_id
+            opening_row.transfer_account_id = world["gbp"]["id"]
+            opening_row.transfer_transaction_id = other.id
+        own.commit()
+        other_id = other.id
+
+    for body in ({"opening_balance": 0}, {"opening_balance": 1300_00}):
+        refused = _patch(client, world, "EUR", **body)
+        assert refused.status_code == 409, refused.text
+        assert refused.json()["detail"] == account_service.OPENING_IS_A_TRANSFER.format(
+            date="2026-03-01"
+        )
+
+    assert _row(client, opening_id).amount == 1234_56
+    leg = _row(client, other_id)
+    assert (leg.amount, leg.cleared) == (-1000_00, ClearedState.reconciled)

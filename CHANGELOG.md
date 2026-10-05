@@ -83,9 +83,16 @@ this repository.
   there is nowhere to keep it. An opening date after the account's oldest
   other transaction is saved with a warning rather than refused, because the
   balance before that date then leaves the opening figure out -- `warnings`
-  on the account, said wherever the account is read. With two
-  opening-balance rows on one account, the earliest is the one shown and
-  edited.
+  on the account, said wherever the account is read. A change that moves
+  the figure or the date is refused while a recorded reconciliation is
+  dated on or after the earlier of the old and new opening dates, since the
+  opening row is part of the floor that statement balanced on; undo the
+  reconciliation first. And the panel edits past the lock only on the row
+  the app wrote as the opening balance -- born reconciled, by its first entry
+  in the audit log, never since ticked by a reconciliation, and not a
+  transfer leg. With two opening-balance rows on one account the earliest is
+  the one shown, and if a person gave that payee to an ordinary row, the
+  panel refuses and points at the register.
 
 ### Changed
 
