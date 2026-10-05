@@ -28,6 +28,48 @@ this repository.
 
 ### Added
 
+- **A key can write a row's memo.** `PATCH /api/agent/v1/households/{id}/transactions/memo`
+  takes `[{transaction_id, memo}]` and applies them as one batch, so one undo.
+  Until now categorising was the only edit a key could make to a row already in
+  the ledger, so what an agent read off a ticket or an invoice could go on a
+  receipt's note but not on the row a person reads. The memo is replaced, null
+  or blank empties it, and a reconciled row is skipped and listed in `locked`,
+  as the register would refuse it. Listed in the manifest, in the sample client
+  and as the `write_memos` MCP tool.
+
+- **A trusted key can split a transaction.** `POST /api/agent/v1/households/{id}/transactions/split`
+  divides rows into 2-5 parts through the register's own `transactions.split`,
+  so the parts must add up, receipts go on every part and the work flag and
+  repayment link are carried. A part can take `"reimbursement": "clear"` -- the
+  personal share of a partial claim -- except on a row already paid back. The
+  whole request is one batch, so one undo puts every original back. Because a
+  split replaces the row, and no key deletes, it needs a key with `may_commit`
+  (`deps.agent_may_split`); an ordinary write key gets a 403 saying so, and
+  `test_agent_access` names the route so the floor cannot drift. Listed in the
+  manifest, the sample client and the `split_transactions` MCP tool.
+
+- **The New account panel asks for the bank and a note** (#12). The API
+  always took `institution` and `note` on create, but the panel never
+  collected them, so the only way to record the bank was to make the account
+  and open it again. Both are sent trimmed, and a blank one as null. The edit
+  panel now asks in the same order -- country, then bank, then note -- and
+  both hold the bank to 120 characters and the note to 2,000, the API's own
+  limits.
+
+- **A staged line can be marked uncategorised on purpose** (#9). The import
+  preview's category cell offers *Uncategorised* beside the categories, as a
+  third answer next to a category and an empty box. The empty box still hands
+  the line back to the suggestion; *Uncategorised* commits the row with no
+  category, and neither the payee's usual category nor the bank's wording for
+  interest, investments and fees is consulted for it -- nor is a category made
+  for that wording. The cell tells the four states apart: a chosen category, a
+  muted suggestion, *uncategorised (chosen)* and plain *uncategorised*. Kept on
+  the staged line, so it survives a reload and a preview reopened from the
+  queue, and the "rest of this payee" offer spreads it within the file (without
+  a rule to set). The agent import route takes the same thing as
+  `uncategorised: true` on a row, never together with `category_id`. No
+  migration: the choice lives in the line's `parsed`, as the typed memo does.
+
 - **The account panel shows and edits the opening balance and its date**
   (#10). Neither is a column, so no migration: both are read off the
   account's opening-balance row, found by its payee's `system` mark, for
@@ -44,6 +86,24 @@ this repository.
   on the account, said wherever the account is read. With two
   opening-balance rows on one account, the earliest is the one shown and
   edited.
+
+### Changed
+
+- **A self-built image can say which commit it runs.** The Application screen
+  and `/api/health` read the commit from `app/build.json`, which
+  `scripts.build_stamp` writes from git. CI and the release workflow ran it;
+  `deploy/DOCKER.md` never told anyone else to, so every image built by
+  following it said *unknown*. Every build command there, in `UPGRADING.md`
+  and at the top of the sidecar compose file is now preceded by the stamp, and
+  a new section, *Naming what runs*, explains it alongside `SPENDTRACKER_ENV`,
+  which was not documented in DOCKER.md at all.
+- **The memory the app needs is written down, and it is more than the docs
+  said.** `deploy/DOCKER.md` said "about 1 GB of RAM". The app container needs
+  `mem_limit: 768m` as a floor (it peaks near 500 MiB and keeps its high-water
+  mark), and a machine that runs only this needs 1.5 GB. Below that the kernel
+  kills the app mid-request and the browser shows a 502 for a second.
+  `deploy/TROUBLESHOOTING.md` has a new section saying how to recognise it and
+  what to change. Measurements in #14.
 
 ## 0.6.2 — 2026-10-04
 

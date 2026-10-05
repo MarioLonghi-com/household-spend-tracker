@@ -86,6 +86,7 @@ def _line_out(line: ImportLine, landing: dict) -> ImportLineOut:
         out.category_id = where.category_id
         out.category_name = where.name
         out.category_chosen = where.chosen
+        out.category_uncategorised = where.uncategorised
     return out
 
 
@@ -217,6 +218,10 @@ def set_line_category(
     staged import has not touched the register, so there is nothing to audit
     yet -- the audit records what the commit does, and the commit will record
     the category this produced.
+
+    Three answers: a category, `clear_category` to hand the line back to the
+    payee's rule, or `uncategorised` for no category at all -- the one a rule
+    or the bank's wording cannot then fill in at commit (issue #9).
     """
     from ...errors import NotFound
 
@@ -232,14 +237,15 @@ def set_line_category(
         category = category_service.get_for_household(
             session, body.category_id, household.id
         )
-    importing.set_line_category(session, line, category)
+    importing.set_line_category(session, line, category, uncategorised=body.uncategorised)
     session.flush()
 
     landing = importing.preview_categories(session, household.id, [line])
     out = _line_out(line, landing)
     # Only worth counting when there is a decision to spread: a line handed back
     # to the payee's rule has nothing of its own to offer the others.
-    if line.category_id:
+    # "Uncategorised" is a decision, and it spreads like one.
+    if line.category_id or body.uncategorised:
         out.similar_lines = len(importing.similar_lines(session, staged.id, line))
     return out
 

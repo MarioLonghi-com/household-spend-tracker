@@ -163,6 +163,14 @@ def categorise(assignments: list[dict]) -> str:
     return _answer(lambda: _api.categorise(assignments))
 
 
+@mcp.tool()
+def write_memos(assignments: list[dict]) -> str:
+    """Set memos: [{"transaction_id": ..., "memo": ...}]. One act, one undo for
+    a person. Replaces the memo (read the row first to keep the bank's words);
+    null empties it. Reconciled rows are skipped and listed. Needs a write key."""
+    return _answer(lambda: _api.write_memos(assignments))
+
+
 # --------------------------------------------------------------------------- #
 # Receipts and expense-portal lines: finding the row (README, jobs 1 and 3)
 # --------------------------------------------------------------------------- #
@@ -223,6 +231,17 @@ def flag_work_expenses(assignments: list[dict]) -> str:
     refused rows come back with a reason and the rest still apply. Needs a
     write key."""
     return _answer(lambda: _api.flag_work_expenses(assignments))
+
+
+@mcp.tool()
+def split_transactions(splits: list[dict]) -> str:
+    """Split rows into 2-5 parts that add up to them, e.g. the work and personal
+    shares of a partial claim: [{"transaction_id": ..., "parts": [{"amount":
+    "-30.00"}, {"amount": "-12.50", "reimbursement": "clear"}]}]. Amounts are
+    decimal STRINGS in the account's currency. Needs a key with may_commit (a
+    split replaces the row). Refused rows come back with the reason; the rest
+    still split, as one undo for a person."""
+    return _answer(lambda: _api.split(splits))
 
 
 # --------------------------------------------------------------------------- #

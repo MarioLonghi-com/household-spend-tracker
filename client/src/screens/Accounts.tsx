@@ -676,6 +676,12 @@ export function Accounts({
   );
 }
 
+// The API's own limits (`Institution` and `Note` in app/schemas.py), so a long
+// paste stops at the field rather than coming back as a 422. Both panels ask
+// for these in the same order: country, then bank, then note.
+const INSTITUTION_MAX = 120;
+const NOTE_MAX = 2000;
+
 function AccountForm({
   household,
   onClose,
@@ -689,6 +695,8 @@ function AccountForm({
   const [type, setType] = useState<AccountType>("checking");
   const [currency, setCurrency] = useState(household.base_currency);
   const [country, setCountry] = useState("");
+  const [institution, setInstitution] = useState("");
+  const [note, setNote] = useState("");
   const [opening, setOpening] = useState("");
   const [openingDate, setOpeningDate] = useState(() => new Date().toISOString().slice(0, 10));
 
@@ -704,6 +712,8 @@ function AccountForm({
         type,
         currency,
         country: country || null,
+        institution: institution.trim() || null,
+        note: note.trim() || null,
         opening_balance: openingMinor ?? 0,
         opening_date: openingDate,
       }),
@@ -747,6 +757,23 @@ function AccountForm({
         Where the account is held. Optional, and separate from the currency — a euro account can
         sit in any number of countries.
       </p>
+      <Field label="Bank or institution">
+        <input
+          value={institution}
+          onChange={(e) => setInstitution(e.target.value)}
+          maxLength={INSTITUTION_MAX}
+        />
+      </Field>
+      <p />
+      <Field label="Note">
+        <textarea
+          value={note}
+          rows={3}
+          onChange={(e) => setNote(e.target.value)}
+          maxLength={NOTE_MAX}
+        />
+      </Field>
+      <p />
 
       <Field
         label="Opening balance"
@@ -871,16 +898,25 @@ function AccountSettings({
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p />
-      <Field label="Bank or institution">
-        <input value={institution} onChange={(e) => setInstitution(e.target.value)} />
-      </Field>
-      <p />
       <Field label="Country">
         <CountryPicker value={country} onChange={setCountry} />
       </Field>
       <p />
+      <Field label="Bank or institution">
+        <input
+          value={institution}
+          onChange={(e) => setInstitution(e.target.value)}
+          maxLength={INSTITUTION_MAX}
+        />
+      </Field>
+      <p />
       <Field label="Note">
-        <textarea value={note} rows={3} onChange={(e) => setNote(e.target.value)} />
+        <textarea
+          value={note}
+          rows={3}
+          onChange={(e) => setNote(e.target.value)}
+          maxLength={NOTE_MAX}
+        />
       </Field>
       <p />
       <Field label="Statement product">

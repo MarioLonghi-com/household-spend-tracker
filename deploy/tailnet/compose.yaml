@@ -1,6 +1,7 @@
 # The app behind its own Tailscale node.
 #
 #   cd deploy/tailnet && cp .env.example .env && chmod 600 .env   # fill in TS_AUTHKEY
+#   (cd ../.. && python3 -m scripts.build_stamp)                     # names the commit
 #   docker compose build
 #   SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d                 # first run only
 #
@@ -95,7 +96,11 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    # So one tenant of a shared box cannot starve the rest.
+    # So one tenant of a shared box cannot starve the rest -- and a floor, not
+    # a ceiling to tune down. The app peaks near 500 MiB (two full-size receipt
+    # decodes while the register reloads) and keeps its high-water mark; at
+    # 384m it was OOM-killed five times in one evening, each a 502 for a second
+    # (#14). deploy/DOCKER.md, "Before you start", has the host sizing.
     mem_limit: 768m
 
 volumes:

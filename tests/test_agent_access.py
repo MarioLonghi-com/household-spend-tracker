@@ -384,6 +384,29 @@ def test_the_capability_floor_is_structural_and_not_a_check(client):
     assert not offenders, "the capability floor has been lowered:\n  " + "\n  ".join(offenders)
 
 
+def test_the_one_route_that_replaces_a_row_needs_the_further_trust(client):
+    """#7: a split replaces the row it divides, which §1.2 would forbid a key.
+
+    It is allowed only because nothing is lost (the parts add up, one undo puts
+    the original back) and only behind `may_commit`. The method-based walk
+    above cannot see that a POST deletes, so this names the route: any agent
+    route that splits must ask for `agent_may_split`, and there must be one,
+    or the check guards nothing.
+    """
+    app = client.app_module.app
+    splitting = [
+        route for route in _api_routes(app)
+        if deps.current_agent in _dependencies_of(route)
+        and route.served_path.rstrip("/").endswith("/split")
+    ]
+    assert splitting, "no agent split route found; this check is vacuous"
+    ungated = [
+        route.served_path for route in splitting
+        if deps.agent_may_split not in _dependencies_of(route)
+    ]
+    assert not ungated, f"these split routes do not ask for may_commit: {ungated}"
+
+
 def test_no_agent_route_also_accepts_a_cookie(client):
     """The two doors stay two.
 

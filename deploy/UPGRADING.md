@@ -229,6 +229,7 @@ have moved over.
 ```bash
 docker compose run --rm -T -v "$PWD/backups:/backups" \
   --entrypoint python app -m scripts.backup --into /backups
+(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
 docker compose build
 docker compose run --rm -T --entrypoint python app -m scripts.upgrade --check
 docker compose stop app
