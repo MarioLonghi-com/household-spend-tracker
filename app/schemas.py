@@ -866,6 +866,11 @@ class ImportLineOut(ORMModel):
     #: screen shows which, because "likely" and "decided" are different
     #: promises and only one of them is worth checking.
     category_chosen: bool = False
+    #: True when a person chose "no category" for this line (issue #9): it
+    #: commits uncategorised, whatever the payee's rule or the bank's wording
+    #: would have said. `category_chosen` is true with it, and `category_id`
+    #: null -- which without this would read as a rule with nothing to go on.
+    category_uncategorised: bool = False
     #: How many other lines in this import have the same payee and no category
     #: of their own. Sent after a change so the screen can offer to do the same
     #: to them rather than making somebody type it eleven more times.
@@ -876,6 +881,21 @@ class SetLineCategory(BaseModel):
     category_id: str | None = None
     #: Hand it back to the payee's rule.
     clear_category: bool = False
+    #: No category, and do not ask the rule or the bank's wording either. The
+    #: third answer, beside a category and "back to the rule" (issue #9) --
+    #: the same distinction `clear_memo` and an empty `memo` make.
+    uncategorised: bool = False
+
+    @model_validator(mode="after")
+    def _one_answer(self) -> SetLineCategory:
+        # Each of the three is a different answer to the same question, so two
+        # at once is a malformed request rather than one to guess the meaning of.
+        if self.uncategorised and (self.category_id or self.clear_category):
+            raise ValueError(
+                "uncategorised means no category at all, so send it without "
+                "category_id and without clear_category"
+            )
+        return self
 
 
 class SetLineMemo(BaseModel):
@@ -2140,6 +2160,11 @@ class AgentImportRow(BaseModel):
     #: over the payee rule, because a rule is a guess and this is a caller
     #: having looked. Refused if it is not a real category for this household.
     category_id: str | None = None
+    #: The row has no category, and the payee rule and the bank's wording are
+    #: not to be asked either. Leaving `category_id` out is a different
+    #: request -- it hands the row to the rule, which may well categorise it.
+    #: Issue #9. Not together with `category_id`.
+    uncategorised: bool = False
     #: How sure you are, 0 to 1, and why. Neither is used to decide anything --
     #: they are kept so a person reviewing the preview can see which rows were
     #: a confident match and which were the agent's best guess.
@@ -2154,6 +2179,15 @@ class AgentImportRow(BaseModel):
                 "give exactly one of amount_minor (integer minor units, e.g. -1250) "
                 "or amount (a decimal STRING, e.g. \"-12.50\"). A JSON float is not "
                 "accepted for money."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def category_or_uncategorised(self) -> AgentImportRow:
+        if self.uncategorised and self.category_id:
+            raise ValueError(
+                "give category_id or uncategorised: true, not both. uncategorised "
+                "means the row lands with no category at all."
             )
         return self
 

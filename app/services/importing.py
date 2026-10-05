@@ -1437,7 +1437,15 @@ def _commit(
         # A category chosen on the preview screen wins outright. That is the
         # whole point of being able to set one: the rule is a guess and this is
         # somebody having looked at the guess and said otherwise.
-        if line.category_id:
+        #
+        # "Uncategorised" chosen there wins the same way, and is checked first:
+        # it is the one answer that has to stop the hint below as well as the
+        # rule, and a hint category is not created for a line that will not
+        # use it. Issue #9.
+        uncategorised = line_uncategorised(parsed)
+        if uncategorised:
+            category = None
+        elif line.category_id:
             if line.category_id not in chosen_categories:
                 chosen_categories[line.category_id] = session.get(Category, line.category_id)
             category = chosen_categories[line.category_id]
@@ -1453,7 +1461,12 @@ def _commit(
                 unflushed_payees.clear()
             category = category_service.decide(session, payee)
             decided[payee.id] = category
-        if category is None and parsed.get("category_hint") and not line.category_id:
+        if (
+            category is None
+            and parsed.get("category_hint")
+            and not line.category_id
+            and not uncategorised
+        ):
             # Nothing the household has said decides it; the bank's fixed
             # wording does -- interest, investments, fees. Created on first use,
             # inside this import's batch, so undoing the import takes it back.
@@ -1688,6 +1701,10 @@ class LineCategory:
     #: the payee's rule would pick. The screen says which, because "likely" and
     #: "decided" are different promises and only one of them is worth checking.
     chosen: bool
+    #: True when the choice was "no category" (issue #9). `chosen` is true
+    #: then too, and `category_id` null -- which on its own would read the same
+    #: as a rule with nothing to go on.
+    uncategorised: bool = False
 
 
 def preview_categories(
@@ -1726,6 +1743,13 @@ def preview_categories(
     out: dict[str, LineCategory] = {}
 
     for line in lines:
+        if line_uncategorised(line.parsed):
+            # Before the rule is asked, not after: the answer would be thrown
+            # away, and asking costs a query per payee.
+            out[line.id] = LineCategory(
+                category_id=None, name=None, chosen=True, uncategorised=True
+            )
+            continue
         if line.category_id:
             out[line.id] = LineCategory(
                 category_id=line.category_id,
@@ -1765,11 +1789,44 @@ def preview_categories(
     return out
 
 
+#: Where "this line is uncategorised, on purpose" lives. Issue #9.
+#:
+#: `category_id` being null already means "let the rule decide", so it cannot
+#: also mean "nothing at all" -- and without a third state, a payee's usual
+#: category or the bank's `category_hint` won every time somebody emptied the
+#: cell. Kept in `parsed`, the way the memo override is, so it needs no
+#: migration and survives a reload and a preview reopened from the queue.
+UNCATEGORISED_KEY = "category_uncategorised"
+
+
+def line_uncategorised(parsed: dict | None) -> bool:
+    """True when somebody said this line has no category, rule or no rule."""
+    return bool((parsed or {}).get(UNCATEGORISED_KEY))
+
+
 def set_line_category(
-    session: Session, line: ImportLine, category: Category | None
+    session: Session,
+    line: ImportLine,
+    category: Category | None,
+    *,
+    uncategorised: bool = False,
 ) -> ImportLine:
-    """Choose a category for one staged line, or hand it back to the rule."""
-    line.category_id = category.id if category else None
+    """Choose a category for one staged line, or hand it back to the rule.
+
+    ``uncategorised`` is the third answer: no category, and neither the payee's
+    rule nor the bank's wording is asked. Each of the three replaces the other
+    two, so a line never carries a chosen category *and* the override, and
+    which of them wins is never a question the commit has to settle.
+    """
+    # Reassigned rather than mutated, for the reason `set_line_memo` gives.
+    parsed = dict(line.parsed or {})
+    if uncategorised:
+        parsed[UNCATEGORISED_KEY] = True
+        line.category_id = None
+    else:
+        parsed.pop(UNCATEGORISED_KEY, None)
+        line.category_id = category.id if category else None
+    line.parsed = parsed
     return line
 
 
@@ -1842,7 +1899,8 @@ def similar_lines(
     The offer this backs is "you just corrected one of these -- there are eleven
     more". Lines that already carry a chosen category are left out: somebody
     decided those individually, and an offer that would quietly overwrite a
-    decision is not an offer.
+    decision is not an offer. A line marked uncategorised on purpose is a
+    decision in exactly the same sense, so it is left out too.
     """
     key = _line_payee_key(line)
     if key is None:
@@ -1863,6 +1921,7 @@ def similar_lines(
         # rejected line is not going to become a transaction, so changing its
         # category would be offering to do nothing.
         if other.outcome in (ImportOutcome.created, ImportOutcome.matched_existing)
+        and not line_uncategorised(other.parsed)
         and _line_payee_key(other) == key
     ]
 
@@ -1870,12 +1929,18 @@ def similar_lines(
 def apply_to_similar(
     session: Session, batch_id: str, line: ImportLine
 ) -> list[ImportLine]:
-    """Give this line's category to the rest of its payee in this import."""
-    if not line.category_id:
+    """Give this line's category to the rest of its payee in this import.
+
+    "Uncategorised, on purpose" spreads the same way a category does: a rule
+    that is wrong for one Corner Shop line is usually wrong for all of them.
+    """
+    uncategorised = line_uncategorised(line.parsed)
+    if not line.category_id and not uncategorised:
         raise ValidationError("that line has no category of its own to apply")
 
+    category = session.get(Category, line.category_id) if line.category_id else None
     changed = similar_lines(session, batch_id, line)
     for other in changed:
-        other.category_id = line.category_id
+        set_line_category(session, other, category, uncategorised=uncategorised)
     session.flush()
     return changed

@@ -56,6 +56,20 @@ this repository.
   both hold the bank to 120 characters and the note to 2,000, the API's own
   limits.
 
+- **A staged line can be marked uncategorised on purpose** (#9). The import
+  preview's category cell offers *Uncategorised* beside the categories, as a
+  third answer next to a category and an empty box. The empty box still hands
+  the line back to the suggestion; *Uncategorised* commits the row with no
+  category, and neither the payee's usual category nor the bank's wording for
+  interest, investments and fees is consulted for it -- nor is a category made
+  for that wording. The cell tells the four states apart: a chosen category, a
+  muted suggestion, *uncategorised (chosen)* and plain *uncategorised*. Kept on
+  the staged line, so it survives a reload and a preview reopened from the
+  queue, and the "rest of this payee" offer spreads it within the file (without
+  a rule to set). The agent import route takes the same thing as
+  `uncategorised: true` on a row, never together with `category_id`. No
+  migration: the choice lives in the line's `parsed`, as the typed memo does.
+
 ### Changed
 
 - **A self-built image can say which commit it runs.** The Application screen

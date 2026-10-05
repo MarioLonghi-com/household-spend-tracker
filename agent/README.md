@@ -436,6 +436,9 @@ already linked: taking a link apart is unlinking, and that is a person's.
   preview the Import screen shows, and a person commits it — unless the key
   has `may_commit`. Send `external_id` when you know the source's ids; read
   `conventions.duplicates` in the manifest before your first import.
+  A row may carry `category_id`; a row without one is categorised by its
+  payee's rule. `uncategorised: true` (never with `category_id`) lands it with
+  no category even when a rule would have given it one.
   `POST $A/imports/{batch}/document` keeps the statement the rows came off.
 - **Find rows you imported:** `POST $H/transactions/lookup` with
   `external_ids`.

@@ -438,6 +438,12 @@ export interface ImportLine {
   category_name: string | null;
   /** True when a person picked it, false when it is the rule's guess. */
   category_chosen: boolean;
+  /**
+   * True when a person chose "no category" (#9): it commits uncategorised
+   * whatever the payee's rule or the bank's wording would say. `category_chosen`
+   * is true with it and `category_id` null.
+   */
+  category_uncategorised: boolean;
   /** Other lines in this import with the same payee and no choice of their own. */
   similar_lines: number;
 }
