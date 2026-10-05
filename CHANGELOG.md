@@ -135,6 +135,13 @@ this repository.
   no-category answer. The household's own category is still a pick from the
   list away, or typed by its full name.
 
+- **A drag that ends outside a panel leaves it open** (#27). Selecting the
+  text in a field and letting go past the panel's edge closed the panel and
+  lost what was typed: the browser sends that click to the backdrop, the
+  nearest element holding both the press and the release. A panel's backdrop,
+  and a confirmation dialog's, now closes only when the press started on it
+  and the click lands on it too. Escape and ✕ close as before.
+
 ## 0.6.2 — 2026-10-04
 
 **Reversible: none** — no migration in this release. To go back, check out

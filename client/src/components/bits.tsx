@@ -1,7 +1,7 @@
 /** Small shared pieces. Nothing here knows about the domain. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactNode, SyntheticEvent } from "react";
 import { ApiError } from "../lib/api";
 import { fixed, moneyKey, sortRows } from "../lib/sorting";
 import type { FixedGroup, SortDirection, SortKeyPart, SortValue } from "../lib/sorting";
@@ -58,6 +58,41 @@ export function Empty({ children }: { children: ReactNode }) {
 }
 
 /**
+ * The click handlers for a backdrop that closes what sits on it (#27).
+ *
+ * A browser sends `click` to the nearest element holding both the press and
+ * the release. Press inside the panel -- selecting the text in a field, say --
+ * and let go past its edge, and that element is the backdrop: an `onClick` on
+ * it alone closes the panel and throws away what was typed. So the backdrop
+ * closes only when the press started on the backdrop itself and the click
+ * lands on it too. `mousedown` is listened to beside `pointerdown` for an
+ * environment that sends no pointer events; both record the same thing.
+ *
+ * `mayClose` is the one place that decides; anything else that should hold a
+ * panel open against a backdrop click belongs in there.
+ */
+function useBackdropClose(onClose: () => void) {
+  const pressedHere = useRef(false);
+
+  const press = (event: SyntheticEvent) => {
+    pressedHere.current = event.target === event.currentTarget;
+  };
+
+  const mayClose = (event: ReactMouseEvent) =>
+    pressedHere.current && event.target === event.currentTarget;
+
+  return {
+    onPointerDown: press,
+    onMouseDown: press,
+    onClick: (event: ReactMouseEvent) => {
+      const close = mayClose(event);
+      pressedHere.current = false;
+      if (close) onClose();
+    },
+  };
+}
+
+/**
  * A slide-in panel.
  *
  * `config` marks it as a place where things are set up rather than recorded --
@@ -79,6 +114,7 @@ export function Panel({
   children: ReactNode;
 }) {
   const panel = useRef<HTMLElement>(null);
+  const backdrop = useBackdropClose(onClose);
 
   // Every caller passes an inline arrow, so `onClose` is a new function each
   // render. Read it through a ref and run the effect once, or the panel
@@ -127,7 +163,7 @@ export function Panel({
   }, []);
 
   return (
-    <div className="panel-backdrop" onClick={onClose} role="presentation">
+    <div className="panel-backdrop" {...backdrop} role="presentation">
       <aside
         ref={panel}
         tabIndex={-1}
@@ -372,6 +408,7 @@ export function Dialog({
   children: ReactNode;
 }) {
   const box = useRef<HTMLDivElement>(null);
+  const backdrop = useBackdropClose(onClose);
   const close = useRef(onClose);
   close.current = onClose;
 
@@ -409,7 +446,7 @@ export function Dialog({
   }, []);
 
   return (
-    <div className="dialog-backdrop" onClick={onClose} role="presentation">
+    <div className="dialog-backdrop" {...backdrop} role="presentation">
       <div
         ref={box}
         tabIndex={-1}
