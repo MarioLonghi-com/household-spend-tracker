@@ -70,6 +70,30 @@ this repository.
   `uncategorised: true` on a row, never together with `category_id`. No
   migration: the choice lives in the line's `parsed`, as the typed memo does.
 
+- **The account panel shows and edits the opening balance and its date**
+  (#10). Neither is a column, so no migration: both are read off the
+  account's opening-balance row, found by its payee's `system` mark, for
+  every account in one query, with a link that opens that row in the
+  register. A change is made to that row in the same batch as the rest of
+  the save, so one undo puts it all back, and the row stays reconciled with
+  its system payee -- no unlocking it by hand. No date in the future, as on
+  creation. A figure on an account opened empty writes the row, dated as
+  given or at the account's oldest transaction; zero deletes it, and undo
+  restores it; a date alone on an account with no row is refused, since
+  there is nowhere to keep it. An opening date after the account's oldest
+  other transaction is saved with a warning rather than refused, because the
+  balance before that date then leaves the opening figure out -- `warnings`
+  on the account, said wherever the account is read. A change that moves
+  the figure or the date is refused while a recorded reconciliation is
+  dated on or after the earlier of the old and new opening dates, since the
+  opening row is part of the floor that statement balanced on; undo the
+  reconciliation first. And the panel edits past the lock only on the row
+  the app wrote as the opening balance -- born reconciled, by its first entry
+  in the audit log, never since ticked by a reconciliation, and not a
+  transfer leg. With two opening-balance rows on one account the earliest is
+  the one shown, and if a person gave that payee to an ordinary row, the
+  panel refuses and points at the register.
+
 ### Changed
 
 - **A self-built image can say which commit it runs.** The Application screen

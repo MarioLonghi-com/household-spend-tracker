@@ -58,6 +58,10 @@ function account(id: string, currency: string, balance: number): Account {
     transaction_count: 1,
     oldest_transaction: "2026-01-01",
     newest_transaction: "2026-01-02",
+    opening_balance: 0,
+    opening_date: null,
+    opening_transaction_id: null,
+    warnings: [],
   };
 }
 

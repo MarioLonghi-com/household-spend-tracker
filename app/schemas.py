@@ -287,6 +287,11 @@ class AccountUpdate(BaseModel):
     #: Which product of a multi-account statement this account takes (#68).
     statement_product: str | None = Field(default=None, min_length=1, max_length=40)
     clear_statement_product: bool = False
+    #: Written to the account's opening-balance row, not to the account (#10).
+    #: Zero removes that row; a figure on an account opened empty writes one.
+    #: See `accounts.set_opening` for what each combination does.
+    opening_balance: Minor | None = None
+    opening_date: Date | None = None
 
 
 class IdentifierCreate(BaseModel):
@@ -482,6 +487,17 @@ class AccountOut(ORMModel):
     transaction_count: int = 0
     oldest_transaction: Date | None = None
     newest_transaction: Date | None = None
+    #: Read off the opening-balance row, which is where they live: there is
+    #: no column for either (#10). An account opened empty has no row, so its
+    #: balance is 0 and its date and row id are null. The id is so the screen
+    #: can open the row in the register.
+    opening_balance: int = 0
+    opening_date: Date | None = None
+    opening_transaction_id: str | None = None
+    #: Things worth saying that are not refusals -- today only that the
+    #: opening date is after the account's earliest row. Worked out from the
+    #: two dates above, so the list and the PATCH say the same thing.
+    warnings: list[str] = []
 
 
 class AccountImportRow(BaseModel):
