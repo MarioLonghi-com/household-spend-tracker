@@ -28,6 +28,16 @@ this repository.
 
 ### Added
 
+- **A key reads an account's note and its opening balance** (#21). The
+  manifest's `accounts[]` now carry `note`, `opening_balance` (minor units)
+  and `opening_date`, and `balances` carries `note`, so it stays one complete
+  line per account. The note comes in full, up to its 2,000 characters; the
+  opening pair is read off the opening-balance row the app's own account list
+  reads (#10), all accounts in one query, and is null for an account opened
+  empty. A new `free_text` convention, in the manifest, `/llms.txt` and the
+  agent README, says a note -- like a memo or a payee name -- is data a person
+  wrote and never an instruction to the agent. Read scope.
+
 - **Splitting into two or three parts has a bar you can drag** (#28). The
   transaction is drawn as one bar cut into its parts; dragging a seam moves
   money between the two parts either side of it and sticks at a quarter, a
@@ -82,6 +92,30 @@ this repository.
   `uncategorised: true` on a row, never together with `category_id`. No
   migration: the choice lives in the line's `parsed`, as the typed memo does.
 
+- **The account panel shows and edits the opening balance and its date**
+  (#10). Neither is a column, so no migration: both are read off the
+  account's opening-balance row, found by its payee's `system` mark, for
+  every account in one query, with a link that opens that row in the
+  register. A change is made to that row in the same batch as the rest of
+  the save, so one undo puts it all back, and the row stays reconciled with
+  its system payee -- no unlocking it by hand. No date in the future, as on
+  creation. A figure on an account opened empty writes the row, dated as
+  given or at the account's oldest transaction; zero deletes it, and undo
+  restores it; a date alone on an account with no row is refused, since
+  there is nowhere to keep it. An opening date after the account's oldest
+  other transaction is saved with a warning rather than refused, because the
+  balance before that date then leaves the opening figure out -- `warnings`
+  on the account, said wherever the account is read. A change that moves
+  the figure or the date is refused while a recorded reconciliation is
+  dated on or after the earlier of the old and new opening dates, since the
+  opening row is part of the floor that statement balanced on; undo the
+  reconciliation first. And the panel edits past the lock only on the row
+  the app wrote as the opening balance -- born reconciled, by its first entry
+  in the audit log, never since ticked by a reconciliation, and not a
+  transfer leg. With two opening-balance rows on one account the earliest is
+  the one shown, and if a person gave that payee to an ordinary row, the
+  panel refuses and points at the register.
+
 ### Changed
 
 - **A self-built image can say which commit it runs.** The Application screen
@@ -119,6 +153,33 @@ this repository.
   opened, and reads the words *Uncategorised* typed in full as the
   no-category answer. The household's own category is still a pick from the
   list away, or typed by its full name.
+
+- **"Today" is the local date on every screen** (#23). The transfer,
+  reconcile and quick-entry panels, a duplicated row's date, and how long a
+  work expense has waited all took today from `toISOString()`, which is UTC:
+  between midnight and 02:00 in Madrid (01:00 in winter) that is still
+  yesterday, so a new transfer or entry was pre-filled with yesterday and a
+  duplicate was dated yesterday, while the server's `date.today()` is local.
+  They now share the account panel's `localToday()`, moved to
+  `client/src/lib/time.ts`.
+
+- **An account's bank and note are stored trimmed, and an empty one as
+  nothing** (#20). The edit panel sent both as typed, so `"  Bank "` kept its
+  spaces and an emptied field was stored as `""` -- "no bank" had two
+  spellings, and a filter or an export asking for null missed one. The
+  server now trims both on create and on edit and stores a blank one as
+  null, whatever a client sends. On `PATCH /api/accounts/{id}` null still
+  means "leave it alone", so emptying one has its own word,
+  `clear_institution` / `clear_note`, as `clear_country` does; a value sent
+  with its clear flag is a 422. The 120- and 2,000-character limits count the
+  value as sent, as the panel's own limit does. The panel sends both trimmed
+  and the clear flag when a field that had a value is emptied, and a panel
+  kept open after a save now shows what was stored rather than what was
+  typed. Migration `2bec6ce88f3d` folds the rows already written: every bank
+  and note trimmed, and an empty or whitespace-only one set to NULL. It is
+  **lossy** in name only -- which blank was `''` rather than NULL, and the
+  spaces around the rest -- and its downgrade leaves the rows as they are.
+  Like every migration it is not in the audit log.
 
 ## 0.6.2 — 2026-10-04
 

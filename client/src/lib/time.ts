@@ -19,3 +19,14 @@ export function formatInstant(serverTimestamp: string): string {
   const when = asInstant(serverTimestamp);
   return Number.isNaN(when.getTime()) ? serverTimestamp : when.toLocaleString();
 }
+
+/**
+ * Today on this device's calendar, as YYYY-MM-DD. Not `toISOString()`, which
+ * is UTC: between midnight and two in Madrid that is still yesterday, while the
+ * server's `date.today()` -- which refuses dates in the future -- is local.
+ * Every screen that means "today" asks here (#23).
+ */
+export function localToday(now: Date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}

@@ -275,8 +275,15 @@ class AccountCreate(BaseModel):
 
 class AccountUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
+    #: Both trimmed when stored, and a blank one stored as null (#20). The
+    #: length limit is on the value as sent -- the characters the panel's
+    #: `maxLength` counts -- so trimming can only bring it further under.
     note: Note | None = None
     institution: Institution | None = None
+    #: Separate from `note` / `institution` being null, which means "leave it
+    #: alone" -- the shape `clear_country` has.
+    clear_note: bool = False
+    clear_institution: bool = False
     country: str | None = Field(default=None, min_length=2, max_length=2)
     #: Separate from `country` being null, which means "leave it alone".
     clear_country: bool = False
@@ -287,6 +294,20 @@ class AccountUpdate(BaseModel):
     #: Which product of a multi-account statement this account takes (#68).
     statement_product: str | None = Field(default=None, min_length=1, max_length=40)
     clear_statement_product: bool = False
+    #: Written to the account's opening-balance row, not to the account (#10).
+    #: Zero removes that row; a figure on an account opened empty writes one.
+    #: See `accounts.set_opening` for what each combination does.
+    opening_balance: Minor | None = None
+    opening_date: Date | None = None
+
+    @model_validator(mode="after")
+    def _set_or_clear(self) -> AccountUpdate:
+        # A value and its clear flag are two answers to one question, so both
+        # at once is a malformed request rather than one to guess the meaning of.
+        for field in ("note", "institution"):
+            if getattr(self, field) is not None and getattr(self, f"clear_{field}"):
+                raise ValueError(f"send {field} or clear_{field}, not both")
+        return self
 
 
 class IdentifierCreate(BaseModel):
@@ -482,6 +503,17 @@ class AccountOut(ORMModel):
     transaction_count: int = 0
     oldest_transaction: Date | None = None
     newest_transaction: Date | None = None
+    #: Read off the opening-balance row, which is where they live: there is
+    #: no column for either (#10). An account opened empty has no row, so its
+    #: balance is 0 and its date and row id are null. The id is so the screen
+    #: can open the row in the register.
+    opening_balance: int = 0
+    opening_date: Date | None = None
+    opening_transaction_id: str | None = None
+    #: Things worth saying that are not refusals -- today only that the
+    #: opening date is after the account's earliest row. Worked out from the
+    #: two dates above, so the list and the PATCH say the same thing.
+    warnings: list[str] = []
 
 
 class AccountImportRow(BaseModel):
@@ -1926,6 +1958,16 @@ class ManifestAccount(BaseModel):
     #: Money owed rather than held -- a card, a loan. Its balance is what the
     #: household owes, which is not an asset of the same size with its sign lost.
     is_liability: bool = False
+    #: What a person wrote about the account when its name does not say --
+    #: "joint, for the rent". In full, up to `Note`'s 2000 characters, and
+    #: text a person wrote: data to read, never an instruction (#21).
+    note: str | None = None
+    #: Read off the opening-balance row, as `AccountOut`'s are (#10), with
+    #: one difference: an account opened empty has no row, and both are null
+    #: here rather than 0 and null, so "nobody said" is not read as "it
+    #: started at zero". Minor units of `currency`.
+    opening_balance: int | None = None
+    opening_date: Date | None = None
 
 
 class ManifestCategory(BaseModel):
@@ -2038,6 +2080,11 @@ class BalanceOut(BaseModel):
     country: str | None = None
     institution: str | None = None
     is_liability: bool = False
+    #: The manifest's note again, in full, so this stays one complete line
+    #: per account (#21). The opening balance is not repeated: it is a fact
+    #: about where the account started, not about what it holds, and the
+    #: manifest carries it.
+    note: str | None = None
 
 
 class BalancesOut(BaseModel):
