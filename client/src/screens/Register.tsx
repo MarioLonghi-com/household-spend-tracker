@@ -10,6 +10,7 @@
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { equalParts } from "../lib/splitting";
 import { amountLookup, format, parse, toInput } from "../lib/money";
@@ -345,6 +346,41 @@ export type RegisterPreset = {
  * spending, so it has no category, and every place this screen offers one --
  * the cell, the panel, the bulk picker -- asks this first.
  */
+/**
+ * Put a saved row into every register list already in the cache (#29).
+ *
+ * The panel saves on blur and stays open, and the register behind it is only
+ * invalidated: until that refetch lands, the cached row is the one from before
+ * the save. Closing the panel and reopening the row in that window opened it
+ * on the old values -- and the panel writes every field on its next save, so
+ * one more edit there would have put the old memo back over the new one. The
+ * server's answer to the PATCH is the row as it now stands, so it goes in
+ * straight away; the refetch still follows, for balances and filters.
+ *
+ * Every query under `["register", household]` whose data is a page of rows --
+ * the list under any filter, and the backlog count -- and nothing else there.
+ */
+export function rememberSavedRow(
+  client: QueryClient,
+  householdId: string,
+  saved: Transaction,
+): void {
+  client.setQueriesData<unknown>({ queryKey: ["register", householdId] }, (data: unknown) => {
+    if (!data || typeof data !== "object" || !Array.isArray((data as RegisterRows).transactions))
+      return data;
+    const page = data as RegisterRows;
+    if (!page.transactions.some((one) => one.id === saved.id)) return data;
+    return {
+      ...page,
+      transactions: page.transactions.map((one) =>
+        // The register's own fields (the currency) survive; the server's
+        // answer wins on everything it sent.
+        one.id === saved.id ? { ...one, ...saved } : one,
+      ),
+    };
+  });
+}
+
 export function isTransferLeg(txn: Pick<Transaction, "transfer_account_id" | "transfer_transaction_id">): boolean {
   return Boolean(txn.transfer_account_id || txn.transfer_transaction_id);
 }
@@ -3314,6 +3350,7 @@ function TransactionPanel({
   //: One side of a transfer: no category, and the amount moves both legs.
   const isTransfer = isTransferLeg(txn);
 
+  const client = useQueryClient();
   const save = useMutation({
     mutationFn: () =>
       api.patch<Transaction>(`/transactions/${txn.id}`, {
@@ -3332,6 +3369,7 @@ function TransactionPanel({
       }),
     onSuccess: (updated) => {
       setRow(updated);
+      rememberSavedRow(client, householdId, updated);
       onSaved();
     },
   });

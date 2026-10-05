@@ -871,3 +871,38 @@ describe("the panel's Detach", () => {
     expect(api.patch).toHaveBeenCalledWith("/receipts/rcpt-1", { detach: true });
   });
 });
+
+describe("the panel's save on the way out of a field", () => {
+  it("reopens the row with what was saved, before the register has refetched (#29)", async () => {
+    vi.mocked(api.patch).mockReset();
+    vi.mocked(api.patch).mockImplementation(((path: string, body: { memo: string | null }) =>
+      Promise.resolve({ ...ROWS[1], id: path.split("/").pop(), memo: body.memo })) as typeof api.patch);
+    await mount({ open: "cinema" });
+    const panel = await screen.findByRole("dialog");
+
+    // From the save on, the register's refetch does not come back: the window
+    // a slow connection leaves between the save landing and the list catching up.
+    const answer = vi.mocked(api.get).getMockImplementation()!;
+    vi.mocked(api.get).mockImplementation(((path: string, ...rest: unknown[]) =>
+      path.includes("/transactions?")
+        ? new Promise(() => {})
+        : (answer as (...args: unknown[]) => unknown)(path, ...rest)) as typeof api.get);
+
+    const memo = within(panel).getByLabelText("Memo") as HTMLTextAreaElement;
+    fireEvent.change(memo, { target: { value: "Saturday matinee" } });
+    fireEvent.focusOut(memo);
+    await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
+    const done = within(panel).getByRole("button", { name: "Done" }) as HTMLButtonElement;
+    await waitFor(() => expect(done.disabled).toBe(false));
+    fireEvent.click(done);
+    expect(screen.queryByRole("dialog")).toBeNull();
+
+    fireEvent.click(within(rowOf("Cinema")).getByRole("button", { name: "2026-03-24" }));
+    const reopened = await screen.findByRole("dialog");
+    expect((within(reopened).getByLabelText("Memo") as HTMLTextAreaElement).value).toBe(
+      "Saturday matinee",
+    );
+    // And the list behind it says the same, not the memo from before.
+    expect(rowOf("Cinema").textContent).toContain("Saturday matinee");
+  });
+});

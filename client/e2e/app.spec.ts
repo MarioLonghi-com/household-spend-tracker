@@ -254,9 +254,18 @@ test("the detail panel saves on the way out of a field", async ({ page }) => {
   const memo = panel.getByLabel("Memo");
   const written = `checked ${Date.now()}`;
   await memo.fill(written);
-  // Leaving the field is the save. There is no Save button any more.
+  // Leaving the field is the save. There is no Save button any more. Wait for
+  // the server's answer to it, not for the button: on the phone run the row
+  // was reopened before the PATCH had landed and showed the memo from before
+  // (#29). Set up before the blur, or a fast answer is missed.
+  const saved = page.waitForResponse(
+    (response) =>
+      response.request().method() === "PATCH" &&
+      /\/transactions\/[^/?]+$/.test(new URL(response.url()).pathname),
+  );
   await panel.getByLabel("Payee").click();
-  await expect(page.getByRole("button", { name: "Done" })).toBeVisible();
+  expect((await saved).ok()).toBe(true);
+  await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
 
   // Prove it reached the server rather than only the input: close, reopen.
   await page.getByRole("button", { name: "Done" }).click();

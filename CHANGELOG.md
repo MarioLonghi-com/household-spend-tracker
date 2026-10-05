@@ -124,6 +124,16 @@ this repository.
 
 ### Fixed
 
+- **A row reopened straight after a save shows what was saved** (#29). The
+  transaction panel saves on the way out of a field and only asked the
+  register behind it to refetch; until that answer came back, closing the
+  panel and reopening the row opened it on the values from before the save.
+  The panel writes every field on its next save, so one more edit there put
+  the old memo back over the new one. The server's answer to the save now goes
+  into the register's cached rows at once, and the refetch still follows. The
+  browser test that caught it on the phone run waits for the save's response
+  before closing the panel.
+
 - **Picking *Uncategorised* on a staged line means uncategorised** (#19). In a
   household with a category of its own called, say, *Other: Uncategorised*,
   the import preview's category cell read the words in the box and matched
