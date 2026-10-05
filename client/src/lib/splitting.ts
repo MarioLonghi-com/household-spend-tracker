@@ -39,3 +39,91 @@ export function equalParts(total: number, count: number): number[] {
   }
   return parts;
 }
+
+/**
+ * Where a dragged seam sticks. Most splits are one of these, and landing on
+ * 2.21 of 4.42 by hand is the arithmetic the bar exists to save.
+ */
+export const SNAP_FRACTIONS: ReadonlyArray<readonly [number, number]> = [
+  [1, 4],
+  [1, 3],
+  [1, 2],
+  [2, 3],
+  [3, 4],
+];
+
+/** How close a drag has to come to a fraction to stick to it: 1/40 of the whole. */
+const SNAP_REACH = 40;
+
+/**
+ * Move the seam after part `seam` to `at` minor units from the start, taking
+ * from or giving to the part on its other side and nobody else.
+ *
+ * `magnitudes` are the parts without their sign -- the bar draws sizes, and the
+ * panel puts the original's direction back on when it saves. Every part keeps
+ * at least one minor unit, because a zero part is refused by the service and a
+ * negative one is not a part. With `snap`, a seam within reach of one of
+ * `SNAP_FRACTIONS` lands on it exactly; the keyboard passes no snap, so a
+ * single cent either side of a half is always reachable.
+ */
+export function moveSeam(
+  magnitudes: number[],
+  seam: number,
+  at: number,
+  snap = false,
+): number[] {
+  const total = magnitudes.reduce((sum, one) => sum + one, 0);
+  const before = magnitudes.slice(0, seam).reduce((sum, one) => sum + one, 0);
+  const pair = magnitudes[seam] + magnitudes[seam + 1];
+
+  let target = Math.round(at);
+  if (snap) {
+    for (const [top, bottom] of SNAP_FRACTIONS) {
+      const mark = Math.round((total * top) / bottom);
+      if (Math.abs(mark - target) * SNAP_REACH <= total) {
+        target = mark;
+        break;
+      }
+    }
+  }
+
+  const left = Math.min(Math.max(target - before, 1), pair - 1);
+  const moved = [...magnitudes];
+  moved[seam] = left;
+  moved[seam + 1] = pair - left;
+  return moved;
+}
+
+/**
+ * Part `index` was typed as `typed`; its neighbour becomes whatever makes the
+ * parts come to `total`. The neighbour is the part after it, or for the last
+ * part the one before. Worked out from the whole rather than from the
+ * neighbour's old figure, so clearing a field and typing a new one still
+ * lands -- a field emptied on the way is not a figure to adjust from.
+ *
+ * Null when that cannot be done: another part is blank or unreadable, or the
+ * neighbour would fall below one minor unit. The caller keeps what was typed
+ * and lets the remainder show, rather than rewriting a figure under
+ * somebody's cursor.
+ */
+export function retype(
+  magnitudes: (number | null)[],
+  total: number,
+  index: number,
+  typed: number,
+): number[] | null {
+  if (typed < 1 || magnitudes.length < 2) return null;
+  const other = index < magnitudes.length - 1 ? index + 1 : index - 1;
+  let rest = total - typed;
+  for (let at = 0; at < magnitudes.length; at++) {
+    if (at === index || at === other) continue;
+    const one = magnitudes[at];
+    if (one === null || one < 1) return null;
+    rest -= one;
+  }
+  if (rest < 1) return null;
+  const moved = magnitudes.map((one) => one ?? 0);
+  moved[index] = typed;
+  moved[other] = rest;
+  return moved;
+}

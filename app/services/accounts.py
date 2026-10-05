@@ -43,6 +43,17 @@ from . import transactions as transaction_service
 CURRENCY_CODE = re.compile(r"[A-Z]{3}")
 
 
+def free_text(value: str | None) -> str | None:
+    """An account's bank or note as it is stored: trimmed, and null when blank.
+
+    One spelling for "none" (#20). The edit panel once stored an emptied field
+    as `""` beside the new-account panel's null, so anything asking for
+    accounts with no bank -- a filter, an export -- missed half of them. Done
+    here rather than in each client, so no caller can write `""` again.
+    """
+    return (value or "").strip() or None
+
+
 def create_account(
     session: Session,
     *,
@@ -82,8 +93,8 @@ def create_account(
         name=name.strip(),
         type=account_type,
         currency=code,
-        note=note,
-        institution=institution,
+        note=free_text(note),
+        institution=free_text(institution),
         country=countries.check(country),
     )
     session.add(account)

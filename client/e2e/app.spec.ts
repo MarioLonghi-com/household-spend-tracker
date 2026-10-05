@@ -89,6 +89,47 @@ test("the split panel offers real categories", async ({ page }) => {
   await expect(category.locator("option", { hasText: "Groceries" })).toHaveCount(1);
 });
 
+test("the split bar moves money by drag and by key, and a split in progress is not lost", async ({
+  page,
+}) => {
+  await openSplit(page);
+  const seam = page.getByRole("slider", { name: "Between part 1 and part 2" });
+  await expect(seam).toBeVisible();
+  const total = (await amounts(page)).map(Number).reduce((a, b) => a + b, 0);
+
+  // A real drag, released well past the panel's left edge -- on a desktop that
+  // is the backdrop, and a release there used to close the panel (#27). The
+  // seam stops at one minor unit; the second part holds the rest.
+  const box = (await seam.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(2, box.y + box.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.getByRole("heading", { name: "Split this transaction" })).toBeVisible();
+  let values = (await amounts(page)).map(Number);
+  expect(values[0]).toBe(0.01);
+  expect(values[0] + values[1]).toBeCloseTo(total, 2);
+
+  // The keyboard: shift moves ten minor units, a bare arrow one.
+  await seam.focus();
+  await page.keyboard.press("Shift+ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  values = (await amounts(page)).map(Number);
+  expect(values[0]).toBe(0.12);
+  expect(values[0] + values[1]).toBeCloseTo(total, 2);
+  await expect(page.getByText("It adds up")).toBeVisible();
+
+  // Changed, so Escape asks rather than closes, and keeping on keeps it all.
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Discard this split?" })).toBeVisible();
+  await page.getByRole("button", { name: "Keep editing" }).click();
+  expect((await amounts(page)).map(Number)[0]).toBe(0.12);
+
+  await page.getByRole("button", { name: "Not now" }).click();
+  await page.getByRole("button", { name: "Discard" }).click();
+  await expect(page.getByRole("heading", { name: "Split this transaction" })).toHaveCount(0);
+});
+
 test("splitting a transaction shows up in History, naming what was split", async ({ page }) => {
   const before = await openSplit(page);
 
