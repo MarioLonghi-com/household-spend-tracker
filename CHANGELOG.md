@@ -37,6 +37,17 @@ this repository.
   as the register would refuse it. Listed in the manifest, in the sample client
   and as the `write_memos` MCP tool.
 
+- **A trusted key can split a transaction.** `POST /api/agent/v1/households/{id}/transactions/split`
+  divides rows into 2-5 parts through the register's own `transactions.split`,
+  so the parts must add up, receipts go on every part and the work flag and
+  repayment link are carried. A part can take `"reimbursement": "clear"` -- the
+  personal share of a partial claim -- except on a row already paid back. The
+  whole request is one batch, so one undo puts every original back. Because a
+  split replaces the row, and no key deletes, it needs a key with `may_commit`
+  (`deps.agent_may_split`); an ordinary write key gets a 403 saying so, and
+  `test_agent_access` names the route so the floor cannot drift. Listed in the
+  manifest, the sample client and the `split_transactions` MCP tool.
+
 ### Changed
 
 - **The memory the app needs is written down, and it is more than the docs

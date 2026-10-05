@@ -2293,6 +2293,83 @@ class AgentMemoed(BaseModel):
     locked: list[str] = []
 
 
+class AgentSplitPart(BaseModel):
+    """One part of a row being divided, as an agent worked it out."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    #: Exactly one of the two, strict for the reason `AgentImportRow` gives: a
+    #: JSON float never reaches money. A decimal string is read in the ROW's
+    #: account currency and refused if it has more decimals than that has.
+    amount_minor: StrictInt | None = None
+    amount: StrictStr | None = None
+    category_id: str | None = None
+    #: Null takes the original row's memo, as the register's split does.
+    memo: Memo | None = None
+    #: Every part of a work expense stays one (`transactions.split`). "clear"
+    #: takes the flag off this part in the same act -- the personal share of a
+    #: partial claim -- and is refused on a row already paid back, because
+    #: that would take a repayment link apart, which is a person's.
+    reimbursement: Literal["keep", "clear"] = "keep"
+
+    @model_validator(mode="after")
+    def exactly_one_amount(self) -> AgentSplitPart:
+        if (self.amount_minor is None) == (self.amount is None):
+            raise ValueError(
+                "give exactly one of amount_minor (integer minor units, e.g. -1250) "
+                "or amount (a decimal STRING, e.g. \"-12.50\"). A JSON float is not "
+                "accepted for money."
+            )
+        return self
+
+
+class AgentSplit(BaseModel):
+    """One row, and the 2-5 parts that add up to it."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    transaction_id: str
+    parts: list[AgentSplitPart] = Field(min_length=2, max_length=5)
+
+
+class AgentSplits(BaseModel):
+    """Divide many rows as one act, so one undo puts every original back. #7.
+
+    A partial work claim -- a shared booking, a share of a bill -- is recorded
+    by splitting the row and keeping the work flag on one part. Until this,
+    an agent that had worked the shares out could only hand a person a table
+    to retype into the split dialog.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    splits: list[AgentSplit] = Field(min_length=1, max_length=100)
+
+
+class AgentSplitDone(BaseModel):
+    #: The row that was divided. It no longer exists; its before-image is in
+    #: the batch, which is what undo puts back.
+    transaction_id: str
+    #: The new rows, in the order the parts were sent.
+    parts: list[str]
+
+
+class AgentSplitRefused(BaseModel):
+    transaction_id: str
+    #: The sentence the register would have shown a person.
+    reason: str
+
+
+class AgentSplitResult(BaseModel):
+    """Per-row answers: what was split, what was refused and why."""
+
+    batch_id: str
+    split: list[AgentSplitDone] = []
+    refused: list[AgentSplitRefused] = []
+    #: Ids that are not rows in this household, named, never dropped.
+    not_found: list[str] = []
+
+
 class AgentLookup(BaseModel):
     """Which transactions carry these source ids? Issue #41.
 

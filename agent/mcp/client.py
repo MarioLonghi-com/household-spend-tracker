@@ -259,6 +259,11 @@ class SpendTracker:
         """[{transaction_id, state: expected|written_off|null, settled_by?}]."""
         return self._write("PATCH", self._house("transactions/reimbursement"), {"assignments": assignments})
 
+    def split(self, splits: list[dict]) -> dict:
+        """[{transaction_id, parts: [{amount|amount_minor, category_id?, memo?,
+        reimbursement: keep|clear}]}]. Needs may_commit; one act, one undo."""
+        return self._write("POST", self._house("transactions/split"), {"splits": splits})
+
     def transfer_findings(self, *, limit: int = 100) -> dict:
         """The matcher's suggested pairs, lone legs, and links awaiting a person."""
         return self._get(self._house("transfers/findings"), limit=limit)
