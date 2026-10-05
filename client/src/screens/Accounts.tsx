@@ -662,12 +662,17 @@ export function Accounts({
           account={editing}
           onOpenRegister={onOpenRegister}
           onClose={() => setEditing(null)}
-          onSaved={(saved) => {
+          onSaved={(saved, sentOpening) => {
             // A save that came back with a warning stays open to show it:
             // closing the panel would be the one way to make sure nobody
-            // reads it. The panel is handed the saved account so it compares
-            // the next edit with what is stored now.
-            setEditing(saved.warnings.length ? saved : null);
+            // reads it. But a warning is a standing fact about the account,
+            // so only a save that could have caused it -- one that sent the
+            // opening figure or date, or that changed what the warnings say
+            // -- keeps the panel open; renaming such an account still closes
+            // it. The panel is handed the saved account so it compares the
+            // next edit with what is stored now.
+            const changed = saved.warnings.join("\n") !== editing.warnings.join("\n");
+            setEditing(saved.warnings.length && (sentOpening || changed) ? saved : null);
             refresh();
           }}
         />
@@ -680,6 +685,17 @@ export function Accounts({
 // paste stops at the field rather than coming back as a 422. Both panels ask
 // for these in the same order: country, then bank, then note.
 const INSTITUTION_MAX = 120;
+
+/**
+ * Today on this device's calendar, as YYYY-MM-DD. Not `toISOString()`, which
+ * is UTC: between midnight and two in Madrid that is still yesterday, while the
+ * server's `date.today()` -- which refuses an opening date in the future -- is
+ * local.
+ */
+export function localToday(now: Date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
 const NOTE_MAX = 2000;
 
 function AccountForm({
@@ -698,7 +714,7 @@ function AccountForm({
   const [institution, setInstitution] = useState("");
   const [note, setNote] = useState("");
   const [opening, setOpening] = useState("");
-  const [openingDate, setOpeningDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [openingDate, setOpeningDate] = useState(localToday);
 
   // Blank means zero; anything else has to parse, or the account would be
   // created with a balance the typist did not intend.
@@ -849,7 +865,8 @@ function AccountSettings({
   account: Account;
   onOpenRegister?: (preset: RegisterPreset) => void;
   onClose: () => void;
-  onSaved: (saved: Account) => void;
+  /** `sentOpening`: whether the save sent the opening figure or date. */
+  onSaved: (saved: Account, sentOpening: boolean) => void;
 }) {
   const [name, setName] = useState(account.name);
   const [institution, setInstitution] = useState(account.institution ?? "");
@@ -866,29 +883,31 @@ function AccountSettings({
   // else has to parse in this account's currency or nothing is sent.
   const openingMinor = opening.trim() === "" ? 0 : parse(opening, account.currency);
   const openingBad = openingMinor === null;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localToday();
   const openingFuture = openingDate > today;
 
+  const body = () => ({
+    name,
+    institution,
+    note,
+    closed,
+    // Null means "leave it alone" on a PATCH, so clearing a country that
+    // was set needs to say so explicitly rather than send nothing.
+    country: country || null,
+    clear_country: country === "" && account.country !== null,
+    statement_product: product.trim() || null,
+    clear_statement_product: product.trim() === "" && account.statement_product !== null,
+    // Only what changed, null being "leave it alone". Both are written to
+    // the opening-balance row, so sending them unchanged would still be
+    // an edit to a reconciled transaction on every save of a name.
+    opening_balance: openingMinor !== account.opening_balance ? openingMinor : null,
+    opening_date: openingDate && openingDate !== account.opening_date ? openingDate : null,
+  });
   const save = useMutation({
-    mutationFn: () =>
-      api.patch<Account>(`/accounts/${account.id}`, {
-        name,
-        institution,
-        note,
-        closed,
-        // Null means "leave it alone" on a PATCH, so clearing a country that
-        // was set needs to say so explicitly rather than send nothing.
-        country: country || null,
-        clear_country: country === "" && account.country !== null,
-        statement_product: product.trim() || null,
-        clear_statement_product: product.trim() === "" && account.statement_product !== null,
-        // Only what changed, null being "leave it alone". Both are written to
-        // the opening-balance row, so sending them unchanged would still be
-        // an edit to a reconciled transaction on every save of a name.
-        opening_balance: openingMinor !== account.opening_balance ? openingMinor : null,
-        opening_date: openingDate && openingDate !== account.opening_date ? openingDate : null,
-      }),
-    onSuccess: onSaved,
+    mutationFn: (sending: ReturnType<typeof body>) =>
+      api.patch<Account>(`/accounts/${account.id}`, sending),
+    onSuccess: (saved, sending) =>
+      onSaved(saved, sending.opening_balance !== null || sending.opening_date !== null),
   });
 
   return (
@@ -1008,7 +1027,7 @@ function AccountSettings({
       <button
         className="primary"
         disabled={save.isPending || openingBad || openingFuture}
-        onClick={() => save.mutate()}
+        onClick={() => save.mutate(body())}
       >
         Save
       </button>

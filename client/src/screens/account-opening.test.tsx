@@ -21,7 +21,7 @@ vi.mock("../lib/api", () => ({
 }));
 
 import { api } from "../lib/api";
-import { Accounts, openingText } from "./Accounts";
+import { Accounts, localToday, openingText } from "./Accounts";
 import type { Account, Household } from "../lib/types";
 
 afterEach(cleanup);
@@ -227,5 +227,61 @@ describe("the opening balance on the account panel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     await vi.waitFor(() => expect(api.patch).toHaveBeenCalledTimes(2));
     expect(sent().opening_date).toBeNull();
+  });
+
+  it("closes on a save that only renames, even with a warning standing", async () => {
+    const warning =
+      "the opening date is after this account's earliest transaction (2026-02-01); " +
+      "the balance on any day before 2026-03-01 leaves the opening balance out";
+    const warned = { ...EUROS, warnings: [warning] };
+    vi.mocked(api.get).mockImplementation(
+      async (url: string) => (url.includes("/accounts") ? [warned, YEN, EMPTY] : []) as never,
+    );
+    vi.mocked(api.patch).mockResolvedValue({ ...warned, name: "Renamed" } as never);
+    mount();
+    await open("Current");
+    expect(screen.getByRole("status").textContent).toContain("The opening date is after");
+
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Renamed" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await vi.waitFor(() => expect(api.patch).toHaveBeenCalled());
+    expect(sent().opening_balance).toBeNull();
+    // Nothing the save sent could have caused it, and it did not change.
+    await vi.waitFor(() => expect(screen.queryByLabelText("Opening balance")).toBeNull());
+  });
+
+  it("shows the server's refusal and keeps what was typed", async () => {
+    const refusal =
+      "this account was reconciled against a statement dated 2026-04-30, on or after the " +
+      "opening date, so changing the opening balance or its date would move a balance the " +
+      "bank has already confirmed. Undo that reconciliation in History first, then change " +
+      "the opening balance";
+    vi.mocked(api.patch).mockRejectedValue(new Error(refusal));
+    mount();
+    const { figure, save } = await open("Current");
+
+    fireEvent.change(figure, { target: { value: "1100" } });
+    fireEvent.click(save);
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toBe(refusal);
+    expect(sent().opening_balance).toBe(110000);
+    // Still open, with the figure as typed, to put right or abandon.
+    expect((screen.getByLabelText("Opening balance") as HTMLInputElement).value).toBe("1100");
+  });
+});
+
+describe("today, for the opening date's limit", () => {
+  it("is this device's calendar day, not UTC's", () => {
+    // Madrid, whatever zone the run is in: at half past midnight there,
+    // toISOString still says yesterday.
+    vi.stubEnv("TZ", "Europe/Madrid");
+    try {
+      expect(localToday(new Date(2026, 9, 5, 0, 30))).toBe("2026-10-05");
+      expect(localToday(new Date(2026, 0, 9, 23, 59))).toBe("2026-01-09");
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
