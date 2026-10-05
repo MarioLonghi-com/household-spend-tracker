@@ -112,6 +112,26 @@ this repository.
   `deploy/TROUBLESHOOTING.md` has a new section saying how to recognise it and
   what to change. Measurements in #14.
 
+### Fixed
+
+- **An account's bank and note are stored trimmed, and an empty one as
+  nothing** (#20). The edit panel sent both as typed, so `"  Bank "` kept its
+  spaces and an emptied field was stored as `""` -- "no bank" had two
+  spellings, and a filter or an export asking for null missed one. The
+  server now trims both on create and on edit and stores a blank one as
+  null, whatever a client sends. On `PATCH /api/accounts/{id}` null still
+  means "leave it alone", so emptying one has its own word,
+  `clear_institution` / `clear_note`, as `clear_country` does; a value sent
+  with its clear flag is a 422. The 120- and 2,000-character limits count the
+  value as sent, as the panel's own limit does. The panel sends both trimmed
+  and the clear flag when a field that had a value is emptied, and a panel
+  kept open after a save now shows what was stored rather than what was
+  typed. Migration `2bec6ce88f3d` folds the rows already written: every bank
+  and note trimmed, and an empty or whitespace-only one set to NULL. It is
+  **lossy** in name only -- which blank was `''` rather than NULL, and the
+  spaces around the rest -- and its downgrade leaves the rows as they are.
+  Like every migration it is not in the audit log.
+
 ## 0.6.2 — 2026-10-04
 
 **Reversible: none** — no migration in this release. To go back, check out

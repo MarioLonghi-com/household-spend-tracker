@@ -275,8 +275,15 @@ class AccountCreate(BaseModel):
 
 class AccountUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
+    #: Both trimmed when stored, and a blank one stored as null (#20). The
+    #: length limit is on the value as sent -- the characters the panel's
+    #: `maxLength` counts -- so trimming can only bring it further under.
     note: Note | None = None
     institution: Institution | None = None
+    #: Separate from `note` / `institution` being null, which means "leave it
+    #: alone" -- the shape `clear_country` has.
+    clear_note: bool = False
+    clear_institution: bool = False
     country: str | None = Field(default=None, min_length=2, max_length=2)
     #: Separate from `country` being null, which means "leave it alone".
     clear_country: bool = False
@@ -292,6 +299,15 @@ class AccountUpdate(BaseModel):
     #: See `accounts.set_opening` for what each combination does.
     opening_balance: Minor | None = None
     opening_date: Date | None = None
+
+    @model_validator(mode="after")
+    def _set_or_clear(self) -> AccountUpdate:
+        # A value and its clear flag are two answers to one question, so both
+        # at once is a malformed request rather than one to guess the meaning of.
+        for field in ("note", "institution"):
+            if getattr(self, field) is not None and getattr(self, f"clear_{field}"):
+                raise ValueError(f"send {field} or clear_{field}, not both")
+        return self
 
 
 class IdentifierCreate(BaseModel):
