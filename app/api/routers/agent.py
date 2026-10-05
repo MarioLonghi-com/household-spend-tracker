@@ -279,9 +279,10 @@ ENDPOINTS = [
             "Stage up to 1000 rows as one import. Duplicates are marked, not written; "
             "send Idempotency-Key and a retry returns the first answer. Money is "
             "amount_minor (integer) or amount (a decimal STRING) -- never a JSON float. "
-            "Each row may carry category_id. Declare statement totals and they are "
-            "checked; read warnings before committing. Lines default to the rows that "
-            "need attention -- include_lines=all for every one."
+            "Each row may carry category_id; without one the payee's rule decides, and "
+            "uncategorised: true lands it with no category. Declare statement totals and "
+            "they are checked; read warnings before committing. Lines default to the rows "
+            "that need attention -- include_lines=all for every one."
         ),
         returns="{batch_id, filename, account_id, sha256, detected, warnings[], counts, decision, lines[]}",
         scope="write",
@@ -858,11 +859,18 @@ def _apply_categories(session, agent, rows, lines) -> None:
     payee rule -- which is the behaviour wanted here, and none of it is new
     code. The confidence and the reason ride along in `parsed` for a person
     reading the preview; nothing decides anything from them.
+
+    `uncategorised` goes through `importing.set_line_category`, the same call
+    the preview screen's "Uncategorised" makes, so the commit treats a row an
+    agent marked that way exactly as one a person did (issue #9).
     """
     wanted = {
         index: row
         for index, row in enumerate(rows, start=1)
-        if row.category_id or row.category_confidence is not None or row.category_reason
+        if row.category_id
+        or row.uncategorised
+        or row.category_confidence is not None
+        or row.category_reason
     }
     if not wanted:
         return
@@ -893,6 +901,8 @@ def _apply_categories(session, agent, rows, lines) -> None:
             continue
         if row.category_id:
             line.category_id = row.category_id
+        elif row.uncategorised:
+            importing.set_line_category(session, line, None, uncategorised=True)
         note = {}
         if row.category_confidence is not None:
             note["confidence"] = row.category_confidence

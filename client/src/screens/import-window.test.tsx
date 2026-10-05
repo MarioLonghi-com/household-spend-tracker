@@ -63,6 +63,7 @@ function line(n: number): ImportLine {
     category_id: null,
     category_name: null,
     category_chosen: false,
+    category_uncategorised: false,
     similar_lines: 0,
   } as ImportLine;
 }
