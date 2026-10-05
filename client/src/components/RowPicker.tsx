@@ -25,6 +25,7 @@ import type { Account, Household, RegisterPage, Transaction } from "../lib/types
 export function shiftDays(iso: string, days: number): string {
   const when = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
   when.setUTCDate(when.getUTCDate() + days);
+  // UTC on purpose: `when` is UTC midnight of a stored date, not "now".
   return when.toISOString().slice(0, 10);
 }
 

@@ -4,6 +4,7 @@ import { useId, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { format, parse, toInput } from "../lib/money";
+import { localToday } from "../lib/time";
 import {
   Empty,
   Field,
@@ -686,16 +687,6 @@ export function Accounts({
 // for these in the same order: country, then bank, then note.
 const INSTITUTION_MAX = 120;
 
-/**
- * Today on this device's calendar, as YYYY-MM-DD. Not `toISOString()`, which
- * is UTC: between midnight and two in Madrid that is still yesterday, while the
- * server's `date.today()` -- which refuses an opening date in the future -- is
- * local.
- */
-export function localToday(now: Date = new Date()): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
 const NOTE_MAX = 2000;
 
 function AccountForm({
