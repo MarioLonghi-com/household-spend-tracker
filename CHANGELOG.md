@@ -26,6 +26,13 @@ this repository.
 
 ## Unreleased
 
+## 0.7.1 — 2026-10-05
+
+**Reversible: none** — no migration in this release. To go back, check out
+`v0.7.0` and restart.
+
+One fix, for the Tailscale sidecar deployment only. The app is unchanged.
+
 ### Fixed
 
 - **A 502 that never ends after the Tailscale sidecar restarts is now
