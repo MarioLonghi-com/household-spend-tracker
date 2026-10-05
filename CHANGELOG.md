@@ -90,6 +90,13 @@ this repository.
 
 ### Fixed
 
+- **A drag that ends outside a panel no longer closes it** (#27). A click
+  goes to the nearest element holding both the press and the release, so
+  selecting text in a panel's field and letting go past its edge was a click
+  on the backdrop, and the panel closed with what had been typed in it. The
+  backdrop now closes a panel only when the press began on the backdrop too.
+  Every side panel had it.
+
 - **Picking *Uncategorised* on a staged line means uncategorised** (#19). In a
   household with a category of its own called, say, *Other: Uncategorised*,
   the import preview's category cell read the words in the box and matched
