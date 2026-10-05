@@ -135,6 +135,33 @@ this repository.
   no-category answer. The household's own category is still a pick from the
   list away, or typed by its full name.
 
+- **"Today" is the local date on every screen** (#23). The transfer,
+  reconcile and quick-entry panels, a duplicated row's date, and how long a
+  work expense has waited all took today from `toISOString()`, which is UTC:
+  between midnight and 02:00 in Madrid (01:00 in winter) that is still
+  yesterday, so a new transfer or entry was pre-filled with yesterday and a
+  duplicate was dated yesterday, while the server's `date.today()` is local.
+  They now share the account panel's `localToday()`, moved to
+  `client/src/lib/time.ts`.
+
+- **An account's bank and note are stored trimmed, and an empty one as
+  nothing** (#20). The edit panel sent both as typed, so `"  Bank "` kept its
+  spaces and an emptied field was stored as `""` -- "no bank" had two
+  spellings, and a filter or an export asking for null missed one. The
+  server now trims both on create and on edit and stores a blank one as
+  null, whatever a client sends. On `PATCH /api/accounts/{id}` null still
+  means "leave it alone", so emptying one has its own word,
+  `clear_institution` / `clear_note`, as `clear_country` does; a value sent
+  with its clear flag is a 422. The 120- and 2,000-character limits count the
+  value as sent, as the panel's own limit does. The panel sends both trimmed
+  and the clear flag when a field that had a value is emptied, and a panel
+  kept open after a save now shows what was stored rather than what was
+  typed. Migration `2bec6ce88f3d` folds the rows already written: every bank
+  and note trimmed, and an empty or whitespace-only one set to NULL. It is
+  **lossy** in name only -- which blank was `''` rather than NULL, and the
+  spaces around the rest -- and its downgrade leaves the rows as they are.
+  Like every migration it is not in the audit log.
+
 - **A drag that ends outside a panel leaves it open** (#27). Selecting the
   text in a field and letting go past the panel's edge closed the panel and
   lost what was typed: the browser sends that click to the backdrop, the

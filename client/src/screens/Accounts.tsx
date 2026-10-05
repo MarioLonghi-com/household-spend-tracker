@@ -4,6 +4,7 @@ import { useId, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { format, parse, toInput } from "../lib/money";
+import { localToday } from "../lib/time";
 import {
   Empty,
   Field,
@@ -326,6 +327,10 @@ export function Accounts({
 }) {
   const client = useQueryClient();
   const [editing, setEditing] = useState<Account | null>(null);
+  // Bumped on every save, so a panel that stays open is mounted afresh from
+  // the saved account and shows what was stored -- trimmed -- not what was
+  // typed (#20).
+  const [saves, setSaves] = useState(0);
   const [adding, setAdding] = useState(false);
   const [importing, setImporting] = useState(false);
   const [reconciling, setReconciling] = useState<Account | null>(null);
@@ -658,6 +663,7 @@ export function Accounts({
       )}
       {editing && (
         <AccountSettings
+          key={`${editing.id}:${saves}`}
           household={household}
           account={editing}
           onOpenRegister={onOpenRegister}
@@ -673,6 +679,7 @@ export function Accounts({
             // next edit with what is stored now.
             const changed = saved.warnings.join("\n") !== editing.warnings.join("\n");
             setEditing(saved.warnings.length && (sentOpening || changed) ? saved : null);
+            setSaves((n) => n + 1);
             refresh();
           }}
         />
@@ -686,16 +693,6 @@ export function Accounts({
 // for these in the same order: country, then bank, then note.
 const INSTITUTION_MAX = 120;
 
-/**
- * Today on this device's calendar, as YYYY-MM-DD. Not `toISOString()`, which
- * is UTC: between midnight and two in Madrid that is still yesterday, while the
- * server's `date.today()` -- which refuses an opening date in the future -- is
- * local.
- */
-export function localToday(now: Date = new Date()): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
 const NOTE_MAX = 2000;
 
 function AccountForm({
@@ -888,13 +885,17 @@ function AccountSettings({
 
   const body = () => ({
     name,
-    institution,
-    note,
     closed,
     // Null means "leave it alone" on a PATCH, so clearing a country that
     // was set needs to say so explicitly rather than send nothing.
     country: country || null,
     clear_country: country === "" && account.country !== null,
+    // Trimmed, as the New account panel sends them, and an emptied one
+    // cleared the same way as the country -- never stored as "" (#20).
+    institution: institution.trim() || null,
+    clear_institution: institution.trim() === "" && account.institution !== null,
+    note: note.trim() || null,
+    clear_note: note.trim() === "" && account.note !== null,
     statement_product: product.trim() || null,
     clear_statement_product: product.trim() === "" && account.statement_product !== null,
     // Only what changed, null being "leave it alone". Both are written to

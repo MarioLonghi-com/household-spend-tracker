@@ -16,6 +16,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { format, parse } from "../lib/money";
+import { localToday } from "../lib/time";
 import {
   Empty,
   Field,
@@ -30,8 +31,6 @@ import type { Account, Reconciliation, Worksheet } from "../lib/types";
 
 type WorksheetSort = "date" | "payee" | "memo" | "amount";
 
-const today = () => new Date().toISOString().slice(0, 10);
-
 export function Reconcile({
   account,
   onClose,
@@ -41,7 +40,7 @@ export function Reconcile({
   onClose: () => void;
   onDone: () => void;
 }) {
-  const [closingDate, setClosingDate] = useState(today());
+  const [closingDate, setClosingDate] = useState(localToday());
   const [closingBalance, setClosingBalance] = useState("");
   const [ticked, setTicked] = useState<Set<string>>(new Set());
 
