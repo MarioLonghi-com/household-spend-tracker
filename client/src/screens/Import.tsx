@@ -1518,6 +1518,10 @@ function CategoryCell({
 }) {
   const [editing, setEditing] = useState(false);
   const [typed, setTyped] = useState("");
+  //: What the box held when it opened. Committing that, untouched, is no
+  //: decision at all and sends nothing -- the line keeps whatever it had,
+  //: whichever category its words also happen to spell (#19).
+  const [opened, setOpened] = useState("");
   const [unmatched, setUnmatched] = useState(false);
 
   const all = useMemo(() => groups.flatMap((group) => group.categories), [groups]);
@@ -1550,17 +1554,27 @@ function CategoryCell({
     return () => onBusy(line.id, false);
   }, [editing, line.id, onBusy]);
 
+  /** The answer an option picked from the list stands for: its position in `labels`. */
+  function picked(at: number): CategoryChoice | undefined {
+    if (at === 0) return "uncategorised";
+    return all[at - 1]?.id;
+  }
+
   function resolve(text: string): { choice: CategoryChoice } | "ambiguous" {
     const needle = fold(text);
     // An empty box hands the line back to the suggestion, as it always has.
     if (!needle) return { choice: null };
+    // Typed text that is exactly the sentinel's label means the sentinel, and
+    // is checked before the categories (#19). The other order let a household
+    // category called "Other: Uncategorised" (short name "Uncategorised")
+    // swallow it, so the option could not be chosen at all. That category is
+    // still reached by its full name, or by picking it from the list, which
+    // commits the option itself rather than its words.
+    const none = fold(UNCATEGORISED);
+    if (needle === none) return { choice: "uncategorised" };
     for (const one of all) {
       if (fold(one.full_name) === needle || fold(one.name) === needle) return { choice: one.id };
     }
-    // After the categories, so a household that has a category of its own
-    // called "Uncategorised" still reaches it by typing its name.
-    const none = fold(UNCATEGORISED);
-    if (needle === none) return { choice: "uncategorised" };
     const hits: CategoryChoice[] = all
       .filter((one) => fold(one.full_name).includes(needle) || fold(one.name).includes(needle))
       .map((one) => one.id);
@@ -1568,8 +1582,17 @@ function CategoryCell({
     return hits.length === 1 ? { choice: hits[0] } : "ambiguous";
   }
 
-  function commit(next: string = typed) {
-    const answer = resolve(next);
+  function commit(next: string = typed, taken?: number) {
+    const fromList = taken === undefined ? undefined : picked(taken);
+    // Nothing picked and nothing changed: no decision, so nothing to send.
+    // Without this, a line marked uncategorised reopened in a household with a
+    // category whose name is "Uncategorised" resolved to that category on blur.
+    if (fromList === undefined && fold(next) === fold(opened)) {
+      setEditing(false);
+      setUnmatched(false);
+      return;
+    }
+    const answer = fromList === undefined ? resolve(next) : { choice: fromList };
     if (answer === "ambiguous") {
       setUnmatched(true);
       return;
@@ -1596,9 +1619,11 @@ function CategoryCell({
             className="cell-edit"
             title="Where this line will land"
             onClick={() => {
-              setTyped(
-                line.category_uncategorised ? UNCATEGORISED : (line.category_name ?? ""),
-              );
+              const start = line.category_uncategorised
+                ? UNCATEGORISED
+                : (line.category_name ?? "");
+              setTyped(start);
+              setOpened(start);
               setUnmatched(false);
               setEditing(true);
             }}
