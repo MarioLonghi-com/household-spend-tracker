@@ -12,7 +12,7 @@ export function Field({
   hint,
   children,
 }: {
-  label: string;
+  label: ReactNode;
   hint?: ReactNode;
   children: ReactNode;
 }) {

@@ -28,6 +28,18 @@ this repository.
 
 ### Added
 
+- **Splitting into two or three parts has a bar you can drag** (#28). The
+  transaction is drawn as one bar cut into its parts; dragging a seam moves
+  money between the two parts either side of it and sticks at a quarter, a
+  third, a half, two thirds and three quarters. Each seam is a slider for the
+  keyboard too: Tab to it, the arrows move it one minor unit and shift moves
+  ten, without snapping. Typing a part's amount moves its neighbour by the
+  same, so the parts keep adding up while the figure is typed; a figure the
+  neighbour cannot cover stays as typed and the remainder shows. Category and
+  memo stay with their part. From four parts on, the amounts are typed as
+  before. Once anything has changed, the backdrop no longer closes the panel,
+  and Escape, the cross and *Not now* ask *Discard this split?* first.
+
 - **A key can write a row's memo.** `PATCH /api/agent/v1/households/{id}/transactions/memo`
   takes `[{transaction_id, memo}]` and applies them as one batch, so one undo.
   Until now categorising was the only edit a key could make to a row already in
