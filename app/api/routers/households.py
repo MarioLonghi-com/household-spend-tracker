@@ -458,10 +458,15 @@ def update_account(
     ):
         if body.name is not None:
             account_service.rename(session, account, body.name)
-        if body.note is not None:
-            account.note = body.note
-        if body.institution is not None:
-            account.institution = body.institution
+        # Trimmed, and a blank one stored as null -- the same as clearing it.
+        if body.clear_note:
+            account.note = None
+        elif body.note is not None:
+            account.note = account_service.free_text(body.note)
+        if body.clear_institution:
+            account.institution = None
+        elif body.institution is not None:
+            account.institution = account_service.free_text(body.institution)
         if body.clear_country:
             account.country = None
         elif body.country is not None:
