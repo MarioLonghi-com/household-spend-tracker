@@ -41,8 +41,9 @@ SOURCE_PATH = "Passwords/Common-Credentials/xato-net-10-million-passwords-100000
 SOURCE_URL = (
     f"https://raw.githubusercontent.com/danielmiessler/SecLists/{SOURCE_COMMIT}/{SOURCE_PATH}"
 )
-#: SHA-256 of `common_passwords.txt` exactly as published at that commit.
-SHA256 = "1472aafa2561df5e3293aee252aee3ca660c12b399a283cf808bb01b39be388b"
+#: SHA-256 of `common_passwords.txt` exactly as published at that commit, with
+#: the `sha256:` prefix an image digest carries.
+SHA256 = "sha256:1472aafa2561df5e3293aee252aee3ca660c12b399a283cf808bb01b39be388b"
 #: How many it holds. The decision was the top 100,000 (2026-10-07).
 ENTRIES = 100_000
 
@@ -50,7 +51,7 @@ LIST = pathlib.Path(__file__).with_name("common_passwords.txt")
 
 
 def digest(path: pathlib.Path = LIST) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 @functools.cache

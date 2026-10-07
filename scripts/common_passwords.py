@@ -43,10 +43,10 @@ def _get(url: str) -> bytes:
 def check() -> int:
     found = cp.digest()
     lines = len(cp.LIST.read_bytes().splitlines())
-    print(f"{cp.LIST.name}: {lines} entries, sha256 {found}")
+    print(f"{cp.LIST.name}: {lines} entries, {found}")
     print(f"source: {cp.SOURCE_URL}")
     if found != cp.SHA256 or lines != cp.ENTRIES:
-        print(f"MISMATCH: the code says {cp.ENTRIES} entries, sha256 {cp.SHA256}")
+        print(f"MISMATCH: the code says {cp.ENTRIES} entries, {cp.SHA256}")
         return 1
     return 0
 
@@ -58,14 +58,14 @@ def refresh() -> int:
     if count != cp.ENTRIES:
         print(f"refused: the file at {newest} has {count} lines, not {cp.ENTRIES}")
         return 1
-    digest = hashlib.sha256(body).hexdigest()
+    digest = "sha256:" + hashlib.sha256(body).hexdigest()
     if (newest, digest) == (cp.SOURCE_COMMIT, cp.SHA256):
         print(f"unchanged: {newest}")
         return 0
     cp.LIST.write_bytes(body)
     source = _MODULE.read_text()
     source = re.sub(r'^SOURCE_COMMIT = "[0-9a-f]+"$', f'SOURCE_COMMIT = "{newest}"', source, flags=re.M)
-    source = re.sub(r'^SHA256 = "[0-9a-f]+"$', f'SHA256 = "{digest}"', source, flags=re.M)
+    source = re.sub(r'^SHA256 = "sha256:[0-9a-f]+"$', f'SHA256 = "{digest}"', source, flags=re.M)
     _MODULE.write_text(source)
     same = "the same bytes" if digest == cp.SHA256 else "new bytes"
     print(f"refreshed: {cp.SOURCE_COMMIT[:12]} -> {newest[:12]}, {same}; commit both files")

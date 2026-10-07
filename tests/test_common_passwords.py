@@ -101,7 +101,7 @@ def test_changing_to_a_common_password_is_refused_and_changes_nothing(client):
 
     refused = client.post(
         "/api/me/password",
-        json={"current_password": PASSWORD, "new_password": "QWERTYUIOPASDFGH"},
+        json={"current_password": PASSWORD, "new_password": "QWERTYuiopASDFGH"},
         headers=HEADERS,
     )
     assert refused.status_code == 422
