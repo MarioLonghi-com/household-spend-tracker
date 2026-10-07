@@ -17,6 +17,7 @@ import { PayeeCategorisationPanel } from "./Categories";
 import type { Tally } from "./Categories";
 import { useWindowed } from "../lib/useWindowed";
 import type { Household, Payee } from "../lib/types";
+import { compareNames } from "../lib/locale";
 
 /** `GET /households/{id}/stats/payees`, one entry per payee with transactions. */
 export interface PayeeStat {
@@ -94,7 +95,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
           if (column === "categories") return byPayee.get(payee.id)?.category_count ?? 0;
           return payee.name;
         },
-        (a, b) => a.name.localeCompare(b.name),
+        (a, b) => compareNames(a.name, b.name),
       ),
     [payees.data, byPayee, query, payeeOrder.sort, payeeOrder.direction],
   );
