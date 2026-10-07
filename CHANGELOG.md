@@ -55,6 +55,13 @@ this repository.
   as before. An amount put back into a box for editing uses the same decimal
   mark, so a three-decimal currency round-trips. (#45)
 
+- **A statement amount written `12.50 DR` imports as money out.** The letters
+  were dropped as decoration, so a debit came in as money in. `DR` after the
+  figure is now a minus and `CR` a plus, in CSV, spreadsheet and PDF
+  statements, with or without a space and in either case; one that also
+  carries a minus sign or brackets is refused as signed twice. The import
+  guide says so. (#84)
+
 ### Changed
 
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
