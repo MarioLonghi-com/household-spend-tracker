@@ -30,6 +30,12 @@ interface ErrorMessage {
 }
 
 export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
+  "currency.not_iso_4217": {
+    message: msg({
+      id: "error.currency.not_iso_4217",
+      message: "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR",
+    }),
+  },
   "money.decimals_in_whole_currency": {
     message: msg({
       id: "error.money.decimals_in_whole_currency",

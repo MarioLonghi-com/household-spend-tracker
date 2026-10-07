@@ -168,6 +168,7 @@ history this repository does not have.
 
 ### Changed
 
+<<<<<<< HEAD
 - **The client's words can come from translation catalogs** (Lingui 6,
   `client/src/locales/`). The menu, the sort headings' tooltip and the
   "try again in" wait are the first messages extracted; a refusal that
@@ -177,6 +178,15 @@ history this repository does not have.
   `en-XA` pseudo-locale is reachable for CI and development, and one
   Playwright pass runs in it at phone width. CI fails when the catalogs are
   behind the source. Nothing an English reader sees changes. (#53)
+=======
+- **An invariant suite over randomised ledgers.** Twelve seeds each build a
+  ledger in two households: rows, transfers within and across currencies,
+  edits, splits and deletes. The suite then holds four things true of any
+  ledger: every balance is the sum of its rows, by every route that reports
+  one; transfer pairs point at each other and net to zero within a currency;
+  undoing a run of acts gives back every column of every row; and no total
+  crosses currencies. A failing seed is reproduced by its number. (#107)
+>>>>>>> origin/dev
 
 - **The database file is looked after, not only its rows.** Every
   housekeeping sweep now ends with a `wal_checkpoint(TRUNCATE)`, so the

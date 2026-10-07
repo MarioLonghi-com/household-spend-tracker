@@ -33,6 +33,11 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.currency.not_iso_4217"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.money.decimals_in_whole_currency"
 msgstr ""
 
