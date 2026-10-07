@@ -37,6 +37,9 @@ import {
 } from "../lib/appearance";
 import type { AgentKey, AuthenticatorStatus, Household, User } from "../lib/types";
 import { LanguagePicker } from "../components/LanguagePicker";
+import { plural, t } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { listText } from "../lib/locale";
 
 type Offer = { token: string; secret: string; uri: string };
 
@@ -49,10 +52,13 @@ export function Profile({
   households: Household[];
   onClose: () => void;
 }) {
+  const { t } = useLingui();
   return (
-    <Panel title="Your account" onClose={onClose} config>
+    <Panel title={t`Your account`} onClose={onClose} config>
       <p className="muted small" style={{ marginTop: 0 }}>
-        Signed in as <strong>{user.display_name}</strong> ({user.email}).
+        <Trans>
+          Signed in as <strong>{user.display_name}</strong> ({user.email}).
+        </Trans>
       </p>
       <AppearanceSection />
       <hr className="rule" />
@@ -78,6 +84,7 @@ export function Profile({
  * not sent to the server and there is no column for it.
  */
 function AppearanceSection() {
+  const { t } = useLingui();
   const [choice, setChoice] = useState<Appearance>(storedAppearance);
 
   const pick = (next: Appearance) => {
@@ -86,23 +93,25 @@ function AppearanceSection() {
   };
 
   const options: { key: Appearance; label: string; icon: string }[] = [
-    { key: "light", label: "Light", icon: "\u2600\ufe0f" },
-    { key: "dark", label: "Dark", icon: "\ud83c\udf19" },
-    { key: "system", label: "System", icon: "\ud83d\udcbb" },
+    { key: "light", label: t`Light`, icon: "\u2600\ufe0f" },
+    { key: "dark", label: t`Dark`, icon: "\ud83c\udf19" },
+    { key: "system", label: t`System`, icon: "\ud83d\udcbb" },
   ];
 
   return (
     <section>
       <h3>
-        Appearance{" "}
-        <Hint label="about appearance">
-          Kept on this device only, so a phone and a laptop can differ. Nothing
-          is sent to the server, and clearing this browser's site data forgets
-          it -- which returns you to following the system.
+        <Trans>Appearance</Trans>{" "}
+        <Hint label={t`about appearance`}>
+          <Trans>
+            Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the
+            server, and clearing this browser's site data forgets it -- which returns you to
+            following the system.
+          </Trans>
         </Hint>
       </h3>
 
-      <div className="appearance-choices" role="group" aria-label="Appearance">
+      <div className="appearance-choices" role="group" aria-label={t`Appearance`}>
         {options.map((one) => (
           <button
             key={one.key}
@@ -118,8 +127,12 @@ function AppearanceSection() {
 
       <p className="muted small">
         {choice === "system"
-          ? `Following this device, which is ${effectiveScheme("system")} right now.`
-          : `Held in ${choice}, whatever this device is set to.`}
+          ? effectiveScheme("system") === "dark"
+            ? t`Following this device, which is dark right now.`
+            : t`Following this device, which is light right now.`
+          : choice === "dark"
+            ? t`Held in dark, whatever this device is set to.`
+            : t`Held in light, whatever this device is set to.`}
       </p>
 
       <LanguagePicker />
@@ -138,6 +151,7 @@ type Method = "password" | "authenticator" | "recovery";
  * currently gets you in.
  */
 function SignInMethods({ user }: { user: User }) {
+  const { t } = useLingui();
   const [open, setOpen] = useState<Method | null>(null);
   const authenticator = useQuery({
     queryKey: ["authenticator"],
@@ -155,56 +169,59 @@ function SignInMethods({ user }: { user: User }) {
   const enrolled = authenticator.data?.enrolled !== false;
   const summary =
     usable > 0
-      ? "You sign in with a passkey, or with your password and authenticator code."
-      : "You sign in with your password and authenticator code.";
+      ? t`You sign in with a passkey, or with your password and authenticator code.`
+      : t`You sign in with your password and authenticator code.`;
 
   const toggle = (method: Method) => setOpen((was) => (was === method ? null : method));
   const passkeyState = passkeys.data
     ? usable > 0
-      ? `${usable} ${usable === 1 ? "passkey" : "passkeys"}`
+      ? plural(usable, { one: `${usable} passkey`, other: `${usable} passkeys` })
       : state.data && !state.data.available
-        ? "Not available here"
-        : "None yet"
+        ? t`Not available here`
+        : t`None yet`
     : "";
 
   return (
     <section aria-labelledby="sign-in-methods">
       <h3 className="section-title" id="sign-in-methods">
-        Sign-in methods
+        <Trans>Sign-in methods</Trans>
       </h3>
       <p className="small" style={{ marginTop: 0 }}>
         {summary}
       </p>
       <ul className="plain-list methods">
         <MethodRow
-          name="Password"
-          state="Set"
-          action="Change"
+          slug="password"
+          name={t`Password`}
+          state={t`Set`}
+          action={t`Change`}
           open={open === "password"}
           onToggle={() => toggle("password")}
         >
           <PasswordSection titled={false} />
         </MethodRow>
         <MethodRow
-          name="Authenticator"
-          state={!enrolled ? "Cleared" : locked ? "Needs setting up again" : "Set up"}
+          slug="authenticator"
+          name={t`Authenticator`}
+          state={!enrolled ? t`Cleared` : locked ? t`Needs setting up again` : t`Set up`}
           warn={locked || !enrolled}
           // In recovery mode (#287) this row is the one thing to do, so it
           // stays open and offers no way to close it.
-          action={locked ? undefined : "Set up again"}
+          action={locked ? undefined : t`Set up again`}
           open={open === "authenticator" || locked}
           onToggle={() => toggle("authenticator")}
         >
           <AuthenticatorSection user={user} titled={false} />
         </MethodRow>
-        <MethodRow name="Passkeys" state={passkeyState} open>
+        <MethodRow slug="passkeys" name={t`Passkeys`} state={passkeyState} open>
           <PasskeysSection />
         </MethodRow>
         <MethodRow
-          name="Recovery codes"
-          state={recovery.data ? `${recovery.data.unused} of 10 left` : ""}
+          slug="recovery-codes"
+          name={t`Recovery codes`}
+          state={recovery.data ? t`${recovery.data.unused} of 10 left` : ""}
           warn={recovery.data?.unused === 0}
-          action="New codes"
+          action={t`New codes`}
           open={open === "recovery"}
           onToggle={() => toggle("recovery")}
         >
@@ -217,6 +234,7 @@ function SignInMethods({ user }: { user: User }) {
 
 /** One sign-in method: its name, its state in words, its action. */
 function MethodRow({
+  slug,
   name,
   state,
   warn = false,
@@ -225,6 +243,8 @@ function MethodRow({
   onToggle,
   children,
 }: {
+  /** The row's id, the English name as it always was, whatever the language. */
+  slug: string;
   name: string;
   state: string;
   warn?: boolean;
@@ -233,7 +253,8 @@ function MethodRow({
   onToggle?: () => void;
   children: React.ReactNode;
 }) {
-  const id = `method-${name.toLowerCase().replace(/\s+/g, "-")}`;
+  const { t } = useLingui();
+  const id = `method-${slug}`;
   return (
     <li className="method-row" aria-labelledby={id}>
       <div className="method-head">
@@ -246,10 +267,10 @@ function MethodRow({
             type="button"
             aria-expanded={open}
             // The visible word alone ("Change") is ambiguous in a list of four.
-            aria-label={`${open ? "Close" : action}: ${name}`}
+            aria-label={open ? t`Close: ${name}` : t`${action}: ${name}`}
             onClick={onToggle}
           >
-            {open ? "Close" : action}
+            {open ? t`Close` : action}
           </button>
         )}
       </div>
@@ -258,7 +279,40 @@ function MethodRow({
   );
 }
 
+/**
+ * What a password change did beyond the password: other browsers signed out,
+ * trusted ones forgotten, agent keys left working. One sentence each.
+ */
+function passwordChangedText(done: {
+  other_sessions_ended: number;
+  devices_revoked: number;
+  keys_still_live: number;
+}): string {
+  const ended = done.other_sessions_ended;
+  const revoked = done.devices_revoked;
+  const keys = done.keys_still_live;
+  let text =
+    ended > 0
+      ? plural(ended, {
+          one: `${ended} other browser was signed out.`,
+          other: `${ended} other browsers were signed out.`,
+        })
+      : t`No other browsers were signed in.`;
+  if (revoked > 0)
+    text += ` ${plural(revoked, {
+      one: `${revoked} trusted browser will ask for a code again.`,
+      other: `${revoked} trusted browsers will ask for a code again.`,
+    })}`;
+  if (keys > 0)
+    text += ` ${plural(keys, {
+      one: `${keys} agent key still works — revoke it below if it should stop.`,
+      other: `${keys} agent keys still work — revoke them below if they should stop.`,
+    })}`;
+  return text;
+}
+
 function PasswordSection({ titled = true }: { titled?: boolean }) {
+  const { t } = useLingui();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [again, setAgain] = useState("");
@@ -286,32 +340,20 @@ function PasswordSection({ titled = true }: { titled?: boolean }) {
 
   return (
     <section>
-      {titled && <h3 className="section-title">Password</h3>}
+      {titled && (
+        <h3 className="section-title">
+          <Trans>Password</Trans>
+        </h3>
+      )}
       <Problem error={change.error} />
       {change.isSuccess && (
         <div className="banner info">
-          Password changed.{" "}
-          {change.data.other_sessions_ended > 0
-            ? `${change.data.other_sessions_ended} other ${
-                change.data.other_sessions_ended === 1 ? "browser was" : "browsers were"
-              } signed out.`
-            : "No other browsers were signed in."}
-          {change.data.devices_revoked > 0
-            ? ` ${change.data.devices_revoked} trusted ${
-                change.data.devices_revoked === 1 ? "browser" : "browsers"
-              } will ask for a code again.`
-            : ""}
-          {change.data.keys_still_live > 0
-            ? ` ${change.data.keys_still_live} agent ${
-                change.data.keys_still_live === 1 ? "key still works" : "keys still work"
-              } — revoke ${change.data.keys_still_live === 1 ? "it" : "them"} below if ${
-                change.data.keys_still_live === 1 ? "it" : "they"
-              } should stop.`
-            : ""}
+          <Trans>Password changed.</Trans>{" "}
+          {passwordChangedText(change.data)}
         </div>
       )}
 
-      <Field label="Current password">
+      <Field label={t`Current password`}>
         <input
           type="password"
           value={current}
@@ -321,17 +363,21 @@ function PasswordSection({ titled = true }: { titled?: boolean }) {
       </Field>
       <p />
       <Field
-        label="New password"
+        label={t`New password`}
         hint={
-          <Hint label="what makes a good one">
+          <Hint label={t`what makes a good one`}>
             <p>
-              Length does more than symbols do. Four unrelated words you can actually remember
-              beats a short one with punctuation in it.
+              <Trans>
+                Length does more than symbols do. Four unrelated words you can actually remember
+                beats a short one with punctuation in it.
+              </Trans>
             </p>
             <p className="muted small" style={{ marginBottom: 0 }}>
-              Changing it signs out every other browser and forgets every trusted one, so if
-              you are changing it because somebody else knows it, they are out too. Agent keys
-              are separate credentials and keep working until you revoke them.
+              <Trans>
+                Changing it signs out every other browser and forgets every trusted one, so if
+                you are changing it because somebody else knows it, they are out too. Agent keys
+                are separate credentials and keep working until you revoke them.
+              </Trans>
             </p>
           </Hint>
         }
@@ -344,7 +390,7 @@ function PasswordSection({ titled = true }: { titled?: boolean }) {
         />
       </Field>
       <p />
-      <Field label="New password again">
+      <Field label={t`New password again`}>
         <input
           type="password"
           value={again}
@@ -352,7 +398,11 @@ function PasswordSection({ titled = true }: { titled?: boolean }) {
           onChange={(e) => setAgain(e.target.value)}
         />
       </Field>
-      {mismatch ? <p className="small neg">Those two don't match.</p> : null}
+      {mismatch ? (
+        <p className="small neg">
+          <Trans>Those two don't match.</Trans>
+        </p>
+      ) : null}
 
       <button
         className="primary"
@@ -360,10 +410,29 @@ function PasswordSection({ titled = true }: { titled?: boolean }) {
         disabled={!ready || change.isPending}
         onClick={() => change.mutate()}
       >
-        Change password
+        <Trans>Change password</Trans>
       </button>
     </section>
   );
+}
+
+/** What replacing the authenticator did to other browsers, one sentence each. */
+function replacedText(done: { devices_revoked: number; other_sessions_ended: number }): string {
+  const revoked = done.devices_revoked;
+  const ended = done.other_sessions_ended;
+  let text =
+    revoked > 0
+      ? plural(revoked, {
+          one: `${revoked} trusted browser will ask for a code again.`,
+          other: `${revoked} trusted browsers will ask for a code again.`,
+        })
+      : t`No browsers were being trusted.`;
+  if (ended > 0)
+    text += ` ${plural(ended, {
+      one: `${ended} other browser was signed out.`,
+      other: `${ended} other browsers were signed out.`,
+    })}`;
+  return text;
 }
 
 /**
@@ -378,6 +447,7 @@ function PasswordSection({ titled = true }: { titled?: boolean }) {
  * recovery code instead.
  */
 function AuthenticatorSection({ user, titled = true }: { user: User; titled?: boolean }) {
+  const { t } = useLingui();
   const queries = useQueryClient();
   const [password, setPassword] = useState("");
   const [offer, setOffer] = useState<Offer | null>(null);
@@ -430,19 +500,14 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
   if (confirm.isSuccess) {
     return (
       <section>
-        {titled && <h3 className="section-title">Authenticator</h3>}
+        {titled && (
+          <h3 className="section-title">
+            <Trans>Authenticator</Trans>
+          </h3>
+        )}
         <div className="banner info">
-          Your new authenticator is the only one that works now.{" "}
-          {confirm.data.devices_revoked > 0
-            ? `${confirm.data.devices_revoked} trusted ${
-                confirm.data.devices_revoked === 1 ? "browser" : "browsers"
-              } will ask for a code again.`
-            : "No browsers were being trusted."}
-          {confirm.data.other_sessions_ended > 0
-            ? ` ${confirm.data.other_sessions_ended} other ${
-                confirm.data.other_sessions_ended === 1 ? "browser was" : "browsers were"
-              } signed out.`
-            : ""}
+          <Trans>Your new authenticator is the only one that works now.</Trans>{" "}
+          {replacedText(confirm.data)}
         </div>
       </section>
     );
@@ -453,23 +518,29 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
   if (offer) {
     return (
       <section>
-        {titled && <h3 className="section-title">Authenticator</h3>}
+        {titled && (
+          <h3 className="section-title">
+            <Trans>Authenticator</Trans>
+          </h3>
+        )}
         <Problem error={confirm.error} />
         <p className="small">
-          Add this to your authenticator app, then type the six digits it shows.{" "}
+          <Trans>Add this to your authenticator app, then type the six digits it shows.</Trans>{" "}
           {locked
-            ? "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
-            : "Nothing has changed yet — your current authenticator keeps working until a code proves the new one pairs."}
+            ? t`Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed.`
+            : t`Nothing has changed yet — your current authenticator keeps working until a code proves the new one pairs.`}
         </p>
         <p className="mono small secret-box">{offer.secret}</p>
         <p className="small muted">
-          Or open{" "}
-          <a href={offer.uri} className="mono">
-            the enrolment link
-          </a>{" "}
-          on the device with the app.
+          <Trans>
+            Or open{" "}
+            <a href={offer.uri} className="mono">
+              the enrolment link
+            </a>{" "}
+            on the device with the app.
+          </Trans>
         </p>
-        <Field label="The six digits from the new one">
+        <Field label={t`The six digits from the new one`}>
           <input
             value={code}
             autoFocus
@@ -481,21 +552,25 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
         <p />
         {spendGrant ? (
           <p className="small muted">
-            The recovery code you signed in with covers this, so no other code is asked for.
+            <Trans>
+              The recovery code you signed in with covers this, so no other code is asked for.
+            </Trans>
           </p>
         ) : (
           <Field
             label={
-              locked ? "One of your recovery codes" : "A code from your current authenticator"
+              locked ? t`One of your recovery codes` : t`A code from your current authenticator`
             }
             hint={
-              <Hint label="why this is asked">
+              <Hint label={t`why this is asked`}>
                 <p>
-                  The password alone cannot replace your second factor — otherwise it would not be
-                  a second factor.{" "}
+                  <Trans>
+                    The password alone cannot replace your second factor — otherwise it would not
+                    be a second factor.
+                  </Trans>{" "}
                   {locked
-                    ? "This server cannot check a code from the authenticator you have, so one of your recovery codes proves it is you instead; it is spent."
-                    : "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."}
+                    ? t`This server cannot check a code from the authenticator you have, so one of your recovery codes proves it is you instead; it is spent.`
+                    : t`If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent.`}
                 </p>
               </Hint>
             }
@@ -513,14 +588,18 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
             disabled={!ready || confirm.isPending}
             onClick={() => confirm.mutate()}
           >
-            Confirm and replace
+            <Trans>Confirm and replace</Trans>
           </button>
-          <button onClick={() => setOffer(null)}>Cancel</button>
+          <button onClick={() => setOffer(null)}>
+            <Trans>Cancel</Trans>
+          </button>
         </div>
         <p className="small muted" style={{ marginTop: 10 }}>
-          Replacing it also un-trusts every browser, including this one, and signs out every other
-          browser — they were let in on the strength of the old authenticator, and that is exactly
-          what you are replacing.
+          <Trans>
+            Replacing it also un-trusts every browser, including this one, and signs out every
+            other browser — they were let in on the strength of the old authenticator, and that is
+            exactly what you are replacing.
+          </Trans>
         </p>
       </section>
     );
@@ -528,23 +607,31 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
 
   return (
     <section>
-      {titled && <h3 className="section-title">Authenticator</h3>}
+      {titled && (
+        <h3 className="section-title">
+          <Trans>Authenticator</Trans>
+        </h3>
+      )}
       <Problem error={start.error} />
       {locked ? (
         <div className="banner warn" role="status">
-          This server's secret key was replaced, so the authenticator you have no longer works
-          here, and nothing that asks for a code from it can be done until you set up a new one.{" "}
+          <Trans>
+            This server's secret key was replaced, so the authenticator you have no longer works
+            here, and nothing that asks for a code from it can be done until you set up a new one.
+          </Trans>{" "}
           {spendGrant
-            ? "The recovery code you signed in with in this tab covers it — no other code is needed."
-            : "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"}
+            ? t`The recovery code you signed in with in this tab covers it — no other code is needed.`
+            : t`Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)`}
         </div>
       ) : (
         <p className="small muted">
-          Set up a new authenticator — a new phone, or one you no longer have. The current one
-          keeps working until the new one is proved.
+          <Trans>
+            Set up a new authenticator — a new phone, or one you no longer have. The current one
+            keeps working until the new one is proved.
+          </Trans>
         </p>
       )}
-      <Field label="Current password">
+      <Field label={t`Current password`}>
         <input
           type="password"
           value={password}
@@ -557,7 +644,7 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
         disabled={password.length === 0 || start.isPending}
         onClick={() => start.mutate()}
       >
-        Set up a new authenticator
+        <Trans>Set up a new authenticator</Trans>
       </button>
     </section>
   );
@@ -576,6 +663,7 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
  * does not sit next to them.
  */
 export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
+  const { t } = useLingui();
   const queries = useQueryClient();
   const left = useQuery({
     queryKey: ["recovery-codes"],
@@ -601,11 +689,15 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
   if (fresh) {
     return (
       <section>
-        {titled && <h3 className="section-title">Recovery codes</h3>}
+        {titled && (
+          <h3 className="section-title">
+            <Trans>Recovery codes</Trans>
+          </h3>
+        )}
         <div className="banner info">
-          New codes made. Every earlier code, used or not, has stopped working.
+          <Trans>New codes made. Every earlier code, used or not, has stopped working.</Trans>
         </div>
-        <RecoveryCodeSheet codes={fresh} action="Done" onStored={() => setFresh(null)} />
+        <RecoveryCodeSheet codes={fresh} action={t`Done`} onStored={() => setFresh(null)} />
       </section>
     );
   }
@@ -615,13 +707,20 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
 
   return (
     <section>
-      {titled && <h3 className="section-title">Recovery codes</h3>}
+      {titled && (
+        <h3 className="section-title">
+          <Trans>Recovery codes</Trans>
+        </h3>
+      )}
       <Problem error={left.error} />
       {unused !== undefined ? (
         <p className={unused === 0 ? "small neg" : "small muted"}>
           {unused === 0
-            ? "You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own."
-            : `${unused} unused recovery ${unused === 1 ? "code" : "codes"} left.`}
+            ? t`You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own.`
+            : plural(unused, {
+                one: `${unused} unused recovery code left.`,
+                other: `${unused} unused recovery codes left.`,
+              })}
         </p>
       ) : null}
 
@@ -629,10 +728,12 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
         <div className="card" style={{ marginTop: 12 }}>
           <Problem error={make.error} />
           <p className="small muted" style={{ marginTop: 0 }}>
-            Every code you have now, used or not, stops working and ten new ones replace them.
-            Nobody is signed out.
+            <Trans>
+              Every code you have now, used or not, stops working and ten new ones replace them.
+              Nobody is signed out.
+            </Trans>
           </p>
-          <Field label="Your password">
+          <Field label={t`Your password`}>
             <input
               type="password"
               value={password}
@@ -642,12 +743,14 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
           </Field>
           <p />
           <Field
-            label="The six digits from your authenticator"
+            label={t`The six digits from your authenticator`}
             hint={
-              <Hint label="why not a recovery code">
+              <Hint label={t`why not a recovery code`}>
                 <p>
-                  A recovery code cannot be used here. If somebody else has seen your codes, one of
-                  them must not be enough to make the next set.
+                  <Trans>
+                    A recovery code cannot be used here. If somebody else has seen your codes, one
+                    of them must not be enough to make the next set.
+                  </Trans>
                 </p>
               </Hint>
             }
@@ -665,7 +768,7 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
               disabled={!ready || make.isPending}
               onClick={() => make.mutate()}
             >
-              {make.isPending ? "Making…" : "Make new codes"}
+              {make.isPending ? t`Making…` : t`Make new codes`}
             </button>
             <button
               onClick={() => {
@@ -675,13 +778,13 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
                 make.reset();
               }}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
           </div>
         </div>
       ) : (
         <button style={{ marginTop: 12 }} onClick={() => setMaking(true)}>
-          Make new codes
+          <Trans>Make new codes</Trans>
         </button>
       )}
     </section>
@@ -701,7 +804,15 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
  * issued; changing your mind means issuing a new one, which costs a minute and
  * removes a whole class of "who widened this, and when".
  */
+/** A key's scope, as the list says it. */
+function scopeWord(scope: string): string {
+  if (scope === "read") return t`read`;
+  if (scope === "write") return t`write`;
+  return scope;
+}
+
 function KeysSection({ households }: { households: Household[] }) {
+  const { t } = useLingui();
   const queries = useQueryClient();
   const keys = useQuery({
     queryKey: ["agent-keys"],
@@ -716,34 +827,44 @@ function KeysSection({ households }: { households: Household[] }) {
     onSuccess: () => queries.invalidateQueries({ queryKey: ["agent-keys"] }),
   });
 
-  const named = (id: string) => households.find((h) => h.id === id)?.name ?? "a household";
+  const named = (id: string) => households.find((h) => h.id === id)?.name ?? t`a household`;
 
   return (
     <section>
-      <h3 className="section-title">Keys for programs</h3>
+      <h3 className="section-title">
+        <Trans>Keys for programs</Trans>
+      </h3>
       <p className="small muted" style={{ marginTop: 0 }}>
-        A key lets a program — a script, an automation, an AI assistant — read and, if you
-        allow it, add to one household on your behalf. Everything it does appears in that
-        household's History under your name and the key's.
+        <Trans>
+          A key lets a program — a script, an automation, an AI assistant — read and, if you
+          allow it, add to one household on your behalf. Everything it does appears in that
+          household's History under your name and the key's.
+        </Trans>
       </p>
 
       {fresh && (
         <div className="banner info">
           <p style={{ marginTop: 0 }}>
-            <strong>Copy this now.</strong> It is the only time it is shown — only a
-            fingerprint of it is stored, so there is nothing to show again.
+            <Trans>
+              <strong>Copy this now.</strong> It is the only time it is shown — only a
+              fingerprint of it is stored, so there is nothing to show again.
+            </Trans>
           </p>
           <p className="mono small secret-box" style={{ wordBreak: "break-all" }}>
             {fresh.token}
           </p>
-          <button onClick={() => setFresh(null)}>I have saved it</button>
+          <button onClick={() => setFresh(null)}>
+            <Trans>I have saved it</Trans>
+          </button>
         </div>
       )}
 
       <Problem error={keys.error ?? revoke.error} />
 
       {keys.data && keys.data.length === 0 && !issuing ? (
-        <Empty>You have not given a key to anything.</Empty>
+        <Empty>
+          <Trans>You have not given a key to anything.</Trans>
+        </Empty>
       ) : null}
 
       {keys.data && keys.data.length > 0 ? (
@@ -754,18 +875,18 @@ function KeysSection({ households }: { households: Household[] }) {
                 <strong>{key.label}</strong>
                 {key.agent_name ? <span className="muted"> · {key.agent_name}</span> : null}
                 <div className="small muted">
-                  {named(key.household_id)} · {key.scopes.join(" and ")}
-                  {key.may_commit ? " · may apply imports" : ""}
+                  {named(key.household_id)} · {listText(key.scopes.map(scopeWord))}
+                  {key.may_commit ? ` · ${t`may apply imports`}` : ""}
                 </div>
                 <div className="small muted">
                   {key.revoked_at
-                    ? `Revoked ${formatInstant(key.revoked_at)}`
+                    ? t`Revoked ${formatInstant(key.revoked_at)}`
                     : key.live
-                      ? `Expires ${formatInstant(key.expires_at)}`
-                      : `Expired ${formatInstant(key.expires_at)}`}
+                      ? t`Expires ${formatInstant(key.expires_at)}`
+                      : t`Expired ${formatInstant(key.expires_at)}`}
                   {key.last_used_at
-                    ? ` · last used ${formatInstant(key.last_used_at)}`
-                    : " · never used"}
+                    ? ` · ${t`last used ${formatInstant(key.last_used_at)}`}`
+                    : ` · ${t`never used`}`}
                 </div>
               </div>
               {key.live ? (
@@ -774,7 +895,7 @@ function KeysSection({ households }: { households: Household[] }) {
                   disabled={revoke.isPending}
                   onClick={() => revoke.mutate(key.id)}
                 >
-                  Revoke
+                  <Trans>Revoke</Trans>
                 </button>
               ) : null}
             </li>
@@ -794,7 +915,7 @@ function KeysSection({ households }: { households: Household[] }) {
         />
       ) : (
         <button style={{ marginTop: 12 }} onClick={() => setIssuing(true)}>
-          Give a program a key
+          <Trans>Give a program a key</Trans>
         </button>
       )}
     </section>
@@ -817,6 +938,7 @@ function IssueKey({
   onDone: (token: string, label: string) => void;
   onCancel: () => void;
 }) {
+  const { t } = useLingui();
   const [label, setLabel] = useState("");
   const [agentName, setAgentName] = useState("");
   const [householdId, setHouseholdId] = useState(households[0]?.id ?? "");
@@ -850,16 +972,16 @@ function IssueKey({
     <div className="card" style={{ marginTop: 12 }}>
       <Problem error={issue.error} />
 
-      <Field label="What is it for">
+      <Field label={t`What is it for`}>
         <input
           value={label}
           autoFocus
-          placeholder="receipt filer"
+          placeholder={t`receipt filer`}
           onChange={(e) => setLabel(e.target.value)}
         />
       </Field>
       <p />
-      <Field label="What is holding it (optional)">
+      <Field label={t`What is holding it (optional)`}>
         <input
           value={agentName}
           placeholder="Claude Desktop"
@@ -867,7 +989,7 @@ function IssueKey({
         />
       </Field>
       <p />
-      <Field label="Which household">
+      <Field label={t`Which household`}>
         <select value={householdId} onChange={(e) => setHouseholdId(e.target.value)}>
           {households.map((house) => (
             <option key={house.id} value={house.id}>
@@ -876,7 +998,9 @@ function IssueKey({
           ))}
         </select>
       </Field>
-      <p className="small muted">One household per key. Two households means two keys.</p>
+      <p className="small muted">
+        <Trans>One household per key. Two households means two keys.</Trans>
+      </p>
 
       {/*
         Not a <Field>: its hint variant wraps children in a <label>, and a
@@ -886,15 +1010,21 @@ function IssueKey({
       */}
       <div className="field">
         <div className="field-head">
-          <span>What it may do</span>
-          <Hint label="what a key can never do">
+          <span>
+            <Trans>What it may do</Trans>
+          </span>
+          <Hint label={t`what a key can never do`}>
             <p>
-              No key can delete anything, undo anything, change who is in a household, touch
-              passwords or authenticators, or create another key — whatever you choose here.
+              <Trans>
+                No key can delete anything, undo anything, change who is in a household, touch
+                passwords or authenticators, or create another key — whatever you choose here.
+              </Trans>
             </p>
             <p className="muted small" style={{ marginBottom: 0 }}>
-              Everything a program gets wrong has to be undoable by a person, which means a
-              person stays the only one who can undo.
+              <Trans>
+                Everything a program gets wrong has to be undoable by a person, which means a
+                person stays the only one who can undo.
+              </Trans>
             </p>
           </Hint>
         </div>
@@ -907,7 +1037,7 @@ function IssueKey({
               if (!e.target.checked) setMayCommit(false);
             }}
           />
-          Let it add and change transactions, not only read them
+          <Trans>Let it add and change transactions, not only read them</Trans>
         </label>
       </div>
       {mayWrite ? (
@@ -917,22 +1047,26 @@ function IssueKey({
             checked={mayCommit}
             onChange={(e) => setMayCommit(e.target.checked)}
           />
-          Let it apply an import without anybody reviewing it
+          <Trans>Let it apply an import without anybody reviewing it</Trans>
         </label>
       ) : null}
       {mayWrite && mayCommit ? (
         <p className="small muted">
-          Normally a program stages an import and you review it before anything lands in the
-          register. This skips that.
+          <Trans>
+            Normally a program stages an import and you review it before anything lands in the
+            register. This skips that.
+          </Trans>
         </p>
       ) : null}
 
       <hr className="rule" />
       <p className="small muted" style={{ marginTop: 0 }}>
-        A key keeps working from somewhere else long after this browser is closed, so this asks
-        for your password and a code — the same as signing in.
+        <Trans>
+          A key keeps working from somewhere else long after this browser is closed, so this asks
+          for your password and a code — the same as signing in.
+        </Trans>
       </p>
-      <Field label="Your password">
+      <Field label={t`Your password`}>
         <input
           type="password"
           value={password}
@@ -941,7 +1075,7 @@ function IssueKey({
         />
       </Field>
       <p />
-      <Field label="The six digits from your authenticator">
+      <Field label={t`The six digits from your authenticator`}>
         <input
           value={code}
           inputMode="numeric"
@@ -952,9 +1086,11 @@ function IssueKey({
 
       <div className="row" style={{ marginTop: 12 }}>
         <button className="primary" disabled={!ready || issue.isPending} onClick={() => issue.mutate()}>
-          {issue.isPending ? "Creating…" : "Create the key"}
+          {issue.isPending ? t`Creating…` : t`Create the key`}
         </button>
-        <button onClick={onCancel}>Cancel</button>
+        <button onClick={onCancel}>
+          <Trans>Cancel</Trans>
+        </button>
       </div>
     </div>
   );
