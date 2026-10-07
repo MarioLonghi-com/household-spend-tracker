@@ -453,7 +453,10 @@ already linked: taking a link apart is unlinking, and that is a person's.
   `conventions.duplicates` in the manifest before your first import.
   A row may carry `category_id`; a row without one is categorised by its
   payee's rule. `uncategorised: true` (never with `category_id`) lands it with
-  no category even when a rule would have given it one.
+  no category even when a rule would have given it one. A row may carry
+  `currency` (an ISO code); one that is not the account's is rejected rather
+  than recorded as the same figure in the account's money, and an import whose
+  every row names another currency is refused.
   `POST $A/imports/{batch}/document` keeps the statement the rows came off.
 - **Find rows you imported:** `POST $H/transactions/lookup` with
   `external_ids`.

@@ -540,6 +540,10 @@ SNAP_SECURITY_HEADERS = {
 #: URLs it minted for itself; a ``blob:`` URL cannot be pointed at another
 #: origin and cannot outlive the document that created it.
 #:
+#: No ``data:`` (#94). Nothing uses one -- the QR code is SVG, and the client
+#: imports no images -- and a ``data:`` image is the one kind of image source
+#: whose bytes are whatever the markup that names it says.
+#:
 #: ``style-src`` is the one concession. ``client/src/lib/theme.ts`` paints a
 #: household's palette by setting a ``<style>`` element's ``textContent``, which
 #: is an inline stylesheet however it got there. A nonce would mean the server
@@ -552,7 +556,7 @@ CONTENT_SECURITY_POLICY = "; ".join(
         "default-src 'self'",
         "script-src 'self'",
         "style-src 'self' 'unsafe-inline'",
-        "img-src 'self' data: blob:",
+        "img-src 'self' blob:",
         "font-src 'self'",
         "connect-src 'self'",
         "object-src 'none'",

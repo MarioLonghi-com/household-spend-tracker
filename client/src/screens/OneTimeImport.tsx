@@ -9,7 +9,9 @@
  * calls, so every call carries the source again (see `ynab/calls.ts`). That is
  * also what keeps a YNAB token short-lived: it lives in this component, goes up
  * as a form field, and is dropped when the import finishes or the wizard
- * closes. Nothing here decides whether a row can be imported; the preview is
+ * closes. The four calls' mutations carry it too, as their `variables`, and
+ * TanStack keeps a finished mutation for five minutes after its component
+ * unmounts -- so each says `gcTime: 0`, and closing the wizard drops them (#93). Nothing here decides whether a row can be imported; the preview is
  * the server running the real import and rolling it back.
  */
 
@@ -196,6 +198,7 @@ function YnabWizard({
   }
 
   const plansCall = useMutation({
+    gcTime: 0,
     mutationFn: (key: string) => calls.listPlans(hid, key),
     onSuccess: (data) => {
       setPlans(data.plans);
@@ -205,6 +208,7 @@ function YnabWizard({
   });
 
   const analyseCall = useMutation({
+    gcTime: 0,
     mutationFn: (vars: { source: Source; currency: string | null; dateFormat: string | null }) =>
       calls.analyse(hid, vars.source, { currency: vars.currency, dateFormat: vars.dateFormat }),
     onSuccess: (data) => {
@@ -312,6 +316,7 @@ function YnabWizard({
   }
 
   const previewCall = useMutation({
+    gcTime: 0,
     mutationFn: (vars: { source: Source; plan: ImportPlan }) =>
       calls.preview(hid, vars.source, vars.plan),
     onMutate: () => setRefusal(null),
@@ -325,6 +330,7 @@ function YnabWizard({
   });
 
   const commitCall = useMutation({
+    gcTime: 0,
     mutationFn: (vars: { source: Source; plan: ImportPlan }) =>
       calls.commit(hid, vars.source, vars.plan),
     onMutate: () => setRefusal(null),

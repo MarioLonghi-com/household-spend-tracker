@@ -153,7 +153,9 @@ export function ImportGuide() {
             <strong>The amount.</strong> Either one signed column, or separate money-in and
             money-out columns. Currency symbols, thousands separators and parentheses for negatives
             are all read, and so is a minus written at the end (<code>12,50-</code>) or as a
-            typographic minus or dash. An amount signed twice, or one that is not a number at all,
+            typographic minus or dash, and a debit or credit written after the figure
+            (<code>12.50 DR</code> is money out, <code>12.50 CR</code> money in). An amount signed
+            twice (<code>-12.50 DR</code>), or one that is not a number at all,
             is refused with the reason rather than read as zero. Whether a comma or a point is the
             decimal one is worked out from the amounts and the balance. When every one of them reads
             either way (<code>1.500</code> is fifteen hundred in Spain and one and a half in
@@ -200,7 +202,8 @@ export function ImportGuide() {
             <em>Not for this account</em>; otherwise, and always in an OFX file (which is one
             account), as <em>Could not read</em>, with the bank's rate if it gave one. Nothing is
             converted. Either way the reason names both currencies. A file whose every row says it
-            is in another currency is refused. A column saying what a purchase cost before it was
+            is in another currency is refused. An agent's row that names its currency is held to
+            the same check, and one in another currency is <em>Could not read</em>. A column saying what a purchase cost before it was
             converted (Original, Moneda origen, Local, Transaction currency) does not count: that
             amount is already in the account's money. If two columns could each be the currency
             the amounts are in and neither is named for the account, the bill or the settlement,
