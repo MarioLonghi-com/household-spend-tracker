@@ -28,6 +28,17 @@ this repository.
 
 ### Fixed
 
+- **An agent's import row can say its currency, and one in another currency
+  is refused.** Rows posted to `POST /imports` had no currency field, so the
+  check a statement file's currency column gets (0.5.0) never ran for them:
+  a row an agent pulled from a yen account and sent to a euro one was
+  recorded as the same figure in euros. A row may now carry `currency`; one
+  that is not the account's is rejected with the sentence a file's row gets,
+  and an import whose every row names another currency is refused. Rows that
+  leave it out are read in the account's currency, as before. (#86)
+
+### Fixed
+
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
   read the last separator as the decimal mark, so a thousands comma with no
   decimals was taken as a decimal comma and the third digit rounded away -- a
