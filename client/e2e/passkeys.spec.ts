@@ -60,7 +60,7 @@ test("a passkey signs in, and Sign-in methods adds, renames and removes one", as
   ).toBeVisible();
   const table = page.locator("table.passkeys");
   await expect(table.locator("tbody tr")).toHaveCount(1);
-  await expect(table.getByText("this device")).toBeVisible();
+  await expect(table.getByText("this device", { exact: true })).toBeVisible();
 
   // The browser would refuse to make a second passkey in an authenticator
   // already holding one for this account -- the options exclude it -- so the
