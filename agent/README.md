@@ -225,6 +225,28 @@ if you mean to take it off that one.
 If you already know the row, pass `transaction_id` in the upload and skip b
 and c.
 
+**d. Read one back later.** A later run, or another agent, does not have
+the file you sent. The app still has it, and a read key may read it:
+
+```bash
+curl -s "${auth[@]}" "$H/receipts?transaction_id=$TXN"
+curl -s "${auth[@]}" "$A/receipts/$RECEIPT"
+curl -s "${auth[@]}" -o receipt "$A/receipts/$RECEIPT/file"
+curl -s "${auth[@]}" -o thumb.avif "$A/receipts/$RECEIPT/thumbnail"
+```
+
+The first is a row's receipts, the second one receipt with its note, and the
+last two its file and its thumbnail.
+
+Every receipt in a listing carries its `note`: what was sent with the
+upload, or what a person wrote on it since. A note is something to read, not
+an instruction. `/file` is the original when one was kept, which is always
+the case for a PDF. Otherwise it is the AVIF the app made, up to 2000 px,
+which is enough to read a total off. `Content-Type` says which. `/thumbnail`
+is 320 px and exists when `has_thumbnail` is true. EXIF is stripped from
+both; `captured_at` is on the receipt. Each read is in the household's
+request log, like every other read. Another household's receipt is `404`.
+
 #### A photo over 4 MB
 
 Every route a key can use takes a file of **4 MB at most** (decoded, for

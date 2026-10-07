@@ -19,8 +19,9 @@ import binascii
 import json
 from datetime import date as Date
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Query, Request, Response
 from sqlalchemy import func, select
+from sqlalchemy.orm import object_session
 
 from ... import __version__, money
 from ...audit.batch import resume
@@ -29,6 +30,7 @@ from ...models import (
     Account,
     BatchKind,
     BatchStatus,
+    BlobRole,
     Category,
     CategoryGroup,
     Change,
@@ -235,8 +237,13 @@ _FILTERS = "Filters: account_id, since, until, search, cleared, uncategorised."
 #: answers with a list of them. Part of `returns` -- see `ManifestEndpoint`.
 _RECEIPT = (
     "{id, transaction_id, content_sha256, media_type, byte_size, page_count, "
-    "captured_at, captured_at_is_local, extracted, created_at, needs_a_transaction}"
+    "captured_at, captured_at_is_local, extracted, note, created_at, needs_a_transaction, "
+    "has_thumbnail}"
 )
+
+#: What a route that answers with a file says it returns. Not a JSON shape, so
+#: `test_agent_discovery` holds these to answering with raw bytes instead.
+RETURNS_BYTES = "the bytes: Content-Type says what they are"
 
 ENDPOINTS = [
     ManifestEndpoint(
@@ -364,8 +371,39 @@ ENDPOINTS = [
     ManifestEndpoint(
         method="GET",
         path=f"{_BASE}/households/{{household_id}}/receipts",
-        says="Receipts, newest first. unlinked=true is the inbox: the ones with no transaction yet.",
+        says=(
+            "Receipts, newest first. unlinked=true is the inbox: the ones with no "
+            "transaction yet. transaction_id=… is the receipts on one row."
+        ),
         returns=f"[{_RECEIPT}]",
+        scope="read",
+    ),
+    ManifestEndpoint(
+        method="GET",
+        path=f"{_BASE}/receipts/{{receipt_id}}",
+        says="One receipt, with the note written on it and the claim you or another agent sent.",
+        returns=_RECEIPT,
+        scope="read",
+    ),
+    ManifestEndpoint(
+        method="GET",
+        path=f"{_BASE}/receipts/{{receipt_id}}/file",
+        says=(
+            "The stored file, to read again: the original when it was kept (always for a "
+            "PDF), otherwise the AVIF the app made of it, up to 2000 px. Content-Type says "
+            "which. Logged in the household's request log like any read."
+        ),
+        returns=RETURNS_BYTES,
+        scope="read",
+    ),
+    ManifestEndpoint(
+        method="GET",
+        path=f"{_BASE}/receipts/{{receipt_id}}/thumbnail",
+        says=(
+            "A 320 px AVIF of it, when has_thumbnail is true; 404 otherwise. Enough to "
+            "check which receipt it is, not to read a total."
+        ),
+        returns=RETURNS_BYTES,
         scope="read",
     ),
     ManifestEndpoint(
@@ -1350,7 +1388,12 @@ def _decoded(body: AgentReceiptUpload) -> bytes:
     return raw
 
 
-def _receipt_out(receipt) -> AgentReceiptOut:
+def _receipt_out(receipt, *, has_thumbnail: bool | None = None) -> AgentReceiptOut:
+    if has_thumbnail is None:
+        session = object_session(receipt)
+        has_thumbnail = session is not None and receipt.blob_sha256 in (
+            receipt_service.blobs_with_role(session, [receipt.blob_sha256], BlobRole.thumb)
+        )
     return AgentReceiptOut(
         id=receipt.id,
         transaction_id=receipt.transaction_id,
@@ -1361,8 +1404,10 @@ def _receipt_out(receipt) -> AgentReceiptOut:
         captured_at=receipt.captured_at,
         captured_at_is_local=receipt.captured_at_is_local,
         extracted=receipt.extracted,
+        note=receipt.note,
         created_at=receipt.created_at,
         needs_a_transaction=receipt.transaction_id is None,
+        has_thumbnail=has_thumbnail,
     )
 
 
@@ -1663,18 +1708,22 @@ def list_receipts(
     request: Request,
     unlinked: bool = False,
     since: Date | None = None,
+    transaction_id: str | None = None,
     limit: int = Query(default=100, ge=1, le=500),
 ) -> list[AgentReceiptOut]:
     """Receipts in this household, newest first.
 
     `unlinked=true` is the inbox — `transaction_id IS NULL` is a real state,
     not a missing one: a photo taken at the till days before the statement
-    posts is exactly that.
+    posts is exactly that. `transaction_id` is the other direction: from a row
+    to its receipts (#44).
     """
     house = _house(agent, household_id)
     stmt = select(Receipt).where(Receipt.household_id == house.id)
     if unlinked:
         stmt = stmt.where(Receipt.transaction_id.is_(None))
+    if transaction_id:
+        stmt = stmt.where(Receipt.transaction_id == transaction_id)
     if since:
         stmt = stmt.where(Receipt.created_at >= since)
     rows = list(
@@ -1683,7 +1732,106 @@ def list_receipts(
         ).scalars()
     )
     request.state.agent_rows = len(rows)
-    return [_receipt_out(row) for row in rows]
+    thumbs = receipt_service.blobs_with_role(
+        agent.session, [row.blob_sha256 for row in rows], BlobRole.thumb
+    )
+    return [_receipt_out(row, has_thumbnail=row.blob_sha256 in thumbs) for row in rows]
+
+
+@router.get("/receipts/{receipt_id}", response_model=AgentReceiptOut)
+def read_receipt(receipt_id: str, agent: CurrentAgent, request: Request) -> AgentReceiptOut:
+    """One receipt: its note, the claim sent with it, and whether it is on a row.
+
+    A note an agent writes at upload used to be write-only: nothing a key
+    could call returned it, so a later run -- or another agent -- could not
+    read back what it had been told (#44). 404 for another household's id,
+    like every other agent route.
+    """
+    receipt = agent.load(Receipt, receipt_id)
+    request.state.agent_rows = 1
+    return _receipt_out(receipt)
+
+
+#: The receipt bytes' own policy, the same as the browser's route: a file is
+#: served to be saved or read, never rendered as a page on this origin.
+_RECEIPT_BYTES_CSP = "default-src 'none'; sandbox"
+
+_RECEIPT_FILE = {
+    200: {
+        "description": "The stored bytes; Content-Type says what they are.",
+        "content": {
+            "image/avif": {},
+            "image/jpeg": {},
+            "image/png": {},
+            "image/webp": {},
+            "image/heic": {},
+            "application/pdf": {},
+        },
+    },
+    404: {"description": "No such receipt in this key's household, or no copy of that kind."},
+}
+
+
+def _receipt_bytes(agent, request: Request, receipt, roles: tuple[BlobRole, ...]) -> Response:
+    """The first of `roles` this receipt has, as a download.
+
+    `receipt` is already loaded through the key's household -- by the route,
+    where `test_api` looks for the check.
+    """
+    blob = None
+    for role in roles:
+        blob = receipt_service.blob_for(agent.session, receipt.blob_sha256, role)
+        if blob is not None:
+            break
+    if blob is None:
+        raise NotFound(
+            "that receipt has no copy of that kind", code="receipt.no_such_copy", params={}
+        )
+    request.state.agent_rows = 1
+    name = f"receipt-{receipt.id}-{blob.role.value}.{receipt_service.suffix_for(blob.media_type)}"
+    return Response(
+        content=blob.data,
+        media_type=blob.media_type,
+        headers={
+            "Content-Disposition": f'attachment; filename="{name}"',
+            "Content-Security-Policy": _RECEIPT_BYTES_CSP,
+            "Cache-Control": "private, no-store",
+        },
+    )
+
+
+@router.get(
+    "/receipts/{receipt_id}/file",
+    response_class=Response,
+    responses=_RECEIPT_FILE,
+)
+def receipt_file(receipt_id: str, agent: CurrentAgent, request: Request) -> Response:
+    """The stored file, so an agent can read a receipt again (#44).
+
+    The original when one was kept -- always for a PDF, whose later pages the
+    raster would lose, and for everything when the household keeps originals
+    -- otherwise the AVIF the app made of it, 2000 px on the long edge, which
+    is what a person sees in the lightbox and is enough to read a total off.
+    EXIF is stripped from both; `captured_at` is on the receipt itself.
+
+    A key could only upload evidence before this, which left an agent asked
+    to summarise last week's receipts hashing local files to find them. Read
+    scope, logged in the request log like every other read, and 404 for
+    another household's receipt.
+    """
+    receipt = agent.load(Receipt, receipt_id)
+    return _receipt_bytes(agent, request, receipt, (BlobRole.original, BlobRole.display))
+
+
+@router.get(
+    "/receipts/{receipt_id}/thumbnail",
+    response_class=Response,
+    responses=_RECEIPT_FILE,
+)
+def receipt_thumbnail(receipt_id: str, agent: CurrentAgent, request: Request) -> Response:
+    """The 320 px AVIF, when the receipt has one (`has_thumbnail`); 404 if not."""
+    receipt = agent.load(Receipt, receipt_id)
+    return _receipt_bytes(agent, request, receipt, (BlobRole.thumb,))
 
 
 @router.post("/receipts/{receipt_id}/link", response_model=AgentReceiptOut)
