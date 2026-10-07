@@ -287,6 +287,15 @@ history this repository does not have.
   the day before had nothing to read but its own claim. Another household's
   receipt is a `404`, and every read is in the request log. (#44)
 
+- **A weekly upgrade rehearsal on a bench-sized ledger** (`bench.yml`,
+  Mondays and by hand). It is not a pull-request check. It builds the demo
+  seed with the last release's code, grows it to about 100 MiB with
+  `scripts/bench_ledger.py`, and times `alembic upgrade head`, a backup and
+  the `/db` snapshot. It still fails if a row is lost. On a 93 MiB,
+  129,024-row ledger, the slowest migration in the project's history (one
+  that rebuilds `transactions`) took 5.8 s, and the whole chain about 25 s.
+  The upgrade from 0.7.1 took under 2 s. (#104)
+
 - **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
   can offer them.** Nothing on the sign-in screen changes yet. The new
   setting is the host name passkeys will be bound to. It defaults to the host
