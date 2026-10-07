@@ -178,6 +178,14 @@ What the compose file already does for you, and why:
   bridge's gateway if you know it; never set it to `*`.
 - **`SPENDTRACKER_PUBLIC_URL`** is where invitation links point. Set it to the
   address people actually use.
+- **Passkeys** are bound to the host of `SPENDTRACKER_PUBLIC_URL`, which is
+  `SPENDTRACKER_RP_ID` unless you set that to something else. Boot refuses
+  any value other than that host. **Choose the name before anyone registers a
+  passkey.** Moving later to the sidecar in section 3 changes the name from
+  `<server>.<tailnet>.ts.net` to `spend-tracker.<tailnet>.ts.net`, and so
+  does renaming the machine or the tailnet. After such a move, every member
+  signs in with password and code and registers again. See *Passkeys, and
+  choosing the host name first* in the README.
 
 > **Never `tailscale funnel`.** Funnel publishes the app to the open internet.
 > Everything on this page assumes the only way in is your tailnet.

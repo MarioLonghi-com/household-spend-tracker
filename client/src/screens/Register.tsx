@@ -42,6 +42,7 @@ import {
   groupByPayment,
   workState,
 } from "../lib/reimbursement";
+import { accountGroups, type AccountGrouping } from "../components/accountGroups";
 import { RowPicker } from "../components/RowPicker";
 import { SplitBar } from "../components/SplitBar";
 import { Transfer } from "./Transfer";
@@ -108,58 +109,6 @@ function Cleared({ state }: { state: Transaction["cleared"] }) {
       {letter}
     </span>
   );
-}
-
-/** How an account type reads in a filter heading. */
-const TYPE_NAMES: Record<string, string> = {
-  checking: "Checking",
-  savings: "Savings",
-  cash: "Cash",
-  credit_card: "Credit cards",
-  other_asset: "Other assets",
-  other_liability: "Other liabilities",
-};
-
-/**
- * How the accounts filter gathers its options.
- *
- * Country first, then type, exactly as the income-and-expense report does it:
- * "what did we spend in Spain" is asked more often than "what did the savings
- * accounts do", and a filter that groups one way on one screen and another way
- * on the next is two things to learn.
- *
- * A second copy of the report's own `accountGroups`, which is not exported and
- * lives in a file this session does not own. It should be hoisted next to
- * `GroupedPicker` so the two cannot drift -- noted rather than done, because
- * moving it means editing that screen.
- */
-type AccountGrouping = "country" | "type";
-
-function accountGroups(accounts: Account[], grouping: AccountGrouping): PickerGroup[] {
-  const buckets = new Map<string, { label: string; items: Account[] }>();
-  for (const account of accounts) {
-    const key = grouping === "country" ? (account.country ?? "—") : account.type;
-    const label =
-      grouping === "country"
-        ? account.country
-          ? `${account.flag} ${account.country}`
-          : "No country set"
-        : (TYPE_NAMES[account.type] ?? account.type);
-    const bucket = buckets.get(key) ?? { label, items: [] };
-    bucket.items.push(account);
-    buckets.set(key, bucket);
-  }
-  return [...buckets.entries()]
-    .sort((a, b) => a[1].label.localeCompare(b[1].label))
-    .map(([key, bucket]) => ({
-      key,
-      label: bucket.label,
-      items: bucket.items.map((account) => ({
-        id: account.id,
-        label: account.name,
-        hint: account.currency,
-      })),
-    }));
 }
 
 /**

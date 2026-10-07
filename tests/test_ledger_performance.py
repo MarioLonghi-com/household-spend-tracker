@@ -83,7 +83,7 @@ def test_a_payees_category_history_is_read_from_an_index_not_a_scan():
     B-tree for the sort: 7-11 ms a query at 50k rows, 1.6 s of a 300-line
     import.
     """
-    engine = create_engine("sqlite://", future=True)
+    engine = create_engine("sqlite://")
     Base.metadata.create_all(engine)
     history = (
         select(Transaction.category_id)
@@ -97,7 +97,7 @@ def test_a_payees_category_history_is_read_from_an_index_not_a_scan():
 
 
 def test_the_transfer_lanes_and_the_account_delete_check_use_an_index():
-    engine = create_engine("sqlite://", future=True)
+    engine = create_engine("sqlite://")
     Base.metadata.create_all(engine)
     restrict = select(Transaction.id).where(Transaction.transfer_account_id == "a" * 32)
     plan = _plan(engine, restrict)
@@ -113,7 +113,7 @@ def test_the_housekeeping_timer_leaves_the_planner_statistics(tmp_path):
     3.46 quietly does nothing at all.
     """
     path = tmp_path / "stats.sqlite3"
-    engine = create_engine(f"sqlite:///{path}", future=True)
+    engine = create_engine(f"sqlite:///{path}")
     Base.metadata.create_all(engine)
     with engine.begin() as conn:
         conn.execute(text("PRAGMA foreign_keys=OFF"))
@@ -1297,7 +1297,7 @@ def test_who_entered_a_households_transactions_is_read_from_that_households_log(
 
 
 def test_where_a_transaction_came_from_is_an_index_search():
-    engine = create_engine("sqlite://", future=True)
+    engine = create_engine("sqlite://")
     Base.metadata.create_all(engine)
     plan = _plan(engine, select(ImportLine).where(ImportLine.transaction_id == "t" * 32))
     assert "ix_import_lines_transaction_id" in plan, plan
@@ -1311,7 +1311,7 @@ def test_the_flow_reports_start_from_the_household_even_with_statistics():
     averages rows per value, so it believed that meant a handful."""
     from app.services.reporting import flow_rows
 
-    engine = create_engine("sqlite://", future=True)
+    engine = create_engine("sqlite://")
     Base.metadata.create_all(engine)
     ours, theirs = "a" * 32, "b" * 32
     with engine.begin() as conn:
@@ -1362,7 +1362,7 @@ def test_the_flow_reports_read_the_repayments_once_whatever_the_statistics(stati
     """
     from app.services.reporting import _is_reimbursement, flow_rows
 
-    engine = create_engine("sqlite://", future=True)
+    engine = create_engine("sqlite://")
     Base.metadata.create_all(engine)
     ours, theirs = "a" * 32, "b" * 32
     rows = [
@@ -1489,7 +1489,7 @@ def test_the_app_connection_syncs_at_checkpoints_and_keeps_a_real_cache(tmp_path
 
     from app import db
 
-    engine = create_engine(f"sqlite:///{tmp_path / 'pragmas.sqlite3'}", future=True)
+    engine = create_engine(f"sqlite:///{tmp_path / 'pragmas.sqlite3'}")
     sa_event.listen(engine, "connect", db._sqlite_pragmas)
     try:
         with engine.connect() as conn:

@@ -124,6 +124,15 @@ history this repository does not have.
 
 ### Changed
 
+- **Small fixes left from reviews** (#110): History headlines a bulk delete
+  of receipts as *Bulk delete*, not *Bulk edit*; an account update that sends
+  a country or statement product together with its clear flag is refused, as
+  the note and the bank already were, rather than the flag winning in silence;
+  `make version` works in a worktree without a `.venv`; the accounts filter's
+  grouping is one shared copy for the register and the income-and-expense
+  report; opening a screen from `?open=` no longer depends on React running
+  the reader once; and three deprecation warnings are gone from the test run.
+
 - **A receipt photo over 4 MB from an agent is told how to shrink it.** The
   `413` from the agent receipt routes pointed at the multipart route, which no
   key can use. It now says to shrink the photo below 4 MB as JPEG or AVIF,
@@ -159,6 +168,10 @@ history this repository does not have.
   same file sent again with *Import it anyway* -- brings it back. Undo in
   History is the other way back. Nothing about importing changed; it is now
   written down and tested. (#91)
+
+- **Why any member may import accounts from a file is written down**, beside
+  the route, with a test: it only adds accounts, each in the audit log, and
+  History undoes the whole file. Nothing about who may run it changed. (#115)
 
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
@@ -214,6 +227,33 @@ history this repository does not have.
   `users.webauthn_user_handle`. **Reversible: lossy**: rolling it back drops
   every registered passkey, and members then sign in with password + code as
   before. (#120)
+- **Signing in with a passkey.** Where passkeys can work, the sign-in screen
+  offers "Sign in with a passkey", and the email field suggests your passkeys
+  itself in browsers that support that. Both the server and the browser
+  must agree that passkeys can work here; anywhere else the screen is as it
+  was. A passkey is both factors at once, so it signs you in with no code
+  step and does not mark the browser as trusted. Every refusal says the same
+  thing: an unknown passkey, a disabled member, a passkey made for another
+  host name, a replayed challenge and a bad signature all read alike.
+  Failed passkey sign-ins have their own rate limit. **What else changes:**
+  - **Account resets remove the account's passkeys.** That covers an owner's
+    reset link, `scripts.reset_account` and `scripts.reset_authenticator`.
+  - **A recovery code leaves passkeys in place**, and the screen now says how
+    many still work, so you can remove one that was on a lost phone.
+  - **A password change leaves passkeys in place**, as it leaves agent keys.
+  (#121)
+
+
+### Documentation
+
+- **Passkeys for operators:** the README section *Passkeys, and choosing the
+  host name first* says how an instance can be reached for passkeys to work,
+  and what `SPENDTRACKER_RP_ID` defaults to and refuses. It also says why the
+  host name has to be chosen before anyone registers a passkey, and what
+  household devices need, including that signing in on a laptop with a phone
+  needs Bluetooth and internet on both. `deploy/DOCKER.md` and
+  `deploy/UPGRADING.md` each add a paragraph on what changes the name and
+  what to do afterwards. (#123)
 
 ## 0.7.1 — 2026-10-05
 

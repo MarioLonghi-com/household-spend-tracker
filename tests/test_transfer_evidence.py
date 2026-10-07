@@ -639,7 +639,7 @@ def test_the_backfill_calls_hand_typed_links_a_persons_and_the_rest_import(tmp_p
     cfg = _config(url)
     command.upgrade(cfg, "c3e8a1f05d72")
 
-    engine = create_engine(url, future=True)
+    engine = create_engine(url)
     with engine.begin() as conn:
         _insert(conn, "households", id="h1", name="Ours")
         for account in ("a1", "a2"):
