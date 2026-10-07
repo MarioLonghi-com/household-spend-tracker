@@ -26,6 +26,13 @@ this repository.
 
 ## Unreleased
 
+### Security
+
+- **`/snap` paints the household's accent only when it is a `#rrggbb` colour.**
+  The server already validates it before storing it; the capture page now
+  checks it again before setting the header's background, as the app's own
+  theme does. Defence in depth. (#92)
+
 ### Fixed
 
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
