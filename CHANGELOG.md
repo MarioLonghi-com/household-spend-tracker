@@ -285,6 +285,15 @@ history this repository does not have.
 
 ### Added
 
+- **An agent key can read a stored receipt back.** Receipts in the agent API
+  now carry their `note`, and there are new read-scope routes for one
+  receipt, its stored file and its thumbnail:
+  `GET /api/agent/v1/receipts/{id}`, `…/file` and `…/thumbnail`. The listing
+  also takes `transaction_id=` to go from a row to its receipts. A note sent
+  at upload used to be write-only, and an agent summarising receipts filed
+  the day before had nothing to read but its own claim. Another household's
+  receipt is a `404`, and every read is in the request log. (#44)
+
 - **A weekly upgrade rehearsal on a bench-sized ledger** (`bench.yml`,
   Mondays and by hand). It is not a pull-request check. It builds the demo
   seed with the last release's code, grows it to about 100 MiB with
