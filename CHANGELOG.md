@@ -79,6 +79,15 @@ history this repository does not have.
   history. A code the household already holds from before this check is still
   accepted, so no existing ledger stops working. Nothing stored changes. (#110)
 
+- **A Spanish statement whose date column is headed `F. Valor` imports.**
+  Spanish banks abbreviate *fecha* to "F.". "F. Valor" matched no date name
+  and did match the amount name "valor", so the file had no date column and
+  its dates were taken as the amount. A header of "F." followed by a word is
+  now a date. Three synthetic statements are kept as regression fixtures:
+  this header; `1,234` beside `1,234.56`; and a blank debit cell next to a
+  balance column. A new test checks that undoing an import gives a
+  hand-entered row it absorbed back exactly as it was. (#90)
+
 - **A register load is one request for its rows, not two.** The count beside
   "Needs a category" was a second `GET …/transactions` fired in the same tick
   as the register's own, and `access.log` drops the query string, so every
