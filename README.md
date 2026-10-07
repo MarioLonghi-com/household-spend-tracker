@@ -56,7 +56,7 @@ documentation:
 
 | | | |
 |---|---|---|
-| **Python** | >= 3.12 | CI runs 3.12; 3.14 works |
+| **Python** | >= 3.12 | CI tests 3.12 only |
 | **Node** | ^22.22.2, ^24.15 or >= 26 | jsdom 30's floor (vite 8 needs less); CI runs 22, and so does `.nvmrc` |
 | SQLite | bundled with Python | nothing to install |
 
@@ -260,6 +260,13 @@ docker compose build --build-arg PY_BASE=python:3.12-slim \
 
 Both are built in CI, so the bypass is tested rather than promised.
 
+Both Chainguard bases are pinned by digest, and Dependabot moves the pins. The
+free tier offers only a moving `:latest` tag, so the digest is what makes a
+build name its input. The release attestation says which workflow built an
+image from which commit; it does not make the build reproducible, and two
+builds of one commit on different days can differ by whatever a base moved
+between them.
+
 ### A release tarball
 
 Needs Python 3.12+ and nothing else — the client is prebuilt inside, so there
@@ -409,7 +416,9 @@ because `tests/test_version.py` fails when the three files drift apart.
 one, and CI's `release-ready` job refuses it until it looks like one
 (`scripts/release_check.py`):
 
-1. On a branch off `dev`: `make version BUMP=minor` (or `technical`, `major`).
+1. On a branch off `dev`: `make version BUMP=minor` (or `technical`, `major`),
+   and `./.venv/bin/python -m scripts.common_passwords --refresh` to take the
+   newest copy of the common-password list (it says if nothing changed).
 2. In `CHANGELOG.md`, retitle `## Unreleased` to `## X.Y.Z — YYYY-MM-DD` and
    put an empty `## Unreleased` above it. The section needs a
    `**Reversible: none|clean|lossy**` line naming **every migration added since
@@ -572,3 +581,10 @@ that if you run a **modified** version and let other people use it over a
 network, those users must be offered the source of the version they are talking
 to. Running it unmodified for your own household — which is what this is for —
 asks nothing of you. Publishing a fork and inviting others onto it does.
+
+**One file in it is somebody else's data.** `app/auth/common_passwords.txt`,
+the list a new password is checked against, is the top 100,000 of the ten
+million passwords Mark Burnett released into the public domain in 2015, as
+distributed in [SecLists](https://github.com/danielmiessler/SecLists) (MIT
+licence, Daniel Miessler). `app/auth/common_passwords.py` pins the commit it
+came from and its digest.

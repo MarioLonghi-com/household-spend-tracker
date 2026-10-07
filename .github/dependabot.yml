@@ -102,10 +102,11 @@ updates:
       actions:
         patterns: ["*"]
 
-  # The Dockerfile's Node stage is pinned by digest, which only stays a
-  # discipline rather than a fossil if something moves it. This is what does.
-  # It watches literal `FROM` lines; the Chainguard bases are `ARG` defaults
-  # and are not pinned yet (issue #63).
+  # The Dockerfile's bases are pinned by digest -- Node and both Chainguard
+  # Pythons -- which only stays a discipline rather than a fossil if something
+  # moves them. This is what does. It watches literal `FROM` lines, which is
+  # why the Chainguard bases are stages of their own rather than `ARG`
+  # defaults (#95).
   - package-ecosystem: docker
     directory: /
     target-branch: dev

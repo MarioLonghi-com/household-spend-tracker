@@ -13,7 +13,7 @@ each carrying an email address and an IP. That is the finding this module
 closes, and the shape of it is worth keeping: **a retention policy written in a
 docstring is not a retention policy.**
 
-All five auth tables here are `__audit__ = False` -- they record what happened
+All six auth tables here are `__audit__ = False` -- they record what happened
 at the door, not what happened to the ledger -- so these are bulk deletes with
 nothing for the audit hook to miss, and each says so where the grep can see it.
 
@@ -33,7 +33,8 @@ Retention, in one place. Each figure is the constant the sweep uses, and
 `tests/test_housekeeping.py` reads this list against them:
 
 - sessions: until the absolute or the idle window ends, whichever is first
-- pending sign-ins, trusted devices, step-up grants: until `expires_at`
+- pending sign-ins, trusted devices, step-up grants, WebAuthn challenges:
+  until `expires_at`
 - login attempts: 30 days (`ratelimit.RETENTION`), each an address as typed
 - invitations: 30 days after they stopped being usable -- accepted, withdrawn
   or expired (`invitations.RETENTION`), each the invitee's address (#211)
@@ -61,7 +62,7 @@ from ..services import agent_requests as agent_request_service
 from ..services import backup_bundle, importing
 from ..services import invitations as invitation_service
 from ..services import receipts as receipt_service
-from . import ratelimit, stepup
+from . import passkeys, ratelimit, stepup
 
 
 def sweep(engine: Engine) -> dict[str, int]:
@@ -104,6 +105,10 @@ def sweep(engine: Engine) -> dict[str, int]:
         # issue: there is no state here worth keeping past it, and the row is
         # a credential hash, so "expired" and "deletable" are the same instant.
         removed["step_up_grants"] = stepup.sweep(own, now=now)
+
+        # A passkey challenge nobody came back with: five minutes, single use,
+        # and nothing worth keeping once it can no longer be answered.
+        removed["webauthn_challenges"] = passkeys.sweep(own, now=now)
 
         # What agent keys asked for, past the thirty days worth keeping. Not
         # audited, so a bulk delete like the four above it.

@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from ... import db
 from ...audit.batch import batch
-from ...auth import cookies, keycheck, service
+from ...auth import cookies, keycheck, passkeys, service
 from ...auth import devices as device_service
 from ...auth import sessions as session_service
 
@@ -18,6 +18,7 @@ from ...auth import sessions as session_service
 from ...errors import Unauthorized
 from ...models import BatchKind, User
 from ...schemas import (
+    PasskeyStateOut,
     PresenceOut,
     SignIn,
     SignInState,
@@ -92,6 +93,22 @@ def sign_in(
     )
     cookies.set_session(response, result.session_value)
     return SignInState(authenticated=True, user=UserOut.model_validate(user))
+
+
+@router.get("/session/passkey/state", response_model=PasskeyStateOut)
+def passkey_state(request: Request) -> PasskeyStateOut:
+    """Whether this instance may offer passkeys to this browser, and if not,
+    why. Asked before anyone signs in, so it names nothing about any account:
+    only how the server is configured and how this request reached it. See
+    `app/auth/passkeys.py`.
+    """
+    found = passkeys.state(request)
+    return PasskeyStateOut(
+        available=found.available,
+        reason=found.reason.value if found.reason else None,
+        detail=found.detail,
+        address=found.address,
+    )
 
 
 @router.post("/session/code", response_model=SignInState)
