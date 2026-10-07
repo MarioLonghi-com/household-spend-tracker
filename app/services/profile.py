@@ -369,6 +369,15 @@ def regenerate_recovery_codes(
     of either is a spent attempt, and a code is not burned for a caller who
     does not have the password.
 
+    A member the server's key cannot open (#287) is refused first, with
+    `key_replaced` and the step-up's sentence (#98): no code from that
+    authenticator can be checked, a recovery code is not taken here either,
+    and a new authenticator set up from the profile is the way on -- the same
+    position as a step-up, so the same words. Before the limiter and the
+    password, as there, so nothing is counted and nothing about the password
+    is said. It used to be the generic refusal, which told them nothing they
+    could act on.
+
     Every existing code goes, used or not, and the new ones are stored only as
     hashes. Sessions, trusted browsers and agent keys are left alone: this is a
     deliberate act from a browser the person holds, like changing a password,
@@ -382,6 +391,9 @@ def regenerate_recovery_codes(
         # Nothing to prove the second factor with. Refused before the budget is
         # touched: it is a fact about the account, not a guess.
         raise ValidationError("set up an authenticator before making new recovery codes")
+    auth_service.refuse_a_replaced_key(
+        user, signed_in=True, sentence=auth_service.KEY_REPLACED_STEP_UP
+    )
 
     held = ratelimit.reserve(engine, email_canonical=user.email_canonical, ip=ip, kind=KIND)
     if not passwords.verify_password(user.password_hash, password):

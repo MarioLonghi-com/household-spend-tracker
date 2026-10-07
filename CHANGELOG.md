@@ -28,6 +28,12 @@ this repository.
 
 ### Fixed
 
+- **"Make new codes" tells a member whose authenticator the server can no
+  longer check what to do.** After `secret.key` was replaced, it answered with
+  the generic "that password and authenticator code do not prove it is you".
+  It now says what a step-up says: the key was replaced, a recovery code does
+  not stand in here, and setting up a new authenticator is the way on. (#98)
+
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
   read the last separator as the decimal mark, so a thousands comma with no
   decimals was taken as a decimal comma and the third digit rounded away -- a
@@ -44,6 +50,7 @@ this repository.
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
+
 - **A receipt's free-text field is now headed "Receipt notes"**, on the
   Receipts screen and on `/snap`. It used to say "Note". A transaction's field
   is a *memo*, and the old heading read as if the two were the same thing.
