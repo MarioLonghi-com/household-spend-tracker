@@ -43,6 +43,11 @@ this repository.
   in the client uses one (the QR code is SVG), so `img-src` is `'self' blob:`.
   (#94)
 
+- **`/snap` paints the household's accent only when it is a `#rrggbb` colour.**
+  The server already validates it before storing it; the capture page now
+  checks it again before setting the header's background, as the app's own
+  theme does. Defence in depth. (#92)
+
 ### Fixed
 
 - **An agent's import row can say its currency, and one in another currency

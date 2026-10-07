@@ -156,9 +156,16 @@ function schemeNow() {
   }
 }
 
+// The same lock as `client/src/lib/theme.ts`, which a test holds this to. The
+// server validates the accent as hex before storing it; this is the second
+// lock, so a server bug, an old row or a tampered response is never pasted
+// into the header's style (#92). Anything else leaves the header as it is.
+const HEX = /^#[0-9a-fA-F]{6}$/;
+
 function accentOf(house) {
   const scheme = house.colours && house.colours[schemeNow()];
-  return scheme ? scheme.accent : null;
+  const accent = scheme ? scheme.accent : null;
+  return typeof accent === "string" && HEX.test(accent) ? accent : null;
 }
 
 function paint() {
