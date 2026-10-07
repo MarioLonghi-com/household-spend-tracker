@@ -252,6 +252,20 @@ history this repository does not have.
 
 ### Added
 
+- **The upgrade drill can be driven by a program.** `python -m scripts.upgrade
+  --check --json` prints what an upgrade would do as one JSON document: the
+  deployed version and commit, the database's stamp, the code's head, and each
+  pending migration with its `Reversible:` verdict. `--yes --report PATH`
+  writes the outcome of a real run -- the backup folder and whether it
+  verified, the stamp and every counted table before and after, the
+  `secret.key` check, the exit status and the log -- whatever the exit. And
+  the exit status now says what happened: a `secret.key` that does not open
+  the migrated ledger exits 5 and a table with fewer rows than the backup
+  counted exits 6, where both used to print a warning and exit 0, which a
+  person reading the output catches and an updater would not. The codes are
+  listed in the script's docstring. A test proves `--check` against a live WAL
+  ledger leaves the database and its `-wal` byte for byte as they were. (#155)
+
 - **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
   can offer them.** Nothing on the sign-in screen changes yet. The new
   setting is the host name passkeys will be bound to. It defaults to the host
