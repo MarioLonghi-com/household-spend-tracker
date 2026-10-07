@@ -147,6 +147,23 @@ class SignInState(BaseModel):
     detail: str | None = None
 
 
+class PasskeyStateOut(BaseModel):
+    """Whether this instance offers passkeys to this request (#47, decision 4).
+
+    `reason` is one of `not_configured`, `ip_address`, `wrong_host`,
+    `insecure` or `no_origins` (`app/auth/passkeys.Unavailable`) when
+    `available` is false; the client words its own sentence from it, and
+    `detail` is the operator's. `address` is the public URL, when one is
+    configured for the RP ID, so a screen reached at the wrong address can
+    say where passkeys do work.
+    """
+
+    available: bool
+    reason: str | None = None
+    detail: str | None = None
+    address: str | None = None
+
+
 # --------------------------------------------------------------------------- #
 # Households
 # --------------------------------------------------------------------------- #

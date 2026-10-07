@@ -78,6 +78,48 @@ def test_an_amount_that_cannot_be_read_says_so_rather_than_reading_zero(text, se
         sniffing.parse_amount(text, decimal_separator=separator)
 
 
+@pytest.mark.parametrize(
+    ("text", "separator", "expected"),
+    [
+        ("12.50 DR", ".", "-12.50"),
+        ("12.50DR", ".", "-12.50"),
+        ("12.50 dr", ".", "-12.50"),
+        ("12,50 DR", ",", "-12.50"),
+        ("1.234,56 DR", ",", "-1234.56"),
+        ("€ 1,234.56 DR.", ".", "-1234.56"),
+        ("12.50 CR", ".", "12.50"),
+        ("1.234,56 Cr", ",", "1234.56"),
+        (f"12.50{chr(0xa0)}DR", ".", "-12.50"),
+    ],
+)
+def test_a_debit_or_credit_written_after_the_figure_is_its_sign(text, separator, expected):
+    """#84: the letters were stripped as decoration, so a debit came in as money in."""
+    assert str(sniffing.parse_amount(text, decimal_separator=separator)) == expected
+
+
+@pytest.mark.parametrize("text", ["-12.50 DR", "12.50- CR", "(12.50) DR", f"{MINUS}12.50 CR", "+12.50 DR"])
+def test_a_sign_and_dr_or_cr_together_is_signed_twice(text):
+    with pytest.raises(ValueError, match="signed twice"):
+        sniffing.parse_amount(text)
+
+
+def test_dr_and_cr_are_signs_only_after_a_figure():
+    """A word that ends in the letters is not a marker, and is not a number either."""
+    assert signs.debit_credit("ACCR") == ("ACCR", None)
+    assert signs.debit_credit("12.50 DR") == ("12.50", "-")
+    with pytest.raises(ValueError, match="could not read"):
+        sniffing.parse_amount("DR")
+    assert signs.written_negative("12.50 DR")
+    assert not signs.written_negative("12.50 CR")
+
+
+def test_dr_does_not_hide_the_decimal_comma():
+    """"12,500 DR" has a three-digit tail, not the six characters "500 DR"."""
+    assert sniffing.guess_decimal_separator(["12,500 DR", "1.500,00 DR"]) == ","
+    assert sniffing.guess_decimal_separator(["12,50 DR"]) == ","
+    assert sniffing._settle(["12,500 DR"]) == (None, "12,500 DR")
+
+
 def test_a_trailing_sign_does_not_hide_the_decimal_comma():
     """``12,50-`` has a two-digit fraction; read as "50-" it was a thousands group."""
     assert sniffing.guess_decimal_separator(["12,50-"]) == ","
@@ -183,6 +225,55 @@ def test_a_file_signed_only_with_minus_signs_is_not_called_all_positive():
     assert not any("positive" in w for w in sniffing.sniff(trailing_only).warnings)
 
 
+# Ledger-style: every amount unsigned, the direction said in letters (#84).
+DEBIT_CREDIT = {
+    "dot": (
+        b"Date,Description,Amount\n"
+        b"2026-01-15,EXAMPLE GROCER,12.50 DR\n"
+        b"2026-01-16,EXAMPLE PAYROLL,2100.00 CR\n"
+        b"2026-01-17,EXAMPLE CAFE,3.20DR\n"
+        b"2026-01-18,EXAMPLE TWICE,-4.00 DR\n"
+    ),
+    "comma": (
+        b"Fecha;Concepto;Importe\n"
+        b"15/01/2026;EXAMPLE GROCER;1.234,56 DR\n"
+        b"16/01/2026;EXAMPLE PAYROLL;2.100,00 CR\n"
+        b"17/01/2026;EXAMPLE CAFE;45,20 dr\n"
+        b"18/01/2026;EXAMPLE TWICE;(1,00) DR\n"
+    ),
+}
+
+
+@pytest.mark.parametrize(
+    ("convention", "account_key", "amounts"),
+    [
+        ("dot", "pounds", {2: -1_250, 3: 210_000, 4: -320}),
+        ("comma", "checking", {2: -123_456, 3: 210_000, 4: -4_520}),
+    ],
+)
+def test_dr_rows_stage_as_money_out_and_cr_as_money_in(
+    session, owner, household, accounts, convention, account_key, amounts
+):
+    raw = DEBIT_CREDIT[convention]
+    assert not any("every amount in this file is positive" in w for w in sniffing.sniff(raw).warnings)
+
+    account = accounts[account_key]
+    staged, lines = _stage(session, owner, household, account, raw)
+    assert {n: lines[n].parsed["amount"] for n in amounts} == amounts
+    assert lines[5].outcome is ImportOutcome.rejected and "signed twice" in lines[5].reason
+
+    with batch(session, kind=BatchKind.imported, actor_id=owner.id, household_id=household.id):
+        result = importing.commit(session, batch_row=staged, account=account)
+        staged.status = BatchStatus.applied
+    assert result["created"] == 3
+
+    from app.services import accounts as account_service
+
+    assert account_service.balances(session, account.id)["balance"] == sum(amounts.values())
+    other = accounts["checking" if account_key == "pounds" else "pounds"]
+    assert account_service.balances(session, other.id)["balance"] == 0
+
+
 FEE_AND_BALANCE = (
     "Date,Description,Outflow,Inflow,Fee,Balance\n"
     f"2026-01-15,EXAMPLE GROCER,{MINUS}12.50,,0.30,100.00\n"
@@ -234,14 +325,18 @@ def test_a_file_with_readable_balances_has_no_balance_warning():
 # --------------------------------------------------------------------------- #
 
 
-@pytest.mark.parametrize("word", [f"{MINUS}930,00", "930,00-", "\u2013930,00", "\uff0d49,00"])
+@pytest.mark.parametrize(
+    "word", [f"{MINUS}930,00", "930,00-", "\u2013930,00", "\uff0d49,00", "930,00DR", "49,00CR"]
+)
 def test_a_pdf_word_signed_either_way_is_money(word):
     """Not seen as a number, it is placed by its left edge, like text."""
     assert pdf_statement._numeric(word)
     assert pdf_statement._looks_like_money(word)
 
 
-@pytest.mark.parametrize("word", ["--12--", "+12.50-", "-12.50-", "--12", "12--", "-", "+-"])
+@pytest.mark.parametrize(
+    "word", ["--12--", "+12.50-", "-12.50-", "--12", "12--", "-", "+-", "-12.50DR", "DR"]
+)
 def test_a_pdf_word_signed_more_than_once_is_not_a_number(word):
     """At most one sign, at one end -- what `parse_amount` accepts, too."""
     assert not pdf_statement._numeric(word)
@@ -302,3 +397,17 @@ def test_a_pdf_with_a_real_minus_sign_imports_a_debit(session, owner, household,
     _, lines = _stage(session, owner, household, accounts["checking"], raw)
     assert [lines[n].parsed["amount"] for n in (2, 3, 4)] == [-1_250, 210_000, -320]
     assert {line.outcome for line in lines.values()} == {ImportOutcome.created}
+
+
+def test_a_pdf_with_dr_and_cr_after_the_figure_imports_their_direction():
+    """#84, in a PDF: "DR" is its own word, and lands in the amount cell beside the figure."""
+    raw = _tiny_pdf(
+        [
+            [(50, "Date"), (150, "Description"), (400, "Amount")],
+            [(50, "15/01/2026"), (150, "EXAMPLE GROCER"), (400, "12,50"), (430, "DR")],
+            [(50, "16/01/2026"), (150, "EXAMPLE PAYROLL"), (400, "2.100,00"), (440, "CR")],
+            [(50, "17/01/2026"), (150, "EXAMPLE CAFE"), (400, "3,20DR")],
+        ]
+    )
+    _, rows = parsing.read(raw)
+    assert [r.amount for r in rows] == [Decimal("-12.50"), Decimal("2100.00"), Decimal("-3.20")]

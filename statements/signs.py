@@ -11,6 +11,8 @@ can use the same table without a cycle.
 
 from __future__ import annotations
 
+import re
+
 #: Every character read as ``-`` in an amount. A named table on purpose:
 #: `app/services/payees.py` holds its own dash table, `UNICODE_DASHES` (#268),
 #: which must be a superset of this; `tests/test_payee_fold_unicode.py` says so.
@@ -31,12 +33,35 @@ def ascii_minus(text: str) -> str:
     return text.translate(_TO_HYPHEN_MINUS)
 
 
-def written_negative(text: str) -> bool:
-    """Does this amount, as written, carry a minus sign or brackets?
+#: ``12.50 DR`` and ``12.50 CR``: a debit or a credit said in letters after the
+#: figure, as ledger-style statements write it. Only after something ending in a
+#: digit, a bracket or a sign, so a word that merely ends in "cr" is not one
+#: (#84) -- and "12.50- CR" is signed twice rather than a debit.
+_DEBIT_CREDIT = re.compile(r"^(?P<figure>.*[\d)+-])\s*(?P<marker>DR|CR)\.?$", re.IGNORECASE)
 
-    At either end: ``-12.50`` and ``12.50-`` are both debits (issue #261).
+
+def debit_credit(text: str) -> tuple[str, str | None]:
+    """``(the figure, "-" for DR, "+" for CR)``, or ``(text, None)`` without one.
+
+    Before #84 the letters were stripped as decoration with the rest of the
+    non-digits, so ``12.50 DR`` -- a debit -- imported as money in.
     """
-    stripped = ascii_minus(text or "").strip()
+    match = _DEBIT_CREDIT.match((text or "").strip())
+    if match is None:
+        return text, None
+    return match["figure"].rstrip(), "-" if match["marker"].upper() == "DR" else "+"
+
+
+def written_negative(text: str) -> bool:
+    """Does this amount, as written, carry a minus sign, brackets or ``DR``?
+
+    At either end: ``-12.50`` and ``12.50-`` are both debits (issue #261), and
+    so is ``12.50 DR`` (#84).
+    """
+    figure, marker = debit_credit(ascii_minus(text or ""))
+    if marker is not None:
+        return marker == "-"
+    stripped = figure.strip()
     if not stripped:
         return False
     return stripped[0] == "-" or stripped[-1] == "-" or ("(" in stripped and ")" in stripped)

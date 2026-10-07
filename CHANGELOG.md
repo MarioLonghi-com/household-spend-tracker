@@ -28,6 +28,12 @@ this repository.
 
 ### Security
 
+- **The container's Chainguard bases are pinned by digest.** The free tier
+  has only a moving `:latest`, so the image named an input that changed under
+  it. Both bases are now their own pinned stages, which Dependabot's weekly
+  Docker check can move; `PY_BASE=`/`PY_RUN=` still build on any other base.
+  The README says what the release attestation does and does not cover. (#95)
+
 - **A new password is checked against the 100,000 most common.** Length was
   the only rule, so `qwertyuiopasdfgh` passed it. The setup wizard, changing
   your password and a reset link now refuse any of the top 100,000 passwords
@@ -40,6 +46,10 @@ this repository.
   closes.** The wizard dropped it from its own state, but the query library
   kept each finished call -- key included -- for five minutes after the
   wizard closed. Those calls are now discarded as soon as it does. (#93)
+
+- **The Content Security Policy no longer allows `data:` images.** Nothing
+  in the client uses one (the QR code is SVG), so `img-src` is `'self' blob:`.
+  (#94)
 
 ### Fixed
 
@@ -62,6 +72,13 @@ this repository.
   way is refused rather than guessed. "1,234.56", "1.234,56" and "12,34" read
   as before. An amount put back into a box for editing uses the same decimal
   mark, so a three-decimal currency round-trips. (#45)
+
+- **A statement amount written `12.50 DR` imports as money out.** The letters
+  were dropped as decoration, so a debit came in as money in. `DR` after the
+  figure is now a minus and `CR` a plus, in CSV, spreadsheet and PDF
+  statements, with or without a space and in either case; one that also
+  carries a minus sign or brackets is refused as signed twice. The import
+  guide says so. (#84)
 
 ### Changed
 
@@ -89,6 +106,22 @@ this repository.
   client's `tsx`, which one test ran unpinned through `npx`, is a dev
   dependency. **For an operator:** nothing to do beyond the usual
   `make install-prod`. (#46)
+
+### Added
+
+- **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
+  can offer them.** Nothing on the sign-in screen changes yet. The new
+  setting is the host name passkeys will be bound to. It defaults to the host
+  of `SPENDTRACKER_PUBLIC_URL`, and it is never taken from the request. Boot
+  refuses any other value, because a passkey only ever works for the name it
+  was made under: a wider name such as the whole tailnet's is refused, and
+  `localhost` is accepted in development only. `GET
+  /api/session/passkey/state` says whether this request may be offered
+  passkeys, or why not: no public URL set, an IP address, the app opened at
+  another address, or plain HTTP. The `Permissions-Policy` now names the two
+  passkey features, allowed on this origin and refused on `/snap`. The
+  `webauthn` library is added, locked. **For an operator:** nothing to do. If
+  `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
 
 ## 0.7.1 — 2026-10-05
 
