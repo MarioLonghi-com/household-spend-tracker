@@ -1311,12 +1311,19 @@ def write_memos(
 #: that large; `/snap` compresses on the phone and so should anything else.
 MAX_BASE64_BYTES = 4 * 1024 * 1024
 
+#: What to do about it, said by every refusal of a file over the ceiling
+#: (#39). Not "use the multipart route": that belongs to a signed-in person
+#: and no key can use it. The ceiling stays; the agent shrinks the photo, and
+#: has to keep the two things the app reads out of it.
+_SHRINK = (
+    "Shrink it below that first, as JPEG or AVIF, keeping its EXIF DateTimeOriginal and "
+    "GPS -- they are where the capture time and place are read from. agent/README.md, "
+    '"A photo over 4 MB", says how.'
+)
+
 #: One sentence for both doors, so the base64 route and the binary one cannot
 #: come to describe the same ceiling differently.
-_TOO_BIG = (
-    f"that is larger than {MAX_BASE64_BYTES // (1024 * 1024)} MB. Compress it first, "
-    "or use the multipart route a browser uses."
-)
+_TOO_BIG = f"that is larger than {MAX_BASE64_BYTES // (1024 * 1024)} MB. {_SHRINK}"
 
 
 def _decoded(body: AgentReceiptUpload) -> bytes:
@@ -1330,7 +1337,7 @@ def _decoded(body: AgentReceiptUpload) -> bytes:
     if len(encoded) > MAX_BASE64_BYTES * 4 // 3 + 16:
         raise TooLarge(
             f"that is larger than {MAX_BASE64_BYTES // (1024 * 1024)} MB decoded, which is "
-            "the ceiling for base64. Compress it first, or use the multipart route."
+            f"the ceiling for base64. {_SHRINK}"
         )
     try:
         raw = base64.b64decode(encoded, validate=True)
@@ -1338,7 +1345,7 @@ def _decoded(body: AgentReceiptUpload) -> bytes:
         raise ValidationError("content_base64 is not valid base64") from exc
     if len(raw) > MAX_BASE64_BYTES:
         raise TooLarge(
-            f"that is larger than {MAX_BASE64_BYTES // (1024 * 1024)} MB decoded."
+            f"that is larger than {MAX_BASE64_BYTES // (1024 * 1024)} MB decoded. {_SHRINK}"
         )
     return raw
 

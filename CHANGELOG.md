@@ -81,6 +81,12 @@ history this repository does not have.
   until nothing new is strong, still as one batch and one undo, and "Link
   all" says how many it linked in all. (#88)
 
+- **"Make new codes" tells a member whose authenticator the server can no
+  longer check what to do.** After `secret.key` was replaced, it answered with
+  the generic "that password and authenticator code do not prove it is you".
+  It now says what a step-up says: the key was replaced, a recovery code does
+  not stand in here, and setting up a new authenticator is the way on. (#98)
+
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
   read the last separator as the decimal mark, so a thousands comma with no
   decimals was taken as a decimal comma and the third digit rounded away -- a
@@ -101,6 +107,12 @@ history this repository does not have.
 
 ### Changed
 
+- **A receipt photo over 4 MB from an agent is told how to shrink it.** The
+  `413` from the agent receipt routes pointed at the multipart route, which no
+  key can use. It now says to shrink the photo below 4 MB as JPEG or AVIF,
+  keeping its EXIF `DateTimeOriginal` and GPS, and names the section of
+  `agent/README.md` that says how. The 4 MB ceiling is unchanged. (#39)
+
 - **`agent/README.md` fills three gaps an agent found by trial:** the range
   and default of `window_days` on `/transactions/match` (0 to 14, default 4),
   that the register's `amount` filter matches the figure without its sign,
@@ -113,6 +125,15 @@ history this repository does not have.
 - **The CHANGELOG says public releases start at 0.6.2**, and that the
   sections below it are history from the earlier private repository, with no
   tag or release here. (#117)
+
+- **`compose.yaml` runs the published image.** It names
+  `ghcr.io/mariolonghi-com/household-spend-tracker` at the release
+  `SPENDTRACKER_VERSION` in `.env` says, and `docker compose pull` fetches it;
+  `build:` stays as the fallback, and a local build is told to call itself
+  `local`. The README and `deploy/DOCKER.md` start, upgrade and roll back that
+  way. The Tailscale sidecar setup still builds from its checkout. `/llms.txt`
+  names the source repository and its licence, and the pull request template
+  asks for the design doc to be re-read against the code. (#111)
 
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it

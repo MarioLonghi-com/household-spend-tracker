@@ -143,8 +143,10 @@ You have several receipt images. You read them; the app stores them.
 **The app does no OCR and calls no model.** You read the merchant, the date,
 the total and the currency off each image. The app sniffs the file, converts it
 to AVIF with a thumbnail, strips EXIF (keeping the capture time and place),
-deduplicates it and stores it. **Send the file as it is** — do not re-encode or
-resize it yourself.
+deduplicates it and stores it. **Send the file as it is when it is 4 MB or
+less** — do not re-encode or resize it yourself. Over 4 MB, which an ordinary
+phone photo often is, it is refused with `413`: shrink it as
+[A photo over 4 MB](#a-photo-over-4-mb) says, and send that.
 
 **a. Store them.** Up to 25 in one call, base64, 4 MB each decoded:
 
@@ -215,6 +217,40 @@ if you mean to take it off that one.
 
 If you already know the row, pass `transaction_id` in the upload and skip b
 and c.
+
+#### A photo over 4 MB
+
+Every route a key can use takes a file of **4 MB at most** (decoded, for
+base64), and that ceiling stays. A phone photo of 5–7 MB is shrunk by you
+before it is sent, and this is the approved way:
+
+- **Under 4 MB.** Aim for 3.5 MB to leave room: scale the long edge down to
+  about 3000 px and save at a quality around 85. A receipt stays readable far
+  below that.
+- **JPEG or AVIF.** The app converts to AVIF either way; do not send PNG,
+  which is larger, or HEIC, if you can avoid it.
+- **Keep the EXIF.** `DateTimeOriginal` and the GPS tags are where the
+  capture time and place are read from — the date `/candidates` searches from
+  and the place the receipt is shown at. Most tools drop EXIF when they
+  resize unless told otherwise. The app strips everything else itself.
+
+```bash
+magick IMG_2041.jpg -resize '3000x3000>' -quality 85 IMG_2041-small.jpg
+```
+
+ImageMagick keeps the EXIF unless it is given `-strip`. From Python, with
+Pillow:
+
+```python
+from PIL import Image
+
+photo = Image.open("IMG_2041.jpg")
+photo.thumbnail((3000, 3000))
+photo.save("IMG_2041-small.jpg", quality=85, exif=photo.info.get("exif", b""))
+```
+
+Then send the smaller file exactly as above. Check the result is under 4 MB
+before sending, and shrink further if not.
 
 ### 2. Categorisation: find what looks wrong, and fix it
 
