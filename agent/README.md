@@ -159,6 +159,18 @@ curl -s "${auth[@]}" "${json[@]}" -X POST "$H/receipts/batch" -d '{
   ]}'
 ```
 
+**Or as raw bytes,** one file a call, when your client can stream a body:
+
+```bash
+curl -s "${auth[@]}" -X POST -H "Content-Type: image/jpeg" \
+     --data-binary @IMG_2041.jpg "$H/receipts/binary?filename=IMG_2041.jpg"
+```
+
+`filename`, `transaction_id` and `note` ride in the query string, because the
+body is the file. The same 4 MB ceiling, and a third less to send than base64.
+It takes no `extracted` — that is a JSON object and belongs with the JSON
+doors above.
+
 `extracted` is kept as **your claim** — the app never treats it as fact. Use
 those four keys: `/candidates` reads them as things to search for.
 `already_had_it: true` means the same bytes were already stored; that is fine.
@@ -273,7 +285,11 @@ The register read takes the register screen's own filters — `account_id`
 (repeatable), `since`, `until`, `search`, `cleared`, `uncategorised`,
 `amount`, `source` (`transfer|split|imported|manual`), `reimbursement`
 (`work|owed|paid|off`) — plus `category_id` and `payee_id`. It is paged:
-`limit` up to 1000, continue from `next_offset` while `has_more`. **It is for
+`limit` up to 1000, continue from `next_offset` while `has_more`. **`amount`
+matches the figure without its sign**, in every currency at once, because Out
+and In are one column read two ways: `amount=12.50` finds a 12.50 debit and a
+12.50 credit. A signed one (`-12.50`, `(12.50)`) is not read as an amount and
+matches nothing; the rows that come back carry their sign. **It is for
 looking at rows, never for adding them up** — that is `summary` or a report.
 
 **c. Change them, in one act.**
@@ -318,6 +334,9 @@ curl -s "${auth[@]}" "${json[@]}" -X POST "$H/transactions/match" -d '{
      "date": "2026-06-13", "text": "taxi"}
   ]}'
 ```
+
+`window_days` is how many days either side of `date` to look: **0 to 14**,
+default 4. More is refused with `422`.
 
 Up to 50 queries, each answered in `results[]` in the order sent with your
 `ref` echoed back — use the portal's own line id. Signs are ignored (money out

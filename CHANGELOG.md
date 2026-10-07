@@ -147,6 +147,12 @@ history this repository does not have.
   GPS and EXIF included, as are payee rule patterns; and old-tracker issue
   numbers in the `Makefile` and `tests.yml` are marked as such.
 
+- **`agent/README.md` fills three gaps an agent found by trial:** the range
+  and default of `window_days` on `/transactions/match` (0 to 14, default 4),
+  that the register's `amount` filter matches the figure without its sign,
+  and the `receipts/binary` door with its query parameters, its 4 MB ceiling
+  and that it takes no `extracted`. Tests hold each to the code. (#41)
+
 - **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
   every CI job runs 3.12, and nothing tests 3.14. (#105)
 
