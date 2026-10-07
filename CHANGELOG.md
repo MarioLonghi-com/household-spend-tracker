@@ -38,6 +38,7 @@ this repository.
   way is refused rather than guessed. "1,234.56", "1.234,56" and "12,34" read
   as before. An amount put back into a box for editing uses the same decimal
   mark, so a three-decimal currency round-trips. (#45)
+
 - **A statement amount written `12.50 DR` imports as money out.** The letters
   were dropped as decoration, so a debit came in as money in. `DR` after the
   figure is now a minus and `CR` a plus, in CSV, spreadsheet and PDF
