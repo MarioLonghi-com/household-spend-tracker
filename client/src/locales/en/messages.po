@@ -58,6 +58,11 @@ msgstr "An amount {digits} digits long is too large to record as money"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.receipt.no_such_copy"
+msgstr "That receipt has no copy of that kind"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.reconcile.does_not_balance"
 msgstr "That does not balance: {difference} out. Tick or untick rows until the difference is zero, or add the transaction the statement has and the register does not."
 

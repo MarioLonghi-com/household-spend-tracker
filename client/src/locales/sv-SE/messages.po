@@ -58,6 +58,11 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.receipt.no_such_copy"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.reconcile.does_not_balance"
 msgstr ""
 

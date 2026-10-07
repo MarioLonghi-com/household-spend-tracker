@@ -58,6 +58,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
       message: "An amount {digits} digits long is too large to record as money",
     }),
   },
+  "receipt.no_such_copy": {
+    message: msg({ id: "error.receipt.no_such_copy", message: "That receipt has no copy of that kind" }),
+  },
   "reconcile.does_not_balance": {
     message: msg({
       id: "error.reconcile.does_not_balance",
