@@ -296,7 +296,7 @@ def _is_one_time_import(session: Session, batch_id: str, mark: str) -> bool:
 #: its own route and its own rules about who may do it. The undo route asks
 #: only for household membership, so without this any member could resurrect
 #: somebody else's revoked key.
-CREDENTIAL_TABLES = frozenset({"agent_keys", "invitations"})
+CREDENTIAL_TABLES = frozenset({"agent_keys", "invitations", "passkeys"})
 
 
 def _refuse_if_credentials(session: Session, batch_id: str) -> None:

@@ -125,6 +125,19 @@ this repository.
   passkey features, allowed on this origin and refused on `/snap`. The
   `webauthn` library is added, locked. **For an operator:** nothing to do. If
   `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
+- **A member can register passkeys, and list, rename and remove them**,
+  through the API so far. The screens come with #122. Adding a passkey costs
+  a fresh password and authenticator code, the same step-up that issuing an
+  agent key costs. The passkey has to be discoverable and must verify the
+  user. Each one records the host name it was made for. `make doctor`,
+  `make upgrade-check` and `make restore` now name any passkeys made for
+  another host name than this instance's, which is what a renamed machine or
+  a restore onto another host leaves behind. Adding, renaming and removing a
+  passkey are in History. Undo never brings one back. **Migration
+  `2de003489b79`** adds the `passkeys` and `webauthn_challenges` tables and
+  `users.webauthn_user_handle`. **Reversible: lossy**: rolling it back drops
+  every registered passkey, and members then sign in with password + code as
+  before. (#120)
 
 ## 0.7.1 — 2026-10-05
 
