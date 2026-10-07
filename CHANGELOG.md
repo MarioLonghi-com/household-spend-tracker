@@ -28,6 +28,11 @@ this repository.
 
 ### Security
 
+- **A YNAB key is gone from the browser's memory when the one-time import
+  closes.** The wizard dropped it from its own state, but the query library
+  kept each finished call -- key included -- for five minutes after the
+  wizard closed. Those calls are now discarded as soon as it does. (#93)
+
 - **The Content Security Policy no longer allows `data:` images.** Nothing
   in the client uses one (the QR code is SVG), so `img-src` is `'self' blob:`.
   (#94)
@@ -46,6 +51,10 @@ this repository.
   mark, so a three-decimal currency round-trips. (#45)
 
 ### Changed
+
+- **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
+  The action only scores the default branch, which is `dev`, so on `main` it
+  failed every release without measuring anything. (#36)
 
 - **A receipt's free-text field is now headed "Receipt notes"**, on the
   Receipts screen and on `/snap`. It used to say "Note". A transaction's field
