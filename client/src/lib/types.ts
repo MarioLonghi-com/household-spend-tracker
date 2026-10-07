@@ -340,6 +340,9 @@ export interface RegisterPage {
   /** True when the household is past the register's ceiling and `total` is
    *  larger than what came back. Never silent: the screen says so. */
   capped: boolean;
+  /** Rows with no category under every other filter of the request, the
+   *  category picker set aside: the count beside "Needs a category". */
+  needs_category: number;
 }
 
 export interface Payee {

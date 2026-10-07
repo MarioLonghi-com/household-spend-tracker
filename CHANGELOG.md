@@ -72,6 +72,15 @@ history this repository does not have.
 
 ### Fixed
 
+- **A register load is one request for its rows, not two.** The count beside
+  "Needs a category" was a second `GET …/transactions` fired in the same tick
+  as the register's own, and `access.log` drops the query string, so every
+  load and every refresh showed up as two identical requests a few
+  milliseconds apart -- each one running the filter, the count and the
+  lookups again. The register's answer now carries the count
+  (`needs_category`); the badge asks on its own only when nothing is ticked
+  and the register is not asked at all. (#101)
+
 - **The test that every household-scoped route checks membership was
   checking nine routes.** Its walk of the route table predated how this
   FastAPI version nests included routers, so it found only the routes declared
