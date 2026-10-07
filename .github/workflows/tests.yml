@@ -153,7 +153,7 @@ jobs:
       # ran on every pull request -- a one-line Dependabot bump to the dev
       # requirements paid for two container builds. This decides, per job,
       # whether the pull request touched anything that job is the check for
-      # (#174). `repo-wide` is not gated: it looks at the whole repository.
+      # (old-tracker `#174`). `repo-wide` is not gated: it looks at the whole repository.
       # Nor is `release-ready`, which has its own condition -- a pull request
       # into `main` -- takes seconds, and is what checks a CHANGELOG-only
       # release that no job here would otherwise look at.
