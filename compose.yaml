@@ -58,6 +58,11 @@ services:
       # Invitation links and /llms.txt are built from it; unset, they are built
       # from the request, which is right only when the proxy is trusted above.
       SPENDTRACKER_PUBLIC_URL: "${SPENDTRACKER_PUBLIC_URL:-}"
+      # The host name passkeys are bound to. Empty means the host of
+      # SPENDTRACKER_PUBLIC_URL, which is the only value boot accepts anyway:
+      # leave it unset unless you want to say so. Without a public URL there
+      # are no passkeys, and password + code is unchanged.
+      SPENDTRACKER_RP_ID: "${SPENDTRACKER_RP_ID:-}"
     volumes:
       # The ledger and secret.key. Named rather than a bind mount so nothing
       # in a working tree can be `git clean -xdf`'d out from under it -- which

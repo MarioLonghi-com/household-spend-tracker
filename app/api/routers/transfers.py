@@ -106,16 +106,19 @@ def link(
     """Link each pair as the two legs of one transfer, all as one act.
 
     One pair from the register's "Link as transfer", or every strong pair the
-    sweep found. Either way one batch, so one undo puts them all back.
+    sweep found -- and then what those made strong, until nothing new is
+    (#88). Either way one batch, so one undo puts them all back.
     """
     with batch(session, kind=BatchKind.bulk_update, actor_id=user.id, household_id=household.id):
         pairs = [_pair_in(session, household.id, one) for one in body.pairs]
         if body.by == "evidence":
-            transfer_service.link_on_evidence(session, household.id, pairs)
+            # Can be more than were sent: what those links made strong (#88).
+            linked = transfer_service.link_on_evidence(session, household.id, pairs)
         else:
             for first, second in pairs:
                 transfer_service.link(session, first, second)
-    return TransferLinkResult(linked=len(body.pairs))
+            linked = len(pairs)
+    return TransferLinkResult(linked=linked)
 
 
 @router.post("/households/{household_id}/transfers/reject", response_model=TransferRejectResult)

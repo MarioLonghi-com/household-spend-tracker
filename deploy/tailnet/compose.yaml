@@ -99,6 +99,11 @@ services:
       # https://spend-tracker.<tailnet>.ts.net -- invitation links and
       # /llms.txt are built from it. Set in .env.
       SPENDTRACKER_PUBLIC_URL: "${SPENDTRACKER_PUBLIC_URL:?set SPENDTRACKER_PUBLIC_URL in deploy/tailnet/.env}"
+      # The host name passkeys are bound to. Empty means the host of
+      # SPENDTRACKER_PUBLIC_URL, which is the only value boot accepts anyway:
+      # leave it unset unless you want to say so. Without a public URL there
+      # are no passkeys, and password + code is unchanged.
+      SPENDTRACKER_RP_ID: "${SPENDTRACKER_RP_ID:-}"
     volumes:
       - ledger:/var/lib/spend-tracker
     read_only: true

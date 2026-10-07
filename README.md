@@ -56,7 +56,7 @@ documentation:
 
 | | | |
 |---|---|---|
-| **Python** | >= 3.12 | CI runs 3.12; 3.14 works |
+| **Python** | >= 3.12 | CI tests 3.12 only |
 | **Node** | ^22.22.2, ^24.15 or >= 26 | jsdom 30's floor (vite 8 needs less); CI runs 22, and so does `.nvmrc` |
 | SQLite | bundled with Python | nothing to install |
 

@@ -54,6 +54,14 @@ this repository.
   and an import whose every row names another currency is refused. Rows that
   leave it out are read in the account's currency, as before. (#86)
 
+- **"Link all" links everything that is strong, not just what was strong
+  before it started.** A link made because a row names the other account
+  makes those two accounts' history, and that history makes their other
+  pairs strong -- but "Link all", and the link on commit at import, asked
+  once and stopped, so a second press of "Link all" found more. Both now link
+  until nothing new is strong, still as one batch and one undo, and "Link
+  all" says how many it linked in all. (#88)
+
 - **"Make new codes" tells a member whose authenticator the server can no
   longer check what to do.** After `secret.key` was replaced, it answered with
   the generic "that password and authenticator code do not prove it is you".
@@ -80,6 +88,9 @@ this repository.
 
 ### Changed
 
+- **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
+  every CI job runs 3.12, and nothing tests 3.14. (#105)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
@@ -104,6 +115,22 @@ this repository.
   client's `tsx`, which one test ran unpinned through `npx`, is a dev
   dependency. **For an operator:** nothing to do beyond the usual
   `make install-prod`. (#46)
+
+### Added
+
+- **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
+  can offer them.** Nothing on the sign-in screen changes yet. The new
+  setting is the host name passkeys will be bound to. It defaults to the host
+  of `SPENDTRACKER_PUBLIC_URL`, and it is never taken from the request. Boot
+  refuses any other value, because a passkey only ever works for the name it
+  was made under: a wider name such as the whole tailnet's is refused, and
+  `localhost` is accepted in development only. `GET
+  /api/session/passkey/state` says whether this request may be offered
+  passkeys, or why not: no public URL set, an IP address, the app opened at
+  another address, or plain HTTP. The `Permissions-Policy` now names the two
+  passkey features, allowed on this origin and refused on `/snap`. The
+  `webauthn` library is added, locked. **For an operator:** nothing to do. If
+  `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
 
 ## 0.7.1 — 2026-10-05
 
