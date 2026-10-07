@@ -73,7 +73,11 @@ def test_the_policy_says_what_it_means(client):
     # back while the server spends 0.6 to 5 seconds encoding it. Without it the
     # frame is a broken image and the only clue is a console violation -- on a
     # phone, at a till, which nobody is reading.
-    assert directives["img-src"] == "'self' data: blob:"
+    #
+    # And no `data:` (#94): nothing in the client uses a data URI, so allowing
+    # one only widens what an injected <img> could carry.
+    assert directives["img-src"] == "'self' blob:"
+    assert "data:" not in directives["img-src"]
 
 
 def test_the_whole_policy_string_is_pinned(client):
@@ -91,7 +95,7 @@ def test_the_whole_policy_string_is_pinned(client):
             "default-src 'self'",
             "script-src 'self'",
             "style-src 'self' 'unsafe-inline'",
-            "img-src 'self' data: blob:",
+            "img-src 'self' blob:",
             "font-src 'self'",
             "connect-src 'self'",
             "object-src 'none'",

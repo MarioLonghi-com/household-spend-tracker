@@ -33,6 +33,10 @@ this repository.
   kept each finished call -- key included -- for five minutes after the
   wizard closed. Those calls are now discarded as soon as it does. (#93)
 
+- **The Content Security Policy no longer allows `data:` images.** Nothing
+  in the client uses one (the QR code is SVG), so `img-src` is `'self' blob:`.
+  (#94)
+
 ### Fixed
 
 - **An agent's import row can say its currency, and one in another currency
