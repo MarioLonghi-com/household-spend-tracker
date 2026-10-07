@@ -36,7 +36,7 @@ def test_upgrade_head_produces_exactly_the_models(tmp_path, monkeypatch):
 
     command.upgrade(_config(url), "head")
 
-    engine = create_engine(url, future=True)
+    engine = create_engine(url)
     with engine.connect() as conn:
         context = MigrationContext.configure(conn, opts={"compare_type": True})
         diff = compare_metadata(context, Base.metadata)
@@ -55,7 +55,7 @@ def test_downgrade_then_upgrade_is_clean(tmp_path, monkeypatch):
     command.downgrade(cfg, "base")
     command.upgrade(cfg, "head")
 
-    engine = create_engine(url, future=True)
+    engine = create_engine(url)
     with engine.connect() as conn:
         context = MigrationContext.configure(conn, opts={"compare_type": True})
         diff = compare_metadata(context, Base.metadata)

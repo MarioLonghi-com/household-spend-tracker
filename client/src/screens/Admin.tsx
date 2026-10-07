@@ -592,7 +592,7 @@ function ResetSignIn({
   }
 
   const consequences = [
-    "every session, trusted browser and agent key ends",
+    "every session, trusted browser, agent key and passkey ends",
     password && "their password stops working",
     authenticator && "their authenticator and recovery codes are cleared",
   ].filter(Boolean);

@@ -536,7 +536,7 @@ def remove_many(
     # once the flush has gone through.
     removed = [row.id for row in rows]
     with batch(
-        session, kind=BatchKind.bulk_update, actor_id=user.id, household_id=household.id
+        session, kind=BatchKind.bulk_delete, actor_id=user.id, household_id=household.id
     ):
         for row in rows:
             session.delete(row)
