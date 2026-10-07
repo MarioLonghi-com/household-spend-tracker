@@ -101,6 +101,14 @@ history this repository does not have.
 
 ### Changed
 
+- **Five statements in the docs and comments now match the code** (#109):
+  CLAUDE.md names `ci-ok`, not a `tests` check, as what a ruleset requires;
+  the setup router says it answers `409` once set up, not `404`; `/db`'s
+  docstring says it shows an owner every household's ledger, which is more
+  than the admin screen; `scripts/db_view.py` says receipts are carried whole,
+  GPS and EXIF included, as are payee rule patterns; and old-tracker issue
+  numbers in the `Makefile` and `tests.yml` are marked as such.
+
 - **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
   every CI job runs 3.12, and nothing tests 3.14. (#105)
 
@@ -148,6 +156,7 @@ history this repository does not have.
   passkey features, allowed on this origin and refused on `/snap`. The
   `webauthn` library is added, locked. **For an operator:** nothing to do. If
   `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
+
 - **A member can register passkeys, and list, rename and remove them**,
   through the API so far. The screens come with #122. Adding a passkey costs
   a fresh password and authenticator code, the same step-up that issuing an
