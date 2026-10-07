@@ -1059,6 +1059,20 @@ def blob_for(session: Session, sha256: str, role: BlobRole) -> ReceiptBlob | Non
     return session.get(ReceiptBlob, (sha256, role))
 
 
+def blobs_with_role(session: Session, sha256s: list[str], role: BlobRole) -> set[str]:
+    """Which of these blobs have a copy of `role`, without loading a byte of it."""
+    if not sha256s:
+        return set()
+    session.flush()
+    return set(
+        session.execute(
+            select(ReceiptBlob.sha256).where(
+                ReceiptBlob.sha256.in_(set(sha256s)), ReceiptBlob.role == role
+            )
+        ).scalars()
+    )
+
+
 def for_transaction(session: Session, transaction_id: str) -> list[Receipt]:
     return list(
         session.execute(
