@@ -32,6 +32,7 @@ export default defineConfig({
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "desktop",
+      testIgnore: /passkeys\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 1280, height: 800 },
@@ -41,8 +42,26 @@ export default defineConfig({
     },
     {
       name: "mobile",
+      testIgnore: /passkeys\.spec\.ts/,
       use: { ...devices["Pixel 5"], storageState: "./e2e/.auth/state.json" },
       dependencies: ["setup"],
+    },
+    // Passkeys (#121): registered once, after the sign-in above has spent its
+    // code window, then signed in with at both widths -- signed out, so these
+    // projects carry no stored session. Their own projects, so a passkey
+    // failure never skips the rest of the suite.
+    { name: "passkey-setup", testMatch: /passkey\.setup\.ts/, dependencies: ["setup"] },
+    {
+      name: "passkeys-desktop",
+      testMatch: /passkeys\.spec\.ts/,
+      use: { browserName: "chromium", viewport: { width: 1280, height: 800 } },
+      dependencies: ["passkey-setup"],
+    },
+    {
+      name: "passkeys-mobile",
+      testMatch: /passkeys\.spec\.ts/,
+      use: { ...devices["Pixel 5"] },
+      dependencies: ["passkey-setup"],
     },
   ],
   webServer: {

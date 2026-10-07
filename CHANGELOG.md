@@ -161,6 +161,21 @@ history this repository does not have.
   `users.webauthn_user_handle`. **Reversible: lossy**: rolling it back drops
   every registered passkey, and members then sign in with password + code as
   before. (#120)
+- **Signing in with a passkey.** Where passkeys can work, the sign-in screen
+  offers "Sign in with a passkey", and the email field suggests your passkeys
+  itself in browsers that support that. Both the server and the browser
+  must agree that passkeys can work here; anywhere else the screen is as it
+  was. A passkey is both factors at once, so it signs you in with no code
+  step and does not mark the browser as trusted. Every refusal says the same
+  thing: an unknown passkey, a disabled member, a passkey made for another
+  host name, a replayed challenge and a bad signature all read alike.
+  Failed passkey sign-ins have their own rate limit. **What else changes:**
+  - **Account resets remove the account's passkeys.** That covers an owner's
+    reset link, `scripts.reset_account` and `scripts.reset_authenticator`.
+  - **A recovery code leaves passkeys in place**, and the screen now says how
+    many still work, so you can remove one that was on a lost phone.
+  - **A password change leaves passkeys in place**, as it leaves agent keys.
+  (#121)
 
 ## 0.7.1 — 2026-10-05
 

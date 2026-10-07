@@ -9,7 +9,8 @@ password, enrols their own authenticator and keeps their own recovery codes.
 owner reaches for this because an account may be in the wrong hands, or
 because its holder has lost the way in; in both cases everything the old
 credentials bought has to end now, not whenever somebody gets round to the
-link. So `issue` ends every session, trusted browser and live agent key, and
+link. So `issue` ends every session, trusted browser, live agent key and
+passkey (#121), and
 clears the password, the authenticator, or both. Until the link is
 followed the account cannot be signed into at all -- and withdrawing the link
 leaves it that way, on purpose: the next step is a new link, not a quiet

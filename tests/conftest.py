@@ -339,3 +339,7 @@ def _setup_owner(client, tmp_path_token: str | None = None) -> dict:
     }
 
 
+
+
+# The passkey tests' two members with two passkeys each (#120, #121).
+from tests.passkey_world import passkey_world, passkeys_on  # noqa: E402, F401

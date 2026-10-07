@@ -60,9 +60,9 @@ function untilNextStep(): number {
 }
 
 /** One pass at the front door. Returns whether it got through. */
-async function attempt(page: Page): Promise<boolean> {
+async function attempt(page: Page, at: string): Promise<boolean> {
   const who = credentials();
-  await page.goto("/");
+  await page.goto(at);
   await page.getByLabel("Email").fill(who.email);
   await page.getByLabel("Password").fill(who.password);
   await page.getByRole("button", { name: "Sign in" }).click();
@@ -98,10 +98,10 @@ async function attempt(page: Page): Promise<boolean> {
  * path every test goes through, rather than being stubbed to make the suite
  * convenient.
  */
-export async function signIn(page: Page): Promise<void> {
-  if (await attempt(page)) return;
+export async function signIn(page: Page, at: string = "/"): Promise<void> {
+  if (await attempt(page, at)) return;
   await page.waitForTimeout(untilNextStep());
-  if (await attempt(page)) return;
+  if (await attempt(page, at)) return;
   // A third is not worth having: two failures in different windows is a real
   // failure, and the assertion below reports it with the page's own words.
   await page.getByRole("heading", { name: "Transactions", exact: true }).waitFor();
@@ -126,4 +126,41 @@ export async function go(page: Page, label: string): Promise<void> {
   const menu = page.getByRole("button", { name: /Open the menu/ });
   if (await menu.isVisible()) await menu.click();
   await page.locator("nav.side").getByRole("button", { name: label, exact: true }).click();
+}
+
+/**
+ * The same server by name rather than by address: `localhost` is the one
+ * host where passkeys work without HTTPS, and `e2e/serve.sh` makes it the
+ * RP ID. At `127.0.0.1` -- the suite's `baseURL` -- they are not offered.
+ */
+export const BY_NAME = "http://localhost:8850";
+
+/** Where the passkey the passkey setup registered is kept for the specs. */
+export const PASSKEY = join(HERE, ".auth", "passkey.json");
+
+/**
+ * A platform authenticator in software, through Chrome DevTools' WebAuthn
+ * domain: discoverable credentials, user verification that succeeds, and a
+ * user who is always there to touch it. Both e2e projects are Chromium.
+ */
+export async function virtualAuthenticator(page: Page) {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("WebAuthn.enable");
+  const { authenticatorId } = await cdp.send("WebAuthn.addVirtualAuthenticator", {
+    options: {
+      protocol: "ctap2",
+      transport: "internal",
+      hasResidentKey: true,
+      hasUserVerification: true,
+      isUserVerified: true,
+      automaticPresenceSimulation: true,
+    },
+  });
+  return { cdp, authenticatorId };
+}
+
+/** A fresh code, in a window no earlier step of this run has spent. */
+export async function nextCode(): Promise<string> {
+  await new Promise((done) => setTimeout(done, untilNextStep()));
+  return totp(credentials().totp_secret);
 }
