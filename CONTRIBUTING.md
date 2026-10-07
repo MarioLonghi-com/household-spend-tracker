@@ -251,8 +251,9 @@ old; security updates arrive on their own whenever they are published.
 
 Two more workflows run beside `tests.yml`, and neither is a pull-request check
 on `dev`: `codeql.yml` (Python and TypeScript, on the release PR, on `main` and
-weekly) and `scorecard.yml` (OpenSSF Scorecard, weekly and on `main`). Their
-findings land in the Security tab.
+weekly) and `scorecard.yml` (OpenSSF Scorecard, weekly and on pushes to `dev` --
+the default branch, the only one it will score). Their findings land in the
+Security tab.
 
 ---
 
