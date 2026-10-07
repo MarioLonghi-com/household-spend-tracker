@@ -107,6 +107,15 @@ history this repository does not have.
 
 ### Changed
 
+- **Small fixes left from reviews** (#110): History headlines a bulk delete
+  of receipts as *Bulk delete*, not *Bulk edit*; an account update that sends
+  a country or statement product together with its clear flag is refused, as
+  the note and the bank already were, rather than the flag winning in silence;
+  `make version` works in a worktree without a `.venv`; the accounts filter's
+  grouping is one shared copy for the register and the income-and-expense
+  report; opening a screen from `?open=` no longer depends on React running
+  the reader once; and three deprecation warnings are gone from the test run.
+
 - **A receipt photo over 4 MB from an agent is told how to shrink it.** The
   `413` from the agent receipt routes pointed at the multipart route, which no
   key can use. It now says to shrink the photo below 4 MB as JPEG or AVIF,

@@ -677,6 +677,8 @@ def test_deleting_a_selection_of_receipts_is_one_act_and_one_undo(client):
     removal = next(one for one in batches if "receipt" in one["detail"].lower())
     assert removal["change_count"] == 3
     assert removal["detail"] == "3 receipts removed."
+    # A delete, headlined as one -- it was "Bulk edit" (#110).
+    assert removal["headline"] == "Bulk delete"
 
     undo = client.post(
         f"/api/households/{house}/batches/{removal['id']}/undo", headers=HEADERS

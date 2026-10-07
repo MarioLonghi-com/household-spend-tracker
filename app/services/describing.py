@@ -325,6 +325,7 @@ HEADLINES: dict[BatchKind, str] = {
     BatchKind.imported: "Statement import",
     BatchKind.manual: "Edit",
     BatchKind.bulk_update: "Bulk edit",
+    BatchKind.bulk_delete: "Bulk delete",
     BatchKind.undo: "Undo",
     BatchKind.admin: "Setup change",
     BatchKind.setup: "First setup",

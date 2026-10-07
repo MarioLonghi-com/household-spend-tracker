@@ -56,7 +56,6 @@ if settings.database_url.startswith("sqlite"):
 engine: Engine = create_engine(
     settings.database_url,
     echo=settings.echo_sql,
-    future=True,
     connect_args=_connect_args,
     **_pool_args,
 )
@@ -100,7 +99,6 @@ SessionLocal = sessionmaker(
     autoflush=False,
     #: Not a performance choice -- see the module docstring.
     expire_on_commit=False,
-    future=True,
 )
 
 

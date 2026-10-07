@@ -209,7 +209,7 @@ snapshot:  ## a consistent, redacted copy of the database, beside it in the data
 #   minor      a new feature, or a functional change to one that exists
 #   technical  a dependency bump, a security fix, patching, a bug fix
 version:  ## print the version; `make version BUMP=minor` to move it
-	@./.venv/bin/python -m scripts.version $(BUMP)
+	@$(PYTHON) -m scripts.version $(BUMP)
 
 # VACUUM INTO, never a file copy: WAL mode keeps recent writes in
 # `spendtracker.sqlite3-wal` until a checkpoint folds them in, and in the

@@ -94,7 +94,7 @@ JAN = date(2026, 1, 1)
 
 @pytest.fixture()
 def engine():
-    eng = create_engine("sqlite://", future=True, connect_args={"check_same_thread": False})
+    eng = create_engine("sqlite://", connect_args={"check_same_thread": False})
 
     @event.listens_for(eng, "connect")
     def _fk(dbapi_connection, _record):  # pragma: no cover - driver glue
@@ -114,7 +114,7 @@ def session(engine) -> Iterator[Session]:
     from app.audit.guard import AuditedSession
 
     factory = sessionmaker(
-        class_=AuditedSession, bind=engine, autoflush=False, expire_on_commit=False, future=True
+        class_=AuditedSession, bind=engine, autoflush=False, expire_on_commit=False
     )
     with factory() as s:
         yield s
