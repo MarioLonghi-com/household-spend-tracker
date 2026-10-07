@@ -35,6 +35,7 @@ this repository.
   once and stopped, so a second press of "Link all" found more. Both now link
   until nothing new is strong, still as one batch and one undo, and "Link
   all" says how many it linked in all. (#88)
+
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
   read the last separator as the decimal mark, so a thousands comma with no
   decimals was taken as a decimal comma and the third digit rounded away -- a
@@ -51,6 +52,7 @@ this repository.
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
+
 - **A receipt's free-text field is now headed "Receipt notes"**, on the
   Receipts screen and on `/snap`. It used to say "Note". A transaction's field
   is a *memo*, and the old heading read as if the two were the same thing.
