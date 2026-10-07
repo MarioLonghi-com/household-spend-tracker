@@ -222,6 +222,18 @@ history this repository does not have.
   - **A password change leaves passkeys in place**, as it leaves agent keys.
   (#121)
 
+
+### Documentation
+
+- **Passkeys for operators:** the README section *Passkeys, and choosing the
+  host name first* says how an instance can be reached for passkeys to work,
+  and what `SPENDTRACKER_RP_ID` defaults to and refuses. It also says why the
+  host name has to be chosen before anyone registers a passkey, and what
+  household devices need, including that signing in on a laptop with a phone
+  needs Bluetooth and internet on both. `deploy/DOCKER.md` and
+  `deploy/UPGRADING.md` each add a paragraph on what changes the name and
+  what to do afterwards. (#123)
+
 ## 0.7.1 — 2026-10-05
 
 **Reversible: none** — no migration in this release. To go back, check out
