@@ -15,6 +15,7 @@ import { Empty, Money, Problem, SortHeading, fixed, moneyKey, sortRows, useSort 
 import type { Household } from "../lib/types";
 import { UnprovenSection, WaitingSection, type LinkedPair } from "./TransferSections";
 import { useIdentifierSuggestions } from "./Accounts";
+import { formatDate } from "../lib/locale";
 
 export interface Leg {
   id: string;
@@ -47,7 +48,7 @@ function LegCell({ leg }: { leg: Leg }) {
   return (
     <>
       <div>
-        <strong>{leg.account_name}</strong> · {leg.date}
+        <strong>{leg.account_name}</strong> · {formatDate(leg.date)}
       </div>
       <div className="small muted">{leg.description ?? "—"}</div>
     </>
@@ -191,7 +192,7 @@ function PairTable({
                     checked={ticked.has(pairKey(pair))}
                     disabled={clashes(pair)}
                     onChange={() => toggle(pair)}
-                    aria-label={`Select ${pair.out_leg.account_name} to ${pair.in_leg.account_name}, ${pair.out_leg.date}`}
+                    aria-label={`Select ${pair.out_leg.account_name} to ${pair.in_leg.account_name}, ${formatDate(pair.out_leg.date)}`}
                     title={clashes(pair) ? SHARES_A_ROW : undefined}
                     style={{ width: "auto" }}
                   />

@@ -20,6 +20,13 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:8850",
     trace: "retain-on-failure",
+    // Pinned, so what a spec reads -- "€1,234.56", a date, a sort order -- does
+    // not depend on the machine that runs it. The en-XA pass in #53 is the one
+    // place another locale is meant to show. UTC, because the server under test
+    // decides "today" in its own zone, and a browser a day ahead of it would
+    // have a date refused as in the future.
+    locale: "en-US",
+    timezoneId: "UTC",
   },
   // Both projects are Chromium, deliberately. `Desktop Chrome` wants a real
   // Chrome install and `iPhone 13` wants WebKit, so the pair needed three

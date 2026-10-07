@@ -36,6 +36,7 @@ import type {
   ReportRow,
   ReportSection,
 } from "../../lib/types";
+import { formatDate, monthLabel } from "../../lib/locale";
 
 /**
  * Which figure somebody clicked, in the terms the server narrows by.
@@ -103,17 +104,6 @@ export function toggleFold(current: ReadonlySet<string>, key: string): ReadonlyS
   if (next.has(key)) next.delete(key);
   else next.add(key);
   return next;
-}
-
-const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-
-/** `2026-03` as `Mar 2026`, without constructing a Date and risking the shift. */
-function monthLabel(period: string): string {
-  const [year, month] = period.split("-");
-  return `${MONTH_NAMES[Number(month) - 1]} ${year}`;
 }
 
 export function IncomeExpense({ household }: { household: Household }) {
@@ -599,7 +589,7 @@ function Behind({
                 {rows.data.entries.map((entry) => (
                   <tr key={entry.id}>
                     <td>{entry.account_name}</td>
-                    <td className="mono">{entry.date}</td>
+                    <td className="mono">{formatDate(entry.date)}</td>
                     <td>{entry.payee_name ?? <span className="muted">—</span>}</td>
                     <td className="muted small">{entry.memo ?? ""}</td>
                     <td className="amount">
