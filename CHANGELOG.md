@@ -26,6 +26,13 @@ this repository.
 
 ## Unreleased
 
+### Security
+
+- **A YNAB key is gone from the browser's memory when the one-time import
+  closes.** The wizard dropped it from its own state, but the query library
+  kept each finished call -- key included -- for five minutes after the
+  wizard closed. Those calls are now discarded as soon as it does. (#93)
+
 ### Fixed
 
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
