@@ -200,7 +200,8 @@ export function ImportGuide() {
             <em>Not for this account</em>; otherwise, and always in an OFX file (which is one
             account), as <em>Could not read</em>, with the bank's rate if it gave one. Nothing is
             converted. Either way the reason names both currencies. A file whose every row says it
-            is in another currency is refused. A column saying what a purchase cost before it was
+            is in another currency is refused. An agent's row that names its currency is held to
+            the same check, and one in another currency is <em>Could not read</em>. A column saying what a purchase cost before it was
             converted (Original, Moneda origen, Local, Transaction currency) does not count: that
             amount is already in the account's money. If two columns could each be the currency
             the amounts are in and neither is named for the account, the bill or the settlement,

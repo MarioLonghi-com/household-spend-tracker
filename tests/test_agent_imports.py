@@ -207,6 +207,83 @@ def test_a_decimal_string_is_converted_with_the_accounts_own_currency(client, wo
     assert {p["amount"] for p in amounts} == {-1250}, "EUR 12.50 and JPY 1250 are both -1250"
 
 
+def _lines(client) -> dict[str, ImportLine]:
+    with Session(client.app_module.db_engine, expire_on_commit=False) as own:
+        return {line.raw: line for line in own.execute(select(ImportLine)).scalars()}
+
+
+def test_a_row_in_another_currency_is_refused_with_the_files_sentence(client, world):
+    """#86: the rows had no currency, so the account check never ran.
+
+    Both accounts, both ways round: a JPY row sent to the EUR account and a
+    EUR row sent to the JPY one are each rejected with the sentence a file's
+    currency column gets, and the rows in the account's own currency -- named
+    in either case, or not named at all -- stage with their amounts.
+    """
+    eur = _post(
+        client, world,
+        [
+            {"date": "2026-07-05", "amount": "-12.50", "currency": "EUR", "payee": "Cafe"},
+            {"date": "2026-07-06", "amount": "-3.20", "currency": "eur", "payee": "Kiosk"},
+            {"date": "2026-07-07", "amount": "-1250", "currency": "JPY", "payee": "Ramen"},
+            {"date": "2026-07-08", "amount_minor": -700, "payee": "Books"},
+        ],
+    )
+    assert eur.status_code == 201, eur.text
+    assert eur.json()["counts"]["rejected"] == 1
+
+    yen = _post(
+        client, world,
+        [
+            {"date": "2026-07-09", "amount": "-980", "currency": "JPY", "payee": "Konbini"},
+            {"date": "2026-07-10", "amount": "-4.00", "currency": "EUR", "payee": "Bakery"},
+        ],
+        account=world["yen"]["id"], source="tokyo",
+    )
+    assert yen.status_code == 201, yen.text
+
+    by_payee = {
+        line.parsed["payee"] if line.parsed else line.raw: line for line in _lines(client).values()
+    }
+    assert {p: by_payee[p].parsed["amount"] for p in ("Cafe", "Kiosk", "Books", "Konbini")} == {
+        "Cafe": -1250, "Kiosk": -320, "Books": -700, "Konbini": -980,
+    }
+    ramen = next(line for line in _lines(client).values() if "Ramen" in line.raw)
+    bakery = next(line for line in _lines(client).values() if "Bakery" in line.raw)
+    assert ramen.outcome.value == "rejected" and bakery.outcome.value == "rejected"
+    assert ramen.parsed is None and bakery.parsed is None, "no figure recorded in the wrong money"
+    assert ramen.reason == (
+        "this row is in JPY, and Santander holds EUR, so it cannot be read into it -- "
+        "it would be recorded as EUR"
+    )
+    assert bakery.reason == (
+        "this row is in EUR, and Tokyo holds JPY, so it cannot be read into it -- "
+        "it would be recorded as JPY"
+    )
+
+
+def test_an_import_whose_every_row_names_another_currency_is_refused(client, world):
+    before = _count(client, ImportLine)
+    refused = _post(
+        client, world,
+        [
+            {"date": "2026-07-05", "amount": "-1250", "currency": "JPY"},
+            {"date": "2026-07-06", "amount": "-980", "currency": "JPY"},
+        ],
+    )
+    assert refused.status_code == 422
+    assert "holds EUR: none of its rows are in EUR" in refused.text
+    assert _count(client, ImportLine) == before, "nothing was staged"
+
+
+@pytest.mark.parametrize("currency", ["EURO", "E1", "", "€"])
+def test_a_currency_that_is_not_a_code_is_refused(client, world, currency):
+    refused = _post(
+        client, world, [{"date": "2026-07-05", "amount": "-1.00", "currency": currency}]
+    )
+    assert refused.status_code == 422
+
+
 def test_both_amounts_or_neither_is_refused(client, world):
     for row in (
         {"date": "2026-07-05"},
