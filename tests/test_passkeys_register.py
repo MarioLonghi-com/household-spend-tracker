@@ -16,97 +16,25 @@ from __future__ import annotations
 
 import sqlite3
 from datetime import timedelta
-from pathlib import Path
 
-import pyotp
 import pytest
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Batch, Change, Passkey, User, WebAuthnChallenge, utcnow
-from tests.conftest import HEADERS, PASSWORD
+from tests.conftest import HEADERS
+from tests.passkey_world import (
+    DEVICE_BOUND,
+    HERE,
+    OLD_HOST,
+    ORIGIN,
+    _ledger,
+    _rows,
+    options,
+    register,
+    step_up,
+)
 from tests.soft_authenticator import ICLOUD_KEYCHAIN, SoftAuthenticator, b64url
 from tests.test_recovery_codes_regenerate import _two_members
-
-HERE = "testserver"
-ORIGIN = f"https://{HERE}"
-OLD_HOST = "old.example.ts.net"
-DEVICE_BOUND = bytes(16)  # an authenticator that will not say what it is
-
-
-@pytest.fixture()
-def passkeys_on(monkeypatch, client):
-    """The suite's own address as the public URL, so passkeys are available
-    to the test client, as they would be at a tailnet name."""
-    import app.config as config
-
-    monkeypatch.setenv("SPENDTRACKER_PUBLIC_URL", ORIGIN)
-    monkeypatch.delenv("SPENDTRACKER_RP_ID", raising=False)
-    monkeypatch.setattr(config, "settings", config.Settings.from_env())
-    assert config.settings.rp_id == HERE
-
-
-def _ledger() -> Path:
-    from app import config
-
-    return Path(config.settings.database_url.split("///", 1)[-1])
-
-
-def _rows(client, model, *where):
-    with Session(client.app_module.db_engine) as own:
-        return list(own.execute(select(model).where(*where)).scalars())
-
-
-def step_up(browser, secret: str, clock) -> str:
-    answer = browser.post(
-        "/api/me/step-up",
-        json={"password": PASSWORD, "code": pyotp.TOTP(secret).at(clock())},
-        headers=HEADERS,
-    )
-    assert answer.status_code == 200, answer.text
-    return answer.json()["token"]
-
-
-def options(browser, secret: str, clock) -> dict:
-    answer = browser.post(
-        "/api/me/passkeys/options",
-        json={"step_up_token": step_up(browser, secret, clock)},
-        headers=HEADERS,
-    )
-    assert answer.status_code == 200, answer.text
-    return answer.json()
-
-
-def register(browser, secret, clock, authenticator: SoftAuthenticator, *, label=None) -> dict:
-    made = authenticator.create(options(browser, secret, clock), origin=ORIGIN)
-    answer = browser.post(
-        "/api/me/passkeys", json={"credential": made, "label": label}, headers=HEADERS
-    )
-    assert answer.status_code == 201, answer.text
-    return answer.json()
-
-
-@pytest.fixture()
-def world(client, clock, passkeys_on):
-    """Two members, two passkeys each, on two RP IDs."""
-    people = _two_members(client)
-    owner = {**people["owner"], "client": client}
-    member = people["member"]
-    for person in (owner, member):
-        person["synced"] = SoftAuthenticator()
-        person["bound"] = SoftAuthenticator(aaguid=DEVICE_BOUND, synced=False)
-        person["passkeys"] = [
-            register(person["client"], person["secret"], clock, person["synced"]),
-            register(person["client"], person["secret"], clock, person["bound"], label="Work laptop"),
-        ]
-    # What a restore onto a renamed host leaves: rows made under the old name.
-    with sqlite3.connect(_ledger()) as conn:
-        for person in (owner, member):
-            conn.execute(
-                "UPDATE passkeys SET rp_id = ? WHERE id = ?", (OLD_HOST, person["passkeys"][1]["id"])
-            )
-    return {"owner": owner, "member": member}
-
 
 # --------------------------------------------------------------------------- #
 # Registering
@@ -299,9 +227,9 @@ def test_nothing_is_offered_or_registered_where_passkeys_are_unavailable(client,
 # --------------------------------------------------------------------------- #
 
 
-def test_each_member_lists_their_own_passkeys_and_which_work_here(client, world):
+def test_each_member_lists_their_own_passkeys_and_which_work_here(client, passkey_world):
     for who in ("owner", "member"):
-        person = world[who]
+        person = passkey_world[who]
         listed = person["client"].get("/api/me/passkeys", headers=HEADERS).json()
         assert {one["id"] for one in listed} == {one["id"] for one in person["passkeys"]}
         by_id = {one["id"]: one for one in listed}
@@ -314,8 +242,8 @@ def test_each_member_lists_their_own_passkeys_and_which_work_here(client, world)
         )
 
 
-def test_a_member_renames_their_own_passkey(client, world):
-    target = world["owner"]["passkeys"][0]["id"]
+def test_a_member_renames_their_own_passkey(client, passkey_world):
+    target = passkey_world["owner"]["passkeys"][0]["id"]
     answer = client.patch(f"/api/me/passkeys/{target}", json={"label": "  Phone   in my pocket "}, headers=HEADERS)
     assert answer.status_code == 200, answer.text
     assert answer.json()["label"] == "Phone in my pocket"
@@ -325,19 +253,19 @@ def test_a_member_renames_their_own_passkey(client, world):
     assert _rows(client, Passkey, Passkey.id == target)[0].label == "Phone in my pocket"
 
 
-def test_a_member_removes_their_own_passkey_and_only_that_one(client, world):
-    target = world["owner"]["passkeys"][0]["id"]
+def test_a_member_removes_their_own_passkey_and_only_that_one(client, passkey_world):
+    target = passkey_world["owner"]["passkeys"][0]["id"]
     assert client.delete(f"/api/me/passkeys/{target}", headers=HEADERS).status_code == 204
     left = {row.id for row in _rows(client, Passkey)}
     assert target not in left
     assert left == {
-        world["owner"]["passkeys"][1]["id"],
-        *(one["id"] for one in world["member"]["passkeys"]),
+        passkey_world["owner"]["passkeys"][1]["id"],
+        *(one["id"] for one in passkey_world["member"]["passkeys"]),
     }
 
 
-def test_member_a_cannot_list_rename_or_remove_member_bs_passkey(client, world):
-    theirs = world["member"]["passkeys"][0]["id"]
+def test_member_a_cannot_list_rename_or_remove_member_bs_passkey(client, passkey_world):
+    theirs = passkey_world["member"]["passkeys"][0]["id"]
     [before] = _rows(client, Passkey, Passkey.id == theirs)
 
     listed = client.get("/api/me/passkeys", headers=HEADERS).json()
@@ -350,13 +278,13 @@ def test_member_a_cannot_list_rename_or_remove_member_bs_passkey(client, world):
     assert renamed.json() == removed.json() == unknown.json() == {"detail": "no such passkey"}
 
     [after] = _rows(client, Passkey, Passkey.id == theirs)
-    assert (after.label, after.user_id) == (before.label, before.user_id) == ("iCloud Keychain", world["member"]["user"]["id"])
+    assert (after.label, after.user_id) == (before.label, before.user_id) == ("iCloud Keychain", passkey_world["member"]["user"]["id"])
 
 
-def test_history_records_a_passkey_and_undo_never_brings_one_back(client, world):
+def test_history_records_a_passkey_and_undo_never_brings_one_back(client, passkey_world):
     """Audited, without the public key, and refused by undo like every other
     credential."""
-    target = world["owner"]["passkeys"][0]["id"]
+    target = passkey_world["owner"]["passkeys"][0]["id"]
     assert client.delete(f"/api/me/passkeys/{target}", headers=HEADERS).status_code == 204
     changes = _rows(client, Change, Change.table_name == "passkeys", Change.row_id == target)
     assert [c.op for c in changes] == ["insert", "delete"]
@@ -379,7 +307,7 @@ def test_history_records_a_passkey_and_undo_never_brings_one_back(client, world)
 # --------------------------------------------------------------------------- #
 
 
-def test_the_doctor_reports_passkeys_made_for_another_host(client, world, capsys, tmp_path):
+def test_the_doctor_reports_passkeys_made_for_another_host(client, passkey_world, capsys, tmp_path):
     from scripts import doctor
 
     doctor.main(["--backups", str(tmp_path / "none")])
@@ -400,7 +328,7 @@ def test_the_doctor_is_quiet_when_every_passkey_belongs_here(client, clock, pass
     assert lines == [f"  ok    passkeys        1 registered, all for {HERE}"]
 
 
-def test_upgrade_check_names_passkeys_made_for_another_host(client, world, monkeypatch):
+def test_upgrade_check_names_passkeys_made_for_another_host(client, passkey_world, monkeypatch):
     from scripts import upgrade
 
     monkeypatch.setattr(upgrade, "published", lambda: (None, None))
@@ -410,7 +338,7 @@ def test_upgrade_check_names_passkeys_made_for_another_host(client, world, monke
     assert said == [f"    passkeys         2 passkeys registered for {OLD_HOST}, this instance is {HERE}"]
 
 
-def test_with_passkeys_switched_off_every_one_is_reported(client, world, monkeypatch):
+def test_with_passkeys_switched_off_every_one_is_reported(client, passkey_world, monkeypatch):
     import app.config as config
     from app.auth import passkeys
 

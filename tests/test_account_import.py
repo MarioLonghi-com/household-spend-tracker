@@ -510,3 +510,57 @@ def test_over_http_a_file_too_big_is_413_and_a_stranger_gets_404(client):
 
     with db.SessionLocal() as session:
         assert session.execute(select(func.count()).select_from(Account)).scalar_one() == 0
+
+
+def test_any_member_may_import_accounts_but_only_into_their_own_households(client):
+    """#115: decided that a member, not only the owner, may run this import --
+    it only adds accounts, and History undoes it. Two households: the member
+    belongs to one, and the other answers them 404 and gains nothing."""
+    import time
+
+    import pyotp
+    from fastapi.testclient import TestClient
+
+    from tests.conftest import PASSWORD
+
+    _setup_owner(client)
+    ours = client.post("/api/households", json={"name": "Ours"}, headers=HEADERS).json()
+    mine = client.post("/api/households", json={"name": "Owner only"}, headers=HEADERS).json()
+    invite = client.post(
+        "/api/admin/invitations",
+        json={"role": "member", "email": None, "household_ids": [ours["id"]], "step_up_token": None},
+        headers=HEADERS,
+    )
+    assert invite.status_code == 201, invite.text
+    member = TestClient(client.app_module.app, base_url="https://testserver")
+    started = member.post(
+        "/api/invite/begin",
+        json={
+            "token": invite.json()["link"].rsplit("/", 1)[-1],
+            "email": "sam@example.com", "display_name": "Sam", "password": PASSWORD,
+        },
+        headers=HEADERS,
+    ).json()
+    enrolled = member.post(
+        "/api/invite/enrol",
+        json={"blob": started["blob"], "code": pyotp.TOTP(started["secret"]).at(int(time.time()))},
+        headers=HEADERS,
+    ).json()
+    done = member.post(
+        "/api/invite/complete", json={"blob": enrolled["blob"], "codes_saved": True}, headers=HEADERS
+    )
+    assert done.status_code == 200, done.text
+    assert done.json()["role"] == "member"
+
+    made = _post(member, ours["id"], _file(JOINT, POUNDS), dry_run=False)
+    assert made.status_code == 201, made.text
+    assert made.json()["created"] == 2
+    listed = client.get(f"/api/households/{ours['id']}/accounts", headers=HEADERS).json()
+    assert {(a["name"], a["currency"], a["balance"]) for a in listed} == {
+        ("Joint current", "EUR", 123456),
+        ("Pounds pot", "GBP", 25000),
+    }
+
+    refused = _post(member, mine["id"], _file(JOINT), dry_run=False)
+    assert refused.status_code == 404
+    assert client.get(f"/api/households/{mine['id']}/accounts", headers=HEADERS).json() == []

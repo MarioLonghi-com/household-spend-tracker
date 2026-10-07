@@ -162,6 +162,10 @@ class BatchKind(enum.StrEnum):
     setup = "setup"
     manual = "manual"
     bulk_update = "bulk_update"
+    #: Several rows removed in one gesture -- the Receipts screen's selection.
+    #: Its own kind so History headlines it as a delete, not an edit (#110).
+    #: A plain string in a VARCHAR(16), like every kind: no migration.
+    bulk_delete = "bulk_delete"
     imported = "import"
     #: Proving an account against a statement, which locks the rows it covered.
     reconciled = "reconcile"

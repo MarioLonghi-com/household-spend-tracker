@@ -21,6 +21,9 @@ markers = [
 filterwarnings = [
     "ignore::DeprecationWarning:starlette.*",
     "ignore::DeprecationWarning:fastapi.*",
+    # Starlette's own warning class is a UserWarning, so the two above miss it.
+    # It asks for `httpx2`, which the test client does not need yet (#110).
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated:UserWarning",
 ]
 
 [tool.ruff]
