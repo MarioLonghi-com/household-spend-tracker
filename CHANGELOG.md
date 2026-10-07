@@ -36,6 +36,7 @@ this repository.
   that is not the account's is rejected with the sentence a file's row gets,
   and an import whose every row names another currency is refused. Rows that
   leave it out are read in the account's currency, as before. (#86)
+
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
   read the last separator as the decimal mark, so a thousands comma with no
   decimals was taken as a decimal comma and the third digit rounded away -- a
@@ -52,6 +53,7 @@ this repository.
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
+
 - **A receipt's free-text field is now headed "Receipt notes"**, on the
   Receipts screen and on `/snap`. It used to say "Note". A transaction's field
   is a *memo*, and the old heading read as if the two were the same thing.
