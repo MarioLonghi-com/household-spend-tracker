@@ -225,6 +225,7 @@ history this repository does not have.
   `users.webauthn_user_handle`. **Reversible: lossy**: rolling it back drops
   every registered passkey, and members then sign in with password + code as
   before. (#120)
+
 - **Signing in with a passkey.** Where passkeys can work, the sign-in screen
   offers "Sign in with a passkey", and the email field suggests your passkeys
   itself in browsers that support that. Both the server and the browser
@@ -240,7 +241,6 @@ history this repository does not have.
     many still work, so you can remove one that was on a lost phone.
   - **A password change leaves passkeys in place**, as it leaves agent keys.
   (#121)
-
 
 ### Documentation
 
