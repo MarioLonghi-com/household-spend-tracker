@@ -71,6 +71,22 @@ this repository.
   dependency. **For an operator:** nothing to do beyond the usual
   `make install-prod`. (#46)
 
+### Added
+
+- **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
+  can offer them.** Nothing on the sign-in screen changes yet. The new
+  setting is the host name passkeys will be bound to. It defaults to the host
+  of `SPENDTRACKER_PUBLIC_URL`, and it is never taken from the request. Boot
+  refuses any other value, because a passkey only ever works for the name it
+  was made under: a wider name such as the whole tailnet's is refused, and
+  `localhost` is accepted in development only. `GET
+  /api/session/passkey/state` says whether this request may be offered
+  passkeys, or why not: no public URL set, an IP address, the app opened at
+  another address, or plain HTTP. The `Permissions-Policy` now names the two
+  passkey features, allowed on this origin and refused on `/snap`. The
+  `webauthn` library is added, locked. **For an operator:** nothing to do. If
+  `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
+
 ## 0.7.1 — 2026-10-05
 
 **Reversible: none** — no migration in this release. To go back, check out
