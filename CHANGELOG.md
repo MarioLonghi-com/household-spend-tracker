@@ -34,6 +34,14 @@ history this repository does not have.
 
 ### Security
 
+- **The `sql` logging style no longer prints the ledger to the console.**
+  Turning it on set SQLAlchemy's `echo`, which attaches SQLAlchemy's own
+  handler writing every statement and its values to standard output -- that
+  is, to `docker logs` -- below the guard meant to keep them in `sql.log`
+  alone. The style now works by log level, never `echo`, and takes off any
+  such handler it finds. Found through a test that only failed when run on its
+  own. (#108)
+
 - **The container's Chainguard bases are pinned by digest.** The free tier
   has only a moving `:latest`, so the image named an input that changed under
   it. Both bases are now their own pinned stages, which Dependabot's weekly
@@ -219,6 +227,7 @@ history this repository does not have.
   `users.webauthn_user_handle`. **Reversible: lossy**: rolling it back drops
   every registered passkey, and members then sign in with password + code as
   before. (#120)
+
 - **Signing in with a passkey.** Where passkeys can work, the sign-in screen
   offers "Sign in with a passkey", and the email field suggests your passkeys
   itself in browsers that support that. Both the server and the browser
@@ -234,7 +243,6 @@ history this repository does not have.
     many still work, so you can remove one that was on a lost phone.
   - **A password change leaves passkeys in place**, as it leaves agent keys.
   (#121)
-
 
 ### Documentation
 

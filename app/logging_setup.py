@@ -431,7 +431,21 @@ def apply(style: Style) -> None:
     # for anything that only wanted to read the current style.
     from .db import engine
 
-    engine.echo = style.echo_sql
+    # By level, never by `engine.echo`. Setting `echo = True` makes SQLAlchemy
+    # attach its own `StreamHandler(sys.stdout)` to `sqlalchemy.engine.Engine`
+    # whenever that logger has no handler -- below the `propagate = False` on
+    # `sqlalchemy.engine` that keeps the ledger out of the console -- so the
+    # `sql` style printed every statement and its values to stdout, which is
+    # `docker logs` (#108: the "order-dependent" test that caught it passed
+    # only when an earlier test's handler was already there). At INFO the
+    # statements reach `sql.log` without it. A handler SQLAlchemy added anyway
+    # -- `SPENDTRACKER_ECHO_SQL` at `create_engine` -- is taken back off.
+    engine.echo = False
+    sql_engine = logging.getLogger("sqlalchemy.engine.Engine")
+    ours = {id(handler) for handler in our_handlers()}
+    for handler in list(sql_engine.handlers):
+        if id(handler) not in ours:
+            sql_engine.removeHandler(handler)
     logging.getLogger("sqlalchemy.engine").setLevel(
         logging.INFO if style.echo_sql else logging.WARNING
     )
