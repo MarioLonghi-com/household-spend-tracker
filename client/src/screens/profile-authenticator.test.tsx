@@ -87,8 +87,10 @@ function profileFor(user: User) {
 async function toTheOffer() {
   // In Sign-in methods (#122) the authenticator's row opens by itself in
   // recovery mode, and with a press otherwise.
-  const row = await screen.findByRole("button", { name: /: Authenticator$/ });
-  if (row.getAttribute("aria-expanded") === "false") fireEvent.click(row);
+  // Wait for the status, then open the row unless recovery mode already has.
+  await screen.findByText(/^(Set up|Needs setting up again)$/);
+  const row = screen.queryByRole("button", { name: /: Authenticator$/ });
+  if (row) fireEvent.click(row);
   fireEvent.change(screen.getByLabelText("Current password"), {
     target: { value: "a long password" },
   });

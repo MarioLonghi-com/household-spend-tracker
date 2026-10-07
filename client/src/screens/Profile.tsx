@@ -186,7 +186,9 @@ function SignInMethods({ user }: { user: User }) {
           name="Authenticator"
           state={!enrolled ? "Cleared" : locked ? "Needs setting up again" : "Set up"}
           warn={locked || !enrolled}
-          action="Set up again"
+          // In recovery mode (#287) this row is the one thing to do, so it
+          // stays open and offers no way to close it.
+          action={locked ? undefined : "Set up again"}
           open={open === "authenticator" || locked}
           onToggle={() => toggle("authenticator")}
         >
