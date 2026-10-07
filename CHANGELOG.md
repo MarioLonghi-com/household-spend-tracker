@@ -101,6 +101,12 @@ history this repository does not have.
 
 ### Changed
 
+- **`agent/README.md` fills three gaps an agent found by trial:** the range
+  and default of `window_days` on `/transactions/match` (0 to 14, default 4),
+  that the register's `amount` filter matches the figure without its sign,
+  and the `receipts/binary` door with its query parameters, its 4 MB ceiling
+  and that it takes no `extracted`. Tests hold each to the code. (#41)
+
 - **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
   every CI job runs 3.12, and nothing tests 3.14. (#105)
 
@@ -148,6 +154,7 @@ history this repository does not have.
   passkey features, allowed on this origin and refused on `/snap`. The
   `webauthn` library is added, locked. **For an operator:** nothing to do. If
   `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
+
 - **A member can register passkeys, and list, rename and remove them**,
   through the API so far. The screens come with #122. Adding a passkey costs
   a fresh password and authenticator code, the same step-up that issuing an
