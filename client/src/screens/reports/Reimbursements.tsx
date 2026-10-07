@@ -44,17 +44,7 @@ import type {
 } from "../../lib/types";
 import type { RegisterPreset } from "../Register";
 import { HeadSlot } from "./IncomeExpense";
-
-const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-
-/** `2026-03` as `Mar 2026`, without constructing a Date and risking the shift. */
-function monthLabel(period: string): string {
-  const [year, month] = period.split("-");
-  return `${MONTH_NAMES[Number(month) - 1] ?? month} ${year}`;
-}
+import { formatDate, monthLabel } from "../../lib/locale";
 
 /** "1 expense", "3 expenses". */
 function expenses(count: number): string {
@@ -583,7 +573,7 @@ function Details({
   onClose: () => void;
 }) {
   const describe = (one: { date: string; payee_name: string | null }, amount: string) =>
-    `${one.date} · ${one.payee_name ?? "no payee"} · ${amount}`;
+    `${formatDate(one.date)} · ${one.payee_name ?? "no payee"} · ${amount}`;
 
   let row: {
     id: string;
@@ -648,10 +638,10 @@ function Details({
 
   const blank = <span className="muted">—</span>;
   return (
-    <Dialog title={`${row.payee_name ?? "No payee"} · ${row.date}`} onClose={onClose}>
+    <Dialog title={`${row.payee_name ?? "No payee"} · ${formatDate(row.date)}`} onClose={onClose}>
       <dl className="reimb-detail">
         <dt>Date</dt>
-        <dd className="mono">{row.date}</dd>
+        <dd className="mono">{formatDate(row.date)}</dd>
         <dt>Account</dt>
         <dd>{row.account_name}</dd>
         <dt>Payee</dt>
@@ -806,7 +796,7 @@ function Outstanding({
                         }}
                         title="Open it in Transactions"
                       >
-                        {row.date}
+                        {formatDate(row.date)}
                       </button>
                     </td>
                     <td data-primary="true">
@@ -945,7 +935,7 @@ function ClaimRows({
   return (
     <>
       <tr className="reimb-claim row-pick" {...pickable(() => onPick({ kind: "payment", claim }))}>
-        <td className="mono">{pay.date}</td>
+        <td className="mono">{formatDate(pay.date)}</td>
         <td>{pay.payee_name ?? <span className="muted">—</span>}</td>
         <td className="small muted">{pay.account_name}</td>
         <td className="small reimb-memo">{pay.memo ?? ""}</td>
@@ -969,7 +959,7 @@ function ClaimRows({
             <span className="work-child" aria-hidden="true">
               ↳
             </span>
-            {one.date} · {one.payee_name ?? "—"} · {one.account_name}
+            {formatDate(one.date)} · {one.payee_name ?? "—"} · {one.account_name}
           </td>
           <td className="small reimb-memo">{one.memo ?? ""}</td>
           <td />

@@ -38,6 +38,7 @@ import type {
   Via,
   YnabPlan,
 } from "./ynab/types";
+import { YNAB_STEP_LABELS } from "../lib/labels";
 
 export const NEW_ISSUE_URL = "https://github.com/MarioLonghi-com/household-spend-tracker/issues/new";
 export const YNAB_DEVELOPER_URL = "https://app.ynab.com/settings/developer";
@@ -104,17 +105,7 @@ type Step =
   | "preview"
   | "report";
 
-const STEP_LABELS: Record<Step, string> = {
-  source: "Source app",
-  connect: "Connect",
-  plan: "Plan",
-  review: "Review",
-  accounts: "Accounts",
-  categories: "Categories",
-  options: "Flags & options",
-  preview: "Preview",
-  report: "Report",
-};
+const STEP_LABELS: Record<Step, string> = YNAB_STEP_LABELS;
 
 const COMMON_CURRENCIES = ["GBP", "EUR", "USD", "CAD", "AUD", "NZD", "CHF", "SEK", "NOK", "DKK", "JPY"];
 

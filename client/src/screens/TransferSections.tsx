@@ -21,6 +21,7 @@ import { api } from "../lib/api";
 import { Empty, Money, Problem, SortHeading, sortRows, useSort } from "../components/bits";
 import type { CategoryGroup, Household } from "../lib/types";
 import type { Leg } from "./Transfers";
+import { formatDate } from "../lib/locale";
 
 export interface LinkedPair {
   out_leg: Leg;
@@ -192,7 +193,7 @@ export function WaitingSection({
                     <td data-select="true">
                       <input
                         type="checkbox"
-                        aria-label={`Select ${leg.account_name} ${leg.date}`}
+                        aria-label={`Select ${leg.account_name} ${formatDate(leg.date)}`}
                         checked={ticked.has(leg.id)}
                         disabled={busy}
                         onChange={() =>
@@ -209,7 +210,7 @@ export function WaitingSection({
                     <td data-label="Account">
                       <strong>{leg.account_name}</strong>
                     </td>
-                    <td data-label="Date">{leg.date}</td>
+                    <td data-label="Date">{formatDate(leg.date)}</td>
                     <td className="amount" data-label="Amount">
                       <Money minor={leg.amount} currency={leg.currency} />
                     </td>
@@ -253,7 +254,7 @@ function LegCell({ leg }: { leg: Leg }) {
   return (
     <>
       <div>
-        <strong>{leg.account_name}</strong> · {leg.date}
+        <strong>{leg.account_name}</strong> · {formatDate(leg.date)}
       </div>
       <div className="small muted">{leg.description ?? "—"}</div>
     </>

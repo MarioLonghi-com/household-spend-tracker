@@ -650,10 +650,16 @@ export function Register({
   /**
    * How many rows need a category, for the badge beside that tick (#188).
    *
-   * Asked of the register itself -- every other filter, the backlog alone --
-   * so the number is how many of *these* rows need one, and it is there
-   * whether or not the tick is on: it is what tells you whether ticking it is
-   * worth doing. One row, because only the total is wanted.
+   * Every other filter, the backlog alone -- so the number is how many of
+   * *these* rows need one, and it is there whether or not the tick is on: it
+   * is what tells you whether ticking it is worth doing.
+   *
+   * The register's own answer carries it (`needs_category`). It used to be a
+   * second request to the same path, fired in the same tick, and the access
+   * log -- which drops the query string -- showed every load and every
+   * refresh as two identical GETs (#101). It is asked separately only when
+   * the register itself is not asked: nothing ticked in the category picker,
+   * when the badge is the one number left worth showing.
    */
   const backlogQuery = new URLSearchParams(query);
   for (const key of ["category_id", "categorised", "uncategorised", "sort", "direction"]) {
@@ -661,15 +667,18 @@ export function Register({
   }
   backlogQuery.set("uncategorised", "true");
   backlogQuery.set("limit", "1");
-  const backlogCount = useQuery({
+  const backlogAlone = useQuery({
     queryKey: ["register", household.id, "backlog-count", backlogQuery.toString()],
     queryFn: ({ signal }) =>
       api.get<RegisterRows>(
         `/households/${household.id}/transactions?${backlogQuery.toString()}`,
         { signal },
       ),
-    enabled: !noAccounts,
+    enabled: !noAccounts && noCategories,
   });
+  const backlogCount = noCategories
+    ? backlogAlone.data?.total
+    : register.data?.needs_category;
 
   const onSort = (column: SortKey, next: SortDirection) => {
     setSort(column);
@@ -1271,7 +1280,7 @@ export function Register({
                 onChange={(ids) => pickCategories(ids, backlog)}
                 extra={{
                   label: "Needs a category",
-                  count: backlogCount.data?.total,
+                  count: backlogCount,
                   checked: backlog,
                   onChange: (tick) => pickCategories(categoryIds, tick),
                 }}

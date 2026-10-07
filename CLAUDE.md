@@ -15,6 +15,12 @@ sharing a checkout with a session you cannot see.
 
 - **Money is integer minor units.** Never a float, anywhere, ever. `app/money.py`
   owns every conversion.
+- **A `DomainError` carries a `code`; `params` are raw values, never formatted
+  text.** `detail` stays the English sentence; the code, registered in
+  `app/error_codes.py`, is what a translated screen reads. Money goes as minor
+  units beside its currency code, a date as ISO, an enum as its value.
+  `tests/test_error_codes.py` fails if the number of raises without a code
+  goes up -- convert a site, lower the number.
 - **Store deliberate acts. Compute consequences.** One stored number per concept.
 - **A test that does not assert a changed value is not a test.** Asserting a 200,
   or that a mechanism fired, is not asserting what it did to the data. Four of

@@ -28,6 +28,7 @@ import {
   Toasts,
 } from "../components/bits";
 import type { Account, Household, Payee, PayeeCollision } from "../lib/types";
+import { compareNames } from "../lib/locale";
 
 type PayeeSort = "name" | "kind";
 type CollisionSort = "spellings" | "transactions";
@@ -363,7 +364,7 @@ function MergeSpellings({
   error: unknown;
 }) {
   const busiest = [...group.payees].sort(
-    (a, b) => b.transaction_count - a.transaction_count || a.name.localeCompare(b.name),
+    (a, b) => b.transaction_count - a.transaction_count || compareNames(a.name, b.name),
   )[0];
   const [keep, setKeep] = useState(busiest?.id ?? "");
   const kept = group.payees.find((one) => one.id === keep);

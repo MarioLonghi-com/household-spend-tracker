@@ -30,44 +30,16 @@ import type {
   IdentifierSuggestion,
   IdentifierSuggestions,
 } from "../lib/types";
+import { ACCOUNT_TYPE_LABELS } from "../lib/labels";
+import { compareNames, countryName as localCountryName } from "../lib/locale";
 
 export const TYPES: { value: AccountType; label: string; owed: boolean; blurb: string }[] = [
-  {
-    value: "checking",
-    label: "Current account",
-    owed: false,
-    blurb: "Day-to-day money at a bank. Salary in, card and direct debits out.",
-  },
-  {
-    value: "savings",
-    label: "Savings",
-    owed: false,
-    blurb: "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly.",
-  },
-  {
-    value: "cash",
-    label: "Cash",
-    owed: false,
-    blurb: "Notes and coins in a wallet or a tin. Nothing imports into it — you enter what you spend.",
-  },
-  {
-    value: "credit_card",
-    label: "Credit card",
-    owed: true,
-    blurb: "Money you owe the card issuer. Spending makes the balance more negative; paying the bill is a transfer from the account that pays it.",
-  },
-  {
-    value: "other_asset",
-    label: "Other asset",
-    owed: false,
-    blurb: "Something you own that holds value and that you want in the totals — a deposit held by a landlord, an investment you track by hand.",
-  },
-  {
-    value: "other_liability",
-    label: "Other debt",
-    owed: true,
-    blurb: "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it.",
-  },
+  { value: "checking", owed: false, ...ACCOUNT_TYPE_LABELS.checking },
+  { value: "savings", owed: false, ...ACCOUNT_TYPE_LABELS.savings },
+  { value: "cash", owed: false, ...ACCOUNT_TYPE_LABELS.cash },
+  { value: "credit_card", owed: true, ...ACCOUNT_TYPE_LABELS.credit_card },
+  { value: "other_asset", owed: false, ...ACCOUNT_TYPE_LABELS.other_asset },
+  { value: "other_liability", owed: true, ...ACCOUNT_TYPE_LABELS.other_liability },
 ];
 
 /** What the six types mean, as one bubble. */
@@ -117,7 +89,8 @@ export function useCountries() {
 /** What to call a code in a tooltip, before the list has arrived or when unset. */
 export function countryName(list: Country[] | undefined, code: string | null): string {
   if (!code) return "no country set";
-  return list?.find((one) => one.code === code)?.name ?? code;
+  const english = list?.find((one) => one.code === code)?.name;
+  return english ? localCountryName(code, english) : code;
 }
 
 /** Accent- and case-insensitive, so "curacao" finds Curaçao. */
@@ -396,7 +369,7 @@ export function Accounts({
         // Equal cells keep a fixed order rather than shuffling between
         // renders -- except under "order", where every row ties and the
         // household's own arrangement is what must survive untouched.
-        (a, b) => (sort === "order" ? 0 : a.name.localeCompare(b.name)),
+        (a, b) => (sort === "order" ? 0 : compareNames(a.name, b.name)),
       ),
     [accounts.data, sort, direction, countries.data, household.base_currency],
   );

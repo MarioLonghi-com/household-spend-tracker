@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, ApiError } from "../lib/api";
 import type { Receipt, ReceiptUpload } from "../lib/types";
 import { formatInstant } from "../lib/time";
+import { formatFixed } from "../lib/locale";
 
 /** What the file picker offers. A hint, never a control — the magic-byte
  *  sniff on the server is the control, and the two must not be confused. */
@@ -20,8 +21,8 @@ export const ACCEPT =
 
 export function sizeText(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024) return `${formatFixed(bytes / 1024, 0)} KB`;
+  return `${formatFixed(bytes / 1024 / 1024, 1)} MB`;
 }
 
 /** A fix worse than this is a district, not a doorway. */
@@ -47,10 +48,13 @@ function whereText(receipt: Receipt): { text: string; query: string } | null {
   const lat = receipt.gps_lat.toFixed(places);
   const lon = receipt.gps_lon.toFixed(places);
 
-  let text = vague ? `approximate — ${lat}, ${lon}` : `${lat}, ${lon}`;
+  // The text in the reader's decimal mark; the link below keeps the point,
+  // which is what a map service reads.
+  const shown = `${formatFixed(receipt.gps_lat, places)}, ${formatFixed(receipt.gps_lon, places)}`;
+  let text = vague ? `approximate — ${shown}` : shown;
   if (receipt.gps_accuracy_m !== null) {
     const metres = receipt.gps_accuracy_m;
-    text += metres >= 1000 ? ` ±${(metres / 1000).toFixed(1)} km` : ` ±${Math.round(metres)} m`;
+    text += metres >= 1000 ? ` ±${formatFixed(metres / 1000, 1)} km` : ` ±${Math.round(metres)} m`;
   }
   if (receipt.gps_bearing !== null) {
     text += ` facing ${Math.round(receipt.gps_bearing)}° ${compass(receipt.gps_bearing)}`;

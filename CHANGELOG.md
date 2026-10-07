@@ -72,6 +72,15 @@ history this repository does not have.
 
 ### Fixed
 
+- **A register load is one request for its rows, not two.** The count beside
+  "Needs a category" was a second `GET …/transactions` fired in the same tick
+  as the register's own, and `access.log` drops the query string, so every
+  load and every refresh showed up as two identical requests a few
+  milliseconds apart -- each one running the filter, the count and the
+  lookups again. The register's answer now carries the count
+  (`needs_category`); the badge asks on its own only when nothing is ticked
+  and the register is not asked at all. (#101)
+
 - **The test that every household-scoped route checks membership was
   checking nine routes.** Its walk of the route table predated how this
   FastAPI version nests included routers, so it found only the routes declared
@@ -132,6 +141,15 @@ history this repository does not have.
   undone. Planner statistics are refreshed straight after any commit that
   writes 1,000 rows or more, and after `make restore`, rather than waiting up
   to six hours for the next sweep. (#103)
+
+- **The client asks one module which locale it is in** (`lib/locale.ts`):
+  the words stay English, and numbers, money and dates follow the browser's
+  own formatting locale as they always did. Money is formatted from its
+  digits rather than a divided float, sorting by name goes through one
+  collator, and the labels for account types, import outcomes, roles and the
+  YNAB import's steps live in `lib/labels.ts`. Typed amounts now also read
+  the minus sign, spaces and apostrophes other locales write. Nothing an
+  English reader sees changes; tests compare the old and new output. (#52)
 
 - **Small fixes left from reviews** (#110): History headlines a bulk delete
   of receipts as *Bulk delete*, not *Bulk edit*; an account update that sends
@@ -278,6 +296,17 @@ history this repository does not have.
     many still work, so you can remove one that was on a lost phone.
   - **A password change leaves passkeys in place**, as it leaves agent keys.
   (#121)
+
+- **Refusals can carry a stable code and raw values beside the sentence.**
+  A converted refusal answers `{"detail", "code", "params"}`: `detail` is the
+  same English sentence as before, `code` a name from `app/error_codes.py`,
+  and `params` the raw values -- money as minor units with its currency, dates
+  as ISO -- so a translated screen can say it in its own words and format.
+  Ten refusals are converted (the exact money parser, transfers to the same
+  account or across currencies, a reconciliation that does not balance or
+  holds a later row, a split that does not add up); the rest follow with the
+  translations. Agent answers are unchanged: they carry no code yet. A test
+  stops new refusals arriving without one. (#65)
 
 ### Documentation
 

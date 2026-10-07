@@ -158,14 +158,22 @@ def parse_exact(value: str, currency: str) -> int:
     if not whole.isdigit() or not whole.isascii() or (point and not (fraction.isdigit() and fraction.isascii())):
         raise MoneyError(
             f"{text!r} is not an amount this can read -- write it with a '.' before the "
-            "decimals and no thousands separators, like 1234.56 or -80"
+            "decimals and no thousands separators, like 1234.56 or -80",
+            code="money.not_an_amount",
+            params={"value": text},
         )
     places = exponent(currency)
     if len(fraction) > places:
         if places == 0:
-            raise MoneyError(f"{text!r} has decimals, and {currency.upper()} has none")
+            raise MoneyError(
+                f"{text!r} has decimals, and {currency.upper()} has none",
+                code="money.decimals_in_whole_currency",
+                params={"value": text, "currency": currency.upper()},
+            )
         raise MoneyError(
-            f"{text!r} has more decimals than {currency.upper()} has ({places})"
+            f"{text!r} has more decimals than {currency.upper()} has ({places})",
+            code="money.too_many_decimals",
+            params={"value": text, "currency": currency.upper(), "places": places},
         )
     # Digits, not arithmetic: the figure is the typed digits with the point
     # moved, which is exact at any length and never touches a float.
@@ -175,12 +183,20 @@ def parse_exact(value: str, currency: str) -> int:
     # a reason. Anything longer than the column's widest value is too large
     # whatever the digits are, and the sentence does not repeat all of them.
     if len(digits) > len(str(MAX_MINOR)):
-        raise MoneyError(f"an amount {len(whole)} digits long is too large to record as money")
+        raise MoneyError(
+            f"an amount {len(whole)} digits long is too large to record as money",
+            code="money.too_many_digits",
+            params={"digits": len(whole)},
+        )
     minor = int(digits)
     if text.startswith("-"):
         minor = -minor
     if not MIN_MINOR <= minor <= MAX_MINOR:
-        raise MoneyError(f"{text!r} is too large to record as money")
+        raise MoneyError(
+            f"{text!r} is too large to record as money",
+            code="money.too_large",
+            params={"value": text},
+        )
     return minor
 
 
