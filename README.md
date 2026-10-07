@@ -218,12 +218,19 @@ force rather than by documentation.
 ### A container
 
 ```bash
+echo SPENDTRACKER_VERSION=X.Y.Z >> .env    # the release to run
+docker compose pull
 SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
 docker compose up -d
 ```
 
+- `docker compose pull` — fetches the published image,
+  `ghcr.io/mariolonghi-com/household-spend-tracker`, at the release `.env` names
 - `SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d` — first run only
 - `docker compose up -d` — every time after
+
+To build this checkout instead, `SPENDTRACKER_VERSION=local docker compose build`;
+Compose also builds it when the image cannot be pulled.
 
 **[`deploy/DOCKER.md`](deploy/DOCKER.md) is the full guide** — seeding a demo
 database, attaching a ledger you already have, backing up, upgrading, and what

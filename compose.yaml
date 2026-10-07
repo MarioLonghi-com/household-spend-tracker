@@ -10,13 +10,22 @@ name: spend-tracker
 
 services:
   app:
+    # The published image, the release named in `.env`:
+    #   SPENDTRACKER_VERSION=X.Y.Z
+    # `docker compose pull` fetches it; unset, it is whatever `latest` was when
+    # it was pulled. Every release is built, attested and published by
+    # .github/workflows/release.yml. deploy/DOCKER.md.
+    image: ghcr.io/mariolonghi-com/household-spend-tracker:${SPENDTRACKER_VERSION:-latest}
+    # The fallback: when that tag cannot be pulled, Compose builds this
+    # checkout instead -- and `docker compose build` always does. Build with
+    # SPENDTRACKER_VERSION=local so a local image never carries a release's
+    # name. Both bases build in CI, so the bypass is tested rather than
+    # promised:
+    #   docker compose build --build-arg PY_BASE=python:3.12-slim \
+    #                        --build-arg PY_RUN=python:3.12-slim
     build:
       context: .
-      # Both bases build in CI, so the bypass is tested rather than promised:
-      #   docker compose build --build-arg PY_BASE=python:3.12-slim \
-      #                        --build-arg PY_RUN=python:3.12-slim
       dockerfile: Dockerfile
-    image: household-spend-tracker:local
     restart: unless-stopped
     ports:
       # **127.0.0.1 on purpose.** `tailscale serve` proxies from the tailnet

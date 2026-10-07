@@ -48,14 +48,25 @@ this repository.
 
 ### Changed
 
+- **`compose.yaml` runs the published image.** It names
+  `ghcr.io/mariolonghi-com/household-spend-tracker` at the release
+  `SPENDTRACKER_VERSION` in `.env` says, and `docker compose pull` fetches it;
+  `build:` stays as the fallback, and a local build is told to call itself
+  `local`. The README and `deploy/DOCKER.md` start, upgrade and roll back that
+  way. The Tailscale sidecar setup still builds from its checkout. `/llms.txt`
+  names the source repository and its licence, and the pull request template
+  asks for the design doc to be re-read against the code. (#111)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
+
 - **A receipt's free-text field is now headed "Receipt notes"**, on the
   Receipts screen and on `/snap`. It used to say "Note". A transaction's field
   is a *memo*, and the old heading read as if the two were the same thing.
   Only the wording changed: it is still the receipt's `note` field, and the API
   and the agent are unchanged. (#114)
+
 - **The Python dependencies are locked, with hashes.** `requirements.in` and
   `requirements-dev.in` hold the floors you edit; `make lock` compiles them
   with `uv pip compile --universal --generate-hashes` into `requirements.txt`
