@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "household-spend-tracker"
+abstract: "A self-hosted, multi-currency, fully audited spend tracker for one household."
+type: software
+authors:
+  - family-names: Longhi
+    given-names: Mario
+repository-code: "https://github.com/MarioLonghi-com/household-spend-tracker"
+license: AGPL-3.0-or-later
+keywords:
+  - personal finance
+  - self-hosted
+  - multi-currency
+  - audit log
