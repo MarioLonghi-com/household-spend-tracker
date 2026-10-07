@@ -63,9 +63,10 @@ from webauthn.helpers.structs import (
 )
 
 from .. import config
-from ..errors import Conflict, NotFound, ValidationError
+from ..errors import Conflict, NotFound, TooManyAttempts, Unauthorized, ValidationError
 from ..hosts import _host_of, _is_ip_literal
 from ..models import Passkey, User, WebAuthnChallenge, utcnow
+from . import ratelimit
 
 LOCALHOST = "localhost"
 
@@ -497,3 +498,154 @@ def stranded(counts: dict[str, int], rp_id: str) -> list[str]:
         for found, count in sorted(counts.items())
         if found != rp_id
     ]
+
+
+# --------------------------------------------------------------------------- #
+# Signing in with a passkey (#121)
+# --------------------------------------------------------------------------- #
+
+#: Its own rate-limit counter, beside "password", "totp", "recovery" and
+#: "stepup" (#47 §2): failures here are not guesses at a password, and a
+#: fumbled passkey prompt must not lock anybody out of typing one.
+RATE_KIND = "passkey"
+
+#: The account arm of the limiter needs a name before a credential has named
+#: anybody. Every unknown credential counts against this one, so the per-IP
+#: arm is what bounds a stranger presenting made-up ones.
+UNKNOWN = "-unknown-passkey-"
+
+#: One sentence for an unknown credential, a disabled member, a passkey made
+#: for another host, a spent or expired challenge and a bad signature: which
+#: of them it was is only ever useful to somebody probing (#47 §2).
+REFUSED = "that passkey cannot sign in here"
+
+#: A ceiling on unanswered sign-in challenges. They are issued to anybody
+#: before signing in, five minutes each; this keeps a loop asking for options
+#: from filling the table between sweeps. Far above what a household makes.
+MAX_LIVE_SIGN_IN_CHALLENGES = 500
+
+
+def sign_in_options(session: Session, request: Request) -> dict:
+    """Options for `navigator.credentials.get()`: a challenge and nothing else.
+
+    No `allowCredentials`: the passkeys are discoverable, so the browser
+    offers whichever it holds for this RP ID, and the server says nothing
+    about which accounts have any. `userVerification: required`, because the
+    verified assertion stands in for both factors.
+    """
+    refuse_unless_available(request)
+    live = session.execute(
+        select(func.count())
+        .select_from(WebAuthnChallenge)
+        .where(WebAuthnChallenge.purpose == SIGN_IN, WebAuthnChallenge.expires_at > utcnow())
+    ).scalar_one()
+    if live >= MAX_LIVE_SIGN_IN_CHALLENGES:
+        raise TooManyAttempts("too many sign-ins at once. Try again in a minute.", retry_after=60)
+    options = webauthn.generate_authentication_options(
+        rp_id=config.settings.rp_id,
+        challenge=issue_challenge(session, purpose=SIGN_IN, user_id=None),
+        timeout=CHALLENGE_SECONDS * 1000,
+        user_verification=UserVerificationRequirement.REQUIRED,
+    )
+    return json.loads(webauthn.options_to_json(options))
+
+
+def _presented(session: Session, credential: dict) -> tuple[Passkey | None, User | None]:
+    """The passkey this credential names and its member, or Nones. A disabled
+    member's passkey reads exactly like an unknown one, as `find_user` reads a
+    disabled member's email (#47 §2)."""
+    credential_id = credential.get("id") if isinstance(credential, dict) else None
+    if not isinstance(credential_id, str) or len(credential_id) > 1400:
+        return None, None
+    passkey = session.execute(
+        select(Passkey).where(Passkey.credential_id == credential_id)
+    ).scalar_one_or_none()
+    if passkey is None:
+        return None, None
+    user = session.get(User, passkey.user_id)
+    if user is None or user.disabled_at is not None:
+        return None, None
+    return passkey, user
+
+
+def verify_sign_in(
+    session: Session, engine: Engine, request: Request, *, credential: dict, ip: str | None
+) -> tuple[User, Passkey]:
+    """Check a browser's assertion and return whose it is.
+
+    A verified assertion with user verification is **both factors** (#47 §2):
+    something the member has, unlocked by something they know or are. So the
+    caller completes the sign-in with no code step and no trusted-device row.
+
+    The challenge is spent first, whatever follows. The attempt is counted
+    before it is judged (`ratelimit.reserve`), under the member's address when
+    the credential names one. Every refusal is the one sentence `REFUSED`.
+
+    The new counter, the time and the backed-up flag are written to the row.
+    All three are redacted from the audit log, so this needs no batch.
+    """
+    refuse_unless_available(request)
+    settings = config.settings
+    challenge = challenge_of(credential)
+    passkey, user = _presented(session, credential)
+    held = ratelimit.reserve(
+        engine,
+        email_canonical=user.email_canonical if user else UNKNOWN,
+        ip=ip,
+        kind=RATE_KIND,
+    )
+    spent = claim_challenge(engine, challenge, purpose=SIGN_IN, user_id=None)
+    if not spent or passkey is None or user is None or passkey.rp_id != settings.rp_id:
+        raise Unauthorized(REFUSED)
+
+    # The authenticator's own claim about whose credential this is, when it
+    # makes one, has to agree with the row: `webauthn` does not compare it.
+    handle = (credential.get("response") or {}).get("userHandle")
+    if handle:
+        try:
+            said = base64url_to_bytes(handle)
+        except (ValueError, TypeError) as exc:
+            raise Unauthorized(REFUSED) from exc
+        if said != user.webauthn_user_handle:
+            raise Unauthorized(REFUSED)
+
+    try:
+        verified = webauthn.verify_authentication_response(
+            credential=credential,
+            expected_challenge=challenge,
+            expected_rp_id=settings.rp_id,
+            expected_origin=expected_origins(request),
+            credential_public_key=passkey.public_key,
+            credential_current_sign_count=passkey.sign_count,
+            require_user_verification=True,
+        )
+    except (WebAuthnException, ValueError, KeyError, TypeError) as exc:
+        raise Unauthorized(REFUSED) from exc
+    ratelimit.release(engine, held)
+
+    passkey.sign_count = verified.new_sign_count
+    passkey.last_used_at = utcnow()
+    passkey.backed_up = verified.credential_backed_up
+    session.flush()
+    return user, passkey
+
+
+def usable_count(session: Session, user: User) -> int:
+    """How many of this member's passkeys work on this instance. What a
+    recovery-code sign-in reports (decision 1): the passkeys it deliberately
+    left alone, one of which may be on the device that was lost."""
+    return session.execute(
+        select(func.count())
+        .select_from(Passkey)
+        .where(Passkey.user_id == user.id, Passkey.rp_id == config.settings.rp_id)
+    ).scalar_one()
+
+
+def remove_all_for(session: Session, user: User) -> int:
+    """Every passkey this member has, through the ORM so the audit log sees
+    each one. What an account reset does (#121): a reset account must not
+    still be reachable with a passkey. Call inside a batch."""
+    rows = list(session.execute(select(Passkey).where(Passkey.user_id == user.id)).scalars())
+    for row in rows:
+        session.delete(row)
+    return len(rows)

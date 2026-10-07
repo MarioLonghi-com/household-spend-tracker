@@ -12,7 +12,7 @@ all of this from *Admin* instead, where the audit log names them.
 
 - `--password`, `--authenticator`, or both: a one-time reset link. Issuing it
   shuts the account at once, exactly as an owner's link does -- every session,
-  trusted browser and agent key ends; the password is replaced with one nobody
+  trusted browser, agent key and passkey ends; the password is replaced with one nobody
   knows, and/or the authenticator and its recovery codes are cleared -- and
   following the link is the only way back in.
 - `--make-owner`: makes an existing account an owner. On its own it prints no
@@ -251,7 +251,7 @@ def _run(args: argparse.Namespace, *, ask) -> int:
         elif args.enable:
             print("  - (already enabled)")
         if issuing and not creating:
-            print("  - end every session, trusted browser and agent key they have")
+            print("  - end every session, trusted browser, agent key and passkey they have")
             if reset_password:
                 print("  - clear their password, so it no longer signs them in")
             if reset_authenticator:

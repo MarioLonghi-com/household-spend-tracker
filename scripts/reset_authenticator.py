@@ -14,7 +14,8 @@ What it does, in order, and nothing is written until step 3:
 2. Asks for a code from it. Three tries; a wrong clock is the usual cause.
 3. In one audited batch: stores the new secret, sealed with the `secret.key`
    in the data directory now; replaces the recovery codes with ten new ones;
-   ends every session and trusted browser and revokes every live agent key.
+   ends every session and trusted browser, revokes every live agent key and
+   removes every passkey (#121): a passkey is a way in on its own.
 4. Prints the ten recovery codes, once.
 
 The new secret and the codes go to this terminal and nowhere else: not the
@@ -93,6 +94,7 @@ def main(argv: list[str] | None = None, *, ask=input) -> int:
     print(f"  sessions ended      {done.sessions_ended}")
     print(f"  browsers forgotten  {done.devices_revoked}")
     print(f"  agent keys revoked  {done.keys_revoked}")
+    print(f"  passkeys removed    {done.passkeys_removed}")
     print()
     print("New recovery codes. Each works once, in place of a code. They are not")
     print("shown again; store them somewhere that is not this terminal:")

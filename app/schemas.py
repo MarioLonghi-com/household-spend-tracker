@@ -123,6 +123,12 @@ class SubmitRecoveryCode(BaseModel):
     code: str = Field(min_length=6, max_length=64)
 
 
+class SignInWithPasskey(BaseModel):
+    """The browser's answer to the passkey sign-in options: `credential.toJSON()`."""
+
+    credential: dict
+
+
 class SignInState(BaseModel):
     """Where the sign-in has got to."""
 
@@ -145,6 +151,14 @@ class SignInState(BaseModel):
     #: the code step would not.
     key_replaced: bool = False
     detail: str | None = None
+    #: Only after a recovery code (#121, decision 1): how many of the member's
+    #: passkeys still work here. Redeeming a code leaves them alone, so one
+    #: synced to the lost phone keeps working until it is removed in Sign-in
+    #: methods; the screen says so when this is more than zero.
+    passkeys_live: int = 0
+    #: Only after a passkey sign-in: which passkey it was, so Sign-in methods
+    #: can mark it "this device" (#47 §3). The member's own id, nobody else's.
+    passkey_id: str | None = None
 
 
 class PasskeyStateOut(BaseModel):

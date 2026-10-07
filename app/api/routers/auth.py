@@ -22,6 +22,7 @@ from ...schemas import (
     PresenceOut,
     SignIn,
     SignInState,
+    SignInWithPasskey,
     SubmitCode,
     SubmitRecoveryCode,
     UserOut,
@@ -194,7 +195,51 @@ def submit_recovery_code(
         user=UserOut.model_validate(user),
         keys_revoked=keys_revoked,
         reenrolment_grant=grant,
+        # Left alone by decision (#47, decision 1), and counted so the screen
+        # can say so rather than leave a passkey on a lost phone to be found.
+        passkeys_live=passkeys.usable_count(session, user),
     )
+
+
+@router.post("/session/passkey/options")
+def passkey_sign_in_options(request: Request, session: SessionDep) -> dict:
+    """The options for `navigator.credentials.get()`: a fresh challenge.
+
+    Asked before anyone is known, so it says nothing about any account: no
+    `allowCredentials`, because the passkeys are discoverable. Refused with
+    the reason where passkeys are not available (`GET
+    /session/passkey/state`), which the sign-in screen asks first.
+    """
+    return passkeys.sign_in_options(session, request)
+
+
+@router.post("/session/passkey", response_model=SignInState)
+def sign_in_with_passkey(
+    body: SignInWithPasskey, request: Request, response: Response, session: SessionDep
+) -> SignInState:
+    """Sign in with a passkey. A verified assertion with user verification is
+    both factors, so there is no code step and no trusted-device row (#47 §2).
+
+    A half-finished password sign-in this browser may hold is left as it is:
+    it expires on its own, and a passkey says nothing about it.
+
+    In recovery mode after a replaced key (#287) this still works -- a passkey
+    was never sealed with `secret.key` -- and the shell then asks for the new
+    authenticator as it does after any sign-in in that state.
+    """
+    user, passkey = passkeys.verify_sign_in(
+        session, db.engine, request, credential=body.credential, ip=client_ip(request)
+    )
+    result = service.complete_sign_in(
+        session,
+        user,
+        trust_this_browser=False,
+        device_cookie=device_cookie(request),
+        ip=client_ip(request),
+        user_agent=request.headers.get("user-agent"),
+    )
+    cookies.set_session(response, result.session_value)
+    return SignInState(authenticated=True, user=UserOut.model_validate(user), passkey_id=passkey.id)
 
 
 @router.delete("/session", status_code=204)

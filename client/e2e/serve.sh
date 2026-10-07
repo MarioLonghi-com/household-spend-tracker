@@ -9,6 +9,9 @@ cd "$(dirname "$0")/../.."
 export SPENDTRACKER_DATA_DIR=./e2e-data
 export DATABASE_URL="sqlite:///./e2e-data/e2e.sqlite3"
 export SPENDTRACKER_ENV=development
+# Passkeys work at http://localhost:8850 and nowhere else here (#121): the
+# suite's own address, 127.0.0.1, is an IP and is never offered them.
+export SPENDTRACKER_RP_ID=localhost
 
 # The venv locally; whatever interpreter CI installed into, there. Both go
 # through `-m uvicorn` rather than the console script, so one variable covers
