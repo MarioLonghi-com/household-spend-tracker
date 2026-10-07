@@ -287,8 +287,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+let client: QueryClient;
+
 function mount() {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
       <HouseholdPage household={HOME} user={USER} onChanged={vi.fn()} />
@@ -504,6 +506,56 @@ describe("The YNAB wizard", () => {
     expect(form.get("token")).toBe("test-token-abc");
     expect(form.get("plan_id")).toBe("plan-1");
     expect(form.get("file")).toBeNull();
+  });
+
+  it("keeps no mutation holding the key once the wizard closes (#93)", async () => {
+    // TanStack keeps a finished mutation, variables and all, for five minutes
+    // after its component unmounts. The variables of all four calls carry the
+    // source, and through the API the source is the key.
+    const holding = () =>
+      client
+        .getMutationCache()
+        .getAll()
+        .filter((m) => JSON.stringify(m.state.variables ?? null).includes("test-token-xyz"));
+
+    const panel = open();
+    fireEvent.click(nextButton(panel));
+    fireEvent.click(within(panel).getByRole("radio", { name: /API key/ }));
+    fireEvent.change(within(panel).getByLabelText("YNAB personal access token"), {
+      target: { value: "test-token-xyz" },
+    });
+    fireEvent.click(nextButton(panel));
+    await within(panel).findByRole("radio", { name: /Test Plan/ });
+    fireEvent.click(within(panel).getByRole("radio", { name: /Test Plan/ }));
+    fireEvent.click(nextButton(panel, "Use this plan"));
+    await within(panel).findByText("Cleared states");
+    await waitFor(() => expect(nextButton(panel).disabled).toBe(false));
+    fireEvent.click(nextButton(panel));
+    await within(panel).findByRole("combobox", { name: "Target for Alpha Current" });
+    fireEvent.click(nextButton(panel));
+    await within(panel).findByRole("combobox", { name: "Target for Groceries" });
+    fireEvent.click(nextButton(panel));
+    await within(panel).findByText(/everything\s+arrives uncleared/);
+    fireEvent.click(within(panel).getByRole("checkbox", { name: /I understand YNAB's/ }));
+    fireEvent.click(nextButton(panel, "Preview"));
+    await within(panel).findByText(/Nothing has been imported yet/);
+    fireEvent.click(nextButton(panel, "Import"));
+    await waitFor(() =>
+      expect(client.getMutationCache().getAll().map((m) => m.state.status)).toEqual([
+        "success", "success", "success", "success",
+      ]),
+    );
+
+    // Every one of the four ran with the key, and while the wizard is open
+    // the cache has them -- which is what makes the assertion below mean
+    // something.
+    expect(uploads("/preview").length + uploads("/commit").length).toBe(2);
+    expect(holding().length).toBe(4);
+
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    fireEvent.click(within(panel).getByRole("button", { name: "Close" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "One-time Import" })).toBeNull());
+    await waitFor(() => expect(holding()).toEqual([]));
   });
 
   it("warns when this household has had a YNAB import before", async () => {
