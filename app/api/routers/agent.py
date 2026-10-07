@@ -1677,6 +1677,11 @@ def upload_receipts(
     Each one keeps its own answer, in order, including "you already had this" --
     a partial repeat is the normal case when a caller re-sends a trip after a
     timeout, and collapsing the array to a single verdict would hide it.
+
+    **The whole request is at most 32 MB** (`MAX_BATCH_BODY_BYTES`), whatever
+    each receipt's own 4 MB allows: 25 full-size receipts would be about 140 MB
+    of base64. Past it the answer is `413` with a sentence and nothing is
+    stored -- send the rest as another batch (#40).
     """
     house = _house(agent, household_id)
     stored = [
