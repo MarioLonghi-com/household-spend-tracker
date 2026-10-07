@@ -41,14 +41,26 @@ Retention, in one place. Each figure is the constant the sweep uses, and
 - account resets: 30 days after they expired (`account_resets.RETENTION`).
   A used or withdrawn one is deleted there and then, so only lapsed links
   wait, and only so an owner can see that one lapsed (#284)
+
+The database file, too (#103). Nothing in `app/` ever checkpointed the WAL:
+SQLite's automatic checkpoint copies pages back into the main file but never
+shrinks the `-wal` file, so after one large import it stayed at its high-water
+mark for the life of the process. Every sweep now ends with
+`wal_checkpoint(TRUNCATE)`, and a `VACUUM` when most of the file is free pages
+-- a household deleted, a big import undone. And the planner's statistics are
+refreshed after any commit that wrote `LARGE_WRITE_ROWS` rows or more, not only
+on this timer, so a restore or a first import is not planned blind for six
+hours (`note_large_writes`).
 """
 
 from __future__ import annotations
 
+import logging
 from datetime import timedelta
 
-from sqlalchemy import delete
+from sqlalchemy import delete, event
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from ..audit.batch import batch
@@ -63,6 +75,8 @@ from ..services import backup_bundle, importing
 from ..services import invitations as invitation_service
 from ..services import receipts as receipt_service
 from . import passkeys, ratelimit, stepup
+
+log = logging.getLogger("spendtracker.housekeeping")
 
 
 def sweep(engine: Engine) -> dict[str, int]:
@@ -151,6 +165,10 @@ def sweep(engine: Engine) -> dict[str, int]:
 
     removed["backup_downloads"] = backup_bundle.sweep_leftovers(platform.backup_dir())
     refresh_planner_statistics(engine)
+    # Last, after every delete above has committed: the checkpoint can only
+    # copy back what is committed, and the free pages a VACUUM would reclaim
+    # are the ones those deletes just made.
+    removed.update(tend_the_file(engine))
     return removed
 
 
@@ -185,6 +203,126 @@ def refresh_planner_statistics(engine: Engine) -> None:
         conn.exec_driver_sql(f"PRAGMA analysis_limit={ANALYSIS_LIMIT}")
         conn.exec_driver_sql("ANALYZE")
         conn.commit()
+
+
+#: When a file counts as "mostly free pages": more than half of it, and at
+#: least this many pages (4 MiB at SQLite's default 4 KiB page). Below that a
+#: VACUUM reclaims nothing worth rewriting the file for.
+VACUUM_FREE_FRACTION = 0.5
+VACUUM_MIN_FREE_PAGES = 1024
+
+
+def tend_the_file(engine: Engine) -> dict[str, int]:
+    """Give the WAL back to the main file, and the free pages back to the disk.
+
+    **The checkpoint.** SQLite checkpoints automatically every thousand pages,
+    but a PASSIVE checkpoint never truncates the `-wal` file: it is reused from
+    the start, at whatever size it once reached. One large import leaves a
+    WAL of tens of megabytes beside a ledger that is mostly smaller than that,
+    and `make backup`'s warning about copying the file exists because of it.
+    `TRUNCATE` copies every committed page back and resets the file to zero
+    bytes. It waits up to the busy timeout for readers, and a reader still
+    open after that leaves the checkpoint partial rather than failing: the
+    next sweep finishes it.
+
+    **The VACUUM.** Deleting rows frees pages inside the file but never
+    shrinks it. When more than `VACUUM_FREE_FRACTION` of the file is free --
+    a household deleted, a large import undone -- the file is rebuilt. Only
+    then: a VACUUM rewrites every live page and holds the write lock while it
+    does, and when most pages are free there is little to rewrite. A VACUUM
+    that meets a lock is skipped and tried again on the next sweep; it is
+    never worth stalling a request for.
+
+    Returns the pages each step handled, for the sweep's log line:
+    `wal_pages` checkpointed, `free_pages` reclaimed.
+    """
+    if engine.dialect.name != "sqlite":
+        return {}
+    done = {"wal_pages": 0, "free_pages": 0}
+    with engine.connect() as conn:
+        # (busy, frames in the log, frames copied back); -1s outside WAL mode.
+        # A TRUNCATE reports the log *after* resetting it -- zeros -- so a
+        # PASSIVE pass first says how much there was, and does most of the
+        # copying without waiting on anyone.
+        _busy, frames, _copied = conn.exec_driver_sql("PRAGMA wal_checkpoint(PASSIVE)").one()
+        busy, _frames, _copied = conn.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)").one()
+        done["wal_pages"] = max(frames or 0, 0)
+        if busy:
+            log.info("housekeeping: WAL checkpoint was partial; a reader held it")
+
+        pages = conn.exec_driver_sql("PRAGMA page_count").scalar_one()
+        free = conn.exec_driver_sql("PRAGMA freelist_count").scalar_one()
+        conn.rollback()
+        if free < VACUUM_MIN_FREE_PAGES or free <= pages * VACUUM_FREE_FRACTION:
+            return done
+    try:
+        # VACUUM cannot run inside a transaction, and SQLAlchemy begins one
+        # implicitly: AUTOCOMMIT hands the statement to SQLite as it is.
+        with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+            conn.exec_driver_sql("VACUUM")
+            conn.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)")
+            done["free_pages"] = free - conn.exec_driver_sql(
+                "PRAGMA freelist_count"
+            ).scalar_one()
+    except OperationalError:
+        log.info("housekeeping: VACUUM skipped; the database was busy")
+    return done
+
+
+#: How many rows one commit has to write before the planner's statistics are
+#: refreshed straight away rather than on the next sweep. A statement of a
+#: few months is a few hundred rows and changes no index's shape; a first
+#: import, a YNAB history or a restore is thousands.
+LARGE_WRITE_ROWS = 1000
+
+_WRITTEN_KEY = "housekeeping.rows_written"
+
+
+@event.listens_for(AuditedSession, "after_flush")
+def _count_written(session, _flush_context) -> None:
+    """Rows this transaction has written so far, across every flush."""
+    session.info[_WRITTEN_KEY] = (
+        session.info.get(_WRITTEN_KEY, 0) + len(session.new) + len(session.deleted)
+    )
+
+
+@event.listens_for(AuditedSession, "after_rollback")
+def _forget_written(session) -> None:
+    session.info.pop(_WRITTEN_KEY, None)
+
+
+@event.listens_for(AuditedSession, "after_commit")
+def note_large_writes(session) -> None:
+    """`ANALYZE` after a commit that wrote `LARGE_WRITE_ROWS` rows or more.
+
+    The statistics behind the planner's index choices were refreshed only by
+    the sweep, at boot and every six hours. A restore boots the app and is
+    analysed at once, but a first import into a fresh install -- or a YNAB
+    history, or an agent's backfill -- arrived into a ledger whose statistics
+    described it as empty, and the planner chose indexes for an empty ledger
+    for up to six hours (#103). Counted in the ORM rather than in each import
+    route, so every path that writes thousands of rows is covered, including
+    ones not written yet.
+
+    Runs after the commit, on its own connection, so the write lock it needs
+    for `sqlite_stat1` is free; `analysis_limit` keeps it to milliseconds. A
+    failure here is logged and swallowed: the rows are committed, and stale
+    statistics are a slower query, never a wrong one.
+    """
+    written = session.info.pop(_WRITTEN_KEY, 0)
+    if written < LARGE_WRITE_ROWS:
+        return
+    try:
+        bind = session.get_bind()
+    except Exception:  # pragma: no cover - an unbound session wrote nothing here
+        return
+    engine = bind if isinstance(bind, Engine) else getattr(bind, "engine", None)
+    if engine is None:
+        return
+    try:
+        refresh_planner_statistics(engine)
+    except OperationalError:
+        log.info("housekeeping: ANALYZE after a large write skipped; the database was busy")
 
 
 def _sweep_agent_keys(engine: Engine, *, now) -> int:
