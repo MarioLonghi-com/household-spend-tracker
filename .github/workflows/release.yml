@@ -307,6 +307,13 @@ jobs:
   publish:
     needs: build
     if: github.ref_type == 'tag'
+    # The `release` environment (#96): with a required reviewer set on it in
+    # the repository's settings, a pushed `v*` tag builds and then waits for a
+    # click before anything is published. The reviewer is a repository
+    # setting, not a line here -- and an environment this names that does not
+    # exist yet is created on the first run *with no protection*, so this line
+    # alone guards nothing until the reviewer is added.
+    environment: release
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # The one job that can write to the repository, and it checks out nothing
@@ -359,6 +366,9 @@ jobs:
   publish-image:
     needs: [image, publish]
     if: github.ref_type == 'tag'
+    # The same gate as `publish`, so nothing reaches ghcr.io without it even
+    # if the `needs` above ever changes. Each job asks for its own approval.
+    environment: release
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

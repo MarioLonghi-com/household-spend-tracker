@@ -74,6 +74,12 @@ this repository.
 
 ### Changed
 
+- **`release.yml`'s publishing jobs run in a `release` environment.** Once
+  the repository gives that environment a required reviewer, a pushed `v*` tag
+  builds and smoke-tests as before and then waits for an approval before
+  anything is published to Releases or ghcr.io. Until then it behaves as it
+  did. (#96)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
@@ -83,6 +89,7 @@ this repository.
   is a *memo*, and the old heading read as if the two were the same thing.
   Only the wording changed: it is still the receipt's `note` field, and the API
   and the agent are unchanged. (#114)
+
 - **The Python dependencies are locked, with hashes.** `requirements.in` and
   `requirements-dev.in` hold the floors you edit; `make lock` compiles them
   with `uv pip compile --universal --generate-hashes` into `requirements.txt`
