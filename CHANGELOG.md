@@ -81,6 +81,12 @@ history this repository does not have.
   until nothing new is strong, still as one batch and one undo, and "Link
   all" says how many it linked in all. (#88)
 
+- **"Make new codes" tells a member whose authenticator the server can no
+  longer check what to do.** After `secret.key` was replaced, it answered with
+  the generic "that password and authenticator code do not prove it is you".
+  It now says what a step-up says: the key was replaced, a recovery code does
+  not stand in here, and setting up a new authenticator is the way on. (#98)
+
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
   read the last separator as the decimal mark, so a thousands comma with no
   decimals was taken as a decimal comma and the third digit rounded away -- a
@@ -148,6 +154,7 @@ history this repository does not have.
   passkey features, allowed on this origin and refused on `/snap`. The
   `webauthn` library is added, locked. **For an operator:** nothing to do. If
   `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
+
 - **A member can register passkeys, and list, rename and remove them**,
   through the API so far. The screens come with #122. Adding a passkey costs
   a fresh password and authenticator code, the same step-up that issuing an
