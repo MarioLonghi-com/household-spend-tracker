@@ -184,17 +184,18 @@ def test_boot_refuses_an_rp_id_that_is_not_the_public_urls_host(monkeypatch, pub
 
 
 def test_the_state_answer_is_the_same_signed_in_or_not(client, configure):
-    """It describes the server and the request, never an account."""
+    """It describes the server and the request, never an account: the same
+    browser gets the same answer before and after signing in."""
     from tests.conftest import _setup_owner
 
-    configure(public_url=PUBLIC)
-    signed_out = _state(client, PUBLIC)
+    configure(public_url="https://testserver")
+    before = client.get("/api/session/passkey/state", headers=HEADERS).json()
     _setup_owner(client)
-    signed_in = client.get("/api/session/passkey/state", headers=HEADERS).json()
-    assert signed_out["available"] is True
-    # The suite's own client is at https://testserver: the wrong host.
-    assert signed_in == {**signed_out, "available": False, "reason": "wrong_host",
-                         "detail": "Passkeys work only at this server's own address."}
+    assert client.get("/api/me", headers=HEADERS).status_code == 200
+    after = client.get("/api/session/passkey/state", headers=HEADERS).json()
+    assert before == after == {
+        "available": True, "reason": None, "detail": None, "address": "https://testserver",
+    }
 
 
 def test_every_page_may_use_passkeys_except_snap(client):
