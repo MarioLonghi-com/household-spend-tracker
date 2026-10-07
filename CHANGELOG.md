@@ -72,6 +72,15 @@ history this repository does not have.
 
 ### Fixed
 
+- **A Spanish statement whose date column is headed `F. Valor` imports.**
+  Spanish banks abbreviate *fecha* to "F.". "F. Valor" matched no date name
+  and did match the amount name "valor", so the file had no date column and
+  its dates were taken as the amount. A header of "F." followed by a word is
+  now a date. Three synthetic statements are kept as regression fixtures:
+  this header; `1,234` beside `1,234.56`; and a blank debit cell next to a
+  balance column. A new test checks that undoing an import gives a
+  hand-entered row it absorbed back exactly as it was. (#90)
+
 - **A register load is one request for its rows, not two.** The count beside
   "Needs a category" was a second `GET …/transactions` fired in the same tick
   as the register's own, and `access.log` drops the query string, so every
@@ -132,6 +141,15 @@ history this repository does not have.
   guide says so. (#84)
 
 ### Changed
+
+- **The database file is looked after, not only its rows.** Every
+  housekeeping sweep now ends with a `wal_checkpoint(TRUNCATE)`, so the
+  `-wal` file goes back to zero instead of staying at the size the biggest
+  import ever left it, and it runs `VACUUM` when more than half the file is
+  free pages, such as after a household is deleted or a large import is
+  undone. Planner statistics are refreshed straight after any commit that
+  writes 1,000 rows or more, and after `make restore`, rather than waiting up
+  to six hours for the next sweep. (#103)
 
 - **The register loads five hundred rows at a time.** It used to ask for
   everything the filter matched, up to 25,000 rows, and refetch all of it
