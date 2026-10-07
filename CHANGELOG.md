@@ -82,6 +82,9 @@ this repository.
 
 ### Changed
 
+- **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
+  every CI job runs 3.12, and nothing tests 3.14. (#105)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
