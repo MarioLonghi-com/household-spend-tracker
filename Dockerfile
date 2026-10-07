@@ -16,12 +16,10 @@
 # assumed, and two things about the free tier matter:
 #
 #   - It is `:latest` only. Versioned and historical tags are a paid
-#     subscription, so a build that names `:latest` is not reproducible -- the
-#     tag moves underneath it. The mitigation is to pin the **digest** and let
-#     Dependabot move it, which is the same discipline already applied to the
-#     SHA-pinned actions in .github/workflows/tests.yml. The digest is not
-#     pinned here yet because pinning one this session cannot verify would be
-#     worse than saying so: see issue #63.
+#     subscription, so a build that names `:latest` alone is not reproducible
+#     -- the tag moves underneath it. So both bases are pinned by **digest**
+#     below, and Dependabot's `docker` entry moves the digests, the same
+#     discipline as the SHA-pinned actions in .github/workflows/ (#95).
 #   - Chainguard Libraries for Python -- their rebuilt-from-source PyPI
 #     packages -- is a **paid** product and is not in use. Nothing here should
 #     be read as claiming otherwise.
@@ -32,8 +30,21 @@
 #     docker build --build-arg PY_BASE=python:3.12-slim \
 #                  --build-arg PY_RUN=python:3.12-slim .
 #
-ARG PY_BASE=cgr.dev/chainguard/python:latest-dev
-ARG PY_RUN=cgr.dev/chainguard/python:latest
+# The defaults name the two stages just below rather than the images, because
+# Dependabot rewrites literal `FROM` lines and does not follow a build argument
+# into one. A stage that nothing builds from is skipped, so the bypass never
+# pulls a Chainguard image.
+ARG PY_BASE=chainguard-dev
+ARG PY_RUN=chainguard-run
+
+# --------------------------------------------------------------------------- #
+# **Pinned by digest** (#95): the multi-arch index (amd64, arm64) of
+# `cgr.dev/chainguard/python:latest-dev` and `:latest` as of 2026-10-07, read
+# from the registry's manifest endpoint and checked against the SHA-256 of the
+# index itself. The tag stays beside the digest so Dependabot knows what to
+# look up; the digest is what is pulled.
+FROM cgr.dev/chainguard/python:latest-dev@sha256:630df1be3733f7b38d1b535872904248adfe23fbea4befcb08da47cb7436ddb2 AS chainguard-dev
+FROM cgr.dev/chainguard/python:latest@sha256:8c6e0d0a587455e8a8d145e20234d5ef5a531a1c052a7b9d76b155ccc7fcded2 AS chainguard-run
 
 # --------------------------------------------------------------------------- #
 # **Pinned by digest.** This stage builds the JavaScript that ships, so a tag
@@ -44,7 +55,7 @@ ARG PY_RUN=cgr.dev/chainguard/python:latest
 #
 # A literal `FROM` rather than an `ARG` default, because Dependabot rewrites
 # `FROM` lines and does not follow a build argument into one -- which is also
-# why the two Chainguard bases above are not watched yet (issue #63).
+# why the two Chainguard bases above are stages of their own.
 FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS client
 # The layout matters: `client/vite.config.ts` has `outDir: "../app/static/dist"`,
 # so the build writes *outside* the client directory and the stage has to give

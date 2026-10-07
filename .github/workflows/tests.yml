@@ -716,8 +716,8 @@ jobs:
   # test below uses one rather than a bind mount or nothing.
   #
   # On a pull request only when its recipe moved and the tree has not already
-  # passed; weekly, because the Chainguard base moves underneath it (issue
-  # #63); and by hand. Not on the push to `main`: release.yml builds,
+  # passed; weekly, because a Dependabot digest bump is only proven by a build;
+  # and by hand. Not on the push to `main`: release.yml builds,
   # smoke-tests and publishes the same image from the tag.
   image:
     needs: changes

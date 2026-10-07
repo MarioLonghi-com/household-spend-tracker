@@ -28,6 +28,12 @@ this repository.
 
 ### Security
 
+- **The container's Chainguard bases are pinned by digest.** The free tier
+  has only a moving `:latest`, so the image named an input that changed under
+  it. Both bases are now their own pinned stages, which Dependabot's weekly
+  Docker check can move; `PY_BASE=`/`PY_RUN=` still build on any other base.
+  The README says what the release attestation does and does not cover. (#95)
+
 - **A YNAB key is gone from the browser's memory when the one-time import
   closes.** The wizard dropped it from its own state, but the query library
   kept each finished call -- key included -- for five minutes after the
@@ -51,6 +57,7 @@ this repository.
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
+
 - **A receipt's free-text field is now headed "Receipt notes"**, on the
   Receipts screen and on `/snap`. It used to say "Note". A transaction's field
   is a *memo*, and the old heading read as if the two were the same thing.
