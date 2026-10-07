@@ -65,7 +65,7 @@ async function attempt(page: Page, at: string): Promise<boolean> {
   await page.goto(at);
   await page.getByLabel("Email").fill(who.email);
   await page.getByLabel("Password").fill(who.password);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
 
   await page.getByLabel("Code").fill(totp(who.totp_secret));
   await page.getByRole("button", { name: "Continue" }).click();
