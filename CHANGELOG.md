@@ -72,6 +72,15 @@ history this repository does not have.
 
 ### Fixed
 
+- **The test that every household-scoped route checks membership was
+  checking nine routes.** Its walk of the route table predated how this
+  FastAPI version nests included routers, so it found only the routes declared
+  on the app itself and passed by looking at almost nothing. It now walks all
+  of them -- every non-agent route passed -- and holds agent routes to their
+  own check (`current_agent`, then the key's household). The empty-household
+  test walks the same table instead of a hand-kept list of eleven paths, so
+  reports, receipts, transfers and categories are covered. (#106)
+
 - **An agent's import row can say its currency, and one in another currency
   is refused.** Rows posted to `POST /imports` had no currency field, so the
   check a statement file's currency column gets (0.5.0) never ran for them:
@@ -121,6 +130,14 @@ history this repository does not have.
   keeping its EXIF `DateTimeOriginal` and GPS, and names the section of
   `agent/README.md` that says how. The 4 MB ceiling is unchanged. (#39)
 
+- **Five statements in the docs and comments now match the code** (#109):
+  CLAUDE.md names `ci-ok`, not a `tests` check, as what a ruleset requires;
+  the setup router says it answers `409` once set up, not `404`; `/db`'s
+  docstring says it shows an owner every household's ledger, which is more
+  than the admin screen; `scripts/db_view.py` says receipts are carried whole,
+  GPS and EXIF included, as are payee rule patterns; and old-tracker issue
+  numbers in the `Makefile` and `tests.yml` are marked as such.
+
 - **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
   every CI job runs 3.12, and nothing tests 3.14. (#105)
 
@@ -136,6 +153,12 @@ history this repository does not have.
   way. The Tailscale sidecar setup still builds from its checkout. `/llms.txt`
   names the source repository and its licence, and the pull request template
   asks for the design doc to be re-read against the code. (#111)
+
+- **The import guide says what happens to a statement line whose row you
+  deleted:** it is new again, so the next statement that carries it -- or the
+  same file sent again with *Import it anyway* -- brings it back. Undo in
+  History is the other way back. Nothing about importing changed; it is now
+  written down and tested. (#91)
 
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
