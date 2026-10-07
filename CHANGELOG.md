@@ -72,6 +72,13 @@ history this repository does not have.
 
 ### Fixed
 
+- **A currency code has to be a real one.** Only the shape was checked, so a
+  typo like `GPB` opened an account in a currency that does not exist. A new
+  account or a household's currency must now be an ISO 4217 code: a current
+  one, or one withdrawn since 1999 such as `HRK` or `DEM`, for accounts with
+  history. A code the household already holds from before this check is still
+  accepted, so no existing ledger stops working. Nothing stored changes. (#110)
+
 - **A register load is one request for its rows, not two.** The count beside
   "Needs a category" was a second `GET …/transactions` fired in the same tick
   as the register's own, and `access.log` drops the query string, so every

@@ -17,7 +17,7 @@ from datetime import date
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .. import countries
+from .. import countries, currencies
 from ..errors import Conflict, NotFound, ValidationError
 from ..models import (
     Account,
@@ -41,6 +41,20 @@ from . import transactions as transaction_service
 #: and the client renders money on every screen, so one stored code that is
 #: three characters but not three letters blanked the whole household (#193).
 CURRENCY_CODE = re.compile(r"[A-Z]{3}")
+
+
+def codes_in_use(session: Session, household: Household) -> set[str]:
+    """Every currency code this household already holds: its base and its accounts'.
+
+    What `currencies.refusal` accepts whatever it is, so a ledger holding a code
+    from before the ISO check can still open another account in it (#110).
+    """
+    held = set(
+        session.execute(
+            select(Account.currency).where(Account.household_id == household.id).distinct()
+        ).scalars()
+    )
+    return held | {household.base_currency}
 
 
 def free_text(value: str | None) -> str | None:
@@ -81,6 +95,9 @@ def create_account(
     code = (currency or household.base_currency).strip().upper()
     if not CURRENCY_CODE.fullmatch(code):
         raise ValidationError(f"{currency!r} is not a three-letter currency code")
+    problem = currencies.refusal(code, codes_in_use(session, household))
+    if problem:
+        raise ValidationError(problem)
 
     _refuse_taken_name(session, household.id, name)
 
