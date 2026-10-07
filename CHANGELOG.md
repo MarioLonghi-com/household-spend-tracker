@@ -72,6 +72,14 @@ history this repository does not have.
 
 ### Fixed
 
+- **A burst of requests can no longer use more memory than a small host
+  has.** Each SQLite connection had a 32 MiB page cache whatever the machine,
+  and the connection pool is unbounded on purpose. On a 95 MiB ledger, ten
+  connections reading at once held 456 MiB. SQLite now has a process-wide soft
+  heap limit of an eighth of the memory the process may use (the container's
+  limit, or the machine's), and each connection's cache is a sixty-fourth of
+  it, between 2 and 32 MiB. The same ten connections measured 178 MiB. (#102)
+
 - **The test that every household-scoped route checks membership was
   checking nine routes.** Its walk of the route table predated how this
   FastAPI version nests included routers, so it found only the routes declared
