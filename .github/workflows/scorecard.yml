@@ -8,8 +8,8 @@ name: scorecard
 #
 # Two of its checks will always score low here and can be ignored: Fuzzing
 # (no fuzz target, none warranted) and CII-Best-Practices (a self-assessment
-# badge). Pinned-Dependencies will complain about `>=` floors in
-# requirements*.txt until issue #96's lockfile lands.
+# badge). The Python dependencies are locked with hashes in requirements*.txt
+# since #46, so Pinned-Dependencies reads those rather than floors.
 
 on:
   branch_protection_rule:

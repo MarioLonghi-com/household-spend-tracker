@@ -33,6 +33,20 @@ this repository.
   is a *memo*, and the old heading read as if the two were the same thing.
   Only the wording changed: it is still the receipt's `note` field, and the API
   and the agent are unchanged. (#114)
+- **The Python dependencies are locked, with hashes.** `requirements.in` and
+  `requirements-dev.in` hold the floors you edit; `make lock` compiles them
+  with `uv pip compile --universal --generate-hashes` into `requirements.txt`
+  and `requirements-dev.txt`, every package pinned exactly, transitive ones
+  included. `make install-py`, `make install-prod`, the container image and CI
+  install them with `--require-hashes`, so two installs of one tag get the same
+  set. CI fails a pull request whose locks do not match its `.in` files, and
+  checks that the image holds exactly the runtime lock. `starlette` and
+  `certifi`, which the app imports directly, are now declared. `make audit`
+  audits the locks as written, a release carries a CycloneDX SBOM of the
+  runtime set, and Dependabot reads the locks through its `uv` ecosystem. The
+  client's `tsx`, which one test ran unpinned through `npx`, is a dev
+  dependency. **For an operator:** nothing to do beyond the usual
+  `make install-prod`. (#46)
 
 ## 0.7.1 — 2026-10-05
 
@@ -1248,7 +1262,7 @@ back past any of those.
   bases, not just builds it.
 - **`make serve`** (`#63`) — uvicorn without `--reload`, keeping the loopback
   bind that makes `tailscale serve` the only way in. **`make install-prod`**
-  installs the runtime dependencies alone (`#96`).
+  installs the runtime dependencies alone (a first step toward #46).
 - **`make version`** (`#63`), moving every copy of the version together — the
   three files and, since 0.2.0, the two in `client/package-lock.json` — with
   `tests/test_version.py` failing when they drift.
@@ -1302,7 +1316,7 @@ back past any of those.
 - CI now checks pull requests into `dev` as well as `main`, and no longer
   leaves a usable token in `.git/config` for every step after checkout. The
   release job that holds a write token installs and runs nothing, and the
-  Node build stage is pinned by digest (`#96`).
+  Node build stage is pinned by digest (a first step toward #46).
 - **Dependencies** (`#135`–`#141`, applied on `dev` rather than the `main`
   branches Dependabot opened them against): uvicorn >=0.53.0, SQLAlchemy
   >=2.0.54 (resolves to 2.1), python-multipart >=0.0.32, argon2-cffi >=25.1.0,
@@ -1366,7 +1380,7 @@ back past any of those.
   on in the repository settings. None of these is a commit.
 - The Chainguard base is not pinned by digest. The free tier is `:latest` only,
   so the tag moves; pinning wants a digest Dependabot then maintains.
-- Python dependencies have no lockfile with hashes yet (`#96`).
+- Python dependencies have no lockfile with hashes yet (done since in #46).
 
 ---
 
