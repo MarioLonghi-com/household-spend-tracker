@@ -64,6 +64,15 @@ history this repository does not have.
 
 ### Fixed
 
+- **The test that every household-scoped route checks membership was
+  checking nine routes.** Its walk of the route table predated how this
+  FastAPI version nests included routers, so it found only the routes declared
+  on the app itself and passed by looking at almost nothing. It now walks all
+  of them -- every non-agent route passed -- and holds agent routes to their
+  own check (`current_agent`, then the key's household). The empty-household
+  test walks the same table instead of a hand-kept list of eleven paths, so
+  reports, receipts, transfers and categories are covered. (#106)
+
 - **An agent's import row can say its currency, and one in another currency
   is refused.** Rows posted to `POST /imports` had no currency field, so the
   check a statement file's currency column gets (0.5.0) never ran for them:
