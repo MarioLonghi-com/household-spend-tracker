@@ -79,6 +79,14 @@ history this repository does not have.
   history. A code the household already holds from before this check is still
   accepted, so no existing ledger stops working. Nothing stored changes. (#110)
 
+- **A burst of requests can no longer use more memory than a small host
+  has.** Each SQLite connection had a 32 MiB page cache whatever the machine,
+  and the connection pool is unbounded on purpose. On a 95 MiB ledger, ten
+  connections reading at once held 456 MiB. SQLite now has a process-wide soft
+  heap limit of an eighth of the memory the process may use (the container's
+  limit, or the machine's), and each connection's cache is a sixty-fourth of
+  it, between 2 and 32 MiB. The same ten connections measured 178 MiB. (#102)
+
 - **A Spanish statement whose date column is headed `F. Valor` imports.**
   Spanish banks abbreviate *fecha* to "F.". "F. Valor" matched no date name
   and did match the amount name "valor", so the file had no date column and
