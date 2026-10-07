@@ -26,6 +26,12 @@ this repository.
 
 ## Unreleased
 
+### Security
+
+- **The Content Security Policy no longer allows `data:` images.** Nothing
+  in the client uses one (the QR code is SVG), so `img-src` is `'self' blob:`.
+  (#94)
+
 ### Fixed
 
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
