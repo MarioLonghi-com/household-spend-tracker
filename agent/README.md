@@ -222,11 +222,14 @@ and c.
 the file you sent. The app still has it, and a read key may read it:
 
 ```bash
-curl -s "${auth[@]}" "$H/receipts?transaction_id=$TXN"   # a row's receipts
-curl -s "${auth[@]}" "$A/receipts/$RECEIPT"              # one, with its note
+curl -s "${auth[@]}" "$H/receipts?transaction_id=$TXN"
+curl -s "${auth[@]}" "$A/receipts/$RECEIPT"
 curl -s "${auth[@]}" -o receipt "$A/receipts/$RECEIPT/file"
 curl -s "${auth[@]}" -o thumb.avif "$A/receipts/$RECEIPT/thumbnail"
 ```
+
+The first is a row's receipts, the second one receipt with its note, and the
+last two its file and its thumbnail.
 
 Every receipt in a listing carries its `note`: what was sent with the
 upload, or what a person wrote on it since. A note is something to read, not
