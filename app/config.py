@@ -18,6 +18,7 @@ import os
 import secrets
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from .permissions import private_dir, tighten_umask
 
@@ -149,6 +150,47 @@ def _public_url(raw: str | None) -> str:
     return value
 
 
+def _rp_id(raw: str | None, public_url: str, environment: str) -> str:
+    """`SPENDTRACKER_RP_ID`: the host name passkeys are bound to, or empty.
+
+    A passkey works only for the relying-party ID it was registered under, so
+    this is permanent in a way no other setting is: change it and every
+    passkey stops working, silently (#47 §1.2). Hence three rules.
+
+    - **Default: the host of `SPENDTRACKER_PUBLIC_URL`.** Neither set means
+      passkeys are off. It is never taken from the request's `Host`, which is
+      whatever the client wrote.
+    - **The full host name only** (#47, decision 2). `<tailnet>.ts.net` would
+      be legal and would survive a machine rename, but every other node on the
+      tailnet could then ask for assertions for this app's passkeys. So a set
+      value must equal the public URL's host -- or be `localhost` in
+      development -- and boot refuses anything else, the way a malformed
+      public URL is refused.
+    - **An IP literal is kept, and passkeys stay off** (`passkey_state` says
+      why). Browsers refuse an IP as an RP ID, so there is nothing to offer,
+      but it is the honest consequence of an IP public URL rather than a
+      reason to refuse the boot.
+    """
+    public_host = (urlsplit(public_url).hostname or "") if public_url else ""
+    value = (raw or "").strip().lower().rstrip(".")
+    if not value:
+        return public_host
+    allowed = {public_host} - {""}
+    if environment == "development":
+        allowed.add("localhost")
+    if value not in allowed:
+        said = f"the host of SPENDTRACKER_PUBLIC_URL ({public_host})" if public_host else (
+            "the host of SPENDTRACKER_PUBLIC_URL, which is not set"
+        )
+        raise ValueError(
+            f"SPENDTRACKER_RP_ID must be {said}"
+            + (", or localhost in development" if environment == "development" else "")
+            + f", not {value!r}. A passkey is bound to the full host name people open "
+            "this app at; leave the variable unset to use the public URL's."
+        )
+    return value
+
+
 def _hosts(raw: str | None) -> tuple[str, ...]:
     if raw is None or not raw.strip():
         return DEFAULT_ALLOWED_HOSTS
@@ -203,6 +245,11 @@ class Settings:
     #: header out of those documents altogether.
     public_url: str = ""
 
+    #: The relying-party ID passkeys are bound to: `SPENDTRACKER_RP_ID`, or the
+    #: host of `public_url`, or empty for off. See `_rp_id`, and
+    #: `app/auth/passkeys.py` for when an instance offers them.
+    rp_id: str = ""
+
     #: Cookie and session lifetimes, in seconds. The trusted-device window is
     #: fixed from issuance and deliberately does not slide.
     session_absolute_seconds: int = 60 * 60 * 24 * 30
@@ -241,17 +288,20 @@ class Settings:
         tighten_umask()
         data_dir = resolve_data_dir()
         url = os.environ.get("DATABASE_URL") or f"sqlite:///{data_dir / 'spendtracker.sqlite3'}"
+        environment = os.environ.get("SPENDTRACKER_ENV", "production")
+        public_url = _public_url(os.environ.get("SPENDTRACKER_PUBLIC_URL"))
         return cls(
             database_url=url,
             data_dir=data_dir,
             secret_key=_load_or_create_secret_key(data_dir),
             secret_key_from_env=bool(_key_from_env()),
             echo_sql=_bool("SPENDTRACKER_ECHO_SQL"),
-            environment=os.environ.get("SPENDTRACKER_ENV", "production"),
+            environment=environment,
             db_view=os.environ.get("SPENDTRACKER_DB_VIEW", "on"),
             cookie_secure=_bool("SPENDTRACKER_COOKIE_SECURE", True),
             allowed_hosts=_hosts(os.environ.get("SPENDTRACKER_ALLOWED_HOSTS")),
-            public_url=_public_url(os.environ.get("SPENDTRACKER_PUBLIC_URL")),
+            public_url=public_url,
+            rp_id=_rp_id(os.environ.get("SPENDTRACKER_RP_ID"), public_url, environment),
         )
 
 
