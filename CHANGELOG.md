@@ -64,6 +64,15 @@ history this repository does not have.
 
 ### Fixed
 
+- **The test that every household-scoped route checks membership was
+  checking nine routes.** Its walk of the route table predated how this
+  FastAPI version nests included routers, so it found only the routes declared
+  on the app itself and passed by looking at almost nothing. It now walks all
+  of them -- every non-agent route passed -- and holds agent routes to their
+  own check (`current_agent`, then the key's household). The empty-household
+  test walks the same table instead of a hand-kept list of eleven paths, so
+  reports, receipts, transfers and categories are covered. (#106)
+
 - **An agent's import row can say its currency, and one in another currency
   is refused.** Rows posted to `POST /imports` had no currency field, so the
   check a statement file's currency column gets (0.5.0) never ran for them:
@@ -148,6 +157,7 @@ history this repository does not have.
   passkey features, allowed on this origin and refused on `/snap`. The
   `webauthn` library is added, locked. **For an operator:** nothing to do. If
   `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
+
 - **A member can register passkeys, and list, rename and remove them**,
   through the API so far. The screens come with #122. Adding a passkey costs
   a fresh password and authenticator code, the same step-up that issuing an
