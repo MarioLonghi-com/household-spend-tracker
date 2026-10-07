@@ -26,10 +26,17 @@ test("a passkey signs in, and only where passkeys can work", async ({ page }) =>
   await page.goto(BY_NAME);
   const button = page.getByRole("button", { name: "Sign in with a passkey" });
   const landed = page.getByRole("heading", { name: "Transactions", exact: true });
-  // The email field may already have offered it (conditional UI); if the
-  // screen is still there, the button does it.
+  // Chrome's virtual authenticator answers the email field's conditional
+  // request by itself, so the suggestion may sign in before anybody presses
+  // anything. Give it a moment; only if the screen is still there, use the
+  // button. Pressing while that sign-in is under way would wait on a button
+  // that is about to leave the page.
   await expect(button.or(landed)).toBeVisible();
-  if (await button.isVisible()) await button.click();
+  const bySuggestion = await landed
+    .waitFor({ timeout: 5_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!bySuggestion) await button.click();
   await expect(landed).toBeVisible();
 
   // Signed in by that passkey: the server counted the use.
