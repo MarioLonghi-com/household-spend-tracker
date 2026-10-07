@@ -35,6 +35,11 @@ class Code:
 
 
 REGISTRY: dict[str, Code] = {
+    # -- currency: app/currencies.py `check_new` (#110) ---------------------- #
+    "currency.not_iso_4217": Code(
+        "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR",
+        ("code",),
+    ),
     # -- money: app/money.py `parse_exact`, a typed amount read exactly ------ #
     "money.decimals_in_whole_currency": Code(
         "{value} has decimals, and {currency} has none", ("value", "currency")
