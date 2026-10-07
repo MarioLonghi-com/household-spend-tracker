@@ -72,6 +72,17 @@ history this repository does not have.
 
 ### Fixed
 
+- **An agent's oversized receipt batch is answered `413`, not a dropped
+  connection.** The app refused a body over its limit from the declared
+  length and closed the socket at once. Most clients write the whole body
+  before reading the answer, so they saw a broken pipe, which looks like a
+  network fault and does not say whether anything was stored. A body up to
+  five times over its limit is now read and discarded first, so the client
+  reads the sentence. Nothing in it is kept. `agent/README.md` and the route's
+  OpenAPI description give the batch's whole-request limit of 32 MB, and
+  `deploy/DOCKER.md` says a reverse proxy needs a body limit at least as
+  high. (#40)
+
 - **A register load is one request for its rows, not two.** The count beside
   "Needs a category" was a second `GET …/transactions` fired in the same tick
   as the register's own, and `access.log` drops the query string, so every

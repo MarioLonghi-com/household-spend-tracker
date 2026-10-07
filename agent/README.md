@@ -148,7 +148,14 @@ less** — do not re-encode or resize it yourself. Over 4 MB, which an ordinary
 phone photo often is, it is refused with `413`: shrink it as
 [A photo over 4 MB](#a-photo-over-4-mb) says, and send that.
 
-**a. Store them.** Up to 25 in one call, base64, 4 MB each decoded:
+**a. Store them.** Up to 25 in one call, base64, 4 MB each decoded, and
+**the whole request at most 32 MB**. Twenty-five full-size files do not fit:
+that would be about 140 MB of JSON. Group receipts into batches of about 30 MB
+of base64 (roughly seven 3.5 MB photos), each with its own Idempotency-Key. A
+request over 32 MB is answered `413` with a sentence, and nothing in it is
+stored. Send the same receipts again in smaller batches. A proxy in front of
+the app may have a smaller limit of its own (see `deploy/DOCKER.md`). If one
+drops the connection instead of answering, halve the batch and try again.
 
 ```bash
 curl -s "${auth[@]}" "${json[@]}" -X POST "$H/receipts/batch" -d '{
