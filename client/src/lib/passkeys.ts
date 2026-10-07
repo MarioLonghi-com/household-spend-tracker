@@ -135,3 +135,33 @@ export function thisDevicePasskey(): string | null {
     return null;
   }
 }
+
+const RECOVERED = "spend-tracker.passkeys-after-recovery";
+
+/**
+ * A recovery-code sign-in left passkeys working (#47 §2, decision 1): kept for
+ * this tab so Sign-in methods can repeat the reminder until it is dismissed.
+ */
+export function noteRecoveryReminder(passkeys: number): void {
+  try {
+    window.sessionStorage.setItem(RECOVERED, String(passkeys));
+  } catch {
+    // The sign-in screen has already said it once.
+  }
+}
+
+export function recoveryReminder(): number {
+  try {
+    return Number(window.sessionStorage.getItem(RECOVERED) ?? 0) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function forgetRecoveryReminder(): void {
+  try {
+    window.sessionStorage.removeItem(RECOVERED);
+  } catch {
+    // Nothing to forget.
+  }
+}

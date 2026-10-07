@@ -63,6 +63,8 @@ function server(locked: boolean, confirm: () => Promise<unknown> = async () => D
     if (path === "/me/authenticator") return { enrolled: true, locked_by_key: locked };
     if (path === "/me/keys") return [];
     if (path === "/me/recovery-codes") return { unused: 9 };
+    if (path === "/me/passkeys") return [];
+    if (path === "/session/passkey/state") return { available: false, reason: "not_configured" };
     throw new Error(`unexpected GET ${path}`);
   });
   vi.mocked(api.post).mockImplementation(async (path: string) => {
@@ -83,7 +85,11 @@ function profileFor(user: User) {
 
 /** Password, the offer, the six digits from the new authenticator. */
 async function toTheOffer() {
-  fireEvent.change(screen.getAllByLabelText("Current password")[1], {
+  // In Sign-in methods (#122) the authenticator's row opens by itself in
+  // recovery mode, and with a press otherwise.
+  const row = await screen.findByRole("button", { name: /: Authenticator$/ });
+  if (row.getAttribute("aria-expanded") === "false") fireEvent.click(row);
+  fireEvent.change(screen.getByLabelText("Current password"), {
     target: { value: "a long password" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Set up a new authenticator" }));
