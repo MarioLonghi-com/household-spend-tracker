@@ -152,6 +152,10 @@ history this repository does not have.
   History is the other way back. Nothing about importing changed; it is now
   written down and tested. (#91)
 
+- **Why any member may import accounts from a file is written down**, beside
+  the route, with a test: it only adds accounts, each in the audit log, and
+  History undoes the whole file. Nothing about who may run it changed. (#115)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
