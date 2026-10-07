@@ -380,8 +380,10 @@ def register(
     The default is everything the filter matches, not a page of it. It used to
     be 200 and the client never asked for more, so a household with a thousand
     rows saw two hundred of them with nothing on screen to say which two
-    hundred. `limit` survives for a caller that wants less; nothing in the app
-    sends it.
+    hundred. The register screen pages now (#100): it sends `limit=500` and an
+    `offset`, reads `total` to know there is more, and asks for the next page
+    when the end of what it holds is reached -- so the default is for a caller
+    that did not ask, and `total` is what keeps a page from passing for all.
 
     `account_id` repeats, the way the income-and-expense report's does: the
     register's account filter is a grouped picker, so "the three Spanish

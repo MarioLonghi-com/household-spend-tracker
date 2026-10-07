@@ -142,6 +142,14 @@ history this repository does not have.
   writes 1,000 rows or more, and after `make restore`, rather than waiting up
   to six hours for the next sweep. (#103)
 
+- **The register loads five hundred rows at a time.** It used to ask for
+  everything the filter matched, up to 25,000 rows, and refetch all of it
+  after every edit. It now asks for the first 500, says how many the filter
+  matched and how many are loaded, and asks for the next 500 when you reach
+  the end of what is there. Sorting at a column heading is still done by the
+  server, from the first page. The heading's tick box selects the rows that
+  are loaded. (#100)
+
 - **The client asks one module which locale it is in** (`lib/locale.ts`):
   the words stay English, and numbers, money and dates follow the browser's
   own formatting locale as they always did. Money is formatted from its
