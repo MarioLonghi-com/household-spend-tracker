@@ -82,6 +82,12 @@ this repository.
 
 ### Changed
 
+- **A receipt photo over 4 MB from an agent is told how to shrink it.** The
+  `413` from the agent receipt routes pointed at the multipart route, which no
+  key can use. It now says to shrink the photo below 4 MB as JPEG or AVIF,
+  keeping its EXIF `DateTimeOriginal` and GPS, and names the section of
+  `agent/README.md` that says how. The 4 MB ceiling is unchanged. (#39)
+
 - **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
   every CI job runs 3.12, and nothing tests 3.14. (#105)
 
