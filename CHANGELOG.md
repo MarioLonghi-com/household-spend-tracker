@@ -51,6 +51,9 @@ this repository.
 
 ### Changed
 
+- **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
+  The action only scores the default branch, which is `dev`, so on `main` it
+  failed every release without measuring anything. (#36)
 - **A receipt's free-text field is now headed "Receipt notes"**, on the
   Receipts screen and on `/snap`. It used to say "Note". A transaction's field
   is a *memo*, and the old heading read as if the two were the same thing.
