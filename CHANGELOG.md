@@ -154,6 +154,7 @@ history this repository does not have.
   passkey features, allowed on this origin and refused on `/snap`. The
   `webauthn` library is added, locked. **For an operator:** nothing to do. If
   `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
+
 - **A member can register passkeys, and list, rename and remove them**,
   through the API so far. The screens come with #122. Adding a passkey costs
   a fresh password and authenticator code, the same step-up that issuing an
