@@ -73,6 +73,17 @@ DATE_FORMATS = (
 #: Swedish is in here because a Swedbank export was the first file that failed
 #: on nothing but vocabulary: "Belopp", "Bokforingsdag", "Beskrivning".
 _DATE_NEEDLES = ("date", "fecha", "datum", "data", "dag")
+#: "F. Valor", "F. Operación", "F.Contable": Spanish banks abbreviate *fecha*
+#: to "F." in a header, and "F. Valor" -- the value date -- then matched none
+#: of the date needles and *did* match the amount needle "valor". A file with
+#: "F. Valor;Concepto;Importe" had no date column and its dates as amounts
+#: (#90). An "F." followed by a word is a date.
+_ABBREVIATED_DATE = re.compile(r"^f\.\s*[a-záéíóú]")
+
+
+def _names_a_date(header: str) -> bool:
+    low = header.strip().lower()
+    return any(needle in low for needle in _DATE_NEEDLES) or bool(_ABBREVIATED_DATE.match(low))
 _PAYEE_NEEDLES = (
     "payee", "descrip", "concepto", "merchant", "name", "beneficiar", "detalle",
     "beskrivning", "referens", "lancamento", "lançamento", "meddelande",
@@ -366,8 +377,8 @@ def _header_score(cells: list[str]) -> int:
     low = [c.strip().lower() for c in cells if c and c.strip()]
     if len(low) < 2:
         return 0
-    groups = (_DATE_NEEDLES, _PAYEE_NEEDLES, _AMOUNT_NEEDLES, _OUTFLOW_NEEDLES, _INFLOW_NEEDLES)
-    return sum(
+    groups = (_PAYEE_NEEDLES, _AMOUNT_NEEDLES, _OUTFLOW_NEEDLES, _INFLOW_NEEDLES)
+    return int(any(_names_a_date(cell) for cell in low)) + sum(
         1 for needles in groups if any(needle in cell for cell in low for needle in needles)
     )
 
@@ -422,7 +433,7 @@ def _pick(
         # "FECHA VALOR" -- the value date -- matching the amount needle "valor"
         # and becoming the amount column, which is the same mistake as
         # "Transaction/Value date" in another language.
-        if money and any(needle in low for needle in _DATE_NEEDLES):
+        if money and _names_a_date(low):
             continue
         if any(needle in low for needle in needles):
             return header
@@ -778,9 +789,8 @@ def sniff(
     # Date first, and every later pick excludes what is already spoken for.
     # The booking date when there is one, so the date agrees with the running
     # balance and with the other leg of a transfer.
-    date_column = _pick(
-        [h for h in headers if any(n in h.lower() for n in _DATE_NEEDLES)], _BOOKED_NEEDLES
-    ) or _pick(headers, _DATE_NEEDLES)
+    dated = [h for h in headers if _names_a_date(h)]
+    date_column = _pick(dated, _BOOKED_NEEDLES) or (dated[0] if dated else None)
     outflow_column = _pick(headers, _OUTFLOW_NEEDLES, taken=(date_column,), money=True)
     inflow_column = _pick(
         headers, _INFLOW_NEEDLES, taken=(date_column, outflow_column), money=True

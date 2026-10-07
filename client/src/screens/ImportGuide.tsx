@@ -143,7 +143,9 @@ export function ImportGuide() {
             again as UTF-8, rather than guessed at.
           </li>
           <li>
-            <strong>The date.</strong> Day-first or month-first is decided from the whole file, and
+            <strong>The date.</strong> A column named for a date in any of several languages, or
+            abbreviated the way Spanish banks do (<code>F. Valor</code>,{" "}
+            <code>F. Operación</code>). Day-first or month-first is decided from the whole file, and
             you are warned when nothing in it settles the question. Dates written with a time keep
             only the date. When a file has both a started and a <em>completed</em> date, the
             completed one is used: it is when the bank booked it, the date the running balance
