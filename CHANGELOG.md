@@ -72,6 +72,13 @@ history this repository does not have.
 
 ### Fixed
 
+- **A currency code has to be a real one.** Only the shape was checked, so a
+  typo like `GPB` opened an account in a currency that does not exist. A new
+  account or a household's currency must now be an ISO 4217 code: a current
+  one, or one withdrawn since 1999 such as `HRK` or `DEM`, for accounts with
+  history. A code the household already holds from before this check is still
+  accepted, so no existing ledger stops working. Nothing stored changes. (#110)
+
 - **An agent's oversized receipt batch is answered `413`, not a dropped
   connection.** The app refused a body over its limit from the declared
   length and closed the socket at once. Most clients write the whole body
