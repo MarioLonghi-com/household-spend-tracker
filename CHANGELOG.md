@@ -287,6 +287,17 @@ history this repository does not have.
   - **A password change leaves passkeys in place**, as it leaves agent keys.
   (#121)
 
+- **Refusals can carry a stable code and raw values beside the sentence.**
+  A converted refusal answers `{"detail", "code", "params"}`: `detail` is the
+  same English sentence as before, `code` a name from `app/error_codes.py`,
+  and `params` the raw values -- money as minor units with its currency, dates
+  as ISO -- so a translated screen can say it in its own words and format.
+  Ten refusals are converted (the exact money parser, transfers to the same
+  account or across currencies, a reconciliation that does not balance or
+  holds a later row, a split that does not add up); the rest follow with the
+  translations. Agent answers are unchanged: they carry no code yet. A test
+  stops new refusals arriving without one. (#65)
+
 ### Documentation
 
 - **Passkeys for operators:** the README section *Passkeys, and choosing the
@@ -297,6 +308,10 @@ history this repository does not have.
   needs Bluetooth and internet on both. `deploy/DOCKER.md` and
   `deploy/UPGRADING.md` each add a paragraph on what changes the name and
   what to do afterwards. (#123)
+- **A glossary for the first translations:** `client/src/locales/GLOSSARY.md`
+  holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
+  each language uses, and how each writes money and dates. Nothing in the app
+  changes. (#174)
 
 ## 0.7.1 — 2026-10-05
 
