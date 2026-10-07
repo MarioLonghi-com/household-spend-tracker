@@ -289,6 +289,10 @@ history this repository does not have.
   needs Bluetooth and internet on both. `deploy/DOCKER.md` and
   `deploy/UPGRADING.md` each add a paragraph on what changes the name and
   what to do afterwards. (#123)
+- **A glossary for the first translations:** `client/src/locales/GLOSSARY.md`
+  holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
+  each language uses, and how each writes money and dates. Nothing in the app
+  changes. (#174)
 
 ## 0.7.1 — 2026-10-05
 
