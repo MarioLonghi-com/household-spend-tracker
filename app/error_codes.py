@@ -52,6 +52,8 @@ REGISTRY: dict[str, Code] = {
     "money.too_many_digits": Code(
         "An amount {digits} digits long is too large to record as money", ("digits",)
     ),
+    # -- receipt: app/api/routers/agent.py, the agent's file routes (#44) ----- #
+    "receipt.no_such_copy": Code("That receipt has no copy of that kind"),
     # -- reconcile: app/services/reconciling.py ------------------------------ #
     "reconcile.does_not_balance": Code(
         "That does not balance: {difference} out. Tick or untick rows until the "
