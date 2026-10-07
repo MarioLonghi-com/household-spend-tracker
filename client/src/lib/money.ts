@@ -56,20 +56,88 @@ export function format(minor: number, currency: string): string {
  * "1,234" came back as 1 -- a saved yen amount divided by a thousand. This
  * emits ungrouped digits with the currency's own number of decimals, so
  * parse(toInput(n)) === n for every currency.
+ *
+ * The decimal mark is the reader's own (`locale`, or the browser's), because
+ * `parse` resolves a lone mark before three digits by that format: "1.234" in
+ * a three-decimal currency is a thousand to a German reader, so a German
+ * reader's box says "1,234".
  */
-export function toInput(minor: number, currency: string): string {
+export function toInput(minor: number, currency: string, locale?: string): string {
   const digits = exponent(currency);
-  return (Math.abs(minor) / minorFactor(currency)).toFixed(digits);
+  const figure = (Math.abs(minor) / minorFactor(currency)).toFixed(digits);
+  const { decimal } = separators(locale);
+  return decimal === "," ? figure.replace(".", ",") : figure;
+}
+
+/**
+ * The characters this locale groups thousands and marks decimals with.
+ *
+ * `1234567.5` rather than `1234.5`: Spanish, among others, does not group a
+ * four-digit number at all, and would report no group character.
+ */
+function separators(locale?: string): { group: string | null; decimal: string } {
+  try {
+    const parts = new Intl.NumberFormat(locale).formatToParts(1234567.5);
+    return {
+      group: parts.find((p) => p.type === "group")?.value ?? null,
+      decimal: parts.find((p) => p.type === "decimal")?.value ?? ".",
+    };
+  } catch {
+    return { group: ",", decimal: "." };
+  }
+}
+
+/**
+ * Digits with at most one `.` as the decimal point, or null.
+ *
+ * Takes text that holds only digits, `,` and `.`. When both separators appear
+ * the last one is the decimal mark -- "1.234,56" and "1,234.56" say so
+ * themselves. When only one kind appears it is not that simple: "1,234" is a
+ * thousand in English and one-and-a-bit in German, and reading it by position
+ * alone stored 1.23 for a typed thousand (#45). So a lone separator followed
+ * by exactly three digits is resolved by the reader's number format; one that
+ * format does not use either way is refused rather than guessed. A separator
+ * that repeats ("1,234,567") can only be grouping, and every group after the
+ * first must then be three digits.
+ */
+function normalise(text: string, locale?: string): string | null {
+  const lastComma = text.lastIndexOf(",");
+  const lastDot = text.lastIndexOf(".");
+  if (lastComma >= 0 && lastDot >= 0) {
+    return lastComma > lastDot
+      ? text.replace(/\./g, "").replace(",", ".")
+      : text.replace(/,/g, "");
+  }
+  const sep = lastComma >= 0 ? "," : lastDot >= 0 ? "." : null;
+  if (sep === null) return text;
+
+  const pieces = text.split(sep);
+  if (pieces.length > 2) {
+    const [head, ...groups] = pieces;
+    if (!/^\d{1,3}$/.test(head) || !groups.every((g) => /^\d{3}$/.test(g))) return null;
+    return pieces.join("");
+  }
+  const [whole, frac] = pieces;
+  // "1234.567" cannot be grouping -- a first group is at most three digits.
+  const ambiguous = /^\d{1,3}$/.test(whole) && frac.length === 3;
+  if (!ambiguous) return `${whole}.${frac}`;
+
+  const { group, decimal } = separators(locale);
+  if (sep === decimal) return `${whole}.${frac}`;
+  if (sep === group) return `${whole}${frac}`;
+  return null;
 }
 
 /**
  * Read what someone typed.
  *
  * Tolerant on purpose: "12,34", "-1.234,56" and "(12.34)" all mean what they
- * look like. Returns null for anything that is not a number, so a caller can
- * tell "nothing yet" from "zero".
+ * look like. "1,234" and "1.234" mean what they mean in the reader's number
+ * format -- `locale`, or the browser's when it is not given -- and nothing if
+ * that format uses neither mark (see `normalise`). Returns null for anything
+ * that is not a number, so a caller can tell "nothing yet" from "zero".
  */
-export function parse(text: string, currency: string): number | null {
+export function parse(text: string, currency: string, locale?: string): number | null {
   let cleaned = (text ?? "").trim().replace(/[\s  ]/g, "");
   if (!cleaned) return null;
 
@@ -81,16 +149,10 @@ export function parse(text: string, currency: string): number | null {
   cleaned = cleaned.replace(/[^\d,.\-+]/g, "");
   if (!cleaned || cleaned === "-" || cleaned === "+") return null;
 
-  const lastComma = cleaned.lastIndexOf(",");
-  const lastDot = cleaned.lastIndexOf(".");
-  if (lastComma > lastDot) {
-    cleaned = cleaned.replace(/\./g, "").replace(",", ".");
-  } else {
-    cleaned = cleaned.replace(/,/g, "");
-  }
-
   if (cleaned.includes("-")) negative = !negative;
-  cleaned = cleaned.replace(/[-+]/g, "");
+  const normalised = normalise(cleaned.replace(/[-+]/g, ""), locale);
+  if (normalised === null) return null;
+  cleaned = normalised;
 
   // Digits, not floats. `Math.round(8.165 * 100)` is 816 because 8.165 is not
   // 8.165 in binary, while app/money.py quantizes a Decimal ROUND_HALF_UP and
@@ -127,17 +189,14 @@ export function parse(text: string, currency: string): number | null {
  * "45" means either. Returns an unsigned decimal with a `.` point --
  * "1.234,56" is "1234.56" -- or null for anything that is not an amount.
  */
-export function amountLookup(text: string): string | null {
+export function amountLookup(text: string, locale?: string): string | null {
   let cleaned = (text ?? "").trim().replace(/[\s  ()+-]/g, "");
   cleaned = cleaned.replace(/[^\d,.]/g, "");
   if (!cleaned) return null;
 
-  const lastComma = cleaned.lastIndexOf(",");
-  const lastDot = cleaned.lastIndexOf(".");
-  cleaned =
-    lastComma > lastDot
-      ? cleaned.replace(/\./g, "").replace(",", ".")
-      : cleaned.replace(/,/g, "");
+  const normalised = normalise(cleaned, locale);
+  if (normalised === null) return null;
+  cleaned = normalised;
 
   if (!/^\d*(\.\d*)?$/.test(cleaned)) return null;
   const [whole, frac] = cleaned.split(".");
