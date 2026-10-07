@@ -71,6 +71,11 @@ class User(Base, UUIDPrimaryKey, Timestamped):
     #: dead the moment it is used -- even while still inside its window.
     totp_last_counter: Mapped[int | None] = mapped_column(Integer)
     disabled_at: Mapped[datetime | None] = mapped_column(DateTime)
+    #: WebAuthn's `user.id` for this member's passkeys (#120): 32 random bytes,
+    #: made on their first registration and never changed. Not the row id and
+    #: not the email, because an authenticator stores it and may show or sync
+    #: it, and it must carry nothing about the person. NULL until then.
+    webauthn_user_handle: Mapped[bytes | None] = mapped_column(LargeBinary(64), unique=True)
 
     recovery_codes: Mapped[list[RecoveryCode]] = relationship(
         "RecoveryCode", back_populates="user", cascade="all, delete-orphan"
@@ -114,6 +119,13 @@ class User(Base, UUIDPrimaryKey, Timestamped):
     #: so the hook walks it and each revocation is a logged delete.
     agent_keys: Mapped[list[AgentKey]] = relationship(
         "AgentKey",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    #: A member's passkeys go with them, through the ORM where the audit log
+    #: sees each delete, for the reason `agent_keys` is declared here.
+    passkeys: Mapped[list[Passkey]] = relationship(
+        "Passkey",
         back_populates="user",
         cascade="all, delete-orphan",
     )
@@ -459,6 +471,94 @@ class AgentKey(Base, UUIDPrimaryKey):
         a disabled member's screen is not where they find that out.
         """
         return self.revoked_at is None and self.expires_at > (now or utcnow())
+
+
+class Passkey(Base, UUIDPrimaryKey):
+    """A WebAuthn credential a member registered: a way in that is both
+    factors at once (#47, #120).
+
+    Only the public half is here. The private key never leaves the member's
+    authenticator, so nothing in this row lets anyone sign in -- which is also
+    why it is not encrypted with `secret.key` (#47 §1.4): a member in recovery
+    mode after a replaced key can still use a passkey.
+
+    Audited, because adding, renaming and removing a way into an account is
+    exactly what History should carry. Undo never touches it
+    (`undo.CREDENTIAL_TABLES`): undoing a removal would resurrect a credential
+    somebody took away on purpose.
+    """
+
+    __tablename__ = "passkeys"
+    __audit__ = True
+    #: `public_key` so an undo could never put a credential back even if
+    #: `CREDENTIAL_TABLES` forgot it. The other three move on every sign-in,
+    #: which has no batch open: leaving them out of both images means an
+    #: update touching only them produces no change row and demands none --
+    #: the path `agent_keys.last_used_at` takes for the same reason.
+    __audit_redact__ = frozenset({"public_key", "sign_count", "last_used_at", "backed_up"})
+
+    user_id: Mapped[str] = mapped_column(
+        String(32), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    #: base64url, as every client and the JSON API spell it. The spec allows
+    #: up to 1023 bytes, which is 1364 characters.
+    credential_id: Mapped[str] = mapped_column(String(1400), nullable=False, unique=True, index=True)
+    #: COSE-encoded, as `webauthn` hands it over and wants it back.
+    public_key: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    #: The authenticator's signature counter at its last use. Synced passkeys
+    #: mostly report 0 forever; a counter that goes backwards on one that does
+    #: count is refused by `webauthn` as a cloned authenticator.
+    sign_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    #: What the browser said it can reach this authenticator over ("internal",
+    #: "hybrid", "usb"...), handed back as a hint when signing in.
+    transports: Mapped[list | None] = mapped_column(JSON)
+    #: The member's own name for it. Defaults to the provider the AAGUID
+    #: names ("iCloud Keychain") or "Passkey".
+    label: Mapped[str] = mapped_column(String(80), nullable=False)
+    #: The host name it was registered under, and the only one it will ever
+    #: work for (#47 §1.2). Stored so a changed `SPENDTRACKER_RP_ID` -- a
+    #: renamed machine, a restore onto another host -- is reported as such
+    #: rather than as passkeys that silently stopped working.
+    rp_id: Mapped[str] = mapped_column(String(253), nullable=False)
+    #: Which provider made it, as a UUID string; all zeros when it would not say.
+    aaguid: Mapped[str | None] = mapped_column(String(36))
+    #: May be synced to other devices (the BE flag) ...
+    backup_eligible: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    #: ... and is (BS), as of its last use. What "synced" or "this device only"
+    #: on the member's list is read from.
+    backed_up: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+    user: Mapped[User] = relationship("User", back_populates="passkeys")
+
+
+class WebAuthnChallenge(Base):
+    """A challenge handed to a browser for one ceremony, and spent by it.
+
+    Keyed by the challenge's SHA-256, so the row is found from the challenge
+    the browser signed (`clientDataJSON`) rather than from a cookie, and spent
+    with one `DELETE ... RETURNING` the way `stepup.claim` spends a grant
+    (#206): two requests presenting one challenge cannot both succeed.
+
+    Not audited: like `step_up_grants` it records what happened at the door.
+    Swept by `auth/housekeeping.py` once expired.
+    """
+
+    __tablename__ = "webauthn_challenges"
+    __audit__ = False
+
+    id_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    #: Whose registration this is. NULL for a sign-in, where nobody is known
+    #: until the passkey says who it belongs to.
+    user_id: Mapped[str | None] = mapped_column(
+        String(32), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    #: "register" or "sign_in": a challenge issued for one ceremony is no use
+    #: to the other.
+    purpose: Mapped[str] = mapped_column(String(12), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
 
 
 class AgentRequest(Base, UUIDPrimaryKey):

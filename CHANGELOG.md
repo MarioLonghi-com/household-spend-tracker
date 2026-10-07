@@ -22,6 +22,12 @@ Issue numbers written in backticks (`` `#NNN` ``) refer to the project's
 original private tracker and are kept for the record; they are not issues in
 this repository.
 
+**Public releases start at 0.6.2**, the first one tagged and published from
+this repository. The sections from 0.6.1 down were released from the project's
+earlier, private repository and are kept here as history: they have no tag
+and no release on this one, deliberately, because a tag would point at
+history this repository does not have.
+
 ---
 
 ## Unreleased
@@ -34,6 +40,14 @@ this repository.
   Docker check can move; `PY_BASE=`/`PY_RUN=` still build on any other base.
   The README says what the release attestation does and does not cover. (#95)
 
+- **A new password is checked against the 100,000 most common.** Length was
+  the only rule, so `qwertyuiopasdfgh` passed it. The setup wizard, changing
+  your password and a reset link now refuse any of the top 100,000 passwords
+  of a public-domain breach corpus, ignoring case, and say why. The list ships
+  with the app -- it never calls out -- and is refreshed when a release is cut
+  (`python -m scripts.common_passwords --refresh`). Existing passwords are not
+  checked. (#97)
+
 - **A YNAB key is gone from the browser's memory when the one-time import
   closes.** The wizard dropped it from its own state, but the query library
   kept each finished call -- key included -- for five minutes after the
@@ -42,6 +56,11 @@ this repository.
 - **The Content Security Policy no longer allows `data:` images.** Nothing
   in the client uses one (the QR code is SVG), so `img-src` is `'self' blob:`.
   (#94)
+
+- **`/snap` paints the household's accent only when it is a `#rrggbb` colour.**
+  The server already validates it before storing it; the capture page now
+  checks it again before setting the header's background, as the app's own
+  theme does. Defence in depth. (#92)
 
 ### Fixed
 
@@ -53,6 +72,20 @@ this repository.
   that is not the account's is rejected with the sentence a file's row gets,
   and an import whose every row names another currency is refused. Rows that
   leave it out are read in the account's currency, as before. (#86)
+
+- **"Link all" links everything that is strong, not just what was strong
+  before it started.** A link made because a row names the other account
+  makes those two accounts' history, and that history makes their other
+  pairs strong -- but "Link all", and the link on commit at import, asked
+  once and stopped, so a second press of "Link all" found more. Both now link
+  until nothing new is strong, still as one batch and one undo, and "Link
+  all" says how many it linked in all. (#88)
+
+- **"Make new codes" tells a member whose authenticator the server can no
+  longer check what to do.** After `secret.key` was replaced, it answered with
+  the generic "that password and authenticator code do not prove it is you".
+  It now says what a step-up says: the key was replaced, a recovery code does
+  not stand in here, and setting up a new authenticator is the way on. (#98)
 
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
   read the last separator as the decimal mark, so a thousands comma with no
@@ -73,6 +106,28 @@ this repository.
   guide says so. (#84)
 
 ### Changed
+
+- **A receipt photo over 4 MB from an agent is told how to shrink it.** The
+  `413` from the agent receipt routes pointed at the multipart route, which no
+  key can use. It now says to shrink the photo below 4 MB as JPEG or AVIF,
+  keeping its EXIF `DateTimeOriginal` and GPS, and names the section of
+  `agent/README.md` that says how. The 4 MB ceiling is unchanged. (#39)
+
+- **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
+  every CI job runs 3.12, and nothing tests 3.14. (#105)
+
+- **The CHANGELOG says public releases start at 0.6.2**, and that the
+  sections below it are history from the earlier private repository, with no
+  tag or release here. (#117)
+
+- **`compose.yaml` runs the published image.** It names
+  `ghcr.io/mariolonghi-com/household-spend-tracker` at the release
+  `SPENDTRACKER_VERSION` in `.env` says, and `docker compose pull` fetches it;
+  `build:` stays as the fallback, and a local build is told to call itself
+  `local`. The README and `deploy/DOCKER.md` start, upgrade and roll back that
+  way. The Tailscale sidecar setup still builds from its checkout. `/llms.txt`
+  names the source repository and its licence, and the pull request template
+  asks for the design doc to be re-read against the code. (#111)
 
 - **`release.yml`'s publishing jobs run in a `release` environment.** Once
   the repository gives that environment a required reviewer, a pushed `v*` tag
@@ -104,6 +159,36 @@ this repository.
   client's `tsx`, which one test ran unpinned through `npx`, is a dev
   dependency. **For an operator:** nothing to do beyond the usual
   `make install-prod`. (#46)
+
+### Added
+
+- **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
+  can offer them.** Nothing on the sign-in screen changes yet. The new
+  setting is the host name passkeys will be bound to. It defaults to the host
+  of `SPENDTRACKER_PUBLIC_URL`, and it is never taken from the request. Boot
+  refuses any other value, because a passkey only ever works for the name it
+  was made under: a wider name such as the whole tailnet's is refused, and
+  `localhost` is accepted in development only. `GET
+  /api/session/passkey/state` says whether this request may be offered
+  passkeys, or why not: no public URL set, an IP address, the app opened at
+  another address, or plain HTTP. The `Permissions-Policy` now names the two
+  passkey features, allowed on this origin and refused on `/snap`. The
+  `webauthn` library is added, locked. **For an operator:** nothing to do. If
+  `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
+
+- **A member can register passkeys, and list, rename and remove them**,
+  through the API so far. The screens come with #122. Adding a passkey costs
+  a fresh password and authenticator code, the same step-up that issuing an
+  agent key costs. The passkey has to be discoverable and must verify the
+  user. Each one records the host name it was made for. `make doctor`,
+  `make upgrade-check` and `make restore` now name any passkeys made for
+  another host name than this instance's, which is what a renamed machine or
+  a restore onto another host leaves behind. Adding, renaming and removing a
+  passkey are in History. Undo never brings one back. **Migration
+  `2de003489b79`** adds the `passkeys` and `webauthn_challenges` tables and
+  `users.webauthn_user_handle`. **Reversible: lossy**: rolling it back drops
+  every registered passkey, and members then sign in with password + code as
+  before. (#120)
 
 ## 0.7.1 — 2026-10-05
 

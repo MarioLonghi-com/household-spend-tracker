@@ -502,7 +502,12 @@ BASE_SECURITY_HEADERS = {
     # An invitation link carries its token in the path, so no referrer may
     # leave this origin carrying it.
     "Referrer-Policy": "no-referrer",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+    # Passkeys (#47 §1.4): `self` is already the default for both, written
+    # out so the policy says in one place what this origin may use.
+    "Permissions-Policy": (
+        "camera=(), microphone=(), geolocation=(), payment=(), "
+        "publickey-credentials-get=(self), publickey-credentials-create=(self)"
+    ),
 }
 
 #: `/snap` is the one document allowed to ask the browser where it is, and only
@@ -524,7 +529,11 @@ BASE_SECURITY_HEADERS = {
 #: one carrying the toggle.
 SNAP_SECURITY_HEADERS = {
     **BASE_SECURITY_HEADERS,
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=(self), payment=()",
+    # `/snap` signs nobody in, so it is the one page that may not use a passkey.
+    "Permissions-Policy": (
+        "camera=(), microphone=(), geolocation=(self), payment=(), "
+        "publickey-credentials-get=(), publickey-credentials-create=()"
+    ),
 }
 
 #: Everything is same-origin and self-hosted: the SPA is built into
