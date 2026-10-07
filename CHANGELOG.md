@@ -34,6 +34,14 @@ history this repository does not have.
 
 ### Security
 
+- **The `sql` logging style no longer prints the ledger to the console.**
+  Turning it on set SQLAlchemy's `echo`, which attaches SQLAlchemy's own
+  handler writing every statement and its values to standard output -- that
+  is, to `docker logs` -- below the guard meant to keep them in `sql.log`
+  alone. The style now works by log level, never `echo`, and takes off any
+  such handler it finds. Found through a test that only failed when run on its
+  own. (#108)
+
 - **The container's Chainguard bases are pinned by digest.** The free tier
   has only a moving `:latest`, so the image named an input that changed under
   it. Both bases are now their own pinned stages, which Dependabot's weekly
