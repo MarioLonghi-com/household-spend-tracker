@@ -23,6 +23,8 @@ import type {
   OneTimePriorImport,
   Recognised,
 } from "../lib/types";
+import { IMPORT_OUTCOME_WORDS } from "../lib/labels";
+import { formatLocale } from "../lib/locale";
 
 /**
  * One import staged and never committed, as the queue lists it.
@@ -222,7 +224,7 @@ export function sortQueue(
 function whenStaged(value: string): string {
   const at = new Date(value);
   if (Number.isNaN(at.getTime())) return value;
-  return at.toLocaleString(undefined, {
+  return at.toLocaleString(formatLocale(), {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -248,14 +250,7 @@ export function memoOf(line: ImportLine): { text: string; chosen: boolean } {
   return { text: bank == null ? "" : String(bank), chosen: false };
 }
 
-const OUTCOME_WORDS: Record<string, string> = {
-  created: "New",
-  matched_existing: "Already have it",
-  duplicate_skipped: "Already imported",
-  rejected: "Could not read",
-  needs_review: "Needs a look",
-  skipped: "Not for this account",
-};
+const OUTCOME_WORDS = IMPORT_OUTCOME_WORDS;
 
 type PreviewSort = "line" | "date" | "payee" | "memo" | "amount" | "category" | "outcome";
 

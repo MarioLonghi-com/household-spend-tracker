@@ -6,6 +6,8 @@
  * inspector — is going to disagree with anything else by 2.4%, which is
  * exactly enough to make somebody think one of them is wrong.
  */
+import { formatFixed } from "./locale";
+
 export const bytes = (n: number | null): string => {
   if (n === null) return "—";
   if (n < 1024) return `${n} B`;
@@ -16,5 +18,5 @@ export const bytes = (n: number | null): string => {
     value /= 1024;
     at += 1;
   }
-  return `${value.toFixed(value < 10 ? 1 : 0)} ${units[at]}`;
+  return `${formatFixed(value, value < 10 ? 1 : 0)} ${units[at]}`;
 };
