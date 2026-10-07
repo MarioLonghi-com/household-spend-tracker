@@ -335,7 +335,9 @@ class AccountUpdate(BaseModel):
     def _set_or_clear(self) -> AccountUpdate:
         # A value and its clear flag are two answers to one question, so both
         # at once is a malformed request rather than one to guess the meaning of.
-        for field in ("note", "institution"):
+        # The country and the statement product used to let the flag win in
+        # silence; all four refuse now (#110).
+        for field in ("note", "institution", "country", "statement_product"):
             if getattr(self, field) is not None and getattr(self, f"clear_{field}"):
                 raise ValueError(f"send {field} or clear_{field}, not both")
         return self

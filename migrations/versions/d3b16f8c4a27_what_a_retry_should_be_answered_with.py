@@ -18,13 +18,6 @@ discard what it actually asked for.
 Unaudited, like `agent_requests`: it records what happened at the door, and
 auditing it would make replying to a retry demand a batch.
 
-> [!important] If this migration and another both claim `c92a4e7b3d61`
-> `feature/reports-income-expense` carries `f18b5c2a9e33` off the same parent.
-> Two heads is not a merge conflict git will show you -- both files apply
-> cleanly and `alembic upgrade head` then refuses. Whichever branch merges
-> second re-points its `down_revision` at the other's revision id. Nothing else
-> changes: these two touch different tables and neither reads the other's.
-
 Reversible: clean -- the replay cache. A retry is answered afresh instead of from it.
 
 Revision ID: d3b16f8c4a27

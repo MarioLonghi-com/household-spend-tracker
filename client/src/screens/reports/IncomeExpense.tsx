@@ -25,6 +25,7 @@ import {
   type PickerGroup,
   type Selection,
 } from "../../components/GroupedPicker";
+import { accountGroups, type AccountGrouping } from "../../components/accountGroups";
 import { format } from "../../lib/money";
 import type {
   Account,
@@ -104,16 +105,6 @@ export function toggleFold(current: ReadonlySet<string>, key: string): ReadonlyS
   return next;
 }
 
-/** How an account type reads in a filter heading. */
-const TYPE_NAMES: Record<string, string> = {
-  checking: "Checking",
-  savings: "Savings",
-  cash: "Cash",
-  credit_card: "Credit cards",
-  other_asset: "Other assets",
-  other_liability: "Other liabilities",
-};
-
 const MONTH_NAMES = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -123,45 +114,6 @@ const MONTH_NAMES = [
 function monthLabel(period: string): string {
   const [year, month] = period.split("-");
   return `${MONTH_NAMES[Number(month) - 1]} ${year}`;
-}
-
-/**
- * How the accounts filter gathers its options.
- *
- * Country first, then type, because that is the order the question is usually
- * asked in: "what did we spend in Spain" comes up more than "what did the
- * savings accounts do". Both groupings list every account, so an account with
- * no country still appears -- under a heading that says so rather than being
- * quietly absent from a filter that claims to list accounts.
- */
-type AccountGrouping = "country" | "type";
-
-function accountGroups(accounts: Account[], grouping: AccountGrouping): PickerGroup[] {
-  const buckets = new Map<string, { label: string; items: Account[] }>();
-  for (const account of accounts) {
-    const key =
-      grouping === "country" ? (account.country ?? "—") : account.type;
-    const label =
-      grouping === "country"
-        ? account.country
-          ? `${account.flag} ${account.country}`
-          : "No country set"
-        : (TYPE_NAMES[account.type] ?? account.type);
-    const bucket = buckets.get(key) ?? { label, items: [] };
-    bucket.items.push(account);
-    buckets.set(key, bucket);
-  }
-  return [...buckets.entries()]
-    .sort((a, b) => a[1].label.localeCompare(b[1].label))
-    .map(([key, bucket]) => ({
-      key,
-      label: bucket.label,
-      items: bucket.items.map((account) => ({
-        id: account.id,
-        label: account.name,
-        hint: account.currency,
-      })),
-    }));
 }
 
 export function IncomeExpense({ household }: { household: Household }) {

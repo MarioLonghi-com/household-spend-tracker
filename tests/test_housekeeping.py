@@ -48,7 +48,7 @@ def db(tmp_path):
     in a thread the *same* DBAPI connection, which would hide exactly the
     cross-transaction behaviour this module is about.
     """
-    eng = create_engine(f"sqlite:///{tmp_path / 'sweep.sqlite3'}", future=True)
+    eng = create_engine(f"sqlite:///{tmp_path / 'sweep.sqlite3'}")
 
     @event.listens_for(eng, "connect")
     def _pragmas(dbapi_connection, _record):  # pragma: no cover - driver glue
@@ -59,7 +59,7 @@ def db(tmp_path):
 
     Base.metadata.create_all(eng)
     factory = sessionmaker(
-        class_=AuditedSession, bind=eng, expire_on_commit=False, future=True
+        class_=AuditedSession, bind=eng, expire_on_commit=False
     )
     with factory() as s:
         user = User(
