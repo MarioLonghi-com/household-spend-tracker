@@ -47,6 +47,3 @@ pillow-heif>=1.8.0
 # macOS build does not read the system's. It used to arrive only through
 # httpx, a dev dependency, so a deployment silently fell back.
 certifi>=2026.7.22
-
-# DELIBERATE: proving the lock drift check bites (#46); reverted next commit.
-six>=1.16
