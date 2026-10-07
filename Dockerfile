@@ -78,8 +78,10 @@ WORKDIR /build
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
 COPY requirements.txt ./
 # Into a virtualenv rather than the system site-packages, so the runtime stage
-# copies one directory and inherits nothing else from the builder.
-RUN python -m venv /venv && /venv/bin/pip install -r requirements.txt
+# copies one directory and inherits nothing else from the builder. From the
+# hashed lock, so the image holds exactly the locked set and a download that
+# does not match its hash fails the build (#46).
+RUN python -m venv /venv && /venv/bin/pip install --require-hashes -r requirements.txt
 
 # The data directory, created here because the runtime image has **no shell**
 # and cannot `RUN mkdir` -- and it has to exist *in the image*, owned by the

@@ -403,9 +403,8 @@ def packages() -> list[Package]:
     """Every distribution installed in this environment, by name and version.
 
     Read from the installed metadata rather than from `requirements.txt`: that
-    file says what was asked for, with ranges, and this question is what is
-    actually running -- which is the one that matters when a dependency is the
-    suspect.
+    file says what was locked, and this question is what is actually running --
+    which is the one that matters when a dependency is the suspect.
     """
     from importlib import metadata
 
@@ -608,8 +607,8 @@ def _trust() -> ssl.SSLContext:
     it fails with `CERTIFICATE_VERIFY_FAILED: unable to get local issuer
     certificate` until somebody runs `Install Certificates.command`. This app
     is developed on exactly that build, so the check would have shipped looking
-    broken. `certifi` is already installed as a dependency of something else;
-    when it is not, the default context is still the right fallback.
+    broken. `certifi` is declared in requirements.in for this (#46); when it
+    is somehow missing, the default context is still the right fallback.
     """
     try:
         import certifi
