@@ -18,7 +18,7 @@ PORT   ?= 8848
 # NODE= has to govern npm and npx too, and the only thing that achieves that is
 # PATH. Parameterising them separately (NPM ?= npm) looks equivalent and is not:
 # npm's own shim starts `#!/usr/bin/env node`, so even the right npm re-execs
-# whichever node PATH finds first -- which, on the machine in #16, is the broken
+# whichever node PATH finds first -- which, on the machine in old-tracker `#16`, is the broken
 # x86_64 one. Resolving NODE to its directory and putting that first means one
 # knob covers install-client, client, web, test and lint.
 #
@@ -36,7 +36,7 @@ endif
 # keep: a leftover x86_64 node on an arm64 Mac passes `command -v` and then
 # fails with "env: node: Bad CPU type in executable", which names neither npm,
 # nor the client, nor the architecture. Reported from a fresh macOS clone in
-# issue #1, where diagnosing it took `file $(which node)` plus `uname -m`.
+# old-tracker `#1`, where diagnosing it took `file $(which node)` plus `uname -m`.
 preflight:  ## check the toolchain before anything tries to use it
 	@command -v $(PYTHON) >/dev/null 2>&1 \
 		|| { echo "python3 not found. This needs Python >= 3.12."; exit 1; }
@@ -259,7 +259,7 @@ audit:  ## known advisories against the pinned dependencies, Python and npm
 # own /db instead, which is behind the session check.
 # The script builds the snapshot and then serves it, rather than this target
 # naming the file: the snapshot lives in the resolved data directory, and a
-# path written here went stale the day that directory moved (#64).
+# path written here went stale the day that directory moved (old-tracker `#64`).
 db-view:  ## browse the database at http://127.0.0.1:8899 (loopback only)
 	PYTHONPATH=. ./.venv/bin/python scripts/db_view.py --serve
 

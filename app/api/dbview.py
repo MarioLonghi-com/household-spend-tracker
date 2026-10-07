@@ -10,8 +10,12 @@ Three deliberate limits on top of that:
 
 **Owner only.** The rest of the API is scoped per household and answers 404 for
 one you are not in. Raw tables have no such notion: `transactions` is every
-household at once. An owner already sees every household on the admin screen,
-so this gives them nothing new; a member it would.
+household at once. So this gives an owner more than the admin screen does --
+that shows every household's name and id, this shows every household's whole
+ledger, including ones they are not a member of. The owner runs the instance
+and holds its database file on the host, so it is the same reach by another
+door; a member it would give everybody's ledger, which is why it is the
+owner's alone.
 
 **The snapshot, never the live database.** `scripts/db_view.py` blanks every
 password hash, TOTP secret, recovery-code hash and session token before writing

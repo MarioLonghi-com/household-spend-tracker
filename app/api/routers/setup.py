@@ -1,7 +1,8 @@
 """The first-boot wizard.
 
-Reachable only while the instance is fresh; ``main`` returns 404 for all of it
-once an owner exists.
+Reachable only while the instance is fresh. Once an owner exists, the status
+read says ``setup_required: false`` and nothing more, and every step answers
+409 "this instance has already been set up".
 """
 
 from __future__ import annotations

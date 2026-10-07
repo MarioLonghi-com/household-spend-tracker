@@ -85,8 +85,13 @@ CARRIED_WHOLE = (
     "household_members",
     "households",
     "instance",
+    # Carried whole, `pattern` and all: a rule is the household's own words for
+    # its payees, which the ledger shows anyway.
     "payee_rules",
     "payees",
+    # Carried whole, which includes where and when each photo was taken --
+    # `gps_lat`, `gps_lon`, `captured_at`, `camera` -- and the `exif` it was
+    # read from. The photographs themselves are `receipt_blobs`, purged above.
     "receipts",
     "reconciliations",
     "transactions",
