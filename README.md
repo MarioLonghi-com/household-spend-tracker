@@ -218,12 +218,13 @@ force rather than by documentation.
 ### A container
 
 ```bash
-echo SPENDTRACKER_VERSION=X.Y.Z >> .env    # the release to run
+echo SPENDTRACKER_VERSION=X.Y.Z >> .env
 docker compose pull
 SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
 docker compose up -d
 ```
 
+- `SPENDTRACKER_VERSION=X.Y.Z` — the release to run, from the releases page
 - `docker compose pull` — fetches the published image,
   `ghcr.io/mariolonghi-com/household-spend-tracker`, at the release `.env` names
 - `SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d` — first run only

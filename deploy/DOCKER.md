@@ -81,7 +81,7 @@ The app answers on this machine only, at `http://localhost:8848`. Nothing on
 your network can reach it, and no Tailscale is involved.
 
 ```bash
-echo SPENDTRACKER_VERSION=X.Y.Z >> .env    # the release to run
+echo SPENDTRACKER_VERSION=X.Y.Z >> .env
 docker compose pull
 SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
 curl -s localhost:8848/api/health
@@ -137,13 +137,16 @@ Every device on your tailnet reaches the app at
 the tailnet in the admin console (DNS → HTTPS Certificates).
 
 ```bash
-echo SPENDTRACKER_VERSION=X.Y.Z >> .env    # or build it: section 1
+echo SPENDTRACKER_VERSION=X.Y.Z >> .env
 docker compose pull
 SPENDTRACKER_PUBLIC_URL=https://<server>.<tailnet>.ts.net \
 SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
 curl -s localhost:8848/api/health
 sudo tailscale serve --bg 8848
 ```
+
+`X.Y.Z` is the release to run, as in section 1, which also says how to build
+the image yourself instead.
 
 Then open `https://<server>.<tailnet>.ts.net` from any device on the tailnet
 and go to **The setup token** below. `tailscale serve --bg` persists across
