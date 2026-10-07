@@ -37,14 +37,35 @@ against `expected_origins` whatever this answer said.
 
 from __future__ import annotations
 
+import hashlib
+import json
+import pathlib
+import secrets
+import sqlite3
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import StrEnum
 from urllib.parse import urlsplit
 
+import webauthn
 from fastapi import Request
+from sqlalchemy import delete, func, select
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session
+from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
+from webauthn.helpers.exceptions import WebAuthnException
+from webauthn.helpers.structs import (
+    AuthenticatorSelectionCriteria,
+    CredentialDeviceType,
+    PublicKeyCredentialDescriptor,
+    ResidentKeyRequirement,
+    UserVerificationRequirement,
+)
 
 from .. import config
+from ..errors import Conflict, NotFound, ValidationError
 from ..hosts import _host_of, _is_ip_literal
+from ..models import Passkey, User, WebAuthnChallenge, utcnow
 
 LOCALHOST = "localhost"
 
@@ -150,3 +171,315 @@ def state(request: Request) -> PasskeyState:
     if not expected_origins(request):
         return PasskeyState(False, Unavailable.NO_ORIGINS)
     return PasskeyState(True, address=address)
+
+
+# --------------------------------------------------------------------------- #
+# Challenges (#120)
+# --------------------------------------------------------------------------- #
+
+#: How long a browser has between asking for options and answering them. The
+#: same figure is the `timeout` the options carry, so the browser's prompt and
+#: the server's row give up together.
+CHALLENGE_SECONDS = 5 * 60
+
+REGISTER = "register"
+SIGN_IN = "sign_in"
+
+
+def _challenge_hash(challenge: bytes) -> str:
+    return hashlib.sha256(challenge).hexdigest()
+
+
+def issue_challenge(session: Session, *, purpose: str, user_id: str | None) -> bytes:
+    """A fresh challenge, recorded so it can be spent once.
+
+    A registration drops the member's earlier unspent ones, like
+    `stepup.grant` drops earlier grants: two live challenges means one of them
+    is the one somebody forgot about.
+    """
+    if user_id is not None:
+        for old in session.execute(
+            select(WebAuthnChallenge).where(
+                WebAuthnChallenge.user_id == user_id, WebAuthnChallenge.purpose == purpose
+            )
+        ).scalars():
+            session.delete(old)
+    challenge = secrets.token_bytes(32)
+    now = utcnow()
+    session.add(
+        WebAuthnChallenge(
+            id_hash=_challenge_hash(challenge),
+            user_id=user_id,
+            purpose=purpose,
+            created_at=now,
+            expires_at=now + timedelta(seconds=CHALLENGE_SECONDS),
+        )
+    )
+    session.flush()
+    return challenge
+
+
+def claim_challenge(
+    engine: Engine, challenge: bytes, *, purpose: str, user_id: str | None, now: datetime | None = None
+) -> bool:
+    """Spend a challenge. True only if it was issued for this ceremony and this
+    member, and is still live.
+
+    One `DELETE ... RETURNING` on its own transaction, exactly as
+    `stepup.claim` (#206): the row count is the verdict, so two requests
+    presenting one challenge cannot both be told yes, and the spend is
+    committed before the rest of the request runs. The row goes either way.
+    """
+    table = WebAuthnChallenge.__table__
+    with engine.begin() as own:
+        row = own.execute(  # audit-exempt: webauthn challenges are not audited
+            delete(table)
+            .where(table.c.id_hash == _challenge_hash(challenge))
+            .returning(table.c.user_id, table.c.purpose, table.c.expires_at)
+        ).first()
+    if row is None:
+        return False
+    owner_id, issued_for, expires_at = row
+    return issued_for == purpose and owner_id == user_id and expires_at > (now or utcnow())
+
+
+def sweep(session: Session, *, now: datetime | None = None) -> int:
+    """Challenges nobody came back with. Called by `housekeeping.sweep`.
+
+    A bulk statement, allowed because `webauthn_challenges` is not audited --
+    the comment is what the CI grep reads.
+    """
+    table = WebAuthnChallenge.__table__
+    return (
+        session.execute(  # audit-exempt: webauthn challenges are not audited
+            delete(table).where(table.c.expires_at <= (now or utcnow()))
+        ).rowcount
+        or 0
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Registering and managing a passkey (#120)
+# --------------------------------------------------------------------------- #
+
+#: The provider an AAGUID names, for a new passkey's default label. Only the
+#: common ones a household will meet; anything else is "Passkey", and the
+#: member renames it. From the community-maintained AAGUID list.
+PROVIDERS: dict[str, str] = {
+    "fbfc3007-154e-4ecc-8c0b-6e020557d7bd": "iCloud Keychain",
+    "dd4ec289-e01d-41c9-bb89-70fa845d4bf2": "iCloud Keychain",
+    "ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4": "Google Password Manager",
+    "adce0002-35bc-c60a-648b-0b25f1f05503": "Chrome on Mac",
+    "08987058-cadc-4b81-b6e1-30de50dcbe96": "Windows Hello",
+    "9ddd1817-af5a-4672-a2b9-3e3dd95000a9": "Windows Hello",
+    "6028b017-b1d4-4c02-b4b3-afcdafc96bb2": "Windows Hello",
+    "bada5566-a7aa-401f-bd96-45619a55120d": "1Password",
+    "d548826e-79b4-db40-a3d8-11116f7e8349": "Bitwarden",
+    "53414d53-554e-4700-0000-000000000000": "Samsung Pass",
+}
+DEFAULT_LABEL = "Passkey"
+LABEL_MAX = 80
+
+#: The one sentence for every way a registration answer can be wrong -- a
+#: spent, expired or someone else's challenge, the wrong origin or host, a
+#: signature that does not verify, no user verification. Which of them it was
+#: helps only somebody probing.
+_NOT_REGISTERED = "that passkey could not be registered here. Start again."
+
+
+def default_label(aaguid: str | None) -> str:
+    return PROVIDERS.get((aaguid or "").lower(), DEFAULT_LABEL)
+
+
+def refuse_unless_available(request: Request) -> None:
+    """The server's half of decision 4 on every ceremony, not only on the
+    state answer: an endpoint that would only fail is refused with the
+    reason, rather than reached and failing obscurely."""
+    found = state(request)
+    if not found.available:
+        raise Conflict(found.detail or "passkeys are not available here")
+
+
+def give_user_handle(user: User) -> bool:
+    """Make the member's WebAuthn user handle if they have none yet. True when
+    one was made -- `users` is audited, so the caller holds a batch then."""
+    if user.webauthn_user_handle is not None:
+        return False
+    user.webauthn_user_handle = secrets.token_bytes(32)
+    return True
+
+
+def registration_options(session: Session, user: User, request: Request) -> dict:
+    """The options for `navigator.credentials.create()`, as JSON the browser's
+    `PublicKeyCredential.parseCreationOptionsFromJSON` reads.
+
+    `residentKey: required` -- a passkey has to be discoverable, or it cannot
+    sign in from the email field -- and `userVerification: required`, because
+    a verified assertion is both factors at once (#121). Every passkey the
+    member already has for this RP ID is excluded, so the browser says "already
+    registered" instead of making a second one in the same provider.
+
+    The member needs a user handle first (`give_user_handle`).
+    """
+    refuse_unless_available(request)
+    if user.webauthn_user_handle is None:
+        raise Conflict("give the member a user handle first")
+    settings = config.settings
+    existing = [
+        PublicKeyCredentialDescriptor(id=base64url_to_bytes(p.credential_id))
+        for p in user.passkeys
+        if p.rp_id == settings.rp_id
+    ]
+    options = webauthn.generate_registration_options(
+        rp_id=settings.rp_id,
+        rp_name=settings.app_name,
+        user_id=user.webauthn_user_handle,
+        user_name=user.email,
+        user_display_name=user.display_name,
+        challenge=issue_challenge(session, purpose=REGISTER, user_id=user.id),
+        timeout=CHALLENGE_SECONDS * 1000,
+        authenticator_selection=AuthenticatorSelectionCriteria(
+            resident_key=ResidentKeyRequirement.REQUIRED,
+            user_verification=UserVerificationRequirement.REQUIRED,
+        ),
+        exclude_credentials=existing,
+    )
+    return json.loads(webauthn.options_to_json(options))
+
+
+def challenge_of(credential: dict) -> bytes:
+    """The challenge the browser signed, read from its `clientDataJSON`.
+
+    Read only to find which row to spend. Whether it is the right kind of
+    ceremony, the right origin and properly signed is `webauthn`'s to verify
+    afterwards against that same value.
+    """
+    try:
+        client_data = json.loads(base64url_to_bytes(credential["response"]["clientDataJSON"]))
+        return base64url_to_bytes(client_data["challenge"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValidationError("that is not a passkey answer") from exc
+
+
+def register(
+    session: Session,
+    engine: Engine,
+    user: User,
+    request: Request,
+    *,
+    credential: dict,
+    label: str | None = None,
+) -> Passkey:
+    """Verify a browser's answer to `registration_options` and store the passkey.
+
+    The challenge is spent first, whatever follows -- one challenge is worth
+    one attempt. The caller holds a batch.
+    """
+    refuse_unless_available(request)
+    settings = config.settings
+    if not claim_challenge(engine, challenge_of(credential), purpose=REGISTER, user_id=user.id):
+        raise ValidationError(_NOT_REGISTERED)
+    try:
+        verified = webauthn.verify_registration_response(
+            credential=credential,
+            expected_challenge=challenge_of(credential),
+            expected_rp_id=settings.rp_id,
+            expected_origin=expected_origins(request),
+            require_user_verification=True,
+        )
+    except (WebAuthnException, ValueError, KeyError, TypeError) as exc:
+        raise ValidationError(_NOT_REGISTERED) from exc
+
+    credential_id = bytes_to_base64url(verified.credential_id)
+    if session.execute(
+        select(Passkey.id).where(Passkey.credential_id == credential_id)
+    ).first():
+        raise Conflict("that passkey is already registered")
+
+    transports = (credential.get("response") or {}).get("transports")
+    passkey = Passkey(
+        user_id=user.id,
+        credential_id=credential_id,
+        public_key=verified.credential_public_key,
+        sign_count=verified.sign_count,
+        transports=[str(t) for t in transports][:8] if isinstance(transports, list) else None,
+        label=_clean_label(label) or default_label(verified.aaguid),
+        rp_id=settings.rp_id,
+        aaguid=verified.aaguid,
+        backup_eligible=verified.credential_device_type == CredentialDeviceType.MULTI_DEVICE,
+        backed_up=verified.credential_backed_up,
+        created_at=utcnow(),
+    )
+    session.add(passkey)
+    session.flush()
+    return passkey
+
+
+def _clean_label(label: str | None) -> str | None:
+    tidy = " ".join((label or "").split())
+    return tidy[:LABEL_MAX] or None
+
+
+def owned(session: Session, user: User, passkey_id: str) -> Passkey:
+    """This member's passkey, or 404 -- somebody else's reads exactly like
+    one that never existed."""
+    passkey = session.get(Passkey, passkey_id)
+    if passkey is None or passkey.user_id != user.id:
+        raise NotFound("no such passkey")
+    return passkey
+
+
+def rename(passkey: Passkey, label: str) -> Passkey:
+    tidy = _clean_label(label)
+    if tidy is None:
+        raise ValidationError("a passkey needs a name")
+    passkey.label = tidy
+    return passkey
+
+
+def for_user(session: Session, user: User) -> list[Passkey]:
+    """Newest first, the order the list opens in before anyone sorts it."""
+    return list(
+        session.execute(
+            select(Passkey).where(Passkey.user_id == user.id).order_by(Passkey.created_at.desc())
+        ).scalars()
+    )
+
+
+def elsewhere(session: Session) -> dict[str, int]:
+    """Passkeys registered under another RP ID than this instance's, counted
+    per RP ID: the ones a renamed host or a restore onto another one has
+    silently stranded (#47 §1.2). With passkeys off, every one counts."""
+    rp_id = config.settings.rp_id
+    rows = session.execute(
+        select(Passkey.rp_id, func.count()).where(Passkey.rp_id != rp_id).group_by(Passkey.rp_id)
+    ).all()
+    return {found: count for found, count in rows}
+
+
+def hosts_in(database: pathlib.Path) -> dict[str, int]:
+    """How many passkeys each RP ID holds, read straight from a SQLite file.
+
+    Read-only and standard library, for the operator scripts that look at a
+    ledger without booting the app -- `doctor`, `upgrade --check`, `restore`.
+    An empty answer from a ledger older than passkeys, which has no table.
+    """
+    try:
+        with sqlite3.connect(f"file:{database}?mode=ro", uri=True) as conn:
+            rows = conn.execute("SELECT rp_id, count(*) FROM passkeys GROUP BY rp_id").fetchall()
+    except sqlite3.Error:
+        return {}
+    return {rp_id: count for rp_id, count in rows}
+
+
+def stranded(counts: dict[str, int], rp_id: str) -> list[str]:
+    """One sentence per RP ID whose passkeys this instance cannot use (#47 §1.2):
+    "3 passkeys registered for old.example.ts.net, this instance is
+    new.example.ts.net". Members with those sign in with password + code and
+    register again; the stranded rows are theirs to remove."""
+    here = rp_id or "not set up for passkeys"
+    return [
+        f"{count} passkey{'s' if count != 1 else ''} registered for {found}, this instance is {here}"
+        for found, count in sorted(counts.items())
+        if found != rp_id
+    ]

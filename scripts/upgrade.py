@@ -204,6 +204,15 @@ def report(say: Step) -> list[Migration]:
     say(f"    data directory   {settings.data_dir}")
     say(f"    app version      {__version__}")
     say(f"    database stamped {at or 'nothing -- this database has never been migrated'}")
+    # A passkey works only for the host name it was made under, so one made
+    # under another name is the one thing an upgrade check can see that
+    # nothing else reports (#47 §1.2).
+    if settings.database_url.startswith("sqlite:"):
+        from app.auth import passkeys
+
+        database = pathlib.Path(settings.database_url.split("///", 1)[-1])
+        for line in passkeys.stranded(passkeys.hosts_in(database), settings.rp_id):
+            say(f"    passkeys         {line}")
     say("")
     say("  What is published on main")
     if there is None and in_a_container():
