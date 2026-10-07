@@ -74,6 +74,9 @@ this repository.
 
 ### Changed
 
+- **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
+  every CI job runs 3.12, and nothing tests 3.14. (#105)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
@@ -83,6 +86,7 @@ this repository.
   is a *memo*, and the old heading read as if the two were the same thing.
   Only the wording changed: it is still the receipt's `note` field, and the API
   and the agent are unchanged. (#114)
+
 - **The Python dependencies are locked, with hashes.** `requirements.in` and
   `requirements-dev.in` hold the floors you edit; `make lock` compiles them
   with `uv pip compile --universal --generate-hashes` into `requirements.txt`
