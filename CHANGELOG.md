@@ -150,6 +150,15 @@ history this repository does not have.
 
 ### Changed
 
+- **The database file is looked after, not only its rows.** Every
+  housekeeping sweep now ends with a `wal_checkpoint(TRUNCATE)`, so the
+  `-wal` file goes back to zero instead of staying at the size the biggest
+  import ever left it, and it runs `VACUUM` when more than half the file is
+  free pages, such as after a household is deleted or a large import is
+  undone. Planner statistics are refreshed straight after any commit that
+  writes 1,000 rows or more, and after `make restore`, rather than waiting up
+  to six hours for the next sweep. (#103)
+
 - **The register loads five hundred rows at a time.** It used to ask for
   everything the filter matched, up to 25,000 rows, and refetch all of it
   after every edit. It now asks for the first 500, says how many the filter
