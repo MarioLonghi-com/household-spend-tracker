@@ -9,7 +9,7 @@
 
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { equalParts, retype } from "../lib/splitting";
@@ -71,6 +71,20 @@ import type {
  */
 type Row = Transaction & { currency?: string | null };
 type RegisterRows = Omit<RegisterPage, "transactions"> & { transactions: Row[] };
+
+/**
+ * How many rows the register asks the server for at a time (#100).
+ *
+ * It used to ask for everything the filter matched, up to the API's ceiling of
+ * 25,000, and hand the browser a few hundred at a time. Getting the rows was
+ * cheap; carrying all of them was not -- every refresh after an edit fetched
+ * and parsed the whole household again, and a long ledger is megabytes of
+ * JSON. Five hundred is two of `useWindowed`'s steps: the first screenful
+ * arrives with room to scroll, and reaching the end of what is here asks for
+ * the next five hundred. Sorting stays on the server, so every page is in
+ * the order the headings say.
+ */
+export const REGISTER_PAGE = 500;
 
 /**
  * What each cleared state is called on screen, as one letter.
@@ -310,29 +324,36 @@ export function isTransferLeg(txn: Pick<Transaction, "transfer_account_id" | "tr
  * straight away; the refetch still follows, for balances and filters.
  *
  * Every query under `["register", household]` whose data is a page of rows --
- * the list under any filter, and the backlog count -- and nothing else there.
+ * the list under any filter, kept as pages since #100, and the backlog count
+ * -- and nothing else there.
  */
 export function rememberSavedRow(
   client: QueryClient,
   householdId: string,
   saved: Transaction,
 ): void {
+  const onePage = (page: RegisterRows): RegisterRows =>
+    page.transactions.some((one) => one.id === saved.id)
+      ? {
+          ...page,
+          transactions: page.transactions.map((one) =>
+            // The register's own fields (the currency) survive; the server's
+            // answer wins on everything it sent.
+            one.id === saved.id ? { ...one, ...saved } : one,
+          ),
+        }
+      : page;
+  const isPage = (data: unknown): data is RegisterRows =>
+    !!data && typeof data === "object" && Array.isArray((data as RegisterRows).transactions);
   client.setQueriesData<unknown>({ queryKey: ["register", householdId] }, (data: unknown) => {
-    if (!data || typeof data !== "object" || !Array.isArray((data as RegisterRows).transactions))
-      return data;
-    const page = data as RegisterRows;
-    if (!page.transactions.some((one) => one.id === saved.id)) return data;
-    return {
-      ...page,
-      transactions: page.transactions.map((one) =>
-        // The register's own fields (the currency) survive; the server's
-        // answer wins on everything it sent.
-        one.id === saved.id ? { ...one, ...saved } : one,
-      ),
-    };
+    if (isPage(data)) return onePage(data);
+    const paged = data as { pages?: unknown } | undefined;
+    if (paged && Array.isArray(paged.pages) && paged.pages.every(isPage)) {
+      return { ...paged, pages: (paged.pages as RegisterRows[]).map(onePage) };
+    }
+    return data;
   });
 }
-
 
 /**
  * What to say after a bulk work-expense change, or nothing.
@@ -621,7 +642,7 @@ export function Register({
   query.set("sort", sort);
   query.set("direction", direction);
 
-  const register = useQuery({
+  const register = useInfiniteQuery({
     queryKey: [
       "register",
       household.id,
@@ -640,12 +661,58 @@ export function Register({
     ],
     // The signal lets a superseded search be aborted in flight rather than
     // downloaded and parsed for nobody.
-    queryFn: ({ signal }) =>
-      api.get<RegisterRows>(`/households/${household.id}/transactions?${query.toString()}`, {
-        signal,
-      }),
+    queryFn: ({ signal, pageParam }) => {
+      const paged = new URLSearchParams(query);
+      paged.set("limit", String(REGISTER_PAGE));
+      paged.set("offset", String(pageParam));
+      return api.get<RegisterRows>(
+        `/households/${household.id}/transactions?${paged.toString()}`,
+        { signal },
+      );
+    },
+    initialPageParam: 0,
+    //: The next page starts where the rows in hand end, until `total` -- what
+    //: the filter matched on the server -- is reached.
+    getNextPageParam: (last, pages) => {
+      const loaded = pages.reduce((n, one) => n + one.transactions.length, 0);
+      return last.transactions.length > 0 && loaded < last.total ? loaded : undefined;
+    },
     enabled: !noAccounts && !noCategories,
   });
+  /**
+   * The pages in hand, as one register answer.
+   *
+   * A row can appear on two pages when the ledger changed between the two
+   * requests -- a row added above the boundary pushes the last row of page one
+   * onto page two -- so the rows are kept once each, the first time seen.
+   * `total` and the badge's count are the newest page's: the latest word on
+   * what the filter matches.
+   */
+  const data = useMemo<RegisterRows | undefined>(() => {
+    const pages = register.data?.pages;
+    if (!pages || pages.length === 0) return undefined;
+    const seen = new Set<string>();
+    const transactions: Row[] = [];
+    for (const one of pages) {
+      for (const row of one.transactions) {
+        if (seen.has(row.id)) continue;
+        seen.add(row.id);
+        transactions.push(row);
+      }
+    }
+    const newest = pages[pages.length - 1];
+    return {
+      ...newest,
+      transactions,
+      has_running_balance: pages[0].has_running_balance,
+    };
+  }, [register.data]);
+  //: Rows the filter matched that are not in hand yet.
+  const unloaded = data ? Math.max(data.total - data.transactions.length, 0) : 0;
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = register;
+  const loadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   /**
    * How many rows need a category, for the badge beside that tick (#188).
@@ -678,7 +745,7 @@ export function Register({
   });
   const backlogCount = noCategories
     ? backlogAlone.data?.total
-    : register.data?.needs_category;
+    : data?.needs_category;
 
   const onSort = (column: SortKey, next: SortDirection) => {
     setSort(column);
@@ -717,7 +784,7 @@ export function Register({
     },
   });
 
-  const rows = useMemo(() => register.data?.transactions ?? [], [register.data]);
+  const rows = useMemo(() => data?.transactions ?? [], [data]);
 
   //: Two existing rows made the two legs of one transfer (issues #70, #71):
   //: one from each bank's statement, in the same currency or not.
@@ -914,9 +981,17 @@ export function Register({
     };
   }, [visible, groupedByPayment]);
 
-  // Everything the filter matched is already here; this decides how much of it
-  // is in the DOM. See `useWindowed` for the measurements behind the split.
-  const page = useWindowed(ordered);
+  // The rows in hand, a page or more of what the filter matched; this decides
+  // how much of it is in the DOM, and asks the server for the next page when
+  // the DOM has all of it. See `useWindowed` for the measurements behind the
+  // split. A new question -- another filter, sort or currency -- starts from
+  // the top; another page arriving, or a refresh after an edit, does not.
+  const page = useWindowed(
+    ordered,
+    undefined,
+    `${query.toString()}|${columns.join(",")}`,
+    hasNextPage && !isFetchingNextPage ? loadMore : undefined,
+  );
 
   /**
    * Every column of the table, left to right, by what it holds (#74).
@@ -925,7 +1000,7 @@ export function Register({
    * measures the heading row cell by cell and files each width under the key
    * at the same place here.
    */
-  const hasBalance = register.data?.has_running_balance ?? false;
+  const hasBalance = data?.has_running_balance ?? false;
   const columnKeys = useMemo(
     () => [
       "select",
@@ -968,10 +1043,11 @@ export function Register({
    * The heading's tick box: every row the filter shows, or none of them
    * (#143).
    *
-   * "Shows" is `ordered` -- everything the filter and the currency toggle
-   * leave, including the rows further down that the windowing has not put in
-   * the DOM yet. The register fetches the whole filtered set, so there is no
-   * page beyond this one for "all" to be ambiguous about.
+   * "Shows" is `ordered` -- the rows in hand that the currency toggle
+   * leaves, including the rows further down that the windowing has not put in
+   * the DOM yet. Not the pages the server has not sent (#100): a tick box
+   * cannot honestly select rows nobody has seen, so the count line above
+   * the table says how many it covers when there are more to load.
    *
    * Ticked when every one of them is, indeterminate when some are, and a
    * click on a full box empties it. Rows selected earlier under another
@@ -1006,12 +1082,18 @@ export function Register({
   //: is among have arrived, and then forgotten -- the panel is not reopened
   //: every time the register refetches behind it.
   const openOnArrival = useRef(preset?.open ?? null);
+  //: Not on the pages in hand is not yet "not there": the next page is asked
+  //: for until the row turns up or the filter has no more to give.
   useEffect(() => {
-    if (!openOnArrival.current || !register.data) return;
-    const wanted = register.data.transactions.find((one) => one.id === openOnArrival.current);
+    if (!openOnArrival.current || !data) return;
+    const wanted = data.transactions.find((one) => one.id === openOnArrival.current);
+    if (!wanted && hasNextPage) {
+      loadMore();
+      return;
+    }
     openOnArrival.current = null;
     if (wanted) setOpened(wanted);
-  }, [register.data]);
+  }, [data, hasNextPage, loadMore]);
 
   function pickRow(index: number, event: React.MouseEvent) {
     // The row is a selection target *and* holds the controls that open, edit
@@ -1317,8 +1399,19 @@ export function Register({
             states below say their own thing. */}
         {ordered.length > 0 ? (
           <p className="small muted register-count">
-            {ordered.length.toLocaleString()} {ordered.length === 1 ? "transaction" : "transactions"}
-            {filtered ? " match the filters" : ""}
+            {unloaded > 0 && data ? (
+              <>
+                {data.total.toLocaleString()} {data.total === 1 ? "transaction" : "transactions"}
+                {filtered ? " match the filters" : ""}
+                {` · the first ${rows.length.toLocaleString()} loaded`}
+              </>
+            ) : (
+              <>
+                {ordered.length.toLocaleString()}{" "}
+                {ordered.length === 1 ? "transaction" : "transactions"}
+                {filtered ? " match the filters" : ""}
+              </>
+            )}
             {selected.size > 0 ? ` · ${selected.size.toLocaleString()} selected` : ""}
           </p>
         ) : null}
@@ -1334,7 +1427,7 @@ export function Register({
             No accounts are ticked, so there is nothing to show. Tick one in the accounts
             filter — or Select all, which is not the same as ticking every one of them.
           </Empty>
-        ) : register.data?.transactions.length === 0 ? (
+        ) : data?.transactions.length === 0 ? (
           <Empty>
             Nothing here yet. Add a row above, or import a statement from the Import screen.
           </Empty>
@@ -1603,7 +1696,7 @@ export function Register({
                         </Fragment>
                       );
                     })}
-                    {register.data?.has_running_balance ? (
+                    {data?.has_running_balance ? (
                       <td className="amount muted" data-label="Balance">
                         {txn.running_balance === null
                           ? ""
@@ -1621,9 +1714,10 @@ export function Register({
                 ))}
               </tbody>
             </table>
-            {/* The sentinel. Crossing it hands the next few hundred rows to the
-                browser; there is no request behind it. */}
-            {!page.allShown && (
+            {/* The sentinel. Crossing it hands the next few hundred rows in
+                hand to the browser, and once they are all drawn, asks the
+                server for the next page (#100). */}
+            {!page.allShown ? (
               <button
                 type="button"
                 className="more-rows"
@@ -1632,7 +1726,20 @@ export function Register({
               >
                 Showing {page.shown.toLocaleString()} of {page.total.toLocaleString()} — show more
               </button>
-            )}
+            ) : unloaded > 0 ? (
+              <button
+                type="button"
+                className="more-rows"
+                ref={page.sentinelRef}
+                onClick={page.extend}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage
+                  ? "Loading the next rows…"
+                  : `Showing ${page.shown.toLocaleString()} — ${unloaded.toLocaleString()} more ` +
+                    `${unloaded === 1 ? "row" : "rows"} to load — show more`}
+              </button>
+            ) : null}
           </div>
         )}
 
@@ -1656,15 +1763,7 @@ export function Register({
           </p>
         ) : null}
 
-        {register.data?.capped ? (
-          <div className="banner warn" style={{ marginTop: 10 }}>
-            This household has {register.data.total.toLocaleString()} transactions and the register
-            hands over {register.data.transactions.length.toLocaleString()} at a time. Narrow it
-            with the dates or an account to see the rest.
-          </div>
-        ) : null}
-
-        {register.data && !register.data.has_running_balance && register.data.total > 0 ? (
+        {data && !data.has_running_balance && data.total > 0 ? (
           <p className="small muted" style={{ marginTop: 10 }}>
             A running balance needs one account, newest-first by date, and no filters — it is a
             sum down the page, so in any other order or with rows hidden it would not mean
