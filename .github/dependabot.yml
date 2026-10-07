@@ -83,6 +83,12 @@ updates:
       default-days: 7
     open-pull-requests-limit: 2
     groups:
+      # Lingui's packages are pinned exactly and must move together: a core at
+      # one version and a macro or a vite plugin at another compile messages
+      # the runtime cannot read (#53). Their own group, so one pull request
+      # moves all of them and the en-XA pass and the extraction gate check it.
+      lingui:
+        patterns: ["@lingui/*"]
       client:
         patterns: ["*"]
 

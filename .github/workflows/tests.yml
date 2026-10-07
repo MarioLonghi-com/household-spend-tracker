@@ -459,6 +459,12 @@ jobs:
         working-directory: client
       - run: npm test
         working-directory: client
+      # The catalogs are never behind the code (#53): extracting again from
+      # the source must change nothing. A new message, an edited one or a
+      # removed one shows up here, and `npm run extract` is the fix.
+      - name: catalogs match the source
+        run: npx lingui extract --clean && git diff --exit-code -- src/locales
+        working-directory: client
       - run: npm run build
         working-directory: client
 
@@ -731,6 +737,12 @@ jobs:
       - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294  # v5.0.0
         with:
           fail-on-severity: high
+          # braces <= 3.0.3 (stack exhaustion on deeply nested patterns) has no
+          # fixed release. It arrives through micromatch in @lingui/cli, which
+          # runs at build time on this repository's own globs and is not in
+          # the bundle a browser receives (#53). Named one advisory at a time,
+          # so anything else still fails this check.
+          allow-ghsas: GHSA-vfj7-8cjw-p6xm
 
   # --------------------------------------------------------------------------- #
   # The container, on both bases

@@ -1,0 +1,138 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-10-08 00:14+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: sv-SE\n"
+
+#: src/App.tsx
+msgid "Application management"
+msgstr ""
+
+#: src/App.tsx
+msgid "History"
+msgstr ""
+
+#: src/App.tsx
+msgid "Transactions"
+msgstr ""
+
+#: src/components/bits.tsx
+msgid "Sort by {label}"
+msgstr ""
+
+#: src/App.tsx
+msgid "Accounts"
+msgstr ""
+
+#: src/App.tsx
+msgid "Payee Merge"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.decimals_in_whole_currency"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.not_an_amount"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.too_large"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.too_many_decimals"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.too_many_digits"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reconcile.does_not_balance"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reconcile.row_after_statement"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.does_not_add_up"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.needs_amount_arriving"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.same_account"
+msgstr ""
+
+#: src/App.tsx
+msgid "Register"
+msgstr ""
+
+#: src/App.tsx
+msgid "Transfers"
+msgstr ""
+
+#: src/App.tsx
+msgid "How import works"
+msgstr ""
+
+#: src/App.tsx
+msgid "Import"
+msgstr ""
+
+#: src/App.tsx
+msgid "Categories"
+msgstr ""
+
+#: src/App.tsx
+msgid "Snap a Receipt"
+msgstr ""
+
+#: src/components/bits.tsx
+msgid "{wait, plural, other {Try again in # seconds.}}"
+msgstr ""
+
+#: src/App.tsx
+msgid "Payee Naming Rules"
+msgstr ""
+
+#: src/App.tsx
+msgid "Payee"
+msgstr ""
+
+#: src/App.tsx
+msgid "Reports"
+msgstr ""
+
+#: src/App.tsx
+msgid "Payee Categorisation"
+msgstr ""
+
+#: src/App.tsx
+msgid "Admin"
+msgstr ""
+
+#: src/components/LanguagePicker.tsx
+msgid "Language"
+msgstr ""
+
+#: src/App.tsx
+msgid "Receipts"
+msgstr ""
