@@ -74,6 +74,10 @@ this repository.
 
 ### Changed
 
+- **Why any member may import accounts from a file is written down**, beside
+  the route, with a test: it only adds accounts, each in the audit log, and
+  History undoes the whole file. Nothing about who may run it changed. (#115)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
@@ -83,6 +87,7 @@ this repository.
   is a *memo*, and the old heading read as if the two were the same thing.
   Only the wording changed: it is still the receipt's `note` field, and the API
   and the agent are unchanged. (#114)
+
 - **The Python dependencies are locked, with hashes.** `requirements.in` and
   `requirements-dev.in` hold the floors you edit; `make lock` compiles them
   with `uv pip compile --universal --generate-hashes` into `requirements.txt`

@@ -416,6 +416,12 @@ async def import_accounts(
 ) -> AccountImportOut:
     """Many accounts from one CSV file, all or none (#146).
 
+    **Any member may run it, not only the owner** -- `CurrentUser`, decided
+    2026-10-07 (#115). It only adds accounts, every one is a row in the audit
+    log under one batch, and Undo in History takes the whole file back. The
+    one-time import is owner-only because it brings a whole ledger in -- other
+    people's transactions, categories and payees -- which this does not.
+
     `dry_run` defaults to true: the file is read and every row run through
     the real service, and then nothing is kept -- 200 with a verdict per row.
     Sent again with `dry_run` false it is kept -- 201 -- unless any row has a
