@@ -74,6 +74,12 @@ this repository.
 
 ### Changed
 
+- **The import guide says what happens to a statement line whose row you
+  deleted:** it is new again, so the next statement that carries it -- or the
+  same file sent again with *Import it anyway* -- brings it back. Undo in
+  History is the other way back. Nothing about importing changed; it is now
+  written down and tested. (#91)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
@@ -83,6 +89,7 @@ this repository.
   is a *memo*, and the old heading read as if the two were the same thing.
   Only the wording changed: it is still the receipt's `note` field, and the API
   and the agent are unchanged. (#114)
+
 - **The Python dependencies are locked, with hashes.** `requirements.in` and
   `requirements-dev.in` hold the floors you edit; `make lock` compiles them
   with `uv pip compile --universal --generate-hashes` into `requirements.txt`

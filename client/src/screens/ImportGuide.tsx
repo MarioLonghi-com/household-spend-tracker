@@ -276,6 +276,13 @@ export function ImportGuide() {
           import only what is new. Lines imported by an older version of the app are still
           recognised.
         </p>
+        <p className="small">
+          A line counts as already imported only while its row is in the register. Delete the row
+          and the line is new again: the next statement that carries it, or the same file sent
+          again with <em>Import it anyway</em>, brings it back, known by the same identity — the
+          statement is the record. Undo in History is the other way back, and it also restores
+          anything you had changed on the row.
+        </p>
         <h4>Payee and category</h4>
         <p className="small">
           Your payee naming rules decide the payee, and the payee's categorisation decides the
