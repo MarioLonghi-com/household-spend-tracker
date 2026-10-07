@@ -114,6 +114,15 @@ history this repository does not have.
   sections below it are history from the earlier private repository, with no
   tag or release here. (#117)
 
+- **`compose.yaml` runs the published image.** It names
+  `ghcr.io/mariolonghi-com/household-spend-tracker` at the release
+  `SPENDTRACKER_VERSION` in `.env` says, and `docker compose pull` fetches it;
+  `build:` stays as the fallback, and a local build is told to call itself
+  `local`. The README and `deploy/DOCKER.md` start, upgrade and roll back that
+  way. The Tailscale sidecar setup still builds from its checkout. `/llms.txt`
+  names the source repository and its licence, and the pull request template
+  asks for the design doc to be re-read against the code. (#111)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)

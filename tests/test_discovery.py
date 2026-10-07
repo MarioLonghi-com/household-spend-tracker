@@ -84,6 +84,14 @@ def test_it_names_the_floor_a_key_can_never_cross(page):
         assert promise in page
 
 
+def test_it_names_where_the_source_is(page):
+    """#111: the one line a program needs for the AGPL's source offer."""
+    from app.services.platform import REPOSITORY
+
+    assert f"Source: {REPOSITORY} (AGPL-3.0-or-later)." in page.splitlines()
+    assert REPOSITORY == "https://github.com/MarioLonghi-com/household-spend-tracker"
+
+
 def test_the_urls_in_it_point_at_this_instance(client, page):
     assert "/api/agent/v1/manifest" in page
     assert "testserver" in page, "built from the request's own origin"
