@@ -14,9 +14,9 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 
-from ... import db
+from ... import config, db
 from ...audit.batch import batch
-from ...auth import cookies, keycheck, stepup, tokens
+from ...auth import cookies, keycheck, passkeys, stepup, tokens
 
 # `from ...db import engine` would bind the object at import time, which is the
 # trap `routers/auth.py` carries a comment about: the test harness rebuilds the
@@ -24,7 +24,7 @@ from ...auth import cookies, keycheck, stepup, tokens
 # would stay pointed at the previous test's database. Rate limiting and the
 # grant spend both write through it, and both would go to the wrong file.
 from ...errors import NotFound
-from ...models import AgentKey, BatchKind, Household
+from ...models import AgentKey, BatchKind, Household, Passkey
 from ...schemas import (
     AgentKeyIssued,
     AgentKeyOut,
@@ -32,12 +32,16 @@ from ...schemas import (
     ChangePassword,
     ConfirmReenrolment,
     IssueAgentKey,
+    PasskeyOptionsRequest,
+    PasskeyOut,
     PasswordChanged,
     RecoveryCodesIssued,
     RecoveryCodesLeft,
     ReenrolmentDone,
     ReenrolmentOffer,
     RegenerateRecoveryCodes,
+    RegisterPasskey,
+    RenamePasskey,
     StartReenrolment,
     StepUpGranted,
     StepUpRequest,
@@ -298,3 +302,90 @@ def revoke_key(
     ):
         key_service.revoke(session, key, by=user)
     return _out(key)
+
+
+# --------------------------------------------------------------------------- #
+# Passkeys (#120)
+# --------------------------------------------------------------------------- #
+
+
+def _passkey_out(passkey: Passkey) -> PasskeyOut:
+    return PasskeyOut(
+        id=passkey.id,
+        label=passkey.label,
+        created_at=passkey.created_at,
+        last_used_at=passkey.last_used_at,
+        synced=passkey.backed_up,
+        rp_id=passkey.rp_id,
+        usable_here=passkey.rp_id == config.settings.rp_id,
+        aaguid=passkey.aaguid,
+    )
+
+
+@router.get("/me/passkeys", response_model=list[PasskeyOut])
+def my_passkeys(session: SessionDep, user: CurrentUser) -> list[PasskeyOut]:
+    """Your passkeys, newest first, including any made for another host name
+    -- marked `usable_here: false`, so they can be seen and removed rather
+    than silently not working."""
+    return [_passkey_out(one) for one in passkeys.for_user(session, user)]
+
+
+@router.post("/me/passkeys/options")
+def passkey_options(
+    body: PasskeyOptionsRequest, request: Request, session: SessionDep, user: CurrentUser
+) -> dict:
+    """Begin adding a passkey: the options for `navigator.credentials.create()`.
+
+    Gated like an agent key (`app/auth/stepup.py`): a passkey is a way in that
+    outlives this session, so it costs a fresh password + code. Whether this
+    instance can offer passkeys at all is checked first, so a grant is not
+    spent on a request that could only be refused. The grant is then spent
+    whether or not a passkey follows.
+    """
+    passkeys.refuse_unless_available(request)
+    stepup.require(db.engine, body.step_up_token, user_id=user.id)
+    if user.webauthn_user_handle is None:
+        # `users` is audited; the handle is written once, on a first passkey.
+        with batch(session, kind=BatchKind.manual, actor_id=user.id):
+            passkeys.give_user_handle(user)
+    return passkeys.registration_options(session, user, request)
+
+
+@router.post("/me/passkeys", response_model=PasskeyOut, status_code=201)
+def register_passkey(
+    body: RegisterPasskey, request: Request, session: SessionDep, user: CurrentUser
+) -> PasskeyOut:
+    """Finish adding a passkey: verify the browser's answer and keep it.
+
+    No second grant: the challenge the options issued is the proof, single-use,
+    bound to this member, and five minutes long.
+    """
+    with batch(session, kind=BatchKind.manual, actor_id=user.id):
+        passkey = passkeys.register(
+            session, db.engine, user, request, credential=body.credential, label=body.label
+        )
+    return _passkey_out(passkey)
+
+
+@router.patch("/me/passkeys/{passkey_id}", response_model=PasskeyOut)
+def rename_passkey(
+    passkey_id: str, body: RenamePasskey, session: SessionDep, user: CurrentUser
+) -> PasskeyOut:
+    passkey = passkeys.owned(session, user, passkey_id)
+    with batch(session, kind=BatchKind.manual, actor_id=user.id):
+        passkeys.rename(passkey, body.label)
+    return _passkey_out(passkey)
+
+
+@router.delete("/me/passkeys/{passkey_id}", status_code=204)
+def remove_passkey(passkey_id: str, session: SessionDep, user: CurrentUser) -> None:
+    """Remove a passkey. It stops working at once.
+
+    No step-up, for the reason revoking an agent key has none: taking a way in
+    away is the safe direction. Hard-deleted, like everything else here; the
+    audit log keeps the before-image, and undo never brings it back
+    (`undo.CREDENTIAL_TABLES`).
+    """
+    passkey = passkeys.owned(session, user, passkey_id)
+    with batch(session, kind=BatchKind.manual, actor_id=user.id):
+        session.delete(passkey)

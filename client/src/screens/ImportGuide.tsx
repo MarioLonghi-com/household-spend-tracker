@@ -322,7 +322,9 @@ export function ImportGuide() {
             no other row could be its pair (or this one is strictly the closest in date, or — when
             date cannot tell two of them apart — its two descriptions share strictly more words
             than any rival's, not counting words like <em>TO</em>, <em>FROM</em> or your account
-            numbers).
+            numbers). A link that makes two accounts' history makes their other pairs strong too,
+            so those are linked in the same commit — and by <em>Link all</em> on the Transfers
+            screen, which links until nothing new is strong.
           </li>
           <li>
             <strong>Suggested</strong> when only the amounts and dates match, or when a row could

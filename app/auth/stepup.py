@@ -22,6 +22,8 @@ one. Each calls `require` before it writes or reads anything:
 * `POST /admin/application/backups/{name}/download` with ``include_key`` -- the
   zip then carries every password hash and the key that opens every member's
   authenticator, portable and forever (#204).
+* `POST /me/passkeys/options` -- a passkey is a way in that outlives this
+  session, and on its own it is both factors (#120).
 * `POST /admin/invitations` with ``role: owner``, and
   `POST /admin/users/{id}/role` making somebody an owner -- an owner account
   survives every reset the inviting owner can make to their own password,

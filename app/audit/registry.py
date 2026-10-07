@@ -27,6 +27,8 @@ EXPECTED_EXCLUDED: frozenset[str] = frozenset(
         # A spent proof of identity, single-use and swept. Out for the same
         # reason `pending_sign_ins` is: it records what happened at the door.
         "step_up_grants",
+        # A WebAuthn challenge: single-use and swept, the same kind of row.
+        "webauthn_challenges",
         "login_attempts",
         # What a key asked for. Out for the reason `login_attempts` is: it
         # records what happened at the door, not what happened to the ledger,

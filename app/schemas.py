@@ -2181,6 +2181,46 @@ class AgentKeyIssued(BaseModel):
     token: str
 
 
+class PasskeyOptionsRequest(BaseModel):
+    """The grant that pays for adding a passkey (`POST /me/step-up`).
+    Single-use, and spent whether or not the registration that follows works."""
+
+    step_up_token: str = Field(max_length=200)
+
+
+class RegisterPasskey(BaseModel):
+    """The browser's answer to the options: `credential.toJSON()`, as is."""
+
+    credential: dict
+    #: Optional: without one the passkey is named after its provider.
+    label: str | None = Field(default=None, max_length=200)
+
+
+class RenamePasskey(BaseModel):
+    label: str = Field(max_length=200)
+
+
+class PasskeyOut(BaseModel):
+    """A passkey as its owner sees it: what the Sign-in methods list shows
+    (#47 §3). Never the public key, which no screen has a use for."""
+
+    id: str
+    label: str
+    created_at: datetime
+    last_used_at: datetime | None = None
+    #: True when it may live on more than one device (iCloud Keychain, Google
+    #: Password Manager, a password manager), false when it is bound to this
+    #: authenticator. From the backed-up flag at its last use.
+    synced: bool
+    #: The host name it was made for (#47 §1.2) ...
+    rp_id: str
+    #: ... and whether that is this instance's. False is a passkey a renamed
+    #: host or a restore stranded: it cannot be used here, only removed.
+    usable_here: bool
+    #: Which provider made it, when it said.
+    aaguid: str | None = None
+
+
 class AgentImportRow(BaseModel):
     """One transaction an agent is asking to stage.
 
