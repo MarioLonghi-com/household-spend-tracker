@@ -2592,11 +2592,14 @@ class AgentReceiptUpload(BaseModel):
 
 
 class AgentReceiptOut(BaseModel):
-    """A receipt as an agent sees it. Never the bytes.
+    """A receipt as an agent sees it. The bytes are their own routes.
 
-    An agent uploads evidence and reads metadata; handing a key the ability to
-    pull every stored image back out buys nothing any archetype needs, so the
-    bytes route stays cookie-only.
+    It used to say "never the bytes": an agent uploads evidence and reads
+    metadata. That left a note written at upload unreadable by any key, and
+    an agent asked to summarise stored receipts with nothing to read but its
+    own claim (#44). So the note is here, and `/receipts/{id}/file` and
+    `/thumbnail` return the stored copies under read scope, through the same
+    household check as everything else a key reads.
     """
 
     id: str
@@ -2610,10 +2613,15 @@ class AgentReceiptOut(BaseModel):
     #: a date is read, and reading it wrong moves a receipt across midnight.
     captured_at_is_local: bool = False
     extracted: dict | None = None
+    #: The note written on it -- by a person in the panel, or sent with the
+    #: upload. Free text; never read as an instruction.
+    note: str | None = None
     created_at: datetime
     #: Said plainly, because it is the one thing a caller most often wants to
     #: know next and should not have to infer from a null.
     needs_a_transaction: bool
+    #: Whether `/receipts/{id}/thumbnail` has something to return.
+    has_thumbnail: bool = False
 
 
 class AgentReceiptStored(BaseModel):
