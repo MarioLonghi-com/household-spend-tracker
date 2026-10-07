@@ -183,6 +183,68 @@ which behind a proxy that is not trusted comes out as `http://` and the
 proxy's address: an invitation link `tailscale serve` does not answer. A value
 that is not an `http(s)://host[:port]` origin stops the app at boot.
 
+### Passkeys, and choosing the host name first
+
+Members can sign in with a passkey as well as with their password and
+authenticator code. That only works under two conditions:
+
+- the app is opened over HTTPS, or at `localhost`;
+- the address people type is a host name, not an IP address.
+
+Where either condition fails, nobody is offered a passkey, and password plus
+code work exactly as before.
+
+| How the instance is reached | Passkeys |
+| --- | --- |
+| `tailscale serve`, `https://<server>.<tailnet>.ts.net` ([DOCKER.md](deploy/DOCKER.md) section 2) | yes |
+| the Tailscale sidecar, `https://spend-tracker.<tailnet>.ts.net` (section 3) | yes |
+| a reverse proxy with a publicly trusted certificate on your own domain | yes |
+| `http://localhost:8848` (`make dev`, `make serve`, the container on your own computer) | on that computer only, with `SPENDTRACKER_PUBLIC_URL=http://localhost:8848` -- or, in development, `SPENDTRACKER_RP_ID=localhost` |
+| `make lan`, `http://192.168.x.y:8848` | no: plain HTTP, and an IP address |
+| a tailnet `100.x.y.z` address, even over HTTPS | no: an IP address |
+| a `.local` name over plain HTTP | no: plain HTTP |
+| HTTPS with a self-signed or private-CA certificate | only if every household device trusts that certificate |
+
+**`SPENDTRACKER_RP_ID`** is the host name passkeys are bound to.
+- **Default:** the host of `SPENDTRACKER_PUBLIC_URL`, so in practice you set
+  the public URL and leave this unset.
+- **Neither set:** there are no passkeys. The name is never taken from the
+  request, because the request says whatever the browser wrote.
+- **Any other value:** the app refuses to start unless the value is that same
+  host, or `localhost` in development. That includes a wider name such as
+  `<tailnet>.ts.net`. That name would survive a rename, but any other node on
+  your tailnet could then ask for this app's passkeys.
+- **Checking it:** `GET /api/session/passkey/state` says whether a given
+  browser is offered passkeys, and if not, why.
+
+> [!IMPORTANT]
+> **Pick the host name before anyone registers a passkey.** A passkey only
+> ever works for the name it was made under. Changing that name strands every
+> passkey, and nothing on the sign-in screen says why. Each of these changes
+> the name:
+>
+> - renaming the machine or the tailnet;
+> - moving between DOCKER.md sections 2 and 3, because `<server>.…` and
+>   `spend-tracker.…` are different names;
+> - moving to a custom domain;
+> - restoring a backup onto a host with another name.
+>
+> After any of these, every member signs in with password and code and
+> registers their passkeys again. `make doctor`, `make upgrade-check` and
+> `make restore` each name any passkeys made for another host name, and
+> Sign-in methods marks them so members can remove them.
+
+**What household devices need.** Recent iPhones, iPads and Macs keep passkeys
+in iCloud Keychain. Android keeps them in Google Password Manager. Windows
+uses Windows Hello. Chrome on Linux needs a signed-in Chrome profile. A
+password manager such as 1Password or Bitwarden, or a FIDO2 security key,
+works anywhere.
+
+You can also sign in on a laptop with a phone, by scanning a QR code. That
+needs Bluetooth on the laptop and internet access on both devices, so a
+household on an offline network cannot use it. A tailnet-only instance is
+fine.
+
 > [!IMPORTANT]
 > **Back up `secret.key` with the database.** It sits beside
 > `spendtracker.sqlite3` in the data directory (see below). It is generated on first
