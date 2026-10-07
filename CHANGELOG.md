@@ -379,6 +379,13 @@ history this repository does not have.
 
 ### Documentation
 
+- **The README shows the register**, from the demo household `make seed`
+  creates, so every name and figure in it is invented. There is also a
+  `CITATION.cff`. The data-hygiene test now lets screenshots live under
+  `docs/screenshots/` if they are PNGs with no metadata chunks. It skips
+  `CITATION.cff`'s two author lines, as it already skipped the copyright
+  line. (#111)
+
 - **Passkeys for operators:** the README section *Passkeys, and choosing the
   host name first* says how an instance can be reached for passkeys to work,
   and what `SPENDTRACKER_RP_ID` defaults to and refuses. It also says why the
