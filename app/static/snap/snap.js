@@ -744,12 +744,12 @@ async function send(id, item) {
  */
 const LANDED_STATE = {
   in: "✓ in the inbox",
-  saving: "saving the note…",
+  saving: "saving the receipt notes…",
   // A confirmation that stays put. The note is the one thing on this page
   // that can silently not have happened, and a message that vanishes after
   // three seconds is a message somebody at a till misses.
-  saved: "✓ in the inbox · note saved",
-  failed: "✓ in the inbox · the note did not save — type it again to retry",
+  saved: "✓ in the inbox · receipt notes saved",
+  failed: "✓ in the inbox · the receipt notes did not save — type them again to retry",
 };
 
 /**
@@ -820,7 +820,7 @@ function landedRender() {
       note.type = "text";
       note.placeholder = "What was it for? (optional)";
       note.value = one.note;
-      note.setAttribute("aria-label", `Note for ${one.name}`);
+      note.setAttribute("aria-label", `Receipt notes for ${one.name}`);
       // On the way out of the field, like everywhere else in this app that
       // saves without a button.
       note.onchange = () => saveNote(one, note.value);

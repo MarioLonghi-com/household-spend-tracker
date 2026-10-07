@@ -26,6 +26,14 @@ this repository.
 
 ## Unreleased
 
+### Changed
+
+- **A receipt's free-text field is now headed "Receipt notes"**, on the
+  Receipts screen and on `/snap`. It used to say "Note". A transaction's field
+  is a *memo*, and the old heading read as if the two were the same thing.
+  Only the wording changed: it is still the receipt's `note` field, and the API
+  and the agent are unchanged. (#114)
+
 ## 0.7.1 — 2026-10-05
 
 **Reversible: none** — no migration in this release. To go back, check out

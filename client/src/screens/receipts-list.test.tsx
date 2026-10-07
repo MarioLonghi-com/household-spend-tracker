@@ -118,7 +118,7 @@ async function listView(rows?: Receipt[]) {
 }
 
 function noteBox(row: HTMLElement) {
-  return within(row).getByRole("textbox", { name: "Note" });
+  return within(row).getByRole("textbox", { name: "Receipt notes" });
 }
 
 beforeEach(() => {
@@ -141,7 +141,7 @@ describe("the receipts list", () => {
       note: "Mercadona, the big shop",
     });
     // The confirmation is the point of saving without a button.
-    expect(await screen.findByText("Note saved.")).toBeTruthy();
+    expect(await screen.findByText("Receipt notes saved.")).toBeTruthy();
   });
 
   it("empties a note through clear_note rather than an empty string", async () => {
