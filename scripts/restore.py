@@ -266,6 +266,8 @@ def _restore(
         print("The copy failed. Everything has been put back as it was.")
         raise
 
+    _analyse(live)
+
     print()
     print(f"Restored. The database is at revision {checked['revision']}.")
     print("  1. Run the code that matches that revision, or newer and then")
@@ -285,6 +287,31 @@ def _restore(
     print("  What was there before is beside it, renamed `.before-restore-" + stamp + "`.")
     print("  Remove those once you are sure, and not before.")
     return 0
+
+
+def _analyse(live: pathlib.Path) -> None:
+    """Planner statistics for the ledger just put back (#103).
+
+    The app's own sweep analyses at boot, and a restore is followed by one --
+    but nothing promises the next boot is this code's, and a ledger restored
+    under a plan of "start it later" should not be planned blind until then.
+    Bounded like the sweep's, so it is milliseconds whatever the size; a
+    failure is said and left, because the rows are already in place and
+    statistics are a speed, not a fact.
+    """
+    import contextlib
+    import sqlite3
+
+    from app.auth.housekeeping import ANALYSIS_LIMIT
+
+    try:
+        with contextlib.closing(sqlite3.connect(live)) as conn:
+            conn.execute(f"PRAGMA analysis_limit={ANALYSIS_LIMIT}")
+            conn.execute("ANALYZE")
+            conn.commit()
+        print("  analysed     planner statistics refreshed")
+    except sqlite3.Error as problem:
+        print(f"  not analysed ({problem}); the app does it at its next start")
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -72,6 +72,14 @@ history this repository does not have.
 
 ### Fixed
 
+- **A burst of requests can no longer use more memory than a small host
+  has.** Each SQLite connection had a 32 MiB page cache whatever the machine,
+  and the connection pool is unbounded on purpose. On a 95 MiB ledger, ten
+  connections reading at once held 456 MiB. SQLite now has a process-wide soft
+  heap limit of an eighth of the memory the process may use (the container's
+  limit, or the machine's), and each connection's cache is a sixty-fourth of
+  it, between 2 and 32 MiB. The same ten connections measured 178 MiB. (#102)
+
 - **A Spanish statement whose date column is headed `F. Valor` imports.**
   Spanish banks abbreviate *fecha* to "F.". "F. Valor" matched no date name
   and did match the amount name "valor", so the file had no date column and
@@ -141,6 +149,15 @@ history this repository does not have.
   guide says so. (#84)
 
 ### Changed
+
+- **The database file is looked after, not only its rows.** Every
+  housekeeping sweep now ends with a `wal_checkpoint(TRUNCATE)`, so the
+  `-wal` file goes back to zero instead of staying at the size the biggest
+  import ever left it, and it runs `VACUUM` when more than half the file is
+  free pages, such as after a household is deleted or a large import is
+  undone. Planner statistics are refreshed straight after any commit that
+  writes 1,000 rows or more, and after `make restore`, rather than waiting up
+  to six hours for the next sweep. (#103)
 
 - **The register loads five hundred rows at a time.** It used to ask for
   everything the filter matched, up to 25,000 rows, and refetch all of it
