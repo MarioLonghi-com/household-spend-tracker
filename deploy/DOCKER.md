@@ -91,7 +91,13 @@ Then open <http://localhost:8848> and go to **The setup token** below.
 
 `docker compose pull` fetches the published image,
 `ghcr.io/mariolonghi-com/household-spend-tracker:X.Y.Z`, which
-`release.yml` built, smoke-tested and attested from that release's tag.
+`release.yml` built, smoke-tested and attested from that release's tag. It is
+one index of two platforms, `linux/amd64` and `linux/arm64`, each built and
+started natively on a runner of that architecture, so Docker Desktop on an
+Apple-silicon Mac runs it as is rather than emulated. The release goes
+public only after the image is on the registry and has been pulled back
+with no credentials, and `X.Y` and `latest` move after that: a release you
+can see is one whose image you can pull.
 Use the number of the release you want from the repository's releases page;
 without `SPENDTRACKER_VERSION` it is whatever `latest` was when you pulled.
 
