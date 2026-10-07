@@ -146,6 +146,12 @@ history this repository does not have.
   names the source repository and its licence, and the pull request template
   asks for the design doc to be re-read against the code. (#111)
 
+- **The import guide says what happens to a statement line whose row you
+  deleted:** it is new again, so the next statement that carries it -- or the
+  same file sent again with *Import it anyway* -- brings it back. Undo in
+  History is the other way back. Nothing about importing changed; it is now
+  written down and tested. (#91)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
