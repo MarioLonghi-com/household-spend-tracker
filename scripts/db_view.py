@@ -54,6 +54,8 @@ PURGE = (
     "trusted_devices",
     "pending_sign_ins",
     "step_up_grants",
+    # A challenge is spent or swept within minutes; there is nothing to browse.
+    "webauthn_challenges",
     "login_attempts",
     "agent_requests",
     "agent_replays",
@@ -107,6 +109,9 @@ REDACTIONS: dict[str, dict[str, str]] = {
         "password_hash": "'-- redacted --'",
         "totp_secret": "x''",
         "totp_last_counter": "NULL",
+        # Random, and stored by the member's authenticators: a browsable copy
+        # has no use for it. NULL, not a literal, for its unique index.
+        "webauthn_user_handle": "NULL",
     },
     "recovery_codes": {"code_hash": "'-- redacted --'"},
     "invitations": {"token_hash": "'-- redacted -- ' || rowid"},
@@ -122,6 +127,15 @@ REDACTIONS: dict[str, dict[str, str]] = {
     # column carries a unique index, so one literal for every row fails on the
     # second, in a way an instance with a single key never shows you.
     "agent_keys": {"token_hash": "'-- redacted -- ' || rowid"},
+    # Which passkeys a member has, what they are called, the host each was made
+    # for and when it was last used is what somebody opens this to check. The
+    # public key is not a secret, but a browsable copy has no use for it, and
+    # the credential id is what an authenticator presents to sign in; it goes
+    # with `|| rowid` for its unique index.
+    "passkeys": {
+        "public_key": "x''",
+        "credential_id": "'-- redacted -- ' || rowid",
+    },
     # IBANs, account and card numbers, and how a bank spells a person's name
     # (issue #66). Which account has *an* identifier of which kind is worth
     # browsing; the number itself is not something a snapshot should carry.

@@ -34,6 +34,7 @@ from app.models import (
     StepUpGrant,
     TrustedDevice,
     User,
+    WebAuthnChallenge,
     WebSession,
     utcnow,
 )
@@ -371,6 +372,8 @@ def test_the_sweep_leaves_everything_that_is_still_live(db, household_id):
                            kind="password", at=now))
         s.add(StepUpGrant(id_hash="unspent", user_id=user.id, created_at=now,
                           expires_at=now + timedelta(minutes=4)))
+        s.add(WebAuthnChallenge(id_hash="unanswered", user_id=user.id, purpose="register",
+                                created_at=now, expires_at=now + timedelta(minutes=4)))
         with batch(s, kind=BatchKind.admin, actor_id=user.id, household_id=household_id):
             s.add(_a_key(user, household_id, n=9))
         # Unaudited, so no batch -- and inside the retention window, so it stays.
@@ -385,7 +388,7 @@ def test_the_sweep_leaves_everything_that_is_still_live(db, household_id):
     removed = housekeeping.sweep(engine)
 
     assert removed == {"sessions": 0, "pending_sign_ins": 0, "trusted_devices": 0,
-                       "step_up_grants": 0, "agent_requests": 0, "agent_replays": 0,
+                       "step_up_grants": 0, "webauthn_challenges": 0, "agent_requests": 0, "agent_replays": 0,
                        "receipt_blobs": 0, "login_attempts": 0, "agent_keys": 0,
                        # An agent's staged-and-forgotten imports. A person's
                        # are never touched -- see `sweep_stale_agent_previews`.

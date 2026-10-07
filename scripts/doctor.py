@@ -25,6 +25,9 @@ What it looks at:
   when the old one went missing and a new one was made in its place.
 - **Recovery codes**: how many each member has left. None left is one lost
   phone away from `scripts.reset_authenticator`.
+- **Passkeys**: any registered for another host name than this instance's
+  RP ID -- a renamed machine or tailnet, or a restore onto another host. They
+  cannot be used here, and nothing else says so.
 - **Backups**: the newest in the data directory's `backups/` and in
   `./backups`, and how old it is.
 
@@ -90,7 +93,7 @@ def _newest_backup(places: list[pathlib.Path]) -> pathlib.Path | None:
 
 def run(say: Report, *, backups: list[pathlib.Path]) -> None:
     from app import schema_check
-    from app.auth import keycheck
+    from app.auth import keycheck, passkeys
     from app.config import settings
     from app.permissions import not_private
     from app.services import backup_bundle
@@ -174,6 +177,16 @@ def run(say: Report, *, backups: list[pathlib.Path]) -> None:
             say.warn("recovery codes", f"{email} has none left; scripts.reset_authenticator if they lose their device")
     if left and all(unused for _, unused in left):
         say.ok("recovery codes", ", ".join(f"{email} {unused}" for email, unused in left))
+
+    by_host = passkeys.hosts_in(db)
+    lost = passkeys.stranded(by_host, settings.rp_id)
+    for line in lost:
+        say.warn("passkeys", f"{line}; their members sign in with password + code and register again")
+    if not lost:
+        total = sum(by_host.values())
+        say.ok("passkeys", f"{total} registered, all for {settings.rp_id}" if total else (
+            "none registered" + ("" if settings.rp_id else "; not set up here (no SPENDTRACKER_PUBLIC_URL)")
+        ))
 
     places = [data / "backups", *backups]
     newest = _newest_backup(places)

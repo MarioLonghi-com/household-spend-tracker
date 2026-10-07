@@ -211,6 +211,12 @@ def _restore(
     print()
     print(f"  over       {live}")
     print(f"  key        {key_from}: {verdict}")
+    # Passkeys come back with the rows, but each works only for the host name
+    # it was made under (#47 §1.2): restoring onto another one strands them.
+    from app.auth import passkeys
+
+    for line in passkeys.stranded(passkeys.hosts_in(folder / "spendtracker.sqlite3"), settings.rp_id):
+        print(f"  passkeys   {line}; those members sign in with password + code and register again")
     print("  The database that is there now is moved aside, not deleted.")
     print()
 

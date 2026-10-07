@@ -22,6 +22,12 @@ Issue numbers written in backticks (`` `#NNN` ``) refer to the project's
 original private tracker and are kept for the record; they are not issues in
 this repository.
 
+**Public releases start at 0.6.2**, the first one tagged and published from
+this repository. The sections from 0.6.1 down were released from the project's
+earlier, private repository and are kept here as history: they have no tag
+and no release on this one, deliberately, because a tag would point at
+history this repository does not have.
+
 ---
 
 ## Unreleased
@@ -34,6 +40,14 @@ this repository.
   Docker check can move; `PY_BASE=`/`PY_RUN=` still build on any other base.
   The README says what the release attestation does and does not cover. (#95)
 
+- **A new password is checked against the 100,000 most common.** Length was
+  the only rule, so `qwertyuiopasdfgh` passed it. The setup wizard, changing
+  your password and a reset link now refuse any of the top 100,000 passwords
+  of a public-domain breach corpus, ignoring case, and say why. The list ships
+  with the app -- it never calls out -- and is refreshed when a release is cut
+  (`python -m scripts.common_passwords --refresh`). Existing passwords are not
+  checked. (#97)
+
 - **A YNAB key is gone from the browser's memory when the one-time import
   closes.** The wizard dropped it from its own state, but the query library
   kept each finished call -- key included -- for five minutes after the
@@ -42,6 +56,11 @@ this repository.
 - **The Content Security Policy no longer allows `data:` images.** Nothing
   in the client uses one (the QR code is SVG), so `img-src` is `'self' blob:`.
   (#94)
+
+- **`/snap` paints the household's accent only when it is a `#rrggbb` colour.**
+  The server already validates it before storing it; the capture page now
+  checks it again before setting the header's background, as the app's own
+  theme does. Defence in depth. (#92)
 
 ### Fixed
 
@@ -91,6 +110,10 @@ this repository.
 - **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
   every CI job runs 3.12, and nothing tests 3.14. (#105)
 
+- **The CHANGELOG says public releases start at 0.6.2**, and that the
+  sections below it are history from the earlier private repository, with no
+  tag or release here. (#117)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
@@ -131,6 +154,19 @@ this repository.
   passkey features, allowed on this origin and refused on `/snap`. The
   `webauthn` library is added, locked. **For an operator:** nothing to do. If
   `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
+- **A member can register passkeys, and list, rename and remove them**,
+  through the API so far. The screens come with #122. Adding a passkey costs
+  a fresh password and authenticator code, the same step-up that issuing an
+  agent key costs. The passkey has to be discoverable and must verify the
+  user. Each one records the host name it was made for. `make doctor`,
+  `make upgrade-check` and `make restore` now name any passkeys made for
+  another host name than this instance's, which is what a renamed machine or
+  a restore onto another host leaves behind. Adding, renaming and removing a
+  passkey are in History. Undo never brings one back. **Migration
+  `2de003489b79`** adds the `passkeys` and `webauthn_challenges` tables and
+  `users.webauthn_user_handle`. **Reversible: lossy**: rolling it back drops
+  every registered passkey, and members then sign in with password + code as
+  before. (#120)
 
 ## 0.7.1 — 2026-10-05
 
