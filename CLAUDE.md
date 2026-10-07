@@ -164,6 +164,7 @@ passed a file containing an undefined name.
     make upgrade     backup, maintenance page, migrate, verify, log
     make restore     FROM=backups/<stamp>, a downloaded .zip or a .sqlite3 [KEY=]
     make audit       pip-audit and npm audit against what is pinned
+    make lock        requirements*.txt from requirements*.in, pinned and hashed
 
 **Never back up by copying the database file.** WAL mode keeps recent writes in
 `spendtracker.sqlite3-wal`; the main file has been 4 KB while the WAL held

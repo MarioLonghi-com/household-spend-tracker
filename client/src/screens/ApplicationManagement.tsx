@@ -394,7 +394,7 @@ function PackagesTable({ packages }: { packages: Package[] }) {
         <Hint label="what this list is">
           <p>
             Every distribution installed in this environment, with the version that is actually
-            loaded — not what <code>requirements.txt</code> asked for, which is a set of ranges.
+            loaded — not what <code>requirements.txt</code> locked, which an install may not have followed.
             When a dependency is the suspect, this is the list that answers it.
           </p>
         </Hint>

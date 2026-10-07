@@ -516,7 +516,8 @@ def _settle(samples: list[str]) -> tuple[str | None, str | None]:
     for value in samples:
         # A trailing sign is not part of the tail: "12,50-" has a two-digit
         # fraction, not the three-character one that reads as thousands (#261).
-        cleaned = signs.ascii_minus(value or "").strip().rstrip("-+ ")
+        # Nor are the letters of "12,500 DR" (#84).
+        cleaned = signs.debit_credit(signs.ascii_minus(value or ""))[0].strip().rstrip("-+ ")
         if not cleaned:
             continue
         last_comma, last_dot = cleaned.rfind(","), cleaned.rfind(".")
@@ -607,16 +608,17 @@ def parse_amount(text: str, *, decimal_separator: str = ".") -> Decimal:
     Handles accounting parentheses, currency symbols, thin and non-breaking
     spaces, either separator convention, a minus sign written at the end
     (``12.50-``, issue #261) and a minus written as a dash or a real minus sign
-    (`signs.MINUS_SIGNS`, issue #262). An empty cell is zero, which is what
-    makes separate outflow and inflow columns work, and so is a cell holding
-    nothing but a dash.
+    (`signs.MINUS_SIGNS`, issue #262), and a debit or credit said in letters
+    after the figure (``12.50 DR``, ``12.50 CR``, #84). An empty cell is zero,
+    which is what makes separate outflow and inflow columns work, and so is a
+    cell holding nothing but a dash.
 
     A cell that says something and is not a number raises `ValueError` with a
-    reason, and so does one signed twice (``-12.50-``, ``(-12.50)``): which
-    sign the bank meant is a guess. Reading either as zero is what hid #261 --
+    reason, and so does one signed twice (``-12.50-``, ``(-12.50)``,
+    ``-12.50 DR``): which sign the bank meant is a guess. Reading either as zero is what hid #261 --
     the row was skipped as "moves no money" with the debit still in it.
     """
-    cleaned = signs.ascii_minus(text or "").strip()
+    cleaned, marker = signs.debit_credit(signs.ascii_minus(text or "").strip())
     cleaned = cleaned.replace(" ", "").replace("\u00a0", "").replace("\u202f", "")
     cleaned = cleaned.replace("\u2009", "")
     if not cleaned:
@@ -635,7 +637,11 @@ def parse_amount(text: str, *, decimal_separator: str = ".") -> Decimal:
 
     leading = digits[0] if digits[0] in "-+" else ""
     trailing = digits[-1] if digits[-1] in "-+" else ""
-    if (leading and trailing) or (bracketed and (leading or trailing)):
+    if (
+        (leading and trailing)
+        or (bracketed and (leading or trailing))
+        or (marker and (leading or trailing or bracketed))
+    ):
         raise ValueError(
             f"{text!r} is signed twice, so whether it is money in or money out would be a guess"
         )
@@ -648,7 +654,7 @@ def parse_amount(text: str, *, decimal_separator: str = ".") -> Decimal:
         value = Decimal(body)
     except InvalidOperation:
         raise ValueError(f"could not read {text!r} as an amount") from None
-    negative = bracketed or "-" in (leading, trailing)
+    negative = bracketed or "-" in (leading, trailing, marker)
     return -value if negative else value
 
 

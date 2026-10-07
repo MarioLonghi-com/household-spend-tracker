@@ -93,6 +93,13 @@ def to_parsed_rows(rows: list, *, currency: str) -> list[ParsedRow]:
                 # approximation a CSV gets. No new dedupe concept.
                 fitid=(row.external_id or None),
                 details=dict(row.details or {}),
+                # Checked by `stage()` against the account's, with the sentence
+                # a file's currency column gets (#86). Not "column": that marks
+                # a multi-currency export whose other rows are *skipped* as
+                # another account's, and an agent naming a currency the account
+                # does not hold is a mistake to refuse, not rows to set aside.
+                currency=row.currency.upper() if row.currency else None,
+                currency_from="agent" if row.currency else None,
             )
         )
     return parsed

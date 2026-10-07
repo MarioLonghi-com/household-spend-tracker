@@ -9,14 +9,17 @@
 # Eleven separate pull requests for one week's patch releases is how a bot gets
 # muted, and a muted bot is worse than no bot.
 #
-# - **Groups with no `update-types` filter.** The groups used to say
-#   `update-types: ["minor", "patch"]`, which only works when Dependabot can
-#   classify the bump -- and for a `>=` floor in requirements.txt it cannot, so
-#   every pip bump fell out of the group and opened on its own: eight separate
-#   pull requests on 2026-09-29 and five on 2026-09-30, each a full CI run.
-#   `patterns: ["*"]` alone puts everything in one pull request. (Exact pins --
-#   the lockfile with hashes issue #96 plans -- would let a minor/patch split
-#   come back; until then, one.)
+# - **Python: minor and patch together, each major on its own.** The groups
+#   once said `update-types: ["minor", "patch"]` while requirements.txt held
+#   only `>=` floors, which Dependabot cannot classify -- so every pip bump fell
+#   out of the group and opened on its own: eight separate pull requests on
+#   2026-09-29 and five on 2026-09-30, each a full CI run. Since #46 the `.in`
+#   files hold the floors and requirements*.txt are `uv pip compile` locks with
+#   exact, hashed pins, which the `uv` ecosystem reads and re-locks; an exact
+#   pin is a bump it can classify, so the split is back. A major still opens
+#   alone, because it is the one worth reading.
+# - **The other ecosystems: one group with no `update-types` filter**, which
+#   puts everything in one pull request.
 # - **`cooldown`.** A release that is seven days old has had a week for its own
 #   regressions and any hijacked-package advisory to surface. The cheapest
 #   supply-chain control there is. Security updates ignore it, and open on
@@ -46,7 +49,11 @@
 
 version: 2
 updates:
-  - package-ecosystem: pip
+  # `uv`, not `pip`: requirements*.txt are written by `uv pip compile` from
+  # the `.in` files (#46), and it is the `uv` ecosystem that understands that
+  # pair -- it edits the `.in` floor where it has to and re-runs the compile, so
+  # the hashes move with the version.
+  - package-ecosystem: uv
     directory: /
     target-branch: dev
     rebase-strategy: disabled
@@ -61,6 +68,7 @@ updates:
     groups:
       python:
         patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: npm
     directory: /client
@@ -94,10 +102,11 @@ updates:
       actions:
         patterns: ["*"]
 
-  # The Dockerfile's Node stage is pinned by digest, which only stays a
-  # discipline rather than a fossil if something moves it. This is what does.
-  # It watches literal `FROM` lines; the Chainguard bases are `ARG` defaults
-  # and are not pinned yet (issue #63).
+  # The Dockerfile's bases are pinned by digest -- Node and both Chainguard
+  # Pythons -- which only stays a discipline rather than a fossil if something
+  # moves them. This is what does. It watches literal `FROM` lines, which is
+  # why the Chainguard bases are stages of their own rather than `ARG`
+  # defaults (#95).
   - package-ecosystem: docker
     directory: /
     target-branch: dev

@@ -252,6 +252,13 @@ docker compose build --build-arg PY_BASE=python:3.12-slim \
 
 Both are built in CI, so the bypass is tested rather than promised.
 
+Both Chainguard bases are pinned by digest, and Dependabot moves the pins. The
+free tier offers only a moving `:latest` tag, so the digest is what makes a
+build name its input. The release attestation says which workflow built an
+image from which commit; it does not make the build reproducible, and two
+builds of one commit on different days can differ by whatever a base moved
+between them.
+
 ### A release tarball
 
 Needs Python 3.12+ and nothing else — the client is prebuilt inside, so there
