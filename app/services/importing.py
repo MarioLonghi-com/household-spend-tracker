@@ -1525,8 +1525,11 @@ def _commit(
     ]
     transfers_linked = 0
     if written:
-        found = transfer_service.find(session, account.household_id, among=written)
-        transfers_linked = transfer_service.link_strong(session, found)
+        # Until nothing new is strong (#88): a link this makes can be the
+        # history that makes the next pair strong.
+        transfers_linked = transfer_service.link_until_settled(
+            session, account.household_id, among=written
+        )
 
     summary = {
         "created": created,

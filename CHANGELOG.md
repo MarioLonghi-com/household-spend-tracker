@@ -28,6 +28,16 @@ this repository.
 
 ### Fixed
 
+- **"Link all" links everything that is strong, not just what was strong
+  before it started.** A link made because a row names the other account
+  makes those two accounts' history, and that history makes their other
+  pairs strong -- but "Link all", and the link on commit at import, asked
+  once and stopped, so a second press of "Link all" found more. Both now link
+  until nothing new is strong, still as one batch and one undo, and "Link
+  all" says how many it linked in all. (#88)
+
+### Fixed
+
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
   read the last separator as the decimal mark, so a thousands comma with no
   decimals was taken as a decimal comma and the third digit rounded away -- a
