@@ -30,6 +30,7 @@ import { Field, Problem } from "../components/bits";
 import {
   conditionalMediationAvailable,
   getPasskey,
+  noteRecoveryReminder,
   passkeyState,
   rememberThisDevice,
   wasDismissed,
@@ -109,6 +110,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
    */
   function finish(user: User, keys: number, passkeys = 0) {
     waiting.current?.abort();
+    if (passkeys > 0) noteRecoveryReminder(passkeys);
     if (keys > 0 || passkeys > 0) setRecovered({ user, keys, passkeys });
     else onDone(user);
   }

@@ -204,6 +204,26 @@ history this repository does not have.
   dependency. **For an operator:** nothing to do beyond the usual
   `make install-prod`. (#46)
 
+- **One "Sign-in methods" section in your account.** Password,
+  authenticator, passkeys and recovery codes are now rows of one section
+  instead of four separate blocks. Each row says its state in words, such as
+  "Set", "Needs setting up again" or "7 of 10 left", and offers its own
+  action. A line at the top says what currently gets you in. Keys for
+  programs stay a separate section.
+  - **Your passkeys** are listed with their name, whether each is synced or on
+    this device only, when it was added and last used, and "this device" on
+    the one you signed in with. The list sorts at its headers.
+  - **Renaming** is done in place, and **removing** asks once and says what
+    you can still sign in with.
+  - **A passkey made for another host name** is marked as such and can only
+    be removed.
+  - **Adding a passkey** asks for your password and code in the same panel,
+    then hands over to the browser's prompt. The new passkey appears
+    highlighted, with its name ready to edit.
+  - **Where passkeys cannot work** there is no Add button, only one line
+    saying why.
+  (#122)
+
 ### Added
 
 - **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
