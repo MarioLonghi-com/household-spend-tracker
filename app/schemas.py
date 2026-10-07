@@ -753,6 +753,10 @@ class RegisterPage(BaseModel):
     #: fewer rows without saying which is how somebody reads a fifth of their
     #: ledger and believes it is all of it.
     capped: bool = False
+    #: Rows with no category under every *other* filter of this request -- the
+    #: category picker set aside -- for the count beside "Needs a category".
+    #: Carried here so one register load is one request (#101).
+    needs_category: int = 0
 
 
 # --------------------------------------------------------------------------- #
