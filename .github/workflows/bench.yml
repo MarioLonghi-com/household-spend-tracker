@@ -52,7 +52,11 @@ jobs:
         env:
           ASKED: ${{ inputs.before }}
         run: |
-          before="${ASKED:-$(git describe --tags --abbrev=0 --match 'v*')}"
+          # The newest release by version, not `git describe`: a release is
+          # tagged on `main`'s merge commit, which `dev` never contains, so
+          # describe from `dev` finds no tag at all.
+          before="${ASKED:-$(git tag --list 'v*' --sort=-v:refname | head -n 1)}"
+          if [ -z "$before" ]; then echo "no release tag to upgrade from"; exit 1; fi
           echo "ref=$before" >> "$GITHUB_OUTPUT"
           echo "upgrading from $before"
 
@@ -135,7 +139,7 @@ jobs:
             echo "## Upgrade on a bench ledger, from $BEFORE"
             echo
             echo '```json'
-            cat grown.json 2>/dev/null
+            cat grown.json 2>/dev/null || echo "the bench was not built"
             echo '```'
             echo
             echo "**alembic upgrade head:** $(cat upgrade-seconds.txt 2>/dev/null || echo 'did not finish') s"
@@ -146,5 +150,5 @@ jobs:
             echo
             echo "**After:** $(cat after.json 2>/dev/null)"
             echo
-            echo "**fsync on the runner's disk** (not the target's): $(cat fsync.json 2>/dev/null | tr -d '\n ')"
+            echo "**fsync on the runner's disk** (not the target's): $(tr -d '\n ' < fsync.json 2>/dev/null || true)"
           } >> "$GITHUB_STEP_SUMMARY"
