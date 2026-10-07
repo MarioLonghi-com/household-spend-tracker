@@ -56,9 +56,7 @@ def create_household(
     currency = (base_currency or "").strip().upper()
     if not CURRENCY_CODE.fullmatch(currency):
         raise ValidationError(f"{base_currency!r} is not a three-letter currency code")
-    problem = currencies.refusal(currency)
-    if problem:
-        raise ValidationError(problem)
+    currencies.check_new(currency)
 
     # A new household opens in a colour nobody else is wearing. The whole point
     # of the palette is telling two ledgers apart, and a second household that
@@ -127,9 +125,7 @@ def update_household(
             raise ValidationError(f"{base_currency!r} is not a three-letter currency code")
         from .accounts import codes_in_use
 
-        problem = currencies.refusal(currency, codes_in_use(session, household))
-        if problem:
-            raise ValidationError(problem)
+        currencies.check_new(currency, codes_in_use(session, household))
         household.base_currency = currency
 
     if date_format is not None:

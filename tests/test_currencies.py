@@ -34,12 +34,15 @@ def test_both_lists_are_three_capital_letters_and_do_not_overlap():
 
 @pytest.mark.parametrize("code", ["EUR", "GBP", "JPY", "SEK", "BRL", "XAU", "HRK", "DEM"])
 def test_assigned_codes_are_accepted(code):
-    assert currencies.refusal(code) is None
+    currencies.check_new(code)
 
 
 @pytest.mark.parametrize("code", ["GPB", "EUO", "ABC", "BTC"])
-def test_a_code_iso_never_assigned_is_refused(code):
-    assert "is not an ISO 4217 currency code" in currencies.refusal(code)
+def test_a_code_iso_never_assigned_is_refused_with_a_code(code):
+    with pytest.raises(ValidationError, match="is not an ISO 4217 currency code") as refused:
+        currencies.check_new(code)
+    assert refused.value.code == "currency.not_iso_4217"
+    assert refused.value.params == {"code": code}
 
 
 def _open(session, owner, household, currency):

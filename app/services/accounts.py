@@ -95,9 +95,7 @@ def create_account(
     code = (currency or household.base_currency).strip().upper()
     if not CURRENCY_CODE.fullmatch(code):
         raise ValidationError(f"{currency!r} is not a three-letter currency code")
-    problem = currencies.refusal(code, codes_in_use(session, household))
-    if problem:
-        raise ValidationError(problem)
+    currencies.check_new(code, codes_in_use(session, household))
 
     _refuse_taken_name(session, household.id, name)
 

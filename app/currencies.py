@@ -65,12 +65,18 @@ def is_assigned(code: str) -> bool:
     return code in ASSIGNED
 
 
-def refusal(code: str, in_use: Iterable[str] = ()) -> str | None:
-    """Why `code` cannot be used for something new, or None when it can.
+def check_new(code: str, in_use: Iterable[str] = ()) -> None:
+    """Refuse `code` for something new unless ISO 4217 assigned it or it is in use.
 
     `code` is already upper-cased and three letters. `in_use` is every code the
     household holds now; one of those is never refused, whatever it is.
     """
     if code in ASSIGNED or code in set(in_use):
-        return None
-    return f"{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR"
+        return
+    from .errors import ValidationError
+
+    raise ValidationError(
+        f"{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR",
+        code="currency.not_iso_4217",
+        params={"code": code},
+    )
