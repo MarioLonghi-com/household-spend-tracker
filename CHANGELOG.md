@@ -22,6 +22,12 @@ Issue numbers written in backticks (`` `#NNN` ``) refer to the project's
 original private tracker and are kept for the record; they are not issues in
 this repository.
 
+**Public releases start at 0.6.2**, the first one tagged and published from
+this repository. The sections from 0.6.1 down were released from the project's
+earlier, private repository and are kept here as history: they have no tag
+and no release on this one, deliberately, because a tag would point at
+history this repository does not have.
+
 ---
 
 ## Unreleased
@@ -97,6 +103,10 @@ this repository.
 
 - **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
   every CI job runs 3.12, and nothing tests 3.14. (#105)
+
+- **The CHANGELOG says public releases start at 0.6.2**, and that the
+  sections below it are history from the earlier private repository, with no
+  tag or release here. (#117)
 
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
