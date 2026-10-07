@@ -123,7 +123,7 @@ branch, which is minutes each time, and the checks it ran now run in CI.
 > The `push: main` trigger fires *after* the merge, so on its own it reports on
 > `main` rather than protecting it. The `pull_request` triggers are what
 > protect. Branch protection is a repository setting, not a workflow one: a
-> ruleset on `main` requiring the `tests` and `release-ready` checks is what
+> ruleset on `main` requiring the `ci-ok` and `release-ready` checks is what
 > stops a direct push.
 
 ### The upgrade rehearsal is the one that is easy to skip
