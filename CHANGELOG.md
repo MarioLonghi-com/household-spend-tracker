@@ -144,6 +144,23 @@ history this repository does not have.
 
 ### Changed
 
+- **The register loads five hundred rows at a time.** It used to ask for
+  everything the filter matched, up to 25,000 rows, and refetch all of it
+  after every edit. It now asks for the first 500, says how many the filter
+  matched and how many are loaded, and asks for the next 500 when you reach
+  the end of what is there. Sorting at a column heading is still done by the
+  server, from the first page. The heading's tick box selects the rows that
+  are loaded. (#100)
+
+- **The client asks one module which locale it is in** (`lib/locale.ts`):
+  the words stay English, and numbers, money and dates follow the browser's
+  own formatting locale as they always did. Money is formatted from its
+  digits rather than a divided float, sorting by name goes through one
+  collator, and the labels for account types, import outcomes, roles and the
+  YNAB import's steps live in `lib/labels.ts`. Typed amounts now also read
+  the minus sign, spaces and apostrophes other locales write. Nothing an
+  English reader sees changes; tests compare the old and new output. (#52)
+
 - **Small fixes left from reviews** (#110): History headlines a bulk delete
   of receipts as *Bulk delete*, not *Bulk edit*; an account update that sends
   a country or statement product together with its clear flag is refused, as

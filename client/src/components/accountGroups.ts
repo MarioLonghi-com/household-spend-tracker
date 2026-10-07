@@ -10,18 +10,13 @@
  * quietly absent from a filter that claims to list accounts.
  */
 
+import { ACCOUNT_TYPE_HEADINGS } from "../lib/labels";
+import { compareNames } from "../lib/locale";
 import type { Account } from "../lib/types";
 import type { PickerGroup } from "./GroupedPicker";
 
 /** How an account type reads in a filter heading. */
-export const TYPE_NAMES: Record<string, string> = {
-  checking: "Checking",
-  savings: "Savings",
-  cash: "Cash",
-  credit_card: "Credit cards",
-  other_asset: "Other assets",
-  other_liability: "Other liabilities",
-};
+export const TYPE_NAMES = ACCOUNT_TYPE_HEADINGS;
 
 export type AccountGrouping = "country" | "type";
 
@@ -40,7 +35,7 @@ export function accountGroups(accounts: Account[], grouping: AccountGrouping): P
     buckets.set(key, bucket);
   }
   return [...buckets.entries()]
-    .sort((a, b) => a[1].label.localeCompare(b[1].label))
+    .sort((a, b) => compareNames(a[1].label, b[1].label))
     .map(([key, bucket]) => ({
       key,
       label: bucket.label,

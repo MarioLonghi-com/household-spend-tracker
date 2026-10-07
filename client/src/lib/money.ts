@@ -6,6 +6,8 @@
  * asserts it matches, so drift fails CI rather than a report.
  */
 
+import { formatLocale, numberFormat } from "./locale";
+
 // ISO 4217 exponents that are not 2. Everything unlisted uses 2.
 export const EXPONENTS: Record<string, number> = {
   JPY: 0, KRW: 0, CLP: 0, ISK: 0, VND: 0, HUF: 0, TWD: 0,
@@ -20,30 +22,64 @@ export function minorFactor(currency: string): number {
   return 10 ** exponent(currency);
 }
 
-/** Render minor units for a human, in the account's own currency. */
+/**
+ * Minor units as a plain decimal string -- `-123456` in EUR is `"-1234.56"` --
+ * built from the digits, never by dividing. `Intl.NumberFormat` reads a string
+ * as an exact decimal, so an amount past 2^53 / 100 is still written as the
+ * figure that was stored rather than the nearest float to it.
+ */
+export function decimalText(minor: number, currency: string): string {
+  const digits = exponent(currency);
+  const magnitude = String(Math.abs(Math.trunc(minor))).padStart(digits + 1, "0");
+  const whole = magnitude.slice(0, magnitude.length - digits);
+  const fraction = digits ? `.${magnitude.slice(magnitude.length - digits)}` : "";
+  return `${minor < 0 ? "-" : ""}${whole}${fraction}`;
+}
+
+/**
+ * `Intl` given a decimal string. The types say `number`; every engine this app
+ * supports takes the string as an exact decimal (Intl.NumberFormat v3), and one
+ * that did not would read it as the same number the division used to give.
+ */
+function formatDecimal(formatter: Intl.NumberFormat, text: string): string {
+  return formatter.format(text as unknown as number);
+}
+
+/**
+ * Render minor units for a human, in the account's own currency.
+ *
+ * The currency's decimals are this file's table, not ICU's, and are passed as
+ * both the minimum and the maximum: ICU and ISO disagree about a few (ISK,
+ * and the cash rounding some currencies use), and the ledger stores ISO's.
+ * The locale is the reader's formatting locale (`lib/locale.ts`), which is the
+ * browser's own, as `undefined` was.
+ */
 export function format(minor: number, currency: string): string {
   const digits = exponent(currency);
-  const figure = minor / minorFactor(currency);
+  const text = decimalText(minor, currency);
   // `Intl` throws a RangeError for a code that is not three letters ("€€€",
   // "12A"), and this runs per row on every screen: one bad code stored in the
   // ledger blanked the whole household (#193). The server refuses them now,
   // but a row written before that still has to render, so it renders as text.
   if (/^[A-Za-z]{3}$/.test(currency)) {
     try {
-      return new Intl.NumberFormat(undefined, {
-        style: "currency",
-        currency: currency.toUpperCase(),
-        minimumFractionDigits: digits,
-        maximumFractionDigits: digits,
-      }).format(figure);
+      return formatDecimal(
+        numberFormat({
+          style: "currency",
+          currency: currency.toUpperCase(),
+          minimumFractionDigits: digits,
+          maximumFractionDigits: digits,
+        }),
+        text,
+      );
     } catch {
       // fall through to the plain rendering
     }
   }
-  const plain = Math.abs(figure).toLocaleString(undefined, {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  });
+  const plain = formatDecimal(
+    numberFormat({ minimumFractionDigits: digits, maximumFractionDigits: digits }),
+    text.replace(/^-/, ""),
+  );
   return `${minor < 0 ? "-" : ""}${plain} ${currency}`;
 }
 
@@ -63,8 +99,7 @@ export function format(minor: number, currency: string): string {
  * reader's box says "1,234".
  */
 export function toInput(minor: number, currency: string, locale?: string): string {
-  const digits = exponent(currency);
-  const figure = (Math.abs(minor) / minorFactor(currency)).toFixed(digits);
+  const figure = decimalText(Math.abs(minor), currency);
   const { decimal } = separators(locale);
   return decimal === "," ? figure.replace(".", ",") : figure;
 }
@@ -77,7 +112,7 @@ export function toInput(minor: number, currency: string, locale?: string): strin
  */
 function separators(locale?: string): { group: string | null; decimal: string } {
   try {
-    const parts = new Intl.NumberFormat(locale).formatToParts(1234567.5);
+    const parts = numberFormat(undefined, locale ?? formatLocale()).formatToParts(1234567.5);
     return {
       group: parts.find((p) => p.type === "group")?.value ?? null,
       decimal: parts.find((p) => p.type === "decimal")?.value ?? ".",
@@ -129,6 +164,24 @@ function normalise(text: string, locale?: string): string | null {
 }
 
 /**
+ * What someone typed, with the characters other locales write folded into the
+ * ones `parse` reads, and every space gone.
+ *
+ * - Spaces of every width: U+00A0 and U+202F are what sv-SE and fr-FR group
+ *   thousands with, U+2009 what some style guides do. Copying an amount out of
+ *   this app in Swedish pastes a U+00A0.
+ * - Apostrophes, straight or curly: de-CH groups with them ("1'234.50").
+ * - U+2212 MINUS SIGN and the dashes beside it: sv-SE writes a negative with
+ *   U+2212, and a minus that was dropped would turn money out into money in.
+ * - Parentheses are kept: `parse` reads them as accounting's negative.
+ */
+function unify(text: string): string {
+  return (text ?? "")
+    .replace(/[\u2212\u2012\u2013\u2014\uFE63\uFF0D]/g, "-")
+    .replace(/[\s'\u2019\u02BC]/g, "");
+}
+
+/**
  * Read what someone typed.
  *
  * Tolerant on purpose: "12,34", "-1.234,56" and "(12.34)" all mean what they
@@ -138,7 +191,7 @@ function normalise(text: string, locale?: string): string | null {
  * that is not a number, so a caller can tell "nothing yet" from "zero".
  */
 export function parse(text: string, currency: string, locale?: string): number | null {
-  let cleaned = (text ?? "").trim().replace(/[\s  ]/g, "");
+  let cleaned = unify(text);
   if (!cleaned) return null;
 
   let negative = false;
@@ -190,7 +243,7 @@ export function parse(text: string, currency: string, locale?: string): number |
  * "1.234,56" is "1234.56" -- or null for anything that is not an amount.
  */
 export function amountLookup(text: string, locale?: string): string | null {
-  let cleaned = (text ?? "").trim().replace(/[\s  ()+-]/g, "");
+  let cleaned = unify(text).replace(/[()+-]/g, "");
   cleaned = cleaned.replace(/[^\d,.]/g, "");
   if (!cleaned) return null;
 
