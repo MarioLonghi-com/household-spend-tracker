@@ -15,8 +15,11 @@ on:
   branch_protection_rule:
   schedule:
     - cron: "23 7 * * 1"
+  # The default branch, which is `dev`: the action refuses any other with
+  # "Only the default branch dev is supported", so on `main` it failed every
+  # release without measuring anything (#36).
   push:
-    branches: [main]
+    branches: [dev]
   workflow_dispatch:
 
 permissions: read-all
