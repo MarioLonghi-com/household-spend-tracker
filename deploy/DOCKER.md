@@ -172,6 +172,14 @@ What the compose file already does for you, and why:
   If a different reverse proxy reaches it under a name of its own, set
   `SPENDTRACKER_ALLOWED_HOSTS`; it replaces the default rather than adding to
   it, so include the entries you still use.
+- **Request sizes.** The app sets its own limit on each request body and
+  answers `413` with a sentence when one is too large. The largest are about
+  33 MB, for a YNAB export and an agent's receipt batch. A receipt from the
+  browser can be 25 MB, a statement 8 MB, and ordinary JSON 1 MB. A reverse
+  proxy in front of the app usually has a limit of its own (nginx's
+  `client_max_body_size` is 1 MB by default). Set it at least as high as the
+  app's, or the proxy refuses uploads and agent batches, often by dropping
+  the connection rather than answering.
 - **Forwarded addresses.** Requests arrive from Docker's bridge, so
   `FORWARDED_ALLOW_IPS` trusts that range and the per-address sign-in limits
   apply per tailnet peer rather than to everybody at once. Narrow it to your

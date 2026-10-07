@@ -19,6 +19,21 @@ The ceilings are **derived from the route caps they sit above**, not typed in a
 second time, so raising a cap in its own module cannot leave this refusing the
 files it just allowed. Each carries a megabyte of slack for multipart framing,
 form fields and JSON keys; the route's own check remains the precise one.
+
+**A refusal the client can read** (#40). Answering from the declared length
+and closing the socket at once is correct and useless to most clients:
+`http.client`, `requests` and their kind write the whole body before they
+read a byte of the answer, so a 38 MB batch over its 32 MB ceiling came back
+as `BrokenPipeError` -- which looks like a network fault, and says nothing
+about whether anything was stored. So a declared body over its ceiling, but
+within `DRAIN_FACTOR` times it, is **read and thrown away** before the 413 is
+sent: the client finishes writing, then reads a sentence. Nothing drained is
+kept or parsed -- memory stays one chunk -- and past the drain a declared
+length is still refused before a byte is read, because reading a stranger's
+gigabyte to be polite to them is doing their bidding. A client that sent
+`Expect: 100-continue` is waiting for leave to send and is refused at once.
+A chunked body has no length to judge, so it is still cut off where it
+crosses the ceiling.
 """
 
 from __future__ import annotations
@@ -43,6 +58,17 @@ SLACK = MIB
 #: API is an agent's list of up to 1,000 ids or category assignments, which is
 #: tens of kilobytes; a megabyte is room for twenty times that.
 DEFAULT_CEILING = MIB
+
+#: How far past its ceiling a declared body is still read -- and discarded --
+#: so that the 413 reaches a client that writes before it reads. Five times
+#: covers the batch's documented worst case (25 receipts at 4 MB, about 140 MB
+#: of base64 against a 32 MB ceiling) and keeps a 1 MB route at 5 MB.
+DRAIN_FACTOR = 5
+
+
+def drain_limit(ceiling: int) -> int:
+    return ceiling * DRAIN_FACTOR
+
 
 #: The base64 form of the agent's per-receipt cap, as `_decoded` measures it.
 _BASE64_BODY = agent_router.MAX_BASE64_BYTES * 4 // 3 + 16
@@ -87,7 +113,7 @@ def ceiling_for(path: str) -> int:
 def _sentence(ceiling: int) -> str:
     return (
         f"that request body is larger than this endpoint accepts "
-        f"({ceiling // MIB} MB). Nothing was read past the limit."
+        f"({ceiling // MIB} MB). Nothing in it was stored: send less in one request."
     )
 
 
@@ -120,15 +146,19 @@ class BodyLimit:
         ceiling = ceiling_for(scope.get("path", ""))
 
         declared = None
+        waiting = False
         for name, value in scope.get("headers", ()):
             if name == b"content-length":
                 declared = value
-                break
+            elif name == b"expect" and value.lower() == b"100-continue":
+                waiting = True
         if declared is not None:
             if not declared.isdigit():
                 await self._refuse(send, 400, "Content-Length is not a number")
                 return
             if int(declared) > ceiling:
+                if not waiting and int(declared) <= drain_limit(ceiling):
+                    await self._drain(receive, int(declared))
                 await self._refuse(send, 413, _sentence(ceiling))
                 return
 
@@ -174,6 +204,23 @@ class BodyLimit:
             if not exceeded or started:
                 raise
             await self._refuse(send, 413, _sentence(ceiling))
+
+    @staticmethod
+    async def _drain(receive: Receive, declared: int) -> None:
+        """Read a declared body to its end and keep none of it.
+
+        Bounded by the declared length the caller has already held to the
+        drain limit: a client that sends more than it declared is cut off
+        there, and one that goes quiet is the server's read timeout's to end.
+        """
+        seen = 0
+        while seen <= declared:
+            message = await receive()
+            if message["type"] != "http.request":
+                return
+            seen += len(message.get("body", b""))
+            if not message.get("more_body", False):
+                return
 
     @staticmethod
     async def _refuse(send: Send, status: int, detail: str) -> None:
