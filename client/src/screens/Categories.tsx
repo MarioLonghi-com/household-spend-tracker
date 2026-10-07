@@ -21,6 +21,7 @@ import {
   useSort,
 } from "../components/bits";
 import type { Category, CategoryGroup, Household } from "../lib/types";
+import { compareNames } from "../lib/locale";
 
 /**
  * One line of a breakdown from `/stats/…`: what it is, and how many rows carry it.
@@ -129,7 +130,7 @@ export function Categories({ household }: { household: Household }) {
             if (column === "payees") return byCategory.get(category.id)?.payee_count ?? 0;
             return null;
           },
-          (a, b) => (order.sort === "order" ? 0 : a.name.localeCompare(b.name)),
+          (a, b) => (order.sort === "order" ? 0 : compareNames(a.name, b.name)),
         ),
       })),
     [tree.data, byCategory, order.sort, order.direction],

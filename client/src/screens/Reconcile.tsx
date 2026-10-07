@@ -28,6 +28,7 @@ import {
   useSort,
 } from "../components/bits";
 import type { Account, Reconciliation, Worksheet } from "../lib/types";
+import { formatDate } from "../lib/locale";
 
 type WorksheetSort = "date" | "payee" | "memo" | "amount";
 
@@ -122,7 +123,7 @@ export function Reconcile({
       <p className="muted small" style={{ marginTop: 0 }}>
         {sheet.data?.last_statement_date ? (
           <>
-            Last proved to <strong>{sheet.data.last_statement_date}</strong> at{" "}
+            Last proved to <strong>{formatDate(sheet.data.last_statement_date)}</strong> at{" "}
             {format(sheet.data.last_statement_balance ?? 0, account.currency)}. Everything up to
             there is locked and is not counted again.
           </>
@@ -235,13 +236,13 @@ export function Reconcile({
                   <td>
                     <input
                       type="checkbox"
-                      aria-label={`Tick ${row.date}`}
+                      aria-label={`Tick ${formatDate(row.date)}`}
                       checked={ticked.has(row.id)}
                       onChange={() => toggle(row.id)}
                       style={{ width: "auto" }}
                     />
                   </td>
-                  <td className="mono small">{row.date}</td>
+                  <td className="mono small">{formatDate(row.date)}</td>
                   <td>{row.payee ?? <span className="muted">—</span>}</td>
                   <td className="small muted">{row.memo}</td>
                   <td className={row.amount < 0 ? "amount neg" : "amount pos"}>
@@ -278,7 +279,7 @@ export function Reconcile({
             <tbody>
               {(past.data ?? []).map((one) => (
                 <tr key={one.id}>
-                  <td className="mono small">{one.statement_date}</td>
+                  <td className="mono small">{formatDate(one.statement_date)}</td>
                   <td className="amount">{format(one.statement_balance, account.currency)}</td>
                 </tr>
               ))}
