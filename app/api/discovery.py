@@ -26,6 +26,7 @@ from __future__ import annotations
 
 from .. import __version__
 from ..services import agent_keys, agent_requests
+from ..services.platform import REPOSITORY
 from .routers.agent import API_VERSION, CONVENTIONS, WELL_KNOWN
 
 
@@ -93,6 +94,8 @@ def document(*, base_url: str = "") -> str:
 A self-hosted, multi-currency spend tracker for one household. Version
 {__version__}. This file is for programs and language models; a person should
 use the app.
+
+Source: {REPOSITORY} (AGPL-3.0-or-later).
 
 ## Can I use this without a key?
 

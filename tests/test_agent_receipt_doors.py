@@ -163,6 +163,41 @@ def test_an_oversized_binary_body_is_refused_on_what_it_declared(world):
         },
     )
     assert answer.status_code == 413, answer.text
+    _says_how_to_shrink(answer.json()["detail"])
+
+
+def _says_how_to_shrink(detail: str) -> None:
+    """#39: every refusal over the ceiling says what to do -- shrink, keeping
+    the EXIF the app reads -- and no longer points at the multipart route,
+    which belongs to a signed-in person and no key can use."""
+    assert "multipart" not in detail
+    assert "DateTimeOriginal" in detail and "GPS" in detail
+    assert '"A photo over 4 MB"' in detail
+
+
+def test_a_photo_over_the_ceiling_is_told_how_to_shrink_on_every_door(world):
+    from app.api.routers.agent import MAX_BASE64_BYTES
+
+    over = b"\xff\xd8" + b"x" * MAX_BASE64_BYTES
+    binary = world["client"].post(
+        f"{V1}/households/{world['house']['id']}/receipts/binary",
+        content=over,
+        headers={**_auth(world), "content-type": "image/jpeg"},
+    )
+    assert binary.status_code == 413, binary.text
+    _says_how_to_shrink(binary.json()["detail"])
+
+    import base64
+
+    encoded = base64.b64encode(over).decode()
+    single = world["client"].post(
+        f"{V1}/households/{world['house']['id']}/receipts",
+        json={"content_base64": encoded},
+        headers=_auth(world),
+    )
+    assert single.status_code == 413, single.text
+    _says_how_to_shrink(single.json()["detail"])
+    assert len(_receipts(world)) == 0
 
 
 def test_a_trips_worth_goes_in_one_call(world):
@@ -480,3 +515,20 @@ def test_what_an_agent_puts_in_details_survives_to_the_ledger(world):
     assert bank["source_page"] == 3
     assert bank["bank_reference"] == "0293841"
     assert bank["raw_description"] == "PAGO MOVIL NIGHT OWL"
+
+
+# Reads agent/README.md: run on every pull request, so a README-only change meets it.
+@pytest.mark.repo_wide
+def test_the_section_the_refusal_names_is_in_the_agent_readme():
+    """The 413 sends an agent to a heading by name; the heading has to exist
+    and say the three things the decision asked for (#39)."""
+    import pathlib
+    import re
+
+    readme = (pathlib.Path(__file__).resolve().parent.parent / "agent" / "README.md").read_text()
+    section = re.search(r"^#### A photo over 4 MB\n(.*?)(?=^#)", readme, re.M | re.S)
+    assert section, "the heading the 413 names is gone"
+    text = section.group(1)
+    assert "Under 4 MB" in text and "JPEG or AVIF" in text
+    assert "DateTimeOriginal" in text and "GPS" in text
+    assert "Send the file as it is when it is 4 MB or\nless" in readme
