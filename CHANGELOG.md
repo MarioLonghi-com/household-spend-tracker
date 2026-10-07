@@ -35,6 +35,15 @@ this repository.
 
 ### Fixed
 
+- **An agent's import row can say its currency, and one in another currency
+  is refused.** Rows posted to `POST /imports` had no currency field, so the
+  check a statement file's currency column gets (0.5.0) never ran for them:
+  a row an agent pulled from a yen account and sent to a euro one was
+  recorded as the same figure in euros. A row may now carry `currency`; one
+  that is not the account's is rejected with the sentence a file's row gets,
+  and an import whose every row names another currency is refused. Rows that
+  leave it out are read in the account's currency, as before. (#86)
+
 - **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
   read the last separator as the decimal mark, so a thousands comma with no
   decimals was taken as a decimal comma and the third digit rounded away -- a
@@ -45,6 +54,13 @@ this repository.
   way is refused rather than guessed. "1,234.56", "1.234,56" and "12,34" read
   as before. An amount put back into a box for editing uses the same decimal
   mark, so a three-decimal currency round-trips. (#45)
+
+- **A statement amount written `12.50 DR` imports as money out.** The letters
+  were dropped as decoration, so a debit came in as money in. `DR` after the
+  figure is now a minus and `CR` a plus, in CSV, spreadsheet and PDF
+  statements, with or without a space and in either case; one that also
+  carries a minus sign or brackets is refused as signed twice. The import
+  guide says so. (#84)
 
 ### Changed
 

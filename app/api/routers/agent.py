@@ -295,7 +295,8 @@ ENDPOINTS = [
             "send Idempotency-Key and a retry returns the first answer. Money is "
             "amount_minor (integer) or amount (a decimal STRING) -- never a JSON float. "
             "Each row may carry category_id; without one the payee's rule decides, and "
-            "uncategorised: true lands it with no category. Declare statement totals and "
+            "uncategorised: true lands it with no category. A row may name its currency; "
+            "one that is not the account's is refused. Declare statement totals and "
             "they are checked; read warnings before committing. Lines default to the rows "
             "that need attention -- include_lines=all for every one."
         ),
