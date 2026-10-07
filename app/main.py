@@ -645,13 +645,32 @@ async def add_security_headers(request: Request, call_next):
     return response
 
 
+def _speaks_to_agent(request: Request) -> bool:
+    """Whether this answer goes to a program holding an agent key.
+
+    The codes exist for the client's translations. An agent reads ``detail``,
+    and the localisation work promised it byte-identical answers (#48), so it
+    gets none of them yet. Offering them is this one condition plus the
+    descriptor and `/llms.txt` saying what they are.
+    """
+    return request.url.path.startswith(f"{API_PREFIX}/agent/") or _carries_a_key(request)
+
+
 @app.exception_handler(DomainError)
 def handle_domain_error(request: Request, exc: DomainError) -> JSONResponse:
-    """Domain rules answer with their own status code and their own words."""
+    """Domain rules answer with their own status code and their own words.
+
+    A raise that carries a ``code`` also sends it, with its ``params`` nested
+    beside ``detail`` so they can never collide with ``fields`` (#65). Not to
+    an agent: its answers stay byte-identical until the codes are documented
+    for agents in `/llms.txt` -- see `_speaks_to_agent`.
+    """
     headers = dict(getattr(exc, "headers", {}) or {})
     if isinstance(exc, TooManyAttempts):
         headers["Retry-After"] = str(exc.retry_after)
     content = {"detail": str(exc), **(getattr(exc, "fields", None) or {})}
+    if not _speaks_to_agent(request):
+        content.update(exc.wire())
     return JSONResponse(status_code=exc.status_code, content=content, headers=headers)
 
 

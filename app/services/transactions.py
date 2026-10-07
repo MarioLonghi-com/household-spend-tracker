@@ -524,7 +524,7 @@ def create_transfer(
     pair -- so the difference is a reporting question rather than a silent loss.
     """
     if source.id == destination.id:
-        raise ValidationError("an account cannot transfer to itself")
+        raise ValidationError("an account cannot transfer to itself", code="transfer.same_account")
     if source.household_id != destination.household_id:
         raise ValidationError("those accounts are in different households")
     if amount <= 0:
@@ -535,7 +535,9 @@ def create_transfer(
         if to_amount is None:
             raise CurrencyMismatch(
                 f"a {source.currency} to {destination.currency} transfer needs the amount that "
-                "arrives; we never invent a rate"
+                "arrives; we never invent a rate",
+                code="transfer.needs_amount_arriving",
+                params={"from_currency": source.currency, "to_currency": destination.currency},
             )
         if to_amount <= 0:
             raise ValidationError("the amount arriving must be positive")
@@ -694,9 +696,16 @@ def split(
 
     total = sum(part.amount for part in parts)
     if total != txn.amount:
+        account = session.get(Account, txn.account_id)
         raise Conflict(
             f"the parts come to {total} and the transaction is {txn.amount}. "
-            "A split has to add up, or it moves the balance."
+            "A split has to add up, or it moves the balance.",
+            code="split.does_not_add_up",
+            params={
+                "total": total,
+                "amount": txn.amount,
+                "currency": account.currency if account else None,
+            },
         )
     for part in parts:
         if part.category is not None and part.category.household_id != txn.household_id:

@@ -192,7 +192,9 @@ def reconcile(
         if row.date > statement_date:
             raise ValidationError(
                 f"a row dated {row.date.isoformat()} is after the statement closes "
-                f"on {statement_date.isoformat()}, so it cannot be on it"
+                f"on {statement_date.isoformat()}, so it cannot be on it",
+                code="reconcile.row_after_statement",
+                params={"row_date": row.date, "statement_date": statement_date},
             )
 
     floor = locked_balance(session, account.id)
@@ -202,7 +204,9 @@ def reconcile(
         raise Conflict(
             f"that does not balance: {_signed(difference, account.currency)} out. "
             "Tick or untick rows until the difference is zero, or add the transaction "
-            "the statement has and the register does not."
+            "the statement has and the register does not.",
+            code="reconcile.does_not_balance",
+            params={"difference": difference, "currency": account.currency},
         )
 
     for row in rows:
