@@ -34,6 +34,14 @@ this repository.
   Docker check can move; `PY_BASE=`/`PY_RUN=` still build on any other base.
   The README says what the release attestation does and does not cover. (#95)
 
+- **A new password is checked against the 100,000 most common.** Length was
+  the only rule, so `qwertyuiopasdfgh` passed it. The setup wizard, changing
+  your password and a reset link now refuse any of the top 100,000 passwords
+  of a public-domain breach corpus, ignoring case, and say why. The list ships
+  with the app -- it never calls out -- and is refreshed when a release is cut
+  (`python -m scripts.common_passwords --refresh`). Existing passwords are not
+  checked. (#97)
+
 - **A YNAB key is gone from the browser's memory when the one-time import
   closes.** The wizard dropped it from its own state, but the query library
   kept each finished call -- key included -- for five minutes after the

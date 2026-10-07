@@ -408,7 +408,9 @@ because `tests/test_version.py` fails when the three files drift apart.
 one, and CI's `release-ready` job refuses it until it looks like one
 (`scripts/release_check.py`):
 
-1. On a branch off `dev`: `make version BUMP=minor` (or `technical`, `major`).
+1. On a branch off `dev`: `make version BUMP=minor` (or `technical`, `major`),
+   and `./.venv/bin/python -m scripts.common_passwords --refresh` to take the
+   newest copy of the common-password list (it says if nothing changed).
 2. In `CHANGELOG.md`, retitle `## Unreleased` to `## X.Y.Z — YYYY-MM-DD` and
    put an empty `## Unreleased` above it. The section needs a
    `**Reversible: none|clean|lossy**` line naming **every migration added since
@@ -571,3 +573,10 @@ that if you run a **modified** version and let other people use it over a
 network, those users must be offered the source of the version they are talking
 to. Running it unmodified for your own household — which is what this is for —
 asks nothing of you. Publishing a fork and inviting others onto it does.
+
+**One file in it is somebody else's data.** `app/auth/common_passwords.txt`,
+the list a new password is checked against, is the top 100,000 of the ten
+million passwords Mark Burnett released into the public domain in 2015, as
+distributed in [SecLists](https://github.com/danielmiessler/SecLists) (MIT
+licence, Daniel Miessler). `app/auth/common_passwords.py` pins the commit it
+came from and its digest.

@@ -20,3 +20,7 @@ tests/ export-ignore
 client/e2e/ export-ignore
 .github/ export-ignore
 .githooks/ export-ignore
+
+# A vendored word list (app/auth/common_passwords.py): 100,000 lines of noise
+# in a diff, and pinned by digest rather than reviewed by eye.
+app/auth/common_passwords.txt -diff linguist-vendored

@@ -392,6 +392,20 @@ def tracked_text_files() -> list[pathlib.Path]:
     return [p for p in _all_tracked() if p.is_file() and p.suffix.lower() not in BINARY_SUFFIXES]
 
 
+def vendored(path: pathlib.Path) -> bool:
+    """The bundled common-password list, while it is byte for byte the published one.
+
+    A list of the 100,000 commonest passwords is full of first names and of
+    strings shaped like secrets -- that is what people type -- and none of it
+    is anybody's data. It is exempt from the name and marker scans by its path
+    *and* its digest (`app/auth/common_passwords.py` pins both), so a line
+    added to it is scanned like any other file, and fails the digest test too.
+    """
+    from app.auth import common_passwords
+
+    return path == common_passwords.LIST and common_passwords.digest() == common_passwords.SHA256
+
+
 def stray_binaries(paths: list[pathlib.Path]) -> list[str]:
     """Binaries outside the two folders anybody scans, relative to the root."""
     return sorted(
@@ -417,6 +431,8 @@ def test_no_tracked_file_names_anybody_real():
     """
     offenders: list[str] = []
     for path in tracked_text_files():
+        if vendored(path):
+            continue
         try:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
@@ -444,6 +460,8 @@ def test_no_tracked_file_carries_private_markers():
     """
     offenders: list[str] = []
     for path in tracked_text_files():
+        if vendored(path):
+            continue
         try:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
