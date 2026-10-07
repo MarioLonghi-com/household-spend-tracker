@@ -505,3 +505,53 @@ def test_the_capture_page_can_be_held_in_one_scheme():
     # And the browser's own furniture is told, or a forced theme leaves white
     # select menus on a dark page.
     assert ':root[data-theme="dark"] { color-scheme: dark; }' in page
+
+
+# Reads theme.ts as well as snap.js: run on every pull request, so a change to
+# either alone still meets this.
+@pytest.mark.repo_wide
+def test_snap_paints_the_accent_only_when_it_is_hex():
+    """#92: `/snap` set the header's background from the server unchecked.
+
+    The SPA's `theme.ts` re-checks every colour; `/snap` has no bundler and
+    cannot import it, so it carries its own copy of the regex. The copy is
+    held to the app's, and `accentOf` itself is run on good and bad values.
+    """
+    import json
+    import re
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    theme = (root / "client" / "src" / "lib" / "theme.ts").read_text()
+    script = (root / "app" / "static" / "snap" / "snap.js").read_text()
+
+    in_app = re.search(r"^const HEX = (/.+/);$", theme, re.M)
+    in_snap = re.search(r"^const HEX = (/.+/);$", script, re.M)
+    assert in_app and in_snap, "HEX is not declared where this test reads it"
+    assert in_app.group(1) == in_snap.group(1)
+
+    accent_of = re.search(r"^function accentOf\(house\) \{\n.*?^\}$", script, re.M | re.S)
+    assert accent_of, "accentOf is not where this test reads it"
+    assert re.search(r"style\.background = accent;", script)
+    assert len(re.findall(r"style\.background", script)) == 1, "one place paints the header"
+
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node is missing")
+    harness = "\n".join(
+        [
+            'function schemeNow() { return "light"; }',
+            in_snap.group(0),
+            accent_of.group(0),
+            "const cases = JSON.parse(process.argv[1]);",
+            "console.log(JSON.stringify(cases.map((c) => accentOf({ colours: { light: { accent: c } } }))));",
+        ]
+    )
+    cases = ["#1a2b3c", "#ABCDEF", "red", "#12345", "#1234567", "#12345g", "red; } body { color: red", 12, None]
+    done = subprocess.run(
+        [node, "-e", harness, json.dumps(cases)], capture_output=True, text=True, timeout=60
+    )
+    assert done.returncode == 0, done.stderr
+    assert json.loads(done.stdout) == ["#1a2b3c", "#ABCDEF", None, None, None, None, None, None, None]
