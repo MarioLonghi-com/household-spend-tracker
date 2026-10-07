@@ -1767,16 +1767,21 @@ _RECEIPT_FILE = {
 }
 
 
-def _receipt_bytes(agent, request: Request, receipt_id: str, roles: tuple[BlobRole, ...]) -> Response:
-    """The first of `roles` this receipt has, as a download."""
-    receipt = agent.load(Receipt, receipt_id)
+def _receipt_bytes(agent, request: Request, receipt, roles: tuple[BlobRole, ...]) -> Response:
+    """The first of `roles` this receipt has, as a download.
+
+    `receipt` is already loaded through the key's household -- by the route,
+    where `test_api` looks for the check.
+    """
     blob = None
     for role in roles:
         blob = receipt_service.blob_for(agent.session, receipt.blob_sha256, role)
         if blob is not None:
             break
     if blob is None:
-        raise NotFound("that receipt has no copy of that kind")
+        raise NotFound(
+            "that receipt has no copy of that kind", code="receipt.no_such_copy", params={}
+        )
     request.state.agent_rows = 1
     name = f"receipt-{receipt.id}-{blob.role.value}.{receipt_service.suffix_for(blob.media_type)}"
     return Response(
@@ -1809,9 +1814,8 @@ def receipt_file(receipt_id: str, agent: CurrentAgent, request: Request) -> Resp
     scope, logged in the request log like every other read, and 404 for
     another household's receipt.
     """
-    return _receipt_bytes(
-        agent, request, receipt_id, (BlobRole.original, BlobRole.display)
-    )
+    receipt = agent.load(Receipt, receipt_id)
+    return _receipt_bytes(agent, request, receipt, (BlobRole.original, BlobRole.display))
 
 
 @router.get(
@@ -1821,7 +1825,8 @@ def receipt_file(receipt_id: str, agent: CurrentAgent, request: Request) -> Resp
 )
 def receipt_thumbnail(receipt_id: str, agent: CurrentAgent, request: Request) -> Response:
     """The 320 px AVIF, when the receipt has one (`has_thumbnail`); 404 if not."""
-    return _receipt_bytes(agent, request, receipt_id, (BlobRole.thumb,))
+    receipt = agent.load(Receipt, receipt_id)
+    return _receipt_bytes(agent, request, receipt, (BlobRole.thumb,))
 
 
 @router.post("/receipts/{receipt_id}/link", response_model=AgentReceiptOut)
