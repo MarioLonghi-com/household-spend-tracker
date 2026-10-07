@@ -402,7 +402,7 @@ def register(
         credential_id=credential_id,
         public_key=verified.credential_public_key,
         sign_count=verified.sign_count,
-        transports=[str(t) for t in transports][:8] if isinstance(transports, list) else None,
+        transports=_transports(transports),
         label=_clean_label(label) or default_label(verified.aaguid),
         rp_id=settings.rp_id,
         aaguid=verified.aaguid,
@@ -413,6 +413,20 @@ def register(
     session.add(passkey)
     session.flush()
     return passkey
+
+
+def _transports(said: object) -> list[str] | None:
+    """What the browser said it can reach the authenticator over, kept only
+    as the short known words it should be: this is the client's to write, and
+    a hint is not worth storing anything else for."""
+    if not isinstance(said, list):
+        return None
+    known = list(dict.fromkeys(one for one in said if isinstance(one, str) and one in TRANSPORTS))
+    return known or None
+
+
+#: The values WebAuthn Level 3 defines for `AuthenticatorTransport`.
+TRANSPORTS = frozenset({"usb", "nfc", "ble", "smart-card", "hybrid", "internal", "cable"})
 
 
 def _clean_label(label: str | None) -> str | None:

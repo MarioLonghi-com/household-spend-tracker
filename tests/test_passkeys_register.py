@@ -155,6 +155,15 @@ def test_a_registered_passkey_is_stored_as_the_authenticator_made_it(client, clo
     assert _rows(client, WebAuthnChallenge) == []
 
 
+def test_only_known_transports_are_kept(client, clock, passkeys_on):
+    people = _two_members(client)
+    made = SoftAuthenticator().create(options(client, people["owner"]["secret"], clock), origin=ORIGIN)
+    made["response"]["transports"] = ["usb", "x" * 5000, 7, "internal", "usb"]
+    assert client.post("/api/me/passkeys", json={"credential": made}, headers=HEADERS).status_code == 201
+    [row] = _rows(client, Passkey)
+    assert row.transports == ["usb", "internal"]
+
+
 def test_a_device_bound_passkey_of_an_unnamed_provider_says_so(client, clock, passkeys_on):
     people = _two_members(client)
     made = register(client, people["owner"]["secret"], clock, SoftAuthenticator(aaguid=DEVICE_BOUND, synced=False))
