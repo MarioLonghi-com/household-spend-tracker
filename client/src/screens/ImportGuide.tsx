@@ -153,7 +153,9 @@ export function ImportGuide() {
             <strong>The amount.</strong> Either one signed column, or separate money-in and
             money-out columns. Currency symbols, thousands separators and parentheses for negatives
             are all read, and so is a minus written at the end (<code>12,50-</code>) or as a
-            typographic minus or dash. An amount signed twice, or one that is not a number at all,
+            typographic minus or dash, and a debit or credit written after the figure
+            (<code>12.50 DR</code> is money out, <code>12.50 CR</code> money in). An amount signed
+            twice (<code>-12.50 DR</code>), or one that is not a number at all,
             is refused with the reason rather than read as zero. Whether a comma or a point is the
             decimal one is worked out from the amounts and the balance. When every one of them reads
             either way (<code>1.500</code> is fifteen hundred in Spain and one and a half in
