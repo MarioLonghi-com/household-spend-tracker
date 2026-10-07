@@ -1,6 +1,6 @@
 .PHONY: help preflight install install-py install-prod install-client client dev api lan web test e2e lint \
         migrate revision seed snapshot db-view clean hooks serve version backup restore \
-        upgrade upgrade-check doctor reset audit
+        upgrade upgrade-check doctor reset audit lock
 
 help:
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -63,7 +63,7 @@ install-py:  ## the venv alone: enough for the API and the tests, no Node needed
 	@$(PYTHON) -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 12) else 1)' \
 		|| { echo "python3 is $$($(PYTHON) -V 2>&1), and this needs >= 3.12."; exit 1; }
 	$(PYTHON) -m venv .venv
-	./.venv/bin/pip install -q -r requirements-dev.txt
+	./.venv/bin/pip install -q --require-hashes -r requirements-dev.txt
 
 # What a deployment installs: the runtime dependencies and nothing else. No
 # pytest, no ruff, no pip-audit, no datasette -- every package in the venv is
@@ -71,14 +71,30 @@ install-py:  ## the venv alone: enough for the API and the tests, no Node needed
 # The one visible difference is /db, the snapshot browser, which needs
 # datasette and says so when it is missing; `make install-py` adds it.
 #
-# A lockfile with hashes is the Phase 4 release artefact, not this target.
+# Both install from the hashed locks with `--require-hashes`, so what lands is
+# exactly what was locked, transitive dependencies included (#46).
 install-prod:  ## runtime dependencies only, for a deployment (no test or lint tools)
 	@command -v $(PYTHON) >/dev/null 2>&1 \
 		|| { echo "python3 not found. This needs Python >= 3.12."; exit 1; }
 	@$(PYTHON) -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 12) else 1)' \
 		|| { echo "python3 is $$($(PYTHON) -V 2>&1), and this needs >= 3.12."; exit 1; }
 	$(PYTHON) -m venv .venv
-	./.venv/bin/pip install -q -r requirements.txt
+	./.venv/bin/pip install -q --require-hashes -r requirements.txt
+
+# The locks are generated; the `.in` files are where a person edits (#46).
+# `--universal` resolves one lock for Linux (the image, CI), macOS and
+# Windows, with environment markers, rather than for whichever machine ran it;
+# 3.12 is the floor `make preflight` and pyproject.toml hold. An existing pin is
+# kept unless its `.in` line no longer allows it -- moving versions is
+# Dependabot's job, or `make lock UPGRADE=1`. CI re-runs exactly this and fails
+# a pull request whose locks differ from what it writes (with UV=uv, the one
+# the dev lock pins).
+UV   ?= ./.venv/bin/uv
+LOCK  = $(UV) pip compile --universal --python-version 3.12 --generate-hashes \
+	--custom-compile-command 'make lock' --quiet $(if $(UPGRADE),--upgrade)
+lock:  ## rewrite requirements*.txt from the .in files (UPGRADE=1 to move versions)
+	$(LOCK) requirements.in -o requirements.txt
+	$(LOCK) requirements-dev.in -o requirements-dev.txt
 
 install-client: preflight  ## node_modules for the SPA
 	cd client && npm ci
@@ -234,7 +250,7 @@ upgrade:  ## the drill: backup, placard, migrate, verify, log
 # when the first one finds something, because "python is clean" is not an
 # answer to "is the client clean".
 audit:  ## known advisories against the pinned dependencies, Python and npm
-	-./.venv/bin/python -m pip_audit -r requirements.txt -r requirements-dev.txt
+	-./.venv/bin/python -m pip_audit --require-hashes --disable-pip -r requirements.txt -r requirements-dev.txt
 	-cd client && npm audit --audit-level=high
 
 # Standalone, for poking at the file without running the app. 127.0.0.1 on

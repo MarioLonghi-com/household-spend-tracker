@@ -127,7 +127,7 @@ def _client_parse(cases: list[tuple[str, str]], tmp_path: Path) -> list[int | No
     harness.write_text(_HARNESS)
     try:
         done = subprocess.run(
-            ["npx", "tsx", str(harness), json.dumps([list(one) for one in cases])],
+            ["npx", "--no-install", "tsx", str(harness), json.dumps([list(one) for one in cases])],
             cwd=CLIENT_DIR,
             capture_output=True,
             text=True,

@@ -91,6 +91,7 @@ jobs:
       image: ${{ steps.diff.outputs.image }}
       rehearsal: ${{ steps.diff.outputs.rehearsal }}
       audit: ${{ steps.diff.outputs.audit }}
+      lock: ${{ steps.diff.outputs.lock }}
       tree: ${{ steps.green.outputs.tree }}
       # The id of an earlier successful run of this workflow on the identical
       # tree, or empty. The heavy jobs skip when it is set.
@@ -184,7 +185,7 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
         run: |
-          jobs="python client code image rehearsal audit"
+          jobs="python client code image rehearsal audit lock"
           everything() {
             echo "$1: everything runs"
             for job in $jobs; do echo "$job=true" >> "$GITHUB_OUTPUT"; done
@@ -258,6 +259,14 @@ jobs:
           ^client/package(-lock)?\.json$
           PATHS
 
+          # Whether the locks are what their `.in` files compile to. Either
+          # half alone is the change it exists to catch, and the Makefile holds
+          # the compile command.
+          decide lock <<'PATHS'
+          ^requirements[^/]*\.(in|txt)$
+          ^Makefile$
+          PATHS
+
   # --------------------------------------------------------------------------- #
   # Tier 0: about a minute each
   # --------------------------------------------------------------------------- #
@@ -287,8 +296,8 @@ jobs:
   # Lint actually runs here. The previous build configured ruff in
   # pyproject.toml and never installed it, so it never gated a commit. On its
   # own since #242, so a lint failure is reported in under a minute rather than
-  # after the suite. Only ruff is installed, at the floor requirements-dev.txt
-  # names.
+  # after the suite. Only ruff is installed, at the version requirements-dev.txt
+  # locks.
   lint:
     needs: changes
     if: needs.changes.outputs.python == 'true'
@@ -301,11 +310,37 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - run: pip install "$(grep -E '^ruff' requirements-dev.txt)"
+      - run: pip install "$(grep -oE '^ruff==[^ ]+' requirements-dev.txt)"
       - name: ruff
         run: ruff check app/ statements/ tests/ scripts/
       - name: no bulk statements against audited tables
         run: ./scripts/no-bulk-statements.sh
+
+  # The locks are generated (#46): a person edits requirements*.in and runs
+  # `make lock`. This runs the same compile, with the uv the dev lock pins, and
+  # fails when the result differs from what is committed -- an `.in` changed
+  # without re-locking, or a lock edited by hand. Existing pins are kept as
+  # preferences, so on a tree that is in step it writes the same bytes.
+  lock:
+    needs: changes
+    if: needs.changes.outputs.lock == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install "$(grep -oE '^uv==[^ ]+' requirements-dev.txt)"
+      - run: make lock UV=uv
+      - name: the committed locks are what the .in files compile to
+        run: |
+          if ! git diff --exit-code -- requirements.txt requirements-dev.txt; then
+            echo "::error::requirements*.txt do not match requirements*.in. Run \`make lock\` and commit the result."
+            exit 1
+          fi
 
   # The part of the suite that reads the whole repository rather than the
   # backend, so a client-only or docs-only pull request still owes it: a real
@@ -337,7 +372,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - run: pip install -r requirements-dev.txt
+      - run: pip install --require-hashes -r requirements-dev.txt
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -379,7 +414,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - run: pip install -r requirements-dev.txt
+      - run: pip install --require-hashes -r requirements-dev.txt
 
       # tests/test_migrations.py -- the check that a model change shipped with
       # its migration -- is part of this run. It used to run a second time as
@@ -450,7 +485,7 @@ jobs:
           cache: pip
       # The server's own dependencies only. The dev extras are for pytest, and
       # this job does not run it.
-      - run: pip install -r requirements.txt
+      - run: pip install --require-hashes -r requirements.txt
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
         with:
@@ -536,7 +571,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - run: pip install -r requirements.txt
+      - run: pip install --require-hashes -r requirements.txt
 
       - name: work out what "before" is
         id: before
@@ -583,7 +618,7 @@ jobs:
           DATABASE_URL: sqlite:///./ci-data/rehearsal.sqlite3
         run: |
           git checkout --detach "$GITHUB_SHA"
-          pip install -r requirements.txt
+          pip install --require-hashes -r requirements.txt
           python -m alembic upgrade head
 
       # The assertion this job exists for. A table that existed before and has
@@ -662,12 +697,13 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       # Pinned: this job exists to distrust what gets installed, and an
       # unpinned auditor is the one package it would install on faith.
-      # Dependabot does not read `run:` lines, so this moves by hand -- with
-      # the `pip-audit>=` floor in requirements-dev.txt as the reminder.
-      - run: pip install pip-audit==2.10.1
+      # Read from the dev lock, so it moves when Dependabot moves that.
+      - run: pip install "$(grep -oE '^pip-audit==[^ ]+' requirements-dev.txt)"
+      # The locks as written, nothing resolved (`--disable-pip`): exactly the
+      # set an install gets (#46).
       - name: python dependencies
         continue-on-error: true
-        run: pip-audit -r requirements.txt -r requirements-dev.txt
+        run: pip-audit --require-hashes --disable-pip -r requirements.txt -r requirements-dev.txt
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
         with:
@@ -716,8 +752,8 @@ jobs:
   # test below uses one rather than a bind mount or nothing.
   #
   # On a pull request only when its recipe moved and the tree has not already
-  # passed; weekly, because the Chainguard base moves underneath it (issue
-  # #63); and by hand. Not on the push to `main`: release.yml builds,
+  # passed; weekly, because a Dependabot digest bump is only proven by a build;
+  # and by hand. Not on the push to `main`: release.yml builds,
   # smoke-tests and publishes the same image from the tag.
   image:
     needs: changes
@@ -818,6 +854,22 @@ jobs:
               sys.exit(f'the volume is missing {missing}')
           "
 
+      # What the image holds is exactly the runtime lock (#46): every package
+      # whose environment marker applies on Linux, at its locked version, and
+      # nothing else. Read through importlib.metadata inside the container, so
+      # it needs nothing the image does not already have.
+      - name: it holds exactly the locked dependencies
+        env:
+          NAME: ${{ matrix.name }}
+        run: |
+          set -eu
+          docker exec "st-$NAME" python -c "
+          from importlib import metadata
+          for d in metadata.distributions():
+              print(f\"{d.metadata['Name']}=={d.version}\")
+          " > installed.txt
+          python3 scripts/lock_matches.py requirements.txt installed.txt
+
       # Not root. The Dockerfile says `USER 65532:65532`; this is what makes
       # that a fact rather than a line in a file, including under the bypass
       # base where the uid has no named user.
@@ -856,6 +908,7 @@ jobs:
       - audit
       - dependency-review
       - image
+      - lock
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5

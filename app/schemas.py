@@ -2189,6 +2189,12 @@ class AgentImportRow(BaseModel):
     #: that naturally writes "12.50" is right, and never has to guess an
     #: exponent for a currency it has not met.
     amount: StrictStr | None = None
+    #: The currency the source says this amount is in, as an ISO code. Optional:
+    #: left out, the row is taken to be in the account's currency, as it always
+    #: was. Given, it is held to the account's exactly as a statement file's
+    #: currency column is (#86) -- a row in another currency is refused, never
+    #: recorded as the same figure in the wrong money.
+    currency: str | None = Field(default=None, pattern=r"^[A-Za-z]{3}$")
     payee: str | None = Field(default=None, max_length=200)
     memo: Memo | None = None
     #: The source system's own id. Preferred over the derived key for dedupe,

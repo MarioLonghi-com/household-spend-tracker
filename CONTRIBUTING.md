@@ -302,6 +302,15 @@ make e2e
 - `make test` — the suite with its coverage gate, then the client's
 - `make e2e` — a real browser, desktop and phone — before anything touching the UI
 
+**Changed a Python dependency? Edit the `.in`, then run `make lock`.**
+`requirements.in` and `requirements-dev.in` hold the floors and the reasons;
+`requirements.txt` and `requirements-dev.txt` are generated from them, every
+package pinned and hashed, and every install reads those with
+`--require-hashes`. Never edit a `.txt` by hand: CI's `lock` job re-runs the
+compile and fails the pull request when the result differs. `make lock` keeps
+existing pins; `make lock UPGRADE=1` moves everything to the newest the floors
+allow.
+
 **Know which ledger the tests will touch.** `tests/conftest.py` gives the suite
 a fresh temporary data directory *unless `SPENDTRACKER_DATA_DIR` is already set*,
 in which case it uses that one. So never run the suite from a shell where that

@@ -170,7 +170,10 @@ def _looks_like_money(text: str) -> bool:
     """
     if not _numeric(text):
         return False
-    stripped = signs.ascii_minus(text).strip()
+    stripped, marker = signs.debit_credit(signs.ascii_minus(text).strip())
+    if marker is not None:
+        return True
+    stripped = stripped.strip()
     if stripped[0] in "+-(" or stripped[-1] in ")-":
         return True
     # A decimal fraction: the last separator has one or two digits after it.
@@ -183,16 +186,18 @@ def _numeric(text: str) -> bool:
 
     Signed at either end, and with any of `signs.MINUS_SIGNS` for the minus: a
     PDF's text layer may write "−12,50" or "12,50-" for "-12,50" (#261, #262),
+    or "12,50DR" (#84),
     and a number not seen as one is placed by its left edge, like text.
 
     At most one sign, at one end: ``--12--`` and ``+12.50-`` are not numbers,
     the same as `sniffing.parse_amount` says of them.
     """
-    stripped = signs.ascii_minus(text).strip().strip("()")
+    stripped, marker = signs.debit_credit(signs.ascii_minus(text).strip())
+    stripped = stripped.strip().strip("()")
     if not stripped:
         return False
     leading, trailing = stripped[0] in "+-", stripped[-1] in "+-"
-    if leading and trailing:
+    if (leading and trailing) or (marker and (leading or trailing)):
         return False
     core = stripped[1 if leading else 0 : len(stripped) - (1 if trailing else 0)]
     core = core.replace(".", "").replace(",", "").replace("\u00a0", "")
