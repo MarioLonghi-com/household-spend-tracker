@@ -709,7 +709,15 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
           <div style={{ marginTop: 8 }}>
             {/* Your name is the way into your own settings -- the same place
                 every other app puts them, and the reason nobody hunts for it. */}
-            <button className="link" onClick={() => setProfileOpen(true)}>
+            {/* Closes the drawer as every page button does: on a phone the
+                drawer sits above the account sheet and would cover it. */}
+            <button
+              className="link"
+              onClick={() => {
+                setNavOpen(false);
+                setProfileOpen(true);
+              }}
+            >
               {user.display_name}
             </button>
             <button className="link" onClick={() => signOut.mutate()}>

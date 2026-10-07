@@ -55,6 +55,8 @@ test("a passkey signs in, and Sign-in methods adds, renames and removes one", as
   if (await menu.isVisible()) await menu.click();
   await page.locator("nav").getByRole("button", { name: "Demo", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Sign-in methods" })).toBeVisible();
+  // On a phone the drawer has closed rather than stay over the account sheet.
+  await expect(page.getByRole("button", { name: "Close the menu" })).toHaveCount(0);
   await expect(
     page.getByText("You sign in with a passkey, or with your password and authenticator code."),
   ).toBeVisible();
