@@ -59,8 +59,8 @@ U8 = {
     "podman-4.3": ("podman", True, False, "too_old", "4.3.1", "1.41", "1.24-1.41"),
     "podman-4.9": ("podman", False, False, "ok", "4.9.4", "1.41", "1.24-1.41"),
     "podman-machine": ("podman-machine", True, True, "ok", "6.1.3", "1.44", "1.24-1.44"),
-    "podman-rootful": ("podman", False, False, "ok", "5.4.2", "1.41", "1.24-1.41"),
-    "podman-rootless-fedora": ("podman", True, True, "ok", "6.1.3", "1.44", "1.24-1.44"),
+    "podman-rootful-fedora": ("podman", False, True, "ok", "5.8.7", "1.44", "1.24-1.44"),
+    "podman-rootless-fedora": ("podman", True, True, "ok", "5.8.7", "1.44", "1.24-1.44"),
 }  # fmt: skip
 
 
@@ -80,14 +80,16 @@ def test_u8_each_engine_is_identified(name):
 
 @pytest.mark.parametrize("name", sorted(U8))
 def test_u8_each_engine_has_a_not_root_rule_with_the_volume_group(name):
-    engine_, rootless, selinux, *_ = U8[name]
-    rule = detect.not_root(engine_, rootless, selinux)
+    engine_, rootless, *_ = U8[name]
+    rule = detect.not_root(engine_, rootless)
     assert rule.group_add[-1] == "65532"
-    assert rule.label_disable or not selinux
+    assert rule.label_disable
+    # Rootless on Linux is in-container uid 0; everywhere else 65532.
+    assert rule.user == ("0:0" if rootless and engine_ in ("docker-engine", "podman") else "65532:65532")
 
 
 def test_the_hand_written_fixtures_say_so_and_the_recorded_ones_do_not():
-    recorded = {"docker-desktop", "podman-machine", "docker-engine-rootful"}
+    recorded = {"docker-desktop", "podman-machine", "docker-engine-rootful", "podman-rootful-fedora", "podman-rootless-fedora"}
     readme = (ENGINES / "README.md").read_text()
     for folder in U8:
         assert f"`{folder}`" in readme
@@ -97,10 +99,10 @@ def test_the_hand_written_fixtures_say_so_and_the_recorded_ones_do_not():
 
 
 def test_detection_ignores_the_hand_written_marker():
-    doc = engine_fixture("podman-rootless-fedora")
+    doc = engine_fixture("docker-engine-rootless")
     bare = {k: v for k, v in doc.items() if k != "_hand_written"}
-    assert detect.identify(doc, info_of("podman-rootless-fedora")) == detect.identify(
-        bare, info_of("podman-rootless-fedora")
+    assert detect.identify(doc, info_of("docker-engine-rootless")) == detect.identify(
+        bare, info_of("docker-engine-rootless")
     )
 
 
@@ -296,28 +298,28 @@ def test_a_refused_socket_refuses_a_request_with_detections_sentence():
 # --------------------------------------------------------------------------- #
 
 
-def test_not_root_rules_follow_s4():
+def test_not_root_rules_follow_the_spikes():
     desktop = detect.not_root("docker-desktop", False)
-    machine = detect.not_root("podman-machine", True, selinux=True)
+    machine = detect.not_root("podman-machine", True)
     rootless_docker = detect.not_root("docker-engine", True)
     rootful_docker = detect.not_root("docker-engine", False)
     assert (desktop.user, desktop.group_add, desktop.confirmed) == ("65532:65532", ("0", "65532"), True)
-    assert (machine.user, machine.label_disable, machine.podman_restart) == ("65532:65532", True, "user")
-    # B11 is kept for rootless Docker only: observed on Debian 13, where only
-    # in-container uid 0 reaches the user's socket.
-    assert (rootless_docker.user, rootless_docker.label_disable, rootless_docker.confirmed) == ("0:0", False, True)
+    assert (machine.user, machine.podman_restart, machine.linger) == ("65532:65532", "user", False)
+    # B11: rootless Docker, observed: only in-container uid 0 reaches the socket.
+    assert (rootless_docker.user, rootless_docker.linger, rootless_docker.confirmed) == ("0:0", True, True)
     # Rootful Docker: the host's docker group, never 0 (observed: gid 0 is refused).
     assert rootful_docker.group_add == ("${SPENDTRACKER_SOCKET_GID}", "65532")
-    assert "0" not in rootful_docker.group_add and rootful_docker.confirmed
-    assert rootful_docker.podman_restart is None
+    assert rootful_docker.podman_restart is None and rootful_docker.confirmed
 
 
-def test_selinux_turns_label_disable_on_wherever_it_is():
-    plain = detect.not_root("docker-engine", False)
-    enforcing = detect.not_root("docker-engine", False, selinux=True)
-    rootful_podman = detect.not_root("podman", False)
-    assert (plain.label_disable, enforcing.label_disable) == (False, True)
-    assert rootful_podman.podman_restart == "system"
+def test_linux_podman_rootless_is_uid_0_with_podman_restart_and_lingering_and_rootful_is_not():
+    rootless = detect.not_root("podman", True)
+    rootful = detect.not_root("podman", False)
+    assert (rootless.user, rootless.group_add, rootless.podman_restart, rootless.linger) == ("0:0", ("65532",), "user", True)
+    assert (rootful.user, rootful.group_add, rootful.podman_restart, rootful.linger) == (
+        "65532:65532", ("0", "65532"), "system", False,
+    )  # fmt: skip
+    assert rootless.label_disable and rootful.label_disable
     with pytest.raises(KeyError):
         detect.not_root("lxc", False)
 

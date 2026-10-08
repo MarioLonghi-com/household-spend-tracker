@@ -328,66 +328,76 @@ class NotRoot:
     user: str
     #: compose `group_add:`. The volume's group (C11) is always last.
     group_add: tuple[str, ...]
-    #: Whether `security_opt: label=disable` is needed to open the socket.
-    #: The bundle carries it everywhere (S4); this says where it matters.
-    label_disable: bool
     #: Whether the launcher must enable `podman-restart.service`, and in
     #: which systemd scope (`system` or `user`); None where a daemon restarts.
+    #: It is off by default in podman machine and on Fedora alike (S2).
     podman_restart: str | None
+    #: Whether the launcher must enable lingering (`loginctl enable-linger`)
+    #: so a rootless engine's containers come back at boot. The updater can
+    #: fix neither this nor podman-restart; it can only report.
+    linger: bool
     #: The socket's host path, the default for SPENDTRACKER_ENGINE_SOCKET.
     socket: str
     #: True when a spike observed this row; False while it is written from docs.
     confirmed: bool
+    #: `security_opt: label=disable`, carried on every engine (S4): SELinux
+    #: needs it to open the socket, and everywhere else it is a no-op.
+    label_disable: bool = True
 
 
 _RULES: dict[tuple[str, bool], NotRoot] = {
     # Observed on Debian 13: the socket is root:docker 660; the docker group
     # reaches it and group 0 does not.
     ("docker-engine", False): NotRoot(
-        "docker-engine", False, "65532:65532", (SOCKET_GID, UPDATE_GROUP), False, None,
+        "docker-engine", False, "65532:65532", (SOCKET_GID, UPDATE_GROUP), None, False,
         "/var/run/docker.sock", True,
     ),
-    # B11, kept only here (S4). Observed on Debian 13: the user's socket is
-    # mode 1660 and only in-container uid 0 -- the unprivileged host user --
-    # reaches it; 65532 fails with group 0 and with the socket's mapped group.
+    # B11. Observed on Debian 13: the user's socket is mode 1660 and only
+    # in-container uid 0 -- the unprivileged host user -- reaches it; 65532
+    # fails with group 0 and with the socket's mapped group.
     ("docker-engine", True): NotRoot(
-        "docker-engine", True, "0:0", (UPDATE_GROUP,), False, None,
+        "docker-engine", True, "0:0", (UPDATE_GROUP,), None, True,
         "${XDG_RUNTIME_DIR}/docker.sock", True,
     ),
+    # Observed on macOS: the VM's socket is 0:0 660 (S7).
     ("docker-desktop", False): NotRoot(
-        "docker-desktop", False, "65532:65532", ("0", UPDATE_GROUP), False, None,
+        "docker-desktop", False, "65532:65532", ("0", UPDATE_GROUP), None, False,
         "/var/run/docker.sock", True,
     ),
+    # Observed on Fedora 44, SELinux enforcing: root:root 660, reached by
+    # 65532 with group 0 only under label=disable.
     ("podman", False): NotRoot(
-        "podman", False, "65532:65532", ("0", UPDATE_GROUP), False, "system",
-        "/run/podman/podman.sock", False,
+        "podman", False, "65532:65532", ("0", UPDATE_GROUP), "system", False,
+        "/run/podman/podman.sock", True,
     ),
+    # Observed on Fedora 44: 65532 reaches the socket with group 0 and
+    # label=disable, but cannot write the user's project directory (it maps
+    # into the subuid range), so in-container uid 0 -- the user -- it is.
     ("podman", True): NotRoot(
-        "podman", True, "65532:65532", ("0", UPDATE_GROUP), True, "user",
-        "/run/user/${UID}/podman/podman.sock", False,
+        "podman", True, "0:0", (UPDATE_GROUP,), "user", True,
+        "/run/user/${UID}/podman/podman.sock", True,
     ),
+    # Not yet run: a rootful machine is taken to behave as rootful Podman.
     ("podman-machine", False): NotRoot(
-        "podman-machine", False, "65532:65532", ("0", UPDATE_GROUP), True, "system",
+        "podman-machine", False, "65532:65532", ("0", UPDATE_GROUP), "system", False,
         "/run/podman/podman.sock", False,
     ),
-    # S4: observed on podman machine, SELinux enforcing; `/var/run/docker.sock`
-    # in the machine is a symlink to the user socket.
+    # S4, observed on macOS: unlike Linux, the project directory is shared
+    # over VirtioFS and 65532 writes it; `/var/run/docker.sock` in the
+    # machine is a symlink to the user socket. Lingering is on in the machine.
     ("podman-machine", True): NotRoot(
-        "podman-machine", True, "65532:65532", ("0", UPDATE_GROUP), True, "user",
+        "podman-machine", True, "65532:65532", ("0", UPDATE_GROUP), "user", False,
         "/var/run/docker.sock", True,
     ),
 }  # fmt: skip
 
 
-def not_root(engine: str, rootless: bool, selinux: bool = False) -> NotRoot:
-    """The rule for an engine. SELinux, wherever it is on, needs `label=disable` (S4)."""
+def not_root(engine: str, rootless: bool) -> NotRoot:
+    """The rule for an engine. Docker Desktop has no rootless mode of its own."""
     key = (engine, rootless and engine != "docker-desktop")
     if key not in _RULES:
         raise KeyError(f"no not-root rule for {engine} (rootless={rootless})")
-    rule = _RULES[key]
-    if selinux and not rule.label_disable:
-        rule = NotRoot(**{**rule.__dict__, "label_disable": True})
-    return rule
+    return _RULES[key]
 
 
 # --------------------------------------------------------------------------- #

@@ -1,5 +1,5 @@
 {
-  "ID": "00000000-0000-4000-8000-0000000000f2",
+  "ID": "00000000-0000-4000-8000-0000000000f1",
   "Containers": 0,
   "ContainersRunning": 0,
   "ContainersPaused": 0,
@@ -17,15 +17,15 @@
     ],
     [
       "Native Overlay Diff",
-      "true"
+      "false"
     ],
     [
       "Using metacopy",
-      "false"
+      "true"
     ],
     [
       "Supports shifting",
-      "false"
+      "true"
     ],
     [
       "Supports volatile",
@@ -58,10 +58,10 @@
   "PidsLimit": true,
   "IPv4Forwarding": false,
   "Debug": false,
-  "NFd": 12,
+  "NFd": 13,
   "OomKillDisable": false,
-  "NGoroutines": 14,
-  "SystemTime": "2026-10-08T07:53:14.66459571Z",
+  "NGoroutines": 12,
+  "SystemTime": "2026-10-08T07:55:06.939033326Z",
   "LoggingDriver": "",
   "CgroupDriver": "systemd",
   "NEventsListener": 0,
@@ -79,7 +79,7 @@
   "NCPU": 2,
   "MemTotal": 2050043904,
   "GenericResources": null,
-  "DockerRootDir": "/home/user/.local/share/containers/storage",
+  "DockerRootDir": "/var/lib/containers/storage",
   "HttpProxy": "",
   "HttpsProxy": "",
   "NoProxy": "",
@@ -142,7 +142,6 @@
   },
   "SecurityOptions": [
     "name=seccomp,profile=default",
-    "name=rootless",
     "name=selinux"
   ],
   "ProductLicense": "Apache-2.0",
@@ -174,8 +173,8 @@
   "CPURealtimePeriod": false,
   "CPURealtimeRuntime": false,
   "CgroupVersion": "2",
-  "Rootless": true,
+  "Rootless": false,
   "SwapFree": 2049961984,
   "SwapTotal": 2049961984,
-  "Uptime": "0h 4m 53.00s"
+  "Uptime": "0h 6m 46.00s"
 }
