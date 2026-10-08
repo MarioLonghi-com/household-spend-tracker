@@ -1,0 +1,9 @@
+# Spend Tracker on this computer. Nothing secret lives here.
+#
+# Where the browser reaches it, as an origin. Passkeys are bound to it; leave
+# it as it is unless you change the port in compose.yaml as well.
+SPENDTRACKER_PUBLIC_URL=http://localhost:8848
+#
+# The launcher adds the lines below for the container engine it finds, and the
+# updater adds SPENDTRACKER_IMAGE and SPENDTRACKER_UPDATER_IMAGE after an
+# update from the browser. Leave those to them.
