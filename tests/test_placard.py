@@ -11,6 +11,7 @@ judges a code: the updater does, through the files of the handshake.
 
 from __future__ import annotations
 
+import errno
 import http.client
 import io
 import json
@@ -433,3 +434,38 @@ def test_the_code_reaches_no_file_the_page_and_updater_wrote(recovering, tmp_pat
         data = path.read_bytes()
         for v in (CODE, CODE.lower(), canonical, canonical.lower(), WRONG, updates.canonical_code(WRONG)):
             assert v.encode() not in data, f"{v} reached {path}"
+
+
+def test_two_requests_on_a_clock_that_has_not_moved_carry_different_times(tmp_path, monkeypatch):
+    """The page tells an answer from the last one's by the request's `created_at`.
+
+    With the clock standing still between two requests, the old `last +
+    0.000001` formatted to the same microsecond about one time in twenty, and
+    the page took the wrong code's refusal for the right code's answer (a CI
+    flake that looked like a timing problem). The reading below is between two
+    microseconds, as a real clock's is, and collided before the fix.
+    """
+    frozen = next(
+        r
+        for r in (1_790_000_000.0 + k * 0.000000123 for k in range(100_000))
+        if placard.now_iso(r) == placard.now_iso(r + 0.000001)
+    )
+    sent: list[dict] = []
+
+    def capture(directory, request):
+        sent.append(dict(request))
+        raise OSError(errno.EROFS, "captured")
+
+    monkeypatch.setattr(placard, "write_request", capture)
+    place = placard.Place(
+        tmp_path / "update", tmp_path / "ledger", recovery=True, clock=lambda: frozen, sleep=lambda s: None, answer_seconds=0
+    )
+    update_id = "4b1d9a3e-5a2f-4c3e-9d1b-0a1b2c3d4e5f"
+    first = place.ask(update_id, "open", "WRONG-CODE")
+    second = place.ask(update_id, "open", "RIGHT-CODE")
+    assert first["state"] == second["state"] == "refused"
+    assert [r["code"] for r in sent] == ["WRONG-CODE", "RIGHT-CODE"]
+    assert sent[0]["created_at"] != sent[1]["created_at"]
+    # One microsecond apart, and both read back as times.
+    gap = placard.parse_iso(sent[1]["created_at"]) - placard.parse_iso(sent[0]["created_at"])
+    assert gap == pytest.approx(0.000001, abs=1e-7)
