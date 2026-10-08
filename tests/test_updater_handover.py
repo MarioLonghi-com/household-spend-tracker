@@ -19,6 +19,7 @@ from tests.updater_world import APP, PROJECT, UPD, A, B, C, Killed, World, diges
 from updater import contract, journal, pin, shapes, volume
 from updater import engine as eng
 from updater.handover import (
+    GONE_GRACE_SECONDS,
     STANDBY_SECONDS,
     Successions,
     current_side,
@@ -417,7 +418,10 @@ def test_a_successor_that_dies_within_ten_minutes_is_taken_back_from(world):
     world.run_for(180)
     world.stay_down.add(u2)
     world.crash(u2, restart=False)
+    # Taken back once the grace for a replacement has passed (GONE_GRACE_SECONDS).
     world.run_for(10)
+    assert world.fleet[world.updater_id].mode != "current"
+    world.run_for(GONE_GRACE_SECONDS)
 
     assert named(world, CANONICAL)["Id"] == world.updater_id and world.is_running(world.updater_id)
     assert named(world, NEXT)["Id"] == u2 and not world.is_running(u2)
@@ -429,6 +433,42 @@ def test_a_successor_that_dies_within_ten_minutes_is_taken_back_from(world):
     world.run_for(STANDBY_SECONDS)
     # Current for good: the standby window does not stop a taken-back updater.
     assert assert_exactly_one_current(world).version == A
+
+
+def test_a_successor_recreated_by_compose_within_ten_minutes_is_not_taken_back_from(world):
+    """podman-compose's `up` removes and recreates the updater: the successor
+    is a new container of the same image a few seconds later, and its
+    heartbeat never went stale. That is U2 still (#169, E12 on rootless Podman)."""
+    import copy
+
+    req, record = update_updater(world, C)
+    assert record["state"] == "succeeded"
+    world.run_for(60)
+    u2 = world.successor_id()
+    seen = copy.deepcopy(world.fake.inspect_of(world.fake.containers[u2]))
+    world.stay_down.add(u2)
+    world.crash(u2, restart=False)
+    del world.fake.containers[u2]
+    world.run_for(6)
+    # compose's new container: same image, the canonical name, its own command.
+    cmd = seen["Config"].get("Cmd") or []
+    if "--successor" in cmd:
+        at = cmd.index("--successor")
+        seen["Config"]["Cmd"] = cmd[:at] + cmd[at + 2 :]
+    seen.pop("Id")
+    seen["Name"] = "/" + CANONICAL
+    seen["State"] = {"Running": True, "Status": "running"}
+    fresh = world.fake.add_inspected(seen)
+    world.pending.append(fresh)
+    world.run_for(120)
+
+    assert load(world.volume, req["id"]).get("outcome") != "taken_back"
+    assert world.history(req["id"])["state"] == "succeeded"
+    assert world.fleet[world.updater_id].mode != "current"
+    assert [u.cid for u in world.current()] == [fresh]
+    world.run_for(STANDBY_SECONDS)
+    assert not world.is_running(world.updater_id)  # H7: retired after its ten minutes
+    assert assert_exactly_one_current(world).version == C
 
 
 def test_a_successor_whose_heartbeat_goes_stale_is_taken_back_from_after_two_minutes(world):

@@ -198,6 +198,14 @@ def test_under_podman_the_launcher_removes_the_running_app_and_updater_before_up
     assert 'rm -f "$id"' not in block[: _first(block, "up -d")]  # stopped first, never killed
 
 
+def test_the_launcher_stops_a_standby_updater_before_it_replaces_the_updater():
+    """H6's standby took back over while compose replaced the updater (#169, E15)."""
+    body = LAUNCHER[LAUNCHER.find("\n\n") :]
+    standby = _first(body, '*-previous) "$ENGINE" stop "$id"')
+    assert _first(body, "label=com.docker.compose.service=updater") < standby
+    assert standby < _first(body, "for svc in updater app") < _first(body, '"$ENGINE" compose --env-file .env up -d')
+
+
 @pytest.mark.parametrize("text", [LAUNCHER, BAT], ids=["sh", "bat"])
 def test_each_launcher_opens_localhost_and_probes_health(text):
     assert re.search(r"URL=.?http://localhost:8848", text)

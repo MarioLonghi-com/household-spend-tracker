@@ -228,6 +228,17 @@ for key in com.docker.compose.project io.podman.compose.project; do
   done
 done
 
+# A handover's standby: the previous updater watches its successor for ten
+# minutes after an update and takes back over if the successor goes (6.6, H6).
+# This launcher replacing the updater is not the successor failing, and the
+# standby took back in the gap and left two updaters running (#169, E15 on
+# rootless Podman). So a running `-previous` updater is stopped first.
+for id in $("$ENGINE" ps -q --filter "label=com.docker.compose.project=$PROJECT" --filter "label=com.docker.compose.service=updater" 2>/dev/null); do
+  case "$("$ENGINE" inspect --format '{{.Name}}' "$id" 2>/dev/null)" in
+    *-previous) "$ENGINE" stop "$id" >/dev/null 2>&1 ;;
+  esac
+done
+
 # podman-compose does not replace a running container whose configuration
 # changed: `up` tries to remove it without force, fails, prints the error and
 # still exits 0, leaving the old updater running (#169, E15 on rootless

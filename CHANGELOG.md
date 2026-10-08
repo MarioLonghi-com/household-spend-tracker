@@ -66,6 +66,15 @@ history this repository does not have.
   so the updated app was reported unhealthy for good. The updater now sends
   it in the form Podman 4 reads back unchanged. (#169)
 
+- **Recreating the updater soon after an update no longer leaves two
+  updaters running.** For ten minutes after it hands over, the previous
+  updater stands by and takes back over if the new one stops. A `compose up`
+  that recreates the updater (podman-compose always does), or the release
+  zip's launcher replacing it, looked like the new one stopping. The standby
+  now counts a container of the new updater's image as the new updater and
+  allows twenty seconds for the replacement, and the launcher stops a
+  standby before it replaces the updater. (#169)
+
 - **The release zip's launcher replaces the updater under Podman.**
   podman-compose cannot replace a running container and said nothing, so a
   newer zip's launcher left the old updater running. The launcher now stops

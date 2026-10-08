@@ -99,6 +99,11 @@ TAKEOVER_SECONDS = 60
 STANDBY_SECONDS = 10 * 60
 #: A heartbeat older than this is stale (H6, and the `-previous` lifecycle).
 STALE_SECONDS = 2 * 60
+#: H6: how long U2's container may be gone, its heartbeat still fresh, before
+#: U1 takes back over -- the time compose takes to replace it. podman-compose's
+#: `up` removes and recreates every container, the successor included (#169,
+#: E12 on rootless Podman); U1 took back in that gap, and two updaters ran.
+GONE_GRACE_SECONDS = 20
 #: A `-previous` updater started by hand beside a healthy canonical one stops
 #: itself again after this long.
 PREVIOUS_PATIENCE_SECONDS = 5 * 60
@@ -405,6 +410,8 @@ class Successions:
         self.on_beat: Callable[[], object] = lambda: None
         self._standby: Deadline | None = None
         self._saved_at = 0.0
+        #: H6: when U2's container was first seen not running.
+        self._gone_since: float | None = None
 
     # ------------------------------------------------------------------ #
 
@@ -793,9 +800,22 @@ class Successions:
         if age > STALE_SECONDS:
             return f"wrote no heartbeat for {int(age)} seconds"
         found = self._by_id(doc.get("successor_id"))
-        if not survey.running(found):
-            return "stopped running"
-        return None
+        if survey.running(found):
+            self._gone_since = None
+            return None
+        # Not the container H2 made. H6 watches U2's heartbeat, and it is
+        # fresh: if another container of the project runs U2's image, compose
+        # (or a person) replaced it, and that one is U2 now. If none does yet,
+        # a moment's grace for the replacement to start.
+        succ = Owner.from_dict(doc.get("successor"))
+        if succ is not None and runs(self.client, succ.image_digest):
+            self._gone_since = None
+            return None
+        if self._gone_since is None:
+            self._gone_since = self.now()
+        if self.now() - self._gone_since < GONE_GRACE_SECONDS:
+            return None
+        return "stopped running"
 
     def _h7(self, doc: dict) -> None:
         succ = Owner.from_dict(doc.get("successor"))
