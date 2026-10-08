@@ -283,7 +283,8 @@ def request_of(doc: Mapping) -> str:
 
 
 def own_bind_sources(inspect: Mapping, destinations: tuple[str, ...]) -> tuple[str, ...]:
-    """The host paths the updater itself binds at `destinations`: the socket and `/project`.
+    """The host paths the updater itself binds at `destinations`: the socket, `/project`
+    and, where a server configured one, the pre-update hook's `/hook` (6.5).
 
     The only host paths its successor may bind (the create guard's
     `Scope.bind_sources`), read from the engine, never configured.

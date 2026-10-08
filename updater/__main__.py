@@ -10,9 +10,10 @@ engine, and then runs the heartbeat (`updater.heartbeat`) and the request loop
 updater it replaces (6.6, H2), never by hand: it starts in successor mode,
 proves it can work, and waits to be told to go.
 
-The host paths it binds -- the engine socket and the project directory --
-are read from its own container and are the only ones its successor may
-bind (`handover.own_bind_sources`).
+The host paths it binds -- the engine socket, the project directory and, on
+a server with a pre-update hook, `/hook` -- are read from its own container
+and are the only ones its successor may bind (`handover.own_bind_sources`),
+so a successor keeps the hook rather than silently skipping it.
 
 There is no option, variable or argument that changes how images are
 verified: `trust.Sigstore` is the only trust this entry point builds.
@@ -74,7 +75,8 @@ def build(args: argparse.Namespace, trust: Trust) -> tuple[Kit, heartbeat.Identi
         own = client.inspect(me.container)
         own_id = own.get("Id")
         client.scope = replace(
-            client.scope, bind_sources=own_bind_sources(own, (args.socket, args.project_dir))
+            client.scope,
+            bind_sources=own_bind_sources(own, (args.socket, args.project_dir, args.hook)),
         )
     found = detect.detect(client)
     site = Site(
@@ -118,7 +120,8 @@ def serve(args: argparse.Namespace, trust: Trust) -> None:
         beat_client,
         kit.site.volume,
         identity,
-        hook=kit.site.hook_dir is not None,
+        # Configured, not merely mounted: what the confirmation shows as "On".
+        hook=kit.site.hook_dir is not None and (kit.site.hook_dir / "hook.json").is_file(),
         busy=lambda: service.busy or handover.mode != "current",
         role=lambda: service.heartbeat_role,
     )

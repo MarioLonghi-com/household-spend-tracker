@@ -54,6 +54,7 @@ from updater.volume import Volume
 SOCKET_HOST = "/var/run/docker.sock"
 SOCKET_MOUNT = "/run/engine.sock"
 PROJECT_MOUNT = "/project"
+HOOK_MOUNT = "/hook"
 
 
 class Killed(BaseException):
@@ -601,7 +602,9 @@ class World(_Fleet):
     def kit(self, **kw) -> Kit:
         assert self.running is not None
         own = self.fake.inspect_of(self.fake.containers[self.updater_id])
-        scope = eng.Scope(project=PROJECT, bind_sources=own_bind_sources(own, (SOCKET_MOUNT, PROJECT_MOUNT)))
+        scope = eng.Scope(
+            project=PROJECT, bind_sources=own_bind_sources(own, (SOCKET_MOUNT, PROJECT_MOUNT, HOOK_MOUNT))
+        )
         client = eng.EngineClient(self.running.socket_path, scope)
         client.negotiate()
         self.client = client

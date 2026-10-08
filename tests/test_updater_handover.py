@@ -181,6 +181,51 @@ def test_the_successor_is_a_copy_of_the_running_updater_with_its_image_and_one_a
         eng.guard_create(body, eng.Scope(project=PROJECT, bind_sources=sources[:1]))
 
 
+HOOK_HOST = "/srv/spend-tracker/hook"
+
+
+def with_hook(w: World) -> None:
+    """A server's `compose.override.yaml` mounts a host directory at `/hook` in the updater (6.5)."""
+    seen = w.fake.containers[w.updater_id]["_inspect"]
+    seen["HostConfig"]["Binds"].append(f"{HOOK_HOST}:/hook:rw")
+    seen["Mounts"].append({"Type": "bind", "Source": HOOK_HOST, "Destination": "/hook"})
+
+
+def successor_body(w: World) -> dict:
+    return next(c for c in w.fake.calls if c.bare == "/containers/create" and c.query.get("name") == NEXT).body
+
+
+def test_the_successor_keeps_the_pre_update_hooks_bind(tmp_path):
+    with World(tmp_path, fleet=True) as w:
+        with_hook(w)
+        boot(w)
+        _, record = update_updater(w, B)
+        assert record["state"] == "succeeded"
+        body = successor_body(w)
+        assert f"{HOOK_HOST}:/hook:rw" in body["HostConfig"]["Binds"]
+        u2 = w.fake.inspect_of(w.fake.containers[w.successor_id()])
+        assert [m["Source"] for m in u2["Mounts"] if m["Destination"] == "/hook"] == [HOOK_HOST]
+        # Exactly U1's own: the same bind from another host directory is refused.
+        own = w.fake.inspect_of(w.fake.containers[w.updater_id])
+        scope = eng.Scope(project=PROJECT, bind_sources=own_bind_sources(own, ("/run/engine.sock", "/project", "/hook")))
+        eng.guard_create(body, scope)
+        elsewhere = {**body, "HostConfig": {**body["HostConfig"], "Binds": ["/etc:/hook:rw"]}}
+        with pytest.raises(eng.NotAllowed):
+            eng.guard_create(elsewhere, scope)
+
+
+def test_without_a_hook_the_successor_binds_no_hook_directory(world):
+    _, record = update_updater(world, B)
+    assert record["state"] == "succeeded"
+    body = successor_body(world)
+    assert not [b for b in body["HostConfig"]["Binds"] if ":/hook" in b]
+    own = world.fake.inspect_of(world.fake.containers[world.updater_id])
+    assert own_bind_sources(own, ("/run/engine.sock", "/project", "/hook")) == (
+        "/var/run/docker.sock",
+        str(world.project_dir),
+    )
+
+
 def iter_requests(w: World):
     for path in sorted((w.volume.root / "handover").glob("*.request")):
         yield path.name[: -len(".request")]
