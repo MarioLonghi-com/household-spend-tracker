@@ -43,9 +43,11 @@ history this repository does not have.
 
 ## 0.9.1 — 2026-10-09
 
-**Reversible: none** — no migration in this release. To go back, run
-`0.9.0` again (`SPENDTRACKER_VERSION=0.9.0` in `.env`, then
-`docker compose up -d`) or check out `v0.9.0` and restart.
+**Reversible: none** — no migration in this release. To go back to
+`0.9.0`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`: after an update from the browser, `.env` and
+`pin/release.env` name the image, so `SPENDTRACKER_VERSION` alone no
+longer moves it. From a checkout, check out `v0.9.0` and restart.
 
 Three fixes to updates from the browser, found while testing 0.9.0 on real
 engines.
@@ -74,9 +76,11 @@ engines.
 
 ## 0.9.0 — 2026-10-09
 
-**Reversible: none** — no migration in this release. To go back, run
-`0.8.0` again (`SPENDTRACKER_VERSION=0.8.0` in `.env`, then
-`docker compose up -d`) or check out `v0.8.0` and restart.
+**Reversible: none** — no migration in this release. To go back to
+`0.8.0`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`: after an update from the browser, `.env` and
+`pin/release.env` name the image, so `SPENDTRACKER_VERSION` alone no
+longer moves it. From a checkout, check out `v0.8.0` and restart.
 
 **Updates from the browser.** A container install can now update itself from
 Admin → Application → Updates: check for a release, see every skipped
