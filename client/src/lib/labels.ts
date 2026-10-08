@@ -135,3 +135,32 @@ export const ROLE_LABELS: Record<Role, string> = {
 export function roleLabel(role: string): string {
   return ROLE_LABELS[role as Role] ?? role;
 }
+
+/**
+ * What the Import preview calls each thing it worked out about a file -- the
+ * reader's `Format.describe()` keys (statements/sniffing.py). An unknown key
+ * reads as it always did, underscores as spaces.
+ */
+const DETECTED: Record<string, () => string> = {
+  kind: () => t`kind`,
+  encoding: () => t`encoding`,
+  delimiter: () => t`delimiter`,
+  date_column: () => t`date column`,
+  payee_column: () => t`payee column`,
+  memo_column: () => t`memo column`,
+  amount_column: () => t`amount column`,
+  outflow_column: () => t`outflow column`,
+  inflow_column: () => t`inflow column`,
+  date_format: () => t`date format`,
+  decimal_separator: () => t`decimal separator`,
+  state_column: () => t`state column`,
+  product_column: () => t`product column`,
+  currency_column: () => t`currency column`,
+  fee_column: () => t`fee column`,
+  balance_column: () => t`balance column`,
+  skip_rows: () => t`skip rows`,
+};
+
+export function detectedLabel(key: string): string {
+  return DETECTED[key]?.() ?? key.replace(/_/g, " ");
+}

@@ -20,6 +20,7 @@ import { activate } from "../lib/i18n";
 import type { Account, Household } from "../lib/types";
 import { untranslated } from "../test-pseudo";
 import { Accounts, SuggestedIdentifiers } from "./Accounts";
+import { Import } from "./Import";
 import { Transfer } from "./Transfer";
 import { UnprovenSection, WaitingSection } from "./TransferSections";
 import { api } from "../lib/api";
@@ -182,5 +183,20 @@ describe("in en-XA, the register's screens show no English", () => {
     );
     await screen.findByText("Sam", { selector: ".mono" });
     expect(untranslated(container)).toEqual([]);
+  });
+
+  it("importing a statement, with one waiting to be reviewed", async () => {
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path.endsWith("/imports"))
+        return [{ batch_id: "b1", filename: "casa.csv", account_id: "a", account_name: "Casa", actor_name: "Sam", staged_at: "2026-03-02T10:15:00", row_count: 3, sha256: "x" }];
+      if (path.endsWith("/accounts")) return [account("a", "Casa", "EUR")];
+      if (path.endsWith("/one-time-import/history")) return { imports: [] };
+      return [];
+    });
+    render(withQueries(<Import household={HOUSEHOLD} onGo={vi.fn()} />));
+    await screen.findByText("casa.csv");
+    // whenStaged writes the month as a word, the browser's way; it is not ours.
+    const left = untranslated(document.body).filter((word) => !/^(March|AM|PM)$/.test(word));
+    expect(left).toEqual([]);
   });
 });
