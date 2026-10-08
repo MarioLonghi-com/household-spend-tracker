@@ -13,6 +13,9 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <!--
+      Its words, in any language but English, are `WORDS` in snap.js: each
+      element that says something carries the key it says (`data-say`).
+
       One page, one job: photograph the receipt at the till, compress it on the
       phone, send it to the inbox, take another.
 
@@ -288,7 +291,7 @@
         <!-- Back to the ledger, hard left: it is the way out of this page, and
              a chevron pointing that way is the one thing on a phone that reads
              as "back" without being labelled twice. -->
-        <a id="toapp" href="/">&lsaquo; Go to app</a>
+        <a id="toapp" href="/" data-say="toApp">&lsaquo; Go to app</a>
         <!-- Who and where, hard right, in one compact group: they answer the
              same question -- which ledger is this receipt about to land in,
              under whose name -- and a receipt in the wrong one is the failure
@@ -325,9 +328,9 @@
       -->
       <button id="gps" class="gps" type="button" aria-pressed="false" aria-describedby="gpswhy">
         <span aria-hidden="true">📍</span>
-        <span id="gpslabel">Location off</span>
+        <span id="gpslabel" data-say="locationOff">Location off</span>
       </button>
-      <p class="note" id="gpswhy" role="status" aria-live="polite">
+      <p class="note" id="gpswhy" role="status" aria-live="polite" data-say="gpsOff">
         Off. A photo records only what the camera wrote. Switch this on and
         every picture you send — taken here, or added from your library — also
         records where this phone is now, asked of the browser when you switch
@@ -335,7 +338,7 @@
       </p>
       <button id="shoot" type="button">
         <span class="camera" aria-hidden="true">📷</span>
-        <span>Take a photo</span>
+        <span data-say="takePhoto">Take a photo</span>
       </button>
       <!--
         `<input capture>` and never getUserMedia. A video frame grab is a
@@ -360,7 +363,7 @@
         This input drops `capture`, which opens the picker, where several can
         be chosen at once.
       -->
-      <button id="several" type="button">Add several from the library</button>
+      <button id="several" type="button" data-say="several">Add several from the library</button>
 
       <input
         id="files"
@@ -372,7 +375,7 @@
       <p class="note" id="summary" role="status" aria-live="polite"></p>
       <ul id="landed"></ul>
       <ul id="queue"></ul>
-      <p class="note">
+      <p class="note" data-say="goesToInbox">
         Goes to the inbox. Match it to a transaction later, when the statement
         arrives.
       </p>

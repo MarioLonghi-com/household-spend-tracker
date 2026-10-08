@@ -235,6 +235,7 @@ history this repository does not have.
   hook failed.*, with the reason and the end of the command's output in the
   update's history. Without a `hook.json` in that directory the step is
   skipped and says so; nothing changes for an installation without a hook.
+
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
