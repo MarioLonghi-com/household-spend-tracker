@@ -32,6 +32,21 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.8.0 — 2026-10-08
+
+**Reversible: lossy** — one migration.
+
+- `2de003489b79` — lossy: adds the `passkeys` and `webauthn_challenges` tables
+  and `users.webauthn_user_handle` (#120). Rolling it back drops every
+  registered passkey. Members then sign in with password + code, as before
+  passkeys existed, and register their passkeys again after upgrading back.
+  The sign-in challenges it drops expire within minutes anyway.
+
+Passkeys: registering them, signing in with one, and one "Sign-in methods"
+section in your account to manage them. Alongside them, security and
+data-integrity fixes, a locked and hashed Python dependency set, and the
+published image as what `compose.yaml` runs.
+
 ### Security
 
 - **The `sql` logging style no longer prints the ledger to the console.**
@@ -195,6 +210,18 @@ history this repository does not have.
   writes 1,000 rows or more, and after `make restore`, rather than waiting up
   to six hours for the next sweep. (#103)
 
+- **The container image is built for linux/amd64 and linux/arm64, and the
+  release is published last.** The image was amd64 only, so Docker Desktop on
+  an Apple-silicon Mac ran it emulated; each platform is now built and
+  smoke-tested natively and the two are joined into one index, whose digest
+  the provenance attestation names. The GitHub release is created as a draft,
+  the image pushed, attested and pulled back with no credentials to prove the
+  package is public, and only then does the release go public and `X.Y` and
+  `latest` move -- a run that fails halfway leaves a draft, not a release
+  with no image behind it. The `org.opencontainers.image.version` label is
+  the bare `X.Y.Z`, the number `/api/health` reports, and the release body
+  leads with the version's CHANGELOG section. (#181)
+
 - **The register loads five hundred rows at a time.** It used to ask for
   everything the filter matched, up to 25,000 rows, and refetch all of it
   after every edit. It now asks for the first 500, says how many the filter
@@ -332,6 +359,20 @@ history this repository does not have.
   that rebuilds `transactions`) took 5.8 s, and the whole chain about 25 s.
   The upgrade from 0.7.1 took under 2 s. (#104)
 
+- **The upgrade drill can be driven by a program.** `python -m scripts.upgrade
+  --check --json` prints what an upgrade would do as one JSON document: the
+  deployed version and commit, the database's stamp, the code's head, and each
+  pending migration with its `Reversible:` verdict. `--yes --report PATH`
+  writes the outcome of a real run -- the backup folder and whether it
+  verified, the stamp and every counted table before and after, the
+  `secret.key` check, the exit status and the log -- whatever the exit. And
+  the exit status now says what happened: a `secret.key` that does not open
+  the migrated ledger exits 5 and a table with fewer rows than the backup
+  counted exits 6, where both used to print a warning and exit 0, which a
+  person reading the output catches and an updater would not. The codes are
+  listed in the script's docstring. A test proves `--check` against a live WAL
+  ledger leaves the database and its `-wal` byte for byte as they were. (#155)
+
 - **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
   can offer them.** Nothing on the sign-in screen changes yet. The new
   setting is the host name passkeys will be bound to. It defaults to the host
@@ -404,6 +445,7 @@ history this repository does not have.
   needs Bluetooth and internet on both. `deploy/DOCKER.md` and
   `deploy/UPGRADING.md` each add a paragraph on what changes the name and
   what to do afterwards. (#123)
+
 - **A glossary for the first translations:** `client/src/locales/GLOSSARY.md`
   holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
   each language uses, and how each writes money and dates. Nothing in the app
