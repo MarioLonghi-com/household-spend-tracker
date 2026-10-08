@@ -179,6 +179,13 @@ msgstr "Lösennycklar kräver att appen öppnas på sin HTTPS-adress, {address}.
 msgid "New household"
 msgstr "Nytt hushåll"
 
+#. placeholder {0}: leg.account_name
+#. placeholder {1}: formatDate(leg.date)
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Select {0} {1}"
+msgstr "Markera {0} {1}"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "What it may do"
@@ -233,6 +240,11 @@ msgstr "Du är redan inloggad"
 msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
 msgstr "Serverns hemliga nyckel har bytts ut, så din autentiseringsapp fungerar inte längre här, och tills du ställer in en ny kommer varje inloggning att kräva en ny återställningskod."
 
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Unlink"
+msgstr "Koppla isär"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody reset {user}'s password and authenticator"
@@ -265,6 +277,7 @@ msgid "Once it is confirmed, keep only this entry for the account in your app: t
 msgstr "När den är bekräftad, behåll bara den här posten för kontot i appen: den gamla kan inte fungera här, och inte heller en som du skannade tidigare men aldrig bekräftade."
 
 #: src/screens/Passkeys.tsx
+#: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Actions"
 msgstr "Åtgärder"
@@ -352,6 +365,11 @@ msgstr "Utseende"
 msgid "None yet"
 msgstr "Inga än"
 
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Account"
+msgstr "Konto"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "never used"
@@ -384,6 +402,11 @@ msgstr "När du byter det loggas alla andra webbläsare ut och alla betrodda gl�
 msgid "{by} reset {user}'s password and authenticator"
 msgstr "{by} återställde lösenordet och autentiseringsappen för {user}"
 
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Into"
+msgstr "Till"
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Add a second on another device. If you lose this one, you will need your password and code."
@@ -393,6 +416,11 @@ msgstr "Lägg till en till på en annan enhet. Om du tappar bort den här behöv
 #, fuzzy
 msgid "Your new recovery codes"
 msgstr "Dina nya återställningskoder"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Not a transfer — categorise as…"
+msgstr "Ingen överföring – kategorisera som…"
 
 #. placeholder {0}: offer.secret
 #. placeholder {0}: owed.offer.secret
@@ -435,10 +463,20 @@ msgstr "Lägg till överföring"
 msgid "receipt filer"
 msgstr "kvittoarkiverare"
 
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
+msgstr "Dessa nämner ett av dina konton eller någon i hushållet, och deras andra sida finns inte i boken än. De kopplas ihop när det kontoutdraget importeras. Ge raden en kategori om det inte är en överföring."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
 msgstr "{revoked, plural, one {{revoked} betrodd webbläsare kommer att fråga efter en kod igen.} other {{revoked} betrodda webbläsare kommer att fråga efter en kod igen.}}"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Select every waiting row"
+msgstr "Markera alla väntande rader"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -503,6 +541,11 @@ msgstr "Om du inte längre har den gamla autentiseringsappen kan du använda en 
 #, fuzzy
 msgid "Cancel"
 msgstr "Avbryt"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Why"
+msgstr "Varför"
 
 #: src/screens/Profile.tsx
 #: src/screens/ResetAccount.tsx
@@ -672,6 +715,12 @@ msgstr "Ett hushåll samlar kontona och registret. Valutan här används bara f�
 msgid "Transfers"
 msgstr "Överföringar"
 
+#. placeholder {0}: ticked.size
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Categorise {0} selected as…"
+msgstr "Kategorisera {0} markerade som…"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Cleared"
@@ -747,6 +796,11 @@ msgstr "Återkalla"
 msgid "Don't ask on this browser for 30 days"
 msgstr "Fråga inte i den här webbläsaren på 30 dagar"
 
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Nothing waiting."
+msgstr "Inget väntar."
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "Looking up your invitation…"
@@ -763,6 +817,7 @@ msgid "Set up {PRODUCT}"
 msgstr "Installera {PRODUCT}"
 
 #: src/screens/Transfer.tsx
+#: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Amount"
 msgstr "Belopp"
@@ -781,6 +836,11 @@ msgstr "Tillagd som ägare"
 #, fuzzy
 msgid "The server reset {user}'s authenticator"
 msgstr "Servern återställde autentiseringsappen för {user}"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Not a transfer"
+msgstr "Ingen överföring"
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -934,6 +994,16 @@ msgstr "Tills dess kommer varje inloggning att kräva en ny återställningskod.
 msgid "Setting it up takes one of your recovery codes."
 msgstr "Att ställa in den kostar en av dina återställningskoder."
 
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Every link has a name or a person behind it."
+msgstr "Varje koppling har ett namn eller en person bakom sig."
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Waiting for the other statement"
+msgstr "Väntar på det andra kontoutdraget"
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Continue to the passkey"
@@ -1049,6 +1119,7 @@ msgid "Your account is under your name in the menu."
 msgstr "Ditt konto finns under ditt namn i menyn."
 
 #: src/screens/Transfer.tsx
+#: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Date"
 msgstr "Datum"
@@ -1088,6 +1159,11 @@ msgstr "Om du inte väntade dig detta, säg till en ägare av instansen innan du
 #, fuzzy
 msgid "Amount leaving ({0})"
 msgstr "Belopp som går ut ({0})"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Description"
+msgstr "Beskrivning"
 
 #: src/App.tsx
 #, fuzzy
@@ -1203,6 +1279,11 @@ msgstr "En återställningskod kan inte användas här. Om någon annan har sett
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "Ditt lösenord för {email} återställdes från servern den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in det igen nedan."
 
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
+msgstr "Kopplade som överföringar fast ingen människa valde dem – för att de två kontona har kopplats ihop förut och ingen av raderna nämner den andra, eller för att ett program kopplade dem med en agentnyckel. Ett köp och återbetalningen av exakt samma belopp kan se ut så. Koppla isär dem som inte är överföringar; de föreslås inte igen. Behåll dem som är det."
+
 #. placeholder {0}: passkey.rp_id
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -1275,6 +1356,11 @@ msgstr "Ställ in en ny autentiseringsapp"
 #, fuzzy
 msgid "the server answered {0}"
 msgstr "servern svarade {0}"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Keep"
+msgstr "Behåll"
 
 #: src/components/StepUp.tsx
 #: src/screens/Profile.tsx
@@ -1393,6 +1479,11 @@ msgstr "Behåll den"
 #, fuzzy
 msgid "You have not given a key to anything."
 msgstr "Du har inte gett någon nyckel till något."
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Out of"
+msgstr "Från"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1769,6 +1860,11 @@ msgstr "{inviter} har bjudit in dig till {PRODUCT} som medlem, i {households}."
 #, fuzzy
 msgid "I have saved it"
 msgstr "Jag har sparat den"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Linked by history only"
+msgstr "Kopplade bara genom historiken"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
