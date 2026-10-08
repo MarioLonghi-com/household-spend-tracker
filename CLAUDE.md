@@ -94,8 +94,12 @@ sharing a checkout with a session you cannot see.
     client/        Vite + React + TS, built into app/static/dist
     migrations/    Alembic, from the first commit
     updater/       the self-updater's own container: file contract, journal,
-                   restricted engine client, and prepare/apply/rollback on top
-                   (apply.py) -- standard library and sigstore, no import of app/
+                   restricted engine client, prepare/apply/rollback (apply.py),
+                   the handover to its successor, browser recovery, and the
+                   launchers' decisions (launch.py). Standard library only,
+                   except verify.py, which uses sigstore; no import of app/
+    deploy/bundle/ the release zip for a personal computer: compose file,
+                   `.env` and the launchers, built by scripts/bundle.py
 
 ## Security posture, in one place
 
@@ -113,6 +117,10 @@ sharing a checkout with a session you cannot see.
   hex before they are stored, so do not relax that validation.
 - HSTS is production-only. Pinning a dev browser to HTTPS on localhost costs an
   afternoon and protects nothing.
+- **Only the `updater` service holds the engine socket**, in every compose
+  file; the app never does. Its calls are the list in `updater/engine.py`,
+  every image it runs is verified first (`updater/verify.py`), and nothing
+  switches that off. `SECURITY.md` has the model.
 
 ## Where the checks run
 
