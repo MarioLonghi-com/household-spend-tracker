@@ -82,7 +82,7 @@ def _person(session, *, email: str, name: str, role: Role) -> User:
 def world(client) -> dict:
     """Four people, two households, a session cookie each."""
     jane = _setup_owner(client)["user"]["id"]
-    jane_cookie = client.cookies.get(cookies.session_name())
+    jane_cookie = client.cookies.get(cookies.session_name("testserver"))
     ids = {"jane": jane}
     cookie = {"jane": jane_cookie}
 
@@ -117,7 +117,7 @@ def world(client) -> dict:
 
 def _as(client, world, who: str):
     client.cookies.clear()
-    client.cookies.set(cookies.session_name(), world["cookie"][who])
+    client.cookies.set(cookies.session_name("testserver"), world["cookie"][who])
     return client
 
 

@@ -32,6 +32,148 @@ history this repository does not have.
 
 ## Unreleased
 
+### Fixed
+
+- **Safari can sign in at `http://localhost`.** The cookies carried the
+  `__Host-` prefix, which Safari refuses on plain-HTTP `localhost` while
+  keeping an unprefixed `Secure` cookie, so the container on your own
+  computer answered the sign-in, lost the cookie and showed the sign-in
+  screen again, with nothing in any log. At `localhost`, `127.0.0.1` and
+  `[::1]` the cookies are now named without the prefix and are still
+  `Secure`; every other address, the tailnet included, keeps it. HSTS is no
+  longer sent over plain HTTP to those three, where browsers ignore it.
+  After upgrading, expect to sign in at `localhost` once more, code
+  included, in any browser: the old names are no longer read there. (#196)
+
+### Changed
+
+- **Short messages carry a note for the translator.** Every message of one
+  or two words, and any whose English alone is ambiguous, says in one line
+  what it is -- a button, a column heading, a state, which sense of
+  "Balance" -- through Lingui's own `comment`, so it reaches every
+  language's catalog. "New" and the authenticator's "Set up" now have a
+  context of their own, because they need different words in other
+  languages. The rule is in `client/src/locales/README.md`, and the catalog
+  tests refuse a bare short message. English is unchanged. (#228)
+
+- **"Check the repository" reads published releases, not tags,** and returns
+  every release newer than the running one, newest first, each with its
+  notes: the release's CHANGELOG section where the release body leads with
+  it, and an older release's body as it is. Drafts, prereleases and any tag
+  that is not `vX.Y.Z` are never offered -- a tag can exist with no image
+  behind it, as 0.3.1's did. Still one request, only when the button is
+  pressed, saying nothing about the instance. (#165)
+
+- **The remaining screens' words go into the catalogs one screen at a time**,
+  starting with Categories. English is unchanged; each screen has a test
+  that renders it in the `en-XA` pseudo-locale and finds no English left.
+  (#56)
+
+- **The transfer panel's words are in the catalogs.** English is unchanged;
+  a test renders it in the `en-XA` pseudo-locale and finds no English left.
+  (#55)
+
+- **Draft translations of the first screens** in pt-BR, es-ES and sv-SE:
+  every message extracted so far, each marked `#, fuzzy` until a native
+  speaker reviews it (#58). None is served or selectable; a test checks every
+  catalog entry is valid ICU and keeps the English placeholders. (#175, #176,
+  #177)
+
+- **The first screens' words are in the catalogs:** the shell and its menu,
+  signing in, step-up, recovery codes, resetting a sign-in, the profile and
+  passkeys, setting up the instance and accepting an invitation, plus the
+  shared panel, hint and dialog furniture and the sign-in-changes notice.
+  Sentences built from fragments are whole sentences now, one per case, so
+  each can be translated as it is read. English is unchanged, and a test
+  renders each of these screens in the `en-XA` pseudo-locale and finds no
+  English left. (#54)
+
+- **The client's words can come from translation catalogs** (Lingui 6,
+  `client/src/locales/`). The menu, the sort headings' tooltip and the
+  "try again in" wait are the first messages extracted; a refusal that
+  carries a code shows the catalog's message in another language and the
+  server's sentence in English, as before. English is the only language
+  served and the language picker in Profile → Appearance stays hidden; the
+  `en-XA` pseudo-locale is reachable for CI and development, and one
+  Playwright pass runs in it at phone width. CI fails when the catalogs are
+  behind the source. Nothing an English reader sees changes. (#53)
+
+### Added
+
+- **The app's side of self-update, API only** (#165). Owner-only endpoints
+  under `/admin/application/update` -- a member gets 403 and nothing is
+  written: the updater's heartbeat, status, current prepare report, newest
+  outcome and update backups (`GET`, no outbound request); `prepare`; a
+  one-time recovery code for the confirmation; `apply`, which spends a
+  step-up grant first and must accept exactly the report's lossy migrations;
+  `discard`; `updater`, to replace the updater only, with an optional newer
+  release; and dismissing an outcome. Each writes one request into the
+  shared `update` volume (`SPENDTRACKER_UPDATE_DIR`, default
+  `/var/lib/spend-tracker-update` in the container), atomically, group-shared,
+  never over a request not yet taken; the app checks what it can first, so a
+  refusal is a sentence at once. The recovery code is 140 random bits shown
+  once; only its scrypt hash travels, and the code is never written or
+  logged. Prepared, confirmed (with the lossy migrations accepted),
+  discarded and deleted-backup events are logged at WARNING with the owner's
+  email. The backups listing includes update backups (folders) with their
+  size, version and revision, and the newest five cannot be deleted (409).
+  The Updates section of the screen follows in #166.
+
+- **The self-updater's core, not yet wired to anything** (#158). A new
+  top-level package, `updater/`, standard library only: the file contract
+  between the app and the updater in the shared `update` volume (requests,
+  heartbeat, status, prepare reports, history), strict request validation that
+  refuses anything but a published release newer than the running one and
+  makes no engine call when it refuses, a journal that records which step of
+  an apply has started and which updater owns it, deadlines that do not count
+  time the machine slept, and an engine client that can make only a listed set
+  of calls, negotiates the engine's API version, and refuses privileged
+  containers, host mounts and host networking whoever asks. Tested against a
+  recording fake engine on a real unix socket and `/version` answers recorded
+  from Docker Desktop and Podman. No image, compose service or screen uses it
+  yet.
+- **The self-updater knows which engine it is on** (#160). `updater/detect.py`
+  tells Docker Engine, Docker Desktop, Podman and `podman machine` apart from
+  the engine's `/version` and `/info` and the project's own directory, with
+  rootless and SELinux, and refuses with one sentence each: permission denied
+  on the socket, Enhanced Container Isolation, Windows containers, a TCP
+  socket, Podman older than 4.4, an API older than the tested window, and an
+  engine it does not know; an engine newer than that window is `outdated`. It
+  also reads a local build from the app container's labels and digest, holds
+  the not-root rule for each engine as data for the compose file and the
+  launchers, and infers whether `podman-restart` is on. `updater/heartbeat.py`
+  writes `updater.json` every 30 seconds with the negotiated API version, the
+  engine's window and the updater's real container name, under Docker
+  Compose's and podman-compose's naming alike. Nothing runs it yet.
+
+- **The updater can prove where an image came from before pulling it**
+  (#159). `updater/verify.py` reads the build attestation `release.yml` pushed
+  beside the app or updater image -- anonymously, from the registry, every
+  digest recomputed -- and checks with sigstore that this repository's release
+  workflow built exactly that digest for tag `vX.Y.Z` on a GitHub-hosted
+  runner, by repository and owner id rather than name, with no prerelease
+  suffix. Signature, certificate chain and transparency-log proof are checked
+  from the bundle alone; when Sigstore's trust repository cannot be reached it
+  falls back to the trust root committed beside it and records which one
+  verified. Any doubt is a refusal and nothing skips it. sigstore lives in a
+  lock of its own, `requirements-updater.txt`, never in the app's runtime
+  lock. Tested offline against the real 0.7.0, 0.7.1 and 0.8.0 bundles and
+  tampered copies of them. Nothing calls it yet.
+## 0.8.0 — 2026-10-08
+
+**Reversible: lossy** — one migration.
+
+- `2de003489b79` — lossy: adds the `passkeys` and `webauthn_challenges` tables
+  and `users.webauthn_user_handle` (#120). Rolling it back drops every
+  registered passkey. Members then sign in with password + code, as before
+  passkeys existed, and register their passkeys again after upgrading back.
+  The sign-in challenges it drops expire within minutes anyway.
+
+Passkeys: registering them, signing in with one, and one "Sign-in methods"
+section in your account to manage them. Alongside them, security and
+data-integrity fixes, a locked and hashed Python dependency set, and the
+published image as what `compose.yaml` runs.
+
 ### Security
 
 - **The `sql` logging style no longer prints the ledger to the console.**
@@ -168,43 +310,6 @@ history this repository does not have.
 
 ### Changed
 
-- **The remaining screens' words go into the catalogs one screen at a time**,
-  starting with Categories, Payees, Payee categorisation and the payee
-  naming rules, the household page and Admin. English is unchanged; each screen has a test
-  that renders it in the `en-XA` pseudo-locale and finds no English left.
-  (#56)
-
-- **The register's, the transfer screens', the Accounts screen's and the
-  Import screen's words are in the catalogs**, with the labels in `lib/labels.ts`. English is unchanged;
-  a test renders it in the `en-XA` pseudo-locale and finds no English left.
-  (#55)
-
-- **Draft translations of the first screens, the transfer screens,
-  Accounts, Import and the register** in pt-BR, es-ES and sv-SE: every
-  message extracted so far, each marked `#, fuzzy` until a native
-  speaker reviews it (#58). None is served or selectable; a test checks every
-  catalog entry is valid ICU and keeps the English placeholders. (#175, #176,
-  #177)
-
-- **The first screens' words are in the catalogs:** the shell and its menu,
-  signing in, step-up, recovery codes, resetting a sign-in, the profile and
-  passkeys, setting up the instance and accepting an invitation, plus the
-  shared panel, hint and dialog furniture and the sign-in-changes notice.
-  Sentences built from fragments are whole sentences now, one per case, so
-  each can be translated as it is read. English is unchanged, and a test
-  renders each of these screens in the `en-XA` pseudo-locale and finds no
-  English left. (#54)
-
-- **The client's words can come from translation catalogs** (Lingui 6,
-  `client/src/locales/`). The menu, the sort headings' tooltip and the
-  "try again in" wait are the first messages extracted; a refusal that
-  carries a code shows the catalog's message in another language and the
-  server's sentence in English, as before. English is the only language
-  served and the language picker in Profile → Appearance stays hidden; the
-  `en-XA` pseudo-locale is reachable for CI and development, and one
-  Playwright pass runs in it at phone width. CI fails when the catalogs are
-  behind the source. Nothing an English reader sees changes. (#53)
-
 - **An invariant suite over randomised ledgers.** Twelve seeds each build a
   ledger in two households: rows, transfers within and across currencies,
   edits, splits and deletes. The suite then holds four things true of any
@@ -221,6 +326,18 @@ history this repository does not have.
   undone. Planner statistics are refreshed straight after any commit that
   writes 1,000 rows or more, and after `make restore`, rather than waiting up
   to six hours for the next sweep. (#103)
+
+- **The container image is built for linux/amd64 and linux/arm64, and the
+  release is published last.** The image was amd64 only, so Docker Desktop on
+  an Apple-silicon Mac ran it emulated; each platform is now built and
+  smoke-tested natively and the two are joined into one index, whose digest
+  the provenance attestation names. The GitHub release is created as a draft,
+  the image pushed, attested and pulled back with no credentials to prove the
+  package is public, and only then does the release go public and `X.Y` and
+  `latest` move -- a run that fails halfway leaves a draft, not a release
+  with no image behind it. The `org.opencontainers.image.version` label is
+  the bare `X.Y.Z`, the number `/api/health` reports, and the release body
+  leads with the version's CHANGELOG section. (#181)
 
 - **The register loads five hundred rows at a time.** It used to ask for
   everything the filter matched, up to 25,000 rows, and refetch all of it
@@ -359,6 +476,20 @@ history this repository does not have.
   that rebuilds `transactions`) took 5.8 s, and the whole chain about 25 s.
   The upgrade from 0.7.1 took under 2 s. (#104)
 
+- **The upgrade drill can be driven by a program.** `python -m scripts.upgrade
+  --check --json` prints what an upgrade would do as one JSON document: the
+  deployed version and commit, the database's stamp, the code's head, and each
+  pending migration with its `Reversible:` verdict. `--yes --report PATH`
+  writes the outcome of a real run -- the backup folder and whether it
+  verified, the stamp and every counted table before and after, the
+  `secret.key` check, the exit status and the log -- whatever the exit. And
+  the exit status now says what happened: a `secret.key` that does not open
+  the migrated ledger exits 5 and a table with fewer rows than the backup
+  counted exits 6, where both used to print a warning and exit 0, which a
+  person reading the output catches and an updater would not. The codes are
+  listed in the script's docstring. A test proves `--check` against a live WAL
+  ledger leaves the database and its `-wal` byte for byte as they were. (#155)
+
 - **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
   can offer them.** Nothing on the sign-in screen changes yet. The new
   setting is the host name passkeys will be bound to. It defaults to the host
@@ -431,6 +562,7 @@ history this repository does not have.
   needs Bluetooth and internet on both. `deploy/DOCKER.md` and
   `deploy/UPGRADING.md` each add a paragraph on what changes the name and
   what to do afterwards. (#123)
+
 - **A glossary for the first translations:** `client/src/locales/GLOSSARY.md`
   holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
   each language uses, and how each writes money and dates. Nothing in the app

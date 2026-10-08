@@ -49,6 +49,12 @@ export interface Backup {
   path: string;
   bytes: number;
   made_at: string;
+  /** `file` from this screen, `update` from an update's drill, `folder` by hand. */
+  kind?: "file" | "update" | "folder";
+  version?: string | null;
+  revision?: string | null;
+  /** One of the newest five update backups: the server will not delete it. */
+  protected?: boolean;
 }
 
 export function BackupList({

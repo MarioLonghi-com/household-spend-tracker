@@ -34,7 +34,7 @@ export function ReenrolmentDue({ user, onOpen }: { user: User; onOpen: () => voi
   if (status.data?.locked_by_key !== true) return null;
   const covered = heldGrant(user.id) !== null;
   return (
-    <div className="banner warn" role="status" aria-label={t`Your authenticator`}>
+    <div className="banner warn" role="status" aria-label={t({ message: "Your authenticator", comment: "Screen-reader name, ReenrolmentDue (shared)" })}>
       <Trans>
         This server's secret key was replaced, so your authenticator no longer works here, and
         until you set up a new one every sign-in will ask for another recovery code.

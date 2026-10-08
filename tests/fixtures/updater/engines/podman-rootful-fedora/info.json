@@ -1,0 +1,180 @@
+{
+  "ID": "00000000-0000-4000-8000-0000000000f1",
+  "Containers": 0,
+  "ContainersRunning": 0,
+  "ContainersPaused": 0,
+  "ContainersStopped": 0,
+  "Images": 0,
+  "Driver": "overlay",
+  "DriverStatus": [
+    [
+      "Backing Filesystem",
+      "btrfs"
+    ],
+    [
+      "Supports d_type",
+      "true"
+    ],
+    [
+      "Native Overlay Diff",
+      "false"
+    ],
+    [
+      "Using metacopy",
+      "true"
+    ],
+    [
+      "Supports shifting",
+      "true"
+    ],
+    [
+      "Supports volatile",
+      "true"
+    ]
+  ],
+  "Plugins": {
+    "Volume": [
+      "local"
+    ],
+    "Network": [
+      "bridge",
+      "macvlan",
+      "ipvlan"
+    ],
+    "Authorization": null,
+    "Log": [
+      "k8s-file",
+      "none",
+      "passthrough",
+      "journald"
+    ]
+  },
+  "MemoryLimit": true,
+  "SwapLimit": false,
+  "CpuCfsPeriod": false,
+  "CpuCfsQuota": false,
+  "CPUShares": false,
+  "CPUSet": false,
+  "PidsLimit": true,
+  "IPv4Forwarding": false,
+  "Debug": false,
+  "NFd": 13,
+  "OomKillDisable": false,
+  "NGoroutines": 12,
+  "SystemTime": "2026-10-08T07:55:06.939033326Z",
+  "LoggingDriver": "",
+  "CgroupDriver": "systemd",
+  "NEventsListener": 0,
+  "KernelVersion": "6.19.10-300.fc44.x86_64",
+  "OperatingSystem": "fedora",
+  "OSVersion": "44",
+  "OSType": "linux",
+  "Architecture": "amd64",
+  "IndexServerAddress": "",
+  "RegistryConfig": {
+    "IndexConfigs": {},
+    "InsecureRegistryCIDRs": [],
+    "Mirrors": []
+  },
+  "NCPU": 2,
+  "MemTotal": 2050043904,
+  "GenericResources": null,
+  "DockerRootDir": "/var/lib/containers/storage",
+  "HttpProxy": "",
+  "HttpsProxy": "",
+  "NoProxy": "",
+  "Name": "fedora-host",
+  "Labels": null,
+  "ExperimentalBuild": true,
+  "ServerVersion": "5.8.7",
+  "Runtimes": {
+    "crun": {
+      "path": "/usr/bin/crun"
+    },
+    "crun-vm": {
+      "path": "/usr/bin/crun-vm"
+    },
+    "crun-wasm": {
+      "path": "/usr/bin/crun-wasm"
+    },
+    "kata": {
+      "path": "/usr/bin/kata-runtime"
+    },
+    "krun": {
+      "path": "/usr/bin/krun"
+    },
+    "ocijail": {
+      "path": "/usr/local/bin/ocijail"
+    },
+    "runc": {
+      "path": "/usr/bin/runc"
+    },
+    "runj": {
+      "path": "/usr/local/bin/runj"
+    },
+    "runsc": {
+      "path": "/usr/bin/runsc"
+    },
+    "youki": {
+      "path": "/usr/local/bin/youki"
+    }
+  },
+  "DefaultRuntime": "crun",
+  "Swarm": {
+    "NodeID": "",
+    "NodeAddr": "",
+    "LocalNodeState": "inactive",
+    "ControlAvailable": false,
+    "Error": "",
+    "RemoteManagers": null
+  },
+  "LiveRestoreEnabled": false,
+  "Isolation": "",
+  "InitBinary": "",
+  "ContainerdCommit": {
+    "ID": ""
+  },
+  "RuncCommit": {
+    "ID": ""
+  },
+  "InitCommit": {
+    "ID": ""
+  },
+  "SecurityOptions": [
+    "name=seccomp,profile=default",
+    "name=selinux"
+  ],
+  "ProductLicense": "Apache-2.0",
+  "DefaultAddressPools": [
+    {
+      "Base": "10.89.0.0/16",
+      "Size": 24
+    },
+    {
+      "Base": "10.90.0.0/15",
+      "Size": 24
+    },
+    {
+      "Base": "10.92.0.0/14",
+      "Size": 24
+    },
+    {
+      "Base": "10.96.0.0/11",
+      "Size": 24
+    },
+    {
+      "Base": "10.128.0.0/9",
+      "Size": 24
+    }
+  ],
+  "CDISpecDirs": null,
+  "Warnings": [],
+  "BuildahVersion": "1.43.4",
+  "CPURealtimePeriod": false,
+  "CPURealtimeRuntime": false,
+  "CgroupVersion": "2",
+  "Rootless": false,
+  "SwapFree": 2049961984,
+  "SwapTotal": 2049961984,
+  "Uptime": "0h 6m 46.00s"
+}

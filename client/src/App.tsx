@@ -144,11 +144,11 @@ export function menu(householdName: string): NavSection[] {
   return [
     {
       id: "register",
-      label: t`Register`,
+      label: t({ message: "Register", comment: "Menu item and the name of its screen. See GLOSSARY.md" }),
       children: [
-        { key: "register", label: t`Transactions` },
-        { key: "import", label: t`Import` },
-        { key: "receipts", label: t`Receipts` },
+        { key: "register", label: t({ message: "Transactions", comment: "Menu item and the name of its screen. See GLOSSARY.md" }) },
+        { key: "import", label: t({ message: "Import", comment: "Menu item and the name of its screen: noun, one import of a statement. See GLOSSARY.md" }) },
+        { key: "receipts", label: t({ message: "Receipts", comment: "Menu item and the name of its screen: noun, photos or PDFs of receipts. See GLOSSARY.md" }) },
         // Reachable since receipts landed, and for a while linked from
         // nowhere: the only way to open it was to know the URL.
         { href: "/snap", label: t`Snap a Receipt` },
@@ -156,7 +156,7 @@ export function menu(householdName: string): NavSection[] {
     },
     {
       id: "reports",
-      label: t`Reports`,
+      label: t({ message: "Reports", comment: "Menu item and the name of its screen. See GLOSSARY.md" }),
       screen: "reports",
       children: REPORTS.map((one) => ({ key: reportScreen(one.key), label: one.label })),
     },
@@ -169,19 +169,19 @@ export function menu(householdName: string): NavSection[] {
       // The order is #185's: the three things a ledger is made of, then the
       // three payee screens gathered under a heading of their own.
       children: [
-        { key: "accounts", label: t`Accounts` },
-        { key: "transfers", label: t`Transfers` },
-        { key: "categories", label: t`Categories` },
+        { key: "accounts", label: t({ message: "Accounts", comment: "Menu item and the name of its screen: noun, bank or cash accounts. See GLOSSARY.md" }) },
+        { key: "transfers", label: t({ message: "Transfers", comment: "Menu item and the name of its screen: noun, money moved between your own accounts. See GLOSSARY.md" }) },
+        { key: "categories", label: t({ message: "Categories", comment: "Menu item and the name of its screen. See GLOSSARY.md" }) },
         {
-          heading: t`Payee`,
+          heading: t({ message: "Payee", comment: "Heading on the app's menu and frame: noun, who was paid or who paid. See GLOSSARY.md" }),
           children: [
             // The list of payees, whose job in practice is folding two
             // spellings of one shop together.
-            { key: "payees", label: t`Payee Merge` },
+            { key: "payees", label: t({ message: "Payee Merge", comment: "Menu item and the name of its screen. See GLOSSARY.md" }) },
             // Two screens where there was one "Payee Rules" (#65): the naming
             // rules are a dozen rows and the categorisation table is one row
             // per payee, and on one page the second buried the first.
-            { key: "payee-categorisation", label: t`Payee Categorisation` },
+            { key: "payee-categorisation", label: t({ message: "Payee Categorisation", comment: "Menu item and the name of its screen. See GLOSSARY.md" }) },
             { key: "rules", label: t`Payee Naming Rules` },
           ],
         },
@@ -189,7 +189,7 @@ export function menu(householdName: string): NavSection[] {
     },
     {
       id: "admin",
-      label: t`Admin`,
+      label: t({ message: "Admin", comment: "Menu item and the name of its screen" }),
       screen: "admin",
       // The Admin *screen* is the owner's. History is not -- it is a
       // household's own record of what everyone in it did, and it has been
@@ -197,7 +197,7 @@ export function menu(householdName: string): NavSection[] {
       // everybody and only the header stops being a link.
       ownerOnly: true,
       children: [
-        { key: "history", label: t`History` },
+        { key: "history", label: t({ message: "History", comment: "Menu item and the name of its screen. See GLOSSARY.md" }) },
         // Every member's, like History: it explains what the Import screen
         // does, and nothing behind it is private (#73).
         { key: "import-guide", label: t`How import works` },
@@ -205,7 +205,7 @@ export function menu(householdName: string): NavSection[] {
         // above it is every member's, and this one is about the installation
         // rather than about a ledger. Hiding it is a courtesy -- every route
         // behind it answers 403 to a member.
-        { key: "application", label: t`Application management`, ownerOnly: true },
+        { key: "application", label: t({ message: "Application management", comment: "Menu item and the name of its screen. See GLOSSARY.md" }), ownerOnly: true },
       ],
     },
   ];
@@ -363,13 +363,13 @@ export function App() {
   const before = !ready
     ? null
     : setupNeeded
-      ? t`Set up`
+      ? t({ message: "Set up", comment: "Menu item and the name of its screen" })
       : reset
-        ? t`Reset`
+        ? t({ message: "Reset", comment: "Menu item and the name of its screen" })
         : token
-        ? t`Invitation`
+        ? t({ message: "Invitation", comment: "Menu item and the name of its screen. See GLOSSARY.md" })
         : !user
-          ? t`Sign in`
+          ? t({ message: "Sign in", comment: "Menu item and the name of its screen. See GLOSSARY.md" })
           : undefined;
   useEffect(() => {
     if (before !== undefined) document.title = tabTitle(before);
@@ -378,7 +378,7 @@ export function App() {
   if (!ready)
     return (
       <div className="centred muted">
-        <Trans>Loading…</Trans>
+        <Trans comment="Text on the app's menu and frame">Loading…</Trans>
       </div>
     );
   if (setupNeeded)
@@ -565,7 +565,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
     household
       ? pageLabel(menu(household.name), screen)
       : households.isSuccess && list.length === 0
-        ? t`New household`
+        ? t({ message: "New household", comment: "Menu item and the name of its screen" })
         : null,
     // Its own page is already its name. Decided by the screen, not by
     // comparing names: a household called "Transfers" keeps its name there.
@@ -575,7 +575,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
   if (households.isLoading)
     return (
       <div className="centred muted">
-        <Trans>Loading…</Trans>
+        <Trans comment="Text on the app's menu and frame">Loading…</Trans>
       </div>
     );
   // An error is not an empty instance. Without this branch a failed read shows
@@ -588,7 +588,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
         </h1>
         <Problem error={households.error} />
         <button className="primary" onClick={() => households.refetch()}>
-          <Trans>Try again</Trans>
+          <Trans comment="Button on the app's menu and frame">Try again</Trans>
         </button>
       </div>
     );
@@ -596,7 +596,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
   if (!household)
     return (
       <div className="centred muted">
-        <Trans>Loading…</Trans>
+        <Trans comment="Text on the app's menu and frame">Loading…</Trans>
       </div>
     );
 
@@ -644,7 +644,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
             furniture nobody sees -- so it disappears at zero, which is also
             the only moment it is worth noticing. */}
         {child.key === "receipts" && waiting > 0 ? (
-          <span className="nav-badge" aria-label={t`${waiting} waiting`}>
+          <span className="nav-badge" aria-label={t({ message: `${waiting} waiting`, comment: "Screen-reader name on the app's menu and frame" })}>
             {waiting}
           </span>
         ) : null}
@@ -769,7 +769,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
               {user.display_name}
             </button>
             <button className="link" onClick={() => signOut.mutate()}>
-              <Trans>Sign out</Trans>
+              <Trans comment="Button on the app's menu and frame. See GLOSSARY.md">Sign out</Trans>
             </button>
           </div>
         </div>
@@ -871,7 +871,7 @@ function FirstHousehold({ onCreated }: { onCreated: () => void }) {
   return (
     <div className="centred">
       <h1>
-        <Trans>Your household</Trans>
+        <Trans comment="Screen title on the app's menu and frame">Your household</Trans>
       </h1>
       <p className="muted small">
         <Trans>
@@ -881,11 +881,11 @@ function FirstHousehold({ onCreated }: { onCreated: () => void }) {
       </p>
       <div className="card">
         <Problem error={create.error} />
-        <Field label={t`Name`}>
+        <Field label={t({ message: "Name", comment: "Label of a form field on the app's menu and frame: noun" })}>
           <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
         </Field>
         <p />
-        <Field label={t`Main currency`}>
+        <Field label={t({ message: "Main currency", comment: "Label of a form field on the app's menu and frame" })}>
           <input
             value={currency}
             onChange={(e) => setCurrency(e.target.value.toUpperCase())}
@@ -894,7 +894,7 @@ function FirstHousehold({ onCreated }: { onCreated: () => void }) {
         </Field>
         <p />
         <button className="primary" disabled={!name.trim() || create.isPending} onClick={() => create.mutate()}>
-          <Trans>Create it</Trans>
+          <Trans comment="Button on the app's menu and frame: verb">Create it</Trans>
         </button>
       </div>
     </div>

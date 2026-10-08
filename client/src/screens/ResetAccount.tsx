@@ -135,7 +135,7 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
     return (
       <div className="centred">
         <h1>
-          <Trans>Done</Trans>
+          <Trans comment="Screen title on the account reset page">Done</Trans>
         </h1>
         {codes.length > 0 ? (
           <div className="card">
@@ -164,7 +164,7 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
             </label>
             <p />
             <button className="primary" disabled={!saved} onClick={onDone}>
-              <Trans>Sign in</Trans>
+              <Trans comment="Button on the account reset page. See GLOSSARY.md">Sign in</Trans>
             </button>
           </div>
         ) : (
@@ -173,7 +173,7 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
               <Trans>Your new password is set. Sign in with it and your authenticator as usual.</Trans>
             </p>
             <button className="primary" onClick={onDone}>
-              <Trans>Sign in</Trans>
+              <Trans comment="Button on the account reset page. See GLOSSARY.md">Sign in</Trans>
             </button>
           </div>
         )}
@@ -201,7 +201,7 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
           <h2>
             <Trans>A new password</Trans>
           </h2>
-          <Field label={t`Password`}>
+          <Field label={t({ message: "Password", comment: "Label of a form field on the account reset page: noun. See GLOSSARY.md" })}>
             <input
               type="password"
               name="new-password"

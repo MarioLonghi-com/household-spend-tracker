@@ -101,12 +101,30 @@ interface LoggingState {
   streams: LogStream[];
 }
 
+interface Release {
+  version: string;
+  tag: string;
+  name: string | null;
+  published_at: string | null;
+  /** Plain text: render it as text, never as HTML. */
+  notes: string;
+  notes_from: "changelog" | "release";
+}
+
+interface UpdaterOffer {
+  version: string | null;
+  compatible: boolean | null;
+  note: string;
+}
+
 interface Upstream {
   checked_at: string;
   running: string;
   latest: string | null;
   newer: boolean;
   problem: string | null;
+  releases: Release[];
+  updater: UpdaterOffer | null;
 }
 
 interface DatabaseEngine {
@@ -615,10 +633,9 @@ function Operations({ me }: { me: Instance }) {
 
       <h3 className="section-title">Is there a newer version?</h3>
       <p className="muted small">
-        Asks {me.repository} for its newest tag and compares it with the {me.version} this is
-        running. It is the only request this application ever makes to anything outside itself,
-        it happens when you press this button and at no other time, and it says nothing about
-        this instance.
+        Asks {me.repository} for its published releases and compares them with the {me.version}{" "}
+        this is running. Nothing leaves this instance unless an owner presses a button like this
+        one, nothing is asked on a timer, and no request says anything about this instance.
       </p>
       <button onClick={() => upstream.mutate()} disabled={upstream.isPending}>
         {upstream.isPending ? "Asking…" : "Check the repository"}
@@ -634,8 +651,8 @@ function Operations({ me }: { me: Instance }) {
             </>
           ) : (
             <>
-              This is the newest there is: {upstream.data.running}, and the repository's latest tag
-              is {upstream.data.latest}.
+              This is the newest there is: {upstream.data.running}, and the repository's latest
+              release is {upstream.data.latest}.
             </>
           )}
         </div>

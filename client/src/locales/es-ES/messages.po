@@ -12,6 +12,7 @@ msgstr ""
 msgid "The name looks like its IBAN."
 msgstr "El nombre parece ser su IBAN."
 
+#. What the import detected: the running balance column. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "balance column"
@@ -21,11 +22,14 @@ msgstr "columna de saldo"
 msgid "Always use my choice"
 msgstr ""
 
+#. Column heading on the Accounts screen
+#. Column name shown beside a value on phones on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Mentions"
 msgstr "Menciones"
 
+#. Button on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Creating…"
@@ -41,32 +45,41 @@ msgstr "{0} ahora indica que un archivo es de esa cuenta"
 msgid "No payees yet. They appear as you enter or import transactions."
 msgstr ""
 
+#. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
 msgid "Application management"
 msgstr "Gestión de la aplicación"
 
+#. Label of a form field on the Transfers screen: the end of a range, or where money goes
+#. Text on the date range picker: the end of a range, or where money goes
 #: src/components/DateRange.tsx
 #: src/screens/Transfer.tsx
 #, fuzzy
 msgid "To"
 msgstr "A"
 
+#. Option in a dropdown on the Rules screen: a rule's match: the text starts with this
 #: src/screens/Rules.tsx
 msgid "starts with"
 msgstr ""
 
+#. Option in a dropdown on the Accounts screen
+#. Option in a dropdown on the Import screen
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Choose…"
 msgstr "Elegir…"
 
+#. Label of a form field on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "New password"
 msgstr "Nueva contraseña"
 
+#. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
+#. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Cash"
@@ -91,10 +104,6 @@ msgstr ""
 msgid "this account is closed"
 msgstr "esta cuenta está cerrada"
 
-#: src/screens/Admin.tsx
-msgid "An owner can administer this instance, and stays one whatever you later do to your own password or authenticator."
-msgstr ""
-
 #. placeholder {0}: group.name
 #: src/screens/Categories.tsx
 msgid "Delete the group {0}?"
@@ -105,6 +114,7 @@ msgstr ""
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
 msgstr "Una clave permite que un programa —un script, una automatización, un asistente de IA— lea y, si lo permites, añada datos a un hogar en tu nombre. Todo lo que haga aparece en el Historial de ese hogar con tu nombre y el de la clave."
 
+#. How a rule matches, inside the rule list: the bank's text contains the pattern
 #: src/screens/Rules.tsx
 msgctxt "rule list"
 msgid "contains"
@@ -114,26 +124,28 @@ msgstr ""
 msgid "Grouped by what the bank sent, with the per-transaction reference taken off. Each one is a single rule away from being one payee."
 msgstr ""
 
+#. Screen-reader name on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "To month"
 msgstr "Mes final"
-
-#: src/screens/Admin.tsx
-msgid "What"
-msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Add this to your authenticator app, then type the six digits it shows."
 msgstr "Añade esto a tu aplicación de autenticación y escribe los seis dígitos que muestre."
 
+#. Button on the Register screen: noun, account type
+#. Column heading on the Accounts screen: noun, account type
+#. Column name shown beside a value on phones on the Accounts screen: noun, account type
+#. Label of a form field on the Accounts screen: noun, account type
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Type"
 msgstr "Tipo"
 
+#. Screen-reader name on the Register screen
 #. placeholder {0}: formatDate(txn.date)
 #: src/screens/Register.tsx
 #, fuzzy
@@ -145,11 +157,14 @@ msgstr "Seleccionar {0}"
 msgid "No browsers were being trusted."
 msgstr "No había ningún navegador de confianza."
 
+#. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
 msgid "History"
 msgstr "Historial"
 
+#. Column heading on the Rules screen: how a rule compares the bank's text (contains, starts with…)
+#. Column heading on the Rules screen: how a rule compares the bank's text (contains, starts with…)
 #: src/screens/Rules.tsx
 msgid "Match"
 msgstr ""
@@ -173,11 +188,13 @@ msgstr "Al final no se reembolsó"
 msgid "You can pick a palette and one accent of your own. You cannot reach the text and background colours, so no household can be made unreadable — and the accent is checked for contrast before it is saved."
 msgstr ""
 
+#. Screen-reader name of a help button on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "account types"
 msgstr "tipos de cuenta"
 
+#. Text on the household page
 #. placeholder {0}: count(it.category_groups)
 #: src/screens/Household.tsx
 msgid "in {0} groups"
@@ -188,6 +205,7 @@ msgstr ""
 msgid "Locked — checked against the bank, refuse every change"
 msgstr "Bloqueado: comprobado con el banco, rechazar cualquier cambio"
 
+#. Screen-reader name of a button on the passkeys panel
 #. placeholder {0}: passkey.label
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -198,16 +216,6 @@ msgstr "Cambiar el nombre de {0}"
 #, fuzzy
 msgid "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "{by} restableció tu aplicación de autenticación para {email} el {when}. Se ha cerrado la sesión en todos los navegadores en los que la tenías iniciada. Vuelve a configurarla abajo."
-
-#. placeholder {0}: confirming.user.display_name
-#. placeholder {1}: confirming.user.email
-#: src/screens/Admin.tsx
-msgid "{0} ({1}) is signed out everywhere and their trusted browsers are forgotten. Re-enable brings the account back."
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Nothing in the last 14 days."
-msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot mean “whatever comes after it” — choose <2>take this bit off</2> for that."
@@ -220,11 +228,13 @@ msgstr ""
 msgid "The first is this file only. The second also makes <0>{0}</0> the rule for <1>{1}</1>, so every future statement follows without asking."
 msgstr "La primera es solo para este archivo. La segunda también hace de <0>{0}</0> la regla para <1>{1}</1>, así que todos los extractos futuros la siguen sin preguntar."
 
+#. Button on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "no memo"
 msgstr "sin concepto"
 
+#. What the import detected: which column holds the date. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "date column"
@@ -241,6 +251,7 @@ msgstr "Eso no es un importe en {0}."
 msgid "what a key can never do"
 msgstr "lo que una clave nunca puede hacer"
 
+#. Column name shown beside a value on phones on the Rules screen: noun, which rule is tried first
 #: src/screens/Rules.tsx
 msgid "Priority"
 msgstr ""
@@ -255,11 +266,13 @@ msgstr "Nombre que usa el banco"
 msgid "Finish the category you are editing first"
 msgstr "Termina primero la categoría que estás editando"
 
+#. Label on the Your account panel: colour scheme
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Light"
 msgstr "Claro"
 
+#. Button on the Payees screen: verb, look over before going on
 #: src/screens/Payees.tsx
 msgid "Review…"
 msgstr ""
@@ -269,6 +282,8 @@ msgstr ""
 msgid "the server's answer could not be read"
 msgstr "no se pudo leer la respuesta del servidor"
 
+#. Button on the passkeys panel: verb, hide this notice
+#. Button, SignInNotice (shared): verb, hide this notice
 #: src/components/SignInNotice.tsx
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -288,29 +303,24 @@ msgstr "{why} Por eso te pedimos la contraseña y un código, igual que al inici
 msgid "{0, plural, one {{1} pair} other {{2} pairs}}"
 msgstr "{0, plural, one {{1} par} other {{2} pares}}"
 
-#: src/screens/Admin.tsx
-msgid "Every reset link, every new owner, and anything the server did to an account's way in, in the last 14 days, by anyone. Read from the audit log."
-msgstr ""
-
+#. Button on the Import screen: verb
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Open"
 msgstr "Abrir"
 
-#: src/screens/Admin.tsx
-msgid "Copy this link now — it is shown once."
-msgstr ""
-
+#. Column heading on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "What happens"
 msgstr "Qué pasa"
 
-#: src/screens/Admin.tsx
+#. Label on the household page
 #: src/screens/Household.tsx
 msgid "People"
 msgstr ""
 
+#. Screen-reader name on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "More currencies"
@@ -324,10 +334,6 @@ msgstr "Más divisas"
 #, fuzzy
 msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 msgstr "{unloaded, plural, one {Mostrando {0}: queda {1} fila por cargar; mostrar más} other {Mostrando {2}: quedan {3} filas por cargar; mostrar más}}"
-
-#: src/screens/Admin.tsx
-msgid "When"
-msgstr ""
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -363,10 +369,6 @@ msgstr ""
 msgid "This browser does not support passkeys yet."
 msgstr "Este navegador todavía no admite llaves de acceso."
 
-#: src/screens/Admin.tsx
-msgid "YYYY-MM-DD"
-msgstr ""
-
 #: src/screens/Household.tsx
 msgid "What is in it"
 msgstr ""
@@ -376,6 +378,7 @@ msgstr ""
 msgid "Reset links work once and they expire. Ask an owner of this instance for a new one."
 msgstr "Los enlaces de restablecimiento funcionan una sola vez y caducan. Pide uno nuevo a un propietario de esta instancia."
 
+#. Heading on the Your account panel. See GLOSSARY.md
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Sign-in methods"
@@ -401,6 +404,7 @@ msgstr "La longitud importa más que los símbolos. Cuatro palabras sin relació
 msgid "<0>{0}</0> goes to the receipts inbox and stays there until it is attached again or deleted."
 msgstr "<0>{0}</0> pasa a la bandeja de tickets y se queda allí hasta que se vuelva a adjuntar o se elimine."
 
+#. Button on the passkeys panel
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Rename"
@@ -421,6 +425,7 @@ msgstr "Ninguna clave puede eliminar nada, deshacer nada, cambiar quién está e
 msgid "Group accounts by"
 msgstr "Agrupar cuentas por"
 
+#. Heading over the credit card accounts on the Accounts screen. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Credit cards"
@@ -450,11 +455,14 @@ msgstr "Editar el beneficiario"
 msgid "Not seen by the bank yet"
 msgstr "El banco aún no la ha visto"
 
+#. Label of a form field on the Register screen
+#. Label of a form field on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "In ({currency})"
 msgstr "Entrada ({currency})"
 
+#. What the import detected: which column holds the currency. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "currency column"
@@ -475,6 +483,7 @@ msgstr "Cuadra"
 msgid "{waited, plural, one {Not reimbursed yet · {waited} day} other {Not reimbursed yet · {waited} days}}"
 msgstr "{waited, plural, one {Sin reembolsar todavía · {waited} día} other {Sin reembolsar todavía · {waited} días}}"
 
+#. Screen-reader name of a button on the Accounts screen
 #. placeholder {0}: one.value
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -500,20 +509,17 @@ msgstr ""
 msgid "One part of a split"
 msgstr "Una parte de una división"
 
+#. Heading on the first-run setup
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "2. You"
 msgstr "2. Tú"
 
-#: src/screens/Admin.tsx
-msgid "Keep them active"
-msgstr ""
-
 #: src/screens/Categories.tsx
 msgid "Start with a common set"
 msgstr ""
 
-#. placeholder {0}: found.filename ?? t`a statement`
+#. placeholder {0}: found.filename ?? t({ message: "a statement", comment: "Sentence on the Register screen" })
 #. placeholder {1}: found.line_no
 #. placeholder {2}: formatInstant(found.imported_at)
 #: src/screens/Register.tsx
@@ -521,6 +527,7 @@ msgstr ""
 msgid "Imported from <0>{0}</0>, line {1}, on {2}."
 msgstr "Importado de <0>{0}</0>, línea {1}, el {2}."
 
+#. Screen title on the app's menu and frame
 #: src/App.tsx
 #, fuzzy
 msgid "Your household"
@@ -530,6 +537,13 @@ msgstr "Tu hogar"
 #, fuzzy
 msgid "Passkeys need this app opened at its HTTPS address, {address}."
 msgstr "Las llaves de acceso necesitan que abras esta aplicación en su dirección HTTPS, {address}."
+
+#. Import outcome: the line becomes a new transaction. See GLOSSARY.md
+#: src/lib/labels.ts
+#, fuzzy
+msgctxt "import outcome"
+msgid "New"
+msgstr "Nueva"
 
 #. placeholder {0}: tagOffer.value
 #. placeholder {1}: account.name
@@ -554,17 +568,19 @@ msgstr ""
 msgid "Set the category on {done} row and skipped 1 transfer leg — a transfer has no category."
 msgstr "Se puso la categoría a {done} fila y se omitió 1 parte de transferencia: una transferencia no tiene categoría."
 
+#. Menu item and the name of its screen
 #: src/App.tsx
-#: src/screens/Admin.tsx
 #, fuzzy
 msgid "New household"
 msgstr "Nuevo hogar"
 
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Mark cleared"
 msgstr "Marcar como contabilizado"
 
+#. Screen-reader name on the Transfers screen
 #. placeholder {0}: leg.account_name
 #. placeholder {1}: formatDate(leg.date)
 #: src/screens/TransferSections.tsx
@@ -572,17 +588,19 @@ msgstr "Marcar como contabilizado"
 msgid "Select {0} {1}"
 msgstr "Seleccionar {0} {1}"
 
+#. What the import detected: the character between columns. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "delimiter"
 msgstr "delimitador"
 
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Keep editing"
 msgstr "Seguir editando"
 
-#: src/screens/Admin.tsx
+#. Table cell on the household page
 #: src/screens/Household.tsx
 msgid "(you)"
 msgstr ""
@@ -595,14 +613,12 @@ msgstr ""
 msgid "{0, plural, one {({1} line)} other {({2} lines)}}"
 msgstr "{0, plural, one {({1} línea)} other {({2} líneas)}}"
 
+#. Label of a form field on the Accounts screen
+#. Label of a form field on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Opening date"
 msgstr "Fecha de apertura"
-
-#: src/screens/Admin.tsx
-msgid "nobody"
-msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "It matters most on an import: a statement of three hundred rows is three hundred categories you did not have to type, or three hundred corrections if it guesses badly."
@@ -618,6 +634,17 @@ msgstr "Lo que puede hacer"
 msgid "Skip to transactions"
 msgstr "Saltar a los movimientos"
 
+#. Column heading on the Categories screen. See GLOSSARY.md
+#. Column heading on the Payee Categorisation screen. See GLOSSARY.md
+#. Column heading on the Payees screen. See GLOSSARY.md
+#. Column heading on the household page. See GLOSSARY.md
+#. Column heading on the household page. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Payees screen. See GLOSSARY.md
+#. Column name shown beside a value on phones on the household page. See GLOSSARY.md
+#. Column name shown beside a value on phones on the household page. See GLOSSARY.md
+#. Label on the household page. See GLOSSARY.md
+#. Menu item and the name of its screen. See GLOSSARY.md
+#. Screen title on the Register screen. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
@@ -628,6 +655,7 @@ msgstr "Saltar a los movimientos"
 msgid "Transactions"
 msgstr "Movimientos"
 
+#. Label on the Register screen
 #. placeholder {0}: found.filename
 #: src/screens/Register.tsx
 #, fuzzy
@@ -639,6 +667,7 @@ msgstr "el archivo <0>{0}</0>"
 msgid "The type and currency are fixed once an account exists, because every transaction on it is recorded in that currency."
 msgstr "El tipo y la divisa quedan fijados una vez creada la cuenta, porque cada movimiento se registra en esa divisa."
 
+#. Text on the Your account panel: adjective, no longer works
 #. placeholder {0}: formatInstant(key.expires_at)
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -650,6 +679,7 @@ msgstr "Caducó el {0}"
 msgid "The table needs at least one currency column"
 msgstr "La tabla necesita al menos una columna de divisa"
 
+#. Button on the Register screen: verb, divide a transaction into equal parts
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Split equally"
@@ -671,16 +701,20 @@ msgstr ""
 msgid "Check the code and finish"
 msgstr "Comprobar el código y terminar"
 
+#. Button on the Import screen
+#. Button on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Opening…"
 msgstr "Abriendo…"
 
+#. How a rule matches, inside the rule list: the bank's text is exactly the pattern
 #: src/screens/Rules.tsx
 msgctxt "rule list"
 msgid "equals"
 msgstr ""
 
+#. Label on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Account number"
@@ -696,10 +730,6 @@ msgstr "Gasto de trabajo: sin reembolsar todavía"
 msgid "Somebody gave {user} a new authenticator"
 msgstr "Alguien dio a {user} una nueva aplicación de autenticación"
 
-#: src/screens/Admin.tsx
-msgid "Revoke this invitation?"
-msgstr ""
-
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
@@ -710,6 +740,7 @@ msgstr "Solo para un banco cuyo extracto reúne varias cuentas en un archivo, di
 msgid "Put the number in Out or In — no minus signs. Press Enter to add and go straight to the next row."
 msgstr "Pon la cifra en Salida o Entrada, sin signo menos. Pulsa Intro para añadirla y pasar directamente a la siguiente fila."
 
+#. Step name in the one-time import: look over what was read
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Review"
@@ -720,10 +751,10 @@ msgstr "Revisión"
 msgid "Add an account"
 msgstr "Añadir una cuenta"
 
-#: src/screens/Admin.tsx
-msgid "Couldn't reach the clipboard. Select the link above and copy it by hand."
-msgstr ""
-
+#. Button on the account reset page. See GLOSSARY.md
+#. Button on the account reset page. See GLOSSARY.md
+#. Button on the sign-in page. See GLOSSARY.md
+#. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
@@ -736,6 +767,7 @@ msgstr "Iniciar sesión"
 msgid "{by} added {user} as an owner"
 msgstr "{by} añadió a {user} como propietario"
 
+#. Tooltip on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "Earlier"
@@ -756,10 +788,6 @@ msgstr "O abre <0>el enlace de registro</0> en el dispositivo que tiene la aplic
 msgid "You're already signed in"
 msgstr "Ya has iniciado sesión"
 
-#: src/screens/Admin.tsx
-msgid "Withdrawing a link stops it working. It does not undo the reset: the account stays shut, and the way back in is a new link."
-msgstr ""
-
 #: src/components/ReenrolmentDue.tsx
 #, fuzzy
 msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
@@ -775,6 +803,7 @@ msgstr "Sí, desvincularlo"
 msgid "{count, plural, other {{shown} files}}"
 msgstr "{count, plural, one {{shown} archivo} other {{shown} archivos}}"
 
+#. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "All transactions"
@@ -785,10 +814,12 @@ msgstr "Todos los movimientos"
 msgid "Set the category…"
 msgstr "Poner la categoría…"
 
+#. Label on the household page
 #: src/screens/Household.tsx
 msgid "Statements reconciled"
 msgstr ""
 
+#. Button on the Transfers screen: verb, undo a link between two rows
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Unlink"
@@ -799,18 +830,12 @@ msgstr "Desvincular"
 msgid "Remove this part"
 msgstr "Quitar esta parte"
 
-#: src/screens/Admin.tsx
-msgid "Nobody yet, which should be impossible while you are reading this."
-msgstr ""
-
+#. Column heading on the Payees screen
+#. Column heading on the Rules screen
+#. Column name shown beside a value on phones on the Rules screen
 #: src/screens/Payees.tsx
 #: src/screens/Rules.tsx
 msgid "Spellings"
-msgstr ""
-
-#. placeholder {0}: one.recovery_codes_left
-#: src/screens/Admin.tsx
-msgid "{0} left"
 msgstr ""
 
 #: src/lib/signInChanges.ts
@@ -832,18 +857,25 @@ msgstr "{keys, plural, one {{keys} clave de agente sigue funcionando: revócala 
 msgid "Call the payee"
 msgstr ""
 
-#: src/screens/Admin.tsx
-msgid "Copied"
-msgstr ""
-
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr "Solo este archivo. La regla del beneficiario se queda como está para los próximos extractos."
 
+#. Column heading on the Payees screen: noun
+#. Column heading on the household page: noun
+#. Column heading on the passkeys panel: noun
+#. Label of a form field on the Accounts screen: noun
+#. Label of a form field on the Accounts screen: noun
+#. Label of a form field on the Categories screen: noun
+#. Label of a form field on the Categories screen: noun
+#. Label of a form field on the Categories screen: noun
+#. Label of a form field on the Categories screen: noun
+#. Label of a form field on the Payees screen: noun
+#. Label of a form field on the app's menu and frame: noun
+#. Label of a form field on the household page: noun
 #: src/App.tsx
 #: src/screens/Accounts.tsx
-#: src/screens/Admin.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
 #: src/screens/Passkeys.tsx
@@ -852,24 +884,18 @@ msgstr "Solo este archivo. La regla del beneficiario se queda como está para lo
 msgid "Name"
 msgstr "Nombre"
 
-#: src/screens/Admin.tsx
-msgid "Dismiss without copying? The link cannot be shown again."
-msgstr ""
-
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Discard the staged one"
 msgstr "Descartar la preparada"
 
-#: src/screens/Admin.tsx
-msgid "{name} is told on the link page that you reset them, and every owner sees it under Recent sign-in changes."
-msgstr ""
-
+#. Step name in the one-time import: flags, date range and other choices
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Flags & options"
 msgstr "Marcas y opciones"
 
+#. What the import detected: the file's text encoding. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "encoding"
@@ -880,6 +906,10 @@ msgstr "codificación"
 msgid "One part of a split. The others are in the register on the same date, and the transaction they replaced is in History."
 msgstr "Una parte de una división. Las demás están en el registro en la misma fecha, y el movimiento al que sustituyeron está en el Historial."
 
+#. Heading on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md
+#. Heading on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md
+#. Heading on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md
+#. Label on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Authenticator"
@@ -910,6 +940,18 @@ msgstr ""
 msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
 msgstr "Dinero que debes y que no es una tarjeta: una hipoteca, un préstamo del coche, dinero que le debes a alguien. Los pagos son transferencias hacia ella."
 
+#. Row state in the one-time import's category mapping: a new category will be made
+#: src/lib/labels.ts
+#, fuzzy
+msgctxt "new category"
+msgid "New"
+msgstr "Nueva"
+
+#. Screen-reader name on the Accounts screen
+#. Screen-reader name on the Payees screen
+#. Screen-reader name on the Payees screen
+#. Screen-reader name on the Transfers screen
+#. Screen-reader text on the passkeys panel
 #: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Payees.tsx
@@ -918,16 +960,19 @@ msgstr "Dinero que debes y que no es una tarjeta: una hipoteca, un préstamo del
 msgid "Actions"
 msgstr "Acciones"
 
+#. Text on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Password changed."
 msgstr "Contraseña cambiada."
 
+#. Column heading on the passkeys panel: where the passkey is kept (synced, or this device only)
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Kept"
-msgstr "Guardada"
+msgstr "Dónde se guarda"
 
+#. Sentence on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Looking…"
@@ -942,6 +987,8 @@ msgstr "Una fila, escrita a mano"
 msgid "Nothing — check you are matching what the bank wrote rather than what the register shows."
 msgstr ""
 
+#. Table cell on the Register screen: money going out
+#. Text on the Register screen: money going out
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Out"
@@ -984,6 +1031,7 @@ msgstr "Poner la categoría"
 msgid "A screen copy and a thumbnail. About <0>33 KB</0> per receipt."
 msgstr ""
 
+#. Name of a fact on the Register screen: how much of the payment the expenses account for
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Covered"
@@ -1011,10 +1059,6 @@ msgstr "Hemos elegido <0>{0}</0> por ti: {1}."
 msgid "Closed — hide it from the accounts list"
 msgstr "Cerrada: ocultarla de la lista de cuentas"
 
-#: src/screens/Admin.tsx
-msgid "Choose what {name} sets again. They do it themselves, from a one-time link you hand over."
-msgstr ""
-
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "That isn't an amount in {currency}."
@@ -1033,6 +1077,7 @@ msgstr "Los seis dígitos"
 msgid "Find the payment…"
 msgstr "Buscar el pago…"
 
+#. Button on the Register screen
 #. placeholder {0}: restOn.join(", ")
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1044,8 +1089,13 @@ msgstr "También se muestra {0}"
 msgid "The recovery code you signed in with in this tab covers it — no other code is needed."
 msgstr "El código de recuperación con el que iniciaste sesión en esta pestaña lo cubre; no hace falta otro código."
 
+#. Heading on the Your account panel: noun. See GLOSSARY.md
+#. Label of a form field on the account reset page: noun. See GLOSSARY.md
+#. Label of a form field on the first-run setup: noun. See GLOSSARY.md
+#. Label of a form field on the invitation page: noun. See GLOSSARY.md
+#. Label of a form field on the sign-in page: noun. See GLOSSARY.md
+#. Label on the Your account panel: noun. See GLOSSARY.md
 #: src/screens/AcceptInvite.tsx
-#: src/screens/Admin.tsx
 #: src/screens/Profile.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/Setup.tsx
@@ -1073,14 +1123,6 @@ msgstr ""
 msgid "Somebody reset {user}'s authenticator"
 msgstr "Alguien restableció la aplicación de autenticación de {user}"
 
-#: src/screens/Admin.tsx
-msgid "Whom"
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Issued"
-msgstr ""
-
 #: src/screens/Household.tsx
 msgid "Everyone in a household can do everything in it. Only the owner can change who is in it, from the Admin screen. The count is transactions still in the register that each person entered — by hand, by import, or by an agent key of theirs — read from the History, so a row somebody has since deleted is not counted against anyone."
 msgstr ""
@@ -1090,29 +1132,27 @@ msgstr ""
 msgid "Invitations are single-use and they expire. Ask whoever sent it for a fresh one."
 msgstr "Las invitaciones son de un solo uso y caducan. Pide una nueva a quien te la envió."
 
+#. What the import detected: which column holds the payee. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "payee column"
 msgstr "columna de beneficiario"
 
+#. Label on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "Latest 3 months"
 msgstr "Últimos 3 meses"
 
-#: src/screens/Admin.tsx
-msgid "Make them an owner"
-msgstr ""
-
+#. Row state in the one-time import's account mapping: left out
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Skipped"
 msgstr "Omitida"
 
-#: src/screens/Admin.tsx
-msgid "That is more than you chose: what was already reset for them stays reset, so the link has to set it too."
-msgstr ""
-
+#. Label of a form field on the Your account panel
+#. Label of a form field on the Your account panel
+#. Label of a form field on the password-and-code check
 #: src/components/StepUp.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1124,6 +1164,7 @@ msgstr "Tu contraseña"
 msgid "Anything you change here is recorded, and can be put back from the History screen."
 msgstr "Todo lo que cambies aquí queda registrado y se puede deshacer desde la pantalla Historial."
 
+#. Button on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Making…"
@@ -1134,11 +1175,13 @@ msgstr "Generando…"
 msgid "e.g. the code after _en_"
 msgstr "p. ej., el código después de _en_"
 
+#. Tooltip on the shared controls
 #: src/components/bits.tsx
 #, fuzzy
 msgid "Sort by {label}"
 msgstr "Ordenar por {label}"
 
+#. Label of a form field on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Search"
@@ -1149,29 +1192,30 @@ msgstr "Buscar"
 msgid "Show the menu"
 msgstr "Mostrar el menú"
 
-#: src/screens/Admin.tsx
-msgid "their password stops working"
-msgstr ""
-
 #: src/lib/reimbursement.ts
 #, fuzzy
 msgid "Work expense — reimbursed"
 msgstr "Gasto de trabajo: reembolsado"
 
-#: src/screens/Admin.tsx
-msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password and authenticator."
-msgstr ""
-
+#. Heading on the Your account panel. See GLOSSARY.md
+#. Screen-reader name on the Your account panel. See GLOSSARY.md
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Appearance"
 msgstr "Apariencia"
 
+#. Label on the Your account panel: nothing so far
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "None yet"
 msgstr "Ninguna todavía"
 
+#. Column heading on the Accounts screen: noun, a bank or cash account. See GLOSSARY.md
+#. Column heading on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Register screen: noun, a bank or cash account. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
+#. Label of a form field on the Register screen: noun, a bank or cash account. See GLOSSARY.md
+#. Label on the Register screen: noun, a bank or cash account. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #: src/screens/TransferSections.tsx
@@ -1179,10 +1223,7 @@ msgstr "Ninguna todavía"
 msgid "Account"
 msgstr "Cuenta"
 
-#: src/screens/Admin.tsx
-msgid "Revoking…"
-msgstr ""
-
+#. Text on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "never used"
@@ -1209,6 +1250,7 @@ msgstr "Comprobar el código"
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Dinero apartado en un banco. Igual que una cuenta corriente, pero separado para que el registro se lea con claridad."
 
+#. Text on the household page
 #: src/screens/Household.tsx
 msgid "Counting…"
 msgstr ""
@@ -1230,11 +1272,13 @@ msgstr "En qué cuenta"
 msgid "use the bank's: {0}"
 msgstr "usar el del banco: {0}"
 
+#. Label of a form field on the Register screen: noun, being paid back by work
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Reimbursement"
 msgstr "Reembolso"
 
+#. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
 msgid "Merge…"
 msgstr ""
@@ -1245,6 +1289,9 @@ msgstr ""
 msgid "<0>{0} selected.</0> Changing them is one act, so undo puts all of them back together."
 msgstr "<0>{0} seleccionadas.</0> Cambiarlas es un solo acto, así que deshacer las devuelve todas a la vez."
 
+#. Column name shown beside a value on phones on the Register screen (noun). See GLOSSARY.md
+#. Label on the Register screen (noun). See GLOSSARY.md
+#. Screen-reader text on the Register screen (noun). See GLOSSARY.md
 #: src/screens/Register.tsx
 #, fuzzy
 msgctxt "noun"
@@ -1267,11 +1314,13 @@ msgstr "Todavía no hay categorías: añade algunas en la pantalla Categorías."
 msgid "New name for {0}"
 msgstr "Nuevo nombre para {0}"
 
+#. Sentence on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Sum"
 msgstr "Suma"
 
+#. Label on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "Last year"
@@ -1287,6 +1336,8 @@ msgstr "un pago fuera de lo que el registro puede mostrar"
 msgid "Changing it signs out every other browser and forgets every trusted one, so if you are changing it because somebody else knows it, they are out too. Agent keys are separate credentials and keep working until you revoke them."
 msgstr "Cambiarla cierra la sesión en todos los demás navegadores y olvida los de confianza, así que, si la cambias porque alguien más la conoce, también queda fuera. Las claves de agente son credenciales aparte y siguen funcionando hasta que las revoques."
 
+#. Table cell on the Register screen
+#. Text on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "saving…"
@@ -1301,6 +1352,10 @@ msgstr "{by} restableció la contraseña y la aplicación de autenticación de {
 msgid "Your own accent (optional)"
 msgstr ""
 
+#. Column heading on the Transfers screen: preposition, the account money arrives in
+#. Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in
+#. Label of a form field on the Payees screen: where it goes, or what it is merged into
+#. Label on the Import screen: preposition, the account money arrives in
 #: src/screens/Import.tsx
 #: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
@@ -1308,6 +1363,7 @@ msgstr ""
 msgid "Into"
 msgstr "Hacia"
 
+#. Button on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Discarding…"
@@ -1319,6 +1375,8 @@ msgstr "Descartando…"
 msgid "{stored, plural, one {The {0} receipt that already has an original keeps it — nothing here deletes anything.} other {The {1} receipts that already have an original keep it — nothing here deletes anything.}}"
 msgstr ""
 
+#. Account type `savings`, and the heading of its group. See GLOSSARY.md
+#. Account type `savings`, and the heading of its group. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Savings"
@@ -1344,12 +1402,6 @@ msgstr "El banco lo llamó <0>{0}</0>, tal como lo guardó {app}."
 #, fuzzy
 msgid "Nothing recorded. Rows created before the audit log existed have no history."
 msgstr "No hay nada registrado. Las filas creadas antes de que existiera el registro de auditoría no tienen historial."
-
-#. placeholder {0}: withdrawing.display_name
-#. placeholder {1}: withdrawing.email
-#: src/screens/Admin.tsx
-msgid "The link for {0} ({1}) stops working at once. Their password and authenticator stays reset, so they cannot sign in until you make them a new link."
-msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1381,11 +1433,6 @@ msgstr "¿No puedes escanearlo? Escribe esta clave a mano: <0>{0}</0>"
 msgid "Add a group"
 msgstr ""
 
-#. placeholder {0}: one.display_name
-#: src/screens/Admin.tsx
-msgid "Role for {0}"
-msgstr ""
-
 #. placeholder {0}: formatCount(rows.length)
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1401,6 +1448,13 @@ msgstr "El servidor añadió a {user} como propietario"
 msgid "Two households open in one browser look identical, and that is how a statement gets posted into the wrong one. The colour is on every screen, needs no reading, and you notice it changed before you notice anything else."
 msgstr ""
 
+#. Column heading on the household page: noun, bank or cash accounts. See GLOSSARY.md
+#. Column name shown beside a value on phones on the household page: noun, bank or cash accounts. See GLOSSARY.md
+#. Label on the household page: noun, bank or cash accounts. See GLOSSARY.md
+#. Menu item and the name of its screen: noun, bank or cash accounts. See GLOSSARY.md
+#. Screen title on the Accounts screen: noun, bank or cash accounts. See GLOSSARY.md
+#. Step name in the one-time import: map the other app's accounts. See GLOSSARY.md
+#. Text on the Register screen: noun, bank or cash accounts. See GLOSSARY.md
 #: src/App.tsx
 #: src/lib/labels.ts
 #: src/screens/Accounts.tsx
@@ -1415,6 +1469,7 @@ msgstr "Cuentas"
 msgid "Needs a category"
 msgstr "Necesita categoría"
 
+#. Text on the Payees screen
 #: src/screens/Payees.tsx
 msgid "Folded into {kept}"
 msgstr ""
@@ -1435,37 +1490,38 @@ msgstr "Todo lo que un programa haga mal tiene que poder deshacerlo una persona,
 msgid "Waiting to be reviewed"
 msgstr "Pendientes de revisar"
 
+#. Sentence on the Import screen
 #. placeholder {0}: formatCount(raw.total)
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "{0} characters"
 msgstr "{0} caracteres"
 
+#. Step name in the one-time import: which app the history comes from
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Source app"
 msgstr "Aplicación de origen"
 
+#. Sentence on the sign-in page: conjunction between two choices
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "or"
 msgstr "o"
 
+#. Button on the Import screen: verb, throw away what was not saved
+#. Button on the Register screen: verb, throw away what was not saved
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Discard"
 msgstr "Descartar"
 
+#. Title of a panel on the Transfers screen
 #: src/screens/Transfer.tsx
 #, fuzzy
 msgid "Add transfer"
 msgstr "Añadir transferencia"
-
-#. placeholder {0}: one.display_name
-#: src/screens/Admin.tsx
-msgid "Reset sign-in for {0}"
-msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1477,6 +1533,7 @@ msgstr "Este se introdujo a mano."
 msgid "{count, plural, one {{shown} transaction match the filters} other {{shown} transactions match the filters}}"
 msgstr "{count, plural, one {{shown} movimiento coincide con los filtros} other {{shown} movimientos coinciden con los filtros}}"
 
+#. Placeholder in an empty field on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "receipt filer"
@@ -1494,15 +1551,18 @@ msgstr ""
 msgid "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
 msgstr "Estas filas nombran una de tus cuentas o a alguien del hogar, y su otra parte todavía no está en el libro. Se vinculan cuando se importe ese extracto. Ponle una categoría a la fila si no es una transferencia."
 
+#. Text on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Attach receipts"
 msgstr "Adjuntar tickets"
 
+#. Label on the household page
 #: src/screens/Household.tsx
 msgid "Newest transaction"
 msgstr ""
 
+#. Text on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "DOE JANE"
@@ -1512,10 +1572,6 @@ msgstr "GARCIA LUCIA"
 #, fuzzy
 msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
 msgstr "{revoked, plural, one {{revoked} navegador de confianza volverá a pedir un código.} other {{revoked} navegadores de confianza volverán a pedir un código.}}"
-
-#: src/screens/Admin.tsx
-msgid "Changing your own role would close this screen; ask the other owner"
-msgstr ""
 
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -1527,10 +1583,9 @@ msgstr "Seleccionar todas las filas pendientes"
 msgid "That isn't an amount"
 msgstr "Eso no es un importe"
 
-#: src/screens/Admin.tsx
-msgid "Yes, revoke it"
-msgstr ""
-
+#. Button on the Categories screen: verb
+#. Button on the Register screen: verb
+#. Button on the Rules screen: verb
 #: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 #: src/screens/Rules.tsx
@@ -1543,22 +1598,11 @@ msgstr "Eliminar"
 msgid "Held in dark, whatever this device is set to."
 msgstr "Fijado en oscuro, sea cual sea el ajuste de este dispositivo."
 
-#: src/screens/Admin.tsx
-msgid "Disable"
-msgstr ""
-
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Filters"
 msgstr "Filtros"
-
-#: src/screens/Admin.tsx
-msgid "Disabling somebody signs them out everywhere and forgets their trusted browsers. It leaves their work alone — their name stays on every batch they ran."
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "every session, trusted browser, agent key and passkey ends"
-msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1579,6 +1623,7 @@ msgstr "Ese enlace no funciona"
 msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 msgstr "{0, plural, one {También en {1} movimiento más: el mismo archivo, guardado una sola vez.} other {También en {2} movimientos más: el mismo archivo, guardado una sola vez.}}"
 
+#. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
 msgid "Payee Merge"
@@ -1589,22 +1634,20 @@ msgstr "Fusionar beneficiarios"
 msgid "Click to edit"
 msgstr "Haz clic para editar"
 
+#. Label of a form field on the app's menu and frame
+#. Label of a form field on the household page
 #: src/App.tsx
-#: src/screens/Admin.tsx
 #: src/screens/Household.tsx
 #, fuzzy
 msgid "Main currency"
 msgstr "Divisa principal"
-
-#: src/screens/Admin.tsx
-msgid "Reset sign-in…"
-msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
 msgstr "Escanea esto con tu aplicación de autenticación y escribe los seis dígitos que muestre. Comprobamos el código ahora, para que sepas que funciona aquí y no lo descubras la próxima vez que inicies sesión. La entrada que tenía la aplicación para esta cuenta ya no funciona; bórrala."
 
+#. Button on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Import these"
@@ -1621,22 +1664,25 @@ msgstr "Cerrar el menú"
 msgid "Remove <0>{0}</0>? It stops working at once."
 msgstr "¿Quitar <0>{0}</0>? Dejará de funcionar al instante."
 
+#. Label on the Your account panel: colour scheme: follow the device
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "System"
 msgstr "Sistema"
 
+#. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Closed"
 msgstr "Cerrada"
 
+#. Menu item and the name of its screen
 #: src/App.tsx
-#: src/screens/Profile.tsx
 #, fuzzy
 msgid "Set up"
 msgstr "Configuración"
 
+#. Sentence on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "No payee"
@@ -1652,11 +1698,18 @@ msgstr "Ya has vuelto a entrar"
 msgid "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
 msgstr "Si ya no tienes la aplicación de autenticación antigua, usa aquí uno de tus códigos de recuperación; se gasta."
 
+#. Label of a form field on the Rules screen
 #: src/screens/Rules.tsx
 msgid "And then"
 msgstr ""
 
-#: src/screens/Admin.tsx
+#. Button on the Import screen
+#. Button on the Register screen
+#. Button on the Your account panel
+#. Button on the Your account panel
+#. Button on the Your account panel
+#. Button on the passkeys panel
+#. Button on the passkeys panel
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Profile.tsx
@@ -1674,6 +1727,12 @@ msgstr ""
 msgid "Yes, all of them and set the rule"
 msgstr "Sí, todas y poner la regla"
 
+#. Column heading on the Accounts screen: noun, the reason
+#. Column heading on the Transfers screen: noun, the reason
+#. Column heading on the Transfers screen: noun, the reason
+#. Column name shown beside a value on phones on the Accounts screen: noun, the reason
+#. Column name shown beside a value on phones on the Transfers screen: noun, the reason
+#. Column name shown beside a value on phones on the Transfers screen: noun, the reason
 #: src/screens/Accounts.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -1689,17 +1748,15 @@ msgstr "Motivo"
 msgid "{0, plural, one {and {1} more payee — {2} in all.} other {and {3} more payees — {4} in all.}}"
 msgstr ""
 
+#. Import outcome: something changed, so the person has to decide. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Needs a look"
 msgstr "Hay que revisarla"
 
-#. placeholder {0}: confirming.user.display_name
-#: src/screens/Admin.tsx
-msgid "Make {0} a member?"
-msgstr ""
-
-#: src/screens/Admin.tsx
+#. Button on the Register screen: finish and close
+#. Button on the Your account panel: finish and close
+#. Screen title on the account reset page
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
 #: src/screens/ResetAccount.tsx
@@ -1707,15 +1764,13 @@ msgstr ""
 msgid "Done"
 msgstr "Listo"
 
-#: src/screens/Admin.tsx
-msgid "Re-enable them first: a disabled account cannot follow a link"
-msgstr ""
-
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Add a transaction"
 msgstr "Añadir un movimiento"
 
+#. Column heading on the Accounts screen
+#. Column name shown beside a value on phones on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Newest"
@@ -1727,6 +1782,7 @@ msgstr "Más reciente"
 msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and that payee will be gone. Each merge is one act in History, so it can be undone there."
 msgstr ""
 
+#. Label on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "another app"
@@ -1737,19 +1793,12 @@ msgstr "otra aplicación"
 msgid "Those two don't match."
 msgstr "No coinciden."
 
+#. Label of a form field on the Transfers screen
 #. placeholder {0}: to!.currency
 #: src/screens/Transfer.tsx
 #, fuzzy
 msgid "Amount arriving ({0})"
 msgstr "Importe que llega ({0})"
-
-#: src/screens/Admin.tsx
-msgid "Disabled"
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Reset and make the link"
-msgstr ""
 
 #: src/screens/Payees.tsx
 msgid "Choose a payee…"
@@ -1787,6 +1836,7 @@ msgstr ""
 msgid "Who was paid"
 msgstr "A quién se pagó"
 
+#. Label on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "T — Transfers"
@@ -1810,6 +1860,8 @@ msgstr ""
 msgid "Pick an accent colour"
 msgstr ""
 
+#. Label of a form field on the Transfers screen: the start of a range, or where money comes from
+#. Text on the date range picker: the start of a range, or where money comes from
 #: src/components/DateRange.tsx
 #: src/screens/Transfer.tsx
 #, fuzzy
@@ -1821,6 +1873,7 @@ msgstr "Desde"
 msgid "No category needed"
 msgstr "No necesita categoría"
 
+#. Tooltip on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "not counted"
@@ -1836,6 +1889,8 @@ msgstr "Se cerró la ventana de la llave de acceso, así que no se añadió nada
 msgid "Smaller text in the table"
 msgstr "Texto más pequeño en la tabla"
 
+#. Heading on the Accounts screen
+#. Screen-reader name on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Suggested identifiers"
@@ -1849,6 +1904,7 @@ msgstr "Identificadores sugeridos"
 msgid "{0, plural, one {Repays {1} expense} other {Repays {2} expenses}}"
 msgstr "{0, plural, one {Devuelve {1} gasto} other {Devuelve {2} gastos}}"
 
+#. What the import detected: how many lines above the table are skipped. Lower case
 #: src/lib/labels.ts
 #, fuzzy
 msgid "skip rows"
@@ -1860,6 +1916,7 @@ msgstr "filas omitidas"
 msgid "It rewrites <0>{0}</0> of {1} rows already in this ledger."
 msgstr ""
 
+#. Button on the Categories screen: verb
 #: src/screens/Categories.tsx
 msgid "Edit"
 msgstr ""
@@ -1869,9 +1926,15 @@ msgstr ""
 msgid "No single category matches that. Keep typing, or empty it."
 msgstr "Ninguna categoría coincide exactamente. Sigue escribiendo o vacía el campo."
 
+#. Title of a panel on the Payees screen
 #. placeholder {0}: payee.name
 #: src/screens/Payees.tsx
 msgid "Merge {0}"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.backup.protected"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -1946,15 +2009,82 @@ msgstr "Una transferencia de {from_currency} a {to_currency} necesita el importe
 msgid "error.transfer.same_account"
 msgstr "Una cuenta no puede transferir a sí misma"
 
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.digest_mismatch"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.engine_refused"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.in_flight"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.lossy_mismatch"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.no_report"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.no_updater"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.not_a_version"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.not_newer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.outcome_not_found"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.recovery_code_unknown"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_not_newer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_older_than_app"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_outdated"
+msgstr ""
+
 #: src/screens/Payees.tsx
 msgid "No payees yet. One appears the first time you name somebody on a transaction."
 msgstr ""
 
+#. Stands in for a household's name the panel no longer knows. Lower case
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "a household"
 msgstr "un hogar"
 
+#. Button on the Register screen: verb, make a copy of this transaction
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Duplicate"
@@ -1970,25 +2100,24 @@ msgstr "{app}, a través de la API de {app}"
 msgid "Read a statement file into this register"
 msgstr "Leer un archivo de extracto en este registro"
 
+#. Text on the sign-in page: noun, a code typed in
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Code"
 msgstr "Código"
 
+#. What the import detected: the column saying if a row happened. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "state column"
 msgstr "columna de estado"
-
-#: src/screens/Admin.tsx
-msgid "No households yet."
-msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "Se cambió {done} fila y se dejaron {skipped} como estaban: solo una salida de dinero que no sea una transferencia puede ser un gasto de trabajo."
 
+#. Button on the Payees screen
 #: src/screens/Payees.tsx
 msgid "Add payee"
 msgstr ""
@@ -2007,14 +2136,7 @@ msgstr "Preparado a través de la API de agentes por <0>{0}</0>."
 msgid "<0>{0}</0> leaves {1} and the same arrives in {2}."
 msgstr "<0>{0}</0> sale de {1} y lo mismo llega a {2}."
 
-#: src/screens/Admin.tsx
-msgid "Active"
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Households"
-msgstr ""
-
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Clear selection"
@@ -2030,6 +2152,7 @@ msgstr "qué hace buena una contraseña"
 msgid "one part of a split; the other parts stay."
 msgstr "una parte de una división; las demás partes se quedan."
 
+#. Button on the app's menu and frame. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
 msgid "Sign out"
@@ -2040,6 +2163,13 @@ msgstr "Cerrar sesión"
 msgid "A passkey is a way in that keeps working after this browser is closed."
 msgstr "Una llave de acceso es una forma de entrar que sigue funcionando después de cerrar este navegador."
 
+#. State of the authenticator: it is enrolled and working. See GLOSSARY.md
+#: src/screens/Profile.tsx
+#, fuzzy
+msgctxt "authenticator state"
+msgid "Set up"
+msgstr "Configurada"
+
 #. placeholder {0}: format(txn.amount, currency)
 #. placeholder {1}: txn.payee_name
 #. placeholder {2}: formatDate(txn.date)
@@ -2048,6 +2178,7 @@ msgstr "Una llave de acceso es una forma de entrar que sigue funcionando despué
 msgid "{0} · {1} on {2}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} · {1} el {2}. Las partes lo sustituyen, así que tienen que sumar el mismo importe. Sin signo menos: cada parte va en el mismo sentido que el original."
 
+#. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
 msgid "Register"
@@ -2057,6 +2188,7 @@ msgstr "Registro"
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
 msgstr ""
 
+#. How a rule matches, inside the rule list: the bank's text starts with the pattern
 #: src/screens/Rules.tsx
 msgctxt "rule list"
 msgid "prefix"
@@ -2071,6 +2203,7 @@ msgstr "La clave secreta de este servidor se ha sustituido, así que tu aplicaci
 msgid "Use the palette's"
 msgstr ""
 
+#. Tooltip on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "Later"
@@ -2081,11 +2214,13 @@ msgstr "Después"
 msgid "A household holds the accounts and the register. The currency here is only used for totals; each account keeps its own."
 msgstr "Un hogar reúne las cuentas y el registro. La divisa de aquí solo se usa para los totales; cada cuenta conserva la suya."
 
+#. Account type `other_asset`: something owned that holds value. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Other asset"
 msgstr "Otro activo"
 
+#. Menu item and the name of its screen: noun, money moved between your own accounts. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
 msgid "Transfers"
@@ -2096,21 +2231,28 @@ msgstr "Transferencias"
 msgid "Click to change"
 msgstr "Haz clic para cambiar"
 
+#. Button on the Register screen: verb, take the receipt off the transaction
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Detach"
 msgstr "Desvincular"
 
+#. Heading over the other-debt accounts on the Accounts screen. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Other liabilities"
 msgstr "Otras deudas"
 
+#. Button on the Register screen: verb
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Replace"
 msgstr "Sustituir"
 
+#. Column heading on the Accounts screen: noun, the amount an account holds. See GLOSSARY.md
+#. Column heading on the Register screen: noun, the amount an account holds. See GLOSSARY.md
+#. Column name for resizing the column on the Register screen: noun, the amount an account holds. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Register screen: noun, the amount an account holds. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2123,6 +2265,7 @@ msgstr "Saldo"
 msgid "Categorise {0} selected as…"
 msgstr "Categorizar {0} seleccionadas como…"
 
+#. Sentence on the Register screen
 #. placeholder {0}: formatCount(selected.size)
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2134,22 +2277,27 @@ msgstr "{0} seleccionadas"
 msgid "The file itself"
 msgstr "El archivo en sí"
 
-#: src/screens/Admin.tsx
-msgid "Re-enable"
-msgstr ""
-
+#. Column heading on the Accounts screen: state, the bank has the row. See GLOSSARY.md
+#. Column heading on the Register screen: state, the bank has the row. See GLOSSARY.md
+#. Column name for resizing the column on the Register screen: state, the bank has the row. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Accounts screen: state, the bank has the row. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Register screen: state, the bank has the row. See GLOSSARY.md
+#. Label of a choice on the Register screen: state, the bank has the row. See GLOSSARY.md
+#. Label of a form field on the Register screen: state, the bank has the row. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Cleared"
 msgstr "Contabilizado"
 
+#. Label on the Register screen
 #. placeholder {0}: found.plan_name
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "the plan <0>{0}</0>"
 msgstr "el plan <0>{0}</0>"
 
+#. Label on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "Latest 12 months"
@@ -2162,22 +2310,14 @@ msgstr "Últimos 12 meses"
 msgid "{0} will always be {1} — and the payee was added"
 msgstr "{0} será siempre {1}, y se ha añadido el beneficiario"
 
+#. Name of a fact on the Register screen: money that came in
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Received"
 msgstr "Recibido"
 
-#. placeholder {0}: confirming.user.display_name
-#: src/screens/Admin.tsx
-msgid "Disable {0}?"
-msgstr ""
-
 #: src/screens/Categories.tsx
 msgid "Auto-categorise based on payee history"
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "By"
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -2189,6 +2329,7 @@ msgstr "Una contraseña nueva"
 msgid "Every new receipt will take about <0>70× more space</0> in the database. Only worth it if you need the exact file. Existing receipts are not changed."
 msgstr ""
 
+#. Button on the Register screen
 #. placeholder {0}: rest.join(", ")
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2200,6 +2341,7 @@ msgstr "{0}: todas ocultas"
 msgid "Filled in from the invitation. Change it if you would rather use another address."
 msgstr "Rellenado a partir de la invitación. Cámbialo si prefieres usar otra dirección."
 
+#. Label of a form field on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Which household"
@@ -2210,31 +2352,33 @@ msgstr "Qué hogar"
 msgid "Keep it here"
 msgstr "Dejarlo aquí"
 
+#. Button on the Accounts screen
+#. Button on the Import screen
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Ignore"
 msgstr "Ignorar"
 
+#. Step name in the one-time import: pick which YNAB plan (budget) to bring over
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Plan"
 msgstr "Plan"
 
-#: src/screens/Admin.tsx
-msgid "Create household"
-msgstr ""
-
+#. Title of a panel on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Your account"
 msgstr "Tu cuenta"
 
-#: src/screens/Admin.tsx
+#. Column heading on the household page: noun, owner or member
+#. Column name shown beside a value on phones on the household page: noun, owner or member
 #: src/screens/Household.tsx
 msgid "Role"
 msgstr ""
 
+#. Screen title on the Payee Categorisation screen. See GLOSSARY.md
 #: src/screens/PayeeCategorisation.tsx
 msgid "Payee categorisation"
 msgstr ""
@@ -2247,6 +2391,7 @@ msgstr ""
 msgid "{0, plural, one {Matches {1} row, such as:} other {Matches {2} rows, such as:}}"
 msgstr "{0, plural, one {Coincide con {1} fila, como:} other {Coincide con {2} filas, como:}}"
 
+#. Label on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Single transaction"
@@ -2257,19 +2402,13 @@ msgstr "Movimiento único"
 msgid "Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it."
 msgstr "Números y nombres que usan los extractos para esta cuenta. Un archivo que lleve uno se asocia a esta cuenta en la pantalla Importar, y una transferencia que nombre uno, también."
 
-#: src/screens/Admin.tsx
-msgid "Reset sign-in for {name}?"
-msgstr ""
-
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Splitting…"
 msgstr "Dividiendo…"
 
-#: src/screens/Admin.tsx
-msgid "Issued by"
-msgstr ""
-
+#. Step name in the one-time import: what the import did
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Report"
@@ -2285,20 +2424,18 @@ msgstr "Cargando las siguientes filas…"
 msgid "No accounts are ticked, so there is nothing to show. Tick one in the accounts filter — or Select all, which is not the same as ticking every one of them."
 msgstr "No hay ninguna cuenta marcada, así que no hay nada que mostrar. Marca una en el filtro de cuentas, o Seleccionar todo, que no es lo mismo que marcarlas una a una."
 
-#: src/screens/Admin.tsx
-msgid "fills in the acceptance screen"
-msgstr ""
-
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "I've lost my authenticator — use a recovery code"
 msgstr "He perdido mi aplicación de autenticación: usar un código de recuperación"
 
+#. Import outcome: the line could not be read. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Could not read"
 msgstr "No se pudo leer"
 
+#. Button on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Change password"
@@ -2309,11 +2446,6 @@ msgstr "Cambiar contraseña"
 msgid "Normally a program stages an import and you review it before anything lands in the register. This skips that."
 msgstr "Normalmente un programa prepara una importación y tú la revisas antes de que nada llegue al registro. Esto se salta ese paso."
 
-#. placeholder {0}: consequences.join("; ")
-#: src/screens/Admin.tsx
-msgid "<0>At once, not when the link is followed:</0> {name} is signed out everywhere — {0}. They cannot sign in again until they follow the link."
-msgstr ""
-
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "The password alone cannot replace your second factor — otherwise it would not be a second factor."
@@ -2323,10 +2455,6 @@ msgstr "La contraseña sola no puede sustituir tu segundo factor; si pudiera, no
 #, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as an owner."
 msgstr "{inviter} te ha invitado a {PRODUCT} como propietario."
-
-#: src/screens/Admin.tsx
-msgid "none yet"
-msgstr ""
 
 #: src/screens/Transfer.tsx
 #, fuzzy
@@ -2339,17 +2467,17 @@ msgid "No minus signs — the direction is the two accounts above."
 msgstr "Sin signo menos: el sentido lo dan las dos cuentas de arriba."
 
 #: src/components/SignInNotice.tsx
-#: src/screens/Admin.tsx
 #, fuzzy
 msgid "Recent sign-in changes"
 msgstr "Cambios recientes en el inicio de sesión"
 
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Deleting…"
 msgstr "Eliminando…"
 
-#: src/screens/Admin.tsx
+#. Button on the Your account panel: verb, stop a key or device from working
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Revoke"
@@ -2369,42 +2497,35 @@ msgstr "Ancho de la columna {label}"
 msgid "part of a name"
 msgstr ""
 
-#: src/screens/Admin.tsx
-msgid "Everything on this screen is recorded as a batch with your name on it. These are instance-wide rather than household changes, so they are kept out of a household's History."
-msgstr ""
-
+#. Column heading on the Accounts screen
+#. Column name shown beside a value on phones on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Would link"
 msgstr "Vincularía"
 
+#. Shown when a list is empty on the Transfers screen
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Nothing waiting."
 msgstr "No hay nada pendiente."
-
-#: src/screens/Admin.tsx
-msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password."
-msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "Looking up your invitation…"
 msgstr "Buscando tu invitación…"
 
-#: src/screens/Admin.tsx
-msgid "Every household on this instance, including ones you are not in. Joining one is still an explicit act."
-msgstr ""
-
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Reset your sign-in"
 msgstr "Restablecer tu inicio de sesión"
 
+#. Heading on the household page
 #: src/screens/Household.tsx
 msgid "By currency"
 msgstr ""
 
+#. Screen title on the first-run setup
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "Set up {PRODUCT}"
@@ -2415,10 +2536,13 @@ msgstr "Configurar {PRODUCT}"
 msgid "The name looks like its number."
 msgstr "El nombre parece ser su número."
 
-#: src/screens/Admin.tsx
-msgid "Copy"
-msgstr ""
-
+#. Column heading on the Import screen: noun, a sum of money. See GLOSSARY.md
+#. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
+#. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
+#. Label of a choice on the Register screen: noun, a sum of money. See GLOSSARY.md
+#. Text on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
@@ -2434,6 +2558,7 @@ msgid "Fecha;Concepto;Importe\n"
 msgstr "Fecha;Concepto;Importe\n"
 "05/01/2026;MERCADONA;-45,20"
 
+#. Button on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Close: {name}"
@@ -2444,6 +2569,7 @@ msgstr "Cerrar: {name}"
 msgid "Added as an owner"
 msgstr "Añadido como propietario"
 
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Detaching…"
@@ -2459,11 +2585,17 @@ msgstr "Esta fila está bloqueada, así que no se puede cambiar nada y una impor
 msgid "The server reset {user}'s authenticator"
 msgstr "El servidor restableció la aplicación de autenticación de {user}"
 
+#. What the import detected: how dates are written. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "date format"
 msgstr "formato de fecha"
 
+#. Column heading on the Accounts screen: noun, lines of a file or table
+#. Column heading on the Import screen: noun, lines of a file or table
+#. Column heading on the Rules screen: noun, lines of a file or table
+#. Column name shown beside a value on phones on the Accounts screen: noun, lines of a file or table
+#. Column name shown beside a value on phones on the Rules screen: noun, lines of a file or table
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
 #: src/screens/Rules.tsx
@@ -2471,6 +2603,7 @@ msgstr "formato de fecha"
 msgid "Rows"
 msgstr "Filas"
 
+#. Heading on the Register screen
 #. placeholder {0}: list.length
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2482,6 +2615,7 @@ msgstr "Tickets ({0})"
 msgid "Not a transfer"
 msgstr "No es una transferencia"
 
+#. Column heading on the passkeys panel: the date the passkey was added
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Added"
@@ -2493,15 +2627,13 @@ msgstr "Añadida"
 msgid "{0} left to account for"
 msgstr "faltan {0} por repartir"
 
+#. Label on the Categories screen
+#. Text on the Import screen
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "this payee"
 msgstr "este beneficiario"
-
-#: src/screens/Admin.tsx
-msgid "Withdrawing…"
-msgstr ""
 
 #. placeholder {0}: purging.row_count
 #: src/screens/Import.tsx
@@ -2524,10 +2656,15 @@ msgstr ""
 msgid "Add a part for the {0}"
 msgstr "Añadir una parte para los {0}"
 
+#. Screen-reader text on the Payee Categorisation screen
 #: src/screens/PayeeCategorisation.tsx
 msgid "Search payees"
 msgstr ""
 
+#. Button on the Accounts screen: verb
+#. Button on the Categories screen: verb
+#. Button on the Categories screen: verb
+#. Button on the Rules screen: verb
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Rules.tsx
@@ -2555,15 +2692,14 @@ msgstr "{inviter} te ha invitado a {PRODUCT} como propietario, en {households}."
 msgid "Passkeys are not set up on this server."
 msgstr "Las llaves de acceso no están configuradas en este servidor."
 
-#: src/screens/Admin.tsx
-msgid "anyone with the link"
-msgstr ""
-
+#. Row state in the one-time import's mapping: goes to an existing one
+#. Row state in the one-time import's mapping: goes to an existing one
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Matched"
 msgstr "Emparejada"
 
+#. Table cell on the Categories screen
 #: src/screens/Categories.tsx
 msgid "unused"
 msgstr ""
@@ -2573,11 +2709,13 @@ msgstr ""
 msgid "No single category matches that."
 msgstr "Ninguna categoría coincide exactamente con eso."
 
+#. Button on the Register screen: verb, divide one transaction into parts. See GLOSSARY.md
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Split"
 msgstr "Dividir"
 
+#. Option in a dropdown on the Rules screen: a rule's match: the text is exactly this
 #: src/screens/Rules.tsx
 msgid "is exactly"
 msgstr ""
@@ -2587,6 +2725,7 @@ msgstr ""
 msgid "Import from a file"
 msgstr "Importar desde un archivo"
 
+#. Text on the household page
 #. placeholder {0}: count(it.accounts_closed)
 #: src/screens/Household.tsx
 msgid "{0} closed"
@@ -2597,6 +2736,7 @@ msgstr ""
 msgid "New codes made. Every earlier code, used or not, has stopped working."
 msgstr "Códigos nuevos generados. Todos los códigos anteriores, usados o no, han dejado de funcionar."
 
+#. Sentence on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "a statement"
@@ -2607,6 +2747,7 @@ msgstr "un extracto"
 msgid "You've been invited"
 msgstr "Te han invitado"
 
+#. Text on the household page
 #. placeholder {0}: count(it.payee_rules - it.payee_rules_enabled)
 #: src/screens/Household.tsx
 msgid "{0} turned off"
@@ -2623,29 +2764,29 @@ msgstr "divisas mezcladas, sin comparar"
 msgid "Came from a statement. Its line key is <0>{0}</0>, which is what stops the same line being imported twice."
 msgstr "Viene de un extracto. Su clave de línea es <0>{0}</0>, que es lo que impide que la misma línea se importe dos veces."
 
+#. Label on the household page. See GLOSSARY.md
 #: src/screens/Household.tsx
 msgid "Payee rules"
 msgstr ""
 
+#. Import outcome: the row came in with an earlier statement. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Already imported"
 msgstr "Ya importada"
 
+#. Heading over the everyday bank accounts on the Accounts screen. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Checking"
 msgstr "Cuentas corrientes"
-
-#: src/screens/Admin.tsx
-msgid "You are a member of anything you create, whether or not you tick yourself."
-msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Work will not pay this. It counts as your spending."
 msgstr "El trabajo no va a pagar esto. Cuenta como gasto tuyo."
 
+#. Column heading on the Rules screen
 #: src/screens/Rules.tsx
 msgid "Call it"
 msgstr ""
@@ -2654,6 +2795,7 @@ msgstr ""
 msgid "Do not auto-categorise {name}"
 msgstr ""
 
+#. Text on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Add more"
@@ -2673,52 +2815,44 @@ msgstr "Cada uno funciona una vez y solo se muestran ahora. Son la forma de volv
 msgid "Your new authenticator is the only one that works now."
 msgstr "Tu nueva aplicación de autenticación es la única que funciona ahora."
 
-#: src/screens/Admin.tsx
-msgid "Invitation link"
-msgstr ""
-
+#. Step name in the one-time import: how to reach the other app (file or API key)
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Connect"
 msgstr "Conectar"
 
-#: src/lib/labels.ts
-#, fuzzy
-msgid "New"
-msgstr "Nueva"
-
+#. Screen-reader name on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "Date range"
 msgstr "Periodo"
 
+#. Text on the Register screen
 #. placeholder {0}: index + 1
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Part {0} ({currency})"
 msgstr "Parte {0} ({currency})"
 
+#. Button on the app's menu and frame: verb
 #: src/App.tsx
 #, fuzzy
 msgid "Create it"
 msgstr "Crearlo"
 
+#. What the import detected: which column holds the amount. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "amount column"
 msgstr "columna de importe"
-
-#. placeholder {0}: withdrawing.display_name
-#. placeholder {1}: withdrawing.email
-#: src/screens/Admin.tsx
-msgid "The link for {0} ({1}) stops working at once. Their authenticator stays reset, so they cannot sign in until you make them a new link."
-msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Category: no category needed, this is one leg of a transfer"
 msgstr "Categoría: no hace falta, es una parte de una transferencia"
 
+#. Label of a form field on the Import screen
+#. Label on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "File"
@@ -2745,6 +2879,7 @@ msgstr "Las llaves de acceso necesitan que abras esta aplicación en su direcci�
 msgid "One part is still empty"
 msgstr "Una parte sigue vacía"
 
+#. Account type `checking`: an everyday bank account. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Current account"
@@ -2756,20 +2891,12 @@ msgstr "Cuenta corriente"
 msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and those payees will be gone. Each merge is one act in History, so it can be undone there."
 msgstr ""
 
-#. placeholder {0}: one.display_name
-#: src/screens/Admin.tsx
-msgid "Withdraw the reset link for {0}"
-msgstr ""
-
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "{text} — edit the memo"
 msgstr "{text}: editar el concepto"
 
-#: src/screens/Admin.tsx
-msgid "Changing…"
-msgstr ""
-
+#. A sign-in change in Admin's list: the person's password was reset
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Reset: password"
@@ -2780,6 +2907,7 @@ msgstr "Restablecimiento: contraseña"
 msgid "{by} reset your password and your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
 msgstr "{by} restableció tu contraseña y tu aplicación de autenticación para {email} el {when}. Se ha cerrado la sesión en todos los navegadores en los que la tenías iniciada. Vuelve a configurar las dos abajo."
 
+#. Column heading on the passkeys panel
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Last used"
@@ -2796,10 +2924,6 @@ msgstr "Este navegador tiene la sesión iniciada como {0}. Una invitación crea 
 msgid "the last four, or the part the bank prints"
 msgstr "los cuatro últimos, o la parte que imprime el banco"
 
-#: src/screens/Admin.tsx
-msgid "A suggestion, not a restriction: it fills in the address on the acceptance screen and the person can change it. <0>The link is the credential</0> — whoever opens it gets this role, so treat it like a password."
-msgstr ""
-
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Untick every row shown"
@@ -2810,16 +2934,24 @@ msgstr "Desmarcar todas las filas mostradas"
 msgid "Locked — checked against the bank, and every change to it is refused"
 msgstr "Bloqueado: comprobado con el banco, y se rechaza cualquier cambio"
 
+#. Screen-reader name on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "To year"
 msgstr "Año final"
 
+#. Button on the invitation page: finish the steps
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "Finish"
 msgstr "Terminar"
 
+#. Button on the Register screen: noun. See GLOSSARY.md
+#. Column heading on the Accounts screen: noun. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md
+#. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
+#. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
+#. Screen-reader name on the Accounts screen: noun. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2851,6 +2983,7 @@ msgstr "No disponible aquí"
 msgid "One line per currency, and no total across them."
 msgstr "Una línea por divisa, y ningún total entre ellas."
 
+#. Screen-reader name of a button on the Accounts screen
 #. placeholder {0}: one.value
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -2881,15 +3014,18 @@ msgstr ""
 msgid "Drag to resize · double-click to reset every column"
 msgstr "Arrastra para cambiar el tamaño · doble clic para restablecer todas las columnas"
 
+#. Button on the Categories screen
 #: src/screens/Categories.tsx
 msgid "Delete group"
 msgstr ""
 
+#. Text on the sign-in page. See GLOSSARY.md
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Recovery code"
 msgstr "Código de recuperación"
 
+#. Title of a panel on the Categories screen
 #: src/screens/Categories.tsx
 msgid "New group"
 msgstr ""
@@ -2899,6 +3035,18 @@ msgstr ""
 msgid "Detach this receipt?"
 msgstr "¿Desvincular este ticket?"
 
+#. Column heading on the Categories screen: noun, what a transaction was for. See GLOSSARY.md
+#. Column heading on the Import screen: noun, what a transaction was for. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
+#. Label of a form field on the Register screen: noun, what a transaction was for. See GLOSSARY.md
+#. Label of a form field on the Register screen: noun, what a transaction was for. See GLOSSARY.md
+#. Label of a form field on the Register screen: noun, what a transaction was for. See GLOSSARY.md
+#. Label on the Register screen: noun, what a transaction was for. See GLOSSARY.md
+#. Screen-reader name on the Import screen: noun, what a transaction was for. See GLOSSARY.md
+#. Screen-reader name on the Register screen: noun, what a transaction was for. See GLOSSARY.md
+#. Screen-reader name on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
@@ -2911,6 +3059,15 @@ msgstr "Categoría"
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr "Todavía tienes 1 llave de acceso, y un código de recuperación no las desactiva. Si una estaba en el dispositivo que perdiste, quítala en Métodos de inicio de sesión de tu perfil: tu nombre en el menú."
 
+#. Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Label of a form field on the Transfers screen: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Label on the Import screen: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Label on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Screen-reader name on the Import screen: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Screen-reader name on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Table cell on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
@@ -2918,16 +3075,21 @@ msgstr "Todavía tienes 1 llave de acceso, y un código de recuperación no las 
 msgid "Memo"
 msgstr "Concepto"
 
+#. Button on the Import screen
+#. Label on the Import screen
+#. Screen-reader name on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "One-time Import"
 msgstr "Importación única"
 
+#. Screen-reader name on the app's menu and frame
 #: src/App.tsx
 #, fuzzy
 msgid "{waiting} waiting"
 msgstr "{waiting} pendientes"
 
+#. Title of a panel on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "New account"
@@ -2938,14 +3100,11 @@ msgstr "Nueva cuenta"
 msgid "The server reset {user}'s password"
 msgstr "El servidor restableció la contraseña de {user}"
 
+#. Button on the app's menu and frame
 #: src/App.tsx
 #, fuzzy
 msgid "Try again"
 msgstr "Volver a intentarlo"
-
-#: src/screens/Admin.tsx
-msgid "You cannot disable yourself"
-msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2959,10 +3118,7 @@ msgstr "M — Introducido a mano"
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
 msgstr "El nombre de este archivo lleva <0>{0}</0>. ¿Guardarlo como etiqueta de archivo de <1>{1}</1>, para que su próximo extracto elija la cuenta solo?"
 
-#: src/screens/Admin.tsx
-msgid "Yes, make them a member"
-msgstr ""
-
+#. What the import detected: the column naming the account. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "product column"
@@ -2973,11 +3129,15 @@ msgstr "columna de producto"
 msgid "Set work expense on the selected rows"
 msgstr "Marcar como gasto de trabajo las filas seleccionadas"
 
+#. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
 msgid "Invitation"
 msgstr "Invitación"
 
+#. Column heading on the Payee Categorisation screen
+#. Column name shown beside a value on phones on the Payee Categorisation screen
+#. Heading on the Payee Categorisation screen
 #: src/screens/PayeeCategorisation.tsx
 msgid "Categorised as"
 msgstr ""
@@ -2997,6 +3157,9 @@ msgstr "{user} configuró esta instancia como propietario"
 msgid "This writes both rows as one act, so undoing it from History takes both back together."
 msgstr "Esto guarda las dos filas como un solo acto, así que deshacerlo desde el Historial quita las dos a la vez."
 
+#. Label of a form field on the Accounts screen. See GLOSSARY.md
+#. Label of a form field on the Accounts screen. See GLOSSARY.md
+#. Label of a form field on the household page. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
 #, fuzzy
@@ -3013,21 +3176,21 @@ msgstr "Cómo funciona la importación"
 msgid "Transfer between your own accounts"
 msgstr "Transferencia entre tus propias cuentas"
 
+#. Column heading on the Accounts screen: noun, the institution that holds an account. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Accounts screen: noun, the institution that holds an account. See G…
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Bank"
 msgstr "Banco"
 
+#. Table cell on the household page
 #: src/screens/Household.tsx
 msgid "(main)"
 msgstr ""
 
+#. Heading on the household page
 #: src/screens/Household.tsx
 msgid "Colour"
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Expires"
 msgstr ""
 
 #: src/screens/SignIn.tsx
@@ -3052,12 +3215,15 @@ msgstr "{0, plural, one {{1} línea} other {{1} líneas}}"
 msgid "Every link has a name or a person behind it."
 msgstr "Cada vínculo tiene un nombre o una persona detrás."
 
+#. Screen-reader name on the Accounts screen
 #. placeholder {0}: one.value
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Account for {0}"
 msgstr "Cuenta para {0}"
 
+#. Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md
+#. Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Opening balance"
@@ -3068,6 +3234,11 @@ msgstr "Saldo inicial"
 msgid "Written off — work will not pay"
 msgstr "Dado por perdido: el trabajo no pagará"
 
+#. Column heading on the Accounts screen: noun, what sort of thing
+#. Column heading on the Payees screen: noun, what sort of thing
+#. Column name shown beside a value on phones on the Accounts screen: noun, what sort of thing
+#. Column name shown beside a value on phones on the Payees screen: noun, what sort of thing
+#. Label of a form field on the Accounts screen: noun, what sort of thing
 #: src/screens/Accounts.tsx
 #: src/screens/Payees.tsx
 #, fuzzy
@@ -3083,10 +3254,6 @@ msgstr "Esperando el otro extracto"
 #, fuzzy
 msgid "Brought in by the <0>One-time Import</0> from {how}, reading {what}, on {when}."
 msgstr "Traído por la <0>Importación única</0> desde {how}, leyendo {what}, el {when}."
-
-#: src/screens/Admin.tsx
-msgid "Making them an owner…"
-msgstr ""
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -3111,6 +3278,7 @@ msgstr ""
 msgid "Applied as a statement is read, so <0>CARREFOUR MADRID 4432</0> arrives as Carrefour. The bank's own words are kept on the transaction either way."
 msgstr ""
 
+#. Role: manages the household. Lower case, shown inside a sentence. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "owner"
@@ -3122,22 +3290,27 @@ msgstr "propietario"
 msgid "Undo in History brings it back."
 msgstr "Deshacer en el Historial lo recupera."
 
+#. Button on the Register screen: verb, bring the rows in. See GLOSSARY.md
+#. Menu item and the name of its screen: noun, one import of a statement. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Import"
 msgstr "Importar"
 
+#. Label on the Payees screen
 #. placeholder {0}: kept.name
 #: src/screens/Payees.tsx
 msgid "Folded into {0}"
 msgstr ""
 
+#. Sentence on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Reimbursed by"
 msgstr "Reembolsado por"
 
+#. Label of a form field on the Categories screen: noun, a category group
 #: src/screens/Categories.tsx
 msgid "Group"
 msgstr ""
@@ -3162,10 +3335,7 @@ msgstr "Dónde está la cuenta. Opcional, e independiente de la divisa: una cuen
 msgid "The line exactly as it arrived"
 msgstr "La línea tal como llegó"
 
-#: src/screens/Admin.tsx
-msgid "Date format"
-msgstr ""
-
+#. Button on the first-run setup
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "Finish setup"
@@ -3209,6 +3379,7 @@ msgstr "Devuelto por el pago de arriba"
 msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
 msgstr "Los dos, porque las cuentas están en divisas distintas y no nos vamos a inventar un tipo de cambio: usa la cifra que tu banco abonó de verdad."
 
+#. Label on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Amount ({currency})"
@@ -3220,6 +3391,7 @@ msgstr "Importe ({currency})"
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so a figure adding {0} would be a number with nothing behind it."
 msgstr "Este libro nunca convierte. La divisa está en la cuenta y no hay ningún tipo de cambio guardado, así que una cifra que sumara {0} sería un número sin nada detrás."
 
+#. Tooltip on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Larger text"
@@ -3242,6 +3414,7 @@ msgstr "Pendiente: el banco todavía no lo ha visto"
 msgid "A new authenticator"
 msgstr "Una nueva aplicación de autenticación"
 
+#. Heading on the invitation page
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "1. You"
@@ -3257,15 +3430,13 @@ msgstr "Se registra como un movimiento real en esa fecha, no como una cifra ocul
 msgid "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
 msgstr "Ten a mano uno de tus códigos de recuperación: demuestra que eres tú en lugar de la aplicación de autenticación antigua. (El código de recuperación con el que iniciaste sesión solo lo cubre en la pestaña donde lo usaste, mientras sigas con la sesión iniciada y durante un día.)"
 
-#: src/screens/Admin.tsx
-msgid "Owner"
-msgstr ""
-
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "What was in the account on the day you started tracking it — usually a date in the past, the one your first statement opens with."
 msgstr "Lo que había en la cuenta el día que empezaste a seguirla: normalmente una fecha pasada, la del inicio de tu primer extracto."
 
+#. Option in a dropdown on the Register screen
+#. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Any"
@@ -3280,11 +3451,13 @@ msgstr ""
 msgid "You will still be able to sign in with your password and code."
 msgstr "Podrás seguir iniciando sesión con tu contraseña y un código."
 
+#. Scope of a key for programs: it may only read. Lower case, inside a sentence
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "read"
-msgstr "leer"
+msgstr "lectura"
 
+#. Import outcome: the line belongs to another account in the file. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Not for this account"
@@ -3295,6 +3468,13 @@ msgstr "No es de esta cuenta"
 msgid "Each currency is totalled on its own instead. Nothing on this screen ever adds two together."
 msgstr "En su lugar, cada divisa se suma por separado. Nada en esta pantalla suma dos divisas."
 
+#. Button on the Accounts screen: verb
+#. Button on the Accounts screen: verb
+#. Button on the Import screen: verb
+#. Button on the Payees screen: verb
+#. Button on the Register screen: verb
+#. Column heading on the Import screen
+#. Screen-reader name on the Register screen
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
 #: src/screens/Payees.tsx
@@ -3308,6 +3488,7 @@ msgstr "Añadir"
 msgid "Only you right now"
 msgstr "Solo tú ahora mismo"
 
+#. Account type `other_liability`: money owed that is not a card. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Other debt"
@@ -3318,6 +3499,7 @@ msgstr "Otra deuda"
 msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
 msgstr "En su lugar, cada divisa tiene su propia Salida y Entrada, y una fila solo rellena las suyas. Desactivar una oculta sus filas además de sus columnas; la tabla dice cuántas."
 
+#. A sign-in change in Admin's list: the person may sign in again
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Re-enabled"
@@ -3343,7 +3525,6 @@ msgstr ""
 msgid "The server reset {user}'s password and authenticator"
 msgstr "El servidor restableció la contraseña y la aplicación de autenticación de {user}"
 
-#: src/screens/Admin.tsx
 #: src/screens/Household.tsx
 msgid "Who is in it"
 msgstr ""
@@ -3358,6 +3539,7 @@ msgstr "Los seis dígitos de la nueva"
 msgid "double click to edit"
 msgstr "doble clic para editar"
 
+#. A sign-in change in Admin's list: the person was given a new authenticator
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "New authenticator"
@@ -3373,6 +3555,7 @@ msgstr "Tu cuenta está en tu nombre, en el menú."
 msgid "no country set"
 msgstr "sin país"
 
+#. Text on a dropdown that picks several on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "All accounts"
@@ -3385,6 +3568,14 @@ msgstr "Todas las cuentas"
 msgid "This file looks like it is for <0>{0}</0> ({1}), not the account chosen above."
 msgstr "Este archivo parece ser de <0>{0}</0> ({1}), no de la cuenta elegida arriba."
 
+#. Column heading on the Transfers screen: noun. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Register screen: noun. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Transfers screen: noun. See GLOSSARY.md
+#. Label of a form field on the Register screen: noun. See GLOSSARY.md
+#. Label of a form field on the Transfers screen: noun. See GLOSSARY.md
+#. Label on the Import screen: noun. See GLOSSARY.md
+#. Label on the Register screen: noun. See GLOSSARY.md
+#. Label on the Register screen: noun. See GLOSSARY.md
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
@@ -3393,6 +3584,7 @@ msgstr "Este archivo parece ser de <0>{0}</0> ({1}), no de la cuenta elegida arr
 msgid "Date"
 msgstr "Fecha"
 
+#. What the import detected: which column holds the memo. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "memo column"
@@ -3402,6 +3594,7 @@ msgstr "columna de concepto"
 msgid "How to categorise {name}"
 msgstr ""
 
+#. Link on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Download"
@@ -3412,6 +3605,7 @@ msgstr "Descargar"
 msgid "The server gave {user} a new authenticator"
 msgstr "El servidor dio a {user} una nueva aplicación de autenticación"
 
+#. How a rule matches, inside the rule list: the pattern is a regular expression
 #: src/screens/Rules.tsx
 msgctxt "rule list"
 msgid "regex"
@@ -3422,6 +3616,7 @@ msgstr ""
 msgid "Somebody reset {user}'s password"
 msgstr "Alguien restableció la contraseña de {user}"
 
+#. Table cell on the passkeys panel
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Synced"
@@ -3441,14 +3636,7 @@ msgstr "el nombre de un apartado o de un producto de tarjeta"
 msgid "The category is chosen from how the last {0} transactions for {name} were categorised — the most common of them, most recent winning a tie. It updates as you add and edit transactions."
 msgstr ""
 
-#: src/screens/Admin.tsx
-msgid "No reset links pending."
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Yes, withdraw it"
-msgstr ""
-
+#. State of the password: it has been chosen. Shown beside the word Password
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Set"
@@ -3458,11 +3646,13 @@ msgstr "Establecida"
 msgid "Only rows nobody has corrected"
 msgstr ""
 
+#. Label on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "uncategorised (chosen)"
 msgstr "sin categoría (elegido)"
 
+#. What the import detected: the kind of file. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "kind"
@@ -3482,14 +3672,11 @@ msgstr ""
 msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."
 msgstr "Las partes que has preparado no se han guardado. Descartar deja el movimiento como estaba."
 
-#: src/screens/Admin.tsx
-msgid "To create a new user, use the <0>Invitation link</0>."
-msgstr ""
-
 #: src/screens/Payees.tsx
 msgid "Find a payee"
 msgstr ""
 
+#. Screen-reader name on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Currencies shown"
@@ -3500,35 +3687,36 @@ msgstr "Divisas mostradas"
 msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled — <0>show it in the register</0>. Zero removes it."
 msgstr "Los dos son un movimiento real del registro, conciliado, con la fecha en que empezó el seguimiento. Cambiarlos aquí edita esa fila y la mantiene conciliada: <0>verla en el registro</0>. Cero la elimina."
 
+#. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "C — Cleared"
 msgstr "C — Contabilizado"
-
-#: src/screens/Admin.tsx
-msgid "Yes, disable them"
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "expired"
-msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "If you did not expect this, tell an owner of this instance before you go on."
 msgstr "Si no lo esperabas, avisa a un propietario de esta instancia antes de seguir."
 
+#. Text on the Transfers screen
 #. placeholder {0}: from.currency
 #: src/screens/Transfer.tsx
 #, fuzzy
 msgid "Amount leaving ({0})"
 msgstr "Importe que sale ({0})"
 
+#. Column heading on the Transfers screen
+#. Column name shown beside a value on phones on the Transfers screen
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Description"
 msgstr "Descripción"
 
+#. Label on the household page. See GLOSSARY.md
+#. Menu item and the name of its screen. See GLOSSARY.md
+#. Screen title on the Categories screen. See GLOSSARY.md
+#. Step name in the one-time import: map the other app's categories. See GLOSSARY.md
+#. Text on the Register screen. See GLOSSARY.md
 #: src/App.tsx
 #: src/lib/labels.ts
 #: src/screens/Categories.tsx
@@ -3548,6 +3736,7 @@ msgstr "El que está en pantalla va a la bandeja y el archivo nuevo ocupa su lug
 msgid "type to search — leave empty for none"
 msgstr "escribe para buscar; déjalo vacío para ninguno"
 
+#. Label on the household page
 #: src/screens/Household.tsx
 msgid "Countries"
 msgstr ""
@@ -3557,11 +3746,13 @@ msgstr ""
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked 1 agent key. A program that was using it will be refused from now on; issue a new key on your profile if it should keep working."
 msgstr "Usar un código de recuperación ha cerrado tu sesión en todas partes, ha olvidado todos los navegadores de confianza y ha revocado 1 clave de agente. Un programa que la usara será rechazado a partir de ahora; crea una clave nueva en tu perfil si debe seguir funcionando."
 
+#. Role: uses the household, cannot manage it. Lower case, inside a sentence. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "member"
 msgstr "miembro"
 
+#. Screen-reader name of a help button on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "about appearance"
@@ -3572,6 +3763,7 @@ msgstr "sobre la apariencia"
 msgid "The server re-enabled {user}"
 msgstr "El servidor reactivó a {user}"
 
+#. Tooltip on the Categories screen: adjective, kept but hidden from pickers. See GLOSSARY.md
 #: src/screens/Categories.tsx
 msgid "archived"
 msgstr ""
@@ -3584,16 +3776,11 @@ msgstr ""
 msgid "nothing recorded yet"
 msgstr ""
 
+#. Sentence on the first-run setup
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "In Docker:"
 msgstr "En Docker:"
-
-#. placeholder {0}: confirming.user.display_name
-#. placeholder {0}: person.display_name
-#: src/screens/Admin.tsx
-msgid "Make {0} an owner?"
-msgstr ""
 
 #. placeholder {0}: offer.count
 #: src/screens/Import.tsx
@@ -3601,6 +3788,8 @@ msgstr ""
 msgid "<0>{0} other line has the same payee</0> and no category of their own."
 msgstr "<0>{0} fila más tiene el mismo beneficiario</0> y ninguna categoría propia."
 
+#. Button on the Register screen: verb
+#. Button on the Your account panel: verb
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3613,6 +3802,7 @@ msgstr "Cambiar"
 msgid "You still have {0} passkeys, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr "Todavía tienes {0} llaves de acceso, y un código de recuperación no las desactiva. Si una estaba en el dispositivo que perdiste, quítala en Métodos de inicio de sesión de tu perfil: tu nombre en el menú."
 
+#. A sign-in change in Admin's list: the person's authenticator was reset
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Reset: authenticator"
@@ -3623,25 +3813,29 @@ msgstr "Restablecimiento: aplicación de autenticación"
 msgid "This lands as one entry in History, so the whole import can be undone in one go."
 msgstr "Esto queda como una sola entrada en el Historial, así que toda la importación se puede deshacer de una vez."
 
+#. Label of a form field on the first-run setup: noun, an email address
+#. Label of a form field on the invitation page: noun, an email address
+#. Label of a form field on the sign-in page: noun, an email address
 #: src/screens/AcceptInvite.tsx
-#: src/screens/Admin.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Email"
 msgstr "Correo electrónico"
 
+#. Stands in for who made a change when the name is not known. Lower case
 #: src/lib/signInChanges.ts
-#: src/screens/Admin.tsx
 #, fuzzy
 msgid "somebody"
 msgstr "alguien"
 
+#. Option in a dropdown on the Register screen: noun, spending your employer should pay back. See GLOSSARY.md
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Work expense…"
 msgstr "Gasto de trabajo…"
 
+#. Button on the Accounts screen: verb, check an account against a bank statement. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Reconcile"
@@ -3696,6 +3890,7 @@ msgstr "por qué cada divisa tiene sus propias columnas"
 msgid "Only used for totals across accounts. Each account keeps its own, and nothing in the ledger is ever converted."
 msgstr ""
 
+#. Menu item and the name of its screen
 #: src/App.tsx
 #, fuzzy
 msgid "Reset"
@@ -3715,11 +3910,13 @@ msgstr ""
 msgid "Following this device, which is dark right now."
 msgstr "Siguiendo a este dispositivo, que ahora está en oscuro."
 
+#. Heading over the other-asset accounts on the Accounts screen. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Other assets"
 msgstr "Otros activos"
 
+#. Heading on the first-run setup
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "4. Recovery codes"
@@ -3730,6 +3927,10 @@ msgstr "4. Códigos de recuperación"
 msgid "Discard this staged import?"
 msgstr "¿Descartar esta importación preparada?"
 
+#. Label on the Import screen: having no category. See GLOSSARY.md
+#. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
+#. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
+#. Row state in the one-time import's category mapping: no category. See GLOSSARY.md
 #: src/lib/labels.ts
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
@@ -3741,6 +3942,7 @@ msgstr "Sin categoría"
 msgid "why households have colours"
 msgstr ""
 
+#. What was reset, inside a sentence: the password. Lower case. See GLOSSARY.md
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "password"
@@ -3751,6 +3953,7 @@ msgstr "contraseña"
 msgid "Cleared — the bank has it"
 msgstr "Contabilizado: el banco ya lo tiene"
 
+#. Button on the Accounts screen
 #. placeholder {0}: suggested.value
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -3767,10 +3970,7 @@ msgstr "Importado de un extracto o de una importación única"
 msgid "Snap a Receipt"
 msgstr "Fotografiar un ticket"
 
-#: src/screens/Admin.tsx
-msgid "Create the link"
-msgstr ""
-
+#. Text on the Your account panel: verb, stops working on a date
 #. placeholder {0}: formatInstant(key.expires_at)
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -3782,27 +3982,24 @@ msgstr "Caduca el {0}"
 msgid "A recovery code cannot be used here. If somebody else has seen your codes, one of them must not be enough to make the next set."
 msgstr "Aquí no se puede usar un código de recuperación. Si otra persona ha visto tus códigos, uno de ellos no debe bastar para generar el siguiente juego."
 
+#. Account type `credit_card`, one card. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Credit card"
 msgstr "Tarjeta de crédito"
 
+#. Heading on the Register screen: noun, a photo or PDF of a receipt. See GLOSSARY.md
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Receipt"
 msgstr "Ticket"
-
-#. placeholder {0}: withdrawing.display_name
-#. placeholder {1}: withdrawing.email
-#: src/screens/Admin.tsx
-msgid "The link for {0} ({1}) stops working at once. Their password stays reset, so they cannot sign in until you make them a new link."
-msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "Tu contraseña para {email} se restableció desde el servidor el {when}. Se ha cerrado la sesión en todos los navegadores en los que la tenías iniciada. Vuelve a establecerla abajo."
 
+#. Label on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Staged by"
@@ -3813,22 +4010,11 @@ msgstr "Preparada por"
 msgid "Split this transaction"
 msgstr "Dividir este movimiento"
 
-#: src/screens/Admin.tsx
-msgid "Withdraw"
-msgstr ""
-
 #: src/screens/Rules.tsx
 msgid "Apply rules to what is already here"
 msgstr ""
 
-#: src/screens/Admin.tsx
-msgid "Withdraw this reset link?"
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Member"
-msgstr ""
-
+#. Label on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "This month"
@@ -3839,6 +4025,7 @@ msgstr "Este mes"
 msgid "No, just this one"
 msgstr "No, solo esta"
 
+#. State of the authenticator: it was removed and has to be set up again
 #: src/screens/Profile.tsx
 #, fuzzy
 msgctxt "authenticator state"
@@ -3859,6 +4046,7 @@ msgstr "{hiddenByCurrency, plural, one {{0} fila no se muestra: el selector de d
 msgid "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
 msgstr "Vinculadas como transferencias aunque nadie las eligió: porque las dos cuentas ya se habían vinculado antes y ninguna fila nombra a la otra, o porque un programa las vinculó con una clave de agente. Una compra y la devolución de exactamente su importe pueden parecerlo. Desvincula las que no sean transferencias; no se volverán a proponer. Conserva las que sí lo sean."
 
+#. Label on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "This import"
@@ -3870,17 +4058,27 @@ msgstr "Esta importación"
 msgid "Made for {0}, cannot be used here."
 msgstr "Creada para {0}, no se puede usar aquí."
 
+#. Button on the Register screen
+#. Button on the sign-in page
 #: src/screens/Register.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Not now"
 msgstr "Ahora no"
 
+#. What the import detected: the column of money going out. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "outflow column"
 msgstr "columna de salida"
 
+#. Column heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Column heading on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Label on the household page: noun, who was paid or who paid. See GLOSSARY.md
+#. Screen title on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
 #: src/screens/Payees.tsx
@@ -3898,11 +4096,13 @@ msgstr "Etiqueta en el nombre del archivo descargado"
 msgid "{text} — edit the payee"
 msgstr "{text}: editar el beneficiario"
 
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Mark uncleared"
 msgstr "Marcar como pendiente"
 
+#. Screen-reader name on the Import screen
 #. placeholder {0}: line.line_no
 #: src/screens/Import.tsx
 #, fuzzy
@@ -3924,6 +4124,7 @@ msgstr "Solo este dispositivo"
 msgid "See them in Admin"
 msgstr "Verlos en Administración"
 
+#. Button on the shared controls
 #: src/components/bits.tsx
 #, fuzzy
 msgid "Hide help: {label}"
@@ -3937,11 +4138,8 @@ msgstr ""
 msgid "The bank keeps saying"
 msgstr ""
 
-#. placeholder {0}: confirming.user.display_name
-#: src/screens/Admin.tsx
-msgid "{0} will be able to administer this instance: people, households and invitations."
-msgstr ""
-
+#. Label of a form field on the Your account panel
+#. Label of a form field on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Current password"
@@ -3981,15 +4179,20 @@ msgstr "Has iniciado sesión con un código de recuperación y tus llaves de acc
 msgid "Rename or delete this group"
 msgstr ""
 
+#. Label on the Payees screen
 #: src/screens/Payees.tsx
 msgid "another account"
 msgstr ""
 
+#. Column name for resizing the column on the Register screen: money going out
+#. Table cell on the Register screen: money going out
+#. Text on the Register screen: money going out
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Out {code}"
 msgstr "Salida {code}"
 
+#. Label on the Your account panel: colour scheme
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Dark"
@@ -4000,6 +4203,10 @@ msgstr "Oscuro"
 msgid "Ignore it and carry on"
 msgstr "Ignorarla y seguir"
 
+#. Sentence on the Payees screen
+#. Text on the app's menu and frame
+#. Text on the app's menu and frame
+#. Text on the app's menu and frame
 #: src/App.tsx
 #: src/screens/Payees.tsx
 #, fuzzy
@@ -4022,6 +4229,8 @@ msgstr "el servidor respondió {0}"
 msgid "When the statement line"
 msgstr ""
 
+#. Button on the Transfers screen: verb, leave it as it is
+#. Heading of a group of choices on the Payees screen: verb
 #: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -4039,11 +4248,17 @@ msgstr "Cinco partes es el máximo"
 msgid "The six digits from your authenticator"
 msgstr "Los seis dígitos de tu aplicación de autenticación"
 
+#. What the import detected: which column holds fees. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "fee column"
 msgstr "columna de comisión"
 
+#. Column heading on the Accounts screen: noun. See GLOSSARY.md
+#. Column heading on the household page: noun. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md
+#. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
+#. Text on the Register screen: noun. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
 #: src/screens/Register.tsx
@@ -4051,11 +4266,14 @@ msgstr "columna de comisión"
 msgid "Currency"
 msgstr "Divisa"
 
+#. What the import detected: comma or point before decimals. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "decimal separator"
 msgstr "separador decimal"
 
+#. Label of a form field on the first-run setup
+#. Label of a form field on the invitation page
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -4066,14 +4284,6 @@ msgstr "Tu nombre"
 #, fuzzy
 msgid "{by} reset {user}'s authenticator"
 msgstr "{by} restableció la aplicación de autenticación de {user}"
-
-#: src/screens/Admin.tsx
-msgid "None yet."
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Email (optional)"
-msgstr ""
 
 #. placeholder {0}: purging.row_count
 #: src/screens/Import.tsx
@@ -4087,6 +4297,8 @@ msgstr "Se eliminarán <0>{purgingName}</0> y su {0} línea. Nada de ello ha lle
 msgid "type any part"
 msgstr "escribe cualquier parte"
 
+#. Button on the Payee Categorisation screen
+#. Heading on the Categories screen
 #: src/screens/Categories.tsx
 #: src/screens/PayeeCategorisation.tsx
 msgid "Categorisation"
@@ -4116,10 +4328,6 @@ msgstr "{others, plural, one {Podrás seguir iniciando sesión con tu otra llave
 msgid "Every rule of this kind gets a turn, in this order, each one working on what the last one left."
 msgstr ""
 
-#: src/screens/Admin.tsx
-msgid "Owner — can administer this instance"
-msgstr ""
-
 #: src/screens/Rules.tsx
 msgid "It runs <0>before</0> the rules that name a payee, and hands them what is left — so one <1>COMPRA INTERNET</1> rule plus your existing <2>Amazon</2> rule covers the whole Amazon-over-Santander family. Several of these compose: each one gets a turn, in order."
 msgstr ""
@@ -4128,11 +4336,14 @@ msgstr ""
 msgid "Archived — hide it from the pickers"
 msgstr ""
 
+#. Heading on the invitation page
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "3. Recovery codes"
 msgstr "3. Códigos de recuperación"
 
+#. Text on the Accounts screen
+#. Text on the Accounts screen
 #. placeholder {0}: "Savings"
 #. placeholder {0}: one.sample
 #: src/screens/Accounts.tsx
@@ -4145,11 +4356,13 @@ msgstr "p. ej., {0}"
 msgid "One of your recovery codes"
 msgstr "Uno de tus códigos de recuperación"
 
+#. Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "opening balance"
 msgstr "saldo inicial"
 
+#. Table cell on the passkeys panel: has never happened
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Never"
@@ -4184,35 +4397,16 @@ msgstr "Una transferencia mueve dinero entre tus propias cuentas, así que no es
 msgid "{count, plural, other {{shown} rows}}"
 msgstr "{count, plural, one {{shown} fila} other {{shown} filas}}"
 
-#: src/screens/Admin.tsx
-msgid "Leave it"
-msgstr ""
-
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "A recovery code"
 msgstr "Un código de recuperación"
 
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Hide filters"
 msgstr "Ocultar filtros"
-
-#: src/screens/Admin.tsx
-msgid "Whoever opens an owner link can administer this instance, and stays an owner whatever you later do to your own password or authenticator."
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Authenticator, with its recovery codes"
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "A reset link for {name} is already pending. This one replaces it, and what that one reset stays reset."
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "none"
-msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
@@ -4237,10 +4431,7 @@ msgstr ""
 msgid "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} el {1}. Las partes lo sustituyen, así que tienen que sumar el mismo importe. Sin signo menos: cada parte va en el mismo sentido que el original."
 
-#: src/screens/Admin.tsx
-msgid "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
-msgstr ""
-
+#. Heading on the invitation page
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "2. Your authenticator"
@@ -4256,6 +4447,7 @@ msgstr "Reglas de nombre de beneficiarios"
 msgid "{by} made {user} an owner"
 msgstr "{by} hizo propietario a {user}"
 
+#. Step name in the one-time import: what the import would do, not yet done
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Preview"
@@ -4276,6 +4468,8 @@ msgstr "Hecho propietario"
 msgid "Show a new code to scan"
 msgstr "Mostrar un código nuevo para escanear"
 
+#. Label of a form field on the Register screen
+#. Label of a form field on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Out ({currency})"
@@ -4288,15 +4482,13 @@ msgstr "Salida ({currency})"
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so its next statement picks the account itself?"
 msgstr "El nombre de este archivo lleva <0>{0}</0>. ¿Guardarlo como IBAN de <1>{1}</1>, para que su próximo extracto elija la cuenta solo?"
 
-#: src/screens/Admin.tsx
-msgid "Disabling…"
-msgstr ""
-
+#. Button on the Rules screen
 #. placeholder {0}: formatCount(proposed.changing)
 #: src/screens/Rules.tsx
 msgid "Move {0} rows"
 msgstr ""
 
+#. Label on the Import screen: noun, a line of a file
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Line"
@@ -4312,6 +4504,7 @@ msgstr "Este archivo no es texto: una exportación de hoja de cálculo guarda su
 msgid "Brought in by the <0>One-time Import</0> from {how}, on {when}."
 msgstr "Traído por la <0>Importación única</0> desde {how}, el {when}."
 
+#. Screen-reader name on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "From year"
@@ -4326,10 +4519,8 @@ msgstr "Sustituirla también retira la confianza a todos los navegadores, inclui
 msgid "For a <0>payment rail</0> rather than a shop. <1>SQ *</1>, <2>PAGO MOVIL</2> and <3>COMPRA INTERNET</3> are how the money travelled, not who was paid — every shop that takes Square appears behind <4>SQ *</4>. There is no single payee to point at, so this kind of rule takes the rail off and lets whatever is left be the shop."
 msgstr ""
 
-#: src/screens/Admin.tsx
-msgid "Reset link for {name}"
-msgstr ""
-
+#. Heading on the sign-in page
+#. Screen-reader name, ReenrolmentDue (shared)
 #: src/components/ReenrolmentDue.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -4350,7 +4541,11 @@ msgstr "Cambios en el inicio de sesión en los últimos 14 días, hechos por otr
 msgid "Every category this payee has been filed under, biggest first. The transactions with no category are listed too, because they are what this payee still costs you to classify."
 msgstr ""
 
-#: src/screens/Admin.tsx
+#. Button on the Categories screen
+#. Button on the Categories screen
+#. Button on the Import screen
+#. Button on the Register screen
+#. Button on the passkeys panel
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
@@ -4364,15 +4559,18 @@ msgstr "Conservarla"
 msgid "No money in between those dates. Widen them above — a repayment can take weeks."
 msgstr "No entra dinero entre esas fechas. Amplíalas arriba: un reembolso puede tardar semanas."
 
+#. Label of a choice on the Register screen: noun, spending your employer should pay back. See GLOSSARY.md
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Work expenses"
 msgstr "Gastos de trabajo"
 
+#. Label on the household page
 #: src/screens/Household.tsx
 msgid "Oldest transaction"
 msgstr ""
 
+#. Button on the Payee Categorisation screen
 #. placeholder {0}: formatCount(rest)
 #: src/screens/PayeeCategorisation.tsx
 msgid "+{0} more"
@@ -4387,6 +4585,7 @@ msgstr "Leer el archivo"
 msgid "take this bit off, and see what is left"
 msgstr ""
 
+#. Table cell on the Payees screen
 #. placeholder {0}: accountName(one.transfer_account_id)
 #: src/screens/Payees.tsx
 msgid "Transfer to {0}"
@@ -4414,19 +4613,18 @@ msgstr "No has dado una clave a nada."
 msgid "Money in within {PAYMENT_PICKER_DAYS} days either side of {0}. Either side, because an advance arrives before the spending it covers."
 msgstr "Entradas de dinero hasta {PAYMENT_PICKER_DAYS} días antes o después del {0}. Antes o después, porque un anticipo llega antes del gasto que cubre."
 
+#. Column heading on the Transfers screen: preposition, the account money leaves
+#. Column name shown beside a value on phones on the Transfers screen: preposition, the account money leaves
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Out of"
 msgstr "Desde"
 
-#: src/screens/Admin.tsx
-msgid "Resets"
-msgstr ""
-
+#. Scope of a key for programs: it may also change data. Lower case, inside a sentence
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "write"
-msgstr "escribir"
+msgstr "escritura"
 
 #: src/lib/labels.ts
 #, fuzzy
@@ -4458,24 +4656,17 @@ msgstr "{by} restableció la contraseña de {user}"
 msgid "in {0} groups, {1} archived"
 msgstr ""
 
-#: src/screens/Admin.tsx
-msgid "Choose at least one."
-msgstr ""
-
 #. placeholder {0}: recovered.keys
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
 msgstr "Usar un código de recuperación ha cerrado tu sesión en todas partes, ha olvidado todos los navegadores de confianza y ha revocado {0} claves de agente. Un programa que usara una de ellas será rechazado a partir de ahora; crea una clave nueva en tu perfil si debe seguir funcionando."
 
+#. Label on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "All dates"
 msgstr "Todas las fechas"
-
-#: src/screens/Admin.tsx
-msgid "Yes, make them an owner"
-msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -4487,11 +4678,13 @@ msgstr "Cómo la llaman los bancos"
 msgid "Empty it to go back to the suggestion."
 msgstr "Vacíalo para volver a la sugerencia."
 
+#. Button on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Importing…"
 msgstr "Importando…"
 
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Add transaction"
@@ -4529,11 +4722,13 @@ msgstr ""
 msgid "{app}, via its CSV export"
 msgstr "{app}, mediante su exportación CSV"
 
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Unlink transfer"
 msgstr "Desvincular transferencia"
 
+#. Label on the Import screen: prepared, not yet written
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Staged"
@@ -4544,6 +4739,7 @@ msgstr "Preparada el"
 msgid "Needs setting up again"
 msgstr "Hay que volver a configurarla"
 
+#. Button on the Payees screen
 #. placeholder {0}: kept?.name ?? "…"
 #: src/screens/Payees.tsx
 msgid "Merge into {0}"
@@ -4564,6 +4760,7 @@ msgstr "por qué se pide esto"
 msgid "The money out, repaid by the one payment in"
 msgstr "El dinero que salió, devuelto por el único pago que entró"
 
+#. Label of a form field on the Rules screen
 #: src/screens/Rules.tsx
 msgid "This text"
 msgstr ""
@@ -4574,6 +4771,10 @@ msgstr ""
 msgid "{0, plural, one {{who} is here too} other {{who} are here too}}"
 msgstr "{0, plural, one {{who} también está aquí} other {{who} también están aquí}}"
 
+#. Button on the Accounts screen: verb
+#. Button on the Register screen: verb
+#. Button on the passkeys panel: verb
+#. Button on the passkeys panel: verb
 #: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Register.tsx
@@ -4581,25 +4782,34 @@ msgstr "{0, plural, one {{who} también está aquí} other {{who} también está
 msgid "Remove"
 msgstr "Quitar"
 
-#: src/screens/Admin.tsx
-msgid "Invite somebody"
-msgstr ""
-
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Leave them <0>uncategorised</0> too?"
 msgstr "¿Dejarlas también <0>sin categoría</0>?"
 
+#. What the import detected: the column of money coming in. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
 msgid "inflow column"
 msgstr "columna de entrada"
 
+#. Name of a fact on the Register screen: noun, what is left after subtracting
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Difference"
 msgstr "Diferencia"
 
+#. Column heading on the Payee Categorisation screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Heading on the app's menu and frame: noun, who was paid or who paid. See GLOSSARY.md
+#. Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Label on the Import screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Label on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Table cell on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Table cell on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/Import.tsx
 #: src/screens/PayeeCategorisation.tsx
@@ -4634,6 +4844,7 @@ msgstr "Para qué es"
 msgid "Nothing has changed yet — your current authenticator keeps working until a code proves the new one pairs."
 msgstr "Todavía no ha cambiado nada: tu aplicación de autenticación actual sigue funcionando hasta que un código demuestre que la nueva está vinculada."
 
+#. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
 msgid "Reports"
@@ -4644,6 +4855,7 @@ msgstr "Informes"
 msgid "a note for this row"
 msgstr "una nota para esta fila"
 
+#. Placeholder in an empty field on the Rules screen
 #: src/screens/Rules.tsx
 msgid "usually nothing"
 msgstr ""
@@ -4653,6 +4865,7 @@ msgstr ""
 msgid "in or out, any currency"
 msgstr "entrada o salida, cualquier divisa"
 
+#. Tag beside a name on the Categories screen: adjective, kept but hidden from pickers. See GLOSSARY.md
 #: src/screens/Categories.tsx
 msgid "Archived"
 msgstr ""
@@ -4672,6 +4885,12 @@ msgstr "Transferencia: la otra parte está en {otherAccount}"
 msgid "Larger text in the table"
 msgstr "Texto más grande en la tabla"
 
+#. Button on the Accounts screen: verb
+#. Button on the Categories screen: verb
+#. Button on the Categories screen: verb
+#. Button on the Categories screen: verb
+#. Button on the household page: verb
+#. Button on the passkeys panel: verb
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
@@ -4695,11 +4914,6 @@ msgstr "No se pudieron cargar tus hogares"
 msgid "Work expense — written off"
 msgstr "Gasto de trabajo: dado por perdido"
 
-#. placeholder {0}: confirming.user.display_name
-#: src/screens/Admin.tsx
-msgid "{0} will no longer be able to administer this instance."
-msgstr ""
-
 #. placeholder {0}: formatCount(proposed.orphaned.length)
 #: src/screens/Rules.tsx
 msgid "Also delete the {0} payees left empty"
@@ -4711,6 +4925,9 @@ msgstr ""
 msgid "Recorded as {0} on the date below."
 msgstr "Se registra como {0} en la fecha de abajo."
 
+#. Button on the Register screen: show only the rows with no category. See GLOSSARY.md
+#. Label on the Import screen: having no category. See GLOSSARY.md
+#. Text on the Import screen: having no category. See GLOSSARY.md
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
 #, fuzzy
@@ -4727,24 +4944,20 @@ msgstr "Dado por perdido: el trabajo no lo pagará"
 msgid "What this would do"
 msgstr "Lo que haría esto"
 
-#: src/screens/Admin.tsx
-msgid "No invitations outstanding."
-msgstr ""
-
+#. Row state in the one-time import's mapping: YNAB's own bucket, cannot be changed
+#. Row state in the one-time import's mapping: YNAB's own bucket, cannot be changed
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Fixed"
-msgstr "Corregida"
+msgstr "Fija"
 
+#. Button on the shared controls
 #: src/components/bits.tsx
 #, fuzzy
 msgid "What's this? {label}"
 msgstr "¿Qué es esto? {label}"
 
-#: src/screens/Admin.tsx
-msgid "The server keeps only a hash of it, so nobody — you included — can read it back."
-msgstr ""
-
+#. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
 msgid "Payee Categorisation"
@@ -4758,6 +4971,13 @@ msgstr ""
 #, fuzzy
 msgid "At most {LINK_MAX_EXPENSES} expenses at a time"
 msgstr "Como máximo {LINK_MAX_EXPENSES} gastos a la vez"
+
+#. Row state in the one-time import's account mapping: a new account will be made
+#: src/lib/labels.ts
+#, fuzzy
+msgctxt "new account"
+msgid "New"
+msgstr "Nueva"
 
 #. placeholder {0}: waiting.length
 #. placeholder {1}: waiting.length
@@ -4773,21 +4993,16 @@ msgstr "{0, plural, one {Se preparó una importación y nunca se terminó. Nada 
 msgid "At least 12 characters. Length is what matters."
 msgstr "Al menos 12 caracteres. Lo que importa es la longitud."
 
+#. Label on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "Latest 6 months"
 msgstr "Últimos 6 meses"
 
-#. placeholder {0}: revoking.email ?? t`anyone with the link`
-#. placeholder {1}: roleLabel(revoking.role)
-#: src/screens/Admin.tsx
-msgid "The link for {0} ({1}) stops working at once. To invite them again, make a new one."
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Households they join on arrival"
-msgstr ""
-
+#. Button on the Accounts screen
+#. Heading on the household page
+#. Text on the household page
+#. Text on the shared controls
 #: src/components/bits.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
@@ -4805,13 +5020,14 @@ msgstr "Vincular como reembolso"
 msgid "Set the category on {done} rows and skipped {skipped} transfer legs — a transfer has no category."
 msgstr "Se puso la categoría a {done} filas y se omitieron {skipped} partes de transferencia: una transferencia no tiene categoría."
 
+#. Label of a choice on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Show closed"
 msgstr "Mostrar cerradas"
 
+#. Menu item and the name of its screen
 #: src/App.tsx
-#: src/screens/Admin.tsx
 #, fuzzy
 msgid "Admin"
 msgstr "Administración"
@@ -4826,11 +5042,13 @@ msgstr "Repite la contraseña nueva"
 msgid "why not a recovery code"
 msgstr "por qué no un código de recuperación"
 
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Clear filters"
 msgstr "Borrar filtros"
 
+#. Tag beside a name on the passkeys panel
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "this device"
@@ -4845,29 +5063,24 @@ msgstr "Todavía no hay cuentas. Añade la que más uses e importa un extracto e
 msgid "call it one payee"
 msgstr ""
 
-#: src/screens/Admin.tsx
-msgid "Status"
-msgstr ""
-
+#. Import outcome: the row is already in the ledger, typed in by hand. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Already have it"
 msgstr "Ya la tienes"
 
+#. Label on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Holder's name"
 msgstr "Nombre del titular"
-
-#: src/screens/Admin.tsx
-msgid "Dates"
-msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Keys for programs"
 msgstr "Claves para programas"
 
+#. Label on the Register screen: a work expense work will not pay; counted as your own spending. See GLOSSARY.md
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Written off"
@@ -4893,6 +5106,7 @@ msgstr ""
 msgid "What has happened to this"
 msgstr "Lo que le ha pasado a esto"
 
+#. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
 msgid "Merge"
 msgstr ""
@@ -4906,6 +5120,7 @@ msgstr "Los dos son un movimiento real del registro, conciliado, con la fecha en
 msgid "type any part of a payee"
 msgstr ""
 
+#. Table cell on the Rules screen
 #. placeholder {0}: matchWord(rule.match_type)
 #: src/screens/Rules.tsx
 msgid "{0}, then strip"
@@ -4924,16 +5139,14 @@ msgstr ""
 msgid "New category in {0}"
 msgstr ""
 
-#: src/screens/Admin.tsx
-msgid "MM/DD/YYYY"
-msgstr ""
-
+#. Text on the Your account panel
 #. placeholder {0}: recovery.data.unused
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "{0} of 10 left"
 msgstr "Quedan {0} de 10"
 
+#. A sign-in change, as a sentence; the placeholder is a person's name
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody re-enabled {user}"
@@ -4943,10 +5156,12 @@ msgstr "Alguien reactivó a {user}"
 msgid "The first rule that matches wins; the rest are not tried."
 msgstr ""
 
+#. Column heading on the Rules screen: noun, sort order
 #: src/screens/Rules.tsx
 msgid "Order"
 msgstr ""
 
+#. Label on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "I — Imported"
@@ -4957,6 +5172,7 @@ msgstr "I — Importados"
 msgid "Matches nothing in the register yet."
 msgstr "Todavía no coincide con nada del registro."
 
+#. Label on the Your account panel. See GLOSSARY.md
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Passkeys"
@@ -4967,11 +5183,13 @@ msgstr "Llaves de acceso"
 msgid "Import it anyway"
 msgstr "Importarlo de todos modos"
 
+#. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "U — Uncleared"
 msgstr "U — Pendientes"
 
+#. How a rule matches, inside the rule list: the bank's text contains the pattern
 #: src/screens/Rules.tsx
 msgid "contains"
 msgstr ""
@@ -4991,15 +5209,12 @@ msgstr "Cada parte del original está repartida."
 msgid "Change a part, or add another."
 msgstr "Cambia una parte o añade otra."
 
+#. List item, SignInNotice (shared)
 #. placeholder {0}: owed.length - SHOWN
 #: src/components/SignInNotice.tsx
 #, fuzzy
 msgid "and {0} more."
 msgstr "y {0} más."
-
-#: src/screens/Admin.tsx
-msgid "Reset link"
-msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -5015,10 +5230,6 @@ msgstr "Todos los códigos que tienes ahora, usados o no, dejan de funcionar y d
 #, fuzzy
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 msgstr "{count, plural, one {{shown} movimiento} other {{shown} movimientos}}"
-
-#: src/screens/Admin.tsx
-msgid "Close without copying? The link cannot be shown again."
-msgstr ""
 
 #. placeholder {0}: category.name
 #: src/screens/Categories.tsx
@@ -5070,6 +5281,7 @@ msgstr "Se imprimió en el registro del servidor cuando arrancó esta instancia 
 msgid "Set the category on {done} rows and skipped 1 transfer leg — a transfer has no category."
 msgstr "Se puso la categoría a {done} filas y se omitió 1 parte de transferencia: una transferencia no tiene categoría."
 
+#. Screen-reader name on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "From month"
@@ -5089,6 +5301,7 @@ msgstr ""
 msgid "Showing {0} of {1} — show more"
 msgstr "Mostrando {0} de {1}: mostrar más"
 
+#. Heading on the first-run setup
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "3. Your authenticator"
@@ -5099,14 +5312,11 @@ msgstr "3. Tu aplicación de autenticación"
 msgid "1. The setup token"
 msgstr "1. El token de configuración"
 
+#. Label of a choice on the language picker
 #: src/components/LanguagePicker.tsx
 #, fuzzy
 msgid "Language"
 msgstr "Idioma"
-
-#: src/screens/Admin.tsx
-msgid "Change your own password or authenticator from your profile"
-msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
@@ -5118,6 +5328,9 @@ msgstr "{inviter} te ha invitado a {PRODUCT} como miembro."
 msgid "Add an account before entering transactions."
 msgstr "Añade una cuenta antes de introducir movimientos."
 
+#. Column name for resizing the column on the Register screen: money coming in
+#. Table cell on the Register screen: money coming in
+#. Text on the Register screen: money coming in
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "In {code}"
@@ -5128,11 +5341,6 @@ msgstr "Entrada {code}"
 #, fuzzy
 msgid "{0} of the selected rows are outside the current filter and are not in the figures above — they are still selected, and a change made here still reaches them."
 msgstr "{0} de las filas seleccionadas están fuera del filtro actual y no entran en las cifras de arriba: siguen seleccionadas, y un cambio hecho aquí también les llega."
-
-#. placeholder {0}: one.display_name
-#: src/screens/Admin.tsx
-msgid "Re-enable {0}"
-msgstr ""
 
 #. placeholder {0}: entry.filename
 #: src/screens/Import.tsx
@@ -5149,6 +5357,9 @@ msgstr "la carpeta de datos"
 msgid "When the bank says"
 msgstr ""
 
+#. Screen-reader name of a button on the Accounts screen
+#. Screen-reader name of a button on the passkeys panel
+#. Screen-reader name on the passkeys panel
 #. placeholder {0}: passkey.label
 #. placeholder {0}: removing.label
 #. placeholder {0}: row.value
@@ -5163,12 +5374,9 @@ msgstr "Quitar {0}"
 msgid "Create the key"
 msgstr "Crear la clave"
 
+#. Label on the household page: noun
 #: src/screens/Household.tsx
 msgid "Currencies"
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Pending reset links"
 msgstr ""
 
 #: src/screens/SignIn.tsx
@@ -5176,6 +5384,7 @@ msgstr ""
 msgid "Sign in with a passkey"
 msgstr "Iniciar sesión con una llave de acceso"
 
+#. What was reset, inside a sentence: the authenticator. Lower case. See GLOSSARY.md
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "authenticator"
@@ -5195,12 +5404,18 @@ msgstr ""
 msgid "A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from your bank's website. CSV and spreadsheets are worked out from the file itself — the delimiter, the date format, the decimal separator, which column is which, and which row the table actually starts on. OFX needs none of that: it names its own fields, and its transaction ids are used so re-importing an overlapping statement cannot double anything up. A PDF is read by where the words sit on the page, so a running-balance column is not mistaken for the amount — and a designed bill, which is summary boxes rather than a table, is refused rather than half-read. You will see all of it before anything is written."
 msgstr "Un CSV, una descarga OFX/QFX, una exportación .xls del banco, un extracto en PDF o algo pegado de la web de tu banco. Los CSV y las hojas de cálculo se interpretan a partir del propio archivo: el delimitador, el formato de fecha, el separador decimal, qué columna es cuál y en qué fila empieza de verdad la tabla. OFX no necesita nada de eso: nombra sus propios campos, y se usan los identificadores de sus movimientos para que reimportar un extracto que se solapa no duplique nada. Un PDF se lee por la posición de las palabras en la página, así que una columna de saldo acumulado no se confunde con el importe, y una factura maquetada, que son recuadros de resumen y no una tabla, se rechaza en vez de leerse a medias. Lo verás todo antes de que se escriba nada."
 
+#. Button on the Import screen
+#. Button on the Rules screen
 #: src/screens/Import.tsx
 #: src/screens/Rules.tsx
 #, fuzzy
 msgid "Applying…"
 msgstr "Aplicando…"
 
+#. Column heading on the Register screen: noun, where it came from
+#. Column name for resizing the column on the Register screen: noun, where it came from
+#. Column name shown beside a value on phones on the Register screen: noun, where it came from
+#. Label of a choice on the Register screen: noun, where it came from
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Source"
@@ -5220,6 +5435,8 @@ msgstr ""
 msgid "Edit the memo"
 msgstr "Editar el concepto"
 
+#. Table cell on the Register screen: money coming in
+#. Text on the Register screen: money coming in
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "In"
@@ -5241,24 +5458,17 @@ msgstr "Intro otra vez para editar"
 msgid "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
 msgstr "<0>SPENDTRACKER_SECRET_KEY</0> no abre {locked, plural, one {la aplicación de autenticación de 1 miembro} other {las aplicaciones de autenticación de {locked} miembros}}; se les pedirá un código de recuperación y después que configuren una nueva. Volver a poner la clave original termina con esto para todos los que todavía no se hayan vuelto a registrar."
 
-#: src/screens/Admin.tsx
-msgid "Members"
-msgstr ""
-
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "An account cannot have been opened in the future."
 msgstr "Una cuenta no puede haberse abierto en el futuro."
 
+#. Column heading on the Accounts screen
+#. Text on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Value"
 msgstr "Valor"
-
-#. placeholder {0}: formatInstant(issued.expires_at)
-#: src/screens/Admin.tsx
-msgid "Expires {0}. Hand it over yourself; it is not sent anywhere."
-msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "Case does not matter. <0>Matches the pattern</0> is a full regular expression, capped at 300 characters and given a tenth of a second per row — one that runs longer is set aside for the rest of that import. Try it below before you save it."
@@ -5268,6 +5478,7 @@ msgstr ""
 msgid "No rules yet. Add one the next time a statement gives you a name you dislike."
 msgstr ""
 
+#. Label of a form field on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Statement product"
@@ -5284,6 +5495,7 @@ msgstr "<0>{0} filas más tienen el mismo beneficiario</0> y ninguna categoría 
 msgid "Somebody added {user} as an owner"
 msgstr "Alguien añadió a {user} como propietario"
 
+#. Button on the Rules screen
 #: src/screens/Rules.tsx
 msgid "Trying…"
 msgstr ""
@@ -5297,16 +5509,13 @@ msgstr ""
 msgid "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "Se cambiaron {done} filas y se dejaron {skipped} como estaban: solo una salida de dinero que no sea una transferencia puede ser un gasto de trabajo."
 
+#. Label of a choice on the Categories screen
 #: src/screens/Categories.tsx
 msgid "Show archived"
 msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Who"
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -5328,7 +5537,9 @@ msgstr "Se guarda solo en este dispositivo, así que un móvil y un portátil pu
 msgid "No payee matches “{0}”."
 msgstr ""
 
-#: src/screens/Admin.tsx
+#. Heading on the Your account panel. See GLOSSARY.md
+#. Heading on the Your account panel. See GLOSSARY.md
+#. Label on the Your account panel. See GLOSSARY.md
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Recovery codes"
@@ -5365,6 +5576,11 @@ msgstr "<0>secret.key</0> no abre {locked, plural, one {la aplicación de autent
 msgid "You sign in with your password and authenticator code."
 msgstr "Inicias sesión con tu contraseña y el código de la aplicación de autenticación."
 
+#. Button on the first-run setup: go on to the next step
+#. Button on the first-run setup: go on to the next step
+#. Button on the invitation page: go on to the next step
+#. Button on the sign-in page: go on to the next step
+#. Button on the sign-in page: go on to the next step
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
@@ -5381,6 +5597,7 @@ msgstr ""
 msgid "The bar comes back once the parts add up."
 msgstr "La barra vuelve cuando las partes cuadren."
 
+#. Label on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Card number"
@@ -5391,37 +5608,30 @@ msgstr "Número de tarjeta"
 msgid "{hiddenByCurrency, plural, one {Every row here is in a currency the toggle is hiding. Turn one back on to see them — {hiddenByCurrency} row is waiting.} other {Every row here is in a currency the toggle is hiding. Turn one back on to see them — {hiddenByCurrency} rows are waiting.}}"
 msgstr "{hiddenByCurrency, plural, one {Todas las filas están en una divisa que el selector oculta. Vuelve a activar una para verlas: {hiddenByCurrency} fila espera.} other {Todas las filas están en una divisa que el selector oculta. Vuelve a activar una para verlas: {hiddenByCurrency} filas esperan.}}"
 
+#. Text on a dropdown that picks several on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "All categories"
 msgstr "Todas las categorías"
-
-#: src/screens/Admin.tsx
-msgid "Used for totals only. Each account keeps its own currency, and nothing is ever converted."
-msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Bank or institution"
 msgstr "Banco o entidad"
 
+#. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "L — Locked"
 msgstr "L — Bloqueados"
 
 #: src/lib/signInChanges.ts
-#: src/screens/Admin.tsx
 #, fuzzy
 msgid "from the server"
 msgstr "desde el servidor"
 
 #: src/screens/Categories.tsx
 msgid "Every new transaction for this payee gets a category without you choosing one. Which one depends on the setting below."
-msgstr ""
-
-#: src/screens/Admin.tsx
-msgid "Resetting…"
 msgstr ""
 
 #: src/screens/AcceptInvite.tsx
@@ -5450,12 +5660,14 @@ msgstr "No se guarda nada hasta el último paso. Si cierras esta página, la ins
 msgid "the number other statements quote"
 msgstr "el número que citan otros extractos"
 
+#. Text on the Your account panel
 #. placeholder {0}: formatInstant(key.last_used_at)
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "last used {0}"
 msgstr "último uso el {0}"
 
+#. Label of a form field on the first-run setup. See GLOSSARY.md
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "Setup token"
@@ -5471,6 +5683,7 @@ msgstr ""
 msgid "<0>▾</0> marks the two whose balance is normally negative — you owe it. Nothing else changes: every account holds transactions the same way, and no arithmetic depends on the type. Pick the one that describes it, because it can't be changed afterwards."
 msgstr "<0>▾</0> marca los dos cuyo saldo suele ser negativo: lo debes. Nada más cambia: todas las cuentas guardan movimientos igual y ningún cálculo depende del tipo. Elige el que la describa, porque luego no se puede cambiar."
 
+#. Label on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "This year"
@@ -5480,11 +5693,6 @@ msgstr "Este año"
 #, fuzzy
 msgid "Give a program a key"
 msgstr "Dar una clave a un programa"
-
-#. placeholder {0}: one.display_name
-#: src/screens/Admin.tsx
-msgid "Disable {0}"
-msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -5523,18 +5731,21 @@ msgstr "¿Qué pago devolvió esto?"
 msgid "{0} will always be {1}"
 msgstr "{0} será siempre {1}"
 
+#. Button on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Reading…"
 msgstr "Leyendo…"
 
+#. Button on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "New codes"
 msgstr "Códigos nuevos"
 
+#. Column heading on the Accounts screen
+#. Column name shown beside a value on phones on the Accounts screen
 #: src/screens/Accounts.tsx
-#: src/screens/Admin.tsx
 #, fuzzy
 msgid "For"
 msgstr "Para"
@@ -5563,10 +5774,7 @@ msgstr "Alguien hizo propietario a {user}"
 msgid "Add transfer between accounts"
 msgstr "Añadir transferencia entre cuentas"
 
-#: src/screens/Admin.tsx
-msgid "their authenticator and recovery codes are cleared"
-msgstr ""
-
+#. Text on the Your account panel
 #. placeholder {0}: formatInstant(key.revoked_at)
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -5578,6 +5786,7 @@ msgstr "Revocada el {0}"
 msgid "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
 msgstr "El tipo dice qué clase de cosa es la cuenta. Ordena la lista y marca qué saldos son dinero que <0>debes</0> y no dinero que tienes."
 
+#. Sentence on the Payees screen
 #. placeholder {0}: rows.length
 #. placeholder {1}: payees.data?.length ?? 0
 #: src/screens/Payees.tsx
@@ -5603,18 +5812,25 @@ msgstr "Texto más pequeño, más filas en pantalla"
 msgid "Notes and coins in a wallet or a tin. Nothing imports into it — you enter what you spend."
 msgstr "Billetes y monedas en una cartera o una lata. No se importa nada en ella: anotas lo que gastas."
 
+#. Button on the Your account panel: verb, close this panel
+#. Screen-reader name of a button on the shared controls
+#. Screen-reader name of a button on the shared controls
 #: src/components/bits.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Close"
 msgstr "Cerrar"
 
+#. Heading on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md
+#. Label on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md
+#. Menu item and the name of its screen: noun, photos or PDFs of receipts. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/Household.tsx
 #, fuzzy
 msgid "Receipts"
 msgstr "Tickets"
 
+#. Button on the Register screen: verb, link two rows as one transfer
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Link"
@@ -5636,6 +5852,7 @@ msgstr "El banco lo llamó <0>{0}</0>."
 msgid "{count, plural, one {Linked {count} expense to the payment of {paid} on {on}.} other {Linked {count} expenses to the payment of {paid} on {on}.}}"
 msgstr "{count, plural, one {Se vinculó {count} gasto al pago de {paid} del {on}.} other {Se vincularon {count} gastos al pago de {paid} del {on}.}}"
 
+#. Column heading on the Rules screen: switched on
 #: src/screens/Rules.tsx
 msgid "On"
 msgstr ""
@@ -5664,10 +5881,6 @@ msgstr ""
 msgid "They were only ever the bank’s reference numbers. Leaving them is what makes a payee list that is still three hundred long afterwards."
 msgstr ""
 
-#: src/screens/Admin.tsx
-msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new authenticator."
-msgstr ""
-
 #. placeholder {0}: one.transaction_count
 #. placeholder {1}: one.transaction_count
 #. placeholder {2}: one.transaction_count
@@ -5680,6 +5893,7 @@ msgstr ""
 msgid "Gather the accounts by type: checking, savings, cards…"
 msgstr "Agrupar las cuentas por tipo: corrientes, ahorro, tarjetas…"
 
+#. Sentence on the Import screen: preposition, the account money arrives in
 #. placeholder {0}: account?.name ?? ""
 #: src/screens/Import.tsx
 #, fuzzy
@@ -5691,6 +5905,7 @@ msgstr "en {0}"
 msgid "I have saved it"
 msgstr "Ya la he guardado"
 
+#. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "OK"
@@ -5701,6 +5916,7 @@ msgstr "Vale"
 msgid "Linked by history only"
 msgstr "Vinculadas solo por el historial"
 
+#. A sign-in change, as a sentence: who re-enabled whom; both are people's names
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "{by} re-enabled {user}"
@@ -5711,6 +5927,7 @@ msgstr "{by} reactivó a {user}"
 msgid "The whole import is one entry in History, and undoing it there takes every row it brought in back out."
 msgstr "Toda la importación es una sola entrada en el Historial, y deshacerla allí saca todas las filas que trajo."
 
+#. Button on the Transfers screen: verb, move money between two of your accounts. See GLOSSARY.md
 #: src/screens/Transfer.tsx
 #, fuzzy
 msgid "Transfer"
@@ -5726,10 +5943,8 @@ msgstr "Esta cuenta empezó vacía, así que no hay fila de saldo inicial. Escri
 msgid "{unused, plural, one {{unused} unused recovery code left.} other {{unused} unused recovery codes left.}}"
 msgstr "{unused, plural, one {Queda {unused} código de recuperación sin usar.} other {Quedan {unused} códigos de recuperación sin usar.}}"
 
-#: src/screens/Admin.tsx
-msgid "Invitations"
-msgstr ""
-
+#. Column heading on the Accounts screen
+#. Column name shown beside a value on phones on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Oldest"
@@ -5740,10 +5955,7 @@ msgstr "Más antigua"
 msgid "Open that import"
 msgstr "Abrir esa importación"
 
-#: src/screens/Admin.tsx
-msgid "DD/MM/YYYY"
-msgstr ""
-
+#. Button on the Register screen
 #. placeholder {0}: parts.length
 #: src/screens/Register.tsx
 #, fuzzy
