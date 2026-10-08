@@ -22,6 +22,7 @@ import { Empty, Money, Problem, SortHeading, sortRows, useSort } from "../compon
 import type { CategoryGroup, Household } from "../lib/types";
 import type { Leg } from "./Transfers";
 import { formatDate } from "../lib/locale";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export interface LinkedPair {
   out_leg: Leg;
@@ -68,6 +69,7 @@ export function WaitingSection({
   /** The findings are stale: a row just stopped being a candidate. */
   onChanged: () => void;
 }) {
+  const { t } = useLingui();
   const client = useQueryClient();
   const categories = useQuery({
     queryKey: ["categories", household.id, false],
@@ -136,18 +138,22 @@ export function WaitingSection({
 
   return (
     <div className="card">
-      <h3>Waiting for the other statement</h3>
+      <h3>
+        <Trans>Waiting for the other statement</Trans>
+      </h3>
       <p className="small muted">
-        These name one of your accounts or a member of the household, and their other side is not
-        in the ledger yet. They are linked when that statement is imported. Give a row a category
-        if it isn't a transfer.
+        <Trans>
+          These name one of your accounts or a member of the household, and their other side is
+          not in the ledger yet. They are linked when that statement is imported. Give a row a
+          category if it isn't a transfer.
+        </Trans>
       </p>
       <Problem error={categories.error ?? one.error ?? many.error} />
       {waiting.length > 0 ? (
         <>
           <div className="row-actions">
             <select
-              aria-label={`Categorise ${ticked.size} selected as…`}
+              aria-label={t`Categorise ${ticked.size} selected as…`}
               value=""
               disabled={busy || ticked.size === 0}
               onChange={(event) => {
@@ -156,7 +162,7 @@ export function WaitingSection({
                 }
               }}
             >
-              <option value="">Categorise {ticked.size} selected as…</option>
+              <option value="">{t`Categorise ${ticked.size} selected as…`}</option>
               <CategoryOptions groups={groups} />
             </select>
           </div>
@@ -168,7 +174,7 @@ export function WaitingSection({
                   <th>
                     <input
                       type="checkbox"
-                      aria-label="Select every waiting row"
+                      aria-label={t`Select every waiting row`}
                       checked={allTicked}
                       disabled={busy}
                       onChange={() =>
@@ -179,12 +185,12 @@ export function WaitingSection({
                       style={{ width: "auto" }}
                     />
                   </th>
-                  <SortHeading label="Account" column="account" {...heading} />
-                  <SortHeading label="Date" column="date" {...heading} />
-                  <SortHeading label="Amount" column="amount" align="right" {...heading} />
-                  <SortHeading label="Description" column="description" {...heading} />
-                  <SortHeading label="Why" column="why" {...heading} />
-                  <th aria-label="Not a transfer" />
+                  <SortHeading label={t`Account`} column="account" {...heading} />
+                  <SortHeading label={t`Date`} column="date" {...heading} />
+                  <SortHeading label={t`Amount`} column="amount" align="right" {...heading} />
+                  <SortHeading label={t`Description`} column="description" {...heading} />
+                  <SortHeading label={t`Why`} column="why" {...heading} />
+                  <th aria-label={t`Not a transfer`} />
                 </tr>
               </thead>
               <tbody>
@@ -193,7 +199,7 @@ export function WaitingSection({
                     <td data-select="true">
                       <input
                         type="checkbox"
-                        aria-label={`Select ${leg.account_name} ${formatDate(leg.date)}`}
+                        aria-label={t`Select ${leg.account_name} ${formatDate(leg.date)}`}
                         checked={ticked.has(leg.id)}
                         disabled={busy}
                         onChange={() =>
@@ -207,22 +213,22 @@ export function WaitingSection({
                         style={{ width: "auto" }}
                       />
                     </td>
-                    <td data-label="Account">
+                    <td data-label={t`Account`}>
                       <strong>{leg.account_name}</strong>
                     </td>
-                    <td data-label="Date">{formatDate(leg.date)}</td>
-                    <td className="amount" data-label="Amount">
+                    <td data-label={t`Date`}>{formatDate(leg.date)}</td>
+                    <td className="amount" data-label={t`Amount`}>
                       <Money minor={leg.amount} currency={leg.currency} />
                     </td>
-                    <td className="small" data-label="Description">
+                    <td className="small" data-label={t`Description`}>
                       {leg.description ?? "—"}
                     </td>
-                    <td className="small muted" data-label="Why">
+                    <td className="small muted" data-label={t`Why`}>
                       {why}
                     </td>
                     <td className="row-actions">
                       <select
-                        aria-label="Not a transfer — categorise as…"
+                        aria-label={t`Not a transfer — categorise as…`}
                         value=""
                         disabled={busy}
                         onChange={(event) => {
@@ -231,7 +237,7 @@ export function WaitingSection({
                           }
                         }}
                       >
-                        <option value="">Not a transfer — categorise as…</option>
+                        <option value="">{t`Not a transfer — categorise as…`}</option>
                         <CategoryOptions groups={groups} />
                       </select>
                     </td>
@@ -242,7 +248,9 @@ export function WaitingSection({
           </div>
         </>
       ) : (
-        <Empty>Nothing waiting.</Empty>
+        <Empty>
+          <Trans>Nothing waiting.</Trans>
+        </Empty>
       )}
     </div>
   );
@@ -270,6 +278,7 @@ export function UnprovenSection({
   linked: LinkedPair[];
   onChanged: () => void;
 }) {
+  const { t } = useLingui();
   const client = useQueryClient();
   const done = () => {
     onChanged();
@@ -309,12 +318,16 @@ export function UnprovenSection({
 
   return (
     <div className="card">
-      <h3>Linked by history only</h3>
+      <h3>
+        <Trans>Linked by history only</Trans>
+      </h3>
       <p className="small muted">
-        Linked as transfers although no person chose them — because the two accounts had been
-        linked before and neither row names the other, or because a program linked them through an
-        agent key. A purchase and the refund of exactly its amount can look like that. Unlink the
-        ones that are not transfers; they are not offered again. Keep the ones that are.
+        <Trans>
+          Linked as transfers although no person chose them — because the two accounts had been
+          linked before and neither row names the other, or because a program linked them through
+          an agent key. A purchase and the refund of exactly its amount can look like that. Unlink
+          the ones that are not transfers; they are not offered again. Keep the ones that are.
+        </Trans>
       </p>
       <Problem error={unlink.error ?? keep.error} />
       {linked.length > 0 ? (
@@ -322,34 +335,34 @@ export function UnprovenSection({
           <table>
             <thead>
               <tr>
-                <SortHeading label="Out of" column="out" {...heading} />
-                <SortHeading label="Into" column="into" {...heading} />
-                <SortHeading label="Amount" column="amount" align="right" {...heading} />
-                <SortHeading label="Why" column="why" {...heading} />
-                <th aria-label="Actions" />
+                <SortHeading label={t`Out of`} column="out" {...heading} />
+                <SortHeading label={t`Into`} column="into" {...heading} />
+                <SortHeading label={t`Amount`} column="amount" align="right" {...heading} />
+                <SortHeading label={t`Why`} column="why" {...heading} />
+                <th aria-label={t`Actions`} />
               </tr>
             </thead>
             <tbody>
               {rows.map((pair) => (
                 <tr key={`${pair.out_leg.id}-${pair.in_leg.id}`}>
-                  <td data-label="Out of">
+                  <td data-label={t`Out of`}>
                     <LegCell leg={pair.out_leg} />
                   </td>
-                  <td data-label="Into">
+                  <td data-label={t`Into`}>
                     <LegCell leg={pair.in_leg} />
                   </td>
-                  <td className="amount" data-label="Amount">
+                  <td className="amount" data-label={t`Amount`}>
                     <Money minor={pair.in_leg.amount} currency={pair.in_leg.currency} />
                   </td>
-                  <td className="small" data-label="Why">
+                  <td className="small" data-label={t`Why`}>
                     {pair.why}
                   </td>
                   <td className="amount row-actions">
                     <button className="link" disabled={busy} onClick={() => unlink.mutate(pair)}>
-                      Unlink
+                      <Trans>Unlink</Trans>
                     </button>
                     <button className="link" disabled={busy} onClick={() => keep.mutate(pair)}>
-                      Keep
+                      <Trans>Keep</Trans>
                     </button>
                   </td>
                 </tr>
@@ -358,7 +371,9 @@ export function UnprovenSection({
           </table>
         </div>
       ) : (
-        <Empty>Every link has a name or a person behind it.</Empty>
+        <Empty>
+          <Trans>Every link has a name or a person behind it.</Trans>
+        </Empty>
       )}
     </div>
   );

@@ -145,6 +145,12 @@ msgstr "Passkeys need this app opened at its HTTPS address, {address}."
 msgid "New household"
 msgstr "New household"
 
+#. placeholder {0}: leg.account_name
+#. placeholder {1}: formatDate(leg.date)
+#: src/screens/TransferSections.tsx
+msgid "Select {0} {1}"
+msgstr "Select {0} {1}"
+
 #: src/screens/Profile.tsx
 msgid "What it may do"
 msgstr "What it may do"
@@ -189,6 +195,10 @@ msgstr "You're already signed in"
 msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
 msgstr "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
 
+#: src/screens/TransferSections.tsx
+msgid "Unlink"
+msgstr "Unlink"
+
 #: src/lib/signInChanges.ts
 msgid "Somebody reset {user}'s password and authenticator"
 msgstr "Somebody reset {user}'s password and authenticator"
@@ -215,6 +225,7 @@ msgid "Once it is confirmed, keep only this entry for the account in your app: t
 msgstr "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
 
 #: src/screens/Passkeys.tsx
+#: src/screens/TransferSections.tsx
 msgid "Actions"
 msgstr "Actions"
 
@@ -286,6 +297,10 @@ msgstr "Appearance"
 msgid "None yet"
 msgstr "None yet"
 
+#: src/screens/TransferSections.tsx
+msgid "Account"
+msgstr "Account"
+
 #: src/screens/Profile.tsx
 msgid "never used"
 msgstr "never used"
@@ -312,6 +327,10 @@ msgstr "Changing it signs out every other browser and forgets every trusted one,
 msgid "{by} reset {user}'s password and authenticator"
 msgstr "{by} reset {user}'s password and authenticator"
 
+#: src/screens/TransferSections.tsx
+msgid "Into"
+msgstr "Into"
+
 #: src/screens/Passkeys.tsx
 msgid "Add a second on another device. If you lose this one, you will need your password and code."
 msgstr "Add a second on another device. If you lose this one, you will need your password and code."
@@ -319,6 +338,10 @@ msgstr "Add a second on another device. If you lose this one, you will need your
 #: src/screens/ResetAccount.tsx
 msgid "Your new recovery codes"
 msgstr "Your new recovery codes"
+
+#: src/screens/TransferSections.tsx
+msgid "Not a transfer — categorise as…"
+msgstr "Not a transfer — categorise as…"
 
 #. placeholder {0}: offer.secret
 #. placeholder {0}: owed.offer.secret
@@ -354,9 +377,17 @@ msgstr "Add transfer"
 msgid "receipt filer"
 msgstr "receipt filer"
 
+#: src/screens/TransferSections.tsx
+msgid "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
+msgstr "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
+
 #: src/screens/Profile.tsx
 msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
 msgstr "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
+
+#: src/screens/TransferSections.tsx
+msgid "Select every waiting row"
+msgstr "Select every waiting row"
 
 #: src/screens/Profile.tsx
 msgid "Held in dark, whatever this device is set to."
@@ -409,6 +440,10 @@ msgstr "If you no longer have the old authenticator, use one of your recovery co
 #: src/screens/Profile.tsx
 msgid "Cancel"
 msgstr "Cancel"
+
+#: src/screens/TransferSections.tsx
+msgid "Why"
+msgstr "Why"
 
 #: src/screens/Profile.tsx
 #: src/screens/ResetAccount.tsx
@@ -548,6 +583,11 @@ msgstr "A household holds the accounts and the register. The currency here is on
 msgid "Transfers"
 msgstr "Transfers"
 
+#. placeholder {0}: ticked.size
+#: src/screens/TransferSections.tsx
+msgid "Categorise {0} selected as…"
+msgstr "Categorise {0} selected as…"
+
 #: src/screens/Profile.tsx
 msgid "Cleared"
 msgstr "Cleared"
@@ -608,6 +648,10 @@ msgstr "Revoke"
 msgid "Don't ask on this browser for 30 days"
 msgstr "Don't ask on this browser for 30 days"
 
+#: src/screens/TransferSections.tsx
+msgid "Nothing waiting."
+msgstr "Nothing waiting."
+
 #: src/screens/AcceptInvite.tsx
 msgid "Looking up your invitation…"
 msgstr "Looking up your invitation…"
@@ -621,6 +665,7 @@ msgid "Set up {PRODUCT}"
 msgstr "Set up {PRODUCT}"
 
 #: src/screens/Transfer.tsx
+#: src/screens/TransferSections.tsx
 msgid "Amount"
 msgstr "Amount"
 
@@ -635,6 +680,10 @@ msgstr "Added as an owner"
 #: src/lib/signInChanges.ts
 msgid "The server reset {user}'s authenticator"
 msgstr "The server reset {user}'s authenticator"
+
+#: src/screens/TransferSections.tsx
+msgid "Not a transfer"
+msgstr "Not a transfer"
 
 #: src/screens/Passkeys.tsx
 msgid "Added"
@@ -758,6 +807,14 @@ msgstr "Until you do, every sign-in will ask for another recovery code. To do it
 msgid "Setting it up takes one of your recovery codes."
 msgstr "Setting it up takes one of your recovery codes."
 
+#: src/screens/TransferSections.tsx
+msgid "Every link has a name or a person behind it."
+msgstr "Every link has a name or a person behind it."
+
+#: src/screens/TransferSections.tsx
+msgid "Waiting for the other statement"
+msgstr "Waiting for the other statement"
+
 #: src/screens/Passkeys.tsx
 msgid "Continue to the passkey"
 msgstr "Continue to the passkey"
@@ -851,6 +908,7 @@ msgid "Your account is under your name in the menu."
 msgstr "Your account is under your name in the menu."
 
 #: src/screens/Transfer.tsx
+#: src/screens/TransferSections.tsx
 msgid "Date"
 msgstr "Date"
 
@@ -882,6 +940,10 @@ msgstr "If you did not expect this, tell an owner of this instance before you go
 #: src/screens/Transfer.tsx
 msgid "Amount leaving ({0})"
 msgstr "Amount leaving ({0})"
+
+#: src/screens/TransferSections.tsx
+msgid "Description"
+msgstr "Description"
 
 #: src/App.tsx
 msgid "Categories"
@@ -975,6 +1037,10 @@ msgstr "A recovery code cannot be used here. If somebody else has seen your code
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 
+#: src/screens/TransferSections.tsx
+msgid "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
+msgstr "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
+
 #. placeholder {0}: passkey.rp_id
 #: src/screens/Passkeys.tsx
 msgid "Made for {0}, cannot be used here."
@@ -1033,6 +1099,10 @@ msgstr "Set up a new authenticator"
 #: src/lib/api.ts
 msgid "the server answered {0}"
 msgstr "the server answered {0}"
+
+#: src/screens/TransferSections.tsx
+msgid "Keep"
+msgstr "Keep"
 
 #: src/components/StepUp.tsx
 #: src/screens/Profile.tsx
@@ -1128,6 +1198,10 @@ msgstr "Keep it"
 #: src/screens/Profile.tsx
 msgid "You have not given a key to anything."
 msgstr "You have not given a key to anything."
+
+#: src/screens/TransferSections.tsx
+msgid "Out of"
+msgstr "Out of"
 
 #: src/screens/Profile.tsx
 msgid "write"
@@ -1432,6 +1506,10 @@ msgstr "{inviter} invited you to {PRODUCT} as a member, in {households}."
 #: src/screens/Profile.tsx
 msgid "I have saved it"
 msgstr "I have saved it"
+
+#: src/screens/TransferSections.tsx
+msgid "Linked by history only"
+msgstr "Linked by history only"
 
 #: src/lib/signInChanges.ts
 msgid "{by} re-enabled {user}"

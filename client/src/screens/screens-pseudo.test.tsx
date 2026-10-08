@@ -20,6 +20,8 @@ import { activate } from "../lib/i18n";
 import type { Account, Household } from "../lib/types";
 import { untranslated } from "../test-pseudo";
 import { Transfer } from "./Transfer";
+import { UnprovenSection, WaitingSection } from "./TransferSections";
+import { api } from "../lib/api";
 
 const HOUSEHOLD: Household = {
   id: "house-1",
@@ -101,5 +103,35 @@ describe("in en-XA, the register's screens show no English", () => {
       ),
     );
     expect(untranslated(container.ownerDocument.body)).toEqual([]);
+  });
+
+  it("the transfers waiting for a statement, and the ones linked by history only", async () => {
+    vi.mocked(api.get).mockResolvedValue([]);
+    const leg = (id: string, name: string) => ({
+      id,
+      account_id: id,
+      account_name: name,
+      date: "2026-03-02",
+      amount: -4250,
+      currency: "EUR",
+      description: "Casa",
+    });
+    // `why` is the server's sentence; it is data here until History and the
+    // findings carry codes (#57).
+    const { container } = render(
+      withQueries(
+        <>
+          <WaitingSection household={HOUSEHOLD} waiting={[{ leg: leg("a", "Casa"), why: "Sam" }]} onChanged={vi.fn()} />
+          <UnprovenSection
+            household={HOUSEHOLD}
+            linked={[{ out_leg: leg("a", "Casa"), in_leg: leg("b", "Doe"), link_source: "history", why: "Sam" }]}
+            onChanged={vi.fn()}
+          />
+          <WaitingSection household={HOUSEHOLD} waiting={[]} onChanged={vi.fn()} />
+          <UnprovenSection household={HOUSEHOLD} linked={[]} onChanged={vi.fn()} />
+        </>,
+      ),
+    );
+    expect(untranslated(container)).toEqual([]);
   });
 });
