@@ -32,6 +32,19 @@ history this repository does not have.
 
 ## Unreleased
 
+### Fixed
+
+- **Safari can sign in at `http://localhost`.** The cookies carried the
+  `__Host-` prefix, which Safari refuses on plain-HTTP `localhost` while
+  keeping an unprefixed `Secure` cookie, so the container on your own
+  computer answered the sign-in, lost the cookie and showed the sign-in
+  screen again, with nothing in any log. At `localhost`, `127.0.0.1` and
+  `[::1]` the cookies are now named without the prefix and are still
+  `Secure`; every other address, the tailnet included, keeps it. HSTS is no
+  longer sent over plain HTTP to those three, where browsers ignore it.
+  After upgrading, expect to sign in at `localhost` once more, code
+  included, in any browser: the old names are no longer read there. (#196)
+
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
