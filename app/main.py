@@ -54,6 +54,7 @@ from .api.routers import (
     stats,
     transactions,
     transfers,
+    updates,
 )
 from .auth import cookies, housekeeping, keycheck
 from .auth import setup as setup_service
@@ -806,6 +807,7 @@ for router in (
     imports.router,
     identifiers.router,
     admin.router,
+    updates.router,
     invites.router,
     account_resets.router,
     profile.router,

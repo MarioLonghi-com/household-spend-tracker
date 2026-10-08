@@ -1220,6 +1220,11 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.backup.protected"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.currency.not_iso_4217"
 msgstr ""
 
@@ -1276,6 +1281,71 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.transfer.same_account"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.digest_mismatch"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.engine_refused"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.in_flight"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.lossy_mismatch"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.no_report"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.no_updater"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.not_a_version"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.not_newer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.outcome_not_found"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.recovery_code_unknown"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_not_newer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_older_than_app"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_outdated"
 msgstr ""
 
 #: src/screens/Profile.tsx

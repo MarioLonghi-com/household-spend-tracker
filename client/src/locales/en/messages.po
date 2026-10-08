@@ -1220,6 +1220,11 @@ msgstr "No single category matches that. Keep typing, or empty it."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.backup.protected"
+msgstr "{name} is one of the newest five update backups. They are kept so an update can be undone, and the updater removes older ones itself"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.currency.not_iso_4217"
 msgstr "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR"
 
@@ -1277,6 +1282,71 @@ msgstr "A {from_currency} to {to_currency} transfer needs the amount that arrive
 #: src/lib/errorMessages.ts
 msgid "error.transfer.same_account"
 msgstr "An account cannot transfer to itself"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.digest_mismatch"
+msgstr "The image digests are not the ones the prepare report verified. Prepare the update again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.engine_refused"
+msgstr "The updater cannot use the container engine ({socket}), so it cannot update anything"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.in_flight"
+msgstr "Another update request is waiting or running. Wait for it to finish, then try again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.lossy_mismatch"
+msgstr "Tick every migration that cannot be undone, and only those: the update needs exactly the ones the report lists"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.no_report"
+msgstr "There is no prepared update with that id for this version. Check for updates and prepare it again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.no_updater"
+msgstr "Updating from this screen needs the updater, and none has answered in the last two minutes"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.not_a_version"
+msgstr "{version} is not a release version like 1.2.3"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.not_newer"
+msgstr "{to_version} is not newer than {running}, which this instance runs. An update never goes back"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.outcome_not_found"
+msgstr "There is no update outcome with that id"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.recovery_code_unknown"
+msgstr "That recovery code has expired or belongs to another confirmation. Draw the confirmation again for a new one"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_not_newer"
+msgstr "The updater already runs {updater_version}, which is not older than {to_version}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_older_than_app"
+msgstr "The updater of {to_version} is older than this instance, which runs {running}, so it would not accept its requests"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_outdated"
+msgstr "The updater is too old for this container engine. Update the updater first, then try again"
 
 #: src/screens/Profile.tsx
 msgid "a household"

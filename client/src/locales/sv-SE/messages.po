@@ -1487,6 +1487,11 @@ msgstr "Ingen enskild kategori matchar det. Fortsätt skriva eller töm fältet.
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.backup.protected"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.currency.not_iso_4217"
 msgstr "{code} är inte en valutakod enligt ISO 4217. Kontrollera stavningen, som GBP eller EUR"
@@ -1556,6 +1561,71 @@ msgstr "En överföring från {from_currency} till {to_currency} behöver belopp
 #, fuzzy
 msgid "error.transfer.same_account"
 msgstr "Ett konto kan inte föra över till sig självt"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.digest_mismatch"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.engine_refused"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.in_flight"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.lossy_mismatch"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.no_report"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.no_updater"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.not_a_version"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.not_newer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.outcome_not_found"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.recovery_code_unknown"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_not_newer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_older_than_app"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.updater_outdated"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
