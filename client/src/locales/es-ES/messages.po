@@ -42,6 +42,7 @@ msgid "No payees yet. They appear as you enter or import transactions."
 msgstr ""
 
 #: src/App.tsx
+#: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Application management"
 msgstr "Gestión de la aplicación"
@@ -128,6 +129,7 @@ msgid "To month"
 msgstr "Mes final"
 
 #: src/screens/Admin.tsx
+#: src/screens/ApplicationManagement.tsx
 msgid "What"
 msgstr ""
 
@@ -234,6 +236,10 @@ msgstr ""
 msgid "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot mean “whatever comes after it” — choose <2>take this bit off</2> for that."
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "what this list is"
+msgstr ""
+
 #. placeholder {0}: offer.name
 #. placeholder {1}: offer.payee
 #: src/screens/Import.tsx
@@ -245,6 +251,10 @@ msgstr "La primera es solo para este archivo. La segunda también hace de <0>{0}
 #, fuzzy
 msgid "no memo"
 msgstr "sin concepto"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Process"
+msgstr ""
 
 #: src/lib/labels.ts
 #, fuzzy
@@ -318,6 +328,10 @@ msgstr ""
 msgid "Open"
 msgstr "Abrir"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Engine"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Copy this link now — it is shown once."
 msgstr ""
@@ -326,6 +340,10 @@ msgstr ""
 #, fuzzy
 msgid "What happens"
 msgstr "Qué pasa"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "The end of {open}"
+msgstr ""
 
 #: src/screens/Admin.tsx
 #: src/screens/Household.tsx
@@ -427,6 +445,10 @@ msgstr "La longitud importa más que los símbolos. Cuatro palabras sin relació
 msgid "<0>{0}</0> goes to the receipts inbox and stays there until it is attached again or deleted."
 msgstr "<0>{0}</0> pasa a la bandeja de tickets y se queda allí hasta que se vuelva a adjuntar o se elimine."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Reading this instance…"
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Rename"
@@ -441,6 +463,10 @@ msgstr "Al final sí tengo mi aplicación de autenticación"
 #, fuzzy
 msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 msgstr "Ninguna clave puede eliminar nada, deshacer nada, cambiar quién está en un hogar, tocar contraseñas ni aplicaciones de autenticación, ni crear otra clave, elijas lo que elijas aquí."
+
+#: src/screens/ApplicationManagement.tsx
+msgid "this path does not exist"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -659,6 +685,7 @@ msgid "Skip to transactions"
 msgstr "Saltar a los movimientos"
 
 #: src/App.tsx
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
 #: src/screens/PayeeCategorisation.tsx
@@ -749,6 +776,12 @@ msgstr ""
 #, fuzzy
 msgid "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
 msgstr "Solo para un banco cuyo extracto reúne varias cuentas en un archivo, distinguidas por una columna Product (el extracto de cuenta de Revolut). Esta cuenta se queda con las filas que tienen este valor; las demás se omiten. Una cuenta corriente se queda con las filas Current, salvo que digas otra cosa."
+
+#. placeholder {0}: bytes(me.size.main_bytes)
+#. placeholder {1}: bytes(me.size.wal_bytes)
+#: src/screens/ApplicationManagement.tsx
+msgid "{0} + {1} not yet checkpointed"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -862,6 +895,12 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Nobody yet, which should be impossible while you are reading this."
+msgstr ""
+
+#. placeholder {0}: me.repository
+#. placeholder {1}: me.version
+#: src/screens/ApplicationManagement.tsx
+msgid "Asks {0} for its newest tag and compares it with the {1} this is running. It is the only request this application ever makes to anything outside itself, it happens when you press this button and at no other time, and it says nothing about this instance."
 msgstr ""
 
 #: src/screens/Payees.tsx
@@ -1045,6 +1084,10 @@ msgstr "Introducido a mano"
 msgid "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
 msgstr "Cada forma en que un banco escribe el nombre de alguien de este hogar. Un pago que nombra una de ellas es tu propio dinero moviéndose, no un ingreso ni un gasto."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "missing"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Add a part"
@@ -1111,6 +1154,11 @@ msgstr ""
 #, fuzzy
 msgid "That isn't an amount in {currency}."
 msgstr "Eso no es un importe en {currency}."
+
+#. placeholder {0}: me.database_url_scheme
+#: src/screens/ApplicationManagement.tsx
+msgid "{0} — not a local file"
+msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
@@ -1280,6 +1328,12 @@ msgstr "Apariencia"
 msgid "None yet"
 msgstr "Ninguna todavía"
 
+#. placeholder {0}: upstream.data.latest
+#. placeholder {1}: upstream.data.running
+#: src/screens/ApplicationManagement.tsx
+msgid "<0>{0}</0> is available. This instance is running {1}."
+msgstr ""
+
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
@@ -1287,6 +1341,10 @@ msgstr "Ninguna todavía"
 #, fuzzy
 msgid "Account"
 msgstr "Cuenta"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Writing…"
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Revoking…"
@@ -1324,6 +1382,10 @@ msgstr "Dinero apartado en un banco. Igual que una cuenta corriente, pero separa
 
 #: src/screens/History.tsx
 msgid "Nothing recorded against this one."
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "with uncommitted changes"
 msgstr ""
 
 #: src/screens/Household.tsx
@@ -1378,6 +1440,10 @@ msgstr "Ocultar el menú"
 msgid "No categories yet — add some on the Categories screen."
 msgstr "Todavía no hay categorías: añade algunas en la pantalla Categorías."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Environment"
+msgstr ""
+
 #. placeholder {0}: passkey.label
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -1408,6 +1474,10 @@ msgstr "Cambiarla cierra la sesión en todos los demás navegadores y olvida los
 #, fuzzy
 msgid "saving…"
 msgstr "guardando…"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Operations"
+msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -1511,6 +1581,11 @@ msgstr ""
 #. placeholder {0}: one.display_name
 #: src/screens/Admin.tsx
 msgid "Role for {0}"
+msgstr ""
+
+#. placeholder {0}: formatInstant(build.committed_at)
+#: src/screens/ApplicationManagement.tsx
+msgid "committed {0}"
 msgstr ""
 
 #. placeholder {0}: formatCount(rows.length)
@@ -1631,6 +1706,10 @@ msgstr "Estas filas nombran una de tus cuentas o a alguien del hogar, y su otra 
 msgid "Attach receipts"
 msgstr "Adjuntar tickets"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "This writes the ledger's own values into a file in plain text. Turn it off when you are done."
+msgstr ""
+
 #: src/screens/Household.tsx
 msgid "Newest transaction"
 msgstr ""
@@ -1649,6 +1728,7 @@ msgstr "{revoked, plural, one {{revoked} navegador de confianza volverá a pedir
 msgid "Changing your own role would close this screen; ask the other owner"
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Backups.tsx
 msgid "Size"
 msgstr ""
@@ -1686,6 +1766,15 @@ msgstr "Fijado en oscuro, sea cual sea el ajuste de este dispositivo."
 
 #: src/screens/Admin.tsx
 msgid "Disable"
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Read"
+msgstr ""
+
+#. placeholder {0}: it?.directory ?? "…"
+#: src/screens/ApplicationManagement.tsx
+msgid "Written to <0>{0}</0>, rotated at a megabyte and five files deep. A rotated file is named for the moment it was closed — <1>app-20260923-131545.log</1> — so it keeps its name instead of shuffling along behind a number."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -1767,6 +1856,10 @@ msgstr "¿Quitar <0>{0}</0>? Dejará de funcionar al instante."
 msgid "System"
 msgstr "Sistema"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Check the repository"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Closed"
@@ -1828,6 +1921,18 @@ msgstr "Motivo"
 #. placeholder {4}: formatCount(stat.payee_count)
 #: src/screens/Categories.tsx
 msgid "{0, plural, one {and {1} more payee — {2} in all.} other {and {3} more payees — {4} in all.}}"
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Changing the setting below writes a line into <0>all three</0>, on both sides of the change — including when you turn it <1>down</1>, which is the one that used to leave no trace at all."
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Writes a complete, compacted copy into the backups directory above, with this instance still serving. It does <0>not</0> copy <1>secret.key</1> there: without that key every authenticator is refused, so a copy that leaves this machine either carries it (tick the box below) or travels with it separately."
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Where the files are"
 msgstr ""
 
 #: src/lib/labels.ts
@@ -1940,6 +2045,10 @@ msgstr ""
 msgid "Who was paid"
 msgstr "A quién se pagó"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Version"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "T — Transfers"
@@ -1993,6 +2102,10 @@ msgstr ""
 msgid "Smaller text in the table"
 msgstr "Texto más pequeño en la tabla"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Runtime"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Suggested identifiers"
@@ -2019,6 +2132,10 @@ msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Edit"
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Household"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -2103,6 +2220,10 @@ msgstr "Una transferencia de {from_currency} a {to_currency} necesita el importe
 msgid "error.transfer.same_account"
 msgstr "Una cuenta no puede transferir a sí misma"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Last written"
+msgstr ""
+
 #: src/screens/Reconcile.tsx
 msgid "Tick every row"
 msgstr ""
@@ -2115,6 +2236,10 @@ msgstr ""
 #, fuzzy
 msgid "a household"
 msgstr "un hogar"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Counts, never amounts — this ledger never converts one currency into another, so there is no such thing as an instance-wide total. For the full picture, <0>download every table with its row count and size</0>. That report scans the database, which is why it is a download rather than a block here."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2140,6 +2265,10 @@ msgstr "Código"
 #, fuzzy
 msgid "state column"
 msgstr "columna de estado"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Back the database up"
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "No households yet."
@@ -2319,6 +2448,10 @@ msgstr "el plan <0>{0}</0>"
 #, fuzzy
 msgid "Latest 12 months"
 msgstr "Últimos 12 meses"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Nothing written yet. The file appears the next time this instance starts."
+msgstr ""
 
 #. placeholder {0}: done.payee_name
 #. placeholder {1}: done.category_name
@@ -2509,11 +2642,19 @@ msgstr "Elige dos cuentas distintas: el dinero no puede moverse a la misma cuent
 msgid "No minus signs — the direction is the two accounts above."
 msgstr "Sin signo menos: el sentido lo dan las dos cuentas de arriba."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Show them"
+msgstr ""
+
 #: src/components/SignInNotice.tsx
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Recent sign-in changes"
 msgstr "Cambios recientes en el inicio de sesión"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
+msgstr ""
 
 #: src/screens/Backups.tsx
 #: src/screens/Register.tsx
@@ -2586,6 +2727,10 @@ msgstr "Configurar {PRODUCT}"
 #, fuzzy
 msgid "The name looks like its number."
 msgstr "El nombre parece ser su número."
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Machine"
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Copy"
@@ -2759,6 +2904,10 @@ msgstr ""
 msgid "No single category matches that."
 msgstr "Ninguna categoría coincide exactamente con eso."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Path"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Split"
@@ -2861,6 +3010,11 @@ msgstr "Añadir más"
 msgid "New payee rule"
 msgstr ""
 
+#. placeholder {0}: me.python
+#: src/screens/ApplicationManagement.tsx
+msgid "Python {0}"
+msgstr ""
+
 #: src/components/RecoveryCodes.tsx
 #, fuzzy
 msgid "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
@@ -2921,6 +3075,11 @@ msgstr ""
 msgid "Category: no category needed, this is one leg of a transfer"
 msgstr "Categoría: no hace falta, es una parte de una transferencia"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "no git history and no build stamp to ask"
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "File"
@@ -2979,6 +3138,10 @@ msgstr "{text}: editar el concepto"
 msgid "Changing…"
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Started"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Reset: password"
@@ -3007,6 +3170,10 @@ msgstr "los cuatro últimos, o la parte que imprime el banco"
 
 #: src/screens/Admin.tsx
 msgid "A suggestion, not a restriction: it fills in the address on the acceptance screen and the person can change it. <0>The link is the credential</0> — whoever opens it gets this role, so treat it like a password."
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "The source, on GitHub"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -3085,6 +3252,10 @@ msgstr ""
 #, fuzzy
 msgid "Gather the accounts by country"
 msgstr "Agrupar las cuentas por país"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Database"
+msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "Put this back instead (leave empty to remove it)"
@@ -3310,6 +3481,10 @@ msgstr ""
 msgid "running"
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "How much to write down"
+msgstr ""
+
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Waiting for the other statement"
@@ -3402,6 +3577,10 @@ msgstr "Dónde está la cuenta. Opcional, e independiente de la divisa: una cuen
 msgid "The line exactly as it arrived"
 msgstr "La línea tal como llegó"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Where it can be reached"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Date format"
 msgstr ""
@@ -3471,6 +3650,10 @@ msgstr "Texto más grande"
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so one Out column holding {0} would be a column nobody could add up."
 msgstr "Este libro nunca convierte. La divisa está en la cuenta y no hay ningún tipo de cambio guardado, así que una columna de Salida con {0} sería una columna que nadie podría sumar."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "The process answering this request."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Uncleared — the bank has not seen this yet"
@@ -3501,6 +3684,10 @@ msgstr "Se registra como un movimiento real en esa fecha, no como una cifra ocul
 #, fuzzy
 msgid "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
 msgstr "Ten a mano uno de tus códigos de recuperación: demuestra que eres tú en lugar de la aplicación de autenticación antigua. (El código de recuperación con el que iniciaste sesión solo lo cubre en la pestaña donde lo usaste, mientras sigas con la sesión iniciada y durante un día.)"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "your data"
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Owner"
@@ -3624,10 +3811,18 @@ msgstr "doble clic para editar"
 msgid "New authenticator"
 msgstr "Nueva aplicación de autenticación"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "use the button below"
+msgstr ""
+
 #: src/components/StepUp.tsx
 #, fuzzy
 msgid "Your account is under your name in the menu."
 msgstr "Tu cuenta está en tu nombre, en el menú."
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Asking…"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -3714,6 +3909,10 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Yes, withdraw it"
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Last backup"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -3902,6 +4101,13 @@ msgstr "Esto queda como una sola entrada en el Historial, así que toda la impor
 msgid "Email"
 msgstr "Correo electrónico"
 
+#. placeholder {0}: packages.length
+#. placeholder {1}: count(packages.length)
+#. placeholder {2}: count(packages.length)
+#: src/screens/ApplicationManagement.tsx
+msgid "{0, plural, one {{1} packages.} other {{2} packages.}}"
+msgstr ""
+
 #: src/screens/Reconcile.tsx
 msgid "The difference has to be zero first"
 msgstr ""
@@ -4006,6 +4212,10 @@ msgstr "Otros activos"
 #, fuzzy
 msgid "4. Recovery codes"
 msgstr "4. Códigos de recuperación"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Every distribution installed in this environment, with the version that is actually loaded — not what <0>requirements.txt</0> locked, which an install may not have followed. When a dependency is the suspect, this is the list that answers it."
+msgstr ""
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -4322,6 +4532,10 @@ msgstr "Ignorarla y seguir"
 msgid "Loading…"
 msgstr "Cargando…"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "How much data, per household"
+msgstr ""
+
 #: src/components/ReenrolmentDue.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -4438,6 +4652,10 @@ msgstr "{others, plural, one {Podrás seguir iniciando sesión con tu otra llave
 msgid "Every rule of this kind gets a turn, in this order, each one working on what the last one left."
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Schema"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Owner — can administer this instance"
 msgstr ""
@@ -4461,6 +4679,10 @@ msgstr "3. Códigos de recuperación"
 #, fuzzy
 msgid "e.g. {0}"
 msgstr "p. ej., {0}"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "What it depends on"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -4569,6 +4791,10 @@ msgstr ""
 msgid "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} el {1}. Las partes lo sustituyen, así que tienen que sumar el mismo importe. Sin signo menos: cada parte va en el mismo sentido que el original."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "The ledger this process is serving."
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
 msgstr ""
@@ -4654,6 +4880,10 @@ msgstr "Traído por la <0>Importación única</0> desde {how}, el {when}."
 msgid "From year"
 msgstr "Año inicial"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Commit"
+msgstr ""
+
 #: src/screens/Reconcile.tsx
 msgid "Type the closing balance"
 msgstr ""
@@ -4695,6 +4925,10 @@ msgstr "Cambios en el inicio de sesión en los últimos 14 días, hechos por otr
 msgid "Every category this payee has been filed under, biggest first. The transactions with no category are listed too, because they are what this payee still costs you to classify."
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "hand this to kill or lsof"
+msgstr ""
+
 #: src/screens/Admin.tsx
 #: src/screens/Backups.tsx
 #: src/screens/Categories.tsx
@@ -4722,6 +4956,10 @@ msgstr "No entra dinero entre esas fechas. Amplíalas arriba: un reembolso puede
 #, fuzzy
 msgid "Work expenses"
 msgstr "Gastos de trabajo"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "unknown"
+msgstr ""
 
 #: src/screens/Household.tsx
 msgid "Oldest transaction"
@@ -5089,6 +5327,10 @@ msgstr "Guardar"
 msgid "One row from each account's statement, made the two sides of one transfer"
 msgstr "Una fila del extracto de cada cuenta, convertidas en las dos partes de una transferencia"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Log files"
+msgstr ""
+
 #: src/App.tsx
 #, fuzzy
 msgid "Couldn't load your households"
@@ -5139,8 +5381,18 @@ msgstr ""
 msgid "No invitations outstanding."
 msgstr ""
 
+#. placeholder {0}: upstream.data.running
+#. placeholder {1}: upstream.data.latest
+#: src/screens/ApplicationManagement.tsx
+msgid "This is the newest there is: {0}, and the repository's latest tag is {1}."
+msgstr ""
+
 #: src/screens/Backups.tsx
 msgid "If <0>Google Drive for desktop</0> or the Dropbox app is installed, it keeps a folder in sync — usually <1>Google Drive</1> or <2>Dropbox</2> in your home folder. Pick it, and the app uploads the zip from there."
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "The second one is what a phone on this network types in. Location on the Snap page needs an https address — a browser will not offer it over plain http, whatever this app sends."
 msgstr ""
 
 #: src/lib/labels.ts
@@ -5157,10 +5409,18 @@ msgstr "¿Qué es esto? {label}"
 msgid "The server keeps only a hash of it, so nobody — you included — can read it back."
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "the migration this database is at"
+msgstr ""
+
 #: src/App.tsx
 #, fuzzy
 msgid "Payee Categorisation"
 msgstr "Categorización de beneficiarios"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Back up now"
+msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Choose a category…"
@@ -5360,6 +5620,10 @@ msgstr "Quedan {0} de 10"
 msgid "Somebody re-enabled {user}"
 msgstr "Alguien reactivó a {user}"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "About"
+msgstr ""
+
 #: src/screens/Rules.tsx
 msgid "The first rule that matches wins; the rest are not tried."
 msgstr ""
@@ -5411,6 +5675,10 @@ msgstr "Sí, eliminarlo"
 #, fuzzy
 msgid "Every part of the original is accounted for."
 msgstr "Cada parte del original está repartida."
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Is there a newer version?"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -5473,6 +5741,10 @@ msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "see it"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -5585,6 +5857,11 @@ msgstr "{0} de las filas seleccionadas están fuera del filtro actual y no entra
 msgid "Re-enable {0}"
 msgstr ""
 
+#. placeholder {0}: me.engine.journal_mode
+#: src/screens/ApplicationManagement.tsx
+msgid "{0} journal"
+msgstr ""
+
 #. placeholder {0}: entry.filename
 #: src/screens/Import.tsx
 #, fuzzy
@@ -5687,6 +5964,10 @@ msgstr ""
 msgid "Enter again to edit"
 msgstr "Intro otra vez para editar"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "no branch"
+msgstr ""
+
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
 msgid "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
@@ -5737,6 +6018,10 @@ msgstr "Alguien añadió a {user} como propietario"
 
 #: src/screens/Rules.tsx
 msgid "Trying…"
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Pages"
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -5795,6 +6080,10 @@ msgstr "Volver a configurar"
 msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
 msgstr "Una transferencia necesita dos cuentas abiertas. Añade otra antes en la pantalla Cuentas."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "A download is a zip with a README for whoever opens it next: what the file is, how to read it, and how to put it back with <0>make restore</0>. Delete removes one file when you say so and confirm. Nothing here deletes a backup on its own — no pruning and no timer."
+msgstr ""
+
 #. placeholder {0}: household.name
 #: src/screens/Import.tsx
 #, fuzzy
@@ -5847,6 +6136,10 @@ msgstr "{hiddenByCurrency, plural, one {Todas las filas están en una divisa que
 msgid "All categories"
 msgstr "Todas las categorías"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "No households on this instance yet."
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Used for totals only. Each account keeps its own currency, and nothing is ever converted."
 msgstr ""
@@ -5896,6 +6189,10 @@ msgstr ""
 msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
 msgstr "No se guarda nada hasta el último paso. Si cierras esta página, la instancia sigue intacta y puedes empezar de nuevo."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "this process"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "the number other statements quote"
@@ -5941,6 +6238,10 @@ msgstr "Dar una clave a un programa"
 msgid "Disable {0}"
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "not migrated"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "A code from your current authenticator"
@@ -5961,6 +6262,10 @@ msgstr "de la copia de este navegador, no del servidor: el archivo en sí no se 
 msgid "Yes, discard it"
 msgstr "Sí, descartarla"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Where it is"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Following this device, which is light right now."
@@ -5978,6 +6283,7 @@ msgstr "¿Qué pago devolvió esto?"
 msgid "{0} will always be {1}"
 msgstr "{0} será siempre {1}"
 
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Reading…"
@@ -6050,6 +6356,10 @@ msgstr "Revocada el {0}"
 msgid "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
 msgstr "El tipo dice qué clase de cosa es la cuenta. Ordena la lista y marca qué saldos son dinero que <0>debes</0> y no dinero que tienes."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Its author, and their other projects"
+msgstr ""
+
 #. placeholder {0}: rows.length
 #. placeholder {1}: payees.data?.length ?? 0
 #: src/screens/Payees.tsx
@@ -6076,12 +6386,14 @@ msgid "Notes and coins in a wallet or a tin. Nothing imports into it — you ent
 msgstr "Billetes y monedas en una cartera o una lata. No se importa nada en ella: anotas lo que gastas."
 
 #: src/components/bits.tsx
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Close"
 msgstr "Cerrar"
 
 #: src/App.tsx
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Household.tsx
 #, fuzzy
 msgid "Receipts"
@@ -6096,6 +6408,10 @@ msgstr "Vincular"
 #, fuzzy
 msgid "Choose the replacement"
 msgstr "Elegir el sustituto"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Hide them"
+msgstr ""
 
 #. placeholder {0}: found.payee_original
 #: src/screens/Register.tsx
@@ -6133,6 +6449,12 @@ msgstr "esa importación se ha descartado: no se ha escrito nada"
 
 #: src/screens/History.tsx
 msgid "Putting it back…"
+msgstr ""
+
+#. placeholder {0}: bytes(me.size.page_size)
+#. placeholder {1}: count(me.size.free_pages ?? 0)
+#: src/screens/ApplicationManagement.tsx
+msgid "{0} each, {1} free"
 msgstr ""
 
 #. placeholder {0}: rule.pattern
@@ -6239,10 +6561,20 @@ msgstr ""
 msgid "Oldest"
 msgstr "Más antigua"
 
+#. placeholder {0}: me.app_name
+#. placeholder {1}: me.version
+#: src/screens/ApplicationManagement.tsx
+msgid "{0} {1} — a self-hosted, multi-currency spend tracker for one household, under the AGPL."
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Open that import"
 msgstr "Abrir esa importación"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "never"
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "DD/MM/YYYY"
