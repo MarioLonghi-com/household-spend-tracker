@@ -15,6 +15,10 @@ msgstr "The name looks like its IBAN."
 msgid "balance column"
 msgstr "balance column"
 
+#: src/screens/Categories.tsx
+msgid "Always use my choice"
+msgstr "Always use my choice"
+
 #: src/screens/Accounts.tsx
 msgid "Mentions"
 msgstr "Mentions"
@@ -61,6 +65,11 @@ msgstr "payee, memo, or the bank's own words"
 #: src/screens/Accounts.tsx
 msgid "this account is closed"
 msgstr "this account is closed"
+
+#. placeholder {0}: group.name
+#: src/screens/Categories.tsx
+msgid "Delete the group {0}?"
+msgstr "Delete the group {0}?"
 
 #: src/screens/Profile.tsx
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
@@ -228,6 +237,10 @@ msgstr "Reset links work once and they expire. Ask an owner of this instance for
 msgid "Sign-in methods"
 msgstr "Sign-in methods"
 
+#: src/screens/Categories.tsx
+msgid "Add a category"
+msgstr "Add a category"
+
 #: src/screens/Profile.tsx
 msgid "This server cannot check a code from the authenticator you have, so one of your recovery codes proves it is you instead; it is spent."
 msgstr "This server cannot check a code from the authenticator you have, so one of your recovery codes proves it is you instead; it is spent."
@@ -318,6 +331,10 @@ msgstr "One part of a split"
 msgid "2. You"
 msgstr "2. You"
 
+#: src/screens/Categories.tsx
+msgid "Start with a common set"
+msgstr "Start with a common set"
+
 #. placeholder {0}: found.filename ?? t`a statement`
 #. placeholder {1}: found.line_no
 #. placeholder {2}: formatInstant(found.imported_at)
@@ -376,6 +393,10 @@ msgstr "{0, plural, one {({1} line)} other {({2} lines)}}"
 msgid "Opening date"
 msgstr "Opening date"
 
+#: src/screens/Categories.tsx
+msgid "It matters most on an import: a statement of three hundred rows is three hundred categories you did not have to type, or three hundred corrections if it guesses badly."
+msgstr "It matters most on an import: a statement of three hundred rows is three hundred categories you did not have to type, or three hundred corrections if it guesses badly."
+
 #: src/screens/Profile.tsx
 msgid "What it may do"
 msgstr "What it may do"
@@ -385,6 +406,7 @@ msgid "Skip to transactions"
 msgstr "Skip to transactions"
 
 #: src/App.tsx
+#: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 msgid "Transactions"
 msgstr "Transactions"
@@ -525,6 +547,7 @@ msgstr "This file only. The payee’s rule is left as it is for future statement
 
 #: src/App.tsx
 #: src/screens/Accounts.tsx
+#: src/screens/Categories.tsx
 #: src/screens/Passkeys.tsx
 msgid "Name"
 msgstr "Name"
@@ -875,6 +898,10 @@ msgstr "Not a transfer — categorise as…"
 msgid "Can't scan? Enter this key by hand: <0>{0}</0>"
 msgstr "Can't scan? Enter this key by hand: <0>{0}</0>"
 
+#: src/screens/Categories.tsx
+msgid "Add a group"
+msgstr "Add a group"
+
 #. placeholder {0}: formatCount(rows.length)
 #: src/screens/Register.tsx
 msgid "the first {0} loaded"
@@ -942,6 +969,13 @@ msgstr "{count, plural, one {{shown} transaction match the filters} other {{show
 msgid "receipt filer"
 msgstr "receipt filer"
 
+#. placeholder {0}: category.used_by
+#. placeholder {1}: category.used_by
+#. placeholder {2}: category.used_by
+#: src/screens/Categories.tsx
+msgid "{0, plural, one {{1} transaction carries this category, so it cannot be deleted. Archive it instead.} other {{2} transactions carry this category, so it cannot be deleted. Archive it instead.}}"
+msgstr "{0, plural, one {{1} transaction carries this category, so it cannot be deleted. Archive it instead.} other {{2} transactions carry this category, so it cannot be deleted. Archive it instead.}}"
+
 #: src/screens/TransferSections.tsx
 msgid "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
 msgstr "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
@@ -966,6 +1000,7 @@ msgstr "Select every waiting row"
 msgid "That isn't an amount"
 msgstr "That isn't an amount"
 
+#: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 msgid "Delete"
 msgstr "Delete"
@@ -1063,6 +1098,15 @@ msgstr "Yes, all of them and set the rule"
 #: src/screens/TransferSections.tsx
 msgid "Why"
 msgstr "Why"
+
+#. placeholder {0}: stat.more_payees
+#. placeholder {1}: formatCount(stat.more_payees)
+#. placeholder {2}: formatCount(stat.payee_count)
+#. placeholder {3}: formatCount(stat.more_payees)
+#. placeholder {4}: formatCount(stat.payee_count)
+#: src/screens/Categories.tsx
+msgid "{0, plural, one {and {1} more payee — {2} in all.} other {and {3} more payees — {4} in all.}}"
+msgstr "{0, plural, one {and {1} more payee — {2} in all.} other {and {3} more payees — {4} in all.}}"
 
 #: src/lib/labels.ts
 msgid "Needs a look"
@@ -1165,6 +1209,10 @@ msgstr "{0, plural, one {Repays {1} expense} other {Repays {2} expenses}}"
 #: src/lib/labels.ts
 msgid "skip rows"
 msgstr "skip rows"
+
+#: src/screens/Categories.tsx
+msgid "Edit"
+msgstr "Edit"
 
 #: src/screens/Register.tsx
 msgid "No single category matches that. Keep typing, or empty it."
@@ -1380,6 +1428,10 @@ msgstr "{0} will always be {1} — and the payee was added"
 msgid "Received"
 msgstr "Received"
 
+#: src/screens/Categories.tsx
+msgid "Auto-categorise based on payee history"
+msgstr "Auto-categorise based on payee history"
+
 #: src/screens/ResetAccount.tsx
 msgid "A new password"
 msgstr "A new password"
@@ -1581,6 +1633,7 @@ msgstr "Added"
 msgid "{0} left to account for"
 msgstr "{0} left to account for"
 
+#: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 msgid "this payee"
 msgstr "this payee"
@@ -1600,6 +1653,7 @@ msgid "Add a part for the {0}"
 msgstr "Add a part for the {0}"
 
 #: src/screens/Accounts.tsx
+#: src/screens/Categories.tsx
 msgid "Create"
 msgstr "Create"
 
@@ -1622,6 +1676,10 @@ msgstr "Passkeys are not set up on this server."
 #: src/lib/labels.ts
 msgid "Matched"
 msgstr "Matched"
+
+#: src/screens/Categories.tsx
+msgid "unused"
+msgstr "unused"
 
 #: src/screens/Import.tsx
 msgid "No single category matches that."
@@ -1667,6 +1725,10 @@ msgstr "Checking"
 #: src/screens/Register.tsx
 msgid "Work will not pay this. It counts as your spending."
 msgstr "Work will not pay this. It counts as your spending."
+
+#: src/screens/Categories.tsx
+msgid "Do not auto-categorise {name}"
+msgstr "Do not auto-categorise {name}"
 
 #: src/screens/Register.tsx
 msgid "Add more"
@@ -1817,14 +1879,23 @@ msgstr "Gather the accounts by country"
 msgid "Drag to resize · double-click to reset every column"
 msgstr "Drag to resize · double-click to reset every column"
 
+#: src/screens/Categories.tsx
+msgid "Delete group"
+msgstr "Delete group"
+
 #: src/screens/SignIn.tsx
 msgid "Recovery code"
 msgstr "Recovery code"
+
+#: src/screens/Categories.tsx
+msgid "New group"
+msgstr "New group"
 
 #: src/screens/Register.tsx
 msgid "Detach this receipt?"
 msgstr "Detach this receipt?"
 
+#: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
 msgid "Category"
@@ -1969,6 +2040,7 @@ msgstr "The server made {user} an owner"
 msgid "owner"
 msgstr "owner"
 
+#: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 msgid "Undo in History brings it back."
 msgstr "Undo in History brings it back."
@@ -1981,6 +2053,10 @@ msgstr "Import"
 #: src/screens/Register.tsx
 msgid "Reimbursed by"
 msgstr "Reimbursed by"
+
+#: src/screens/Categories.tsx
+msgid "Group"
+msgstr "Group"
 
 #: src/screens/Register.tsx
 msgid "Import is in the menu on the left — this screen was given no way to navigate"
@@ -2171,6 +2247,10 @@ msgstr "Date"
 msgid "memo column"
 msgstr "memo column"
 
+#: src/screens/Categories.tsx
+msgid "How to categorise {name}"
+msgstr "How to categorise {name}"
+
 #: src/screens/Register.tsx
 msgid "Download"
 msgstr "Download"
@@ -2191,6 +2271,11 @@ msgstr "Synced"
 msgid "a pocket's or a card product's name"
 msgstr "a pocket's or a card product's name"
 
+#. placeholder {0}: rule.data?.history_window ?? 3
+#: src/screens/Categories.tsx
+msgid "The category is chosen from how the last {0} transactions for {name} were categorised — the most common of them, most recent winning a tie. It updates as you add and edit transactions."
+msgstr "The category is chosen from how the last {0} transactions for {name} were categorised — the most common of them, most recent winning a tie. It updates as you add and edit transactions."
+
 #: src/screens/Profile.tsx
 msgid "Set"
 msgstr "Set"
@@ -2206,6 +2291,10 @@ msgstr "kind"
 #: src/screens/Profile.tsx
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
 msgstr "The recovery code you signed in with covers this, so no other code is asked for."
+
+#: src/screens/Categories.tsx
+msgid "New transactions arrive blank and you choose each time. Right for a payee that is genuinely different every time."
+msgstr "New transactions arrive blank and you choose each time. Right for a payee that is genuinely different every time."
 
 #: src/screens/Register.tsx
 msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."
@@ -2238,6 +2327,7 @@ msgstr "Description"
 
 #: src/App.tsx
 #: src/lib/labels.ts
+#: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 msgid "Categories"
 msgstr "Categories"
@@ -2265,6 +2355,14 @@ msgstr "about appearance"
 #: src/lib/signInChanges.ts
 msgid "The server re-enabled {user}"
 msgstr "The server re-enabled {user}"
+
+#: src/screens/Categories.tsx
+msgid "archived"
+msgstr "archived"
+
+#: src/screens/Categories.tsx
+msgid "No categories yet. Categories say what a transaction was <0>for</0> — they group the register and let a payee fill itself in."
+msgstr "No categories yet. Categories say what a transaction was <0>for</0> — they group the register and let a payee fill itself in."
 
 #: src/screens/Setup.tsx
 msgid "In Docker:"
@@ -2466,6 +2564,10 @@ msgstr "Not now"
 msgid "outflow column"
 msgstr "outflow column"
 
+#: src/screens/Categories.tsx
+msgid "Payees"
+msgstr "Payees"
+
 #: src/screens/Accounts.tsx
 msgid "Tag in the download's file name"
 msgstr "Tag in the download's file name"
@@ -2499,6 +2601,10 @@ msgstr "See them in Admin"
 msgid "Hide help: {label}"
 msgstr "Hide help: {label}"
 
+#: src/screens/Categories.tsx
+msgid "how this works"
+msgstr "how this works"
+
 #: src/screens/Profile.tsx
 msgid "Current password"
 msgstr "Current password"
@@ -2526,6 +2632,10 @@ msgstr "Later: the same length of time, just after"
 #: src/screens/Passkeys.tsx
 msgid "You signed in with a recovery code, and your passkeys still work. If one of them was on the device you lost, remove it here."
 msgstr "You signed in with a recovery code, and your passkeys still work. If one of them was on the device you lost, remove it here."
+
+#: src/screens/Categories.tsx
+msgid "Rename or delete this group"
+msgstr "Rename or delete this group"
 
 #: src/screens/Register.tsx
 msgid "Out {code}"
@@ -2598,6 +2708,10 @@ msgstr "<0>{purgingName}</0> and its {0} line will be deleted. Nothing in it has
 msgid "type any part"
 msgstr "type any part"
 
+#: src/screens/Categories.tsx
+msgid "Categorisation"
+msgstr "Categorisation"
+
 #: src/screens/Register.tsx
 msgid "Reimbursed, with the payment"
 msgstr "Reimbursed, with the payment"
@@ -2613,6 +2727,10 @@ msgstr "Where this line will land"
 #: src/screens/Passkeys.tsx
 msgid "{others, plural, one {You will still be able to sign in with your other passkey, or with your password and code.} other {You will still be able to sign in with your other {others} passkeys, or with your password and code.}}"
 msgstr "{others, plural, one {You will still be able to sign in with your other passkey, or with your password and code.} other {You will still be able to sign in with your other {others} passkeys, or with your password and code.}}"
+
+#: src/screens/Categories.tsx
+msgid "Archived — hide it from the pickers"
+msgstr "Archived — hide it from the pickers"
 
 #: src/screens/AcceptInvite.tsx
 msgid "3. Recovery codes"
@@ -2643,6 +2761,10 @@ msgstr "Not the same thing — add it separately"
 #: src/screens/Profile.tsx
 msgid "{usable, plural, one {{usable} passkey} other {{usable} passkeys}}"
 msgstr "{usable, plural, one {{usable} passkey} other {{usable} passkeys}}"
+
+#: src/screens/Categories.tsx
+msgid "A group can only be deleted when there are no categories under it, archived ones included. Deleting it is an entry in History, and Undo there brings it back."
+msgstr "A group can only be deleted when there are no categories under it, archived ones included. Deleting it is an entry in History, and Undo there brings it back."
 
 #: src/lib/signInChanges.ts
 msgid "{by} gave {user} a new authenticator"
@@ -2745,6 +2867,7 @@ msgstr "Nothing here yet. Add a row above, or import a statement from the Import
 msgid "Sign-in changes in the last 14 days, by somebody other than you:"
 msgstr "Sign-in changes in the last 14 days, by somebody other than you:"
 
+#: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Register.tsx
@@ -2788,6 +2911,10 @@ msgstr "write"
 msgid "Money you owe the card issuer. Spending makes the balance more negative; paying the bill is a transfer from the account that pays it."
 msgstr "Money you owe the card issuer. Spending makes the balance more negative; paying the bill is a transfer from the account that pays it."
 
+#: src/screens/Categories.tsx
+msgid "Nothing to go on yet, so new transactions stay uncategorised."
+msgstr "Nothing to go on yet, so new transactions stay uncategorised."
+
 #: src/screens/Profile.tsx
 msgid "{action}: {name}"
 msgstr "{action}: {name}"
@@ -2828,6 +2955,10 @@ msgstr "Add transaction"
 #: src/screens/Register.tsx
 msgid "S — Split parts"
 msgstr "S — Split parts"
+
+#: src/screens/Categories.tsx
+msgid "Nothing in this group yet."
+msgstr "Nothing in this group yet."
 
 #. placeholder {0}: offer.count + 1
 #: src/screens/Import.tsx
@@ -2923,6 +3054,10 @@ msgstr "a note for this row"
 msgid "in or out, any currency"
 msgstr "in or out, any currency"
 
+#: src/screens/Categories.tsx
+msgid "Archived"
+msgstr "Archived"
+
 #: src/screens/Profile.tsx
 msgid "Let it add and change transactions, not only read them"
 msgstr "Let it add and change transactions, not only read them"
@@ -2936,6 +3071,7 @@ msgid "Larger text in the table"
 msgstr "Larger text in the table"
 
 #: src/screens/Accounts.tsx
+#: src/screens/Categories.tsx
 #: src/screens/Passkeys.tsx
 msgid "Save"
 msgstr "Save"
@@ -2981,6 +3117,10 @@ msgstr "What's this? {label}"
 #: src/App.tsx
 msgid "Payee Categorisation"
 msgstr "Payee Categorisation"
+
+#: src/screens/Categories.tsx
+msgid "Choose a category…"
+msgstr "Choose a category…"
 
 #: src/screens/Register.tsx
 msgid "At most {LINK_MAX_EXPENSES} expenses at a time"
@@ -3076,6 +3216,15 @@ msgstr "What has happened to this"
 msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
 msgstr "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
 
+#: src/screens/Categories.tsx
+msgid "A heading the categories sit under — Bills, Everyday, whatever divides your spending in a way you recognise."
+msgstr "A heading the categories sit under — Bills, Everyday, whatever divides your spending in a way you recognise."
+
+#. placeholder {0}: group.name
+#: src/screens/Categories.tsx
+msgid "New category in {0}"
+msgstr "New category in {0}"
+
 #. placeholder {0}: recovery.data.unused
 #: src/screens/Profile.tsx
 msgid "{0} of 10 left"
@@ -3134,6 +3283,11 @@ msgstr "Every code you have now, used or not, stops working and ten new ones rep
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 msgstr "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 
+#. placeholder {0}: category.name
+#: src/screens/Categories.tsx
+msgid "Delete the category {0}?"
+msgstr "Delete the category {0}?"
+
 #: src/screens/Register.tsx
 msgid "Send it to the inbox. It stays there until you delete it."
 msgstr "Send it to the inbox. It stays there until you delete it."
@@ -3143,6 +3297,10 @@ msgstr "Send it to the inbox. It stays there until you delete it."
 #: src/screens/Transfer.tsx
 msgid "That works out at <0>{impliedRate}</0> {0} per {1}."
 msgstr "That works out at <0>{impliedRate}</0> {0} per {1}."
+
+#: src/screens/Categories.tsx
+msgid "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
+msgstr "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
 
 #: src/screens/Register.tsx
 msgid "Discard this split?"
@@ -3164,6 +3322,11 @@ msgstr "Set the category on {done} rows and skipped 1 transfer leg — a transfe
 #: src/components/DateRange.tsx
 msgid "From month"
 msgstr "From month"
+
+#. placeholder {0}: rule.data.current_default_name
+#: src/screens/Categories.tsx
+msgid "Right now that is <0>{0}</0>."
+msgstr "Right now that is <0>{0}</0>."
 
 #. placeholder {0}: formatCount(page.shown)
 #. placeholder {1}: formatCount(page.total)
@@ -3250,6 +3413,10 @@ msgstr "Source"
 msgid "may apply imports"
 msgstr "may apply imports"
 
+#: src/screens/Categories.tsx
+msgid "Build my own"
+msgstr "Build my own"
+
 #: src/screens/Register.tsx
 msgid "Edit the memo"
 msgstr "Edit the memo"
@@ -3290,6 +3457,10 @@ msgstr "Somebody added {user} as an owner"
 #: src/screens/Register.tsx
 msgid "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
+
+#: src/screens/Categories.tsx
+msgid "Show archived"
+msgstr "Show archived"
 
 #: src/screens/Import.tsx
 msgid "The memo this row will carry"
@@ -3361,6 +3532,10 @@ msgstr "L — Locked"
 #: src/lib/signInChanges.ts
 msgid "from the server"
 msgstr "from the server"
+
+#: src/screens/Categories.tsx
+msgid "Every new transaction for this payee gets a category without you choosing one. Which one depends on the setting below."
+msgstr "Every new transaction for this payee gets a category without you choosing one. Which one depends on the setting below."
 
 #: src/screens/AcceptInvite.tsx
 msgid "An owner can administer this instance: people, households and invitations."
