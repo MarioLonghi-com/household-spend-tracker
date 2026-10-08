@@ -270,7 +270,7 @@ def get_or_create(
     """
     cleaned = " ".join((name or "").split())
     if not cleaned:
-        raise ValidationError("a payee needs a name")
+        raise ValidationError("a payee needs a name", code="payee.needs_name")
 
     folded = fold(cleaned)
     existing = by_folded(session, household_id, [cleaned]).get(folded)
@@ -339,7 +339,7 @@ def add_pending(session: Session, household_id: str, name: str) -> Payee:
     looked for it with `by_folded` and will flush many rows at once."""
     cleaned = " ".join((name or "").split())
     if not cleaned:
-        raise ValidationError("a payee needs a name")
+        raise ValidationError("a payee needs a name", code="payee.needs_name")
     payee = Payee(household_id=household_id, name=cleaned, name_folded=fold(cleaned))
     session.add(payee)
     return payee
@@ -390,9 +390,13 @@ MERGE_CHUNK = 500
 def merge(session: Session, *, source: Payee, target: Payee) -> Payee:
     """Fold one payee into another, moving everything that points at it."""
     if source.id == target.id:
-        raise ValidationError("a payee cannot be merged into itself")
+        raise ValidationError(
+            "a payee cannot be merged into itself", code="payee.merge_into_itself"
+        )
     if source.household_id != target.household_id:
-        raise ValidationError("those payees are in different households")
+        raise ValidationError(
+            "those payees are in different households", code="payee.merge_different_households"
+        )
 
     from ..models import Transaction
 
@@ -505,28 +509,42 @@ def create_rule(
     does = RuleAction(action)
     cleaned = (pattern or "").strip()
     if not cleaned:
-        raise ValidationError("a rule needs something to match on")
+        raise ValidationError("a rule needs something to match on", code="payee.rule_needs_pattern")
     if len(cleaned) > MAX_PATTERN_LENGTH:
-        raise ValidationError(f"that pattern is too long (max {MAX_PATTERN_LENGTH} characters)")
+        raise ValidationError(
+            f"that pattern is too long (max {MAX_PATTERN_LENGTH} characters)",
+            code="payee.rule_pattern_too_long",
+            params={"max": MAX_PATTERN_LENGTH},
+        )
     if kind is MatchType.regex:
         try:
             re.compile(cleaned)
         except re.error as exc:
-            raise ValidationError(f"that is not a valid regular expression: {exc}") from exc
+            raise ValidationError(
+                f"that is not a valid regular expression: {exc}",
+                code="payee.rule_not_a_regex",
+                params={"reason": str(exc)},
+            ) from exc
 
     instead = (replacement or "").strip() or None
     if instead is not None and len(instead) > MAX_PATTERN_LENGTH:
         raise ValidationError(
-            f"that replacement is too long (max {MAX_PATTERN_LENGTH} characters)"
+            f"that replacement is too long (max {MAX_PATTERN_LENGTH} characters)",
+            code="payee.rule_replacement_too_long",
+            params={"max": MAX_PATTERN_LENGTH},
         )
 
     if does is RuleAction.map:
         if payee is None:
-            raise ValidationError("a rule that names a payee needs a payee to point at")
+            raise ValidationError(
+                "a rule that names a payee needs a payee to point at",
+                code="payee.rule_needs_payee",
+            )
         if instead is not None:
             raise ValidationError(
                 "a replacement only means something on a rule that rewrites; "
-                "this one names a payee"
+                "this one names a payee",
+                code="payee.rule_replacement_on_map",
             )
     else:
         # Not an error to pass one -- the rules screen sends the whole form --
@@ -572,30 +590,42 @@ def _check_template(pattern: str, replacement: str) -> None:
     try:
         compiled = regex.compile(pattern, flags=regex.IGNORECASE)
     except regex.error as exc:  # pragma: no cover - create_rule checked it first
-        raise ValidationError(f"that is not a valid regular expression: {exc}") from exc
+        raise ValidationError(
+            f"that is not a valid regular expression: {exc}",
+            code="payee.rule_not_a_regex",
+            params={"reason": str(exc)},
+        ) from exc
 
     for number, name in _TEMPLATE_REFERENCE.findall(replacement):
         if number:
             if int(number) > compiled.groups:
+                if compiled.groups == 0:
+                    raise ValidationError(
+                        f"that replacement uses \\{number}, and the pattern has "
+                        "no bracketed groups. Put brackets round the part you want to keep.",
+                        code="payee.rule_template_no_groups",
+                        params={"reference": f"\\{number}"},
+                    )
                 raise ValidationError(
                     f"that replacement uses \\{number}, and the pattern has "
-                    + (
-                        "no bracketed groups"
-                        if compiled.groups == 0
-                        else f"only {compiled.groups}"
-                    )
-                    + ". Put brackets round the part you want to keep."
+                    f"only {compiled.groups}. Put brackets round the part you want to keep.",
+                    code="payee.rule_template_too_few_groups",
+                    params={"reference": f"\\{number}", "groups": compiled.groups},
                 )
         elif name.isdigit():
             if int(name) > compiled.groups:
                 raise ValidationError(
                     f"that replacement uses \\g<{name}>, and the pattern has "
-                    f"only {compiled.groups} bracketed groups"
+                    f"only {compiled.groups} bracketed groups",
+                    code="payee.rule_template_too_few_groups",
+                    params={"reference": f"\\g<{name}>", "groups": compiled.groups},
                 )
         elif name not in compiled.groupindex:
             raise ValidationError(
                 f"that replacement uses \\g<{name}>, and the pattern has no "
-                f"group called {name}"
+                f"group called {name}",
+                code="payee.rule_template_no_such_group",
+                params={"reference": f"\\g<{name}>", "name": name},
             )
 
 
@@ -1462,14 +1492,22 @@ def try_pattern(
     does = RuleAction(action)
     cleaned = (pattern or "").strip()
     if not cleaned:
-        raise ValidationError("a rule needs something to match on")
+        raise ValidationError("a rule needs something to match on", code="payee.rule_needs_pattern")
     if len(cleaned) > MAX_PATTERN_LENGTH:
-        raise ValidationError(f"that pattern is too long (max {MAX_PATTERN_LENGTH} characters)")
+        raise ValidationError(
+            f"that pattern is too long (max {MAX_PATTERN_LENGTH} characters)",
+            code="payee.rule_pattern_too_long",
+            params={"max": MAX_PATTERN_LENGTH},
+        )
     if kind is MatchType.regex:
         try:
             re.compile(cleaned)
         except re.error as exc:
-            raise ValidationError(f"that is not a valid regular expression: {exc}") from exc
+            raise ValidationError(
+                f"that is not a valid regular expression: {exc}",
+                code="payee.rule_not_a_regex",
+                params={"reason": str(exc)},
+            ) from exc
 
     instead = (replacement or "").strip() or None
     if does is RuleAction.rewrite and kind is MatchType.regex and instead is not None:

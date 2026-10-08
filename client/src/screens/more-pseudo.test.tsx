@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 // The One-time Import's card is its own screen, extracted on its own.
-vi.mock("./OneTimeImport", () => ({ OneTimeImport: () => null }));
+vi.mock("./OneTimeImport", () => ({ OneTimeImport: () => null, NEW_ISSUE_URL: "https://example.com/new" }));
 
 vi.mock("../lib/api", () => ({
   api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), del: vi.fn(), upload: vi.fn() },
@@ -33,6 +33,10 @@ import { Reconcile } from "./Reconcile";
 import { AccountImport } from "./AccountImport";
 import { History } from "./History";
 import { BackupList, SavePanel } from "./Backups";
+import { ApplicationManagement } from "./ApplicationManagement";
+import { Receipts } from "./Receipts";
+import { ImportGuide, guideFor } from "./ImportGuide";
+import { ImportGuideDocument } from "./importGuide/en";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -341,5 +345,133 @@ describe("in en-XA, the remaining screens show no English", () => {
     cleanup();
     render(withQueries(<SavePanel backup={backup} withKey routes={["share", "folder", "download"]} onClose={vi.fn()} />));
     expect(left().filter(dates).filter((word) => !/^(Google|Drive|Dropbox|desktop)$/.test(word))).toEqual([]);
+  });
+
+  it("application management, every section, with the logs and a package list open", async () => {
+    const instance = {
+      app_name: "Casa", version: "9.9.9",
+      build: { commit: "abcdef1234", branch: "dev", committed_at: "2026-03-01T10:00:00", dirty: true, source: "git" },
+      environment: "dev", python: "3.12.1", platform: "Linux", schema_revision: "0001", started_at: "2026-03-01T10:00:00",
+      process_id: 4242, database_url_scheme: "sqlite",
+      engine: { name: "SQLite", version: "3.45.0", journal_mode: "wal", path: "/srv/casa.sqlite3" },
+      size: { total_bytes: 4096, main_bytes: 2048, wal_bytes: 2048, page_size: 1024, page_count: 4, free_pages: 1 },
+      households: [{ id: "h1", name: "Casa", transactions: 1234, receipts: 2 }],
+      places: [{ what: "Doe", path: "/srv/doe", exists: false, bytes: null, note: "Sam", optional: false }],
+      packages: [{ name: "fastapi", version: "1.0" }],
+      addresses: ["http://127.0.0.1:8860"],
+      latest_backup: null, logging_style: "normal", logs: [],
+      repository: "https://example.com/casa", author: "https://example.com/sam",
+    };
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path === "/admin/application") return instance;
+      if (path === "/admin/application/logging")
+        return {
+          current: "normal", directory: "/srv/logs",
+          styles: [{ key: "normal", label: "Sam", blurb: "Doe", echo_sql: true }],
+          files: [{ name: "app.log", bytes: 1536, modified: "2026-03-01T10:00:00" }],
+          streams: [{ key: "sql", label: "Sam", filename: "sql.log", blurb: "Doe", holds_ledger_values: true }],
+        };
+      if (path.startsWith("/admin/application/logs/")) return { name: "app.log", bytes: 3, text: "Sam" };
+      // The Updates section (#166): a working updater, so its sentence shows.
+      if (path === "/admin/application/update")
+        return {
+          case: "working", running: "9.9.9", protocol: 1, in_flight: false, status: null, report: null,
+          outcome: null, backups: [],
+          heartbeat: {
+            fresh: true, updater_version: "9.9.9", engine: "docker-desktop", engine_version: "4.48.0",
+            container: "casa-updater-1", socket: "ok", hook: false,
+          },
+        };
+      return [];
+    });
+    const release = (version: string) => ({
+      version, tag: `v${version}`, name: null, published_at: "2026-03-01T10:00:00", notes: "Sam", notes_from: "changelog",
+    });
+    vi.mocked(api.post).mockResolvedValue({
+      checked_at: "2026-03-01T10:00:00", running: "9.9.9", latest: "9.9.11", newer: true, problem: null,
+      releases: [release("9.9.11"), release("9.9.10")],
+      updater: { version: null, compatible: null, note: "Sam" },
+    });
+    render(withQueries(<ApplicationManagement />));
+    await screen.findByText("app.log");
+    // Paths, file names, versions and the engine's own words are data.
+    const data = (word: string) =>
+      !/^(AM|PM|at|srv|casa|sqlite|doe|logs|app|log|sql|SQLite|wal|dev|git|Linux|fastapi|http|https|example|com|sam|abcdef|txt|requirements|make|restore|secret|key|kill|lsof|Python|AGPL|GitHub|KiB|B|Docker|Desktop|updater)$/.test(word);
+    expect(left().filter(data)).toEqual([]);
+
+    fireEvent.click(document.querySelector("p.muted.small > button.link")!);
+    const read = Array.from(document.querySelectorAll<HTMLButtonElement>("td.row-actions button"))[0];
+    fireEvent.click(read);
+    await screen.findByText("Sam", { selector: "pre" });
+    const sections = document.querySelectorAll("section.card");
+    fireEvent.click(sections[3].querySelector("button")!);
+    await screen.findByRole("option", { name: "9.9.10" });
+    screen.getByText("fastapi");
+    expect(left().filter(data)).toEqual([]);
+  });
+
+  it("Receipts: both views, a selection and its dialog, and a receipt's panel", async () => {
+    const one = {
+      id: "r1", household_id: "house-1", transaction_id: null, content_sha256: "0123456789abcdef",
+      original_filename: "casa.pdf", media_type: "application/pdf", byte_size: 2048, width: 600, height: 800,
+      page_count: 3, captured_at: "2026-03-01T10:00:00", captured_at_is_local: true,
+      gps_lat: 40.4, gps_lon: -3.7, gps_accuracy_m: 2500, gps_bearing: 90, camera: "Doe",
+      exif: { SpendTrackerLocationSource: "device" }, client_encoded: true, note: null,
+      uploaded_by_id: "u1", uploaded_by_name: "Sam", created_at: "2026-03-02T10:00:00",
+      download_name: "casa/2026-03-01.pdf", has_original: true, download_bytes: 1536, also_on: 0,
+    };
+    const two = { ...one, id: "r2", transaction_id: "t1", captured_at: null, gps_lat: null, gps_lon: null, camera: null, page_count: 1 };
+    vi.mocked(api.get).mockResolvedValue([one, two]);
+    render(withQueries(<Receipts household={HOUSEHOLD} />));
+    await screen.findAllByRole("checkbox");
+    const data = (word: string) =>
+      !/^(AM|PM|at|PDF|SHA|casa|pdf|application|KB|km|Google|Maps)$/.test(word);
+    expect(left().filter(data)).toEqual([]);
+
+    // Pick both, then ask to delete them.
+    for (const box of Array.from(document.querySelectorAll<HTMLInputElement>(".card-pick input")))
+      fireEvent.click(box);
+    expect(left().filter(data)).toEqual([]);
+    fireEvent.click(document.querySelector(".banner button.danger")!);
+    await screen.findByRole("dialog");
+    expect(left().filter(data)).toEqual([]);
+    cleanup();
+
+    // The list view, and the first receipt's panel with everything the camera wrote.
+    render(withQueries(<Receipts household={HOUSEHOLD} />));
+    await screen.findAllByRole("checkbox");
+    const views = Array.from(document.querySelectorAll<HTMLButtonElement>(".receipts-bar .row:nth-child(2) button"));
+    fireEvent.click(views[1]);
+    await screen.findByRole("table");
+    expect(left().filter(data)).toEqual([]);
+    // The receipt with a camera and a place, wherever the sort put it.
+    const thumbs = Array.from(document.querySelectorAll<HTMLButtonElement>("button.thumb"));
+    fireEvent.click(thumbs.find((one) => one.closest("tr")!.textContent!.includes("2026-03-01"))!);
+    await screen.findByText("Doe");
+    expect(left().filter(data)).toEqual([]);
+  });
+
+  it("the import guide: no document in this language, so the English one, marked as English", () => {
+    render(<ImportGuide />);
+    expect(left()).toEqual([]);
+    const english = document.querySelector('[lang="en"]') as HTMLElement;
+    expect(english.textContent).toContain("How import works");
+    expect(document.querySelector(".banner.info")!.textContent).not.toMatch(/^[\x20-\x7e]+$/);
+  });
+});
+
+describe("the import guide in English", () => {
+  it("is the English document exactly, with no notice and no language mark", async () => {
+    await activate("en");
+    const { container: picked } = render(<ImportGuide />);
+    const shown = picked.innerHTML;
+    cleanup();
+    const { container: direct } = render(<ImportGuideDocument />);
+    expect(shown).toBe(direct.innerHTML);
+    expect(shown).not.toContain('lang="en"');
+    expect(guideFor("en")).toBe(ImportGuideDocument);
+    expect(guideFor("en-GB")).toBe(ImportGuideDocument);
+    expect(guideFor("en-XA")).toBeUndefined();
+    expect(guideFor("sv-SE")).toBeUndefined();
   });
 });

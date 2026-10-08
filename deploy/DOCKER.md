@@ -83,7 +83,7 @@ your network can reach it, and no Tailscale is involved.
 ```bash
 echo SPENDTRACKER_VERSION=X.Y.Z >> .env
 docker compose pull
-SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
+docker compose up -d
 curl -s localhost:8848/api/health
 ```
 
@@ -114,12 +114,15 @@ docker compose build
 
 Three things worth knowing about this mode:
 
-- **`SPENDTRACKER_AUTO_MIGRATE=1` is for the first start only.** A brand-new
-  volume has no schema, and that flag creates it. After that run plain
-  `docker compose up -d`: a restart is not a decision to change a schema, and
-  with the flag off the app refuses to boot against a database that is behind
-  or ahead and says which revision each side is at. That is what you want from
-  a container that came back at 04:00.
+- **The first start needs no flag.** A brand-new volume has no tables at all,
+  so the entrypoint creates the schema without being asked and says so in
+  `docker compose logs app`: there is nothing in it to lose. Any other
+  database is never migrated by a start. A restart is not a decision to change
+  a schema, and the app refuses to boot against a database that is behind or
+  ahead, or has tables but no migration stamp, and says which. That is what
+  you want from a container that came back at 04:00.
+  `SPENDTRACKER_AUTO_MIGRATE=1` is for a deliberate migration of an existing
+  ledger; see **Upgrading**, which takes the backup first.
 - **`localhost` is enough for the `Secure` cookie.** Browsers treat
   `http://localhost` as a trustworthy origin, so sign-in works over plain HTTP
   here. It would not at `http://192.168.1.50:8848`: the browser silently drops
@@ -149,7 +152,7 @@ the tailnet in the admin console (DNS → HTTPS Certificates).
 echo SPENDTRACKER_VERSION=X.Y.Z >> .env
 docker compose pull
 SPENDTRACKER_PUBLIC_URL=https://<server>.<tailnet>.ts.net \
-SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
+docker compose up -d
 curl -s localhost:8848/api/health
 sudo tailscale serve --bg 8848
 ```
@@ -444,18 +447,20 @@ release it is running.
 #### 5. Start both containers, creating the database
 
 ```bash
-SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
+docker compose up -d
 docker compose ps
 ```
 
 - `up -d` starts the `tailscale` container first, then the `app` inside its
   network, both in the background (`-d`).
-- `SPENDTRACKER_AUTO_MIGRATE=1` lets the app create the schema in a brand-new
-  volume. **First start only.** Every later start is plain `docker compose up -d`;
+- A brand-new volume has no tables at all, so the app creates the schema on
+  this first start without any flag, and `docker compose logs app` says so.
+  Every later start is the same `docker compose up -d` and never migrates;
   see section 1 for why.
 - **If a ledger already exists in the volume `spend-tracker_ledger`, this
-  opens it.** The volume outlives containers, images and checkouts, so a fresh
-  clone does not mean a fresh database. [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+  opens it** -- or, if it is at another revision, refuses and says which.
+  The volume outlives containers, images and checkouts, so a fresh clone does
+  not mean a fresh database. [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
   explains, and has the commands for a deliberate reset.
 
 `docker compose ps` should show two services, both `running`, and `app`

@@ -54,3 +54,21 @@ test("the shell speaks the pseudo-locale, and the screen still works", async ({ 
   await nav.locator(".nav-head").nth(1).click();
   await expect(page).not.toHaveTitle(title);
 });
+
+test("at a desktop width the nav holds the longer words", async ({ page }) => {
+  // The longer language's nav grows to its widest item, up to 240px, and a
+  // word wider than that breaks rather than spilling past the edge (#56).
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const nav = page.locator("nav.side");
+  await expect(nav).toBeVisible();
+  const width = (await nav.boundingBox())!.width;
+  expect(width).toBeGreaterThanOrEqual(190);
+  expect(width).toBeLessThanOrEqual(241);
+  const spilling = await nav.evaluate((element) =>
+    Array.from(element.querySelectorAll("button, a"))
+      .filter((one) => one.scrollWidth > one.clientWidth + 1)
+      .map((one) => one.textContent),
+  );
+  expect(spilling).toEqual([]);
+});
+

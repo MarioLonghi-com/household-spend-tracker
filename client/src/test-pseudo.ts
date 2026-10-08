@@ -26,8 +26,14 @@ export const DATA = new Set([
   "Current",
   "Savings",
   // Lists are joined by `listText` (Intl's own conjunction outside English),
-  // not by the catalog, so the pseudo-locale cannot accent it.
+  // not by the catalog, so the pseudo-locale cannot accent it. `orText` is the
+  // same for alternatives.
   "and",
+  "or",
+  // Month names come from Intl in the format locale, which the tests pin to
+  // en-US; the pseudo-locale has no calendar of its own to give them.
+  ..."January February March April May June July August September October November December".split(" "),
+  ..."Jan Feb Mar Apr Jun Jul Aug Sep Oct Nov Dec".split(" "),
 ]);
 
 /** Words of plain ASCII letters, from the text and the labels people are given. */
@@ -35,11 +41,13 @@ export function untranslated(root: HTMLElement): string[] {
   const shown: string[] = [];
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    // Code to type, not words to read.
-    if ((node.parentElement?.closest(".mono, .codes, svg") ?? null) !== null) continue;
+    // Code to type, not words to read -- and a block that says which language
+    // it is in, like a guide not yet written in this one, is in that language.
+    if ((node.parentElement?.closest(".mono, .codes, svg, [lang]:not(html)") ?? null) !== null) continue;
     shown.push(node.textContent ?? "");
   }
   for (const element of Array.from(root.querySelectorAll("[aria-label], [title], [placeholder], [data-label]"))) {
+    if (element.closest("[lang]:not(html)")) continue;
     // data-label is what a phone shows beside each cell of a table row.
     for (const name of ["aria-label", "title", "placeholder", "data-label"]) {
       const value = element.getAttribute(name);

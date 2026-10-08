@@ -186,9 +186,14 @@ def prepare(body: UpdatePrepare, owner: OwnerOnly) -> UpdateRequestOut:
     return UpdateRequestOut(id=doc["id"], kind="prepare", to_version=to_version)
 
 
-@router.get("/recovery-code", response_model=UpdateRecoveryCodeOut)
+@router.post("/recovery-code", response_model=UpdateRecoveryCodeOut)
 def recovery_code(response: Response, owner: OwnerOnly) -> UpdateRecoveryCodeOut:
     """A fresh recovery code for the confirmation of the current report (3.4, 11.2).
+
+    **A `POST`, not a `GET`** (R21): issuing a code replaces the one held, so
+    it changes state. As a `GET` a cross-site request could not read the code
+    but could rotate it, and the owner's *Update* would then be refused. As a
+    `POST` it is behind the same Origin check as every other unsafe method.
 
     Shown once. Only its scrypt hash is kept, in this process, for ten
     minutes, bound to this report and this owner; *Update* spends it. Drawing

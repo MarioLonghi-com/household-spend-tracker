@@ -321,3 +321,92 @@ def test_a_registry_that_gives_no_token_is_refused(body):
     finally:
         server.shutdown()
         server.server_close()
+
+
+# --------------------------------------------------------------------------- #
+# Resolving a release to a digest without pulling (4.4 P2, P3)
+# --------------------------------------------------------------------------- #
+
+
+def _platform_manifest(layers: list[int], config: int = 1500) -> bytes:
+    return as_json({
+        "schemaVersion": 2,
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "config": {"mediaType": "application/vnd.oci.image.config.v1+json", "digest": sha(b"c"), "size": config},
+        "layers": [{"mediaType": "application/vnd.oci.image.layer.v1.tar+gzip", "digest": sha(bytes([i])), "size": n}
+                   for i, n in enumerate(layers)],
+    })  # fmt: skip
+
+
+def _release(store: Store, path: str, version: str, platforms: dict[str, bytes]) -> bytes:
+    """A multi-arch release as release.yml pushes it: an index at the version's tag."""
+    index = as_json({
+        "schemaVersion": 2,
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "manifests": [
+            *({"mediaType": "application/vnd.oci.image.manifest.v1+json", "digest": sha(body), "size": len(body),
+               "platform": {"os": "linux", "architecture": arch}} for arch, body in platforms.items()),
+            # buildx's attestation manifest sits in the index too, as unknown/unknown.
+            {"mediaType": "application/vnd.oci.image.manifest.v1+json", "digest": sha(b"att"), "size": 3,
+             "platform": {"os": "unknown", "architecture": "unknown"}},
+        ],
+    })  # fmt: skip
+    store.manifests[(path, version)] = index
+    for body in platforms.values():
+        store.manifests[(path, sha(body))] = body
+    return index
+
+
+@pytest.mark.parametrize("arch,layers", [("amd64", [40_000_000, 2_000_000]), ("arm64", [38_000_000, 1_900_000])])
+def test_a_release_resolves_to_its_index_digest_and_the_platform_image_size(registry, arch, layers):
+    path = V.REPOSITORIES[APP]
+    bodies = {"amd64": _platform_manifest([40_000_000, 2_000_000]), "arm64": _platform_manifest([38_000_000, 1_900_000])}
+    index = _release(registry, path, "0.8.0", bodies)
+    found = V.resolve(APP, "0.8.0", arch, registry.client)
+    assert found.digest == sha(index) and found.platform == f"linux/{arch}"
+    assert found.size == sum(layers) + 1500
+    # Two reads: the tag, then the platform manifest by its digest. Nothing pulled.
+    reads = [p for _, p, _ in registry.seen if "/manifests/" in p]
+    assert reads == [f"/v2/{path}/manifests/0.8.0", f"/v2/{path}/manifests/{sha(bodies[arch])}"]
+
+
+def test_a_single_platform_release_resolves_to_its_manifest(registry):
+    path = V.REPOSITORIES[UPDATER]
+    body = _platform_manifest([10_000_000])
+    registry.manifests[(path, "0.8.0")] = body
+    found = V.resolve(UPDATER, "0.8.0", "amd64", registry.client)
+    assert found.digest == sha(body) and found.size == 10_001_500 and found.platform == "single"
+
+
+def test_a_release_without_the_machines_platform_is_refused(registry):
+    _release(registry, V.REPOSITORIES[APP], "0.8.0", {"amd64": _platform_manifest([1])})
+    with pytest.raises(V.Refused) as e:
+        V.resolve(APP, "0.8.0", "arm64", registry.client)
+    assert e.value.rule == "platform"
+
+
+def test_a_platform_manifest_that_does_not_hash_to_its_digest_is_refused(registry):
+    path = V.REPOSITORIES[APP]
+    body = _platform_manifest([1])
+    _release(registry, path, "0.8.0", {"amd64": body})
+    registry.manifests[(path, sha(body))] = _platform_manifest([2])
+    with pytest.raises(V.Refused, match="hashes to"):
+        V.resolve(APP, "0.8.0", "amd64", registry.client)
+
+
+def test_a_release_with_no_such_tag_or_a_prerelease_is_refused(registry):
+    with pytest.raises(V.Refused) as missing:
+        V.resolve(APP, "0.9.9", "amd64", registry.client)
+    assert missing.value.rule == "release" and missing.value.detail == "the registry has no 0.9.9 of this image"
+    with pytest.raises(V.Refused) as pre:
+        V.resolve(APP, "0.9.0-rc1", "amd64", registry.client)
+    assert pre.value.rule == "version"
+
+
+def test_an_unreachable_registry_is_refused_as_unreachable():
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]
+    with pytest.raises(V.Refused) as e:
+        V.resolve(APP, "0.8.0", "amd64", V.Registry(base=f"http://127.0.0.1:{port}", timeout=2))
+    assert e.value.rule == "unreachable"

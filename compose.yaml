@@ -40,7 +40,10 @@ services:
       # Off. A restart is not a decision to change a schema; `schema_check`
       # refuses to boot against a mismatch and says which revision it wanted,
       # which is the right behaviour for a container that came back at 04:00.
-      # Turn it on for a first run against an empty volume.
+      # A first run needs nothing: a volume with no tables at all is migrated
+      # without it, because there is nothing to lose. Turn it on only for a
+      # deliberate migration of an existing ledger -- `make upgrade` and the
+      # updater do that properly, with a backup first.
       SPENDTRACKER_AUTO_MIGRATE: "${SPENDTRACKER_AUTO_MIGRATE:-0}"
       # The reverse proxy terminates TLS, so the cookie stays Secure.
       SPENDTRACKER_COOKIE_SECURE: "on"

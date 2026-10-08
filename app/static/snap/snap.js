@@ -63,6 +63,137 @@ const GPS_KEY = "snap.gps";
 //: `APPEARANCE_KEY` in `client/src/lib/appearance.ts`; there is a test.
 const APPEARANCE_KEY = "spendtracker.appearance";
 
+// --------------------------------------------------------------------------
+// Words (#56)
+// --------------------------------------------------------------------------
+
+/**
+ * Every word this page says, by language: a small JSON-shaped dictionary.
+ *
+ * Not the app's catalogs. This page loads nothing of the app's bundle -- that
+ * is the reason it exists -- so it carries its own few dozen sentences, keyed
+ * the same way in every language. A value is a string, or one string per
+ * plural category (`Intl.PluralRules`) where a count is in it; `{name}` is
+ * filled in by `say`.
+ *
+ * Only English is written. Other languages ship with the app's (#58); until
+ * one is here, a phone in that language gets English, exactly as before.
+ */
+export const WORDS = {
+  en: {
+    title: "{app} - Snap a Receipt",
+    titleIn: "{app} - Snap a Receipt - {household}",
+    toApp: "‹ Go to app",
+    takePhoto: "Take a photo",
+    several: "Add several from the library",
+    goesToInbox: "Goes to the inbox. Match it to a transaction later, when the statement arrives.",
+    offline: "No connection. Photograph it anyway and it will send later.",
+    noHousehold: "This account is not in a household yet.",
+    gpsOff:
+      "Off. A photo records only what the camera wrote. Switch this on and every " +
+      "picture you send — taken here, or added from your library — also records " +
+      "where this phone is now, asked of the browser when you switch it on and " +
+      "sent to this household's own server and nowhere else.",
+    gpsOn:
+      "On. Every picture you send records where this phone is now, to about a " +
+      "street — including one taken earlier and added from your library, which " +
+      "gets this place rather than the place it was taken. It is used only where " +
+      "the picture carries no location of its own.",
+    noLocation: "This browser has no location at all. Nothing was recorded.",
+    notSecure:
+      "This page is not on a secure connection, so the browser will not offer " +
+      "location at all — it never asks, whatever this app sends. Open Snap " +
+      "over https (the tailnet address), and the toggle will work. Photographs " +
+      "still carry their own location where the camera wrote one.",
+    locationUnavailable: "Location unavailable",
+    locationOn: "Location on",
+    locationOff: "Location off",
+    refused:
+      "This browser refused. Check that this site is allowed to use your " +
+      "location in the browser's own settings for it. Nothing was recorded.",
+    noFix: "This phone could not get a fix just now. Nothing was recorded.",
+    asking: "Asking this browser where it is…",
+    serverSaid: "the server said {status}",
+    landedIn: "✓ in the inbox",
+    landedSaving: "saving the receipt notes…",
+    landedSaved: "✓ in the inbox · receipt notes saved",
+    landedFailed: "✓ in the inbox · the receipt notes did not save — type them again to retry",
+    notePlaceholder: "What was it for? (optional)",
+    noteLabel: "Receipt notes for {name}",
+    sent: { one: "✓ {count} sent to the inbox", other: "✓ {count} sent to the inbox" },
+    sending: "Sending…",
+    waiting: "Waiting",
+    retry: "Retry",
+  },
+};
+
+/** The pseudo-locale the app's tests and CI use: English, visibly accented. */
+const PSEUDO = "en-XA";
+const ACCENTED = Object.fromEntries(
+  [..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"].map((letter, at) => [
+    letter,
+    [..."áƀçđéƒĝĥíĵķĺɱñóþʠŕšţúṽŵẋýžÁƁÇĐÉƑĜĤÍĴĶĹṀÑÓÞǪŔŠŢÚṼŴẊÝŽ"][at],
+  ]),
+);
+//: The product's name, the same in every language.
+const APP_NAME = "Spend Tracker";
+
+/**
+ * The language this page speaks: the one chosen in the app on this device,
+ * then the browser's, then English. Only a language with words here counts,
+ * by its full tag or by its language alone; en-XA is English accented.
+ */
+export function chooseLanguage(stored, browser) {
+  for (const tag of [stored, ...browser]) {
+    if (!tag) continue;
+    if (tag === PSEUDO) return PSEUDO;
+    if (WORDS[tag]) return tag;
+    const base = tag.split("-")[0];
+    if (WORDS[base]) return base;
+  }
+  return "en";
+}
+
+function storedLanguage() {
+  try {
+    //: The app's own key (`LOCALE_KEY` in `client/src/lib/i18n.ts`).
+    return window.localStorage.getItem("spendtracker.locale");
+  } catch {
+    return null;
+  }
+}
+
+const LANGUAGE = chooseLanguage(
+  storedLanguage(),
+  navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language],
+);
+
+/** One sentence in this page's language, with `{name}` filled in. */
+export function say(key, values = {}, language = LANGUAGE) {
+  const words = WORDS[language === PSEUDO ? "en" : language] || WORDS.en;
+  let text = words[key] ?? WORDS.en[key];
+  if (typeof text === "object") {
+    const form = new Intl.PluralRules(language === PSEUDO ? "en" : language).select(values.count ?? 0);
+    text = text[form] ?? text.other;
+  }
+  if (language === PSEUDO) text = text.replace(/[A-Za-z](?![^{]*\})/g, (letter) => ACCENTED[letter] ?? letter);
+  const filled = { app: APP_NAME, ...values };
+  return text.replace(/\{(\w+)\}/g, (whole, name) => (name in filled ? String(filled[name]) : whole));
+}
+
+/**
+ * The words already in the markup, in another language. English is left as
+ * the HTML wrote it, so an English page is byte for byte what it was.
+ */
+function sayStatic() {
+  if (LANGUAGE === "en") return;
+  document.documentElement.lang = LANGUAGE;
+  document.title = say("title");
+  for (const element of document.querySelectorAll("[data-say]")) {
+    element.textContent = say(element.dataset.say);
+  }
+}
+
 const els = {
   house: document.getElementById("house"),
   caret: document.getElementById("caret"),
@@ -175,7 +306,7 @@ function paint() {
   els.who.textContent = me ? me.display_name : "";
   els.where.textContent = chosen.name;
   // Like the app's own tabs (#189); the static <title> stands until here.
-  document.title = `Spend Tracker - Snap a Receipt - ${chosen.name}`;
+  document.title = say("titleIn", { household: chosen.name });
   const accent = accentOf(chosen);
   if (accent) document.querySelector("header").style.background = accent;
 
@@ -211,6 +342,7 @@ async function start() {
   // Before anything on the network: the toggle has to say which state it is
   // in even on a page that could not reach the server, because it is a
   // statement about what the next photo will record.
+  sayStatic();
   gpsOn = gpsRemembered();
   paintGps();
   paintScheme();
@@ -231,7 +363,7 @@ async function start() {
   try {
     list = await fetch("/api/households", { credentials: "same-origin" });
   } catch {
-    els.summary.textContent = "No connection. Photograph it anyway and it will send later.";
+    els.summary.textContent = say("offline");
     return;
   }
   if (list.status === 401) {
@@ -250,7 +382,7 @@ async function start() {
 
   households = await list.json();
   if (households.length === 0) {
-    els.summary.textContent = "This account is not in a household yet.";
+    els.summary.textContent = say("noHousehold");
     els.shoot.disabled = true;
     return;
   }
@@ -298,16 +430,8 @@ async function start() {
 //: gets the kitchen table. Saying "each photo" and leaving the reader to
 //: work that out is the sort of accuracy that is technically true and
 //: practically a surprise.
-const OFF_TEXT =
-  "Off. A photo records only what the camera wrote. Switch this on and every " +
-  "picture you send — taken here, or added from your library — also records " +
-  "where this phone is now, asked of the browser when you switch it on and " +
-  "sent to this household's own server and nowhere else.";
-const ON_TEXT =
-  "On. Every picture you send records where this phone is now, to about a " +
-  "street — including one taken earlier and added from your library, which " +
-  "gets this place rather than the place it was taken. It is used only where " +
-  "the picture carries no location of its own.";
+const OFF_TEXT = say("gpsOff");
+const ON_TEXT = say("gpsOn");
 
 //: A fix from the last two minutes is the same till. Asking again per photo
 //: costs a second of GPS warm-up for four receipts on the same counter.
@@ -357,15 +481,10 @@ function rememberGps(on) {
  */
 function blocked() {
   if (!navigator.geolocation) {
-    return "This browser has no location at all. Nothing was recorded.";
+    return say("noLocation");
   }
   if (!window.isSecureContext) {
-    return (
-      "This page is not on a secure connection, so the browser will not offer " +
-      "location at all — it never asks, whatever this app sends. Open Snap " +
-      "over https (the tailnet address), and the toggle will work. Photographs " +
-      "still carry their own location where the camera wrote one."
-    );
+    return say("notSecure");
   }
   return null;
 }
@@ -377,7 +496,7 @@ function paintGps(why) {
   // its job should say so before it is pressed, not after. The sentence under
   // it is where the reason goes, and it is `aria-describedby` on the button.
   els.gps.disabled = cannot !== null;
-  els.gpsLabel.textContent = cannot ? "Location unavailable" : gpsOn ? "Location on" : "Location off";
+  els.gpsLabel.textContent = say(cannot ? "locationUnavailable" : gpsOn ? "locationOn" : "locationOff");
   els.gpsWhy.textContent = why || cannot || (gpsOn ? ON_TEXT : OFF_TEXT);
 }
 
@@ -432,10 +551,7 @@ function refusal(problem) {
   // reason in a row.
   const cannot = blocked();
   if (cannot) return cannot;
-  return problem && problem.code === 1
-    ? "This browser refused. Check that this site is allowed to use your " +
-        "location in the browser's own settings for it. Nothing was recorded."
-    : "This phone could not get a fix just now. Nothing was recorded.";
+  return say(problem && problem.code === 1 ? "refused" : "noFix");
 }
 
 els.gps.onclick = async () => {
@@ -455,7 +571,7 @@ els.gps.onclick = async () => {
   }
   // Asked here, at the tap, which is the moment the permission prompt belongs
   // to -- not at page load, and not silently behind the shutter.
-  paintGps("Asking this browser where it is…");
+  paintGps(say("asking"));
   try {
     await locate();
   } catch (problem) {
@@ -699,7 +815,7 @@ async function send(id, item) {
     }
     if (!answer.ok) {
       const problem = await answer.json().catch(() => null);
-      throw new Error((problem && problem.detail) || `the server said ${answer.status}`);
+      throw new Error((problem && problem.detail) || say("serverSaid", { status: answer.status }));
     }
     const body = await answer.json().catch(() => null);
     await unpark(id);
@@ -750,13 +866,13 @@ async function send(id, item) {
  * the inbox stops meaning "evidence waiting for its row".
  */
 const LANDED_STATE = {
-  in: "✓ in the inbox",
-  saving: "saving the receipt notes…",
+  in: say("landedIn"),
+  saving: say("landedSaving"),
   // A confirmation that stays put. The note is the one thing on this page
   // that can silently not have happened, and a message that vanishes after
   // three seconds is a message somebody at a till misses.
-  saved: "✓ in the inbox · receipt notes saved",
-  failed: "✓ in the inbox · the receipt notes did not save — type them again to retry",
+  saved: say("landedSaved"),
+  failed: say("landedFailed"),
 };
 
 /**
@@ -825,9 +941,9 @@ function landedRender() {
       const note = document.createElement("input");
       note.className = "note-field";
       note.type = "text";
-      note.placeholder = "What was it for? (optional)";
+      note.placeholder = say("notePlaceholder");
       note.value = one.note;
-      note.setAttribute("aria-label", `Receipt notes for ${one.name}`);
+      note.setAttribute("aria-label", say("noteLabel", { name: one.name }));
       // On the way out of the field, like everywhere else in this app that
       // saves without a button.
       note.onchange = () => saveNote(one, note.value);
@@ -861,7 +977,7 @@ async function saveNote(entry, text) {
     // longer than the column or a session that had expired since the photo
     // went up said "✓" and was gone. The receipt is safely stored either way
     // -- only the note failed -- and saying so beats a silent nothing.
-    if (!answer.ok) throw new Error(`the server said ${answer.status}`);
+    if (!answer.ok) throw new Error(say("serverSaid", { status: answer.status }));
   } catch {
     entry.pending = null;
     entry.state = "failed";
@@ -877,9 +993,7 @@ async function saveNote(entry, text) {
 }
 
 function render() {
-  els.summary.textContent = sent
-    ? `✓ ${sent} sent to the inbox`
-    : "";
+  els.summary.textContent = sent ? say("sent", { count: sent }) : "";
   els.queue.replaceChildren(
     ...[...items.entries()].map(([id, item]) => {
       const row = document.createElement("li");
@@ -898,10 +1012,10 @@ function render() {
       state.className = "state";
       state.textContent =
         item.state === "sending"
-          ? "Sending…"
+          ? say("sending")
           : item.state === "failed"
             ? item.why
-            : "Waiting";
+            : say("waiting");
       middle.append(name, state);
       row.append(preview, middle);
 
@@ -909,7 +1023,7 @@ function render() {
         const retry = document.createElement("button");
         retry.type = "button";
         retry.className = "retry";
-        retry.textContent = "Retry";
+        retry.textContent = say("retry");
         retry.onclick = () => {
           item.state = "waiting";
           render();
