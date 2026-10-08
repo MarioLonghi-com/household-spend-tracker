@@ -1,16 +1,24 @@
 """What the container runs, and the one guard it has to carry.
 
-**It does not migrate unattended.** A container restart is not a decision to
-change a schema, and a restart policy of `unless-stopped` would otherwise make
-every crash a fresh chance to run a migration nobody was watching. So:
+**It does not migrate a ledger unattended.** A container restart is not a
+decision to change a schema, and a restart policy of `unless-stopped` would
+otherwise make every crash a fresh chance to run a migration nobody was
+watching. So:
 
-- `SPENDTRACKER_AUTO_MIGRATE=1` runs `alembic upgrade head` and then serves.
-  For a first run against an empty volume, and for anybody who has decided they
-  want it.
-- Unset -- the default -- serves without migrating. `app/schema_check.py` then
-  refuses to boot against a database that is behind or ahead, and says which
-  revision each side is at. That refusal is exactly the right behaviour for a
-  restart, and it is free: the guard already exists.
+- **A database with no tables at all is migrated without being asked** (#167,
+  decision B2). A first start against a fresh volume has nothing to lose, and
+  asking for a flag there was a terminal step a double-click install cannot
+  take. "No tables at all" means `sqlite_master` is empty -- no table, index,
+  view or trigger -- or the file does not exist yet. See `database_is_empty`.
+- `SPENDTRACKER_AUTO_MIGRATE=1` runs `alembic upgrade head` and then serves,
+  whatever the database holds. That is a deliberate migration of an existing
+  ledger, for anybody who has decided they want it; `make upgrade` and the
+  updater do the same with a backup first.
+- Otherwise -- the default -- it serves without migrating. `app/schema_check.py`
+  then refuses to boot against a database that is behind or ahead, stamped at a
+  revision this code does not know, or that has tables but no Alembic stamp,
+  and says which. That refusal is exactly the right behaviour for a restart,
+  and it is free: the guard already exists.
 
 The backup rule does not change inside a container. `docker compose exec` into
 it and run `python -m scripts.backup` **before** you pull a new image, or the
@@ -19,8 +27,10 @@ volume's contents are the only copy you have.
 
 from __future__ import annotations
 
+import contextlib
 import os
 import pathlib
+import sqlite3
 import subprocess
 import sys
 
@@ -139,6 +149,72 @@ def bind_host() -> str:
     return (os.environ.get("SPENDTRACKER_HOST") or DEFAULT_HOST).strip() or DEFAULT_HOST
 
 
+def database_path() -> pathlib.Path | None:
+    """The SQLite file the app and Alembic will open, or None if it is not one.
+
+    The same answer `app.config` gives -- `DATABASE_URL` if set, else
+    `spendtracker.sqlite3` in the data directory -- worked out here rather than
+    imported, because this file runs as `python deploy/entrypoint.py` and the
+    app package is not on its path. A URL that is not a plain SQLite file
+    (another engine, `:memory:`) is None, which `database_is_empty` reads as
+    "not empty": only a file this can look inside is ever migrated unasked.
+    """
+    url = (os.environ.get("DATABASE_URL") or "").strip()
+    if not url:
+        where = pathlib.Path(os.environ.get("SPENDTRACKER_DATA_DIR") or "/var/lib/spend-tracker")
+        return where / "spendtracker.sqlite3"
+    prefix = "sqlite:///"
+    if not url.startswith(prefix):
+        return None
+    path = url[len(prefix):].split("?", 1)[0]
+    if not path or path == ":memory:":
+        return None
+    return pathlib.Path(path)
+
+
+def database_is_empty() -> bool:
+    """True only when the database holds no schema object of any kind (B2).
+
+    `sqlite_master` lists every table, index, view and trigger in the file, so
+    a count of zero means there is no table for a row to be in: nothing to
+    lose by migrating. Any ledger the app ever wrote has `alembic_version` and
+    every model's table, and even a stray database with one table and no stamp
+    counts as not empty -- `app/schema_check.py` refuses that one, as before.
+
+    The file is opened **read-only** (`mode=ro`), so looking cannot change it.
+    A file that does not exist yet is empty, unless its `-wal` or `-journal`
+    is lying next to it: that is somebody's data in an odd state, not nothing.
+    Anything this cannot read -- not a database, locked, another engine --
+    answers False, and the app's own guard says what is wrong.
+    """
+    path = database_path()
+    if path is None:
+        return False
+    if not path.exists():
+        return not any(
+            path.with_name(path.name + suffix).exists() for suffix in ("-wal", "-journal")
+        )
+    try:
+        uri = f"{path.resolve().as_uri()}?mode=ro"
+        with contextlib.closing(sqlite3.connect(uri, uri=True)) as db:
+            (objects,) = db.execute("select count(*) from sqlite_master").fetchone()
+    except sqlite3.Error:
+        return False
+    return objects == 0
+
+
+def _migrate() -> int:
+    """`alembic upgrade head`; 0, or the failing exit code after saying so."""
+    done = subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"])
+    if done.returncode != 0:
+        print(
+            "The migration failed, so the app is not being started against a "
+            "half-migrated database.",
+            file=sys.stderr, flush=True,
+        )
+    return done.returncode
+
+
 def main() -> int:
     if "--fix-ownership" in sys.argv[1:]:
         return fix_ownership()
@@ -152,14 +228,18 @@ def main() -> int:
         "1", "true", "yes", "on",
     }:
         print("SPENDTRACKER_AUTO_MIGRATE is on: running alembic upgrade head", flush=True)
-        done = subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"])
-        if done.returncode != 0:
-            print(
-                "The migration failed, so the app is not being started against a "
-                "half-migrated database.",
-                file=sys.stderr, flush=True,
-            )
-            return done.returncode
+        failed = _migrate()
+        if failed:
+            return failed
+    elif database_is_empty():
+        failed = _migrate()
+        if failed:
+            return failed
+        print(
+            f"{database_path()} had no tables at all, so it was migrated to head "
+            "without SPENDTRACKER_AUTO_MIGRATE: an empty database has nothing to lose.",
+            flush=True,
+        )
 
     port = (os.environ.get("PORT") or "8848").strip()
     host = bind_host()

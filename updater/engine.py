@@ -23,6 +23,32 @@ On top of the list:
 - **Images are only this repository's two**, and pulled by digest.
 - **The sidecar is never stopped, started, renamed or removed**, and its only
   exec is `wget`.
+- **Create bodies come in named shapes (6.2).** A container carrying
+  `com.docker.compose.oneoff=True` is one of the updater's own one-offs and
+  must say which (`ROLE_LABEL`, one of `ONEOFF_ROLES`): the drill, the check,
+  the restore and the other ledger one-offs run with `network_mode: none`;
+  the port probe of 8.4 runs on the default bridge with no mounts at all; the
+  maintenance page takes the app's network. **No one-off binds a host path**,
+  not even the two the updater may: the socket and the project directory go
+  only to a container that is not a one-off -- the successor updater (6.6).
+  The app's copy is not a one-off and carries no role.
+- **Logs are read from the updater's own one-offs only** (`logs`): the check's
+  JSON and the floors' measurements arrive on a one-off's standard output,
+  and nothing else's output is ever read.
+
+**Which images may be inspected, and how (R27).** Pulls, removals and
+inspections by reference name only this repository's two images, by digest.
+One more inspection is allowed: `GET /images/{id}/json` **by image id, only
+for an id a container of this project already runs** (its `ImageID`, read
+from the project-filtered listing). Container inspect gives the image as
+`sha256:<config id>`, and without this the updater could learn neither its
+own digest (for the heartbeat) nor whether the app's image is a published
+one (A6, `RepoDigests`). The alternative -- trusting the digests written in
+the pin or `.env` -- was rejected: on the first update there is no pin, and
+`.env` names a tag (`SPENDTRACKER_VERSION`), not a digest, so A6 would refuse
+every first update. The id comes from the engine, is checked against the
+project's own containers before a byte naming it is sent, and the call pulls
+nothing and reaches no other repository.
 
 **API versions are negotiated, never pinned (C3).** `GET /version`,
 unversioned, gives the engine's window (`MinAPIVersion` to `ApiVersion`). The
@@ -83,6 +109,9 @@ REPOSITORIES = (
 IMAGE_BY_DIGEST = re.compile(
     r"(ghcr\.io/mariolonghi-com/household-spend-tracker(?:-updater)?)@(sha256:[0-9a-f]{64})"
 )
+#: An image id as container inspect and the listing give it, with or without
+#: the `sha256:` prefix (Podman leaves it off). R27.
+IMAGE_ID = re.compile(r"(?:sha256:)?([0-9a-f]{64})")
 CONTAINER_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}")
 CONTAINER_ID = re.compile(r"[0-9a-f]{12,64}")
 EXEC_ID = re.compile(r"[0-9a-f]{12,64}")
@@ -90,6 +119,19 @@ EXEC_ID = re.compile(r"[0-9a-f]{12,64}")
 #: The only commands an exec may start: the health probes (6.2).
 APP_PROBES = ("python", "python3")
 SIDECAR_PROBES = ("wget",)
+
+#: Compose's own marker for a container that is not the service (C9).
+ONEOFF_LABEL = "com.docker.compose.oneoff"
+#: The updater's labels on what it creates, built from the ghcr owner like the
+#: protocol label (R28): `com.github.<owner>.spend-tracker.updater-role` and
+#: `…updater-request`.
+_LABEL_NS = f"com.github.{REPOSITORIES[0].split('/')[1]}.spend-tracker"
+ROLE_LABEL = f"{_LABEL_NS}.updater-role"
+REQUEST_LABEL = f"{_LABEL_NS}.updater-request"
+#: One-offs that touch the ledger (or measure it) and nothing else: no network.
+LEDGER_ROLES = ("check", "drill", "restore", "measure", "find-backup", "prune")
+#: Every role a one-off may have: those, the port probe and the maintenance page.
+ONEOFF_ROLES = (*LEDGER_ROLES, "probe", "placard")
 
 
 @dataclass(frozen=True)
@@ -118,7 +160,11 @@ ENDPOINTS: tuple[Endpoint, ...] = (
     Endpoint("exec_create", "POST", "/containers/{id}/exec", True),
     Endpoint("exec_start", "POST", "/exec/{id}/start", True),
     Endpoint("exec_inspect", "GET", "/exec/{id}/json", False),
+    # The updater's own one-offs only: the check's JSON, the floors (8.5).
+    Endpoint("logs", "GET", "/containers/{id}/logs", False),
     Endpoint("pull", "POST", "/images/create", True),
+    # By repository digest, this repository's two images only -- or (R27) by
+    # the image id a container of this project runs: `inspect_image_id`.
     Endpoint("image_inspect", "GET", "/images/{image}/json", False),
     Endpoint("image_remove", "DELETE", "/images/{image}", True),
 )
@@ -362,6 +408,8 @@ class EngineClient:
             return None
         if name == "ping":
             return data.decode()
+        if name in ("logs", "exec_start"):
+            return data
         if name == "pull":
             return _pull_stream(data)
         try:
@@ -463,6 +511,10 @@ class EngineClient:
 
     def probe(self, ref: str, cmd: list[str]) -> int:
         """Run a health probe in a project container. Returns its exit code."""
+        return self.probe_output(ref, cmd)[0]
+
+    def probe_output(self, ref: str, cmd: list[str]) -> tuple[int, str]:
+        """Run a health probe; its exit code and what it printed (8.4)."""
         c = self._resolve(ref)
         names = [n.lstrip("/") for n in c.get("Names") or []]
         allowed_cmds = SIDECAR_PROBES if self.scope.sidecar and self.scope.sidecar in names else APP_PROBES
@@ -474,10 +526,19 @@ class EngineClient:
         exec_id = made.get("Id") if isinstance(made, dict) else None
         if not isinstance(exec_id, str) or not EXEC_ID.fullmatch(exec_id):
             raise EngineError(500, "exec create answered without an id")
-        self._call("exec_start", body={"Detach": False, "Tty": False}, id=exec_id)
+        raw = self._call("exec_start", body={"Detach": False, "Tty": False}, id=exec_id)
         done = self._call("exec_inspect", id=exec_id)
         code = done.get("ExitCode") if isinstance(done, dict) else None
-        return code if isinstance(code, int) else -1
+        return (code if isinstance(code, int) else -1), demux(raw if isinstance(raw, bytes) else b"")
+
+    def logs(self, ref: str, tail: int = 400, stderr: bool = True) -> str:
+        """What one of the updater's own one-offs printed. Nothing else's (6.2)."""
+        c = self._resolve(ref)
+        labels = c.get("Labels") or {}
+        if labels.get(ONEOFF_LABEL) != "True" or labels.get(ROLE_LABEL) not in ONEOFF_ROLES:
+            raise NotAllowed("Only the updater's own one-off containers' output is read.")
+        raw = self._call("logs", query={"stdout": "1", "stderr": "1", "tail": str(int(tail))}, id=c["Id"])
+        return demux(raw if isinstance(raw, bytes) else b"", (1, 2) if stderr else (1,))
 
     # ------------------------------------------------------------------ #
     # Images, this repository's two only
@@ -495,8 +556,48 @@ class EngineClient:
     def inspect_image(self, ref: str) -> dict:
         return self._call("image_inspect", image=self._image(ref))  # type: ignore[return-value]
 
+    def inspect_image_id(self, image_id: str) -> dict:
+        """The image a container of this project runs, by its id (R27). Pulls nothing.
+
+        Refused unless the project-filtered listing shows a container running
+        exactly that image id, so no other image on the engine can be read.
+        """
+        m = IMAGE_ID.fullmatch(image_id or "")
+        if not m:
+            raise NotAllowed(f"{image_id!r} is not an image id.")
+        wanted = m.group(1)
+        used = set()
+        for c in self.containers():
+            found = IMAGE_ID.fullmatch(str(c.get("ImageID") or ""))
+            if found:
+                used.add(found.group(1))
+        if wanted not in used:
+            raise NotAllowed("Only an image a container of this project runs may be inspected by id.")
+        return self._call("image_inspect", image=wanted)  # type: ignore[return-value]
+
     def remove_image(self, ref: str) -> None:
         self._call("image_remove", image=self._image(ref))
+
+
+def demux(data: bytes, streams: tuple[int, ...] = (1, 2)) -> str:
+    """A container's output as text. Without a TTY the engine frames it.
+
+    Each frame is an 8-byte header -- stream (0, 1 or 2), three zero bytes, a
+    big-endian length -- then that many bytes. Docker and Podman both frame;
+    an unframed answer is taken as it is. `streams` keeps standard output
+    (1), standard error (2) or both.
+    """
+    out = bytearray()
+    view = memoryview(data)
+    while len(view) >= 8 and view[0] in (0, 1, 2) and bytes(view[1:4]) == b"\0\0\0":
+        size = int.from_bytes(view[4:8], "big")
+        if view[0] in streams:
+            out += view[8 : 8 + size]
+        view = view[8 + size :]
+    if len(view) == len(data):
+        return data.decode("utf-8", "replace")
+    out += view
+    return out.decode("utf-8", "replace")
 
 
 def _pull_stream(data: bytes) -> list[dict]:
@@ -541,6 +642,7 @@ def guard_create(body: object, scope: Scope) -> None:
     host = body.get("HostConfig") or {}
     if not isinstance(host, dict):
         raise NotAllowed("HostConfig is a JSON object.")
+    _guard_shape(body, labels, host)
     if host.get("Privileged"):
         raise NotAllowed("Privileged containers are refused.")
     if host.get("CapAdd"):
@@ -574,6 +676,36 @@ def guard_create(body: object, scope: Scope) -> None:
                 raise NotAllowed(f"A host bind mount of {mount.get('Source')} is refused.")
         elif kind not in ("volume", "tmpfs"):
             raise NotAllowed(f"A {kind} mount is refused.")
+
+
+def _guard_shape(body: dict, labels: dict, host: dict) -> None:
+    """The one-off shapes of 6.2. A container that is not a one-off has no role."""
+    role = labels.get(ROLE_LABEL)
+    if labels.get(ONEOFF_LABEL) != "True":
+        if role is not None:
+            raise NotAllowed("Only a one-off container carries an updater role.")
+        return
+    if role not in ONEOFF_ROLES:
+        raise NotAllowed(f"A one-off container is one of {', '.join(ONEOFF_ROLES)}, not {role!r}.")
+    if not isinstance(labels.get(REQUEST_LABEL), str):
+        raise NotAllowed("A one-off container names the request it serves.")
+    for bind in host.get("Binds") or []:
+        if isinstance(bind, str) and _bind_source(bind).startswith(("/", ".", "~")):
+            raise NotAllowed("A one-off container binds no host path.")
+    for mount in host.get("Mounts") or []:
+        if isinstance(mount, dict) and mount.get("Type") == "bind":
+            raise NotAllowed("A one-off container binds no host path.")
+    mode = host.get("NetworkMode")
+    if role in LEDGER_ROLES and mode != "none":
+        raise NotAllowed(f"The {role} one-off runs with network_mode none.")
+    if role == "probe":
+        if mode not in ("bridge", "default"):
+            raise NotAllowed("The port probe runs on the default bridge.")
+        if host.get("Binds") or host.get("Mounts") or host.get("PortBindings"):
+            raise NotAllowed("The port probe mounts and publishes nothing.")
+        image = IMAGE_BY_DIGEST.fullmatch(str(body.get("Image")))
+        if not image or image.group(1) != REPOSITORIES[0]:
+            raise NotAllowed("The port probe runs the app's image.")
 
 
 def endpoints_table() -> Iterable[tuple[str, str, bool]]:
