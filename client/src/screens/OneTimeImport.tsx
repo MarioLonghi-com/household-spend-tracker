@@ -62,7 +62,7 @@ export function OneTimeImport({
   return (
     <section className="card" aria-labelledby="one-time-import-title">
       <h2 id="one-time-import-title" className="section-title">
-        <Trans>
+        <Trans comment="Heading on the one-time import">
           One-time Import
         </Trans>
       </h2>
@@ -84,7 +84,7 @@ export function OneTimeImport({
         </Trans>
       </button>
       {open ? (
-        <Panel title={t`One-time Import`} onClose={dismiss} config wide>
+        <Panel title={t({ message: "One-time Import", comment: "Title of a panel on the one-time import" })} onClose={dismiss} config wide>
           {/* Unmounting the wizard is what drops the token and the file. */}
           <YnabWizard
             household={household}
@@ -411,12 +411,12 @@ function YnabWizard({
 
   const nextLabel =
     step === "options"
-      ? t`Preview`
+      ? t({ message: "Preview", comment: "Button on the one-time import: verb, see what the import would do without doing it" })
       : step === "preview"
-        ? t`Import`
+        ? t({ message: "Import", comment: "Button on the one-time import: verb, run the import" })
         : step === "plan"
           ? t`Use this plan`
-          : t`Next`;
+          : t({ message: "Next", comment: "Button on the one-time import: go to the next step" });
 
   const error =
     refusal && refusal.step === step
@@ -433,12 +433,12 @@ function YnabWizard({
 
   return (
     <div className="ynab-wizard">
-      <nav className="ynab-stepper" aria-label={t`Steps`}>
+      <nav className="ynab-stepper" aria-label={t({ message: "Steps", comment: "Screen-reader name on the one-time import" })}>
         {/* A phone gets one line and a bar instead of the row of circles; the
             list stays in the page for a screen reader either way. */}
         <div className="ynab-stepper-compact" aria-hidden="true">
           <span className="small">
-            <Trans>
+            <Trans comment="Text on the one-time import">
               Step {at + 1} of {steps.length} — <strong>{STEP_LABELS[step]}</strong>
             </Trans>
           </span>
@@ -460,7 +460,7 @@ function YnabWizard({
                 </span>
                 <span className="ynab-step-label">
                   <span className="sr-only">
-                    {state === "done" ? t`Step ${index + 1}, done:` : t`Step ${index + 1}:`}{" "}
+                    {state === "done" ? t({ message: `Step ${index + 1}, done:`, comment: "Screen-reader text on the one-time import" }) : t({ message: `Step ${index + 1}:`, comment: "Screen-reader text on the one-time import" })}{" "}
                   </span>
                   {STEP_LABELS[one]}
                 </span>
@@ -479,7 +479,7 @@ function YnabWizard({
 
       {step === "source" && (
         <fieldset className="storage-choices" style={{ gridTemplateColumns: "1fr" }}>
-          <legend className="sr-only"><Trans>Source app</Trans></legend>
+          <legend className="sr-only"><Trans comment="Heading of a group of choices on the one-time import">Source app</Trans></legend>
           <label className="storage-choice chosen">
             <input type="radio" name="ynab-source-app" checked readOnly />
             <span>
@@ -513,7 +513,7 @@ function YnabWizard({
               />
               <span>
                 <strong>
-                  <Trans>Export file</Trans>
+                  <Trans comment="Label of a choice on the one-time import">Export file</Trans>
                 </strong>
                 <span className="small muted">
                   <Trans>The .zip YNAB exports, or the CSV inside it.</Trans>
@@ -533,7 +533,7 @@ function YnabWizard({
               />
               <span>
                 <strong>
-                  <Trans>API key</Trans>
+                  <Trans comment="Label of a choice on the one-time import">API key</Trans>
                 </strong>
                 <span className="small muted">
                   <Trans>A personal access token from your YNAB account.</Trans>
@@ -544,7 +544,7 @@ function YnabWizard({
 
           {via === "csv" ? (
             <>
-              <Field label={t`YNAB export`}>
+              <Field label={t({ message: "YNAB export", comment: "Label of a form field on the one-time import" })}>
                 <input
                   type="file"
                   accept=".zip,.csv"
@@ -633,9 +633,9 @@ function YnabWizard({
                       {[
                         one.currency,
                         one.first_month || one.last_month
-                          ? t`${one.first_month ?? "…"} to ${one.last_month ?? "…"}`
+                          ? t({ message: `${one.first_month ?? "…"} to ${one.last_month ?? "…"}`, comment: "Label of a choice on the one-time import" })
                           : null,
-                        one.last_modified_on ? t`last changed ${one.last_modified_on.slice(0, 10)}` : null,
+                        one.last_modified_on ? t({ message: `last changed ${one.last_modified_on.slice(0, 10)}`, comment: "Label of a choice on the one-time import" }) : null,
                       ]
                         .filter(Boolean)
                         .join(" · ")}
@@ -698,7 +698,7 @@ function YnabWizard({
       {step === "options" && analysis && (
         <>
           <h4 className="ynab-sub" id="ynab-flags">
-            <Trans>
+            <Trans comment="Heading on the one-time import: noun, YNAB's coloured markers on rows">
               Flags
             </Trans>
           </h4>
@@ -728,7 +728,7 @@ function YnabWizard({
               />
               <span>
                 <strong>
-                  <Trans>Ignore</Trans>
+                  <Trans comment="Label of a choice on the one-time import">Ignore</Trans>
                 </strong>
                 <span className="small muted">
                   <Trans>Flags are left behind.</Trans>
@@ -737,15 +737,15 @@ function YnabWizard({
             </label>
           </fieldset>
 
-          <h4 className="ynab-sub"><Trans>Date range</Trans></h4>
+          <h4 className="ynab-sub"><Trans comment="Heading on the one-time import">Date range</Trans></h4>
           <p className="small muted" style={{ marginTop: 0 }}>
             {t`Leave both empty to import everything (${range(analysis.totals.date_min, analysis.totals.date_max)}).`}
           </p>
           <div className="row">
-            <Field label={t`From`}>
+            <Field label={t({ message: "From", comment: "Label of a form field on the one-time import: the start of a range, or where money comes from" })}>
               <input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
             </Field>
-            <Field label={t`To`}>
+            <Field label={t({ message: "To", comment: "Label of a form field on the one-time import: the end of a range, or where money goes" })}>
               <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
             </Field>
           </div>
@@ -762,7 +762,7 @@ function YnabWizard({
                 onChange={() => setStartingBalance("import")}
               />
               <span>
-                <strong>{t({ message: "Import", context: "starting balance rows" })}</strong>
+                <strong>{t({ message: "Import", context: "starting balance rows", comment: "Button on the one-time import: verb, run the import" })}</strong>
                 <span className="small muted">
                   <Trans>As ordinary transactions.</Trans>
                 </span>
@@ -776,7 +776,7 @@ function YnabWizard({
                 onChange={() => setStartingBalance("skip")}
               />
               <span>
-                <strong>{t({ message: "Skip", context: "starting balance rows" })}</strong>
+                <strong>{t({ message: "Skip", context: "starting balance rows", comment: "Label of a choice on the one-time import (starting balance rows)" })}</strong>
                 <span className="small muted">
                   <Trans>Leave them out; they are listed in the report.</Trans>
                 </span>
@@ -849,7 +849,7 @@ function YnabWizard({
           />
           {commitCall.isPending ? (
             <p className="small muted">
-              <Trans>Importing…</Trans>
+              <Trans comment="Sentence on the one-time import">Importing…</Trans>
             </p>
           ) : null}
         </>
@@ -864,14 +864,14 @@ function YnabWizard({
       <div className="ynab-nav">
         {step === "report" ? (
           <button type="button" className="primary" onClick={onClose}>
-            <Trans>
+            <Trans comment="Button on the one-time import: finish and close">
               Done
             </Trans>
           </button>
         ) : (
           <>
             <button type="button" onClick={back} disabled={at === 0 || busy}>
-              <Trans>
+              <Trans comment="Button on the one-time import: go to the previous step">
                 Back
               </Trans>
             </button>
@@ -953,7 +953,7 @@ function Review({
 
       {where ? (
         <p className="small">
-          <Trans>
+          <Trans comment="Sentence on the one-time import">
             From <strong>{where}</strong>.
           </Trans>
         </p>
@@ -961,17 +961,17 @@ function Review({
 
       <dl className="facts">
         <dt>
-          <Trans>Transactions</Trans>
+          <Trans comment="Name of a fact on the one-time import. See GLOSSARY.md">Transactions</Trans>
         </dt>
         <dd>{formatCount(totals.rows)}</dd>
-        <dt><Trans>Dates</Trans></dt>
+        <dt><Trans comment="Name of a fact on the one-time import: noun, a date range">Dates</Trans></dt>
         <dd>{range(totals.date_min, totals.date_max)}</dd>
-        <dt><Trans>Accounts</Trans></dt>
+        <dt><Trans comment="Name of a fact on the one-time import: noun, bank or cash accounts. See GLOSSARY.md">Accounts</Trans></dt>
         <dd>{formatCount(analysis.accounts.length)}</dd>
-        <dt><Trans>Categories</Trans></dt>
+        <dt><Trans comment="Name of a fact on the one-time import. See GLOSSARY.md">Categories</Trans></dt>
         <dd>{formatCount(analysis.categories.length)}</dd>
         <dt>
-          <Trans>Transfers</Trans>
+          <Trans comment="Name of a fact on the one-time import: noun, money moved between your own accounts. See GLOSSARY.md">Transfers</Trans>
         </dt>
         <dd>
           {plural(totals.transfers, {
@@ -979,25 +979,25 @@ function Review({
             other: `${formatCount(totals.transfers)} legs`,
           })}
         </dd>
-        <dt><Trans>Split parts</Trans></dt>
+        <dt><Trans comment="Name of a fact on the one-time import: noun, the parts of split transactions">Split parts</Trans></dt>
         <dd>{t`${formatCount(totals.splits)}, each imported as its own transaction`}</dd>
         <dt><Trans>Starting Balance rows</Trans></dt>
         <dd>{formatCount(totals.starting_balance_rows)}</dd>
-        <dt><Trans>Cleared states</Trans></dt>
+        <dt><Trans comment="Name of a fact on the one-time import">Cleared states</Trans></dt>
         <dd>
           {t`${formatCount(totals.cleared.reconciled)} reconciled · ${formatCount(totals.cleared.cleared)} cleared · ${formatCount(totals.cleared.uncleared)} uncleared`}
         </dd>
-        <dt><Trans>Flags</Trans></dt>
+        <dt><Trans comment="Name of a fact on the one-time import: noun, YNAB's coloured markers on rows">Flags</Trans></dt>
         <dd>
           {analysis.flags.length === 0
-            ? t({ message: "None", context: "flags" })
+            ? t({ message: "None", context: "flags", comment: "Value of a fact on the one-time import (flags)" })
             : analysis.flags.map((one) => `${one.label} (${formatCount(one.count)})`).join(", ")}
         </dd>
-        <dt><Trans>Currency</Trans></dt>
+        <dt><Trans comment="Name of a fact on the one-time import: noun. See GLOSSARY.md">Currency</Trans></dt>
         <dd>
           {analysis.currency.detected
             ? `${analysis.currency.detected}${analysis.currency.symbol ? ` (${analysis.currency.symbol})` : ""}`
-            : t`Not detected`}
+            : t({ message: "Not detected", comment: "Value of a fact on the one-time import" })}
         </dd>
       </dl>
 
@@ -1009,7 +1009,7 @@ function Review({
               disabled={busy}
               onChange={(event) => event.target.value && onCurrency(event.target.value)}
             >
-              {!currency ? <option value="">{t`Choose…`}</option> : null}
+              {!currency ? <option value="">{t({ message: "Choose…", comment: "Option in a dropdown on the one-time import" })}</option> : null}
               {currencies.map((code) => (
                 <option key={code} value={code}>
                   {code}
@@ -1025,7 +1025,7 @@ function Review({
               disabled={busy}
               onChange={(event) => event.target.value && onDateFormat(event.target.value)}
             >
-              {!dateFormat ? <option value="">{t`Choose…`}</option> : null}
+              {!dateFormat ? <option value="">{t({ message: "Choose…", comment: "Option in a dropdown on the one-time import" })}</option> : null}
               {analysis.date_format.options.map((option) => (
                 <option key={option} value={option}>
                   {option}

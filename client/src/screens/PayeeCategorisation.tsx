@@ -115,7 +115,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
       )}
       {breakdown && (
         <Panel title={breakdown.name} onClose={() => setBreakdown(null)}>
-          <h3 className="section-title"><Trans>Categorised as</Trans></h3>
+          <h3 className="section-title"><Trans comment="Heading on the Payee Categorisation screen">Categorised as</Trans></h3>
           <ul className="breakdown">
             {(byPayee.get(breakdown.id)?.categories ?? []).map((one) => (
               <li key={one.key ?? "none"}>
@@ -133,7 +133,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
           </p>
         </Panel>
       )}
-      <h1><Trans>Payee categorisation</Trans></h1>
+      <h1><Trans comment="Screen title on the Payee Categorisation screen. See GLOSSARY.md">Payee categorisation</Trans></h1>
       <p className="muted small">
         <Trans>
           What each payee has been filed under, and what a new transaction for it will be. Which
@@ -154,7 +154,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
               clear button and the phone keyboard's search key, and neither is
               worth rebuilding. `role="searchbox"` is what it already is. */}
           <label className="payee-search">
-            <span className="sr-only"><Trans>Search payees</Trans></span>
+            <span className="sr-only"><Trans comment="Screen-reader text on the Payee Categorisation screen">Search payees</Trans></span>
             <input
               type="search"
               value={search}
@@ -181,14 +181,14 @@ export function PayeeCategorisation({ household }: { household: Household }) {
               <thead>
                 <tr>
                   <SortHeading
-                    label={t`Payee`}
+                    label={t({ message: "Payee", comment: "Column heading on the Payee Categorisation screen: noun, who was paid or who paid. See GLOSSARY.md" })}
                     column="name"
                     sort={payeeOrder.sort}
                     direction={payeeOrder.direction}
                     onSort={payeeOrder.onSort}
                   />
                   <SortHeading
-                    label={t`Transactions`}
+                    label={t({ message: "Transactions", comment: "Column heading on the Payee Categorisation screen. See GLOSSARY.md" })}
                     column="transactions"
                     sort={payeeOrder.sort}
                     direction={payeeOrder.direction}
@@ -196,7 +196,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
                     align="right"
                   />
                   <SortHeading
-                    label={t`Categorised as`}
+                    label={t({ message: "Categorised as", comment: "Column heading on the Payee Categorisation screen" })}
                     column="categories"
                     sort={payeeOrder.sort}
                     direction={payeeOrder.direction}
@@ -216,7 +216,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
                         ? "…"
                         : formatCount(byPayee.get(payee.id)?.transaction_count ?? 0)}
                     </td>
-                    <td className="small" data-label={t`Categorised as`} data-detail-first="true">
+                    <td className="small" data-label={t({ message: "Categorised as", comment: "Column name shown beside a value on phones on the Payee Categorisation screen" })} data-detail-first="true">
                       <CategorySummary
                         stat={byPayee.get(payee.id)}
                         onMore={() => setBreakdown(payee)}
@@ -224,7 +224,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
                     </td>
                     <td className="amount">
                       <button className="link" onClick={() => setCategorising(payee.id)}>
-                        <Trans>
+                        <Trans comment="Button on the Payee Categorisation screen">
                           Categorisation
                         </Trans>
                       </button>
@@ -281,7 +281,7 @@ function CategorySummary({
       ))}
       {rest > 0 && (
         <button type="button" className="link tally-more" onClick={onMore}>
-          {t`+${formatCount(rest)} more`}
+          {t({ message: `+${formatCount(rest)} more`, comment: "Button on the Payee Categorisation screen" })}
         </button>
       )}
     </span>

@@ -18,7 +18,8 @@ from ..models import PendingSignIn, User, WebSession, utcnow
 from . import tokens
 
 #: The cookie's name is `cookies.session_name()`: it depends on `Secure`
-#: (#209), and one module decides both.
+#: (#209) and on whether the request named a loopback host (#196), and one
+#: module decides all of it.
 
 
 def issue(

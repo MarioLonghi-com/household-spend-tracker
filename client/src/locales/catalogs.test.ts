@@ -22,6 +22,9 @@ interface Entry {
   id: string;
   translation: string;
   fuzzy: boolean;
+  /** The translator notes, `#.` lines: a source `comment` (#228). */
+  notes: string[];
+  context: string;
 }
 
 /** Enough of a PO reader for this: entries, their flags, and their msgstr. */
@@ -34,14 +37,19 @@ export function readPo(text: string): Entry[] {
     let translation = "";
     let field: "id" | "str" | null = null;
     let fuzzy = false;
+    let context = "";
+    const notes: string[] = [];
     for (const line of lines) {
       if (line.startsWith("#,")) fuzzy ||= line.includes("fuzzy");
+      // Lingui's own "placeholder {0}: expr" lines are about the code, not a note.
+      else if (line.startsWith("#. ") && !line.startsWith("#. placeholder ")) notes.push(line.slice(3));
+      else if (line.startsWith("msgctxt ")) context = unquote(line);
       else if (line.startsWith("msgid ")) [field, id] = ["id", unquote(line)];
       else if (line.startsWith("msgstr ")) [field, translation] = ["str", unquote(line)];
       else if (line.startsWith('"') && field === "id") id += unquote(line);
       else if (line.startsWith('"') && field === "str") translation += unquote(line);
     }
-    if (field && id) entries.push({ id, translation, fuzzy });
+    if (field && id) entries.push({ id, translation, fuzzy, notes, context });
   }
   return entries;
 }
@@ -55,6 +63,20 @@ const FILES = import.meta.glob<string>("./*/messages.po", {
 
 function catalog(locale: string): Entry[] {
   return readPo(FILES[`./${locale}/messages.po`] ?? "");
+}
+
+/**
+ * Short messages that need no note: the same word, the same job, on every
+ * screen of every app. Reviewed; add to it only with a reason a translator
+ * would accept (#228).
+ */
+const SELF_EXPLANATORY = new Set(["OK", "Cancel"]);
+
+/** Words a reader sees, leaving out placeholders, tags and plural syntax. */
+export function wordsIn(message: string): number {
+  if (/\{\w+, (plural|select)/.test(message)) return 0;
+  const plain = message.replace(/<\/?\d+\/?>/g, " ").replace(/\{[^{}]*\}/g, " ");
+  return (plain.match(/[A-Za-z][A-Za-z'’-]*/g) ?? []).length;
 }
 
 const translated = config.locales.filter((one) => one !== SOURCE_LOCALE && one !== PSEUDO_LOCALE);
@@ -101,19 +123,59 @@ describe("the catalogs", () => {
     }
   });
 
+  it("give every message of one or two words a translator note, or a reviewed reason not to", () => {
+    // A translator sees only the English. "Balance", "Split" or "Open" alone
+    // could be a button, a heading, a column or a state, and in finance most
+    // have more than one meaning (#228).
+    const bare = catalog(SOURCE_LOCALE)
+      .filter((one) => wordsIn(one.id) >= 1 && wordsIn(one.id) <= 2)
+      .filter((one) => one.notes.length === 0 && !SELF_EXPLANATORY.has(one.id))
+      .map((one) => one.id);
+    expect(bare).toEqual([]);
+  });
+
+  it.each(config.locales)("%s carries the same translator notes as the English catalog", (locale) => {
+    const key = (one: Entry) => `${one.context}\u0004${one.id}`;
+    const english = new Map(catalog(SOURCE_LOCALE).map((one) => [key(one), one.notes]));
+    for (const one of catalog(locale)) expect(one.notes, `${locale}: ${one.id}`).toEqual(english.get(key(one)));
+  });
+
+  it("keeps each translator note to one short line", () => {
+    const long = catalog(SOURCE_LOCALE)
+      .flatMap((one) => one.notes)
+      .filter((note) => note.length > 120);
+    expect(long).toEqual([]);
+  });
+
   it("serves no draft language yet", () => {
     expect(SERVED_LOCALES.filter((one) => translated.includes(one))).toEqual([]);
   });
 });
 
+describe("counting a message's words", () => {
+  it("leaves out placeholders, tags and plurals", () => {
+    expect(wordsIn("Balance")).toBe(1);
+    expect(wordsIn("Rename {0}")).toBe(1);
+    expect(wordsIn("From <0>{where}</0>.")).toBe(1);
+    expect(wordsIn("{0}")).toBe(0);
+    expect(wordsIn("{count, plural, one {# day} other {# days}}")).toBe(0);
+    expect(wordsIn("Save receipt notes")).toBe(3);
+  });
+});
+
 describe("the PO reader", () => {
+  it("sees a translator note and a context", () => {
+    const [entry] = readPo(['#. Column heading', 'msgctxt "noun"', 'msgid "Transfer"', 'msgstr ""'].join("\n"));
+    expect([entry.notes, entry.context]).toEqual([["Column heading"], "noun"]);
+  });
+
   it("sees a fuzzy flag and a continued msgstr", () => {
     const entries = readPo(
       ['#, fuzzy', 'msgid "Accounts"', 'msgstr ""', '"Con"', '"tas"', "", 'msgid "History"', 'msgstr ""'].join("\n"),
     );
     expect(entries).toEqual([
-      { id: "Accounts", translation: "Contas", fuzzy: true },
-      { id: "History", translation: "", fuzzy: false },
+      { id: "Accounts", translation: "Contas", fuzzy: true, notes: [], context: "" },
+      { id: "History", translation: "", fuzzy: false, notes: [], context: "" },
     ]);
   });
 });

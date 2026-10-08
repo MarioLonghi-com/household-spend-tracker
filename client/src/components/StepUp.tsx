@@ -81,7 +81,7 @@ export function StepUpFields({
       <p className="small muted" style={{ marginTop: 0 }}>
         <Trans>{why} So this asks for your password and a code — the same as signing in.</Trans>
       </p>
-      <Field label={t`Your password`}>
+      <Field label={t({ message: "Your password", comment: "Label of a form field on the password-and-code check" })}>
         <input
           type="password"
           value={proof.password}
