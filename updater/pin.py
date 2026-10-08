@@ -66,10 +66,25 @@ def merged_env(existing: str, values: dict[str, str]) -> str:
                 done.add(key)
             continue
         out.append(line)
-    for key in KEYS:
-        if key in values and key not in done:
+    for key in values:
+        if key not in done:
             out.append(f"{key}={values[key]}")
     return "\n".join(out) + "\n"
+
+
+def set_env(project_dir: Path, values: dict[str, str]) -> None:
+    """Each key of `values` set in the project's `.env`, every other line kept, its mode too.
+
+    The pin's two keys, and the launcher's per-engine settings (`updater.launch`).
+    """
+    env = Path(project_dir) / ".env"
+    try:
+        st = os.lstat(env)
+        mode = stat.S_IMODE(st.st_mode) if stat.S_ISREG(st.st_mode) else 0o600
+        existing = env.read_text(encoding="utf-8") if stat.S_ISREG(st.st_mode) else ""
+    except FileNotFoundError:
+        mode, existing = 0o600, ""
+    _replace(env, merged_env(existing, values).encode(), mode)
 
 
 def write(project_dir: Path, app: str | None, updater: str | None) -> dict[str, str]:
@@ -87,14 +102,7 @@ def write(project_dir: Path, app: str | None, updater: str | None) -> dict[str, 
         values[UPDATER_KEY] = updater
     if not values:
         return {}
-    env = Path(project_dir) / ".env"
-    try:
-        st = os.lstat(env)
-        mode = stat.S_IMODE(st.st_mode) if stat.S_ISREG(st.st_mode) else 0o600
-        existing = env.read_text(encoding="utf-8") if stat.S_ISREG(st.st_mode) else ""
-    except FileNotFoundError:
-        mode, existing = 0o600, ""
-    _replace(env, merged_env(existing, values).encode(), mode)
+    set_env(project_dir, values)
 
     record_dir = Path(project_dir) / "pin"
     record_dir.mkdir(mode=0o775, exist_ok=True)

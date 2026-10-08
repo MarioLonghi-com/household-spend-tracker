@@ -7,7 +7,7 @@ backup, upgrades, logs, troubleshooting) is the same for all three.
 
 | Where it runs | How it is reached | Compose file | Section |
 |---|---|---|---|
-| **Your own computer** (laptop or desktop) | `http://localhost:8848`, this machine only | `compose.yaml` | [1](#1-on-your-own-computer) |
+| **Your own computer** (laptop or desktop) | `http://localhost:8848`, this machine only | the release zip, or `compose.yaml` | [1](#1-on-your-own-computer) |
 | **A server**, Tailscale installed on the server | `https://<server>.<tailnet>.ts.net`, from any device on your tailnet | `compose.yaml` | [2](#2-on-a-server-with-tailscale-on-the-host) |
 | **A server**, Tailscale as a sidecar container | `https://spend-tracker.<tailnet>.ts.net`, its own tailnet node | `deploy/tailnet/compose.yaml` | [3](#3-on-a-server-with-tailscale-as-a-sidecar) |
 
@@ -79,6 +79,88 @@ authenticator: [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
 The app answers on this machine only, at `http://localhost:8848`. Nothing on
 your network can reach it, and no Tailscale is involved.
+
+### Without a terminal: the release zip
+
+Every release carries `spend-tracker-<version>-compose.zip`. It needs no
+checkout, no Python and no command line:
+
+1. **Install Docker Desktop or Podman Desktop**, and start it.
+2. **Unzip** the release's zip somewhere you will keep it. The folder holds
+   the settings Spend Tracker is started with; keep it.
+3. **Double-click the launcher**: `Start Spend Tracker.command` on macOS,
+   `Start Spend Tracker.bat` on Windows, `start-spend-tracker.sh` on Linux.
+   A window shows what it does; nothing is typed into it. When the app
+   answers, the browser opens `http://localhost:8848` -- always `localhost`,
+   never `127.0.0.1`, which is another origin and would turn passkeys off.
+4. **The setup wizard asks for the one-time setup token.** It is in the app
+   container's log, which Docker Desktop and Podman Desktop show without a
+   terminal (*Containers*, `spend-tracker`, `app`, *Logs*): the line after
+   "Finish setup at /setup with this one-time token". See
+   [The setup token](#the-setup-token).
+
+From then on the containers start with Docker or Podman, and updates,
+rollbacks and the updater's own updates happen in the browser, under
+*Application*.
+
+**The first double-click meets the operating system first.** The launchers
+are not signed yet (signing and notarising are tracked with the desktop
+build):
+
+- **macOS 15 and later** no longer offers right-click → *Open* for a
+  downloaded script. Double-click it once and close the warning; then open
+  **System Settings → Privacy & Security**, scroll to the line about
+  `Start Spend Tracker.command`, click **Open Anyway** and enter your
+  password. The next double-click runs it.
+- **Windows** SmartScreen says *Windows protected your PC*: click
+  **More info**, then **Run anyway**.
+
+**The Windows launcher is untested.** No Windows machine has run it yet. It
+ships so that one can, and does what the macOS and Linux launcher does; if it
+stops, `docker compose --env-file .env up -d` in the unzipped folder starts
+the same thing.
+
+**What the launcher does**, so that nothing it does is a surprise:
+
+- it `cd`s to its own folder, finds `docker compose` or `podman compose`,
+  and asks the release's own updater image, run once with no network, what
+  to start: it detects the engine, finds the *pin* -- the release your ledger
+  is at, which the updater writes into `.env` after every update -- and
+  writes the pin and the engine's settings (`SPENDTRACKER_ENGINE_SOCKET`,
+  `SPENDTRACKER_SOCKET_GID`, `SPENDTRACKER_UPDATER_USER`) into `.env`;
+- under Podman it enables `podman-restart` -- inside the Podman machine on a
+  Mac or Windows, the system unit on a rootful engine, the user unit and
+  lingering under a rootless one -- because without it nothing comes back
+  after a restart;
+- on Linux under a rootful engine it makes the folder and `.env` writable by
+  the socket's group, which the updater carries (`chgrp`, `chmod g+w`);
+- it removes a leftover maintenance page of the updater's, runs
+  `compose --env-file .env up -d`, waits for `/api/health` and opens the
+  browser.
+
+It never runs `sudo`. When a step needs it -- enabling the system
+`podman-restart` unit or lingering, for example -- it prints the one command
+to run and stops; run that, then the launcher again.
+
+**The launcher is also how you start it again, and the repair tool.** Run it
+after reinstalling Docker or Podman, or when the browser says the updater
+cannot reach the engine. It is safe at any time:
+
+- with a pin, it starts **the pinned release of the app, whatever the zip
+  ships** -- the ledger is at that release, and moving it is the browser's
+  job, with a backup first;
+- for the **updater**, it runs the **newer** of the pinned one and the zip's,
+  never an older one. So the launcher of a newer zip, unzipped anywhere,
+  replaces a broken or outgrown updater and leaves the app and its data
+  alone. It finds the old folder by itself, from the running containers, and
+  carries its pin over.
+
+Without a launcher, `docker compose --env-file .env up -d` in the folder
+starts the same thing once a launcher has run there once. The zip's
+`compose.yaml` names both images by digest and has no `build:`: a failed pull
+is an error to read, not a local build.
+
+### From a checkout
 
 ```bash
 echo SPENDTRACKER_VERSION=X.Y.Z >> .env

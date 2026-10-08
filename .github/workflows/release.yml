@@ -75,6 +75,15 @@ name: release
 # still a draft, with the sentence that says where to make it public; after
 # that, re-running the failed jobs finishes the release.
 #
+# And the release zip for a personal computer (#167),
+# `spend-tracker-<version>-compose.zip`: a compose file naming both images by
+# the index digests `publish-image` pushed, `.env`, an empty `pin/`, the three
+# launchers and a README, from `deploy/bundle/` through `scripts/bundle.py`.
+# It needs those digests, so `publish-bundle` builds it after `publish-image`
+# and before `publish-release`: attested, and attached to the draft, which
+# does not go public without it. `build` builds one with stand-in digests on
+# every run, dry runs included, and checks it the same way.
+#
 # Started by hand (`workflow_dispatch`) from a branch it is a dry run: it
 # builds and smoke-tests both artefacts on both platforms, checks the two
 # platform images carry the same labels, and publishes nothing.
@@ -288,6 +297,27 @@ jobs:
           pip-audit --require-hashes --disable-pip -r requirements.txt \
             --format cyclonedx-json --output "$sbom" || true
           test -s "$sbom" || { echo "no SBOM was written"; exit 1; }
+
+      # The release zip (#167) from the templates, with stand-in digests: the
+      # real one needs the index digests only `publish-image` knows, and is
+      # built in `publish-bundle`. This one is checked and thrown away, so a
+      # template that breaks the zip -- a lost executable bit, a placeholder
+      # left in, a `build:` -- fails here, on a dry run too, before anything is
+      # published. On a dry run the version is the one the files declare.
+      - name: the release zip builds, from stand-in digests
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -eu
+          case "$VERSION" in
+            snapshot-*) VERSION="$(python -c 'from scripts.version import declared; print(sorted(set(declared().values()))[0])')" ;;
+          esac
+          python -m scripts.bundle --version "$VERSION" --zip bundle-check \
+            --app-digest "sha256:$(printf '0%.0s' $(seq 64))" \
+            --updater-digest "sha256:$(printf '1%.0s' $(seq 64))"
+          python -m scripts.bundle --check "bundle-check/spend-tracker-${VERSION}-compose.zip"
+          zipinfo "bundle-check/spend-tracker-${VERSION}-compose.zip"
+          rm -rf bundle-check
 
       # release-notes.md rides along; on a dry run there is none, and the
       # tarballs are enough for the upload to succeed.
@@ -617,6 +647,11 @@ jobs:
           Or the container, for linux/amd64 and linux/arm64: \`docker pull ${IMAGE}:${VERSION}\`,
           with its self-updater, \`${UPDATER_IMAGE}:${VERSION}\`, which compose.yaml runs beside it.
 
+          On a computer of your own, with Docker Desktop or Podman Desktop:
+          \`spend-tracker-${VERSION}-compose.zip\` -- unzip it and double-click the
+          launcher inside. \`deploy/DOCKER.md\`, *On a computer of your own*, has
+          the first-open prompts.
+
           Check where either came from with
           \`gh attestation verify <file or oci://image> --repo ${GITHUB_REPOSITORY}\`.
 
@@ -778,6 +813,70 @@ jobs:
           public "$IMAGE" "$APP"
           public "$UPDATER_IMAGE" "$UPDATER"
 
+  # The release zip for a personal computer (#167), now that both index
+  # digests exist: built from the tagged tree by `scripts/bundle.py`, checked
+  # (one folder, every entry's mode -- the `.command` must stay executable for
+  # macOS to open it, C16 -- both images by this release's digest, no
+  # `build:`, `mem_limit`, PUBLIC_URL), attested like the tarballs, and
+  # attached to the draft. `publish-release` needs this job, so the release
+  # never goes public without its zip.
+  #
+  # It runs the repository's own script, standard library only, from a fresh
+  # checkout of the tag: no `npm ci` and nothing installed, which is what keeps
+  # a write token out of a job that runs other people's code.
+  publish-bundle:
+    needs: [build, publish-image]
+    if: github.ref_type == 'tag'
+    # Gated through `publish`, by way of `publish-image`.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write       # attach the zip to the draft
+      id-token: write       # the Sigstore certificate behind the attestation
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: the zip, naming the images by the digests just pushed
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          APP_DIGEST: ${{ needs.publish-image.outputs.digest }}
+          UPDATER_DIGEST: ${{ needs.publish-image.outputs.updater-digest }}
+        run: |
+          set -eu
+          SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)" python -m scripts.bundle \
+            --version "$VERSION" --app-digest "$APP_DIGEST" --updater-digest "$UPDATER_DIGEST" --zip dist
+          zip="dist/spend-tracker-${VERSION}-compose.zip"
+          python -m scripts.bundle --check "$zip"
+          grep -q "${IMAGE}:${VERSION}@${APP_DIGEST}" <(unzip -p "$zip" "spend-tracker-${VERSION}/compose.yaml")
+          grep -q "${UPDATER_IMAGE}:${VERSION}@${UPDATER_DIGEST}" <(unzip -p "$zip" "spend-tracker-${VERSION}/compose.yaml")
+          # Read back by a tool that is not the one that wrote it.
+          zipinfo "$zip" | tee zipinfo.txt
+          for launcher in "Start Spend Tracker.command" "start-spend-tracker.sh"; do
+            grep -qE "^-rwxr-xr-x .* spend-tracker-${VERSION}/${launcher}\$" zipinfo.txt \
+              || { echo "${launcher} lost its executable bit in the zip"; exit 1; }
+          done
+          (cd dist && sha256sum "spend-tracker-${VERSION}-compose.zip") | tee "${zip}.sha256"
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-path: dist/*-compose.zip
+
+      - name: attached to the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          set -eu
+          gh release upload "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --clobber \
+            "dist/spend-tracker-${VERSION}-compose.zip" "dist/spend-tracker-${VERSION}-compose.zip.sha256"
+          test "$(gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)" = "true"
+
   # Last: the draft goes public, and only then do `X.Y` and `latest` move.
   # Anything that reads the releases page, `releases/latest` or the floating
   # tags finds the image already there, attested and pullable. The order
@@ -785,7 +884,7 @@ jobs:
   # without `latest` pointing at it is a release; `latest` pointing at an
   # image with no release is a surprise.
   publish-release:
-    needs: [build, publish-image]
+    needs: [build, publish-image, publish-bundle]
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     timeout-minutes: 10

@@ -138,6 +138,24 @@ history this repository does not have.
 
 ### Added
 
+- **Spend Tracker on a computer of your own, without a terminal.** Every
+  release now carries `spend-tracker-<version>-compose.zip`: install Docker
+  Desktop or Podman Desktop, unzip, and double-click `Start Spend
+  Tracker.command` (macOS), `start-spend-tracker.sh` (Linux) or `Start Spend
+  Tracker.bat` (Windows -- shipped, not yet tested on a Windows machine). The
+  zip's `compose.yaml` names the app and its updater by the digests the
+  release pushed, with no `build:` and a 768m memory ceiling, and its `.env`
+  sets `SPENDTRACKER_PUBLIC_URL=http://localhost:8848` so passkeys work at
+  `localhost`. The launcher sets the container engine up -- the socket and
+  its group, the updater's user under a rootless engine, `podman-restart`
+  and lingering where Podman needs them -- starts both containers, waits for
+  them to answer and opens the setup wizard. Run again, it is the restart
+  and the repair: it keeps the release your ledger is at, and runs the
+  newer of the installed updater and the zip's, never an older one. Built,
+  checked, attested and attached by the release workflow before the release
+  goes public. `deploy/DOCKER.md` has the first-open prompts of macOS and
+  Windows. (#167)
+
 - **Self-update: the maintenance page and browser recovery** (#163).
   While an update runs, whoever opens Spend Tracker sees only "Spend Tracker
   is being updated. It will be back in a few minutes." and `/api/health`
