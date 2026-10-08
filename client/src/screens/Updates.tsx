@@ -21,9 +21,9 @@
  * while the updater prepares, and, once *Update* is pressed, the full-width
  * panel below watches on its own -- the update state every two seconds while
  * the app answers, then `/api/health` every three once it has stopped, keeping
- * the last progress it saw, and loading `/?open=application` when the app is
- * back, so the page opens on this screen and its outcome rather than on the
- * register.
+ * the last progress it saw, and loading `/?open=application#updates` when the
+ * app is back, so the page opens on this section and its outcome rather than
+ * on the register.
  *
  * **The Update button needs every box**: one per migration a downgrade cannot
  * undo (an undeclared one counts), *I have saved the recovery code*, and the
@@ -304,11 +304,12 @@ function saveText(name: string, text: string): void {
  * fresh load -- the new version's client, not this one -- opened on
  * Application management, where the outcome is. A bare reload landed on the
  * register, because the shell keeps its screen in memory only, and the owner
- * never saw whether the update worked or was rolled back. `App.tsx` reads
- * `?open=` and puts the address back to `/`.
+ * never saw whether the update worked or was rolled back. `#updates` scrolls
+ * this section into view there. `App.tsx` reads both and puts the address
+ * back to `/`.
  */
 export function backToThisScreen(): void {
-  window.location.assign("/?open=application");
+  window.location.assign("/?open=application#updates");
 }
 
 export function Updates({

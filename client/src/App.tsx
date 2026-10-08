@@ -240,8 +240,8 @@ function returnTo(): string | null {
  * - the Updating panel, once the app is back after an update or a rollback.
  *   The screen is held in memory only, so a bare reload landed on the
  *   register and the owner never saw how the update ended. It loads
- *   `/?open=application` instead, with no household: the screen is about the
- *   installation, not a ledger.
+ *   `/?open=application#updates` instead, with no household: the screen is
+ *   about the installation, not a ledger. The `#updates` is `sectionAt`'s.
  *
  * Only the screens named here, for the same reason `next` is fenced: it
  * arrives in a query string. `application` is the owner's; the shell opens
@@ -276,6 +276,17 @@ export function openedAt(): { screen: OpensInNewTab | null; household: string } 
   // households before using it; this is the fence at the door.
   const household = screen ? (query.get("household") ?? "") : "";
   return { screen, household: /^[\w-]{1,64}$/.test(household) ? household : "" };
+}
+
+/**
+ * A section of the opened screen to scroll to, from the address's `#`: only
+ * `#updates`, and only with `?open=application`. The Updating panel asks for
+ * it once the app is back, so the outcome is on screen without scrolling; a
+ * visit from the menu never carries it. Reads and changes nothing, like
+ * `openedAt`.
+ */
+export function sectionAt(opened: { screen: OpensInNewTab | null }): "updates" | null {
+  return opened.screen === "application" && window.location.hash === "#updates" ? "updates" : null;
 }
 
 /** Once a screen has been opened from `?open=`, the address goes back to `/`. */
@@ -514,6 +525,9 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
   const [opened] = useState(openedAt);
   useEffect(() => putTheAddressBack(opened), [opened]);
   const [screen, setScreen] = useState<Screen>(() => firstScreen(opened, user.role));
+  //: Asked for once, by the address; cleared once shown, so coming back to
+  //: the screen from the menu does not scroll it again.
+  const [section, setSection] = useState(() => sectionAt(opened));
   //: Where the register should open when a report sends somebody there: a
   //: Work expenses view, and maybe one row's panel. Held here because the
   //: register is unmounted while a report is on screen, so it cannot be told
@@ -867,7 +881,9 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
         {/* Guarded here as well as in the menu. The menu decides what is
             offered; this decides what renders, and a member who reached the
             name some other way gets nothing rather than a screen of 403s. */}
-        {screen === "application" && user.role === "owner" && <ApplicationManagement />}
+        {screen === "application" && user.role === "owner" && (
+          <ApplicationManagement section={section} onSectionShown={() => setSection(null)} />
+        )}
         </ScreenBoundary>
       </main>
 

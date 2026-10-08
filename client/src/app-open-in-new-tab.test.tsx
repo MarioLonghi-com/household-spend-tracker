@@ -17,7 +17,7 @@ vi.mock("./lib/api", () => ({
 }));
 
 import { api } from "./lib/api";
-import { App, firstScreen, openedAt, putTheAddressBack } from "./App";
+import { App, firstScreen, openedAt, putTheAddressBack, sectionAt } from "./App";
 import type { Household, User } from "./lib/types";
 
 describe("opening a screen in a new tab", () => {
@@ -80,6 +80,29 @@ describe("the screen the shell opens on", () => {
 
   it("is a member's own screen for a member", () => {
     expect(firstScreen({ screen: "history" }, "member")).toBe("history");
+  });
+});
+
+describe("the section the opened screen scrolls to", () => {
+  afterEach(() => window.history.replaceState(null, "", "/"));
+
+  it("is Updates when the Updating panel asks for it", () => {
+    window.history.replaceState(null, "", "/?open=application#updates");
+    expect(sectionAt(openedAt())).toBe("updates");
+  });
+
+  it("is nothing without the #, on another screen, or for another #", () => {
+    for (const address of ["/?open=application", "/?open=history#updates", "/#updates", "/?open=application#logs"]) {
+      window.history.replaceState(null, "", address);
+      expect(sectionAt(openedAt())).toBeNull();
+    }
+  });
+
+  it("goes with the rest of the address once read", () => {
+    window.history.replaceState(null, "", "/?open=application#updates");
+    putTheAddressBack(openedAt());
+    expect(window.location.hash).toBe("");
+    expect(window.location.search).toBe("");
   });
 });
 

@@ -616,7 +616,7 @@ describe("updating", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(APPLY_POLL_MS);
     });
-    expect(assign.mock.calls).toEqual([["/?open=application"]]);
+    expect(assign.mock.calls).toEqual([["/?open=application#updates"]]);
     expect(reload).not.toHaveBeenCalled();
   });
 
