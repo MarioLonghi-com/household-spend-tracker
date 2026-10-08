@@ -34,8 +34,9 @@ export function untranslated(root: HTMLElement): string[] {
     if ((node.parentElement?.closest(".mono, .codes, svg") ?? null) !== null) continue;
     shown.push(node.textContent ?? "");
   }
-  for (const element of Array.from(root.querySelectorAll("[aria-label], [title], [placeholder]"))) {
-    for (const name of ["aria-label", "title", "placeholder"]) {
+  for (const element of Array.from(root.querySelectorAll("[aria-label], [title], [placeholder], [data-label]"))) {
+    // data-label is what a phone shows beside each cell of a table row.
+    for (const name of ["aria-label", "title", "placeholder", "data-label"]) {
       const value = element.getAttribute(name);
       if (value) shown.push(value);
     }
