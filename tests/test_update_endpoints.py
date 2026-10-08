@@ -351,7 +351,7 @@ def test_prepare_writes_the_request_the_updater_accepts(world, caplog):
         "from_version": __version__,
         "to_version": NEXT,
     }
-    assert oct(vol.request.stat().st_mode & 0o777) == oct(0o660)
+    assert oct(vol.request.stat().st_mode & 0o777) == oct(0o640)
     assert not [p for p in vol.root.iterdir() if p.name.endswith(".tmp")]
     said = [r.getMessage() for r in caplog.records]
     assert any("prepared" in line and "jane.doe@gmail.com" in line.lower() for line in said), said

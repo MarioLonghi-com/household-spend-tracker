@@ -66,9 +66,13 @@ log = logging.getLogger("spendtracker")
 #: `…updater-protocol` label (C4).
 PROTOCOL = 1
 
-#: The group every file in the volume belongs to (C11), and the modes.
+#: The group every file in the volume belongs to (C11), and the mode of the
+#: request this app writes. Group-readable, not group-writable: the updater
+#: takes a request by renaming it, which needs the directory's write bit,
+#: not the file's, and then only reads it. The volume's directories stay
+#: 2770 (C11); nothing else in it is written by the app.
 UPDATE_GID = 65532
-FILE_MODE = 0o660
+FILE_MODE = 0o640
 
 #: A heartbeat older than this means no updater (3.1). It is rewritten every
 #: 30 seconds.
