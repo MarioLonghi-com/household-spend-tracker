@@ -39,7 +39,11 @@ def test_the_page_uses_the_words_the_preview_shows(page):
 
     labels = LABELS.read_text(encoding="utf-8")
     shown = dict(
-        re.findall(r'^\s+(\w+): "([^"]+)",$', labels.split("IMPORT_OUTCOME_WORDS")[1].split("};")[0], re.M)
+        re.findall(
+            r"^\s+get (\w+)\(\) \{ return t`([^`]+)`; \},$",
+            labels.split("IMPORT_OUTCOME_WORDS")[1].split("};")[0],
+            re.M,
+        )
     )
     explained = dict(re.findall(r'code: "(\w+)",\s+label: "([^"]+)"', page))
     assert shown == explained
