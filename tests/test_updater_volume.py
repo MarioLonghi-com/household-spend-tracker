@@ -46,6 +46,31 @@ def test_a_loosened_directory_is_tightened_again(tmp_path):
         assert {os.lstat(d).st_gid for d in (first, second)} == {UPDATE_GID}
 
 
+def test_a_directory_already_2770_is_not_chmodded_again(tmp_path, monkeypatch):
+    """Rootless engines: the updater is root with `cap_drop: ALL` and does not
+    own the volume's root, so a chmod there is EPERM (#169). One that is
+    already right is left alone; one that is not is still tightened."""
+    right, loose = tmp_path / "update", tmp_path / "loose"
+    for d in (right, loose):
+        d.mkdir()
+    os.chmod(right, 0o2770)
+    os.chmod(loose, 0o755)
+    chmodded = []
+    real = os.chmod
+
+    def refuse_unowned(path, mode_, *a, **kw):
+        chmodded.append(os.fspath(path))
+        if os.fspath(path) == os.fspath(right):
+            raise PermissionError(1, "Operation not permitted", os.fspath(path))
+        return real(path, mode_, *a, **kw)
+
+    monkeypatch.setattr(volume.os, "chmod", refuse_unowned)
+    volume.make_shared_dir(right)
+    volume.make_shared_dir(loose)
+    assert chmodded == [os.fspath(loose)]
+    assert (mode(right), mode(loose)) == (0o2770, 0o2770)
+
+
 def test_a_symlink_where_a_directory_belongs_is_refused(tmp_path):
     target = tmp_path / "elsewhere"
     target.mkdir()
