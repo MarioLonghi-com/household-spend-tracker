@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 // The One-time Import's card is its own screen, extracted on its own.
-vi.mock("./OneTimeImport", () => ({ OneTimeImport: () => null }));
+vi.mock("./OneTimeImport", () => ({ OneTimeImport: () => null, NEW_ISSUE_URL: "https://example.com/new" }));
 
 vi.mock("../lib/api", () => ({
   api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), del: vi.fn(), upload: vi.fn() },
@@ -35,6 +35,8 @@ import { History } from "./History";
 import { BackupList, SavePanel } from "./Backups";
 import { ApplicationManagement } from "./ApplicationManagement";
 import { Receipts } from "./Receipts";
+import { ImportGuide, guideFor } from "./ImportGuide";
+import { ImportGuideDocument } from "./importGuide/en";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -357,14 +359,31 @@ describe("in en-XA, the remaining screens show no English", () => {
           streams: [{ key: "sql", label: "Sam", filename: "sql.log", blurb: "Doe", holds_ledger_values: true }],
         };
       if (path.startsWith("/admin/application/logs/")) return { name: "app.log", bytes: 3, text: "Sam" };
+      // The Updates section (#166): a working updater, so its sentence shows.
+      if (path === "/admin/application/update")
+        return {
+          case: "working", running: "9.9.9", protocol: 1, in_flight: false, status: null, report: null,
+          outcome: null, backups: [],
+          heartbeat: {
+            fresh: true, updater_version: "9.9.9", engine: "docker-desktop", engine_version: "4.48.0",
+            container: "casa-updater-1", socket: "ok", hook: false,
+          },
+        };
       return [];
     });
-    vi.mocked(api.post).mockResolvedValue({ checked_at: "2026-03-01T10:00:00", running: "9.9.9", latest: "9.9.10", newer: true, problem: null });
+    const release = (version: string) => ({
+      version, tag: `v${version}`, name: null, published_at: "2026-03-01T10:00:00", notes: "Sam", notes_from: "changelog",
+    });
+    vi.mocked(api.post).mockResolvedValue({
+      checked_at: "2026-03-01T10:00:00", running: "9.9.9", latest: "9.9.11", newer: true, problem: null,
+      releases: [release("9.9.11"), release("9.9.10")],
+      updater: { version: null, compatible: null, note: "Sam" },
+    });
     render(withQueries(<ApplicationManagement />));
     await screen.findByText("app.log");
     // Paths, file names, versions and the engine's own words are data.
     const data = (word: string) =>
-      !/^(AM|PM|at|srv|casa|sqlite|doe|logs|app|log|sql|SQLite|wal|dev|git|Linux|fastapi|http|https|example|com|sam|abcdef|txt|requirements|make|restore|secret|key|kill|lsof|Python|AGPL|GitHub|KiB|B)$/.test(word);
+      !/^(AM|PM|at|srv|casa|sqlite|doe|logs|app|log|sql|SQLite|wal|dev|git|Linux|fastapi|http|https|example|com|sam|abcdef|txt|requirements|make|restore|secret|key|kill|lsof|Python|AGPL|GitHub|KiB|B|Docker|Desktop|updater)$/.test(word);
     expect(left().filter(data)).toEqual([]);
 
     fireEvent.click(document.querySelector("p.muted.small > button.link")!);
@@ -373,7 +392,7 @@ describe("in en-XA, the remaining screens show no English", () => {
     await screen.findByText("Sam", { selector: "pre" });
     const sections = document.querySelectorAll("section.card");
     fireEvent.click(sections[3].querySelector("button")!);
-    await screen.findByText("9.9.10");
+    await screen.findByRole("option", { name: "9.9.10" });
     screen.getByText("fastapi");
     expect(left().filter(data)).toEqual([]);
   });
@@ -417,5 +436,29 @@ describe("in en-XA, the remaining screens show no English", () => {
     fireEvent.click(thumbs.find((one) => one.closest("tr")!.textContent!.includes("2026-03-01"))!);
     await screen.findByText("Doe");
     expect(left().filter(data)).toEqual([]);
+  });
+
+  it("the import guide: no document in this language, so the English one, marked as English", () => {
+    render(<ImportGuide />);
+    expect(left()).toEqual([]);
+    const english = document.querySelector('[lang="en"]') as HTMLElement;
+    expect(english.textContent).toContain("How import works");
+    expect(document.querySelector(".banner.info")!.textContent).not.toMatch(/^[\x20-\x7e]+$/);
+  });
+});
+
+describe("the import guide in English", () => {
+  it("is the English document exactly, with no notice and no language mark", async () => {
+    await activate("en");
+    const { container: picked } = render(<ImportGuide />);
+    const shown = picked.innerHTML;
+    cleanup();
+    const { container: direct } = render(<ImportGuideDocument />);
+    expect(shown).toBe(direct.innerHTML);
+    expect(shown).not.toContain('lang="en"');
+    expect(guideFor("en")).toBe(ImportGuideDocument);
+    expect(guideFor("en-GB")).toBe(ImportGuideDocument);
+    expect(guideFor("en-XA")).toBeUndefined();
+    expect(guideFor("sv-SE")).toBeUndefined();
   });
 });
