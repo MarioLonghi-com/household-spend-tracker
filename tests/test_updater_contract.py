@@ -472,13 +472,17 @@ def test_the_heartbeat_carries_every_key_of_5_3():
     assert set(beat) == {
         "protocol", "updater_version", "image_digest", "seen_at", "engine", "engine_version",
         "rootless", "layout", "socket", "hook", "busy", "role", "protocols", "api_version",
-        "engine_api", "container",
+        "engine_api", "container", "socket_sentence", "podman_restart",
     }  # fmt: skip
     assert (beat["protocol"], beat["protocols"]) == (1, "1-1")
     with pytest.raises(ValueError):
         contract.Heartbeat(**{**beat, "engine": "lxc"})
     with pytest.raises(ValueError):
         contract.Heartbeat(**{**beat, "socket": "fine"})
+    with pytest.raises(ValueError):
+        contract.Heartbeat(**{**beat, "podman_restart": "disabled"})
+    unknown = contract.Heartbeat(**{**beat, "engine": "unknown", "socket": "unreachable"}).to_dict()
+    assert (unknown["engine"], beat["podman_restart"], beat["socket_sentence"]) == ("unknown", "not_applicable", None)
 
 
 def test_history_keeps_the_last_40_log_lines_and_refuses_an_unknown_state():
