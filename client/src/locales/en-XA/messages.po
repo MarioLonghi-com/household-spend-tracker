@@ -15,6 +15,10 @@ msgstr ""
 msgid "Application management"
 msgstr ""
 
+#: src/screens/Transfer.tsx
+msgid "To"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "New password"
 msgstr ""
@@ -342,6 +346,10 @@ msgstr ""
 msgid "or"
 msgstr ""
 
+#: src/screens/Transfer.tsx
+msgid "Add transfer"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "receipt filer"
 msgstr ""
@@ -411,6 +419,11 @@ msgstr ""
 msgid "Those two don't match."
 msgstr ""
 
+#. placeholder {0}: to!.currency
+#: src/screens/Transfer.tsx
+msgid "Amount arriving ({0})"
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in."
@@ -422,6 +435,10 @@ msgstr ""
 
 #: src/lib/signInChanges.ts
 msgid "Reset: password and authenticator"
+msgstr ""
+
+#: src/screens/Transfer.tsx
+msgid "From"
 msgstr ""
 
 #: src/screens/Passkeys.tsx
@@ -496,6 +513,13 @@ msgstr ""
 msgid "Code"
 msgstr ""
 
+#. placeholder {0}: format(out, from.currency)
+#. placeholder {1}: from.name
+#. placeholder {2}: to?.name
+#: src/screens/Transfer.tsx
+msgid "<0>{0}</0> leaves {1} and the same arrives in {2}."
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "what makes a good one"
 msgstr ""
@@ -564,6 +588,14 @@ msgstr ""
 msgid "{inviter} invited you to {PRODUCT} as an owner."
 msgstr ""
 
+#: src/screens/Transfer.tsx
+msgid "Pick two different accounts — money cannot move to itself."
+msgstr ""
+
+#: src/screens/Transfer.tsx
+msgid "No minus signs — the direction is the two accounts above."
+msgstr ""
+
 #: src/components/SignInNotice.tsx
 msgid "Recent sign-in changes"
 msgstr ""
@@ -586,6 +618,10 @@ msgstr ""
 
 #: src/screens/Setup.tsx
 msgid "Set up {PRODUCT}"
+msgstr ""
+
+#: src/screens/Transfer.tsx
+msgid "Amount"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -682,6 +718,10 @@ msgstr ""
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr ""
 
+#: src/screens/Transfer.tsx
+msgid "Memo"
+msgstr ""
+
 #: src/App.tsx
 msgid "{waiting} waiting"
 msgstr ""
@@ -700,6 +740,10 @@ msgstr ""
 
 #: src/lib/signInChanges.ts
 msgid "{user} set up this instance as its owner"
+msgstr ""
+
+#: src/screens/Transfer.tsx
+msgid "This writes both rows as one act, so undoing it from History takes both back together."
 msgstr ""
 
 #: src/App.tsx
@@ -747,6 +791,10 @@ msgstr ""
 #. placeholder {1}: user.email
 #: src/screens/Profile.tsx
 msgid "Signed in as <0>{0}</0> ({1})."
+msgstr ""
+
+#: src/screens/Transfer.tsx
+msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -802,6 +850,10 @@ msgstr ""
 msgid "Your account is under your name in the menu."
 msgstr ""
 
+#: src/screens/Transfer.tsx
+msgid "Date"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 msgid "The server gave {user} a new authenticator"
 msgstr ""
@@ -824,6 +876,11 @@ msgstr ""
 
 #: src/screens/ResetAccount.tsx
 msgid "If you did not expect this, tell an owner of this instance before you go on."
+msgstr ""
+
+#. placeholder {0}: from.currency
+#: src/screens/Transfer.tsx
+msgid "Amount leaving ({0})"
 msgstr ""
 
 #: src/App.tsx
@@ -1184,6 +1241,10 @@ msgstr ""
 msgid "Keys for programs"
 msgstr ""
 
+#: src/screens/Transfer.tsx
+msgid "12,34"
+msgstr ""
+
 #. placeholder {0}: recovery.data.unused
 #: src/screens/Profile.tsx
 msgid "{0} of 10 left"
@@ -1208,6 +1269,12 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
+msgstr ""
+
+#. placeholder {0}: to!.currency
+#. placeholder {1}: from!.currency
+#: src/screens/Transfer.tsx
+msgid "That works out at <0>{impliedRate}</0> {0} per {1}."
 msgstr ""
 
 #. placeholder {0}: tokenPath ?? t`the data directory`
@@ -1277,6 +1344,10 @@ msgstr ""
 msgid "Set up again"
 msgstr ""
 
+#: src/screens/Transfer.tsx
+msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
+msgstr ""
+
 #: src/components/RecoveryModeBanner.tsx
 msgid "<0>secret.key</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Putting the original key back ends this for everyone who has not re-enrolled yet."
 msgstr ""
@@ -1332,6 +1403,10 @@ msgstr ""
 msgid "Somebody made {user} an owner"
 msgstr ""
 
+#: src/screens/Transfer.tsx
+msgid "Add transfer between accounts"
+msgstr ""
+
 #. placeholder {0}: formatInstant(key.revoked_at)
 #: src/screens/Profile.tsx
 msgid "Revoked {0}"
@@ -1360,6 +1435,10 @@ msgstr ""
 
 #: src/lib/signInChanges.ts
 msgid "{by} re-enabled {user}"
+msgstr ""
+
+#: src/screens/Transfer.tsx
+msgid "Transfer"
 msgstr ""
 
 #: src/screens/Profile.tsx
