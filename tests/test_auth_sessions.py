@@ -385,19 +385,19 @@ def test_a_trusted_browser_signs_in_through_a_strangers_lockout(client):
 
     world = _setup_owner(client)
     email = world["user"]["email"]
-    device = client.cookies.get(cookies.device_name())
+    device = client.cookies.get(cookies.device_name("testserver"))
     assert device, "setup trusts the browser that did it"
 
     _lock_everything_from_here(client, email)
 
     # Without the trusted-device cookie: the guessing case, still locked.
-    client.cookies.delete(cookies.device_name())
+    client.cookies.delete(cookies.device_name("testserver"))
     refused = _sign_in(client, email, PASSWORD)
     assert refused.status_code == 429, refused.text
 
     # With it: the owner's own laptop, which has already proved the second
     # factor, gets in -- and is not asked for a code.
-    client.cookies.set(cookies.device_name(), device, domain="testserver.local")
+    client.cookies.set(cookies.device_name("testserver"), device, domain="testserver.local")
     allowed = _sign_in(client, email, PASSWORD)
     assert allowed.status_code == 200, allowed.text
     assert allowed.json()["authenticated"] is True
