@@ -132,6 +132,7 @@ msgstr ""
 #. Column heading on the Accounts screen: noun, account type
 #. Column name shown beside a value on phones on the Accounts screen: noun, account type
 #. Label of a form field on the Accounts screen: noun, account type
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 msgid "Type"
@@ -150,6 +151,12 @@ msgstr ""
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 msgid "History"
+msgstr ""
+
+#. placeholder {0}: formatDate(sheet.data.last_statement_date)
+#. placeholder {1}: format(sheet.data.last_statement_balance ?? 0, account.currency)
+#: src/screens/Reconcile.tsx
+msgid "Last proved to <0>{0}</0> at {1}. Everything up to there is locked and is not counted again."
 msgstr ""
 
 #. Column heading on the Rules screen: how a rule compares the bank's text (contains, starts with…)
@@ -207,6 +214,11 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Nothing in the last 14 days."
+msgstr ""
+
+#. placeholder {0}: household.base_currency
+#: src/screens/AccountImport.tsx
+msgid "A three-letter code. Leave it blank for {0}."
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -511,6 +523,10 @@ msgctxt "import outcome"
 msgid "New"
 msgstr ""
 
+#: src/screens/AccountImport.tsx
+msgid "Accounts file"
+msgstr ""
+
 #. placeholder {0}: tagOffer.value
 #. placeholder {1}: account.name
 #: src/screens/Import.tsx
@@ -578,6 +594,7 @@ msgstr ""
 
 #. Label of a form field on the Accounts screen
 #. Label of a form field on the Accounts screen
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 msgid "Opening date"
 msgstr ""
@@ -683,6 +700,11 @@ msgstr ""
 msgid "Somebody gave {user} a new authenticator"
 msgstr ""
 
+#. placeholder {0}: formatDate(row.date)
+#: src/screens/Reconcile.tsx
+msgid "Tick {0}"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Revoke this invitation?"
 msgstr ""
@@ -776,6 +798,14 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Remove this part"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "the closing balance"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "Nothing left to prove on or before that date. Everything up to here is already locked."
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -990,8 +1020,17 @@ msgstr ""
 msgid "Day-to-day money at a bank. Salary in, card and direct debits out."
 msgstr ""
 
+#: src/screens/Reconcile.tsx
+msgid "Already proved"
+msgstr ""
+
 #: src/screens/Import.tsx
 msgid "Undo — add as new instead"
+msgstr ""
+
+#. placeholder {0}: account.name
+#: src/screens/Reconcile.tsx
+msgid "Reconcile {0}"
 msgstr ""
 
 #. placeholder {0}: recognised.account_name
@@ -1170,6 +1209,7 @@ msgstr ""
 #. Column name shown beside a value on phones on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, a bank or cash account. See GLOSSARY.md
 #. Label on the Register screen: noun, a bank or cash account. See GLOSSARY.md
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #: src/screens/TransferSections.tsx
@@ -1188,6 +1228,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "why the currencies are not added"
+msgstr ""
+
+#: src/screens/AccountImport.tsx
+msgid "{count, plural, one {{refused} of {count} row has a problem, so nothing can be imported yet. Correct the file and choose it again.} other {{refused} of {count} rows have a problem, so nothing can be imported yet. Correct the file and choose it again.}}"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -1445,6 +1489,10 @@ msgstr ""
 msgid "Discard"
 msgstr ""
 
+#: src/screens/Reconcile.tsx
+msgid "Locking is one act, so History undoes the whole reconciliation in one click if you got the statement wrong."
+msgstr ""
+
 #. Title of a panel on the Transfers screen
 #: src/screens/Transfer.tsx
 msgid "Add transfer"
@@ -1504,6 +1552,10 @@ msgstr ""
 
 #: src/screens/TransferSections.tsx
 msgid "Select every waiting row"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "The bank says there is more than you have ticked — a payment in you have not entered?"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -1818,6 +1870,10 @@ msgstr ""
 msgid "The passkey prompt was closed, so nothing was added."
 msgstr ""
 
+#: src/screens/Reconcile.tsx
+msgid "It balances"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Smaller text in the table"
 msgstr ""
@@ -1989,6 +2045,10 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.update.updater_outdated"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "Tick every row"
 msgstr ""
 
 #: src/screens/Payees.tsx
@@ -2314,6 +2374,11 @@ msgstr ""
 msgid "Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it."
 msgstr ""
 
+#. placeholder {0}: account.currency
+#: src/screens/Reconcile.tsx
+msgid "Closing balance ({0})"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Reset sign-in for {name}?"
 msgstr ""
@@ -2476,6 +2541,7 @@ msgstr ""
 #. Label of a choice on the Register screen: noun, a sum of money. See GLOSSARY.md
 #. Text on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #: src/screens/Import.tsx
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
@@ -2490,6 +2556,10 @@ msgstr ""
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
 msgid "Close: {name}"
+msgstr ""
+
+#: src/screens/AccountImport.tsx
+msgid "<0>YYYY-MM-DD</0>, like <1>2026-01-31</1>. Blank for today."
 msgstr ""
 
 #: src/lib/signInChanges.ts
@@ -2523,6 +2593,10 @@ msgstr ""
 #: src/screens/Import.tsx
 #: src/screens/Rules.tsx
 msgid "Rows"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "This account has never been reconciled, so you are starting from the beginning of its history."
 msgstr ""
 
 #. Heading on the Register screen
@@ -2688,6 +2762,10 @@ msgstr ""
 msgid "Checking"
 msgstr ""
 
+#: src/screens/Reconcile.tsx
+msgid "Ticked here"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "You are a member of anything you create, whether or not you tick yourself."
 msgstr ""
@@ -2699,6 +2777,10 @@ msgstr ""
 #. Column heading on the Rules screen
 #: src/screens/Rules.tsx
 msgid "Call it"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "You have ticked more than the bank says — a row that is not on this statement?"
 msgstr ""
 
 #: src/screens/Categories.tsx
@@ -2771,6 +2853,13 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
+msgstr ""
+
+#. placeholder {0}: ticked.size
+#. placeholder {1}: ticked.size
+#. placeholder {2}: ticked.size
+#: src/screens/Reconcile.tsx
+msgid "{0, plural, one {Finish and lock {1} row} other {Finish and lock {2} rows}}"
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -2862,6 +2951,7 @@ msgstr ""
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
 #. Screen-reader name on the Accounts screen: noun. See GLOSSARY.md
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 msgid "Country"
@@ -2965,6 +3055,7 @@ msgstr ""
 #. Screen-reader name on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Table cell on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #: src/screens/Import.tsx
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
 msgid "Memo"
@@ -3111,6 +3202,7 @@ msgstr ""
 
 #. Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 msgid "Opening balance"
 msgstr ""
@@ -3312,6 +3404,10 @@ msgstr ""
 msgid "What would this match?"
 msgstr ""
 
+#: src/screens/Reconcile.tsx
+msgid "Every row on this statement is accounted for."
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 msgid "You will still be able to sign in with your password and code."
 msgstr ""
@@ -3425,6 +3521,7 @@ msgstr ""
 #. Label on the Register screen: noun. See GLOSSARY.md
 #. Label on the Register screen: noun. See GLOSSARY.md
 #: src/screens/Import.tsx
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
@@ -3438,6 +3535,10 @@ msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "How to categorise {name}"
+msgstr ""
+
+#: src/screens/AccountImport.tsx
+msgid "Required. No two accounts can share one."
 msgstr ""
 
 #. Link on the Register screen
@@ -3668,6 +3769,10 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
+#: src/screens/Reconcile.tsx
+msgid "The difference has to be zero first"
+msgstr ""
+
 #. Stands in for who made a change when the name is not known. Lower case
 #. Table cell on the Admin screen
 #: src/lib/signInChanges.ts
@@ -3850,6 +3955,10 @@ msgstr ""
 msgid "Withdraw this reset link?"
 msgstr ""
 
+#: src/screens/AccountImport.tsx
+msgid "{count, plural, one {Import {count} account} other {Import {count} accounts}}"
+msgstr ""
+
 #. Option in a dropdown on the Admin screen: role, can use the household but not manage it. See GLOSSARY.md
 #. Option in a dropdown on the Admin screen: role, can use the household but not manage it. See GLOSSARY.md
 #: src/screens/Admin.tsx
@@ -3859,6 +3968,10 @@ msgstr ""
 #. Label on the date range picker
 #: src/components/DateRange.tsx
 msgid "This month"
+msgstr ""
+
+#: src/screens/AccountImport.tsx
+msgid "Problems"
 msgstr ""
 
 #: src/screens/Import.tsx
@@ -3879,6 +3992,14 @@ msgstr ""
 msgid "{hiddenByCurrency, plural, one {{0} row is not shown: the currency toggle is showing {1}, and that row is in another.} other {{2} rows are not shown: the currency toggle is showing {3}, and those rows are in another.}}"
 msgstr ""
 
+#: src/screens/Reconcile.tsx
+msgid "then tick the rows that are on it"
+msgstr ""
+
+#: src/screens/AccountImport.tsx
+msgid "{count, plural, one {{count} account ready to import. Nothing has been created yet.} other {{count} accounts ready to import. Nothing has been created yet.}}"
+msgstr ""
+
 #: src/screens/TransferSections.tsx
 msgid "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
 msgstr ""
@@ -3895,6 +4016,7 @@ msgstr ""
 
 #. Button on the Register screen
 #. Button on the sign-in page
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #: src/screens/SignIn.tsx
 msgid "Not now"
@@ -4014,6 +4136,10 @@ msgstr ""
 msgid "Out {code}"
 msgstr ""
 
+#: src/screens/AccountImport.tsx
+msgid "Required, one of"
+msgstr ""
+
 #. Label on the Your account panel: colour scheme
 #: src/screens/Profile.tsx
 msgid "Dark"
@@ -4072,6 +4198,7 @@ msgstr ""
 #. Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
 #. Text on the Register screen: noun. See GLOSSARY.md
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
 #: src/screens/Register.tsx
@@ -4097,6 +4224,10 @@ msgstr ""
 #. Text on the Admin screen: nothing so far
 #: src/screens/Admin.tsx
 msgid "None yet."
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "The figure printed on the statement for the day it closes — what the bank says you had, not what this app thinks."
 msgstr ""
 
 #. Label of a form field on the Admin screen
@@ -4314,6 +4445,7 @@ msgid "Move {0} rows"
 msgstr ""
 
 #. Label on the Import screen: noun, a line of a file
+#: src/screens/AccountImport.tsx
 #: src/screens/Import.tsx
 msgid "Line"
 msgstr ""
@@ -4329,6 +4461,10 @@ msgstr ""
 #. Screen-reader name on the date range picker
 #: src/components/DateRange.tsx
 msgid "From year"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "Type the closing balance"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -4417,8 +4553,13 @@ msgstr ""
 msgid "The register runs from {0} to {1}."
 msgstr ""
 
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 msgid "That isn't an amount in {currency}"
+msgstr ""
+
+#: src/screens/AccountImport.tsx
+msgid "Import accounts from a file"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -4481,6 +4622,10 @@ msgstr ""
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
 msgstr ""
 
+#: src/screens/AccountImport.tsx
+msgid "IBAN"
+msgstr ""
+
 #. Label on the date range picker
 #: src/components/DateRange.tsx
 msgid "All dates"
@@ -4540,6 +4685,10 @@ msgstr ""
 #. Button on the Register screen
 #: src/screens/Register.tsx
 msgid "Unlink transfer"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "Statement closing date"
 msgstr ""
 
 #. Label on the Import screen: prepared, not yet written
@@ -4624,6 +4773,7 @@ msgstr ""
 #: src/screens/Import.tsx
 #: src/screens/PayeeCategorisation.tsx
 #: src/screens/Payees.tsx
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 msgid "Payee"
 msgstr ""
@@ -4737,6 +4887,10 @@ msgstr ""
 
 #: src/screens/Import.tsx
 msgid "What this would do"
+msgstr ""
+
+#: src/screens/AccountImport.tsx
+msgid "Every column but name and type can be left blank. Institution, iban and note are kept as written."
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -4894,6 +5048,11 @@ msgstr ""
 msgid "12,34"
 msgstr ""
 
+#. placeholder {0}: format(difference, currency)
+#: src/screens/Reconcile.tsx
+msgid "{0} out"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "a negative balance here is money you owe"
 msgstr ""
@@ -4990,6 +5149,10 @@ msgstr ""
 msgid "contains"
 msgstr ""
 
+#: src/screens/AccountImport.tsx
+msgid "Its two-letter code, like <0>ES</0>."
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Yes, delete it"
 msgstr ""
@@ -5069,6 +5232,10 @@ msgstr ""
 msgid "It was printed to the server log when this instance started, and written to <0>{0}</0>. It changes every time the server restarts until setup is finished."
 msgstr ""
 
+#: src/screens/AccountImport.tsx
+msgid "Reading the file…"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Set the category on {done} rows and skipped 1 transfer leg — a transfer has no category."
 msgstr ""
@@ -5098,6 +5265,10 @@ msgstr ""
 
 #: src/screens/Setup.tsx
 msgid "1. The setup token"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "Already locked"
 msgstr ""
 
 #. Label of a choice on the language picker
@@ -5467,6 +5638,10 @@ msgstr ""
 msgid "This year"
 msgstr ""
 
+#: src/screens/AccountImport.tsx
+msgid "One row per account, under the template's header row. <0>Download the template</0>, fill it in with a spreadsheet, and save it as CSV."
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Give a program a key"
 msgstr ""
@@ -5646,6 +5821,10 @@ msgstr ""
 msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new authenticator."
 msgstr ""
 
+#: src/screens/Reconcile.tsx
+msgid "For a credit card, type what you owe as a negative."
+msgstr ""
+
 #. placeholder {0}: one.transaction_count
 #. placeholder {1}: one.transaction_count
 #. placeholder {2}: one.transaction_count
@@ -5655,6 +5834,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Gather the accounts by type: checking, savings, cards…"
+msgstr ""
+
+#: src/screens/AccountImport.tsx
+msgid "A plain figure like <0>1234.56</0> or <1>-80.00</1> — a point for the decimals and no thousands separator. Blank for an account that starts empty."
 msgstr ""
 
 #. Sentence on the Import screen: preposition, the account money arrives in
