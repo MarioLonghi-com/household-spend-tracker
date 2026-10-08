@@ -338,7 +338,25 @@ history this repository does not have.
   and linux/arm64 beside the app, and the app image carries the
   `updater-protocol` label. `deploy/tailnet/check.sh` checks the updater:
   outside the sidecar's namespace, the only holder of the socket, able to
-  reach it, and whether an update is in progress.## 0.8.0 — 2026-10-08
+  reach it, and whether an update is in progress.
+
+- **Self-update is tested end to end on every engine it supports** (#169).
+  CI's `self-update` job is now a matrix: rootful Docker Engine in the
+  loopback and the sidecar layouts, rootless Podman (podman-compose, the
+  updater as `0:0`), rootless Docker, and Docker on arm64. Each leg runs the
+  updater in its own container -- the release's real updater image, with
+  only CI's trust policy added on top -- through an update, a skipped
+  release, a rollback on a failed migration and on failed health, the
+  updater killed and the engine restarted mid-update, recovery through the
+  maintenance page with the recovery code, stale and duplicate requests, the
+  handover to a newer updater and one that fails to start, `compose up`
+  again afterwards, refreshing the updater alone, and the release zip's
+  launcher repairing an install whose updater is older than the zip's. A
+  weekly canary runs an update and the handover on the newest Docker Engine
+  (stable and test channel) and Podman, and opens an issue when one breaks. Nothing changes
+  for an installation.
+
+## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
 
