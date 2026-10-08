@@ -1,0 +1,23 @@
+#!/bin/sh
+# EXAMPLE ONLY -- a Proxmox snapshot of the VM Spend Tracker runs in, taken
+# before each update. Adapt it, then install it as
+# /etc/spend-tracker/pre-update-hook (root:root, mode 0700).
+#
+# The runner gives this script three variables, already validated:
+#   SPENDTRACKER_HOOK_FROM   the running version, X.Y.Z
+#   SPENDTRACKER_HOOK_TO     the version being installed, X.Y.Z
+#   SPENDTRACKER_HOOK_ID     the update's id (a UUID)
+# Exit 0 and the update goes ahead. Any other exit and it does not start;
+# the last 4 KiB of what this prints is kept in the update's history.
+#
+# This runs on the Docker host -- the VM -- where `qm` does not exist, so it
+# asks the Proxmox node over SSH with a key that can do nothing else (see
+# README.md, "The example: a Proxmox snapshot").
+set -eu
+
+PVE_HOST=pve.example.internal        # the Proxmox node
+KEY=/etc/spend-tracker/pve-snapshot-key
+
+# The node's forced command builds the snapshot name from this version.
+exec ssh -i "$KEY" -o BatchMode=yes -o ConnectTimeout=15 \
+    "root@$PVE_HOST" "$SPENDTRACKER_HOOK_TO"

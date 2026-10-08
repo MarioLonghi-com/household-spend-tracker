@@ -1,0 +1,92 @@
+# Spend Tracker @VERSION@ on this computer.
+#
+# Start it with the launcher beside this file -- "Start Spend Tracker" -- which
+# also sets up the container engine. `docker compose --env-file .env up -d`
+# typed in this folder does the same once the launcher has run here once.
+# README.txt has the rest.
+#
+# This file is the release zip's (#167), built from deploy/bundle/compose.yaml
+# by scripts/bundle.py. It is the repository's compose.yaml with three
+# differences: both images are named by the digest the release pushed, there
+# is no `build:` (a pull that fails is an error to read, not a local build the
+# updater would refuse, C15), and the app has a memory ceiling (C14).
+
+# The project name, pinned, so the ledger's volume is the same whatever this
+# folder is called: a newer zip unzipped next to this one finds it.
+name: spend-tracker
+
+# No pod under podman-compose (S19): the updater's containers could not join it.
+x-podman:
+  in_pod: false
+
+services:
+  app:
+    # SPENDTRACKER_IMAGE is the updater's: after an update from the browser it
+    # writes the release it installed into `.env`, and the launcher keeps it
+    # there. Unset, this release, by digest.
+    image: ${SPENDTRACKER_IMAGE:-@APP_IMAGE@}
+    restart: unless-stopped
+    ports:
+      # Loopback only: this computer, nobody else on the network.
+      - "127.0.0.1:8848:8848"
+    environment:
+      # Off: a restart is not a decision to change a schema. An empty ledger
+      # migrates on its first start without it; the updater migrates an
+      # existing one, with a backup first.
+      SPENDTRACKER_AUTO_MIGRATE: "${SPENDTRACKER_AUTO_MIGRATE:-0}"
+      # Browsers treat http://localhost as secure, so the cookies stay Secure.
+      SPENDTRACKER_COOKIE_SECURE: "on"
+      SPENDTRACKER_ENV: "${SPENDTRACKER_ENV:-production}"
+      SPENDTRACKER_ALLOWED_HOSTS: "${SPENDTRACKER_ALLOWED_HOSTS:-}"
+      # The published port arrives from the bridge gateway, not loopback.
+      FORWARDED_ALLOW_IPS: "${FORWARDED_ALLOW_IPS:-172.16.0.0/12}"
+      # http://localhost:8848, from `.env`: without it there are no passkeys
+      # (C13). The launcher always opens localhost, never 127.0.0.1, which is a
+      # different origin.
+      SPENDTRACKER_PUBLIC_URL: "${SPENDTRACKER_PUBLIC_URL:-http://localhost:8848}"
+      SPENDTRACKER_RP_ID: "${SPENDTRACKER_RP_ID:-}"
+    volumes:
+      - ledger:/var/lib/spend-tracker
+      - update:/var/lib/spend-tracker-update
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # The app peaks near 500 MiB; 768m is the floor the tailnet layout uses.
+    mem_limit: 768m
+
+  # The self-updater: the one container that holds the engine's socket, so the
+  # app can be updated from the browser without holding it itself.
+  updater:
+    # SPENDTRACKER_UPDATER_IMAGE is written into `.env` by the updater when it
+    # replaces itself, and by the launcher when this zip's is newer (C5).
+    image: ${SPENDTRACKER_UPDATER_IMAGE:-@UPDATER_IMAGE@}
+    restart: unless-stopped
+    # The launcher writes these three into `.env` for the engine it finds
+    # (updater/launch.py): 0:0 under a rootless engine on Linux, the socket's
+    # own group under rootful Docker Engine, Podman's socket path.
+    user: "${SPENDTRACKER_UPDATER_USER:-65532:65532}"
+    group_add:
+      - "${SPENDTRACKER_SOCKET_GID:-0}"
+      - "65532"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+      - label=disable
+    cap_drop:
+      - ALL
+    mem_limit: 128m
+    volumes:
+      - update:/update
+      - ${SPENDTRACKER_ENGINE_SOCKET:-/var/run/docker.sock}:/run/engine.sock
+      # This folder: the updater writes the pin into `.env` here, by a rename.
+      - .:/project
+
+volumes:
+  ledger:
+  update:

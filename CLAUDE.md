@@ -69,6 +69,15 @@ sharing a checkout with a session you cannot see.
   exempt. Sort on the meaning, not the glyph: the country column sorts by
   country name, not by the flag. Money across mixed currencies sorts by
   currency first, then figure.
+- **The client's words come from Lingui catalogs** (`client/src/locales/`,
+  `lib/i18n.ts`). A message written with the `t`, `msg` or `plural` macros or
+  `<Trans>` is extracted by `npm run extract`, and CI fails when the catalogs
+  are behind the source. Only English is served: a translated catalog holds
+  `#, fuzzy` drafts and has no loader until #58 ships it, and the picker stays
+  hidden until then. A new error code needs its message in
+  `client/src/lib/errorMessages.ts` as well as `app/error_codes.py`. A
+  message of one or two words, or one whose English alone is ambiguous,
+  carries a translator `comment` (`client/src/locales/README.md`, #228).
 - **An enum value with no designed behaviour is a bug with a menu item.** The
   previous build shipped twelve account types with three behaviours and five
   loan types it never modelled.
@@ -84,6 +93,13 @@ sharing a checkout with a session you cannot see.
     app/api/       deps.py holds current_user / current_household / require_owner
     client/        Vite + React + TS, built into app/static/dist
     migrations/    Alembic, from the first commit
+    updater/       the self-updater's own container: file contract, journal,
+                   restricted engine client, prepare/apply/rollback (apply.py),
+                   the handover to its successor, browser recovery, and the
+                   launchers' decisions (launch.py). Standard library only,
+                   except verify.py, which uses sigstore; no import of app/
+    deploy/bundle/ the release zip for a personal computer: compose file,
+                   `.env` and the launchers, built by scripts/bundle.py
 
 ## Security posture, in one place
 
@@ -101,6 +117,10 @@ sharing a checkout with a session you cannot see.
   hex before they are stored, so do not relax that validation.
 - HSTS is production-only. Pinning a dev browser to HTTPS on localhost costs an
   afternoon and protects nothing.
+- **Only the `updater` service holds the engine socket**, in every compose
+  file; the app never does. Its calls are the list in `updater/engine.py`,
+  every image it runs is verified first (`updater/verify.py`), and nothing
+  switches that off. `SECURITY.md` has the model.
 
 ## Where the checks run
 

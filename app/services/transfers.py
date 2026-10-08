@@ -135,18 +135,34 @@ def link(
     """
     how = LinkSource(source)
     if first.id == second.id:
-        raise ValidationError("a transaction cannot be a transfer with itself")
+        raise ValidationError(
+            "a transaction cannot be a transfer with itself", code="transfer.pair_with_itself"
+        )
     if first.household_id != second.household_id:
-        raise ValidationError("those transactions are in different households")
+        raise ValidationError(
+            "those transactions are in different households",
+            code="transfer.pair_in_two_households",
+        )
     if first.account_id == second.account_id:
-        raise ValidationError("both of those are in the same account; a transfer moves between two")
+        raise ValidationError(
+            "both of those are in the same account; a transfer moves between two",
+            code="transfer.link_same_account",
+        )
     for leg in (first, second):
         if leg.transfer_transaction_id or leg.transfer_account_id:
-            raise Conflict("one of those is already a transfer; unlink it first")
+            raise Conflict(
+                "one of those is already a transfer; unlink it first",
+                code="transfer.link_already_a_transfer",
+            )
         if leg.split_id:
-            raise ValidationError("a part of a split cannot be a transfer leg")
+            raise ValidationError(
+                "a part of a split cannot be a transfer leg", code="transfer.link_split_part"
+            )
         if leg.amount == 0:
-            raise ValidationError("a row with no money in it cannot be a transfer leg")
+            raise ValidationError(
+                "a row with no money in it cannot be a transfer leg",
+                code="transfer.link_no_money",
+            )
         # #131: the matcher took an employer's refund of a card purchase for
         # a transfer, and so would a person clicking through. A work expense
         # and the payment that repaid it are two movements of money with
@@ -154,7 +170,8 @@ def link(
         if leg.reimbursement is not None:
             raise Conflict(
                 "one of those is a work expense, which is money spent, not moved. "
-                "Take the work-expense flag off it first if it really is a transfer."
+                "Take the work-expense flag off it first if it really is a transfer.",
+                code="transfer.link_work_expense",
             )
     paid = (
         {first.id, second.id} & known.payments
@@ -164,12 +181,16 @@ def link(
     if paid:
         raise Conflict(
             "one of those is the payment that repaid a work expense, not a transfer. "
-            "Take it off the expenses it repaid first if it really is a transfer."
+            "Take it off the expenses it repaid first if it really is a transfer.",
+            code="transfer.link_repayment",
         )
 
     out_leg, in_leg = (first, second) if first.amount < 0 else (second, first)
     if not (out_leg.amount < 0 < in_leg.amount):
-        raise ValidationError("a transfer takes money out of one account and into the other")
+        raise ValidationError(
+            "a transfer takes money out of one account and into the other",
+            code="transfer.pair_same_direction",
+        )
 
     source = session.get(Account, out_leg.account_id)
     destination = session.get(Account, in_leg.account_id)
@@ -177,7 +198,8 @@ def link(
     if source.currency == destination.currency:
         if in_leg.amount != -out_leg.amount:
             raise ValidationError(
-                "the two sides of a same-currency transfer must be the same amount"
+                "the two sides of a same-currency transfer must be the same amount",
+                code="transfer.sides_differ",
             )
     else:
         rate = str(
@@ -263,7 +285,7 @@ def unlink(session: Session, txn: Transaction) -> None:
     History removes the record with the rest of the batch.
     """
     if not txn.transfer_transaction_id and not txn.transfer_account_id:
-        raise Conflict("that transaction is not a transfer")
+        raise Conflict("that transaction is not a transfer", code="transfer.not_a_transfer")
     other = session.get(Transaction, txn.transfer_transaction_id) if txn.transfer_transaction_id else None
     for leg in (txn, other):
         if leg is None:
@@ -292,12 +314,20 @@ def reject(session: Session, first: Transaction, second: Transaction) -> Transfe
     recorded, since a record nobody can see would be a record of nothing.
     """
     if first.id == second.id:
-        raise ValidationError("a transaction cannot be a transfer with itself")
+        raise ValidationError(
+            "a transaction cannot be a transfer with itself", code="transfer.pair_with_itself"
+        )
     if first.household_id != second.household_id:
-        raise ValidationError("those transactions are in different households")
+        raise ValidationError(
+            "those transactions are in different households",
+            code="transfer.pair_in_two_households",
+        )
     out_leg, in_leg = (first, second) if first.amount < 0 else (second, first)
     if not (out_leg.amount < 0 < in_leg.amount):
-        raise ValidationError("a transfer takes money out of one account and into the other")
+        raise ValidationError(
+            "a transfer takes money out of one account and into the other",
+            code="transfer.pair_same_direction",
+        )
     if _rejections(session, out_leg, in_leg):
         return None
     batch_row = session.info.get(BATCH_KEY)
@@ -1246,7 +1276,7 @@ def confirm(session: Session, txn: Transaction) -> None:
     """A person says this link is right: it counts as history from now on,
     and leaves the "Linked by history only" list."""
     if not txn.transfer_transaction_id:
-        raise Conflict("that transaction is not a transfer")
+        raise Conflict("that transaction is not a transfer", code="transfer.not_a_transfer")
     other = session.get(Transaction, txn.transfer_transaction_id)
     for leg in (txn, other):
         if leg is not None:

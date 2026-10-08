@@ -714,6 +714,7 @@ def _described(
     )
     out = BatchOut.model_validate(batch)
     out.headline = words.headline
+    out.headline_key = words.headline_key
     out.detail = words.detail
     out.actor_name = words.actor
     out.via = words.via
@@ -765,6 +766,7 @@ def batch_detail(
 
     out = BatchDetail.model_validate(target)
     out.headline = words.headline
+    out.headline_key = words.headline_key
     out.detail = words.detail
     out.actor_name = words.actor
     out.via = words.via
@@ -782,6 +784,7 @@ def batch_detail(
             fields=[FieldChangeOut(**asdict(f)) for f in one.fields],
             snapshot=[FieldChangeOut(**asdict(f)) for f in one.snapshot],
             redacted=one.redacted,
+            table_key=one.table_key,
         )
         for one in describing.detail_of(session, household.id, changes, names=names)
     ]

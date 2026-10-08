@@ -7,6 +7,11 @@ import { Actor, Empty, Panel, Problem, SortHeading, sortRows, useSort } from "..
 import { formatInstant } from "../lib/time";
 import { useWindowed } from "../lib/useWindowed";
 import type { Batch, BatchDetail, Household } from "../lib/types";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { formatCount } from "../lib/locale";
+import { fieldOf, headlineOf, tableOf } from "../lib/historyWords";
+
 
 type HistorySort = "when" | "what" | "by" | "state" | "rows";
 
@@ -41,7 +46,7 @@ export function History({ household }: { household: Household }) {
               // The headline is the kind of act; the detail is what it did to
               // this household. Sorting on the pair groups the imports
               // together and then orders inside the group.
-              return [entry.headline, entry.detail];
+              return [headlineOf(entry), entry.detail];
             case "by":
               // The person first, the program second: an agent acting for
               // somebody is still their act, so sorting by who groups it with
@@ -71,10 +76,12 @@ export function History({ household }: { household: Household }) {
 
   return (
     <>
-      <h1>History</h1>
+      <h1><Trans comment="Screen title on the History screen. See GLOSSARY.md">History</Trans></h1>
       <p className="muted small">
-        Everything that has changed this household, grouped by the act that changed it. An import
-        of two hundred rows is one entry here, and undoing it puts all two hundred back.
+        <Trans>
+          Everything that has changed this household, grouped by the act that changed it. An import
+          of two hundred rows is one entry here, and undoing it puts all two hundred back.
+        </Trans>
       </p>
 
       <Problem error={batches.error} />
@@ -87,39 +94,41 @@ export function History({ household }: { household: Household }) {
             onChange={(e) => setEverything(e.target.checked)}
             style={{ width: "auto", marginRight: 8 }}
           />
-          Include single edits made in the register
+          <Trans>
+            Include single edits made in the register
+          </Trans>
         </label>
 
         {entries.length === 0 ? (
-          <Empty>Nothing has happened here yet.</Empty>
+          <Empty><Trans>Nothing has happened here yet.</Trans></Empty>
         ) : (
           <div className="table-scroll">
             <table>
               <thead>
                 <tr>
                   <SortHeading
-                    label="When"
+                    label={t({ message: "When", comment: "Column heading on the History screen: noun, the time" })}
                     column="when"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label="What happened"
+                    label={t({ message: "What happened", comment: "Column heading on the History screen" })}
                     column="what"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label="By"
+                    label={t({ message: "By", comment: "Column heading on the History screen: preposition, done by a person" })}
                     column="by"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label="State"
+                    label={t({ message: "State", comment: "Column heading on the History screen: noun, a row's status" })}
                     column="state"
                     sort={sort}
                     direction={direction}
@@ -129,7 +138,7 @@ export function History({ household }: { household: Household }) {
                       about the batch and therefore something to sort on: the
                       big imports are what you go looking for. */}
                   <SortHeading
-                    label="Rows"
+                    label={t({ message: "Rows", comment: "Column heading on the History screen: noun, lines of a file or table" })}
                     column="rows"
                     sort={sort}
                     direction={direction}
@@ -144,7 +153,7 @@ export function History({ household }: { household: Household }) {
                     <td
                       className="small mono"
                       style={{ whiteSpace: "nowrap" }}
-                      data-label="When"
+                      data-label={t({ message: "When", comment: "Column name shown beside a value on phones on the History screen: noun, the time" })}
                       data-detail-first="true"
                     >
                       {formatInstant(entry.started_at)}
@@ -159,10 +168,10 @@ export function History({ household }: { household: Household }) {
                       <button
                         type="button"
                         className="cell-edit"
-                        title="Everything recorded about this"
+                        title={t`Everything recorded about this`}
                         onClick={() => setOpened(entry)}
                       >
-                        <span className="small muted">{entry.headline}</span>
+                        <span className="small muted">{headlineOf(entry)}</span>
                         <span style={{ display: "block" }}>{entry.detail}</span>
                         {entry.source?.filename ? (
                           <span className="small muted mono" style={{ display: "block" }}>
@@ -171,14 +180,14 @@ export function History({ household }: { household: Household }) {
                         ) : null}
                       </button>
                     </td>
-                    <td className="small muted" data-label="By">
+                    <td className="small muted" data-label={t({ message: "By", comment: "Column name shown beside a value on phones on the History screen: preposition, done by a person" })}>
                       <Actor name={entry.actor_name} via={entry.via} />
                     </td>
                     <td>
-                      <span className="pill">{entry.status}</span>
+                      <span className="pill">{statusWord(entry.status)}</span>
                     </td>
                     <td className="amount small muted" style={{ whiteSpace: "nowrap" }}>
-                      {entry.change_count === 1 ? "1 row" : `${entry.change_count} rows`}
+                      {plural(entry.change_count, { one: "1 row", other: `${entry.change_count} rows` })}
                     </td>
                   </tr>
                 ))}
@@ -186,7 +195,7 @@ export function History({ household }: { household: Household }) {
             </table>
             {!page.allShown && (
               <button type="button" className="more-rows" ref={page.sentinelRef} onClick={page.extend}>
-                Showing {page.shown.toLocaleString()} of {page.total.toLocaleString()} — show more
+                {t`Showing ${formatCount(page.shown)} of ${formatCount(page.total)} — show more`}
               </button>
             )}
           </div>
@@ -221,6 +230,24 @@ export function History({ household }: { household: Household }) {
  * not aimed, and two targets in one gesture is exactly what a stray click
  * crosses.
  */
+/** A batch's state, as the list and the panel name it. */
+function statusWord(status: string): string {
+  switch (status) {
+    case "applied":
+      return t({ message: "applied", comment: "Label on the History screen: written to the ledger" });
+    case "undone":
+      return t({ message: "undone", comment: "Label on the History screen: taken back with undo" });
+    case "preview":
+      return t({ message: "preview", comment: "Label on the History screen: noun or step name: what would happen, not yet done" });
+    case "running":
+      return t({ message: "running", comment: "Label on the History screen" });
+    case "failed":
+      return t({ message: "failed", comment: "Label on the History screen: it did not work" });
+    default:
+      return status;
+  }
+}
+
 function BatchPanel({
   household,
   batch,
@@ -250,22 +277,22 @@ function BatchPanel({
   const summary = (batch.summary ?? {}) as Record<string, number>;
 
   return (
-    <Panel title={batch.headline} onClose={onClose} wide>
+    <Panel title={headlineOf(batch)} onClose={onClose} wide>
       <Problem error={detail.error ?? undo.error} />
 
       <dl className="facts">
-        <dt>When</dt>
+        <dt><Trans comment="Name of a fact on the History screen: noun, the time">When</Trans></dt>
         <dd>{formatInstant(batch.started_at)}</dd>
-        <dt>By</dt>
+        <dt><Trans comment="Name of a fact on the History screen: preposition, done by a person">By</Trans></dt>
         <dd>
           <Actor name={batch.actor_name} via={batch.via} />
         </dd>
-        <dt>State</dt>
+        <dt><Trans comment="Name of a fact on the History screen: noun, a row's status">State</Trans></dt>
         <dd>
-          <span className="pill">{batch.status}</span>
-          {batch.undone_by_id ? <span className="small muted"> — undone later</span> : null}
+          <span className="pill">{statusWord(batch.status)}</span>
+          {batch.undone_by_id ? <span className="small muted"> — {t({ message: "undone later", comment: "Value of a fact on the History screen" })}</span> : null}
         </dd>
-        <dt>Rows touched</dt>
+        <dt><Trans comment="Name of a fact on the History screen">Rows touched</Trans></dt>
         <dd>{count}</dd>
         {Object.entries(source).map(([key, value]) => (
           <div key={key} style={{ display: "contents" }}>
@@ -283,7 +310,7 @@ function BatchPanel({
               <dd>{value}</dd>
             </div>
           ))}
-        <dt>Batch</dt>
+        <dt><Trans comment="Name of a fact on the History screen: noun, one act in History, undone as a whole">Batch</Trans></dt>
         <dd className="mono small" style={{ wordBreak: "break-all" }}>
           {batch.id}
         </dd>
@@ -292,19 +319,20 @@ function BatchPanel({
       <p style={{ marginTop: 14 }}>{batch.detail}</p>
 
       <hr className="rule" />
-      <h3 className="section-title">Every row it changed</h3>
+      <h3 className="section-title"><Trans>Every row it changed</Trans></h3>
       {changes.length > 0 && changes.length < count && (
         <p className="muted small" style={{ marginTop: 0 }}>
-          The first {changes.length} of {count}, in the order they were changed. Undo puts back
-          all {count}.
+          {t`The first ${changes.length} of ${count}, in the order they were changed. Undo puts back all ${count}.`}
         </p>
       )}
 
       {detail.isLoading ? (
-        <p className="muted small">Reading the log…</p>
+        <p className="muted small"><Trans>Reading the log…</Trans></p>
       ) : changes.length === 0 ? (
         <p className="muted small" style={{ margin: 0 }}>
-          Nothing recorded against this one.
+          <Trans>
+            Nothing recorded against this one.
+          </Trans>
         </p>
       ) : (
         <ol className="changes">
@@ -320,7 +348,7 @@ function BatchPanel({
                   <tbody>
                     {change.fields.map((field) => (
                       <tr key={field.field}>
-                        <th scope="row">{field.field}</th>
+                        <th scope="row">{fieldOf(field)}</th>
                         <td className="muted">{field.was}</td>
                         <td aria-hidden="true">→</td>
                         <td>{field.now}</td>
@@ -333,13 +361,15 @@ function BatchPanel({
               {change.snapshot.length > 0 && (
                 <details>
                   <summary className="small muted">
-                    The whole row as it was {change.op === "insert" ? "written" : "before it went"}
+                    {change.op === "insert"
+                      ? t`The whole row as it was written`
+                      : t`The whole row as it was before it went`}
                   </summary>
                   <table className="change-fields">
                     <tbody>
                       {change.snapshot.map((field) => (
                         <tr key={field.field}>
-                          <th scope="row">{field.field}</th>
+                          <th scope="row">{fieldOf(field)}</th>
                           <td colSpan={3}>{field.now}</td>
                         </tr>
                       ))}
@@ -350,13 +380,12 @@ function BatchPanel({
 
               {change.redacted.length > 0 && (
                 <p className="small muted" style={{ margin: "6px 0 0" }}>
-                  Kept out of the log: {change.redacted.join(", ")}. Absent rather than starred
-                  over — an undo writes back what is stored, and "***" would become the password.
+                  {t`Kept out of the log: ${change.redacted.join(", ")}. Absent rather than starred over — an undo writes back what is stored, and "***" would become the password.`}
                 </p>
               )}
 
               <p className="small muted mono" style={{ margin: "6px 0 0", wordBreak: "break-all" }}>
-                {change.table} {change.row_id}
+                {tableOf(change)} {change.row_id}
               </p>
             </li>
           ))}
@@ -367,28 +396,49 @@ function BatchPanel({
         <>
           <hr className="rule" />
           <div className="banner warn">
-            Undoing puts back <strong>{count}</strong> {count === 1 ? "row" : "rows"} exactly as
-            they were before. Anything changed since is overwritten, and undoing the undo is the
-            only way back.
+            {count === 1 ? (
+              <Trans>
+                Undoing puts back <strong>{count}</strong> row exactly as they were before. Anything
+                changed since is overwritten, and undoing the undo is the only way back.
+              </Trans>
+            ) : (
+              <Trans>
+                Undoing puts back <strong>{count}</strong> rows exactly as they were before.
+                Anything changed since is overwritten, and undoing the undo is the only way back.
+              </Trans>
+            )}
           </div>
           {!sure ? (
             <div className="row">
               <button className="danger" disabled={detail.isLoading} onClick={() => setSure(true)}>
-                Undo this
+                <Trans comment="Button on the History screen">
+                  Undo this
+                </Trans>
               </button>
-              <button onClick={onClose}>Leave it alone</button>
+              <button onClick={onClose}><Trans>Leave it alone</Trans></button>
             </div>
           ) : (
             <div className="confirm-again">
               <p style={{ margin: 0 }}>
-                <strong>Last check.</strong> {count} {count === 1 ? "row goes" : "rows go"} back to
-                how they were {formatInstant(batch.started_at)}.
+                {count === 1 ? (
+                  <Trans>
+                    <strong>Last check.</strong> {count} row goes back to how they were{" "}
+                    {formatInstant(batch.started_at)}.
+                  </Trans>
+                ) : (
+                  <Trans>
+                    <strong>Last check.</strong> {count} rows go back to how they were{" "}
+                    {formatInstant(batch.started_at)}.
+                  </Trans>
+                )}
               </p>
               <div className="row" style={{ marginTop: 10 }}>
                 <button className="danger" disabled={undo.isPending} onClick={() => undo.mutate()}>
-                  {undo.isPending ? "Putting it back…" : "Yes, undo it"}
+                  {undo.isPending ? t`Putting it back…` : t`Yes, undo it`}
                 </button>
-                <button onClick={() => setSure(false)}>No, go back</button>
+                <button onClick={() => setSure(false)}>
+                  <Trans>No, go back</Trans>
+                </button>
               </div>
             </div>
           )}

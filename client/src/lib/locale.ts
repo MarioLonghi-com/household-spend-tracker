@@ -21,6 +21,11 @@
  * and the options.
  */
 
+// The Lingui singleton itself, not `./i18n`: that module imports the English
+// catalog, and this one has to load anywhere `money.ts` does -- including the
+// server's agreement test, which runs it under plain Node.
+import { i18n } from "@lingui/core";
+
 /** What the words are in until a catalog is served. */
 export const SOURCE_LANGUAGE = "en";
 
@@ -35,9 +40,12 @@ function browserLocale(): string {
   }
 }
 
-/** The language the words are in. English until #58 ships another. */
+/**
+ * The language the words are in: the active Lingui catalog's (`lib/i18n.ts`).
+ * English until #58 ships another; `en-XA` under the pseudo-locale.
+ */
 export function uiLanguage(): string {
-  return SOURCE_LANGUAGE;
+  return i18n.locale || SOURCE_LANGUAGE;
 }
 
 /** Whether the words are English, so a screen keeps the English it had. */
@@ -191,6 +199,50 @@ export function monthLabel(period: string): string {
   return dateTimeFormat({ month: "short", year: "numeric", timeZone: "UTC" }, uiLanguage()).format(
     Date.UTC(Number(year), index, 1),
   );
+}
+
+const ENGLISH_MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/**
+ * A month's full name, from 0 for January. The English table in English, as
+ * the date range's pickers had it; `Intl` in another language.
+ */
+export function monthName(index: number): string {
+  if (speaksEnglish()) return ENGLISH_MONTH_NAMES[index] ?? String(index + 1);
+  return dateTimeFormat({ month: "long", timeZone: "UTC" }, uiLanguage()).format(Date.UTC(2026, index, 1));
+}
+
+/**
+ * Names joined into one phrase: "Casa and Flat 2". In English, joined with
+ * " and " as the screens always did -- `Intl.ListFormat` would put a comma
+ * before the last of three, which is a visible change. In another language,
+ * `Intl.ListFormat`, which knows its own conjunction.
+ */
+export function listText(items: readonly string[]): string {
+  if (speaksEnglish()) return items.join(" and ");
+  try {
+    return new Intl.ListFormat(uiLanguage(), { type: "conjunction" }).format(items);
+  } catch {
+    return items.join(", ");
+  }
+}
+
+/**
+ * "EUR", "EUR or GBP", "EUR, GBP or USD" -- the alternatives a sentence offers.
+ * English keeps the form it always had, without the serial comma; any other
+ * language gets its own disjunction from Intl.
+ */
+export function orText(items: readonly string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  if (speaksEnglish()) return `${items.slice(0, -1).join(", ")} or ${items[items.length - 1]}`;
+  try {
+    return new Intl.ListFormat(uiLanguage(), { type: "disjunction" }).format(items);
+  } catch {
+    return items.join(", ");
+  }
 }
 
 /**

@@ -53,3 +53,6 @@ client/blob-report/
 # Which commit a build without .git is. Written by `python -m scripts.build_stamp`
 # at release and image time; committed, it would describe the wrong commit.
 app/build.json
+
+# The end-to-end self-update scenarios, run locally (tests/self_update/local.py)
+.self-update/

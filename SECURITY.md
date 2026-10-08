@@ -21,7 +21,9 @@ funded one, so there is no bounty and no guaranteed turnaround beyond that.
 
 The application in this repository: authentication and the second factor, the
 session and trusted-device model, household isolation, the audit log and undo,
-the statement parsing library, and the `/db` viewer.
+the statement parsing library, the `/db` viewer, and the self-updater: its
+container, its image verification, the recovery page and the release zip's
+launchers.
 
 Two things are **not** vulnerabilities here, because they are deliberate
 design:
@@ -34,6 +36,115 @@ design:
 - **The owner can read the whole database.** `/db` serves a redacted snapshot
   to the instance owner by design. An owner seeing another household's rows is
   expected; a *member* seeing them is not, and that is in scope.
+
+## Self-update and the engine socket
+
+A container install updates itself from the browser
+([`deploy/UPGRADING.md`](deploy/UPGRADING.md#from-the-browser-container-installs)).
+That takes the container engine's API socket, and **the socket is root on
+the machine**: anything that can ask the engine to create a container can
+start one with the host's files mounted. Under a rootless engine it is the
+whole of that user's account instead. Everything below follows from that.
+
+**Only the updater holds it. The app never does.** The socket is mounted into
+one container, `updater`, which listens on nothing, is never in the Tailscale
+sidecar's network, runs with a read-only root, no capabilities and
+`no-new-privileges`, and is never root on the host: uid 65532 with the
+socket's group, or, under a rootless engine, in-container uid 0, which is the
+unprivileged user who owns that engine. `deploy/tailnet/check.sh` fails if
+any other container of the project has the socket mounted. The app and the
+updater share one small volume and talk only through files in it.
+
+**What the app can make the updater do** is a short, fixed list of requests,
+each with fixed fields, validated by the updater as if the app were hostile:
+
+- *prepare* and *apply* a **newer, published release of this application**,
+  named by its version: never an image, a path, a command or a mount, never
+  an older release, never a prerelease, and never while the app runs an image
+  built locally;
+- *discard* a prepared update;
+- replace the updater with **the updater of this release or a newer one**;
+- the recovery page's requests, each of which carries the recovery code.
+
+It cannot make the updater run anything else. The updater's own engine
+client is a list of calls, checked before a byte reaches the socket and held
+by a test: containers of its own compose project only; images of this
+repository's two packages only, by digest; never the sidecar except to read
+it and run its health check; no build, no volume or network calls, no prune;
+and the one setting of an existing container it changes is the app's restart
+policy (`no` while it is parked as `-previous`, its own again on a rollback),
+in a request that may carry nothing else.
+Every container it creates is refused if it asks for `Privileged`, added
+capabilities, the host's PID, IPC, UTS, user or network namespace, devices,
+or any host path other than the socket and the compose directory the updater
+itself was started with (plus the pre-update hook's directory, on a server
+that set one up).
+
+The step-up an owner gives to *Update* (password and code) protects the
+owner's intent, not the machine: none of the updater's guarantees depends on
+the app having checked anything.
+
+**Every image is verified before it is pulled**, the app's and the updater's
+alike, in `updater/verify.py`, with sigstore-python. The release's build
+attestation, read from the registry beside the image, must carry a valid
+signature, certificate chain and Rekor inclusion proof, and must say: issued
+by GitHub Actions; signed by this repository's
+`.github/workflows/release.yml` at `refs/tags/vX.Y.Z`, the release being
+installed; this repository and its owner **by numeric id**, which a rename
+cannot take over; a GitHub-hosted runner, triggered by a push; and a subject
+that is exactly the digest about to be pulled, named as the package it is
+pulled from, so an app attestation cannot pass for the updater's. A version
+with any prerelease suffix is refused. After the pull, the image's version
+and commit labels must agree with the attestation, or the image is deleted.
+The trust root comes from Sigstore's TUF repository when it can be reached;
+otherwise the copy embedded in the updater image (`updater/trusted_root.json`)
+is used to verify, and a refusal under the fetched root is final. **There is
+no switch, variable or argument that skips verification.** The end-to-end
+job in CI, whose images cannot carry a release attestation, swaps in a
+test-only policy from `tests/`, and a CI check keeps that out of `updater/`.
+
+**The recovery code** opens the recovery page, which appears only when an
+update could not undo itself and nothing serves the ledger. It is made by the
+server for one update, 140 bits shown as seven groups of four characters,
+and shown once. The app holds only its `scrypt` hash, in memory, for ten
+minutes, bound to that prepared update and that owner, and sends the hash in
+the update request. The updater checks every code; the recovery page, which
+runs the previous app image with no socket and the ledger mounted read-only,
+only forwards it, and the request file that carries it is deleted the moment
+the updater takes it. The code works only until that update has finished,
+when the hash is deleted. Five wrong codes refuse every code for 15 minutes,
+doubling after each further five; while that pause lasts, codes are refused
+unread, so a flood of requests cannot lengthen it. The page is reachable only where the app was: `localhost` on a
+personal computer, the tailnet on a server.
+
+**What a compromised app can still do.** It already holds the ledger and
+`secret.key`; what it must not gain is the machine. The files the app and the
+updater share are group-writable by design, so an app under someone else's
+control could forge the updater's handover files, its lock or its heartbeat.
+The most that buys is a **delay or a forced take-back**: an updater stepping
+aside early, or taking back over from its successor, and updates not
+happening until an owner notices. It can never get unverified code run: an
+updater checks its successor's image with the engine, at the verified digest,
+before it starts it. The same holds for every request: at worst the app makes
+the updater install a genuine, newer release of this application, built by
+this repository's release workflow.
+
+**A suggested egress firewall.** Not required, and not set up by anything
+here. The updater container reaches out only while it handles a request an
+owner started, and only to:
+
+| Host | For |
+|---|---|
+| `ghcr.io` | resolving a release to a digest, and its attestation |
+| `pkg-containers.githubusercontent.com` | where ghcr.io redirects blob downloads, the attestation included |
+| `tuf-repo-cdn.sigstore.dev` | refreshing Sigstore's trust root; without it the embedded root is used |
+
+The engine itself pulls the images, from `ghcr.io` and
+`pkg-containers.githubusercontent.com`, and the app reaches `api.github.com`
+for *Check the repository* and `api.ynab.com` for the one-time YNAB import.
+A host firewall that lets the compose project's network reach those and
+nothing else costs the updater nothing. In the root `compose.yaml` the app
+shares that network, so allow the app's two hosts as well.
 
 ## What the instance holds, and what it costs to lose
 

@@ -7,7 +7,7 @@ backup, upgrades, logs, troubleshooting) is the same for all three.
 
 | Where it runs | How it is reached | Compose file | Section |
 |---|---|---|---|
-| **Your own computer** (laptop or desktop) | `http://localhost:8848`, this machine only | `compose.yaml` | [1](#1-on-your-own-computer) |
+| **Your own computer** (laptop or desktop) | `http://localhost:8848`, this machine only | the release zip, or `compose.yaml` | [1](#1-on-your-own-computer) |
 | **A server**, Tailscale installed on the server | `https://<server>.<tailnet>.ts.net`, from any device on your tailnet | `compose.yaml` | [2](#2-on-a-server-with-tailscale-on-the-host) |
 | **A server**, Tailscale as a sidecar container | `https://spend-tracker.<tailnet>.ts.net`, its own tailnet node | `deploy/tailnet/compose.yaml` | [3](#3-on-a-server-with-tailscale-as-a-sidecar) |
 
@@ -80,10 +80,133 @@ authenticator: [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 The app answers on this machine only, at `http://localhost:8848`. Nothing on
 your network can reach it, and no Tailscale is involved.
 
+### Without a terminal: the release zip
+
+Every release carries `spend-tracker-<version>-compose.zip`. It needs no
+checkout, no Python and no command line:
+
+1. **Install Docker Desktop or Podman Desktop**, and start it.
+2. **Unzip** the release's zip somewhere you will keep it. The folder holds
+   the settings Spend Tracker is started with; keep it.
+3. **Double-click the launcher**: `Start Spend Tracker.command` on macOS,
+   `Start Spend Tracker.bat` on Windows, `start-spend-tracker.sh` on Linux.
+   A window shows what it does; nothing is typed into it. When the app
+   answers, the browser opens `http://localhost:8848` -- always `localhost`,
+   never `127.0.0.1`, which is another origin and would turn passkeys off.
+4. **The setup wizard asks for the one-time setup token.** It is in the app
+   container's log, which Docker Desktop and Podman Desktop show without a
+   terminal: [The setup token, without a terminal](#without-a-terminal).
+
+From then on the containers start with Docker or Podman, and updates,
+rollbacks and the updater's own updates happen in the browser, under
+*Application*.
+
+**The first double-click meets the operating system first.** The launchers
+are not signed yet (signing and notarising are tracked with the desktop
+build):
+
+- **macOS 15 and later** no longer offers right-click → *Open* for a
+  downloaded script. Double-click it once and close the warning; then open
+  **System Settings → Privacy & Security**, scroll to the line about
+  `Start Spend Tracker.command`, click **Open Anyway** and enter your
+  password. The next double-click runs it.
+- **Windows** SmartScreen says *Windows protected your PC*: click
+  **More info**, then **Run anyway**.
+
+> [!note]
+> **Screenshot to add, by a person on a real Mac (macOS 15 or later):**
+> `docs/screenshots/macos-open-anyway.png`. Download the release zip in
+> Safari, unzip it in Finder, double-click `Start Spend Tracker.command`,
+> and close the warning with **Done**. Open **System Settings → Privacy &
+> Security** and scroll to the *Security* heading, where a line says
+> `"Start Spend Tracker.command" was blocked to protect your Mac`, with
+> **Open Anyway** beside it. Capture the window at that point, before
+> pressing the button, and put the image here.
+
+> [!note]
+> **Screenshot to add, by a person on a real Windows 10 or 11 machine:**
+> `docs/screenshots/windows-smartscreen.png`. Download the release zip in
+> Edge or Chrome, so it carries the Mark of the Web, choose **Extract All**
+> in File Explorer, and double-click `Start Spend Tracker.bat`. SmartScreen
+> shows *Windows protected your PC*; click **More info**, so the dialog names
+> the file and shows **Run anyway**. Capture the dialog at that point and
+> put the image here.
+
+**Docker Desktop or Podman Desktop.** Either works, and nothing in the
+folder is specific to one: the launcher looks for `docker compose` first and
+`podman compose` second, and writes what it found into `.env`.
+
+- **Docker Desktop** (macOS, Windows with WSL 2): nothing to set. The updater
+  reaches the socket inside Docker Desktop's VM. Keep Docker Desktop set to
+  start when you sign in (*Settings → General*), or Spend Tracker is not there
+  after a restart until you open it. Docker Desktop on Linux is expected to
+  behave the same and has not been run yet.
+- **Podman Desktop** (macOS, Windows): its machine must be running. The
+  launcher enables `podman-restart` inside the machine, once: without it
+  nothing in a Podman machine starts again after the machine restarts. A
+  machine is *rootful* by default, and gets the **system** unit
+  (`sudo systemctl enable podman-restart.service` inside it); a rootless one
+  gets the user unit. If the launcher stops because it could not, run the
+  command it printed. A Podman machine has 2 GiB of memory by default, which
+  is enough; if an update says memory is short, raise it with
+  `podman machine set --memory`, the machine stopped.
+- **Podman on a Linux desktop:** the launcher turns on Podman's API socket
+  (`podman.socket`) and `podman-restart`, and for a rootless Podman it also
+  needs your user to *linger* (`loginctl enable-linger`), or nothing of yours
+  starts at boot before you sign in. Where a step needs `sudo` it prints the
+  command and stops; run it, then the launcher again.
+
+**The Windows launcher is untested.** No Windows machine has run it yet. It
+ships so that one can, and does what the macOS and Linux launcher does; if it
+stops, `docker compose --env-file .env up -d` in the unzipped folder starts
+the same thing.
+
+**What the launcher does**, so that nothing it does is a surprise:
+
+- it `cd`s to its own folder, finds `docker compose` or `podman compose`,
+  and asks the release's own updater image, run once with no network, what
+  to start: it detects the engine, finds the *pin* -- the release your ledger
+  is at, which the updater writes into `.env` after every update -- and
+  writes the pin and the engine's settings (`SPENDTRACKER_ENGINE_SOCKET`,
+  `SPENDTRACKER_SOCKET_GID`, `SPENDTRACKER_UPDATER_USER`) into `.env`;
+- under Podman it enables `podman-restart` -- inside the Podman machine on a
+  Mac or Windows, the system unit on a rootful engine, the user unit and
+  lingering under a rootless one -- because without it nothing comes back
+  after a restart;
+- on Linux under a rootful engine it makes the folder and `.env` writable by
+  the socket's group, which the updater carries (`chgrp`, `chmod g+w`);
+- it removes a leftover maintenance page of the updater's, runs
+  `compose --env-file .env up -d`, waits for `/api/health` and opens the
+  browser.
+
+It never runs `sudo`. When a step needs it -- enabling the system
+`podman-restart` unit or lingering, for example -- it prints the one command
+to run and stops; run that, then the launcher again.
+
+**The launcher is also how you start it again, and the repair tool.** Run it
+after reinstalling Docker or Podman, or when the browser says the updater
+cannot reach the engine. It is safe at any time:
+
+- with a pin, it starts **the pinned release of the app, whatever the zip
+  ships** -- the ledger is at that release, and moving it is the browser's
+  job, with a backup first;
+- for the **updater**, it runs the **newer** of the pinned one and the zip's,
+  never an older one. So the launcher of a newer zip, unzipped anywhere,
+  replaces a broken or outgrown updater and leaves the app and its data
+  alone. It finds the old folder by itself, from the running containers, and
+  carries its pin over.
+
+Without a launcher, `docker compose --env-file .env up -d` in the folder
+starts the same thing once a launcher has run there once. The zip's
+`compose.yaml` names both images by digest and has no `build:`: a failed pull
+is an error to read, not a local build.
+
+### From a checkout
+
 ```bash
 echo SPENDTRACKER_VERSION=X.Y.Z >> .env
 docker compose pull
-SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
+docker compose up -d
 curl -s localhost:8848/api/health
 ```
 
@@ -91,7 +214,13 @@ Then open <http://localhost:8848> and go to **The setup token** below.
 
 `docker compose pull` fetches the published image,
 `ghcr.io/mariolonghi-com/household-spend-tracker:X.Y.Z`, which
-`release.yml` built, smoke-tested and attested from that release's tag.
+`release.yml` built, smoke-tested and attested from that release's tag. It is
+one index of two platforms, `linux/amd64` and `linux/arm64`, each built and
+started natively on a runner of that architecture, so Docker Desktop on an
+Apple-silicon Mac runs it as is rather than emulated. The release goes
+public only after the image is on the registry and has been pulled back
+with no credentials, and `X.Y` and `latest` move after that: a release you
+can see is one whose image you can pull.
 Use the number of the release you want from the repository's releases page;
 without `SPENDTRACKER_VERSION` it is whatever `latest` was when you pulled.
 
@@ -108,17 +237,23 @@ docker compose build
 
 Three things worth knowing about this mode:
 
-- **`SPENDTRACKER_AUTO_MIGRATE=1` is for the first start only.** A brand-new
-  volume has no schema, and that flag creates it. After that run plain
-  `docker compose up -d`: a restart is not a decision to change a schema, and
-  with the flag off the app refuses to boot against a database that is behind
-  or ahead and says which revision each side is at. That is what you want from
-  a container that came back at 04:00.
+- **The first start needs no flag.** A brand-new volume has no tables at all,
+  so the entrypoint creates the schema without being asked and says so in
+  `docker compose logs app`: there is nothing in it to lose. Any other
+  database is never migrated by a start. A restart is not a decision to change
+  a schema, and the app refuses to boot against a database that is behind or
+  ahead, or has tables but no migration stamp, and says which. That is what
+  you want from a container that came back at 04:00.
+  `SPENDTRACKER_AUTO_MIGRATE=1` is for a deliberate migration of an existing
+  ledger; see **Upgrading**, which takes the backup first.
 - **`localhost` is enough for the `Secure` cookie.** Browsers treat
   `http://localhost` as a trustworthy origin, so sign-in works over plain HTTP
   here. It would not at `http://192.168.1.50:8848`: the browser silently drops
   the cookie and the sign-in loops with nothing in any log. That is why the
   port is published to `127.0.0.1` and why this mode is for one machine.
+  Safari included: it refuses a `__Host-` cookie from `http://localhost`, so
+  at `localhost`, `127.0.0.1` and `[::1]` the app names its cookies without
+  that prefix (still `Secure`). Every other address keeps it.
 - **For other devices in the house, use a server.** Sections 2 and 3 give you
   HTTPS and a name. For one evening on the sofa the README's `make lan`
   exists, with its warnings.
@@ -140,7 +275,7 @@ the tailnet in the admin console (DNS → HTTPS Certificates).
 echo SPENDTRACKER_VERSION=X.Y.Z >> .env
 docker compose pull
 SPENDTRACKER_PUBLIC_URL=https://<server>.<tailnet>.ts.net \
-SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
+docker compose up -d
 curl -s localhost:8848/api/health
 sudo tailscale serve --bg 8848
 ```
@@ -158,6 +293,11 @@ is not retyped on every `up`:
 ```bash
 echo "SPENDTRACKER_PUBLIC_URL=https://<server>.<tailnet>.ts.net" >> .env
 ```
+
+**Then let the updater reach Docker and write this directory**, once, so the
+owner can update from the browser: [The updater, on a server](#on-a-server).
+Until then the app runs and the Updates section says the updater cannot use
+the engine.
 
 What the compose file already does for you, and why:
 
@@ -415,38 +555,43 @@ substituted in, and prints `OK` only if every required value is present. If
 one is missing it names it, for example *"put a tagged Tailscale auth key in
 deploy/tailnet/.env"*.
 
-#### 4. Build the image
+**Then let the updater reach Docker and write this directory**: the
+commands of [The updater, on a server](#on-a-server), from here. They add
+`SPENDTRACKER_SOCKET_GID` to `.env` and make `.env` `-rw-rw----`, readable
+and writable by you and the `docker` group only.
+
+#### 4. Pull the images
 
 ```bash
-(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
-docker compose build
-docker image ls household-spend-tracker
+docker compose pull
+docker image ls 'ghcr.io/mariolonghi-com/household-spend-tracker*'
 ```
 
-The first line is not optional, though nothing fails without it: it is what
-lets the Application screen and `/api/health` name the commit instead of
-saying *unknown*. [Naming what runs](#naming-what-runs) says why.
-
-Builds the app's image from the checkout (two levels up). It takes a few
-minutes the first time. The listing should show a tag equal to
+Fetches the release `SPENDTRACKER_VERSION` names, as section 1 does: the app,
+and the self-updater that ships with it, both built, smoke-tested and attested
+by `release.yml`. The listing should show both at a tag equal to
 `SPENDTRACKER_VERSION`, so `docker image ls` on this box always says which
-release it is running.
+release it is running. This file has no `build:`: a pull that fails is an
+error to read rather than a silent local build, because the updater will not
+update an image that names no release.
 
 #### 5. Start both containers, creating the database
 
 ```bash
-SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
+docker compose up -d
 docker compose ps
 ```
 
 - `up -d` starts the `tailscale` container first, then the `app` inside its
   network, both in the background (`-d`).
-- `SPENDTRACKER_AUTO_MIGRATE=1` lets the app create the schema in a brand-new
-  volume. **First start only.** Every later start is plain `docker compose up -d`;
+- A brand-new volume has no tables at all, so the app creates the schema on
+  this first start without any flag, and `docker compose logs app` says so.
+  Every later start is the same `docker compose up -d` and never migrates;
   see section 1 for why.
 - **If a ledger already exists in the volume `spend-tracker_ledger`, this
-  opens it.** The volume outlives containers, images and checkouts, so a fresh
-  clone does not mean a fresh database. [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+  opens it** -- or, if it is at another revision, refuses and says which.
+  The volume outlives containers, images and checkouts, so a fresh clone does
+  not mean a fresh database. [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
   explains, and has the commands for a deliberate reset.
 
 `docker compose ps` should show two services, both `running`, and `app`
@@ -545,7 +690,7 @@ health answer are the same release.
 
 ```bash
 git describe --tags
-docker image ls household-spend-tracker
+docker image ls 'ghcr.io/mariolonghi-com/household-spend-tracker*'
 docker compose exec app python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8848/api/health').read().decode())"
 ```
 
@@ -637,7 +782,30 @@ Never copy the database out of that mountpoint by hand; take a backup (see
 ## The setup token
 
 The first screen asks for a one-time token. It is printed to the container
-log at startup and written to a file in the volume:
+log at startup and written to a file in the volume. The log says:
+
+    This instance has no accounts yet. Finish setup at /setup with this one-time token (also written to /var/lib/spend-tracker/setup-token):
+
+        <the token>
+
+The token is on a line of its own, after an empty line, indented.
+
+### Without a terminal
+
+After a double-click install the log is one click away in the Desktop app:
+
+- **Docker Desktop:** *Containers*, open the `spend-tracker` group, click
+  `app-1` (the container `spend-tracker-app-1`), then the *Logs* tab.
+- **Podman Desktop:** *Containers*, open the `spend-tracker` group, click
+  `spend-tracker-app-1` (`spend-tracker_app_1` where podman-compose started
+  it), then *Logs*.
+
+Look for `one-time token` (Docker Desktop's log view has a search box for
+it), and copy the token from below the **last** such line. A token from an
+earlier start no longer works, because a new one is made every time the app
+starts until setup is finished.
+
+### From a terminal
 
 ```bash
 docker compose logs app | grep -A2 "one-time token"
@@ -847,7 +1015,212 @@ copy and counts its rows before reporting success.
 
 ---
 
+## The updater
+
+Every compose file here, the release zip's included, runs a second container
+beside the app: `updater`. It is how the owner updates from the browser
+(*Application management → Updates*; [UPGRADING.md](UPGRADING.md#from-the-browser-container-installs)
+has the whole flow). It is the **only** container that holds the container
+engine's socket, it listens on nothing, it is never in the Tailscale
+sidecar's network, and the app talks to it only through files in the shared
+`update` volume. [SECURITY.md](../SECURITY.md#self-update-and-the-engine-socket)
+says what that does and does not let the app do.
+
+It does nothing until an owner presses a button. On a personal computer the
+launcher sets it up. On a server, three things are yours to do, once.
+
+### On a server
+
+From the compose directory: the top of the checkout for section 2,
+`deploy/tailnet` for section 3. Under rootful Docker Engine, the usual
+server:
+
+```bash
+gid=$(stat -c %g /var/run/docker.sock)
+echo "SPENDTRACKER_SOCKET_GID=$gid" >> .env
+chgrp "$gid" . .env
+chmod g+rws .
+chmod g+rw .env
+ls -ld . .env
+```
+
+Then `docker compose up -d`, which recreates the updater with the group. In
+section 3 on a new server, step 5 does that.
+
+- **`SPENDTRACKER_SOCKET_GID`** is the group that owns the socket, `docker`
+  on Debian and Ubuntu, by number. The updater runs as uid 65532, never root,
+  and reaches the socket through that group. Without it the updater starts,
+  cannot open the socket, and the Updates section says *"The updater cannot
+  use the container engine: permission denied on its socket."*
+- **The directory and `.env` writable by that group.** After an update the
+  updater writes the release it installed into `.env` (the *pin*:
+  [UPGRADING.md](UPGRADING.md#the-pin-env-names-what-runs)) by writing a new
+  file and renaming it over the old one, which needs the directory, and keeps
+  a copy in `pin/release.env`, which it creates. `g+s` on the directory makes
+  both keep its group, so you can still read and edit them; you are in that
+  group already, or `docker` would not work for you without `sudo`.
+- `ls -ld . .env` should show `drwxrwsr-x` and `-rw-rw----` (or
+  `-rw-rw-r--` for a `.env` that was not private). The sidecar's `.env` holds
+  the auth key: group-readable by the `docker` group is no wider than before,
+  because the socket already lets that group read every container's
+  environment. `check.sh` accepts `600` and `660` with the socket's group.
+- **`pin/`**, if you copied one from elsewhere, needs the same:
+  `chgrp -R "$gid" pin && chmod g+rws pin && chmod g+rw pin/*`.
+
+The updater mounts the compose directory at `/project`. In section 2 that is
+the whole checkout, `.git` included; the socket already makes the updater
+root-equivalent, so it gains nothing from it.
+
+**Is it working?** *Application management → Updates* says *"Updates run in
+the updater (`spend-tracker-updater-1`, version X.Y.Z, on Docker Engine …).
+Nothing installs until you confirm it."* In section 3, `deploy/tailnet/check.sh`
+also checks the updater: in its own network and not the sidecar's, the only
+container with the socket mounted, reaching the engine, and whether an update
+is in progress (it then stands back from the checks that would count or start
+containers). Otherwise `docker compose logs updater`.
+
+**Other engines on a Linux server** need the socket's path and, for rootless
+ones, a different user. `.env` takes all of it:
+
+| Engine | `.env` | And on the host |
+|---|---|---|
+| Docker Engine, rootful | `SPENDTRACKER_SOCKET_GID=<gid of /var/run/docker.sock>` | the `chgrp`/`chmod` above |
+| Docker Engine, rootless | `SPENDTRACKER_UPDATER_USER=0:0`, `SPENDTRACKER_ENGINE_SOCKET=/run/user/<uid>/docker.sock` | `sudo loginctl enable-linger <user>` |
+| Podman, rootful | `SPENDTRACKER_ENGINE_SOCKET=/run/podman/podman.sock` (the group is 0, the default) | `systemctl enable --now podman.socket podman-restart.service`, and the `chgrp 0`/`chmod` above |
+| Podman, rootless | `SPENDTRACKER_UPDATER_USER=0:0`, `SPENDTRACKER_ENGINE_SOCKET=/run/user/<uid>/podman/podman.sock` | `systemctl --user enable --now podman.socket podman-restart.service`, `sudo loginctl enable-linger <user>` |
+
+[Podman](#podman) below says why each one is what it is.
+
+### The pre-update hook
+
+Optional, servers only, and off unless you set it up: a command of yours that
+runs **on the machine that runs the containers** every time an update is
+confirmed, before anything is stopped. The case it exists for is a snapshot
+of the virtual machine Spend Tracker lives in. It runs on that VM, not on the
+hypervisor: [`deploy/updater/host-hook/README.md`](updater/host-hook/README.md)
+installs the runner, mounts its directory into the updater through a
+`compose.override.yaml`, and has a Proxmox example that asks the node for the
+snapshot over SSH with a key that can do nothing else.
+
+Once it is set up, **a failing hook stops the update before it starts**: a
+non-zero exit, a timeout, or no runner answering within 60 seconds. The owner
+sees *"The update did not start: the pre-update hook failed. Nothing was
+changed."*, and the app keeps serving.
+The confirmation screen shows *Pre-update hook: On* when it is set up.
+
+### Podman
+
+Podman works, with three things the compose files already carry and two the
+host has to provide.
+
+- **`x-podman: { in_pod: false }`**, at the top of every compose file.
+  podman-compose otherwise puts every service of the project in one pod, and
+  Podman refuses to start a container in another container's network when
+  that container is in a pod and the new one is not. Every container the
+  updater creates is outside any pod, because the API it uses cannot join
+  one: the new app in the sidecar layout, the maintenance page in either.
+  Docker Compose ignores `x-` keys. Do not remove it.
+- **`security_opt: label=disable`** on the updater. With SELinux enforcing
+  (Fedora, RHEL, and Podman's own machines) it is what lets the updater open
+  the socket at all; `:z` on the mount is not enough. It turns SELinux off
+  for that one container, which costs nothing: whatever holds the socket is
+  root-equivalent anyway. Where SELinux is off, and on Docker, it does
+  nothing. Nothing else is needed for SELinux.
+- **`restart: unless-stopped`**, as on Docker. But Podman has no daemon to
+  honour it: only `podman-restart.service` starts containers at boot, and it
+  is **off by default**, on Fedora and inside a Podman machine alike. Enabled,
+  it brings back `unless-stopped` containers and leaves one you stopped by
+  hand stopped. Rootful Podman, and a rootful Podman machine (Podman
+  Desktop's default), need the **system** unit; rootless Podman needs the
+  **user** unit **and lingering** (`loginctl enable-linger`), or your user's
+  services never start at boot. The launcher does this on a personal
+  computer; on a server it is the table above.
+- **The socket.** Podman serves the Docker-compatible API on a socket only
+  while `podman.socket` is enabled, and `SPENDTRACKER_ENGINE_SOCKET` says where
+  it is. Inside a Podman machine `/var/run/docker.sock` is a link to the
+  machine's socket, rootful or rootless, so the default is right there.
+
+**The updater's user, engine by engine.** Never root on the host:
+
+| Engine | The updater runs as | Reaches the socket through |
+|---|---|---|
+| Docker Engine, rootful (Linux) | uid 65532 | the socket's group, `SPENDTRACKER_SOCKET_GID` |
+| Docker Desktop (macOS, Windows; Linux not yet run) | uid 65532 | group 0, which owns the socket inside Desktop's VM (not your computer's root group) |
+| Podman, rootful (Linux) | uid 65532 | group 0, with `label=disable` |
+| Podman machine, rootful or rootless (Podman Desktop, macOS, Windows) | uid 65532 | group 0, with `label=disable` |
+| Docker Engine, rootless (Linux) | in-container uid 0 (`SPENDTRACKER_UPDATER_USER=0:0`) | being the socket's owner |
+| Podman, rootless (Linux) | in-container uid 0 (`SPENDTRACKER_UPDATER_USER=0:0`) | being the socket's owner, with `label=disable` |
+
+Under a rootless engine, uid 0 inside the container **is your own,
+unprivileged user** on the host: that is what rootless means. It is also the
+only user there that both reaches the socket and can write a project
+directory you own; uid 65532 maps to a subordinate id that can do neither.
+Every row also carries group 65532, the `update` volume's group, and drops
+every capability.
+
+Podman older than 4.4 is refused, with that sentence on the Updates section.
+
+### Enhanced Container Isolation
+
+Docker Desktop's Enhanced Container Isolation (ECI) stops containers from
+mounting the Docker socket. It is a Docker **Business** feature, switched on
+by whoever manages Docker Desktop for an organisation, so most installs do not
+have it. Where it is on, the updater is blocked as it starts, so it never runs
+to say why: the Updates section says there is no updater, and the launcher
+stops with *"The updater image could not be run"*, under Docker Desktop's own
+error, which names Enhanced Container Isolation.
+
+The fix is the socket-mount allowlist, in the organisation's
+`admin-settings.json`, by repository, as the setting
+`enhancedContainerIsolation.dockerSocketMount.imageList.images`:
+
+```json
+{
+  "configurationFileVersion": 2,
+  "enhancedContainerIsolation": {
+    "locked": true,
+    "value": true,
+    "dockerSocketMount": {
+      "imageList": {
+        "images": ["ghcr.io/mariolonghi-com/household-spend-tracker-updater:*"]
+      }
+    }
+  }
+}
+```
+
+Only the updater's repository goes in, never the app's: the app has no
+business with the socket. The `:*` admits every tag, and Docker Desktop
+matches the image a container starts from by digest. The updater still
+verifies every image it runs, its successors included, so the entry trusts
+this repository's releases and nothing else. Without the allowlist, update
+from a terminal ([Upgrading](#upgrading)), or replace the release zip with a
+newer one and run its launcher: data and version are kept.
+
+### Other refusals
+
+The Updates section names what the updater will not work with, in one
+sentence each: Docker Desktop in Windows containers mode (switch to Linux
+containers), an engine reached over TCP rather than a unix socket, an engine
+or API older than it supports, one it does not recognise, and an app running
+a locally built image (*"Self-update starts only from a published
+release."*). [TROUBLESHOOTING.md](TROUBLESHOOTING.md#updates-from-the-browser)
+has what to do for each.
+
+---
+
 ## Upgrading
+
+**From the browser is the default** for anything started from a published
+release: [UPGRADING.md](UPGRADING.md#from-the-browser-container-installs).
+The commands below are the same drill by hand, for an image you built
+yourself, a machine that cannot reach the registry, or whenever the browser
+cannot do it.
+
+**After an update from the browser, `.env` pins the release it installed**
+(`SPENDTRACKER_IMAGE=` and `SPENDTRACKER_UPDATER_IMAGE=`), and those lines win
+over `SPENDTRACKER_VERSION`. Delete both, from `.env` and from
+`pin/release.env`, before step 2, or the new version you name is ignored.
 
 ```bash
 # 1. Back up, while it is still running.
@@ -857,7 +1230,8 @@ docker compose run --rm -T -v "$PWD/backups:/backups" \
 # 2. Get the new image: name the new release in .env
 #    (SPENDTRACKER_VERSION=X.Y.Z), then
 docker compose pull
-#    Or, building it yourself (section 3, the sidecar, always builds):
+#    Or, building it yourself (sections 1 and 2 only; the sidecar's file
+#    has no `build:`):
 #    git fetch --tags && git checkout vX.Y.Z
 #    (cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
 #    docker compose build
@@ -999,6 +1373,10 @@ The browser refused to store the `Secure` session cookie because the page is
 plain HTTP at an address that is not `localhost`. Reach the app over HTTPS
 (sections 2 and 3) or at `http://localhost:8848` (section 1). Nothing is
 written to any log when this happens.
+
+In Safari at `http://localhost:8848` on a release before the fix for #196,
+the same loop came from the cookie's `__Host-` prefix, which Safari refuses
+on plain-HTTP `localhost`. Upgrade; until then, Chrome or Firefox work there.
 
 ### The sidecar node never appears in the admin console (section 3)
 

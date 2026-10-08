@@ -84,6 +84,6 @@ def complete(
         ip=client_ip(request),
         user_agent=request.headers.get("user-agent"),
     )
-    cookies.set_session(response, session_value)
-    cookies.set_device(response, device_value)
+    cookies.set_session(response, request, session_value)
+    cookies.set_device(response, request, device_value)
     return UserOut.model_validate(user)

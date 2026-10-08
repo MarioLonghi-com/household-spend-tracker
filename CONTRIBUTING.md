@@ -249,6 +249,58 @@ longer rebases its pull requests by itself when `dev` moves; comment
 pull request per ecosystem a week, on Monday, for releases at least seven days
 old; security updates arrive on their own whenever they are published.
 
+### The self-update job
+
+`self-update` in `tests.yml` -- one of the jobs `ci-ok` requires -- runs when a change touches the updater, `deploy/`,
+the drill and restore scripts, the maintenance page, the migrations, the
+Dockerfile or a compose file. It builds release A from the merge base and B
+from the change -- plus a few variants of B built `FROM` it, such as one whose
+migration fails after writing a row -- pushes them to a registry that answers
+as `ghcr.io` on the runner, and updates a running A through **the updater in
+its own container**, as compose starts it. What it proves is what an owner
+would see: after each of E1-E15 (`tests/self_update/scenarios.py`) it reads
+row counts, the ledger's stamp, which digest each container runs, a
+container's `StartedAt` and the pin in `.env`. It runs on rootful Docker
+(loopback and the Tailscale sidecar layout, with a stand-in for Tailscale),
+rootless Podman, and Docker on arm64. Rootless Docker is in the manual
+matrix instead: its daemon cannot make its bridge network on a hosted runner.
+
+The only thing replaced is verification: nothing built on a runner has an
+attestation. The CI updater image (`tests/self_update/ci-updater.Dockerfile`)
+is the release's real updater image with a test-only trust policy added on
+top. `release.yml` never builds or names it, and
+`tests/test_self_update_ci.py` fails if it ever does.
+
+**One scenario on your own machine**, with Docker Desktop running:
+
+```bash
+.venv/bin/python -m tests.self_update.local E3
+.venv/bin/python -m tests.self_update.local E3 --no-build
+```
+
+- `local E3` -- A from the merge base with `origin/dev`, B from your working tree, uncommitted changes included; `E1,E11` or `all` work too
+- `--no-build` -- reuse the releases the last run built
+
+It runs the scenarios inside a `docker:dind` container, so Docker Desktop's
+own engine, images and containers are left alone; it leaves behind the images
+it built (`spend-tracker-ci*`), two registry containers (`st-ci-registry*`)
+and `.self-update/` in the checkout. E6, which restarts the engine, cannot run
+there. A scenario the updater is known not to pass yet is listed in
+`KNOWN_GAPS` in `scenarios.py`: it runs and prints, and does not fail the job
+(the list is empty). A leg whose engine or layout needs a fix in release A's
+updater -- the merge base's -- names the fixing commit as its `a_floor` in
+the matrix: while the merge base predates it, A is built from that commit
+instead, and the run says so in a notice. The engine canary does the same.
+
+**The engine canary** (`engine-canary.yml`, weekly, never a pull-request
+check) runs an update and the handover on the newest Docker Engine stable and
+test-channel releases and the newest Podman, because an engine updates on a
+laptop without anybody deciding to -- Docker Engine 29 once raised its API
+floor and broke every client that pinned an older one. It records each
+engine's version and API window, and a failure opens one issue labelled
+`docker` (or comments on the open one). The fix ships in a release, and the
+updater going first brings it to every instance.
+
 Two more workflows run beside `tests.yml`, and neither is a pull-request check
 on `dev`: `codeql.yml` (Python and TypeScript, on the release PR, on `main` and
 weekly) and `scorecard.yml` (OpenSSF Scorecard, weekly and on pushes to `dev` --
@@ -332,10 +384,16 @@ is not asserting what it did to the data.** Four of the previous build's
 nineteen bugs hid behind exactly that.
 
 **Changed what an import does? Change the page that explains it** in the same
-commit: `client/src/screens/ImportGuide.tsx`, *Admin → How import works*.
+commit: `client/src/screens/importGuide/en.tsx`, *Admin → How import works*
+(and the same page in any other language it has been written in).
 `tests/test_import_guide.py` fails on an outcome, a state word, a format or an
 identifier kind it does not mention -- but only a person notices a sentence
 that has stopped being true.
+
+**Extracted a short or ambiguous message? Give the translator a note:**
+`t({ message, comment })` or `<Trans comment="…">`, one line of English saying
+what it is -- the rule is in `client/src/locales/README.md`, and
+`catalogs.test.ts` refuses a bare one- or two-word message.
 
 ---
 

@@ -1,0 +1,14 @@
+# Spend Tracker's pre-update hook: watch the hook directory for requests.
+# Installed on the host. See README.md beside this file.
+
+[Unit]
+Description=Spend Tracker pre-update hook: watch for requests
+
+[Path]
+# Triggers while any request is waiting. The runner removes every
+# *.request it sees, so the unit settles once each has been handled.
+PathExistsGlob=/var/lib/spend-tracker/hook/*.request
+Unit=spend-tracker-hook.service
+
+[Install]
+WantedBy=paths.target

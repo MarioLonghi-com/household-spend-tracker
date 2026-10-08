@@ -311,8 +311,13 @@ _REPO_ADDRESS_LINE = "# hygiene: the repo's own address"
 #: Both the old address and the new one are stripped here, so the name check
 #: does not report the handle inside either; `OLD_ADDRESS` below is what says
 #: the old one has to go. `@handle` is how CODEOWNERS and FUNDING.yml name it.
+#:
+#: The image labels the updater reads (design notes C4, R28) spell the ghcr
+#: namespace in reverse, `com.github.<owner>.spend-tracker.updater-protocol`
+#: and `…-protocols`: those two names exactly, nothing else in that form.
 _REPO_ADDRESS = re.compile(
-    r"(github\.com[/:])?mariolonghi(-com)?/(household-)?spend-tracker[\w.-]*|[\w.]*@?mariolonghi\.com[\w/.-]*|@mariolonghi\b",  # hygiene: the repo's own address
+    r"(github\.com[/:])?mariolonghi(-com)?/(household-)?spend-tracker[\w.-]*|[\w.]*@?mariolonghi\.com[\w/.-]*|@mariolonghi\b"  # hygiene: the repo's own address
+    r"|\bcom\.github\.mariolonghi-com\.spend-tracker\.updater-protocols?\b",  # hygiene: the repo's own address
     re.IGNORECASE,
 )
 #: The private repository this was copied out of. Nothing should still point
@@ -460,6 +465,15 @@ def test_no_tracked_file_names_anybody_real():
     assert not offenders, "\n".join(offenders)
 
 
+#: Recorded container inspect output (`tests/fixtures/updater/inspect/`) is
+#: made of engine object ids -- containers, images, networks, endpoints, pods
+#: -- each 64 hex characters by design, and each rewritten by the scrubber that
+#: committed them (that folder's README). They are exempt from the 64-hex
+#: shape, and from nothing else.
+_INSPECT_FIXTURES = pathlib.Path(__file__).resolve().parent / "fixtures" / "updater" / "inspect"
+_ENGINE_ID = re.compile(r"\b[0-9a-f]{64}\b")  # hygiene: a pattern, not a value
+
+
 def test_no_tracked_file_carries_private_markers():
     """Nothing that points into private notes, one machine, or a real secret.
 
@@ -476,9 +490,12 @@ def test_no_tracked_file_carries_private_markers():
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
+        engine_ids = _INSPECT_FIXTURES in path.resolve().parents
         for number, line in enumerate(text.splitlines(), start=1):
             if _REPO_ADDRESS_LINE in line or _PATTERN_LINE in line:
                 continue
+            if engine_ids:
+                line = _ENGINE_ID.sub("", line)
             offenders += [f"{path.name}:{number} {why}" for why in private_markers_in(line)]
     assert not offenders, "\n".join(offenders)
 
@@ -589,6 +606,11 @@ def test_the_detectors_actually_fire(tmp_path):
         "still names the old repository"
     ]
     assert private_markers_in("github.com/MarioLonghi-com/household-spend-tracker/issues") == []
+    # The two image labels in reverse-DNS form, and only those two: another
+    # name under the same namespace still carries the handle.
+    for label in ("updater-protocol", "updater-protocols"):
+        assert _REPO_ADDRESS.sub("", f'LABEL com.github.mariolonghi-com.spend-tracker.{label}="1"') == 'LABEL ="1"'  # hygiene: the repo's own address
+    assert real_names_in(_REPO_ADDRESS.sub("", "com.github.mariolonghi-com.spend-tracker.owner")) != []  # hygiene: the repo's own address
 
     # Personal email local-parts, by digest and in canonical form: dots and a
     # `+tag` do not get a real address past it, and a made-up one passes.

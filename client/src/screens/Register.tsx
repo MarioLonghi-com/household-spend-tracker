@@ -60,6 +60,10 @@ import type {
   Transaction,
   TransactionOrigin,
 } from "../lib/types";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { formatCount, formatDate } from "../lib/locale";
+import { listText } from "../lib/locale";
 
 /**
  * A register row, with the currency its amount is in.
@@ -107,12 +111,25 @@ export const REGISTER_PAGE = 500;
  * before-images in the audit log, and those are the record of what the app did
  * at the time.
  */
+// Getters, so each word is read in the language active when it is shown.
 const CLEARED_PILLS: Record<Transaction["cleared"], { letter: string; word: string }> = {
-  uncleared: { letter: "U", word: "Uncleared — the bank has not seen this yet" },
-  cleared: { letter: "C", word: "Cleared — the bank has it" },
+  uncleared: {
+    letter: "U",
+    get word() {
+      return t`Uncleared — the bank has not seen this yet`;
+    },
+  },
+  cleared: {
+    letter: "C",
+    get word() {
+      return t`Cleared — the bank has it`;
+    },
+  },
   reconciled: {
     letter: "L",
-    word: "Locked — checked against the bank, and every change to it is refused",
+    get word() {
+      return t`Locked — checked against the bank, and every change to it is refused`;
+    },
   },
 };
 
@@ -196,23 +213,54 @@ export function selectionSums<T extends { id: string; amount: number }>(
  * the letter does: a linked pair of imported rows is a transfer, not an import.
  */
 const SOURCE_CHOICES: { value: string; label: string }[] = [
-  { value: "transfer", label: "T — Transfers" },
-  { value: "split", label: "S — Split parts" },
-  { value: "imported", label: "I — Imported" },
-  { value: "manual", label: "M — Entered by hand" },
+  {
+    value: "transfer",
+    get label() {
+      return t({ message: "T — Transfers", comment: "Label on the Register screen" });
+    },
+  },
+  {
+    value: "split",
+    get label() {
+      return t`S — Split parts`;
+    },
+  },
+  {
+    value: "imported",
+    get label() {
+      return t({ message: "I — Imported", comment: "Label on the Register screen" });
+    },
+  },
+  {
+    value: "manual",
+    get label() {
+      return t`M — Entered by hand`;
+    },
+  },
 ];
+
+/**
+ * "1,234 transactions match the filters": the count in the reader's grouping,
+ * as toLocaleString wrote it, in one sentence per case.
+ */
+function countText(count: number, filtered: boolean): string {
+  const shown = formatCount(count);
+  return filtered
+    ? plural(count, { one: `${shown} transaction match the filters`, other: `${shown} transactions match the filters` })
+    : plural(count, { one: `${shown} transaction`, other: `${shown} transactions` });
+}
 
 function Source({ txn }: { txn: Transaction }) {
   const [initial, word] =
     txn.transfer_account_id !== null
-      ? ["T", "Transfer between your own accounts"]
+      ? ["T", t`Transfer between your own accounts`]
       : txn.split_id
-        ? ["S", "One part of a split"]
+        ? ["S", t`One part of a split`]
         : txn.import_id
           ? // A one-time import's rows are imports too (#183): same letter, same
             // filter, and the side panel says which door they came in by.
-            ["I", "Imported from a statement or a one-time import"]
-          : ["M", "Entered by hand"];
+            ["I", t`Imported from a statement or a one-time import`]
+          : ["M", t`Entered by hand`];
   return (
     <span className={`tag source-${initial}`} title={word} aria-label={word}>
       {initial}
@@ -236,8 +284,8 @@ function Source({ txn }: { txn: Transaction }) {
 function TransferMark({ txn, otherAccount }: { txn: Row; otherAccount?: string }) {
   if (!isTransferLeg(txn)) return null;
   const word = otherAccount
-    ? `Transfer — the other side is in ${otherAccount}`
-    : "Transfer between your own accounts";
+    ? t`Transfer — the other side is in ${otherAccount}`
+    : t`Transfer between your own accounts`;
   return (
     <span className="transfer-mark" title={word} aria-label={word}>
       ⇄
@@ -251,10 +299,30 @@ function TransferMark({ txn, otherAccount }: { txn: Row; otherAccount?: string }
  * and the register groups the two together when either is on.
  */
 const WORK_CHOICES: { value: ReimbursementView; label: string }[] = [
-  { value: "work", label: "Work items and their repayments" },
-  { value: "owed", label: "Not reimbursed yet" },
-  { value: "paid", label: "Reimbursed, with the payment" },
-  { value: "off", label: "Written off" },
+  {
+    value: "work",
+    get label() {
+      return t`Work items and their repayments`;
+    },
+  },
+  {
+    value: "owed",
+    get label() {
+      return t`Not reimbursed yet`;
+    },
+  },
+  {
+    value: "paid",
+    get label() {
+      return t`Reimbursed, with the payment`;
+    },
+  },
+  {
+    value: "off",
+    get label() {
+      return t({ message: "Written off", comment: "Label on the Register screen: a work expense work will not pay; counted as your own spending. See GLOSSARY.md" });
+    },
+  },
 ];
 
 /**
@@ -365,10 +433,9 @@ export function rememberSavedRow(
 export function reimbursementSkippedNote(skipped: number, sent: number): string | null {
   if (skipped <= 0) return null;
   const done = sent - skipped;
-  return (
-    `Changed ${done} ${done === 1 ? "row" : "rows"} and left ${skipped} alone — only money ` +
-    "out that is not a transfer can be a work expense."
-  );
+  return done === 1
+    ? t`Changed ${done} row and left ${skipped} alone — only money out that is not a transfer can be a work expense.`
+    : t`Changed ${done} rows and left ${skipped} alone — only money out that is not a transfer can be a work expense.`;
 }
 
 /**
@@ -387,11 +454,13 @@ export const LINK_MAX_EXPENSES = 200;
 export function skippedNote(skipped: number, sent: number): string | null {
   if (skipped <= 0) return null;
   const done = sent - skipped;
-  const legs = skipped === 1 ? "1 transfer leg" : `${skipped} transfer legs`;
-  return (
-    `Set the category on ${done} ${done === 1 ? "row" : "rows"} and skipped ${legs} — ` +
-    "a transfer has no category."
-  );
+  if (done === 1)
+    return skipped === 1
+      ? t`Set the category on ${done} row and skipped 1 transfer leg — a transfer has no category.`
+      : t`Set the category on ${done} row and skipped ${skipped} transfer legs — a transfer has no category.`;
+  return skipped === 1
+    ? t`Set the category on ${done} rows and skipped 1 transfer leg — a transfer has no category.`
+    : t`Set the category on ${done} rows and skipped ${skipped} transfer legs — a transfer has no category.`;
 }
 
 /**
@@ -833,9 +902,13 @@ export function Register({
       ),
     onSuccess: (linked) => {
       const count = linked?.length ?? repaying.length;
+      const paid = format(repaidBy[0].amount, currencyOf(repaidBy[0]));
+      const on = formatDate(repaidBy[0].date);
       setBulkNote(
-        `Linked ${count} ${count === 1 ? "expense" : "expenses"} to the payment of ` +
-          `${format(repaidBy[0].amount, currencyOf(repaidBy[0]))} on ${repaidBy[0].date}.`,
+        plural(count, {
+          one: `Linked ${count} expense to the payment of ${paid} on ${on}.`,
+          other: `Linked ${count} expenses to the payment of ${paid} on ${on}.`,
+        }),
       );
       setSelected(new Set());
       refresh();
@@ -1133,7 +1206,9 @@ export function Register({
           another thing to arrow past. The within-row order -- tick, date,
           payee, category, memo -- is already right and is not touched. */}
       <a className="skip-link" href="#register-rows">
-        Skip to transactions
+        <Trans>
+          Skip to transactions
+        </Trans>
       </a>
       {/* The three ways a transaction gets into this ledger, together at the
           top right. They are the same kind of act -- one of them by hand, one
@@ -1145,7 +1220,9 @@ export function Register({
             section is still called Register -- it holds Import and Receipts
             too -- but the page you land on should be called what you clicked
             to get there. The code keeps calling it the register. */}
-        <h1>Transactions</h1>
+        <h1>
+          <Trans comment="Screen title on the Register screen. See GLOSSARY.md">Transactions</Trans>
+        </h1>
         {/* Beside the heading rather than in the filter line (#143). It
             decides which columns the table *has*, which is a question about
             the table's shape before it is one about which rows -- and on the
@@ -1166,12 +1243,12 @@ export function Register({
               than among the filters: they change how the rows are drawn, not
               which rows there are. Hidden on a phone, where each row is a card
               with its own sizes and these would change nothing. */}
-          <div className="text-steps" role="group" aria-label="Table text size">
+          <div className="text-steps" role="group" aria-label={t`Table text size`}>
             <button
               type="button"
               className="small-button"
-              aria-label="Smaller text in the table"
-              title="Smaller text, more rows on screen"
+              aria-label={t`Smaller text in the table`}
+              title={t`Smaller text, more rows on screen`}
               disabled={textStep <= 0}
               onClick={() => setTextStep((at) => Math.max(0, at - 1))}
             >
@@ -1180,8 +1257,8 @@ export function Register({
             <button
               type="button"
               className="small-button"
-              aria-label="Larger text in the table"
-              title="Larger text"
+              aria-label={t`Larger text in the table`}
+              title={t({ message: "Larger text", comment: "Tooltip on the Register screen" })}
               disabled={textStep >= TEXT_STEPS.length - 1}
               onClick={() => setTextStep((at) => Math.min(TEXT_STEPS.length - 1, at + 1))}
             >
@@ -1197,12 +1274,12 @@ export function Register({
             disabled={!onGo}
             title={
               onGo
-                ? "Read a statement file into this register"
-                : "Import is in the menu on the left — this screen was given no way to navigate"
+                ? t`Read a statement file into this register`
+                : t`Import is in the menu on the left — this screen was given no way to navigate`
             }
             onClick={() => onGo?.("import")}
           >
-            <span aria-hidden="true">📥</span> Import
+            <span aria-hidden="true">📥</span> <Trans comment="Button on the Register screen: verb, bring the rows in. See GLOSSARY.md">Import</Trans>
           </button>
         </div>
       </div>
@@ -1222,8 +1299,8 @@ export function Register({
           aria-expanded={filtersOpen}
           onClick={() => setFiltersOpen(!filtersOpen)}
         >
-          {filtersOpen ? "Hide filters" : "Filters"}
-          {filtered ? <span className="nav-badge" aria-label="filters are set">•</span> : null}
+          {filtersOpen ? t({ message: "Hide filters", comment: "Button on the Register screen" }) : t({ message: "Filters", comment: "Button on the Register screen" })}
+          {filtered ? <span className="nav-badge" aria-label={t`filters are set`}>•</span> : null}
         </button>
         <div className={filtersOpen ? "filters" : "filters collapsed"}>
           {/* One line: the presets at the left edge, the exact months at the
@@ -1246,43 +1323,47 @@ export function Register({
                 headings you tick, not the accounts that exist -- which is why
                 it can live in a label at all. */}
             <div className="field picker-with-mode">
-              <div className="field-head" role="group" aria-label="Group accounts by">
+              <div className="field-head" role="group" aria-label={t`Group accounts by`}>
                 <span>
-                  Accounts (
+                  <Trans comment="Text on the Register screen: noun, bank or cash accounts. See GLOSSARY.md">Accounts</Trans> (
                   <button
                     type="button"
                     className="grouping-toggle"
                     aria-pressed={grouping === "country"}
-                    title="Gather the accounts by country"
+                    title={t`Gather the accounts by country`}
                     onClick={() => setGrouping("country")}
                   >
-                    Country
+                    <Trans comment="Button on the Register screen: noun. See GLOSSARY.md">
+                      Country
+                    </Trans>
                   </button>
                   /
                   <button
                     type="button"
                     className="grouping-toggle"
                     aria-pressed={grouping === "type"}
-                    title="Gather the accounts by type: checking, savings, cards…"
+                    title={t`Gather the accounts by type: checking, savings, cards…`}
                     onClick={() => setGrouping("type")}
                   >
-                    Type
+                    <Trans comment="Button on the Register screen: noun, account type">
+                      Type
+                    </Trans>
                   </button>
                   )
                 </span>
               </div>
               <GroupedPicker
-                label="All accounts"
+                label={t({ message: "All accounts", comment: "Text on a dropdown that picks several on the Register screen" })}
                 groups={accountOptions}
                 value={accountIds}
                 onChange={setAccountIds}
               />
             </div>
-            <Field label="Search">
+            <Field label={t({ message: "Search", comment: "Label of a form field on the Register screen" })}>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="payee, memo, or the bank's own words"
+                placeholder={t`payee, memo, or the bank's own words`}
               />
             </Field>
             {/* Every money column at once: Out or In, in whichever currency
@@ -1290,37 +1371,37 @@ export function Register({
                 45.20 -- because an amount is usually remembered to the euro,
                 not to the cent. */}
             <label className="field amount-lookup">
-              <span>Amount</span>
+              <span><Trans comment="Label of a choice on the Register screen: noun, a sum of money. See GLOSSARY.md">Amount</Trans></span>
               <input
                 value={amountText}
                 onChange={(e) => setAmountText(e.target.value)}
-                placeholder="in or out, any currency"
+                placeholder={t`in or out, any currency`}
                 inputMode="decimal"
                 aria-invalid={amountUnreadable || undefined}
-                title={amountUnreadable ? "That isn't an amount" : undefined}
+                title={amountUnreadable ? t`That isn't an amount` : undefined}
               />
             </label>
             <label className="field narrow-filter">
-              <span>Cleared</span>
+              <span><Trans comment="Label of a choice on the Register screen: state, the bank has the row. See GLOSSARY.md">Cleared</Trans></span>
               <select
                 className="small"
                 value={clearedFilter}
                 onChange={(e) => setClearedFilter(e.target.value as typeof clearedFilter)}
               >
-                <option value="">Any</option>
-                <option value="uncleared">U — Uncleared</option>
-                <option value="cleared">C — Cleared</option>
-                <option value="reconciled">L — Locked</option>
+                <option value=""><Trans comment="Option in a dropdown on the Register screen">Any</Trans></option>
+                <option value="uncleared"><Trans comment="Option in a dropdown on the Register screen">U — Uncleared</Trans></option>
+                <option value="cleared"><Trans comment="Option in a dropdown on the Register screen">C — Cleared</Trans></option>
+                <option value="reconciled"><Trans comment="Option in a dropdown on the Register screen">L — Locked</Trans></option>
               </select>
             </label>
             <label className="field narrow-filter">
-              <span>Source</span>
+              <span><Trans comment="Label of a choice on the Register screen: noun, where it came from">Source</Trans></span>
               <select
                 className="small"
                 value={sourceFilter}
                 onChange={(e) => setSourceFilter(e.target.value)}
               >
-                <option value="">Any</option>
+                <option value=""><Trans comment="Option in a dropdown on the Register screen">Any</Trans></option>
                 {SOURCE_CHOICES.map((one) => (
                   <option key={one.value} value={one.value}>
                     {one.label}
@@ -1332,13 +1413,13 @@ export function Register({
                 from and whether work owes you for it are different
                 questions, and a row can be imported *and* a work expense. */}
             <label className="field narrow-filter">
-              <span>Work expenses</span>
+              <span><Trans comment="Label of a choice on the Register screen: noun, spending your employer should pay back. See GLOSSARY.md">Work expenses</Trans></span>
               <select
                 className="small"
                 value={workFilter}
                 onChange={(e) => setWorkFilter(e.target.value as typeof workFilter)}
               >
-                <option value="">All transactions</option>
+                <option value=""><Trans comment="Option in a dropdown on the Register screen">All transactions</Trans></option>
                 {WORK_CHOICES.map((one) => (
                   <option key={one.value} value={one.value}>
                     {one.label}
@@ -1353,15 +1434,15 @@ export function Register({
                 heading ticks every category in it. */}
             <div className="field category-filter">
               <div className="field-head">
-                <span>Categories</span>
+                <span><Trans comment="Text on the Register screen. See GLOSSARY.md">Categories</Trans></span>
               </div>
               <GroupedPicker
-                label="All categories"
+                label={t({ message: "All categories", comment: "Text on a dropdown that picks several on the Register screen" })}
                 groups={categoryOptions}
                 value={categoryIds}
                 onChange={(ids) => pickCategories(ids, backlog)}
                 extra={{
-                  label: "Needs a category",
+                  label: t`Needs a category`,
                   count: backlogCount,
                   checked: backlog,
                   onChange: (tick) => pickCategories(categoryIds, tick),
@@ -1383,7 +1464,9 @@ export function Register({
                   setBacklogTick(true);
                 }}
               >
-                Clear filters
+                <Trans comment="Button on the Register screen">
+                  Clear filters
+                </Trans>
               </button>
             )}
           </div>
@@ -1401,43 +1484,46 @@ export function Register({
           <p className="small muted register-count">
             {unloaded > 0 && data ? (
               <>
-                {data.total.toLocaleString()} {data.total === 1 ? "transaction" : "transactions"}
-                {filtered ? " match the filters" : ""}
-                {` · the first ${rows.length.toLocaleString()} loaded`}
+                {countText(data.total, filtered)}
+                {` · ${t`the first ${formatCount(rows.length)} loaded`}`}
               </>
             ) : (
-              <>
-                {ordered.length.toLocaleString()}{" "}
-                {ordered.length === 1 ? "transaction" : "transactions"}
-                {filtered ? " match the filters" : ""}
-              </>
+              countText(ordered.length, filtered)
             )}
-            {selected.size > 0 ? ` · ${selected.size.toLocaleString()} selected` : ""}
+            {selected.size > 0 ? ` · ${t({ message: `${formatCount(selected.size)} selected`, comment: "Sentence on the Register screen" })}` : ""}
           </p>
         ) : null}
         </div>
 
         {noCategories && !noAccounts ? (
           <Empty>
-            No categories are ticked, not even Needs a category, so there is nothing to show.
-            Tick one in the categories filter, or Select all.
+            <Trans>
+              No categories are ticked, not even Needs a category, so there is nothing to show.
+              Tick one in the categories filter, or Select all.
+            </Trans>
           </Empty>
         ) : noAccounts ? (
           <Empty>
-            No accounts are ticked, so there is nothing to show. Tick one in the accounts
-            filter — or Select all, which is not the same as ticking every one of them.
+            <Trans>
+              No accounts are ticked, so there is nothing to show. Tick one in the accounts
+              filter — or Select all, which is not the same as ticking every one of them.
+            </Trans>
           </Empty>
         ) : data?.transactions.length === 0 ? (
           <Empty>
-            Nothing here yet. Add a row above, or import a statement from the Import screen.
+            <Trans>
+              Nothing here yet. Add a row above, or import a statement from the Import screen.
+            </Trans>
           </Empty>
         ) : visible.length === 0 && hiddenByCurrency > 0 ? (
           /* Only when the toggle is what emptied it. While the request is
              still out there are no rows for a different reason, and an empty
              table waiting for them is what this screen has always shown. */
           <Empty>
-            Every row here is in a currency the toggle is hiding. Turn one back on to see
-            them — {hiddenByCurrency} {hiddenByCurrency === 1 ? "row is" : "rows are"} waiting.
+            {plural(hiddenByCurrency, {
+              one: `Every row here is in a currency the toggle is hiding. Turn one back on to see them — ${hiddenByCurrency} row is waiting.`,
+              other: `Every row here is in a currency the toggle is hiding. Turn one back on to see them — ${hiddenByCurrency} rows are waiting.`,
+            })}
           </Empty>
         ) : (
           <div className="table-scroll">
@@ -1476,11 +1562,11 @@ export function Register({
                   <th style={{ width: 28 }} data-select="true">
                     <input
                       type="checkbox"
-                      aria-label="Select every row shown"
+                      aria-label={t`Select every row shown`}
                       title={
                         allShownTicked
-                          ? "Untick every row shown"
-                          : `Tick all ${ordered.length.toLocaleString()} rows the filter shows`
+                          ? t`Untick every row shown`
+                          : t`Tick all ${formatCount(ordered.length)} rows the filter shows`
                       }
                       checked={allShownTicked}
                       ref={(box) => {
@@ -1500,14 +1586,14 @@ export function Register({
                       order would be two ways to say one thing. The word is
                       for a screen reader; sighted, the glyph is the heading. */}
                   <th className="transfer-col">
-                    <span className="sr-only">Transfer</span>
+                    <span className="sr-only">{t({ message: "Transfer", context: "noun", comment: "Screen-reader text on the Register screen (noun). See GLOSSARY.md" })}</span>
                   </th>
                   {[
-                    { label: "Date", column: "date" as SortKey },
-                    { label: "Account", column: "account" as SortKey },
-                    { label: "Payee", column: "payee" as SortKey },
-                    { label: "Category", column: "category" as SortKey },
-                    { label: "Memo", column: "memo" as SortKey },
+                    { label: t({ message: "Date", comment: "Label on the Register screen: noun. See GLOSSARY.md" }), column: "date" as SortKey },
+                    { label: t({ message: "Account", comment: "Label on the Register screen: noun, a bank or cash account. See GLOSSARY.md" }), column: "account" as SortKey },
+                    { label: t({ message: "Payee", comment: "Label on the Register screen: noun, who was paid or who paid. See GLOSSARY.md" }), column: "payee" as SortKey },
+                    { label: t({ message: "Category", comment: "Label on the Register screen: noun, what a transaction was for. See GLOSSARY.md" }), column: "category" as SortKey },
+                    { label: t({ message: "Memo", comment: "Label on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md" }), column: "memo" as SortKey },
                   ].map((one) => (
                     <SortHeading
                       key={one.column}
@@ -1533,7 +1619,7 @@ export function Register({
                   {columns.map((code, at) => (
                     <Fragment key={code}>
                       <SortHeading
-                        label={available.length > 1 ? `Out ${code}` : "Out"}
+                        label={available.length > 1 ? t({ message: `Out ${code}`, comment: "Text on the Register screen: money going out" }) : t({ message: "Out", comment: "Text on the Register screen: money going out" })}
                         column="amount"
                         sort={sort}
                         direction={direction}
@@ -1541,10 +1627,10 @@ export function Register({
                         align="right"
                         className="money-open"
                       >
-                        <ColumnEdge column={`out-${code}`} label={`Out ${code}`} widths={widths} />
+                        <ColumnEdge column={`out-${code}`} label={t({ message: `Out ${code}`, comment: "Column name for resizing the column on the Register screen: money going out" })} widths={widths} />
                       </SortHeading>
                       <SortHeading
-                        label={available.length > 1 ? `In ${code}` : "In"}
+                        label={available.length > 1 ? t({ message: `In ${code}`, comment: "Text on the Register screen: money coming in" }) : t({ message: "In", comment: "Text on the Register screen: money coming in" })}
                         column="amount"
                         sort={sort}
                         direction={direction}
@@ -1552,7 +1638,7 @@ export function Register({
                         align="right"
                         className={at === columns.length - 1 ? "money-close" : undefined}
                       >
-                        <ColumnEdge column={`in-${code}`} label={`In ${code}`} widths={widths} />
+                        <ColumnEdge column={`in-${code}`} label={t({ message: `In ${code}`, comment: "Column name for resizing the column on the Register screen: money coming in" })} widths={widths} />
                       </SortHeading>
                     </Fragment>
                   ))}
@@ -1563,8 +1649,8 @@ export function Register({
                       up to anything. */}
                   {hasBalance ? (
                     <th className="amount">
-                      Balance
-                      <ColumnEdge column="balance" label="Balance" widths={widths} />
+                      <Trans comment="Column heading on the Register screen: noun, the amount an account holds. See GLOSSARY.md">Balance</Trans>
+                      <ColumnEdge column="balance" label={t({ message: "Balance", comment: "Column name for resizing the column on the Register screen: noun, the amount an account holds. See GLOSSARY.md" })} widths={widths} />
                     </th>
                   ) : null}
                   {/* Both hold one letter and both were sized by their
@@ -1573,7 +1659,7 @@ export function Register({
                       word is the accessible name, and `flag-col` takes the
                       column down to its content. */}
                   <SortHeading
-                    label="Cleared"
+                    label={t({ message: "Cleared", comment: "Column heading on the Register screen: state, the bank has the row. See GLOSSARY.md" })}
                     short="C"
                     column="cleared"
                     sort={sort}
@@ -1581,10 +1667,10 @@ export function Register({
                     onSort={onSort}
                     className="flag-col"
                   >
-                    <ColumnEdge column="cleared" label="Cleared" widths={widths} />
+                    <ColumnEdge column="cleared" label={t({ message: "Cleared", comment: "Column name for resizing the column on the Register screen: state, the bank has the row. See GLOSSARY.md" })} widths={widths} />
                   </SortHeading>
                   <SortHeading
-                    label="Source"
+                    label={t({ message: "Source", comment: "Column heading on the Register screen: noun, where it came from" })}
                     short="S"
                     column="source"
                     sort={sort}
@@ -1592,7 +1678,7 @@ export function Register({
                     onSort={onSort}
                     className="flag-col"
                   >
-                    <ColumnEdge column="source" label="Source" widths={widths} />
+                    <ColumnEdge column="source" label={t({ message: "Source", comment: "Column name for resizing the column on the Register screen: noun, where it came from" })} widths={widths} />
                   </SortHeading>
                 </tr>
               </thead>
@@ -1606,13 +1692,13 @@ export function Register({
                     <td data-select="true">
                       <input
                         type="checkbox"
-                        aria-label={`Select ${txn.date}`}
+                        aria-label={t({ message: `Select ${formatDate(txn.date)}`, comment: "Screen-reader name on the Register screen" })}
                         checked={selected.has(txn.id)}
                         onChange={() => toggle(txn.id)}
                         style={{ width: "auto" }}
                       />
                     </td>
-                    <td className="transfer-col" data-label="Transfer">
+                    <td className="transfer-col" data-label={t({ message: "Transfer", context: "noun", comment: "Column name shown beside a value on phones on the Register screen (noun). See GLOSSARY.md" })}>
                       <TransferMark
                         txn={txn}
                         otherAccount={
@@ -1622,23 +1708,23 @@ export function Register({
                         }
                       />
                     </td>
-                    <td data-label="Date" data-detail-first="true">
+                    <td data-label={t({ message: "Date", comment: "Column name shown beside a value on phones on the Register screen: noun. See GLOSSARY.md" })} data-col="date" data-detail-first="true">
                       {repaidBelow.has(txn.id) ? (
                         <span
                           className="work-child"
-                          title="Repaid by the payment above"
-                          aria-label="Repaid by the payment above"
+                          title={t`Repaid by the payment above`}
+                          aria-label={t`Repaid by the payment above`}
                         >
                           ↳
                         </span>
                       ) : null}
                       <button className="link" onClick={() => setOpened(txn)}>
-                        {txn.date}
+                        {formatDate(txn.date)}
                       </button>
                     </td>
                     <td
                       className="small muted"
-                      data-label="Account"
+                      data-label={t({ message: "Account", comment: "Column name shown beside a value on phones on the Register screen: noun, a bank or cash account. See GLOSSARY.md" })}
                       title={accountsById.get(txn.account_id)?.name}
                     >
                       {accountsById.get(txn.account_id)?.name ?? "—"}
@@ -1675,20 +1761,20 @@ export function Register({
                         (`td:empty`), so a row is still one line of money. */}
                     {columns.map((code, at) => {
                       const own = currencyOf(txn) === code;
-                      const suffix = available.length > 1 ? ` ${code}` : "";
+                      const several = available.length > 1;
                       const last = at === columns.length - 1;
                       return (
                         <Fragment key={code}>
                           <td
                             className="amount neg money-open"
-                            data-label={`Out${suffix}`}
+                            data-label={several ? t({ message: `Out ${code}`, comment: "Table cell on the Register screen: money going out" }) : t({ message: "Out", comment: "Table cell on the Register screen: money going out" })}
                             data-figure="true"
                           >
                             {own && txn.amount < 0 ? format(-txn.amount, code) : ""}
                           </td>
                           <td
                             className={last ? "amount pos money-close" : "amount pos"}
-                            data-label={`In${suffix}`}
+                            data-label={several ? t({ message: `In ${code}`, comment: "Table cell on the Register screen: money coming in" }) : t({ message: "In", comment: "Table cell on the Register screen: money coming in" })}
                             data-figure="true"
                           >
                             {own && txn.amount > 0 ? format(txn.amount, code) : ""}
@@ -1697,16 +1783,16 @@ export function Register({
                       );
                     })}
                     {data?.has_running_balance ? (
-                      <td className="amount muted" data-label="Balance">
+                      <td className="amount muted" data-label={t({ message: "Balance", comment: "Column name shown beside a value on phones on the Register screen: noun, the amount an account holds. See GLOSSARY.md" })}>
                         {txn.running_balance === null
                           ? ""
                           : format(txn.running_balance, currencyOf(txn))}
                       </td>
                     ) : null}
-                    <td className="small muted cleared-cell flag-col" data-label="Cleared">
+                    <td className="small muted cleared-cell flag-col" data-label={t({ message: "Cleared", comment: "Column name shown beside a value on phones on the Register screen: state, the bank has the row. See GLOSSARY.md" })}>
                       <Cleared state={txn.cleared} />
                     </td>
-                    <td className="flag-col" data-label="Source">
+                    <td className="flag-col" data-label={t({ message: "Source", comment: "Column name shown beside a value on phones on the Register screen: noun, where it came from" })} data-col="source">
                       <Source txn={txn} />
                       {txn.has_receipt ? <ReceiptMark /> : null}
                     </td>
@@ -1724,7 +1810,7 @@ export function Register({
                 ref={page.sentinelRef}
                 onClick={page.extend}
               >
-                Showing {page.shown.toLocaleString()} of {page.total.toLocaleString()} — show more
+                {t`Showing ${formatCount(page.shown)} of ${formatCount(page.total)} — show more`}
               </button>
             ) : unloaded > 0 ? (
               <button
@@ -1735,9 +1821,11 @@ export function Register({
                 disabled={isFetchingNextPage}
               >
                 {isFetchingNextPage
-                  ? "Loading the next rows…"
-                  : `Showing ${page.shown.toLocaleString()} — ${unloaded.toLocaleString()} more ` +
-                    `${unloaded === 1 ? "row" : "rows"} to load — show more`}
+                  ? t`Loading the next rows…`
+                  : plural(unloaded, {
+                      one: `Showing ${formatCount(page.shown)} — ${formatCount(unloaded)} more row to load — show more`,
+                      other: `Showing ${formatCount(page.shown)} — ${formatCount(unloaded)} more rows to load — show more`,
+                    })}
               </button>
             ) : null}
           </div>
@@ -1749,25 +1837,29 @@ export function Register({
             and believes it is all of it. */}
         {hiddenByCurrency > 0 && visible.length > 0 ? (
           <p className="small muted" style={{ marginTop: 10 }}>
-            {hiddenByCurrency.toLocaleString()}{" "}
-            {hiddenByCurrency === 1 ? "row is" : "rows are"} not shown: the currency toggle is
-            showing {columns.join(" and ")}, and{" "}
-            {hiddenByCurrency === 1 ? "that row is" : "those rows are"} in another.
+            {plural(hiddenByCurrency, {
+              one: `${formatCount(hiddenByCurrency)} row is not shown: the currency toggle is showing ${listText(columns)}, and that row is in another.`,
+              other: `${formatCount(hiddenByCurrency)} rows are not shown: the currency toggle is showing ${listText(columns)}, and those rows are in another.`,
+            })}
           </p>
         ) : null}
 
         {groupedByPayment && repaidBelow.size > 0 ? (
           <p className="small muted" style={{ marginTop: 10 }}>
-            Each payment from work is followed by the expenses it repaid, marked ↳. The rest are
-            in the order the headings say.
+            <Trans>
+              Each payment from work is followed by the expenses it repaid, marked ↳. The rest are
+              in the order the headings say.
+            </Trans>
           </p>
         ) : null}
 
         {data && !data.has_running_balance && data.total > 0 ? (
           <p className="small muted" style={{ marginTop: 10 }}>
-            A running balance needs one account, newest-first by date, and no filters — it is a
-            sum down the page, so in any other order or with rows hidden it would not mean
-            anything.
+            <Trans>
+              A running balance needs one account, newest-first by date, and no filters — it is a
+              sum down the page, so in any other order or with rows hidden it would not mean
+              anything.
+            </Trans>
           </p>
         ) : null}
 
@@ -1802,7 +1894,9 @@ export function Register({
               <div className="banner info" role="status">
                 {bulkNote}{" "}
                 <button className="link" onClick={() => setBulkNote(null)}>
-                  OK
+                  <Trans comment="Button on the Register screen">
+                    OK
+                  </Trans>
                 </button>
               </div>
             ) : null}
@@ -1817,7 +1911,7 @@ export function Register({
                 <div className="selection-sums">
                   {sums.map((sum) => (
                     <p className="sum-line" key={sum.currency}>
-                      <span className="sum-label">Sum</span>
+                      <span className="sum-label"><Trans comment="Sentence on the Register screen">Sum</Trans></span>
                       <span className="mono">{sum.currency}</span>
                       <span className="amount pos">{format(sum.ins, sum.currency)}</span>
                       <span aria-hidden="true">+</span>
@@ -1825,7 +1919,7 @@ export function Register({
                       <span aria-hidden="true">=</span>
                       <strong className="amount">{format(sum.net, sum.currency)}</strong>
                       <span className="small muted">
-                        ({sum.count} {sum.count === 1 ? "line" : "lines"})
+                        {plural(sum.count, { one: `(${sum.count} line)`, other: `(${sum.count} lines)` })}
                       </span>
                     </p>
                   ))}
@@ -1834,39 +1928,38 @@ export function Register({
                        paragraphs, and a <p> inside a <p> is closed by the parser
                        before it starts. */
                     <div className="small muted">
-                      One line per currency, and no total across them.{" "}
-                      <Hint label="why the currencies are not added">
+                      <Trans>One line per currency, and no total across them.</Trans>{" "}
+                      <Hint label={t`why the currencies are not added`}>
                         <p>
-                          This ledger never converts. Currency lives on the account and there is no
-                          exchange rate stored anywhere, so a figure adding{" "}
-                          {sums.map((one) => one.currency).join(" and ")} would be a number with
-                          nothing behind it.
+                          {t`This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so a figure adding ${listText(sums.map((one) => one.currency))} would be a number with nothing behind it.`}
                         </p>
                         <p className="muted small" style={{ marginBottom: 0 }}>
-                          Each currency is totalled on its own instead. Nothing on this screen ever
-                          adds two together.
+                          <Trans>
+                            Each currency is totalled on its own instead. Nothing on this screen ever
+                            adds two together.
+                          </Trans>
                         </p>
                       </Hint>
                     </div>
                   )}
                   {counted < selected.size && (
                     <p className="small muted" style={{ margin: 0 }}>
-                      {selected.size - counted} of the selected rows are outside the current filter
-                      and are not in the figures above — they are still selected, and a change made
-                      here still reaches them.
+                      {t`${selected.size - counted} of the selected rows are outside the current filter and are not in the figures above — they are still selected, and a change made here still reaches them.`}
                     </p>
                   )}
                 </div>
                 <div>
-                  <strong>{selected.size} selected.</strong> Changing them is one act, so undo puts
-                  all of them back together.
+                  <Trans>
+                    <strong>{selected.size} selected.</strong> Changing them is one act, so undo puts
+                    all of them back together.
+                  </Trans>
                 </div>
                 <div className="row" style={{ marginTop: 8, gap: 8 }}>
                   {/* A picker rather than the typeahead the cells use: this is one
                       choice applied to many rows, so it is worth seeing the whole
                       list before committing to it. */}
                   <select
-                    aria-label="Set the category on the selected rows"
+                    aria-label={t`Set the category on the selected rows`}
                     value=""
                     onChange={(e) => {
                       if (!e.target.value) return;
@@ -1878,8 +1971,8 @@ export function Register({
                     }}
                     style={{ width: "auto", minWidth: "14em" }}
                   >
-                    <option value="">Set the category…</option>
-                    <option value="__none">Uncategorised</option>
+                    <option value=""><Trans>Set the category…</Trans></option>
+                    <option value="__none"><Trans comment="Option in a dropdown on the Register screen: having no category. See GLOSSARY.md">Uncategorised</Trans></option>
                     {(categories.data ?? []).map((group) => (
                       <optgroup key={group.id} label={group.name}>
                         {group.categories.map((one) => (
@@ -1894,7 +1987,7 @@ export function Register({
                       Money in and transfer legs are left alone and counted,
                       and the note after says how many. */}
                   <select
-                    aria-label="Set work expense on the selected rows"
+                    aria-label={t`Set work expense on the selected rows`}
                     value=""
                     onChange={(e) => {
                       const value = e.target.value;
@@ -1905,10 +1998,10 @@ export function Register({
                     }}
                     style={{ width: "auto", minWidth: "12em" }}
                   >
-                    <option value="">Work expense…</option>
-                    <option value="expected">Work should pay these back</option>
-                    <option value="written_off">Written off — work will not pay</option>
-                    <option value="__none">Not a work expense</option>
+                    <option value=""><Trans comment="Option in a dropdown on the Register screen: noun, spending your employer should pay back. See GLOSSARY.md">Work expense…</Trans></option>
+                    <option value="expected"><Trans>Work should pay these back</Trans></option>
+                    <option value="written_off"><Trans>Written off — work will not pay</Trans></option>
+                    <option value="__none"><Trans>Not a work expense</Trans></option>
                   </select>
                   {reimbursable && (
                     <button
@@ -1917,11 +2010,13 @@ export function Register({
                       onClick={() => reimbursing.mutate()}
                       title={
                         repaying.length > LINK_MAX_EXPENSES
-                          ? `At most ${LINK_MAX_EXPENSES} expenses at a time`
-                          : "The money out, repaid by the one payment in"
+                          ? t`At most ${LINK_MAX_EXPENSES} expenses at a time`
+                          : t`The money out, repaid by the one payment in`
                       }
                     >
-                      Link as reimbursement
+                      <Trans>
+                        Link as reimbursement
+                      </Trans>
                     </button>
                   )}
                   {linkable && (
@@ -1929,9 +2024,11 @@ export function Register({
                       className="link"
                       disabled={linking.isPending}
                       onClick={() => linking.mutate({ link: [picked[0].id, picked[1].id] })}
-                      title="One row from each account's statement, made the two sides of one transfer"
+                      title={t`One row from each account's statement, made the two sides of one transfer`}
                     >
-                      Link as transfer
+                      <Trans>
+                        Link as transfer
+                      </Trans>
                     </button>
                   )}
                   {unlinkable && (
@@ -1940,17 +2037,25 @@ export function Register({
                       disabled={linking.isPending}
                       onClick={() => linking.mutate({ unlink: picked[0].id })}
                     >
-                      Unlink transfer
+                      <Trans comment="Button on the Register screen">
+                        Unlink transfer
+                      </Trans>
                     </button>
                   )}
                   <button className="link" onClick={() => bulk.mutate({ cleared: "cleared" })}>
-                    Mark cleared
+                    <Trans comment="Button on the Register screen">
+                      Mark cleared
+                    </Trans>
                   </button>
                   <button className="link" onClick={() => bulk.mutate({ cleared: "uncleared" })}>
-                    Mark uncleared
+                    <Trans comment="Button on the Register screen">
+                      Mark uncleared
+                    </Trans>
                   </button>
                   <button className="link" onClick={() => setSelected(new Set())}>
-                    Clear selection
+                    <Trans comment="Button on the Register screen">
+                      Clear selection
+                    </Trans>
                   </button>
                 </div>
               </div>
@@ -1960,7 +2065,7 @@ export function Register({
       </div>
 
       {adding && (
-        <Panel title="Add a transaction" onClose={() => setAdding(false)}>
+        <Panel title={t`Add a transaction`} onClose={() => setAdding(false)}>
           <QuickEntry
             household={household}
             accounts={accounts.data ?? []}
@@ -2081,8 +2186,12 @@ function AddMenu({ onSingle, onTransfer }: { onSingle: () => void; onTransfer: (
   };
 
   const choices = [
-    { label: "Single transaction", hint: "One row, typed in by hand", act: onSingle },
-    { label: "Transfer", hint: "Between two of your own accounts — two rows, one act", act: onTransfer },
+    { label: t({ message: "Single transaction", comment: "Label on the Register screen" }), hint: t`One row, typed in by hand`, act: onSingle },
+    {
+      label: t({ message: "Transfer", context: "noun", comment: "Label on the Register screen (noun). See GLOSSARY.md" }),
+      hint: t`Between two of your own accounts — two rows, one act`,
+      act: onTransfer,
+    },
   ];
 
   return (
@@ -2102,10 +2211,11 @@ function AddMenu({ onSingle, onTransfer }: { onSingle: () => void; onTransfer: (
           }
         }}
       >
-        <span aria-hidden="true">➕</span> Add transaction <span aria-hidden="true">▾</span>
+        <span aria-hidden="true">➕</span> <Trans comment="Button on the Register screen">Add transaction</Trans>{" "}
+        <span aria-hidden="true">▾</span>
       </button>
       {open ? (
-        <div className="add-menu-list" role="menu" id={menuId} aria-label="Add">
+        <div className="add-menu-list" role="menu" id={menuId} aria-label={t({ message: "Add", comment: "Screen-reader name on the Register screen" })}>
           {choices.map((one, at) => (
             <button
               key={one.label}
@@ -2206,10 +2316,10 @@ function CurrencyColumns({
         disabled={last}
         title={
           last
-            ? "The table needs at least one currency column"
+            ? t`The table needs at least one currency column`
             : on
-              ? `Hide the ${code} columns`
-              : `Show the ${code} columns`
+              ? t`Hide the ${code} columns`
+              : t`Show the ${code} columns`
         }
         className={on ? "chip active" : "chip"}
         onClick={() => flip(code)}
@@ -2227,8 +2337,8 @@ function CurrencyColumns({
 
   return (
     <div className="currency-toggle">
-      <span className="daterange-label">Currency</span>
-      <div className="daterange-presets" role="group" aria-label="Currencies shown">
+      <span className="daterange-label"><Trans comment="Text on the Register screen: noun. See GLOSSARY.md">Currency</Trans></span>
+      <div className="daterange-presets" role="group" aria-label={t({ message: "Currencies shown", comment: "Screen-reader name on the Register screen" })}>
         {first.map(chip)}
         {rest.length > 0 ? (
           <div className="currency-more" ref={moreHolder}>
@@ -2236,11 +2346,11 @@ function CurrencyColumns({
               type="button"
               className={restOn.length > 0 ? "chip active" : "chip"}
               aria-expanded={moreOpen}
-              aria-label={`${rest.length} more currencies: ${rest.join(", ")}. ${restOn.length} shown.`}
+              aria-label={t`${rest.length} more currencies: ${rest.join(", ")}. ${restOn.length} shown.`}
               title={
                 restOn.length > 0
-                  ? `Also showing ${restOn.join(", ")}`
-                  : `${rest.join(", ")} — all hidden`
+                  ? t({ message: `Also showing ${restOn.join(", ")}`, comment: "Button on the Register screen" })
+                  : t({ message: `${rest.join(", ")} — all hidden`, comment: "Button on the Register screen" })
               }
               onClick={() => setMoreOpen(!moreOpen)}
             >
@@ -2249,22 +2359,22 @@ function CurrencyColumns({
             {/* Right after its button in the page, so Tab walks from the "+"
                 straight into the currencies it opened. */}
             {moreOpen ? (
-              <div className="currency-more-list" role="group" aria-label="More currencies">
+              <div className="currency-more-list" role="group" aria-label={t({ message: "More currencies", comment: "Screen-reader name on the Register screen" })}>
                 {rest.map(chip)}
               </div>
             ) : null}
           </div>
         ) : null}
       </div>
-      <Hint label="why each currency has its own columns">
+      <Hint label={t`why each currency has its own columns`}>
         <p>
-          This ledger never converts. Currency lives on the account and there is no exchange
-          rate stored anywhere, so one Out column holding {available.join(" and ")} would be a
-          column nobody could add up.
+          {t`This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so one Out column holding ${listText(available)} would be a column nobody could add up.`}
         </p>
         <p className="muted small" style={{ marginBottom: 0 }}>
-          Each currency gets its own Out and In instead, and a row only ever fills its own.
-          Turning one off hides its rows as well as its columns — the table says how many.
+          <Trans>
+            Each currency gets its own Out and In instead, and a row only ever fills its own.
+            Turning one off hides its rows as well as its columns — the table says how many.
+          </Trans>
         </p>
       </Hint>
     </div>
@@ -2323,11 +2433,11 @@ function ColumnEdge({
       className="col-resizer"
       role="separator"
       aria-orientation="vertical"
-      aria-label={`Width of the ${label} column`}
+      aria-label={t`Width of the ${label} column`}
       aria-valuenow={widths.widths[column]}
       aria-valuemin={MIN_WIDTH}
       tabIndex={0}
-      title="Drag to resize · double-click to reset every column"
+      title={t`Drag to resize · double-click to reset every column`}
       onPointerDown={(event) => widths.startDrag(column, event)}
       onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => {
@@ -2378,6 +2488,10 @@ function EditableCell({
 
   const locked = txn.cleared === "reconciled";
   const shown = value || "";
+  const editWords =
+    field === "memo"
+      ? { edit: t`Edit the memo`, named: (text: string) => t`${text} — edit the memo` }
+      : { edit: t`Edit the payee`, named: (text: string) => t`${text} — edit the payee` };
 
   function commit(next: string = draft) {
     // Nothing typed, nothing to record: a no-op PATCH would still open a batch
@@ -2407,8 +2521,8 @@ function EditableCell({
            point is that the rest of it is one hover away. What the button
            does is obvious from the shape of the cell; what it says is not,
            once it ends in an ellipsis. */
-        title={shown ? `${shown}\n\nClick to edit` : `Edit the ${field}`}
-        aria-label={shown ? `${shown} — edit the ${field}` : `Edit the ${field}`}
+        title={shown ? `${shown}\n\n${t`Click to edit`}` : editWords.edit}
+        aria-label={shown ? editWords.named(shown) : editWords.edit}
         onClick={() => {
           setDraft(value ?? "");
           setEditing(true);
@@ -2426,7 +2540,7 @@ function EditableCell({
            the whole text is on hover, in the accessible name, and in the panel
            the date opens. Nothing is lost, and the row is a row. */
         className={field === "memo" ? "small muted editable memo-cell" : "editable"}
-        data-label={field === "memo" ? "Memo" : "Payee"}
+        data-label={field === "memo" ? t({ message: "Memo", comment: "Table cell on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md" }) : t({ message: "Payee", comment: "Table cell on the Register screen: noun, who was paid or who paid. See GLOSSARY.md" })}
         /* Marks a cell whose only content is the em dash standing in for
            nothing. On a phone the row is a card, and a line reading "MEMO —"
            is a line spent saying there is nothing to say -- the stylesheet
@@ -2456,7 +2570,7 @@ function EditableCell({
           value={draft}
           onChange={setDraft}
           options={payees.map((one) => one.name)}
-          aria-label="Payee"
+          aria-label={t({ message: "Payee", comment: "Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md" })}
           autoFocus
           onCommit={commit}
           onCancel={() => setEditing(false)}
@@ -2465,7 +2579,7 @@ function EditableCell({
         <input
           value={draft}
           autoFocus
-          aria-label="Memo"
+          aria-label={t({ message: "Memo", comment: "Screen-reader name on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md" })}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={() => commit()}
           onKeyDown={(e) => {
@@ -2479,7 +2593,7 @@ function EditableCell({
           }}
         />
       )}
-      {save.isPending ? <span className="small muted"> saving…</span> : null}
+      {save.isPending ? <span className="small muted"> {t({ message: "saving…", comment: "Table cell on the Register screen" })}</span> : null}
       {save.error ? <div className="small neg">{(save.error as Error).message}</div> : null}
     </td>
   );
@@ -2559,7 +2673,9 @@ function CategoryChooser({
   if (groups.length === 0) {
     return (
       <p className="small muted" style={{ margin: "6px 0 0" }}>
-        No categories yet — add some on the Categories screen.
+        <Trans>
+          No categories yet — add some on the Categories screen.
+        </Trans>
       </p>
     );
   }
@@ -2575,13 +2691,13 @@ function CategoryChooser({
         options={labels}
         browse
         limit={Infinity}
-        placeholder="type any part"
-        aria-label="Category"
+        placeholder={t`type any part`}
+        aria-label={t({ message: "Category", comment: "Screen-reader name on the Register screen: noun, what a transaction was for. See GLOSSARY.md" })}
         onCommit={commit}
         onCancel={() => setUnmatched(false)}
       />
       {unmatched ? (
-        <div className="small neg">No single category matches that. Keep typing, or empty it.</div>
+        <div className="small neg"><Trans>No single category matches that. Keep typing, or empty it.</Trans></div>
       ) : null}
     </>
   );
@@ -2657,12 +2773,14 @@ function CategoryCell({
     // the server refuses a category on it (#124), and a cell offering one
     // would be a control that always fails.
     return (
-      <td className="small editable" data-label="Category">
+      <td className="small editable" data-label={t({ message: "Category", comment: "Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md" })}>
         <span
           className="cell-static muted"
-          title="A transfer moves money between your own accounts, so it is not spending and has no category"
+          title={t`A transfer moves money between your own accounts, so it is not spending and has no category`}
         >
-          No category needed
+          <Trans>
+            No category needed
+          </Trans>
         </span>
       </td>
     );
@@ -2670,7 +2788,7 @@ function CategoryCell({
 
   if (!editing) {
     return (
-      <td className="small editable" data-label="Category">
+      <td className="small editable" data-label={t({ message: "Category", comment: "Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md" })}>
         {locked ? (
           <span className="cell-static">
             {txn.category_name ?? <span className="muted">—</span>}
@@ -2683,12 +2801,16 @@ function CategoryCell({
                "Quality of Life: Subscriptions" is wider than the column. */
             title={
               txn.category_name
-                ? `${txn.category_name}\n\nClick to change`
-                : "Set the category"
+                ? `${txn.category_name}\n\n${t`Click to change`}`
+                : t`Set the category`
             }
             onClick={open}
           >
-            {txn.category_name ?? <span className="muted">uncategorised</span>}
+            {txn.category_name ?? (
+              <span className="muted">
+                <Trans comment="Button on the Register screen: show only the rows with no category. See GLOSSARY.md">uncategorised</Trans>
+              </span>
+            )}
           </button>
         )}
       </td>
@@ -2696,7 +2818,7 @@ function CategoryCell({
   }
 
   return (
-    <td className="editing" data-label="Category">
+    <td className="editing" data-label={t({ message: "Category", comment: "Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md" })}>
       <Combobox
         value={typed}
         onChange={(next) => {
@@ -2706,8 +2828,8 @@ function CategoryCell({
         options={labels}
         browse
         limit={Infinity}
-        placeholder="type any part"
-        aria-label="Category"
+        placeholder={t`type any part`}
+        aria-label={t({ message: "Category", comment: "Screen-reader name on the Register screen: noun, what a transaction was for. See GLOSSARY.md" })}
         autoFocus
         onCommit={commit}
         onCancel={() => {
@@ -2716,7 +2838,7 @@ function CategoryCell({
         }}
       />
       {unmatched ? (
-        <div className="small neg">No single category matches that. Keep typing, or empty it.</div>
+        <div className="small neg"><Trans>No single category matches that. Keep typing, or empty it.</Trans></div>
       ) : null}
       {save.error ? <div className="small neg">{(save.error as Error).message}</div> : null}
     </td>
@@ -2798,14 +2920,18 @@ function QuickEntry({
   }
 
   if (accounts.length === 0) {
-    return <p className="muted small">Add an account before entering transactions.</p>;
+    return (
+      <p className="muted small">
+        <Trans>Add an account before entering transactions.</Trans>
+      </p>
+    );
   }
 
   return (
     <div onKeyDown={onKeyDown}>
       <Problem error={add.error} />
       <div className="row">
-        <Field label="Account">
+        <Field label={t({ message: "Account", comment: "Label of a form field on the Register screen: noun, a bank or cash account. See GLOSSARY.md" })}>
           <select value={account?.id} onChange={(e) => setAccountId(e.target.value)}>
             {accounts.map((one) => (
               <option key={one.id} value={one.id}>
@@ -2814,57 +2940,61 @@ function QuickEntry({
             ))}
           </select>
         </Field>
-        <Field label="Date">
+        <Field label={t({ message: "Date", comment: "Label of a form field on the Register screen: noun. See GLOSSARY.md" })}>
           <input ref={dateRef} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </Field>
-        <Field label="Payee">
+        <Field label={t({ message: "Payee", comment: "Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md" })}>
           <Combobox
             value={payee}
             onChange={setPayee}
             options={payeeNames}
-            placeholder="Who was paid"
-            aria-label="Payee"
+            placeholder={t`Who was paid`}
+            aria-label={t({ message: "Payee", comment: "Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md" })}
           />
         </Field>
         {/* Beside the payee, because the two are chosen together and a rule may
             decide this one from that one. Same typing and the same resolution
             as the register's own cell -- a picker that behaves differently in
             the panel from the list is two things to learn. */}
-        <Field label="Category">
+        <Field label={t({ message: "Category", comment: "Label of a form field on the Register screen: noun, what a transaction was for. See GLOSSARY.md" })}>
           <CategoryChooser groups={groups} value={categoryId} onPick={setCategoryId} />
         </Field>
-        <Field label={`Out (${currency})`}>
+        <Field label={t({ message: `Out (${currency})`, comment: "Label of a form field on the Register screen" })}>
           <input
             value={outflow}
             onChange={(e) => {
               setOutflow(e.target.value);
               if (e.target.value) setInflow("");
             }}
-            placeholder="12,34"
+            placeholder={t`12,34`}
             inputMode="decimal"
           />
         </Field>
-        <Field label={`In (${currency})`}>
+        <Field label={t({ message: `In (${currency})`, comment: "Label of a form field on the Register screen" })}>
           <input
             value={inflow}
             onChange={(e) => {
               setInflow(e.target.value);
               if (e.target.value) setOutflow("");
             }}
-            placeholder="12,34"
+            placeholder={t`12,34`}
             inputMode="decimal"
           />
         </Field>
-        <Field label="Memo">
+        <Field label={t({ message: "Memo", comment: "Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md" })}>
           <input value={memo} onChange={(e) => setMemo(e.target.value)} />
         </Field>
         <button className="primary" disabled={!ready || add.isPending} onClick={() => add.mutate()}>
-          Add
+          <Trans comment="Button on the Register screen: verb">
+            Add
+          </Trans>
         </button>
       </div>
       <p className="small muted" style={{ marginTop: 8 }}>
-        Put the number in Out or In — no minus signs. Press Enter to add and go straight to
-        the next row.
+        <Trans>
+          Put the number in Out or In — no minus signs. Press Enter to add and go straight to
+          the next row.
+        </Trans>
       </p>
     </div>
   );
@@ -2890,22 +3020,36 @@ export function Origin({ transactionId }: { transactionId: string }) {
     return (
       <p className="small">
         <button className="link" onClick={() => setOpen(true)}>
-          Where did this come from?
+          <Trans>
+            Where did this come from?
+          </Trans>
         </button>
       </p>
     );
   }
 
-  if (origin.isLoading) return <p className="small muted">Looking…</p>;
-  if (origin.error) return <p className="small muted">This one was entered by hand.</p>;
+  if (origin.isLoading)
+    return (
+      <p className="small muted">
+        <Trans comment="Sentence on the Register screen">Looking…</Trans>
+      </p>
+    );
+  if (origin.error)
+    return (
+      <p className="small muted">
+        <Trans>This one was entered by hand.</Trans>
+      </p>
+    );
 
   const found = origin.data!;
   if (found.kind === "one_time_import") return <OneTimeOrigin found={found} />;
   return (
     <div className="card" style={{ marginBottom: 12 }}>
       <p className="small muted" style={{ marginBottom: 6 }}>
-        Imported from <strong>{found.filename ?? "a statement"}</strong>, line {found.line_no}, on{" "}
-        {formatInstant(found.imported_at)}.
+        <Trans>
+          Imported from <strong>{found.filename ?? t({ message: "a statement", comment: "Sentence on the Register screen" })}</strong>, line {found.line_no}, on{" "}
+          {formatInstant(found.imported_at)}.
+        </Trans>
       </p>
       {/* An agent import reaches here like any other -- it goes through the
           same staging path, which is the point of the agent API being a second
@@ -2916,12 +3060,16 @@ export function Origin({ transactionId }: { transactionId: string }) {
           Issue #57. */}
       {found.via ? (
         <p className="small muted" style={{ marginBottom: 6 }}>
-          Staged through the agent API by <strong>{found.via}</strong>.
+          <Trans>
+            Staged through the agent API by <strong>{found.via}</strong>.
+          </Trans>
         </p>
       ) : null}
       {found.payee_original ? (
         <p className="small muted" style={{ marginBottom: 6 }}>
-          The bank called it <span className="mono">{found.payee_original}</span>.
+          <Trans>
+            The bank called it <span className="mono">{found.payee_original}</span>.
+          </Trans>
         </p>
       ) : null}
       {found.bank ? (
@@ -2935,7 +3083,7 @@ export function Origin({ transactionId }: { transactionId: string }) {
         </dl>
       ) : null}
       <details>
-        <summary className="small muted">The line exactly as it arrived</summary>
+        <summary className="small muted"><Trans>The line exactly as it arrived</Trans></summary>
         <p className="mono small" style={{ wordBreak: "break-all", marginTop: 6 }}>
           {found.raw}
         </p>
@@ -2955,36 +3103,50 @@ export function Origin({ transactionId }: { transactionId: string }) {
  * its CSV does not, #265).
  */
 function OneTimeOrigin({ found }: { found: TransactionOrigin }) {
-  const app = found.workflow ?? "another app";
+  const app = found.workflow ?? t({ message: "another app", comment: "Label on the Register screen" });
   const how =
     found.workflow_via === "api"
-      ? `${app}, via the ${app} API`
+      ? t`${app}, via the ${app} API`
       : found.workflow_via === "csv"
-        ? `${app}, via its CSV export`
+        ? t`${app}, via its CSV export`
         : app;
   const what = found.filename ? (
-    <>
+    <Trans comment="Label on the Register screen">
       the file <strong>{found.filename}</strong>
-    </>
+    </Trans>
   ) : found.plan_name ? (
-    <>
+    <Trans comment="Label on the Register screen">
       the plan <strong>{found.plan_name}</strong>
-    </>
+    </Trans>
   ) : null;
+  const when = formatInstant(found.imported_at);
   return (
     <div className="card" style={{ marginBottom: 12 }}>
       <p className="small muted" style={{ marginBottom: 6 }}>
-        Brought in by the <strong>One-time Import</strong> from {how}
-        {what ? <>, reading {what}</> : null}, on {formatInstant(found.imported_at)}.
+        {what ? (
+          <Trans>
+            Brought in by the <strong>One-time Import</strong> from {how}, reading {what}, on{" "}
+            {when}.
+          </Trans>
+        ) : (
+          <Trans>
+            Brought in by the <strong>One-time Import</strong> from {how}, on {when}.
+          </Trans>
+        )}
       </p>
       {found.payee_original ? (
         <p className="small muted" style={{ marginBottom: 6 }}>
-          The bank called it <span className="mono">{found.payee_original}</span>, as {app} kept it.
+          <Trans>
+            The bank called it <span className="mono">{found.payee_original}</span>, as {app} kept
+            it.
+          </Trans>
         </p>
       ) : null}
       <p className="small muted" style={{ margin: 0 }}>
-        The whole import is one entry in History, and undoing it there takes every row it brought
-        in back out.
+        <Trans>
+          The whole import is one entry in History, and undoing it there takes every row it brought
+          in back out.
+        </Trans>
       </p>
     </div>
   );
@@ -3022,13 +3184,15 @@ function TransactionHistory({
 
   return (
     <section>
-      <h3 className="section-title">What has happened to this</h3>
+      <h3 className="section-title"><Trans>What has happened to this</Trans></h3>
       <Problem error={history.error} />
       {history.isLoading ? (
-        <p className="muted small">Reading the log…</p>
+        <p className="muted small"><Trans>Reading the log…</Trans></p>
       ) : entries.length === 0 ? (
         <p className="muted small" style={{ margin: 0 }}>
-          Nothing recorded. Rows created before the audit log existed have no history.
+          <Trans>
+            Nothing recorded. Rows created before the audit log existed have no history.
+          </Trans>
         </p>
       ) : (
         <ol className="row-history">
@@ -3178,30 +3342,29 @@ export function SplitPanel({
   }
 
   return (
-    <Panel title="Split this transaction" onClose={leave} dirty={dirty} wide>
+    <Panel title={t`Split this transaction`} onClose={leave} dirty={dirty} wide>
       <Problem error={save.error} />
       <p className="muted small" style={{ marginTop: 0 }}>
-        {format(txn.amount, currency)}
-        {txn.payee_name ? ` · ${txn.payee_name}` : null} on {txn.date}. The parts replace it, so
-        they have to come to the same amount. No minus signs — every part goes the same way the
-        original did.
+        {txn.payee_name
+          ? t`${format(txn.amount, currency)} · ${txn.payee_name} on ${formatDate(txn.date)}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did.`
+          : t`${format(txn.amount, currency)} on ${formatDate(txn.date)}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did.`}
       </p>
 
       <div className={balanced ? "difference agreed" : "difference apart"}>
         <div>
           <strong>
             {anyUnreadable
-              ? `That isn't an amount in ${currency}`
+              ? t`That isn't an amount in ${currency}`
               : left === 0 && anyBlank
-                ? "One part is still empty"
+                ? t`One part is still empty`
                 : left === 0
-                  ? "It adds up"
-                  : `${format(Math.abs(left), currency)} left to account for`}
+                  ? t`It adds up`
+                  : t`${format(Math.abs(left), currency)} left to account for`}
           </strong>
           <span className="small">
             {balanced
-              ? "Every part of the original is accounted for."
-              : "Change a part, or add another."}
+              ? t`Every part of the original is accounted for.`
+              : t`Change a part, or add another.`}
           </span>
         </div>
       </div>
@@ -3211,7 +3374,9 @@ export function SplitPanel({
           <SplitBar magnitudes={drawable} currency={currency} onChange={drag} />
         ) : (
           <p className="small muted split-bar-help">
-            The bar comes back once the parts add up.
+            <Trans>
+              The bar comes back once the parts add up.
+            </Trans>
           </p>
         )
       ) : null}
@@ -3225,7 +3390,7 @@ export function SplitPanel({
                   {barred ? (
                     <span className={`split-swatch split-seg-${index + 1}`} aria-hidden="true" />
                   ) : null}
-                  {`Part ${index + 1} (${currency})`}
+                  {t({ message: `Part ${index + 1} (${currency})`, comment: "Text on the Register screen" })}
                 </>
               }
             >
@@ -3236,20 +3401,22 @@ export function SplitPanel({
                 onChange={(e) => typeAmount(index, e.target.value)}
               />
             </Field>
-            <Field label="Category">
+            <Field label={t({ message: "Category", comment: "Label of a form field on the Register screen: noun, what a transaction was for. See GLOSSARY.md" })}>
               {/* A select whose only option is "Uncategorised" looks like a
                   broken picker rather than an empty ledger, and that is how
                   this screen was read. Say which it is. */}
               {groups.length === 0 ? (
                 <p className="small muted" style={{ margin: "6px 0 0" }}>
-                  No categories yet — add some on the Categories screen.
+                  <Trans>
+                    No categories yet — add some on the Categories screen.
+                  </Trans>
                 </p>
               ) : (
                 <select
                   value={part.categoryId}
                   onChange={(e) => change(index, { categoryId: e.target.value })}
                 >
-                  <option value="">Uncategorised</option>
+                  <option value=""><Trans comment="Option in a dropdown on the Register screen: having no category. See GLOSSARY.md">Uncategorised</Trans></option>
                   {groups.map((group) => (
                     <optgroup key={group.id} label={group.name}>
                       {group.categories.map((one) => (
@@ -3262,7 +3429,7 @@ export function SplitPanel({
                 </select>
               )}
             </Field>
-            <Field label="Memo">
+            <Field label={t({ message: "Memo", comment: "Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md" })}>
               <input
                 value={part.memo}
                 placeholder={txn.memo ?? ""}
@@ -3272,13 +3439,15 @@ export function SplitPanel({
             <button
               className="link"
               disabled={parts.length <= 2}
-              title={parts.length <= 2 ? "A split needs at least two parts" : "Remove this part"}
+              title={parts.length <= 2 ? t`A split needs at least two parts` : t`Remove this part`}
               onClick={() => {
                 const kept = parts.filter((_, at) => at !== index);
                 setParts(spread(kept.length, kept));
               }}
             >
-              Remove
+              <Trans comment="Button on the Register screen: verb">
+                Remove
+              </Trans>
             </button>
           </div>
         ))}
@@ -3287,49 +3456,61 @@ export function SplitPanel({
       <div className="row" style={{ marginTop: 12 }}>
         <button
           disabled={parts.length >= 5}
-          title={parts.length >= 5 ? "Five parts is the most" : ""}
+          title={parts.length >= 5 ? t`Five parts is the most` : ""}
           onClick={() => setParts(spread(parts.length + 1, parts))}
         >
-          Add a part
+          <Trans>
+            Add a part
+          </Trans>
         </button>
         {/* Adding a part re-divides evenly, so the usual case needs no
             arithmetic from anybody. This puts it back after hand-editing,
             which is the only way to undo a typo without reopening the panel. */}
-        <button onClick={() => setParts(spread(parts.length, parts))}>Split equally</button>
+        <button onClick={() => setParts(spread(parts.length, parts))}>
+          <Trans comment="Button on the Register screen: verb, divide a transaction into equal parts">Split equally</Trans>
+        </button>
         {left !== 0 && !anyUnreadable && parts.length < 5 ? (
           <button
             onClick={() =>
               setParts([...parts, { ...blank(), amount: toInput(left, currency) }])
             }
           >
-            Add a part for the {format(left, currency)}
+            {t`Add a part for the ${format(left, currency)}`}
           </button>
         ) : null}
       </div>
 
       <div className="row" style={{ marginTop: 16 }}>
         <button className="primary" disabled={!balanced || save.isPending} onClick={() => save.mutate()}>
-          {save.isPending ? "Splitting…" : `Split into ${parts.length}`}
+          {save.isPending ? t({ message: "Splitting…", comment: "Button on the Register screen" }) : t({ message: `Split into ${parts.length}`, comment: "Button on the Register screen" })}
         </button>
-        <button onClick={leave}>Not now</button>
+        <button onClick={leave}><Trans comment="Button on the Register screen">Not now</Trans></button>
       </div>
       <p className="small muted" style={{ marginTop: 10 }}>
-        This is one act: the original goes, the parts arrive, and History undoes the whole thing
-        in one click. The parts stay marked as belonging together.
+        <Trans>
+          This is one act: the original goes, the parts arrive, and History undoes the whole thing
+          in one click. The parts stay marked as belonging together.
+        </Trans>
       </p>
 
       {asking ? (
-        <Dialog title="Discard this split?" onClose={() => setAsking(false)}>
+        <Dialog title={t`Discard this split?`} onClose={() => setAsking(false)}>
           <p className="small">
-            The parts you have set up have not been saved. Discarding leaves the transaction as it
-            was.
+            <Trans>
+              The parts you have set up have not been saved. Discarding leaves the transaction as it
+              was.
+            </Trans>
           </p>
           <div className="dialog-choices">
             <button className="primary" autoFocus onClick={() => setAsking(false)}>
-              Keep editing
+              <Trans comment="Button on the Register screen">
+                Keep editing
+              </Trans>
             </button>
             <button className="danger" onClick={onClose}>
-              Discard
+              <Trans comment="Button on the Register screen: verb, throw away what was not saved">
+                Discard
+              </Trans>
             </button>
           </div>
         </Dialog>
@@ -3380,8 +3561,8 @@ function Guarded({
           type="button"
           className="guarded"
           disabled={disabled}
-          aria-label={`${label} — ${display}. Double click, or press Enter twice, to edit.`}
-          title="Double click, or press Enter twice, to edit"
+          aria-label={t`${label} — ${display}. Double click, or press Enter twice, to edit.`}
+          title={t`Double click, or press Enter twice, to edit`}
           onDoubleClick={() => setOpen(true)}
           onBlur={() => setArmed(false)}
           onKeyDown={(event) => {
@@ -3399,7 +3580,7 @@ function Guarded({
         >
           <span>{display}</span>
           <span className="small muted">
-            {armed ? "Enter again to edit" : "double click to edit"}
+            {armed ? t`Enter again to edit` : t`double click to edit`}
           </span>
         </button>
       </Field>
@@ -3565,25 +3746,31 @@ function TransactionPanel({
   }
 
   return (
-    <Panel title={`${txn.date} · ${accountName}`} onClose={onClose}>
+    <Panel title={`${formatDate(txn.date)} · ${accountName}`} onClose={onClose}>
       <Problem error={save.error ?? (confirming ? null : remove.error) ?? copy.error} />
       {txn.split_id ? (
         <div className="banner info">
-          One part of a split. The others are in the register on the same date, and the
-          transaction they replaced is in History.
+          <Trans>
+            One part of a split. The others are in the register on the same date, and the
+            transaction they replaced is in History.
+          </Trans>
         </div>
       ) : null}
 
       {isTransfer && (
         <div className="banner warn">
-          This is one leg of a transfer. Changing the amount changes the other side too, so the two
-          can never disagree.
+          <Trans>
+            This is one leg of a transfer. Changing the amount changes the other side too, so the two
+            can never disagree.
+          </Trans>
         </div>
       )}
       {txn.cleared === "reconciled" && (
         <div className="banner warn">
-          This row is locked, so nothing here can be changed and an import will not
-          match against it. Set it back to cleared to edit it.
+          <Trans>
+            This row is locked, so nothing here can be changed and an import will not
+            match against it. Set it back to cleared to edit it.
+          </Trans>
         </div>
       )}
 
@@ -3591,17 +3778,17 @@ function TransactionPanel({
           being corrected come first, and the two that move money come last,
           behind a guard. */}
       <div onBlur={autoSave}>
-        <Field label="Payee">
+        <Field label={t({ message: "Payee", comment: "Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md" })}>
           <Combobox
             value={payee}
             onChange={setPayee}
             options={payees.map((one) => one.name)}
-            aria-label="Payee"
+            aria-label={t({ message: "Payee", comment: "Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md" })}
           />
         </Field>
       </div>
       <p />
-      <Field label="Category">
+      <Field label={t({ message: "Category", comment: "Label of a form field on the Register screen: noun, what a transaction was for. See GLOSSARY.md" })}>
         {isTransfer ? (
           /* Disabled and greyed rather than missing, so the panel keeps its
              shape and says why there is nothing to choose (#124). Unlinking
@@ -3609,9 +3796,9 @@ function TransactionPanel({
           <input
             className="no-category"
             disabled
-            value="No category needed"
-            aria-label="Category: no category needed, this is one leg of a transfer"
-            title="A transfer moves money between your own accounts, so it is not spending and has no category"
+            value={t`No category needed`}
+            aria-label={t`Category: no category needed, this is one leg of a transfer`}
+            title={t`A transfer moves money between your own accounts, so it is not spending and has no category`}
             readOnly
           />
         ) : (
@@ -3620,7 +3807,7 @@ function TransactionPanel({
       </Field>
       <p />
       <div onBlur={autoSave}>
-        <Field label="Memo">
+        <Field label={t({ message: "Memo", comment: "Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md" })}>
           <textarea rows={2} value={memo} onChange={(e) => setMemo(e.target.value)} />
         </Field>
       </div>
@@ -3638,15 +3825,17 @@ function TransactionPanel({
       />
 
       <div onBlur={autoSave}>
-        <Field label="Cleared">
+        <Field label={t({ message: "Cleared", comment: "Label of a form field on the Register screen: state, the bank has the row. See GLOSSARY.md" })}>
           <select
             value={cleared}
             onChange={(e) => setCleared(e.target.value as Transaction["cleared"])}
           >
-            <option value="uncleared">Not seen by the bank yet</option>
-            <option value="cleared">Cleared — the bank has it</option>
+            <option value="uncleared"><Trans>Not seen by the bank yet</Trans></option>
+            <option value="cleared"><Trans>Cleared — the bank has it</Trans></option>
             <option value="reconciled">
-              Locked — checked against the bank, refuse every change
+              <Trans>
+                Locked — checked against the bank, refuse every change
+              </Trans>
             </option>
           </select>
         </Field>
@@ -3655,7 +3844,7 @@ function TransactionPanel({
       {/* Last, and guarded. Everything above is a description of the row;
           these two are the row's effect on a balance. */}
       <hr className="rule" />
-      <Guarded label="Date" display={date} disabled={locked} onDone={autoSave}>
+      <Guarded label={t({ message: "Date", comment: "Label on the Register screen: noun. See GLOSSARY.md" })} display={formatDate(date)} disabled={locked} onDone={autoSave}>
         <input
           type="date"
           value={date}
@@ -3665,13 +3854,13 @@ function TransactionPanel({
       </Guarded>
       <p />
       <Guarded
-        label={`Amount (${currency})`}
+        label={t({ message: `Amount (${currency})`, comment: "Label on the Register screen" })}
         display={format(panelAmount, currency)}
         disabled={locked || isTransfer}
         onDone={autoSave}
       >
         <div className="row">
-          <Field label={`Out (${currency})`}>
+          <Field label={t({ message: `Out (${currency})`, comment: "Label of a form field on the Register screen" })}>
             <input
               value={outflow}
               autoFocus
@@ -3682,7 +3871,7 @@ function TransactionPanel({
               inputMode="decimal"
             />
           </Field>
-          <Field label={`In (${currency})`}>
+          <Field label={t({ message: `In (${currency})`, comment: "Label of a form field on the Register screen" })}>
             <input
               value={inflow}
               onChange={(e) => {
@@ -3697,8 +3886,10 @@ function TransactionPanel({
 
       {txn.import_id && (
         <p className="small muted" style={{ marginTop: 12 }}>
-          Came from a statement. Its line key is <span className="mono">{txn.import_id}</span>,
-          which is what stops the same line being imported twice.
+          <Trans>
+            Came from a statement. Its line key is <span className="mono">{txn.import_id}</span>,
+            which is what stops the same line being imported twice.
+          </Trans>
         </p>
       )}
 
@@ -3715,18 +3906,24 @@ function TransactionPanel({
             onClose();
           }}
         >
-          Done
+          <Trans comment="Button on the Register screen: finish and close">
+            Done
+          </Trans>
         </button>
-        {save.isPending ? <span className="small muted">saving…</span> : null}
+        {save.isPending ? <span className="small muted">{t({ message: "saving…", comment: "Text on the Register screen" })}</span> : null}
         {!isTransfer && (
           <button disabled={copy.isPending} onClick={() => copy.mutate()}>
-            Duplicate
+            <Trans comment="Button on the Register screen: verb, make a copy of this transaction">
+              Duplicate
+            </Trans>
           </button>
         )}
         {/* Not on a transfer leg: one movement of money recorded twice, and
             splitting one side would desynchronise the pair. */}
         {!isTransfer && txn.cleared !== "reconciled" && (
-          <button onClick={() => setSplitting(true)}>Split</button>
+          <button onClick={() => setSplitting(true)}>
+            <Trans comment="Button on the Register screen: verb, divide one transaction into parts. See GLOSSARY.md">Split</Trans>
+          </button>
         )}
         <button
           className="danger"
@@ -3736,22 +3933,26 @@ function TransactionPanel({
             setConfirming(true);
           }}
         >
-          Delete
+          <Trans comment="Button on the Register screen: verb">
+            Delete
+          </Trans>
         </button>
       </div>
       {confirming && (
-        <Dialog title="Delete this transaction?" onClose={() => setConfirming(false)}>
+        <Dialog title={t`Delete this transaction?`} onClose={() => setConfirming(false)}>
           <p style={{ marginTop: 0 }}>
-            {row.date} · {row.payee_name ?? "No payee"} · {format(row.amount, currency)}
-            {txn.split_id ? " — one part of a split; the other parts stay." : null}
+            {formatDate(row.date)} · {row.payee_name ?? t({ message: "No payee", comment: "Sentence on the Register screen" })} · {format(row.amount, currency)}
+            {txn.split_id ? ` — ${t`one part of a split; the other parts stay.`}` : null}
           </p>
-          <p className="small muted">Undo in History brings it back.</p>
+          <p className="small muted"><Trans>Undo in History brings it back.</Trans></p>
           <div className="dialog-choices">
             <button className="danger" disabled={remove.isPending} onClick={() => remove.mutate()}>
-              {remove.isPending ? "Deleting…" : "Yes, delete it"}
+              {remove.isPending ? t({ message: "Deleting…", comment: "Button on the Register screen" }) : t`Yes, delete it`}
             </button>
             <button disabled={remove.isPending} onClick={() => setConfirming(false)}>
-              Keep it
+              <Trans comment="Button on the Register screen">
+                Keep it
+              </Trans>
             </button>
           </div>
           <Problem error={remove.error} />
@@ -3761,7 +3962,9 @@ function TransactionPanel({
       <TransactionHistory householdId={householdId} transactionId={txn.id} />
 
       <p className="small muted" style={{ marginTop: 10 }}>
-        Anything you change here is recorded, and can be put back from the History screen.
+        <Trans>
+          Anything you change here is recorded, and can be put back from the History screen.
+        </Trans>
       </p>
     </Panel>
   );
@@ -3868,13 +4071,16 @@ function ReimbursementSection({
     return (
       <div className="reimbursement-section">
         <h3 className="section-title">
-          Repays {repays.length} {repays.length === 1 ? "expense" : "expenses"}
+          {plural(repays.length, {
+            one: `Repays ${repays.length} expense`,
+            other: `Repays ${repays.length} expenses`,
+          })}
         </h3>
         <table className="work-repays">
           <tbody>
             {repays.map((one) => (
               <tr key={one.id}>
-                <td className="mono">{one.date}</td>
+                <td className="mono">{formatDate(one.date)}</td>
                 <td>{one.payee_name ?? <span className="muted">—</span>}</td>
                 <td className="small muted">{accountNameOf(one.account_id)}</td>
                 <td className="amount">{format(-one.amount, one.currency ?? currency)}</td>
@@ -3883,18 +4089,18 @@ function ReimbursementSection({
           </tbody>
         </table>
         <dl className="difference-sum work-sum">
-          <dt>Received</dt>
+          <dt><Trans comment="Name of a fact on the Register screen: money that came in">Received</Trans></dt>
           <dd className="amount">{format(current.amount, currency)}</dd>
-          <dt>Covered</dt>
+          <dt><Trans comment="Name of a fact on the Register screen: how much of the payment the expenses account for">Covered</Trans></dt>
           <dd className="amount">
             {mixed
               ? repays.map((one) => format(-one.amount, one.currency ?? currency)).join(" + ")
               : format(covered, currency)}
           </dd>
-          <dt>Difference</dt>
+          <dt><Trans comment="Name of a fact on the Register screen: noun, what is left after subtracting">Difference</Trans></dt>
           <dd className="amount">
             {mixed ? (
-              <span className="work-waiting">mixed currencies, not compared</span>
+              <span className="work-waiting"><Trans>mixed currencies, not compared</Trans></span>
             ) : difference === 0 ? (
               format(0, currency)
             ) : (
@@ -3904,14 +4110,12 @@ function ReimbursementSection({
         </dl>
         {!mixed && difference > 0 ? (
           <p className="small muted">
-            {format(difference, currency)} of this payment is not matched to an expense yet. For
-            an advance, that is the part still unspent.
+            {t`${format(difference, currency)} of this payment is not matched to an expense yet. For an advance, that is the part still unspent.`}
           </p>
         ) : null}
         {!mixed && difference < 0 ? (
           <p className="small muted">
-            Work paid {format(-difference, currency)} less than these expenses. If it will not
-            pay the rest, split that part off and write it off.
+            {t`Work paid ${format(-difference, currency)} less than these expenses. If it will not pay the rest, split that part off and write it off.`}
           </p>
         ) : null}
       </div>
@@ -3926,7 +4130,7 @@ function ReimbursementSection({
   return (
     <div className="reimbursement-section">
       <Problem error={change.error} />
-      <Field label="Reimbursement">
+      <Field label={t({ message: "Reimbursement", comment: "Label of a form field on the Register screen: noun, being paid back by work" })}>
         <select
           value={current.reimbursement ?? ""}
           disabled={change.isPending}
@@ -3946,10 +4150,10 @@ function ReimbursementSection({
       {state === "paid" ? (
         <>
           <p className="small" style={{ marginBottom: 4 }}>
-            <span className="muted">Reimbursed by </span>
+            <span className="muted">{t({ message: "Reimbursed by", comment: "Sentence on the Register screen" })} </span>
             {payment ? (
               <>
-                {payment.date} · {accountNameOf(payment.account_id)} ·{" "}
+                {formatDate(payment.date)} · {accountNameOf(payment.account_id)} ·{" "}
                 <span className="amount pos">
                   {format(payment.amount, payment.currency ?? currency)}
                 </span>
@@ -3958,18 +4162,22 @@ function ReimbursementSection({
             ) : links.isLoading ? (
               <span className="muted">…</span>
             ) : (
-              <span className="muted">a payment outside what the register can show</span>
+              <span className="muted"><Trans>a payment outside what the register can show</Trans></span>
             )}
           </p>
           <div className="row">
             <button disabled={change.isPending} onClick={() => setPicking(true)}>
-              Change
+              <Trans comment="Button on the Register screen: verb">
+                Change
+              </Trans>
             </button>
             <button
               disabled={change.isPending}
               onClick={() => change.mutate({ clear_settlement: true })}
             >
-              Not reimbursed after all
+              <Trans>
+                Not reimbursed after all
+              </Trans>
             </button>
           </div>
         </>
@@ -3978,35 +4186,39 @@ function ReimbursementSection({
       {state === "owed" ? (
         <>
           <p className="small work-waiting" style={{ marginBottom: 4 }}>
-            Not reimbursed yet · {waited} {waited === 1 ? "day" : "days"}
+            {plural(waited, {
+              one: `Not reimbursed yet · ${waited} day`,
+              other: `Not reimbursed yet · ${waited} days`,
+            })}
           </p>
           <button disabled={change.isPending} onClick={() => setPicking(true)}>
-            Find the payment…
+            <Trans>
+              Find the payment…
+            </Trans>
           </button>
         </>
       ) : null}
 
       {state === "off" ? (
-        <p className="small muted">Work will not pay this. It counts as your spending.</p>
+        <p className="small muted"><Trans>Work will not pay this. It counts as your spending.</Trans></p>
       ) : null}
 
       {picking ? (
         <RowPicker
           household={household}
-          title="Which payment repaid this?"
+          title={t`Which payment repaid this?`}
           anchor={current.date}
           days={PAYMENT_PICKER_DAYS}
           intro={
-            `Money in within ${PAYMENT_PICKER_DAYS} days either side of ${current.date}. ` +
-            "Either side, because an advance arrives before the spending it covers."
+            t`Money in within ${PAYMENT_PICKER_DAYS} days either side of ${formatDate(current.date)}. Either side, because an advance arrives before the spending it covers.`
           }
           accept={(one) =>
             one.amount > 0 && !isTransferLeg(one) && !one.reimbursement && one.id !== current.id
           }
-          action="Link"
+          action={t({ message: "Link", comment: "Button on the Register screen: verb, link two rows as one transfer" })}
           busy={change.isPending}
           error={change.error}
-          empty="No money in between those dates. Widen them above — a repayment can take weeks."
+          empty={t`No money in between those dates. Widen them above — a repayment can take weeks.`}
           onPick={(one) => change.mutate({ settled_by_id: one.id })}
           onClose={() => setPicking(false)}
         />
@@ -4053,7 +4265,7 @@ function ReceiptSection({ householdId, txn }: { householdId: string; txn: Transa
   return (
     <div className="receipt-section">
       <h3 className="section-title">
-        Receipt{list.length > 1 ? `s (${list.length})` : ""}
+        {list.length > 1 ? t({ message: `Receipts (${list.length})`, comment: "Heading on the Register screen" }) : t({ message: "Receipt", comment: "Heading on the Register screen: noun, a photo or PDF of a receipt. See GLOSSARY.md" })}
       </h3>
 
       {warning ? <div className="banner warn">{warning}</div> : null}
@@ -4086,16 +4298,19 @@ function ReceiptSection({ householdId, txn }: { householdId: string; txn: Transa
             {sizeText(current.download_bytes)}
             {" · "}
             <a href={`/api/receipts/${current.id}/${current.has_original ? "original" : "display"}`}>
-              Download
+              <Trans comment="Link on the Register screen">
+                Download
+              </Trans>
             </a>
           </p>
           {/* Detaching one part of a split does not detach the others — they
               are independent attachments now. Saying so beats pretending. */}
           {current.also_on > 0 ? (
             <p className="small muted">
-              Also on {current.also_on} other{" "}
-              {current.also_on === 1 ? "transaction" : "transactions"} — the same file,
-              stored once.
+              {plural(current.also_on, {
+                one: `Also on ${current.also_on} other transaction — the same file, stored once.`,
+                other: `Also on ${current.also_on} other transactions — the same file, stored once.`,
+              })}
             </p>
           ) : null}
           <MoreInfo receipt={current} />
@@ -4105,7 +4320,7 @@ function ReceiptSection({ householdId, txn }: { householdId: string; txn: Transa
       <div className="row" style={{ marginTop: 10 }}>
         <ReceiptDrop
           target={{ householdId, transactionId: txn.id }}
-          label={list.length ? "Add more" : "Attach receipts"}
+          label={list.length ? t({ message: "Add more", comment: "Text on the Register screen" }) : t({ message: "Attach receipts", comment: "Text on the Register screen" })}
           primary={list.length === 0}
           listenForPaste
           onDone={(result) => refresh(result.warning)}
@@ -4115,7 +4330,9 @@ function ReceiptSection({ householdId, txn }: { householdId: string; txn: Transa
             in a panel people open all day is how the refund funded the wrong
             card. */}
         {current && !replacing ? (
-          <button onClick={() => setReplacing(true)}>Replace</button>
+          <button onClick={() => setReplacing(true)}>
+            <Trans comment="Button on the Register screen: verb">Replace</Trans>
+          </button>
         ) : null}
         {current ? (
           <button
@@ -4124,32 +4341,40 @@ function ReceiptSection({ householdId, txn }: { householdId: string; txn: Transa
               detach.reset();
               setDetaching(current);
             }}
-            title="Send it to the inbox. It stays there until you delete it."
+            title={t`Send it to the inbox. It stays there until you delete it.`}
           >
-            Detach
+            <Trans comment="Button on the Register screen: verb, take the receipt off the transaction">
+              Detach
+            </Trans>
           </button>
         ) : null}
       </div>
 
       {replacing && current ? (
         <div className="banner info">
-          The one on screen goes to the inbox, and the new file takes its place. One
-          undo puts both back.
+          <Trans>
+            The one on screen goes to the inbox, and the new file takes its place. One undo puts
+            both back.
+          </Trans>
           <ReceiptDrop
             target={{ householdId, transactionId: txn.id, replacesId: current.id }}
-            label="Choose the replacement"
+            label={t`Choose the replacement`}
             primary
             onDone={(result) => refresh(result.warning)}
           />
-          <button onClick={() => setReplacing(false)}>Cancel</button>
+          <button onClick={() => setReplacing(false)}>
+            <Trans comment="Button on the Register screen">Cancel</Trans>
+          </button>
         </div>
       ) : null}
 
       {detaching ? (
-        <Dialog title="Detach this receipt?" onClose={() => setDetaching(null)}>
+        <Dialog title={t`Detach this receipt?`} onClose={() => setDetaching(null)}>
           <p style={{ marginTop: 0 }}>
-            <span className="mono">{detaching.download_name.split("/").pop()}</span> goes to the
-            receipts inbox and stays there until it is attached again or deleted.
+            <Trans>
+              <span className="mono">{detaching.download_name.split("/").pop()}</span> goes to the
+              receipts inbox and stays there until it is attached again or deleted.
+            </Trans>
           </p>
           <div className="dialog-choices">
             <button
@@ -4157,10 +4382,12 @@ function ReceiptSection({ householdId, txn }: { householdId: string; txn: Transa
               disabled={detach.isPending}
               onClick={() => detach.mutate(detaching.id)}
             >
-              {detach.isPending ? "Detaching…" : "Yes, detach it"}
+              {detach.isPending ? t({ message: "Detaching…", comment: "Button on the Register screen" }) : t`Yes, detach it`}
             </button>
             <button disabled={detach.isPending} onClick={() => setDetaching(null)}>
-              Keep it here
+              <Trans>
+                Keep it here
+              </Trans>
             </button>
           </div>
           <Problem error={detach.error} />

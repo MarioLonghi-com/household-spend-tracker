@@ -1,6 +1,6 @@
 [project]
 name = "household-spend-tracker"
-version = "0.8.0"
+version = "0.9.0"
 description = "Self-hosted multi-currency spend tracker for one household"
 requires-python = ">=3.12"
 readme = "README.md"
@@ -9,7 +9,7 @@ license-files = ["LICENSE"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=app --cov=statements --cov-report=term-missing --cov-fail-under=85"
+addopts = "--cov=app --cov=statements --cov=updater --cov-report=term-missing --cov-fail-under=85"
 # `repo_wide` marks a test that reads files outside the backend -- every tracked
 # file, the client's sources, the Dockerfile. CI runs those on every pull
 # request (`-m repo_wide`), and the rest only when the backend changed. A test

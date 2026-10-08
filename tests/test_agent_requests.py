@@ -81,7 +81,7 @@ def test_a_key_refused_by_the_csrf_check_still_leaves_a_line(client, keyed):  # 
 
     # A browser-shaped write: the bearer token, a session cookie beside it, and
     # a foreign Origin. Exactly what `refuse_cross_origin_writes` is for.
-    client.cookies.set(cookies.session_name(), "whatever")
+    client.cookies.set(cookies.session_name("testserver"), "whatever")
     refused = client.post(
         f"{MANIFEST.rsplit('/', 1)[0]}/households/x/summary",
         headers={

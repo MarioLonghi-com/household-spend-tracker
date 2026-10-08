@@ -32,6 +32,407 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.9.0 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back, run
+`0.8.0` again (`SPENDTRACKER_VERSION=0.8.0` in `.env`, then
+`docker compose up -d`) or check out `v0.8.0` and restart.
+
+**Updates from the browser.** A container install can now update itself from
+Admin → Application → Updates: check for a release, see every skipped
+release's notes and each migration's `Reversible:` line, confirm with your
+password and code, and save a one-time recovery code. A small updater
+container beside the app verifies the release's build attestation, takes a
+verified backup after the app stops, migrates, checks the new version's
+health, and rolls back to the backup and the previous version by itself if
+anything fails; if even that fails, a recovery page opens in the browser
+behind the recovery code. The updater replaces itself with each release's
+updater, before the app stops when it is newer. It works on Docker Desktop
+(macOS, Windows), Docker Engine (rootful and rootless) and Podman (rootful,
+rootless, and Podman Desktop), with the Tailscale sidecar or without; a
+release zip with double-click launchers installs it without a terminal.
+Release images are now built for amd64 and arm64. Alongside it: Safari signs
+in at `http://localhost`, and a fresh install no longer needs
+`SPENDTRACKER_AUTO_MIGRATE=1` for its first start.
+
+### Fixed
+
+- **Starting the previous app by hand no longer spoils an update.** While an
+  update runs, the stopped app is kept as `…-previous`; started from Docker
+  Desktop's list, its `unless-stopped` policy kept it coming back and it
+  held the port the new version needed, so the update rolled back. The
+  updater now parks it with restart policy `no`, stops it once if it is in
+  the way and starts the new version again, and gives it its own policy back
+  if the update rolls back. The updater's engine client gains one call for
+  this, which changes the app's restart policy and nothing else. (#169)
+
+- **Stopping a container that ignores SIGTERM no longer crashes the
+  updater.** The engine answers a stop only after the grace period and the
+  kill, and the updater's socket gave up at the same 30 seconds, so it
+  crashed and the update rolled back as interrupted. It now waits the grace
+  period on top of its usual timeout. (#169)
+
+- **The updater starts under rootless Podman.** Running as in-container root
+  without capabilities, it tried to change the mode of the `update`
+  volume's directory, which it does not own, and exited before its first
+  heartbeat. It now leaves a directory that is already right alone. (#169)
+
+- **Updates finish under rootless Podman.** The drill wrote its report
+  readable by its own user only, and the updater -- root inside its
+  container, without capabilities -- could not read it, so the apply stalled
+  at the drill and the updater restarted over and over. The report is now
+  written for the `update` volume's group, like every other file the app
+  writes there. (#169)
+
+- **On Podman 4 the new app keeps a healthcheck that can pass.** Podman 4's
+  Docker-compatible API split the copied healthcheck command on every space,
+  so the updated app was reported unhealthy for good. The updater now sends
+  it in the form Podman 4 reads back unchanged. (#169)
+
+- **Recreating the updater soon after an update no longer leaves two
+  updaters running.** For ten minutes after it hands over, the previous
+  updater stands by and takes back over if the new one stops. A `compose up`
+  that recreates the updater (podman-compose always does), or the release
+  zip's launcher replacing it, looked like the new one stopping. The standby
+  now counts a container of the new updater's image as the new updater and
+  allows twenty seconds for the replacement, and the launcher stops a
+  standby before it replaces the updater. (#169)
+
+- **The release zip's launcher replaces the updater under Podman.**
+  podman-compose cannot replace a running container and said nothing, so a
+  newer zip's launcher left the old updater running. The launcher now stops
+  and removes the app and the updater before starting them again. (#169)
+
+- **Updates work on a Podman that shares the host's IPC and UTS namespaces**
+  by default (containers.conf, as in Podman's own image). The copy of the app
+  and of the updater carried a shared-memory size and a hostname that such a
+  Podman refuses in a create, so step 7 and the handover to the new updater
+  failed; neither is carried beside a shared namespace any more. (#169)
+
+- **Safari can sign in at `http://localhost`.** The cookies carried the
+  `__Host-` prefix, which Safari refuses on plain-HTTP `localhost` while
+  keeping an unprefixed `Secure` cookie, so the container on your own
+  computer answered the sign-in, lost the cookie and showed the sign-in
+  screen again, with nothing in any log. At `localhost`, `127.0.0.1` and
+  `[::1]` the cookies are now named without the prefix and are still
+  `Secure`; every other address, the tailnet included, keeps it. HSTS is no
+  longer sent over plain HTTP to those three, where browsers ignore it.
+  After upgrading, expect to sign in at `localhost` once more, code
+  included, in any browser: the old names are no longer read there. (#196)
+
+### Changed
+
+- **A hundred more refusals carry a code for translation.** Transactions,
+  transfers, splits and work expenses, payees and their naming rules,
+  categories, money and the profile panel now answer with a stable `code`
+  and raw `params` beside the same English `detail`, and the client has a
+  catalog message for each. The English a person or an agent reads is
+  unchanged, byte for byte, and agents still get no codes. (#57)
+
+- **History says what kind of act, which field and which table as keys,**
+  beside the English it always sent (`headline_key`, a field's `column`, a
+  row's `table_key`), and a screen in another language words them from its
+  own catalog. English shows the server's words exactly as before; the
+  sentences themselves are still the server's. (#57)
+
+- **A fresh install starts without `SPENDTRACKER_AUTO_MIGRATE=1`.** A first
+  `docker compose up -d` against a new volume used to be refused until you
+  passed the flag once from a terminal. A database with no tables at all --
+  or none yet -- is now migrated on its first start, with one line in the log
+  saying so, because there is nothing in it to lose. Every other mismatch is
+  still refused, including a database with tables but no migration stamp and
+  one stamped at a revision the code does not know. The flag keeps its
+  default (off) and its meaning: a deliberate migration of an existing ledger,
+  which `make upgrade` does with a backup first (#167).
+
+- **The recovery code for an update is issued by `POST`**
+  (`/api/admin/application/update/recovery-code`), not `GET`. Issuing one
+  replaces the code held for the prepared update, so a cross-site `GET` could
+  rotate it and make *Update* fail; as a `POST` it is behind the Origin check.
+- **The updater's heartbeat sentence reaches the screen**: `GET
+  /api/admin/application/update` carries `heartbeat.socket_sentence`.
+
+- **Short messages carry a note for the translator.** Every message of one
+  or two words, and any whose English alone is ambiguous, says in one line
+  what it is -- a button, a column heading, a state, which sense of
+  "Balance" -- through Lingui's own `comment`, so it reaches every
+  language's catalog. "New" and the authenticator's "Set up" now have a
+  context of their own, because they need different words in other
+  languages. The rule is in `client/src/locales/README.md`, and the catalog
+  tests refuse a bare short message. English is unchanged. (#228)
+
+- **"Check the repository" reads published releases, not tags,** and returns
+  every release newer than the running one, newest first, each with its
+  notes: the release's CHANGELOG section where the release body leads with
+  it, and an older release's body as it is. Drafts, prereleases and any tag
+  that is not `vX.Y.Z` are never offered -- a tag can exist with no image
+  behind it, as 0.3.1's did. Still one request, only when the button is
+  pressed, saying nothing about the instance. (#165)
+
+- **Every remaining screen's words are in the catalogs**, one screen per
+  pull request: categories, payees, payee categorisation and the naming
+  rules, the household page, Admin, reconciling and importing accounts,
+  History and backups, application management, receipts, the reports and
+  the one-time YNAB import. Each has a test that renders it in the `en-XA`
+  pseudo-locale and finds no English left. The import guide is a document
+  per language instead: until one is written for a language it shows the
+  English one, marked as English, under a line saying so. `/snap` keeps
+  its words in a small dictionary of its own, keyed by the language chosen
+  on the device. Outside English the desktop menu grows to its widest item,
+  up to 240px, and breaks a word too long for it rather than spilling past
+  the edge. English is unchanged throughout. (#56)
+
+- **The register, the transfer screens, Accounts and Import have their
+  words in the catalogs**, each with a test that renders it in the `en-XA`
+  pseudo-locale and finds no English left. English is unchanged. (#55)
+
+- **Draft translations of every screen** in pt-BR, es-ES and sv-SE, kept as
+  fuzzy drafts and never served until a native speaker has reviewed them
+  (#58). Every catalog entry is valid ICU and keeps the English
+  placeholders, and the drafts were re-checked against the translator
+  notes. (#175, #176, #177)
+
+- **The first screens' words are in the catalogs:** the shell and its menu,
+  signing in, step-up, recovery codes, resetting a sign-in, the profile and
+  passkeys, setting up the instance and accepting an invitation, plus the
+  shared panel, hint and dialog furniture and the sign-in-changes notice.
+  Sentences built from fragments are whole sentences now, one per case, so
+  each can be translated as it is read. English is unchanged, and a test
+  renders each of these screens in the `en-XA` pseudo-locale and finds no
+  English left. (#54)
+
+- **The client's words can come from translation catalogs** (Lingui 6,
+  `client/src/locales/`). The menu, the sort headings' tooltip and the
+  "try again in" wait are the first messages extracted; a refusal that
+  carries a code shows the catalog's message in another language and the
+  server's sentence in English, as before. English is the only language
+  served and the language picker in Profile → Appearance stays hidden; the
+  `en-XA` pseudo-locale is reachable for CI and development, and one
+  Playwright pass runs in it at phone width. CI fails when the catalogs are
+  behind the source. Nothing an English reader sees changes. (#53)
+
+### Added
+
+- **Spend Tracker on a computer of your own, without a terminal.** Every
+  release now carries `spend-tracker-<version>-compose.zip`: install Docker
+  Desktop or Podman Desktop, unzip, and double-click `Start Spend
+  Tracker.command` (macOS), `start-spend-tracker.sh` (Linux) or `Start Spend
+  Tracker.bat` (Windows -- shipped, not yet tested on a Windows machine). The
+  zip's `compose.yaml` names the app and its updater by the digests the
+  release pushed, with no `build:` and a 768m memory ceiling, and its `.env`
+  sets `SPENDTRACKER_PUBLIC_URL=http://localhost:8848` so passkeys work at
+  `localhost`. The launcher sets the container engine up -- the socket and
+  its group, the updater's user under a rootless engine, `podman-restart`
+  and lingering where Podman needs them -- starts both containers, waits for
+  them to answer and opens the setup wizard. Run again, it is the restart
+  and the repair: it keeps the release your ledger is at, and runs the
+  newer of the installed updater and the zip's, never an older one. Built,
+  checked, attested and attached by the release workflow before the release
+  goes public. `deploy/DOCKER.md` has the first-open prompts of macOS and
+  Windows. (#167)
+
+- **Self-update: the maintenance page and browser recovery** (#163).
+  While an update runs, whoever opens Spend Tracker sees only "Spend Tracker
+  is being updated. It will be back in a few minutes." and `/api/health`
+  answers 503: no version, no step, no log. If the update fails *and*
+  putting the previous version back fails three times, the page switches to
+  recovery mode and adds a small "Owner: open recovery" link. `/recovery`
+  asks for the one-time recovery code shown when *Update* was pressed; the
+  updater, not the page, checks it against the hash it holds, refuses for 15
+  minutes after five wrong codes (doubling after each further five), and
+  forgets the hash once the update settles. With the code the page shows the
+  failed update's steps and logs and offers: retry the rollback, restore one
+  of the newest five update backups with the version that took it, start the
+  version that matches the ledger (never a migration), download a backup as
+  a zip (`secret.key` only behind an unticked box with the Backups screen's
+  warning), download the diagnostics (no ledger data, no key), or stop and
+  leave it to a terminal, with the commands. Every action is recorded in the
+  update's history. The same page, without a code, also covers an app that
+  compose started on an image older than the pin: it says the ledger is
+  ahead and to run the launcher again.
+
+- **The Updates section on Admin → Application** (#166), where *Is there a
+  newer version?* was. It says which case this instance is in: a checkout
+  (update from the terminal), a container with no updater (how to start it,
+  naming the container the heartbeat named), an updater the engine refuses
+  (the updater's own sentence), one the engine has outgrown (*Update the
+  updater*), or a working one. A check offers the newest release with every
+  skipped release's notes as plain text, and any other newer release from a
+  menu; *Update the updater only* when a newer updater exists. Preparing shows
+  the updater's progress every two seconds. The confirmation lists the
+  migrations with one tick-box per migration a downgrade cannot undo, shows a
+  one-time recovery code with *Download as a file* and *I have saved it*, and
+  asks for the password and a code; *Update* stays disabled until every box is
+  ticked. While it updates a full-width panel watches `/api/health`, reloads
+  when the app is back, and after 30 minutes points at the recovery page. The
+  outcome stays at the top of the section until dismissed.
+- **Update backups are listed under Database** with their version and
+  migration, apart from the backups made by hand. Each downloads; only those
+  older than the newest five can be deleted, and the server still refuses
+  the five.
+
+- **The app's side of self-update, API only** (#165). Owner-only endpoints
+  under `/admin/application/update` -- a member gets 403 and nothing is
+  written: the updater's heartbeat, status, current prepare report, newest
+  outcome and update backups (`GET`, no outbound request); `prepare`; a
+  one-time recovery code for the confirmation; `apply`, which spends a
+  step-up grant first and must accept exactly the report's lossy migrations;
+  `discard`; `updater`, to replace the updater only, with an optional newer
+  release; and dismissing an outcome. Each writes one request into the
+  shared `update` volume (`SPENDTRACKER_UPDATE_DIR`, default
+  `/var/lib/spend-tracker-update` in the container), atomically, group-shared,
+  never over a request not yet taken; the app checks what it can first, so a
+  refusal is a sentence at once. The recovery code is 140 random bits shown
+  once; only its scrypt hash travels, and the code is never written or
+  logged. Prepared, confirmed (with the lossy migrations accepted),
+  discarded and deleted-backup events are logged at WARNING with the owner's
+  email. The backups listing includes update backups (folders) with their
+  size, version and revision, and the newest five cannot be deleted (409).
+  The Updates section of the screen follows in #166.
+
+- **The self-updater's core, not yet wired to anything** (#158). A new
+  top-level package, `updater/`, standard library only: the file contract
+  between the app and the updater in the shared `update` volume (requests,
+  heartbeat, status, prepare reports, history), strict request validation that
+  refuses anything but a published release newer than the running one and
+  makes no engine call when it refuses, a journal that records which step of
+  an apply has started and which updater owns it, deadlines that do not count
+  time the machine slept, and an engine client that can make only a listed set
+  of calls, negotiates the engine's API version, and refuses privileged
+  containers, host mounts and host networking whoever asks. Tested against a
+  recording fake engine on a real unix socket and `/version` answers recorded
+  from Docker Desktop and Podman. No image, compose service or screen uses it
+  yet.
+- **The self-updater knows which engine it is on** (#160). `updater/detect.py`
+  tells Docker Engine, Docker Desktop, Podman and `podman machine` apart from
+  the engine's `/version` and `/info` and the project's own directory, with
+  rootless and SELinux, and refuses with one sentence each: permission denied
+  on the socket, Enhanced Container Isolation, Windows containers, a TCP
+  socket, Podman older than 4.4, an API older than the tested window, and an
+  engine it does not know; an engine newer than that window is `outdated`. It
+  also reads a local build from the app container's labels and digest, holds
+  the not-root rule for each engine as data for the compose file and the
+  launchers, and infers whether `podman-restart` is on. `updater/heartbeat.py`
+  writes `updater.json` every 30 seconds with the negotiated API version, the
+  engine's window and the updater's real container name, under Docker
+  Compose's and podman-compose's naming alike. Nothing runs it yet.
+
+- **The updater can prove where an image came from before pulling it**
+  (#159). `updater/verify.py` reads the build attestation `release.yml` pushed
+  beside the app or updater image -- anonymously, from the registry, every
+  digest recomputed -- and checks with sigstore that this repository's release
+  workflow built exactly that digest for tag `vX.Y.Z` on a GitHub-hosted
+  runner, by repository and owner id rather than name, with no prerelease
+  suffix. Signature, certificate chain and transparency-log proof are checked
+  from the bundle alone; when Sigstore's trust repository cannot be reached it
+  falls back to the trust root committed beside it and records which one
+  verified. Any doubt is a refusal and nothing skips it. sigstore lives in a
+  lock of its own, `requirements-updater.txt`, never in the app's runtime
+  lock. Tested offline against the real 0.7.0, 0.7.1 and 0.8.0 bundles and
+  tampered copies of them. Nothing calls it yet.
+
+- **The self-updater can prepare, apply and roll back an update** (#161).
+  *Prepare* resolves both images of the release to digests without pulling,
+  checks free disk and memory, verifies both attestations, pulls them by
+  digest, compares their labels with what was verified, and asks the new
+  image's `scripts.upgrade --check --json` what it would do to this ledger,
+  with the app serving throughout. *Apply* runs the steps of the design one
+  journal entry at a time: it stops the app and parks it as
+  `<name>-previous`, runs the drill from the new image (backup first, then
+  the migration), starts the new version as a copy of the previous container
+  that changes only the image and `SPENDTRACKER_AUTO_MIGRATE=0`, checks
+  health from where requests arrive (the Tailscale sidecar, or the published
+  port), writes the pin into the project's `.env` and `pin/release.env`, and
+  prunes update backups beyond the newest five. A failed migration or health
+  check **rolls back on its own**: the backup restored with the old image,
+  the old version started again under its name; after three failed attempts
+  the update needs recovery and nothing serves the ledger. After a crash, a
+  laptop sleeping or the engine restarting, the updater resumes from its
+  journal and never runs the drill twice. The Tailscale sidecar is never
+  stopped or restarted, and an app in a Podman pod is refused with a
+  sentence. The handover to a newer updater (#162) and the maintenance page
+  (#163) are not built yet: the updater carries on without them. CI gains a
+  `self-update` job, advisory for now, that updates release A to B through
+  the updater against a real Docker Engine. No image or compose service runs
+  the updater yet (#164).
+
+- **The self-updater hands over to its successor** (#162). When an update
+  brings a newer updater, the running one verifies it, starts it beside
+  itself as a copy of its own container, and lets it prove it can work --
+  the engine socket, the project's containers, a file written and read back
+  in the `update` volume, and its own image digest -- before stepping aside.
+  The newer updater **goes first**, before the app is stopped, and runs the
+  rest of the update; if it cannot, nothing has been stopped, the old one
+  runs the update and tries again afterwards. The old updater stays on
+  standby for ten minutes and takes back over if the new one stops or falls
+  silent -- rolling back, rather than finishing, an update the newer one had
+  started -- then stops itself and stays as `<name>-previous`. Started by
+  hand from Docker Desktop or Podman Desktop, a `-previous` updater takes over
+  from a canonical one that has been silent for two minutes, and otherwise
+  leaves it alone. After an engine restart, or either updater dying at any
+  point, exactly one of them carries on. *Update the updater only* now works:
+  it verifies and pulls the updater image of a newer release alone, refuses
+  one that does not speak the app's protocol, changes only the updater's
+  line in the pin, and still works when the engine has moved past the
+  updater's tested API versions. The updater is never replaced by an older
+  one. No image or compose service runs the updater yet (#164).
+
+- **An optional pre-update hook for servers** (#168). An operator can have a
+  command of their own run **on the host** before every update -- a Proxmox
+  snapshot of the VM, say -- by installing the systemd path unit, service and
+  runner in `deploy/updater/host-hook/` and mounting their directory into the
+  updater from a server-only `compose.override.yaml` (the README has both,
+  and the snapshot as an example). The updater writes a request naming only
+  the two versions; the runner runs the one root-owned command configured on
+  the host, never anything from the request, and never twice for one update.
+  **A failing hook stops the update before anything changes**: a non-zero
+  exit, a timeout, or no runner answering is *Not started: the pre-update
+  hook failed.*, with the reason and the end of the command's output in the
+  update's history. Without a `hook.json` in that directory the step is
+  skipped and says so; nothing changes for an installation without a hook.
+
+
+- **The self-updater has an image and runs beside the app** (#164).
+  `docker build --target updater .` builds it from the same Dockerfile and
+  the same Chainguard digests as the app: the updater's hashed lock in a
+  venv, `updater/` and nothing else, no shell, no package manager (pip
+  included) and no engine CLI, uid 65532, listening on nothing. Both compose
+  files gain the `updater` service, which alone holds the engine socket,
+  shares an `update` volume with the app and mounts the project directory to
+  pin what it installs in `.env`; it is never in the Tailscale sidecar's
+  network. `SPENDTRACKER_UPDATER_USER=0:0` is for rootless Docker and
+  Podman on Linux, and rootful Docker Engine on Linux needs
+  `SPENDTRACKER_SOCKET_GID` set to the socket's group. Both files carry
+  `x-podman: { in_pod: false }` for podman-compose. **The sidecar's
+  `deploy/tailnet/compose.yaml` now pulls the published images instead of
+  building the checkout,** and has no `build:`: name a release that ships
+  an updater in `.env` (`SPENDTRACKER_VERSION`), then `docker compose pull`.
+  The root `compose.yaml` keeps its build fallback, for the updater too.
+  Every release now builds, smoke-tests, attests and publishes
+  `ghcr.io/mariolonghi-com/household-spend-tracker-updater` for linux/amd64
+  and linux/arm64 beside the app, and the app image carries the
+  `updater-protocol` label. `deploy/tailnet/check.sh` checks the updater:
+  outside the sidecar's namespace, the only holder of the socket, able to
+  reach it, and whether an update is in progress.
+
+- **Self-update is tested end to end on every engine it supports** (#169).
+  CI's `self-update` job is now a matrix: rootful Docker Engine in the
+  loopback and the sidecar layouts, rootless Podman (podman-compose, the
+  updater as `0:0`), and Docker on arm64 (rootless Docker stays in the
+  manual matrix: it cannot make its bridge on a hosted runner). Each leg runs the
+  updater in its own container -- the release's real updater image, with
+  only CI's trust policy added on top -- through an update, a skipped
+  release, a rollback on a failed migration and on failed health, the
+  updater killed and the engine restarted mid-update, recovery through the
+  maintenance page with the recovery code, stale and duplicate requests, the
+  handover to a newer updater and one that fails to start, `compose up`
+  again afterwards, refreshing the updater alone, and the release zip's
+  launcher repairing an install whose updater is older than the zip's. A
+  weekly canary runs an update and the handover on the newest Docker Engine
+  (stable and test channel) and Podman, and opens an issue when one breaks.
+  The bugs it found are under *Fixed*. The job is required by `ci-ok` for
+  any change it covers.
+
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
@@ -200,6 +601,18 @@ published image as what `compose.yaml` runs.
   writes 1,000 rows or more, and after `make restore`, rather than waiting up
   to six hours for the next sweep. (#103)
 
+- **The container image is built for linux/amd64 and linux/arm64, and the
+  release is published last.** The image was amd64 only, so Docker Desktop on
+  an Apple-silicon Mac ran it emulated; each platform is now built and
+  smoke-tested natively and the two are joined into one index, whose digest
+  the provenance attestation names. The GitHub release is created as a draft,
+  the image pushed, attested and pulled back with no credentials to prove the
+  package is public, and only then does the release go public and `X.Y` and
+  `latest` move -- a run that fails halfway leaves a draft, not a release
+  with no image behind it. The `org.opencontainers.image.version` label is
+  the bare `X.Y.Z`, the number `/api/health` reports, and the release body
+  leads with the version's CHANGELOG section. (#181)
+
 - **The register loads five hundred rows at a time.** It used to ask for
   everything the filter matched, up to 25,000 rows, and refetch all of it
   after every edit. It now asks for the first 500, says how many the filter
@@ -272,6 +685,15 @@ published image as what `compose.yaml` runs.
   the route, with a test: it only adds accounts, each in the audit log, and
   History undoes the whole file. Nothing about who may run it changed. (#115)
 
+- **A release waits for one approval before anything is published.**
+  `release.yml`'s `publish` job runs in a `release` environment, and the other
+  two publishing jobs depend on it, so once the repository gives that
+  environment a required reviewer, a pushed `v*` tag builds and smoke-tests as
+  before and then waits for a single click before anything reaches Releases
+  or ghcr.io. `tests/test_release_workflow.py` fails if a publishing job stops
+  depending on the gated one. Until the reviewer is set, it behaves as it did.
+  (#96)
+
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
   failed every release without measuring anything. (#36)
@@ -337,6 +759,20 @@ published image as what `compose.yaml` runs.
   that rebuilds `transactions`) took 5.8 s, and the whole chain about 25 s.
   The upgrade from 0.7.1 took under 2 s. (#104)
 
+- **The upgrade drill can be driven by a program.** `python -m scripts.upgrade
+  --check --json` prints what an upgrade would do as one JSON document: the
+  deployed version and commit, the database's stamp, the code's head, and each
+  pending migration with its `Reversible:` verdict. `--yes --report PATH`
+  writes the outcome of a real run -- the backup folder and whether it
+  verified, the stamp and every counted table before and after, the
+  `secret.key` check, the exit status and the log -- whatever the exit. And
+  the exit status now says what happened: a `secret.key` that does not open
+  the migrated ledger exits 5 and a table with fewer rows than the backup
+  counted exits 6, where both used to print a warning and exit 0, which a
+  person reading the output catches and an updater would not. The codes are
+  listed in the script's docstring. A test proves `--check` against a live WAL
+  ledger leaves the database and its `-wal` byte for byte as they were. (#155)
+
 - **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
   can offer them.** Nothing on the sign-in screen changes yet. The new
   setting is the host name passkeys will be bound to. It defaults to the host
@@ -394,6 +830,33 @@ published image as what `compose.yaml` runs.
 
 ### Documentation
 
+- **Self-update, for operators and owners.** `deploy/UPGRADING.md` makes the
+  browser the default way to update a container install -- prepare,
+  confirm with the recovery code, what happens, the automatic rollback, the
+  pin in `.env`, update backups, going back by hand -- and keeps the
+  terminal drill for checkouts and as the fallback, with screenshots of the
+  Updates section. `deploy/DOCKER.md` covers the updater on a server
+  (`SPENDTRACKER_SOCKET_GID`, the project directory and `.env` writable by
+  the socket's group, the pre-update hook), Docker Desktop and Podman Desktop,
+  Podman (`x-podman: { in_pod: false }`, `label=disable`, `podman-restart`
+  and lingering, the updater's user on each engine), Enhanced Container
+  Isolation's allowlist, and where the setup token is without a terminal.
+  `deploy/TROUBLESHOOTING.md` has the recovery page, the updater that is
+  not running, an updater the engine has outgrown, and every failure by what
+  the owner sees. `SECURITY.md` says what the updater may and may not do,
+  how images are verified, and suggests an egress firewall. The README says
+  what to do when the first release with the updater finds its package
+  private. Placeholders mark where the macOS and Windows first-open
+  screenshots go. (#171)
+
+- **`deploy/tailnet/check.sh` accepts a `.env` of mode 660** shared with the
+  socket's group, which the updater needs to pin a release; 600 still
+  passes. (#171)
+
+- **A rootful Podman machine, Podman Desktop's default, is a confirmed
+  engine** in the updater's per-engine rules: the system `podman-restart`
+  unit and the default socket, as the engine spike observed. (#171)
+
 - **The README shows the register**, from the demo household `make seed`
   creates, so every name and figure in it is invented. There is also a
   `CITATION.cff`. The data-hygiene test now lets screenshots live under
@@ -414,7 +877,6 @@ published image as what `compose.yaml` runs.
   holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
   each language uses, and how each writes money and dates. Nothing in the app
   changes. (#174)
-
 ## 0.7.1 — 2026-10-05
 
 **Reversible: none** — no migration in this release. To go back, check out

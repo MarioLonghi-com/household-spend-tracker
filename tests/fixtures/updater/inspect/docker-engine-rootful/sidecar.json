@@ -1,0 +1,582 @@
+[
+  {
+    "Id": "80292894d224b6f98105c78efec78803a798da647b9d6769b9e28e978d4d9fa5",
+    "Created": "2026-10-08T06:32:27.693206821Z",
+    "Path": "python",
+    "Args": [
+      "deploy/entrypoint.py"
+    ],
+    "State": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 314039,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-08T06:32:28.53396935Z",
+      "FinishedAt": "0001-01-01T00:00:00Z",
+      "Health": {
+        "Status": "healthy",
+        "FailingStreak": 0,
+        "Log": [
+          {
+            "Start": "2026-10-08T09:29:47.513616927+02:00",
+            "End": "2026-10-08T09:29:47.639083029+02:00",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-08T09:30:17.6398953+02:00",
+            "End": "2026-10-08T09:30:17.750499795+02:00",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-08T09:30:47.751096066+02:00",
+            "End": "2026-10-08T09:30:47.907742055+02:00",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-08T09:31:17.908906673+02:00",
+            "End": "2026-10-08T09:31:18.144920991+02:00",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-08T09:31:48.145907471+02:00",
+            "End": "2026-10-08T09:31:48.266967158+02:00",
+            "ExitCode": 0,
+            "Output": ""
+          }
+        ]
+      }
+    },
+    "Image": "sha256:3f7f69b07a2a6adc991a686d01345bc30fabe2bc2fc0b7ee7a5aa4c2d7aaff7e",
+    "ResolvConfPath": "/var/lib/docker/containers/02a5f171525611d9799dcc66e1fa24d9d9c61ba303e434c81d37a59d5083de74/resolv.conf",
+    "HostnamePath": "/var/lib/docker/containers/02a5f171525611d9799dcc66e1fa24d9d9c61ba303e434c81d37a59d5083de74/hostname",
+    "HostsPath": "/var/lib/docker/containers/02a5f171525611d9799dcc66e1fa24d9d9c61ba303e434c81d37a59d5083de74/hosts",
+    "LogPath": "",
+    "Name": "/spend-tracker-app-1",
+    "RestartCount": 0,
+    "Driver": "overlayfs",
+    "Platform": "linux",
+    "MountLabel": "",
+    "ProcessLabel": "",
+    "AppArmorProfile": "docker-default",
+    "ExecIDs": null,
+    "HostConfig": {
+      "Binds": [
+        "spend-tracker_ledger:/var/lib/spend-tracker:rw"
+      ],
+      "ContainerIDFile": "",
+      "LogConfig": {
+        "Type": "journald",
+        "Config": {
+          "tag": "{{.Name}}"
+        }
+      },
+      "NetworkMode": "container:02a5f171525611d9799dcc66e1fa24d9d9c61ba303e434c81d37a59d5083de74",
+      "PortBindings": {},
+      "RestartPolicy": {
+        "Name": "unless-stopped",
+        "MaximumRetryCount": 0
+      },
+      "AutoRemove": false,
+      "VolumeDriver": "",
+      "VolumesFrom": null,
+      "ConsoleSize": [
+        0,
+        0
+      ],
+      "CapAdd": null,
+      "CapDrop": [
+        "ALL"
+      ],
+      "CgroupnsMode": "private",
+      "Dns": null,
+      "DnsOptions": null,
+      "DnsSearch": null,
+      "ExtraHosts": [],
+      "GroupAdd": null,
+      "IpcMode": "private",
+      "Cgroup": "",
+      "Links": null,
+      "OomScoreAdj": 0,
+      "PidMode": "",
+      "Privileged": false,
+      "PublishAllPorts": false,
+      "ReadonlyRootfs": true,
+      "SecurityOpt": [
+        "no-new-privileges:true"
+      ],
+      "Tmpfs": {
+        "/tmp": ""
+      },
+      "UTSMode": "",
+      "UsernsMode": "",
+      "ShmSize": 67108864,
+      "Runtime": "runc",
+      "Isolation": "",
+      "CpuShares": 0,
+      "Memory": 805306368,
+      "NanoCpus": 0,
+      "CgroupParent": "",
+      "BlkioWeight": 0,
+      "BlkioWeightDevice": null,
+      "BlkioDeviceReadBps": null,
+      "BlkioDeviceWriteBps": null,
+      "BlkioDeviceReadIOps": null,
+      "BlkioDeviceWriteIOps": null,
+      "CpuPeriod": 0,
+      "CpuQuota": 0,
+      "CpuRealtimePeriod": 0,
+      "CpuRealtimeRuntime": 0,
+      "CpusetCpus": "",
+      "CpusetMems": "",
+      "Devices": null,
+      "DeviceCgroupRules": null,
+      "DeviceRequests": null,
+      "MemoryReservation": 0,
+      "MemorySwap": 1610612736,
+      "MemorySwappiness": null,
+      "OomKillDisable": null,
+      "PidsLimit": null,
+      "Ulimits": null,
+      "CpuCount": 0,
+      "CpuPercent": 0,
+      "IOMaximumIOps": 0,
+      "IOMaximumBandwidth": 0,
+      "MaskedPaths": [
+        "/proc/acpi",
+        "/proc/asound",
+        "/proc/interrupts",
+        "/proc/kcore",
+        "/proc/keys",
+        "/proc/latency_stats",
+        "/proc/sched_debug",
+        "/proc/scsi",
+        "/proc/timer_list",
+        "/proc/timer_stats",
+        "/sys/devices/virtual/powercap",
+        "/sys/firmware"
+      ],
+      "ReadonlyPaths": [
+        "/proc/bus",
+        "/proc/fs",
+        "/proc/irq",
+        "/proc/sys",
+        "/proc/sysrq-trigger"
+      ]
+    },
+    "Storage": {
+      "RootFS": {
+        "Snapshot": {
+          "Name": "overlayfs"
+        }
+      }
+    },
+    "Mounts": [
+      {
+        "Type": "volume",
+        "Name": "spend-tracker_ledger",
+        "Source": "/var/lib/docker/volumes/spend-tracker_ledger/_data",
+        "Destination": "/var/lib/spend-tracker",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "Config": {
+      "Hostname": "spend-tracker-dev",
+      "Domainname": "",
+      "User": "65532:65532",
+      "AttachStdin": false,
+      "AttachStdout": true,
+      "AttachStderr": true,
+      "ExposedPorts": {
+        "8848/tcp": {}
+      },
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": [
+        "SPENDTRACKER_RP_ID=",
+        "SPENDTRACKER_HOST=127.0.0.1",
+        "SPENDTRACKER_ALLOWED_HOSTS=",
+        "SPENDTRACKER_PUBLIC_URL=https://spend-tracker-dev.tailnet-example.ts.net",
+        "FORWARDED_ALLOW_IPS=127.0.0.1",
+        "SPENDTRACKER_ENV=development",
+        "SPENDTRACKER_AUTO_MIGRATE=0",
+        "SPENDTRACKER_COOKIE_SECURE=on",
+        "PATH=/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin",
+        "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYTHONUNBUFFERED=1",
+        "SPENDTRACKER_DATA_DIR=/var/lib/spend-tracker"
+      ],
+      "Cmd": null,
+      "Healthcheck": {
+        "Test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8848/api/health', timeout=4).status==200 else 1)"
+        ],
+        "Interval": 30000000000,
+        "Timeout": 5000000000,
+        "StartPeriod": 20000000000,
+        "Retries": 3
+      },
+      "Image": "household-spend-tracker:dev",
+      "Volumes": {
+        "/var/lib/spend-tracker": {}
+      },
+      "WorkingDir": "/app",
+      "Entrypoint": [
+        "python",
+        "deploy/entrypoint.py"
+      ],
+      "Labels": {
+        "com.docker.compose.config-hash": "b558a1fe2778cbdd8d027fbaaa3755ec454f2e3ce337266bb2ac47ae819cf43a",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "tailscale:service_started:false",
+        "com.docker.compose.image": "sha256:b14ff97764c1b3b0d2b92e5a9c4ec5bb80a8f6f651b323f10611c42f65594e5c",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "spend-tracker",
+        "com.docker.compose.project.config_files": "/srv/spend-tracker/deploy/tailnet/compose.yaml,/srv/spend-tracker/deploy/tailnet/compose.override.yaml",
+        "com.docker.compose.project.working_dir": "/srv/spend-tracker/deploy/tailnet",
+        "com.docker.compose.replace": "app-1",
+        "com.docker.compose.service": "app",
+        "com.docker.compose.version": "5.6.0",
+        "dev.chainguard.image.title": "python",
+        "dev.chainguard.package.main": "",
+        "org.opencontainers.image.authors": "Chainguard Team https://www.chainguard.dev/",
+        "org.opencontainers.image.created": "2026-10-06T19:04:03Z",
+        "org.opencontainers.image.description": "A self-hosted, multi-currency spend tracker for one household",
+        "org.opencontainers.image.documentation": "https://github.com/MarioLonghi-com/household-spend-tracker/blob/main/deploy/DOCKER.md",
+        "org.opencontainers.image.licenses": "AGPL-3.0-or-later",
+        "org.opencontainers.image.source": "https://github.com/MarioLonghi-com/household-spend-tracker",
+        "org.opencontainers.image.title": "Spend Tracker",
+        "org.opencontainers.image.url": "https://github.com/MarioLonghi-com/household-spend-tracker",
+        "org.opencontainers.image.vendor": "Chainguard"
+      }
+    },
+    "NetworkSettings": {
+      "SandboxID": "",
+      "SandboxKey": "",
+      "Ports": {},
+      "Networks": {}
+    },
+    "ImageManifestDescriptor": {
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "digest": "sha256:b14ff97764c1b3b0d2b92e5a9c4ec5bb80a8f6f651b323f10611c42f65594e5c",
+      "size": 4860,
+      "platform": {
+        "architecture": "amd64",
+        "os": "linux"
+      }
+    }
+  },
+  {
+    "Id": "02a5f171525611d9799dcc66e1fa24d9d9c61ba303e434c81d37a59d5083de74",
+    "Created": "2026-10-05T13:43:15.819542507Z",
+    "Path": "/usr/local/bin/containerboot",
+    "Args": [],
+    "State": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 5003,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-05T14:12:37.638933782Z",
+      "FinishedAt": "2026-10-05T14:12:37.469650519Z",
+      "Health": {
+        "Status": "healthy",
+        "FailingStreak": 0,
+        "Log": [
+          {
+            "Start": "2026-10-08T09:29:25.755058231+02:00",
+            "End": "2026-10-08T09:29:25.809003966+02:00",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-08T09:29:55.810428183+02:00",
+            "End": "2026-10-08T09:29:55.856622336+02:00",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-08T09:30:25.857833496+02:00",
+            "End": "2026-10-08T09:30:25.903936385+02:00",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-08T09:30:55.905022378+02:00",
+            "End": "2026-10-08T09:30:55.953417615+02:00",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-08T09:31:25.954136966+02:00",
+            "End": "2026-10-08T09:31:26.032905529+02:00",
+            "ExitCode": 0,
+            "Output": ""
+          }
+        ]
+      }
+    },
+    "Image": "sha256:c5124a5973948c261450d229135f3749c2002d200b6ba281ffd92e398196e87d",
+    "ResolvConfPath": "/var/lib/docker/containers/02a5f171525611d9799dcc66e1fa24d9d9c61ba303e434c81d37a59d5083de74/resolv.conf",
+    "HostnamePath": "/var/lib/docker/containers/02a5f171525611d9799dcc66e1fa24d9d9c61ba303e434c81d37a59d5083de74/hostname",
+    "HostsPath": "/var/lib/docker/containers/02a5f171525611d9799dcc66e1fa24d9d9c61ba303e434c81d37a59d5083de74/hosts",
+    "LogPath": "",
+    "Name": "/spend-tracker-tailscale-1",
+    "RestartCount": 0,
+    "Driver": "overlayfs",
+    "Platform": "linux",
+    "MountLabel": "",
+    "ProcessLabel": "",
+    "AppArmorProfile": "docker-default",
+    "ExecIDs": null,
+    "HostConfig": {
+      "Binds": [
+        "/srv/spend-tracker/deploy/tailnet/serve.json:/config/serve.json:ro",
+        "spend-tracker_ts-state:/var/lib/tailscale:rw"
+      ],
+      "ContainerIDFile": "",
+      "LogConfig": {
+        "Type": "journald",
+        "Config": {
+          "tag": "{{.Name}}"
+        }
+      },
+      "NetworkMode": "spend-tracker_default",
+      "PortBindings": {},
+      "RestartPolicy": {
+        "Name": "unless-stopped",
+        "MaximumRetryCount": 0
+      },
+      "AutoRemove": false,
+      "VolumeDriver": "",
+      "VolumesFrom": null,
+      "ConsoleSize": [
+        0,
+        0
+      ],
+      "CapAdd": [
+        "CAP_NET_ADMIN"
+      ],
+      "CapDrop": null,
+      "CgroupnsMode": "private",
+      "Dns": null,
+      "DnsOptions": null,
+      "DnsSearch": null,
+      "ExtraHosts": [],
+      "GroupAdd": null,
+      "IpcMode": "private",
+      "Cgroup": "",
+      "Links": null,
+      "OomScoreAdj": 0,
+      "PidMode": "",
+      "Privileged": false,
+      "PublishAllPorts": false,
+      "ReadonlyRootfs": false,
+      "SecurityOpt": null,
+      "UTSMode": "",
+      "UsernsMode": "",
+      "ShmSize": 67108864,
+      "Runtime": "runc",
+      "Isolation": "",
+      "CpuShares": 0,
+      "Memory": 0,
+      "NanoCpus": 0,
+      "CgroupParent": "",
+      "BlkioWeight": 0,
+      "BlkioWeightDevice": null,
+      "BlkioDeviceReadBps": null,
+      "BlkioDeviceWriteBps": null,
+      "BlkioDeviceReadIOps": null,
+      "BlkioDeviceWriteIOps": null,
+      "CpuPeriod": 0,
+      "CpuQuota": 0,
+      "CpuRealtimePeriod": 0,
+      "CpuRealtimeRuntime": 0,
+      "CpusetCpus": "",
+      "CpusetMems": "",
+      "Devices": [
+        {
+          "PathOnHost": "/dev/net/tun",
+          "PathInContainer": "/dev/net/tun",
+          "CgroupPermissions": "rwm"
+        }
+      ],
+      "DeviceCgroupRules": null,
+      "DeviceRequests": null,
+      "MemoryReservation": 0,
+      "MemorySwap": 0,
+      "MemorySwappiness": null,
+      "OomKillDisable": null,
+      "PidsLimit": null,
+      "Ulimits": null,
+      "CpuCount": 0,
+      "CpuPercent": 0,
+      "IOMaximumIOps": 0,
+      "IOMaximumBandwidth": 0,
+      "MaskedPaths": [
+        "/proc/acpi",
+        "/proc/asound",
+        "/proc/interrupts",
+        "/proc/kcore",
+        "/proc/keys",
+        "/proc/latency_stats",
+        "/proc/sched_debug",
+        "/proc/scsi",
+        "/proc/timer_list",
+        "/proc/timer_stats",
+        "/sys/devices/virtual/powercap",
+        "/sys/firmware"
+      ],
+      "ReadonlyPaths": [
+        "/proc/bus",
+        "/proc/fs",
+        "/proc/irq",
+        "/proc/sys",
+        "/proc/sysrq-trigger"
+      ]
+    },
+    "Storage": {
+      "RootFS": {
+        "Snapshot": {
+          "Name": "overlayfs"
+        }
+      }
+    },
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/srv/spend-tracker/deploy/tailnet/serve.json",
+        "Destination": "/config/serve.json",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "volume",
+        "Name": "spend-tracker_ts-state",
+        "Source": "/var/lib/docker/volumes/spend-tracker_ts-state/_data",
+        "Destination": "/var/lib/tailscale",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "Config": {
+      "Hostname": "spend-tracker-dev",
+      "Domainname": "",
+      "User": "",
+      "AttachStdin": false,
+      "AttachStdout": true,
+      "AttachStderr": true,
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": [
+        "TS_STATE_DIR=/var/lib/tailscale",
+        "TS_USERSPACE=false",
+        "TS_AUTHKEY=<redacted>",
+        "TS_EXTRA_ARGS=--advertise-tags=tag:lab",
+        "TS_SERVE_CONFIG=/config/serve.json",
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      ],
+      "Cmd": [
+        "/usr/local/bin/containerboot"
+      ],
+      "Healthcheck": {
+        "Test": [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "-T",
+          "5",
+          "http://127.0.0.1:8848/api/health"
+        ],
+        "Interval": 30000000000,
+        "Timeout": 10000000000,
+        "StartPeriod": 60000000000,
+        "Retries": 3
+      },
+      "Image": "tailscale/tailscale:v1.102.5",
+      "Volumes": null,
+      "WorkingDir": "/",
+      "Entrypoint": null,
+      "Labels": {
+        "com.docker.compose.config-hash": "4e35c463e3d74ad27860b0f70b30deeec546a2b5c5cb296fe5bce75f1fa1507d",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:a2fc939e42fac785865c6c21a36cd0962d36e2aeb6bcb9756fee6aa0ee217804",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "spend-tracker",
+        "com.docker.compose.project.config_files": "/srv/spend-tracker/deploy/tailnet/compose.yaml,/srv/spend-tracker/deploy/tailnet/compose.override.yaml",
+        "com.docker.compose.project.working_dir": "/srv/spend-tracker/deploy/tailnet",
+        "com.docker.compose.replace": "tailscale-1",
+        "com.docker.compose.service": "tailscale",
+        "com.docker.compose.version": "5.6.0"
+      }
+    },
+    "NetworkSettings": {
+      "SandboxID": "a3b32117f2e0dd2c29c55529dd6944c1082cadfc9fe95f5de207c574b41c4bae",
+      "SandboxKey": "/var/run/docker/netns/a3b32117f2e0",
+      "Ports": {},
+      "Networks": {
+        "spend-tracker_default": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "spend-tracker-tailscale-1",
+            "tailscale"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "3b83c27a0d737b3873c9762e8cbae5bca3dbfa87846576733afbde16b5731335",
+          "EndpointID": "910615f5b7b2e6dfc06cdc17505dfd2fd82822eadb9630c039d9bef61d50e049",
+          "Gateway": "192.0.2.10",
+          "IPAddress": "192.0.2.11",
+          "MacAddress": "02:42:c0:00:02:0a",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "spend-tracker-tailscale-1",
+            "tailscale",
+            "02a5f1715256",
+            "spend-tracker-dev"
+          ]
+        }
+      }
+    },
+    "ImageManifestDescriptor": {
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "digest": "sha256:a2fc939e42fac785865c6c21a36cd0962d36e2aeb6bcb9756fee6aa0ee217804",
+      "size": 1458,
+      "platform": {
+        "architecture": "amd64",
+        "os": "linux"
+      }
+    }
+  }
+]

@@ -26,6 +26,7 @@ import { api } from "../lib/api";
 import { NOTHING_DISMISSED, dismissing, isDismissed, owedTo, sentence } from "../lib/signInChanges";
 import { readSticky, writeSticky } from "../lib/sticky";
 import type { SignInChange, User } from "../lib/types";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 /** How many lines before "and N more". */
 const SHOWN = 3;
@@ -39,6 +40,7 @@ export function noticeKey(userId: string): string {
 }
 
 export function SignInNotice({ user, onOpen }: { user: User; onOpen: () => void }) {
+  const { t } = useLingui();
   const owner = user.role === "owner";
   // The Admin screen's own key, so a reset made there refreshes this too.
   const changes = useQuery({
@@ -63,17 +65,27 @@ export function SignInNotice({ user, onOpen }: { user: User; onOpen: () => void 
   };
 
   return (
-    <div className="banner warn" role="status" aria-label="Recent sign-in changes">
-      <strong>Sign-in changes in the last 14 days, by somebody other than you:</strong>
+    <div className="banner warn" role="status" aria-label={t`Recent sign-in changes`}>
+      <strong>
+        <Trans>Sign-in changes in the last 14 days, by somebody other than you:</Trans>
+      </strong>
       <ul style={{ margin: "6px 0", paddingLeft: 18 }}>
         {owed.slice(0, SHOWN).map((one) => (
           <li key={one.key}>{sentence(one)}.</li>
         ))}
-        {owed.length > SHOWN && <li>and {owed.length - SHOWN} more.</li>}
+        {owed.length > SHOWN && (
+          <li>
+            <Trans comment="List item, SignInNotice (shared)">and {owed.length - SHOWN} more.</Trans>
+          </li>
+        )}
       </ul>
       <div className="row" style={{ gap: 8 }}>
-        <button onClick={onOpen}>See them in Admin</button>
-        <button onClick={dismiss}>Dismiss</button>
+        <button onClick={onOpen}>
+          <Trans>See them in Admin</Trans>
+        </button>
+        <button onClick={dismiss}>
+          <Trans comment="Button, SignInNotice (shared): verb, hide this notice">Dismiss</Trans>
+        </button>
       </div>
     </div>
   );

@@ -946,3 +946,90 @@ describe("The YNAB wizard", () => {
     expect(panel.textContent).toContain("2025-13-45");
   });
 });
+
+describe("in en-XA, the wizard shows no English", () => {
+  /** Every string value the server sent -- names, reasons, sentences -- is data. */
+  function serverWords(...sent: unknown[]): Set<string> {
+    const words = new Set<string>(["Test", "Plan", "Spend", "Tracker", "GitHub", "YNAB", "zip", "csv", "Register", "API", "CSV"]);
+    const walk = (value: unknown): void => {
+      if (typeof value === "string") for (const word of value.match(/[A-Za-z]+/g) ?? []) words.add(word);
+      else if (Array.isArray(value)) value.forEach(walk);
+      else if (value && typeof value === "object") Object.values(value).forEach(walk);
+    };
+    sent.forEach(walk);
+    return words;
+  }
+
+  it("every step, from the section to the report, through the API and the file", async () => {
+    const { activate } = await import("../lib/i18n");
+    const { untranslated } = await import("../test-pseudo");
+    found = analysis({
+      previous_imports: [{ batch_id: "b-0", at: "2025-12-01T10:00:00", via: "csv", filename: "old.csv", plan_name: null, status: "applied" }],
+    } as Partial<Analysis>);
+    dryRun = report({ duplicates: DUPLICATES });
+    kept = report({
+      committed: true,
+      batch_id: "b-1",
+      created: { accounts: [{ id: "acc-9", name: "Beta Card", opening_date: "2025-01-31" }], categories: [], payees: 7 },
+      bank_text_rows: 12,
+      rule_suggestions: 30,
+      balance_differences: [
+        { account_key: "Alpha Current", account: "Alpha Current", currency: "GBP", ynab_balance_minor: 1000, imported_minor: 900, difference_minor: 100, sentence: "Zork" },
+      ],
+    } as Partial<ImportReport>);
+    // The server's reasons are sentences of its own (#57); here they are one
+    // made-up word each, so the words they would bring cannot hide the page's.
+    for (const one of [dryRun, kept]) {
+      one.not_imported = one.not_imported.map((row) => ({ ...row, reason: "Zork" }));
+      one.unpaired_transfers = (one.unpaired_transfers ?? []).map((row) => ({ ...row, reason: "Zork", payee: "Pot" }));
+      one.report_text = "";
+    }
+    const data = serverWords(found, dryRun, kept, HOME.name);
+    const left = () => untranslated(document.body).filter((word) => !data.has(word));
+    await activate("en-XA");
+    try {
+      mount();
+      const section = document.querySelector<HTMLElement>('section[aria-labelledby="one-time-import-title"]')!;
+      expect(untranslated(section).filter((word) => !data.has(word))).toEqual([]);
+      fireEvent.click(section.querySelector("button.primary")!);
+      const panel = await screen.findByRole("dialog");
+      const next = () => panel.querySelector<HTMLButtonElement>(".ynab-nav button.primary")!;
+      expect(left()).toEqual([]);
+
+      // Connect: the API key first, then the file.
+      fireEvent.click(next());
+      fireEvent.click(panel.querySelectorAll<HTMLInputElement>('input[name="ynab-via"]')[1]);
+      expect(left()).toEqual([]);
+      fireEvent.click(panel.querySelectorAll<HTMLInputElement>('input[name="ynab-via"]')[0]);
+      const file = new File(["Account,Flag,Date\n"], "Test Register.csv", { type: "text/csv" });
+      fireEvent.change(panel.querySelector('input[type="file"]') as HTMLInputElement, { target: { files: [file] } });
+      expect(left()).toEqual([]);
+
+      // Review, accounts (one created), categories, options.
+      fireEvent.click(next());
+      await waitFor(() => expect(panel.querySelector("dl.facts")).not.toBeNull());
+      expect(left()).toEqual([]);
+      await waitFor(() => expect(next().disabled).toBe(false));
+      fireEvent.click(next());
+      await waitFor(() => expect(panel.querySelector("table.ynab-map")).not.toBeNull());
+      expect(left()).toEqual([]);
+      fireEvent.click(next());
+      await waitFor(() => expect(panel.querySelector('tr[data-state="fixed"]')).not.toBeNull());
+      expect(left()).toEqual([]);
+      fireEvent.click(next());
+      await waitFor(() => expect(panel.querySelector(".ynab-ack")).not.toBeNull());
+      expect(left()).toEqual([]);
+
+      // Preview with duplicates, then the report.
+      fireEvent.click(panel.querySelector<HTMLInputElement>(".ynab-ack input")!);
+      fireEvent.click(next());
+      await waitFor(() => expect(panel.querySelector(".ynab-counts")).not.toBeNull());
+      expect(left()).toEqual([]);
+      fireEvent.click(next());
+      await waitFor(() => expect(panel.querySelector(".ynab-balance-differences")).not.toBeNull());
+      expect(left()).toEqual([]);
+    } finally {
+      await activate("en");
+    }
+  });
+});

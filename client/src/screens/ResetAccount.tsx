@@ -15,6 +15,9 @@ import { api } from "../lib/api";
 import { formatInstant } from "../lib/time";
 import { Field, Problem } from "../components/bits";
 import type { ResetState } from "../lib/types";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
 
 interface Offer {
   blob: string;
@@ -22,7 +25,31 @@ interface Offer {
   secret: string;
 }
 
+/**
+ * Who reset what, when, and what to do now: whole sentences, one per case,
+ * so a translator sees each as it is read.
+ */
+function resetText(state: ResetState, when: string): string {
+  const by = state.reset_by;
+  const email = state.email;
+  const both = state.password && state.authenticator;
+  if (by) {
+    if (both)
+      return t`${by} reset your password and your authenticator for ${email} on ${when}. Every browser that was signed in as you has been signed out. Set both again below.`;
+    return state.password
+      ? t`${by} reset your password for ${email} on ${when}. Every browser that was signed in as you has been signed out. Set it again below.`
+      : t`${by} reset your authenticator for ${email} on ${when}. Every browser that was signed in as you has been signed out. Set it again below.`;
+  }
+  if (both)
+    return t`Your password and your authenticator for ${email} was reset from the server on ${when}. Every browser that was signed in as you has been signed out. Set both again below.`;
+  return state.password
+    ? t`Your password for ${email} was reset from the server on ${when}. Every browser that was signed in as you has been signed out. Set it again below.`
+    : t`Your authenticator for ${email} was reset from the server on ${when}. Every browser that was signed in as you has been signed out. Set it again below.`;
+}
+
 export function ResetAccount({ token, onDone }: { token: string; onDone: () => void }) {
+  // Re-renders in a language that arrives after the first render.
+  useLingui();
   const path = `/reset/${encodeURIComponent(token)}`;
   const [state, setState] = useState<ResetState | null>(null);
   const [looking, setLooking] = useState(true);
@@ -82,36 +109,44 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
       setCodes(done.recovery_codes);
     });
 
-  if (looking) return <div className="centred muted">Looking up your reset link…</div>;
+  if (looking)
+    return (
+      <div className="centred muted">
+        <Trans>Looking up your reset link…</Trans>
+      </div>
+    );
 
   if (!state)
     return (
       <div className="centred">
-        <h1>That link doesn't work</h1>
+        <h1>
+          <Trans>That link doesn't work</Trans>
+        </h1>
         <Problem error={error} />
         <p className="muted small">
-          Reset links work once and they expire. Ask an owner of this instance for a new one.
+          <Trans>
+            Reset links work once and they expire. Ask an owner of this instance for a new one.
+          </Trans>
         </p>
       </div>
     );
 
-  const what =
-    state.password && state.authenticator
-      ? "your password and your authenticator"
-      : state.password
-        ? "your password"
-        : "your authenticator";
-
   if (codes)
     return (
       <div className="centred">
-        <h1>Done</h1>
+        <h1>
+          <Trans comment="Screen title on the account reset page">Done</Trans>
+        </h1>
         {codes.length > 0 ? (
           <div className="card">
-            <h2>Your new recovery codes</h2>
+            <h2>
+              <Trans>Your new recovery codes</Trans>
+            </h2>
             <p className="muted small">
-              Each one works once, and they are shown only now. Your old ones no longer work. They
-              are how you get back in if you lose your phone but still know your password.
+              <Trans>
+                Each one works once, and they are shown only now. Your old ones no longer work.
+                They are how you get back in if you lose your phone but still know your password.
+              </Trans>
             </p>
             <div className="codes">
               {codes.map((one) => (
@@ -125,18 +160,20 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
                 onChange={(e) => setSaved(e.target.checked)}
                 style={{ width: "auto", marginRight: 8 }}
               />
-              I have stored these somewhere that is not this browser
+              <Trans>I have stored these somewhere that is not this browser</Trans>
             </label>
             <p />
             <button className="primary" disabled={!saved} onClick={onDone}>
-              Sign in
+              <Trans comment="Button on the account reset page. See GLOSSARY.md">Sign in</Trans>
             </button>
           </div>
         ) : (
           <div className="card">
-            <p>Your new password is set. Sign in with it and your authenticator as usual.</p>
+            <p>
+              <Trans>Your new password is set. Sign in with it and your authenticator as usual.</Trans>
+            </p>
             <button className="primary" onClick={onDone}>
-              Sign in
+              <Trans comment="Button on the account reset page. See GLOSSARY.md">Sign in</Trans>
             </button>
           </div>
         )}
@@ -149,24 +186,22 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
 
   return (
     <div className="centred">
-      <h1>Reset your sign-in</h1>
+      <h1>
+        <Trans>Reset your sign-in</Trans>
+      </h1>
+      <p className="muted small">{resetText(state, formatInstant(state.created_at))}</p>
       <p className="muted small">
-        {state.reset_by
-          ? `${state.reset_by} reset ${what} for ${state.email}`
-          : `${what[0].toUpperCase()}${what.slice(1)} for ${state.email} was reset from the server`}{" "}
-        on {formatInstant(state.created_at)}. Every browser that was signed in as you has been
-        signed out. Set {state.password && state.authenticator ? "both" : "it"} again below.
-      </p>
-      <p className="muted small">
-        If you did not expect this, tell an owner of this instance before you go on.
+        <Trans>If you did not expect this, tell an owner of this instance before you go on.</Trans>
       </p>
 
       <Problem error={error} />
 
       {state.password && (
         <div className="card">
-          <h2>A new password</h2>
-          <Field label="Password">
+          <h2>
+            <Trans>A new password</Trans>
+          </h2>
+          <Field label={t({ message: "Password", comment: "Label of a form field on the account reset page: noun. See GLOSSARY.md" })}>
             <input
               type="password"
               name="new-password"
@@ -176,19 +211,25 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
               autoFocus
             />
           </Field>
-          <p className="muted small">At least 12 characters. Length is what matters.</p>
+          <p className="muted small">
+            <Trans>At least 12 characters. Length is what matters.</Trans>
+          </p>
         </div>
       )}
 
       {state.authenticator && (
         <div className="card">
-          <h2>A new authenticator</h2>
+          <h2>
+            <Trans>A new authenticator</Trans>
+          </h2>
           {offer ? (
             <>
               <p className="muted small">
-                Scan this with your authenticator app, then type the six digits it shows. We check
-                the code now, so you find out it works here rather than the next time you sign in.
-                The entry your app had for this account no longer works; delete it.
+                <Trans>
+                  Scan this with your authenticator app, then type the six digits it shows. We
+                  check the code now, so you find out it works here rather than the next time you
+                  sign in. The entry your app had for this account no longer works; delete it.
+                </Trans>
               </p>
               <div
                 style={{ background: "#fff", padding: 12, width: "fit-content", margin: "8px 0" }}
@@ -196,9 +237,11 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
                 <QRCodeSVG value={offer.otpauth_uri} size={168} />
               </div>
               <p className="small muted">
-                Can't scan? Enter this key by hand: <span className="mono">{offer.secret}</span>
+                <Trans>
+                  Can't scan? Enter this key by hand: <span className="mono">{offer.secret}</span>
+                </Trans>
               </p>
-              <Field label="The six digits">
+              <Field label={t`The six digits`}>
                 <input
                   name="one-time-code"
                   value={code}
@@ -211,20 +254,20 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
               </Field>
               <p className="small">
                 <button className="link" disabled={busy} onClick={anotherOffer}>
-                  Show a new code to scan
+                  <Trans>Show a new code to scan</Trans>
                 </button>
               </p>
             </>
           ) : (
             <button disabled={busy} onClick={anotherOffer}>
-              Show a code to scan
+              <Trans>Show a code to scan</Trans>
             </button>
           )}
         </div>
       )}
 
       <button className="primary" disabled={busy || !ready} onClick={finish}>
-        {state.authenticator ? "Check the code and finish" : "Set the password"}
+        {state.authenticator ? t`Check the code and finish` : t`Set the password`}
       </button>
     </div>
   );

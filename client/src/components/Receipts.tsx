@@ -13,6 +13,8 @@ import { api, ApiError } from "../lib/api";
 import type { Receipt, ReceiptUpload } from "../lib/types";
 import { formatInstant } from "../lib/time";
 import { formatFixed } from "../lib/locale";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** What the file picker offers. A hint, never a control — the magic-byte
  *  sniff on the server is the control, and the two must not be confused. */
@@ -27,6 +29,11 @@ export function sizeText(bytes: number): string {
 
 /** A fix worse than this is a district, not a doorway. */
 const VAGUE_METRES = 100;
+
+/** "3 pages": a PDF's page count, only ever shown for more than one. */
+function pages(count: number): string {
+  return plural(count, { one: `${count} pages`, other: `${count} pages` });
+}
 
 function compass(degrees: number): string {
   const points = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
@@ -51,13 +58,15 @@ function whereText(receipt: Receipt): { text: string; query: string } | null {
   // The text in the reader's decimal mark; the link below keeps the point,
   // which is what a map service reads.
   const shown = `${formatFixed(receipt.gps_lat, places)}, ${formatFixed(receipt.gps_lon, places)}`;
-  let text = vague ? `approximate — ${shown}` : shown;
+  let text = vague ? t({ message: `approximate — ${shown}`, comment: "Label on the receipts" }) : shown;
   if (receipt.gps_accuracy_m !== null) {
     const metres = receipt.gps_accuracy_m;
     text += metres >= 1000 ? ` ±${formatFixed(metres / 1000, 1)} km` : ` ±${Math.round(metres)} m`;
   }
   if (receipt.gps_bearing !== null) {
-    text += ` facing ${Math.round(receipt.gps_bearing)}° ${compass(receipt.gps_bearing)}`;
+    const bearing = Math.round(receipt.gps_bearing);
+    const point = compass(receipt.gps_bearing);
+    text += ` ${t({ message: `facing ${bearing}° ${point}`, comment: "Label on the receipts" })}`;
   }
   // Five decimals is about a metre, and more than any fix here is worth. The
   // full float stays in the database; the link does not advertise a precision
@@ -111,7 +120,7 @@ export function ReceiptPeek({
         onMouseLeave={() => setNear(false)}
         onFocus={() => setNear(true)}
         onBlur={() => setNear(false)}
-        aria-label={`Open the receipt from ${when}`}
+        aria-label={t`Open the receipt from ${when}`}
       >
         <img src={`/api/receipts/${receipt.id}/thumb`} alt="" loading="lazy" />
       </button>
@@ -138,21 +147,21 @@ export function MoreInfo({ receipt }: { receipt: Receipt }) {
 
   if (receipt.captured_at) {
     rows.push([
-      "Taken",
+      t({ message: "Taken", comment: "Label on the receipts" }),
       <>
         {receipt.captured_at_is_local
           ? receipt.captured_at.replace("T", ", ")
           : formatInstant(receipt.captured_at)}
         {receipt.captured_at_is_local ? (
-          <span className="muted"> (local time, no zone recorded)</span>
+          <span className="muted"> {t`(local time, no zone recorded)`}</span>
         ) : null}
       </>,
     ]);
   }
-  if (receipt.camera) rows.push(["Camera", receipt.camera]);
+  if (receipt.camera) rows.push([t({ message: "Camera", comment: "Label on the receipts" }), receipt.camera]);
   if (where)
     rows.push([
-      "Where",
+      t({ message: "Where", comment: "Label on the receipts: noun, where it is" }),
       <>
         {where.text}
         <div style={{ marginTop: 4 }}>
@@ -172,7 +181,9 @@ export function MoreInfo({ receipt }: { receipt: Receipt }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Open in Google Maps ↗
+            <Trans>
+              Open in Google Maps ↗
+            </Trans>
           </a>
         </div>
         {/* Which of the two claims this is. Without it the pair of columns
@@ -181,44 +192,46 @@ export function MoreInfo({ receipt }: { receipt: Receipt }) {
             which. */}
         <div className="small muted" style={{ marginTop: 2 }}>
           {fromDevice(receipt)
-            ? "Recorded by the phone that sent it, not by the camera — so this is where the phone was when it went up."
-            : "From the photograph's own metadata."}
+            ? t`Recorded by the phone that sent it, not by the camera — so this is where the phone was when it went up.`
+            : t`From the photograph's own metadata.`}
         </div>
       </>,
     ]);
   rows.push([
-    "Uploaded",
+    t({ message: "Uploaded", comment: "Label on the receipts" }),
     <>
-      {formatInstant(receipt.created_at)}
-      {receipt.uploaded_by_name ? ` by ${receipt.uploaded_by_name}` : ""}
+      {receipt.uploaded_by_name
+        ? t({ message: `${formatInstant(receipt.created_at)} by ${receipt.uploaded_by_name}`, comment: "Label on the receipts" })
+        : formatInstant(receipt.created_at)}
       {receipt.client_encoded ? (
-        <span className="muted"> · compressed on the device before sending</span>
+        <span className="muted"> · {t`compressed on the device before sending`}</span>
       ) : null}
     </>,
   ]);
   rows.push([
-    "File",
+    t({ message: "File", comment: "Label on the receipts" }),
     [
       receipt.original_filename,
       sizeText(receipt.byte_size),
       receipt.width && receipt.height ? `${receipt.width}×${receipt.height}` : null,
-      receipt.page_count && receipt.page_count > 1 ? `${receipt.page_count} pages` : null,
+      receipt.page_count && receipt.page_count > 1 ? pages(receipt.page_count) : null,
       receipt.media_type,
     ]
       .filter(Boolean)
       .join(" · "),
   ]);
-  rows.push(["Stored as", <span className="mono">{receipt.download_name}</span>]);
+  rows.push([t({ message: "Stored as", comment: "Label on the receipts" }), <span className="mono">{receipt.download_name}</span>]);
   rows.push([
-    "Checksum",
+    t({ message: "Checksum", comment: "Label on the receipts" }),
     <span className="mono" title={receipt.content_sha256}>
-      {receipt.content_sha256.slice(0, 12)}… <span className="muted">(SHA-256 of the original)</span>
+      {receipt.content_sha256.slice(0, 12)}…{" "}
+      <span className="muted">{t`(SHA-256 of the original)`}</span>
     </span>,
   ]);
 
   return (
     <details className="more-info">
-      <summary>More info</summary>
+      <summary><Trans comment="Heading of a section that opens on the receipts">More info</Trans></summary>
       <dl>
         {rows.map(([label, value]) => (
           <div key={label}>
@@ -260,7 +273,7 @@ export function ReceiptFrame({
         <>
           <img
             src={source}
-            alt={receipt ? `Receipt, ${receipt.download_name}` : "Uploading"}
+            alt={receipt ? t({ message: `Receipt, ${receipt.download_name}`, comment: "Text on the receipts" }) : t({ message: "Uploading", comment: "Text on the receipts" })}
             loading="lazy"
             width={320}
             height={427}
@@ -269,13 +282,19 @@ export function ReceiptFrame({
           />
           {isPdf ? (
             <span className="tag pdf-badge">
-              PDF{receipt?.page_count && receipt.page_count > 1 ? ` · ${receipt.page_count} pages` : ""}
+              PDF{receipt?.page_count && receipt.page_count > 1 ? ` · ${pages(receipt.page_count)}` : ""}
             </span>
           ) : null}
-          {preview ? <span className="frame-working">Encoding…</span> : null}
+          {preview ? (
+            <span className="frame-working">
+              <Trans comment="Text on the receipts">Encoding…</Trans>
+            </span>
+          ) : null}
         </>
       ) : (
-        <span className="muted small">No receipt yet</span>
+        <span className="muted small">
+          <Trans>No receipt yet</Trans>
+        </span>
       )}
     </div>
   );
@@ -293,9 +312,9 @@ export function Lightbox({ receipt, onClose }: { receipt: Receipt; onClose: () =
   }, [onClose]);
 
   return (
-    <div className="lightbox" onClick={onClose} role="dialog" aria-label="Receipt">
+    <div className="lightbox" onClick={onClose} role="dialog" aria-label={t({ message: "Receipt", comment: "Screen-reader name on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md" })}>
       <img src={`/api/receipts/${receipt.id}/display`} alt={receipt.download_name} />
-      <button className="lightbox-close" onClick={onClose} aria-label="Close">
+      <button className="lightbox-close" onClick={onClose} aria-label={t({ message: "Close", comment: "Screen-reader name of a button on the receipts" })}>
         ×
       </button>
     </div>
@@ -476,7 +495,7 @@ export function ReceiptDrop({
         onClick={() => input.current?.click()}
       >
         {busy.length > 0 ? (
-          `Uploading ${busy.length}…`
+          t({ message: `Uploading ${busy.length}…`, comment: "Button on the receipts" })
         ) : (
           <>
             {icon ? (
@@ -509,15 +528,17 @@ export function ReceiptDrop({
                 <span className="name">{job.file.name}</span>
                 <span className="small muted">
                   {job.state === "sending"
-                    ? "Encoding and sending…"
+                    ? t`Encoding and sending…`
                     : job.state === "failed"
                       ? job.why
-                      : "Waiting"}
+                      : t({ message: "Waiting", comment: "Note on the receipts: how long it has waited, or a queue state" })}
                 </span>
               </span>
               {job.state === "failed" ? (
                 <button onClick={() => update(job.id, { state: "waiting", why: undefined })}>
-                  Retry
+                  <Trans comment="Button on the receipts: verb, try again">
+                    Retry
+                  </Trans>
                 </button>
               ) : null}
             </li>
@@ -530,7 +551,10 @@ export function ReceiptDrop({
 
 /** The paperclip in the register's Src column. */
 export function ReceiptMark({ count }: { count?: number }) {
-  const word = count && count > 1 ? `has ${count} receipts` : "has a receipt";
+  const word =
+    count && count > 1
+      ? plural(count, { one: `has ${count} receipts`, other: `has ${count} receipts` })
+      : t`has a receipt`;
   return (
     <span className="receipt-mark" title={word} aria-label={word}>
       📎

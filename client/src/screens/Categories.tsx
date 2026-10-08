@@ -22,6 +22,9 @@ import {
 } from "../components/bits";
 import type { Category, CategoryGroup, Household } from "../lib/types";
 import { compareNames } from "../lib/locale";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { formatCount } from "../lib/locale";
 
 /**
  * One line of a breakdown from `/stats/…`: what it is, and how many rows carry it.
@@ -140,7 +143,7 @@ export function Categories({ household }: { household: Household }) {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
-        <h1>Categories</h1>
+        <h1><Trans comment="Screen title on the Categories screen. See GLOSSARY.md">Categories</Trans></h1>
         <label className="small muted" style={{ flex: "0 0 auto" }}>
           <input
             type="checkbox"
@@ -148,11 +151,15 @@ export function Categories({ household }: { household: Household }) {
             onChange={(e) => setShowArchived(e.target.checked)}
             style={{ width: "auto", marginRight: 6 }}
           />
-          Show archived
+          <Trans comment="Label of a choice on the Categories screen">
+            Show archived
+          </Trans>
         </label>
         {!empty && (
           <button className="primary" onClick={() => setAddingGroup(true)}>
-            Add a group
+            <Trans>
+              Add a group
+            </Trans>
           </button>
         )}
       </div>
@@ -163,8 +170,10 @@ export function Categories({ household }: { household: Household }) {
         <div className="card">
           <Empty>
             <p style={{ marginTop: 0 }}>
-              No categories yet. Categories say what a transaction was <em>for</em> — they group
-              the register and let a payee fill itself in.
+              <Trans>
+                No categories yet. Categories say what a transaction was <em>for</em> — they group
+                the register and let a payee fill itself in.
+              </Trans>
             </p>
             <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
               <button
@@ -172,9 +181,13 @@ export function Categories({ household }: { household: Household }) {
                 disabled={seed.isPending}
                 onClick={() => seed.mutate()}
               >
-                Start with a common set
+                <Trans>
+                  Start with a common set
+                </Trans>
               </button>
-              <button onClick={() => setAddingGroup(true)}>Build my own</button>
+              <button onClick={() => setAddingGroup(true)}>
+                <Trans>Build my own</Trans>
+              </button>
             </div>
           </Empty>
         </div>
@@ -187,19 +200,23 @@ export function Categories({ household }: { household: Household }) {
               <h2 className="card-title">
                 <button
                   className="link heading-link"
-                  title="Rename or delete this group"
+                  title={t`Rename or delete this group`}
                   onClick={() => setEditingGroup(group)}
                 >
                   {group.name}
                 </button>
               </h2>
               <button className="link" onClick={() => setAddingTo(group)}>
-                Add a category
+                <Trans>
+                  Add a category
+                </Trans>
               </button>
             </div>
             {group.categories.length === 0 ? (
               <p className="muted small" style={{ margin: 0 }}>
-                Nothing in this group yet.
+                <Trans>
+                  Nothing in this group yet.
+                </Trans>
               </p>
             ) : (
               /* Each group is its own table, so with the default auto layout
@@ -223,14 +240,14 @@ export function Categories({ household }: { household: Household }) {
                 <thead>
                   <tr>
                     <SortHeading
-                      label="Category"
+                      label={t({ message: "Category", comment: "Column heading on the Categories screen: noun, what a transaction was for. See GLOSSARY.md" })}
                       column="name"
                       sort={order.sort}
                       direction={order.direction}
                       onSort={order.onSort}
                     />
                     <SortHeading
-                      label="Transactions"
+                      label={t({ message: "Transactions", comment: "Column heading on the Categories screen. See GLOSSARY.md" })}
                       column="usage"
                       sort={order.sort}
                       direction={order.direction}
@@ -238,7 +255,7 @@ export function Categories({ household }: { household: Household }) {
                       align="right"
                     />
                     <SortHeading
-                      label="Payees"
+                      label={t({ message: "Payees", comment: "Column heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md" })}
                       column="payees"
                       sort={order.sort}
                       direction={order.direction}
@@ -255,8 +272,10 @@ export function Categories({ household }: { household: Household }) {
                       <td data-primary="true">
                         {category.name}
                         {category.archived ? (
-                          <span className="tag closed" title="archived">
-                            Archived
+                          <span className="tag closed" title={t({ message: "archived", comment: "Tooltip on the Categories screen: adjective, kept but hidden from pickers. See GLOSSARY.md" })}>
+                            <Trans comment="Tag beside a name on the Categories screen: adjective, kept but hidden from pickers. See GLOSSARY.md">
+                              Archived
+                            </Trans>
                           </span>
                         ) : null}
                       </td>
@@ -266,13 +285,11 @@ export function Categories({ household }: { household: Household }) {
                             comes with the tree, so it is there before the stat
                             request lands and never disagrees with it -- both
                             are the same grouped count on the server. */}
-                        {category.used_by === 0
-                          ? "unused"
-                          : category.used_by.toLocaleString()}
+                        {category.used_by === 0 ? t({ message: "unused", comment: "Table cell on the Categories screen" }) : formatCount(category.used_by)}
                       </td>
                       <td
                         className="small muted amount"
-                        data-label="Payees"
+                        data-label={t({ message: "Payees", comment: "Column name shown beside a value on phones on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md" })}
                         data-detail-first="true"
                       >
                         {/* How many different payees are behind that figure.
@@ -282,11 +299,13 @@ export function Categories({ household }: { household: Household }) {
                             tell them apart. */}
                         {stats.isPending && category.used_by > 0
                           ? "…"
-                          : (byCategory.get(category.id)?.payee_count ?? 0).toLocaleString()}
+                          : formatCount(byCategory.get(category.id)?.payee_count ?? 0)}
                       </td>
                       <td className="amount">
                         <button className="link" onClick={() => setEditing(category)}>
-                          Edit
+                          <Trans comment="Button on the Categories screen: verb">
+                            Edit
+                          </Trans>
                         </button>
                       </td>
                     </tr>
@@ -362,17 +381,21 @@ function GroupForm({
   });
 
   return (
-    <Panel title="New group" onClose={onClose} config>
+    <Panel title={t({ message: "New group", comment: "Title of a panel on the Categories screen" })} onClose={onClose} config>
       <Problem error={save.error} />
-      <Field label="Name">
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Categories screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p className="muted small">
-        A heading the categories sit under — Bills, Everyday, whatever divides your spending in a
-        way you recognise.
+        <Trans>
+          A heading the categories sit under — Bills, Everyday, whatever divides your spending in a
+          way you recognise.
+        </Trans>
       </p>
       <button className="primary" disabled={!name.trim() || save.isPending} onClick={() => save.mutate()}>
-        Create
+        <Trans comment="Button on the Categories screen: verb">
+          Create
+        </Trans>
       </button>
     </Panel>
   );
@@ -413,7 +436,7 @@ export function GroupSettings({
     <Panel title={group.name} onClose={onClose} config>
       {/* While the confirmation is open it shows the refusal itself. */}
       <Problem error={save.error ?? (confirming ? null : remove.error)} />
-      <Field label="Name">
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Categories screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <div className="row" style={{ marginTop: 16 }}>
@@ -425,7 +448,9 @@ export function GroupSettings({
             save.mutate();
           }}
         >
-          Save
+          <Trans comment="Button on the Categories screen: verb">
+            Save
+          </Trans>
         </button>
         <button
           className="danger"
@@ -436,22 +461,28 @@ export function GroupSettings({
             setConfirming(true);
           }}
         >
-          Delete group
+          <Trans comment="Button on the Categories screen">
+            Delete group
+          </Trans>
         </button>
       </div>
       <p className="small muted" style={{ marginTop: 10 }}>
-        A group can only be deleted when there are no categories under it, archived ones included.
-        Deleting it is an entry in History, and Undo there brings it back.
+        <Trans>
+          A group can only be deleted when there are no categories under it, archived ones included.
+          Deleting it is an entry in History, and Undo there brings it back.
+        </Trans>
       </p>
       {confirming && (
-        <Dialog title={`Delete the group ${group.name}?`} onClose={() => setConfirming(false)}>
-          <p style={{ marginTop: 0 }}>Undo in History brings it back.</p>
+        <Dialog title={t`Delete the group ${group.name}?`} onClose={() => setConfirming(false)}>
+          <p style={{ marginTop: 0 }}><Trans>Undo in History brings it back.</Trans></p>
           <div className="dialog-choices">
             <button className="danger" disabled={remove.isPending} onClick={() => remove.mutate()}>
               {remove.isPending ? "Deleting…" : "Yes, delete it"}
             </button>
             <button disabled={remove.isPending} onClick={() => setConfirming(false)}>
-              Keep it
+              <Trans comment="Button on the Categories screen">
+                Keep it
+              </Trans>
             </button>
           </div>
           <Problem error={remove.error} />
@@ -480,13 +511,15 @@ function CategoryForm({
   });
 
   return (
-    <Panel title={`New category in ${group.name}`} onClose={onClose} config>
+    <Panel title={t`New category in ${group.name}`} onClose={onClose} config>
       <Problem error={save.error} />
-      <Field label="Name">
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Categories screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <button className="primary" disabled={!name.trim() || save.isPending} onClick={() => save.mutate()}>
-        Create
+        <Trans comment="Button on the Categories screen: verb">
+          Create
+        </Trans>
       </button>
     </Panel>
   );
@@ -504,20 +537,21 @@ function PayeeBreakdown({ stat }: { stat: CategoryStat | undefined }) {
   if (!stat || stat.payees.length === 0) return null;
   return (
     <>
-      <h3 className="section-title">Payees</h3>
+      <h3 className="section-title"><Trans comment="Heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md">Payees</Trans></h3>
       <ul className="breakdown">
         {stat.payees.map((one) => (
           <li key={one.key ?? "none"}>
             <span className={one.key ? "" : "muted"}>{one.name}</span>
-            <span className="small muted">{one.transaction_count.toLocaleString()}</span>
+            <span className="small muted">{formatCount(one.transaction_count)}</span>
           </li>
         ))}
       </ul>
       {stat.more_payees > 0 && (
         <p className="muted small" style={{ marginTop: 6 }}>
-          and {stat.more_payees.toLocaleString()} more{" "}
-          {stat.more_payees === 1 ? "payee" : "payees"} — {stat.payee_count.toLocaleString()} in
-          all.
+          {plural(stat.more_payees, {
+            one: `and ${formatCount(stat.more_payees)} more payee — ${formatCount(stat.payee_count)} in all.`,
+            other: `and ${formatCount(stat.more_payees)} more payees — ${formatCount(stat.payee_count)} in all.`,
+          })}
         </p>
       )}
     </>
@@ -558,11 +592,11 @@ export function CategorySettings({
     <Panel title={category.name} onClose={onClose} config>
       {/* While the confirmation is open it shows the refusal itself. */}
       <Problem error={save.error ?? (confirming ? null : remove.error)} />
-      <Field label="Name">
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Categories screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p />
-      <Field label="Group">
+      <Field label={t({ message: "Group", comment: "Label of a form field on the Categories screen: noun, a category group" })}>
         <select value={groupId} onChange={(e) => setGroupId(e.target.value)}>
           {groups.map((one) => (
             <option key={one.id} value={one.id}>
@@ -579,16 +613,22 @@ export function CategorySettings({
           onChange={(e) => setArchived(e.target.checked)}
           style={{ width: "auto", marginRight: 8 }}
         />
-        Archived — hide it from the pickers
+        <Trans>
+          Archived — hide it from the pickers
+        </Trans>
       </label>
       <p className="muted small">
-        Archiving takes it out of the lists and leaves it on everything it ever categorised, so
-        the past still reads correctly.
+        <Trans>
+          Archiving takes it out of the lists and leaves it on everything it ever categorised, so
+          the past still reads correctly.
+        </Trans>
       </p>
 
       <div className="row" style={{ marginTop: 16 }}>
         <button className="primary" disabled={!name.trim() || save.isPending} onClick={() => save.mutate()}>
-          Save
+          <Trans comment="Button on the Categories screen: verb">
+            Save
+          </Trans>
         </button>
         {/* Offered only when it would work. A delete button that always answers
             "archive it instead" is a button that does nothing. */}
@@ -601,19 +641,23 @@ export function CategorySettings({
               setConfirming(true);
             }}
           >
-            Delete
+            <Trans comment="Button on the Categories screen: verb">
+              Delete
+            </Trans>
           </button>
         )}
       </div>
       {confirming && (
-        <Dialog title={`Delete the category ${category.name}?`} onClose={() => setConfirming(false)}>
-          <p style={{ marginTop: 0 }}>Undo in History brings it back.</p>
+        <Dialog title={t`Delete the category ${category.name}?`} onClose={() => setConfirming(false)}>
+          <p style={{ marginTop: 0 }}><Trans>Undo in History brings it back.</Trans></p>
           <div className="dialog-choices">
             <button className="danger" disabled={remove.isPending} onClick={() => remove.mutate()}>
               {remove.isPending ? "Deleting…" : "Yes, delete it"}
             </button>
             <button disabled={remove.isPending} onClick={() => setConfirming(false)}>
-              Keep it
+              <Trans comment="Button on the Categories screen">
+                Keep it
+              </Trans>
             </button>
           </div>
           <Problem error={remove.error} />
@@ -621,8 +665,10 @@ export function CategorySettings({
       )}
       {category.used_by > 0 && (
         <p className="small muted" style={{ marginTop: 10 }}>
-          {category.used_by} transaction{category.used_by === 1 ? " carries" : "s carry"} this
-          category, so it cannot be deleted. Archive it instead.
+          {plural(category.used_by, {
+            one: `${category.used_by} transaction carries this category, so it cannot be deleted. Archive it instead.`,
+            other: `${category.used_by} transactions carry this category, so it cannot be deleted. Archive it instead.`,
+          })}
         </p>
       )}
 
@@ -680,28 +726,34 @@ export function PayeeCategorisationPanel({
     },
   });
 
-  const name = rule.data?.payee_name ?? "this payee";
+  const name = rule.data?.payee_name ?? t({ message: "this payee", comment: "Label on the Categories screen" });
 
   return (
     <Panel title={name} onClose={onClose} config>
       <Problem error={rule.error ?? tree.error ?? save.error} />
 
       <h3 className="section-title">
-        Categorisation
-        <Hint label="how this works">
+        <Trans comment="Heading on the Categories screen">Categorisation</Trans>
+        <Hint label={t`how this works`}>
           <p>
-            Every new transaction for this payee gets a category without you choosing one. Which
-            one depends on the setting below.
+            <Trans>
+              Every new transaction for this payee gets a category without you choosing one. Which
+              one depends on the setting below.
+            </Trans>
           </p>
           <p className="muted small" style={{ marginBottom: 0 }}>
-            It matters most on an import: a statement of three hundred rows is three hundred
-            categories you did not have to type, or three hundred corrections if it guesses badly.
+            <Trans>
+              It matters most on an import: a statement of three hundred rows is three hundred
+              categories you did not have to type, or three hundred corrections if it guesses badly.
+            </Trans>
           </p>
         </Hint>
       </h3>
 
       <fieldset className="modes">
-        <legend className="sr-only">How to categorise {name}</legend>
+        <legend className="sr-only">
+          <Trans>How to categorise {name}</Trans>
+        </legend>
 
         <label className="mode">
           <input
@@ -711,19 +763,25 @@ export function PayeeCategorisationPanel({
             onChange={() => setMode("history")}
           />
           <span>
-            <strong>Auto-categorise based on payee history</strong>
+            <strong><Trans>Auto-categorise based on payee history</Trans></strong>
             <span className="small muted">
-              The category is chosen from how the last {rule.data?.history_window ?? 3}{" "}
-              transactions for {name} were categorised — the most common of them, most recent
-              winning a tie. It updates as you add and edit transactions.
+              <Trans>
+                The category is chosen from how the last {rule.data?.history_window ?? 3}{" "}
+                transactions for {name} were categorised — the most common of them, most recent
+                winning a tie. It updates as you add and edit transactions.
+              </Trans>
             </span>
             {rule.data?.current_default_name ? (
               <span className="small" style={{ marginTop: 6, display: "block" }}>
-                Right now that is <strong>{rule.data.current_default_name}</strong>.
+                <Trans>
+                  Right now that is <strong>{rule.data.current_default_name}</strong>.
+                </Trans>
               </span>
             ) : (
               <span className="small muted" style={{ marginTop: 6, display: "block" }}>
-                Nothing to go on yet, so new transactions stay uncategorised.
+                <Trans>
+                  Nothing to go on yet, so new transactions stay uncategorised.
+                </Trans>
               </span>
             )}
           </span>
@@ -737,14 +795,14 @@ export function PayeeCategorisationPanel({
             onChange={() => setMode("fixed")}
           />
           <span>
-            <strong>Always use my choice</strong>
+            <strong><Trans>Always use my choice</Trans></strong>
             <select
               value={chosenCategory}
               disabled={chosenMode !== "fixed"}
               onChange={(e) => setCategoryId(e.target.value)}
               style={{ marginTop: 6 }}
             >
-              <option value="">Choose a category…</option>
+              <option value=""><Trans>Choose a category…</Trans></option>
               {(tree.data ?? []).map((group) => (
                 <optgroup key={group.id} label={group.name}>
                   {group.categories.map((one) => (
@@ -766,10 +824,14 @@ export function PayeeCategorisationPanel({
             onChange={() => setMode("none")}
           />
           <span>
-            <strong>Do not auto-categorise {name}</strong>
+            <strong>
+              <Trans>Do not auto-categorise {name}</Trans>
+            </strong>
             <span className="small muted">
-              New transactions arrive blank and you choose each time. Right for a payee that is
-              genuinely different every time.
+              <Trans>
+                New transactions arrive blank and you choose each time. Right for a payee that is
+                genuinely different every time.
+              </Trans>
             </span>
           </span>
         </label>
@@ -781,7 +843,9 @@ export function PayeeCategorisationPanel({
         disabled={save.isPending || (chosenMode === "fixed" && !chosenCategory)}
         onClick={() => save.mutate()}
       >
-        Save
+        <Trans comment="Button on the Categories screen: verb">
+          Save
+        </Trans>
       </button>
     </Panel>
   );

@@ -23,12 +23,15 @@ from __future__ import annotations
 import json
 import os
 import platform as _platform
+import re
+import shutil
 import socket
 import ssl
+import stat as stat_module
 import sys
 import urllib.error
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -452,28 +455,111 @@ def addresses(port: int | None = None) -> list[str]:
 # --------------------------------------------------------------------------- #
 
 
+#: How many update backups are kept from deletion: the newest five (8.7,
+#: A12). The updater prunes the rest after a successful update; the owner may
+#: delete them sooner, but never one of these five, whatever the client sends.
+PROTECTED_UPDATE_BACKUPS = 5
+
+
 @dataclass(frozen=True, slots=True)
 class Backup:
     name: str
     path: str
     bytes: int
     made_at: datetime
+    #: `file`: one `.sqlite3`, made from this screen. `update`: a
+    #: `backups/<stamp>/` folder an update's drill took, named in the
+    #: updater's history. `folder`: the same shape, made by `scripts.backup`.
+    kind: str = "file"
+    #: From a folder's `manifest.json`: the app version that took it and the
+    #: migration its ledger is at. None for a file, which carries neither.
+    version: str | None = None
+    revision: str | None = None
+    #: One of the newest five update backups, which the server will not delete.
+    protected: bool = False
+
+    @property
+    def database(self) -> Path:
+        """The ledger copy itself: the file, or the one inside the folder."""
+        here = Path(self.path)
+        return here / "spendtracker.sqlite3" if self.kind != "file" else here
+
+
+def _folder_backup(folder: Path, update_names: set[str]) -> Backup | None:
+    """A `scripts.backup` folder, or None if this is not one.
+
+    Never through a symlink, and its size is the files directly in it -- the
+    copy, its key and its manifest; a backup folder has nothing deeper.
+    """
+    try:
+        st = os.lstat(folder)
+    except OSError:
+        return None
+    if not stat_module.S_ISDIR(st.st_mode):
+        return None
+    manifest_path = folder / "manifest.json"
+    try:
+        if not stat_module.S_ISREG(os.lstat(manifest_path).st_mode):
+            return None
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(manifest, dict):
+        return None
+    total = 0
+    with os.scandir(folder) as entries:
+        for entry in entries:
+            if entry.is_file(follow_symlinks=False):
+                total += entry.stat(follow_symlinks=False).st_size
+    made = None
+    taken = manifest.get("taken_at")
+    if isinstance(taken, str):
+        try:
+            made = datetime.fromisoformat(taken).astimezone(UTC)
+        except ValueError:
+            made = None
+    version, revision = manifest.get("app_version"), manifest.get("alembic_revision")
+    return Backup(
+        name=folder.name,
+        path=str(folder),
+        bytes=total,
+        made_at=made or datetime.fromtimestamp(st.st_mtime, UTC),
+        kind="update" if folder.name in update_names else "folder",
+        version=version if isinstance(version, str) else None,
+        revision=revision if isinstance(revision, str) else None,
+    )
 
 
 def backups() -> list[Backup]:
+    """Every backup in `data/backups`, newest first: files and folders.
+
+    The folders are what `scripts.backup` writes, and in a container an
+    update's drill writes them here (8.7). Which of them are update backups
+    is the updater's history's to say; the newest five of those are marked
+    `protected`, newest by their stamp, which is how the updater prunes.
+    """
     directory = backup_dir()
     if not directory.is_dir():
         return []
-    found = [
-        Backup(
-            name=path.name,
-            path=str(path),
-            bytes=path.stat().st_size,
-            made_at=datetime.fromtimestamp(path.stat().st_mtime, UTC),
-        )
-        for path in directory.iterdir()
-        if path.is_file() and path.suffix == ".sqlite3"
-    ]
+    from . import updates
+
+    update_names = updates.update_backup_names()
+    found: list[Backup] = []
+    for path in directory.iterdir():
+        if path.is_file() and not path.is_symlink() and path.suffix == ".sqlite3":
+            found.append(
+                Backup(
+                    name=path.name,
+                    path=str(path),
+                    bytes=path.stat().st_size,
+                    made_at=datetime.fromtimestamp(path.stat().st_mtime, UTC),
+                )
+            )
+        elif (folder := _folder_backup(path, update_names)) is not None:
+            found.append(folder)
+    newest = sorted((one.name for one in found if one.kind == "update"), reverse=True)
+    keep = set(newest[:PROTECTED_UPDATE_BACKUPS])
+    found = [replace(one, protected=True) if one.name in keep else one for one in found]
     return sorted(found, key=lambda one: one.made_at, reverse=True)
 
 
@@ -492,19 +578,33 @@ def find_backup(name: str) -> Backup | None:
     return next((one for one in backups() if one.name == name), None)
 
 
+class BackupProtected(RuntimeError):
+    """One of the newest five update backups. Not deleted."""
+
+
 def delete_backup(name: str) -> Backup | None:
-    """Remove one backup file. Returns what went, or None when there was none.
+    """Remove one backup. Returns what went, or None when there was none.
 
     This reverses a sentence the screen used to carry -- "nothing here deletes
     an old backup" -- because #133 asked for it (2026-09-25). What stays true
-    of that sentence is enforced elsewhere: nothing deletes one *on its own*.
-    There is no pruning, no retention window and no timer; a backup goes when
-    an owner names it and then confirms, and not otherwise.
+    of that sentence is enforced elsewhere: nothing in *this app* deletes one
+    on its own. There is no pruning here, no retention window and no timer; a
+    backup goes when an owner names it and then confirms, and not otherwise.
+    The updater prunes update backups beyond the newest five after a
+    successful update (8.7), and this refuses those five with
+    `BackupProtected` -- they are what an update is undone from.
     """
     found = find_backup(name)
     if found is None:
         return None
-    Path(found.path).unlink(missing_ok=True)
+    if found.protected:
+        raise BackupProtected(found.name)
+    if found.kind == "file":
+        Path(found.path).unlink(missing_ok=True)
+    else:
+        # `rmtree` refuses a symlink at the top, and `_folder_backup` only
+        # listed a real directory.
+        shutil.rmtree(found.path)
     return found
 
 
@@ -561,30 +661,88 @@ def make_backup() -> Backup:
 # --------------------------------------------------------------------------- #
 
 
-#: The one outbound request this application makes, and it is made only when an
-#: owner presses the button. No telemetry, nothing on a timer, and nothing about
-#: this instance in the request -- it is a plain GET for a public list of tags.
-UPSTREAM_TAGS = "https://api.github.com/repos/MarioLonghi-com/household-spend-tracker/tags"
+#: The repository's published releases -- not its tags. A tag is not a release:
+#: when 0.3.1 was tagged, the release run was blocked, and the tag stood for a
+#: while with no image behind it (3.2). Asked only when an owner presses the
+#: button. No telemetry, nothing on a timer, and nothing about this instance in
+#: the request: a plain GET for a public list. See `outbound.py`.
+UPSTREAM_RELEASES = (
+    "https://api.github.com/repos/MarioLonghi-com/household-spend-tracker/releases?per_page=30"
+)
 UPSTREAM_TIMEOUT_SECONDS = 8
+
+#: A release this app offers: `vX.Y.Z` exactly. Not `v1.2.0-rc1` (a prerelease
+#: by name, even if nobody ticked the box) and not `demo`.
+_RELEASE_TAG = re.compile(r"v([0-9]{1,6}\.[0-9]{1,6}\.[0-9]{1,6})")
+
+#: Where a release body's CHANGELOG section ends (C17). `release.yml` writes
+#: the section, then a `---` rule and the install text, then GitHub's own list
+#: of pull requests -- which starts with an HTML comment or a `## ` heading if
+#: the rule is ever dropped. A section's own subheadings are `###`.
+_SECTION_END = re.compile(r"^(?:---\s*$|## |<!-- Release notes generated)", re.M)
+
+#: Every CHANGELOG section opens with this field ("Every entry carries a
+#: **Reversible** field"). A body that does not is an older release's, whose
+#: body was the install text; it is returned whole.
+_SECTION_START = "**Reversible:"
+
+#: Notes longer than this are cut. A CHANGELOG section is a few kilobytes.
+NOTES_MAX_CHARS = 20_000
+
+
+@dataclass(frozen=True, slots=True)
+class Release:
+    #: `0.9.0`: the bare version, which is what `prepare` takes.
+    version: str
+    tag: str
+    name: str | None
+    published_at: datetime | None
+    #: Plain text, never HTML: the screen renders it as text (A7).
+    notes: str
+    #: `changelog` when the body led with its CHANGELOG section and `notes` is
+    #: that section; `release` when the body is an older release's, returned
+    #: as it is.
+    notes_from: str
+
+
+@dataclass(frozen=True, slots=True)
+class UpdaterOffer:
+    """The newest updater an *Update the updater only* could ask for (C2).
+
+    `version` is the newest published release at or above the running app's
+    version and above the running updater's, when a heartbeat says which that
+    is. Whether that release's updater accepts this app's protocol is in its
+    image labels, which the release list does not carry (R8): `compatible` is
+    None for "not knowable from here", and the updater checks it when asked.
+    """
+
+    version: str | None
+    compatible: bool | None
+    note: str
 
 
 @dataclass(frozen=True, slots=True)
 class Upstream:
     checked_at: datetime
     running: str
+    #: The newest published release, bare (`0.9.0`), newer or not.
     latest: str | None
     newer: bool
     #: What to tell the user when there is no answer. Null when there is one.
     problem: str | None
+    #: Every published release newer than this one, newest first, each with
+    #: its notes: installing the newest runs the migrations of all of them.
+    releases: list[Release] = field(default_factory=list)
+    updater: UpdaterOffer | None = None
 
 
 def _as_numbers(version: str) -> tuple[int, ...]:
     """`v1.2.10` -> (1, 2, 10). Anything unparseable sorts as nothing.
 
     Stops at the first piece that does not begin with a digit, so `1.2.0-rc1`
-    is (1, 2, 0) and compares as the release it is a candidate for rather than
-    as something unreadable. An empty tuple is falsy, which is what
-    `check_upstream` filters on to ignore a tag like `demo`.
+    is (1, 2, 0). Used to compare the running version, which is always
+    `X.Y.Z`; which releases are offered at all is `_RELEASE_TAG`'s, and that is
+    strict.
     """
     parts: list[int] = []
     for piece in version.lstrip("vV").split("."):
@@ -597,6 +755,56 @@ def _as_numbers(version: str) -> tuple[int, ...]:
             break
         parts.append(int(digits))
     return tuple(parts)
+
+
+def release_notes(body: object) -> tuple[str, str]:
+    """`(notes, notes_from)` for one release body. See `_SECTION_END`."""
+    text = body if isinstance(body, str) else ""
+    text = text.replace("\r\n", "\n")
+    if text.lstrip().startswith(_SECTION_START):
+        found = _SECTION_END.search(text)
+        section = text[: found.start()] if found else text
+        return section.strip()[:NOTES_MAX_CHARS], "changelog"
+    return text.strip()[:NOTES_MAX_CHARS], "release"
+
+
+def _published(value: object) -> datetime | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def published_releases(answer: object) -> list[Release]:
+    """The releases this app would offer anyone, newest first.
+
+    Drafts and prereleases go (A5), and so does anything whose tag is not
+    `vX.Y.Z` -- a prerelease is a prerelease whether or not its box was
+    ticked.
+    """
+    if not isinstance(answer, list):
+        return []
+    found: dict[str, Release] = {}
+    for one in answer:
+        if not isinstance(one, dict) or one.get("draft") is not False or one.get("prerelease") is not False:
+            continue
+        tag = one.get("tag_name")
+        match = _RELEASE_TAG.fullmatch(tag) if isinstance(tag, str) else None
+        if match is None:
+            continue
+        notes, notes_from = release_notes(one.get("body"))
+        name = one.get("name")
+        found[match[1]] = Release(
+            version=match[1],
+            tag=str(tag),
+            name=name if isinstance(name, str) and name else None,
+            published_at=_published(one.get("published_at")),
+            notes=notes,
+            notes_from=notes_from,
+        )
+    return sorted(found.values(), key=lambda one: _as_numbers(one.version), reverse=True)
 
 
 def _trust() -> ssl.SSLContext:
@@ -618,13 +826,44 @@ def _trust() -> ssl.SSLContext:
         return ssl.create_default_context()
 
 
-#: A page of tags is a few kilobytes. Anything past this is not a tag list,
-#: and it is not read to find out (#225).
+#: Thirty releases with their notes are tens of kilobytes. Anything past this
+#: is not a release list, and it is not read to find out (#225).
 UPSTREAM_MAX_BYTES = 1 << 20
 
 
+def _updater_offer(releases: list[Release]) -> UpdaterOffer:
+    from . import updates
+
+    beat = updates.heartbeat()
+    running_updater = beat.updater_version if beat and beat.fresh else None
+    floor = _as_numbers(__version__)
+    candidates = [
+        one
+        for one in releases
+        if _as_numbers(one.version) >= floor
+        and (running_updater is None or _as_numbers(one.version) > _as_numbers(running_updater))
+    ]
+    if not candidates:
+        return UpdaterOffer(
+            version=None,
+            compatible=None,
+            note="No published release has a newer updater than the one running."
+            if running_updater
+            else "No published release is newer than this one.",
+        )
+    return UpdaterOffer(
+        version=candidates[0].version,
+        compatible=None,
+        note=(
+            f"Whether the updater of {candidates[0].version} works with this version is "
+            "written on its image, not in the release list. The updater checks it before "
+            "it installs anything, and refuses if not."
+        ),
+    )
+
+
 def check_upstream() -> Upstream:
-    """Ask the repository for its newest tag and compare it with what is running.
+    """Ask the repository for its published releases and compare them with this one.
 
     Every failure is an answer rather than an exception: an instance on a
     network with no route out is the normal case for this app, and "could not
@@ -639,23 +878,23 @@ def check_upstream() -> Upstream:
         )
 
     request = urllib.request.Request(  # noqa: S310 - a constant https URL
-        UPSTREAM_TAGS,
+        UPSTREAM_RELEASES,
         headers={"Accept": "application/vnd.github+json", "User-Agent": "household-spend-tracker"},
     )
     from . import outbound
 
     try:
-        # No redirect followed: GitHub's tag list does not move, and a 3xx is
-        # an answer from something that is not it (#219).
+        # No redirect followed: GitHub's release list does not move, and a 3xx
+        # is an answer from something that is not it (#219).
         with outbound.opener(_trust()).open(
             request, timeout=UPSTREAM_TIMEOUT_SECONDS
         ) as answer:
             body = outbound.read_within(
                 answer, limit=UPSTREAM_MAX_BYTES, seconds=UPSTREAM_TIMEOUT_SECONDS * 2
             )
-        tags = json.loads(body.decode("utf-8"))
+        listed = json.loads(body.decode("utf-8"))
     except outbound.TooLarge:
-        return unknown("the repository's answer was larger than a tag list")
+        return unknown("the repository's answer was larger than a release list")
     except outbound.TooSlow:
         return unknown("the repository took too long to answer")
     except urllib.error.HTTPError as problem:
@@ -671,23 +910,25 @@ def check_upstream() -> Upstream:
     except (urllib.error.URLError, TimeoutError, ValueError, OSError) as problem:
         return unknown(f"could not reach the repository: {problem}")
     except RecursionError:
-        return unknown("the repository's answer was not a tag list")
-    if not isinstance(tags, list):
-        return unknown("the repository's answer was not a tag list")
+        return unknown("the repository's answer was not a release list")
+    if not isinstance(listed, list):
+        return unknown("the repository's answer was not a release list")
 
-    names = [str(tag.get("name", "")) for tag in tags if isinstance(tag, dict)]
-    versioned = [name for name in names if _as_numbers(name)]
-    if not versioned:
+    releases = published_releases(listed)
+    if not releases:
         return unknown(
-            "the repository has no version tags yet, so there is nothing to compare with"
+            "the repository has no published releases yet, so there is nothing to compare with"
         )
-    latest = max(versioned, key=_as_numbers)
+    running = _as_numbers(__version__)
+    newer = [one for one in releases if _as_numbers(one.version) > running]
     return Upstream(
         checked_at=now,
         running=__version__,
-        latest=latest,
-        newer=_as_numbers(latest) > _as_numbers(__version__),
+        latest=releases[0].version,
+        newer=bool(newer),
         problem=None,
+        releases=newer,
+        updater=_updater_offer(releases),
     )
 
 

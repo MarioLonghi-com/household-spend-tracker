@@ -259,3 +259,66 @@ def test_a_cleared_state_change_reads_in_the_words_the_register_uses(
     detail = describing.describe(session, changed).detail
     assert "state" in detail
     assert "cleared" in detail, detail
+
+
+# --------------------------------------------------------------------------- #
+# Structure beside the words, for a client in another language (#57)
+# --------------------------------------------------------------------------- #
+
+
+def test_the_headline_comes_with_a_key_and_keeps_its_english(session, accounts, tree, write):
+    with write() as made:
+        txn_service.create(session, account=accounts["checking"], date=JAN, amount=-1_000)
+    with write(BatchKind.bulk_update) as bulk:
+        for one in (accounts["checking"], accounts["pounds"]):
+            txn_service.create(session, account=one, date=FEB, amount=-2_000)
+
+    edit = describing.describe(session, made)
+    assert (edit.headline_key, edit.headline) == ("manual", "Edit")
+    many = describing.describe(session, bulk)
+    assert (many.headline_key, many.headline) == ("bulk_update", "Bulk edit")
+
+
+def test_a_changed_column_and_its_table_travel_as_keys(session, accounts, tree, write):
+    with write():
+        txn = txn_service.create(
+            session, account=accounts["checking"], date=JAN, amount=-7_978, category=None
+        )
+    with write() as edited:
+        txn_service.update(session, txn, category=tree["Transport"], memo="Fuel")
+
+    changes = describing._Changes(session, edited.id, None).all()
+    [row] = describing.detail_of(session, accounts["checking"].household_id, changes)
+    assert (row.table_key, row.table) == ("transactions", "transaction")
+    named = {one.column: one.field for one in row.fields}
+    # The English word is unchanged; the key is the column it names.
+    assert named["category_id"] == "category"
+    assert named["memo"] == "memo"
+
+
+def test_the_client_words_every_key_in_the_servers_english():
+    """`client/src/lib/historyWords.ts` has a message for every key the server
+    sends, and its English is the server's word, letter for letter -- that
+    English is what every translation starts from."""
+    import json
+    import re
+    from pathlib import Path
+
+    text = (Path(__file__).resolve().parent.parent / "client/src/lib/historyWords.ts").read_text(
+        encoding="utf-8"
+    )
+
+    def section(name: str) -> dict[str, str]:
+        body = text.split(f"export const {name}")[1].split("\n};")[0]
+        return {
+            json.loads(key) if key.startswith('"') else key: json.loads(message)
+            for key, message in re.findall(
+                r'get ("[^"]+"|\w+)\(\) \{\s*return t\(\{ message: ("(?:[^"\\]|\\.)*")', body
+            )
+        }
+
+    headlines = {kind.value: words for kind, words in describing.HEADLINES.items()}
+    headlines |= describing.SPECIAL_HEADLINES | describing.ONE_TIME_HEADLINES
+    assert section("HISTORY_HEADLINES") == headlines
+    assert section("HISTORY_FIELDS") == describing.FIELD_WORDS
+    assert section("HISTORY_TABLES") == {table: one for table, (one, _) in describing.NOUNS.items()}

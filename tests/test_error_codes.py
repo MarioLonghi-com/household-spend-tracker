@@ -38,8 +38,9 @@ from tests.test_api import _household_with_accounts
 ROOT = Path(__file__).resolve().parent.parent
 
 #: `DomainError` constructions in `app/` and `statements/` that carry no code,
-#: as of #65. **Lower it** when you convert sites; the test fails if it rises.
-CODELESS = 418
+#: as of #57's first wave. **Lower it** when you convert sites; the test fails
+#: if it rises.
+CODELESS = 318
 
 
 @dataclass
@@ -170,7 +171,8 @@ def test_every_template_names_its_params_and_only_those():
             if name == "currency" and "{currency}" not in entry.template:
                 # How a money param is read; the template shows the amount.
                 continue
-            assert "{" + name + "}" in entry.template, (code, name)
+            # `{count}`, or `{count, plural, ...}` where the words follow the number.
+            assert "{" + name + "}" in entry.template or "{" + name + "," in entry.template, (code, name)
         assert code.count(".") >= 1 and code == code.lower(), code
 
 
@@ -428,18 +430,12 @@ def test_a_split_that_does_not_add_up_sends_both_figures_and_the_currency(client
 def test_an_unconverted_refusal_still_answers_with_detail_alone(client):
     world = _two_currencies(client)
     answer = client.post(
-        f"/api/households/{world['household']['id']}/transfers",
-        json={
-            "from_account_id": world["checking"]["id"],
-            "to_account_id": world["card"]["id"],
-            "date": "2026-01-15",
-            "amount": 30_000,
-            "to_amount": 20_000,
-        },
+        f"/api/households/{world['household']['id']}/accounts",
+        json={"name": "Spare", "type": "savings", "opening_date": "2999-01-01"},
         headers=HEADERS,
     )
     assert answer.status_code == 422
-    assert answer.json() == {"detail": "both sides of a same-currency transfer must match"}
+    assert answer.json() == {"detail": "an account cannot have been opened in the future"}
 
 
 # --------------------------------------------------------------------------- #
@@ -488,3 +484,25 @@ def test_fields_and_params_never_collide(client):
 
 def test_the_classes_still_answer_their_own_status():
     assert (Conflict("x", code="a.b").status_code, DomainError("x").status_code) == (409, 400)
+
+
+# --------------------------------------------------------------------------- #
+# The client's half (#53)
+# --------------------------------------------------------------------------- #
+
+
+def _client_messages() -> dict[str, str]:
+    """`client/src/lib/errorMessages.ts`, as code -> English template."""
+    import re
+
+    text = (ROOT / "client/src/lib/errorMessages.ts").read_text(encoding="utf-8")
+    found = {}
+    for block in re.finditer(r'id: "error\.([\w.]+)",\s*message:\s*((?:"[^"]*"\s*)+)', text):
+        found[block.group(1)] = "".join(re.findall(r'"([^"]*)"', block.group(2)))
+    return found
+
+
+@pytest.mark.repo_wide
+def test_the_client_has_every_code_with_the_same_template():
+    """The catalogs are seeded from the client file; it must say what the registry says."""
+    assert _client_messages() == {code: entry.template for code, entry in REGISTRY.items()}

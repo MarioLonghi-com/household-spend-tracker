@@ -89,6 +89,9 @@ class FieldChange:
     field: str
     was: str
     now: str
+    #: The column itself, for a client that words `field` in another language
+    #: (#57). `field` stays the English it always was.
+    column: str = ""
 
 
 @dataclass(slots=True)
@@ -110,6 +113,8 @@ class ChangeDetail:
     #: secrets. Named rather than starred over: an undo writes a "***" back
     #: verbatim, so these are *absent*, and saying so is the honest version.
     redacted: list[str]
+    #: The table itself, for a client that words `table` in another language.
+    table_key: str = ""
 
 
 @dataclass(slots=True)
@@ -132,6 +137,10 @@ class Described:
     via: str | None = None
     #: One line per change, for the confirmation before an undo.
     lines: list[str] = field(default_factory=list)
+    #: Which headline it is, as a key a client words in its own language
+    #: (#57): a `BatchKind` value, or one of `HEADLINE_KEYS`' special ones.
+    #: `headline` stays the English it always was.
+    headline_key: str = ""
 
 
 class _Names:
@@ -321,6 +330,12 @@ def _one_line(change: Change, names: _Names, origin: str | None = None) -> str:
     return f"{label}: " + ", ".join(said)
 
 
+#: The headlines that are not a batch kind's own, by key (#57).
+SPECIAL_HEADLINES: dict[str, str] = {
+    "agent_key": "Agent key",
+    "account_import": "Account import",
+}
+
 HEADLINES: dict[BatchKind, str] = {
     BatchKind.imported: "Statement import",
     BatchKind.manual: "Edit",
@@ -366,6 +381,7 @@ def detail_of(
                     field=FIELD_WORDS.get(column, column.replace("_", " ")),
                     was=names.value(column, was, currency=currency),
                     now=names.value(column, now, currency=currency),
+                    column=column,
                 )
                 for column, (was, now) in _changed_fields(change).items()
             ]
@@ -382,6 +398,7 @@ def detail_of(
                     field=FIELD_WORDS.get(column, column.replace("_", " ")),
                     was="",
                     now=names.value(column, value, currency=currency),
+                    column=column,
                 )
                 for column, value in sorted(image.items())
                 if column not in NOISE and value not in (None, "")
@@ -397,6 +414,7 @@ def detail_of(
                 fields=fields,
                 snapshot=snapshot,
                 redacted=list(change.redacted or []),
+                table_key=change.table_name,
             )
         )
     return out
@@ -573,22 +591,28 @@ def describe(
     names = names if names is not None else _Names(session, household_id)
     changes = _Changes(session, batch.id, change_count)
 
-    headline = HEADLINES.get(batch.kind, batch.kind.value)
+    key = batch.kind.value
     if batch.kind is BatchKind.admin and _about_keys(changes.tally()):
         # `admin` is the right kind -- issuing a credential is administration --
         # but "Setup change" names none of it, and a key is exactly the act
         # somebody scrolling History for "who gave what access" is looking for.
-        headline = "Agent key"
+        key = "agent_key"
     elif batch.kind is BatchKind.admin and _accounts_file(batch):
-        headline = "Account import"
+        key = "account_import"
     elif one_time_headline(batch):
-        headline = one_time_headline(batch)
+        key = f"one-time-import:ynab-{(batch.source or {}).get('via')}"
+    headline = (
+        SPECIAL_HEADLINES.get(key)
+        or ONE_TIME_HEADLINES.get(key)
+        or HEADLINES.get(batch.kind, batch.kind.value)
+    )
     described = Described(
         headline=headline,
         detail=_detail(batch, changes, names),
         actor=names.actor(batch.actor_id) if batch.actor_id else None,
         via=via_words(batch),
         lines=[_one_line(one, names) for one in changes.all()] if with_lines else [],
+        headline_key=key,
     )
     return described
 

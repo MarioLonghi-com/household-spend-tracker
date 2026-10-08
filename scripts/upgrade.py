@@ -4,8 +4,31 @@ The only operation in this project whose failure mode is unrecoverable, so it
 is one command rather than seven remembered ones, and it refuses rather than
 guesses.
 
-    python -m scripts.upgrade --check     # report only. Writes nothing.
-    python -m scripts.upgrade             # the drill
+    python -m scripts.upgrade --check            # report only. Writes nothing.
+    python -m scripts.upgrade --check --json     # the same, as one JSON document
+    python -m scripts.upgrade                    # the drill
+    python -m scripts.upgrade --yes --report PATH   # unattended: no prompt, outcome to PATH
+
+## Exit status
+
+A person reads the output; an updater reads the exit status, and it has to be
+able to tell "nothing happened" from "the ledger is migrated and the key does
+not open it". So the codes are distinct and this is where they are defined.
+
+    0   done. The backup is verified, the migration ran, the stamp is at head,
+        the key opens a secret, no table lost rows.
+    1   refused before anything changed: the port is still answering, the
+        stamp is unknown to this code, the prompt was declined, or the backup
+        could not be taken or verified. The ledger is as it was.
+    2   a usage error (argparse's own).
+    3   the migration failed. The backup is intact; the ledger may not be.
+    4   the migration ran and left migrations pending, which should not happen.
+    5   secret.key does not open a real TOTP secret in the migrated ledger.
+    6   a table holds fewer rows than the backup counted. Outranks 5 when both
+        are true, because a lost ledger is worse than lost authenticators.
+
+Anything 3 and up is "restore from the backup folder the output names". With
+`--report PATH` the same facts go into a JSON document, whatever the exit.
 
 ## What it does, and what it deliberately does not
 
@@ -45,6 +68,8 @@ import argparse
 import datetime as dt
 import html
 import http.server
+import json
+import os
 import pathlib
 import re
 import socket
@@ -187,35 +212,81 @@ def published() -> tuple[str | None, str | None]:
 # --------------------------------------------------------------------------- #
 
 
-def report(say: Step) -> list[Migration]:
-    from app import __version__
+def gather() -> dict:
+    """Everything `--check` reports, as values. Reads the ledger; writes nothing.
+
+    One place, so the sentences a person reads and the document an updater
+    parses cannot drift: `report` renders this, `--json` prints it. The
+    updater's prepare step (design notes, 4.4) runs this from the *new* image
+    against the live volume and keeps `pending` as printed, which is why each
+    migration carries its verdict here rather than only a summary.
+    """
+    from app import __version__, build
     from app.config import settings
     from scripts import in_a_container
 
     at = stamped()
     upcoming = pending(at)
     there, commit = published()
+    walked = chain()
+
+    # A passkey works only for the host name it was made under, so one made
+    # under another name is the one thing an upgrade check can see that
+    # nothing else reports (#47 §1.2).
+    stranded: list[str] = []
+    if settings.database_url.startswith("sqlite:"):
+        from app.auth import passkeys
+
+        database = pathlib.Path(settings.database_url.split("///", 1)[-1])
+        stranded = list(passkeys.stranded(passkeys.hosts_in(database), settings.rp_id))
+
+    return {
+        "data_dir": str(settings.data_dir),
+        "app_version": __version__,
+        "commit": build.short(build.current()),
+        "database_stamped": at,
+        "code_head": walked[-1].revision if walked else None,
+        # `None` for both when nothing could say: no remote, no network, or
+        # no git in the image. `in_container` is what tells the two apart.
+        "published": {"version": there, "commit": commit},
+        "in_container": in_a_container(),
+        "passkeys": stranded,
+        "pending": [
+            {
+                "revision": one.revision,
+                "title": one.title,
+                "reversible": one.reversible,
+                "note": one.note,
+            }
+            for one in upcoming
+        ],
+        # `undeclared` counts as lossy: a migration that does not say is not
+        # one to assume the best of. The same reading the screen gives it.
+        "lossy": any(one.reversible != "clean" for one in upcoming),
+    }
+
+
+def report(say: Step, facts: dict | None = None) -> list[Migration]:
+    from app import __version__
+
+    facts = gather() if facts is None else facts
+    at = facts["database_stamped"]
+    upcoming = pending(at)
+    there, commit = facts["published"]["version"], facts["published"]["commit"]
 
     say("")
     say("  What is deployed")
     # Here rather than only in `run`: `--check` is the command the README and
     # UPGRADING.md send people to when they ask where their data is, and it
     # used to answer everything except that.
-    say(f"    data directory   {settings.data_dir}")
+    say(f"    data directory   {facts['data_dir']}")
     say(f"    app version      {__version__}")
     say(f"    database stamped {at or 'nothing -- this database has never been migrated'}")
-    # A passkey works only for the host name it was made under, so one made
-    # under another name is the one thing an upgrade check can see that
-    # nothing else reports (#47 §1.2).
-    if settings.database_url.startswith("sqlite:"):
-        from app.auth import passkeys
-
-        database = pathlib.Path(settings.database_url.split("///", 1)[-1])
-        for line in passkeys.stranded(passkeys.hosts_in(database), settings.rp_id):
-            say(f"    passkeys         {line}")
+    for line in facts["passkeys"]:
+        say(f"    passkeys         {line}")
     say("")
     say("  What is published on main")
-    if there is None and in_a_container():
+    if there is None and facts["in_container"]:
         # There is no git in the image, and there should not be. Saying "no
         # remote, or no network" would send somebody looking for a network
         # problem that does not exist.
@@ -242,8 +313,7 @@ def report(say: Step) -> list[Migration]:
         say(f"      rolling back: {one.reversible} -- {one.note}")
     say("")
 
-    lossy = [one for one in upcoming if one.reversible != "clean"]
-    if lossy:
+    if facts["lossy"]:
         say("  ROLLING BACK WOULD DESTROY SOMETHING.")
         say("")
         say("    Checking out the old tag is not enough after these. `alembic")
@@ -338,8 +408,8 @@ def port_is_busy(port: int) -> bool:
 # --------------------------------------------------------------------------- #
 
 
-def _key_still_opens_a_secret() -> str:
-    """Can `secret.key` still decrypt what is in the database?
+def _key_still_opens_a_secret() -> tuple[bool, str]:
+    """Can `secret.key` still decrypt what is in the database? The verdict, and why.
 
     The question the review asked as "check if the database and keys will be
     accessible after the upgrade", and it is a real one with a specific failure
@@ -368,18 +438,52 @@ def _key_still_opens_a_secret() -> str:
                 select(User).where(User.totp_secret.is_not(None)).limit(1)
             ).scalars().first()
             if row is None:
-                return "secret.key: nothing enrolled yet, so nothing to check against"
+                return True, "secret.key: nothing enrolled yet, so nothing to check against"
             crypto.open_totp_secret(row.totp_secret, user_id=row.id)
     except Exception as broken:  # noqa: BLE001 - any failure here is the same answer
-        return (
+        return False, (
             f"SECRET.KEY CANNOT DECRYPT THIS DATABASE ({type(broken).__name__}). "
             "Do not start the service: every authenticator will be refused. The "
             "wrong key is in the data directory, or it was not restored with it."
         )
-    return "secret.key opens a real TOTP secret, so authenticators will still work"
+    return True, "secret.key opens a real TOTP secret, so authenticators will still work"
 
 
-def run(port: int, *, yes: bool) -> int:
+#: The exit codes, named. The docstring is where they are explained.
+DONE = 0
+REFUSED = 1
+MIGRATION_FAILED = 3
+STILL_PENDING = 4
+KEY_DOES_NOT_OPEN = 5
+ROWS_DROPPED = 6
+
+
+#: The report's mode: the `update` volume's group reads it (C11).
+REPORT_MODE = 0o660
+
+
+def _write_report(path: pathlib.Path, outcome: dict) -> None:
+    """The outcome, as one document. Written whole or not at all.
+
+    An updater reads this after the process has gone, so it must never find
+    half a file: the write goes beside the target and is renamed into place.
+
+    It is the updater's to read, through the `update` volume's group: under a
+    rootless engine the updater is in-container root without capabilities,
+    which cannot read a 0600 file the drill's user owns (#169's rootless
+    Podman leg, where every apply stalled at step 5). So 0660 whatever the
+    umask, as every other file the app writes there.
+    """
+    scratch = path.with_name(path.name + ".tmp")
+    scratch.unlink(missing_ok=True)
+    fd = os.open(scratch, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, REPORT_MODE)
+    with os.fdopen(fd, "w") as f:
+        os.fchmod(f.fileno(), REPORT_MODE)  # whatever the umask took away
+        f.write(json.dumps(outcome, indent=2) + "\n")
+    scratch.replace(path)
+
+
+def run(port: int, *, yes: bool, report_to: pathlib.Path | None = None) -> int:
     from app import __version__
     from app.config import settings
     from scripts import backup as backup_script
@@ -388,41 +492,98 @@ def run(port: int, *, yes: bool) -> int:
     say = Step()
     say(f"Spend Tracker upgrade, {dt.datetime.now().astimezone().isoformat(timespec='seconds')}")
 
-    upcoming = report(say)
+    # What `--report` writes. Filled in as the run goes, so whatever it reaches
+    # -- a refused port, a failed backup, a migration that did not finish --
+    # the document says how far it got and what is on disk.
+    outcome: dict = {
+        "started_at": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+        "finished_at": None,
+        "app_version": __version__,
+        "data_dir": str(settings.data_dir),
+        "exit": None,
+        "outcome": None,
+        "backup": {"folder": None, "verified": False},
+        "migrated": False,
+        "stamp": {"before": None, "after": None},
+        "rows": {"before": {}, "after": {}},
+        "dropped": [],
+        "key": {"ok": None, "message": None},
+        "error": None,
+        "log": say.lines,
+    }
+    folder: pathlib.Path | None = None
 
-    if port_is_busy(port) and not in_a_container():
-        raise SystemExit(
-            f"something is still answering on port {port}.\n\n"
-            "Stop the service first. This does not stop it for you, because systemd,\n"
-            "a container and a terminal somebody left running are three different\n"
-            "answers and guessing wrong is worse than asking.\n\n"
-            "Then run this again. It will hold the port with a maintenance page so\n"
-            "anyone visiting sees what is happening rather than a refused connection."
-        )
+    def finish(code: int, word: str) -> int:
+        outcome["exit"] = code
+        outcome["outcome"] = word
+        outcome["finished_at"] = dt.datetime.now().astimezone().isoformat(timespec="seconds")
+        if folder is not None:
+            (folder / "upgrade.log").write_text("\n".join(say.lines) + "\n")
+        if report_to is not None:
+            _write_report(report_to, outcome)
+        return code
 
-    if upcoming and not yes:
-        lossy = [one for one in upcoming if one.reversible != "clean"]
-        wording = (
-            "Some of these cannot be undone. Type 'upgrade' to go ahead: "
-            if lossy
-            else "Type 'upgrade' to go ahead: "
-        )
-        if input(wording).strip() != "upgrade":
-            say("Nothing was changed.")
-            return 1
+    try:
+        facts = gather()
+        outcome["stamp"]["before"] = facts["database_stamped"]
+        upcoming = report(say, facts)
 
-    say("")
-    say("Taking a backup. This runs VACUUM INTO, which reads across the WAL, and")
-    say("then reopens the copy and counts its rows before reporting success.")
-    folder = backup_script.take()
-    say(f"  backup       {folder}")
-    say("  verified     the copy was reopened, its revision read, its rows counted")
+        if port_is_busy(port) and not in_a_container():
+            raise SystemExit(
+                f"something is still answering on port {port}.\n\n"
+                "Stop the service first. This does not stop it for you, because systemd,\n"
+                "a container and a terminal somebody left running are three different\n"
+                "answers and guessing wrong is worse than asking.\n\n"
+                "Then run this again. It will hold the port with a maintenance page so\n"
+                "anyone visiting sees what is happening rather than a refused connection."
+            )
 
-    if not upcoming:
+        if upcoming and not yes:
+            wording = (
+                "Some of these cannot be undone. Type 'upgrade' to go ahead: "
+                if facts["lossy"]
+                else "Type 'upgrade' to go ahead: "
+            )
+            if input(wording).strip() != "upgrade":
+                say("Nothing was changed.")
+                return finish(REFUSED, "declined")
+
         say("")
-        say("Nothing to migrate. The backup is taken; start the service again.")
-        (folder / "upgrade.log").write_text("\n".join(say.lines) + "\n")
-        return 0
+        say("Taking a backup. This runs VACUUM INTO, which reads across the WAL, and")
+        say("then reopens the copy and counts its rows before reporting success.")
+        folder = backup_script.take()
+        say(f"  backup       {folder}")
+        say("  verified     the copy was reopened, its revision read, its rows counted")
+        # `take` has already reopened the copy and counted it against the live
+        # database, so the manifest's counts are the "before" of every table.
+        manifest = json.loads((folder / "manifest.json").read_text())
+        outcome["backup"] = {"folder": str(folder), "verified": True}
+        outcome["rows"]["before"] = manifest["rows"]
+
+        if not upcoming:
+            say("")
+            say("Nothing to migrate. The backup is taken; start the service again.")
+            outcome["stamp"]["after"] = outcome["stamp"]["before"]
+            outcome["rows"]["after"] = manifest["rows"]
+            return finish(DONE, "nothing-to-migrate")
+
+        return _migrate(port, say, folder, outcome, finish)
+    except BaseException as stopped:
+        # A refusal is a sentence (SystemExit with a string) and exits 1; a
+        # traceback is a bug and exits 1 too. Either way the report says what
+        # stopped the run, because an updater cannot read the terminal.
+        code = stopped.code if isinstance(stopped, SystemExit) else None
+        outcome["error"] = str(stopped) or type(stopped).__name__
+        finish(code if isinstance(code, int) else REFUSED, "stopped")
+        raise
+
+
+def _migrate(port: int, say: Step, folder: pathlib.Path, outcome: dict, finish) -> int:
+    """From the backup onwards: the placard, alembic, and the three checks."""
+    from app import __version__
+    from app.config import settings
+    from scripts import backup as backup_script
+    from scripts import in_a_container
 
     # Skipped in a container, where it would bind the container's *own*
     # loopback -- an address nothing outside it can reach, so it would serve
@@ -454,35 +615,59 @@ def run(port: int, *, yes: bool) -> int:
             say("THE MIGRATION FAILED. Nothing has been started back up.")
             say(f"The database as it was before is at {folder}.")
             say("Restore it with:  python -m scripts.restore " + str(folder))
-            (folder / "upgrade.log").write_text("\n".join(say.lines) + "\n")
-            return done.returncode
+            outcome["stamp"]["after"] = stamped()
+            return finish(MIGRATION_FAILED, "migration-failed")
+        outcome["migrated"] = True
 
         say("")
         say("Checking the result.")
         now = stamped()
+        outcome["stamp"]["after"] = now
         say(f"    database stamped {now}")
         left = pending(now)
         if left:
             say(f"    {len(left)} migration(s) still pending, which should not happen")
-            (folder / "upgrade.log").write_text("\n".join(say.lines) + "\n")
-            return 1
+            return finish(STILL_PENDING, "still-pending")
         checked = backup_script.verify(folder)
         say(f"    the backup is still readable, at {checked['revision']}")
-        say(f"    {_key_still_opens_a_secret()}")
+        key_ok, key_said = _key_still_opens_a_secret()
+        outcome["key"] = {"ok": key_ok, "message": key_said}
+        say(f"    {key_said}")
         # The live database, counted again: a migration that dropped rows shows
         # up here as a number that moved, which is the assertion the CI
-        # rehearsal makes too.
+        # rehearsal makes too. More rows is a backfill; fewer is the failure.
         import sqlite3
 
         live = pathlib.Path(settings.database_url.split("///", 1)[-1])
+        dropped: list[str] = []
         with sqlite3.connect(f"file:{live}?mode=ro", uri=True) as conn:
             for table, was in sorted(checked["rows"].items()):
                 now_count = conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+                outcome["rows"]["after"][table] = now_count
                 mark = "" if now_count == was else f"   <-- was {was:,}"
                 say(f"    {now_count:>9,}  {table}{mark}")
+                if now_count < was:
+                    dropped.append(table)
+        outcome["dropped"] = dropped
     finally:
         if server is not None:
             server.shutdown()
+
+    # Printed and exited 0 until #155, which a person reading the output
+    # catches and an updater does not. Both are "restore from the backup", so
+    # both say so and exit with their own code.
+    if dropped or not key_ok:
+        say("")
+        say("DO NOT START THE SERVICE.")
+        if dropped:
+            say(f"  These tables hold fewer rows than the backup counted: {', '.join(dropped)}.")
+        if not key_ok:
+            say("  secret.key does not open the migrated ledger.")
+        say(f"  The database as it was before is at {folder}.")
+        say("  Restore it with:  python -m scripts.restore " + str(folder))
+        if dropped:
+            return finish(ROWS_DROPPED, "rows-dropped")
+        return finish(KEY_DOES_NOT_OPEN, "key-does-not-open")
 
     say("")
     say("Done. What to do now:")
@@ -499,22 +684,39 @@ def run(port: int, *, yes: bool) -> int:
     say(f"  The backup stays at {folder} until you remove it. Keep it until you")
     say("  have used the app for a day, not until the page loads.")
 
-    (folder / "upgrade.log").write_text("\n".join(say.lines) + "\n")
+    code = finish(DONE, "done")
     print(f"\nThe full log of this run is at {folder / 'upgrade.log'}")
-    return 0
+    return code
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--check", action="store_true", help="report only; write nothing")
+    parser.add_argument(
+        "--json", action="store_true", help="with --check: one JSON document instead of prose"
+    )
     parser.add_argument("--port", type=int, default=8848, help="the port the app serves on")
     parser.add_argument("--yes", action="store_true", help="do not ask before migrating")
+    parser.add_argument(
+        "--report", type=pathlib.Path, metavar="PATH",
+        help="write the outcome of the run to PATH as JSON, whatever the exit status",
+    )
     args = parser.parse_args(argv)
 
+    # Each flag belongs to one mode, and a caller mixing them would otherwise
+    # get a file that was never written, or prose where it expected a document.
+    if args.json and not args.check:
+        parser.error("--json goes with --check")
+    if args.report and args.check:
+        parser.error("--report is for the run; --check writes nothing. Use --json.")
+
     if args.check:
-        report(Step())
+        if args.json:
+            print(json.dumps(gather(), indent=2))
+        else:
+            report(Step())
         return 0
-    return run(args.port, yes=args.yes)
+    return run(args.port, yes=args.yes, report_to=args.report)
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -10,6 +10,7 @@
  */
 
 import { useState } from "react";
+import { Trans } from "@lingui/react/macro";
 
 export function RecoveryCodeSheet({
   codes,
@@ -28,8 +29,10 @@ export function RecoveryCodeSheet({
   return (
     <>
       <p className="muted small">
-        Each one works once, and they are shown only now. They are how you get back in if you
-        lose your phone but still know your password.
+        <Trans>
+          Each one works once, and they are shown only now. They are how you get back in if you
+          lose your phone but still know your password.
+        </Trans>
       </p>
       <div className="codes">
         {codes.map((one) => (
@@ -43,7 +46,7 @@ export function RecoveryCodeSheet({
           onChange={(e) => setSaved(e.target.checked)}
           style={{ width: "auto", marginRight: 8 }}
         />
-        I have stored these somewhere that is not this browser
+        <Trans>I have stored these somewhere that is not this browser</Trans>
       </label>
       <p />
       <button className="primary" disabled={busy || !saved} onClick={onStored}>

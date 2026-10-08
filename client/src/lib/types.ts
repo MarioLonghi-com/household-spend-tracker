@@ -483,6 +483,8 @@ export interface Batch {
   undone_by_id: string | null;
   /** What kind of act it was, in words. */
   headline: string;
+  /** The same as a key, for a screen not in English (#57). */
+  headline_key?: string;
   /** What it actually did — computed from the change rows, never stored. */
   detail: string;
   /** Who did it, by name. */
@@ -503,6 +505,8 @@ export interface FieldChange {
   field: string;
   was: string;
   now: string;
+  /** The column `field` names, for a screen not in English (#57). */
+  column?: string;
 }
 
 /** One changed row, as far down as the log goes. */
@@ -518,6 +522,8 @@ export interface ChangeDetail {
   snapshot: FieldChange[];
   /** Columns deliberately kept out of the log. Absent, not masked. */
   redacted: string[];
+  /** The table `table` names, for a screen not in English (#57). */
+  table_key?: string;
 }
 
 /** One batch spelled out, which is what the undo confirmation is built from. */

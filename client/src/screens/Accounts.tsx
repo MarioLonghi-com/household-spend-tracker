@@ -31,24 +31,82 @@ import type {
   IdentifierSuggestions,
 } from "../lib/types";
 import { ACCOUNT_TYPE_LABELS } from "../lib/labels";
-import { compareNames, countryName as localCountryName } from "../lib/locale";
+import { compareNames, countryName as localCountryName, formatCount } from "../lib/locale";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export const TYPES: { value: AccountType; label: string; owed: boolean; blurb: string }[] = [
-  { value: "checking", owed: false, ...ACCOUNT_TYPE_LABELS.checking },
-  { value: "savings", owed: false, ...ACCOUNT_TYPE_LABELS.savings },
-  { value: "cash", owed: false, ...ACCOUNT_TYPE_LABELS.cash },
-  { value: "credit_card", owed: true, ...ACCOUNT_TYPE_LABELS.credit_card },
-  { value: "other_asset", owed: false, ...ACCOUNT_TYPE_LABELS.other_asset },
-  { value: "other_liability", owed: true, ...ACCOUNT_TYPE_LABELS.other_liability },
+  {
+    value: "checking",
+    owed: false,
+    get label() {
+      return ACCOUNT_TYPE_LABELS.checking.label;
+    },
+    get blurb() {
+      return ACCOUNT_TYPE_LABELS.checking.blurb;
+    },
+  },
+  {
+    value: "savings",
+    owed: false,
+    get label() {
+      return ACCOUNT_TYPE_LABELS.savings.label;
+    },
+    get blurb() {
+      return ACCOUNT_TYPE_LABELS.savings.blurb;
+    },
+  },
+  {
+    value: "cash",
+    owed: false,
+    get label() {
+      return ACCOUNT_TYPE_LABELS.cash.label;
+    },
+    get blurb() {
+      return ACCOUNT_TYPE_LABELS.cash.blurb;
+    },
+  },
+  {
+    value: "credit_card",
+    owed: true,
+    get label() {
+      return ACCOUNT_TYPE_LABELS.credit_card.label;
+    },
+    get blurb() {
+      return ACCOUNT_TYPE_LABELS.credit_card.blurb;
+    },
+  },
+  {
+    value: "other_asset",
+    owed: false,
+    get label() {
+      return ACCOUNT_TYPE_LABELS.other_asset.label;
+    },
+    get blurb() {
+      return ACCOUNT_TYPE_LABELS.other_asset.blurb;
+    },
+  },
+  {
+    value: "other_liability",
+    owed: true,
+    get label() {
+      return ACCOUNT_TYPE_LABELS.other_liability.label;
+    },
+    get blurb() {
+      return ACCOUNT_TYPE_LABELS.other_liability.blurb;
+    },
+  },
 ];
 
 /** What the six types mean, as one bubble. */
 export function TypeHelp() {
   return (
-    <Hint label="account types">
+    <Hint label={t({ message: "account types", comment: "Screen-reader name of a help button on the Accounts screen" })}>
       <p>
-        The type says what kind of thing the account is. It sorts the list and marks which balances
-        are money you <em>owe</em> rather than money you have.
+        <Trans>
+          The type says what kind of thing the account is. It sorts the list and marks which
+          balances are money you <em>owe</em> rather than money you have.
+        </Trans>
       </p>
       <dl>
         {TYPES.map((one) => (
@@ -62,9 +120,12 @@ export function TypeHelp() {
         ))}
       </dl>
       <p className="muted small" style={{ marginTop: 10, marginBottom: 0 }}>
-        <span className="neg">▾</span> marks the two whose balance is normally negative — you owe
-        it. Nothing else changes: every account holds transactions the same way, and no arithmetic
-        depends on the type. Pick the one that describes it, because it can't be changed afterwards.
+        <Trans>
+          <span className="neg">▾</span> marks the two whose balance is normally negative — you
+          owe it. Nothing else changes: every account holds transactions the same way, and no
+          arithmetic depends on the type. Pick the one that describes it, because it can't be
+          changed afterwards.
+        </Trans>
       </p>
     </Hint>
   );
@@ -88,7 +149,7 @@ export function useCountries() {
 
 /** What to call a code in a tooltip, before the list has arrived or when unset. */
 export function countryName(list: Country[] | undefined, code: string | null): string {
-  if (!code) return "no country set";
+  if (!code) return t`no country set`;
   const english = list?.find((one) => one.code === code)?.name;
   return english ? localCountryName(code, english) : code;
 }
@@ -223,10 +284,10 @@ function CountryPicker({ value, onChange }: { value: string; onChange: (code: st
         aria-controls={showing ? listId : undefined}
         aria-autocomplete="list"
         aria-activedescendant={showing && active >= 0 ? `${listId}-${active}` : undefined}
-        aria-label="Country"
+        aria-label={t({ message: "Country", comment: "Screen-reader name on the Accounts screen: noun. See GLOSSARY.md" })}
         autoComplete="off"
         spellCheck={false}
-        placeholder="type to search — leave empty for none"
+        placeholder={t`type to search — leave empty for none`}
         value={searching ? typed : label}
         onChange={(event) => {
           setTyped(event.target.value);
@@ -379,7 +440,7 @@ export function Accounts({
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
-        <h1>Accounts</h1>
+        <h1><Trans comment="Screen title on the Accounts screen: noun, bank or cash accounts. See GLOSSARY.md">Accounts</Trans></h1>
         <label className="small muted" style={{ flex: "0 0 auto" }}>
           <input
             type="checkbox"
@@ -387,12 +448,16 @@ export function Accounts({
             onChange={(e) => setShowClosed(e.target.checked)}
             style={{ width: "auto", marginRight: 6 }}
           />
-          Show closed
+          <Trans comment="Label of a choice on the Accounts screen">Show closed</Trans>
         </label>
         <div className="row" style={{ flex: "0 0 auto" }}>
-          <button onClick={() => setImporting(true)}>Import from a file</button>
+          <button onClick={() => setImporting(true)}>
+            <Trans>Import from a file</Trans>
+          </button>
           <button className="primary" onClick={() => setAdding(true)}>
-            Add an account
+            <Trans>
+              Add an account
+            </Trans>
           </button>
         </div>
       </div>
@@ -401,7 +466,7 @@ export function Accounts({
 
       <div className="card">
         {accounts.data?.length === 0 ? (
-          <Empty>No accounts yet. Add the one you use most and import a statement into it.</Empty>
+          <Empty><Trans>No accounts yet. Add the one you use most and import a statement into it.</Trans></Empty>
         ) : (
           <div className="table-scroll">
             <table>
@@ -410,28 +475,28 @@ export function Accounts({
                   {/* Every column sorts. The one exception is the actions cell,
                       which holds buttons rather than a fact about the row. */}
                   <SortHeading
-                    label="Account"
+                    label={t({ message: "Account", comment: "Column heading on the Accounts screen: noun, a bank or cash account. See GLOSSARY.md" })}
                     column="name"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label="Type"
+                    label={t({ message: "Type", comment: "Column heading on the Accounts screen: noun, account type" })}
                     column="type"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label="Bank"
+                    label={t({ message: "Bank", comment: "Column heading on the Accounts screen: noun, the institution that holds an account. See GLOSSARY.md" })}
                     column="institution"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label="Country"
+                    label={t({ message: "Country", comment: "Column heading on the Accounts screen: noun. See GLOSSARY.md" })}
                     column="country"
                     sort={sort}
                     direction={direction}
@@ -439,7 +504,7 @@ export function Accounts({
                     className="flag-col"
                   />
                   <SortHeading
-                    label="Currency"
+                    label={t({ message: "Currency", comment: "Column heading on the Accounts screen: noun. See GLOSSARY.md" })}
                     column="currency"
                     sort={sort}
                     direction={direction}
@@ -452,7 +517,7 @@ export function Accounts({
                       want the span of, and an account with nothing in it since
                       March is the one nobody has imported. */}
                   <SortHeading
-                    label="Oldest"
+                    label={t({ message: "Oldest", comment: "Column heading on the Accounts screen" })}
                     column="oldest"
                     sort={sort}
                     direction={direction}
@@ -460,7 +525,7 @@ export function Accounts({
                     className="span-col"
                   />
                   <SortHeading
-                    label="Newest"
+                    label={t({ message: "Newest", comment: "Column heading on the Accounts screen" })}
                     column="newest"
                     sort={sort}
                     direction={direction}
@@ -468,7 +533,7 @@ export function Accounts({
                     className="span-col"
                   />
                   <SortHeading
-                    label="Rows"
+                    label={t({ message: "Rows", comment: "Column heading on the Accounts screen: noun, lines of a file or table" })}
                     column="rows"
                     sort={sort}
                     direction={direction}
@@ -476,7 +541,7 @@ export function Accounts({
                     align="right"
                   />
                   <SortHeading
-                    label="Cleared"
+                    label={t({ message: "Cleared", comment: "Column heading on the Accounts screen: state, the bank has the row. See GLOSSARY.md" })}
                     column="cleared"
                     sort={sort}
                     direction={direction}
@@ -484,7 +549,7 @@ export function Accounts({
                     align="right"
                   />
                   <SortHeading
-                    label="Balance"
+                    label={t({ message: "Balance", comment: "Column heading on the Accounts screen: noun, the amount an account holds. See GLOSSARY.md" })}
                     column="balance"
                     sort={sort}
                     direction={direction}
@@ -507,15 +572,17 @@ export function Accounts({
                           glance. The tag has to be loud enough that nobody
                           reconciles against an account that is gone. */}
                       {account.closed ? (
-                        <span className="tag closed" title="this account is closed">
-                          Closed
+                        <span className="tag closed" title={t`this account is closed`}>
+                          <Trans comment="Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md">
+                            Closed
+                          </Trans>
                         </span>
                       ) : null}
                     </td>
-                    <td className="small muted" data-label="Type" data-detail-first="true">
+                    <td className="small muted" data-label={t({ message: "Type", comment: "Column name shown beside a value on phones on the Accounts screen: noun, account type" })} data-detail-first="true">
                       {TYPES.find((t) => t.value === account.type)?.label ?? account.type}
                       {account.is_liability ? (
-                        <span className="neg" title="a negative balance here is money you owe">
+                        <span className="neg" title={t`a negative balance here is money you owe`}>
                           {" "}
                           ▾
                         </span>
@@ -526,7 +593,7 @@ export function Accounts({
                         bank each was at — which is exactly when you need it. */}
                     <td
                       className="small muted"
-                      data-label="Bank"
+                      data-label={t({ message: "Bank", comment: "Column name shown beside a value on phones on the Accounts screen: noun, the institution that holds an account. See G…" })}
                       data-empty={account.institution ? undefined : "true"}
                     >
                       {account.institution || <span className="muted">—</span>}
@@ -538,7 +605,7 @@ export function Accounts({
                         in it that reads as a rendering fault. */}
                     <td
                       className="flag-col"
-                      data-label="Country"
+                      data-label={t({ message: "Country", comment: "Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md" })}
                       data-empty={account.country ? undefined : "true"}
                     >
                       <span className="flag" title={countryName(countries.data, account.country)}>
@@ -548,7 +615,7 @@ export function Accounts({
                     {/* Its own column: the ledger never converts, so which
                         currency a figure is in is a fact about the row, not a
                         footnote under the name. */}
-                    <td className="small muted mono" data-label="Currency">
+                    <td className="small muted mono" data-label={t({ message: "Currency", comment: "Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md" })}>
                       {account.currency}
                     </td>
                     {/* An em dash, not an empty cell: a blank here reads as a
@@ -556,22 +623,22 @@ export function Accounts({
                         transactions" is a fact worth stating. */}
                     <td
                       className="small muted mono span-col"
-                      data-label="Oldest"
+                      data-label={t({ message: "Oldest", comment: "Column name shown beside a value on phones on the Accounts screen" })}
                       data-empty={account.oldest_transaction ? undefined : "true"}
                     >
                       {account.oldest_transaction ?? "—"}
                     </td>
                     <td
                       className="small muted mono span-col"
-                      data-label="Newest"
+                      data-label={t({ message: "Newest", comment: "Column name shown beside a value on phones on the Accounts screen" })}
                       data-empty={account.newest_transaction ? undefined : "true"}
                     >
                       {account.newest_transaction ?? "—"}
                     </td>
-                    <td className="amount muted" data-label="Rows">
-                      {account.transaction_count.toLocaleString()}
+                    <td className="amount muted" data-label={t({ message: "Rows", comment: "Column name shown beside a value on phones on the Accounts screen: noun, lines of a file or table" })}>
+                      {formatCount(account.transaction_count)}
                     </td>
-                    <td className="amount muted" data-label="Cleared">
+                    <td className="amount muted" data-label={t({ message: "Cleared", comment: "Column name shown beside a value on phones on the Accounts screen: state, the bank has the row. See GLOSSARY.md" })}>
                       {format(account.cleared, account.currency)}
                     </td>
                     <td className="amount" data-figure="true">
@@ -582,10 +649,14 @@ export function Accounts({
                           starts from the account, not from a screen of its own
                           that would then have to ask which one you meant. */}
                       <button className="link" onClick={() => setReconciling(account)}>
-                        Reconcile
+                        <Trans comment="Button on the Accounts screen: verb, check an account against a bank statement. See GLOSSARY.md">
+                          Reconcile
+                        </Trans>
                       </button>{" "}
                       <button className="link" onClick={() => setEditing(account)}>
-                        Settings
+                        <Trans comment="Button on the Accounts screen">
+                          Settings
+                        </Trans>
                       </button>
                     </td>
                   </tr>
@@ -707,13 +778,13 @@ function AccountForm({
   });
 
   return (
-    <Panel title="New account" onClose={onClose} config>
+    <Panel title={t({ message: "New account", comment: "Title of a panel on the Accounts screen" })} onClose={onClose} config>
       <Problem error={save.error} />
-      <Field label="Name">
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Accounts screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p />
-      <Field label="Type" hint={<TypeHelp />}>
+      <Field label={t({ message: "Type", comment: "Label of a form field on the Accounts screen: noun, account type" })} hint={<TypeHelp />}>
         <select value={type} onChange={(e) => setType(e.target.value as AccountType)}>
           {TYPES.map((one) => (
             <option key={one.value} value={one.value}>
@@ -725,7 +796,7 @@ function AccountForm({
       <p className="muted small" style={{ marginTop: 4 }}>
         {TYPES.find((one) => one.value === type)?.blurb}
       </p>
-      <Field label="Currency">
+      <Field label={t({ message: "Currency", comment: "Label of a form field on the Accounts screen: noun. See GLOSSARY.md" })}>
         <input
           value={currency}
           onChange={(e) => setCurrency(e.target.value.toUpperCase())}
@@ -733,17 +804,21 @@ function AccountForm({
         />
       </Field>
       <p className="muted small">
-        Each account keeps its own currency. Nothing is ever converted in the ledger.
+        <Trans>
+          Each account keeps its own currency. Nothing is ever converted in the ledger.
+        </Trans>
       </p>
 
-      <Field label="Country">
+      <Field label={t({ message: "Country", comment: "Label of a form field on the Accounts screen: noun. See GLOSSARY.md" })}>
         <CountryPicker value={country} onChange={setCountry} />
       </Field>
       <p className="muted small">
-        Where the account is held. Optional, and separate from the currency — a euro account can
-        sit in any number of countries.
+        <Trans>
+          Where the account is held. Optional, and separate from the currency — a euro account can
+          sit in any number of countries.
+        </Trans>
       </p>
-      <Field label="Bank or institution">
+      <Field label={t`Bank or institution`}>
         <input
           value={institution}
           onChange={(e) => setInstitution(e.target.value)}
@@ -751,7 +826,7 @@ function AccountForm({
         />
       </Field>
       <p />
-      <Field label="Note">
+      <Field label={t({ message: "Note", comment: "Label of a form field on the Accounts screen. See GLOSSARY.md" })}>
         <textarea
           value={note}
           rows={3}
@@ -762,17 +837,21 @@ function AccountForm({
       <p />
 
       <Field
-        label="Opening balance"
+        label={t({ message: "Opening balance", comment: "Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md" })}
         hint={
-          <Hint label="opening balance">
+          <Hint label={t({ message: "opening balance", comment: "Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md" })}>
             <p>
-              What was in the account on the day you started tracking it — usually a date in the
-              past, the one your first statement opens with.
+              <Trans>
+                What was in the account on the day you started tracking it — usually a date in the
+                past, the one your first statement opens with.
+              </Trans>
             </p>
             <p className="muted small" style={{ marginBottom: 0 }}>
-              It is recorded as a real transaction on that date, not a hidden number, so it shows in
-              the register and can be corrected like anything else. For a card or a loan, type what
-              you owe as a negative.
+              <Trans>
+                It is recorded as a real transaction on that date, not a hidden number, so it shows in
+                the register and can be corrected like anything else. For a card or a loan, type what
+                you owe as a negative.
+              </Trans>
             </p>
           </Hint>
         }
@@ -785,16 +864,18 @@ function AccountForm({
         />
       </Field>
       {openingBad ? (
-        <p className="small neg">That isn't an amount in {currency}.</p>
+        <p className="small neg">
+          <Trans>That isn't an amount in {currency}.</Trans>
+        </p>
       ) : (
         <p className="muted small">
           {openingMinor === 0
-            ? "Leave it blank for an account that starts empty."
-            : `Recorded as ${format(openingMinor, currency)} on the date below.`}
+            ? t`Leave it blank for an account that starts empty.`
+            : t`Recorded as ${format(openingMinor, currency)} on the date below.`}
         </p>
       )}
 
-      <Field label="Opening date">
+      <Field label={t({ message: "Opening date", comment: "Label of a form field on the Accounts screen" })}>
         <input
           type="date"
           value={openingDate}
@@ -808,7 +889,7 @@ function AccountForm({
         disabled={!name.trim() || openingBad || !openingDate || save.isPending}
         onClick={() => save.mutate()}
       >
-        Create
+        <Trans comment="Button on the Accounts screen: verb">Create</Trans>
       </button>
     </Panel>
   );
@@ -887,15 +968,15 @@ function AccountSettings({
   return (
     <Panel title={account.name} onClose={onClose} config>
       <Problem error={save.error} />
-      <Field label="Name">
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Accounts screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p />
-      <Field label="Country">
+      <Field label={t({ message: "Country", comment: "Label of a form field on the Accounts screen: noun. See GLOSSARY.md" })}>
         <CountryPicker value={country} onChange={setCountry} />
       </Field>
       <p />
-      <Field label="Bank or institution">
+      <Field label={t`Bank or institution`}>
         <input
           value={institution}
           onChange={(e) => setInstitution(e.target.value)}
@@ -903,7 +984,7 @@ function AccountSettings({
         />
       </Field>
       <p />
-      <Field label="Note">
+      <Field label={t({ message: "Note", comment: "Label of a form field on the Accounts screen. See GLOSSARY.md" })}>
         <textarea
           value={note}
           rows={3}
@@ -912,20 +993,23 @@ function AccountSettings({
         />
       </Field>
       <p />
-      <Field label="Statement product">
+      <Field label={t({ message: "Statement product", comment: "Label of a form field on the Accounts screen" })}>
         <input
           value={product}
-          placeholder={account.type === "checking" ? "Current" : "e.g. Savings"}
+          // Revolut's own Product values, which are English in every file it writes.
+          placeholder={account.type === "checking" ? "Current" : t({ message: `e.g. ${"Savings"}`, comment: "Text on the Accounts screen" })}
           onChange={(e) => setProduct(e.target.value)}
         />
       </Field>
       <p className="small muted" style={{ marginTop: 4 }}>
-        Only for a bank whose statement holds several accounts in one file, told apart by a
-        Product column (Revolut's account statement). This account takes the rows with this
-        value; the others are skipped. A current account takes the Current rows unless you
-        say otherwise.
+        <Trans>
+          Only for a bank whose statement holds several accounts in one file, told apart by a
+          Product column (Revolut's account statement). This account takes the rows with this
+          value; the others are skipped. A current account takes the Current rows unless you
+          say otherwise.
+        </Trans>
       </p>
-      <Field label="Opening balance">
+      <Field label={t({ message: "Opening balance", comment: "Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md" })}>
         <input
           value={opening}
           onChange={(e) => setOpening(e.target.value)}
@@ -933,8 +1017,12 @@ function AccountSettings({
           placeholder={toInput(0, account.currency)}
         />
       </Field>
-      {openingBad && <p className="small neg">That isn't an amount in {account.currency}.</p>}
-      <Field label="Opening date">
+      {openingBad && (
+        <p className="small neg">
+          <Trans>That isn't an amount in {account.currency}.</Trans>
+        </p>
+      )}
+      <Field label={t({ message: "Opening date", comment: "Label of a form field on the Accounts screen" })}>
         <input
           type="date"
           value={openingDate}
@@ -943,37 +1031,40 @@ function AccountSettings({
         />
       </Field>
       {openingFuture && (
-        <p className="small neg">An account cannot have been opened in the future.</p>
+        <p className="small neg"><Trans>An account cannot have been opened in the future.</Trans></p>
       )}
       <p className="muted small" style={{ marginTop: 4 }}>
         {account.opening_transaction_id ? (
-          <>
-            Both are a real transaction in the register, reconciled, dated the day tracking
-            started. Changing them here edits that row and keeps it reconciled
-            {onOpenRegister ? (
-              <>
-                {" — "}
-                <button
-                  type="button"
-                  className="link"
-                  onClick={() =>
-                    onOpenRegister({
-                      accounts: [account.id],
-                      open: account.opening_transaction_id ?? undefined,
-                    })
-                  }
-                >
-                  show it in the register
-                </button>
-              </>
-            ) : null}
-            . Zero removes it.
-          </>
+          onOpenRegister ? (
+            <Trans>
+              Both are a real transaction in the register, reconciled, dated the day tracking
+              started. Changing them here edits that row and keeps it reconciled
+              {" — "}
+              <button
+                type="button"
+                className="link"
+                onClick={() =>
+                  onOpenRegister({
+                    accounts: [account.id],
+                    open: account.opening_transaction_id ?? undefined,
+                  })
+                }
+              >
+                show it in the register
+              </button>
+              . Zero removes it.
+            </Trans>
+          ) : (
+            <Trans>
+              Both are a real transaction in the register, reconciled, dated the day tracking
+              started. Changing them here edits that row and keeps it reconciled. Zero removes it.
+            </Trans>
+          )
         ) : (
-          <>
+          <Trans>
             This account started empty, so there is no opening balance row. Type a figure to add
             one; without a date it is dated at the account's oldest transaction.
-          </>
+          </Trans>
         )}
       </p>
       {account.warnings.length > 0 && (
@@ -992,18 +1083,20 @@ function AccountSettings({
           onChange={(e) => setClosed(e.target.checked)}
           style={{ width: "auto", marginRight: 8 }}
         />
-        Closed — hide it from the accounts list
+        <Trans>Closed — hide it from the accounts list</Trans>
       </label>
       <p className="muted small">
-        The type and currency are fixed once an account exists, because every transaction on it is
-        recorded in that currency.
+        <Trans>
+          The type and currency are fixed once an account exists, because every transaction on it is
+          recorded in that currency.
+        </Trans>
       </p>
       <button
         className="primary"
         disabled={save.isPending || openingBad || openingFuture}
         onClick={() => save.mutate(body())}
       >
-        Save
+        <Trans comment="Button on the Accounts screen: verb">Save</Trans>
       </button>
       <hr />
       <Identifiers household={household} account={account} />
@@ -1011,16 +1104,49 @@ function AccountSettings({
   );
 }
 
+/** Getters, so each is read in the language active when it is shown. */
 const IDENTIFIER_KINDS: { value: IdentifierKind; label: string; example: string }[] = [
   { value: "iban", label: "IBAN", example: "GB82 WEST 1234 5698 7654 32" },
-  { value: "number", label: "Account number", example: "the number other statements quote" },
-  { value: "card", label: "Card number", example: "the last four, or the part the bank prints" },
-  { value: "alias", label: "Name the bank uses", example: "a pocket's or a card product's name" },
-  { value: "file_tag", label: "Tag in the download's file name", example: "e.g. the code after _en_" },
+  {
+    value: "number",
+    get label() {
+      return t({ message: "Account number", comment: "Label on the Accounts screen" });
+    },
+    get example() {
+      return t`the number other statements quote`;
+    },
+  },
+  {
+    value: "card",
+    get label() {
+      return t({ message: "Card number", comment: "Label on the Accounts screen" });
+    },
+    get example() {
+      return t`the last four, or the part the bank prints`;
+    },
+  },
+  {
+    value: "alias",
+    get label() {
+      return t`Name the bank uses`;
+    },
+    get example() {
+      return t`a pocket's or a card product's name`;
+    },
+  },
+  {
+    value: "file_tag",
+    get label() {
+      return t`Tag in the download's file name`;
+    },
+    get example() {
+      return t`e.g. the code after _en_`;
+    },
+  },
 ];
 
 function kindLabel(kind: IdentifierKind): string {
-  if (kind === "holder") return "Holder's name";
+  if (kind === "holder") return t({ message: "Holder's name", comment: "Label on the Accounts screen" });
   return IDENTIFIER_KINDS.find((one) => one.value === kind)?.label ?? kind;
 }
 
@@ -1082,14 +1208,14 @@ export function Identifiers({
       : null;
 
   return (
-    <section aria-label={account ? "What banks call it" : "How banks write our names"}>
+    <section aria-label={account ? t`What banks call it` : t`How banks write our names`}>
       <h3 style={{ marginBottom: 4 }}>
-        {account ? "What banks call it" : "How banks write our names"}
+        {account ? t`What banks call it` : t`How banks write our names`}
       </h3>
       <p className="small muted" style={{ marginTop: 0 }}>
         {account
-          ? "Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it."
-          : "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."}
+          ? t`Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it.`
+          : t`Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending.`}
       </p>
       <Problem error={add.error ?? remove.error} />
       {mine.length > 0 && (
@@ -1102,9 +1228,9 @@ export function Identifiers({
                 className="link"
                 disabled={remove.isPending}
                 onClick={() => remove.mutate(row.id)}
-                aria-label={`Remove ${row.value}`}
+                aria-label={t({ message: `Remove ${row.value}`, comment: "Screen-reader name of a button on the Accounts screen" })}
               >
-                Remove
+                <Trans comment="Button on the Accounts screen: verb">Remove</Trans>
               </button>
               {!account && <HolderSamples household={household} identifierId={row.id} />}
             </li>
@@ -1113,15 +1239,17 @@ export function Identifiers({
       )}
       {suggested && (
         <p className="small">
-          The name looks like its {suggested.kind === "iban" ? "IBAN" : "number"}.{" "}
+          {suggested.kind === "iban" ? t`The name looks like its IBAN.` : t`The name looks like its number.`}{" "}
           <button className="link" onClick={() => add.mutate(suggested)}>
-            Add <span className="mono">{suggested.value}</span>
+            <Trans comment="Button on the Accounts screen">
+              Add <span className="mono">{suggested.value}</span>
+            </Trans>
           </button>
         </p>
       )}
       <div className="row">
         {account && (
-          <Field label="Kind">
+          <Field label={t({ message: "Kind", comment: "Label of a form field on the Accounts screen: noun, what sort of thing" })}>
             <select value={kind} onChange={(e) => setKind(e.target.value as IdentifierKind)}>
               {IDENTIFIER_KINDS.map((one) => (
                 <option key={one.value} value={one.value}>
@@ -1131,13 +1259,13 @@ export function Identifiers({
             </select>
           </Field>
         )}
-        <Field label={account ? "Value" : "Name as the bank writes it"}>
+        <Field label={account ? t({ message: "Value", comment: "Text on the Accounts screen" }) : t`Name as the bank writes it`}>
           <input
             value={value}
             placeholder={
               account
                 ? IDENTIFIER_KINDS.find((one) => one.value === kind)?.example
-                : "DOE JANE"
+                : t({ message: "DOE JANE", comment: "Text on the Accounts screen" })
             }
             onChange={(e) => setValue(e.target.value)}
           />
@@ -1147,7 +1275,7 @@ export function Identifiers({
         disabled={!value.trim() || add.isPending}
         onClick={() => add.mutate({ kind: account ? kind : "holder", value })}
       >
-        Add
+        <Trans comment="Button on the Accounts screen: verb">Add</Trans>
       </button>
     </section>
   );
@@ -1182,11 +1310,18 @@ function HolderSamples({
   const mine = samples.data?.find((one) => one.identifier_id === identifierId);
   if (!mine) return null;
   if (mine.rows === 0) {
-    return <div className="muted">Matches nothing in the register yet.</div>;
+    return (
+      <div className="muted">
+        <Trans>Matches nothing in the register yet.</Trans>
+      </div>
+    );
   }
   return (
     <div className="muted">
-      Matches {mine.rows} {mine.rows === 1 ? "row" : "rows"}, such as:
+      {plural(mine.rows, {
+        one: `Matches ${mine.rows} row, such as:`,
+        other: `Matches ${mine.rows} rows, such as:`,
+      })}
       <ul className="plain-list" style={{ marginLeft: 12 }}>
         {mine.samples.map((text) => (
           <li key={text} className="mono">
@@ -1196,6 +1331,18 @@ function HolderSamples({
       </ul>
     </div>
   );
+}
+
+/**
+ * "12 rows", "1,234 files": the count in the reader's own grouping, as
+ * `toLocaleString()` wrote it. English said "rows" even for one, and still
+ * does; a translation gets its plural forms.
+ */
+function mentionsText(count: number, unit: string): string {
+  const shown = formatCount(count);
+  return unit === "files"
+    ? plural(count, { other: `${shown} files` })
+    : plural(count, { other: `${shown} rows` });
 }
 
 type SuggestionSort = "value" | "kind" | "account" | "mentions" | "would_link" | "why";
@@ -1287,29 +1434,31 @@ export function SuggestedIdentifiers({
   const busy = add.isPending || ignore.isPending;
 
   return (
-    <section aria-label="Suggested identifiers">
-      <h3 style={{ marginBottom: 4 }}>Suggested identifiers</h3>
+    <section aria-label={t({ message: "Suggested identifiers", comment: "Screen-reader name on the Accounts screen" })}>
+      <h3 style={{ marginBottom: 4 }}><Trans comment="Heading on the Accounts screen">Suggested identifiers</Trans></h3>
       <p className="small muted" style={{ marginTop: 0 }}>
-        Numbers and names your statements already use for your accounts, read off the register.
-        An identifier lets transfers link without asking, so a wrong one makes wrong links:
-        nothing here is added until you say so. <em>Would link</em> is how many transfer pairs
-        adding it would link now.
+        <Trans>
+          Numbers and names your statements already use for your accounts, read off the register.
+          An identifier lets transfers link without asking, so a wrong one makes wrong links:
+          nothing here is added until you say so. <em>Would link</em> is how many transfer pairs
+          adding it would link now.
+        </Trans>
       </p>
       <Problem error={listed.error ?? counted.error ?? add.error ?? ignore.error} />
       {found.data && rows.length === 0 ? (
-        <Empty>Nothing to suggest.</Empty>
+        <Empty><Trans>Nothing to suggest.</Trans></Empty>
       ) : (
         <div className="table-scroll">
           <table>
             <thead>
               <tr>
-                <SortHeading label="Value" column="value" {...heading} />
-                <SortHeading label="Kind" column="kind" {...heading} />
-                <SortHeading label="For" column="account" {...heading} />
-                <SortHeading label="Mentions" column="mentions" align="right" {...heading} />
-                <SortHeading label="Would link" column="would_link" align="right" {...heading} />
-                <SortHeading label="Why" column="why" {...heading} />
-                <th aria-label="Actions" />
+                <SortHeading label={t({ message: "Value", comment: "Column heading on the Accounts screen" })} column="value" {...heading} />
+                <SortHeading label={t({ message: "Kind", comment: "Column heading on the Accounts screen: noun, what sort of thing" })} column="kind" {...heading} />
+                <SortHeading label={t({ message: "For", comment: "Column heading on the Accounts screen" })} column="account" {...heading} />
+                <SortHeading label={t({ message: "Mentions", comment: "Column heading on the Accounts screen" })} column="mentions" align="right" {...heading} />
+                <SortHeading label={t({ message: "Would link", comment: "Column heading on the Accounts screen" })} column="would_link" align="right" {...heading} />
+                <SortHeading label={t({ message: "Why", comment: "Column heading on the Accounts screen: noun, the reason" })} column="why" {...heading} />
+                <th aria-label={t({ message: "Actions", comment: "Screen-reader name on the Accounts screen" })} />
               </tr>
             </thead>
             <tbody>
@@ -1319,19 +1468,23 @@ export function SuggestedIdentifiers({
                   <tr key={key}>
                     <td data-primary="true">
                       <span className="mono">{one.value}</span>
-                      {one.sample && <div className="small muted">e.g. {one.sample}</div>}
+                      {one.sample && (
+                        <div className="small muted">
+                          <Trans comment="Text on the Accounts screen">e.g. {one.sample}</Trans>
+                        </div>
+                      )}
                     </td>
-                    <td className="small muted" data-label="Kind">
+                    <td className="small muted" data-label={t({ message: "Kind", comment: "Column name shown beside a value on phones on the Accounts screen: noun, what sort of thing" })}>
                       {kindLabel(one.kind)}
                     </td>
-                    <td className="small" data-label="For">
+                    <td className="small" data-label={t({ message: "For", comment: "Column name shown beside a value on phones on the Accounts screen" })}>
                       {one.account_name ?? (
                         <select
-                          aria-label={`Account for ${one.value}`}
+                          aria-label={t({ message: `Account for ${one.value}`, comment: "Screen-reader name on the Accounts screen" })}
                           value={chosen[key] ?? ""}
                           onChange={(e) => setChosen({ ...chosen, [key]: e.target.value })}
                         >
-                          <option value="">Choose…</option>
+                          <option value=""><Trans comment="Option in a dropdown on the Accounts screen">Choose…</Trans></option>
                           {accounts.map((account) => (
                             <option key={account.id} value={account.id}>
                               {account.name}
@@ -1340,19 +1493,22 @@ export function SuggestedIdentifiers({
                         </select>
                       )}
                     </td>
-                    <td className="amount muted" data-label="Mentions">
-                      {one.mentions.toLocaleString()} {one.unit === "files" ? "files" : "rows"}
+                    <td className="amount muted" data-label={t({ message: "Mentions", comment: "Column name shown beside a value on phones on the Accounts screen" })}>
+                      {mentionsText(one.mentions, one.unit)}
                     </td>
-                    <td className="amount" data-label="Would link">
+                    <td className="amount" data-label={t({ message: "Would link", comment: "Column name shown beside a value on phones on the Accounts screen" })}>
                       {one.would_link === null ? (
-                        <span className="muted" title="not counted">
+                        <span className="muted" title={t({ message: "not counted", comment: "Tooltip on the Accounts screen" })}>
                           —
                         </span>
                       ) : (
-                        `${one.would_link} ${one.would_link === 1 ? "pair" : "pairs"}`
+                        plural(one.would_link, {
+                          one: `${one.would_link} pair`,
+                          other: `${one.would_link} pairs`,
+                        })
                       )}
                     </td>
-                    <td className="small muted" data-label="Why">
+                    <td className="small muted" data-label={t({ message: "Why", comment: "Column name shown beside a value on phones on the Accounts screen: noun, the reason" })}>
                       {one.why}
                     </td>
                     <td className="amount row-actions">
@@ -1360,17 +1516,17 @@ export function SuggestedIdentifiers({
                         className="link"
                         disabled={busy || !(one.account_id ?? chosen[key])}
                         onClick={() => add.mutate(one)}
-                        aria-label={`Add ${one.value}`}
+                        aria-label={t({ message: `Add ${one.value}`, comment: "Screen-reader name of a button on the Accounts screen" })}
                       >
-                        Add
+                        <Trans comment="Button on the Accounts screen: verb">Add</Trans>
                       </button>{" "}
                       <button
                         className="link"
                         disabled={busy}
                         onClick={() => ignore.mutate(one)}
-                        aria-label={`Ignore ${one.value}`}
+                        aria-label={t({ message: `Ignore ${one.value}`, comment: "Screen-reader name of a button on the Accounts screen" })}
                       >
-                        Ignore
+                        <Trans comment="Button on the Accounts screen">Ignore</Trans>
                       </button>
                     </td>
                   </tr>

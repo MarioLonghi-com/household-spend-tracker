@@ -1,17 +1,18 @@
 # The app behind its own Tailscale node.
 #
 #   cd deploy/tailnet && cp .env.example .env && chmod 600 .env   # fill in TS_AUTHKEY
-#   (cd ../.. && python3 -m scripts.build_stamp)                     # names the commit
-#   docker compose build
-#   SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d                 # first run only
+#   docker compose pull
+#   docker compose up -d                                             # an empty volume migrates itself
 #
-# Two containers, one network namespace. The sidecar joins the tailnet as
+# Three containers, and two of them share one network namespace. The sidecar
+# joins the tailnet as
 # `spend-tracker.<tailnet>.ts.net`, holds a real certificate for it, and
 # `tailscale serve` proxies 443 to the app on loopback *inside the same
 # namespace*. The app publishes no port anywhere: the only way in is over the
 # tailnet, through the thing holding the certificate. deploy/DOCKER.md,
 # "Behind a Tailscale sidecar", has the words; the root compose.yaml has the
-# single-host version where `tailscale serve` runs on the host instead.
+# single-host version where `tailscale serve` runs on the host instead. The
+# third container is the self-updater, outside that namespace.
 #
 # Never add AllowFunnel to serve.json. That is the public internet.
 
@@ -20,6 +21,14 @@
 # `docker compose down` here and an `up` there. deploy/UPGRADING.md says why
 # the name is pinned at all.
 name: spend-tracker
+
+# **No pod under podman-compose** (design notes S19). It otherwise puts every
+# service in one pod, and Podman refuses `network_mode: container:<id>` into a
+# pod member from a container outside it: the app joining the sidecar, and
+# every container the updater creates through the Docker-compatible API,
+# which cannot join a pod. Docker Compose ignores `x-` keys.
+x-podman:
+  in_pod: false
 
 services:
   tailscale:
@@ -66,12 +75,17 @@ services:
       start_period: 60s
 
   app:
-    build:
-      context: ../..
-      dockerfile: Dockerfile
-    # Build from a checkout of a tag and name the version, so `docker image ls`
-    # on the box says what is running:  SPENDTRACKER_VERSION=0.5.1 in .env.
-    image: household-spend-tracker:${SPENDTRACKER_VERSION:-local}
+    # The published image, the release named in `.env`
+    # (SPENDTRACKER_VERSION=X.Y.Z), built, attested and published by
+    # .github/workflows/release.yml. **No `build:`**: a pull that fails here is
+    # an error to read, not a silent local build -- which the updater refuses
+    # to update, because a local build names no release (A6).
+    #
+    # SPENDTRACKER_IMAGE is the updater's: after an update from the browser it
+    # writes the release it installed into `.env`, by digest, so a later
+    # `docker compose up` starts that image and not the older one this line
+    # would otherwise name. Leave it to the updater.
+    image: ${SPENDTRACKER_IMAGE:-ghcr.io/mariolonghi-com/household-spend-tracker:${SPENDTRACKER_VERSION:-latest}}
     # The whole design in one line: the app lives inside the sidecar's network
     # namespace. No `ports:` anywhere in this file, and the test suite checks.
     network_mode: service:tailscale
@@ -84,7 +98,7 @@ services:
       # `tailscale serve` proxies to 127.0.0.1:8848 from inside the same
       # namespace, so loopback is the only listener it needs.
       SPENDTRACKER_HOST: "127.0.0.1"
-      # Off after the first run; see the root compose.yaml.
+      # Off, and not needed for the first run either; see the root compose.yaml.
       SPENDTRACKER_AUTO_MIGRATE: "${SPENDTRACKER_AUTO_MIGRATE:-0}"
       # `tailscale serve` terminates real TLS. This stays on.
       SPENDTRACKER_COOKIE_SECURE: "on"
@@ -106,6 +120,9 @@ services:
       SPENDTRACKER_RP_ID: "${SPENDTRACKER_RP_ID:-}"
     volumes:
       - ledger:/var/lib/spend-tracker
+      # What the app shares with the updater: requests in, status and reports
+      # out. Files only -- the app never holds the engine's socket.
+      - update:/var/lib/spend-tracker-update
     read_only: true
     tmpfs:
       - /tmp
@@ -120,6 +137,63 @@ services:
     # (#14). deploy/DOCKER.md, "Before you start", has the host sizing.
     mem_limit: 768m
 
+  # The self-updater (design notes, Part 6): the one container that holds the
+  # engine's socket, so the app can be updated from the browser without
+  # holding it itself. It listens on nothing; the app talks to it through
+  # files in the `update` volume.
+  updater:
+    # The updater of the same release as the app. SPENDTRACKER_UPDATER_IMAGE is
+    # written into `.env` by the updater, by digest, when it replaces itself.
+    # No `build:`, as for the app.
+    image: ${SPENDTRACKER_UPDATER_IMAGE:-ghcr.io/mariolonghi-com/household-spend-tracker-updater:${SPENDTRACKER_VERSION:-latest}}
+    # On every engine. podman-restart, which the launcher enables, restores
+    # `unless-stopped` as well as `always`, and a hand-stopped one stays
+    # stopped (S2, S20).
+    restart: unless-stopped
+    # 65532 on rootful engines, Docker Desktop and podman machine. 0:0 under
+    # rootless Docker and rootless Podman on Linux (S17, S18): there the
+    # container's uid 0 is the unprivileged host user, and the only user that
+    # both reaches the socket and owns the project directory.
+    user: "${SPENDTRACKER_UPDATER_USER:-65532:65532}"
+    # The socket's group, and the `update` volume's (C11). 0 is the socket's
+    # group under Docker Desktop and Podman; rootful Docker Engine on Linux
+    # needs the docker group's own gid in SPENDTRACKER_SOCKET_GID (S12):
+    #   echo SPENDTRACKER_SOCKET_GID=$(stat -c %g /var/run/docker.sock) >> .env
+    group_add:
+      - "${SPENDTRACKER_SOCKET_GID:-0}"
+      - "65532"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+      # SELinux confinement off for this container alone. Under Podman with
+      # SELinux on it is what lets it open the socket (S4, S18), and the
+      # socket already makes it root-equivalent, so the label protected
+      # nothing. A no-op where SELinux is off and on Docker.
+      - label=disable
+    cap_drop:
+      - ALL
+    # Standard library, sigstore and a JSON file at a time: 128m is room, and
+    # a ceiling on what a runaway verification could take from the host.
+    mem_limit: 128m
+    volumes:
+      - update:/update
+      # Read-write, because a `:ro` socket mount does not make the API
+      # read-only; the restrictions are in updater/engine.py's call list.
+      - ${SPENDTRACKER_ENGINE_SOCKET:-/var/run/docker.sock}:/run/engine.sock
+      # This directory, deploy/tailnet: the updater writes SPENDTRACKER_IMAGE
+      # and SPENDTRACKER_UPDATER_IMAGE into `.env` here (S1), by a rename,
+      # which a single-file mount would not allow, and keeps
+      # `pin/release.env` as the record. `.env` holds TS_AUTHKEY, which the
+      # socket already reaches through the sidecar's own environment.
+      - .:/project
+    # No `ports:`, and **never `network_mode: service:tailscale`**: it is not a
+    # tailnet node and nothing on the tailnet can reach it. It has the
+    # project's default network, for egress to ghcr.io, api.github.com and
+    # Sigstore. check.sh fails if it ever appears in the sidecar's namespace.
+
 volumes:
   ledger:
   ts-state:
+  update:

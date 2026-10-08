@@ -92,6 +92,7 @@ jobs:
       rehearsal: ${{ steps.diff.outputs.rehearsal }}
       audit: ${{ steps.diff.outputs.audit }}
       lock: ${{ steps.diff.outputs.lock }}
+      selfupdate: ${{ steps.diff.outputs.selfupdate }}
       tree: ${{ steps.green.outputs.tree }}
       # The id of an earlier successful run of this workflow on the identical
       # tree, or empty. The heavy jobs skip when it is set.
@@ -185,7 +186,7 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
         run: |
-          jobs="python client code image rehearsal audit lock"
+          jobs="python client code image rehearsal audit lock selfupdate"
           everything() {
             echo "$1: everything runs"
             for job in $jobs; do echo "$job=true" >> "$GITHUB_OUTPUT"; done
@@ -211,7 +212,7 @@ jobs:
           \.py$
           ^requirements[^/]*\.txt$
           ^(pyproject\.toml|alembic\.ini|Makefile)$
-          ^(app|statements|tests|migrations|scripts)/
+          ^(app|statements|updater|tests|migrations|scripts)/
           ^client/src/lib/appearance\.ts$
           PATHS
 
@@ -229,17 +230,22 @@ jobs:
 
           # What the image installs and boots: its own recipe, both dependency
           # manifests (npm ci runs inside it), the entrypoint and the build
-          # stamp its smoke test reads. Backend code and migrations left this
+          # stamp its smoke test reads. And the updater's image (#164): its
+          # lock and its package, because only the image proves the updater
+          # starts on requirements-updater.txt alone, and the check run inside
+          # it. Backend code and migrations left this
           # list in #242: the "a dev-only import in app/ passes pytest and
           # crashes the container" case (pytest installs requirements-dev.txt,
           # the image only requirements.txt) is caught by `rehearsal`, which
           # installs requirements.txt alone, migrates and boots the app -- in
           # half a minute instead of two image builds.
           decide image <<'PATHS'
-          ^(Dockerfile|\.dockerignore|compose\.yaml|requirements\.txt|alembic\.ini|pyproject\.toml)$
+          ^(Dockerfile|\.dockerignore|compose\.yaml|requirements(-updater)?\.txt|alembic\.ini|pyproject\.toml)$
           ^client/package(-lock)?\.json$
           ^deploy/
           ^scripts/build_stamp\.py$
+          ^updater/
+          ^tests/self_update/updater_smoke\.py$
           PATHS
 
           # The rehearsal asks whether an upgrade keeps the rows, and since
@@ -265,6 +271,19 @@ jobs:
           decide lock <<'PATHS'
           ^requirements[^/]*\.(in|txt)$
           ^Makefile$
+          PATHS
+
+          # The end-to-end self-update (design notes 15.5): the updater, what
+          # it runs in the app's image -- the drill, the restore, the
+          # maintenance page, the migrations -- what the image is built from,
+          # and the job's own driver.
+          decide selfupdate <<'PATHS'
+          ^updater/
+          ^deploy/
+          ^scripts/(upgrade|restore|backup|placard)\.py$
+          ^migrations/
+          ^(Dockerfile|compose\.yaml|requirements(-updater)?\.txt)$
+          ^tests/self_update/
           PATHS
 
   # --------------------------------------------------------------------------- #
@@ -312,7 +331,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install "$(grep -oE '^ruff==[^ ]+' requirements-dev.txt)"
       - name: ruff
-        run: ruff check app/ statements/ tests/ scripts/
+        run: ruff check app/ statements/ updater/ tests/ scripts/
       - name: no bulk statements against audited tables
         run: ./scripts/no-bulk-statements.sh
 
@@ -337,7 +356,7 @@ jobs:
       - run: make lock UV=uv
       - name: the committed locks are what the .in files compile to
         run: |
-          if ! git diff --exit-code -- requirements.txt requirements-dev.txt; then
+          if ! git diff --exit-code -- requirements.txt requirements-updater.txt requirements-dev.txt; then
             echo "::error::requirements*.txt do not match requirements*.in. Run \`make lock\` and commit the result."
             exit 1
           fi
@@ -458,6 +477,12 @@ jobs:
       - run: npx tsc -b --noEmit
         working-directory: client
       - run: npm test
+        working-directory: client
+      # The catalogs are never behind the code (#53): extracting again from
+      # the source must change nothing. A new message, an edited one or a
+      # removed one shows up here, and `npm run extract` is the fix.
+      - name: catalogs match the source
+        run: npx lingui extract --clean && git diff --exit-code -- src/locales
         working-directory: client
       - run: npm run build
         working-directory: client
@@ -703,7 +728,7 @@ jobs:
       # set an install gets (#46).
       - name: python dependencies
         continue-on-error: true
-        run: pip-audit --require-hashes --disable-pip -r requirements.txt -r requirements-dev.txt
+        run: pip-audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
         with:
@@ -731,6 +756,12 @@ jobs:
       - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294  # v5.0.0
         with:
           fail-on-severity: high
+          # braces <= 3.0.3 (stack exhaustion on deeply nested patterns) has no
+          # fixed release. It arrives through micromatch in @lingui/cli, which
+          # runs at build time on this repository's own globs and is not in
+          # the bundle a browser receives (#53). Named one advisory at a time,
+          # so anything else still fails this check.
+          allow-ghsas: GHSA-vfj7-8cjw-p6xm
 
   # --------------------------------------------------------------------------- #
   # The container, on both bases
@@ -755,6 +786,9 @@ jobs:
   # passed; weekly, because a Dependabot digest bump is only proven by a build;
   # and by hand. Not on the push to `main`: release.yml builds,
   # smoke-tests and publishes the same image from the tag.
+  #
+  # The self-updater's image is the Dockerfile's `updater` target, on the
+  # same two bases, so each leg builds and runs it after the app.
   image:
     needs: changes
     if: >-
@@ -764,14 +798,17 @@ jobs:
           && needs.changes.outputs.image == 'true'
           && needs.changes.outputs.green == '')
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: chainguard
             args: ""
+            # The Chainguard runtime has no shell; the bypass base does.
+            shell_free: "1"
           - name: bypass
+            shell_free: "0"
             args: |
               PY_BASE=python:3.12-slim
               PY_RUN=python:3.12-slim
@@ -810,6 +847,7 @@ jobs:
           docker run -d --name "st-$NAME" \
             -e SPENDTRACKER_AUTO_MIGRATE=1 \
             -v "st-$NAME:/var/lib/spend-tracker" \
+            -v "st-update-$NAME:/var/lib/spend-tracker-update" \
             -p 18848:8848 \
             "spend-tracker:$NAME"
 
@@ -854,6 +892,21 @@ jobs:
               sys.exit(f'the volume is missing {missing}')
           "
 
+      # The `update` volume, fresh, mounted by the app first: initialised from
+      # the app image's mount point, so 65532:65532 and 2770 (C11). The
+      # updater's job below checks the same from its own image.
+      - name: it initialises a fresh update volume shared by group
+        env:
+          NAME: ${{ matrix.name }}
+        run: |
+          docker exec "st-$NAME" python -c "
+          import os, stat, sys
+          st = os.stat('/var/lib/spend-tracker-update')
+          seen = (st.st_uid, st.st_gid, oct(stat.S_IMODE(st.st_mode)))
+          print('update volume', seen)
+          sys.exit(0 if seen == (65532, 65532, '0o2770') else 1)
+          "
+
       # What the image holds is exactly the runtime lock (#46): every package
       # whose environment marker applies on Linux, at its locked version, and
       # nothing else. Read through importlib.metadata inside the container, so
@@ -887,6 +940,303 @@ jobs:
           NAME: ${{ matrix.name }}
         run: docker logs "st-$NAME" || true
 
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          context: .
+          target: updater
+          push: false
+          load: true
+          tags: spend-tracker-updater:${{ matrix.name }}
+          build-args: ${{ matrix.args }}
+          cache-from: type=gha,scope=updater-${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=updater-${{ matrix.name }}
+
+      # As compose runs it: read-only, no capabilities, the runner's engine
+      # socket with its group, a fresh `update` volume it mounts first. Until
+      # its first heartbeat says the socket answered, then checked from the
+      # inside by tests/self_update/updater_smoke.py: uid 65532 with group
+      # 65532, the volume 65532:65532 2770, nothing listening anywhere in its
+      # namespace (design notes E10), and on Chainguard no shell, package
+      # manager or engine CLI.
+      - name: the updater runs, listens on nothing, and is not root
+        env:
+          NAME: ${{ matrix.name }}
+          SHELL_FREE: ${{ matrix.shell_free }}
+        run: |
+          set -eu
+          docker volume create "st-update-u-$NAME" > /dev/null
+          docker run -d --name "st-updater-$NAME" --read-only --tmpfs /tmp --cap-drop ALL \
+            --security-opt no-new-privileges:true --security-opt label=disable \
+            --group-add "$(stat -c %g /var/run/docker.sock)" --group-add 65532 \
+            -v "st-update-u-$NAME:/update" -v /var/run/docker.sock:/run/engine.sock \
+            "spend-tracker-updater:$NAME"
+          for _ in $(seq 1 30); do
+            sleep 2
+            if docker exec "st-updater-$NAME" python -c "import json, sys; sys.exit(json.load(open('/update/updater.json'))['socket'] != 'ok')" 2>/dev/null; then
+              break
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' "st-updater-$NAME")" != "true" ]; then
+              echo "the updater exited:"; docker logs "st-updater-$NAME"; exit 1
+            fi
+          done
+          docker exec "st-updater-$NAME" python -c "print(open('/update/updater.json').read())"
+          docker exec -i -e "SHELL_FREE=$SHELL_FREE" "st-updater-$NAME" python - < tests/self_update/updater_smoke.py
+
+      # Exactly the updater's lock, as for the app: requirements-updater.txt
+      # and nothing of the app's. pip is gone from this venv on purpose.
+      - name: the updater holds exactly its locked dependencies
+        env:
+          NAME: ${{ matrix.name }}
+        run: |
+          set -eu
+          docker exec "st-updater-$NAME" python -c "
+          from importlib import metadata
+          for d in metadata.distributions():
+              print(f\"{d.metadata['Name']}=={d.version}\")
+          " > updater-installed.txt
+          python3 scripts/lock_matches.py requirements-updater.txt updater-installed.txt
+
+      - name: updater logs
+        if: always()
+        env:
+          NAME: ${{ matrix.name }}
+        run: docker logs "st-updater-$NAME" || true
+
+  # --------------------------------------------------------------------------- #
+  # The end-to-end self-update (design notes 15.5, #169), as a matrix
+  # --------------------------------------------------------------------------- #
+  #
+  # E1-E15 (tests/self_update/scenarios.py) on the engines the updater has to
+  # work on, each asserting what an update did to what an owner has: row
+  # counts and the ledger's stamp, which digest each container runs, a
+  # container's id and StartedAt, the pin's text.
+  #
+  # Release A is built from the merge base and B from this change, both with
+  # release labels, plus small variants of B built FROM it (a migration that
+  # fails after a sentinel row, health 500, an updater that fails its
+  # self-check, a skip): tests/self_update/stage.py. They are pushed to a
+  # registry that answers as ghcr.io on this runner -- the engine client pulls
+  # only ghcr.io references by digest, and only a pushed image has one.
+  #
+  # **The updater runs in its container**, as compose starts it: the CI
+  # updater image, which is each release's real updater image (`--target
+  # updater`) with one thing added on top -- the test-only trust policy and
+  # an entry point that selects it (tests/self_update/ci-updater.Dockerfile).
+  # Nothing built here has an attestation, so verification is the one thing
+  # replaced: the policy "verifies" exactly the digests this job pushed. The
+  # first step proves updater/ cannot reach it, and
+  # tests/test_self_update_ci.py that release.yml never builds or names it.
+  #
+  # The legs (design notes 15.5):
+  #   - docker, loopback and sidecar: the runner's rootful Docker Engine. The
+  #     sidecar layout is deploy/tailnet/compose.yaml with the Tailscale
+  #     container replaced by a stand-in carrying the same healthcheck.
+  #   - podman-rootless: Podman as the runner's user, its socket from
+  #     `systemctl --user` with lingering on, podman-restart enabled,
+  #     podman-compose (x-podman: in_pod: false is in compose.yaml), the
+  #     updater as 0:0 (S18) and label=disable (S4).
+  #   - rootless Docker is not a leg: its daemon cannot make its bridge on a
+  #     hosted runner (NAT chains, then with iptables off "error creating
+  #     default bridge network: operation not permitted"). The manual matrix
+  #     covers it (design notes 15.5), on the test VM.
+  #   - docker-arm: E1 on ubuntu-24.04-arm (C6).
+  #
+  # **Required: in `ci-ok`'s needs**, since the matrix ran green on every leg
+  # three times on one tree (#243). Path-filtered like every job here: a
+  # change that touches none of the paths above is not owed it, and ci-ok
+  # reads its skip as such.
+  self-update:
+    needs: changes
+    if: >-
+      github.event_name == 'schedule'
+      || github.event_name == 'workflow_dispatch'
+      || (github.event_name == 'pull_request'
+          && needs.changes.outputs.selfupdate == 'true'
+          && needs.changes.outputs.green == '')
+    name: self-update (${{ matrix.leg }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # `a_floor`: a commit release A must contain for the leg to run at
+          # all. When the merge base predates it, A is built from the floor
+          # instead -- a commit of the change under review that A's updater
+          # needs on that engine or layout -- and the run says so. Once the
+          # merge base has it, the floor is a no-op.
+          - leg: docker
+            engine: docker
+            layout: loopback
+            runner: ubuntu-latest
+            only: ""
+            variants: ""
+            a_floor: ""
+          - leg: docker-sidecar
+            engine: docker
+            layout: sidecar
+            runner: ubuntu-latest
+            only: ""
+            variants: ""
+            # The sidecar copy without ExposedPorts (E11b runs A's updater).
+            a_floor: 51926060257c831732734c67a6cba6a6e36a8f88
+          # Rootless Podman is the slowest engine here: two shards, run side
+          # by side, each building its own releases.
+          - leg: podman-rootless
+            engine: podman
+            layout: loopback
+            runner: ubuntu-latest
+            only: E1,E10,E11,E13,E12,E11b,E2,E3,E4
+            variants: B1,B2,B3,B4,C
+            # A's updater starting at all as 0:0 with cap_drop ALL (844b32f),
+            # and, as the standby after its handover, not taking back from a
+            # successor podman-compose recreates (0ecbf81; E12).
+            a_floor: 0ecbf8125f64a55672db60e59720eeb6e1550890
+          - leg: podman-rootless-2
+            engine: podman
+            layout: loopback
+            runner: ubuntu-latest
+            only: E5,E6,E7,E8,E9,E14,E15
+            variants: B1,B2,C
+            a_floor: 0ecbf8125f64a55672db60e59720eeb6e1550890
+          - leg: docker-arm
+            engine: docker
+            layout: loopback
+            runner: ubuntu-24.04-arm
+            only: E1
+            variants: none
+            a_floor: ""
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install --require-hashes -r requirements-dev.txt
+      # Outside the checkout: the releases' build context is the checkout.
+      - run: |
+          echo "STAGED=$RUNNER_TEMP/self-update" >> "$GITHUB_ENV"
+          echo "PROJECT_DIR=$RUNNER_TEMP/self-update-project" >> "$GITHUB_ENV"
+
+      - name: the test-only trust policy is out of the updater's reach
+        run: |
+          if grep -rnE 'self_update|ci_trust|CiTrust|ci_updater' updater/; then
+            echo "updater/ names the CI-only trust policy; it must never ship"
+            exit 1
+          fi
+
+      - name: a registry that answers as ghcr.io
+        run: python -m tests.self_update.stage registry --out "$STAGED" --publish 0.0.0.0:443
+
+      # The engine under test resolves ghcr.io to the registry and trusts its
+      # certificate, at the runner's loopback, where both engines pull from.
+      - name: "engine: Docker Engine, rootful"
+        if: matrix.engine == 'docker'
+        run: |
+          set -eu
+          echo "127.0.0.1 ghcr.io" | sudo tee -a /etc/hosts > /dev/null
+          sudo mkdir -p /etc/docker/certs.d/ghcr.io
+          sudo cp "$STAGED/ghcr.crt" /etc/docker/certs.d/ghcr.io/ca.crt
+          {
+            echo "SOCKET=/var/run/docker.sock"
+            echo "COMPOSE=docker compose"
+            echo "RESTART=sudo systemctl restart docker"
+            echo "UPDATER_USER=65532:65532"
+            echo "SOCKET_GID=$(stat -c %g /var/run/docker.sock)"
+          } >> "$GITHUB_ENV"
+          docker version --format 'Docker Engine {{.Server.Version}}, API {{.Server.MinAPIVersion}}-{{.Server.APIVersion}}'
+
+      - name: "engine: Podman, rootless"
+        if: matrix.engine == 'podman'
+        run: |
+          set -eu
+          echo "127.0.0.1 ghcr.io" | sudo tee -a /etc/hosts > /dev/null
+          sudo mkdir -p /etc/containers/certs.d/ghcr.io
+          sudo cp "$STAGED/ghcr.crt" /etc/containers/certs.d/ghcr.io/ca.crt
+          pip install --require-hashes --no-deps -r tests/self_update/podman-compose.txt
+          # S20: a rootless engine's services start at boot only with
+          # lingering, and podman-restart is what restores `unless-stopped`.
+          sudo loginctl enable-linger "$(id -un)"
+          systemctl --user enable --now podman.socket
+          systemctl --user enable podman-restart.service
+          sock="$XDG_RUNTIME_DIR/podman/podman.sock"
+          for _ in $(seq 1 30); do [ -S "$sock" ] && break; sleep 1; done
+          {
+            echo "SOCKET=$sock"
+            echo "COMPOSE=podman-compose"
+            # The API service, not the containers: conmon keeps them running.
+            echo "RESTART=systemctl --user restart podman.service"
+            echo "UPDATER_USER=0:0"
+            echo "SOCKET_GID=0"
+          } >> "$GITHUB_ENV"
+          podman version
+          podman-compose version
+
+      # After the engine is set up: its resolver caches /etc/hosts for a few
+      # seconds, and the first pull once went to the real ghcr.io (`denied`).
+      - name: build and push the releases (A from the merge base, B from this change, B's variants)
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          VARIANTS: ${{ matrix.variants }}
+          A_FLOOR: ${{ matrix.a_floor }}
+        run: |
+          set -eu
+          if [ -n "$BASE_REF" ]; then base="$(git merge-base HEAD "origin/${BASE_REF}")"
+          else base="$(git rev-parse -q --verify 'HEAD^' || git rev-parse HEAD)"; fi
+          if [ -n "$A_FLOOR" ] && ! git merge-base --is-ancestor "$A_FLOOR" "$base"; then
+            echo "::notice::A is the leg's floor $A_FLOOR, not the merge base $base, which predates it"
+            base="$A_FLOOR"
+          fi
+          echo "A is $base, B is $(git rev-parse HEAD)"
+          started=$(date +%s)
+          python -m tests.self_update.stage build --out "$STAGED" --base "$base" --only "$VARIANTS"
+          echo "BUILD_SECONDS=$(( $(date +%s) - started ))" >> "$GITHUB_ENV"
+
+      - name: the scenarios
+        env:
+          LEG: ${{ matrix.leg }}
+          LAYOUT: ${{ matrix.layout }}
+          ONLY: ${{ matrix.only }}
+        run: |
+          python -m tests.self_update.scenarios --staged "$STAGED" --project-dir "$PROJECT_DIR" \
+            --leg "$LEG" --layout "$LAYOUT" --only "$ONLY" \
+            --socket "$SOCKET" --compose "$COMPOSE" --restart "$RESTART" \
+            --updater-user "$UPDATER_USER" --socket-gid "$SOCKET_GID" \
+            --report "$STAGED/report.json" --version-out "$STAGED/version.json"
+
+      - name: summary
+        if: always()
+        env:
+          LEG: ${{ matrix.leg }}
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY" || true
+          import json, os
+          staged = os.environ["STAGED"]
+          version = json.load(open(f"{staged}/version.json"))
+          print(f"### self-update: {os.environ['LEG']}")
+          print(f"{version.get('Version')}, API {version.get('MinAPIVersion')}-{version.get('ApiVersion')}; "
+                f"releases built in {os.environ.get('BUILD_SECONDS', '?')} s\n")
+          print("| scenario | result | s | |")
+          print("|---|---|---:|---|")
+          for r in json.load(open(f"{staged}/report.json")):
+              note = r["skipped"] or r["error"] or "; ".join(r["failed"])[:300]
+              print(f"| {r['scenario']} {r['title']} | {r['result']} | {r['seconds']} | {note or ''} |")
+          PY
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: self-update-${{ matrix.leg }}
+          path: |
+            ${{ env.STAGED }}/report.json
+            ${{ env.STAGED }}/version.json
+            ${{ env.STAGED }}/releases.json
+          if-no-files-found: ignore
+          retention-days: 14
+
   # --------------------------------------------------------------------------- #
   # The one check a ruleset requires
   # --------------------------------------------------------------------------- #
@@ -909,6 +1259,7 @@ jobs:
       - dependency-review
       - image
       - lock
+      - self-update
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
