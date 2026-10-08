@@ -59,7 +59,7 @@ from pathlib import Path
 from updater import contract, health, journal, oneoff, pin, prepare, shapes, survey, verify, volume
 from updater import engine as eng
 from updater.clock import Deadline
-from updater.handover import goes_first, protocol_window, stays_newer
+from updater.handover import goes_first, protocol_window, runs, stays_newer
 from updater.journal import Action, Journal, Observed, Owner
 from updater.site import APP_REPOSITORY, UPDATER_REPOSITORY, Kit, Records
 
@@ -220,6 +220,13 @@ class Apply:
             return self.not_started(e.sentence)
         except (eng.EngineError, eng.NotAllowed) as e:
             return self.not_started(f"the container engine refused a check ({e}).")
+        fresh = journal.load(self.vol, self.id)
+        if fresh is not None and (fresh.step != self.j.step or len(fresh.owners) != len(self.j.owners)):
+            # The successor took the request at H5 and failed after it: the
+            # handover gave it back, or left it past step 3 (6.6, H6). The
+            # journal says which; 5.6 says what to do.
+            self.j, self.ctx = fresh, fresh.context
+            return self.resume()
         return self.from_step3()
 
     def step1(self) -> None:
@@ -348,8 +355,9 @@ class Apply:
         self.start("2a", f"Handing over to the updater of {self.to} before the app stops.")
         outcome = self.kit.handover.first(request_id=self.id, me=me, successor=successor)
         if outcome.done:
-            journal.hand_over(self.vol, self.j, outcome.owner or successor, self.kit.clock.now())
-            self.remember(first_handover="done")
+            # The successor wrote itself in as the owner at H5, with
+            # `first_handover`, and owns the journal from there: this updater
+            # writes nothing more to it, nor to the status.
             return True
         self.remember(first_handover="failed")
         self.notes.append(
@@ -647,23 +655,44 @@ class Apply:
         except _STEP_ERRORS as e:
             self.notes.append(f"Older update backups could not be pruned ({e}).")
 
-    def step10(self) -> None:
+    def step10(self) -> str:
+        """The handover after a successful apply, then the record. Returns the state."""
         me = self.kit.site.me
+
+        def record() -> str:
+            return self._finish("succeeded", f"Updated to {self.to}.")
+
         if self.ctx.get("first_handover") == "done":
-            return
+            return record()
         if stays_newer(me, self.to):
             self.notes.append(f"The updater stays on {me.version}, which is newer.")
-            return
-        self.start("10", "Handing over to the new updater.")
+            return record()
+        if self.j.step != "10":
+            self.start("10", "Handing over to the new updater.")
         successor = Owner(image_digest=str(self.ctx["updater_digest"]), version=self.to, container="")
-        outcome = self.kit.handover.after(request_id=self.id, me=me, successor=successor)
+        written: list[str] = []
+
+        def before_go() -> None:
+            # The app update is recorded before the successor is told to go:
+            # from `go` on it is the successor's volume to write in, and a
+            # take-back adds its sentence to this record (6.6).
+            self.notes.append(
+                f"The updater of {self.to} takes over; this one stays on standby for ten minutes."
+            )
+            written.append(record())
+
+        outcome = self.kit.handover.after(
+            request_id=self.id, me=me, successor=successor, before_go=before_go
+        )
+        if written:
+            return written[0]
         if not outcome.done:
             self.notes.append(f"The updater stayed on {me.version}. {outcome.sentence}")
+        return record()
 
     def finish_success(self) -> str:
         self.step9()
-        self.step10()
-        return self._finish("succeeded", f"Updated to {self.to}.")
+        return self.step10()
 
     # ------------------------------------------------------------------ #
     # Rollback, R1-R5
@@ -807,8 +836,9 @@ class Apply:
         owner = self.j.owner
         alive = False
         me = self.kit.site.me
-        if owner is not None and not owner.is_(me) and owner.container:
-            alive = survey.running(survey.find(self.client, owner.container))
+        if owner is not None and not owner.is_(me):
+            # By image, not by name: a handover renames both updaters (H5).
+            alive = runs(self.client, owner.image_digest)
         return Observed(
             drill_running=drill_running,
             drill_report=report is not None,
@@ -859,6 +889,5 @@ class Apply:
                 return self.finish_rolled_back()
             return self.finish_success()
         if action == Action.RESUME_HANDOVER:
-            self.step10()
-            return self._finish("succeeded", f"Updated to {self.to}.")
+            return self.step10()
         return self.not_started("the journal could not be resumed.")  # pragma: no cover

@@ -60,8 +60,20 @@ class Service:
             socket_sentence=found.sentence,
         )
 
+    @property
+    def heartbeat_role(self) -> str | None:
+        """What `updater.json` should say about this updater, or None for nothing (6.6)."""
+        return self.kit.handover.heartbeat_role
+
     def startup(self) -> None:
         self.vol.init()
+        handover = self.kit.handover
+        handover.startup()
+        if handover.mode != "current":
+            # A successor before H5, a standby, or a `-previous` watching the
+            # canonical updater: none of them takes requests or resumes an apply.
+            self.resume_pending = False
+            return
         if os.path.lexists(self.vol.root / "journal"):
             leftovers = list((self.vol.root / "journal").glob(f"{intake.INTAKE_PREFIX}*.taken"))
             if leftovers:
@@ -85,7 +97,14 @@ class Service:
 
     def resume_journals(self) -> list[str]:
         outcomes = []
+        handover = self.kit.handover
         try:
+            # A handover this updater started settles first: it decides who
+            # owns an apply taken at 2a (5.6).
+            handover.recover()
+            if handover.mode != "current":
+                self.resume_pending = False
+                return outcomes
             for j in self.unfinished():
                 started = [e.get("at") for e in j.started if isinstance(e, dict)]
                 if started and isinstance(started[-1], str):
@@ -102,10 +121,18 @@ class Service:
             self.resume_pending = False
         except eng.EngineUnavailable:
             self.resume_pending = True
+        handover.flush()
         return outcomes
 
     def tick(self) -> intake.Outcome | None:
         self.kit.clock.tick()
+        handover = self.kit.handover
+        if handover.mode != "current":
+            handover.tick()
+            if handover.mode != "current":
+                return None
+            # Taken back over, or taken over: resume what the other one left.
+            self.resume_pending = True
         if self.resume_pending:
             self.resume_journals()
             if self.resume_pending:
@@ -139,15 +166,61 @@ class Service:
             if request.kind == "discard":
                 return self.discard(request)
             if request.kind == "update_updater":
-                Records(self.vol, request.id, request.kind, self.kit.clock).finish(
-                    "not_started",
-                    "Updating the updater on its own is not available in this updater yet.",
-                    requested_by=request.requested_by,
-                )
-                return "not_started"
+                return self.update_updater(request)
         finally:
             self.busy = False
         return None
+
+    def update_updater(self, request: contract.Request) -> str:
+        """C2: the short prepare (resolve, verify, pull the updater only), then the handover.
+
+        No step-up and no journal (R12): it cannot touch the ledger, and the
+        handover keeps its own. Only the pin's updater line changes.
+        """
+        records = Records(self.vol, request.id, "update_updater", self.kit.clock)
+        started = self.kit.clock.now()
+        me = self.kit.site.me
+        try:
+            successor = prepare.updater_only(self.kit, request, records)
+        except prepare.PrepareFailed as e:
+            records.finish("refused", e.sentence, requested_by=request.requested_by, started_at=started)
+            return "refused"
+        except eng.EngineUnavailable:
+            records.finish(
+                "refused",
+                "Updating the updater failed: the container engine stopped answering.",
+                requested_by=request.requested_by,
+                started_at=started,
+            )
+            return "refused"
+        except (eng.EngineError, eng.NotAllowed) as e:
+            records.finish(
+                "refused",
+                f"Updating the updater failed: the container engine refused ({e}).",
+                requested_by=request.requested_by,
+                started_at=started,
+            )
+            return "refused"
+        records.say(f"Handing over to the updater of {successor.version}.", step="H1")
+        outcome = self.kit.handover.update_updater(request_id=request.id, successor=successor)
+        if outcome.done:
+            records.finish(
+                "succeeded",
+                f"The updater now runs {successor.version}.",
+                requested_by=request.requested_by,
+                started_at=started,
+                extra={"handover": "done", "from_version": me.version, "to_version": successor.version},
+            )
+            return "succeeded"
+        recorded = volume.read_own_json(self.vol.history(request.id))
+        if recorded is None:
+            # The handover wrote nothing (none available): the record is this one.
+            sentence = outcome.sentence
+            if not sentence.startswith("The updater stayed on"):
+                sentence = f"The updater stayed on {me.version}: {sentence}"
+            records.finish("not_started", sentence, requested_by=request.requested_by, started_at=started)
+            return "not_started"
+        return str(recorded.get("state"))
 
     def prepare(self, request: contract.Request) -> str:
         records = Records(self.vol, request.id, "prepare", self.kit.clock)

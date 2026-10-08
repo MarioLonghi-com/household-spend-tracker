@@ -8,6 +8,11 @@
 | P6 | `python -m scripts.upgrade --check --json` from the new image, against this ledger |
 | P7 | the prepare report, bound to both digests, valid for 24 hours |
 
+`updater_only` is the short prepare of an `update_updater` request (C2,
+6.6): P2, P4 and P5 for the updater image alone, then its protocol window
+read from the pulled image's labels -- which intake cannot see (R8) -- and
+refused unless it includes the running app's protocol.
+
 The app keeps serving throughout. Every failure is a `refused` record with
 one sentence, *Preparing failed: …*, and leaves the ledger untouched (Part 12,
 rows 3 to 6).
@@ -28,8 +33,9 @@ from __future__ import annotations
 import contextlib
 import json
 
-from updater import contract, oneoff, shapes, survey, verify, volume
+from updater import contract, handover, oneoff, shapes, survey, verify, volume
 from updater import engine as eng
+from updater.journal import Owner
 from updater.site import APP_REPOSITORY, UPDATER_REPOSITORY, Kit, Records
 from updater.trust import architecture
 
@@ -239,3 +245,61 @@ def run(kit: Kit, request: contract.Request, records: Records) -> dict:
     report["code_head"] = facts.get("code_head")
     volume.write_json(kit.site.volume.prepared(request.id), report)
     return report
+
+
+def updater_only(kit: Kit, request: contract.Request, records: Records) -> Owner:
+    """`update_updater`'s own prepare (C2, R8): the updater image of `<to>`, resolved,
+    verified, pulled, and speaking the running app's protocol. Returns the successor.
+
+    Uses only calls an `outdated` engine client still allows (C3): `/info`,
+    the project listing and inspections, the pull and image inspect.
+    """
+    client = kit.client
+    to = str(request.to_version)
+    failed = "Updating the updater failed: "
+    records.say(f"Preparing the updater of {to}.", step="P2")
+    try:
+        app = survey.app(client, pod_ok=True)
+    except survey.NotStarted as e:
+        raise PrepareFailed(failed + e.sentence) from None
+    try:
+        found = kit.trust.resolve(UPDATER_REPOSITORY, to, architecture(client.info()))
+    except verify.Refused as e:
+        if e.rule == "unreachable":
+            raise PrepareFailed(failed + "ghcr.io could not be reached.") from None
+        raise PrepareFailed(
+            failed + f"the updater of {to} could not be found on ghcr.io ({e.detail})."
+        ) from None
+    records.say("Verifying where the updater image came from.", step="P4")
+    try:
+        verified = kit.trust.verify(UPDATER_REPOSITORY, found.digest, to)
+    except verify.Refused as e:
+        raise PrepareFailed(
+            failed + f"the image's origin could not be proven: {e.rule}: {e.detail}."
+        ) from None
+    records.say("Downloading the updater image.", step="P5")
+    ref = by_digest(UPDATER_REPOSITORY, found.digest)
+    try:
+        client.pull(ref)
+        labels = ((client.inspect_image(ref).get("Config") or {}).get("Labels")) or {}
+        verify.labels_agree(verified, labels)
+    except verify.Refused:
+        with contextlib.suppress(eng.EngineError, eng.NotAllowed):
+            client.remove_image(ref)
+        raise PrepareFailed(failed + "the downloaded image is not the one that was verified.") from None
+    except eng.EngineError as e:
+        raise PrepareFailed(failed + f"the image could not be downloaded ({e.message}).") from None
+    window = handover.protocol_window(labels)
+    protocol = app.running_app.protocol  # type: ignore[attr-defined]
+    if window is None or not window[0] <= protocol <= window[1]:
+        with contextlib.suppress(eng.EngineError, eng.NotAllowed):
+            client.remove_image(ref)
+        reads = (
+            f"reads protocols {window[0]} to {window[1]}"
+            if window
+            else "does not say which protocols it reads"
+        )
+        raise PrepareFailed(
+            failed + f"the updater of {to} {reads}, and the app writes protocol {protocol}."
+        )
+    return Owner(image_digest=found.digest, version=to, container="")

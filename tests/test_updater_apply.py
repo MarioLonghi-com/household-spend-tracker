@@ -38,9 +38,9 @@ import pytest
 
 from tests.self_update.compare import ALLOWED, differences
 from tests.updater_world import APP, HEAD, PROJECT, REVISION, UPD, A, B, C, World, digest, ref
-from updater import contract, pin, volume
+from updater import contract, journal, pin, volume
 from updater import engine as eng
-from updater.handover import Outcome
+from updater.handover import NotAvailable, Outcome
 from updater.journal import Owner
 
 
@@ -654,20 +654,28 @@ def test_row_25_during_the_drill_nothing_answers_to_the_app_name(world):
     assert seen["by_name"] is None and seen["parked"]["State"] == "exited"
 
 
-class Taker:
-    """A handover that works: the successor takes the request at 2a."""
+class Taker(NotAvailable):
+    """A handover that works: the successor takes the request at 2a, writing
+    itself in as the journal's owner as a real one does at H5."""
+
+    def __init__(self, vol, clock):
+        self.vol, self.clock = vol, clock
 
     def first(self, *, request_id, me, successor):
-        return Outcome(True, "handed over", owner=replace(successor, container=f"{PROJECT}-updater-1-next"))
+        owner = replace(successor, container=f"{PROJECT}-updater-1-next")
+        j = journal.load(self.vol, request_id)
+        journal.hand_over(self.vol, j, owner, self.clock.now())
+        journal.remember(self.vol, j, first_handover="done")
+        return Outcome(True, "handed over", owner=owner)
 
-    def after(self, *, request_id, me, successor):  # pragma: no cover - not reached
+    def after(self, *, request_id, me, successor, before_go=None):  # pragma: no cover - not reached
         raise AssertionError
 
 
 def test_updater_first_hands_over_before_the_app_stops(tmp_path):
     with World(tmp_path, updater_protocols="1-2") as w:
         req, _ = None, None
-        service = w.service(handover=Taker())
+        service = w.service(handover=Taker(w.volume, w.clock))
         service.startup()
         report = w.prepared(service)
         req = w.apply_request(report)
