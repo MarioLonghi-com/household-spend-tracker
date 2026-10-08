@@ -168,6 +168,12 @@ history this repository does not have.
 
 ### Changed
 
+- **Draft translations of the first screens** in pt-BR, es-ES and sv-SE:
+  every message extracted so far, each marked `#, fuzzy` until a native
+  speaker reviews it (#58). None is served or selectable; a test checks every
+  catalog entry is valid ICU and keeps the English placeholders. (#175, #176,
+  #177)
+
 - **The first screens' words are in the catalogs:** the shell and its menu,
   signing in, step-up, recovery codes, resetting a sign-in, the profile and
   passkeys, setting up the instance and accepting an invitation, plus the

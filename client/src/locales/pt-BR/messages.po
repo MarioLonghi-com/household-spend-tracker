@@ -8,313 +8,386 @@ msgstr ""
 "Language: pt-BR\n"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Creating…"
-msgstr ""
+msgstr "Criando…"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Application management"
-msgstr ""
+msgstr "Gerenciamento do aplicativo"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "New password"
-msgstr ""
+msgstr "Nova senha"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Your new password is set. Sign in with it and your authenticator as usual."
-msgstr ""
+msgstr "Sua nova senha foi definida. Entre com ela e com seu aplicativo autenticador, como de costume."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
-msgstr ""
+msgstr "Uma chave permite que um programa — um script, uma automação, um assistente de IA — leia e, se você permitir, acrescente dados a uma casa em seu nome. Tudo o que ele faz aparece no Histórico dessa casa com o seu nome e o da chave."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Add this to your authenticator app, then type the six digits it shows."
-msgstr ""
+msgstr "Adicione isto ao seu aplicativo autenticador e digite os seis dígitos que ele mostrar."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "No browsers were being trusted."
-msgstr ""
+msgstr "Nenhum navegador estava sendo considerado confiável."
 
 #: src/App.tsx
+#, fuzzy
 msgid "History"
-msgstr ""
+msgstr "Histórico"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own."
-msgstr ""
+msgstr "Você não tem códigos de recuperação não usados. Se perder seu aplicativo autenticador, não terá como voltar a entrar sozinho."
 
 #. placeholder {0}: passkey.label
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Rename {0}"
-msgstr ""
+msgstr "Renomear {0}"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
-msgstr ""
+msgstr "{by} redefiniu seu aplicativo autenticador para {email} em {when}. Todos os navegadores em que você estava conectado foram desconectados. Configure-o de novo abaixo."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "what a key can never do"
-msgstr ""
+msgstr "o que uma chave nunca pode fazer"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Light"
-msgstr ""
+msgstr "Claro"
 
 #: src/lib/api.ts
+#, fuzzy
 msgid "the server's answer could not be read"
-msgstr ""
+msgstr "não foi possível ler a resposta do servidor"
 
 #: src/components/SignInNotice.tsx
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Dismiss"
-msgstr ""
+msgstr "Dispensar"
 
 #: src/components/StepUp.tsx
+#, fuzzy
 msgid "{why} So this asks for your password and a code — the same as signing in."
-msgstr ""
+msgstr "{why} Por isso, pedimos sua senha e um código — o mesmo que para entrar."
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "You're signed in. This server's secret key was replaced, so the authenticator you had no longer works here. Scan this with your authenticator app and type the six digits it shows — the recovery code you just used covers this, so it costs no other. Then delete the old entry for this account from your app."
-msgstr ""
+msgstr "Você entrou. A chave secreta deste servidor foi substituída, então o autenticador que você tinha não funciona mais aqui. Escaneie isto com seu aplicativo autenticador e digite os seis dígitos que ele mostrar — o código de recuperação que você acabou de usar cobre isso, então nenhum outro é gasto. Depois, apague do aplicativo a entrada antiga desta conta."
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "This server's secret key has been replaced. Use one of your recovery codes."
-msgstr ""
+msgstr "A chave secreta deste servidor foi substituída. Use um dos seus códigos de recuperação."
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "This browser does not support passkeys yet."
-msgstr ""
+msgstr "Este navegador ainda não oferece suporte a chaves de acesso."
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Reset links work once and they expire. Ask an owner of this instance for a new one."
-msgstr ""
+msgstr "Links de redefinição funcionam uma única vez e expiram. Peça um novo a um proprietário desta instância."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Sign-in methods"
-msgstr ""
+msgstr "Formas de entrar"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "This server cannot check a code from the authenticator you have, so one of your recovery codes proves it is you instead; it is spent."
-msgstr ""
+msgstr "Este servidor não consegue verificar um código do autenticador que você tem, então um dos seus códigos de recuperação comprova que é você; ele será gasto."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Length does more than symbols do. Four unrelated words you can actually remember beats a short one with punctuation in it."
-msgstr ""
+msgstr "O tamanho conta mais que os símbolos. Quatro palavras sem relação que você consiga lembrar valem mais que uma senha curta cheia de pontuação."
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Rename"
-msgstr ""
+msgstr "Renomear"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "I have my authenticator after all"
-msgstr ""
+msgstr "Estou com meu autenticador, afinal"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
-msgstr ""
+msgstr "Nenhuma chave pode excluir nada, desfazer nada, mudar quem está em uma casa, mexer em senhas ou autenticadores, ou criar outra chave — seja o que for que você escolha aqui."
 
 #: src/components/ReenrolmentDue.tsx
+#, fuzzy
 msgid "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
-msgstr ""
+msgstr "O código de recuperação com que você entrou nesta aba cobre isso, enquanto você continuar conectado e por até um dia."
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Looking up your reset link…"
-msgstr ""
+msgstr "Procurando seu link de redefinição…"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Let it apply an import without anybody reviewing it"
-msgstr ""
+msgstr "Permitir que aplique uma importação sem que ninguém a revise"
 
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "2. You"
-msgstr ""
+msgstr "2. Você"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Your household"
-msgstr ""
+msgstr "Sua casa"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Passkeys need this app opened at its HTTPS address, {address}."
-msgstr ""
+msgstr "As chaves de acesso exigem que este app seja aberto no endereço HTTPS dele, {address}."
 
 #: src/App.tsx
+#, fuzzy
 msgid "New household"
-msgstr ""
+msgstr "Nova casa"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "What it may do"
-msgstr ""
+msgstr "O que ela pode fazer"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Transactions"
-msgstr ""
+msgstr "Transações"
 
 #. placeholder {0}: formatInstant(key.expires_at)
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Expired {0}"
-msgstr ""
+msgstr "Expirou em {0}"
 
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Check the code and finish"
-msgstr ""
+msgstr "Verificar o código e concluir"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Somebody gave {user} a new authenticator"
-msgstr ""
+msgstr "Alguém deu a {user} um novo autenticador"
 
 #: src/App.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Sign in"
-msgstr ""
+msgstr "Entrar"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "{by} added {user} as an owner"
-msgstr ""
+msgstr "{by} adicionou {user} como proprietário"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Or open <0>the enrolment link</0> on the device with the app."
-msgstr ""
+msgstr "Ou abra <0>o link de cadastro</0> no dispositivo que tem o aplicativo."
 
 #: src/App.tsx
+#, fuzzy
 msgid "You're already signed in"
-msgstr ""
+msgstr "Você já entrou"
 
 #: src/components/ReenrolmentDue.tsx
+#, fuzzy
 msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
-msgstr ""
+msgstr "A chave secreta deste servidor foi substituída, então seu autenticador não funciona mais aqui e, até você configurar um novo, cada entrada vai pedir outro código de recuperação."
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Somebody reset {user}'s password and authenticator"
-msgstr ""
+msgstr "Alguém redefiniu a senha e o autenticador de {user}"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "password and authenticator"
-msgstr ""
+msgstr "senha e autenticador"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "{keys, plural, one {{keys} agent key still works — revoke it below if it should stop.} other {{keys} agent keys still work — revoke them below if they should stop.}}"
-msgstr ""
+msgstr "{keys, plural, one {{keys} chave de agente ainda funciona — revogue-a abaixo se ela deve parar.} other {{keys} chaves de agente ainda funcionam — revogue-as abaixo se elas devem parar.}}"
 
 #: src/App.tsx
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Authenticator"
-msgstr ""
+msgstr "Autenticador"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
-msgstr ""
+msgstr "Depois de confirmado, mantenha só esta entrada da conta no aplicativo: a antiga não funciona aqui, nem uma que você escaneou antes e nunca confirmou."
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Actions"
-msgstr ""
+msgstr "Ações"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Password changed."
-msgstr ""
+msgstr "Senha alterada."
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Kept"
-msgstr ""
+msgstr "Guardada"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
-msgstr ""
+msgstr "{ended, plural, one {{ended} outro navegador foi desconectado.} other {{ended} outros navegadores foram desconectados.}}"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "The six digits"
-msgstr ""
+msgstr "Os seis dígitos"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "The recovery code you signed in with in this tab covers it — no other code is needed."
-msgstr ""
+msgstr "O código de recuperação com que você entrou nesta aba cobre isso — nenhum outro código é necessário."
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Profile.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Password"
-msgstr ""
+msgstr "Senha"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Waiting for the passkey…"
-msgstr ""
+msgstr "Aguardando a chave de acesso…"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Somebody reset {user}'s authenticator"
-msgstr ""
+msgstr "Alguém redefiniu o autenticador de {user}"
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "Invitations are single-use and they expire. Ask whoever sent it for a fresh one."
-msgstr ""
+msgstr "Convites só podem ser usados uma vez e expiram. Peça um novo a quem enviou."
 
 #: src/components/StepUp.tsx
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Your password"
-msgstr ""
+msgstr "Sua senha"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Making…"
-msgstr ""
+msgstr "Gerando…"
 
 #: src/components/bits.tsx
+#, fuzzy
 msgid "Sort by {label}"
-msgstr ""
+msgstr "Ordenar por {label}"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Show the menu"
-msgstr ""
+msgstr "Mostrar o menu"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Appearance"
-msgstr ""
+msgstr "Aparência"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "None yet"
-msgstr ""
+msgstr "Nenhuma ainda"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "never used"
-msgstr ""
+msgstr "nunca usada"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "Check the code"
-msgstr ""
+msgstr "Verificar o código"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Hide the menu"
-msgstr ""
+msgstr "Ocultar o menu"
 
 #. placeholder {0}: passkey.label
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "New name for {0}"
-msgstr ""
+msgstr "Novo nome para {0}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Changing it signs out every other browser and forgets every trusted one, so if you are changing it because somebody else knows it, they are out too. Agent keys are separate credentials and keep working until you revoke them."
-msgstr ""
+msgstr "Alterá-la desconecta todos os outros navegadores e esquece todos os confiáveis, então, se você está mudando porque outra pessoa a conhece, ela também fica de fora. Chaves de agente são credenciais à parte e continuam funcionando até você revogá-las."
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "{by} reset {user}'s password and authenticator"
-msgstr ""
+msgstr "{by} redefiniu a senha e o autenticador de {user}"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Add a second on another device. If you lose this one, you will need your password and code."
-msgstr ""
+msgstr "Adicione uma segunda em outro dispositivo. Se perder esta, você vai precisar da senha e do código."
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Your new recovery codes"
-msgstr ""
+msgstr "Seus novos códigos de recuperação"
 
 #. placeholder {0}: offer.secret
 #. placeholder {0}: owed.offer.secret
@@ -323,1049 +396,1299 @@ msgstr ""
 #: src/screens/ResetAccount.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Can't scan? Enter this key by hand: <0>{0}</0>"
-msgstr ""
+msgstr "Não consegue escanear? Digite esta chave à mão: <0>{0}</0>"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "The server added {user} as an owner"
-msgstr ""
+msgstr "O servidor adicionou {user} como proprietário"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Accounts"
-msgstr ""
+msgstr "Contas"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
-msgstr ""
+msgstr "Tudo o que um programa fizer errado precisa poder ser desfeito por uma pessoa, e por isso só uma pessoa pode desfazer."
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "or"
-msgstr ""
+msgstr "ou"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "receipt filer"
-msgstr ""
+msgstr "arquivador de comprovantes"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
-msgstr ""
+msgstr "{revoked, plural, one {{revoked} navegador confiável vai pedir um código de novo.} other {{revoked} navegadores confiáveis vão pedir um código de novo.}}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Held in dark, whatever this device is set to."
-msgstr ""
+msgstr "Fixo no escuro, seja qual for a configuração deste dispositivo."
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "That link doesn't work"
-msgstr ""
+msgstr "Esse link não funciona"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Payee Merge"
-msgstr ""
+msgstr "Unir favorecidos"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Main currency"
-msgstr ""
+msgstr "Moeda principal"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
-msgstr ""
+msgstr "Escaneie isto com seu aplicativo autenticador e digite os seis dígitos que ele mostrar. Verificamos o código agora, para você saber que funciona aqui e não descobrir só na próxima vez que entrar. A entrada que o aplicativo tinha para esta conta não funciona mais; apague-a."
 
 #: src/App.tsx
+#, fuzzy
 msgid "Close the menu"
-msgstr ""
+msgstr "Fechar o menu"
 
 #. placeholder {0}: removing.label
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Remove <0>{0}</0>? It stops working at once."
-msgstr ""
+msgstr "Remover <0>{0}</0>? Ela deixa de funcionar na hora."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "System"
-msgstr ""
+msgstr "Sistema"
 
 #: src/App.tsx
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Set up"
-msgstr ""
+msgstr "Configuração"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "You're back in"
-msgstr ""
+msgstr "Você voltou"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
-msgstr ""
+msgstr "Se você não tem mais o autenticador antigo, use aqui um dos seus códigos de recuperação; ele será gasto."
 
 #: src/screens/Passkeys.tsx
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 #: src/screens/Profile.tsx
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Done"
-msgstr ""
+msgstr "Concluído"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Those two don't match."
-msgstr ""
+msgstr "As duas não coincidem."
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in."
-msgstr ""
+msgstr "Escaneie isto com seu aplicativo autenticador e digite os seis dígitos que ele mostrar. Verificamos o código agora, para você saber que funciona aqui e não descobrir só na próxima vez que entrar."
 
 #: src/App.tsx
+#, fuzzy
 msgid "Open the menu"
-msgstr ""
+msgstr "Abrir o menu"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Reset: password and authenticator"
-msgstr ""
+msgstr "Redefinição: senha e autenticador"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "The passkey prompt was closed, so nothing was added."
-msgstr ""
+msgstr "A janela da chave de acesso foi fechada, então nada foi adicionado."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.currency.not_iso_4217"
-msgstr ""
+msgstr "{code} não é um código de moeda ISO 4217. Confira a grafia, como GBP ou EUR"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.decimals_in_whole_currency"
-msgstr ""
+msgstr "{value} tem casas decimais, e {currency} não tem nenhuma"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.not_an_amount"
-msgstr ""
+msgstr "{value} não é um valor que possamos ler. Escreva com ponto antes das casas decimais e sem separador de milhar, como 1234.56 ou -80"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.too_large"
-msgstr ""
+msgstr "{value} é grande demais para registrar como dinheiro"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.too_many_decimals"
-msgstr ""
+msgstr "{value} tem mais casas decimais do que {currency} tem ({places})"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.too_many_digits"
-msgstr ""
+msgstr "Um valor com {digits} dígitos é grande demais para registrar como dinheiro"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.receipt.no_such_copy"
-msgstr ""
+msgstr "Esse comprovante não tem uma cópia desse tipo"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reconcile.does_not_balance"
-msgstr ""
+msgstr "Isso não fecha: diferença de {difference}. Marque ou desmarque linhas até a diferença chegar a zero, ou adicione a transação que está no extrato e não está no registro."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reconcile.row_after_statement"
-msgstr ""
+msgstr "Uma linha com data {row_date} é posterior ao fechamento do extrato em {statement_date}, então não pode estar nele"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.split.does_not_add_up"
-msgstr ""
+msgstr "As partes somam {total} e a transação é de {amount}. Uma divisão precisa fechar, senão altera o saldo."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.needs_amount_arriving"
-msgstr ""
+msgstr "Uma transferência de {from_currency} para {to_currency} precisa do valor que chega; nunca inventamos uma taxa de câmbio"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.same_account"
-msgstr ""
+msgstr "Uma conta não pode transferir para si mesma"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "a household"
-msgstr ""
+msgstr "uma casa"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Code"
-msgstr ""
+msgstr "Código"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "what makes a good one"
-msgstr ""
+msgstr "o que faz uma boa senha"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Sign out"
-msgstr ""
+msgstr "Sair"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "A passkey is a way in that keeps working after this browser is closed."
-msgstr ""
+msgstr "Uma chave de acesso é uma forma de entrar que continua funcionando depois que este navegador é fechado."
 
 #: src/App.tsx
+#, fuzzy
 msgid "Register"
-msgstr ""
+msgstr "Registro"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "This server's secret key was replaced, so the authenticator you have no longer works here, and nothing that asks for a code from it can be done until you set up a new one."
-msgstr ""
+msgstr "A chave secreta deste servidor foi substituída, então o autenticador que você tem não funciona mais aqui, e nada que peça um código dele pode ser feito até você configurar um novo."
 
 #: src/App.tsx
+#, fuzzy
 msgid "A household holds the accounts and the register. The currency here is only used for totals; each account keeps its own."
-msgstr ""
+msgstr "Uma casa reúne as contas e o registro. A moeda aqui só é usada nos totais; cada conta mantém a sua."
 
 #: src/App.tsx
+#, fuzzy
 msgid "Transfers"
-msgstr ""
+msgstr "Transferências"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Cleared"
-msgstr ""
+msgstr "Apagado"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "A new password"
-msgstr ""
+msgstr "Uma nova senha"
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "Filled in from the invitation. Change it if you would rather use another address."
-msgstr ""
+msgstr "Preenchido a partir do convite. Altere se preferir usar outro endereço."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Which household"
-msgstr ""
+msgstr "Qual casa"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Your account"
-msgstr ""
+msgstr "Sua conta"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "I've lost my authenticator — use a recovery code"
-msgstr ""
+msgstr "Perdi meu autenticador — usar um código de recuperação"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Change password"
-msgstr ""
+msgstr "Alterar senha"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Normally a program stages an import and you review it before anything lands in the register. This skips that."
-msgstr ""
+msgstr "Normalmente um programa prepara uma importação e você a revisa antes que qualquer coisa entre no registro. Isto pula essa etapa."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "The password alone cannot replace your second factor — otherwise it would not be a second factor."
-msgstr ""
+msgstr "A senha sozinha não pode substituir seu segundo fator — senão ele não seria um segundo fator."
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as an owner."
-msgstr ""
+msgstr "{inviter} convidou você para o {PRODUCT} como proprietário."
 
 #: src/components/SignInNotice.tsx
+#, fuzzy
 msgid "Recent sign-in changes"
-msgstr ""
+msgstr "Mudanças recentes nas formas de entrar"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Revoke"
-msgstr ""
+msgstr "Revogar"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Don't ask on this browser for 30 days"
-msgstr ""
+msgstr "Não perguntar neste navegador por 30 dias"
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "Looking up your invitation…"
-msgstr ""
+msgstr "Procurando seu convite…"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Reset your sign-in"
-msgstr ""
+msgstr "Redefinir sua forma de entrar"
 
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "Set up {PRODUCT}"
-msgstr ""
+msgstr "Configurar o {PRODUCT}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Close: {name}"
-msgstr ""
+msgstr "Fechar: {name}"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Added as an owner"
-msgstr ""
+msgstr "Adicionado como proprietário"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "The server reset {user}'s authenticator"
-msgstr ""
+msgstr "O servidor redefiniu o autenticador de {user}"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Added"
-msgstr ""
+msgstr "Adicionada"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Confirm and replace"
-msgstr ""
+msgstr "Confirmar e substituir"
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as an owner, in {households}."
-msgstr ""
+msgstr "{inviter} convidou você para o {PRODUCT} como proprietário, em {households}."
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Passkeys are not set up on this server."
-msgstr ""
+msgstr "As chaves de acesso não estão configuradas neste servidor."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "New codes made. Every earlier code, used or not, has stopped working."
-msgstr ""
+msgstr "Novos códigos gerados. Todos os códigos anteriores, usados ou não, deixaram de funcionar."
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "You've been invited"
-msgstr ""
+msgstr "Você foi convidado"
 
 #: src/components/RecoveryCodes.tsx
+#, fuzzy
 msgid "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
-msgstr ""
+msgstr "Cada um funciona uma vez, e eles só aparecem agora. São a forma de voltar a entrar se você perder o celular mas ainda souber sua senha."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Your new authenticator is the only one that works now."
-msgstr ""
+msgstr "Seu novo autenticador é o único que funciona agora."
 
 #: src/App.tsx
+#, fuzzy
 msgid "Create it"
-msgstr ""
+msgstr "Criar"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
-msgstr ""
+msgstr "Configure um novo autenticador — um celular novo, ou um que você não tem mais. O atual continua funcionando até o novo ser comprovado."
 
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Show a code to scan"
-msgstr ""
+msgstr "Mostrar um código para escanear"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Passkeys need this app opened at its HTTPS address."
-msgstr ""
+msgstr "As chaves de acesso exigem que este app seja aberto no endereço HTTPS dele."
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Reset: password"
-msgstr ""
+msgstr "Redefinição: senha"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "{by} reset your password and your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
-msgstr ""
+msgstr "{by} redefiniu sua senha e seu autenticador para {email} em {when}. Todos os navegadores em que você estava conectado foram desconectados. Configure os dois de novo abaixo."
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Last used"
-msgstr ""
+msgstr "Último uso"
 
 #. placeholder {0}: user.display_name
 #: src/App.tsx
+#, fuzzy
 msgid "This browser is signed in as {0}. An invitation makes a new account, so sign out first if the link is meant for somebody else."
-msgstr ""
+msgstr "Este navegador está conectado como {0}. Um convite cria uma conta nova, então saia primeiro se o link for para outra pessoa."
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "Finish"
-msgstr ""
+msgstr "Concluir"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Not available here"
-msgstr ""
+msgstr "Indisponível aqui"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Recovery code"
-msgstr ""
+msgstr "Código de recuperação"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
-msgstr ""
+msgstr "Você ainda tem 1 chave de acesso, e um código de recuperação não as desativa. Se uma estava no dispositivo que você perdeu, remova-a em Formas de entrar no seu perfil — seu nome no menu."
 
 #: src/App.tsx
+#, fuzzy
 msgid "{waiting} waiting"
-msgstr ""
+msgstr "{waiting} aguardando"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "The server reset {user}'s password"
-msgstr ""
+msgstr "O servidor redefiniu a senha de {user}"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Try again"
-msgstr ""
+msgstr "Tentar de novo"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Invitation"
-msgstr ""
+msgstr "Convite"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "{user} set up this instance as its owner"
-msgstr ""
+msgstr "{user} configurou esta instância como proprietário"
 
 #: src/App.tsx
+#, fuzzy
 msgid "How import works"
-msgstr ""
+msgstr "Como funciona a importação"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Until you do, every sign-in will ask for another recovery code. To do it later, open your account — your name in the menu — and set up a new authenticator there. In this tab, while you stay signed in and for up to a day, the code you just used still covers it; after that, or anywhere else, it takes one more recovery code."
-msgstr ""
+msgstr "Até lá, cada entrada vai pedir outro código de recuperação. Para fazer isso depois, abra sua conta — seu nome no menu — e configure um novo autenticador ali. Nesta aba, enquanto você continuar conectado e por até um dia, o código que você acabou de usar ainda cobre isso; depois disso, ou em qualquer outro lugar, será preciso mais um código de recuperação."
 
 #: src/components/ReenrolmentDue.tsx
+#, fuzzy
 msgid "Setting it up takes one of your recovery codes."
-msgstr ""
+msgstr "Configurá-lo gasta um dos seus códigos de recuperação."
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Continue to the passkey"
-msgstr ""
+msgstr "Continuar para a chave de acesso"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "The server made {user} an owner"
-msgstr ""
+msgstr "O servidor tornou {user} proprietário"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Import"
-msgstr ""
+msgstr "Importar"
 
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "Finish setup"
-msgstr ""
+msgstr "Concluir a configuração"
 
 #: src/components/RecoveryCodes.tsx
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "I have stored these somewhere that is not this browser"
-msgstr ""
+msgstr "Guardei isto em um lugar que não é este navegador"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Each one works once, and they are shown only now. Your old ones no longer work. They are how you get back in if you lose your phone but still know your password."
-msgstr ""
+msgstr "Cada um funciona uma vez, e eles só aparecem agora. Os antigos não funcionam mais. São a forma de voltar a entrar se você perder o celular mas ainda souber sua senha."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "You sign in with a passkey, or with your password and authenticator code."
-msgstr ""
+msgstr "Você entra com uma chave de acesso, ou com sua senha e o código do autenticador."
 
 #. placeholder {0}: user.display_name
 #. placeholder {1}: user.email
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Signed in as <0>{0}</0> ({1})."
-msgstr ""
+msgstr "Conectado como <0>{0}</0> ({1})."
 
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "A new authenticator"
-msgstr ""
+msgstr "Um novo autenticador"
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "1. You"
-msgstr ""
+msgstr "1. Você"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
-msgstr ""
+msgstr "Tenha um dos seus códigos de recuperação à mão: ele comprova que é você no lugar do autenticador antigo. (O código de recuperação com que você entrou só cobre isso na aba em que você o usou, enquanto continuar conectado, e por um dia.)"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "You will still be able to sign in with your password and code."
-msgstr ""
+msgstr "Você ainda vai poder entrar com sua senha e um código."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "read"
-msgstr ""
+msgstr "ler"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Only you right now"
-msgstr ""
+msgstr "Só você agora"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Re-enabled"
-msgstr ""
+msgstr "Reativado"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key."
-msgstr ""
+msgstr "Um dos dez que você guardou quando esta conta foi configurada. Cada um funciona uma vez, e usar um desconecta você em todos os lugares, esquece todos os navegadores confiáveis e revoga todas as chaves de agente."
 
 #: src/components/bits.tsx
+#, fuzzy
 msgid "{wait, plural, other {Try again in {wait} seconds.}}"
-msgstr ""
+msgstr "{wait, plural, one {Tente de novo em {wait} segundo.} other {Tente de novo em {wait} segundos.}}"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "The server reset {user}'s password and authenticator"
-msgstr ""
+msgstr "O servidor redefiniu a senha e o autenticador de {user}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "The six digits from the new one"
-msgstr ""
+msgstr "Os seis dígitos do novo"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "New authenticator"
-msgstr ""
+msgstr "Novo autenticador"
 
 #: src/components/StepUp.tsx
+#, fuzzy
 msgid "Your account is under your name in the menu."
-msgstr ""
+msgstr "Sua conta fica no seu nome, no menu."
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "The server gave {user} a new authenticator"
-msgstr ""
+msgstr "O servidor deu a {user} um novo autenticador"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Somebody reset {user}'s password"
-msgstr ""
+msgstr "Alguém redefiniu a senha de {user}"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Synced"
-msgstr ""
+msgstr "Sincronizada"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Set"
-msgstr ""
+msgstr "Definida"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
-msgstr ""
+msgstr "O código de recuperação com que você entrou cobre isso, então nenhum outro código é pedido."
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "If you did not expect this, tell an owner of this instance before you go on."
-msgstr ""
+msgstr "Se você não esperava por isso, avise um proprietário desta instância antes de continuar."
 
 #: src/App.tsx
+#, fuzzy
 msgid "Categories"
-msgstr ""
+msgstr "Categorias"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked 1 agent key. A program that was using it will be refused from now on; issue a new key on your profile if it should keep working."
-msgstr ""
+msgstr "Usar um código de recuperação desconectou você em todos os lugares, esqueceu todos os navegadores confiáveis e revogou 1 chave de agente. Um programa que a usava será recusado a partir de agora; emita uma nova chave no seu perfil se ele deve continuar funcionando."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "about appearance"
-msgstr ""
+msgstr "sobre a aparência"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "The server re-enabled {user}"
-msgstr ""
+msgstr "O servidor reativou {user}"
 
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "In Docker:"
-msgstr ""
+msgstr "No Docker:"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Change"
-msgstr ""
+msgstr "Alterar"
 
 #. placeholder {0}: recovered.passkeys
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "You still have {0} passkeys, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
-msgstr ""
+msgstr "Você ainda tem {0} chaves de acesso, e um código de recuperação não as desativa. Se uma estava no dispositivo que você perdeu, remova-a em Formas de entrar no seu perfil — seu nome no menu."
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Reset: authenticator"
-msgstr ""
+msgstr "Redefinição: autenticador"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Email"
-msgstr ""
+msgstr "E-mail"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "somebody"
-msgstr ""
+msgstr "alguém"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "It could not be used here anyway."
-msgstr ""
+msgstr "De qualquer forma, ela não podia ser usada aqui."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Make new codes"
-msgstr ""
+msgstr "Gerar novos códigos"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Add a passkey"
-msgstr ""
+msgstr "Adicionar uma chave de acesso"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "One household per key. Two households means two keys."
-msgstr ""
+msgstr "Uma casa por chave. Duas casas, duas chaves."
 
 #: src/App.tsx
+#, fuzzy
 msgid "Reset"
-msgstr ""
+msgstr "Redefinição"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Following this device, which is dark right now."
-msgstr ""
+msgstr "Seguindo este dispositivo, que está no escuro agora."
 
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "4. Recovery codes"
-msgstr ""
+msgstr "4. Códigos de recuperação"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "password"
-msgstr ""
+msgstr "senha"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Snap a Receipt"
-msgstr ""
+msgstr "Fotografar um comprovante"
 
 #. placeholder {0}: formatInstant(key.expires_at)
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Expires {0}"
-msgstr ""
+msgstr "Expira em {0}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "A recovery code cannot be used here. If somebody else has seen your codes, one of them must not be enough to make the next set."
-msgstr ""
+msgstr "Um código de recuperação não pode ser usado aqui. Se alguém viu seus códigos, um deles não pode bastar para gerar o próximo conjunto."
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
-msgstr ""
+msgstr "Sua senha para {email} foi redefinida pelo servidor em {when}. Todos os navegadores em que você estava conectado foram desconectados. Defina-a de novo abaixo."
 
 #. placeholder {0}: passkey.rp_id
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Made for {0}, cannot be used here."
-msgstr ""
+msgstr "Criada para {0}, não pode ser usada aqui."
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Not now"
-msgstr ""
+msgstr "Agora não"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "This device only"
-msgstr ""
+msgstr "Só neste dispositivo"
 
 #: src/components/SignInNotice.tsx
+#, fuzzy
 msgid "See them in Admin"
-msgstr ""
+msgstr "Ver em Administração"
 
 #: src/components/bits.tsx
+#, fuzzy
 msgid "Hide help: {label}"
-msgstr ""
+msgstr "Ocultar ajuda: {label}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Current password"
-msgstr ""
+msgstr "Senha atual"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Set the password"
-msgstr ""
+msgstr "Definir a senha"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Sign out and accept the invitation"
-msgstr ""
+msgstr "Sair e aceitar o convite"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "You signed in with a recovery code, and your passkeys still work. If one of them was on the device you lost, remove it here."
-msgstr ""
+msgstr "Você entrou com um código de recuperação, e suas chaves de acesso continuam funcionando. Se uma delas estava no dispositivo que você perdeu, remova-a aqui."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Dark"
-msgstr ""
+msgstr "Escuro"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Ignore it and carry on"
-msgstr ""
+msgstr "Ignorar e continuar"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Loading…"
-msgstr ""
+msgstr "Carregando…"
 
 #: src/components/ReenrolmentDue.tsx
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Set up a new authenticator"
-msgstr ""
+msgstr "Configurar um novo autenticador"
 
 #. placeholder {0}: response.status
 #: src/lib/api.ts
+#, fuzzy
 msgid "the server answered {0}"
-msgstr ""
+msgstr "o servidor respondeu {0}"
 
 #: src/components/StepUp.tsx
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "The six digits from your authenticator"
-msgstr ""
+msgstr "Os seis dígitos do seu autenticador"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "Your name"
-msgstr ""
+msgstr "Seu nome"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "{by} reset {user}'s authenticator"
-msgstr ""
+msgstr "{by} redefiniu o autenticador de {user}"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Your password and your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
-msgstr ""
+msgstr "Sua senha e seu autenticador para {email} foram redefinidos pelo servidor em {when}. Todos os navegadores em que você estava conectado foram desconectados. Configure os dois de novo abaixo."
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "{others, plural, one {You will still be able to sign in with your other passkey, or with your password and code.} other {You will still be able to sign in with your other {others} passkeys, or with your password and code.}}"
-msgstr ""
+msgstr "{others, plural, one {Você ainda vai poder entrar com sua outra chave de acesso, ou com sua senha e um código.} other {Você ainda vai poder entrar com suas outras {others} chaves de acesso, ou com sua senha e um código.}}"
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "3. Recovery codes"
-msgstr ""
+msgstr "3. Códigos de recuperação"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "One of your recovery codes"
-msgstr ""
+msgstr "Um dos seus códigos de recuperação"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Never"
-msgstr ""
+msgstr "Nunca"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "{usable, plural, one {{usable} passkey} other {{usable} passkeys}}"
-msgstr ""
+msgstr "{usable, plural, one {{usable} chave de acesso} other {{usable} chaves de acesso}}"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "{by} gave {user} a new authenticator"
-msgstr ""
+msgstr "{by} deu a {user} um novo autenticador"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "A recovery code"
-msgstr ""
+msgstr "Um código de recuperação"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "{by} reset your password for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
-msgstr ""
+msgstr "{by} redefiniu sua senha para {email} em {when}. Todos os navegadores em que você estava conectado foram desconectados. Defina-a de novo abaixo."
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "2. Your authenticator"
-msgstr ""
+msgstr "2. Seu autenticador"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Payee Naming Rules"
-msgstr ""
+msgstr "Regras de nome de favorecidos"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "{by} made {user} an owner"
-msgstr ""
+msgstr "{by} tornou {user} proprietário"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "<0>Copy this now.</0> It is the only time it is shown — only a fingerprint of it is stored, so there is nothing to show again."
-msgstr ""
+msgstr "<0>Copie isto agora.</0> É a única vez que aparece — só uma impressão digital dele fica guardada, então não há como mostrá-lo de novo."
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Made an owner"
-msgstr ""
+msgstr "Tornado proprietário"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Show a new code to scan"
-msgstr ""
+msgstr "Mostrar um novo código para escanear"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Replacing it also un-trusts every browser, including this one, and signs out every other browser — they were let in on the strength of the old authenticator, and that is exactly what you are replacing."
-msgstr ""
+msgstr "Substituí-lo também tira a confiança de todos os navegadores, inclusive este, e desconecta todos os outros — eles entraram graças ao autenticador antigo, e é exatamente isso que você está substituindo."
 
 #: src/components/ReenrolmentDue.tsx
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Your authenticator"
-msgstr ""
+msgstr "Seu autenticador"
 
 #: src/components/SignInNotice.tsx
+#, fuzzy
 msgid "Sign-in changes in the last 14 days, by somebody other than you:"
-msgstr ""
+msgstr "Mudanças nas formas de entrar nos últimos 14 dias, feitas por outra pessoa:"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Keep it"
-msgstr ""
+msgstr "Manter"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "You have not given a key to anything."
-msgstr ""
+msgstr "Você não deu uma chave para nada."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "write"
-msgstr ""
+msgstr "escrever"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "{action}: {name}"
-msgstr ""
+msgstr "{action}: {name}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Held in light, whatever this device is set to."
-msgstr ""
+msgstr "Fixo no claro, seja qual for a configuração deste dispositivo."
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "{by} reset {user}'s password"
-msgstr ""
+msgstr "{by} redefiniu a senha de {user}"
 
 #. placeholder {0}: recovered.keys
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
-msgstr ""
+msgstr "Usar um código de recuperação desconectou você em todos os lugares, esqueceu todos os navegadores confiáveis e revogou {0} chaves de agente. Um programa que usava uma delas será recusado a partir de agora; emita uma nova chave no seu perfil se ele deve continuar funcionando."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Needs setting up again"
-msgstr ""
+msgstr "Precisa ser configurado de novo"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "This browser hasn't been used here recently, so we need the six digits."
-msgstr ""
+msgstr "Este navegador não foi usado aqui recentemente, então precisamos dos seis dígitos."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "why this is asked"
-msgstr ""
+msgstr "por que isto é pedido"
 
 #. placeholder {0}: names.length
 #: src/App.tsx
+#, fuzzy
 msgid "{0, plural, one {{who} is here too} other {{who} are here too}}"
-msgstr ""
+msgstr "{0, plural, one {{who} também está aqui} other {{who} também estão aqui}}"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Remove"
-msgstr ""
+msgstr "Remover"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Payee"
-msgstr ""
+msgstr "Favorecido"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "No other browsers were signed in."
-msgstr ""
+msgstr "Nenhum outro navegador estava conectado."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "What is it for"
-msgstr ""
+msgstr "Para que serve"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Nothing has changed yet — your current authenticator keeps working until a code proves the new one pairs."
-msgstr ""
+msgstr "Nada mudou ainda — seu autenticador atual continua funcionando até um código comprovar que o novo está pareado."
 
 #: src/App.tsx
+#, fuzzy
 msgid "Reports"
-msgstr ""
+msgstr "Relatórios"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Let it add and change transactions, not only read them"
-msgstr ""
+msgstr "Permitir que adicione e altere transações, e não só que as leia"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Save"
-msgstr ""
+msgstr "Salvar"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Couldn't load your households"
-msgstr ""
+msgstr "Não foi possível carregar suas casas"
 
 #: src/components/bits.tsx
+#, fuzzy
 msgid "What's this? {label}"
-msgstr ""
+msgstr "O que é isto? {label}"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Payee Categorisation"
-msgstr ""
+msgstr "Categorização de favorecidos"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "At least 12 characters. Length is what matters."
-msgstr ""
+msgstr "Pelo menos 12 caracteres. O que importa é o tamanho."
 
 #: src/components/bits.tsx
+#, fuzzy
 msgid "Settings"
-msgstr ""
+msgstr "Configurações"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Admin"
-msgstr ""
+msgstr "Administração"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "New password again"
-msgstr ""
+msgstr "Nova senha de novo"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "why not a recovery code"
-msgstr ""
+msgstr "por que não um código de recuperação"
 
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "this device"
-msgstr ""
+msgstr "este dispositivo"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Keys for programs"
-msgstr ""
+msgstr "Chaves para programas"
 
 #. placeholder {0}: recovery.data.unused
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "{0} of 10 left"
-msgstr ""
+msgstr "{0} de 10 restantes"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Somebody re-enabled {user}"
-msgstr ""
+msgstr "Alguém reativou {user}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Passkeys"
-msgstr ""
+msgstr "Chaves de acesso"
 
 #. placeholder {0}: owed.length - SHOWN
 #: src/components/SignInNotice.tsx
+#, fuzzy
 msgid "and {0} more."
-msgstr ""
+msgstr "e mais {0}."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "What is holding it (optional)"
-msgstr ""
+msgstr "Quem vai usá-la (opcional)"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
-msgstr ""
+msgstr "Todos os códigos que você tem agora, usados ou não, deixam de funcionar e dez novos os substituem. Ninguém é desconectado."
 
 #. placeholder {0}: tokenPath ?? t`the data directory`
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "It was printed to the server log when this instance started, and written to <0>{0}</0>. It changes every time the server restarts until setup is finished."
-msgstr ""
+msgstr "Ele foi impresso no log do servidor quando esta instância iniciou e gravado em <0>{0}</0>. Ele muda toda vez que o servidor reinicia, até a configuração terminar."
 
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "3. Your authenticator"
-msgstr ""
+msgstr "3. Seu autenticador"
 
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "1. The setup token"
-msgstr ""
+msgstr "1. O token de configuração"
 
 #: src/components/LanguagePicker.tsx
+#, fuzzy
 msgid "Language"
-msgstr ""
+msgstr "Idioma"
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as a member."
-msgstr ""
+msgstr "{inviter} convidou você para o {PRODUCT} como membro."
 
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "the data directory"
-msgstr ""
+msgstr "a pasta de dados"
 
 #. placeholder {0}: passkey.label
 #. placeholder {0}: removing.label
 #: src/screens/Passkeys.tsx
+#, fuzzy
 msgid "Remove {0}"
-msgstr ""
+msgstr "Remover {0}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Create the key"
-msgstr ""
+msgstr "Criar a chave"
 
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Sign in with a passkey"
-msgstr ""
+msgstr "Entrar com uma chave de acesso"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "authenticator"
-msgstr ""
+msgstr "autenticador"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "may apply imports"
-msgstr ""
+msgstr "pode aplicar importações"
 
 #: src/components/RecoveryModeBanner.tsx
+#, fuzzy
 msgid "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
-msgstr ""
+msgstr "<0>SPENDTRACKER_SECRET_KEY</0> não abre {locked, plural, one {o autenticador de 1 membro} other {os autenticadores de {locked} membros}}; vão pedir a eles um código de recuperação e depois que configurem um novo autenticador. Voltar à chave original encerra isso para todos que ainda não se cadastraram de novo."
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Somebody added {user} as an owner"
-msgstr ""
+msgstr "Alguém adicionou {user} como proprietário"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the server, and clearing this browser's site data forgets it -- which returns you to following the system."
-msgstr ""
+msgstr "Fica guardado só neste dispositivo, então um celular e um notebook podem ser diferentes. Nada é enviado ao servidor, e limpar os dados do site neste navegador apaga a escolha — o que faz voltar a seguir o sistema."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Recovery codes"
-msgstr ""
+msgstr "Códigos de recuperação"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Set up again"
-msgstr ""
+msgstr "Configurar de novo"
 
 #: src/components/RecoveryModeBanner.tsx
+#, fuzzy
 msgid "<0>secret.key</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Putting the original key back ends this for everyone who has not re-enrolled yet."
-msgstr ""
+msgstr "<0>secret.key</0> não abre {locked, plural, one {o autenticador de 1 membro} other {os autenticadores de {locked} membros}}; vão pedir a eles um código de recuperação e depois que configurem um novo autenticador. Colocar a chave original de volta encerra isso para todos que ainda não se cadastraram de novo."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "You sign in with your password and authenticator code."
-msgstr ""
+msgstr "Você entra com sua senha e o código do autenticador."
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
+#, fuzzy
 msgid "Continue"
-msgstr ""
+msgstr "Continuar"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "from the server"
-msgstr ""
+msgstr "pelo servidor"
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "An owner can administer this instance: people, households and invitations."
-msgstr ""
+msgstr "Um proprietário pode administrar esta instância: pessoas, casas e convites."
 
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
-msgstr ""
+msgstr "Nada é salvo até a última etapa. Se você fechar esta página, a instância continua intacta e você pode começar de novo."
 
 #. placeholder {0}: formatInstant(key.last_used_at)
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "last used {0}"
-msgstr ""
+msgstr "último uso em {0}"
 
 #: src/screens/Setup.tsx
+#, fuzzy
 msgid "Setup token"
-msgstr ""
+msgstr "Token de configuração"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Give a program a key"
-msgstr ""
+msgstr "Dar uma chave a um programa"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "A code from your current authenticator"
-msgstr ""
+msgstr "Um código do seu autenticador atual"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Following this device, which is light right now."
-msgstr ""
+msgstr "Seguindo este dispositivo, que está no claro agora."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "New codes"
-msgstr ""
+msgstr "Novos códigos"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "Somebody made {user} an owner"
-msgstr ""
+msgstr "Alguém tornou {user} proprietário"
 
 #. placeholder {0}: formatInstant(key.revoked_at)
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Revoked {0}"
-msgstr ""
+msgstr "Revogada em {0}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
-msgstr ""
+msgstr "Uma chave continua funcionando de outro lugar muito depois que este navegador é fechado, então pedimos sua senha e um código — o mesmo que para entrar."
 
 #: src/components/bits.tsx
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "Close"
-msgstr ""
+msgstr "Fechar"
 
 #: src/App.tsx
+#, fuzzy
 msgid "Receipts"
-msgstr ""
+msgstr "Comprovantes"
 
 #: src/screens/AcceptInvite.tsx
+#, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as a member, in {households}."
-msgstr ""
+msgstr "{inviter} convidou você para o {PRODUCT} como membro, em {households}."
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "I have saved it"
-msgstr ""
+msgstr "Já guardei"
 
 #: src/lib/signInChanges.ts
+#, fuzzy
 msgid "{by} re-enabled {user}"
-msgstr ""
+msgstr "{by} reativou {user}"
 
 #: src/screens/Profile.tsx
+#, fuzzy
 msgid "{unused, plural, one {{unused} unused recovery code left.} other {{unused} unused recovery codes left.}}"
-msgstr ""
+msgstr "{unused, plural, one {Resta {unused} código de recuperação não usado.} other {Restam {unused} códigos de recuperação não usados.}}"
 
 #: src/screens/ResetAccount.tsx
+#, fuzzy
 msgid "Your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
-msgstr ""
+msgstr "Seu autenticador para {email} foi redefinido pelo servidor em {when}. Todos os navegadores em que você estava conectado foram desconectados. Configure-o de novo abaixo."
