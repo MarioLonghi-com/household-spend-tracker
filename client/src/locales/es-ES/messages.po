@@ -146,7 +146,9 @@ msgstr "Añade esto a tu aplicación de autenticación y escribe los seis dígit
 
 #. Button on the Register screen: noun, account type
 #. Column heading on the Accounts screen: noun, account type
+#. Column heading on the accounts import: noun, account type
 #. Column name shown beside a value on phones on the Accounts screen: noun, account type
+#. Column name shown beside a value on phones on the accounts import: noun, account type
 #. Label of a form field on the Accounts screen: noun, account type
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
@@ -600,6 +602,7 @@ msgctxt "import outcome"
 msgid "New"
 msgstr "Nueva"
 
+#. Label of a form field on the accounts import
 #: src/screens/AccountImport.tsx
 msgid "Accounts file"
 msgstr ""
@@ -677,6 +680,8 @@ msgstr ""
 msgid "{0, plural, one {({1} line)} other {({2} lines)}}"
 msgstr "{0, plural, one {({1} línea)} other {({2} líneas)}}"
 
+#. Column heading on the accounts import
+#. Column name shown beside a value on phones on the accounts import
 #. Label of a form field on the Accounts screen
 #. Label of a form field on the Accounts screen
 #: src/screens/AccountImport.tsx
@@ -800,6 +805,7 @@ msgstr "Gasto de trabajo: sin reembolsar todavía"
 msgid "Somebody gave {user} a new authenticator"
 msgstr "Alguien dio a {user} una nueva aplicación de autenticación"
 
+#. Screen-reader name on the Reconcile screen
 #. placeholder {0}: formatDate(row.date)
 #: src/screens/Reconcile.tsx
 msgid "Tick {0}"
@@ -1164,6 +1170,7 @@ msgstr "Cubierto"
 msgid "Day-to-day money at a bank. Salary in, card and direct debits out."
 msgstr "El dinero del día a día en un banco. Entra la nómina, salen la tarjeta y los recibos domiciliados."
 
+#. Heading on the Reconcile screen
 #: src/screens/Reconcile.tsx
 msgid "Already proved"
 msgstr ""
@@ -1173,6 +1180,7 @@ msgstr ""
 msgid "Undo — add as new instead"
 msgstr "Deshacer: añadir como nuevo"
 
+#. Title of the panel: reconcile (verb) the named account against a statement. See GLOSSARY.md
 #. placeholder {0}: account.name
 #: src/screens/Reconcile.tsx
 msgid "Reconcile {0}"
@@ -1375,6 +1383,7 @@ msgstr "Ninguna todavía"
 
 #. Column heading on the Accounts screen: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
+#. Column heading on the accounts import: noun, a bank or cash account. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, a bank or cash account. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, a bank or cash account. See GLOSSARY.md
@@ -2134,6 +2143,7 @@ msgstr "sin contar"
 msgid "The passkey prompt was closed, so nothing was added."
 msgstr "Se cerró la ventana de la llave de acceso, así que no se añadió nada."
 
+#. Text on the Reconcile screen
 #: src/screens/Reconcile.tsx
 msgid "It balances"
 msgstr ""
@@ -2701,6 +2711,7 @@ msgstr "Movimiento único"
 msgid "Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it."
 msgstr "Números y nombres que usan los extractos para esta cuenta. Un archivo que lleve uno se asocia a esta cuenta en la pantalla Importar, y una transferencia que nombre uno, también."
 
+#. Label of a form field on the Reconcile screen
 #. placeholder {0}: account.currency
 #: src/screens/Reconcile.tsx
 msgid "Closing balance ({0})"
@@ -2884,6 +2895,7 @@ msgid "Copy"
 msgstr ""
 
 #. Column heading on the Import screen: noun, a sum of money. See GLOSSARY.md
+#. Column heading on the Reconcile screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
@@ -3146,6 +3158,7 @@ msgstr "Ya importada"
 msgid "Checking"
 msgstr "Cuentas corrientes"
 
+#. Name of a fact on the Reconcile screen
 #: src/screens/Reconcile.tsx
 msgid "Ticked here"
 msgstr ""
@@ -3357,7 +3370,9 @@ msgstr "Terminar"
 
 #. Button on the Register screen: noun. See GLOSSARY.md
 #. Column heading on the Accounts screen: noun. See GLOSSARY.md
+#. Column heading on the accounts import: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md
+#. Column name shown beside a value on phones on the accounts import: noun. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
 #. Screen-reader name on the Accounts screen: noun. See GLOSSARY.md
@@ -3469,6 +3484,7 @@ msgstr "Categoría"
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr "Todavía tienes 1 llave de acceso, y un código de recuperación no las desactiva. Si una estaba en el dispositivo que perdiste, quítala en Métodos de inicio de sesión de tu perfil: tu nombre en el menú."
 
+#. Column heading on the Reconcile screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
@@ -3647,6 +3663,7 @@ msgstr "Cada vínculo tiene un nombre o una persona detrás."
 msgid "Account for {0}"
 msgstr "Cuenta para {0}"
 
+#. Column heading on the accounts import: noun, what the account held on the day it starts. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md
 #: src/screens/AccountImport.tsx
@@ -4013,6 +4030,7 @@ msgstr "Todas las cuentas"
 msgid "This file looks like it is for <0>{0}</0> ({1}), not the account chosen above."
 msgstr "Este archivo parece ser de <0>{0}</0> ({1}), no de la cuenta elegida arriba."
 
+#. Column heading on the Reconcile screen: noun. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun. See GLOSSARY.md
@@ -4534,6 +4552,8 @@ msgstr ""
 msgid "This month"
 msgstr "Este mes"
 
+#. Column heading on the accounts import
+#. Column name shown beside a value on phones on the accounts import
 #: src/screens/AccountImport.tsx
 msgid "Problems"
 msgstr ""
@@ -4584,6 +4604,7 @@ msgstr "Esta importación"
 msgid "Made for {0}, cannot be used here."
 msgstr "Creada para {0}, no se puede usar aquí."
 
+#. Button on the Reconcile screen
 #. Button on the Register screen
 #. Button on the sign-in page
 #: src/screens/Reconcile.tsx
@@ -4791,8 +4812,10 @@ msgid "fee column"
 msgstr "columna de comisión"
 
 #. Column heading on the Accounts screen: noun. See GLOSSARY.md
+#. Column heading on the accounts import: noun. See GLOSSARY.md
 #. Column heading on the household page: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md
+#. Column name shown beside a value on phones on the accounts import: noun. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
 #. Text on the Register screen: noun. See GLOSSARY.md
 #: src/screens/AccountImport.tsx
@@ -5074,6 +5097,8 @@ msgstr ""
 msgid "Move {0} rows"
 msgstr ""
 
+#. Column heading on the accounts import: noun, a line of a file
+#. Column name shown beside a value on phones on the accounts import: noun, a line of a file
 #. Label on the Import screen: noun, a line of a file
 #: src/screens/AccountImport.tsx
 #: src/screens/Import.tsx
@@ -5274,6 +5299,8 @@ msgstr ""
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
 msgstr "Usar un código de recuperación ha cerrado tu sesión en todas partes, ha olvidado todos los navegadores de confianza y ha revocado {0} claves de agente. Un programa que usara una de ellas será rechazado a partir de ahora; crea una clave nueva en tu perfil si debe seguir funcionando."
 
+#. Column heading on the accounts import: International Bank Account Number; keep as is. See GLOSSARY.md
+#. Column name shown beside a value on phones on the accounts import: International Bank Account Number; keep as is. See…
 #: src/screens/AccountImport.tsx
 msgid "IBAN"
 msgstr ""
@@ -5430,6 +5457,7 @@ msgid "Difference"
 msgstr "Diferencia"
 
 #. Column heading on the Payee Categorisation screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Column heading on the Reconcile screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Heading on the app's menu and frame: noun, who was paid or who paid. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
@@ -5762,6 +5790,7 @@ msgstr "Dados por perdidos"
 msgid "12,34"
 msgstr "12,34"
 
+#. Text on the Reconcile screen
 #. placeholder {0}: format(difference, currency)
 #: src/screens/Reconcile.tsx
 msgid "{0} out"
@@ -6008,6 +6037,7 @@ msgstr "3. Tu aplicación de autenticación"
 msgid "1. The setup token"
 msgstr "1. El token de configuración"
 
+#. Name of a fact on the Reconcile screen
 #: src/screens/Reconcile.tsx
 msgid "Already locked"
 msgstr ""
