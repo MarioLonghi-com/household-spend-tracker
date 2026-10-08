@@ -113,18 +113,42 @@ def seeded_volume(root: Path, update_id: str, mode: str | None = "recovery") -> 
     )
     volume.write_json(
         vol.status,
-        {"protocol": 1, "id": update_id, "kind": "apply", "state": "needs_recovery", "step": "R2", "sentences": ["Restoring the backup with the previous version."]},
+        {
+            "protocol": 1,
+            "id": update_id,
+            "kind": "apply",
+            "state": "needs_recovery",
+            "step": "R2",
+            "sentences": ["Restoring the backup with the previous version."],
+        },
     )
     volume.write_json(
         vol.journal(update_id),
-        {"protocol": 1, "id": update_id, "kind": "apply", "step": "R2", "recovery_hash": HASH, "context": {"restore_log": ["restore said this"]}},
+        {
+            "protocol": 1,
+            "id": update_id,
+            "kind": "apply",
+            "step": "R2",
+            "recovery_hash": HASH,
+            "context": {"restore_log": ["restore said this"]},
+        },
     )
     if mode:
-        volume.write_json(vol.recovery_mode, contract.recovery_mode(mode, update_id if mode == "recovery" else None, time.time()))
+        volume.write_json(
+            vol.recovery_mode,
+            contract.recovery_mode(mode, update_id if mode == "recovery" else None, time.time()),
+        )
     return vol
 
 
-SECRETS_OF_THE_UPDATE = ("0.7.1", "0.8.0", "R2", "drill line seven", "restore said this", "Restoring the backup")
+SECRETS_OF_THE_UPDATE = (
+    "0.7.1",
+    "0.8.0",
+    "R2",
+    "drill line seven",
+    "restore said this",
+    "Restoring the backup",
+)
 
 
 @pytest.fixture
@@ -158,7 +182,7 @@ def test_everybody_sees_only_that_it_is_being_updated(tmp_path, ids, recovery):
         resp, body = page.get("/recovery")
         if recovery:
             text = body.decode()
-            assert resp.status == 200 and 'name=code' in text
+            assert resp.status == 200 and "name=code" in text
             for leak in SECRETS_OF_THE_UPDATE:
                 assert leak not in text, f"{leak!r} shown before the code"
         else:
@@ -197,7 +221,10 @@ def test_a_post_from_another_origin_writes_no_request(tmp_path, ids):
 
 def test_the_page_shows_the_updaters_refusal_window_and_sends_nothing_during_it(tmp_path, ids):
     vol = seeded_volume(tmp_path / "update", ids[0])
-    volume.write_json(vol.recovery_attempts, {"protocol": 1, "wrong": 5, "refused_until": contract.iso(time.time() + 600), "per_round": 5})
+    volume.write_json(
+        vol.recovery_attempts,
+        {"protocol": 1, "wrong": 5, "refused_until": contract.iso(time.time() + 600), "per_round": 5},
+    )
     page = Page(placard.Place(tmp_path / "update", tmp_path / "ledger", recovery=True))
     try:
         _, body = page.get("/recovery")
@@ -244,9 +271,20 @@ class Updater:
         self.thread.join(10)
 
 
+#: The page in `recovering` reads the world's clock, which only moves when
+#: something sleeps on it -- and the updater thread sleeps on it on every tick.
+#: On a slow runner those ticks can spend the page's 60 s answer deadline (and
+#: its 30 min session) in fake time before the page has read an answer that
+#: did arrive, which failed CI once with "the updater did not answer". These
+#: tests are about what the page and the updater say, not about deadlines,
+#: which have tests of their own on a page that has no ticking updater.
+LONG = 10.0**7
+
+
 @pytest.fixture
-def recovering(tmp_path):
+def recovering(tmp_path, monkeypatch):
     """A world whose update needs recovery, the page in recovery mode, the updater ticking."""
+    monkeypatch.setattr(placard, "SESSION_SECONDS", LONG)
     with World(tmp_path / "world") as w:
         service = w.service()
         service.startup()
@@ -260,7 +298,13 @@ def recovering(tmp_path):
         stamps = sorted(w.ledger.backups)
         make_ledger(tmp_path / "ledger", stamps)
         place = placard.Place(
-            w.volume.root, tmp_path / "ledger", recovery=True, cookie_secure=False, clock=w.time, sleep=lambda s: time.sleep(0.01)
+            w.volume.root,
+            tmp_path / "ledger",
+            recovery=True,
+            cookie_secure=False,
+            clock=w.time,
+            sleep=lambda s: time.sleep(0.01),
+            answer_seconds=LONG,
         )
         page = Page(place)
         updater = Updater(service)
@@ -318,7 +362,10 @@ def test_the_backup_download_leaves_the_key_out_unless_ticked(recovering):
     files = zip_names(data)
     assert set(files) == {"README.txt", "manifest.json", "spendtracker.sqlite3"}
     assert SECRET_KEY_TEXT.encode() not in data
-    resp, data = page.post("/recovery/act", {"csrf": csrf, "kind": "download_backup", "backup": stamps[-1], "include_key": "yes"})
+    resp, data = page.post(
+        "/recovery/act",
+        {"csrf": csrf, "kind": "download_backup", "backup": stamps[-1], "include_key": "yes"},
+    )
     files = zip_names(data)
     assert set(files) == {"README.txt", "manifest.json", "spendtracker.sqlite3", "secret.key"}
     assert files["secret.key"].strip() == SECRET_KEY_TEXT.encode()
