@@ -198,6 +198,8 @@ class Ledger:
     rows: int = 12
     #: Backup folder name -> the stamp it holds.
     backups: dict[str, str] = field(default_factory=dict)
+    #: Backup folder name -> the rows it holds, which a restore puts back.
+    backup_rows: dict[str, int] = field(default_factory=dict)
     #: Databases a restore moved aside (`.before-restore-<stamp>`).
     aside: list[str] = field(default_factory=list)
     drills: int = 0
@@ -778,6 +780,7 @@ class World(_Fleet):
             return
         stamp = self._new_stamp()
         self.ledger.backups[stamp] = before
+        self.ledger.backup_rows[stamp] = self.ledger.rows
         report["backup"] = {"folder": f"/var/lib/spend-tracker/backups/{stamp}", "verified": True}
         if mode == "hang":
             self.ledger.stamp = "migrating"
@@ -835,6 +838,7 @@ class World(_Fleet):
         name = folder.rsplit("/", 1)[1]
         self.ledger.aside.append(self.ledger.stamp)
         self.ledger.stamp = self.ledger.backups[name]
+        self.ledger.rows = self.ledger.backup_rows.get(name, self.ledger.rows)
         fake.finish(c, 0, f"restored {name}\n")
 
     def _check(self, fake: FakeEngine, c: dict, cmd: list, version: str) -> None:
@@ -888,6 +892,19 @@ class World(_Fleet):
     # ------------------------------------------------------------------ #
     # Assertions
     # ------------------------------------------------------------------ #
+
+    def apps_write_mid_drill(self) -> int:
+        """Every running app container writes a row into a ledger the drill is moving (#246).
+
+        Call it from `time.on_sleep`: what the old app, started by hand,
+        does to the ledger while the updater polls. A row written there is a
+        mix -- neither the backup's ledger nor the drill's. Returns how many.
+        """
+        if self.ledger.stamp != "migrating":
+            return 0
+        writers = len(self.running_apps())
+        self.ledger.rows += writers
+        return writers
 
     def by_name(self, name: str) -> dict | None:
         return next((c for c in self.fake.containers.values() if c["Names"] == [f"/{name}"]), None)

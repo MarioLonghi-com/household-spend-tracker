@@ -252,6 +252,8 @@ def test_a_first_install_on_docker_desktop_writes_the_settings_and_no_pin(tmp_pa
         ("APP", ref(APP, "0.9.0", "a")),
         ("UPDATER", ref(UPD, "0.9.0", "b")),
         ("PLACARD", f"{engine.ROLE_LABEL}=placard"),
+        # A first install: nothing made the project yet, the engine's compose stands.
+        ("COMPOSE", ""),
     ]
 
 
@@ -325,3 +327,82 @@ def test_a_tcp_engine_is_refused_before_anything_is_asked(tmp_path, target):
 def test_an_answer_never_carries_a_second_line(value):
     with pytest.raises(ValueError):
         launch.answer([("APP", value)])
+
+
+# --------------------------------------------------------------------------- #
+# #247: the compose that created the project
+# --------------------------------------------------------------------------- #
+
+#: Labels as each implementation writes them on a service container.
+#: podman-compose writes compose's own as well as its own.
+DOCKER_COMPOSE_LABELS = {
+    "com.docker.compose.project": "spend-tracker",
+    "com.docker.compose.config-hash": "f" * 64,
+    "com.docker.compose.project.working_dir": "/home/user/st",
+}
+PODMAN_COMPOSE_LABELS = {
+    "io.podman.compose.project": "spend-tracker",
+    "io.podman.compose.config-hash": "e" * 64,
+    "io.podman.compose.version": "1.5.0",
+    "com.docker.compose.project": "spend-tracker",
+    "com.docker.compose.project.working_dir": "/home/user/st",
+}
+
+
+def _listed(labels: dict, service: str, **more) -> dict:
+    key = "io.podman.compose.service" if "io.podman.compose.project" in labels else "com.docker.compose.service"
+    return {"Id": os.urandom(32).hex(), "Labels": {**labels, key: service, "com.docker.compose.service": service, **more}}
+
+
+@pytest.mark.parametrize(
+    ("labels", "made_by"),
+    [(PODMAN_COMPOSE_LABELS, "podman-compose"), (DOCKER_COMPOSE_LABELS, "docker-compose")],
+)
+def test_the_compose_that_made_the_project_is_read_from_its_labels(labels, made_by):
+    listing = [_listed(labels, "app"), _listed(labels, "updater")]
+    assert launch.compose_of(listing) == made_by
+
+
+def test_no_project_yet_leaves_the_engine_s_compose():
+    assert launch.compose_of([]) is None
+    # The updater's own one-offs (a maintenance page left over) are not compose's.
+    oneoff = _listed(DOCKER_COMPOSE_LABELS, "app", **{"com.docker.compose.oneoff": "True", engine.ROLE_LABEL: "placard"})
+    assert launch.compose_of([oneoff]) is None
+
+
+def test_the_app_s_container_decides_over_any_other():
+    """A second stack of the same project name, made by the other compose, is not
+    what the launcher is starting: the app's own labels decide, then the updater's."""
+    app = _listed(PODMAN_COMPOSE_LABELS, "app")
+    stray = _listed(DOCKER_COMPOSE_LABELS, "tailscale")
+    updater = _listed(DOCKER_COMPOSE_LABELS, "updater")
+    assert launch.compose_of([stray, updater, app]) == "podman-compose"
+    assert launch.compose_of([stray, updater]) == "docker-compose"
+
+
+@pytest.mark.parametrize(
+    ("fixture", "labels", "made_by"),
+    [
+        ("podman-machine", PODMAN_COMPOSE_LABELS, "podman-compose"),
+        ("podman-machine", DOCKER_COMPOSE_LABELS, "docker-compose"),
+        ("docker-desktop", DOCKER_COMPOSE_LABELS, "docker-compose"),
+    ],
+)
+def test_the_launcher_is_told_which_compose_made_the_project(tmp_path, fixture, labels, made_by):
+    """Through the socket: the project's containers as each compose labels them,
+    the second with a running updater and a parked `-previous` beside the app."""
+    project = _folder(tmp_path, "st", env=BUNDLE_ENV)
+    fake = FakeEngine(engine_fixture(fixture), info_of(fixture))
+    service_key = "io.podman.compose.service" if "io.podman.compose.project" in labels else "com.docker.compose.service"
+    for name, service in (
+        ("spend-tracker-app-1", "app"),
+        ("spend-tracker-app-1-previous", "app"),
+        ("spend-tracker-updater-1", "updater"),
+    ):
+        fake.add_container(
+            name, "spend-tracker", labels={**labels, service_key: service, "com.docker.compose.service": service}
+        )
+    with Running(fake) as running:
+        status, out = launch.run(_args(project, running.socket_path))
+    assert status == 0
+    assert dict(_answer(out))["COMPOSE"] == made_by

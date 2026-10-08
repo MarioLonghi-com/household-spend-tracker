@@ -57,6 +57,26 @@ in at `http://localhost`, and a fresh install no longer needs
 
 ### Fixed
 
+- **Starting the previous app by hand during the drill no longer touches the
+  ledger.** Between stopping the app and starting the new version, the
+  stopped app could be started from Docker Desktop's or Podman Desktop's list
+  and run the old version against the ledger while the update backed it up
+  and migrated it. Before the drill starts, and every second while it runs,
+  the updater now stops anything of the project that has the ledger mounted;
+  if it cannot, the drill is not started, or is stopped, and the update rolls
+  back. (#246)
+
+- **An engine that stops answering is treated as one that went away.** A
+  socket timeout escaped the updater's engine client as a plain error, so an
+  update caught by it failed instead of waiting for the engine and resuming
+  from its journal. (#247)
+
+- **The release zip's launcher runs the compose that created your Spend
+  Tracker.** With both docker-compose and podman-compose installed, `podman
+  compose` hands the work to docker-compose, which refuses a stack
+  podman-compose made. The launcher now reads which one made it from the
+  containers' labels and tells Podman to use that one. (#247)
+
 - **Starting the previous app by hand no longer spoils an update.** While an
   update runs, the stopped app is kept as `…-previous`; started from Docker
   Desktop's list, its `unless-stopped` policy kept it coming back and it

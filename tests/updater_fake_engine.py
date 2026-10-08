@@ -92,6 +92,14 @@ class FakeEngine:
     refuse_create: Callable[[str, dict], str | None] | None = None
     #: Every request closes without an answer, as if the engine went away.
     gone: bool = False
+    #: Seconds every request waits before it is answered: an engine that has
+    #: stopped answering without closing the socket (#247).
+    delay: float = 0.0
+    #: Container ids whose stop the engine refuses, as when it cannot kill one (#246).
+    refuse_stop: set = field(default_factory=set)
+    #: Docker 28: a stop answers once the container has exited, but the
+    #: listing still says `running` for a moment. This many listings do (#246).
+    stale_listings_after_stop: int = 0
     #: An engine whose compat API has no `POST /containers/{id}/update` (#169).
     no_update: bool = False
     #: Seconds a stop takes to answer: a container that ignores SIGTERM is
@@ -300,7 +308,11 @@ class FakeEngine:
             for c in self.containers.values():
                 labels = c["Labels"]
                 if all(labels.get(w.split("=", 1)[0]) == w.split("=", 1)[1] for w in wanted):
-                    out.append({k: v for k, v in c.items() if not k.startswith("_")})
+                    listed = {k: v for k, v in c.items() if not k.startswith("_")}
+                    if c.get("_stale_listings"):
+                        c["_stale_listings"] -= 1
+                        listed["State"] = "running"
+                    out.append(listed)
             return 200, out
         if route == ("POST", "/containers/create"):
             name = query.get("name", "")
@@ -337,11 +349,15 @@ class FakeEngine:
                 if self.on_start is not None:
                     self.on_start(self, c)
                 return 204, b""
+            if method == "POST" and action == "/stop" and c["Id"] in self.refuse_stop:
+                return 500, {"message": f"cannot stop container {c['Id']}: permission denied"}
             if method == "POST" and action == "/stop":
                 if self.stop_delay:
                     import time
 
                     time.sleep(self.stop_delay)
+                if c["State"] == "running" and self.stale_listings_after_stop:
+                    c["_stale_listings"] = self.stale_listings_after_stop
                 self.set_state(c, "exited", 143 if c["State"] == "running" else 0)
                 return 204, b""
             if method == "POST" and action == "/update" and self.no_update:
@@ -409,17 +425,25 @@ class _Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length") or 0)
         body = self.rfile.read(length) if length else b""
         engine = self.server.engine  # type: ignore[attr-defined]
+        if engine.delay:
+            import time
+
+            time.sleep(engine.delay)
         if engine.gone:
             # The engine went away mid-call: close without an answer.
             self.close_connection = True
             return
         status, answer = engine.handle(self.command, self.path, body)
         data = answer if isinstance(answer, bytes) else json.dumps(answer).encode()
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        try:
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        except (BrokenPipeError, ConnectionResetError):
+            # The client gave up first (`delay` past its timeout).
+            self.close_connection = True
 
     do_GET = do_POST = do_DELETE = do_HEAD = do_PUT = _any
 

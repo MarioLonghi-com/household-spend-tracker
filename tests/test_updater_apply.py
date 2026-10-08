@@ -532,6 +532,40 @@ def test_row_20_the_engine_going_away_mid_drill_resumes_from_the_journal(world):
     world.no_running_app_at_a_mismatched_stamp()
 
 
+def test_row_20_an_engine_that_stops_answering_mid_drill_is_resumed_like_a_lost_socket(world):
+    """The socket stays open and nothing answers: a `TimeoutError`, which is
+    `EngineUnavailable` like a closed socket (8.6, #247). The apply is left in
+    its journal and resumed when the engine answers again -- not recorded as
+    a failure, and the drill is not started twice."""
+    service = world.service()
+    service.startup()
+    report = world.prepared(service)
+    service.kit.client.timeout = 0.2
+
+    def engine_hangs(c):
+        world.drill = "hang"
+        world.time.on_sleep = lambda: setattr(world.fake, "delay", 0.5)
+
+    world.on_drill = engine_hangs
+    req = world.apply_request(report)
+    world.write_request(req)
+    assert service.tick() is not None
+    # Not a failed step: no record, the journal still at the drill, resume owed.
+    assert world.history(req["id"]) is None and service.resume_pending
+    assert world.journal(req["id"]).step == "5"
+    # The engine answers again, and the drill finished while it was away.
+    world.time.on_sleep = None
+    world.fake.delay = 0.0
+    world.on_drill = None
+    world.finish_hung_drill()
+    service.tick()
+    record = world.history(req["id"])
+    # 5.6 R13: a report with a verified backup, after a gap, is R1: restored.
+    assert record["state"] == "rolled_back" and world.ledger.drills == 1
+    assert world.ledger.stamp == A and world.ledger.aside == [B]
+    world.no_running_app_at_a_mismatched_stamp()
+
+
 def test_row_19_a_laptop_asleep_mid_drill_does_not_expire_it(world):
     """U7 through the orchestration: an hour asleep inside a 30-minute drill."""
     service = world.service()
@@ -694,14 +728,20 @@ def updates(w: World) -> list:
     return [c for c in w.fake.calls if c.bare.endswith("/update")]
 
 
-def started_by_hand_during_the_drill(w: World) -> None:
-    """Docker Desktop's Start button on `-previous`, while the drill runs: the
-    engine starts it whatever its restart policy, and it holds its port."""
+def started_by_hand_before_step_7(w: World) -> None:
+    """Docker Desktop's Start button on `-previous` after the drill, as step 7
+    creates the new app: the engine starts it whatever its restart policy, and
+    it holds its port. (During the drill it is stopped at once: #246, below.)"""
 
-    def start_it(_drill):
-        w.fake.set_state(w.fake.containers[w.app_id], "running")
+    clicked = []
 
-    w.on_drill = start_it
+    def start_it(name: str, _body: dict) -> None:
+        if name == w.app_name and not clicked:
+            clicked.append(name)
+            w.fake.set_state(w.fake.containers[w.app_id], "running")
+        return None
+
+    w.fake.refuse_create = start_it
 
 
 def test_e7_the_parked_app_is_parked_with_restart_policy_no_and_the_journal_keeps_its_own(world):
@@ -719,7 +759,7 @@ def test_e7_the_parked_app_is_parked_with_restart_policy_no_and_the_journal_keep
 
 
 def test_e7_a_previous_started_by_hand_holding_the_port_is_stopped_once_and_b_starts(world):
-    started_by_hand_during_the_drill(world)
+    started_by_hand_before_step_7(world)
     req, record = apply(world)
     assert record["state"] == "succeeded", record
     # E1 holds: B runs under the name, A is parked, stopped, with policy no.
@@ -737,7 +777,7 @@ def test_e7_a_previous_started_by_hand_holding_the_port_is_stopped_once_and_b_st
 
 
 def test_e7_the_retry_is_bounded_then_rolled_back_with_the_restart_policy_put_back(world):
-    started_by_hand_during_the_drill(world)
+    started_by_hand_before_step_7(world)
     # The port stays taken for B's app whatever is stopped: something else holds it.
     refused = []
 
@@ -770,7 +810,7 @@ def test_e7_any_rollback_puts_the_previous_restart_policy_back(world):
 
 def test_e7_in_the_sidecar_layout_a_previous_answering_in_the_namespace_is_stopped_and_b_recreated(tmp_path):
     with World(tmp_path, layout="sidecar") as w:
-        started_by_hand_during_the_drill(w)
+        started_by_hand_before_step_7(w)
         req, record = apply(w)
         assert record["state"] == "succeeded", record
         assert w.version_of(the_app(w)) == B and w.running_apps() == [the_app(w)]
@@ -782,7 +822,7 @@ def test_e7_in_the_sidecar_layout_a_previous_answering_in_the_namespace_is_stopp
 
 def test_e7_an_engine_that_cannot_change_a_restart_policy_is_noted_and_the_update_goes_on(world):
     world.fake.no_update = True
-    started_by_hand_during_the_drill(world)
+    started_by_hand_before_step_7(world)
     req, record = apply(world)
     assert record["state"] == "succeeded"
     assert any("could not be set to `no`" in n for n in record["notes"])
@@ -808,3 +848,204 @@ def test_e7_a_policy_an_older_updater_left_parked_is_not_copied_onto_the_next_ap
     assert record["state"] == "succeeded", record
     assert world.journal(req["id"]).context["previous_restart_policy"]["Name"] == "unless-stopped"
     assert policy_of(world, the_app(world)["Id"])["Name"] == "unless-stopped"
+
+
+# --------------------------------------------------------------------------- #
+# #246: the parked app started by hand before or during the drill
+# --------------------------------------------------------------------------- #
+
+
+def stops_of(w: World) -> list[str]:
+    """The containers the engine was asked to stop, by id, in order."""
+    return [c.bare.split("/")[2] for c in w.fake.calls if c.method == "POST" and c.bare.endswith("/stop")]
+
+
+def holders_stopped(w: World, rid: str) -> list[dict]:
+    return list(w.journal(rid).context.get("ledger_holders_stopped") or [])
+
+
+@pytest.mark.parametrize("stoppable", [True, False])
+def test_246_previous_started_during_the_drill_ends_as_e1_or_e3_never_a_mix(world, stoppable):
+    """Start pressed on `-previous` while the drill holds the ledger. The old app
+    writes into a ledger the drill is moving for as long as it runs (the
+    world's `apps_write_mid_drill`), so any poll it survives is a row that is
+    in neither the backup nor the drill's result.
+
+    Stoppable: it is stopped at the next poll, the drill finishes, and the
+    ledger is E1's -- B's stamp, the rows it had. Not: the drill is removed,
+    and 5.6 judges it as interrupted: a verified backup, so R1-R5 restore it
+    and the ledger is E3's -- A's stamp, the same rows."""
+    world.drill = "hang"
+    rows = world.ledger.rows
+    polls: list[int] = []
+    written: list[int] = []
+
+    def each_poll():
+        polls.append(1)
+        written.append(world.apps_write_mid_drill())
+        if len(polls) == 2:
+            world.fake.set_state(world.fake.containers[world.app_id], "running")
+            if not stoppable:
+                world.fake.refuse_stop.add(world.app_id)
+        if len(polls) == 6 and world.ledger.stamp == "migrating":
+            world.finish_hung_drill()
+
+    world.on_drill = lambda _c: setattr(world.time, "on_sleep", each_poll)
+    req, record = apply(world)
+    world.time.on_sleep = None
+    assert sum(written) == 0, written
+    assert world.ledger.drills == 1
+    if stoppable:
+        assert record["state"] == "succeeded", record
+        assert (world.ledger.stamp, world.ledger.rows) == (B, rows)
+        assert world.version_of(the_app(world)) == B and world.running_apps() == [the_app(world)]
+        assert world.fake.containers[world.app_id]["State"] == "exited"
+        assert [h["id"] for h in holders_stopped(world, req["id"])] == [world.app_id]
+        assert holders_stopped(world, req["id"])[0]["during_drill"] is True
+        # Stopped during the drill: nothing left in step 7's way.
+        assert "previous_stopped_for_new" not in world.journal(req["id"]).context
+        assert any("stopped it during the drill" in n for n in record["notes"])
+    else:
+        assert record["state"] == "rolled_back" and record["failed_step"] == "5", record
+        assert (world.ledger.stamp, world.ledger.rows) == (A, rows)
+        assert world.ledger.aside == ["migrating"]
+        assert "started by hand during the update and could not be stopped" in record["sentence"]
+        assert "the ledger was restored" in record["sentence"]
+        # The drill was stopped, not waited for.
+        assert not [c for c in world.fake.containers.values() if c["Labels"].get(eng.ROLE_LABEL) == "drill"]
+        assert the_app(world)["Id"] == world.app_id and the_app(world)["State"] == "running"
+        assert policy_of(world, world.app_id)["Name"] == "unless-stopped"
+    world.no_running_app_at_a_mismatched_stamp()
+
+
+@pytest.mark.parametrize("stoppable", [True, False])
+def test_246_previous_started_before_the_drill_is_stopped_or_the_drill_never_starts(world, stoppable):
+    """Start pressed between step 3 and step 5 (here as the maintenance page
+    starts). Stoppable: stopped before the drill, which runs, and E1 holds.
+    Not: the drill is never started, and R3 puts A back -- nothing migrated."""
+    rows = world.ledger.rows
+
+    def click(fake, c, cmd, version):
+        fake.set_state(fake.containers[world.app_id], "running")
+        if not stoppable:
+            fake.refuse_stop.add(world.app_id)
+
+    world._placard = click
+    req, record = apply(world)
+    if stoppable:
+        assert record["state"] == "succeeded", record
+        assert (world.ledger.stamp, world.ledger.rows, world.ledger.drills) == (B, rows, 1)
+        assert world.fake.containers[world.app_id]["State"] == "exited"
+        assert [(h["id"], h["during_drill"]) for h in holders_stopped(world, req["id"])] == [
+            (world.app_id, False)
+        ]
+        # Step 3's stop, then this one: the updater and the maintenance page
+        # (which mounts the ledger read-only) are never stopped.
+        assert stops_of(world) == [world.app_id, world.app_id]
+        assert any("stopped it before the drill" in n for n in record["notes"])
+    else:
+        assert record["state"] == "rolled_back" and record["failed_step"] == "5", record
+        assert (world.ledger.stamp, world.ledger.rows, world.ledger.drills) == (A, rows, 0)
+        assert not record.get("backup") and world.ledger.backups == {}
+        assert "could not be stopped" in record["sentence"] and "nothing was migrated" in record["sentence"]
+        assert "drill" not in roles_created(world)
+        assert the_app(world)["Id"] == world.app_id and the_app(world)["State"] == "running"
+    world.no_running_app_at_a_mismatched_stamp()
+
+
+def test_246_a_listing_that_lags_the_stop_does_not_count_as_still_running(world):
+    """Docker 28 answers a stop once the container has exited, and its listing
+    says `running` a moment longer. Read from the listing, that rolled every
+    E7 back on the CI's Docker ("could not be stopped"); inspected, it is
+    stopped, the drill runs, and E1 holds."""
+    world.fake.stale_listings_after_stop = 4
+    rows = world.ledger.rows
+
+    def click(fake, c, cmd, version):
+        fake.set_state(fake.containers[world.app_id], "running")
+
+    world._placard = click
+    req, record = apply(world)
+    assert record["state"] == "succeeded", record
+    assert (world.ledger.stamp, world.ledger.rows, world.ledger.drills) == (B, rows, 1)
+    assert [h["id"] for h in holders_stopped(world, req["id"])] == [world.app_id]
+
+
+def test_246_an_app_compose_started_under_the_free_name_during_the_drill_is_stopped_too(world):
+    """Not only `-previous`: a `compose up` while the app is parked creates a
+    fresh A under the name. It has the ledger too, and is stopped at once."""
+    world.drill = "hang"
+    rows = world.ledger.rows
+    polls: list[int] = []
+    written: list[int] = []
+    made: list[str] = []
+
+    def each_poll():
+        polls.append(1)
+        written.append(world.apps_write_mid_drill())
+        if len(polls) == 2:
+            seen = copy.deepcopy(world.fake.inspect_of(world.fake.containers[world.app_id]))
+            seen.pop("Id")
+            seen["Name"] = f"/{world.app_name}"
+            seen["State"] = {"Status": "running", "Running": True}
+            made.append(world.fake.add_inspected(seen))
+        if len(polls) == 6 and world.ledger.stamp == "migrating":
+            world.finish_hung_drill()
+
+    world.on_drill = lambda _c: setattr(world.time, "on_sleep", each_poll)
+    req, record = apply(world)
+    world.time.on_sleep = None
+    assert sum(written) == 0, written
+    assert [h["id"] for h in holders_stopped(world, req["id"])] == made
+    assert any(f"{world.app_name} was started while the update ran" in n for n in record["notes"]), record
+    # Stopped, it held the name step 7 needs: removed there, as R1 would, and E1 holds.
+    assert record["state"] == "succeeded", record
+    assert made[0] not in world.fake.containers
+    assert (world.ledger.stamp, world.ledger.rows) == (B, rows)
+    assert world.version_of(the_app(world)) == B and world.running_apps() == [the_app(world)]
+    world.no_running_app_at_a_mismatched_stamp()
+
+
+def test_246_a_resumed_drill_is_guarded_as_well(tmp_path):
+    """The updater restarts mid-drill (5.6: wait for it); `-previous` started in
+    the meantime is stopped by the resumed updater's first poll."""
+    from tests.updater_world import Killed
+
+    with World(tmp_path) as w:
+        service = w.service()
+        service.startup()
+        report = w.prepared(service)
+        w.drill = "hang"
+        rows = w.ledger.rows
+        req = w.apply_request(report)
+        w.write_request(req)
+        polls: list[int] = []
+
+        def die_on_the_second_poll():
+            polls.append(1)
+            if len(polls) == 2:
+                raise Killed("5")
+
+        w.time.on_sleep = die_on_the_second_poll
+        with pytest.raises(Killed):
+            service.tick()
+        # While the updater was down: Start pressed on -previous.
+        w.fake.set_state(w.fake.containers[w.app_id], "running")
+        polls.clear()
+        written: list[int] = []
+
+        def each_poll():
+            polls.append(1)
+            written.append(w.apps_write_mid_drill())
+            if len(polls) == 3:
+                w.finish_hung_drill()
+
+        w.time.on_sleep = each_poll
+        again = w.service()
+        again.startup()
+        w.time.on_sleep = None
+        record = w.history(req["id"])
+        assert record["state"] == "succeeded", record
+        assert sum(written) == 0 and (w.ledger.stamp, w.ledger.rows) == (B, rows)
+        assert w.fake.containers[w.app_id]["State"] == "exited"
+        assert [h["id"] for h in holders_stopped(w, req["id"])] == [w.app_id]
