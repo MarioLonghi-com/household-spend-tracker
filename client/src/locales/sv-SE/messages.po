@@ -17,6 +17,10 @@ msgstr "Namnet ser ut att vara dess IBAN."
 msgid "balance column"
 msgstr "saldokolumn"
 
+#: src/screens/Categories.tsx
+msgid "Always use my choice"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Mentions"
@@ -74,6 +78,11 @@ msgstr "mottagare, beskrivning eller bankens egna ord"
 #, fuzzy
 msgid "this account is closed"
 msgstr "det här kontot är avslutat"
+
+#. placeholder {0}: group.name
+#: src/screens/Categories.tsx
+msgid "Delete the group {0}?"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -279,6 +288,10 @@ msgstr "Återställningslänkar fungerar en gång och slutar gälla. Be en ägar
 msgid "Sign-in methods"
 msgstr "Inloggningsmetoder"
 
+#: src/screens/Categories.tsx
+msgid "Add a category"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "This server cannot check a code from the authenticator you have, so one of your recovery codes proves it is you instead; it is spent."
@@ -391,6 +404,10 @@ msgstr "En del av en uppdelning"
 msgid "2. You"
 msgstr "2. Du"
 
+#: src/screens/Categories.tsx
+msgid "Start with a common set"
+msgstr ""
+
 #. placeholder {0}: found.filename ?? t`a statement`
 #. placeholder {1}: found.line_no
 #. placeholder {2}: formatInstant(found.imported_at)
@@ -461,6 +478,10 @@ msgstr "{0, plural, one {({1} rad)} other {({2} rader)}}"
 msgid "Opening date"
 msgstr "Startdatum"
 
+#: src/screens/Categories.tsx
+msgid "It matters most on an import: a statement of three hundred rows is three hundred categories you did not have to type, or three hundred corrections if it guesses badly."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "What it may do"
@@ -472,6 +493,7 @@ msgid "Skip to transactions"
 msgstr "Hoppa till transaktionerna"
 
 #: src/App.tsx
+#: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Transactions"
@@ -645,6 +667,7 @@ msgstr "Bara den här filen. Mottagarens regel lämnas som den är för framtida
 
 #: src/App.tsx
 #: src/screens/Accounts.tsx
+#: src/screens/Categories.tsx
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Name"
@@ -1075,6 +1098,10 @@ msgstr "Ingen överföring – kategorisera som…"
 msgid "Can't scan? Enter this key by hand: <0>{0}</0>"
 msgstr "Går det inte att skanna? Skriv in nyckeln för hand: <0>{0}</0>"
 
+#: src/screens/Categories.tsx
+msgid "Add a group"
+msgstr ""
+
 #. placeholder {0}: formatCount(rows.length)
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1157,6 +1184,13 @@ msgstr "{count, plural, one {{shown} transaktion matchar filtren} other {{shown}
 msgid "receipt filer"
 msgstr "kvittoarkiverare"
 
+#. placeholder {0}: category.used_by
+#. placeholder {1}: category.used_by
+#. placeholder {2}: category.used_by
+#: src/screens/Categories.tsx
+msgid "{0, plural, one {{1} transaction carries this category, so it cannot be deleted. Archive it instead.} other {{2} transactions carry this category, so it cannot be deleted. Archive it instead.}}"
+msgstr ""
+
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
@@ -1187,6 +1221,7 @@ msgstr "Markera alla väntande rader"
 msgid "That isn't an amount"
 msgstr "Det är inte ett belopp"
 
+#: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Delete"
@@ -1306,6 +1341,15 @@ msgstr "Ja, alla och ställ in regeln"
 #, fuzzy
 msgid "Why"
 msgstr "Varför"
+
+#. placeholder {0}: stat.more_payees
+#. placeholder {1}: formatCount(stat.more_payees)
+#. placeholder {2}: formatCount(stat.payee_count)
+#. placeholder {3}: formatCount(stat.more_payees)
+#. placeholder {4}: formatCount(stat.payee_count)
+#: src/screens/Categories.tsx
+msgid "{0, plural, one {and {1} more payee — {2} in all.} other {and {3} more payees — {4} in all.}}"
+msgstr ""
 
 #: src/lib/labels.ts
 #, fuzzy
@@ -1431,6 +1475,10 @@ msgstr "{0, plural, one {Ersätter {1} utgift} other {Ersätter {2} utgifter}}"
 #, fuzzy
 msgid "skip rows"
 msgstr "överhoppade rader"
+
+#: src/screens/Categories.tsx
+msgid "Edit"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1693,6 +1741,10 @@ msgstr "{0} blir alltid {1} – och mottagaren lades till"
 msgid "Received"
 msgstr "Mottaget"
 
+#: src/screens/Categories.tsx
+msgid "Auto-categorise based on payee history"
+msgstr ""
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "A new password"
@@ -1941,6 +1993,7 @@ msgstr "Tillagd"
 msgid "{0} left to account for"
 msgstr "{0} kvar att fördela"
 
+#: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "this payee"
@@ -1964,6 +2017,7 @@ msgid "Add a part for the {0}"
 msgstr "Lägg till en del för {0}"
 
 #: src/screens/Accounts.tsx
+#: src/screens/Categories.tsx
 #, fuzzy
 msgid "Create"
 msgstr "Skapa"
@@ -1992,6 +2046,10 @@ msgstr "Lösennycklar är inte inställda på den här servern."
 #, fuzzy
 msgid "Matched"
 msgstr "Matchad"
+
+#: src/screens/Categories.tsx
+msgid "unused"
+msgstr ""
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -2048,6 +2106,10 @@ msgstr "Lönekonton"
 #, fuzzy
 msgid "Work will not pay this. It counts as your spending."
 msgstr "Jobbet betalar inte detta. Det räknas som din utgift."
+
+#: src/screens/Categories.tsx
+msgid "Do not auto-categorise {name}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2234,16 +2296,25 @@ msgstr "Samla kontona per land"
 msgid "Drag to resize · double-click to reset every column"
 msgstr "Dra för att ändra storlek · dubbelklicka för att återställa alla kolumner"
 
+#: src/screens/Categories.tsx
+msgid "Delete group"
+msgstr ""
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Recovery code"
 msgstr "Återställningskod"
+
+#: src/screens/Categories.tsx
+msgid "New group"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Detach this receipt?"
 msgstr "Koppla loss det här kvittot?"
 
+#: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2422,6 +2493,7 @@ msgstr "Servern gjorde {user} till ägare"
 msgid "owner"
 msgstr "ägare"
 
+#: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Undo in History brings it back."
@@ -2437,6 +2509,10 @@ msgstr "Importera"
 #, fuzzy
 msgid "Reimbursed by"
 msgstr "Ersatt av"
+
+#: src/screens/Categories.tsx
+msgid "Group"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2671,6 +2747,10 @@ msgstr "Datum"
 msgid "memo column"
 msgstr "beskrivningskolumn"
 
+#: src/screens/Categories.tsx
+msgid "How to categorise {name}"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Download"
@@ -2696,6 +2776,11 @@ msgstr "Synkad"
 msgid "a pocket's or a card product's name"
 msgstr "namnet på en sparficka eller en kortprodukt"
 
+#. placeholder {0}: rule.data?.history_window ?? 3
+#: src/screens/Categories.tsx
+msgid "The category is chosen from how the last {0} transactions for {name} were categorised — the most common of them, most recent winning a tie. It updates as you add and edit transactions."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Set"
@@ -2715,6 +2800,10 @@ msgstr "typ"
 #, fuzzy
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
 msgstr "Återställningskoden du loggade in med täcker detta, så ingen annan kod behövs."
+
+#: src/screens/Categories.tsx
+msgid "New transactions arrive blank and you choose each time. Right for a payee that is genuinely different every time."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2754,6 +2843,7 @@ msgstr "Beskrivning"
 
 #: src/App.tsx
 #: src/lib/labels.ts
+#: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Categories"
@@ -2788,6 +2878,14 @@ msgstr "om utseende"
 #, fuzzy
 msgid "The server re-enabled {user}"
 msgstr "Servern återaktiverade {user}"
+
+#: src/screens/Categories.tsx
+msgid "archived"
+msgstr ""
+
+#: src/screens/Categories.tsx
+msgid "No categories yet. Categories say what a transaction was <0>for</0> — they group the register and let a payee fill itself in."
+msgstr ""
 
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -3035,6 +3133,10 @@ msgstr "Inte nu"
 msgid "outflow column"
 msgstr "utflödeskolumn"
 
+#: src/screens/Categories.tsx
+msgid "Payees"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Tag in the download's file name"
@@ -3076,6 +3178,10 @@ msgstr "Se dem under Administration"
 msgid "Hide help: {label}"
 msgstr "Dölj hjälp: {label}"
 
+#: src/screens/Categories.tsx
+msgid "how this works"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Current password"
@@ -3110,6 +3216,10 @@ msgstr "Senare: lika lång period, strax efter"
 #, fuzzy
 msgid "You signed in with a recovery code, and your passkeys still work. If one of them was on the device you lost, remove it here."
 msgstr "Du loggade in med en återställningskod, och dina lösennycklar fungerar fortfarande. Om en av dem fanns på enheten du tappade bort, ta bort den här."
+
+#: src/screens/Categories.tsx
+msgid "Rename or delete this group"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3198,6 +3308,10 @@ msgstr "<0>{purgingName}</0> och dess {0} rad raderas. Inget i den har nått reg
 msgid "type any part"
 msgstr "skriv vilken del som helst"
 
+#: src/screens/Categories.tsx
+msgid "Categorisation"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Reimbursed, with the payment"
@@ -3217,6 +3331,10 @@ msgstr "Var den här raden hamnar"
 #, fuzzy
 msgid "{others, plural, one {You will still be able to sign in with your other passkey, or with your password and code.} other {You will still be able to sign in with your other {others} passkeys, or with your password and code.}}"
 msgstr "{others, plural, one {Du kan fortfarande logga in med din andra lösennyckel, eller med ditt lösenord och en kod.} other {Du kan fortfarande logga in med dina {others} andra lösennycklar, eller med ditt lösenord och en kod.}}"
+
+#: src/screens/Categories.tsx
+msgid "Archived — hide it from the pickers"
+msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
@@ -3254,6 +3372,10 @@ msgstr "Inte samma sak – lägg till den separat"
 #, fuzzy
 msgid "{usable, plural, one {{usable} passkey} other {{usable} passkeys}}"
 msgstr "{usable, plural, one {{usable} lösennyckel} other {{usable} lösennycklar}}"
+
+#: src/screens/Categories.tsx
+msgid "A group can only be deleted when there are no categories under it, archived ones included. Deleting it is an entry in History, and Undo there brings it back."
+msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -3380,6 +3502,7 @@ msgstr "Inget här än. Lägg till en rad ovan, eller importera ett kontoutdrag 
 msgid "Sign-in changes in the last 14 days, by somebody other than you:"
 msgstr "Ändringar av inloggning de senaste 14 dagarna, gjorda av någon annan än du:"
 
+#: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Register.tsx
@@ -3433,6 +3556,10 @@ msgstr "skriva"
 msgid "Money you owe the card issuer. Spending makes the balance more negative; paying the bill is a transfer from the account that pays it."
 msgstr "Pengar du är skyldig kortutgivaren. Köp gör saldot mer negativt; att betala fakturan är en överföring från kontot som betalar den."
 
+#: src/screens/Categories.tsx
+msgid "Nothing to go on yet, so new transactions stay uncategorised."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "{action}: {name}"
@@ -3483,6 +3610,10 @@ msgstr "Lägg till transaktion"
 #, fuzzy
 msgid "S — Split parts"
 msgstr "S – Delar av uppdelning"
+
+#: src/screens/Categories.tsx
+msgid "Nothing in this group yet."
+msgstr ""
 
 #. placeholder {0}: offer.count + 1
 #: src/screens/Import.tsx
@@ -3600,6 +3731,10 @@ msgstr "en anteckning för den här raden"
 msgid "in or out, any currency"
 msgstr "in eller ut, vilken valuta som helst"
 
+#: src/screens/Categories.tsx
+msgid "Archived"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Let it add and change transactions, not only read them"
@@ -3616,6 +3751,7 @@ msgid "Larger text in the table"
 msgstr "Större text i tabellen"
 
 #: src/screens/Accounts.tsx
+#: src/screens/Categories.tsx
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Save"
@@ -3672,6 +3808,10 @@ msgstr "Vad är det här? {label}"
 #, fuzzy
 msgid "Payee Categorisation"
 msgstr "Kategorisering av mottagare"
+
+#: src/screens/Categories.tsx
+msgid "Choose a category…"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3789,6 +3929,15 @@ msgstr "Vad som har hänt med den här"
 msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
 msgstr "Båda är en riktig transaktion i registret, avstämd och daterad den dag uppföljningen började. Ändrar du dem här ändras den raden och den förblir avstämd. Noll tar bort den."
 
+#: src/screens/Categories.tsx
+msgid "A heading the categories sit under — Bills, Everyday, whatever divides your spending in a way you recognise."
+msgstr ""
+
+#. placeholder {0}: group.name
+#: src/screens/Categories.tsx
+msgid "New category in {0}"
+msgstr ""
+
 #. placeholder {0}: recovery.data.unused
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -3861,6 +4010,11 @@ msgstr "Alla koder du har nu, använda eller inte, slutar fungera och tio nya er
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 msgstr "{count, plural, one {{shown} transaktion} other {{shown} transaktioner}}"
 
+#. placeholder {0}: category.name
+#: src/screens/Categories.tsx
+msgid "Delete the category {0}?"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Send it to the inbox. It stays there until you delete it."
@@ -3872,6 +4026,10 @@ msgstr "Skicka den till inkorgen. Den stannar där tills du raderar den."
 #, fuzzy
 msgid "That works out at <0>{impliedRate}</0> {0} per {1}."
 msgstr "Det blir <0>{impliedRate}</0> {0} per {1}."
+
+#: src/screens/Categories.tsx
+msgid "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3898,6 +4056,11 @@ msgstr "Kategorin angavs på {done} rader och 1 överföringsdel hoppades över 
 #, fuzzy
 msgid "From month"
 msgstr "Från månad"
+
+#. placeholder {0}: rule.data.current_default_name
+#: src/screens/Categories.tsx
+msgid "Right now that is <0>{0}</0>."
+msgstr ""
 
 #. placeholder {0}: formatCount(page.shown)
 #. placeholder {1}: formatCount(page.total)
@@ -4003,6 +4166,10 @@ msgstr "Källa"
 msgid "may apply imports"
 msgstr "får genomföra importer"
 
+#: src/screens/Categories.tsx
+msgid "Build my own"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Edit the memo"
@@ -4053,6 +4220,10 @@ msgstr "Någon lade till {user} som ägare"
 #, fuzzy
 msgid "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "Ändrade {done} rader och lämnade {skipped} orörda – bara pengar ut som inte är en överföring kan vara ett jobbutlägg."
+
+#: src/screens/Categories.tsx
+msgid "Show archived"
+msgstr ""
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -4141,6 +4312,10 @@ msgstr "L – Låsta"
 #, fuzzy
 msgid "from the server"
 msgstr "från servern"
+
+#: src/screens/Categories.tsx
+msgid "Every new transaction for this payee gets a category without you choosing one. Which one depends on the setting below."
+msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
