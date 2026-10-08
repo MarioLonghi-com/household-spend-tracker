@@ -1,0 +1,42 @@
+{
+  "_hand_written": true,
+  "Platform": {
+    "Name": "Docker Engine - Community"
+  },
+  "Components": [
+    {
+      "Name": "Engine",
+      "Version": "29.8.2",
+      "Details": {
+        "ApiVersion": "1.56",
+        "MinAPIVersion": "1.40",
+        "Os": "linux",
+        "Arch": "amd64",
+        "KernelVersion": "6.12.48-1-amd64"
+      }
+    },
+    {
+      "Name": "containerd",
+      "Version": "v1.7.28",
+      "Details": {
+        "GitCommit": "0000000"
+      }
+    },
+    {
+      "Name": "rootlesskit",
+      "Version": "2.3.5",
+      "Details": {
+        "ApiVersion": "1.1.1",
+        "NetworkDriver": "slirp4netns",
+        "PortDriver": "builtin",
+        "StateDir": "/run/user/1000/dockerd-rootless"
+      }
+    }
+  ],
+  "Version": "29.8.2",
+  "ApiVersion": "1.56",
+  "MinAPIVersion": "1.40",
+  "Os": "linux",
+  "Arch": "amd64",
+  "KernelVersion": "6.12.48-1-amd64"
+}

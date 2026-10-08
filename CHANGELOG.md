@@ -132,6 +132,19 @@ history this repository does not have.
   recording fake engine on a real unix socket and `/version` answers recorded
   from Docker Desktop and Podman. No image, compose service or screen uses it
   yet.
+- **The self-updater knows which engine it is on** (#160). `updater/detect.py`
+  tells Docker Engine, Docker Desktop, Podman and `podman machine` apart from
+  the engine's `/version` and `/info` and the project's own directory, with
+  rootless and SELinux, and refuses with one sentence each: permission denied
+  on the socket, Enhanced Container Isolation, Windows containers, a TCP
+  socket, Podman older than 4.4, an API older than the tested window, and an
+  engine it does not know; an engine newer than that window is `outdated`. It
+  also reads a local build from the app container's labels and digest, holds
+  the not-root rule for each engine as data for the compose file and the
+  launchers, and infers whether `podman-restart` is on. `updater/heartbeat.py`
+  writes `updater.json` every 30 seconds with the negotiated API version, the
+  engine's window and the updater's real container name, under Docker
+  Compose's and podman-compose's naming alike. Nothing runs it yet.
 
 - **The updater can prove where an image came from before pulling it**
   (#159). `updater/verify.py` reads the build attestation `release.yml` pushed
