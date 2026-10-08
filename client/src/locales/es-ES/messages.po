@@ -2980,10 +2980,6 @@ msgstr "3. Códigos de recuperación"
 msgid "e.g. {0}"
 msgstr "p. ej., {0}"
 
-#: src/screens/Register.tsx
-msgid "W"
-msgstr ""
-
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "One of your recovery codes"

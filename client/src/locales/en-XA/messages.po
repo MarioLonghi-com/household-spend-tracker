@@ -2623,10 +2623,6 @@ msgstr ""
 msgid "e.g. {0}"
 msgstr ""
 
-#: src/screens/Register.tsx
-msgid "W"
-msgstr ""
-
 #: src/screens/Profile.tsx
 msgid "One of your recovery codes"
 msgstr ""

@@ -2980,10 +2980,6 @@ msgstr "3. Återställningskoder"
 msgid "e.g. {0}"
 msgstr "t.ex. {0}"
 
-#: src/screens/Register.tsx
-msgid "W"
-msgstr ""
-
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "One of your recovery codes"
