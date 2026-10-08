@@ -165,10 +165,11 @@ def test_the_client_rounds_exactly_as_the_server_does(tmp_path):
 TYPES_FILE = TS_FILE.resolve().parent / "types.ts"
 
 
-def _interface_fields(name: str) -> set[str]:
-    source = TYPES_FILE.read_text()
-    match = re.search(rf"export interface {name} \{{(.*?)\n\}}", source, re.S)
-    assert match, f"{name} is not where the test expects it in types.ts"
+def _interface_fields(name: str, file: Path | None = None) -> set[str]:
+    file = file or TYPES_FILE
+    source = file.read_text()
+    match = re.search(rf"(?:export )?interface {name} \{{(.*?)\n\}}", source, re.S)
+    assert match, f"{name} is not where the test expects it in {file.name}"
     body = re.sub(r"/\*.*?\*/", "", match.group(1), flags=re.S)
     body = re.sub(r"//.*", "", body)
     return set(re.findall(r"^\s*(\w+)\??:", body, re.M))
@@ -216,3 +217,34 @@ def test_the_import_report_knows_how_many_suggestions_the_rules_screen_lists():
     match = re.search(r"export const RULES_LISTED = (\d+);", RESULTS_FILE.read_text())
     assert match, "RULES_LISTED is not where the test expects it in results.tsx"
     assert int(match.group(1)) == SUGGESTIONS_LISTED
+
+
+# --------------------------------------------------------------------------- #
+# The Application screen's answers that #165 changed
+# --------------------------------------------------------------------------- #
+
+SCREENS = TS_FILE.resolve().parent.parent / "screens"
+
+
+@pytest.mark.skipif(not SCREENS.exists(), reason="the client is not checked out")
+@pytest.mark.parametrize(
+    ("model", "interface", "file"),
+    [
+        ("UpstreamOut", "Upstream", "ApplicationManagement.tsx"),
+        ("ReleaseOut", "Release", "ApplicationManagement.tsx"),
+        ("UpdaterOfferOut", "UpdaterOffer", "ApplicationManagement.tsx"),
+        ("BackupOut", "Backup", "Backups.tsx"),
+    ],
+)
+def test_the_client_knows_every_field_of_the_check_and_of_a_backup(model, interface, file):
+    """The check now returns releases with their notes, and a backup can be an
+    update's folder that the server will not delete. A field the client does
+    not declare is one the screen cannot show."""
+    from app import schemas
+
+    server = set(getattr(schemas, model).model_fields)
+    client = _interface_fields(interface, SCREENS / file)
+    assert server == client, (
+        f"only on the server: {sorted(server - client)}; "
+        f"only in the client: {sorted(client - server)}"
+    )

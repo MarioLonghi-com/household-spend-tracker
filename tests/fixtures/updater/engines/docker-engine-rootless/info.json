@@ -1,0 +1,23 @@
+{
+  "_hand_written": true,
+  "ID": "00000000-0000-4000-8000-0000000000e2",
+  "Driver": "overlay2",
+  "KernelVersion": "6.12.48-1-amd64",
+  "OperatingSystem": "Debian GNU/Linux 13 (trixie)",
+  "OSVersion": "13",
+  "OSType": "linux",
+  "Architecture": "x86_64",
+  "NCPU": 4,
+  "MemTotal": 8227254272,
+  "DockerRootDir": "/home/user/.local/share/docker",
+  "Name": "server-b",
+  "ServerVersion": "29.8.2",
+  "CgroupDriver": "systemd",
+  "CgroupVersion": "2",
+  "SecurityOptions": [
+    "name=seccomp,profile=builtin",
+    "name=rootless",
+    "name=cgroupns"
+  ],
+  "Warnings": null
+}

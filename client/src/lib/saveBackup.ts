@@ -190,7 +190,7 @@ export const CLOUD_PAGES = [
   },
   {
     get label() {
-      return t`Open Dropbox`;
+      return t({ message: "Open Dropbox", comment: "Label used on several screens (saveBackup)" });
     },
     href: "https://www.dropbox.com/home",
   },

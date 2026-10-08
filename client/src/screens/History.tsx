@@ -74,7 +74,7 @@ export function History({ household }: { household: Household }) {
 
   return (
     <>
-      <h1><Trans>History</Trans></h1>
+      <h1><Trans comment="Screen title on the History screen. See GLOSSARY.md">History</Trans></h1>
       <p className="muted small">
         <Trans>
           Everything that has changed this household, grouped by the act that changed it. An import
@@ -105,28 +105,28 @@ export function History({ household }: { household: Household }) {
               <thead>
                 <tr>
                   <SortHeading
-                    label={t`When`}
+                    label={t({ message: "When", comment: "Column heading on the History screen: noun, the time" })}
                     column="when"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label={t`What happened`}
+                    label={t({ message: "What happened", comment: "Column heading on the History screen" })}
                     column="what"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label={t`By`}
+                    label={t({ message: "By", comment: "Column heading on the History screen: preposition, done by a person" })}
                     column="by"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label={t`State`}
+                    label={t({ message: "State", comment: "Column heading on the History screen: noun, a row's status" })}
                     column="state"
                     sort={sort}
                     direction={direction}
@@ -136,7 +136,7 @@ export function History({ household }: { household: Household }) {
                       about the batch and therefore something to sort on: the
                       big imports are what you go looking for. */}
                   <SortHeading
-                    label={t`Rows`}
+                    label={t({ message: "Rows", comment: "Column heading on the History screen: noun, lines of a file or table" })}
                     column="rows"
                     sort={sort}
                     direction={direction}
@@ -151,7 +151,7 @@ export function History({ household }: { household: Household }) {
                     <td
                       className="small mono"
                       style={{ whiteSpace: "nowrap" }}
-                      data-label={t`When`}
+                      data-label={t({ message: "When", comment: "Column name shown beside a value on phones on the History screen: noun, the time" })}
                       data-detail-first="true"
                     >
                       {formatInstant(entry.started_at)}
@@ -178,7 +178,7 @@ export function History({ household }: { household: Household }) {
                         ) : null}
                       </button>
                     </td>
-                    <td className="small muted" data-label={t`By`}>
+                    <td className="small muted" data-label={t({ message: "By", comment: "Column name shown beside a value on phones on the History screen: preposition, done by a person" })}>
                       <Actor name={entry.actor_name} via={entry.via} />
                     </td>
                     <td>
@@ -232,15 +232,15 @@ export function History({ household }: { household: Household }) {
 function statusWord(status: string): string {
   switch (status) {
     case "applied":
-      return t`applied`;
+      return t({ message: "applied", comment: "Label on the History screen: written to the ledger" });
     case "undone":
-      return t`undone`;
+      return t({ message: "undone", comment: "Label on the History screen: taken back with undo" });
     case "preview":
-      return t`preview`;
+      return t({ message: "preview", comment: "Label on the History screen: noun or step name: what would happen, not yet done" });
     case "running":
-      return t`running`;
+      return t({ message: "running", comment: "Label on the History screen" });
     case "failed":
-      return t`failed`;
+      return t({ message: "failed", comment: "Label on the History screen: it did not work" });
     default:
       return status;
   }
@@ -279,18 +279,18 @@ function BatchPanel({
       <Problem error={detail.error ?? undo.error} />
 
       <dl className="facts">
-        <dt><Trans>When</Trans></dt>
+        <dt><Trans comment="Name of a fact on the History screen: noun, the time">When</Trans></dt>
         <dd>{formatInstant(batch.started_at)}</dd>
-        <dt><Trans>By</Trans></dt>
+        <dt><Trans comment="Name of a fact on the History screen: preposition, done by a person">By</Trans></dt>
         <dd>
           <Actor name={batch.actor_name} via={batch.via} />
         </dd>
-        <dt><Trans>State</Trans></dt>
+        <dt><Trans comment="Name of a fact on the History screen: noun, a row's status">State</Trans></dt>
         <dd>
           <span className="pill">{statusWord(batch.status)}</span>
-          {batch.undone_by_id ? <span className="small muted"> — {t`undone later`}</span> : null}
+          {batch.undone_by_id ? <span className="small muted"> — {t({ message: "undone later", comment: "Value of a fact on the History screen" })}</span> : null}
         </dd>
-        <dt><Trans>Rows touched</Trans></dt>
+        <dt><Trans comment="Name of a fact on the History screen">Rows touched</Trans></dt>
         <dd>{count}</dd>
         {Object.entries(source).map(([key, value]) => (
           <div key={key} style={{ display: "contents" }}>
@@ -308,7 +308,7 @@ function BatchPanel({
               <dd>{value}</dd>
             </div>
           ))}
-        <dt><Trans>Batch</Trans></dt>
+        <dt><Trans comment="Name of a fact on the History screen: noun, one act in History, undone as a whole">Batch</Trans></dt>
         <dd className="mono small" style={{ wordBreak: "break-all" }}>
           {batch.id}
         </dd>
@@ -409,7 +409,7 @@ function BatchPanel({
           {!sure ? (
             <div className="row">
               <button className="danger" disabled={detail.isLoading} onClick={() => setSure(true)}>
-                <Trans>
+                <Trans comment="Button on the History screen">
                   Undo this
                 </Trans>
               </button>
