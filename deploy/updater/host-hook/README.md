@@ -105,10 +105,14 @@ that directory.
 ### Check it
 
 ```sh
-systemctl status spend-tracker-hook.path     # active (waiting)
-journalctl -u spend-tracker-hook.service     # one line per request, and its exit
-ls /var/lib/spend-tracker/hook               # <id>.taken and <id>.result per update
+systemctl status spend-tracker-hook.path
+journalctl -u spend-tracker-hook.service
+ls /var/lib/spend-tracker/hook
 ```
+
+The path unit is *active (waiting)*; the journal has one line per request
+and its exit; the directory holds a `<id>.taken` and a `<id>.result` for each
+update.
 
 The `.taken` and `.result` files are the record of each run, and are small;
 delete old ones whenever you like. Do not delete a `.taken` while an update is
@@ -135,7 +139,8 @@ more:
 #!/bin/sh
 # /usr/local/sbin/spend-tracker-snapshot  (root:root, 0755) -- EXAMPLE
 set -eu
-VMID=100                                  # the VM Spend Tracker runs in
+# The VM Spend Tracker runs in.
+VMID=100
 v=${SSH_ORIGINAL_COMMAND:-}
 case "$v" in
   ''|*[!0-9.]*) echo "refused: not a version" >&2; exit 2 ;;
