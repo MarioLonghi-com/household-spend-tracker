@@ -263,6 +263,7 @@ history this repository does not have.
   update's history. Without a `hook.json` in that directory the step is
   skipped and says so; nothing changes for an installation without a hook.
 
+
 - **The self-updater has an image and runs beside the app** (#164).
   `docker build --target updater .` builds it from the same Dockerfile and
   the same Chainguard digests as the app: the updater's hashed lock in a
@@ -285,7 +286,6 @@ history this repository does not have.
   `updater-protocol` label. `deploy/tailnet/check.sh` checks the updater:
   outside the sidecar's namespace, the only holder of the socket, able to
   reach it, and whether an update is in progress.
-
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.

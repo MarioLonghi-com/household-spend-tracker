@@ -299,29 +299,42 @@ describe("in en-XA, the remaining screens show no English", () => {
     expect(left2).toEqual([]);
   });
 
-  it("History's list and a batch's panel; its sentences are the server's until #57", async () => {
+  it("History's list and a batch's panel: the kind, the fields and the table in en-XA; its sentences are still the server's", async () => {
+    // The server's English, with the keys beside it (#57). The sentences (the
+    // detail, a row's summary) are still the server's and are data here.
     const batch = {
       id: "b1", kind: "import", status: "applied", actor_id: "u1", started_at: "2026-03-01T10:00:00",
       finished_at: null, source: null, summary: null, undone_by_id: null,
-      headline: "Sam", detail: "Doe", actor_name: "Sam", via: "Casa", change_count: 3,
+      headline: "Statement import", headline_key: "import", detail: "Doe", actor_name: "Sam", via: "Casa", change_count: 3,
     };
     vi.mocked(api.get).mockImplementation(async (path: string) => {
       if (path.includes("/batches/b1"))
         return {
           ...batch,
           change_count: 3,
-          changed_rows: [{ seq: 1, op: "update", table: "transactions", row_id: "t1", summary: "Sam", fields: [], snapshot: [{ field: "memo", now: "Doe" }], redacted: ["password_hash"] }],
+          changed_rows: [
+            {
+              seq: 1, op: "update", table: "transaction", table_key: "transactions", row_id: "t1", summary: "Sam",
+              fields: [{ field: "category", column: "category_id", was: "Bakery", now: "Cinema" }],
+              snapshot: [], redacted: ["password_hash"],
+            },
+            {
+              seq: 2, op: "insert", table: "payee", table_key: "payees", row_id: "p1", summary: "Sam",
+              fields: [], snapshot: [{ field: "memo", column: "memo", was: "", now: "Doe" }], redacted: [],
+            },
+          ],
         };
       return [batch];
     });
     render(withQueries(<History household={HOUSEHOLD} />));
     await screen.findByText("Doe");
-    const dates = (word: string) => !/^(AM|PM|at|transactions|update|memo|password|hash)$/.test(word);
-    expect(left().filter(dates)).toEqual([]);
+    const data = (word: string) => !/^(AM|PM|at|update|insert|password|hash)$/.test(word);
+    expect(left().filter(data)).toEqual([]);
+    expect(document.body.textContent).not.toContain("Statement import");
     fireEvent.click(document.querySelector("tbody td.editable button, tbody button")!);
     await screen.findByRole("dialog");
-    await new Promise((done) => setTimeout(done, 0));
-    expect(left().filter(dates)).toEqual([]);
+    await screen.findByText("Cinema");
+    expect(left().filter(data)).toEqual([]);
   });
 
   it("the backups list, with and without the key, and the save panel", () => {
