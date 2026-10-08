@@ -8,6 +8,10 @@
 **Spend Tracker** is a self-hosted spend tracker for one household.
 Multi-currency, fully audited, and meant to be reachable only over a tailnet.
 
+![The register of the demo household: two currencies, each with its own Out and In columns, work expenses flagged, and a transfer between two accounts](docs/screenshots/register.png)
+
+*The demo household that `make seed` creates. Every name and figure in it is invented.*
+
 ## What it is, and what it is not
 
 It is a ledger for one household's accounts and transactions, and the

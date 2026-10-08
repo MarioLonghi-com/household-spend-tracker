@@ -170,3 +170,46 @@ def test_the_batch_cap_is_in_the_manifest():
 
     entry = next(e for e in agent.ENDPOINTS if e.path.endswith("/receipts/batch"))
     assert f"{agent.MAX_BATCH_BODY_BYTES // MIB} MB" in entry.says
+
+
+def test_a_declared_body_a_little_over_is_read_out_and_then_refused(client):
+    """Within the drain, the body is read to its end -- so a client that writes
+    before it reads gets to read the 413 (#40) -- and none of it reaches the app.
+    """
+    declared = 3 * MIB
+    status, headers, body, read = _drive(
+        client.app_module.app,
+        path=f"{V1}/households/whatever/transactions/lookup",
+        headers={**BOGUS_KEY, "content-type": "application/json",
+                 "content-length": str(declared)},
+        chunks=_stream(declared),
+    )
+    assert status == 413, body
+    assert read["bytes"] == declared
+    assert "Nothing in it was stored" in body.decode()
+    assert headers["x-frame-options"] == "DENY"
+
+
+def test_a_client_waiting_for_100_continue_is_refused_unread(client):
+    status, _, _, read = _drive(
+        client.app_module.app,
+        path=f"{V1}/households/whatever/transactions/lookup",
+        headers={**BOGUS_KEY, "content-type": "application/json",
+                 "content-length": str(3 * MIB), "expect": "100-continue"},
+        chunks=_stream(3 * MIB),
+    )
+    assert status == 413
+    assert read["bytes"] == 0
+
+
+def test_past_the_drain_a_declared_body_is_refused_unread(client):
+    ceiling = body_limit.ceiling_for(f"{V1}/households/whatever/receipts/batch")
+    status, _, _, read = _drive(
+        client.app_module.app,
+        path=f"{V1}/households/whatever/receipts/batch",
+        headers={**BOGUS_KEY, "content-type": "application/json",
+                 "content-length": str(body_limit.drain_limit(ceiling) + 1)},
+        chunks=_stream(),
+    )
+    assert status == 413
+    assert read["bytes"] == 0

@@ -35,6 +35,11 @@ class Code:
 
 
 REGISTRY: dict[str, Code] = {
+    # -- currency: app/currencies.py `check_new` (#110) ---------------------- #
+    "currency.not_iso_4217": Code(
+        "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR",
+        ("code",),
+    ),
     # -- money: app/money.py `parse_exact`, a typed amount read exactly ------ #
     "money.decimals_in_whole_currency": Code(
         "{value} has decimals, and {currency} has none", ("value", "currency")
@@ -52,6 +57,8 @@ REGISTRY: dict[str, Code] = {
     "money.too_many_digits": Code(
         "An amount {digits} digits long is too large to record as money", ("digits",)
     ),
+    # -- receipt: app/api/routers/agent.py, the agent's file routes (#44) ----- #
+    "receipt.no_such_copy": Code("That receipt has no copy of that kind"),
     # -- reconcile: app/services/reconciling.py ------------------------------ #
     "reconcile.does_not_balance": Code(
         "That does not balance: {difference} out. Tick or untick rows until the "
