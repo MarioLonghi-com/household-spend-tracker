@@ -295,6 +295,11 @@ def test_no_statement_fixture_carries_anybody_real(path: pathlib.Path):
 #: notice, which is a legal statement rather than example data.
 _COPYRIGHT = re.compile(r"copyright \(c\) \d{4}", re.IGNORECASE)
 
+#: The author lines of `CITATION.cff`, which name the owner for the same reason
+#: the copyright line does: a citation is a statement of authorship, not
+#: example data. Only in that file, and only those two keys (#111).
+_CITATION_AUTHOR = re.compile(r"^\s*-?\s*(family|given)-names:\s")
+
 #: The pattern below spells the owner's handle in a form the pattern itself
 #: cannot strip, so its line carries this marker and is the one line skipped.
 _REPO_ADDRESS_LINE = "# hygiene: the repo's own address"
@@ -359,13 +364,16 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 #: Files no text scan can read. Each one is somebody's to check by hand, so
 #: they may live only where somebody does: the statement fixtures, which the
-#: fixture scan opens properly, and the app's own icons.
+#: fixture scan opens properly, the app's own icons, and the README's
+#: screenshots -- taken from the seeded demo household only, and held below to
+#: carrying no metadata a scan could not read (#111).
 BINARY_SUFFIXES = frozenset({
     ".pdf", ".xls", ".xlsx", ".png", ".jpg", ".jpeg", ".gif", ".ico", ".heic", ".heif",
     ".tif", ".tiff", ".bmp", ".woff", ".woff2", ".ttf", ".otf", ".avif", ".webp",
     ".sqlite", ".sqlite3", ".db", ".zip", ".gz", ".tgz",
 })
-BINARY_HOMES = (FIXTURES, ROOT / "client" / "public")
+SCREENSHOTS = ROOT / "docs" / "screenshots"
+BINARY_HOMES = (FIXTURES, ROOT / "client" / "public", SCREENSHOTS)
 
 
 def _all_tracked() -> list[pathlib.Path]:
@@ -440,6 +448,8 @@ def test_no_tracked_file_names_anybody_real():
         for number, line in enumerate(text.splitlines(), start=1):
             if _COPYRIGHT.search(line) or _REPO_ADDRESS_LINE in line:
                 continue
+            if path.name == "CITATION.cff" and _CITATION_AUTHOR.match(line):
+                continue
             # The repository's own address is where it lives, not example data.
             stripped = _REPO_ADDRESS.sub("", line)
             for name in real_names_in(stripped):
@@ -471,6 +481,49 @@ def test_no_tracked_file_carries_private_markers():
                 continue
             offenders += [f"{path.name}:{number} {why}" for why in private_markers_in(line)]
     assert not offenders, "\n".join(offenders)
+
+
+#: What a screenshot may be made of: the image and nothing else. A text,
+#: EXIF or time chunk is where a tool writes a path, a host or a name.
+_IMAGE_ONLY_CHUNKS = frozenset({"IHDR", "PLTE", "IDAT", "IEND", "sRGB", "gAMA", "cHRM", "pHYs"})
+
+
+def png_chunks(raw: bytes) -> list[str]:
+    import struct
+
+    assert raw[:8] == b"\x89PNG\r\n\x1a\n", "not a PNG"
+    chunks, at = [], 8
+    while at < len(raw):
+        (length,) = struct.unpack(">I", raw[at : at + 4])
+        chunks.append(raw[at + 4 : at + 8].decode("latin-1"))
+        at += 12 + length
+    return chunks
+
+
+def test_a_screenshot_is_a_png_carrying_nothing_but_the_image():
+    shots = sorted(SCREENSHOTS.glob("*")) if SCREENSHOTS.exists() else []
+    for shot in shots:
+        assert shot.suffix == ".png", f"{shot.name}: screenshots are PNG"
+        extra = set(png_chunks(shot.read_bytes())) - _IMAGE_ONLY_CHUNKS
+        assert not extra, f"{shot.name} carries {sorted(extra)}; strip them"
+
+
+def test_the_png_reader_sees_a_text_chunk():
+    """The check above, shown to catch what it is for."""
+    import struct
+    import zlib
+
+    def chunk(kind: bytes, body: bytes) -> bytes:
+        return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", zlib.crc32(kind + body))
+
+    raw = (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 0, 0, 0, 0))
+        + chunk(b"tEXt", b"Author\x00someone")
+        + chunk(b"IDAT", zlib.compress(b"\x00\x00"))
+        + chunk(b"IEND", b"")
+    )
+    assert set(png_chunks(raw)) - _IMAGE_ONLY_CHUNKS == {"tEXt"}
 
 
 def test_the_only_tracked_binaries_are_the_fixtures_and_the_icons():

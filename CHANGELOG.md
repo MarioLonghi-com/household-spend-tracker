@@ -72,6 +72,41 @@ history this repository does not have.
 
 ### Fixed
 
+- **A currency code has to be a real one.** Only the shape was checked, so a
+  typo like `GPB` opened an account in a currency that does not exist. A new
+  account or a household's currency must now be an ISO 4217 code: a current
+  one, or one withdrawn since 1999 such as `HRK` or `DEM`, for accounts with
+  history. A code the household already holds from before this check is still
+  accepted, so no existing ledger stops working. Nothing stored changes. (#110)
+
+- **An agent's oversized receipt batch is answered `413`, not a dropped
+  connection.** The app refused a body over its limit from the declared
+  length and closed the socket at once. Most clients write the whole body
+  before reading the answer, so they saw a broken pipe, which looks like a
+  network fault and does not say whether anything was stored. A body up to
+  five times over its limit is now read and discarded first, so the client
+  reads the sentence. Nothing in it is kept. `agent/README.md` and the route's
+  OpenAPI description give the batch's whole-request limit of 32 MB, and
+  `deploy/DOCKER.md` says a reverse proxy needs a body limit at least as
+  high. (#40)
+
+- **A burst of requests can no longer use more memory than a small host
+  has.** Each SQLite connection had a 32 MiB page cache whatever the machine,
+  and the connection pool is unbounded on purpose. On a 95 MiB ledger, ten
+  connections reading at once held 456 MiB. SQLite now has a process-wide soft
+  heap limit of an eighth of the memory the process may use (the container's
+  limit, or the machine's), and each connection's cache is a sixty-fourth of
+  it, between 2 and 32 MiB. The same ten connections measured 178 MiB. (#102)
+
+- **A Spanish statement whose date column is headed `F. Valor` imports.**
+  Spanish banks abbreviate *fecha* to "F.". "F. Valor" matched no date name
+  and did match the amount name "valor", so the file had no date column and
+  its dates were taken as the amount. A header of "F." followed by a word is
+  now a date. Three synthetic statements are kept as regression fixtures:
+  this header; `1,234` beside `1,234.56`; and a blank debit cell next to a
+  balance column. A new test checks that undoing an import gives a
+  hand-entered row it absorbed back exactly as it was. (#90)
+
 - **A register load is one request for its rows, not two.** The count beside
   "Needs a category" was a second `GET …/transactions` fired in the same tick
   as the register's own, and `access.log` drops the query string, so every
@@ -132,6 +167,23 @@ history this repository does not have.
   guide says so. (#84)
 
 ### Changed
+
+- **An invariant suite over randomised ledgers.** Twelve seeds each build a
+  ledger in two households: rows, transfers within and across currencies,
+  edits, splits and deletes. The suite then holds four things true of any
+  ledger: every balance is the sum of its rows, by every route that reports
+  one; transfer pairs point at each other and net to zero within a currency;
+  undoing a run of acts gives back every column of every row; and no total
+  crosses currencies. A failing seed is reproduced by its number. (#107)
+
+- **The database file is looked after, not only its rows.** Every
+  housekeeping sweep now ends with a `wal_checkpoint(TRUNCATE)`, so the
+  `-wal` file goes back to zero instead of staying at the size the biggest
+  import ever left it, and it runs `VACUUM` when more than half the file is
+  free pages, such as after a household is deleted or a large import is
+  undone. Planner statistics are refreshed straight after any commit that
+  writes 1,000 rows or more, and after `make restore`, rather than waiting up
+  to six hours for the next sweep. (#103)
 
 - **The register loads five hundred rows at a time.** It used to ask for
   everything the filter matched, up to 25,000 rows, and refetch all of it
@@ -252,6 +304,24 @@ history this repository does not have.
 
 ### Added
 
+- **An agent key can read a stored receipt back.** Receipts in the agent API
+  now carry their `note`, and there are new read-scope routes for one
+  receipt, its stored file and its thumbnail:
+  `GET /api/agent/v1/receipts/{id}`, `…/file` and `…/thumbnail`. The listing
+  also takes `transaction_id=` to go from a row to its receipts. A note sent
+  at upload used to be write-only, and an agent summarising receipts filed
+  the day before had nothing to read but its own claim. Another household's
+  receipt is a `404`, and every read is in the request log. (#44)
+
+- **A weekly upgrade rehearsal on a bench-sized ledger** (`bench.yml`,
+  Mondays and by hand). It is not a pull-request check. It builds the demo
+  seed with the last release's code, grows it to about 100 MiB with
+  `scripts/bench_ledger.py`, and times `alembic upgrade head`, a backup and
+  the `/db` snapshot. It still fails if a row is lost. On a 93 MiB,
+  129,024-row ledger, the slowest migration in the project's history (one
+  that rebuilds `transactions`) took 5.8 s, and the whole chain about 25 s.
+  The upgrade from 0.7.1 took under 2 s. (#104)
+
 - **The upgrade drill can be driven by a program.** `python -m scripts.upgrade
   --check --json` prints what an upgrade would do as one JSON document: the
   deployed version and commit, the database's stamp, the code's head, and each
@@ -322,6 +392,13 @@ history this repository does not have.
   stops new refusals arriving without one. (#65)
 
 ### Documentation
+
+- **The README shows the register**, from the demo household `make seed`
+  creates, so every name and figure in it is invented. There is also a
+  `CITATION.cff`. The data-hygiene test now lets screenshots live under
+  `docs/screenshots/` if they are PNGs with no metadata chunks. It skips
+  `CITATION.cff`'s two author lines, as it already skipped the copyright
+  line. (#111)
 
 - **Passkeys for operators:** the README section *Passkeys, and choosing the
   host name first* says how an instance can be reached for passkeys to work,
