@@ -200,6 +200,18 @@ published image as what `compose.yaml` runs.
   writes 1,000 rows or more, and after `make restore`, rather than waiting up
   to six hours for the next sweep. (#103)
 
+- **The container image is built for linux/amd64 and linux/arm64, and the
+  release is published last.** The image was amd64 only, so Docker Desktop on
+  an Apple-silicon Mac ran it emulated; each platform is now built and
+  smoke-tested natively and the two are joined into one index, whose digest
+  the provenance attestation names. The GitHub release is created as a draft,
+  the image pushed, attested and pulled back with no credentials to prove the
+  package is public, and only then does the release go public and `X.Y` and
+  `latest` move -- a run that fails halfway leaves a draft, not a release
+  with no image behind it. The `org.opencontainers.image.version` label is
+  the bare `X.Y.Z`, the number `/api/health` reports, and the release body
+  leads with the version's CHANGELOG section. (#181)
+
 - **The register loads five hundred rows at a time.** It used to ask for
   everything the filter matched, up to 25,000 rows, and refetch all of it
   after every edit. It now asks for the first 500, says how many the filter
