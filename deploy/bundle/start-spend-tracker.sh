@@ -228,6 +228,24 @@ for key in com.docker.compose.project io.podman.compose.project; do
   done
 done
 
+# podman-compose does not replace a running container whose configuration
+# changed: `up` tries to remove it without force, fails, prints the error and
+# still exits 0, leaving the old updater running (#169, E15 on rootless
+# Podman). So under Podman the project's app and updater are stopped and
+# removed first. The ledger and the update volume are named volumes and stay;
+# a parked -previous or a -next is left as it is.
+if [ "$ENGINE" = podman ]; then
+  for svc in updater app; do
+    for id in $("$ENGINE" ps -aq --filter "label=com.docker.compose.project=$PROJECT" --filter "label=com.docker.compose.service=$svc" 2>/dev/null); do
+      name="$("$ENGINE" inspect --format '{{.Name}}' "$id" 2>/dev/null)"
+      case "$name" in *-previous|*-next) continue ;; esac
+      [ "$("$ENGINE" inspect --format '{{index .Config.Labels "com.docker.compose.oneoff"}}' "$id" 2>/dev/null)" = True ] && continue
+      "$ENGINE" stop "$id" >/dev/null 2>&1
+      "$ENGINE" rm "$id" >/dev/null 2>&1
+    done
+  done
+fi
+
 "$ENGINE" compose --env-file .env up -d \
   || stop "$PRODUCT could not start Spend Tracker; the lines above say why."
 

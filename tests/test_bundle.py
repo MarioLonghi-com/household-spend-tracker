@@ -185,6 +185,19 @@ def test_each_launcher_cds_first_and_clears_placards_before_up(text, cd, placard
     assert "PLACARD" in text
 
 
+def test_under_podman_the_launcher_removes_the_running_app_and_updater_before_up():
+    """podman-compose's `up` cannot replace a running container and exits 0
+    anyway (#169, E15 on rootless Podman): the launcher takes them away first,
+    and never the parked ones."""
+    body = LAUNCHER[LAUNCHER.find("\n\n") :]
+    block = body[_first(body, 'if [ "$ENGINE" = podman ]; then\n  for svc in updater app') :]
+    assert _first(body, 'rm -f "$id"') < _first(body, "for svc in updater app")
+    assert _first(block, '"$ENGINE" stop "$id"') < _first(block, '"$ENGINE" rm "$id"')
+    assert _first(block, '"$ENGINE" rm "$id"') < _first(block, '"$ENGINE" compose --env-file .env up -d')
+    assert "*-previous|*-next) continue" in block[: _first(block, "up -d")]
+    assert 'rm -f "$id"' not in block[: _first(block, "up -d")]  # stopped first, never killed
+
+
 @pytest.mark.parametrize("text", [LAUNCHER, BAT], ids=["sh", "bat"])
 def test_each_launcher_opens_localhost_and_probes_health(text):
     assert re.search(r"URL=.?http://localhost:8848", text)

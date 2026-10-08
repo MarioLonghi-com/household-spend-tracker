@@ -153,6 +153,8 @@ def check_updated(
     `engine_restarted`: the engine restarted mid-update (E6), which restarts
     every container -- the sidecar too, same container, new `StartedAt`."""
     rid = req["id"]
+    #: Whose code ran the apply: A's updater's, when nothing handed it over.
+    owner = (s.journal(rid).get("owner") or {}).get("image_digest")
     r.check(record.get("state") == "succeeded", f"the apply succeeded: {record.get('sentence')}")
     health = s.health()
     r.check(health.get("version") == to, f"health from where requests arrive says {health.get('version')}")
@@ -190,7 +192,6 @@ def check_updated(
     )
     policy = ((previous.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
     unable = [n for n in record.get("notes") or [] if "could not be set to `no`" in n]
-    owner = (s.journal(rid).get("owner") or {}).get("image_digest")
     if owner == s.releases[A]["updater"] and contains(s.releases[A]["revision"], PARKING) is False:
         print(f"   (A's updater ran the apply and predates {PARKING[:7]}: restart policy {policy} not checked)")
     else:
@@ -217,6 +218,15 @@ def check_updated(
         b.app, after, b.app_image.get("Config") or {}, s.engine.image(after["Image"]).get("Config") or {}
     )
     extra = {k: v for k, v in diff.items() if k not in ALLOWED}
+    if (
+        "Config.Healthcheck" in extra
+        and owner == s.releases[A]["updater"]
+        and contains(s.releases[A]["revision"], PODMAN4_HEALTHCHECK) is False
+    ):
+        # A's updater made this copy, and predates the fix for Podman 4's
+        # compat create splitting a CMD healthcheck on every space.
+        print(f"   Config.Healthcheck: A's updater made the copy and predates {PODMAN4_HEALTHCHECK[:7]}; set aside")
+        extra.pop("Config.Healthcheck")
     raised = extra.get("HostConfig.OomScoreAdj")
     if s.leg.name.startswith("podman-rootless") and raised and (raised[0] or 0) < (raised[1] or 0):
         # Rootless Podman: a container created through the API service gets
@@ -564,7 +574,17 @@ class Run:
         else:
             check_rolled_back(r, s, b, req, record, A, engine_restarted=engine_restarted)
         made = sorted(set(s.vol.backups()) - set(b.backups))
-        r.check(len(made) == 1, f"the drill ran once: one backup folder for the request {made}")
+        if made or state == "succeeded":
+            r.check(len(made) == 1, f"the drill ran once: one backup folder for the request {made}")
+        else:
+            # The interruption took the drill before it had backed up (5.6,
+            # "5, no drill report", no newer backup): R3, nothing migrated,
+            # and the drill was not run again to make one.
+            r.check(
+                not record.get("backup") and "nothing was migrated" in str(record.get("sentence")),
+                f"the drill was taken before its backup: rolled back, nothing migrated, not run again "
+                f"({record.get('sentence')})",
+            )
 
     def E5(self, r: Result) -> None:
         s = self.s
@@ -895,6 +915,8 @@ KNOWN_GAPS: dict[str, str] = {}
 
 #: The commit that parks -previous with restart policy `no` (#169).
 PARKING = "858eb410e39016630daa5d818cd53ed0bdc6a244"
+#: The commit that sends Podman 4 a CMD healthcheck it does not split (#169).
+PODMAN4_HEALTHCHECK = "9de23ffb04e9cadc868a7409306a7e4da6a35eb8"
 
 
 @functools.cache
