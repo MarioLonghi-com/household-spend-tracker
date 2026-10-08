@@ -259,6 +259,9 @@ class Heartbeat:
     api_version: str | None
     engine_api: str | None
     container: str | None
+    #: The refusal's one sentence when `socket` is one (R24): what the
+    #: Updates section says in the `refused` case.
+    socket_sentence: str | None = None
 
 
 def heartbeat(now: float | None = None) -> Heartbeat | None:
@@ -287,6 +290,7 @@ def heartbeat(now: float | None = None) -> Heartbeat | None:
         api_version=_str(doc, "api_version"),
         engine_api=_str(doc, "engine_api"),
         container=_str(doc, "container"),
+        socket_sentence=_str(doc, "socket_sentence"),
     )
 
 
