@@ -292,7 +292,7 @@ class Stack:
     def __init__(self, leg: Leg, engine: api.Engine, project_dir: Path, staged: Path) -> None:
         self.leg = leg
         self.engine = engine
-        self.base = project_dir
+        self.projects = project_dir
         self.dir = project_dir / "run-0"
         self.runs = 0
         self.staged = staged
@@ -376,7 +376,7 @@ class Stack:
         # removable by the driver. The compose project's name is fixed, so the
         # directory's own name does not matter to compose.
         self.runs += 1
-        self.dir = self.base / f"run-{self.runs}"
+        self.dir = self.projects / f"run-{self.runs}"
         self.dir.mkdir(parents=True, exist_ok=True)
 
     def write_project(self, version: str) -> None:

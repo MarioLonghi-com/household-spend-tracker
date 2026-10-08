@@ -1193,8 +1193,10 @@ jobs:
           # AppArmor names; RootlessKit is not one of them on this runner.
           sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
           sudo loginctl enable-linger "$(id -un)"
-          # --skip-iptables: the rootful daemon beside it keeps the host's.
-          dockerd-rootless-setuptool.sh install --force --skip-iptables \
+          # The rootless daemon makes its own NAT chains inside RootlessKit's
+          # namespace, through the legacy modules the runner does not load.
+          sudo modprobe -a ip_tables iptable_nat ip6_tables ip6table_nat
+          dockerd-rootless-setuptool.sh install --force \
             || { journalctl --user -n 60 --no-pager --unit docker.service; dockerd --version; exit 1; }
           sock="$XDG_RUNTIME_DIR/docker.sock"
           for _ in $(seq 1 60); do DOCKER_HOST="unix://$sock" docker version > /dev/null 2>&1 && break; sleep 1; done

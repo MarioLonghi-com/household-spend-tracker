@@ -36,6 +36,13 @@ on:
   schedule:
     # Wednesday morning: after Docker's and Podman's usual Tuesday releases.
     - cron: "37 5 * * 3"
+  # A pull request that changes the canary itself runs it, so a broken canary
+  # is seen before its first Wednesday. It never opens an issue from there.
+  pull_request:
+    branches: [dev]
+    paths:
+      - .github/workflows/engine-canary.yml
+      - tests/self_update/engine_box.py
   workflow_dispatch:
     inputs:
       image:
@@ -51,8 +58,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: engine-canary
-  cancel-in-progress: false
+  group: engine-canary-${{ github.event.pull_request.number || 'weekly' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   PYTHON_VERSION: "3.12"
@@ -167,7 +174,7 @@ jobs:
   # two issues.
   issue:
     needs: canary
-    if: always() && needs.canary.result == 'failure'
+    if: always() && needs.canary.result == 'failure' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

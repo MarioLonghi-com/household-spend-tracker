@@ -578,7 +578,8 @@ class Run:
             req, record = s.update(A, B, during=during)
         finally:
             done.set()
-            thread.join(10)
+            if thread.ident is not None:
+                thread.join(10)
         # By id: after a rollback the old app has its own name back.
         after = s.engine.inspect(b.app["Id"])
         print(f"   {seen['tries']} starts tried, {seen['refused']} refused: {sorted(seen['said'])[:3]}")
