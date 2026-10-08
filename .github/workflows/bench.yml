@@ -70,8 +70,12 @@ jobs:
           DATABASE_URL: sqlite:///./bench-data/bench.sqlite3
         run: |
           cp scripts/bench_ledger.py "$RUNNER_TEMP/bench_ledger.py"
-          git checkout --detach "$BEFORE"
+          # This commit's locked requirements, installed before the checkout
+          # and used for the old code too: releases before the lock (0.7.1
+          # and earlier) pin without hashes, and `--require-hashes` refuses
+          # them. The old migrations and seed run on the newer libraries.
           pip install --require-hashes -r requirements.txt
+          git checkout --detach "$BEFORE"
           python -m alembic upgrade head
           python -m scripts.seed_demo --reset --months 24 > /dev/null
           python "$RUNNER_TEMP/bench_ledger.py" grow bench-data/bench.sqlite3 \
@@ -80,7 +84,10 @@ jobs:
           import json, sqlite3
           conn = sqlite3.connect("bench-data/bench.sqlite3")
           tables = [r[0] for r in conn.execute(
-              "SELECT name FROM sqlite_master WHERE type='table' AND name != 'alembic_version'")]
+              # Not SQLite's own tables: `sqlite_stat1` is planner statistics,
+              # which the ANALYZE after the upgrade rewrites, not ledger rows.
+              "SELECT name FROM sqlite_master WHERE type='table' AND name != 'alembic_version' "
+              "AND name NOT LIKE 'sqlite_%'")]
           print(json.dumps({t: conn.execute(f'SELECT count(*) FROM "{t}"').fetchone()[0]
                             for t in sorted(tables)}))
           PY
