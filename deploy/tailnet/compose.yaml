@@ -3,7 +3,7 @@
 #   cd deploy/tailnet && cp .env.example .env && chmod 600 .env   # fill in TS_AUTHKEY
 #   (cd ../.. && python3 -m scripts.build_stamp)                     # names the commit
 #   docker compose build
-#   SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d                 # first run only
+#   docker compose up -d                                             # an empty volume migrates itself
 #
 # Two containers, one network namespace. The sidecar joins the tailnet as
 # `spend-tracker.<tailnet>.ts.net`, holds a real certificate for it, and
@@ -84,7 +84,7 @@ services:
       # `tailscale serve` proxies to 127.0.0.1:8848 from inside the same
       # namespace, so loopback is the only listener it needs.
       SPENDTRACKER_HOST: "127.0.0.1"
-      # Off after the first run; see the root compose.yaml.
+      # Off, and not needed for the first run either; see the root compose.yaml.
       SPENDTRACKER_AUTO_MIGRATE: "${SPENDTRACKER_AUTO_MIGRATE:-0}"
       # `tailscale serve` terminates real TLS. This stays on.
       SPENDTRACKER_COOKIE_SECURE: "on"

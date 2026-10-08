@@ -286,15 +286,15 @@ force rather than by documentation.
 ```bash
 echo SPENDTRACKER_VERSION=X.Y.Z >> .env
 docker compose pull
-SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
 docker compose up -d
 ```
 
 - `SPENDTRACKER_VERSION=X.Y.Z` — the release to run, from the releases page
 - `docker compose pull` — fetches the published image,
   `ghcr.io/mariolonghi-com/household-spend-tracker`, at the release `.env` names
-- `SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d` — first run only
-- `docker compose up -d` — every time after
+- `docker compose up -d` — the first time and every time after. A brand-new
+  volume has no tables, so the first start creates the schema by itself; an
+  existing ledger is never migrated by a start (`make upgrade` does that)
 
 To build this checkout instead, `SPENDTRACKER_VERSION=local docker compose build`;
 Compose also builds it when the image cannot be pulled.
@@ -493,9 +493,11 @@ one, and CI's `release-ready` job refuses it until it looks like one
    green, merge it.
 4. Tag the merge on `main` and push the tag. `release.yml` checks that
    `tests.yml` already passed on exactly this tree, checks the tag against the
-   version and the CHANGELOG, builds the tarball and the container image,
-   attests both, and publishes them -- the tarball to the release, the image
-   to `ghcr.io/mariolonghi-com/household-spend-tracker`.
+   version and the CHANGELOG, builds the tarball and the container image for
+   `linux/amd64` and `linux/arm64`, attests both, and publishes them -- the
+   tarball to a draft release, the image to
+   `ghcr.io/mariolonghi-com/household-spend-tracker`, and the release itself
+   last, with the CHANGELOG section as its body.
 
    ```bash
    git tag -a vX.Y.Z -m "X.Y.Z" origin/main && git push origin vX.Y.Z

@@ -75,7 +75,7 @@ export function SignInNotice({ user, onOpen }: { user: User; onOpen: () => void 
         ))}
         {owed.length > SHOWN && (
           <li>
-            <Trans>and {owed.length - SHOWN} more.</Trans>
+            <Trans comment="List item, SignInNotice (shared)">and {owed.length - SHOWN} more.</Trans>
           </li>
         )}
       </ul>
@@ -84,7 +84,7 @@ export function SignInNotice({ user, onOpen }: { user: User; onOpen: () => void 
           <Trans>See them in Admin</Trans>
         </button>
         <button onClick={dismiss}>
-          <Trans>Dismiss</Trans>
+          <Trans comment="Button, SignInNotice (shared): verb, hide this notice">Dismiss</Trans>
         </button>
       </div>
     </div>

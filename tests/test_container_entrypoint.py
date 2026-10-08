@@ -250,3 +250,239 @@ def test_the_sidecar_checks_it_can_reach_the_app():
     assert re.search(
         r"^    healthcheck:\n      test: .*http://127\.0\.0\.1:8848/api/health", sidecar, re.M
     ), "the sidecar's healthcheck must fetch the app on loopback"
+
+
+# --------------------------------------------------------------------------- #
+# The first start (#167, decision B2)
+# --------------------------------------------------------------------------- #
+#
+# An empty database migrates without SPENDTRACKER_AUTO_MIGRATE, because there
+# is nothing in it to lose and a double-click install has no terminal to pass
+# the flag from. Every other mismatch still reaches `app/schema_check.py`
+# unmigrated, which refuses to boot. Each case runs `main()` for real against
+# its own data directory -- the real `alembic upgrade head` subprocess
+# included -- and stops it at the `exec` of uvicorn.
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+UNKNOWN_REVISION = "ffffffffffff"
+
+
+class _Served(Exception):
+    """Raised in place of `os.execvp`: the entrypoint got as far as serving."""
+
+
+@pytest.fixture()
+def first_start(tmp_path, monkeypatch):
+    """A fresh data directory per test, and `main()` that stops at the exec."""
+    where = tmp_path / "volume"
+    where.mkdir()
+    monkeypatch.setenv("SPENDTRACKER_DATA_DIR", str(where))
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("SPENDTRACKER_AUTO_MIGRATE", raising=False)
+    monkeypatch.chdir(ROOT)  # where the image runs it from: alembic.ini, migrations/
+    monkeypatch.setattr(entrypoint.sys, "argv", ["entrypoint.py"])
+
+    def _exec(file, args):
+        raise _Served(args)
+
+    monkeypatch.setattr(entrypoint.os, "execvp", _exec)
+
+    migrations = []
+    real_migrate = entrypoint._migrate
+
+    def _counting_migrate():
+        migrations.append(True)
+        return real_migrate()
+
+    monkeypatch.setattr(entrypoint, "_migrate", _counting_migrate)
+
+    def run():
+        try:
+            return entrypoint.main()
+        except _Served:
+            return "served"
+
+    run.db = where / "spendtracker.sqlite3"
+    run.migrations = migrations
+    return run
+
+
+def _alembic(db: pathlib.Path, revision: str) -> None:
+    from alembic import command
+    from alembic.config import Config
+
+    cfg = Config(str(ROOT / "alembic.ini"))
+    cfg.set_main_option("script_location", str(ROOT / "migrations"))
+    cfg.set_main_option("sqlalchemy.url", f"sqlite:///{db}")
+    command.upgrade(cfg, revision)
+
+
+def _inspect(db: pathlib.Path) -> tuple[str | None, set[str]]:
+    """(stamp, table names) as the app's own guard reads them."""
+    from sqlalchemy import create_engine, inspect
+
+    from app import schema_check
+
+    engine = create_engine(f"sqlite:///{db}")
+    try:
+        return schema_check.stamped(engine), set(inspect(engine).get_table_names())
+    finally:
+        engine.dispose()
+
+
+def _refusal(db: pathlib.Path) -> str:
+    """What `lifespan` would say about this file at boot.
+
+    Asked of a copy: once `app.db` is imported, every engine's connect hook
+    sets `journal_mode=WAL`, which rewrites two header bytes -- the app's doing
+    when it boots, not the entrypoint's, and not what these tests measure.
+    """
+    import shutil
+
+    from sqlalchemy import create_engine
+
+    from app import schema_check
+
+    copy = db.with_name("refusal-copy.sqlite3")
+    shutil.copyfile(db, copy)
+    engine = create_engine(f"sqlite:///{copy}")
+    try:
+        with pytest.raises(schema_check.SchemaOutOfDate) as refused:
+            schema_check.verify(engine)
+    finally:
+        engine.dispose()
+    return str(refused.value)
+
+
+def _model_tables() -> set[str]:
+    from app.models import Base
+
+    return set(Base.metadata.tables)
+
+
+@pytest.mark.parametrize("left_by", ["nothing", "a zero-byte file", "a refused start"])
+def test_an_empty_volume_is_migrated_without_the_flag(first_start, capsys, left_by):
+    """D6, first half. A brand-new volume has no file at all; a first start
+    that died early can leave a zero-byte one; and a start that the old
+    entrypoint left to `schema_check` left one in WAL mode with no tables.
+    All three are nothing to lose."""
+    import sqlite3
+
+    from app import schema_check
+
+    if left_by == "a zero-byte file":
+        first_start.db.touch()
+    if left_by == "a refused start":
+        with contextlib.closing(sqlite3.connect(first_start.db)) as db:
+            db.execute("pragma journal_mode=WAL")
+    assert entrypoint.database_is_empty() is True
+
+    assert first_start() == "served"
+
+    stamp, tables = _inspect(first_start.db)
+    assert stamp == schema_check.expected_head()
+    assert _model_tables() <= tables
+    assert "alembic_version" in tables
+    assert first_start.migrations == [True]
+    said = capsys.readouterr().out
+    assert "had no tables at all" in said
+    assert "without SPENDTRACKER_AUTO_MIGRATE" in said
+
+
+@pytest.mark.parametrize("first_table", ["notes", "households"])
+def test_tables_without_a_stamp_are_refused_and_left_alone(first_start, first_table):
+    """D6. One table and no `alembic_version` is somebody's data, built by
+    something other than the migrations. Not migrated; the guard refuses it."""
+    import sqlite3
+
+    with contextlib.closing(sqlite3.connect(first_start.db)) as db:
+        db.execute(f"create table {first_table} (id integer primary key, body text)")
+        db.execute(f"insert into {first_table} (body) values ('keep me'), ('and me')")
+        db.commit()
+    before = first_start.db.read_bytes()
+    assert entrypoint.database_is_empty() is False
+
+    assert first_start() == "served"  # the app's lifespan is what refuses
+
+    assert first_start.migrations == []
+    assert first_start.db.read_bytes() == before
+    assert "tables but no Alembic stamp" in _refusal(first_start.db)
+    assert first_start.db.read_bytes() == before
+
+
+@pytest.mark.parametrize("revision", [UNKNOWN_REVISION, "000000000000"])
+def test_a_stamp_this_code_does_not_know_is_refused_and_left_alone(first_start, revision):
+    """D6. Most likely a database from a newer build: never migrated here."""
+    import sqlite3
+
+    with contextlib.closing(sqlite3.connect(first_start.db)) as db:
+        db.execute("create table alembic_version (version_num varchar(32) primary key)")
+        db.execute("insert into alembic_version values (?)", (revision,))
+        db.commit()
+    before = first_start.db.read_bytes()
+    assert entrypoint.database_is_empty() is False
+
+    assert first_start() == "served"
+
+    assert first_start.migrations == []
+    assert first_start.db.read_bytes() == before
+    assert f"stamped {revision}, which is not a revision this code knows" in _refusal(
+        first_start.db
+    )
+    assert first_start.db.read_bytes() == before
+
+
+def test_a_database_at_head_starts_without_migrating(first_start, capsys):
+    from app import schema_check
+
+    _alembic(first_start.db, "head")
+    before = first_start.db.read_bytes()
+
+    assert first_start() == "served"
+
+    assert first_start.migrations == []
+    assert first_start.db.read_bytes() == before
+    assert _inspect(first_start.db)[0] == schema_check.expected_head()
+    assert "had no tables at all" not in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("flag", ["1", "yes"])
+def test_the_flag_still_migrates_a_ledger_behind_head(first_start, monkeypatch, flag):
+    """`SPENDTRACKER_AUTO_MIGRATE=1` is unchanged: a deliberate migration of an
+    existing ledger, which is not empty and would otherwise be refused."""
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+
+    from app import schema_check
+
+    head = schema_check.expected_head()
+    behind = ScriptDirectory.from_config(Config(str(ROOT / "alembic.ini"))).get_revision(
+        head
+    ).down_revision
+    _alembic(first_start.db, behind)
+    assert _inspect(first_start.db)[0] == behind
+    assert entrypoint.database_is_empty() is False
+    monkeypatch.setenv("SPENDTRACKER_AUTO_MIGRATE", flag)
+
+    assert first_start() == "served"
+
+    assert first_start.migrations == [True]
+    assert _inspect(first_start.db)[0] == head
+
+
+def test_a_lone_wal_is_not_an_empty_database(first_start):
+    """A `-wal` with no database beside it is data in an odd state, not nothing."""
+    first_start.db.with_name(first_start.db.name + "-wal").write_bytes(b"not nothing")
+    assert entrypoint.database_is_empty() is False
+    assert first_start() == "served"
+    assert first_start.migrations == []
+    assert not first_start.db.exists()
+
+
+def test_a_database_that_is_not_sqlite_is_never_migrated_unasked(first_start, monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://somewhere/ledger")
+    assert entrypoint.database_path() is None
+    assert entrypoint.database_is_empty() is False
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{first_start.db}?timeout=5")
+    assert entrypoint.database_path() == first_start.db
+    assert entrypoint.database_is_empty() is True

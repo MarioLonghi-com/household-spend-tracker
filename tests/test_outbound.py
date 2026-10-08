@@ -1,4 +1,4 @@
-"""The two outbound GETs follow no redirect and read nothing unbounded (#219, #225).
+"""The outbound GETs follow no redirect and read nothing unbounded (#219, #225).
 
 Real sockets on 127.0.0.1, not a patched ``urlopen``: the bug was in what
 urllib's own redirect handler does, so replacing urllib would test nothing.
@@ -81,11 +81,12 @@ def drip(every: float, total: int) -> Handler:
 
 
 def test_check_upstream_follows_no_redirect(monkeypatch):
+    listed = b'[{"tag_name": "v99.0.0", "draft": false, "prerelease": false, "body": ""}]'
     with (
-        local_server(body(b'[{"name": "v99.0.0"}]')) as (elsewhere, reached),
+        local_server(body(listed)) as (elsewhere, reached),
         local_server(redirect_to(elsewhere)) as (redirector, asked),
     ):
-        monkeypatch.setattr(platform_service, "UPSTREAM_TAGS", f"{redirector}/tags")
+        monkeypatch.setattr(platform_service, "UPSTREAM_RELEASES", f"{redirector}/releases")
         answer = platform_service.check_upstream()
     assert len(asked) == 1
     assert reached == []
@@ -93,19 +94,24 @@ def test_check_upstream_follows_no_redirect(monkeypatch):
     assert answer.problem is not None and "302" in answer.problem
 
 
-def test_check_upstream_reads_no_more_than_a_tag_list(monkeypatch):
-    """2 MiB is not a tag list; before #225 it was read whole, whatever its size."""
+def test_check_upstream_reads_no_more_than_a_release_list(monkeypatch):
+    """2 MiB is not a release list; before #225 it was read whole, whatever its size."""
     with local_server(body(b"[" + b" " * (2 << 20) + b"]")) as (server, asked):
-        monkeypatch.setattr(platform_service, "UPSTREAM_TAGS", f"{server}/tags")
+        monkeypatch.setattr(platform_service, "UPSTREAM_RELEASES", f"{server}/releases")
         answer = platform_service.check_upstream()
     assert len(asked) == 1
     assert answer.latest is None
-    assert answer.problem == "the repository's answer was larger than a tag list"
+    assert answer.problem == "the repository's answer was larger than a release list"
 
 
-def test_check_upstream_still_reads_a_real_tag_list(monkeypatch):
-    tags = b'[{"name": "v0.3.1"}, {"name": "v99.1.0"}, {"name": "demo"}]'
-    with local_server(body(tags)) as (server, _):
-        monkeypatch.setattr(platform_service, "UPSTREAM_TAGS", f"{server}/tags")
+def test_check_upstream_still_reads_a_real_release_list(monkeypatch):
+    listed = (
+        b'[{"tag_name": "v0.3.1", "draft": false, "prerelease": false, "body": "old"},'
+        b' {"tag_name": "v99.1.0", "draft": false, "prerelease": false, "body": "new"},'
+        b' {"tag_name": "demo", "draft": false, "prerelease": false, "body": ""}]'
+    )
+    with local_server(body(listed)) as (server, _):
+        monkeypatch.setattr(platform_service, "UPSTREAM_RELEASES", f"{server}/releases")
         answer = platform_service.check_upstream()
-    assert (answer.problem, answer.latest, answer.newer) == (None, "v99.1.0", True)
+    assert (answer.problem, answer.latest, answer.newer) == (None, "99.1.0", True)
+    assert [one.version for one in answer.releases] == ["99.1.0"]

@@ -1,0 +1,12 @@
+{
+  "Platform": {"Name": "Docker Engine - Community"},
+  "Components": [
+    {"Name": "Engine", "Version": "29.0.0",
+     "Details": {"ApiVersion": "1.52", "MinAPIVersion": "1.44", "Os": "linux", "Arch": "amd64"}}
+  ],
+  "Version": "29.0.0",
+  "ApiVersion": "1.52",
+  "MinAPIVersion": "1.44",
+  "Os": "linux",
+  "Arch": "amd64"
+}

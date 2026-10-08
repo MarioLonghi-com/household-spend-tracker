@@ -74,13 +74,13 @@ export function Payees({ household }: { household: Household }) {
       setMerging(null);
       // The register and the rules both name payees, and a merge moved both.
       client.invalidateQueries();
-      toasts.say(t`Folded into ${kept.name}`);
+      toasts.say(t({ message: `Folded into ${kept.name}`, comment: "Label on the Payees screen" }));
     },
   });
 
   const order = useSort<PayeeSort>("name");
   const accountName = (id: string | null) =>
-    (accounts.data ?? []).find((one) => one.id === id)?.name ?? t`another account`;
+    (accounts.data ?? []).find((one) => one.id === id)?.name ?? t({ message: "another account", comment: "Label on the Payees screen" });
 
   const rows = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -97,9 +97,9 @@ export function Payees({ household }: { household: Household }) {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1><Trans>Payees</Trans></h1>
+        <h1><Trans comment="Screen title on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md">Payees</Trans></h1>
         <button className="primary" onClick={() => setAdding(true)}>
-          <Trans>
+          <Trans comment="Button on the Payees screen">
             Add payee
           </Trans>
         </button>
@@ -111,7 +111,7 @@ export function Payees({ household }: { household: Household }) {
         </Trans>
       </p>
 
-      <SameName household={household} onMerged={(kept) => toasts.say(t`Folded into ${kept}`)} />
+      <SameName household={household} onMerged={(kept) => toasts.say(t({ message: `Folded into ${kept}`, comment: "Text on the Payees screen" }))} />
 
       <div className="card">
         <Problem error={payees.error ?? create.error ?? merge.error} />
@@ -125,7 +125,7 @@ export function Payees({ household }: { household: Household }) {
         </Field>
 
         {payees.isLoading ? (
-          <p className="muted"><Trans>Loading…</Trans></p>
+          <p className="muted"><Trans comment="Sentence on the Payees screen">Loading…</Trans></p>
         ) : rows.length === 0 ? (
           <Empty>
             {payees.data?.length
@@ -138,31 +138,31 @@ export function Payees({ household }: { household: Household }) {
               <thead>
                 <tr>
                   <SortHeading
-                    label={t`Name`}
+                    label={t({ message: "Name", comment: "Column heading on the Payees screen: noun" })}
                     column="name"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label={t`Kind`}
+                    label={t({ message: "Kind", comment: "Column heading on the Payees screen: noun, what sort of thing" })}
                     column="kind"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   {/* Buttons, not a fact about the row: no sort. */}
-                  <th aria-label={t`Actions`} />
+                  <th aria-label={t({ message: "Actions", comment: "Screen-reader name on the Payees screen" })} />
                 </tr>
               </thead>
               <tbody>
                 {rows.map((one) => (
                   <tr key={one.id}>
                     <td data-primary="true">{one.name}</td>
-                    <td className="small muted" data-label={t`Kind`} data-detail-first="true">
+                    <td className="small muted" data-label={t({ message: "Kind", comment: "Column name shown beside a value on phones on the Payees screen: noun, what sort of thing" })} data-detail-first="true">
                       {one.transfer_account_id
-                        ? t`Transfer to ${accountName(one.transfer_account_id)}`
-                        : t`Payee`}
+                        ? t({ message: `Transfer to ${accountName(one.transfer_account_id)}`, comment: "Table cell on the Payees screen" })
+                        : t({ message: "Payee", comment: "Table cell on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md" })}
                     </td>
                     <td>
                       {/* A transfer payee is the other side of a transfer, kept
@@ -170,7 +170,7 @@ export function Payees({ household }: { household: Household }) {
                           quietly re-point every transfer that used it. */}
                       {one.transfer_account_id ? null : (
                         <button onClick={() => setMerging(one)}>
-                          <Trans>Merge…</Trans>
+                          <Trans comment="Button on the Payees screen: verb, combine two into one">Merge…</Trans>
                         </button>
                       )}
                     </td>
@@ -181,7 +181,7 @@ export function Payees({ household }: { household: Household }) {
           </div>
         )}
         <p className="muted small" style={{ marginBottom: 0 }}>
-          {t`${rows.length} of ${payees.data?.length ?? 0} shown.`}
+          {t({ message: `${rows.length} of ${payees.data?.length ?? 0} shown.`, comment: "Sentence on the Payees screen" })}
         </p>
       </div>
 
@@ -295,14 +295,14 @@ function SameName({
           <thead>
             <tr>
               <SortHeading
-                label={t`Spellings`}
+                label={t({ message: "Spellings", comment: "Column heading on the Payees screen" })}
                 column="spellings"
                 sort={order.sort}
                 direction={order.direction}
                 onSort={order.onSort}
               />
               <SortHeading
-                label={t`Transactions`}
+                label={t({ message: "Transactions", comment: "Column heading on the Payees screen. See GLOSSARY.md" })}
                 column="transactions"
                 sort={order.sort}
                 direction={order.direction}
@@ -310,14 +310,14 @@ function SameName({
                 align="right"
               />
               {/* Buttons, not a fact about the row: no sort. */}
-              <th aria-label={t`Actions`} />
+              <th aria-label={t({ message: "Actions", comment: "Screen-reader name on the Payees screen" })} />
             </tr>
           </thead>
           <tbody>
             {rows.map((group) => (
               <tr key={group.key}>
                 <td data-primary="true">{group.payees.map((one) => one.name).join(" · ")}</td>
-                <td className="amount" data-label={t`Transactions`}>
+                <td className="amount" data-label={t({ message: "Transactions", comment: "Column name shown beside a value on phones on the Payees screen. See GLOSSARY.md" })}>
                   {total(group)}
                 </td>
                 <td>
@@ -327,7 +327,7 @@ function SameName({
                       setReviewingKey(group.key);
                     }}
                   >
-                    <Trans>
+                    <Trans comment="Button on the Payees screen: verb, look over before going on">
                       Review…
                     </Trans>
                   </button>
@@ -386,7 +386,7 @@ function MergeSpellings({
     <Dialog title={t`Merge spellings of one name`} onClose={onClose}>
       <Problem error={error} />
       <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
-        <legend className="small"><Trans>Keep</Trans></legend>
+        <legend className="small"><Trans comment="Heading of a group of choices on the Payees screen: verb">Keep</Trans></legend>
         {group.payees.map((one) => (
           <label key={one.id} className="row" style={{ gap: 8 }}>
             <input
@@ -433,7 +433,7 @@ function MergeSpellings({
         )}
       </p>
       <button className="primary" disabled={!kept || pending} onClick={() => onMerge(keep)}>
-        {t`Merge into ${kept?.name ?? "…"}`}
+        {t({ message: `Merge into ${kept?.name ?? "…"}`, comment: "Button on the Payees screen" })}
       </button>
     </Dialog>
   );
@@ -460,12 +460,12 @@ function AddPayee({
           on a transaction creates them anyway.
         </Trans>
       </p>
-      <Field label={t`Name`}>
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Payees screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus maxLength={200} />
       </Field>
       <p />
       <button className="primary" disabled={!name.trim() || pending} onClick={() => onAdd(name.trim())}>
-        <Trans>
+        <Trans comment="Button on the Payees screen: verb">
           Add
         </Trans>
       </button>
@@ -499,9 +499,9 @@ function MergePayee({
   const target = others.find((one) => one.id === into);
 
   return (
-    <Dialog title={t`Merge ${payee.name}`} onClose={onClose}>
+    <Dialog title={t({ message: `Merge ${payee.name}`, comment: "Title of a panel on the Payees screen" })} onClose={onClose}>
       <Problem error={error} />
-      <Field label={t`Into`}>
+      <Field label={t({ message: "Into", comment: "Label of a form field on the Payees screen: where it goes, or what it is merged into" })}>
         <select value={into} onChange={(e) => setInto(e.target.value)} autoFocus>
           <option value=""><Trans>Choose a payee…</Trans></option>
           {others.map((one) => (
@@ -523,7 +523,7 @@ function MergePayee({
         )}
       </p>
       <button className="primary" disabled={!into || pending} onClick={() => onMerge(into)}>
-        <Trans>
+        <Trans comment="Button on the Payees screen: verb, combine two into one">
           Merge
         </Trans>
       </button>

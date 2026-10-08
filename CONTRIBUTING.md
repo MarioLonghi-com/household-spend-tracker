@@ -338,6 +338,11 @@ commit: `client/src/screens/importGuide/en.tsx`, *Admin → How import works*
 identifier kind it does not mention -- but only a person notices a sentence
 that has stopped being true.
 
+**Extracted a short or ambiguous message? Give the translator a note:**
+`t({ message, comment })` or `<Trans comment="…">`, one line of English saying
+what it is -- the rule is in `client/src/locales/README.md`, and
+`catalogs.test.ts` refuses a bare one- or two-word message.
+
 ---
 
 ## 6. If you are a program
