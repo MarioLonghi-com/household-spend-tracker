@@ -51,6 +51,10 @@ What is carried, and the cases that needed a rule:
 - **What the engine made for the old container is not carried**: `HOSTNAME`
   and Podman's `container=` and `HOME` environment entries, and a hostname
   that is the old container's short id.
+- **What belongs to a namespace the container shares**: `ShmSize` beside
+  `IpcMode: host` and the hostname beside `UTSMode: host`, which Podman
+  reports when containers.conf makes the host's its default and then
+  refuses in a create.
 
 A container in a Podman pod cannot be copied: a container created through
 the Docker-compatible API cannot join the pod (S19). `in_pod` says so, and
@@ -241,6 +245,29 @@ def network_of(inspect: Mapping) -> tuple[str, dict[str, dict]]:
     return mode, endpoints
 
 
+def _namespaces_shared(old_host: Mapping, body: dict, host: dict) -> None:
+    """Leave out what an engine refuses beside a namespace the container shares.
+
+    Not carried, the IPC, UTS and other namespace modes come from the engine's
+    defaults -- and an engine can default to the host's: Podman with
+    `ipcns="host"` / `utsns="host"` in containers.conf (its own
+    `quay.io/podman/stable` image does), whose inspect then reports
+    `IpcMode: host` with a `ShmSize`, and `UTSMode: host` with the host's
+    `Hostname`. Sent back, Podman refuses both ("cannot set shmsize when
+    running in the {host } IPC Namespace", "cannot set hostname when running
+    in the host UTS namespace"; #169's engine canary). The size of a shared
+    /dev/shm and the name of a shared UTS namespace are not the container's to
+    set, so they are not copied.
+    """
+    ipc = str(old_host.get("IpcMode") or "")
+    if ipc == "host" or ipc.startswith("container:"):
+        host.pop("ShmSize", None)
+    uts = str(old_host.get("UTSMode") or "")
+    if uts == "host" or uts.startswith("container:"):
+        body.pop("Hostname", None)
+        body.pop("Domainname", None)
+
+
 def copy_app(
     previous: Mapping,
     image: str,
@@ -305,6 +332,7 @@ def copy_app(
         hostname = cfg.get("Hostname")
         if isinstance(hostname, str) and hostname and hostname != short_id(previous):
             body["Hostname"] = hostname
+    _namespaces_shared(old_host, body, host)
     body["HostConfig"] = host
     return body
 
@@ -371,6 +399,7 @@ def successor(
     host["NetworkMode"] = mode
     if endpoints:
         body["NetworkingConfig"] = {"EndpointsConfig": endpoints}
+    _namespaces_shared(old_host, body, host)
     body["HostConfig"] = host
     return body
 

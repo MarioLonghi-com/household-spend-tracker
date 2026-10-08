@@ -27,6 +27,7 @@ from updater.engine import EngineClient, NotAllowed, Scope
 
 INSPECT = Path(__file__).parent / "fixtures" / "updater" / "inspect"
 NEW = eng.REPOSITORIES[0] + "@sha256:" + "b" * 64
+UPDATER_NEW = eng.REPOSITORIES[1] + "@sha256:" + "c" * 64
 OLD = eng.REPOSITORIES[0] + "@sha256:" + "a" * 64
 
 #: fixture -> (engine fixture, scheme, in a pod, refused by the guard)
@@ -306,3 +307,40 @@ def test_a_one_off_without_a_role_or_a_request_and_a_role_on_a_service_are_refus
 def test_the_published_port_is_read_from_the_bindings():
     assert shapes.published_port(APP) == 18848
     assert shapes.published_port(app_of("docker-engine-rootful/sidecar.json")) is None
+
+
+def _in_host_namespaces(inspect: dict) -> dict:
+    """`inspect` as Podman reports it under containers.conf's `ipcns="host"` and
+    `utsns="host"` (its own quay.io/podman/stable image; #169's engine canary):
+    the host's IPC and UTS namespaces, a ShmSize and the host's name all the same."""
+    seen = json.loads(json.dumps(inspect))
+    seen["HostConfig"].update({"IpcMode": "host", "UTSMode": "host", "ShmSize": 65536000})
+    seen["Config"].update({"Hostname": "fv-az1234-567", "Domainname": "internal.example"})
+    return seen
+
+
+def test_in_the_hosts_ipc_and_uts_namespaces_the_copy_sets_neither_shm_size_nor_hostname():
+    prev = _in_host_namespaces(app_of("podman-rootless-fedora/loopback-app.json"))
+    body = shapes.copy_app(prev, NEW)
+    assert "ShmSize" not in body["HostConfig"]
+    assert "Hostname" not in body and "Domainname" not in body
+    # The namespace modes themselves are the engine's default, not carried, and
+    # the guard passes the body.
+    assert "IpcMode" not in body["HostConfig"] and "UTSMode" not in body["HostConfig"]
+    eng.guard_create(body, Scope(project=project_of(prev)))
+    # Private namespaces keep both, as before.
+    own = app_of("podman-rootless-fedora/loopback-app.json")
+    own["Config"]["Hostname"] = "spend-tracker-app"
+    kept = shapes.copy_app(own, NEW)
+    assert kept["HostConfig"]["ShmSize"] == own["HostConfig"]["ShmSize"]
+    assert kept["Hostname"] == "spend-tracker-app"
+
+
+def test_the_successor_updater_in_the_hosts_ipc_namespace_sets_no_shm_size():
+    own = _in_host_namespaces(app_of("podman-rootless-fedora/loopback-app.json"))
+    body = shapes.successor(own, UPDATER_NEW, "4f1c2b3a-0000-4000-8000-000000000001")
+    assert "ShmSize" not in body["HostConfig"] and "Hostname" not in body and "Domainname" not in body
+    private = shapes.successor(
+        app_of("podman-rootless-fedora/loopback-app.json"), UPDATER_NEW, "4f1c2b3a-0000-4000-8000-000000000001"
+    )
+    assert private["HostConfig"]["ShmSize"] == 65536000
