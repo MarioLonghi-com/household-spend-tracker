@@ -2,10 +2,18 @@
 
     python -m updater [--socket /run/engine.sock] [--update /update]
                       [--project-dir /project] [--project spend-tracker]
+                      [--successor <request id>]
 
 It finds its own container, learns its own digest from it (R27), detects the
 engine, and then runs the heartbeat (`updater.heartbeat`) and the request loop
-(`updater.service`) until it is stopped.
+(`updater.service`) until it is stopped. `--successor` is added by the
+updater it replaces (6.6, H2), never by hand: it starts in successor mode,
+proves it can work, and waits to be told to go.
+
+The host paths it binds -- the engine socket, the project directory and, on
+a server with a pre-update hook, `/hook` -- are read from its own container
+and are the only ones its successor may bind (`handover.own_bind_sources`),
+so a successor keeps the hook rather than silently skipping it.
 
 There is no option, variable or argument that changes how images are
 verified: `trust.Sigstore` is the only trust this entry point builds.
@@ -17,11 +25,13 @@ import argparse
 import os
 import signal
 import threading
+import time
+from dataclasses import replace
 from pathlib import Path
 
-from updater import detect, heartbeat, shapes, survey
+from updater import detect, heartbeat, hook, shapes, survey
 from updater import engine as eng
-from updater.handover import NotAvailable
+from updater.handover import Successions, own_bind_sources
 from updater.journal import Owner
 from updater.service import Service
 from updater.site import Kit, Site
@@ -60,6 +70,14 @@ def build(args: argparse.Namespace, trust: Trust) -> tuple[Kit, heartbeat.Identi
     client = eng.EngineClient(args.socket, eng.Scope(project=args.project))
     client.negotiate()
     me, update_volume = identify(client)
+    own_id = None
+    if me.container:
+        own = client.inspect(me.container)
+        own_id = own.get("Id")
+        client.scope = replace(
+            client.scope,
+            bind_sources=own_bind_sources(own, (args.socket, args.project_dir, args.hook)),
+        )
     found = detect.detect(client)
     site = Site(
         project=args.project,
@@ -72,7 +90,8 @@ def build(args: argparse.Namespace, trust: Trust) -> tuple[Kit, heartbeat.Identi
         engine=found.engine or "docker-engine",
         hook_dir=Path(args.hook) if args.hook and os.path.isdir(args.hook) else None,
     )
-    kit = Kit(client=client, site=site, trust=trust, handover=NotAvailable())
+    kit = Kit(client=client, site=site, trust=trust)
+    kit.handover = Successions(kit, successor_of=args.successor, own_id=own_id)
     return kit, heartbeat.Identity(updater_version=me.version, image_digest=me.image_digest)
 
 
@@ -84,6 +103,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--project-dir", default="/project")
     p.add_argument("--project", default=DEFAULT_PROJECT)
     p.add_argument("--hook", default="/hook")
+    p.add_argument("--successor", default=None, help=argparse.SUPPRESS)
     return p
 
 
@@ -95,13 +115,18 @@ def serve(args: argparse.Namespace, trust: Trust) -> None:
         signal.signal(sig, lambda *_: stop.set())
     # Its own client: detection renegotiates, and must not do so under a step.
     beat_client = eng.EngineClient(args.socket, eng.Scope(project=args.project))
+    handover = kit.handover
     beat = heartbeat.Beat(
         beat_client,
         kit.site.volume,
         identity,
-        hook=kit.site.hook_dir is not None,
-        busy=lambda: service.busy,
+        # Configured, not merely mounted: what the confirmation shows as "On".
+        hook=hook.configured(kit.site.hook_dir) is not None,
+        busy=lambda: service.busy or handover.mode != "current",
+        role=lambda: service.heartbeat_role,
     )
+    if isinstance(handover, Successions):
+        handover.on_beat = lambda: beat.tick(time.time())
     threading.Thread(target=beat.run, args=(stop,), daemon=True).start()
     service.run(stop)
 

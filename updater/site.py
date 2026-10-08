@@ -50,6 +50,7 @@ class Kit:
     trust: Trust
     clock: GapClock = field(default_factory=GapClock)
     sleep: Callable[[float], None] = time.sleep
+    #: `handover.Successions` in the updater's container (`__main__`); none in a bare kit.
     handover: Handover = field(default_factory=NotAvailable)
     #: How often a one-off or a health check is polled.
     poll: float = 1.0
