@@ -85,6 +85,7 @@ msgstr "Elegir…"
 msgid "New password"
 msgstr "Nueva contraseña"
 
+#. Tooltip on the Income vs Expense report: noun, money that went out
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Expense"
 msgstr ""
@@ -123,6 +124,7 @@ msgstr ""
 msgid "One act, so History has one entry and undo puts every row back together."
 msgstr ""
 
+#. Label on the Reports screen. See GLOSSARY.md
 #: src/screens/Reports.tsx
 msgid "Reimbursements"
 msgstr ""
@@ -358,6 +360,7 @@ msgstr "lo que una clave nunca puede hacer"
 msgid "Priority"
 msgstr ""
 
+#. Column heading on the Reimbursements report: adjective, still to be paid back by work
 #: src/screens/reports/Reimbursements.tsx
 msgid "Owed"
 msgstr ""
@@ -591,6 +594,7 @@ msgstr ""
 msgid "Group accounts by"
 msgstr "Agrupar cuentas por"
 
+#. Label on the Income vs Expense report
 #. placeholder {0}: monthLabel(period)
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Net — {0}"
@@ -695,10 +699,12 @@ msgstr ""
 msgid "2. You"
 msgstr "2. Tú"
 
+#. Column heading on the Income vs Expense report: noun, per month
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Average"
 msgstr ""
 
+#. Column heading on the Reimbursements report: marked as a work expense
 #: src/screens/reports/Reimbursements.tsx
 msgid "Flagged"
 msgstr ""
@@ -1203,6 +1209,7 @@ msgstr ""
 msgid "Discard the staged one"
 msgstr "Descartar la preparada"
 
+#. Column heading on the Income vs Expense report: noun, the sum
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Total"
 msgstr ""
@@ -1388,6 +1395,7 @@ msgstr "Poner la categoría"
 msgid "A screen copy and a thumbnail. About <0>33 KB</0> per receipt."
 msgstr ""
 
+#. Column heading on the Reimbursements report: how much of the payment the expenses account for
 #. Name of a fact on the Register screen: how much of the payment the expenses account for
 #: src/screens/Register.tsx
 #: src/screens/reports/Reimbursements.tsx
@@ -1558,6 +1566,7 @@ msgstr "Últimos 3 meses"
 msgid "Make them an owner"
 msgstr ""
 
+#. Label on the Income vs Expense report
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Total expense"
 msgstr ""
@@ -1655,12 +1664,16 @@ msgid "By when the expense happened."
 msgstr ""
 
 #. Column heading on the Accounts screen: noun, a bank or cash account. See GLOSSARY.md
+#. Column heading on the Income vs Expense report: noun, a bank or cash account. See GLOSSARY.md
+#. Column heading on the Reimbursements report: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the accounts import: noun, a bank or cash account. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, a bank or cash account. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Reimbursements report: noun, a bank or cash account. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, a bank or cash account. See GLOSSARY.md
 #. Label on the Register screen: noun, a bank or cash account. See GLOSSARY.md
+#. Name of a fact on the Reimbursements report: noun, a bank or cash account. See GLOSSARY.md
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
@@ -1707,6 +1720,7 @@ msgstr "¿Eliminar este movimiento?"
 msgid "Check the code"
 msgstr "Comprobar el código"
 
+#. Heading on the Reimbursements report: still owed
 #: src/screens/reports/Reimbursements.tsx
 msgid "Outstanding"
 msgstr ""
@@ -1756,12 +1770,14 @@ msgid "use the bank's: {0}"
 msgstr "usar el del banco: {0}"
 
 #. Label of a form field on the Register screen: noun, being paid back by work
+#. Name of a fact on the Reimbursements report: noun, being paid back by work
 #: src/screens/Register.tsx
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
 msgid "Reimbursement"
 msgstr "Reembolso"
 
+#. Name of a fact on the Reimbursements report: paid back by work
 #: src/screens/reports/Reimbursements.tsx
 msgid "Repaid"
 msgstr ""
@@ -1861,6 +1877,7 @@ msgstr ""
 msgid "What happened"
 msgstr ""
 
+#. Column heading on the Reimbursements report: where it goes, or what it is merged into
 #. Column heading on the Transfers screen: preposition, the account money arrives in
 #. Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in
 #. Label of a form field on the Payees screen: where it goes, or what it is merged into
@@ -1902,6 +1919,7 @@ msgstr "Una división necesita al menos dos partes"
 msgid "Add a second on another device. If you lose this one, you will need your password and code."
 msgstr "Añade una segunda en otro dispositivo. Si pierdes esta, necesitarás tu contraseña y un código."
 
+#. Label on the Income vs Expense report
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Total income"
 msgstr ""
@@ -2052,6 +2070,7 @@ msgstr "{0} caracteres"
 msgid "Source app"
 msgstr "Aplicación de origen"
 
+#. Label on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
 msgid "Repaid by {payment}"
 msgstr ""
@@ -2336,6 +2355,7 @@ msgid "Set up"
 msgstr "Configuración"
 
 #. Sentence on the Register screen
+#. Text in a dialog on the Reimbursements report
 #: src/screens/Register.tsx
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
@@ -2512,6 +2532,7 @@ msgstr "Importe que llega ({0})"
 msgid "Disabled"
 msgstr ""
 
+#. Column heading on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
 msgid "Paid on"
 msgstr ""
@@ -2567,6 +2588,7 @@ msgstr "No es un gasto de trabajo"
 msgid "Leave a payee somebody set by hand alone. Turning this off lets the rules overrule those too, which is occasionally what you want and never what you want by accident."
 msgstr ""
 
+#. Column heading on the Income vs Expense report: income minus spending
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Net"
 msgstr ""
@@ -2609,6 +2631,7 @@ msgstr ""
 msgid "Pick an accent colour"
 msgstr ""
 
+#. Column heading on the Reimbursements report: the start of a range, or where money comes from
 #. Label of a form field on the Transfers screen: the start of a range, or where money comes from
 #. Text on the date range picker: the start of a range, or where money comes from
 #: src/components/DateRange.tsx
@@ -3155,6 +3178,8 @@ msgstr ""
 msgid "{0} will always be {1} — and the payee was added"
 msgstr "{0} será siempre {1}, y se ha añadido el beneficiario"
 
+#. Column heading on the Reimbursements report: money that came in
+#. Label on the Reimbursements report: money that came in
 #. Name of a fact on the Register screen: money that came in
 #: src/screens/Register.tsx
 #: src/screens/reports/Reimbursements.tsx
@@ -3494,6 +3519,7 @@ msgstr ""
 msgid "Set up {PRODUCT}"
 msgstr "Configurar {PRODUCT}"
 
+#. Column heading on the Reimbursements report: noun, a calendar month
 #: src/screens/reports/Reimbursements.tsx
 msgid "Month"
 msgstr ""
@@ -3518,6 +3544,7 @@ msgid "{others, plural, one {with {others} other expense} other {with {others} o
 msgstr ""
 
 #. Column heading on the Import screen: noun, a sum of money. See GLOSSARY.md
+#. Column heading on the Income vs Expense report: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Reconcile screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
@@ -4206,6 +4233,7 @@ msgstr "¿Desvincular este ticket?"
 #. Label of a form field on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Label on the Register screen: noun, what a transaction was for. See GLOSSARY.md
+#. Name of a fact on the Reimbursements report: noun, what a transaction was for. See GLOSSARY.md
 #. Screen-reader name on the Import screen: noun, what a transaction was for. See GLOSSARY.md
 #. Screen-reader name on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Screen-reader name on the Register screen: noun, what a transaction was for. See GLOSSARY.md
@@ -4222,13 +4250,18 @@ msgstr "Categoría"
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr "Todavía tienes 1 llave de acceso, y un código de recuperación no las desactiva. Si una estaba en el dispositivo que perdiste, quítala en Métodos de inicio de sesión de tu perfil: tu nombre en el menú."
 
+#. Column heading on the Income vs Expense report: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Column heading on the Reconcile screen: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Column heading on the Reimbursements report: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Column heading on the Reimbursements report: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Reimbursements report: noun, the free-text line of a transaction. S…
 #. Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Label of a form field on the Transfers screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Label on the Import screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Label on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
+#. Name of a fact on the Reimbursements report: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Screen-reader name on the Import screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Screen-reader name on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Table cell on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md
@@ -4481,6 +4514,7 @@ msgstr "Continuar con la llave de acceso"
 msgid "Select every row shown"
 msgstr "Seleccionar todas las filas mostradas"
 
+#. Heading on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
 msgid "By month"
 msgstr ""
@@ -4789,11 +4823,13 @@ msgstr "Otra deuda"
 msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
 msgstr "En su lugar, cada divisa tiene su propia Salida y Entrada, y una fila solo rellena las suyas. Desactivar una oculta sus filas además de sus columnas; la tabla dice cuántas."
 
+#. Text on the Reimbursements report (written off)
 #: src/screens/reports/Reimbursements.tsx
 msgctxt "written off"
 msgid "None"
 msgstr ""
 
+#. Screen-reader text on the Income vs Expense report: the household kept money (for screen readers)
 #: src/screens/reports/IncomeExpense.tsx
 msgid "surplus"
 msgstr ""
@@ -4880,6 +4916,7 @@ msgstr "sin país"
 msgid "That report does not exist."
 msgstr ""
 
+#. Text on a dropdown that picks several on the Income vs Expense report
 #. Text on a dropdown that picks several on the Register screen
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
@@ -4894,15 +4931,19 @@ msgstr "Todas las cuentas"
 msgid "This file looks like it is for <0>{0}</0> ({1}), not the account chosen above."
 msgstr "Este archivo parece ser de <0>{0}</0> ({1}), no de la cuenta elegida arriba."
 
+#. Column heading on the Income vs Expense report: noun. See GLOSSARY.md
 #. Column heading on the Reconcile screen: noun. See GLOSSARY.md
+#. Column heading on the Reimbursements report: noun. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Reimbursements report: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun. See GLOSSARY.md
 #. Label of a form field on the Transfers screen: noun. See GLOSSARY.md
 #. Label on the Import screen: noun. See GLOSSARY.md
 #. Label on the Register screen: noun. See GLOSSARY.md
 #. Label on the Register screen: noun. See GLOSSARY.md
+#. Name of a fact on the Reimbursements report: noun. See GLOSSARY.md
 #: src/screens/Import.tsx
 #: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
@@ -5356,6 +5397,7 @@ msgid "Discard this staged import?"
 msgstr "¿Descartar esta importación preparada?"
 
 #. Label on the Import screen: having no category. See GLOSSARY.md
+#. Label on the Income vs Expense report: having no category. See GLOSSARY.md
 #. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
 #. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
 #. Row state in the one-time import's category mapping: no category. See GLOSSARY.md
@@ -5737,7 +5779,11 @@ msgstr "Oscuro"
 msgid "Ignore it and carry on"
 msgstr "Ignorarla y seguir"
 
+#. Sentence on the Income vs Expense report
 #. Sentence on the Payees screen
+#. Text on the Income vs Expense report
+#. Text on the Income vs Expense report
+#. Text on the Reimbursements report
 #. Text on the app's menu and frame
 #. Text on the app's menu and frame
 #. Text on the app's menu and frame
@@ -5800,6 +5846,8 @@ msgstr "Los seis dígitos de tu aplicación de autenticación"
 msgid "fee column"
 msgstr "columna de comisión"
 
+#. Column heading on the Reimbursements report: paid back by work
+#. Name of a figure on the Reimbursements report: paid back by work
 #: src/screens/reports/Reimbursements.tsx
 msgid "Recovered"
 msgstr ""
@@ -5810,7 +5858,11 @@ msgstr ""
 #. Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the accounts import: noun. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
+#. Screen-reader name on the Income vs Expense report: noun. See GLOSSARY.md
+#. Screen-reader name on the Reimbursements report: noun. See GLOSSARY.md
+#. Text on the Income vs Expense report: noun. See GLOSSARY.md
 #. Text on the Register screen: noun. See GLOSSARY.md
+#. Text on the Reimbursements report: noun. See GLOSSARY.md
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
@@ -6013,6 +6065,7 @@ msgstr ""
 msgid "Authenticator, with its recovery codes"
 msgstr ""
 
+#. Option in a dropdown on the Income vs Expense report
 #: src/screens/reports/IncomeExpense.tsx
 msgid "by country"
 msgstr ""
@@ -6392,6 +6445,7 @@ msgstr "{by} restableció la contraseña de {user}"
 msgid "in {0} groups, {1} archived"
 msgstr ""
 
+#. Text on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
 msgid "Difference: <0/>"
 msgstr ""
@@ -6531,6 +6585,7 @@ msgstr "Este navegador no se ha usado aquí últimamente, así que necesitamos l
 msgid "why this is asked"
 msgstr "por qué se pide esto"
 
+#. Label on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
 msgid "no payee"
 msgstr ""
@@ -6584,6 +6639,7 @@ msgstr "¿Dejarlas también <0>sin categoría</0>?"
 msgid "inflow column"
 msgstr "columna de entrada"
 
+#. Column heading on the Reimbursements report: noun, what is left after subtracting
 #. Name of a fact on the Register screen: noun, what is left after subtracting
 #: src/screens/Register.tsx
 #: src/screens/reports/Reimbursements.tsx
@@ -6591,13 +6647,16 @@ msgstr "columna de entrada"
 msgid "Difference"
 msgstr "Diferencia"
 
+#. Column heading on the Income vs Expense report: noun, who was paid or who paid. See GLOSSARY.md
 #. Column heading on the Payee Categorisation screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Column heading on the Reconcile screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Column heading on the Reimbursements report: noun, who was paid or who paid. See GLOSSARY.md
 #. Heading on the app's menu and frame: noun, who was paid or who paid. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Label on the Import screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Label on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Name of a fact on the Reimbursements report: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
@@ -6640,7 +6699,10 @@ msgstr "Para qué es"
 msgid "Nothing has changed yet — your current authenticator keeps working until a code proves the new one pairs."
 msgstr "Todavía no ha cambiado nada: tu aplicación de autenticación actual sigue funcionando hasta que un código demuestre que la nueva está vinculada."
 
+#. Button on the Reports screen. See GLOSSARY.md
 #. Menu item and the name of its screen. See GLOSSARY.md
+#. Screen title on the Reports screen. See GLOSSARY.md
+#. Screen title on the Reports screen. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/Reports.tsx
 #, fuzzy
@@ -6726,6 +6788,7 @@ msgstr ""
 msgid "Also delete the {0} payees left empty"
 msgstr ""
 
+#. Name of a fact on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
 msgid "Linked to"
 msgstr ""
@@ -6961,7 +7024,9 @@ msgstr ""
 msgid "Keys for programs"
 msgstr "Claves para programas"
 
+#. Column heading on the Reimbursements report: a work expense work will not pay; counted as your own spending. See GLOS…
 #. Label on the Register screen: a work expense work will not pay; counted as your own spending. See GLOSSARY.md
+#. Name of a figure on the Reimbursements report: a work expense work will not pay; counted as your own spending. See GL…
 #: src/screens/Register.tsx
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
@@ -6985,6 +7050,7 @@ msgstr ""
 msgid "a negative balance here is money you owe"
 msgstr "un saldo negativo aquí es dinero que debes"
 
+#. Column heading on the Reimbursements report: still to be paid back by work
 #: src/screens/reports/Reimbursements.tsx
 msgid "Still owed"
 msgstr ""
@@ -7018,6 +7084,8 @@ msgstr ""
 msgid "{0}, then strip"
 msgstr ""
 
+#. Column heading on the Reimbursements report: how long it has waited, or a queue state
+#. Column name shown beside a value on phones on the Reimbursements report: how long it has waited, or a queue state
 #. Note on the receipts: how long it has waited, or a queue state
 #: src/components/Receipts.tsx
 #: src/screens/reports/Reimbursements.tsx
@@ -7107,6 +7175,7 @@ msgstr "U — Pendientes"
 msgid "contains"
 msgstr ""
 
+#. Text on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
 msgid "Nothing owed"
 msgstr ""
@@ -7260,6 +7329,8 @@ msgstr "Mostrando {0} de {1}: mostrar más"
 msgid "3. Your authenticator"
 msgstr "3. Tu aplicación de autenticación"
 
+#. Label on the Reimbursements report: money that went out
+#. Label on the Reimbursements report: money that went out
 #: src/screens/reports/Reimbursements.tsx
 msgid "Spent"
 msgstr ""
@@ -7596,6 +7667,7 @@ msgstr ""
 msgid "The memo this row will carry"
 msgstr "El concepto que llevará esta fila"
 
+#. Screen-reader text on the Income vs Expense report: the household spent more than came in (for screen readers)
 #: src/screens/reports/IncomeExpense.tsx
 msgid "shortfall"
 msgstr ""
@@ -7640,6 +7712,7 @@ msgstr ""
 msgid "<0>Coming from another budgeting app?</0> Statements go in one at a time here. To bring your whole history across at once — YNAB so far — use the {link} on the {0} page. The household’s owner runs it, once."
 msgstr "<0>¿Vienes de otra aplicación de presupuestos?</0> Aquí los extractos entran de uno en uno. Para traer todo tu historial de una vez (de momento, desde YNAB), usa la {link} en la página {0}. La ejecuta el propietario del hogar, una vez."
 
+#. Text on the Reimbursements report
 #. placeholder {0}: days(oldest)
 #: src/screens/reports/Reimbursements.tsx
 msgid "oldest {0}"
@@ -7692,6 +7765,7 @@ msgstr "Número de tarjeta"
 msgid "{hiddenByCurrency, plural, one {Every row here is in a currency the toggle is hiding. Turn one back on to see them — {hiddenByCurrency} row is waiting.} other {Every row here is in a currency the toggle is hiding. Turn one back on to see them — {hiddenByCurrency} rows are waiting.}}"
 msgstr "{hiddenByCurrency, plural, one {Todas las filas están en una divisa que el selector oculta. Vuelve a activar una para verlas: {hiddenByCurrency} fila espera.} other {Todas las filas están en una divisa que el selector oculta. Vuelve a activar una para verlas: {hiddenByCurrency} filas esperan.}}"
 
+#. Text on a dropdown that picks several on the Income vs Expense report
 #. Text on a dropdown that picks several on the Register screen
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
@@ -7768,6 +7842,7 @@ msgstr ""
 msgid "the number other statements quote"
 msgstr "el número que citan otros extractos"
 
+#. Option in a dropdown on the Income vs Expense report
 #: src/screens/reports/IncomeExpense.tsx
 msgid "by type"
 msgstr ""
@@ -7785,6 +7860,7 @@ msgstr "último uso el {0}"
 msgid "Setup token"
 msgstr "Token de configuración"
 
+#. Tooltip on the Income vs Expense report: noun, money that came in
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Income"
 msgstr ""

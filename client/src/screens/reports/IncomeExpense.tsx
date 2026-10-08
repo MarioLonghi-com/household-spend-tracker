@@ -212,7 +212,7 @@ export function IncomeExpense({ household }: { household: Household }) {
   if (currencies.isLoading)
     return (
       <div className="muted">
-        <Trans>Loading…</Trans>
+        <Trans comment="Text on the Income vs Expense report">Loading…</Trans>
       </div>
     );
 
@@ -248,12 +248,12 @@ export function IncomeExpense({ household }: { household: Household }) {
             calendar. */}
         <div className="report-choices">
           <GroupedPicker
-            label={t`All categories`}
+            label={t({ message: "All categories", comment: "Text on a dropdown that picks several on the Income vs Expense report" })}
             groups={categoryOptions}
             value={chosenCategories}
             onChange={setChosenCategories}
             extra={{
-              label: t`Uncategorised`,
+              label: t({ message: "Uncategorised", comment: "Label on the Income vs Expense report: having no category. See GLOSSARY.md" }),
               hint: t`(rows with no category yet)`,
               checked: withUncategorised,
               onChange: setWithUncategorised,
@@ -262,7 +262,7 @@ export function IncomeExpense({ household }: { household: Household }) {
 
           <div className="picker-with-mode">
             <GroupedPicker
-              label={t`All accounts`}
+              label={t({ message: "All accounts", comment: "Text on a dropdown that picks several on the Income vs Expense report" })}
               groups={accountOptions}
               value={chosenAccounts}
               onChange={setChosenAccounts}
@@ -276,8 +276,8 @@ export function IncomeExpense({ household }: { household: Household }) {
               value={grouping}
               onChange={(e) => setGrouping(e.target.value as AccountGrouping)}
             >
-              <option value="country"><Trans>by country</Trans></option>
-              <option value="type"><Trans>by type</Trans></option>
+              <option value="country"><Trans comment="Option in a dropdown on the Income vs Expense report">by country</Trans></option>
+              <option value="type"><Trans comment="Option in a dropdown on the Income vs Expense report">by type</Trans></option>
             </select>
           </div>
         </div>
@@ -290,7 +290,7 @@ export function IncomeExpense({ household }: { household: Household }) {
       <Problem error={report.error} />
 
       {report.isLoading || !report.data ? (
-        <div className="muted"><Trans>Loading…</Trans></div>
+        <div className="muted"><Trans comment="Text on the Income vs Expense report">Loading…</Trans></div>
       ) : (
         <>
           {/* "All dates" sends no ends and the server resolves them to where
@@ -338,9 +338,9 @@ export function CurrencyToggle({
   return (
     <div className="currency-toggle">
       <span className="daterange-label">
-        <Trans>Currency</Trans>
+        <Trans comment="Text on the Income vs Expense report: noun. See GLOSSARY.md">Currency</Trans>
       </span>
-      <div role="radiogroup" aria-label={t`Currency`} className="daterange-presets">
+      <div role="radiogroup" aria-label={t({ message: "Currency", comment: "Screen-reader name on the Income vs Expense report: noun. See GLOSSARY.md" })} className="daterange-presets">
         {options.map((code) => (
           <button
             key={code}
@@ -430,13 +430,13 @@ export function ReportTable({
                   {monthLabel(period)}
                 </th>
               ))}
-              <th className="amount"><Trans>Average</Trans></th>
-              <th className="amount"><Trans>Total</Trans></th>
+              <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, per month">Average</Trans></th>
+              <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, the sum">Total</Trans></th>
             </tr>
           </thead>
 
           <Band
-            title={t`Income`}
+            title={t({ message: "Income", comment: "Tooltip on the Income vs Expense report: noun, money that came in" })}
             tone="in"
             section={report.income}
             months={months}
@@ -446,7 +446,7 @@ export function ReportTable({
             onOpen={setCell}
           />
           <Band
-            title={t`Expense`}
+            title={t({ message: "Expense", comment: "Tooltip on the Income vs Expense report: noun, money that went out" })}
             tone="out"
             section={report.expense}
             months={months}
@@ -471,7 +471,7 @@ export function ReportTable({
                 is told no colour at all. */}
             <tr className="report-net">
               <th scope="row" className="report-label">
-                <Trans>
+                <Trans comment="Column heading on the Income vs Expense report: income minus spending">
                   Net
                 </Trans>
               </th>
@@ -482,7 +482,7 @@ export function ReportTable({
                     currency={currency}
                     signed
                     onOpen={onOpen}
-                    cell={{ title: t`Net — ${monthLabel(period)}`, period }}
+                    cell={{ title: t({ message: `Net — ${monthLabel(period)}`, comment: "Label on the Income vs Expense report" }), period }}
                   />
                 </td>
               ))}
@@ -595,7 +595,7 @@ function Behind({
     <Dialog title={cell.title} onClose={onClose}>
       <Problem error={rows.error} />
       {rows.isLoading || !rows.data ? (
-        <p className="muted"><Trans>Loading…</Trans></p>
+        <p className="muted"><Trans comment="Sentence on the Income vs Expense report">Loading…</Trans></p>
       ) : rows.data.entries.length === 0 ? (
         <Empty><Trans>Nothing went into this one.</Trans></Empty>
       ) : (
@@ -604,11 +604,11 @@ function Behind({
             <table className="behind">
               <thead>
                 <tr>
-                  <th><Trans>Account</Trans></th>
-                  <th><Trans>Date</Trans></th>
-                  <th><Trans>Payee</Trans></th>
-                  <th><Trans>Memo</Trans></th>
-                  <th className="amount"><Trans>Amount</Trans></th>
+                  <th><Trans comment="Column heading on the Income vs Expense report: noun, a bank or cash account. See GLOSSARY.md">Account</Trans></th>
+                  <th><Trans comment="Column heading on the Income vs Expense report: noun. See GLOSSARY.md">Date</Trans></th>
+                  <th><Trans comment="Column heading on the Income vs Expense report: noun, who was paid or who paid. See GLOSSARY.md">Payee</Trans></th>
+                  <th><Trans comment="Column heading on the Income vs Expense report: noun, the free-text line of a transaction. See GLOSSARY.md">Memo</Trans></th>
+                  <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, a sum of money. See GLOSSARY.md">Amount</Trans></th>
                 </tr>
               </thead>
               <tbody>
@@ -766,7 +766,7 @@ function Band({
   const groups = useMemo(() => groupRows(section.rows), [section.rows]);
   // A whole phrase per band, not "Total" plus the band's name lower-cased:
   // case and word order are the translator's.
-  const total = tone === "in" ? t`Total income` : t`Total expense`;
+  const total = tone === "in" ? t({ message: "Total income", comment: "Label on the Income vs Expense report" }) : t({ message: "Total expense", comment: "Label on the Income vs Expense report" });
 
   return (
     <tbody className={`report-band report-${tone}`}>
@@ -1017,7 +1017,7 @@ function Figure({
       {text}
       {/* The word a screen reader hears, because it hears no colour. The "-"
           in front of the figure is the cue that is there for everybody else. */}
-      {signed && <span className="sr-only"> {minor > 0 ? t`surplus` : t`shortfall`}</span>}
+      {signed && <span className="sr-only"> {minor > 0 ? t({ message: "surplus", comment: "Screen-reader text on the Income vs Expense report: the household kept money (for screen readers)" }) : t({ message: "shortfall", comment: "Screen-reader text on the Income vs Expense report: the household spent more than came in (for screen readers)" })}</span>}
     </span>
   );
   if (!onOpen || !cell) return body;
