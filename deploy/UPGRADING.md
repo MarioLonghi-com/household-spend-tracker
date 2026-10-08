@@ -31,7 +31,218 @@ standard reflex for "my build is in a weird state, start clean". An existing
 
 ---
 
+## Two ways to upgrade
+
+| You run it | Upgrade with | Section |
+|---|---|---|
+| **In containers, from a published release**: the release zip on your own computer, or `compose.yaml` or `deploy/tailnet/compose.yaml` on a server | the browser: *Application management → Updates* | [From the browser](#from-the-browser-container-installs) |
+| **From a checkout or a release tarball**, with `make serve` | the terminal: `make upgrade` | [Do this](#do-this) |
+
+The terminal drill is also the **fallback for a container install** when the
+browser cannot do it: an image built on the box rather than pulled from a
+release, a machine that cannot reach the registry, Docker Desktop's Enhanced
+Container Isolation without its allowlist entry, or an updater that is gone.
+[In a container](#in-a-container) has its commands. Both routes run the same
+drill underneath, `scripts.upgrade`: a verified backup, the migrations, then
+the checks.
+
+---
+
+## From the browser (container installs)
+
+Every compose file runs a second, small container beside the app: the
+**updater**. It holds the container engine's socket; the app never does. The
+app writes it a request, and the updater downloads the new release, proves
+where it came from, runs the drill, starts the new version, and puts the old
+one back if anything fails. Nothing installs until the owner confirms it,
+and nothing is fetched until the owner presses a button.
+
+> The steps in this section use simplified technical English, as *Do this*
+> below does.
+
+### Before you start
+
+1. Sign in as an owner. Open *Application management*. Find *Updates*.
+2. Read the sentence under the heading. It must say *Updates run in the
+   updater*. If it says anything else, read
+   [TROUBLESHOOTING.md](TROUBLESHOOTING.md#updates-from-the-browser) first.
+3. On a laptop, plug it in. Keep Docker Desktop or Podman Desktop running.
+
+### Prepare
+
+4. Press *Check the repository*.
+5. Read the release notes. The notes of every release you skip are shown too,
+   because their migrations run as well.
+6. Choose the release. The newest is offered. *or choose* lists the others.
+7. Press *Prepare X.Y.Z*. Wait. The app stays up. Nothing in the ledger
+   changes.
+
+### Confirm
+
+8. Read the confirmation. Read the line `rolling back:` for each migration.
+9. Tick the box under each migration that cannot be undone. If you do not
+   accept one, press *Discard* and stop here.
+10. Save the recovery code. Press *Download as a file*, or write it down.
+11. Tick *I have saved the recovery code*.
+12. Type your password and a code from your authenticator.
+13. Press *Update to X.Y.Z*.
+
+### Wait
+
+14. Keep the tab open. Keep the computer awake.
+15. Wait for the page to reload. That takes a few minutes.
+16. Read the outcome at the top of *Updates*.
+17. Keep the backup for one day. It is listed under *Database*, in *Backups
+    taken by updates*.
+
+### What happens when you press *Update*
+
+| | What the updater does | If that fails |
+|---|---|---|
+| 1 | Checks again: the app runs the version the report was prepared from, both downloaded images are present and still verify, the sidecar runs (servers), and there is disk and memory for it | *Not started*. Nothing changed. |
+| 2 | Runs the pre-update hook, on a server where one is set up ([DOCKER.md](DOCKER.md#the-pre-update-hook)) | *Not started*. Nothing changed. |
+| 2a | Hands over to the new release's updater first, when that one is newer | The current updater carries on itself. |
+| 3 | Stops the app, and renames it `…-previous` so nothing restarts it by name | The app is started again. *Not started*. |
+| 4 | Starts the maintenance page where the app was, from the old image | |
+| 5 | Runs the drill from the **new** image against your ledger: a verified backup, the migrations, the checks | Rolled back |
+| 7 | Starts the new app: a copy of the previous container, with the new image | Rolled back |
+| 8 | Checks its health from where the browser's requests arrive, and that it reports the new version and commit | Rolled back |
+| 9 | Pins the new release (below), keeps a record of the previous container, prunes older update backups, and makes the recovery code useless | Logged only |
+| 10 | Replaces itself with the new release's updater, unless step 2a did | The updater stays on its version and says so. |
+
+Anybody but you sees the maintenance page meanwhile: *"Spend Tracker is being
+updated. It will be back in a few minutes."*, and nothing else. Your own tab
+watches `/api/health` and reloads when the app answers.
+
+**Rolled back** means: the new app is removed, the backup from step 5 is
+restored **with the old image**, the previous container is renamed back and
+started, and its health is checked. You are on the old version with the
+ledger exactly as it was when the app stopped, and still signed in, because
+the backup was taken after the app stopped. The outcome names the step that
+failed, what the updater said and the end of the drill's log. The new image
+stays on the disk, so *Prepare* can try again.
+
+**A rollback that fails** is retried; three attempts in all. After that
+nothing serves the ledger, and the maintenance page becomes the **recovery
+page**: [TROUBLESHOOTING.md](TROUBLESHOOTING.md#the-recovery-page).
+
+**A laptop that sleeps, or an engine that restarts, mid-update** is not a
+failure. The updater keeps a journal of each step, and when the engine is
+back it carries on from where it was, or rolls back. The drill never runs
+twice. Time asleep does not count towards any deadline.
+
+**Passkeys survive an update and a rollback.** The host name and the port do
+not change, because the new container is a copy of the previous one.
+
+### The recovery code
+
+A code of seven groups of four characters, made for one update, shown once on
+the confirmation. Only its hash goes to the updater, and the updater is what
+checks it. It opens the recovery page if the update cannot undo itself, and
+nothing else. It stops working when that update finishes, whichever way it
+finishes, so there is never a standing code to keep safe for long. Five wrong
+codes pause the recovery page for 15 minutes, and each further five double
+the pause.
+
+### The pin: `.env` names what runs
+
+After a successful update the updater writes two lines into the compose
+project's `.env`, and a copy of them into `pin/release.env` beside it:
+
+    SPENDTRACKER_IMAGE=ghcr.io/mariolonghi-com/household-spend-tracker:X.Y.Z@sha256:…
+    SPENDTRACKER_UPDATER_IMAGE=ghcr.io/mariolonghi-com/household-spend-tracker-updater:X.Y.Z@sha256:…
+
+Both compose files name the images through these, so a later
+`docker compose up -d`, a reboot or the launcher starts the release the
+ledger is at, and not the older one `SPENDTRACKER_VERSION` names. **They win
+over `SPENDTRACKER_VERSION`.** To upgrade by hand after a self-update, delete
+both lines from `.env` and from `pin/release.env` first, or the manual
+drill's new version is ignored. `compose.override.yaml` is never touched.
+
+### Update backups
+
+Each update's drill takes its backup into the data volume, as
+`backups/<stamp>/` (for example `/var/lib/spend-tracker/backups/20261008-211100`
+inside the container). The newest **five** are always kept. After a
+**successful** update, older ones are deleted; a rollback deletes nothing.
+*Application management → Database → Backups taken by updates* lists them with
+the version that took them, downloads each as a zip `make restore` takes, and
+offers *Delete* only on those older than the newest five. The server refuses
+to delete one of the five whatever the browser sends.
+
+Backups you made yourself, from the screen or with `make backup`, are not
+update backups and are never deleted. A ledger that a rollback moved aside,
+`spendtracker.sqlite3.before-restore-<stamp>`, stays until you remove it.
+
+**The update backups are in the same volume as the ledger.** They protect you
+from a bad migration, not from losing the volume. Download one, or take your
+own off the machine ([DOCKER.md](DOCKER.md#backing-up)).
+
+### The updater updates itself
+
+Every release ships its own updater. When the release you install carries a
+newer one, the old updater starts it beside itself, checks it can work, and
+steps aside **before** the app is stopped, so the update runs on the newest
+code. Otherwise it does so after the update. The old updater stays, stopped,
+under its name with `-previous` added (`spend-tracker-updater-1-previous`
+under Docker Compose) until the next one, and is what to start if the new one
+ever stops working
+([TROUBLESHOOTING.md](TROUBLESHOOTING.md#the-updater-is-not-running)). *Update the updater only*
+appears after a check when a newer updater works with the version you run;
+it never touches the ledger and needs no password. An updater is never
+replaced by an older one.
+
+### Going back after a successful update
+
+There is no button for it. Going back is [Case C](#rolling-back-three-cases-and-only-one-is-easy)
+whatever the migrations said: the only way back is the update's backup,
+**and everything written since the update goes with it**. From a terminal, in
+the compose directory, with the old version as `X.Y.Z` and the backup's stamp
+from *Backups taken by updates*:
+
+```bash
+docker compose stop app
+docker compose run --rm -T --entrypoint python app -m scripts.restore /var/lib/spend-tracker/backups/<stamp> --yes
+```
+
+That restore runs on the **new** image, which can read the old backup. Then,
+in `.env` **and** in `pin/release.env`, change the `SPENDTRACKER_IMAGE=`
+line to `SPENDTRACKER_IMAGE=ghcr.io/mariolonghi-com/household-spend-tracker:X.Y.Z`
+and leave the updater's line alone: a newer updater works with an older app.
+Then:
+
+```bash
+docker compose pull app
+docker compose up -d
+curl -s localhost:8848/api/health
+```
+
+Behind the sidecar, ask `/api/health` from inside the app as DOCKER.md
+section 3 does. **A passkey registered after the update is lost**: the
+restored ledger does not know it, but the member's authenticator still offers
+it, and the sign-in fails without saying why. The member signs in with
+password and code and removes it from the authenticator.
+
+### When the app has not come back
+
+The tab says so after 30 minutes. In order:
+
+1. **On a laptop:** wake it and keep it awake. If Docker Desktop shows no
+   containers at all, quit Docker Desktop fully and start it again; it can
+   stay absent for many minutes after a plain reopen. With Podman, start the
+   Podman machine. The update carries on when the engine is back.
+2. **After an hour**, open `/recovery` on the same address and enter the
+   recovery code ([TROUBLESHOOTING.md](TROUBLESHOOTING.md#the-recovery-page)).
+3. **With no recovery code**, run the release zip's launcher again on a
+   personal computer, or use a terminal on a server
+   ([TROUBLESHOOTING.md](TROUBLESHOOTING.md#updates-from-the-browser)).
+
+---
+
 ## Do this
+
+The drill from a terminal, for a checkout or a tarball. A container install
+uses the same steps through `docker compose`: [In a container](#in-a-container).
 
 > The steps in this section use simplified technical English: one instruction
 > per sentence, active voice, present tense. The reasoning is in the sections
