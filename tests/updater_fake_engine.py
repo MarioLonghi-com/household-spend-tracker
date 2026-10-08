@@ -97,6 +97,9 @@ class FakeEngine:
     delay: float = 0.0
     #: Container ids whose stop the engine refuses, as when it cannot kill one (#246).
     refuse_stop: set = field(default_factory=set)
+    #: Docker 28: a stop answers once the container has exited, but the
+    #: listing still says `running` for a moment. This many listings do (#246).
+    stale_listings_after_stop: int = 0
     #: An engine whose compat API has no `POST /containers/{id}/update` (#169).
     no_update: bool = False
     #: Seconds a stop takes to answer: a container that ignores SIGTERM is
@@ -305,7 +308,11 @@ class FakeEngine:
             for c in self.containers.values():
                 labels = c["Labels"]
                 if all(labels.get(w.split("=", 1)[0]) == w.split("=", 1)[1] for w in wanted):
-                    out.append({k: v for k, v in c.items() if not k.startswith("_")})
+                    listed = {k: v for k, v in c.items() if not k.startswith("_")}
+                    if c.get("_stale_listings"):
+                        c["_stale_listings"] -= 1
+                        listed["State"] = "running"
+                    out.append(listed)
             return 200, out
         if route == ("POST", "/containers/create"):
             name = query.get("name", "")
@@ -349,6 +356,8 @@ class FakeEngine:
                     import time
 
                     time.sleep(self.stop_delay)
+                if c["State"] == "running" and self.stale_listings_after_stop:
+                    c["_stale_listings"] = self.stale_listings_after_stop
                 self.set_state(c, "exited", 143 if c["State"] == "running" else 0)
                 return 204, b""
             if method == "POST" and action == "/update" and self.no_update:

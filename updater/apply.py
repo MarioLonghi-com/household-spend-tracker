@@ -142,6 +142,10 @@ PARKED_POLICY = {"Name": "no"}
 #: drill has it (#246). Short: it should not be running at all, and SQLite
 #: survives the kill.
 HOLDER_GRACE_SECONDS = 5
+#: How long a stopped holder may still be reported running before it counts as
+#: not stopped: Docker wakes a stop's caller before its state is saved (#246).
+HOLDER_SETTLE_TRIES = 5
+HOLDER_SETTLE_SECONDS = 0.5
 #: This request's own one-offs that may run with the ledger while the drill
 #: does: the drill itself, and the maintenance page, which mounts it read-only.
 OWN_LEDGER_ROLES = ("drill", "placard")
@@ -687,7 +691,7 @@ class Apply:
             )
             try:
                 self.client.stop(cid, grace=HOLDER_GRACE_SECONDS)
-                still = survey.running(self.by_id(cid))
+                still = self.still_running(cid)
             except (eng.EngineError, eng.NotAllowed) as e:
                 raise LedgerHeld(f"{held} ({e})") from None
             if still:
@@ -700,6 +704,28 @@ class Apply:
                 f"{'the drill was moving' if during else 'about to be backed up'}; "
                 f"the updater stopped it {'during' if during else 'before'} the drill."
             )
+
+    def still_running(self, cid: str) -> bool:
+        """Whether a container the engine has just stopped still runs, by inspecting it.
+
+        Not from the listing: Docker answers a stop once the container has
+        exited, but its listing can say `running` a moment longer (found by
+        E7 on Docker 28, #246). Asked again a few times before it counts.
+        """
+        for attempt in range(HOLDER_SETTLE_TRIES):
+            try:
+                seen = self.client.inspect(cid)
+            except eng.NotAllowed:
+                return False  # gone
+            except eng.EngineError as e:
+                if e.status == 404:
+                    return False
+                raise
+            if not survey.running(seen):
+                return False
+            if attempt < HOLDER_SETTLE_TRIES - 1:
+                self.kit.sleep(HOLDER_SETTLE_SECONDS)
+        return True
 
     def judge_drill(self, code: int | None) -> tuple[str, str] | None:
         report = volume.read_own_json(self.drill_report_path())

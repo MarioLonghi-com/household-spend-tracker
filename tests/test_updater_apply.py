@@ -953,6 +953,24 @@ def test_246_previous_started_before_the_drill_is_stopped_or_the_drill_never_sta
     world.no_running_app_at_a_mismatched_stamp()
 
 
+def test_246_a_listing_that_lags_the_stop_does_not_count_as_still_running(world):
+    """Docker 28 answers a stop once the container has exited, and its listing
+    says `running` a moment longer. Read from the listing, that rolled every
+    E7 back on the CI's Docker ("could not be stopped"); inspected, it is
+    stopped, the drill runs, and E1 holds."""
+    world.fake.stale_listings_after_stop = 4
+    rows = world.ledger.rows
+
+    def click(fake, c, cmd, version):
+        fake.set_state(fake.containers[world.app_id], "running")
+
+    world._placard = click
+    req, record = apply(world)
+    assert record["state"] == "succeeded", record
+    assert (world.ledger.stamp, world.ledger.rows, world.ledger.drills) == (B, rows, 1)
+    assert [h["id"] for h in holders_stopped(world, req["id"])] == [world.app_id]
+
+
 def test_246_an_app_compose_started_under_the_free_name_during_the_drill_is_stopped_too(world):
     """Not only `-previous`: a `compose up` while the app is parked creates a
     fresh A under the name. It has the ledger too, and is stopped at once."""

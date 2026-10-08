@@ -720,7 +720,19 @@ class Run:
             return None
 
         def click_during_the_drill(rid: str) -> None:
-            drill_c = s.wait_for(lambda: the_drill(rid), "the drill to be created", 600, every=0.02)
+            # Not `wait_for`, which waits out a Failure: an apply that ended
+            # before its drill fails the scenario now, with its record dumped.
+            deadline, looked, drill_c = time.monotonic() + 600, 0, None
+            while drill_c is None:
+                with contextlib.suppress(api.Unreachable, api.Failed):
+                    drill_c = the_drill(rid)
+                looked += 1
+                if drill_c is None and looked % 50 == 0 and s.vol.exists(f"/u/history/{rid}.json"):
+                    raise Failure("the apply ended before its drill was created")
+                if drill_c is None and time.monotonic() > deadline:
+                    raise Failure("timed out after 600 s waiting for the drill to be created")
+                if drill_c is None:
+                    time.sleep(0.02)
             owner = self.owner_container(rid)["Id"]
             # The drill first, while it still runs: the click then lands while
             # the drill holds the ledger, however quick the drill is.
