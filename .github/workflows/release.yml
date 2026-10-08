@@ -62,6 +62,19 @@ name: release
 #   - **The release body leads with the CHANGELOG section** the tag is checked
 #     against; GitHub's generated pull-request list follows it.
 #
+# And the self-updater's image beside the app's (#164), through exactly the
+# same steps: the `updater` target of the same Dockerfile, built and
+# smoke-tested natively per platform in `image`, labels compared in `labels`,
+# pushed by digest, indexed, attested and pulled anonymously in
+# `publish-image`, floating tags moved in `publish-release`. Every release
+# ships one (design notes A10), and the updater verifies each against its own
+# attestation subject, so an app attestation never passes for it (R19).
+#
+# **Its package is new, and ghcr.io may create it private** on the first
+# push. The anonymous pull in `publish-image` then fails, while the release is
+# still a draft, with the sentence that says where to make it public; after
+# that, re-running the failed jobs finishes the release.
+#
 # Started by hand (`workflow_dispatch`) from a branch it is a dry run: it
 # builds and smoke-tests both artefacts on both platforms, checks the two
 # platform images carry the same labels, and publishes nothing.
@@ -85,6 +98,9 @@ env:
   # Lower case: ghcr.io refuses an upper-case repository name, and the
   # organisation's is not.
   IMAGE: ghcr.io/mariolonghi-com/household-spend-tracker
+  # The self-updater's package: the app's name and `-updater`, the second of
+  # the two repositories updater/engine.py will pull from.
+  UPDATER_IMAGE: ghcr.io/mariolonghi-com/household-spend-tracker-updater
 
 jobs:
   # Did CI pass on exactly this tree? Looked up the same way tests.yml's
@@ -294,6 +310,9 @@ jobs:
   #
   # After `build`, for the bare version its label carries, and so a tag that
   # fails the CHANGELOG or version check never gets as far as a build.
+  #
+  # The updater's image is built and checked here too, per platform, after the
+  # app's: one runner per architecture builds both images of the release.
   image:
     needs: build
     strategy:
@@ -305,7 +324,7 @@ jobs:
           - arch: arm64
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 25
+    timeout-minutes: 35
     permissions:
       contents: read
     steps:
@@ -409,6 +428,88 @@ jobs:
           path: labels-${{ matrix.arch }}.json
           if-no-files-found: error
 
+      # The self-updater: the `updater` target of the same Dockerfile, on the
+      # same digests, with the same OCI labels the app gets here. Its own
+      # `updater-protocols` label is in the Dockerfile. No `npm ci` runs in
+      # this target, but it shares the job, so the token stays read-only.
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          context: .
+          target: updater
+          platforms: linux/${{ matrix.arch }}
+          provenance: false
+          tags: spend-tracker-updater:release
+          outputs: |
+            type=docker
+            type=oci,dest=updater-${{ matrix.arch }}.tar
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ needs.build.outputs.version }}
+            org.opencontainers.image.licenses=AGPL-3.0-or-later
+
+      # Run as compose runs it -- read-only, no capabilities, the runner's
+      # engine socket, a fresh `update` volume -- until it has written its
+      # first heartbeat. Then, from inside it: uid 65532 with group 65532,
+      # the fresh volume initialised 65532:65532 at 2770 (C11), nothing
+      # listening on any port or socket in its namespace (E10), and no shell,
+      # package manager or engine CLI on its PATH.
+      - name: the updater runs, listens on nothing, and is not root
+        run: |
+          set -eu
+          docker volume create st-update > /dev/null
+          docker run -d --name st-updater --read-only --tmpfs /tmp --cap-drop ALL \
+            --security-opt no-new-privileges:true --security-opt label=disable \
+            --group-add "$(stat -c %g /var/run/docker.sock)" --group-add 65532 \
+            -v st-update:/update -v /var/run/docker.sock:/run/engine.sock \
+            spend-tracker-updater:release
+          for _ in $(seq 1 30); do
+            sleep 2
+            if docker exec st-updater python -c "import json, sys; sys.exit(json.load(open('/update/updater.json'))['socket'] != 'ok')" 2>/dev/null; then
+              break
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' st-updater)" != "true" ]; then
+              echo "the updater exited:"; docker logs st-updater; exit 1
+            fi
+          done
+          docker exec st-updater python -c "print(open('/update/updater.json').read())"
+          docker exec -i -e SHELL_FREE=1 st-updater python - < tests/self_update/updater_smoke.py
+
+      - name: updater logs
+        if: always()
+        run: docker logs st-updater || true
+
+      - name: the updater archive is this platform's image, labelled
+        env:
+          ARCH: ${{ matrix.arch }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          set -eu
+          tar -xOf "updater-${ARCH}.tar" --wildcards '*index.json' | jq -e '
+            (.manifests | length) == 1
+            and .manifests[0].mediaType == "application/vnd.oci.image.manifest.v1+json"' > /dev/null \
+            || { echo "updater-${ARCH}.tar is not a single image manifest"; exit 1; }
+          skopeo inspect "oci-archive:updater-${ARCH}.tar" > inspect.json
+          test "$(jq -r .Architecture inspect.json)" = "$ARCH" \
+            || { echo "the updater archive says $(jq -r .Architecture inspect.json), not $ARCH"; exit 1; }
+          jq -S .Labels inspect.json > "updater-labels-${ARCH}.json"
+          docker inspect -f '{{json .Config.Labels}}' spend-tracker-updater:release | jq -S . > daemon-labels.json
+          diff daemon-labels.json "updater-labels-${ARCH}.json"
+          test "$(jq -r '."org.opencontainers.image.version"' "updater-labels-${ARCH}.json")" = "$VERSION" \
+            || { echo "the updater's version label is not ${VERSION}"; exit 1; }
+          cat "updater-labels-${ARCH}.json"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: updater-image-${{ matrix.arch }}
+          path: updater-${{ matrix.arch }}.tar
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: updater-labels-${{ matrix.arch }}
+          path: updater-labels-${{ matrix.arch }}.json
+          if-no-files-found: error
+
   # Both platform images carry the same labels, byte for byte. The updater
   # cannot choose which of the two the engine pulls, so a label that differed
   # between them would be a version that depends on the machine reading it.
@@ -422,7 +523,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
-          pattern: labels-*
+          pattern: '*labels-*'
           merge-multiple: true
       - name: both platform images carry the same labels
         run: |
@@ -430,10 +531,22 @@ jobs:
           cat labels-amd64.json
           diff labels-amd64.json labels-arm64.json \
             || { echo "the amd64 and arm64 images disagree on their labels"; exit 1; }
-          for key in source revision version licenses; do
-            jq -e --arg key "org.opencontainers.image.$key" '.[$key] | length > 0' labels-amd64.json > /dev/null \
-              || { echo "org.opencontainers.image.$key is missing"; exit 1; }
+          cat updater-labels-amd64.json
+          diff updater-labels-amd64.json updater-labels-arm64.json \
+            || { echo "the amd64 and arm64 updater images disagree on their labels"; exit 1; }
+          for file in labels-amd64.json updater-labels-amd64.json; do
+            for key in source revision version licenses; do
+              jq -e --arg key "org.opencontainers.image.$key" '.[$key] | length > 0' "$file" > /dev/null \
+                || { echo "org.opencontainers.image.$key is missing from $file"; exit 1; }
+            done
           done
+          # The protocol labels (C4): the one the app writes, the window the
+          # updater accepts. The updater reads both off the pulled image, and
+          # an app image without one is read as protocol 1 only by default.
+          jq -e '."com.github.mariolonghi-com.spend-tracker.updater-protocol" | test("^[0-9]+$")' labels-amd64.json > /dev/null \
+            || { echo "the app image has no updater-protocol label"; exit 1; }
+          jq -e '."com.github.mariolonghi-com.spend-tracker.updater-protocols" | test("^[0-9]+-[0-9]+$")' updater-labels-amd64.json > /dev/null \
+            || { echo "the updater image has no updater-protocols window"; exit 1; }
 
   # The release, as a draft: the tarball attested and attached, the body
   # written, nothing public yet. A draft is not offered by the releases page,
@@ -501,7 +614,8 @@ jobs:
               tar xzf household-spend-tracker.tar.gz && cd household-spend-tracker-*
               make install-prod && make migrate && make serve
 
-          Or the container, for linux/amd64 and linux/arm64: \`docker pull ${IMAGE}:${VERSION}\`
+          Or the container, for linux/amd64 and linux/arm64: \`docker pull ${IMAGE}:${VERSION}\`,
+          with its self-updater, \`${UPDATER_IMAGE}:${VERSION}\`, which compose.yaml runs beside it.
 
           Check where either came from with
           \`gh attestation verify <file or oci://image> --repo ${GITHUB_REPOSITORY}\`.
@@ -525,28 +639,30 @@ jobs:
           generate_release_notes: true
 
   # The two platform images `image` built and started, pushed by digest and
-  # joined into one index under the version tag. The index digest is what the
-  # provenance names and what the updater verifies and pulls; the floating
-  # tags wait for `publish-release`. After `publish`, so there is a draft to
-  # go public behind this; before it goes public, so a push that fails leaves
-  # the draft a draft.
+  # joined into one index under the version tag -- for the app and for the
+  # updater alike. Each index digest is what its provenance names and what the
+  # updater verifies and pulls; the floating tags wait for `publish-release`.
+  # After `publish`, so there is a draft to go public behind this; before it
+  # goes public, so a push that fails leaves the draft a draft.
   publish-image:
     needs: [build, image, labels, publish]
     if: github.ref_type == 'tag'
     # Gated through `publish` (it needs it); see the comment there.
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: read
       packages: write
       id-token: write
       attestations: write
     outputs:
-      digest: ${{ steps.index.outputs.digest }}
+      digest: ${{ steps.index.outputs.app }}
+      updater-digest: ${{ steps.index.outputs.updater }}
     steps:
+      # image-<arch> and updater-image-<arch>: the four archives.
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
-          pattern: image-*
+          pattern: '*image-*'
           merge-multiple: true
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
         with:
@@ -565,70 +681,102 @@ jobs:
         id: push
         run: |
           set -eu
-          for arch in amd64 arm64; do
-            digest="$(skopeo inspect "oci-archive:image-${arch}.tar" | jq -r .Digest)"
-            case "$digest" in sha256:*) ;; *) echo "no digest for $arch: $digest"; exit 1 ;; esac
-            skopeo copy --preserve-digests "oci-archive:image-${arch}.tar" "docker://${IMAGE}@${digest}"
-            echo "${arch}=${digest}" >> "$GITHUB_OUTPUT"
-            echo "pushed linux/${arch} as ${digest}"
+          for kind in app updater; do
+            if [ "$kind" = app ]; then repo="$IMAGE"; archive=image; else repo="$UPDATER_IMAGE"; archive=updater; fi
+            for arch in amd64 arm64; do
+              digest="$(skopeo inspect "oci-archive:${archive}-${arch}.tar" | jq -r .Digest)"
+              case "$digest" in sha256:*) ;; *) echo "no digest for $kind $arch: $digest"; exit 1 ;; esac
+              skopeo copy --preserve-digests "oci-archive:${archive}-${arch}.tar" "docker://${repo}@${digest}"
+              echo "${kind}-${arch}=${digest}" >> "$GITHUB_OUTPUT"
+              echo "pushed ${repo} linux/${arch} as ${digest}"
+            done
           done
 
-      # One index over the two, tagged with the version alone. Its digest is
-      # the release's identity from here on: the attestation's subject, what
-      # the updater pins, what the floating tags are pointed at last.
-      - name: the index
+      # One index over the two, per image, tagged with the version alone. Its
+      # digest is that image's identity from here on: the attestation's
+      # subject, what the updater pins, what the floating tags are pointed at
+      # last.
+      - name: the indexes
         id: index
         env:
           VERSION: ${{ needs.build.outputs.version }}
-          AMD64: ${{ steps.push.outputs.amd64 }}
-          ARM64: ${{ steps.push.outputs.arm64 }}
+          APP_AMD64: ${{ steps.push.outputs.app-amd64 }}
+          APP_ARM64: ${{ steps.push.outputs.app-arm64 }}
+          UPDATER_AMD64: ${{ steps.push.outputs.updater-amd64 }}
+          UPDATER_ARM64: ${{ steps.push.outputs.updater-arm64 }}
         run: |
           set -eu
-          docker buildx imagetools create -t "${IMAGE}:${VERSION}" "${IMAGE}@${AMD64}" "${IMAGE}@${ARM64}"
-          digest="$(docker buildx imagetools inspect "${IMAGE}:${VERSION}" --format '{{.Manifest.Digest}}')"
-          case "$digest" in sha256:*) ;; *) echo "no index digest: $digest"; exit 1 ;; esac
-          docker buildx imagetools inspect --raw "${IMAGE}@${digest}" \
-            | jq -r '.manifests[].platform | "\(.os)/\(.architecture)"' | sort > platforms.txt
-          printf 'linux/amd64\nlinux/arm64\n' | diff - platforms.txt \
-            || { echo "the index does not hold exactly linux/amd64 and linux/arm64"; exit 1; }
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
-          echo "${IMAGE}:${VERSION} is ${digest}"
+          index() {  # kind repo amd64 arm64
+            docker buildx imagetools create -t "$2:${VERSION}" "$2@$3" "$2@$4"
+            digest="$(docker buildx imagetools inspect "$2:${VERSION}" --format '{{.Manifest.Digest}}')"
+            case "$digest" in sha256:*) ;; *) echo "no index digest for $2: $digest"; exit 1 ;; esac
+            docker buildx imagetools inspect --raw "$2@${digest}" \
+              | jq -r '.manifests[].platform | "\(.os)/\(.architecture)"' | sort > platforms.txt
+            printf 'linux/amd64\nlinux/arm64\n' | diff - platforms.txt \
+              || { echo "the $2 index does not hold exactly linux/amd64 and linux/arm64"; exit 1; }
+            echo "$1=$digest" >> "$GITHUB_OUTPUT"
+            echo "$2:${VERSION} is ${digest}"
+          }
+          index app "$IMAGE" "$APP_AMD64" "$APP_ARM64"
+          index updater "$UPDATER_IMAGE" "$UPDATER_AMD64" "$UPDATER_ARM64"
 
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
         with:
           subject-name: ${{ env.IMAGE }}
-          subject-digest: ${{ steps.index.outputs.digest }}
+          subject-digest: ${{ steps.index.outputs.app }}
           push-to-registry: true
           # A storage record also wants `artifact-metadata: write`; the
           # attestation is what verification reads, and this keeps the grant
           # to what is used.
           create-storage-record: false
+      # Its own subject name, which is the updater's own repository: the
+      # verifier requires the name to match, so neither attestation can stand
+      # in for the other (R19).
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-name: ${{ env.UPDATER_IMAGE }}
+          subject-digest: ${{ steps.index.outputs.updater }}
+          push-to-registry: true
+          create-storage-record: false
 
-      # What the updater will run, run here first: the attestation names this
+      # What the updater will run, run here first: each attestation names its
       # index, and this repository's workflow signed it.
-      - name: the attestation verifies
+      - name: the attestations verify
         env:
           GH_TOKEN: ${{ github.token }}
-          DIGEST: ${{ steps.index.outputs.digest }}
-        run: gh attestation verify "oci://${IMAGE}@${DIGEST}" --repo "${GITHUB_REPOSITORY}"
+          APP: ${{ steps.index.outputs.app }}
+          UPDATER: ${{ steps.index.outputs.updater }}
+        run: |
+          set -eu
+          gh attestation verify "oci://${IMAGE}@${APP}" --repo "${GITHUB_REPOSITORY}"
+          gh attestation verify "oci://${UPDATER_IMAGE}@${UPDATER}" --repo "${GITHUB_REPOSITORY}"
 
       # With no credentials at all. A ghcr.io package can be private, and a
-      # new one starts that way (#164 adds one): a private package pulls fine
-      # from a job holding a token and fails for everyone else. Found out
+      # new one -- the updater's, on its first release -- may start that way: a private
+      # package pulls fine from a job holding a token and fails for everyone
+      # else, including every updater asked to install this release. Found out
       # here, while the release is still a draft, not by the first user.
-      - name: the package is public
+      - name: both packages are public
         env:
           VERSION: ${{ needs.build.outputs.version }}
-          DIGEST: ${{ steps.index.outputs.digest }}
+          APP: ${{ steps.index.outputs.app }}
+          UPDATER: ${{ steps.index.outputs.updater }}
         run: |
           set -eu
           docker logout ghcr.io
-          docker pull "${IMAGE}:${VERSION}"
-          pulled="$(docker buildx imagetools inspect "${IMAGE}:${VERSION}" --format '{{.Manifest.Digest}}')"
-          test "$pulled" = "$DIGEST" \
-            || { echo "anonymous ${IMAGE}:${VERSION} is ${pulled}, not ${DIGEST}"; exit 1; }
-          test "$(docker inspect -f '{{index .Config.Labels "org.opencontainers.image.version"}}' "${IMAGE}:${VERSION}")" = "$VERSION"
-          echo "${IMAGE}:${VERSION} pulls anonymously as ${DIGEST}"
+          public() {  # repo digest
+            if ! docker pull "$1:${VERSION}"; then
+              echo "::error::$1 cannot be pulled without credentials. A new ghcr.io package starts private: make it public at https://github.com/orgs/${GITHUB_REPOSITORY_OWNER}/packages/container/${1##*/}/settings (Danger Zone, Change visibility, Public), then re-run the failed jobs of this run. The release is still a draft."
+              exit 1
+            fi
+            pulled="$(docker buildx imagetools inspect "$1:${VERSION}" --format '{{.Manifest.Digest}}')"
+            test "$pulled" = "$2" \
+              || { echo "anonymous $1:${VERSION} is ${pulled}, not $2"; exit 1; }
+            test "$(docker inspect -f '{{index .Config.Labels "org.opencontainers.image.version"}}' "$1:${VERSION}")" = "$VERSION"
+            echo "$1:${VERSION} pulls anonymously as $2"
+          }
+          public "$IMAGE" "$APP"
+          public "$UPDATER_IMAGE" "$UPDATER"
 
   # Last: the draft goes public, and only then do `X.Y` and `latest` move.
   # Anything that reads the releases page, `releases/latest` or the floating
@@ -661,29 +809,38 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
       # `1.2` and `latest` from `1.2.3`: the same index, re-tagged, so the
-      # digest a user resolves through either is the attested one.
+      # digest a user resolves through either is the attested one. The
+      # updater's move with the app's, so `latest` of each is one release.
       - name: the floating tags move
         env:
           VERSION: ${{ needs.build.outputs.version }}
           DIGEST: ${{ needs.publish-image.outputs.digest }}
+          UPDATER_DIGEST: ${{ needs.publish-image.outputs.updater-digest }}
         run: |
           set -eu
           minor="${VERSION%.*}"
           docker buildx imagetools create -t "${IMAGE}:${minor}" -t "${IMAGE}:latest" "${IMAGE}@${DIGEST}"
           echo "${IMAGE}:${minor} and ${IMAGE}:latest -> ${DIGEST}"
+          docker buildx imagetools create -t "${UPDATER_IMAGE}:${minor}" -t "${UPDATER_IMAGE}:latest" "${UPDATER_IMAGE}@${UPDATER_DIGEST}"
+          echo "${UPDATER_IMAGE}:${minor} and ${UPDATER_IMAGE}:latest -> ${UPDATER_DIGEST}"
 
       # And, once more with no credentials, each tag a user or compose.yaml's
-      # default would pull resolves to the attested index.
+      # default would pull resolves to the attested index, for both images.
       - name: every tag resolves anonymously to the attested index
         env:
           VERSION: ${{ needs.build.outputs.version }}
           DIGEST: ${{ needs.publish-image.outputs.digest }}
+          UPDATER_DIGEST: ${{ needs.publish-image.outputs.updater-digest }}
         run: |
           set -eu
           docker logout ghcr.io
-          for tag in "$VERSION" "${VERSION%.*}" latest; do
-            found="$(docker buildx imagetools inspect "${IMAGE}:${tag}" --format '{{.Manifest.Digest}}')"
-            test "$found" = "$DIGEST" \
-              || { echo "anonymous ${IMAGE}:${tag} is ${found}, not ${DIGEST}"; exit 1; }
-            echo "${IMAGE}:${tag} -> ${found}"
-          done
+          resolves() {  # repo digest
+            for tag in "$VERSION" "${VERSION%.*}" latest; do
+              found="$(docker buildx imagetools inspect "$1:${tag}" --format '{{.Manifest.Digest}}')"
+              test "$found" = "$2" \
+                || { echo "anonymous $1:${tag} is ${found}, not $2"; exit 1; }
+              echo "$1:${tag} -> ${found}"
+            done
+          }
+          resolves "$IMAGE" "$DIGEST"
+          resolves "$UPDATER_IMAGE" "$UPDATER_DIGEST"
