@@ -538,10 +538,30 @@ class EngineClient:
         if not CONTAINER_NAME.fullmatch(name):
             raise NotAllowed(f"{name!r} is not a container name.")
         guard_create(body, self.scope)
-        made = self._call("create", query={"name": name}, body=body)
+        made = self._call("create", query={"name": name}, body=self._for_engine(body))
         if not isinstance(made, dict) or not isinstance(made.get("Id"), str):
             raise EngineError(500, "create answered without an id")
         return made["Id"]
+
+    def _for_engine(self, body: dict) -> dict:
+        """The create body as this engine reads it back unchanged.
+
+        Podman 4's Docker-compatible create joins `Healthcheck.Test` with
+        spaces and parses the result again: `CMD` and the rest are split on
+        every space, so `["CMD", "python", "-c", "<script>"]` became a dozen
+        words and a probe that never passes (#169's rootless Podman leg,
+        Podman 4.9.3). A single element holding the command as a JSON array is
+        parsed back as exactly that command, in exec form. Podman 5 reads
+        `Test` as it is sent (the canary, 5.8), and so does Docker.
+        """
+        n = self.negotiated
+        check = body.get("Healthcheck")
+        if not (n and n.podman and str(n.engine_version or "").split(".")[0] == "4" and isinstance(check, dict)):
+            return body
+        test = check.get("Test")
+        if not (isinstance(test, list) and len(test) > 1 and test[0] == "CMD"):
+            return body
+        return {**body, "Healthcheck": {**check, "Test": [json.dumps(test[1:])]}}
 
     def probe(self, ref: str, cmd: list[str]) -> int:
         """Run a health probe in a project container. Returns its exit code."""

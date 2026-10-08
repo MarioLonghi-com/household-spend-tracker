@@ -851,6 +851,15 @@ class Run:
             (shim / "docker").write_text("#!/bin/sh\nexit 127\n")
             (shim / "docker").chmod(0o755)
             env["PATH"] = f"{shim}:{env.get('PATH', '')}"
+            # And `podman compose` takes Docker's compose plugin over
+            # podman-compose when both are installed, as on the runner; the
+            # stack was made by podman-compose, whose network docker-compose
+            # refuses ("incorrect label com.docker.compose.network").
+            import shutil
+
+            provider = shutil.which("podman-compose")
+            if provider:
+                env["PODMAN_COMPOSE_PROVIDER"] = provider
         else:
             env["DOCKER_HOST"] = f"unix://{self.leg.socket}"
         env["SPENDTRACKER_HEALTH_TIMEOUT"] = "240"

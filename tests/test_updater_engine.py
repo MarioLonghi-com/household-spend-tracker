@@ -538,3 +538,25 @@ def test_a_stop_waits_for_the_grace_period_beyond_the_clients_own_timeout():
         client.negotiate()
         client.stop("spend-tracker-app-1", grace=1)
         assert fake.by_name("spend-tracker-app-1")["State"] == "exited"
+
+
+@pytest.mark.parametrize("fixture,podman4", [("podman-4.9", True), ("podman-machine", False), ("docker-desktop", False)])
+def test_a_cmd_healthcheck_reaches_podman_4_as_one_json_array(fixture, podman4):
+    """Podman 4's compat create splits a CMD healthcheck on every space; one
+    element holding the JSON array is read back as the exec form (#169)."""
+    fake = FakeEngine(engine_fixture(fixture), {"OSType": "linux"})
+    with Running(fake) as running:
+        client = EngineClient(running.socket_path, scope())
+        client.negotiate()
+        test = ["CMD", "python", "-c", "import sys; sys.exit(0 if 1 else 1)"]
+        body = {
+            "Image": APP_IMAGE,
+            "Labels": {"com.docker.compose.project": PROJECT},
+            "Healthcheck": {"Test": list(test), "Retries": 3},
+            "HostConfig": {"NetworkMode": "spend-tracker_default"},
+        }
+        client.create("spend-tracker-app-1", body)
+        sent = next(c.body for c in fake.calls if c.bare == "/containers/create")
+        want = ['["python", "-c", "import sys; sys.exit(0 if 1 else 1)"]'] if podman4 else test
+        assert sent["Healthcheck"] == {"Test": want, "Retries": 3}
+        assert body["Healthcheck"]["Test"] == test  # the caller's body is not changed
