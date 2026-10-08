@@ -59,6 +59,7 @@ msgstr "Gerenciamento do aplicativo"
 msgid "To"
 msgstr "Para"
 
+#. Option in a dropdown on the Rules screen: a rule's match: the text starts with this
 #: src/screens/Rules.tsx
 msgid "starts with"
 msgstr ""
@@ -113,6 +114,7 @@ msgstr ""
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
 msgstr "Uma chave permite que um programa — um script, uma automação, um assistente de IA — leia e, se você permitir, acrescente dados a uma casa em seu nome. Tudo o que ele faz aparece no Histórico dessa casa com o seu nome e o da chave."
 
+#. How a rule matches, inside the rule list: the bank's text contains the pattern
 #: src/screens/Rules.tsx
 msgctxt "rule list"
 msgid "contains"
@@ -161,6 +163,8 @@ msgstr "Nenhum navegador estava sendo considerado confiável."
 msgid "History"
 msgstr "Histórico"
 
+#. Column heading on the Rules screen: how a rule compares the bank's text (contains, starts with…)
+#. Column heading on the Rules screen: how a rule compares the bank's text (contains, starts with…)
 #: src/screens/Rules.tsx
 msgid "Match"
 msgstr ""
@@ -237,6 +241,7 @@ msgstr "Isso não é um valor em {0}."
 msgid "what a key can never do"
 msgstr "o que uma chave nunca pode fazer"
 
+#. Column name shown beside a value on phones on the Rules screen: noun, which rule is tried first
 #: src/screens/Rules.tsx
 msgid "Priority"
 msgstr ""
@@ -673,6 +678,7 @@ msgstr "Verificar o código e concluir"
 msgid "Opening…"
 msgstr "Abrindo…"
 
+#. How a rule matches, inside the rule list: the bank's text is exactly the pattern
 #: src/screens/Rules.tsx
 msgctxt "rule list"
 msgid "equals"
@@ -790,6 +796,8 @@ msgid "Remove this part"
 msgstr "Remover esta parte"
 
 #. Column heading on the Payees screen
+#. Column heading on the Rules screen
+#. Column name shown beside a value on phones on the Rules screen
 #: src/screens/Payees.tsx
 #: src/screens/Rules.tsx
 msgid "Spellings"
@@ -1495,6 +1503,7 @@ msgstr "Isso não é um valor"
 
 #. Button on the Categories screen: verb
 #. Button on the Register screen: verb
+#. Button on the Rules screen: verb
 #: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 #: src/screens/Rules.tsx
@@ -1605,6 +1614,7 @@ msgstr "Você voltou"
 msgid "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
 msgstr "Se você não tem mais o autenticador antigo, use aqui um dos seus códigos de recuperação; ele será gasto."
 
+#. Label of a form field on the Rules screen
 #: src/screens/Rules.tsx
 msgid "And then"
 msgstr ""
@@ -2090,6 +2100,7 @@ msgstr "Registro"
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
 msgstr ""
 
+#. How a rule matches, inside the rule list: the bank's text starts with the pattern
 #: src/screens/Rules.tsx
 msgctxt "rule list"
 msgid "prefix"
@@ -2475,7 +2486,9 @@ msgstr "formato de data"
 
 #. Column heading on the Accounts screen: noun, lines of a file or table
 #. Column heading on the Import screen: noun, lines of a file or table
+#. Column heading on the Rules screen: noun, lines of a file or table
 #. Column name shown beside a value on phones on the Accounts screen: noun, lines of a file or table
+#. Column name shown beside a value on phones on the Rules screen: noun, lines of a file or table
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
 #: src/screens/Rules.tsx
@@ -2540,6 +2553,7 @@ msgstr ""
 #. Button on the Accounts screen: verb
 #. Button on the Categories screen: verb
 #. Button on the Categories screen: verb
+#. Button on the Rules screen: verb
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Rules.tsx
@@ -2590,6 +2604,7 @@ msgstr "Nenhuma categoria corresponde exatamente a isso."
 msgid "Split"
 msgstr "Dividir"
 
+#. Option in a dropdown on the Rules screen: a rule's match: the text is exactly this
 #: src/screens/Rules.tsx
 msgid "is exactly"
 msgstr ""
@@ -2643,6 +2658,7 @@ msgstr "Contas correntes"
 msgid "Work will not pay this. It counts as your spending."
 msgstr "O trabalho não vai pagar isto. Conta como gasto seu."
 
+#. Column heading on the Rules screen
 #: src/screens/Rules.tsx
 msgid "Call it"
 msgstr ""
@@ -3436,6 +3452,7 @@ msgstr "Baixar"
 msgid "The server gave {user} a new authenticator"
 msgstr "O servidor deu a {user} um novo autenticador"
 
+#. How a rule matches, inside the rule list: the pattern is a regular expression
 #: src/screens/Rules.tsx
 msgctxt "rule list"
 msgid "regex"
@@ -3875,7 +3892,9 @@ msgid "outflow column"
 msgstr "coluna de saída"
 
 #. Column heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Column heading on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen title on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md
 #: src/screens/Categories.tsx
@@ -4278,6 +4297,7 @@ msgstr "Saída ({currency})"
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so its next statement picks the account itself?"
 msgstr "O nome deste arquivo traz <0>{0}</0>. Guardar como IBAN de <1>{1}</1>, para que o próximo extrato escolha a conta sozinho?"
 
+#. Button on the Rules screen
 #. placeholder {0}: formatCount(proposed.changing)
 #: src/screens/Rules.tsx
 msgid "Move {0} rows"
@@ -4538,6 +4558,7 @@ msgstr "por que isto é pedido"
 msgid "The money out, repaid by the one payment in"
 msgstr "A saída de dinheiro, reembolsada pelo único pagamento de entrada"
 
+#. Label of a form field on the Rules screen
 #: src/screens/Rules.tsx
 msgid "This text"
 msgstr ""
@@ -4632,6 +4653,7 @@ msgstr "Relatórios"
 msgid "a note for this row"
 msgstr "uma observação para esta linha"
 
+#. Placeholder in an empty field on the Rules screen
 #: src/screens/Rules.tsx
 msgid "usually nothing"
 msgstr ""
@@ -4891,6 +4913,7 @@ msgstr "Os dois são uma transação de verdade no registro, conciliada, com a d
 msgid "type any part of a payee"
 msgstr ""
 
+#. Table cell on the Rules screen
 #. placeholder {0}: matchWord(rule.match_type)
 #: src/screens/Rules.tsx
 msgid "{0}, then strip"
@@ -4922,6 +4945,7 @@ msgstr "Alguém reativou {user}"
 msgid "The first rule that matches wins; the rest are not tried."
 msgstr ""
 
+#. Column heading on the Rules screen: noun, sort order
 #: src/screens/Rules.tsx
 msgid "Order"
 msgstr ""
@@ -4954,6 +4978,7 @@ msgstr "Importar mesmo assim"
 msgid "U — Uncleared"
 msgstr "U — Não compensadas"
 
+#. How a rule matches, inside the rule list: the bank's text contains the pattern
 #: src/screens/Rules.tsx
 msgid "contains"
 msgstr ""
@@ -5156,6 +5181,7 @@ msgid "A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a p
 msgstr "Um CSV, um download OFX/QFX, uma exportação .xls do banco, um extrato em PDF ou algo colado do site do banco. CSV e planilhas são entendidos a partir do próprio arquivo — o delimitador, o formato de data, o separador decimal, qual coluna é qual e em que linha a tabela começa de fato. OFX não precisa de nada disso: ele nomeia os próprios campos, e os ids das transações são usados para que reimportar um extrato sobreposto não duplique nada. Um PDF é lido pela posição das palavras na página, então uma coluna de saldo acumulado não é confundida com o valor — e uma fatura diagramada, que tem caixas de resumo em vez de uma tabela, é recusada em vez de lida pela metade. Você vê tudo antes de qualquer coisa ser gravada."
 
 #. Button on the Import screen
+#. Button on the Rules screen
 #: src/screens/Import.tsx
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -5245,6 +5271,7 @@ msgstr "<0>{0} outras linhas têm o mesmo favorecido</0> e nenhuma categoria pr�
 msgid "Somebody added {user} as an owner"
 msgstr "Alguém adicionou {user} como proprietário"
 
+#. Button on the Rules screen
 #: src/screens/Rules.tsx
 msgid "Trying…"
 msgstr ""
@@ -5593,6 +5620,7 @@ msgstr "O banco chamou de <0>{0}</0>."
 msgid "{count, plural, one {Linked {count} expense to the payment of {paid} on {on}.} other {Linked {count} expenses to the payment of {paid} on {on}.}}"
 msgstr "{count, plural, one {{count} despesa vinculada ao pagamento de {paid} em {on}.} other {{count} despesas vinculadas ao pagamento de {paid} em {on}.}}"
 
+#. Column heading on the Rules screen: switched on
 #: src/screens/Rules.tsx
 msgid "On"
 msgstr ""
