@@ -547,7 +547,9 @@ def test_the_updater_package_imports_the_standard_library_and_itself_only():
 
     package = pathlib.Path(contract.__file__).parent
     imported: dict[str, set[str]] = {}
-    for source in sorted(package.glob("*.py")):
+    # verify.py is the one module that imports sigstore (design notes 7.4);
+    # tests/test_updater_verify.py holds it to exactly that.
+    for source in sorted(p for p in package.glob("*.py") if p.name != "verify.py"):
         for node in ast.walk(ast.parse(source.read_text())):
             names = []
             if isinstance(node, ast.Import):

@@ -87,6 +87,20 @@ history this repository does not have.
   recording fake engine on a real unix socket and `/version` answers recorded
   from Docker Desktop and Podman. No image, compose service or screen uses it
   yet.
+
+- **The updater can prove where an image came from before pulling it**
+  (#159). `updater/verify.py` reads the build attestation `release.yml` pushed
+  beside the app or updater image -- anonymously, from the registry, every
+  digest recomputed -- and checks with sigstore that this repository's release
+  workflow built exactly that digest for tag `vX.Y.Z` on a GitHub-hosted
+  runner, by repository and owner id rather than name, with no prerelease
+  suffix. Signature, certificate chain and transparency-log proof are checked
+  from the bundle alone; when Sigstore's trust repository cannot be reached it
+  falls back to the trust root committed beside it and records which one
+  verified. Any doubt is a refusal and nothing skips it. sigstore lives in a
+  lock of its own, `requirements-updater.txt`, never in the app's runtime
+  lock. Tested offline against the real 0.7.0, 0.7.1 and 0.8.0 bundles and
+  tampered copies of them. Nothing calls it yet.
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
