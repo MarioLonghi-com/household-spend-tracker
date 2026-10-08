@@ -500,6 +500,25 @@ class Run:
         app_ref = pin["SPENDTRACKER_IMAGE"].split(":", 2)
         apps = s.wait_for(lambda: s.running("app"), "an app container", 120)
         upd = s.running("updater")
+        # docker compose removes the parked containers of a service (S5);
+        # podman-compose leaves them, and the previous updater is standing by
+        # for ten minutes after E1's handover (6.6, H6) -- running, and not
+        # the updater. It is set aside only while the handover says so.
+        standing_by = [
+            n for n in (s.vol.listdir("/u/handover") or []) if n.endswith(".request")
+            and (lambda d: d.get("step") == "H6" and d.get("outcome") is None)(s.vol.read(f"handover/{n}") or {})
+        ]  # fmt: skip
+        if standing_by:
+            parked = [c for c in upd if s.name(c).endswith("-previous")]
+            if parked:
+                print(f"   {[s.name(c) for c in parked]} standing by (H6, {standing_by[0]}); set aside")
+            upd = [c for c in upd if c not in parked]
+        beat = s.vol.read("updater.json") or {}
+        r.check(
+            beat.get("role") == "current"
+            and beat.get("image_digest") == pin["SPENDTRACKER_UPDATER_IMAGE"].split("@", 1)[1],
+            f"the heartbeat is the pin's updater, current ({beat.get('role')}, {str(beat.get('image_digest'))[:19]})",
+        )
         r.check(len(apps) == 1, f"exactly one app container runs: {[s.name(c) for c in apps]}")
         r.check(len(upd) == 1, f"exactly one updater container runs: {[s.name(c) for c in upd]}")
         app_id = s.image_id(f"{APP_REPO}@{pin['SPENDTRACKER_IMAGE'].split('@', 1)[1]}")
