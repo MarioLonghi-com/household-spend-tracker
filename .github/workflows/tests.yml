@@ -230,17 +230,22 @@ jobs:
 
           # What the image installs and boots: its own recipe, both dependency
           # manifests (npm ci runs inside it), the entrypoint and the build
-          # stamp its smoke test reads. Backend code and migrations left this
+          # stamp its smoke test reads. And the updater's image (#164): its
+          # lock and its package, because only the image proves the updater
+          # starts on requirements-updater.txt alone, and the check run inside
+          # it. Backend code and migrations left this
           # list in #242: the "a dev-only import in app/ passes pytest and
           # crashes the container" case (pytest installs requirements-dev.txt,
           # the image only requirements.txt) is caught by `rehearsal`, which
           # installs requirements.txt alone, migrates and boots the app -- in
           # half a minute instead of two image builds.
           decide image <<'PATHS'
-          ^(Dockerfile|\.dockerignore|compose\.yaml|requirements\.txt|alembic\.ini|pyproject\.toml)$
+          ^(Dockerfile|\.dockerignore|compose\.yaml|requirements(-updater)?\.txt|alembic\.ini|pyproject\.toml)$
           ^client/package(-lock)?\.json$
           ^deploy/
           ^scripts/build_stamp\.py$
+          ^updater/
+          ^tests/self_update/updater_smoke\.py$
           PATHS
 
           # The rehearsal asks whether an upgrade keeps the rows, and since
@@ -781,6 +786,9 @@ jobs:
   # passed; weekly, because a Dependabot digest bump is only proven by a build;
   # and by hand. Not on the push to `main`: release.yml builds,
   # smoke-tests and publishes the same image from the tag.
+  #
+  # The self-updater's image is the Dockerfile's `updater` target, on the
+  # same two bases, so each leg builds and runs it after the app.
   image:
     needs: changes
     if: >-
@@ -790,14 +798,17 @@ jobs:
           && needs.changes.outputs.image == 'true'
           && needs.changes.outputs.green == '')
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: chainguard
             args: ""
+            # The Chainguard runtime has no shell; the bypass base does.
+            shell_free: "1"
           - name: bypass
+            shell_free: "0"
             args: |
               PY_BASE=python:3.12-slim
               PY_RUN=python:3.12-slim
@@ -836,6 +847,7 @@ jobs:
           docker run -d --name "st-$NAME" \
             -e SPENDTRACKER_AUTO_MIGRATE=1 \
             -v "st-$NAME:/var/lib/spend-tracker" \
+            -v "st-update-$NAME:/var/lib/spend-tracker-update" \
             -p 18848:8848 \
             "spend-tracker:$NAME"
 
@@ -880,6 +892,21 @@ jobs:
               sys.exit(f'the volume is missing {missing}')
           "
 
+      # The `update` volume, fresh, mounted by the app first: initialised from
+      # the app image's mount point, so 65532:65532 and 2770 (C11). The
+      # updater's job below checks the same from its own image.
+      - name: it initialises a fresh update volume shared by group
+        env:
+          NAME: ${{ matrix.name }}
+        run: |
+          docker exec "st-$NAME" python -c "
+          import os, stat, sys
+          st = os.stat('/var/lib/spend-tracker-update')
+          seen = (st.st_uid, st.st_gid, oct(stat.S_IMODE(st.st_mode)))
+          print('update volume', seen)
+          sys.exit(0 if seen == (65532, 65532, '0o2770') else 1)
+          "
+
       # What the image holds is exactly the runtime lock (#46): every package
       # whose environment marker applies on Linux, at its locked version, and
       # nothing else. Read through importlib.metadata inside the container, so
@@ -913,6 +940,68 @@ jobs:
           NAME: ${{ matrix.name }}
         run: docker logs "st-$NAME" || true
 
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          context: .
+          target: updater
+          push: false
+          load: true
+          tags: spend-tracker-updater:${{ matrix.name }}
+          build-args: ${{ matrix.args }}
+          cache-from: type=gha,scope=updater-${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=updater-${{ matrix.name }}
+
+      # As compose runs it: read-only, no capabilities, the runner's engine
+      # socket with its group, a fresh `update` volume it mounts first. Until
+      # its first heartbeat says the socket answered, then checked from the
+      # inside by tests/self_update/updater_smoke.py: uid 65532 with group
+      # 65532, the volume 65532:65532 2770, nothing listening anywhere in its
+      # namespace (design notes E10), and on Chainguard no shell, package
+      # manager or engine CLI.
+      - name: the updater runs, listens on nothing, and is not root
+        env:
+          NAME: ${{ matrix.name }}
+          SHELL_FREE: ${{ matrix.shell_free }}
+        run: |
+          set -eu
+          docker volume create "st-update-u-$NAME" > /dev/null
+          docker run -d --name "st-updater-$NAME" --read-only --tmpfs /tmp --cap-drop ALL \
+            --security-opt no-new-privileges:true --security-opt label=disable \
+            --group-add "$(stat -c %g /var/run/docker.sock)" --group-add 65532 \
+            -v "st-update-u-$NAME:/update" -v /var/run/docker.sock:/run/engine.sock \
+            "spend-tracker-updater:$NAME"
+          for _ in $(seq 1 30); do
+            sleep 2
+            if docker exec "st-updater-$NAME" python -c "import json, sys; sys.exit(json.load(open('/update/updater.json'))['socket'] != 'ok')" 2>/dev/null; then
+              break
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' "st-updater-$NAME")" != "true" ]; then
+              echo "the updater exited:"; docker logs "st-updater-$NAME"; exit 1
+            fi
+          done
+          docker exec "st-updater-$NAME" python -c "print(open('/update/updater.json').read())"
+          docker exec -i -e "SHELL_FREE=$SHELL_FREE" "st-updater-$NAME" python - < tests/self_update/updater_smoke.py
+
+      # Exactly the updater's lock, as for the app: requirements-updater.txt
+      # and nothing of the app's. pip is gone from this venv on purpose.
+      - name: the updater holds exactly its locked dependencies
+        env:
+          NAME: ${{ matrix.name }}
+        run: |
+          set -eu
+          docker exec "st-updater-$NAME" python -c "
+          from importlib import metadata
+          for d in metadata.distributions():
+              print(f\"{d.metadata['Name']}=={d.version}\")
+          " > updater-installed.txt
+          python3 scripts/lock_matches.py requirements-updater.txt updater-installed.txt
+
+      - name: updater logs
+        if: always()
+        env:
+          NAME: ${{ matrix.name }}
+        run: docker logs "st-updater-$NAME" || true
+
   # --------------------------------------------------------------------------- #
   # The end-to-end self-update (design notes 15.5, #169), E1 alone for now
   # --------------------------------------------------------------------------- #
@@ -922,9 +1011,11 @@ jobs:
   # this change, both with release labels (a bare X.Y.Z version and the
   # revision), and pushed to a registry that answers as ghcr.io on this
   # runner -- the engine client pulls only ghcr.io references by digest, and
-  # only a pushed image has one. No updater image exists yet (#164), so the
-  # updater runs as a Python process on the runner, as root because it reads
-  # the `update` volume at its mountpoint. The one thing replaced is
+  # only a pushed image has one. B ships the real updater image (#164), which
+  # prepare pulls; the updater under test still runs as a Python process on
+  # the runner, as root because it reads the `update` volume at its
+  # mountpoint, because the test-only trust policy below must never be built
+  # into an image. The one thing replaced is
   # verification: nothing built here has an attestation, so the test-only
   # trust policy in tests/self_update/ci_trust.py "verifies" exactly the
   # digests this job pushed. The first step proves updater/ cannot reach it.
@@ -1007,9 +1098,13 @@ jobs:
           build "$RUNNER_TEMP/a" "$VERSION_A"
           build "$GITHUB_WORKSPACE" "$VERSION_B"
           git checkout -- app/__init__.py
-          # No updater image yet (#164): B's app image stands in at the updater
-          # repository, so prepare resolves, verifies and pulls a second image.
-          docker tag "$APP_REPO:$VERSION_B" "$APP_REPO-updater:$VERSION_B"
+          # B's updater image, the Dockerfile's `updater` target with B's
+          # release labels, so prepare resolves, verifies and pulls the image a
+          # release really ships. The updater under test still runs as a
+          # process: the CI trust policy must never be inside an image.
+          docker build -q --target updater -t "$APP_REPO-updater:$VERSION_B" \
+            --label "org.opencontainers.image.version=$VERSION_B" \
+            --label "org.opencontainers.image.revision=$(git rev-parse HEAD)" .
           docker push -q "$APP_REPO-updater:$VERSION_B"
           python3 - <<'PY'
           import json, os, subprocess
