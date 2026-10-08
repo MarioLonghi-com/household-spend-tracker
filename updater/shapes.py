@@ -291,6 +291,12 @@ def copy_app(
             host.pop("PortBindings")
         if host.get("PublishAllPorts"):
             host.pop("PublishAllPorts")
+        # And exposed ports too: inspect lists the image's EXPOSE, which
+        # compose never sent, and Docker Engine refuses to create a container
+        # with both ("conflicting options: port exposing and the container
+        # type network mode"; the self-update job's sidecar leg, #169). The
+        # new image exposes its own.
+        body.pop("ExposedPorts", None)
         body.pop("Domainname", None)
     else:
         host["NetworkMode"] = mode

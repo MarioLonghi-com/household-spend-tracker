@@ -273,11 +273,12 @@ top. `release.yml` never builds or names it, and
 **One scenario on your own machine**, with Docker Desktop running:
 
 ```bash
-.venv/bin/python -m tests.self_update.local E3        # or E1,E11 -- or all
-.venv/bin/python -m tests.self_update.local E3 --no-build   # reuse the last build
+.venv/bin/python -m tests.self_update.local E3
+.venv/bin/python -m tests.self_update.local E3 --no-build
 ```
 
-- `local E3` -- A from the merge base with `origin/dev`, B from your working tree, uncommitted changes included
+- `local E3` -- A from the merge base with `origin/dev`, B from your working tree, uncommitted changes included; `E1,E11` or `all` work too
+- `--no-build` -- reuse the releases the last run built
 
 It runs the scenarios inside a `docker:dind` container, so Docker Desktop's
 own engine, images and containers are left alone; it leaves behind the images

@@ -142,6 +142,11 @@ def test_on_an_engine_the_copy_differs_only_in_the_image_and_auto_migrate(name):
             return
         cid = client.create(shapes.name_of(prev), body)
         made = client.inspect(cid)
+    if "ExposedPorts" not in body and prev["Config"].get("ExposedPorts"):
+        # The sidecar copy leaves exposed ports to the image (Docker refuses
+        # them beside `container:`); an engine merges the image's EXPOSE into
+        # the inspect, which the fake does not. The app image exposes 8848.
+        made["Config"]["ExposedPorts"] = prev["Config"]["ExposedPorts"]
     diff = differences(prev, made, old_cfg, new_cfg)
     allowed = set(ALLOWED)
     if prev["HostConfig"]["NetworkMode"] in ("bridge", "default"):
@@ -171,6 +176,19 @@ def test_the_sidecar_layout_joins_the_sidecar_as_it_is_now_not_as_it_was():
     assert prev["HostConfig"]["NetworkMode"] != body["HostConfig"]["NetworkMode"]
     with pytest.raises(ValueError):
         shapes.copy_app(prev, NEW, sidecar_id=None)
+
+
+def test_the_sidecar_layout_copy_exposes_no_port_of_its_own():
+    """Docker Engine refuses ExposedPorts beside `container:` networking (#169's sidecar leg)."""
+    prev = app_of("docker-engine-rootful/sidecar.json")
+    prev = {**prev, "Config": {**prev["Config"], "ExposedPorts": {"8848/tcp": {}}}}
+    body = shapes.copy_app(prev, NEW, sidecar_id="d" * 64)
+    assert "ExposedPorts" not in body
+    assert not body["HostConfig"].get("PortBindings") and not body["HostConfig"].get("PublishAllPorts")
+    # The loopback layout keeps what it had.
+    loop = app_of("docker-engine-rootful/loopback-app.json")
+    loop = {**loop, "Config": {**loop["Config"], "ExposedPorts": {"8848/tcp": {}}}}
+    assert shapes.copy_app(loop, NEW)["ExposedPorts"] == {"8848/tcp": {}}
 
 
 def test_what_came_from_the_old_image_is_left_to_the_new_one():

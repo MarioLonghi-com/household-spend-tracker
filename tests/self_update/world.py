@@ -31,7 +31,6 @@ import hashlib
 import json
 import os
 import secrets
-import shutil
 import subprocess
 import sys
 import time
@@ -293,7 +292,9 @@ class Stack:
     def __init__(self, leg: Leg, engine: api.Engine, project_dir: Path, staged: Path) -> None:
         self.leg = leg
         self.engine = engine
-        self.dir = project_dir
+        self.base = project_dir
+        self.dir = project_dir / "run-0"
+        self.runs = 0
         self.staged = staged
         self.table = json.loads((staged / "ci-trust.json").read_text())
         manifest = json.loads((staged / "releases.json").read_text())
@@ -370,13 +371,13 @@ class Stack:
         for net in ("default",):
             with contextlib.suppress(api.Failed):
                 self.engine.call("DELETE", f"/networks/{PROJECT}_{net}")
+        # A new project directory for each stack: what the updater wrote into
+        # the last one (`pin/`, as uid 65532 on a rootful engine) need not be
+        # removable by the driver. The compose project's name is fixed, so the
+        # directory's own name does not matter to compose.
+        self.runs += 1
+        self.dir = self.base / f"run-{self.runs}"
         self.dir.mkdir(parents=True, exist_ok=True)
-        for name in (".env", "pin", "compose.yaml", "ci-trust.json"):
-            path = self.dir / name
-            if path.is_dir():
-                shutil.rmtree(path)
-            elif path.exists():
-                path.unlink()
 
     def write_project(self, version: str) -> None:
         text = sidecar_compose() if self.leg.layout == "sidecar" else (ROOT / "compose.yaml").read_text()
