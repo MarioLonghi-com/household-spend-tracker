@@ -1,8 +1,19 @@
 """The two rules every outbound GET in this app keeps (#219, #225).
 
-There are two: the YNAB client (``one_time_import/ynab_api``) and the owner's
-"check upstream" button (``platform.check_upstream``). Both talk to one fixed
-host, and neither has any business following a redirect or waiting forever.
+**Nothing leaves the instance unless the owner presses a button, and no
+request says anything about the instance.** That is the promise, and it is
+the one that stays as the list of requests grows. This app's own requests:
+the YNAB client (``one_time_import/ynab_api``), when an owner runs the
+one-time import, and the owner's "check for updates" button
+(``platform.check_upstream``), which reads the repository's published
+releases. Both talk to one fixed host, and neither has any business following
+a redirect or waiting forever.
+
+The self-updater, which runs in its own container, makes requests of its own
+-- to ghcr.io, api.github.com and Sigstore -- and only while it handles a
+request an owner started from the Application screen: *Prepare*, *Update* or
+*Update the updater*. Nothing on a timer, and nothing that names this
+instance, there either.
 
 **No redirects.** urllib's default handler copies every header onto the next
 request -- ``Authorization`` included -- whatever host or scheme ``Location``

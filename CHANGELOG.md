@@ -47,6 +47,14 @@ history this repository does not have.
 
 ### Changed
 
+- **"Check the repository" reads published releases, not tags,** and returns
+  every release newer than the running one, newest first, each with its
+  notes: the release's CHANGELOG section where the release body leads with
+  it, and an older release's body as it is. Drafts, prereleases and any tag
+  that is not `vX.Y.Z` are never offered -- a tag can exist with no image
+  behind it, as 0.3.1's did. Still one request, only when the button is
+  pressed, saying nothing about the instance. (#165)
+
 - **The transfer panel's words are in the catalogs.** English is unchanged;
   a test renders it in the `en-XA` pseudo-locale and finds no English left.
   (#55)
@@ -77,6 +85,25 @@ history this repository does not have.
   behind the source. Nothing an English reader sees changes. (#53)
 
 ### Added
+
+- **The app's side of self-update, API only** (#165). Owner-only endpoints
+  under `/admin/application/update` -- a member gets 403 and nothing is
+  written: the updater's heartbeat, status, current prepare report, newest
+  outcome and update backups (`GET`, no outbound request); `prepare`; a
+  one-time recovery code for the confirmation; `apply`, which spends a
+  step-up grant first and must accept exactly the report's lossy migrations;
+  `discard`; `updater`, to replace the updater only, with an optional newer
+  release; and dismissing an outcome. Each writes one request into the
+  shared `update` volume (`SPENDTRACKER_UPDATE_DIR`, default
+  `/var/lib/spend-tracker-update` in the container), atomically, group-shared,
+  never over a request not yet taken; the app checks what it can first, so a
+  refusal is a sentence at once. The recovery code is 140 random bits shown
+  once; only its scrypt hash travels, and the code is never written or
+  logged. Prepared, confirmed (with the lossy migrations accepted),
+  discarded and deleted-backup events are logged at WARNING with the owner's
+  email. The backups listing includes update backups (folders) with their
+  size, version and revision, and the newest five cannot be deleted (409).
+  The Updates section of the screen follows in #166.
 
 - **The self-updater's core, not yet wired to anything** (#158). A new
   top-level package, `updater/`, standard library only: the file contract
