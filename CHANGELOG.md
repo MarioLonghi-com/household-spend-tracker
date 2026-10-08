@@ -171,8 +171,8 @@ history this repository does not have.
 - **The remaining screens' words go into the catalogs one screen at a time**,
   starting with Categories, Payees, Payee categorisation and the payee
   naming rules, the household page, Admin, reconciling and importing
-  accounts, History and backups, application management, receipts and the
-  reports. English is unchanged; each screen has a test
+  accounts, History and backups, application management, receipts, the
+  reports and the one-time YNAB import. English is unchanged; each screen has a test
   that renders it in the `en-XA` pseudo-locale and finds no English left.
   (#56)
 
