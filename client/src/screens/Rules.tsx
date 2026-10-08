@@ -14,6 +14,9 @@ import type {
   RuleAction,
   RuleTrial,
 } from "../lib/types";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { formatCount } from "../lib/locale";
 
 type RuleSort = "pattern" | "match" | "payee" | "priority" | "enabled";
 
@@ -76,7 +79,7 @@ export function Rules({ household }: { household: Household }) {
     rule.action === "rewrite"
       ? rule.replacement
         ? `→ ${rule.replacement}`
-        : "whatever is left"
+        : t`whatever is left`
       : nameOf(rule.payee_id);
 
   // Priority ascending is the order the server sends, so the list opens on the
@@ -114,56 +117,60 @@ export function Rules({ household }: { household: Household }) {
         <ReapplyPanel household={household} onClose={() => setTidying(false)} onDone={refresh} />
       )}
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
-        <h1>Payee naming rules</h1>
+        <h1><Trans>Payee naming rules</Trans></h1>
         <button className="primary" onClick={() => setAdding(true)}>
-          Add a rule
+          <Trans>
+            Add a rule
+          </Trans>
         </button>
       </div>
       <p className="muted small">
-        Applied as a statement is read, so <span className="mono">CARREFOUR MADRID 4432</span>{" "}
-        arrives as Carrefour. The bank's own words are kept on the transaction either way.
+        <Trans>
+          Applied as a statement is read, so <span className="mono">CARREFOUR MADRID 4432</span>{" "}
+          arrives as Carrefour. The bank's own words are kept on the transaction either way.
+        </Trans>
       </p>
 
       <Problem error={rules.error ?? remove.error ?? setEnabled.error} />
 
       <div className="card">
         {rules.data?.length === 0 ? (
-          <Empty>No rules yet. Add one the next time a statement gives you a name you dislike.</Empty>
+          <Empty><Trans>No rules yet. Add one the next time a statement gives you a name you dislike.</Trans></Empty>
         ) : (
           <div className="table-scroll">
             <table>
               <thead>
                 <tr>
                   <SortHeading
-                    label="When the bank says"
+                    label={t`When the bank says`}
                     column="pattern"
                     sort={ruleOrder.sort}
                     direction={ruleOrder.direction}
                     onSort={ruleOrder.onSort}
                   />
                   <SortHeading
-                    label="Match"
+                    label={t`Match`}
                     column="match"
                     sort={ruleOrder.sort}
                     direction={ruleOrder.direction}
                     onSort={ruleOrder.onSort}
                   />
                   <SortHeading
-                    label="Call it"
+                    label={t`Call it`}
                     column="payee"
                     sort={ruleOrder.sort}
                     direction={ruleOrder.direction}
                     onSort={ruleOrder.onSort}
                   />
                   <SortHeading
-                    label="Order"
+                    label={t`Order`}
                     column="priority"
                     sort={ruleOrder.sort}
                     direction={ruleOrder.direction}
                     onSort={ruleOrder.onSort}
                   />
                   <SortHeading
-                    label="On"
+                    label={t`On`}
                     column="enabled"
                     sort={ruleOrder.sort}
                     direction={ruleOrder.direction}
@@ -178,17 +185,18 @@ export function Rules({ household }: { household: Household }) {
                     {/* The pattern is what a rule *is*; the payee it produces
                         is the figure on the right of the card. */}
                     <td className="mono small" data-primary="true">{rule.pattern}</td>
-                    <td className="small muted" data-label="Match" data-detail-first="true">
-                      {rule.match_type}
-                      {rule.action === "rewrite" ? ", then strip" : ""}
+                    <td className="small muted" data-label={t`Match`} data-detail-first="true">
+                      {rule.action === "rewrite"
+                        ? t`${matchWord(rule.match_type)}, then strip`
+                        : matchWord(rule.match_type)}
                     </td>
                     <td data-figure="true">{becomes(rule)}</td>
-                    <td className="small muted" data-label="Priority">{rule.priority}</td>
+                    <td className="small muted" data-label={t`Priority`}>{rule.priority}</td>
                     <td>
                       <input
                         type="checkbox"
                         checked={rule.enabled}
-                        aria-label={`Apply the rule for ${rule.pattern}`}
+                        aria-label={t`Apply the rule for ${rule.pattern}`}
                         onChange={(e) =>
                           setEnabled.mutate({ id: rule.id, enabled: e.target.checked })
                         }
@@ -197,7 +205,9 @@ export function Rules({ household }: { household: Household }) {
                     </td>
                     <td>
                       <button className="link danger" onClick={() => remove.mutate(rule.id)}>
-                        Delete
+                        <Trans>
+                          Delete
+                        </Trans>
                       </button>
                     </td>
                   </tr>
@@ -301,7 +311,7 @@ function RuleForm({
   });
 
   return (
-    <Panel title="New payee rule" onClose={onClose} config>
+    <Panel title={t`New payee rule`} onClose={onClose} config>
       <Problem error={save.error ?? trial.error} />
       {/* What the panel never said, and every one of these cost somebody a
           confused ten minutes. The pattern is matched against the BANK's
@@ -309,94 +319,108 @@ function RuleForm({
           reason a rule written against what is on screen matches nothing. */}
       <div className="banner info">
         <p className="small" style={{ marginTop: 0 }}>
-          A rule is matched against <strong>the bank&rsquo;s own words</strong>, not the payee
-          you see in the register. The register may say <em>Amazon</em> while the statement said{" "}
-          <span className="mono">COMPRA INTERNET WWW.AMAZON K513Z4FW5</span> &mdash; so write the
-          rule for the second one. Open a transaction and press{" "}
-          <em>Where did this come from?</em> to see exactly what arrived.
+          <Trans>
+            A rule is matched against <strong>the bank&rsquo;s own words</strong>, not the payee
+            you see in the register. The register may say <em>Amazon</em> while the statement
+            said <span className="mono">COMPRA INTERNET WWW.AMAZON K513Z4FW5</span> &mdash; so
+            write the rule for the second one. Open a transaction and press{" "}
+            <em>Where did this come from?</em> to see exactly what arrived.
+          </Trans>
         </p>
         <p className="small" style={{ marginBottom: 0 }}>
-          Case does not matter. <em>Matches the pattern</em> is a full regular expression,
-          capped at 300 characters and given a tenth of a second per row &mdash; one that runs
-          longer is set aside for the rest of that import. Try it below before you save it.
+          <Trans>
+            Case does not matter. <em>Matches the pattern</em> is a full regular expression,
+            capped at 300 characters and given a tenth of a second per row &mdash; one that runs
+            longer is set aside for the rest of that import. Try it below before you save it.
+          </Trans>
         </p>
       </div>
 
       {/* The choice this panel could not previously offer, and the reason a
           rail needed a rule per shop. Issue #58. */}
-      <Field label="And then">
+      <Field label={t`And then`}>
         <select value={action} onChange={(e) => setAction(e.target.value as RuleAction)}>
-          <option value="map">call it one payee</option>
-          <option value="rewrite">take this bit off, and see what is left</option>
+          <option value="map"><Trans>call it one payee</Trans></option>
+          <option value="rewrite"><Trans>take this bit off, and see what is left</Trans></option>
         </select>
       </Field>
       <p />
       {rewriting ? (
         <div className="banner info">
           <p className="small" style={{ marginTop: 0 }}>
-            For a <strong>payment rail</strong> rather than a shop.{" "}
-            <span className="mono">SQ *</span>, <span className="mono">PAGO MOVIL</span> and{" "}
-            <span className="mono">COMPRA INTERNET</span> are how the money travelled, not who
-            was paid &mdash; every shop that takes Square appears behind{" "}
-            <span className="mono">SQ *</span>. There is no single payee to point at, so this
-            kind of rule takes the rail off and lets whatever is left be the shop.
+            <Trans>
+              For a <strong>payment rail</strong> rather than a shop.{" "}
+              <span className="mono">SQ *</span>, <span className="mono">PAGO MOVIL</span> and{" "}
+              <span className="mono">COMPRA INTERNET</span> are how the money travelled, not who
+              was paid &mdash; every shop that takes Square appears behind{" "}
+              <span className="mono">SQ *</span>. There is no single payee to point at, so this
+              kind of rule takes the rail off and lets whatever is left be the shop.
+            </Trans>
           </p>
           <p className="small" style={{ marginBottom: 0 }}>
-            It runs <strong>before</strong> the rules that name a payee, and hands them what is
-            left &mdash; so one <span className="mono">COMPRA INTERNET</span> rule plus your
-            existing <em>Amazon</em> rule covers the whole Amazon-over-Santander family. Several
-            of these compose: each one gets a turn, in order.
+            <Trans>
+              It runs <strong>before</strong> the rules that name a payee, and hands them what is
+              left &mdash; so one <span className="mono">COMPRA INTERNET</span> rule plus your
+              existing <em>Amazon</em> rule covers the whole Amazon-over-Santander family. Several
+              of these compose: each one gets a turn, in order.
+            </Trans>
           </p>
         </div>
       ) : (
         <p className="muted small">
-          A rule of this kind points at <strong>one</strong> payee, so{" "}
-          <span className="mono">SQ *</span> cannot mean &ldquo;whatever comes after it&rdquo;
-          &mdash; choose <em>take this bit off</em> for that.
+          <Trans>
+            A rule of this kind points at <strong>one</strong> payee, so{" "}
+            <span className="mono">SQ *</span> cannot mean &ldquo;whatever comes after it&rdquo;
+            &mdash; choose <em>take this bit off</em> for that.
+          </Trans>
         </p>
       )}
       <p />
-      <Field label="When the statement line">
+      <Field label={t`When the statement line`}>
         <select
           value={matchType}
           onChange={(e) => setMatchType(e.target.value as PayeeRule["match_type"])}
         >
-          <option value="contains">contains</option>
-          <option value="prefix">starts with</option>
-          <option value="equals">is exactly</option>
-          <option value="regex">matches the pattern</option>
+          <option value="contains"><Trans>contains</Trans></option>
+          <option value="prefix"><Trans>starts with</Trans></option>
+          <option value="equals"><Trans>is exactly</Trans></option>
+          <option value="regex"><Trans>matches the pattern</Trans></option>
         </select>
       </Field>
       <p />
-      <Field label="This text">
+      <Field label={t`This text`}>
         <input value={pattern} onChange={(e) => setPattern(e.target.value)} autoFocus />
       </Field>
       <p />
       {rewriting ? (
         <>
-          <Field label="Put this back instead (leave empty to remove it)">
+          <Field label={t`Put this back instead (leave empty to remove it)`}>
             <input
               value={replacement}
               onChange={(e) => setReplacement(e.target.value)}
-              placeholder="usually nothing"
+              placeholder={t`usually nothing`}
             />
           </Field>
           <p className="muted small">
-            Empty is the usual answer: <span className="mono">PAGO MOVIL BAR MARISOL</span>{" "}
-            becomes <span className="mono">Bar Marisol</span>.
+            <Trans>
+              Empty is the usual answer: <span className="mono">PAGO MOVIL BAR MARISOL</span>{" "}
+              becomes <span className="mono">Bar Marisol</span>.
+            </Trans>
             {matchType === "regex" ? (
               <>
                 {" "}
-                With <em>matches the pattern</em> this is a template, so{" "}
-                <span className="mono">\1</span> is the first bracketed group:{" "}
-                <span className="mono">^SQ \*(.+)$</span> with{" "}
-                <span className="mono">\1</span> keeps what follows.
+                <Trans>
+                  With <em>matches the pattern</em> this is a template, so{" "}
+                  <span className="mono">\1</span> is the first bracketed group:{" "}
+                  <span className="mono">^SQ \*(.+)$</span> with{" "}
+                  <span className="mono">\1</span> keeps what follows.
+                </Trans>
               </>
             ) : null}
           </p>
         </>
       ) : (
-        <Field label="Call the payee">
+        <Field label={t`Call the payee`}>
           <input
             value={payeeName}
             onChange={(e) => setPayeeName(e.target.value)}
@@ -410,7 +434,7 @@ function RuleForm({
         </Field>
       )}
       <p />
-      <Field label="Order (lower runs first)">
+      <Field label={t`Order (lower runs first)`}>
         <input
           type="number"
           value={priority}
@@ -419,15 +443,15 @@ function RuleForm({
       </Field>
       <p className="muted small">
         {rewriting
-          ? "Every rule of this kind gets a turn, in this order, each one working on what the last one left."
-          : "The first rule that matches wins; the rest are not tried."}
+          ? t`Every rule of this kind gets a turn, in this order, each one working on what the last one left.`
+          : t`The first rule that matches wins; the rest are not tried.`}
       </p>
 
       {/* The "test this rule" the screen never had. It is also what stops a
           regex that backtracks being discovered by an import going quiet. */}
       <div className="row" style={{ gap: 8 }}>
         <button disabled={!pattern.trim() || trial.isPending} onClick={() => trial.mutate()}>
-          {trial.isPending ? "Trying…" : "What would this match?"}
+          {trial.isPending ? t`Trying…` : t`What would this match?`}
         </button>
         <button
           className="primary"
@@ -436,7 +460,9 @@ function RuleForm({
           }
           onClick={() => save.mutate()}
         >
-          Create
+          <Trans>
+            Create
+          </Trans>
         </button>
       </div>
       {trial.data ? (
@@ -446,18 +472,28 @@ function RuleForm({
         >
           {trial.data.timed_out ? (
             <p className="small" style={{ margin: 0 }}>
-              That pattern ran past its tenth of a second. An import would set it aside part
-              way through and carry on without it, so it would work sometimes and not others.
-              Simplify it.
+              <Trans>
+                That pattern ran past its tenth of a second. An import would set it aside part
+                way through and carry on without it, so it would work sometimes and not others.
+                Simplify it.
+              </Trans>
             </p>
           ) : (
             <>
               <p className="small" style={{ marginTop: 0 }}>
-                It {rewriting ? "rewrites" : "claims"}{" "}
-                <strong>{trial.data.matches.toLocaleString()}</strong> of{" "}
-                {trial.data.considered.toLocaleString()} rows already in this ledger.
+                {rewriting ? (
+                  <Trans>
+                    It rewrites <strong>{formatCount(trial.data.matches)}</strong> of{" "}
+                    {formatCount(trial.data.considered)} rows already in this ledger.
+                  </Trans>
+                ) : (
+                  <Trans>
+                    It claims <strong>{formatCount(trial.data.matches)}</strong> of{" "}
+                    {formatCount(trial.data.considered)} rows already in this ledger.
+                  </Trans>
+                )}
                 {trial.data.matches === 0
-                  ? " Nothing — check you are matching what the bank wrote rather than what the register shows."
+                  ? ` ${t`Nothing — check you are matching what the bank wrote rather than what the register shows.`}`
                   : ""}
               </p>
               {trial.data.examples.length > 0 && (
@@ -497,6 +533,22 @@ function RuleForm({
  * payee grows one new row per purchase. Amazon alone will have hundreds within
  * a year.
  */
+/** How the list names a rule's match, as the form's choices word it. */
+function matchWord(type: string): string {
+  switch (type) {
+    case "contains":
+      return t({ message: "contains", context: "rule list" });
+    case "prefix":
+      return t({ message: "prefix", context: "rule list" });
+    case "equals":
+      return t({ message: "equals", context: "rule list" });
+    case "regex":
+      return t({ message: "regex", context: "rule list" });
+    default:
+      return type;
+  }
+}
+
 function Suggestions({
   household,
   onAccept,
@@ -518,23 +570,27 @@ function Suggestions({
   return (
     <div className="card">
       <div className="row" style={{ justifyContent: "space-between" }}>
-        <h2 className="section-title">These look like the same shop</h2>
+        <h2 className="section-title"><Trans>These look like the same shop</Trans></h2>
         <button className="small-button" onClick={onTidy}>
-          Apply rules to what is already here
+          <Trans>
+            Apply rules to what is already here
+          </Trans>
         </button>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
-        Grouped by what the bank sent, with the per-transaction reference taken off. Each one is
-        a single rule away from being one payee.
+        <Trans>
+          Grouped by what the bank sent, with the per-transaction reference taken off. Each one is
+          a single rule away from being one payee.
+        </Trans>
       </p>
       <div className="table-scroll">
         <table>
           <thead>
             <tr>
-              <th>The bank keeps saying</th>
-              <th className="amount">Spellings</th>
-              <th className="amount">Payees</th>
-              <th className="amount">Rows</th>
+              <th><Trans>The bank keeps saying</Trans></th>
+              <th className="amount"><Trans>Spellings</Trans></th>
+              <th className="amount"><Trans>Payees</Trans></th>
+              <th className="amount"><Trans>Rows</Trans></th>
               <th />
             </tr>
           </thead>
@@ -547,21 +603,23 @@ function Suggestions({
                     {one.examples.slice(0, 2).join(" · ")}
                   </span>
                 </td>
-                <td className="amount" data-label="Spellings">
+                <td className="amount" data-label={t`Spellings`}>
                   {one.strings}
                 </td>
                 {/* The number that makes the case. Four payees becoming one is
                     worth a click; one payee becoming one is not, and those are
                     filtered out server-side. */}
-                <td className="amount" data-label="Payees">
+                <td className="amount" data-label={t`Payees`}>
                   {one.payees}
                 </td>
-                <td className="amount" data-label="Rows">
+                <td className="amount" data-label={t`Rows`}>
                   {one.transactions}
                 </td>
                 <td className="row-actions">
                   <button className="small-button" onClick={() => onAccept(one.pattern)}>
-                    Write this rule
+                    <Trans>
+                      Write this rule
+                    </Trans>
                   </button>
                 </td>
               </tr>
@@ -633,12 +691,14 @@ function ReapplyPanel({
   }, [proposed]);
 
   return (
-    <Panel title="Apply rules to what is already here" onClose={onClose} config>
+    <Panel title={t`Apply rules to what is already here`} onClose={onClose} config>
       <Problem error={plan.error ?? run.error} />
       <p className="small muted" style={{ marginTop: 0 }}>
-        A rule only runs as a statement is read, so writing one changes nothing already in your
-        register. This runs today&rsquo;s rules over the rows that are, matching against the
-        bank&rsquo;s own words exactly as an import would.
+        <Trans>
+          A rule only runs as a statement is read, so writing one changes nothing already in your
+          register. This runs today&rsquo;s rules over the rows that are, matching against the
+          bank&rsquo;s own words exactly as an import would.
+        </Trans>
       </p>
 
       <label className="row" style={{ gap: 8, alignItems: "flex-start" }}>
@@ -649,34 +709,39 @@ function ReapplyPanel({
           style={{ width: "auto", marginTop: 3 }}
         />
         <span>
-          <strong>Only rows nobody has corrected</strong>
+          <strong>
+            <Trans>Only rows nobody has corrected</Trans>
+          </strong>
           <span className="small muted" style={{ display: "block" }}>
-            Leave a payee somebody set by hand alone. Turning this off lets the rules overrule
-            those too, which is occasionally what you want and never what you want by accident.
+            <Trans>
+              Leave a payee somebody set by hand alone. Turning this off lets the rules overrule
+              those too, which is occasionally what you want and never what you want by accident.
+            </Trans>
           </span>
         </span>
       </label>
 
       {plan.isLoading ? (
-        <p className="muted small">Working out what would change…</p>
+        <p className="muted small"><Trans>Working out what would change…</Trans></p>
       ) : proposed && proposed.changing === 0 ? (
         <div className="banner info" style={{ marginTop: 10 }}>
           <p className="small" style={{ margin: 0 }}>
-            Nothing would change. {proposed.considered.toLocaleString()} rows carry the
-            bank&rsquo;s words and today&rsquo;s rules already agree with all of them.
+            {t`Nothing would change. ${formatCount(proposed.considered)} rows carry the bank’s words and today’s rules already agree with all of them.`}
           </p>
         </div>
       ) : proposed ? (
         <>
           <div className="banner info" style={{ marginTop: 10 }}>
             <p className="small" style={{ marginTop: 0 }}>
-              <strong>{proposed.changing.toLocaleString()}</strong> of{" "}
-              {proposed.considered.toLocaleString()} rows would move.
+              <Trans>
+                <strong>{formatCount(proposed.changing)}</strong> of{" "}
+                {formatCount(proposed.considered)} rows would move.
+              </Trans>
             </p>
             <ul className="plain-list small" style={{ marginBottom: 0 }}>
               {landing.map(([name, count]) => (
                 <li key={name}>
-                  {count.toLocaleString()} &rarr; <strong>{name}</strong>
+                  {formatCount(count)} &rarr; <strong>{name}</strong>
                 </li>
               ))}
             </ul>
@@ -691,20 +756,24 @@ function ReapplyPanel({
               />
               <span>
                 <strong>
-                  Also delete the {proposed.orphaned.length.toLocaleString()} payees left empty
+                  {t`Also delete the ${formatCount(proposed.orphaned.length)} payees left empty`}
                 </strong>
                 <span className="small muted" style={{ display: "block" }}>
-                  They were only ever the bank&rsquo;s reference numbers. Leaving them is what
-                  makes a payee list that is still three hundred long afterwards.
+                  <Trans>
+                    They were only ever the bank&rsquo;s reference numbers. Leaving them is what
+                    makes a payee list that is still three hundred long afterwards.
+                  </Trans>
                 </span>
               </span>
             </label>
           )}
           <p className="muted small">
-            One act, so History has one entry and undo puts every row back together.
+            <Trans>
+              One act, so History has one entry and undo puts every row back together.
+            </Trans>
           </p>
           <button className="primary" disabled={run.isPending} onClick={() => run.mutate()}>
-            {run.isPending ? "Applying…" : `Move ${proposed.changing.toLocaleString()} rows`}
+            {run.isPending ? t`Applying…` : t`Move ${formatCount(proposed.changing)} rows`}
           </button>
         </>
       ) : null}

@@ -169,7 +169,8 @@ history this repository does not have.
 ### Changed
 
 - **The remaining screens' words go into the catalogs one screen at a time**,
-  starting with Categories, Payees and Payee categorisation. English is unchanged; each screen has a test
+  starting with Categories, Payees, Payee categorisation and the payee
+  naming rules. English is unchanged; each screen has a test
   that renders it in the `en-XA` pseudo-locale and finds no English left.
   (#56)
 

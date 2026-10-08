@@ -23,6 +23,7 @@ import { untranslated } from "../test-pseudo";
 import { Categories } from "./Categories";
 import { PayeeCategorisation } from "./PayeeCategorisation";
 import { Payees } from "./Payees";
+import { Rules } from "./Rules";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -32,7 +33,7 @@ const HOUSEHOLD = {
 } as unknown as Household;
 
 /** The fixtures' own words. */
-const DATA = /^(Casa|Doe|Sam|Bakery|Cinema|Everyday|Groceries|Bills|Rent|Water)$/;
+const DATA = /^(Casa|Doe|Sam|Bakery|Cinema|Everyday|Groceries|Bills|Rent|Water|Amazon|Carrefour|Square|Santander|Bar|Marisol|SQ|WWW|AMAZON|COMPRA|INTERNET|PAGO|MOVIL|MARISOL|MADRID|CARREFOUR|CINEMA|BAKERY)$/;
 
 function withQueries(children: ReactNode) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -155,6 +156,39 @@ describe("in en-XA, the remaining screens show no English", () => {
     await screen.findByText("Bakery");
     expect(left()).toEqual([]);
     fireEvent.click(document.querySelector("button.tally-more")!);
+    expect(left()).toEqual([]);
+  });
+
+  it("Payee naming rules, a new rule of both kinds, and applying them", async () => {
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path.endsWith("/payee-rules"))
+        return [
+          { id: "r1", match_type: "contains", action: "map", pattern: "BAKERY", payee_id: "p1", replacement: null, priority: 1, enabled: true },
+          { id: "r2", match_type: "prefix", action: "rewrite", pattern: "SQ", payee_id: null, replacement: null, priority: 2, enabled: false },
+        ];
+      if (path.endsWith("/payee-suggestions"))
+        return [{ pattern: "CINEMA", match_type: "contains", strings: 3, transactions: 9, payees: 3, examples: ["CINEMA 1", "CINEMA 2"] }];
+      return [{ id: "p1", name: "Bakery", transfer_account_id: null, transaction_count: 3, rule_count: 1 }];
+    });
+    vi.mocked(api.post).mockResolvedValue({ considered: 40, changing: 3, moves: [{ to_name: "Bakery" }], orphaned: ["x"] });
+    render(withQueries(<Rules household={HOUSEHOLD} />));
+    await screen.findByText("BAKERY");
+    expect(left()).toEqual([]);
+
+    // The new-rule panel, naming a payee and then taking a rail off.
+    fireEvent.click(document.querySelector("h1 + button")!);
+    expect(left()).toEqual([]);
+    const action = document.querySelectorAll(".panel select")[0] as HTMLSelectElement;
+    fireEvent.change(action, { target: { value: "rewrite" } });
+    expect(left()).toEqual([]);
+    cleanup();
+
+    // Applying the rules to what is already here.
+    render(withQueries(<Rules household={HOUSEHOLD} />));
+    await screen.findByText("CINEMA");
+    fireEvent.click(document.querySelector(".card .row .small-button")!);
+    await screen.findByText("x", { exact: false }).catch(() => undefined);
+    await new Promise((done) => setTimeout(done, 0));
     expect(left()).toEqual([]);
   });
 });

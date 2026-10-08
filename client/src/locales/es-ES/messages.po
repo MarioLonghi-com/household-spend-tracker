@@ -52,6 +52,10 @@ msgstr "Gestión de la aplicación"
 msgid "To"
 msgstr "A"
 
+#: src/screens/Rules.tsx
+msgid "starts with"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
 #, fuzzy
@@ -78,6 +82,10 @@ msgstr "Tu nueva contraseña ya está establecida. Inicia sesión con ella y con
 msgid "payee, memo, or the bank's own words"
 msgstr "beneficiario, concepto o las palabras del propio banco"
 
+#: src/screens/Rules.tsx
+msgid "One act, so History has one entry and undo puts every row back together."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "this account is closed"
@@ -92,6 +100,15 @@ msgstr ""
 #, fuzzy
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
 msgstr "Una clave permite que un programa —un script, una automatización, un asistente de IA— lea y, si lo permites, añada datos a un hogar en tu nombre. Todo lo que haga aparece en el Historial de ese hogar con tu nombre y el de la clave."
+
+#: src/screens/Rules.tsx
+msgctxt "rule list"
+msgid "contains"
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgid "Grouped by what the bank sent, with the per-transaction reference taken off. Each one is a single rule away from being one payee."
+msgstr ""
 
 #: src/components/DateRange.tsx
 #, fuzzy
@@ -124,6 +141,10 @@ msgstr "No había ningún navegador de confianza."
 #, fuzzy
 msgid "History"
 msgstr "Historial"
+
+#: src/screens/Rules.tsx
+msgid "Match"
+msgstr ""
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -161,6 +182,10 @@ msgstr "Cambiar el nombre de {0}"
 msgid "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "{by} restableció tu aplicación de autenticación para {email} el {when}. Se ha cerrado la sesión en todos los navegadores en los que la tenías iniciada. Vuelve a configurarla abajo."
 
+#: src/screens/Rules.tsx
+msgid "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot mean “whatever comes after it” — choose <2>take this bit off</2> for that."
+msgstr ""
+
 #. placeholder {0}: offer.name
 #. placeholder {1}: offer.payee
 #: src/screens/Import.tsx
@@ -188,6 +213,10 @@ msgstr "Eso no es un importe en {0}."
 #, fuzzy
 msgid "what a key can never do"
 msgstr "lo que una clave nunca puede hacer"
+
+#: src/screens/Rules.tsx
+msgid "Priority"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -410,6 +439,10 @@ msgstr "Buscando tu enlace de restablecimiento…"
 msgid "Let it apply an import without anybody reviewing it"
 msgstr "Permitir que aplique una importación sin que nadie la revise"
 
+#: src/screens/Rules.tsx
+msgid "Add a rule"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "One part of a split"
@@ -448,6 +481,10 @@ msgstr "Las llaves de acceso necesitan que abras esta aplicación en su direcci�
 #, fuzzy
 msgid "{0} now tells a file it is for {1}"
 msgstr "{0} ahora indica que un archivo es de {1}"
+
+#: src/screens/Rules.tsx
+msgid "Write this rule"
+msgstr ""
 
 #. placeholder {0}: payee.name
 #. placeholder {1}: target.name
@@ -557,6 +594,10 @@ msgstr "Dividir a partes iguales"
 msgid "{0} of this payment is not matched to an expense yet. For an advance, that is the part still unspent."
 msgstr "{0} de este pago todavía no se corresponde con un gasto. En un anticipo, es la parte aún sin gastar."
 
+#: src/screens/Rules.tsx
+msgid "A rule only runs as a statement is read, so writing one changes nothing already in your register. This runs today’s rules over the rows that are, matching against the bank’s own words exactly as an import would."
+msgstr ""
+
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -567,6 +608,11 @@ msgstr "Comprobar el código y terminar"
 #, fuzzy
 msgid "Opening…"
 msgstr "Abriendo…"
+
+#: src/screens/Rules.tsx
+msgctxt "rule list"
+msgid "equals"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -671,6 +717,7 @@ msgid "Remove this part"
 msgstr "Quitar esta parte"
 
 #: src/screens/Payees.tsx
+#: src/screens/Rules.tsx
 msgid "Spellings"
 msgstr ""
 
@@ -688,6 +735,10 @@ msgstr "contraseña y aplicación de autenticación"
 #, fuzzy
 msgid "{keys, plural, one {{keys} agent key still works — revoke it below if it should stop.} other {{keys} agent keys still work — revoke them below if they should stop.}}"
 msgstr "{keys, plural, one {{keys} clave de agente sigue funcionando: revócala abajo si debe dejar de hacerlo.} other {{keys} claves de agente siguen funcionando: revócalas abajo si deben dejar de hacerlo.}}"
+
+#: src/screens/Rules.tsx
+msgid "Call the payee"
+msgstr ""
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -733,6 +784,10 @@ msgstr "Aplicación de autenticación"
 msgid "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
 msgstr "Una vez confirmada, conserva solo esta entrada de la cuenta en la aplicación: la antigua no puede funcionar aquí, ni tampoco una que escaneaste antes y nunca confirmaste."
 
+#: src/screens/Rules.tsx
+msgid "With <0>matches the pattern</0> this is a template, so <1>\\1</1> is the first bracketed group: <2>^SQ \\*(.+)$</2> with <3>\\1</3> keeps what follows."
+msgstr ""
+
 #. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
 #: src/screens/Import.tsx
 #, fuzzy
@@ -776,6 +831,10 @@ msgstr "Buscando…"
 #, fuzzy
 msgid "One row, typed in by hand"
 msgstr "Una fila, escrita a mano"
+
+#: src/screens/Rules.tsx
+msgid "Nothing — check you are matching what the bank wrote rather than what the register shows."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1272,6 +1331,7 @@ msgstr "Eso no es un importe"
 
 #: src/screens/Categories.tsx
 #: src/screens/Register.tsx
+#: src/screens/Rules.tsx
 #, fuzzy
 msgid "Delete"
 msgstr "Eliminar"
@@ -1371,6 +1431,10 @@ msgstr "Ya has vuelto a entrar"
 #, fuzzy
 msgid "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
 msgstr "Si ya no tienes la aplicación de autenticación antigua, usa aquí uno de tus códigos de recuperación; se gasta."
+
+#: src/screens/Rules.tsx
+msgid "And then"
+msgstr ""
 
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
@@ -1475,6 +1539,10 @@ msgstr "Abrir el menú"
 msgid "Not a work expense"
 msgstr "No es un gasto de trabajo"
 
+#: src/screens/Rules.tsx
+msgid "Leave a payee somebody set by hand alone. Turning this off lets the rules overrule those too, which is occasionally what you want and never what you want by accident."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Who was paid"
@@ -1494,6 +1562,10 @@ msgstr "Restablecimiento: contraseña y aplicación de autenticación"
 #, fuzzy
 msgid "Every path a statement can take, and every way a line can go, is explained in <0>How import works</0>."
 msgstr "Cada camino que puede seguir un extracto, y cada destino posible de una línea, se explica en <0>Cómo funciona la importación</0>."
+
+#: src/screens/Rules.tsx
+msgid "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
+msgstr ""
 
 #: src/components/DateRange.tsx
 #: src/screens/Transfer.tsx
@@ -1538,6 +1610,12 @@ msgstr "{0, plural, one {Devuelve {1} gasto} other {Devuelve {2} gastos}}"
 #, fuzzy
 msgid "skip rows"
 msgstr "filas omitidas"
+
+#. placeholder {0}: formatCount(trial.data.matches)
+#. placeholder {1}: formatCount(trial.data.considered)
+#: src/screens/Rules.tsx
+msgid "It rewrites <0>{0}</0> of {1} rows already in this ledger."
+msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Edit"
@@ -1722,6 +1800,11 @@ msgstr "Registro"
 
 #: src/screens/Payees.tsx
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgctxt "rule list"
+msgid "prefix"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -2055,6 +2138,7 @@ msgstr "formato de fecha"
 
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
+#: src/screens/Rules.tsx
 #, fuzzy
 msgid "Rows"
 msgstr "Filas"
@@ -2110,6 +2194,7 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
+#: src/screens/Rules.tsx
 #, fuzzy
 msgid "Create"
 msgstr "Crear"
@@ -2152,6 +2237,10 @@ msgstr "Ninguna categoría coincide exactamente con eso."
 #, fuzzy
 msgid "Split"
 msgstr "Dividir"
+
+#: src/screens/Rules.tsx
+msgid "is exactly"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -2199,6 +2288,10 @@ msgstr "Cuentas corrientes"
 msgid "Work will not pay this. It counts as your spending."
 msgstr "El trabajo no va a pagar esto. Cuenta como gasto tuyo."
 
+#: src/screens/Rules.tsx
+msgid "Call it"
+msgstr ""
+
 #: src/screens/Categories.tsx
 msgid "Do not auto-categorise {name}"
 msgstr ""
@@ -2207,6 +2300,10 @@ msgstr ""
 #, fuzzy
 msgid "Add more"
 msgstr "Añadir más"
+
+#: src/screens/Rules.tsx
+msgid "New payee rule"
+msgstr ""
 
 #: src/components/RecoveryCodes.tsx
 #, fuzzy
@@ -2384,10 +2481,19 @@ msgstr "Ignorar {0}"
 msgid "Link as transfer"
 msgstr "Vincular como transferencia"
 
+#. placeholder {0}: formatCount(proposed.considered)
+#: src/screens/Rules.tsx
+msgid "Nothing would change. {0} rows carry the bank’s words and today’s rules already agree with all of them."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Gather the accounts by country"
 msgstr "Agrupar las cuentas por país"
+
+#: src/screens/Rules.tsx
+msgid "Put this back instead (leave empty to remove it)"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2591,6 +2697,10 @@ msgstr "Seleccionar todas las filas mostradas"
 msgid "The server made {user} an owner"
 msgstr "El servidor hizo propietario a {user}"
 
+#: src/screens/Rules.tsx
+msgid "Applied as a statement is read, so <0>CARREFOUR MADRID 4432</0> arrives as Carrefour. The bank's own words are kept on the transaction either way."
+msgstr ""
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "owner"
@@ -2743,6 +2853,10 @@ msgstr "Lo que había en la cuenta el día que empezaste a seguirla: normalmente
 msgid "Any"
 msgstr "Cualquiera"
 
+#: src/screens/Rules.tsx
+msgid "What would this match?"
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "You will still be able to sign in with your password and code."
@@ -2870,6 +2984,11 @@ msgstr "Descargar"
 msgid "The server gave {user} a new authenticator"
 msgstr "El servidor dio a {user} una nueva aplicación de autenticación"
 
+#: src/screens/Rules.tsx
+msgctxt "rule list"
+msgid "regex"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody reset {user}'s password"
@@ -2894,6 +3013,10 @@ msgstr ""
 #, fuzzy
 msgid "Set"
 msgstr "Establecida"
+
+#: src/screens/Rules.tsx
+msgid "Only rows nobody has corrected"
+msgstr ""
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -3105,6 +3228,10 @@ msgstr "por qué cada divisa tiene sus propias columnas"
 msgid "Reset"
 msgstr "Restablecimiento"
 
+#: src/screens/Rules.tsx
+msgid "Order (lower runs first)"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Following this device, which is dark right now."
@@ -3194,6 +3321,10 @@ msgstr "Preparada por"
 msgid "Split this transaction"
 msgstr "Dividir este movimiento"
 
+#: src/screens/Rules.tsx
+msgid "Apply rules to what is already here"
+msgstr ""
+
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "This month"
@@ -3248,6 +3379,7 @@ msgstr "columna de salida"
 
 #: src/screens/Categories.tsx
 #: src/screens/Payees.tsx
+#: src/screens/Rules.tsx
 msgid "Payees"
 msgstr ""
 
@@ -3294,6 +3426,10 @@ msgstr "Ocultar ayuda: {label}"
 
 #: src/screens/Categories.tsx
 msgid "how this works"
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgid "The bank keeps saying"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -3371,6 +3507,10 @@ msgstr "Configurar una nueva aplicación de autenticación"
 #, fuzzy
 msgid "the server answered {0}"
 msgstr "el servidor respondió {0}"
+
+#: src/screens/Rules.tsx
+msgid "When the statement line"
+msgstr ""
 
 #: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
@@ -3452,6 +3592,14 @@ msgstr "Dónde acabará esta línea"
 #, fuzzy
 msgid "{others, plural, one {You will still be able to sign in with your other passkey, or with your password and code.} other {You will still be able to sign in with your other {others} passkeys, or with your password and code.}}"
 msgstr "{others, plural, one {Podrás seguir iniciando sesión con tu otra llave de acceso, o con tu contraseña y un código.} other {Podrás seguir iniciando sesión con tus otras {others} llaves de acceso, o con tu contraseña y un código.}}"
+
+#: src/screens/Rules.tsx
+msgid "Every rule of this kind gets a turn, in this order, each one working on what the last one left."
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgid "It runs <0>before</0> the rules that name a payee, and hands them what is left — so one <1>COMPRA INTERNET</1> rule plus your existing <2>Amazon</2> rule covers the whole Amazon-over-Santander family. Several of these compose: each one gets a turn, in order."
+msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Archived — hide it from the pickers"
@@ -3535,6 +3683,10 @@ msgstr "{by} restableció tu contraseña para {email} el {when}. Se ha cerrado l
 msgid "{0, plural, one {{1} rule} other {{2} rules}}"
 msgstr ""
 
+#: src/screens/Rules.tsx
+msgid "Working out what would change…"
+msgstr ""
+
 #. placeholder {0}: format(txn.amount, currency)
 #. placeholder {1}: formatDate(txn.date)
 #: src/screens/Register.tsx
@@ -3589,6 +3741,11 @@ msgstr "Salida ({currency})"
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so its next statement picks the account itself?"
 msgstr "El nombre de este archivo lleva <0>{0}</0>. ¿Guardarlo como IBAN de <1>{1}</1>, para que su próximo extracto elija la cuenta solo?"
 
+#. placeholder {0}: formatCount(proposed.changing)
+#: src/screens/Rules.tsx
+msgid "Move {0} rows"
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Line"
@@ -3613,6 +3770,10 @@ msgstr "Año inicial"
 #, fuzzy
 msgid "Replacing it also un-trusts every browser, including this one, and signs out every other browser — they were let in on the strength of the old authenticator, and that is exactly what you are replacing."
 msgstr "Sustituirla también retira la confianza a todos los navegadores, incluido este, y cierra la sesión en todos los demás: entraron gracias a la aplicación de autenticación antigua, y eso es justo lo que estás sustituyendo."
+
+#: src/screens/Rules.tsx
+msgid "For a <0>payment rail</0> rather than a shop. <1>SQ *</1>, <2>PAGO MOVIL</2> and <3>COMPRA INTERNET</3> are how the money travelled, not who was paid — every shop that takes Square appears behind <4>SQ *</4>. There is no single payee to point at, so this kind of rule takes the rail off and lets whatever is left be the shop."
+msgstr ""
 
 #: src/components/ReenrolmentDue.tsx
 #: src/screens/SignIn.tsx
@@ -3661,6 +3822,10 @@ msgstr ""
 #, fuzzy
 msgid "Read the file"
 msgstr "Leer el archivo"
+
+#: src/screens/Rules.tsx
+msgid "take this bit off, and see what is left"
+msgstr ""
 
 #. placeholder {0}: accountName(one.transfer_account_id)
 #: src/screens/Payees.tsx
@@ -3753,6 +3918,10 @@ msgstr "Añadir movimiento"
 msgid "S — Split parts"
 msgstr "S — Partes de división"
 
+#: src/screens/Rules.tsx
+msgid "whatever is left"
+msgstr ""
+
 #: src/screens/Categories.tsx
 msgid "Nothing in this group yet."
 msgstr ""
@@ -3765,6 +3934,10 @@ msgstr "Sí, las {0}"
 
 #: src/screens/Payees.tsx
 msgid "Add a payee"
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgid "Payee naming rules"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -3806,6 +3979,10 @@ msgstr "por qué se pide esto"
 #, fuzzy
 msgid "The money out, repaid by the one payment in"
 msgstr "El dinero que salió, devuelto por el único pago que entró"
+
+#: src/screens/Rules.tsx
+msgid "This text"
+msgstr ""
 
 #. placeholder {0}: names.length
 #: src/App.tsx
@@ -3879,6 +4056,10 @@ msgstr "Informes"
 msgid "a note for this row"
 msgstr "una nota para esta fila"
 
+#: src/screens/Rules.tsx
+msgid "usually nothing"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "in or out, any currency"
@@ -3924,6 +4105,11 @@ msgstr "No se pudieron cargar tus hogares"
 #, fuzzy
 msgid "Work expense — written off"
 msgstr "Gasto de trabajo: dado por perdido"
+
+#. placeholder {0}: formatCount(proposed.orphaned.length)
+#: src/screens/Rules.tsx
+msgid "Also delete the {0} payees left empty"
+msgstr ""
 
 #. placeholder {0}: format(openingMinor, currency)
 #: src/screens/Accounts.tsx
@@ -4041,6 +4227,10 @@ msgstr "este dispositivo"
 msgid "No accounts yet. Add the one you use most and import a statement into it."
 msgstr "Todavía no hay cuentas. Añade la que más uses e importa un extracto en ella."
 
+#: src/screens/Rules.tsx
+msgid "call it one payee"
+msgstr ""
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Already have it"
@@ -4094,6 +4284,11 @@ msgstr "Los dos son un movimiento real del registro, conciliado, con la fecha en
 msgid "type any part of a payee"
 msgstr ""
 
+#. placeholder {0}: matchWord(rule.match_type)
+#: src/screens/Rules.tsx
+msgid "{0}, then strip"
+msgstr ""
+
 #: src/screens/Categories.tsx
 msgid "A heading the categories sit under — Bills, Everyday, whatever divides your spending in a way you recognise."
 msgstr ""
@@ -4113,6 +4308,14 @@ msgstr "Quedan {0} de 10"
 #, fuzzy
 msgid "Somebody re-enabled {user}"
 msgstr "Alguien reactivó a {user}"
+
+#: src/screens/Rules.tsx
+msgid "The first rule that matches wins; the rest are not tried."
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgid "Order"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -4138,6 +4341,10 @@ msgstr "Importarlo de todos modos"
 #, fuzzy
 msgid "U — Uncleared"
 msgstr "U — Pendientes"
+
+#: src/screens/Rules.tsx
+msgid "contains"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -4283,6 +4490,10 @@ msgstr "{0} se ha descartado: no se ha escrito nada"
 msgid "the data directory"
 msgstr "la carpeta de datos"
 
+#: src/screens/Rules.tsx
+msgid "When the bank says"
+msgstr ""
+
 #. placeholder {0}: passkey.label
 #. placeholder {0}: removing.label
 #. placeholder {0}: row.value
@@ -4312,12 +4523,17 @@ msgstr "aplicación de autenticación"
 msgid "Set the category on {done} row and skipped {skipped} transfer legs — a transfer has no category."
 msgstr "Se puso la categoría a {done} fila y se omitieron {skipped} partes de transferencia: una transferencia no tiene categoría."
 
+#: src/screens/Rules.tsx
+msgid "matches the pattern"
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from your bank's website. CSV and spreadsheets are worked out from the file itself — the delimiter, the date format, the decimal separator, which column is which, and which row the table actually starts on. OFX needs none of that: it names its own fields, and its transaction ids are used so re-importing an overlapping statement cannot double anything up. A PDF is read by where the words sit on the page, so a running-balance column is not mistaken for the amount — and a designed bill, which is summary boxes rather than a table, is refused rather than half-read. You will see all of it before anything is written."
 msgstr "Un CSV, una descarga OFX/QFX, una exportación .xls del banco, un extracto en PDF o algo pegado de la web de tu banco. Los CSV y las hojas de cálculo se interpretan a partir del propio archivo: el delimitador, el formato de fecha, el separador decimal, qué columna es cuál y en qué fila empieza de verdad la tabla. OFX no necesita nada de eso: nombra sus propios campos, y se usan los identificadores de sus movimientos para que reimportar un extracto que se solapa no duplique nada. Un PDF se lee por la posición de las palabras en la página, así que una columna de saldo acumulado no se confunde con el importe, y una factura maquetada, que son recuadros de resumen y no una tabla, se rechaza en vez de leerse a medias. Lo verás todo antes de que se escriba nada."
 
 #: src/screens/Import.tsx
+#: src/screens/Rules.tsx
 #, fuzzy
 msgid "Applying…"
 msgstr "Aplicando…"
@@ -4346,6 +4562,12 @@ msgstr "Editar el concepto"
 msgid "In"
 msgstr "Entrada"
 
+#. placeholder {0}: formatCount(trial.data.matches)
+#. placeholder {1}: formatCount(trial.data.considered)
+#: src/screens/Rules.tsx
+msgid "It claims <0>{0}</0> of {1} rows already in this ledger."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Enter again to edit"
@@ -4366,6 +4588,14 @@ msgstr "Una cuenta no puede haberse abierto en el futuro."
 msgid "Value"
 msgstr "Valor"
 
+#: src/screens/Rules.tsx
+msgid "Case does not matter. <0>Matches the pattern</0> is a full regular expression, capped at 300 characters and given a tenth of a second per row — one that runs longer is set aside for the rest of that import. Try it below before you save it."
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgid "No rules yet. Add one the next time a statement gives you a name you dislike."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Statement product"
@@ -4382,6 +4612,14 @@ msgstr "<0>{0} filas más tienen el mismo beneficiario</0> y ninguna categoría 
 msgid "Somebody added {user} as an owner"
 msgstr "Alguien añadió a {user} como propietario"
 
+#: src/screens/Rules.tsx
+msgid "Trying…"
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgid "These look like the same shop"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
@@ -4389,6 +4627,14 @@ msgstr "Se cambiaron {done} filas y se dejaron {skipped} como estaban: solo una 
 
 #: src/screens/Categories.tsx
 msgid "Show archived"
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 msgstr ""
 
 #: src/screens/Import.tsx
@@ -4501,6 +4747,12 @@ msgstr "Un propietario puede administrar esta instancia: personas, hogares e inv
 #, fuzzy
 msgid "No categories are ticked, not even Needs a category, so there is nothing to show. Tick one in the categories filter, or Select all."
 msgstr "No hay ninguna categoría marcada, ni siquiera Necesita categoría, así que no hay nada que mostrar. Marca una en el filtro de categorías, o Seleccionar todo."
+
+#. placeholder {0}: formatCount(proposed.changing)
+#. placeholder {1}: formatCount(proposed.considered)
+#: src/screens/Rules.tsx
+msgid "<0>{0}</0> of {1} rows would move."
+msgstr ""
 
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -4682,6 +4934,10 @@ msgstr "El banco lo llamó <0>{0}</0>."
 msgid "{count, plural, one {Linked {count} expense to the payment of {paid} on {on}.} other {Linked {count} expenses to the payment of {paid} on {on}.}}"
 msgstr "{count, plural, one {Se vinculó {count} gasto al pago de {paid} del {on}.} other {Se vincularon {count} gastos al pago de {paid} del {on}.}}"
 
+#: src/screens/Rules.tsx
+msgid "On"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "This is one leg of a transfer. Changing the amount changes the other side too, so the two can never disagree."
@@ -4696,6 +4952,15 @@ msgstr "{inviter} te ha invitado a {PRODUCT} como miembro, en {households}."
 #, fuzzy
 msgid "that import was discarded — nothing was written"
 msgstr "esa importación se ha descartado: no se ha escrito nada"
+
+#. placeholder {0}: rule.pattern
+#: src/screens/Rules.tsx
+msgid "Apply the rule for {0}"
+msgstr ""
+
+#: src/screens/Rules.tsx
+msgid "They were only ever the bank’s reference numbers. Leaving them is what makes a payee list that is still three hundred long afterwards."
+msgstr ""
 
 #. placeholder {0}: one.transaction_count
 #. placeholder {1}: one.transaction_count
