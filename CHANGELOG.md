@@ -43,7 +43,6 @@ history this repository does not have.
   `en-XA` pseudo-locale is reachable for CI and development, and one
   Playwright pass runs in it at phone width. CI fails when the catalogs are
   behind the source. Nothing an English reader sees changes. (#53)
-
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
