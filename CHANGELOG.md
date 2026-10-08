@@ -117,6 +117,26 @@ history this repository does not have.
 
 ### Added
 
+- **Self-update: the maintenance page and browser recovery** (#163).
+  While an update runs, whoever opens Spend Tracker sees only "Spend Tracker
+  is being updated. It will be back in a few minutes." and `/api/health`
+  answers 503: no version, no step, no log. If the update fails *and*
+  putting the previous version back fails three times, the page switches to
+  recovery mode and adds a small "Owner: open recovery" link. `/recovery`
+  asks for the one-time recovery code shown when *Update* was pressed; the
+  updater, not the page, checks it against the hash it holds, refuses for 15
+  minutes after five wrong codes (doubling after each further five), and
+  forgets the hash once the update settles. With the code the page shows the
+  failed update's steps and logs and offers: retry the rollback, restore one
+  of the newest five update backups with the version that took it, start the
+  version that matches the ledger (never a migration), download a backup as
+  a zip (`secret.key` only behind an unticked box with the Backups screen's
+  warning), download the diagnostics (no ledger data, no key), or stop and
+  leave it to a terminal, with the commands. Every action is recorded in the
+  update's history. The same page, without a code, also covers an app that
+  compose started on an image older than the pin: it says the ledger is
+  ahead and to run the launcher again.
+
 - **The Updates section on Admin → Application** (#166), where *Is there a
   newer version?* was. It says which case this instance is in: a checkout
   (update from the terminal), a container with no updater (how to start it,

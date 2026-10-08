@@ -34,6 +34,7 @@ import threading
 from updater import contract, detect, intake, journal, prepare, survey, volume
 from updater import engine as eng
 from updater.apply import Apply
+from updater.recovery import Recovery
 from updater.site import Kit, Records
 from updater.volume import REQUEST_OWNER_UID
 
@@ -47,6 +48,8 @@ class Service:
         self.busy = False
         self.resume_pending = True
         self.lock = threading.Lock()
+        #: Part 11: the recovery page's requests, and when recovery mode starts (#163).
+        self.recovery = Recovery(kit, owner_uid)
 
     @property
     def vol(self) -> volume.Volume:
@@ -93,6 +96,8 @@ class Service:
                     self.vol, ctx, self.kit.clock.now(), self.owner_uid, self.kit.site.me
                 ):
                     self.dispatch(outcome)
+        with contextlib.suppress(eng.EngineUnavailable):
+            self.recovery.startup()
         self.resume_journals()
 
     def unfinished(self) -> list[journal.Journal]:
@@ -145,9 +150,21 @@ class Service:
             handover.tick()
             if handover.mode != "current":
                 return None
-            # Taken back over, or taken over: resume what the other one left.
+            # Taken back over, or taken over: what the other one left -- a
+            # recovery action half done, an apply -- is this one's now.
+            with contextlib.suppress(eng.EngineUnavailable):
+                self.recovery.startup()
             self.resume_journals(restarted=False)
             return None
+        # Before resuming: a journal that cannot proceed is exactly when
+        # recovery has to be reachable (11.1).
+        self.busy = True
+        try:
+            self.recovery.tick(self.unfinished, busy=False)
+        except eng.EngineUnavailable:
+            pass
+        finally:
+            self.busy = False
         if self.resume_pending:
             self.resume_journals()
             if self.resume_pending:

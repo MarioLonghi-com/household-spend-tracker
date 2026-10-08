@@ -835,7 +835,9 @@ class World(_Fleet):
 
     def _check(self, fake: FakeEngine, c: dict, cmd: list, version: str) -> None:
         doc = {
-            "database_stamped": HEAD[A],
+            # What the ledger is stamped at now: a release's head, or nothing
+            # a release knows (half-migrated).
+            "database_stamped": HEAD.get(self.ledger.stamp),
             "code_head": HEAD.get(version or ""),
             "pending": [
                 {
