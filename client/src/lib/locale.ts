@@ -231,6 +231,21 @@ export function listText(items: readonly string[]): string {
 }
 
 /**
+ * "EUR", "EUR or GBP", "EUR, GBP or USD" -- the alternatives a sentence offers.
+ * English keeps the form it always had, without the serial comma; any other
+ * language gets its own disjunction from Intl.
+ */
+export function orText(items: readonly string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  if (speaksEnglish()) return `${items.slice(0, -1).join(", ")} or ${items[items.length - 1]}`;
+  try {
+    return new Intl.ListFormat(uiLanguage(), { type: "disjunction" }).format(items);
+  } catch {
+    return items.join(", ");
+  }
+}
+
+/**
  * A country's name. In English, the name the server sent, which is the list
  * the account form searches; in another language, `Intl.DisplayNames`.
  */

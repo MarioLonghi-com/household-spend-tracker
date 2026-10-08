@@ -18,6 +18,7 @@ import {
   formatLocale,
   monthLabel,
   numberFormat,
+  orText,
   setFormatLocale,
   uiLanguage,
 } from "./locale";
@@ -234,5 +235,26 @@ describe("words in another language, once one is served", () => {
     setFormatLocale("de-DE");
     expect(formatFixed(1.5, 1)).toBe("1,5");
     expect(bytes(1536)).toBe("1,5 KiB");
+  });
+});
+
+describe("alternatives in a sentence", () => {
+  it("keeps the English it had: no serial comma, and one is just itself", () => {
+    expect(orText([])).toBe("");
+    expect(orText(["EUR"])).toBe("EUR");
+    expect(orText(["EUR", "GBP"])).toBe("EUR or GBP");
+    expect(orText(["EUR", "GBP", "USD"])).toBe("EUR, GBP or USD");
+  });
+
+  it("asks Intl for the disjunction in another language", async () => {
+    const { i18n } = await import("@lingui/core");
+    const was = i18n.locale;
+    i18n.load("es-ES", {});
+    i18n.activate("es-ES");
+    try {
+      expect(orText(["EUR", "GBP", "USD"])).toBe("EUR, GBP o USD");
+    } finally {
+      i18n.activate(was);
+    }
   });
 });

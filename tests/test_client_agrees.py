@@ -230,10 +230,20 @@ SCREENS = TS_FILE.resolve().parent.parent / "screens"
 @pytest.mark.parametrize(
     ("model", "interface", "file"),
     [
-        ("UpstreamOut", "Upstream", "ApplicationManagement.tsx"),
-        ("ReleaseOut", "Release", "ApplicationManagement.tsx"),
-        ("UpdaterOfferOut", "UpdaterOffer", "ApplicationManagement.tsx"),
+        ("UpstreamOut", "Upstream", "Updates.tsx"),
+        ("ReleaseOut", "Release", "Updates.tsx"),
+        ("UpdaterOfferOut", "UpdaterOffer", "Updates.tsx"),
         ("BackupOut", "Backup", "Backups.tsx"),
+        # The Updates section (#166): everything `GET .../update` answers with,
+        # and what the requests it sends answer.
+        ("UpdateStateOut", "UpdateState", "Updates.tsx"),
+        ("UpdateHeartbeatOut", "Heartbeat", "Updates.tsx"),
+        ("UpdateStatusOut", "UpdateStatus", "Updates.tsx"),
+        ("UpdateReportOut", "Report", "Updates.tsx"),
+        ("UpdateMigrationOut", "Migration", "Updates.tsx"),
+        ("UpdateOutcomeOut", "Outcome", "Updates.tsx"),
+        ("UpdateRecoveryCodeOut", "RecoveryCode", "Updates.tsx"),
+        ("UpdateRequestOut", "UpdateRequest", "Updates.tsx"),
     ],
 )
 def test_the_client_knows_every_field_of_the_check_and_of_a_backup(model, interface, file):
@@ -248,3 +258,21 @@ def test_the_client_knows_every_field_of_the_check_and_of_a_backup(model, interf
         f"only on the server: {sorted(server - client)}; "
         f"only in the client: {sorted(client - server)}"
     )
+
+
+@pytest.mark.skipif(not (SCREENS / "Updates.tsx").exists(), reason="the client is not checked out")
+def test_the_client_asks_for_the_recovery_code_with_a_post():
+    """R21: the route is a `POST` because issuing a code replaces the held one.
+    A screen still calling it with `GET` would get a 405 and no code at all."""
+    from app.api.routers.updates import router
+
+    methods = {
+        method
+        for route in router.routes
+        if getattr(route, "path", "").endswith("/recovery-code")
+        for method in route.methods
+    }
+    assert methods == {"POST"}
+    source = (SCREENS / "Updates.tsx").read_text()
+    calls = re.findall(r"api\.(\w+)<\w+>\(`\$\{BASE\}/recovery-code`", source)
+    assert calls == ["post"], calls

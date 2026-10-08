@@ -460,6 +460,15 @@ def test_no_tracked_file_names_anybody_real():
     assert not offenders, "\n".join(offenders)
 
 
+#: Recorded container inspect output (`tests/fixtures/updater/inspect/`) is
+#: made of engine object ids -- containers, images, networks, endpoints, pods
+#: -- each 64 hex characters by design, and each rewritten by the scrubber that
+#: committed them (that folder's README). They are exempt from the 64-hex
+#: shape, and from nothing else.
+_INSPECT_FIXTURES = pathlib.Path(__file__).resolve().parent / "fixtures" / "updater" / "inspect"
+_ENGINE_ID = re.compile(r"\b[0-9a-f]{64}\b")  # hygiene: a pattern, not a value
+
+
 def test_no_tracked_file_carries_private_markers():
     """Nothing that points into private notes, one machine, or a real secret.
 
@@ -476,9 +485,12 @@ def test_no_tracked_file_carries_private_markers():
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
+        engine_ids = _INSPECT_FIXTURES in path.resolve().parents
         for number, line in enumerate(text.splitlines(), start=1):
             if _REPO_ADDRESS_LINE in line or _PATTERN_LINE in line:
                 continue
+            if engine_ids:
+                line = _ENGINE_ID.sub("", line)
             offenders += [f"{path.name}:{number} {why}" for why in private_markers_in(line)]
     assert not offenders, "\n".join(offenders)
 

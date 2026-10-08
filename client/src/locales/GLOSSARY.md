@@ -105,7 +105,7 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | exchange rate | [Transfer](../screens/Transfer.tsx) | taxa de câmbio | tipo de cambio | växelkurs | | draft |
 | History | [History](../screens/History.tsx) | Histórico | Historial | Historik | The household's record of every change, with Undo | draft |
 | household | [Household](../screens/Household.tsx) | casa | hogar | hushåll | The shared ledger of the people who live together. pt-BR *domicílio* is a census word; *família* assumes too much | draft |
-| How import works | [App menu](../App.tsx), [ImportGuide](../screens/ImportGuide.tsx) | Como funciona a importação | Cómo funciona la importación | Så fungerar importen | | draft |
+| How import works | [App menu](../App.tsx), [ImportGuide](../screens/importGuide/en.tsx) | Como funciona a importação | Cómo funciona la importación | Så fungerar importen | | draft |
 | IBAN | [Accounts](../screens/Accounts.tsx) | IBAN | IBAN | IBAN | Stays | draft |
 | import (verb) | [Import](../screens/Import.tsx) | importar | importar | importera | | draft |
 | import (noun) | [Import](../screens/Import.tsx) | importação | importación | import | | draft |
@@ -117,7 +117,7 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | ledger | many sentences | livro-caixa | libro | boken | Everything recorded for a household; sv takes the definite form in a sentence | draft |
 | leg (of a transfer) | [History field names](../../../app/services/describing.py), refusals | lado | lado | ben | One of the two rows a transfer is made of; also said "side" | draft |
 | Locked (state `reconciled`) | [Register `CLEARED_PILLS`](../screens/Register.tsx) | Bloqueada | Bloqueada | Låst | The stored value is `reconciled`; the screen says "Locked" | draft |
-| match (verb, import and transfers) | [ImportGuide](../screens/ImportGuide.tsx) | corresponder | emparejar | matcha | Two rows found to be the same thing | draft |
+| match (verb, import and transfers) | [ImportGuide](../screens/importGuide/en.tsx) | corresponder | emparejar | matcha | Two rows found to be the same thing | draft |
 | member (role `member`) | [Household](../screens/Household.tsx) | membro | miembro | medlem | | draft |
 | memo | [Register](../screens/Register.tsx) | descrição | concepto | beskrivning | es-ES statements call the bank's text *concepto*, which is what an import puts here. Not *nota*: that is **note** | draft |
 | merge (payees) | [Payees](../screens/Payees.tsx) | unir; união | fusionar; fusión | slå ihop; sammanslagning | Two payees become one | draft |

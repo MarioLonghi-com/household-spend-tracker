@@ -36,7 +36,9 @@ import type {
   ReportRow,
   ReportSection,
 } from "../../lib/types";
-import { formatDate, monthLabel } from "../../lib/locale";
+import { formatDate, listText, monthLabel } from "../../lib/locale";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * Which figure somebody clicked, in the terms the server narrows by.
@@ -207,13 +209,20 @@ export function IncomeExpense({ household }: { household: Household }) {
     enabled: Boolean(currency),
   });
 
-  if (currencies.isLoading) return <div className="muted">Loading…</div>;
+  if (currencies.isLoading)
+    return (
+      <div className="muted">
+        <Trans comment="Text on the Income vs Expense report">Loading…</Trans>
+      </div>
+    );
 
   if (available.length === 0)
     return (
       <Empty>
-        There are no accounts yet, so there is nothing to report on. Add one on the Accounts
-        screen and the figures will follow.
+        <Trans>
+          There are no accounts yet, so there is nothing to report on. Add one on the Accounts
+          screen and the figures will follow.
+        </Trans>
       </Empty>
     );
 
@@ -239,13 +248,13 @@ export function IncomeExpense({ household }: { household: Household }) {
             calendar. */}
         <div className="report-choices">
           <GroupedPicker
-            label="All categories"
+            label={t({ message: "All categories", comment: "Text on a dropdown that picks several on the Income vs Expense report" })}
             groups={categoryOptions}
             value={chosenCategories}
             onChange={setChosenCategories}
             extra={{
-              label: "Uncategorised",
-              hint: "(rows with no category yet)",
+              label: t({ message: "Uncategorised", comment: "Label on the Income vs Expense report: having no category. See GLOSSARY.md" }),
+              hint: t`(rows with no category yet)`,
               checked: withUncategorised,
               onChange: setWithUncategorised,
             }}
@@ -253,7 +262,7 @@ export function IncomeExpense({ household }: { household: Household }) {
 
           <div className="picker-with-mode">
             <GroupedPicker
-              label="All accounts"
+              label={t({ message: "All accounts", comment: "Text on a dropdown that picks several on the Income vs Expense report" })}
               groups={accountOptions}
               value={chosenAccounts}
               onChange={setChosenAccounts}
@@ -262,13 +271,13 @@ export function IncomeExpense({ household }: { household: Household }) {
                 useful, and neither is a filter -- it changes the headings
                 you tick, not the accounts that exist. */}
             <select
-              aria-label="Group accounts by"
+              aria-label={t`Group accounts by`}
               className="small"
               value={grouping}
               onChange={(e) => setGrouping(e.target.value as AccountGrouping)}
             >
-              <option value="country">by country</option>
-              <option value="type">by type</option>
+              <option value="country"><Trans comment="Option in a dropdown on the Income vs Expense report">by country</Trans></option>
+              <option value="type"><Trans comment="Option in a dropdown on the Income vs Expense report">by type</Trans></option>
             </select>
           </div>
         </div>
@@ -281,7 +290,7 @@ export function IncomeExpense({ household }: { household: Household }) {
       <Problem error={report.error} />
 
       {report.isLoading || !report.data ? (
-        <div className="muted">Loading…</div>
+        <div className="muted"><Trans comment="Text on the Income vs Expense report">Loading…</Trans></div>
       ) : (
         <>
           {/* "All dates" sends no ends and the server resolves them to where
@@ -291,7 +300,9 @@ export function IncomeExpense({ household }: { household: Household }) {
               range was decided for it should say what was decided. */}
           {(!range.since || !range.until) && (
             <p className="muted small" style={{ marginTop: 0 }}>
-              All dates: {report.data.since} to {report.data.until}.
+              <Trans>
+                All dates: {report.data.since} to {report.data.until}.
+              </Trans>
             </p>
           )}
           <ReportTable
@@ -326,8 +337,10 @@ export function CurrencyToggle({
 }) {
   return (
     <div className="currency-toggle">
-      <span className="daterange-label">Currency</span>
-      <div role="radiogroup" aria-label="Currency" className="daterange-presets">
+      <span className="daterange-label">
+        <Trans comment="Text on the Income vs Expense report: noun. See GLOSSARY.md">Currency</Trans>
+      </span>
+      <div role="radiogroup" aria-label={t({ message: "Currency", comment: "Screen-reader name on the Income vs Expense report: noun. See GLOSSARY.md" })} className="daterange-presets">
         {options.map((code) => (
           <button
             key={code}
@@ -342,20 +355,34 @@ export function CurrencyToggle({
         ))}
       </div>
       {options.length > 1 && (
-        <Hint label="why one currency at a time">
+        <Hint label={t`why one currency at a time`}>
           <p>
-            This ledger never converts. Currency lives on the account, and there is no exchange
-            rate stored anywhere — so a total mixing {options.join(" and ")} would be a number
-            with nothing behind it.
+            <Trans>
+              This ledger never converts. Currency lives on the account, and there is no exchange
+              rate stored anywhere — so a total mixing {listText(options)} would be a number with
+              nothing behind it.
+            </Trans>
           </p>
           <p className="muted small" style={{ marginBottom: 0 }}>
-            Each currency gets its own report instead. Nothing on this screen ever adds two
-            together.
+            <Trans>
+              Each currency gets its own report instead. Nothing on this screen ever adds two
+              together.
+            </Trans>
           </p>
         </Hint>
       )}
     </div>
   );
+}
+
+/** "3 transfer legs", for the line saying what the report left out. */
+function legs(count: number): string {
+  return plural(count, { one: `${count} transfer leg`, other: `${count} transfer legs` });
+}
+
+/** "2 opening balances", likewise. */
+function openings(count: number): string {
+  return plural(count, { one: `${count} opening balance`, other: `${count} opening balances` });
 }
 
 export function ReportTable({
@@ -403,13 +430,13 @@ export function ReportTable({
                   {monthLabel(period)}
                 </th>
               ))}
-              <th className="amount">Average</th>
-              <th className="amount">Total</th>
+              <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, per month">Average</Trans></th>
+              <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, the sum">Total</Trans></th>
             </tr>
           </thead>
 
           <Band
-            title="Income"
+            title={t({ message: "Income", comment: "Tooltip on the Income vs Expense report: noun, money that came in" })}
             tone="in"
             section={report.income}
             months={months}
@@ -419,7 +446,7 @@ export function ReportTable({
             onOpen={setCell}
           />
           <Band
-            title="Expense"
+            title={t({ message: "Expense", comment: "Tooltip on the Income vs Expense report: noun, money that went out" })}
             tone="out"
             section={report.expense}
             months={months}
@@ -444,7 +471,9 @@ export function ReportTable({
                 is told no colour at all. */}
             <tr className="report-net">
               <th scope="row" className="report-label">
-                Net
+                <Trans comment="Column heading on the Income vs Expense report: income minus spending">
+                  Net
+                </Trans>
               </th>
               {months.map((period) => (
                 <td key={period} className="amount">
@@ -453,7 +482,7 @@ export function ReportTable({
                     currency={currency}
                     signed
                     onOpen={onOpen}
-                    cell={{ title: `Net — ${monthLabel(period)}`, period }}
+                    cell={{ title: t({ message: `Net — ${monthLabel(period)}`, comment: "Label on the Income vs Expense report" }), period }}
                   />
                 </td>
               ))}
@@ -469,7 +498,7 @@ export function ReportTable({
                   strong
                   signed
                   onOpen={onOpen}
-                  cell={{ title: "Net — whole period" }}
+                  cell={{ title: t`Net — whole period` }}
                 />
               </td>
             </tr>
@@ -484,26 +513,23 @@ export function ReportTable({
       <p className="muted small report-notes">
         {hidden > 0 ? (
           <>
-            Not counted: {report.excluded.transfers} transfer
-            {report.excluded.transfers === 1 ? " leg" : " legs"} and{" "}
-            {report.excluded.opening_balances} opening balance
-            {report.excluded.opening_balances === 1 ? "" : "s"}. Moving money between your own
-            accounts is not income or spending, and what an account held when you started is
-            not money you earned.{" "}
+            {t`Not counted: ${legs(report.excluded.transfers)} and ${openings(report.excluded.opening_balances)}. Moving money between your own accounts is not income or spending, and what an account held when you started is not money you earned.`}{" "}
           </>
         ) : null}
         {work > 0 ? (
           <>
-            {work} work {work === 1 ? "expense or repayment" : "expenses and repayments"} left
-            out: what work pays you back was never your spending, and the repayment is not
-            income.{" "}
+            {plural(work, {
+              one: `${work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.`,
+              other: `${work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.`,
+            })}{" "}
           </>
         ) : null}
         {gaps > 0 ? (
           <>
-            {report.coverage.months_with_activity} of {report.coverage.months_in_range} months
-            have any transactions — an empty column is a month with nothing imported, not a
-            month you spent nothing.
+            {plural(report.coverage.months_in_range, {
+              one: `${report.coverage.months_with_activity} of ${report.coverage.months_in_range} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.`,
+              other: `${report.coverage.months_with_activity} of ${report.coverage.months_in_range} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.`,
+            })}
           </>
         ) : null}
       </p>
@@ -569,20 +595,20 @@ function Behind({
     <Dialog title={cell.title} onClose={onClose}>
       <Problem error={rows.error} />
       {rows.isLoading || !rows.data ? (
-        <p className="muted">Loading…</p>
+        <p className="muted"><Trans comment="Sentence on the Income vs Expense report">Loading…</Trans></p>
       ) : rows.data.entries.length === 0 ? (
-        <Empty>Nothing went into this one.</Empty>
+        <Empty><Trans>Nothing went into this one.</Trans></Empty>
       ) : (
         <>
           <div className="behind-scroll">
             <table className="behind">
               <thead>
                 <tr>
-                  <th>Account</th>
-                  <th>Date</th>
-                  <th>Payee</th>
-                  <th>Memo</th>
-                  <th className="amount">Amount</th>
+                  <th><Trans comment="Column heading on the Income vs Expense report: noun, a bank or cash account. See GLOSSARY.md">Account</Trans></th>
+                  <th><Trans comment="Column heading on the Income vs Expense report: noun. See GLOSSARY.md">Date</Trans></th>
+                  <th><Trans comment="Column heading on the Income vs Expense report: noun, who was paid or who paid. See GLOSSARY.md">Payee</Trans></th>
+                  <th><Trans comment="Column heading on the Income vs Expense report: noun, the free-text line of a transaction. See GLOSSARY.md">Memo</Trans></th>
+                  <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, a sum of money. See GLOSSARY.md">Amount</Trans></th>
                 </tr>
               </thead>
               <tbody>
@@ -601,7 +627,10 @@ function Behind({
               <tfoot>
                 <tr>
                   <th scope="row" colSpan={4}>
-                    {rows.data.count} {rows.data.count === 1 ? "transaction" : "transactions"}
+                    {plural(rows.data.count, {
+                      one: `${rows.data.count} transaction`,
+                      other: `${rows.data.count} transactions`,
+                    })}
                   </th>
                   <td className="amount">
                     <Figure minor={rows.data.total_minor} currency={currency} strong />
@@ -612,9 +641,11 @@ function Behind({
           </div>
           {rows.data.capped && (
             <p className="muted small">
-              Showing the {rows.data.entries.length} most recent of {rows.data.count}. The
-              total above is over all of them — narrow the report, or open one month rather
-              than the whole period.
+              <Trans>
+                Showing the {rows.data.entries.length} most recent of {rows.data.count}. The total
+                above is over all of them — narrow the report, or open one month rather than the
+                whole period.
+              </Trans>
             </p>
           )}
         </>
@@ -733,6 +764,9 @@ function Band({
   const key = bandKey(tone);
   const shut = collapsed.has(key);
   const groups = useMemo(() => groupRows(section.rows), [section.rows]);
+  // A whole phrase per band, not "Total" plus the band's name lower-cased:
+  // case and word order are the translator's.
+  const total = tone === "in" ? t({ message: "Total income", comment: "Label on the Income vs Expense report" }) : t({ message: "Total expense", comment: "Label on the Income vs Expense report" });
 
   return (
     <tbody className={`report-band report-${tone}`}>
@@ -750,9 +784,10 @@ function Band({
         <td colSpan={months.length + 2}>
           {shut && section.rows.length > 0 && (
             <span className="muted small">
-              {section.rows.length}{" "}
-              {section.rows.length === 1 ? "category" : "categories"} folded away — the
-              total is on the line below.
+              {plural(section.rows.length, {
+                one: `${section.rows.length} category folded away — the total is on the line below.`,
+                other: `${section.rows.length} categories folded away — the total is on the line below.`,
+              })}
             </span>
           )}
         </td>
@@ -761,7 +796,9 @@ function Band({
       {shut ? null : section.rows.length === 0 ? (
         <tr>
           <td className="muted small" colSpan={months.length + 3}>
-            Nothing in this window.
+            <Trans>
+              Nothing in this window.
+            </Trans>
           </td>
         </tr>
       ) : (
@@ -781,7 +818,7 @@ function Band({
 
       <tr className="report-total">
         <th scope="row" className="report-label">
-          Total {title.toLowerCase()}
+          {total}
         </th>
         {months.map((period) => (
           <td key={period} className="amount">
@@ -790,7 +827,7 @@ function Band({
               currency={currency}
               onOpen={onOpen}
               cell={{
-                title: `Total ${title.toLowerCase()} — ${monthLabel(period)}`,
+                title: `${total} — ${monthLabel(period)}`,
                 period,
                 direction: tone,
               }}
@@ -808,7 +845,7 @@ function Band({
             currency={currency}
             strong
             onOpen={onOpen}
-            cell={{ title: `Total ${title.toLowerCase()}`, direction: tone }}
+            cell={{ title: total, direction: tone }}
           />
         </td>
       </tr>
@@ -862,8 +899,10 @@ function Group({
           <td colSpan={months.length + 2}>
             {shut && (
               <span className="muted small">
-                {group.rows.length} {group.rows.length === 1 ? "category" : "categories"}{" "}
-                folded away
+                {plural(group.rows.length, {
+                  one: `${group.rows.length} category folded away`,
+                  other: `${group.rows.length} categories folded away`,
+                })}
               </span>
             )}
           </td>
@@ -978,7 +1017,7 @@ function Figure({
       {text}
       {/* The word a screen reader hears, because it hears no colour. The "-"
           in front of the figure is the cue that is there for everybody else. */}
-      {signed && <span className="sr-only"> {minor > 0 ? "surplus" : "shortfall"}</span>}
+      {signed && <span className="sr-only"> {minor > 0 ? t({ message: "surplus", comment: "Screen-reader text on the Income vs Expense report: the household kept money (for screen readers)" }) : t({ message: "shortfall", comment: "Screen-reader text on the Income vs Expense report: the household spent more than came in (for screen readers)" })}</span>}
     </span>
   );
   if (!onOpen || !cell) return body;
@@ -988,7 +1027,7 @@ function Figure({
       type="button"
       className="figure-open"
       onClick={() => onOpen(cell)}
-      title={`What went into ${cell.title}`}
+      title={t`What went into ${cell.title}`}
     >
       {body}
     </button>

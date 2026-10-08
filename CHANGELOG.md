@@ -47,12 +47,22 @@ history this repository does not have.
 
 ### Changed
 
-- **A hundred more refusals carry a code for translation.** Transactions,
-  transfers, splits and work expenses, payees and their naming rules,
-  categories, money and the profile panel now answer with a stable `code`
-  and raw `params` beside the same English `detail`, and the client has a
-  catalog message for each. The English a person or an agent reads is
-  unchanged, byte for byte, and agents still get no codes. (#57)
+- **A fresh install starts without `SPENDTRACKER_AUTO_MIGRATE=1`.** A first
+  `docker compose up -d` against a new volume used to be refused until you
+  passed the flag once from a terminal. A database with no tables at all --
+  or none yet -- is now migrated on its first start, with one line in the log
+  saying so, because there is nothing in it to lose. Every other mismatch is
+  still refused, including a database with tables but no migration stamp and
+  one stamped at a revision the code does not know. The flag keeps its
+  default (off) and its meaning: a deliberate migration of an existing ledger,
+  which `make upgrade` does with a backup first (#167).
+
+- **The recovery code for an update is issued by `POST`**
+  (`/api/admin/application/update/recovery-code`), not `GET`. Issuing one
+  replaces the code held for the prepared update, so a cross-site `GET` could
+  rotate it and make *Update* fail; as a `POST` it is behind the Origin check.
+- **The updater's heartbeat sentence reaches the screen**: `GET
+  /api/admin/application/update` carries `heartbeat.socket_sentence`.
 
 - **Short messages carry a note for the translator.** Every message of one
   or two words, and any whose English alone is ambiguous, says in one line
@@ -106,6 +116,26 @@ history this repository does not have.
   behind the source. Nothing an English reader sees changes. (#53)
 
 ### Added
+
+- **The Updates section on Admin → Application** (#166), where *Is there a
+  newer version?* was. It says which case this instance is in: a checkout
+  (update from the terminal), a container with no updater (how to start it,
+  naming the container the heartbeat named), an updater the engine refuses
+  (the updater's own sentence), one the engine has outgrown (*Update the
+  updater*), or a working one. A check offers the newest release with every
+  skipped release's notes as plain text, and any other newer release from a
+  menu; *Update the updater only* when a newer updater exists. Preparing shows
+  the updater's progress every two seconds. The confirmation lists the
+  migrations with one tick-box per migration a downgrade cannot undo, shows a
+  one-time recovery code with *Download as a file* and *I have saved it*, and
+  asks for the password and a code; *Update* stays disabled until every box is
+  ticked. While it updates a full-width panel watches `/api/health`, reloads
+  when the app is back, and after 30 minutes points at the recovery page. The
+  outcome stays at the top of the section until dismissed.
+- **Update backups are listed under Database** with their version and
+  migration, apart from the backups made by hand. Each downloads; only those
+  older than the newest five can be deleted, and the server still refuses
+  the five.
 
 - **The app's side of self-update, API only** (#165). Owner-only endpoints
   under `/admin/application/update` -- a member gets 403 and nothing is
@@ -166,7 +196,31 @@ history this repository does not have.
   lock of its own, `requirements-updater.txt`, never in the app's runtime
   lock. Tested offline against the real 0.7.0, 0.7.1 and 0.8.0 bundles and
   tampered copies of them. Nothing calls it yet.
-## 0.8.0 — 2026-10-08
+
+- **The self-updater can prepare, apply and roll back an update** (#161).
+  *Prepare* resolves both images of the release to digests without pulling,
+  checks free disk and memory, verifies both attestations, pulls them by
+  digest, compares their labels with what was verified, and asks the new
+  image's `scripts.upgrade --check --json` what it would do to this ledger,
+  with the app serving throughout. *Apply* runs the steps of the design one
+  journal entry at a time: it stops the app and parks it as
+  `<name>-previous`, runs the drill from the new image (backup first, then
+  the migration), starts the new version as a copy of the previous container
+  that changes only the image and `SPENDTRACKER_AUTO_MIGRATE=0`, checks
+  health from where requests arrive (the Tailscale sidecar, or the published
+  port), writes the pin into the project's `.env` and `pin/release.env`, and
+  prunes update backups beyond the newest five. A failed migration or health
+  check **rolls back on its own**: the backup restored with the old image,
+  the old version started again under its name; after three failed attempts
+  the update needs recovery and nothing serves the ledger. After a crash, a
+  laptop sleeping or the engine restarting, the updater resumes from its
+  journal and never runs the drill twice. The Tailscale sidecar is never
+  stopped or restarted, and an app in a Podman pod is refused with a
+  sentence. The handover to a newer updater (#162) and the maintenance page
+  (#163) are not built yet: the updater carries on without them. CI gains a
+  `self-update` job, advisory for now, that updates release A to B through
+  the updater against a real Docker Engine. No image or compose service runs
+  the updater yet (#164).## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
 
@@ -417,6 +471,15 @@ published image as what `compose.yaml` runs.
 - **Why any member may import accounts from a file is written down**, beside
   the route, with a test: it only adds accounts, each in the audit log, and
   History undoes the whole file. Nothing about who may run it changed. (#115)
+
+- **A release waits for one approval before anything is published.**
+  `release.yml`'s `publish` job runs in a `release` environment, and the other
+  two publishing jobs depend on it, so once the repository gives that
+  environment a required reviewer, a pushed `v*` tag builds and smoke-tests as
+  before and then waits for a single click before anything reaches Releases
+  or ghcr.io. `tests/test_release_workflow.py` fails if a publishing job stops
+  depending on the gated one. Until the reviewer is set, it behaves as it did.
+  (#96)
 
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it

@@ -246,7 +246,8 @@ a fresh chance to run a migration nobody was watching. Set
 `SPENDTRACKER_AUTO_MIGRATE=1` when you mean it. Without it, `schema_check`
 refuses to boot against a database that is behind or ahead and says which
 revision each side is at — which is the correct behaviour for a container that
-came back at 04:00.
+came back at 04:00. The one database a start migrates by itself is one with
+no tables at all, a brand-new volume, because there is nothing in it to lose.
 
 ## A backup downloaded from the Application screen
 

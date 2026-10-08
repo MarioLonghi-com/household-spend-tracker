@@ -332,7 +332,8 @@ is not asserting what it did to the data.** Four of the previous build's
 nineteen bugs hid behind exactly that.
 
 **Changed what an import does? Change the page that explains it** in the same
-commit: `client/src/screens/ImportGuide.tsx`, *Admin → How import works*.
+commit: `client/src/screens/importGuide/en.tsx`, *Admin → How import works*
+(and the same page in any other language it has been written in).
 `tests/test_import_guide.py` fails on an outcome, a state word, a format or an
 identifier kind it does not mention -- but only a person notices a sentence
 that has stopped being true.

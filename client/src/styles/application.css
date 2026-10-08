@@ -136,3 +136,73 @@
     margin-left: 0;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Updates (#166)
+   ---------------------------------------------------------------------------
+
+   Release notes are plain text from GitHub, rendered as text: their line
+   breaks are kept and nothing in them is markup. Wrapped rather than
+   scrolled sideways, because they are prose, not a log.
+   --------------------------------------------------------------------------- */
+.release-notes {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  border-left: 3px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 4px;
+  max-height: 18rem;
+  overflow-y: auto;
+}
+.release-notes-one { margin-top: 12px; }
+.release-notes-one h4 { margin-bottom: 4px; }
+
+.update-choose { flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0 4px; }
+.update-choose select { width: auto; }
+
+.update-steps { list-style: none; padding: 0; margin: 8px 0; font-size: 14px; }
+.update-steps li { padding: 2px 0; }
+.update-steps li.current { color: var(--muted); }
+
+.update-facts th { text-align: left; white-space: nowrap; vertical-align: top; padding-right: 14px; }
+.update-migrations { padding-left: 18px; }
+.update-lossy .check { margin-top: 6px; color: var(--ink); }
+.update-recovery { margin-top: 14px; }
+.recovery-code {
+  font-family: var(--mono);
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+  overflow-wrap: anywhere;
+}
+.update-stepup { margin-top: 14px; max-width: 420px; }
+.update-actions { gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.update-outcome .log-dump { max-height: 14rem; }
+
+/* While an update runs the whole page is this panel: there is nothing else
+   to do on the instance until it is back, and a half-usable screen invites
+   a click that the stopped app cannot answer. */
+.update-takeover {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--surface);
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+}
+.update-takeover-body {
+  width: min(760px, 100%);
+  padding: 32px 16px;
+}
+
+@media (max-width: 767px) {
+  .update-facts th { white-space: normal; }
+  .update-takeover-body { padding: 20px 16px; }
+}
