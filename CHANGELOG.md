@@ -47,6 +47,23 @@ history this repository does not have.
 
 ### Changed
 
+- **Short messages carry a note for the translator.** Every message of one
+  or two words, and any whose English alone is ambiguous, says in one line
+  what it is -- a button, a column heading, a state, which sense of
+  "Balance" -- through Lingui's own `comment`, so it reaches every
+  language's catalog. "New" and the authenticator's "Set up" now have a
+  context of their own, because they need different words in other
+  languages. The rule is in `client/src/locales/README.md`, and the catalog
+  tests refuse a bare short message. English is unchanged. (#228)
+
+- **"Check the repository" reads published releases, not tags,** and returns
+  every release newer than the running one, newest first, each with its
+  notes: the release's CHANGELOG section where the release body leads with
+  it, and an older release's body as it is. Drafts, prereleases and any tag
+  that is not `vX.Y.Z` are never offered -- a tag can exist with no image
+  behind it, as 0.3.1's did. Still one request, only when the button is
+  pressed, saying nothing about the instance. (#165)
+
 - **The remaining screens' words go into the catalogs one screen at a time**,
   starting with Categories. English is unchanged; each screen has a test
   that renders it in the `en-XA` pseudo-locale and finds no English left.
@@ -83,6 +100,25 @@ history this repository does not have.
 
 ### Added
 
+- **The app's side of self-update, API only** (#165). Owner-only endpoints
+  under `/admin/application/update` -- a member gets 403 and nothing is
+  written: the updater's heartbeat, status, current prepare report, newest
+  outcome and update backups (`GET`, no outbound request); `prepare`; a
+  one-time recovery code for the confirmation; `apply`, which spends a
+  step-up grant first and must accept exactly the report's lossy migrations;
+  `discard`; `updater`, to replace the updater only, with an optional newer
+  release; and dismissing an outcome. Each writes one request into the
+  shared `update` volume (`SPENDTRACKER_UPDATE_DIR`, default
+  `/var/lib/spend-tracker-update` in the container), atomically, group-shared,
+  never over a request not yet taken; the app checks what it can first, so a
+  refusal is a sentence at once. The recovery code is 140 random bits shown
+  once; only its scrypt hash travels, and the code is never written or
+  logged. Prepared, confirmed (with the lossy migrations accepted),
+  discarded and deleted-backup events are logged at WARNING with the owner's
+  email. The backups listing includes update backups (folders) with their
+  size, version and revision, and the newest five cannot be deleted (409).
+  The Updates section of the screen follows in #166.
+
 - **The self-updater's core, not yet wired to anything** (#158). A new
   top-level package, `updater/`, standard library only: the file contract
   between the app and the updater in the shared `update` volume (requests,
@@ -109,6 +145,20 @@ history this repository does not have.
   writes `updater.json` every 30 seconds with the negotiated API version, the
   engine's window and the updater's real container name, under Docker
   Compose's and podman-compose's naming alike. Nothing runs it yet.
+
+- **The updater can prove where an image came from before pulling it**
+  (#159). `updater/verify.py` reads the build attestation `release.yml` pushed
+  beside the app or updater image -- anonymously, from the registry, every
+  digest recomputed -- and checks with sigstore that this repository's release
+  workflow built exactly that digest for tag `vX.Y.Z` on a GitHub-hosted
+  runner, by repository and owner id rather than name, with no prerelease
+  suffix. Signature, certificate chain and transparency-log proof are checked
+  from the bundle alone; when Sigstore's trust repository cannot be reached it
+  falls back to the trust root committed beside it and records which one
+  verified. Any doubt is a refusal and nothing skips it. sigstore lives in a
+  lock of its own, `requirements-updater.txt`, never in the app's runtime
+  lock. Tested offline against the real 0.7.0, 0.7.1 and 0.8.0 bundles and
+  tampered copies of them. Nothing calls it yet.
 
 ## 0.8.0 — 2026-10-08
 

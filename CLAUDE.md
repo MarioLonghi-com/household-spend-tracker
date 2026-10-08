@@ -75,7 +75,9 @@ sharing a checkout with a session you cannot see.
   are behind the source. Only English is served: a translated catalog holds
   `#, fuzzy` drafts and has no loader until #58 ships it, and the picker stays
   hidden until then. A new error code needs its message in
-  `client/src/lib/errorMessages.ts` as well as `app/error_codes.py`.
+  `client/src/lib/errorMessages.ts` as well as `app/error_codes.py`. A
+  message of one or two words, or one whose English alone is ambiguous,
+  carries a translator `comment` (`client/src/locales/README.md`, #228).
 - **An enum value with no designed behaviour is a bug with a menu item.** The
   previous build shipped twelve account types with three behaviours and five
   loan types it never modelled.

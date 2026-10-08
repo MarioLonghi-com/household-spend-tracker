@@ -357,7 +357,7 @@ export function OneTimeImportNote({
   if (imports.some((one) => one.status === "applied")) return null;
   const link = <OneTimeImportLink onGo={onGo} />;
   return (
-    <div className="card" role="note" aria-label={t`One-time Import`}>
+    <div className="card" role="note" aria-label={t({ message: "One-time Import", comment: "Screen-reader name on the Import screen" })}>
       <p className="small" style={{ margin: 0 }}>
         <Trans>
           <strong>Coming from another budgeting app?</strong> Statements go in one at a time here.
@@ -384,10 +384,10 @@ function OneTimeImportLink({ onGo }: { onGo?: (screen: string) => void }) {
               }, 0);
             }}
           >
-            {t`One-time Import`}
+            {t({ message: "One-time Import", comment: "Button on the Import screen" })}
           </button>
         ) : (
-          t`One-time Import`
+          t({ message: "One-time Import", comment: "Label on the Import screen" })
         )}
     </>
   );
@@ -460,7 +460,7 @@ export function Import({
   const [queueDirection, setQueueDirection] = useState<SortDirection>("desc");
   const [purging, setPurging] = useState<StagedImport | null>(null);
   // The staged file's name, or words for one that has none.
-  const purgingName = purging?.filename ?? t`This import`;
+  const purgingName = purging?.filename ?? t({ message: "This import", comment: "Label on the Import screen" });
 
   //: Imports staged and never committed. The refusal to stage a file twice
   //: says one "is waiting to be reviewed"; this is how it gets reached.
@@ -741,10 +741,10 @@ export function Import({
                 <tr>
                   {(
                     [
-                      { label: t`File`, column: "filename" },
-                      { label: t`Into`, column: "account" },
-                      { label: t`Staged by`, column: "actor" },
-                      { label: t`Staged`, column: "staged_at" },
+                      { label: t({ message: "File", comment: "Label on the Import screen" }), column: "filename" },
+                      { label: t({ message: "Into", comment: "Label on the Import screen: preposition, the account money arrives in" }), column: "account" },
+                      { label: t({ message: "Staged by", comment: "Label on the Import screen" }), column: "actor" },
+                      { label: t({ message: "Staged", comment: "Label on the Import screen: prepared, not yet written" }), column: "staged_at" },
                     ] as { label: string; column: QueueSort }[]
                   ).map((one) => (
                     <SortHeading
@@ -760,7 +760,7 @@ export function Import({
                     />
                   ))}
                   <SortHeading
-                    label={t`Rows`}
+                    label={t({ message: "Rows", comment: "Column heading on the Import screen: noun, lines of a file or table" })}
                     column="rows"
                     sort={queueSort}
                     direction={queueDirection}
@@ -789,15 +789,15 @@ export function Import({
                         onClick={() => open.mutate(one)}
                       >
                         {open.isPending && open.variables?.batch_id === one.batch_id
-                          ? t`Opening…`
-                          : t`Open`}
+                          ? t({ message: "Opening…", comment: "Button on the Import screen" })
+                          : t({ message: "Open", comment: "Button on the Import screen: verb" })}
                       </button>
                       <button
                         className="link"
                         disabled={open.isPending || purge.isPending}
                         onClick={() => setPurging(one)}
                       >
-                        <Trans>Discard</Trans>
+                        <Trans comment="Button on the Import screen: verb, throw away what was not saved">Discard</Trans>
                       </button>
                     </td>
                   </tr>
@@ -831,10 +831,10 @@ export function Import({
               disabled={purge.isPending}
               onClick={() => purge.mutate(purging)}
             >
-              {purge.isPending ? t`Discarding…` : t`Yes, discard it`}
+              {purge.isPending ? t({ message: "Discarding…", comment: "Button on the Import screen" }) : t`Yes, discard it`}
             </button>
             <button disabled={purge.isPending} onClick={() => setPurging(null)}>
-              <Trans>Keep it</Trans>
+              <Trans comment="Button on the Import screen">Keep it</Trans>
             </button>
           </div>
         </Dialog>
@@ -870,7 +870,7 @@ export function Import({
                     disabled={open.isPending}
                     onClick={() => open.mutate(alreadyStaged)}
                   >
-                    {open.isPending ? t`Opening…` : t`Open that import`}
+                    {open.isPending ? t({ message: "Opening…", comment: "Button on the Import screen" }) : t`Open that import`}
                   </button>
                 )}
                 <button onClick={() => send.mutate(true)}>
@@ -888,7 +888,7 @@ export function Import({
           <div className="row">
             <Field label={t`Into which account`}>
               <select value={accountId} onChange={(e) => setAccountId(e.target.value)}>
-                <option value="">{t`Choose…`}</option>
+                <option value="">{t({ message: "Choose…", comment: "Option in a dropdown on the Import screen" })}</option>
                 {(accounts.data ?? []).map((one) => (
                   <option key={one.id} value={one.id}>
                     {one.name} ({one.currency})
@@ -896,7 +896,7 @@ export function Import({
                 ))}
               </select>
             </Field>
-            <Field label={t`File`}>
+            <Field label={t({ message: "File", comment: "Label of a form field on the Import screen" })}>
               <input
                 type="file"
                 accept=".csv,.txt,.ofx,.qfx,.xls,.pdf,text/csv,application/x-ofx,application/pdf"
@@ -941,14 +941,14 @@ export function Import({
                 disabled={answerTag.isPending}
                 onClick={() => answerTag.mutate({ add: true })}
               >
-                <Trans>Add</Trans>
+                <Trans comment="Button on the Import screen: verb">Add</Trans>
               </button>{" "}
               <button
                 className="link"
                 disabled={answerTag.isPending}
                 onClick={() => answerTag.mutate({ add: false })}
               >
-                <Trans>Ignore</Trans>
+                <Trans comment="Button on the Import screen">Ignore</Trans>
               </button>
             </p>
           )}
@@ -970,7 +970,7 @@ export function Import({
             disabled={!accountId || (!file && !pasted.trim()) || send.isPending}
             onClick={() => send.mutate(false)}
           >
-            {send.isPending ? t`Reading…` : t`Read the file`}
+            {send.isPending ? t({ message: "Reading…", comment: "Button on the Import screen" }) : t`Read the file`}
           </button>
         </div>
       )}
@@ -1012,7 +1012,7 @@ export function Import({
               onClick={() => void onlyThisFile(offer.lineId)}
             >
               {spread.isPending && !rule.isPending
-                ? t`Applying…`
+                ? t({ message: "Applying…", comment: "Button on the Import screen" })
                 : t`Yes, all ${offer.count + 1} of them`}
             </button>
             {offer.uncategorised ? null : (
@@ -1052,7 +1052,7 @@ export function Import({
               <Trans>What this would do</Trans>
             </h2>
             <p className="muted small">
-              {preview.filename} · {plural(preview.lines.length, { other: `${preview.lines.length} lines` })} · {t`into ${account?.name ?? ""}`}
+              {preview.filename} · {plural(preview.lines.length, { other: `${preview.lines.length} lines` })} · {t({ message: `into ${account?.name ?? ""}`, comment: "Sentence on the Import screen: preposition, the account money arrives in" })}
             </p>
 
             {preview.warnings.map((warning) => (
@@ -1091,14 +1091,14 @@ export function Import({
                 <thead>
                   <tr>
                     <th style={{ width: 28 }}>
-                      <Trans>Add</Trans>
+                      <Trans comment="Column heading on the Import screen">Add</Trans>
                     </th>
                     {(
                       [
-                        { label: t`Line`, column: "line" },
-                        { label: t`Date`, column: "date" },
-                        { label: t`Payee`, column: "payee" },
-                        { label: t`Memo`, column: "memo" },
+                        { label: t({ message: "Line", comment: "Label on the Import screen: noun, a line of a file" }), column: "line" },
+                        { label: t({ message: "Date", comment: "Label on the Import screen: noun. See GLOSSARY.md" }), column: "date" },
+                        { label: t({ message: "Payee", comment: "Label on the Import screen: noun, who was paid or who paid. See GLOSSARY.md" }), column: "payee" },
+                        { label: t({ message: "Memo", comment: "Label on the Import screen: noun, the free-text line of a transaction. See GLOSSARY.md" }), column: "memo" },
                       ] as { label: string; column: PreviewSort }[]
                     ).map((one) => (
                       <SortHeading
@@ -1114,7 +1114,7 @@ export function Import({
                       />
                     ))}
                     <SortHeading
-                      label={t`Amount`}
+                      label={t({ message: "Amount", comment: "Column heading on the Import screen: noun, a sum of money. See GLOSSARY.md" })}
                       column="amount"
                       sort={sort}
                       direction={direction}
@@ -1125,7 +1125,7 @@ export function Import({
                       align="right"
                     />
                     <SortHeading
-                      label={t`Category`}
+                      label={t({ message: "Category", comment: "Column heading on the Import screen: noun, what a transaction was for. See GLOSSARY.md" })}
                       column="category"
                       sort={sort}
                       direction={direction}
@@ -1135,7 +1135,7 @@ export function Import({
                       }}
                     />
                     <SortHeading
-                      label={t`What happens`}
+                      label={t({ message: "What happens", comment: "Column heading on the Import screen" })}
                       column="outcome"
                       sort={sort}
                       direction={direction}
@@ -1176,10 +1176,10 @@ export function Import({
                             ? {
                                 lineId: updated.id,
                                 count: updated.similar_lines,
-                                name: updated.category_name ?? t`uncategorised`,
+                                name: updated.category_name ?? t({ message: "uncategorised", comment: "Text on the Import screen: having no category. See GLOSSARY.md" }),
                                 payee:
                                   ((updated.parsed ?? {}) as Record<string, string>).payee ??
-                                  t`this payee`,
+                                  t({ message: "this payee", comment: "Text on the Import screen" }),
                                 uncategorised: updated.category_uncategorised,
                               }
                             : null,
@@ -1214,10 +1214,10 @@ export function Import({
                 title={busyLines.size > 0 ? t`Finish the category you are editing first` : ""}
                 onClick={() => commit.mutate()}
               >
-                {commit.isPending ? t`Importing…` : t`Import these`}
+                {commit.isPending ? t({ message: "Importing…", comment: "Button on the Import screen" }) : t({ message: "Import these", comment: "Button on the Import screen" })}
               </button>
               <button onClick={() => setPreview(null)}>
-                <Trans>Cancel</Trans>
+                <Trans comment="Button on the Import screen">Cancel</Trans>
               </button>
             </div>
             <p className="small muted" style={{ marginTop: 10 }}>
@@ -1282,7 +1282,7 @@ export function RawFile({
         <Trans>The file itself</Trans>
       </h2>
       <p className="muted small">
-        {raw.name} · {t`${formatCount(raw.total)} characters`}
+        {raw.name} · {t({ message: `${formatCount(raw.total)} characters`, comment: "Sentence on the Import screen" })}
         {truncated ? ` · ${t`showing the first ${formatCount(RAW_TEXT_LIMIT)}`}` : ""}
         {` · ${t`from the copy in this browser, not from the server — the file itself is not kept`}`}
       </p>
@@ -1366,7 +1366,7 @@ function PreviewRow({
       <td>
         <input
           type="checkbox"
-          aria-label={t`Include line ${line.line_no}`}
+          aria-label={t({ message: `Include line ${line.line_no}`, comment: "Screen-reader name on the Import screen" })}
           checked={willWrite && !skipped}
           disabled={!willWrite}
           onChange={onToggleSkip}
@@ -1500,7 +1500,7 @@ function MemoCell({
             {shown.text ? (
               <span className={shown.chosen ? undefined : "muted"}>{shown.text}</span>
             ) : (
-              <span className="muted">{shown.chosen ? t`no memo` : "—"}</span>
+              <span className="muted">{shown.chosen ? t({ message: "no memo", comment: "Button on the Import screen" }) : "—"}</span>
             )}
             {shown.chosen && bank ? (
               <span className="memo-was mono">{String(bank)}</span>
@@ -1522,7 +1522,7 @@ function MemoCell({
         value={typed}
         autoFocus
         maxLength={500}
-        aria-label={t`Memo`}
+        aria-label={t({ message: "Memo", comment: "Screen-reader name on the Import screen: noun, the free-text line of a transaction. See GLOSSARY.md" })}
         placeholder={bank ? String(bank) : t`a note for this row`}
         onChange={(e) => setTyped(e.target.value)}
         onKeyDown={(e) => {
@@ -1723,7 +1723,7 @@ function CategoryCell({
         browse
         limit={Infinity}
         placeholder={t`type any part`}
-        aria-label={t`Category`}
+        aria-label={t({ message: "Category", comment: "Screen-reader name on the Import screen: noun, what a transaction was for. See GLOSSARY.md" })}
         autoFocus
         onCommit={commit}
         onCancel={() => {
@@ -1757,7 +1757,7 @@ function CategoryCell({
  */
 /** The choice that means "no category", as the category box lists and accepts it. */
 export function uncategorisedWord(): string {
-  return t`Uncategorised`;
+  return t({ message: "Uncategorised", comment: "Label on the Import screen: having no category. See GLOSSARY.md" });
 }
 
 /** What the category cell sends: a category id, null for "back to the rule", or none at all. */
@@ -1772,9 +1772,9 @@ type CategoryChoice = string | null | "uncategorised";
  * are different promises here: one is a decision, the other a gap.
  */
 export function categoryOf(line: ImportLine): { text: string; muted: boolean } {
-  if (line.category_uncategorised) return { text: t`uncategorised (chosen)`, muted: false };
+  if (line.category_uncategorised) return { text: t({ message: "uncategorised (chosen)", comment: "Label on the Import screen" }), muted: false };
   if (line.category_name) return { text: line.category_name, muted: !line.category_chosen };
-  return { text: t`uncategorised`, muted: true };
+  return { text: t({ message: "uncategorised", comment: "Label on the Import screen: having no category. See GLOSSARY.md" }), muted: true };
 }
 
 /** Same folding the Combobox ranks with, so what matches is what was offered. */
