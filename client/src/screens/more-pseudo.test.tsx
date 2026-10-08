@@ -29,6 +29,8 @@ import { Payees } from "./Payees";
 import { Rules } from "./Rules";
 import { HouseholdPage } from "./Household";
 import { Admin } from "./Admin";
+import { Reconcile } from "./Reconcile";
+import { AccountImport } from "./AccountImport";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -253,5 +255,41 @@ describe("in en-XA, the remaining screens show no English", () => {
       await new Promise((done) => setTimeout(done, 0));
       expect(left().filter(dates)).toEqual([]);
     }
+  });
+
+  it("reconciling an account, before and after the balance is typed", async () => {
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path.includes("/reconciliations")) return [{ id: "z1", account_id: "a", statement_date: "2026-01-31", statement_balance: 5000, batch_id: null }];
+      return {
+        locked_balance: 5000,
+        last_statement_date: "2026-01-31",
+        last_statement_balance: 5000,
+        candidates: [{ id: "t1", date: "2026-02-03", payee: "Bakery", memo: "Sam", amount: -1200, cleared: "cleared" }],
+      };
+    });
+    const account = { id: "a", name: "Casa", currency: "EUR" } as never;
+    render(withQueries(<Reconcile account={account} onClose={vi.fn()} onDone={vi.fn()} />));
+    await screen.findByText("Bakery");
+    expect(left()).toEqual([]);
+    const balance = document.querySelectorAll(".panel input")[1] as HTMLInputElement;
+    fireEvent.change(balance, { target: { value: "38.00" } });
+    expect(left()).toEqual([]);
+  });
+
+  it("importing accounts from a file, with a problem in it", async () => {
+    vi.mocked(api.get).mockResolvedValue([{ code: "ES", name: "Spain", flag: "" }]);
+    vi.mocked(api.upload).mockResolvedValue({
+      rows: [
+        { line: 2, name: "Casa", type: "checking", currency: "EUR", country: "ES", flag: "", opening_balance: 1000, opening_date: "2026-01-02", iban: null, problems: [] },
+        { line: 3, name: "Doe", type: "boat", currency: "EUR", country: null, flag: "", opening_balance: null, opening_date: null, iban: null, problems: ["Sam"] },
+      ],
+    } as never);
+    render(withQueries(<AccountImport household={HOUSEHOLD} onClose={vi.fn()} onImported={vi.fn()} />));
+    const file = new File(["x"], "accounts.csv", { type: "text/csv" });
+    fireEvent.change(document.querySelector('input[type="file"]')!, { target: { files: [file] } });
+    await screen.findByText("Doe");
+    // The template's own column names stay as the file writes them.
+    const left2 = left().filter((word) => !/^(name|type|currency|country|opening_balance|opening_date|checking|savings|cash|credit_card|other_asset|other_liability|boat|accounts|csv|Spain)$/.test(word));
+    expect(left2).toEqual([]);
   });
 });
