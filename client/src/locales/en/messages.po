@@ -7,6 +7,14 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
 
+#: src/screens/Accounts.tsx
+msgid "The name looks like its IBAN."
+msgstr "The name looks like its IBAN."
+
+#: src/screens/Accounts.tsx
+msgid "Mentions"
+msgstr "Mentions"
+
 #: src/screens/Profile.tsx
 msgid "Creating…"
 msgstr "Creating…"
@@ -19,13 +27,25 @@ msgstr "Application management"
 msgid "To"
 msgstr "To"
 
+#: src/screens/Accounts.tsx
+msgid "Choose…"
+msgstr "Choose…"
+
 #: src/screens/Profile.tsx
 msgid "New password"
 msgstr "New password"
 
+#: src/lib/labels.ts
+msgid "Cash"
+msgstr "Cash"
+
 #: src/screens/ResetAccount.tsx
 msgid "Your new password is set. Sign in with it and your authenticator as usual."
 msgstr "Your new password is set. Sign in with it and your authenticator as usual."
+
+#: src/screens/Accounts.tsx
+msgid "this account is closed"
+msgstr "this account is closed"
 
 #: src/screens/Profile.tsx
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
@@ -34,6 +54,10 @@ msgstr "A key lets a program — a script, an automation, an AI assistant — re
 #: src/screens/Profile.tsx
 msgid "Add this to your authenticator app, then type the six digits it shows."
 msgstr "Add this to your authenticator app, then type the six digits it shows."
+
+#: src/screens/Accounts.tsx
+msgid "Type"
+msgstr "Type"
 
 #: src/screens/Profile.tsx
 msgid "No browsers were being trusted."
@@ -47,6 +71,10 @@ msgstr "History"
 msgid "You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own."
 msgstr "You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own."
 
+#: src/screens/Accounts.tsx
+msgid "account types"
+msgstr "account types"
+
 #. placeholder {0}: passkey.label
 #: src/screens/Passkeys.tsx
 msgid "Rename {0}"
@@ -56,9 +84,18 @@ msgstr "Rename {0}"
 msgid "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 
+#. placeholder {0}: account.currency
+#: src/screens/Accounts.tsx
+msgid "That isn't an amount in {0}."
+msgstr "That isn't an amount in {0}."
+
 #: src/screens/Profile.tsx
 msgid "what a key can never do"
 msgstr "what a key can never do"
+
+#: src/screens/Accounts.tsx
+msgid "Name the bank uses"
+msgstr "Name the bank uses"
 
 #: src/screens/Profile.tsx
 msgid "Light"
@@ -76,6 +113,13 @@ msgstr "Dismiss"
 #: src/components/StepUp.tsx
 msgid "{why} So this asks for your password and a code — the same as signing in."
 msgstr "{why} So this asks for your password and a code — the same as signing in."
+
+#. placeholder {0}: one.would_link
+#. placeholder {1}: one.would_link
+#. placeholder {2}: one.would_link
+#: src/screens/Accounts.tsx
+msgid "{0, plural, one {{1} pair} other {{2} pairs}}"
+msgstr "{0, plural, one {{1} pair} other {{2} pairs}}"
 
 #: src/screens/SignIn.tsx
 msgid "You're signed in. This server's secret key was replaced, so the authenticator you had no longer works here. Scan this with your authenticator app and type the six digits it shows — the recovery code you just used covers this, so it costs no other. Then delete the old entry for this account from your app."
@@ -117,9 +161,18 @@ msgstr "I have my authenticator after all"
 msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 msgstr "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 
+#: src/lib/labels.ts
+msgid "Credit cards"
+msgstr "Credit cards"
+
 #: src/components/ReenrolmentDue.tsx
 msgid "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
 msgstr "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
+
+#. placeholder {0}: one.value
+#: src/screens/Accounts.tsx
+msgid "Add {0}"
+msgstr "Add {0}"
 
 #: src/screens/ResetAccount.tsx
 msgid "Looking up your reset link…"
@@ -151,6 +204,10 @@ msgstr "New household"
 msgid "Select {0} {1}"
 msgstr "Select {0} {1}"
 
+#: src/screens/Accounts.tsx
+msgid "Opening date"
+msgstr "Opening date"
+
 #: src/screens/Profile.tsx
 msgid "What it may do"
 msgstr "What it may do"
@@ -158,6 +215,10 @@ msgstr "What it may do"
 #: src/App.tsx
 msgid "Transactions"
 msgstr "Transactions"
+
+#: src/screens/Accounts.tsx
+msgid "The type and currency are fixed once an account exists, because every transaction on it is recorded in that currency."
+msgstr "The type and currency are fixed once an account exists, because every transaction on it is recorded in that currency."
 
 #. placeholder {0}: formatInstant(key.expires_at)
 #: src/screens/Profile.tsx
@@ -169,9 +230,25 @@ msgstr "Expired {0}"
 msgid "Check the code and finish"
 msgstr "Check the code and finish"
 
+#: src/screens/Accounts.tsx
+msgid "Account number"
+msgstr "Account number"
+
 #: src/lib/signInChanges.ts
 msgid "Somebody gave {user} a new authenticator"
 msgstr "Somebody gave {user} a new authenticator"
+
+#: src/screens/Accounts.tsx
+msgid "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
+msgstr "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
+
+#: src/lib/labels.ts
+msgid "Review"
+msgstr "Review"
+
+#: src/screens/Accounts.tsx
+msgid "Add an account"
+msgstr "Add an account"
 
 #: src/App.tsx
 #: src/screens/ResetAccount.tsx
@@ -182,6 +259,10 @@ msgstr "Sign in"
 #: src/lib/signInChanges.ts
 msgid "{by} added {user} as an owner"
 msgstr "{by} added {user} as an owner"
+
+#: src/lib/labels.ts
+msgid "Something you own that holds value and that you want in the totals — a deposit held by a landlord, an investment you track by hand."
+msgstr "Something you own that holds value and that you want in the totals — a deposit held by a landlord, an investment you track by hand."
 
 #: src/screens/Profile.tsx
 msgid "Or open <0>the enrolment link</0> on the device with the app."
@@ -194,6 +275,10 @@ msgstr "You're already signed in"
 #: src/components/ReenrolmentDue.tsx
 msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
 msgstr "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
+
+#: src/screens/Accounts.tsx
+msgid "{count, plural, other {{shown} files}}"
+msgstr "{count, plural, other {{shown} files}}"
 
 #: src/screens/TransferSections.tsx
 msgid "Unlink"
@@ -212,9 +297,14 @@ msgid "{keys, plural, one {{keys} agent key still works — revoke it below if i
 msgstr "{keys, plural, one {{keys} agent key still works — revoke it below if it should stop.} other {{keys} agent keys still work — revoke them below if they should stop.}}"
 
 #: src/App.tsx
+#: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
 msgid "Name"
 msgstr "Name"
+
+#: src/lib/labels.ts
+msgid "Flags & options"
+msgstr "Flags & options"
 
 #: src/screens/Profile.tsx
 msgid "Authenticator"
@@ -224,6 +314,11 @@ msgstr "Authenticator"
 msgid "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
 msgstr "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
 
+#: src/lib/labels.ts
+msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
+msgstr "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
+
+#: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/TransferSections.tsx
 msgid "Actions"
@@ -240,6 +335,22 @@ msgstr "Kept"
 #: src/screens/Profile.tsx
 msgid "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
 msgstr "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
+
+#: src/screens/Accounts.tsx
+msgid "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
+msgstr "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
+
+#: src/lib/labels.ts
+msgid "Day-to-day money at a bank. Salary in, card and direct debits out."
+msgstr "Day-to-day money at a bank. Salary in, card and direct debits out."
+
+#: src/screens/Accounts.tsx
+msgid "Closed — hide it from the accounts list"
+msgstr "Closed — hide it from the accounts list"
+
+#: src/screens/Accounts.tsx
+msgid "That isn't an amount in {currency}."
+msgstr "That isn't an amount in {currency}."
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
@@ -264,6 +375,10 @@ msgstr "Password"
 msgid "Waiting for the passkey…"
 msgstr "Waiting for the passkey…"
 
+#: src/screens/Accounts.tsx
+msgid "Name as the bank writes it"
+msgstr "Name as the bank writes it"
+
 #: src/lib/signInChanges.ts
 msgid "Somebody reset {user}'s authenticator"
 msgstr "Somebody reset {user}'s authenticator"
@@ -271,6 +386,10 @@ msgstr "Somebody reset {user}'s authenticator"
 #: src/screens/AcceptInvite.tsx
 msgid "Invitations are single-use and they expire. Ask whoever sent it for a fresh one."
 msgstr "Invitations are single-use and they expire. Ask whoever sent it for a fresh one."
+
+#: src/lib/labels.ts
+msgid "Skipped"
+msgstr "Skipped"
 
 #: src/components/StepUp.tsx
 #: src/screens/Profile.tsx
@@ -280,6 +399,10 @@ msgstr "Your password"
 #: src/screens/Profile.tsx
 msgid "Making…"
 msgstr "Making…"
+
+#: src/screens/Accounts.tsx
+msgid "e.g. the code after _en_"
+msgstr "e.g. the code after _en_"
 
 #: src/components/bits.tsx
 msgid "Sort by {label}"
@@ -297,6 +420,7 @@ msgstr "Appearance"
 msgid "None yet"
 msgstr "None yet"
 
+#: src/screens/Accounts.tsx
 #: src/screens/TransferSections.tsx
 msgid "Account"
 msgstr "Account"
@@ -309,6 +433,10 @@ msgstr "never used"
 #: src/screens/Setup.tsx
 msgid "Check the code"
 msgstr "Check the code"
+
+#: src/lib/labels.ts
+msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
+msgstr "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 
 #: src/App.tsx
 msgid "Hide the menu"
@@ -330,6 +458,10 @@ msgstr "{by} reset {user}'s password and authenticator"
 #: src/screens/TransferSections.tsx
 msgid "Into"
 msgstr "Into"
+
+#: src/lib/labels.ts
+msgid "Savings"
+msgstr "Savings"
 
 #: src/screens/Passkeys.tsx
 msgid "Add a second on another device. If you lose this one, you will need your password and code."
@@ -358,12 +490,18 @@ msgid "The server added {user} as an owner"
 msgstr "The server added {user} as an owner"
 
 #: src/App.tsx
+#: src/lib/labels.ts
+#: src/screens/Accounts.tsx
 msgid "Accounts"
 msgstr "Accounts"
 
 #: src/screens/Profile.tsx
 msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
 msgstr "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
+
+#: src/lib/labels.ts
+msgid "Source app"
+msgstr "Source app"
 
 #: src/screens/SignIn.tsx
 msgid "or"
@@ -380,6 +518,10 @@ msgstr "receipt filer"
 #: src/screens/TransferSections.tsx
 msgid "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
 msgstr "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
+
+#: src/screens/Accounts.tsx
+msgid "DOE JANE"
+msgstr "DOE JANE"
 
 #: src/screens/Profile.tsx
 msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
@@ -423,6 +565,10 @@ msgstr "Remove <0>{0}</0>? It stops working at once."
 msgid "System"
 msgstr "System"
 
+#: src/screens/Accounts.tsx
+msgid "Closed"
+msgstr "Closed"
+
 #: src/App.tsx
 #: src/screens/Profile.tsx
 msgid "Set up"
@@ -441,14 +587,23 @@ msgstr "If you no longer have the old authenticator, use one of your recovery co
 msgid "Cancel"
 msgstr "Cancel"
 
+#: src/screens/Accounts.tsx
 #: src/screens/TransferSections.tsx
 msgid "Why"
 msgstr "Why"
+
+#: src/lib/labels.ts
+msgid "Needs a look"
+msgstr "Needs a look"
 
 #: src/screens/Profile.tsx
 #: src/screens/ResetAccount.tsx
 msgid "Done"
 msgstr "Done"
+
+#: src/screens/Accounts.tsx
+msgid "Newest"
+msgstr "Newest"
 
 #: src/screens/Profile.tsx
 msgid "Those two don't match."
@@ -476,9 +631,17 @@ msgstr "Reset: password and authenticator"
 msgid "From"
 msgstr "From"
 
+#: src/screens/Accounts.tsx
+msgid "not counted"
+msgstr "not counted"
+
 #: src/screens/Passkeys.tsx
 msgid "The passkey prompt was closed, so nothing was added."
 msgstr "The passkey prompt was closed, so nothing was added."
+
+#: src/screens/Accounts.tsx
+msgid "Suggested identifiers"
+msgstr "Suggested identifiers"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -579,16 +742,28 @@ msgstr "This server's secret key was replaced, so the authenticator you have no 
 msgid "A household holds the accounts and the register. The currency here is only used for totals; each account keeps its own."
 msgstr "A household holds the accounts and the register. The currency here is only used for totals; each account keeps its own."
 
+#: src/lib/labels.ts
+msgid "Other asset"
+msgstr "Other asset"
+
 #: src/App.tsx
 msgid "Transfers"
 msgstr "Transfers"
+
+#: src/lib/labels.ts
+msgid "Other liabilities"
+msgstr "Other liabilities"
+
+#: src/screens/Accounts.tsx
+msgid "Balance"
+msgstr "Balance"
 
 #. placeholder {0}: ticked.size
 #: src/screens/TransferSections.tsx
 msgid "Categorise {0} selected as…"
 msgstr "Categorise {0} selected as…"
 
-#: src/screens/Profile.tsx
+#: src/screens/Accounts.tsx
 msgid "Cleared"
 msgstr "Cleared"
 
@@ -604,13 +779,40 @@ msgstr "Filled in from the invitation. Change it if you would rather use another
 msgid "Which household"
 msgstr "Which household"
 
+#: src/screens/Accounts.tsx
+msgid "Ignore"
+msgstr "Ignore"
+
+#: src/lib/labels.ts
+msgid "Plan"
+msgstr "Plan"
+
 #: src/screens/Profile.tsx
 msgid "Your account"
 msgstr "Your account"
 
+#. placeholder {0}: mine.rows
+#. placeholder {1}: mine.rows
+#. placeholder {2}: mine.rows
+#: src/screens/Accounts.tsx
+msgid "{0, plural, one {Matches {1} row, such as:} other {Matches {2} rows, such as:}}"
+msgstr "{0, plural, one {Matches {1} row, such as:} other {Matches {2} rows, such as:}}"
+
+#: src/screens/Accounts.tsx
+msgid "Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it."
+msgstr "Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it."
+
+#: src/lib/labels.ts
+msgid "Report"
+msgstr "Report"
+
 #: src/screens/SignIn.tsx
 msgid "I've lost my authenticator — use a recovery code"
 msgstr "I've lost my authenticator — use a recovery code"
+
+#: src/lib/labels.ts
+msgid "Could not read"
+msgstr "Could not read"
 
 #: src/screens/Profile.tsx
 msgid "Change password"
@@ -648,6 +850,10 @@ msgstr "Revoke"
 msgid "Don't ask on this browser for 30 days"
 msgstr "Don't ask on this browser for 30 days"
 
+#: src/screens/Accounts.tsx
+msgid "Would link"
+msgstr "Would link"
+
 #: src/screens/TransferSections.tsx
 msgid "Nothing waiting."
 msgstr "Nothing waiting."
@@ -663,6 +869,10 @@ msgstr "Reset your sign-in"
 #: src/screens/Setup.tsx
 msgid "Set up {PRODUCT}"
 msgstr "Set up {PRODUCT}"
+
+#: src/screens/Accounts.tsx
+msgid "The name looks like its number."
+msgstr "The name looks like its number."
 
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
@@ -681,6 +891,10 @@ msgstr "Added as an owner"
 msgid "The server reset {user}'s authenticator"
 msgstr "The server reset {user}'s authenticator"
 
+#: src/screens/Accounts.tsx
+msgid "Rows"
+msgstr "Rows"
+
 #: src/screens/TransferSections.tsx
 msgid "Not a transfer"
 msgstr "Not a transfer"
@@ -693,6 +907,10 @@ msgstr "Added"
 msgid "Confirm and replace"
 msgstr "Confirm and replace"
 
+#: src/screens/Accounts.tsx
+msgid "Create"
+msgstr "Create"
+
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as an owner, in {households}."
 msgstr "{inviter} invited you to {PRODUCT} as an owner, in {households}."
@@ -700,6 +918,14 @@ msgstr "{inviter} invited you to {PRODUCT} as an owner, in {households}."
 #: src/screens/Passkeys.tsx
 msgid "Passkeys are not set up on this server."
 msgstr "Passkeys are not set up on this server."
+
+#: src/lib/labels.ts
+msgid "Matched"
+msgstr "Matched"
+
+#: src/screens/Accounts.tsx
+msgid "Import from a file"
+msgstr "Import from a file"
 
 #: src/screens/Profile.tsx
 msgid "New codes made. Every earlier code, used or not, has stopped working."
@@ -709,6 +935,14 @@ msgstr "New codes made. Every earlier code, used or not, has stopped working."
 msgid "You've been invited"
 msgstr "You've been invited"
 
+#: src/lib/labels.ts
+msgid "Already imported"
+msgstr "Already imported"
+
+#: src/lib/labels.ts
+msgid "Checking"
+msgstr "Checking"
+
 #: src/components/RecoveryCodes.tsx
 msgid "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
 msgstr "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
@@ -716,6 +950,14 @@ msgstr "Each one works once, and they are shown only now. They are how you get b
 #: src/screens/Profile.tsx
 msgid "Your new authenticator is the only one that works now."
 msgstr "Your new authenticator is the only one that works now."
+
+#: src/lib/labels.ts
+msgid "Connect"
+msgstr "Connect"
+
+#: src/lib/labels.ts
+msgid "New"
+msgstr "New"
 
 #: src/App.tsx
 msgid "Create it"
@@ -734,6 +976,10 @@ msgstr "Show a code to scan"
 msgid "Passkeys need this app opened at its HTTPS address."
 msgstr "Passkeys need this app opened at its HTTPS address."
 
+#: src/lib/labels.ts
+msgid "Current account"
+msgstr "Current account"
+
 #: src/lib/signInChanges.ts
 msgid "Reset: password"
 msgstr "Reset: password"
@@ -751,13 +997,30 @@ msgstr "Last used"
 msgid "This browser is signed in as {0}. An invitation makes a new account, so sign out first if the link is meant for somebody else."
 msgstr "This browser is signed in as {0}. An invitation makes a new account, so sign out first if the link is meant for somebody else."
 
+#: src/screens/Accounts.tsx
+msgid "the last four, or the part the bank prints"
+msgstr "the last four, or the part the bank prints"
+
 #: src/screens/AcceptInvite.tsx
 msgid "Finish"
 msgstr "Finish"
 
+#: src/screens/Accounts.tsx
+msgid "Country"
+msgstr "Country"
+
+#: src/screens/Accounts.tsx
+msgid "Each account keeps its own currency. Nothing is ever converted in the ledger."
+msgstr "Each account keeps its own currency. Nothing is ever converted in the ledger."
+
 #: src/screens/Profile.tsx
 msgid "Not available here"
 msgstr "Not available here"
+
+#. placeholder {0}: one.value
+#: src/screens/Accounts.tsx
+msgid "Ignore {0}"
+msgstr "Ignore {0}"
 
 #: src/screens/SignIn.tsx
 msgid "Recovery code"
@@ -775,6 +1038,10 @@ msgstr "Memo"
 msgid "{waiting} waiting"
 msgstr "{waiting} waiting"
 
+#: src/screens/Accounts.tsx
+msgid "New account"
+msgstr "New account"
+
 #: src/lib/signInChanges.ts
 msgid "The server reset {user}'s password"
 msgstr "The server reset {user}'s password"
@@ -787,6 +1054,10 @@ msgstr "Try again"
 msgid "Invitation"
 msgstr "Invitation"
 
+#: src/screens/Accounts.tsx
+msgid "Leave it blank for an account that starts empty."
+msgstr "Leave it blank for an account that starts empty."
+
 #: src/lib/signInChanges.ts
 msgid "{user} set up this instance as its owner"
 msgstr "{user} set up this instance as its owner"
@@ -795,9 +1066,17 @@ msgstr "{user} set up this instance as its owner"
 msgid "This writes both rows as one act, so undoing it from History takes both back together."
 msgstr "This writes both rows as one act, so undoing it from History takes both back together."
 
+#: src/screens/Accounts.tsx
+msgid "Note"
+msgstr "Note"
+
 #: src/App.tsx
 msgid "How import works"
 msgstr "How import works"
+
+#: src/screens/Accounts.tsx
+msgid "Bank"
+msgstr "Bank"
 
 #: src/screens/SignIn.tsx
 msgid "Until you do, every sign-in will ask for another recovery code. To do it later, open your account — your name in the menu — and set up a new authenticator there. In this tab, while you stay signed in and for up to a day, the code you just used still covers it; after that, or anywhere else, it takes one more recovery code."
@@ -811,6 +1090,19 @@ msgstr "Setting it up takes one of your recovery codes."
 msgid "Every link has a name or a person behind it."
 msgstr "Every link has a name or a person behind it."
 
+#. placeholder {0}: one.value
+#: src/screens/Accounts.tsx
+msgid "Account for {0}"
+msgstr "Account for {0}"
+
+#: src/screens/Accounts.tsx
+msgid "Opening balance"
+msgstr "Opening balance"
+
+#: src/screens/Accounts.tsx
+msgid "Kind"
+msgstr "Kind"
+
 #: src/screens/TransferSections.tsx
 msgid "Waiting for the other statement"
 msgstr "Waiting for the other statement"
@@ -823,9 +1115,21 @@ msgstr "Continue to the passkey"
 msgid "The server made {user} an owner"
 msgstr "The server made {user} an owner"
 
+#: src/lib/labels.ts
+msgid "owner"
+msgstr "owner"
+
 #: src/App.tsx
 msgid "Import"
 msgstr "Import"
+
+#: src/screens/Accounts.tsx
+msgid "How banks write our names"
+msgstr "How banks write our names"
+
+#: src/screens/Accounts.tsx
+msgid "Where the account is held. Optional, and separate from the currency — a euro account can sit in any number of countries."
+msgstr "Where the account is held. Optional, and separate from the currency — a euro account can sit in any number of countries."
 
 #: src/screens/Setup.tsx
 msgid "Finish setup"
@@ -863,9 +1167,17 @@ msgstr "A new authenticator"
 msgid "1. You"
 msgstr "1. You"
 
+#: src/screens/Accounts.tsx
+msgid "It is recorded as a real transaction on that date, not a hidden number, so it shows in the register and can be corrected like anything else. For a card or a loan, type what you owe as a negative."
+msgstr "It is recorded as a real transaction on that date, not a hidden number, so it shows in the register and can be corrected like anything else. For a card or a loan, type what you owe as a negative."
+
 #: src/screens/Profile.tsx
 msgid "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
 msgstr "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
+
+#: src/screens/Accounts.tsx
+msgid "What was in the account on the day you started tracking it — usually a date in the past, the one your first statement opens with."
+msgstr "What was in the account on the day you started tracking it — usually a date in the past, the one your first statement opens with."
 
 #: src/screens/Passkeys.tsx
 msgid "You will still be able to sign in with your password and code."
@@ -875,9 +1187,21 @@ msgstr "You will still be able to sign in with your password and code."
 msgid "read"
 msgstr "read"
 
+#: src/lib/labels.ts
+msgid "Not for this account"
+msgstr "Not for this account"
+
+#: src/screens/Accounts.tsx
+msgid "Add"
+msgstr "Add"
+
 #: src/App.tsx
 msgid "Only you right now"
 msgstr "Only you right now"
+
+#: src/lib/labels.ts
+msgid "Other debt"
+msgstr "Other debt"
 
 #: src/lib/signInChanges.ts
 msgid "Re-enabled"
@@ -907,6 +1231,10 @@ msgstr "New authenticator"
 msgid "Your account is under your name in the menu."
 msgstr "Your account is under your name in the menu."
 
+#: src/screens/Accounts.tsx
+msgid "no country set"
+msgstr "no country set"
+
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
 msgid "Date"
@@ -924,6 +1252,10 @@ msgstr "Somebody reset {user}'s password"
 msgid "Synced"
 msgstr "Synced"
 
+#: src/screens/Accounts.tsx
+msgid "a pocket's or a card product's name"
+msgstr "a pocket's or a card product's name"
+
 #: src/screens/Profile.tsx
 msgid "Set"
 msgstr "Set"
@@ -931,6 +1263,10 @@ msgstr "Set"
 #: src/screens/Profile.tsx
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
 msgstr "The recovery code you signed in with covers this, so no other code is asked for."
+
+#: src/screens/Accounts.tsx
+msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled — <0>show it in the register</0>. Zero removes it."
+msgstr "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled — <0>show it in the register</0>. Zero removes it."
 
 #: src/screens/ResetAccount.tsx
 msgid "If you did not expect this, tell an owner of this instance before you go on."
@@ -946,12 +1282,21 @@ msgid "Description"
 msgstr "Description"
 
 #: src/App.tsx
+#: src/lib/labels.ts
 msgid "Categories"
 msgstr "Categories"
+
+#: src/screens/Accounts.tsx
+msgid "type to search — leave empty for none"
+msgstr "type to search — leave empty for none"
 
 #: src/screens/SignIn.tsx
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked 1 agent key. A program that was using it will be refused from now on; issue a new key on your profile if it should keep working."
 msgstr "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked 1 agent key. A program that was using it will be refused from now on; issue a new key on your profile if it should keep working."
+
+#: src/lib/labels.ts
+msgid "member"
+msgstr "member"
 
 #: src/screens/Profile.tsx
 msgid "about appearance"
@@ -988,9 +1333,17 @@ msgstr "Email"
 msgid "somebody"
 msgstr "somebody"
 
+#: src/screens/Accounts.tsx
+msgid "Reconcile"
+msgstr "Reconcile"
+
 #: src/screens/Passkeys.tsx
 msgid "It could not be used here anyway."
 msgstr "It could not be used here anyway."
+
+#: src/screens/Accounts.tsx
+msgid "Numbers and names your statements already use for your accounts, read off the register. An identifier lets transfers link without asking, so a wrong one makes wrong links: nothing here is added until you say so. <0>Would link</0> is how many transfer pairs adding it would link now."
+msgstr "Numbers and names your statements already use for your accounts, read off the register. An identifier lets transfers link without asking, so a wrong one makes wrong links: nothing here is added until you say so. <0>Would link</0> is how many transfer pairs adding it would link now."
 
 #: src/screens/Profile.tsx
 msgid "Make new codes"
@@ -1012,13 +1365,26 @@ msgstr "Reset"
 msgid "Following this device, which is dark right now."
 msgstr "Following this device, which is dark right now."
 
+#: src/lib/labels.ts
+msgid "Other assets"
+msgstr "Other assets"
+
 #: src/screens/Setup.tsx
 msgid "4. Recovery codes"
 msgstr "4. Recovery codes"
 
+#: src/lib/labels.ts
+msgid "Uncategorised"
+msgstr "Uncategorised"
+
 #: src/lib/signInChanges.ts
 msgid "password"
 msgstr "password"
+
+#. placeholder {0}: suggested.value
+#: src/screens/Accounts.tsx
+msgid "Add <0>{0}</0>"
+msgstr "Add <0>{0}</0>"
 
 #: src/App.tsx
 msgid "Snap a Receipt"
@@ -1033,9 +1399,18 @@ msgstr "Expires {0}"
 msgid "A recovery code cannot be used here. If somebody else has seen your codes, one of them must not be enough to make the next set."
 msgstr "A recovery code cannot be used here. If somebody else has seen your codes, one of them must not be enough to make the next set."
 
+#: src/lib/labels.ts
+msgid "Credit card"
+msgstr "Credit card"
+
 #: src/screens/ResetAccount.tsx
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+
+#: src/screens/Profile.tsx
+msgctxt "authenticator state"
+msgid "Cleared"
+msgstr "Cleared"
 
 #: src/screens/TransferSections.tsx
 msgid "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
@@ -1049,6 +1424,10 @@ msgstr "Made for {0}, cannot be used here."
 #: src/screens/SignIn.tsx
 msgid "Not now"
 msgstr "Not now"
+
+#: src/screens/Accounts.tsx
+msgid "Tag in the download's file name"
+msgstr "Tag in the download's file name"
 
 #: src/screens/Passkeys.tsx
 msgid "This device only"
@@ -1065,6 +1444,10 @@ msgstr "Hide help: {label}"
 #: src/screens/Profile.tsx
 msgid "Current password"
 msgstr "Current password"
+
+#: src/screens/Accounts.tsx
+msgid "Nothing to suggest."
+msgstr "Nothing to suggest."
 
 #: src/screens/ResetAccount.tsx
 msgid "Set the password"
@@ -1109,6 +1492,10 @@ msgstr "Keep"
 msgid "The six digits from your authenticator"
 msgstr "The six digits from your authenticator"
 
+#: src/screens/Accounts.tsx
+msgid "Currency"
+msgstr "Currency"
+
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 msgid "Your name"
@@ -1130,9 +1517,19 @@ msgstr "{others, plural, one {You will still be able to sign in with your other 
 msgid "3. Recovery codes"
 msgstr "3. Recovery codes"
 
+#. placeholder {0}: "Savings"
+#. placeholder {0}: one.sample
+#: src/screens/Accounts.tsx
+msgid "e.g. {0}"
+msgstr "e.g. {0}"
+
 #: src/screens/Profile.tsx
 msgid "One of your recovery codes"
 msgstr "One of your recovery codes"
+
+#: src/screens/Accounts.tsx
+msgid "opening balance"
+msgstr "opening balance"
 
 #: src/screens/Passkeys.tsx
 msgid "Never"
@@ -1145,6 +1542,10 @@ msgstr "{usable, plural, one {{usable} passkey} other {{usable} passkeys}}"
 #: src/lib/signInChanges.ts
 msgid "{by} gave {user} a new authenticator"
 msgstr "{by} gave {user} a new authenticator"
+
+#: src/screens/Accounts.tsx
+msgid "{count, plural, other {{shown} rows}}"
+msgstr "{count, plural, other {{shown} rows}}"
 
 #: src/screens/SignIn.tsx
 msgid "A recovery code"
@@ -1165,6 +1566,10 @@ msgstr "Payee Naming Rules"
 #: src/lib/signInChanges.ts
 msgid "{by} made {user} an owner"
 msgstr "{by} made {user} an owner"
+
+#: src/lib/labels.ts
+msgid "Preview"
+msgstr "Preview"
 
 #: src/screens/Profile.tsx
 msgid "<0>Copy this now.</0> It is the only time it is shown — only a fingerprint of it is stored, so there is nothing to show again."
@@ -1207,6 +1612,10 @@ msgstr "Out of"
 msgid "write"
 msgstr "write"
 
+#: src/lib/labels.ts
+msgid "Money you owe the card issuer. Spending makes the balance more negative; paying the bill is a transfer from the account that pays it."
+msgstr "Money you owe the card issuer. Spending makes the balance more negative; paying the bill is a transfer from the account that pays it."
+
 #: src/screens/Profile.tsx
 msgid "{action}: {name}"
 msgstr "{action}: {name}"
@@ -1223,6 +1632,10 @@ msgstr "{by} reset {user}'s password"
 #: src/screens/SignIn.tsx
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
 msgstr "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
+
+#: src/screens/Accounts.tsx
+msgid "What banks call it"
+msgstr "What banks call it"
 
 #: src/screens/Profile.tsx
 msgid "Needs setting up again"
@@ -1241,6 +1654,7 @@ msgstr "why this is asked"
 msgid "{0, plural, one {{who} is here too} other {{who} are here too}}"
 msgstr "{0, plural, one {{who} is here too} other {{who} are here too}}"
 
+#: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
 msgid "Remove"
 msgstr "Remove"
@@ -1269,6 +1683,7 @@ msgstr "Reports"
 msgid "Let it add and change transactions, not only read them"
 msgstr "Let it add and change transactions, not only read them"
 
+#: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
 msgid "Save"
 msgstr "Save"
@@ -1276,6 +1691,15 @@ msgstr "Save"
 #: src/App.tsx
 msgid "Couldn't load your households"
 msgstr "Couldn't load your households"
+
+#. placeholder {0}: format(openingMinor, currency)
+#: src/screens/Accounts.tsx
+msgid "Recorded as {0} on the date below."
+msgstr "Recorded as {0} on the date below."
+
+#: src/lib/labels.ts
+msgid "Fixed"
+msgstr "Fixed"
 
 #: src/components/bits.tsx
 msgid "What's this? {label}"
@@ -1292,8 +1716,13 @@ msgid "At least 12 characters. Length is what matters."
 msgstr "At least 12 characters. Length is what matters."
 
 #: src/components/bits.tsx
+#: src/screens/Accounts.tsx
 msgid "Settings"
 msgstr "Settings"
+
+#: src/screens/Accounts.tsx
+msgid "Show closed"
+msgstr "Show closed"
 
 #: src/App.tsx
 msgid "Admin"
@@ -1311,6 +1740,18 @@ msgstr "why not a recovery code"
 msgid "this device"
 msgstr "this device"
 
+#: src/screens/Accounts.tsx
+msgid "No accounts yet. Add the one you use most and import a statement into it."
+msgstr "No accounts yet. Add the one you use most and import a statement into it."
+
+#: src/lib/labels.ts
+msgid "Already have it"
+msgstr "Already have it"
+
+#: src/screens/Accounts.tsx
+msgid "Holder's name"
+msgstr "Holder's name"
+
 #: src/screens/Profile.tsx
 msgid "Keys for programs"
 msgstr "Keys for programs"
@@ -1318,6 +1759,14 @@ msgstr "Keys for programs"
 #: src/screens/Transfer.tsx
 msgid "12,34"
 msgstr "12,34"
+
+#: src/screens/Accounts.tsx
+msgid "a negative balance here is money you owe"
+msgstr "a negative balance here is money you owe"
+
+#: src/screens/Accounts.tsx
+msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
+msgstr "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
 
 #. placeholder {0}: recovery.data.unused
 #: src/screens/Profile.tsx
@@ -1327,6 +1776,10 @@ msgstr "{0} of 10 left"
 #: src/lib/signInChanges.ts
 msgid "Somebody re-enabled {user}"
 msgstr "Somebody re-enabled {user}"
+
+#: src/screens/Accounts.tsx
+msgid "Matches nothing in the register yet."
+msgstr "Matches nothing in the register yet."
 
 #: src/screens/Profile.tsx
 msgid "Passkeys"
@@ -1378,6 +1831,8 @@ msgstr "the data directory"
 
 #. placeholder {0}: passkey.label
 #. placeholder {0}: removing.label
+#. placeholder {0}: row.value
+#: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
 msgid "Remove {0}"
 msgstr "Remove {0}"
@@ -1401,6 +1856,18 @@ msgstr "may apply imports"
 #: src/components/RecoveryModeBanner.tsx
 msgid "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
 msgstr "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
+
+#: src/screens/Accounts.tsx
+msgid "An account cannot have been opened in the future."
+msgstr "An account cannot have been opened in the future."
+
+#: src/screens/Accounts.tsx
+msgid "Value"
+msgstr "Value"
+
+#: src/screens/Accounts.tsx
+msgid "Statement product"
+msgstr "Statement product"
 
 #: src/lib/signInChanges.ts
 msgid "Somebody added {user} as an owner"
@@ -1436,6 +1903,14 @@ msgstr "You sign in with your password and authenticator code."
 msgid "Continue"
 msgstr "Continue"
 
+#: src/screens/Accounts.tsx
+msgid "Card number"
+msgstr "Card number"
+
+#: src/screens/Accounts.tsx
+msgid "Bank or institution"
+msgstr "Bank or institution"
+
 #: src/lib/signInChanges.ts
 msgid "from the server"
 msgstr "from the server"
@@ -1448,6 +1923,10 @@ msgstr "An owner can administer this instance: people, households and invitation
 msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
 msgstr "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
 
+#: src/screens/Accounts.tsx
+msgid "the number other statements quote"
+msgstr "the number other statements quote"
+
 #. placeholder {0}: formatInstant(key.last_used_at)
 #: src/screens/Profile.tsx
 msgid "last used {0}"
@@ -1456,6 +1935,10 @@ msgstr "last used {0}"
 #: src/screens/Setup.tsx
 msgid "Setup token"
 msgstr "Setup token"
+
+#: src/screens/Accounts.tsx
+msgid "<0>▾</0> marks the two whose balance is normally negative — you owe it. Nothing else changes: every account holds transactions the same way, and no arithmetic depends on the type. Pick the one that describes it, because it can't be changed afterwards."
+msgstr "<0>▾</0> marks the two whose balance is normally negative — you owe it. Nothing else changes: every account holds transactions the same way, and no arithmetic depends on the type. Pick the one that describes it, because it can't be changed afterwards."
 
 #: src/screens/Profile.tsx
 msgid "Give a program a key"
@@ -1473,6 +1956,10 @@ msgstr "Following this device, which is light right now."
 msgid "New codes"
 msgstr "New codes"
 
+#: src/screens/Accounts.tsx
+msgid "For"
+msgstr "For"
+
 #: src/lib/signInChanges.ts
 msgid "Somebody made {user} an owner"
 msgstr "Somebody made {user} an owner"
@@ -1486,9 +1973,17 @@ msgstr "Add transfer between accounts"
 msgid "Revoked {0}"
 msgstr "Revoked {0}"
 
+#: src/screens/Accounts.tsx
+msgid "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
+msgstr "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
+
 #: src/screens/Profile.tsx
 msgid "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
 msgstr "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
+
+#: src/lib/labels.ts
+msgid "Notes and coins in a wallet or a tin. Nothing imports into it — you enter what you spend."
+msgstr "Notes and coins in a wallet or a tin. Nothing imports into it — you enter what you spend."
 
 #: src/components/bits.tsx
 #: src/screens/Profile.tsx
@@ -1519,9 +2014,17 @@ msgstr "{by} re-enabled {user}"
 msgid "Transfer"
 msgstr "Transfer"
 
+#: src/screens/Accounts.tsx
+msgid "This account started empty, so there is no opening balance row. Type a figure to add one; without a date it is dated at the account's oldest transaction."
+msgstr "This account started empty, so there is no opening balance row. Type a figure to add one; without a date it is dated at the account's oldest transaction."
+
 #: src/screens/Profile.tsx
 msgid "{unused, plural, one {{unused} unused recovery code left.} other {{unused} unused recovery codes left.}}"
 msgstr "{unused, plural, one {{unused} unused recovery code left.} other {{unused} unused recovery codes left.}}"
+
+#: src/screens/Accounts.tsx
+msgid "Oldest"
+msgstr "Oldest"
 
 #: src/screens/ResetAccount.tsx
 msgid "Your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."

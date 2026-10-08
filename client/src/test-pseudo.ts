@@ -20,6 +20,11 @@ export const DATA = new Set([
   "Claude",
   "Desktop",
   "HTTPS",
+  // Stays as it is in every language (glossary).
+  "IBAN",
+  // A bank's own words, as its files write them.
+  "Current",
+  "Savings",
   // Lists are joined by `listText` (Intl's own conjunction outside English),
   // not by the catalog, so the pseudo-locale cannot accent it.
   "and",
