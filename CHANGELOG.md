@@ -168,6 +168,11 @@ history this repository does not have.
 
 ### Changed
 
+- **The menu makes room for longer languages.** Outside English the desktop
+  menu grows to its widest item, up to 240px, and a word too long even for
+  that breaks at a hyphen instead of spilling past the edge. English keeps the
+  190px it had. (#56)
+
 - **`/snap` keeps its words in a small dictionary of its own**, keyed by
   language: the one chosen in the app on this device, then the browser's.
   Only English is written, so every phone still reads the page in English,
