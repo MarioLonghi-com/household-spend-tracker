@@ -44,8 +44,11 @@ BASE = "/api/admin/application/update"
 DIGEST = "sha256:" + "3f2a" * 16
 UPDATER_DIGEST = "sha256:" + "77b0" * 16
 #: The next release after the running one, and the one after that.
-NEXT = "0.9.0"
-LATER = "0.10.0"
+#: Releases newer than the one running, counted from it: a version bump must
+#: not turn the "newer" release into the running one (0.9.0 did, once).
+_MAJOR, _MINOR, _ = (int(part) for part in __version__.split("."))
+NEXT = f"{_MAJOR}.{_MINOR + 1}.0"
+LATER = f"{_MAJOR}.{_MINOR + 2}.0"
 #: Two migrations that need a box (one lossy, one undeclared) and one that
 #: does not.
 LOSSY = ["b2c3d4e5f6a1", "d4e5f6a1b2c3"]
@@ -812,10 +815,10 @@ def test_a_newer_tag_draft_or_prerelease_is_not_offered(monkeypatch, tmp_path):
     answer = _check(
         monkeypatch,
         [
-            _release("0.9.0", draft=True),
-            _release("0.9.1", prerelease=True),
-            _release("0.9.2", tag="v0.9.2-rc1"),
-            _release("0.9.3", tag="0.9.3"),
+            _release(NEXT, draft=True),
+            _release(f"{_MAJOR}.{_MINOR + 1}.1", prerelease=True),
+            _release(f"{_MAJOR}.{_MINOR + 1}.2", tag=f"v{_MAJOR}.{_MINOR + 1}.2-rc1"),
+            _release(f"{_MAJOR}.{_MINOR + 1}.3", tag=f"{_MAJOR}.{_MINOR + 1}.3"),
             _release(__version__),
             _release("0.7.1"),
         ],

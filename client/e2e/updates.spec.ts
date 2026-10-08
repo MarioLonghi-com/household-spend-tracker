@@ -90,7 +90,11 @@ test("update backups list with their version, the newest five kept, and an older
   }
   const newest = rows.first();
   await expect(newest.locator("td[data-primary]")).toHaveText("20260925-100000");
-  await expect(newest).toContainText("0.8.0");
+  // The newest seeded backup carries the running version (bootstrap.py
+  // counts back from it), so it is read rather than written here: a version
+  // bump must not break this test.
+  const health = await (await page.request.get("/api/health")).json();
+  await expect(newest).toContainText(health.version);
   await expect(newest.getByRole("link", { name: "Download" })).toHaveAttribute(
     "href",
     /\/api\/admin\/application\/backups\/20260925-100000\/download/,
@@ -124,7 +128,9 @@ test("update backups list with their version, the newest five kept, and an older
   // Sorted at its headings, by version as numbers.
   const version = block.locator("th.sortable", { hasText: "Version" });
   await version.getByRole("button").click();
-  await expect(rows.first()).toContainText("0.2.0");
+  // The oldest of bootstrap.py's seven is six minor releases back.
+  const [major, minor] = String(health.version).split(".").map(Number);
+  await expect(rows.first()).toContainText(`${major}.${Math.max(minor - 6, 0)}.0`);
 
   const oldest = block.locator("tbody tr", { hasText: "20260901-100000" });
   await oldest.getByRole("button", { name: "Delete" }).click();
