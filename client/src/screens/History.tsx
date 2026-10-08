@@ -10,6 +10,8 @@ import type { Batch, BatchDetail, Household } from "../lib/types";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { formatCount } from "../lib/locale";
+import { fieldOf, headlineOf, tableOf } from "../lib/historyWords";
+
 
 type HistorySort = "when" | "what" | "by" | "state" | "rows";
 
@@ -44,7 +46,7 @@ export function History({ household }: { household: Household }) {
               // The headline is the kind of act; the detail is what it did to
               // this household. Sorting on the pair groups the imports
               // together and then orders inside the group.
-              return [entry.headline, entry.detail];
+              return [headlineOf(entry), entry.detail];
             case "by":
               // The person first, the program second: an agent acting for
               // somebody is still their act, so sorting by who groups it with
@@ -169,7 +171,7 @@ export function History({ household }: { household: Household }) {
                         title={t`Everything recorded about this`}
                         onClick={() => setOpened(entry)}
                       >
-                        <span className="small muted">{entry.headline}</span>
+                        <span className="small muted">{headlineOf(entry)}</span>
                         <span style={{ display: "block" }}>{entry.detail}</span>
                         {entry.source?.filename ? (
                           <span className="small muted mono" style={{ display: "block" }}>
@@ -275,7 +277,7 @@ function BatchPanel({
   const summary = (batch.summary ?? {}) as Record<string, number>;
 
   return (
-    <Panel title={batch.headline} onClose={onClose} wide>
+    <Panel title={headlineOf(batch)} onClose={onClose} wide>
       <Problem error={detail.error ?? undo.error} />
 
       <dl className="facts">
@@ -346,7 +348,7 @@ function BatchPanel({
                   <tbody>
                     {change.fields.map((field) => (
                       <tr key={field.field}>
-                        <th scope="row">{field.field}</th>
+                        <th scope="row">{fieldOf(field)}</th>
                         <td className="muted">{field.was}</td>
                         <td aria-hidden="true">→</td>
                         <td>{field.now}</td>
@@ -367,7 +369,7 @@ function BatchPanel({
                     <tbody>
                       {change.snapshot.map((field) => (
                         <tr key={field.field}>
-                          <th scope="row">{field.field}</th>
+                          <th scope="row">{fieldOf(field)}</th>
                           <td colSpan={3}>{field.now}</td>
                         </tr>
                       ))}
@@ -383,7 +385,7 @@ function BatchPanel({
               )}
 
               <p className="small muted mono" style={{ margin: "6px 0 0", wordBreak: "break-all" }}>
-                {change.table} {change.row_id}
+                {tableOf(change)} {change.row_id}
               </p>
             </li>
           ))}

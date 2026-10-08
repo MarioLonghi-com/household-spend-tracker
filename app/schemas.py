@@ -1079,6 +1079,10 @@ class BatchOut(ORMModel):
     via: str | None = None
     #: What kind of act it was, in words.
     headline: str = ""
+    #: The same, as a key the client words in its own language (#57): a batch
+    #: kind's value, "agent_key", "account_import" or a one-time import's
+    #: "one-time-import:ynab-csv". `headline` stays the English it was.
+    headline_key: str = ""
     #: What it actually did. Computed from the change rows on every read, never
     #: stored -- a stored copy would be free to drift from the log it describes.
     detail: str = ""
@@ -1095,6 +1099,8 @@ class FieldChangeOut(BaseModel):
     field: str
     was: str
     now: str
+    #: The column `field` names, for a client that words it itself (#57).
+    column: str = ""
 
 
 class ChangeDetailOut(BaseModel):
@@ -1113,6 +1119,8 @@ class ChangeDetailOut(BaseModel):
     #: over, because they are *absent* -- a "***" written back by an undo would
     #: be a password hash of three asterisks.
     redacted: list[str] = []
+    #: The table `table` names, for a client that words it itself (#57).
+    table_key: str = ""
 
 
 class BatchDetail(BatchOut):

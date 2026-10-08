@@ -31,6 +31,11 @@ msgstr "Mentions"
 msgid "Creating…"
 msgstr "Creating…"
 
+#. A changed field in History's detail, lower case. See GLOSSARY.md
+#: src/lib/historyWords.ts
+msgid "note"
+msgstr "note"
+
 #. placeholder {0}: tagOffer.value
 #: src/screens/Import.tsx
 msgid "{0} now tells a file it is for that account"
@@ -87,6 +92,12 @@ msgstr "payee, memo, or the bank's own words"
 #: src/lib/saveBackup.ts
 msgid "Open Dropbox"
 msgstr "Open Dropbox"
+
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "receipt"
+msgstr "receipt"
 
 #: src/screens/Rules.tsx
 msgid "One act, so History has one entry and undo puts every row back together."
@@ -290,6 +301,11 @@ msgstr "Review…"
 msgid "the server's answer could not be read"
 msgstr "the server's answer could not be read"
 
+#. History headline, the kind of act: several rows changed at once
+#: src/lib/historyWords.ts
+msgid "Bulk edit"
+msgstr "Bulk edit"
+
 #. Button on the passkeys panel: verb, hide this notice
 #. Button, SignInNotice (shared): verb, hide this notice
 #: src/components/SignInNotice.tsx
@@ -465,6 +481,12 @@ msgstr "What each payee is categorised as"
 #: src/screens/Register.tsx
 msgid "Edit the payee"
 msgstr "Edit the payee"
+
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "account"
+msgstr "account"
 
 #: src/screens/Register.tsx
 msgid "Not seen by the bank yet"
@@ -669,6 +691,12 @@ msgstr "Skip to transactions"
 #: src/screens/Register.tsx
 msgid "Transactions"
 msgstr "Transactions"
+
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "agent key"
+msgstr "agent key"
 
 #. Label on the Register screen
 #. placeholder {0}: found.filename
@@ -1052,6 +1080,12 @@ msgstr "Turned on for every household by whoever runs this server, so it cannot 
 msgid "undone later"
 msgstr "undone later"
 
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "payee"
+msgstr "payee"
+
 #: src/screens/Register.tsx
 msgid "Entered by hand"
 msgstr "Entered by hand"
@@ -1219,6 +1253,11 @@ msgstr "Latest 3 months"
 msgid "Make them an owner"
 msgstr "Make them an owner"
 
+#. History headline, the kind of act: a change to accounts, categories or settings
+#: src/lib/historyWords.ts
+msgid "Setup change"
+msgstr "Setup change"
+
 #. Row state in the one-time import's account mapping: left out
 #: src/lib/labels.ts
 msgid "Skipped"
@@ -1239,6 +1278,11 @@ msgstr "Your password"
 #: src/screens/Register.tsx
 msgid "Anything you change here is recorded, and can be put back from the History screen."
 msgstr "Anything you change here is recorded, and can be put back from the History screen."
+
+#. History headline, the kind of act: an earlier act was taken back
+#: src/lib/historyWords.ts
+msgid "Undo"
+msgstr "Undo"
 
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
@@ -1313,6 +1357,12 @@ msgstr "Revoking…"
 #: src/screens/Profile.tsx
 msgid "never used"
 msgstr "never used"
+
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "category"
+msgstr "category"
 
 #: src/screens/Register.tsx
 msgid "why the currencies are not added"
@@ -1877,6 +1927,11 @@ msgstr "Re-enable them first: a disabled account cannot follow a link"
 msgid "Add a transaction"
 msgstr "Add a transaction"
 
+#. A changed field in History's detail, lower case: position in a list
+#: src/lib/historyWords.ts
+msgid "order"
+msgstr "order"
+
 #. Column heading on the Accounts screen
 #. Column name shown beside a value on phones on the Accounts screen
 #: src/screens/Accounts.tsx
@@ -2006,6 +2061,12 @@ msgstr "It balances"
 msgid "Smaller text in the table"
 msgstr "Smaller text in the table"
 
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "user"
+msgstr "user"
+
 #. Heading on the Accounts screen
 #. Screen-reader name on the Accounts screen
 #: src/screens/Accounts.tsx
@@ -2031,6 +2092,8 @@ msgid "It rewrites <0>{0}</0> of {1} rows already in this ledger."
 msgstr "It rewrites <0>{0}</0> of {1} rows already in this ledger."
 
 #. Button on the Categories screen: verb
+#. History headline, the kind of act: one edit made by hand
+#: src/lib/historyWords.ts
 #: src/screens/Categories.tsx
 msgid "Edit"
 msgstr "Edit"
@@ -2219,6 +2282,12 @@ msgstr "No households yet."
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "payee rule"
+msgstr "payee rule"
+
 #. Label on the History screen: noun or step name: what would happen, not yet done
 #: src/screens/History.tsx
 msgid "preview"
@@ -2270,6 +2339,11 @@ msgstr "one part of a split; the other parts stay."
 #: src/App.tsx
 msgid "Sign out"
 msgstr "Sign out"
+
+#. A changed field in History's detail, lower case: how a payee's rows get a category
+#: src/lib/historyWords.ts
+msgid "categorisation"
+msgstr "categorisation"
 
 #: src/screens/Passkeys.tsx
 msgid "A passkey is a way in that keeps working after this browser is closed."
@@ -2457,6 +2531,12 @@ msgstr "Which household"
 #: src/screens/Register.tsx
 msgid "Keep it here"
 msgstr "Keep it here"
+
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "pair marked not a transfer"
+msgstr "pair marked not a transfer"
 
 #. Button on the Accounts screen
 #. Button on the Import screen
@@ -2650,6 +2730,11 @@ msgstr "Looking up your invitation…"
 msgid "Every household on this instance, including ones you are not in. Joining one is still an explicit act."
 msgstr "Every household on this instance, including ones you are not in. Joining one is still an explicit act."
 
+#. History headline, the kind of act: a key for a program was issued or changed
+#: src/lib/historyWords.ts
+msgid "Agent key"
+msgstr "Agent key"
+
 #: src/screens/ResetAccount.tsx
 msgid "Reset your sign-in"
 msgstr "Reset your sign-in"
@@ -2753,6 +2838,11 @@ msgstr "Receipts ({0})"
 msgid "Not a transfer"
 msgstr "Not a transfer"
 
+#. History headline, the kind of act: history brought over through YNAB's API
+#: src/lib/historyWords.ts
+msgid "One-time Import · YNAB (API)"
+msgstr "One-time Import · YNAB (API)"
+
 #. Column heading on the passkeys panel: the date the passkey was added
 #: src/screens/Passkeys.tsx
 msgid "Added"
@@ -2849,6 +2939,8 @@ msgid "No single category matches that."
 msgstr "No single category matches that."
 
 #. Button on the Register screen: verb, divide one transaction into parts. See GLOSSARY.md
+#. History headline, the kind of act: noun, a transaction was divided into parts. See GLOSSARY.md
+#: src/lib/historyWords.ts
 #: src/screens/Register.tsx
 msgid "Split"
 msgstr "Split"
@@ -3433,6 +3525,11 @@ msgstr "Select every row shown"
 msgid "The server made {user} an owner"
 msgstr "The server made {user} an owner"
 
+#. A changed field in History's detail, lower case: whether an account is closed
+#: src/lib/historyWords.ts
+msgid "closed"
+msgstr "closed"
+
 #: src/screens/Household.tsx
 msgid "Readable copies only <0>Recommended</0>"
 msgstr "Readable copies only <0>Recommended</0>"
@@ -3689,6 +3786,11 @@ msgstr "Who is in it"
 msgid "The whole row as it was written"
 msgstr "The whole row as it was written"
 
+#. A changed field in History's detail, lower case. See GLOSSARY.md
+#: src/lib/historyWords.ts
+msgid "payee"
+msgstr "payee"
+
 #: src/screens/Profile.tsx
 msgid "The six digits from the new one"
 msgstr "The six digits from the new one"
@@ -3785,6 +3887,11 @@ msgstr "These are counts, not amounts: this ledger never converts one currency i
 msgid "a pocket's or a card product's name"
 msgstr "a pocket's or a card product's name"
 
+#. History headline, the kind of act: several rows deleted at once
+#: src/lib/historyWords.ts
+msgid "Bulk delete"
+msgstr "Bulk delete"
+
 #. placeholder {0}: rule.data?.history_window ?? 3
 #: src/screens/Categories.tsx
 msgid "The category is chosen from how the last {0} transactions for {name} were categorised — the most common of them, most recent winning a tie. It updates as you add and edit transactions."
@@ -3793,6 +3900,11 @@ msgstr "The category is chosen from how the last {0} transactions for {name} wer
 #: src/screens/Admin.tsx
 msgid "No reset links pending."
 msgstr "No reset links pending."
+
+#. History headline, the kind of act: example data was added
+#: src/lib/historyWords.ts
+msgid "Demo data"
+msgstr "Demo data"
 
 #: src/screens/Admin.tsx
 msgid "Yes, withdraw it"
@@ -3920,7 +4032,9 @@ msgstr "about appearance"
 msgid "The server re-enabled {user}"
 msgstr "The server re-enabled {user}"
 
+#. A changed field in History's detail, lower case: whether it is hidden from pickers
 #. Tooltip on the Categories screen: adjective, kept but hidden from pickers. See GLOSSARY.md
+#: src/lib/historyWords.ts
 #: src/screens/Categories.tsx
 msgid "archived"
 msgstr "archived"
@@ -4099,6 +4213,11 @@ msgstr "Uncategorised"
 msgid "why households have colours"
 msgstr "why households have colours"
 
+#. A changed field in History's detail, lower case. See GLOSSARY.md
+#: src/lib/historyWords.ts
+msgid "amount"
+msgstr "amount"
+
 #. What was reset, inside a sentence: the password. Lower case. See GLOSSARY.md
 #: src/lib/signInChanges.ts
 msgid "password"
@@ -4203,6 +4322,12 @@ msgstr "Problems"
 msgid "No, just this one"
 msgstr "No, just this one"
 
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "member"
+msgstr "member"
+
 #. State of the authenticator: it was removed and has to be set up again
 #: src/screens/Profile.tsx
 msgctxt "authenticator state"
@@ -4306,6 +4431,11 @@ msgstr "a zip with secret.key needs your password and a code"
 msgid "See them in Admin"
 msgstr "See them in Admin"
 
+#. A changed field in History's detail, lower case. See GLOSSARY.md
+#: src/lib/historyWords.ts
+msgid "date"
+msgstr "date"
+
 #. Button on the shared controls
 #: src/components/bits.tsx
 msgid "Hide help: {label}"
@@ -4334,6 +4464,17 @@ msgstr "{0} will be able to administer this instance: people, households and inv
 #: src/screens/Profile.tsx
 msgid "Current password"
 msgstr "Current password"
+
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "category group"
+msgstr "category group"
+
+#. A changed field in History's detail, lower case: the category group it is in
+#: src/lib/historyWords.ts
+msgid "group"
+msgstr "group"
 
 #: src/screens/Accounts.tsx
 msgid "Nothing to suggest."
@@ -4447,6 +4588,11 @@ msgstr "fee column"
 msgid "Currency"
 msgstr "Currency"
 
+#. A changed field in History's detail, lower case: the accent colour of a household
+#: src/lib/historyWords.ts
+msgid "accent"
+msgstr "accent"
+
 #. What the import detected: comma or point before decimals. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "decimal separator"
@@ -4497,6 +4643,12 @@ msgstr "Categorisation"
 #: src/screens/Register.tsx
 msgid "Reimbursed, with the payment"
 msgstr "Reimbursed, with the payment"
+
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "household"
+msgstr "household"
 
 #: src/screens/ResetAccount.tsx
 msgid "Your password and your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
@@ -4640,6 +4792,11 @@ msgstr "Download…"
 msgid "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 
+#. History headline, the kind of act: history brought over from YNAB's export file
+#: src/lib/historyWords.ts
+msgid "One-time Import · YNAB (CSV)"
+msgstr "One-time Import · YNAB (CSV)"
+
 #: src/screens/Admin.tsx
 msgid "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
 msgstr "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
@@ -4648,6 +4805,11 @@ msgstr "A one-time link. The role travels on it, so you can hand somebody owners
 #: src/screens/AcceptInvite.tsx
 msgid "2. Your authenticator"
 msgstr "2. Your authenticator"
+
+#. A changed field in History's detail, lower case: whether work should pay it back
+#: src/lib/historyWords.ts
+msgid "work expense"
+msgstr "work expense"
 
 #: src/App.tsx
 msgid "Payee Naming Rules"
@@ -4779,6 +4941,11 @@ msgstr "Every category this payee has been filed under, biggest first. The trans
 msgid "Keep it"
 msgstr "Keep it"
 
+#. History headline, the kind of act: the instance was set up
+#: src/lib/historyWords.ts
+msgid "First setup"
+msgstr "First setup"
+
 #. Column heading on the History screen: noun, a row's status
 #. Name of a fact on the History screen: noun, a row's status
 #: src/screens/History.tsx
@@ -4789,6 +4956,11 @@ msgstr "State"
 #: src/screens/History.tsx
 msgid "Batch"
 msgstr "Batch"
+
+#. A changed field in History's detail, lower case. See GLOSSARY.md
+#: src/lib/historyWords.ts
+msgid "memo"
+msgstr "memo"
 
 #: src/screens/Register.tsx
 msgid "No money in between those dates. Widen them above — a repayment can take weeks."
@@ -5124,6 +5296,12 @@ msgstr "Reports"
 msgid "a note for this row"
 msgstr "a note for this row"
 
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "transaction"
+msgstr "transaction"
+
 #. Placeholder in an empty field on the Rules screen
 #: src/screens/Rules.tsx
 msgid "usually nothing"
@@ -5132,6 +5310,12 @@ msgstr "usually nothing"
 #: src/screens/Register.tsx
 msgid "in or out, any currency"
 msgstr "in or out, any currency"
+
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "ignored identifier suggestion"
+msgstr "ignored identifier suggestion"
 
 #. Tag beside a name on the Categories screen: adjective, kept but hidden from pickers. See GLOSSARY.md
 #: src/screens/Categories.tsx
@@ -5252,6 +5436,11 @@ msgctxt "new account"
 msgid "New"
 msgstr "New"
 
+#. A changed field in History's detail, lower case
+#: src/lib/historyWords.ts
+msgid "reimbursed by"
+msgstr "reimbursed by"
+
 #. placeholder {0}: waiting.length
 #. placeholder {1}: waiting.length
 #: src/screens/Import.tsx
@@ -5278,6 +5467,11 @@ msgstr "The link for {0} ({1}) stops working at once. To invite them again, make
 #: src/screens/Admin.tsx
 msgid "Households they join on arrival"
 msgstr "Households they join on arrival"
+
+#. A changed field in History's detail, lower case: the colour palette of a household
+#: src/lib/historyWords.ts
+msgid "colour"
+msgstr "colour"
 
 #. Button on the Accounts screen
 #. Heading on the household page
@@ -5312,6 +5506,12 @@ msgstr "Admin"
 #: src/screens/Profile.tsx
 msgid "New password again"
 msgstr "New password again"
+
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "invitation"
+msgstr "invitation"
 
 #: src/screens/Profile.tsx
 msgid "why not a recovery code"
@@ -5380,6 +5580,11 @@ msgstr "12,34"
 #: src/screens/Reconcile.tsx
 msgid "{0} out"
 msgstr "{0} out"
+
+#. A changed field in History's detail, lower case: a household's main currency. See GLOSSARY.md
+#: src/lib/historyWords.ts
+msgid "currency"
+msgstr "currency"
 
 #: src/screens/Accounts.tsx
 msgid "a negative balance here is money you owe"
@@ -5477,6 +5682,11 @@ msgstr "U — Uncleared"
 msgid "contains"
 msgstr "contains"
 
+#. A changed field in History's detail, lower case
+#: src/lib/historyWords.ts
+msgid "default category"
+msgstr "default category"
+
 #: src/screens/AccountImport.tsx
 msgid "Its two-letter code, like <0>ES</0>."
 msgstr "Its two-letter code, like <0>ES</0>."
@@ -5543,6 +5753,11 @@ msgstr "That works out at <0>{impliedRate}</0> {0} per {1}."
 #: src/screens/Household.tsx
 msgid "Nothing in the register yet."
 msgstr "Nothing in the register yet."
+
+#. A changed field in History's detail, lower case: the bank that holds an account. See GLOSSARY.md
+#: src/lib/historyWords.ts
+msgid "bank"
+msgstr "bank"
 
 #: src/screens/Categories.tsx
 msgid "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
@@ -5648,6 +5863,11 @@ msgstr "In {code}"
 #: src/screens/Register.tsx
 msgid "{0} of the selected rows are outside the current filter and are not in the figures above — they are still selected, and a change made here still reaches them."
 msgstr "{0} of the selected rows are outside the current filter and are not in the figures above — they are still selected, and a change made here still reaches them."
+
+#. A changed field in History's detail, lower case. See GLOSSARY.md
+#: src/lib/historyWords.ts
+msgid "category"
+msgstr "category"
 
 #. Button on the Admin screen: verb, let an account sign in again
 #. placeholder {0}: one.display_name
@@ -5811,6 +6031,11 @@ msgstr "Trying…"
 msgid "These look like the same shop"
 msgstr "These look like the same shop"
 
+#. History headline, the kind of act: accounts were read from a file
+#: src/lib/historyWords.ts
+msgid "Account import"
+msgstr "Account import"
+
 #: src/screens/Register.tsx
 msgid "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
@@ -5913,6 +6138,11 @@ msgstr "{hiddenByCurrency, plural, one {Every row here is in a currency the togg
 msgid "All categories"
 msgstr "All categories"
 
+#. History headline, the kind of act: a statement was imported
+#: src/lib/historyWords.ts
+msgid "Statement import"
+msgstr "Statement import"
+
 #: src/screens/Admin.tsx
 msgid "Used for totals only. Each account keeps its own currency, and nothing is ever converted."
 msgstr "Used for totals only. Each account keeps its own currency, and nothing is ever converted."
@@ -5920,6 +6150,11 @@ msgstr "Used for totals only. Each account keeps its own currency, and nothing i
 #: src/screens/Accounts.tsx
 msgid "Bank or institution"
 msgstr "Bank or institution"
+
+#. A changed field in History's detail, lower case
+#: src/lib/historyWords.ts
+msgid "name"
+msgstr "name"
 
 #. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
@@ -6184,6 +6419,11 @@ msgstr "that import was discarded — nothing was written"
 msgid "Putting it back…"
 msgstr "Putting it back…"
 
+#. A changed field in History's detail, lower case: whether the bank has the row (cleared, uncleared, locked)
+#: src/lib/historyWords.ts
+msgid "state"
+msgstr "state"
+
 #. placeholder {0}: rule.pattern
 #: src/screens/Rules.tsx
 msgid "Apply the rule for {0}"
@@ -6221,6 +6461,12 @@ msgstr "A plain figure like <0>1234.56</0> or <1>-80.00</1> — a point for the 
 #: src/screens/Import.tsx
 msgid "into {0}"
 msgstr "into {0}"
+
+#. What kind of row changed, lower case, singular, in History beside its id
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "reconciliation"
+msgstr "reconciliation"
 
 #: src/screens/Profile.tsx
 msgid "I have saved it"
@@ -6287,6 +6533,11 @@ msgstr "Oldest"
 #: src/screens/Import.tsx
 msgid "Open that import"
 msgstr "Open that import"
+
+#. History headline, the kind of act: an account was checked against a statement. See GLOSSARY.md
+#: src/lib/historyWords.ts
+msgid "Reconciliation"
+msgstr "Reconciliation"
 
 #: src/screens/Admin.tsx
 msgid "DD/MM/YYYY"

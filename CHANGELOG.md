@@ -47,6 +47,12 @@ history this repository does not have.
 
 ### Changed
 
+- **History says what kind of act, which field and which table as keys,**
+  beside the English it always sent: `headline_key` on a batch, `column` on
+  a changed field and `table_key` on a changed row. A screen in another
+  language words them from its own catalog; English shows the server's words
+  exactly as before. The sentences themselves are still the server's. (#57)
+
 - **Short messages carry a note for the translator.** Every message of one
   or two words, and any whose English alone is ambiguous, says in one line
   what it is -- a button, a column heading, a state, which sense of
