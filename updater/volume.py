@@ -154,7 +154,13 @@ def make_shared_dir(path: Path, gid: int = UPDATE_GID) -> bool:
         raise UnsafeFile(f"{path.name} in the update volume is not a directory.")
     grouped = _set_group(path, gid)
     # The group first, then the mode: changing a group can clear setgid.
-    os.chmod(path, DIR_MODE)
+    # Only when it is not already right: under a rootless engine the updater
+    # is in-container root with `cap_drop: ALL`, so it cannot chmod a
+    # directory it does not own -- and the volume's root is the image's
+    # mount point, 65532's, already 2770 (C11). Startup died there on rootless
+    # Podman before this (#169's podman-rootless leg).
+    if stat.S_IMODE(os.lstat(path).st_mode) != DIR_MODE:
+        os.chmod(path, DIR_MODE)
     return grouped
 
 

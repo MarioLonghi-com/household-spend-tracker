@@ -112,11 +112,11 @@ and nothing is fetched until the owner presses a button.
 | 1 | Checks again: the app runs the version the report was prepared from, both downloaded images are present and still verify, the sidecar runs (servers), and there is disk and memory for it | *Not started*. Nothing changed. |
 | 2 | Runs the pre-update hook, on a server where one is set up ([DOCKER.md](DOCKER.md#the-pre-update-hook)) | *Not started*. Nothing changed. |
 | 2a | Hands over to the new release's updater first, when that one is newer | The current updater carries on itself. |
-| 3 | Stops the app, and renames it `…-previous` so nothing restarts it by name | The app is started again. *Not started*. |
+| 3 | Stops the app, renames it `…-previous` so nothing restarts it by name, and sets its restart policy to `no` so a hand start does not keep it coming back | The app is started again. *Not started*. |
 | 4 | Starts the maintenance page where the app was, from the old image | |
 | 5 | Runs the drill from the **new** image against your ledger: a verified backup, the migrations, the checks | Rolled back |
 | 6 | Stops the maintenance page | |
-| 7 | Starts the new app: a copy of the previous container, with the new image | Rolled back |
+| 7 | Starts the new app: a copy of the previous container, with the new image. If `…-previous` was started by hand and holds its place, it is stopped and the new app started again, once | Rolled back |
 | 8 | Checks its health from where the browser's requests arrive, and that it reports the new version and commit | Rolled back |
 | 9 | Pins the new release (below), keeps a record of the previous container, prunes older update backups, and makes the recovery code useless | Logged only |
 | 10 | Replaces itself with the new release's updater, unless step 2a did | The updater stays on its version and says so. |
@@ -126,8 +126,8 @@ updated. It will be back in a few minutes."*, and nothing else. Your own tab
 watches `/api/health` and reloads when the app answers.
 
 **Rolled back** means: the new app is removed, the backup from step 5 is
-restored **with the old image**, the previous container is renamed back and
-started, and its health is checked. You are on the old version with the
+restored **with the old image**, the previous container is renamed back,
+given its own restart policy again, and started, and its health is checked. You are on the old version with the
 ledger exactly as it was when the app stopped, and still signed in, because
 the backup was taken after the app stopped. The outcome names the step that
 failed, what the updater said and the end of the drill's log. The new image

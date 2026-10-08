@@ -1,0 +1,8 @@
+# podman-compose for the `podman-rootless` leg of the self-update job (design
+# notes 15.5, S19): the version the spikes ran, hashed like every other
+# install in CI. Its two dependencies, python-dotenv and pyyaml, are already
+# in requirements-dev.txt, which the job installs first; this is installed
+# with --no-deps on top.
+podman-compose==1.6.0 \
+    --hash=sha256:98e48af25d44c10ecef948163bfcca002e32aa8bbb7e66593fbd4faff7270c30 \
+    --hash=sha256:c83fd9bcbaa635100d581ce52a7a4b712ee0d457481232aff392efe3ebc5a217

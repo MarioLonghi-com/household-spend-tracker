@@ -34,6 +34,58 @@ history this repository does not have.
 
 ### Fixed
 
+- **Starting the previous app by hand no longer spoils an update.** While an
+  update runs, the stopped app is kept as `…-previous`; started from Docker
+  Desktop's list, its `unless-stopped` policy kept it coming back and it
+  held the port the new version needed, so the update rolled back. The
+  updater now parks it with restart policy `no`, stops it once if it is in
+  the way and starts the new version again, and gives it its own policy back
+  if the update rolls back. The updater's engine client gains one call for
+  this, which changes the app's restart policy and nothing else. (#169)
+
+- **Stopping a container that ignores SIGTERM no longer crashes the
+  updater.** The engine answers a stop only after the grace period and the
+  kill, and the updater's socket gave up at the same 30 seconds, so it
+  crashed and the update rolled back as interrupted. It now waits the grace
+  period on top of its usual timeout. (#169)
+
+- **The updater starts under rootless Podman.** Running as in-container root
+  without capabilities, it tried to change the mode of the `update`
+  volume's directory, which it does not own, and exited before its first
+  heartbeat. It now leaves a directory that is already right alone. (#169)
+
+- **Updates finish under rootless Podman.** The drill wrote its report
+  readable by its own user only, and the updater -- root inside its
+  container, without capabilities -- could not read it, so the apply stalled
+  at the drill and the updater restarted over and over. The report is now
+  written for the `update` volume's group, like every other file the app
+  writes there. (#169)
+
+- **On Podman 4 the new app keeps a healthcheck that can pass.** Podman 4's
+  Docker-compatible API split the copied healthcheck command on every space,
+  so the updated app was reported unhealthy for good. The updater now sends
+  it in the form Podman 4 reads back unchanged. (#169)
+
+- **Recreating the updater soon after an update no longer leaves two
+  updaters running.** For ten minutes after it hands over, the previous
+  updater stands by and takes back over if the new one stops. A `compose up`
+  that recreates the updater (podman-compose always does), or the release
+  zip's launcher replacing it, looked like the new one stopping. The standby
+  now counts a container of the new updater's image as the new updater and
+  allows twenty seconds for the replacement, and the launcher stops a
+  standby before it replaces the updater. (#169)
+
+- **The release zip's launcher replaces the updater under Podman.**
+  podman-compose cannot replace a running container and said nothing, so a
+  newer zip's launcher left the old updater running. The launcher now stops
+  and removes the app and the updater before starting them again. (#169)
+
+- **Updates work on a Podman that shares the host's IPC and UTS namespaces**
+  by default (containers.conf, as in Podman's own image). The copy of the app
+  and of the updater carried a shared-memory size and a hostname that such a
+  Podman refuses in a create, so step 7 and the handover to the new updater
+  failed; neither is carried beside a shared namespace any more. (#169)
+
 - **Safari can sign in at `http://localhost`.** The cookies carried the
   `__Host-` prefix, which Safari refuses on plain-HTTP `localhost` while
   keeping an unprefixed `Secure` cookie, so the container on your own
@@ -338,7 +390,27 @@ history this repository does not have.
   and linux/arm64 beside the app, and the app image carries the
   `updater-protocol` label. `deploy/tailnet/check.sh` checks the updater:
   outside the sidecar's namespace, the only holder of the socket, able to
-  reach it, and whether an update is in progress.## 0.8.0 — 2026-10-08
+  reach it, and whether an update is in progress.
+
+- **Self-update is tested end to end on every engine it supports** (#169).
+  CI's `self-update` job is now a matrix: rootful Docker Engine in the
+  loopback and the sidecar layouts, rootless Podman (podman-compose, the
+  updater as `0:0`), and Docker on arm64 (rootless Docker stays in the
+  manual matrix: it cannot make its bridge on a hosted runner). Each leg runs the
+  updater in its own container -- the release's real updater image, with
+  only CI's trust policy added on top -- through an update, a skipped
+  release, a rollback on a failed migration and on failed health, the
+  updater killed and the engine restarted mid-update, recovery through the
+  maintenance page with the recovery code, stale and duplicate requests, the
+  handover to a newer updater and one that fails to start, `compose up`
+  again afterwards, refreshing the updater alone, and the release zip's
+  launcher repairing an install whose updater is older than the zip's. A
+  weekly canary runs an update and the handover on the newest Docker Engine
+  (stable and test channel) and Podman, and opens an issue when one breaks.
+  The bugs it found are under *Fixed*. The job is required by `ci-ok` for
+  any change it covers.
+
+## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
 

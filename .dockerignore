@@ -25,3 +25,6 @@ app/static/dist
 
 # The client is built inside the image, from source. Shipping a local build in
 # would mean the image's UI depends on whatever was last on somebody's laptop.
+
+# What a local run of the self-update scenarios stages (tests/self_update/local.py).
+.self-update

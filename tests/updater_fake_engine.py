@@ -92,6 +92,11 @@ class FakeEngine:
     refuse_create: Callable[[str, dict], str | None] | None = None
     #: Every request closes without an answer, as if the engine went away.
     gone: bool = False
+    #: An engine whose compat API has no `POST /containers/{id}/update` (#169).
+    no_update: bool = False
+    #: Seconds a stop takes to answer: a container that ignores SIGTERM is
+    #: killed only after its grace period.
+    stop_delay: float = 0.0
     lock: threading.RLock = field(default_factory=threading.RLock)
 
     def add_container(self, name: str, project: str, label: str = "com.docker.compose.project", **extra) -> str:
@@ -179,6 +184,26 @@ class FakeEngine:
         running = (seen.get("State") or {}).get("Running")
         bindings = (seen.get("HostConfig") or {}).get("PortBindings") or {}
         seen.setdefault("NetworkSettings", {})["Ports"] = copy.deepcopy(bindings) if running else {}
+
+    def _port_taken(self, c: dict) -> str | None:
+        """A host port `c` publishes that another running container already holds, as Docker refuses."""
+        mine = ((c.get("_inspect") or {}).get("HostConfig") or {}).get("PortBindings") or {}
+        wanted = {
+            f"{b.get('HostIp') or '0.0.0.0'}:{b.get('HostPort')}"
+            for binds in mine.values()
+            for b in binds or []
+            if b.get("HostPort")
+        }
+        for other in self.containers.values():
+            if other is c or other["State"] != "running":
+                continue
+            theirs = ((other.get("_inspect") or {}).get("HostConfig") or {}).get("PortBindings") or {}
+            for binds in theirs.values():
+                for b in binds or []:
+                    held = f"{b.get('HostIp') or '0.0.0.0'}:{b.get('HostPort')}"
+                    if b.get("HostPort") and held in wanted:
+                        return held
+        return None
 
     # ------------------------------------------------------------------ #
 
@@ -296,7 +321,7 @@ class FakeEngine:
                 self.images[ref] = {"Id": "sha256:" + "0" * 64, "RepoDigests": [ref], "Config": {"Labels": {}}}
             return 200, b'{"status":"Pulling"}\n{"status":"Digest: ok"}\n'
 
-        cm = re.fullmatch(r"/containers/([^/]+)(/json|/start|/stop|/rename|/exec|/logs)?", bare)
+        cm = re.fullmatch(r"/containers/([^/]+)(/json|/start|/stop|/rename|/exec|/logs|/update)?", bare)
         if cm:
             c = self.containers.get(cm.group(1))
             if c is None:
@@ -305,13 +330,29 @@ class FakeEngine:
             if method == "GET" and action == "/json":
                 return 200, self.inspect_of(c)
             if method == "POST" and action == "/start":
+                taken = self._port_taken(c)
+                if taken:
+                    return 500, {"message": f"Bind for {taken} failed: port is already allocated"}
                 self.set_state(c, "running")
                 if self.on_start is not None:
                     self.on_start(self, c)
                 return 204, b""
             if method == "POST" and action == "/stop":
+                if self.stop_delay:
+                    import time
+
+                    time.sleep(self.stop_delay)
                 self.set_state(c, "exited", 143 if c["State"] == "running" else 0)
                 return 204, b""
+            if method == "POST" and action == "/update" and self.no_update:
+                return 404, {"message": f"page not found: {method} {bare}"}
+            if method == "POST" and action == "/update":
+                # Docker's `UpdateConfig`: resources and the restart policy.
+                if "_inspect" in c and isinstance(payload, dict) and "RestartPolicy" in payload:
+                    c["_inspect"].setdefault("HostConfig", {})["RestartPolicy"] = copy.deepcopy(
+                        payload["RestartPolicy"]
+                    )
+                return 200, {"Warnings": []}
             if method == "POST" and action == "/rename":
                 new = query["name"]
                 if any(f"/{new}" in o["Names"] for o in self.containers.values() if o is not c):

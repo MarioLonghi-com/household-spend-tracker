@@ -45,12 +45,16 @@ What is carried, and the cases that needed a rule:
 - **What came from the image is not carried**: labels and environment entries
   equal to the old image's own (`org.opencontainers.image.version` above all,
   which would otherwise pin the old version onto the new image), and the old
-  image's entrypoint, command and working directory. When the old image's
+  image's entrypoint, command, working directory and healthcheck. When the old image's
   configuration is unknown, OCI and Chainguard labels are dropped and the rest
   is carried as it is.
 - **What the engine made for the old container is not carried**: `HOSTNAME`
   and Podman's `container=` and `HOME` environment entries, and a hostname
   that is the old container's short id.
+- **What belongs to a namespace the container shares**: `ShmSize` beside
+  `IpcMode: host` and the hostname beside `UTSMode: host`, which Podman
+  reports when containers.conf makes the host's its default and then
+  refuses in a create.
 
 A container in a Podman pod cannot be copied: a container created through
 the Docker-compatible API cannot join the pod (S19). `in_pod` says so, and
@@ -241,6 +245,42 @@ def network_of(inspect: Mapping) -> tuple[str, dict[str, dict]]:
     return mode, endpoints
 
 
+def _image_healthcheck(body: dict, cfg: Mapping, image_cfg: Mapping | None) -> None:
+    """A healthcheck that is the old image's own is the new image's to give (C10).
+
+    Besides being right, it keeps the healthcheck out of Podman 4's
+    Docker-compatible create, which joins `Test` with spaces and splits it
+    again on every space, so `["CMD", "python", "-c", "<script>"]` came back
+    as a dozen words and a probe that can never pass (#169's rootless Podman
+    leg, Podman 4.9). One the compose file set is still carried.
+    """
+    if image_cfg is not None and "Healthcheck" in body and image_cfg.get("Healthcheck") == cfg.get("Healthcheck"):
+        body.pop("Healthcheck")
+
+
+def _namespaces_shared(old_host: Mapping, body: dict, host: dict) -> None:
+    """Leave out what an engine refuses beside a namespace the container shares.
+
+    Not carried, the IPC, UTS and other namespace modes come from the engine's
+    defaults -- and an engine can default to the host's: Podman with
+    `ipcns="host"` / `utsns="host"` in containers.conf (its own
+    `quay.io/podman/stable` image does), whose inspect then reports
+    `IpcMode: host` with a `ShmSize`, and `UTSMode: host` with the host's
+    `Hostname`. Sent back, Podman refuses both ("cannot set shmsize when
+    running in the {host } IPC Namespace", "cannot set hostname when running
+    in the host UTS namespace"; #169's engine canary). The size of a shared
+    /dev/shm and the name of a shared UTS namespace are not the container's to
+    set, so they are not copied.
+    """
+    ipc = str(old_host.get("IpcMode") or "")
+    if ipc == "host" or ipc.startswith("container:"):
+        host.pop("ShmSize", None)
+    uts = str(old_host.get("UTSMode") or "")
+    if uts == "host" or uts.startswith("container:"):
+        body.pop("Hostname", None)
+        body.pop("Domainname", None)
+
+
 def copy_app(
     previous: Mapping,
     image: str,
@@ -261,6 +301,7 @@ def copy_app(
         if cfg.get(key) not in (None, "", [], {}):
             body[key] = cfg[key]
     image_cfg = _dict(image_config) if image_config is not None else None
+    _image_healthcheck(body, cfg, image_cfg)
     for key in ("Entrypoint", "Cmd", "WorkingDir"):
         value = cfg.get(key)
         if value in (None, "", []):
@@ -291,6 +332,12 @@ def copy_app(
             host.pop("PortBindings")
         if host.get("PublishAllPorts"):
             host.pop("PublishAllPorts")
+        # And exposed ports too: inspect lists the image's EXPOSE, which
+        # compose never sent, and Docker Engine refuses to create a container
+        # with both ("conflicting options: port exposing and the container
+        # type network mode"; the self-update job's sidecar leg, #169). The
+        # new image exposes its own.
+        body.pop("ExposedPorts", None)
         body.pop("Domainname", None)
     else:
         host["NetworkMode"] = mode
@@ -299,6 +346,7 @@ def copy_app(
         hostname = cfg.get("Hostname")
         if isinstance(hostname, str) and hostname and hostname != short_id(previous):
             body["Hostname"] = hostname
+    _namespaces_shared(old_host, body, host)
     body["HostConfig"] = host
     return body
 
@@ -333,6 +381,7 @@ def successor(
     for key in CONFIG_FIELDS:
         if cfg.get(key) not in (None, "", [], {}):
             body[key] = cfg[key]
+    _image_healthcheck(body, cfg, image_cfg)
     for key in ("Entrypoint", "WorkingDir"):
         value = cfg.get(key)
         if value in (None, "", []) or (image_cfg is not None and image_cfg.get(key) == value):
@@ -365,6 +414,7 @@ def successor(
     host["NetworkMode"] = mode
     if endpoints:
         body["NetworkingConfig"] = {"EndpointsConfig": endpoints}
+    _namespaces_shared(old_host, body, host)
     body["HostConfig"] = host
     return body
 
