@@ -10,6 +10,8 @@
  * with it.
  */
 
+import { t } from "@lingui/core/macro";
+
 import type { ReimbursementState, Transaction } from "./types";
 
 /** What the `W` pill says about a row. `none` draws nothing. */
@@ -49,9 +51,24 @@ export function workState(
  * household cannot be given a twelfth.
  */
 export const WORK_PILLS: Record<Exclude<WorkState, "none">, { className: string; word: string }> = {
-  owed: { className: "tag work-owed", word: "Work expense — not reimbursed yet" },
-  paid: { className: "tag work-paid", word: "Work expense — reimbursed" },
-  off: { className: "tag work-off", word: "Work expense — written off" },
+  owed: {
+    className: "tag work-owed",
+    get word() {
+      return t`Work expense — not reimbursed yet`;
+    },
+  },
+  paid: {
+    className: "tag work-paid",
+    get word() {
+      return t`Work expense — reimbursed`;
+    },
+  },
+  off: {
+    className: "tag work-off",
+    get word() {
+      return t`Work expense — written off`;
+    },
+  },
 };
 
 /**
@@ -63,9 +80,16 @@ export const WORK_PILLS: Record<Exclude<WorkState, "none">, { className: string;
  * state; it is the absence of one, and sends `clear_state`.
  */
 export const REIMBURSEMENT_LABELS: Record<"" | ReimbursementState, string> = {
-  "": "Not a work expense",
-  expected: "Work should pay this back",
-  written_off: "Written off — work will not pay it",
+  // Getters, so each is read in the language active when it is shown.
+  get ""() {
+    return t`Not a work expense`;
+  },
+  get expected() {
+    return t`Work should pay this back`;
+  },
+  get written_off() {
+    return t`Written off — work will not pay it`;
+  },
 };
 
 /**

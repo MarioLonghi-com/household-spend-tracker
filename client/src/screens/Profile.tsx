@@ -203,7 +203,7 @@ function SignInMethods({ user }: { user: User }) {
         <MethodRow
           slug="authenticator"
           name={t`Authenticator`}
-          state={!enrolled ? t`Cleared` : locked ? t`Needs setting up again` : t`Set up`}
+          state={!enrolled ? t({ message: "Cleared", context: "authenticator state" }) : locked ? t`Needs setting up again` : t`Set up`}
           warn={locked || !enrolled}
           // In recovery mode (#287) this row is the one thing to do, so it
           // stays open and offers no way to close it.

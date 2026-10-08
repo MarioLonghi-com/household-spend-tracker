@@ -20,6 +20,11 @@ export const DATA = new Set([
   "Claude",
   "Desktop",
   "HTTPS",
+  // Stays as it is in every language (glossary).
+  "IBAN",
+  // A bank's own words, as its files write them.
+  "Current",
+  "Savings",
   // Lists are joined by `listText` (Intl's own conjunction outside English),
   // not by the catalog, so the pseudo-locale cannot accent it.
   "and",
@@ -34,8 +39,9 @@ export function untranslated(root: HTMLElement): string[] {
     if ((node.parentElement?.closest(".mono, .codes, svg") ?? null) !== null) continue;
     shown.push(node.textContent ?? "");
   }
-  for (const element of Array.from(root.querySelectorAll("[aria-label], [title], [placeholder]"))) {
-    for (const name of ["aria-label", "title", "placeholder"]) {
+  for (const element of Array.from(root.querySelectorAll("[aria-label], [title], [placeholder], [data-label]"))) {
+    // data-label is what a phone shows beside each cell of a table row.
+    for (const name of ["aria-label", "title", "placeholder", "data-label"]) {
       const value = element.getAttribute(name);
       if (value) shown.push(value);
     }

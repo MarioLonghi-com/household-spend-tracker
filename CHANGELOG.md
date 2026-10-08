@@ -55,6 +55,11 @@ history this repository does not have.
   behind it, as 0.3.1's did. Still one request, only when the button is
   pressed, saying nothing about the instance. (#165)
 
+- **The remaining screens' words go into the catalogs one screen at a time**,
+  starting with Categories. English is unchanged; each screen has a test
+  that renders it in the `en-XA` pseudo-locale and finds no English left.
+  (#56)
+
 - **The transfer panel's words are in the catalogs.** English is unchanged;
   a test renders it in the `en-XA` pseudo-locale and finds no English left.
   (#55)

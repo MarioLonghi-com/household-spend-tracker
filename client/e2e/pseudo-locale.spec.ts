@@ -21,9 +21,10 @@ test.beforeEach(async ({ page }) => {
     window.localStorage.setItem("spendtracker.locale", "en-XA");
   });
   await page.goto("/");
-  // The register's heading is not extracted yet (#55), so it still reads in
-  // English -- which is also what proves the screen behind the shell rendered.
-  await page.getByRole("heading", { name: "Transactions", exact: true }).waitFor();
+  // The register's own heading, pseudo-localised since #55: the screen behind
+  // the shell rendered, in the second language.
+  await page.locator(".register-card").waitFor();
+  await expect(page.getByRole("heading", { level: 1 })).not.toHaveText("Transactions");
 });
 
 test("the shell speaks the pseudo-locale, and the screen still works", async ({ page }) => {
