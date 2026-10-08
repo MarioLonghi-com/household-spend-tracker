@@ -3253,9 +3253,11 @@ msgstr ""
 #. Column heading on the one-time import's mapping step: noun, the amount an account holds. See GLOSSARY.md
 #. Column name for resizing the column on the Register screen: noun, the amount an account holds. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, the amount an account holds. See GLOSSARY.md
+#. Probe one
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #: src/screens/ynab/mapping.tsx
+#: src/zz-probe.tsx
 msgid "Balance"
 msgstr ""
 
@@ -6899,6 +6901,7 @@ msgstr ""
 #. Label on the Import screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Label on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Name of a fact on the Reimbursements report: noun, who was paid or who paid. See GLOSSARY.md
+#. Probe two
 #. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
@@ -6913,6 +6916,7 @@ msgstr ""
 #: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/Reimbursements.tsx
 #: src/screens/ynab/results.tsx
+#: src/zz-probe.tsx
 msgid "Payee"
 msgstr ""
 
