@@ -231,15 +231,35 @@ function returnTo(): string | null {
 }
 
 /**
- * `/?open=<screen>&household=<id>` opens one screen in a fresh tab, for a
- * page that must stay where it is -- the One-time Import's report links to
- * the accounts it made, to History and to the payee rules its bank text
- * feeds, without closing the wizard. Only the screens named here, for the
- * same reason `next` is fenced: it arrives in a query string. Read once, then
+ * `/?open=<screen>&household=<id>` opens the shell on one screen rather than
+ * on the register. Two kinds of page load ask for it:
+ *
+ * - a fresh tab, for a page that must stay where it is -- the One-time
+ *   Import's report links to the accounts it made, to History and to the
+ *   payee rules its bank text feeds, without closing the wizard;
+ * - the Updating panel, once the app is back after an update or a rollback.
+ *   The screen is held in memory only, so a bare reload landed on the
+ *   register and the owner never saw how the update ended. It loads
+ *   `/?open=application` instead, with no household: the screen is about the
+ *   installation, not a ledger.
+ *
+ * Only the screens named here, for the same reason `next` is fenced: it
+ * arrives in a query string. `application` is the owner's; the shell opens
+ * the register instead for anybody else (`OWNER_ONLY_OPENS`). Read once, then
  * the address goes back to `/`.
  */
-const OPENS_IN_NEW_TAB = ["accounts", "history", "rules"] as const;
+const OPENS_IN_NEW_TAB = ["accounts", "history", "rules", "application"] as const;
 type OpensInNewTab = (typeof OPENS_IN_NEW_TAB)[number];
+
+/** Of those, the ones only an owner is shown -- the menu hides them too. */
+const OWNER_ONLY_OPENS: readonly OpensInNewTab[] = ["application"];
+
+/** Where the shell opens: what `?open=` asked for, if this person may see it. */
+export function firstScreen(opened: { screen: OpensInNewTab | null }, role: User["role"]): Screen {
+  if (!opened.screen) return "register";
+  if (OWNER_ONLY_OPENS.includes(opened.screen) && role !== "owner") return "register";
+  return opened.screen;
+}
 
 /**
  * What `?open=` asked for. Reads the address and changes nothing: it runs as a
@@ -493,7 +513,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
   const client = useQueryClient();
   const [opened] = useState(openedAt);
   useEffect(() => putTheAddressBack(opened), [opened]);
-  const [screen, setScreen] = useState<Screen>(opened.screen ?? "register");
+  const [screen, setScreen] = useState<Screen>(() => firstScreen(opened, user.role));
   //: Where the register should open when a report sends somebody there: a
   //: Work expenses view, and maybe one row's panel. Held here because the
   //: register is unmounted while a report is on screen, so it cannot be told

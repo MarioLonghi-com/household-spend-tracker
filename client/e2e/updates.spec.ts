@@ -140,3 +140,15 @@ test("update backups list with their version, the newest five kept, and an older
   await expect(block.locator("tbody tr", { hasText: "20260901-100000" })).toHaveCount(0);
   await expect(block.locator('tbody tr[data-protected="true"]')).toHaveCount(5);
 });
+
+test("the address the Updating panel loads once the app is back opens Application management (#255)", async ({
+  page,
+}) => {
+  // The shell holds its screen in memory only, so a bare reload after an
+  // update landed on Transactions and the outcome was never seen.
+  await page.goto("/?open=application");
+  await expect(page.getByRole("heading", { name: "Application management", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Updates", exact: true })).toBeVisible();
+  // Read once, then the address goes back to `/`.
+  await expect(page).toHaveURL(/\/$/);
+});

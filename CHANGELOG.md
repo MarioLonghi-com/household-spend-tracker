@@ -32,6 +32,14 @@ history this repository does not have.
 
 ## Unreleased
 
+### Fixed
+
+- **After an update, the page opens where the outcome is.** Once the app was
+  back, the Updating panel reloaded the page, and the reload landed on
+  Transactions, so whether the update worked, or was rolled back, was only
+  seen by going back to Application management by hand. The page now opens
+  on Application management itself. (#255)
+
 ## 0.9.1 — 2026-10-09
 
 **Reversible: none** — no migration in this release. To go back, run
