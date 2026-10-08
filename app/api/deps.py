@@ -57,7 +57,7 @@ def public_origin(request: Request) -> str:
 
 
 def current_user(request: Request, session: SessionDep) -> User:
-    row = session_service.lookup(session, cookies.session_value(request.cookies))
+    row = session_service.lookup(session, cookies.session_value(request))
     if row is None:
         raise Unauthorized("sign in first")
     user = session.get(User, row.user_id)
@@ -112,7 +112,7 @@ def load_for[T](session: Session, user: User, model: type[T], object_id: str) ->
 
 
 def device_cookie(request: Request) -> str | None:
-    return cookies.device_value(request.cookies)
+    return cookies.device_value(request)
 
 
 # --------------------------------------------------------------------------- #
@@ -152,10 +152,11 @@ _NO_KEY_HEADERS = {
 
 def carries_session_cookie(request: Request) -> bool:
     """Whether this request carries a session cookie, under the one name
-    `cookies.session_name()` gives it. `main`'s CSRF middleware asks this: the
-    cookie's presence is what decides that a request is a browser's, so it and
-    `current_user` must agree on the name -- which is why neither spells it."""
-    return cookies.session_name() in request.cookies
+    `cookies.session_name()` gives its host. `main`'s CSRF middleware asks
+    this: the cookie's presence is what decides that a request is a browser's,
+    so it and `current_user` must agree on the name -- which is why neither
+    spells it, and both hand `cookies` the request rather than a name."""
+    return cookies.carries_session(request)
 
 
 #: Headers a caller might reasonably have put a key in, and which this API does
