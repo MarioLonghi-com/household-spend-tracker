@@ -54,6 +54,12 @@ history this repository does not have.
   catalog message for each. The English a person or an agent reads is
   unchanged, byte for byte, and agents still get no codes. (#57)
 
+- **History says what kind of act, which field and which table as keys,**
+  beside the English it always sent (`headline_key`, a field's `column`, a
+  row's `table_key`), and a screen in another language words them from its
+  own catalog. English shows the server's words exactly as before; the
+  sentences themselves are still the server's. (#57)
+
 - **A fresh install starts without `SPENDTRACKER_AUTO_MIGRATE=1`.** A first
   `docker compose up -d` against a new volume used to be refused until you
   passed the flag once from a terminal. A database with no tables at all --
@@ -88,20 +94,28 @@ history this repository does not have.
   behind it, as 0.3.1's did. Still one request, only when the button is
   pressed, saying nothing about the instance. (#165)
 
-- **The remaining screens' words go into the catalogs one screen at a time**,
-  starting with Categories. English is unchanged; each screen has a test
-  that renders it in the `en-XA` pseudo-locale and finds no English left.
-  (#56)
+- **Every remaining screen's words are in the catalogs**, one screen per
+  pull request: categories, payees, payee categorisation and the naming
+  rules, the household page, Admin, reconciling and importing accounts,
+  History and backups, application management, receipts, the reports and
+  the one-time YNAB import. Each has a test that renders it in the `en-XA`
+  pseudo-locale and finds no English left. The import guide is a document
+  per language instead: until one is written for a language it shows the
+  English one, marked as English, under a line saying so. `/snap` keeps
+  its words in a small dictionary of its own, keyed by the language chosen
+  on the device. Outside English the desktop menu grows to its widest item,
+  up to 240px, and breaks a word too long for it rather than spilling past
+  the edge. English is unchanged throughout. (#56)
 
-- **The transfer panel's words are in the catalogs.** English is unchanged;
-  a test renders it in the `en-XA` pseudo-locale and finds no English left.
-  (#55)
+- **The register, the transfer screens, Accounts and Import have their
+  words in the catalogs**, each with a test that renders it in the `en-XA`
+  pseudo-locale and finds no English left. English is unchanged. (#55)
 
-- **Draft translations of the first screens** in pt-BR, es-ES and sv-SE:
-  every message extracted so far, each marked `#, fuzzy` until a native
-  speaker reviews it (#58). None is served or selectable; a test checks every
-  catalog entry is valid ICU and keeps the English placeholders. (#175, #176,
-  #177)
+- **Draft translations of every screen** in pt-BR, es-ES and sv-SE, kept as
+  fuzzy drafts and never served until a native speaker has reviewed them
+  (#58). Every catalog entry is valid ICU and keeps the English
+  placeholders, and the drafts were re-checked against the translator
+  notes. (#175, #176, #177)
 
 - **The first screens' words are in the catalogs:** the shell and its menu,
   signing in, step-up, recovery codes, resetting a sign-in, the profile and
