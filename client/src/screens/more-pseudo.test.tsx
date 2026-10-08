@@ -11,6 +11,9 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
+// The One-time Import's card is its own screen, extracted on its own.
+vi.mock("./OneTimeImport", () => ({ OneTimeImport: () => null }));
+
 vi.mock("../lib/api", () => ({
   api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), del: vi.fn(), upload: vi.fn() },
   ApiError: class ApiError extends Error {},
@@ -24,6 +27,7 @@ import { Categories } from "./Categories";
 import { PayeeCategorisation } from "./PayeeCategorisation";
 import { Payees } from "./Payees";
 import { Rules } from "./Rules";
+import { HouseholdPage } from "./Household";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -189,6 +193,36 @@ describe("in en-XA, the remaining screens show no English", () => {
     fireEvent.click(document.querySelector(".card .row .small-button")!);
     await screen.findByText("x", { exact: false }).catch(() => undefined);
     await new Promise((done) => setTimeout(done, 0));
+    expect(left()).toEqual([]);
+  });
+
+  it("the household page: what is in it, its settings and who is in it", async () => {
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path.endsWith("/stats"))
+        return {
+          members: 2, accounts: 3, accounts_closed: 1, transactions: 1234, transactions_uncleared: 5,
+          first_transaction: "2026-01-02", last_transaction: "2026-03-02", receipts: 4, receipts_unattached: 1,
+          payees: 9, payee_rules: 3, payee_rules_enabled: 2, categories: 12, categories_archived: 1,
+          category_groups: 3, reconciliations: 2,
+          currencies: [{ currency: "EUR", accounts: 2, transactions: 1000 }, { currency: "SEK", accounts: 1, transactions: 234 }],
+          countries: [{ code: "ES", name: "Spain", flag: "" }],
+        };
+      if (path === "/themes") return [];
+      if (path.endsWith("/members"))
+        return [
+          { user_id: "u1", display_name: "Sam", email: "sam@example.com", role: "owner", transactions_logged: 10, transactions_by_agent: 2 },
+          { user_id: "u2", display_name: "Doe", email: "doe@example.com", role: "member", transactions_logged: 0, transactions_by_agent: 0 },
+        ];
+      return [];
+    });
+    const household = { ...HOUSEHOLD, receipts_keep_original: false, receipts_keep_original_forced: false, receipts_with_original: 3, theme: "default", accent: null, note: null } as unknown as Household;
+    render(
+      withQueries(
+        <HouseholdPage household={household} user={{ id: "u1", display_name: "Sam" } as never} onChanged={vi.fn()} />,
+      ),
+    );
+    await screen.findByText("doe@example.com");
+    await screen.findByText("SEK");
     expect(left()).toEqual([]);
   });
 });

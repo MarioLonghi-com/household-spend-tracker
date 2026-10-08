@@ -22,6 +22,9 @@ import { Field, Hint, Problem, SortHeading, sortRows, useSort } from "../compone
 import type { Household, Member, Palette, User } from "../lib/types";
 import { OneTimeImport } from "./OneTimeImport";
 import { roleLabel } from "../lib/labels";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { formatCount, formatDate } from "../lib/locale";
 
 /** One currency this household keeps accounts in. Counts, never a figure. */
 interface CurrencyRows {
@@ -52,7 +55,7 @@ interface HouseholdStats {
   countries: { code: string; name: string; flag: string }[];
 }
 
-const count = (n: number) => n.toLocaleString();
+const count = (n: number) => formatCount(n);
 
 export function HouseholdPage({
   household,
@@ -70,7 +73,9 @@ export function HouseholdPage({
         <h1>{household.name}</h1>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
-        One ledger: its accounts, its register, its receipts and the people who can reach them.
+        <Trans>
+          One ledger: its accounts, its register, its receipts and the people who can reach them.
+        </Trans>
       </p>
 
       <Stats household={household} />
@@ -91,7 +96,12 @@ function Stats({ household }: { household: Household }) {
     queryFn: () => api.get<HouseholdStats>(`/households/${household.id}/stats`),
   });
 
-  if (stats.isLoading) return <div className="card muted">Counting…</div>;
+  if (stats.isLoading)
+    return (
+      <div className="card muted">
+        <Trans comment="Text on the household page">Counting…</Trans>
+      </div>
+    );
   if (stats.isError)
     return (
       <div className="card">
@@ -102,40 +112,42 @@ function Stats({ household }: { household: Household }) {
 
   return (
     <section className="card">
-      <h2 className="section-title">What is in it</h2>
+      <h2 className="section-title"><Trans>What is in it</Trans></h2>
 
       <dl className="stat-grid">
-        <Stat label="Accounts" value={count(it.accounts)}
-          note={it.accounts_closed > 0 ? `${count(it.accounts_closed)} closed` : undefined} />
-        <Stat label="Transactions" value={count(it.transactions)}
+        <Stat label={t({ message: "Accounts", comment: "Label on the household page: noun, bank or cash accounts. See GLOSSARY.md" })} value={count(it.accounts)}
+          note={it.accounts_closed > 0 ? t({ message: `${count(it.accounts_closed)} closed`, comment: "Text on the household page" }) : undefined} />
+        <Stat label={t({ message: "Transactions", comment: "Label on the household page. See GLOSSARY.md" })} value={count(it.transactions)}
           note={
             it.transactions_uncleared > 0
-              ? `${count(it.transactions_uncleared)} not yet cleared`
+              ? t`${count(it.transactions_uncleared)} not yet cleared`
               : undefined
           } />
-        <Stat label="Receipts" value={count(it.receipts)}
+        <Stat label={t({ message: "Receipts", comment: "Label on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md" })} value={count(it.receipts)}
           note={
             it.receipts_unattached > 0
-              ? `${count(it.receipts_unattached)} waiting to be attached`
+              ? t`${count(it.receipts_unattached)} waiting to be attached`
               : undefined
           } />
-        <Stat label="Payees" value={count(it.payees)} />
-        <Stat label="Payee rules" value={count(it.payee_rules)}
+        <Stat label={t({ message: "Payees", comment: "Label on the household page: noun, who was paid or who paid. See GLOSSARY.md" })} value={count(it.payees)} />
+        <Stat label={t({ message: "Payee rules", comment: "Label on the household page. See GLOSSARY.md" })} value={count(it.payee_rules)}
           note={
             it.payee_rules > it.payee_rules_enabled
-              ? `${count(it.payee_rules - it.payee_rules_enabled)} turned off`
+              ? t({ message: `${count(it.payee_rules - it.payee_rules_enabled)} turned off`, comment: "Text on the household page" })
               : undefined
           } />
-        <Stat label="Categories" value={count(it.categories)}
-          note={`in ${count(it.category_groups)} groups${
-            it.categories_archived > 0 ? `, ${count(it.categories_archived)} archived` : ""
-          }`} />
-        <Stat label="Currencies" value={count(it.currencies.length)}
+        <Stat label={t({ message: "Categories", comment: "Label on the household page. See GLOSSARY.md" })} value={count(it.categories)}
+          note={
+            it.categories_archived > 0
+              ? t`in ${count(it.category_groups)} groups, ${count(it.categories_archived)} archived`
+              : t({ message: `in ${count(it.category_groups)} groups`, comment: "Text on the household page" })
+          } />
+        <Stat label={t({ message: "Currencies", comment: "Label on the household page: noun" })} value={count(it.currencies.length)}
           note={it.currencies.map((one) => one.currency).join(" · ") || undefined} />
-        <Stat label="Countries" value={count(it.countries.length)}
+        <Stat label={t({ message: "Countries", comment: "Label on the household page" })} value={count(it.countries.length)}
           note={it.countries.map((one) => `${one.flag} ${one.code}`).join(" ") || undefined} />
-        <Stat label="People" value={count(it.members)} />
-        <Stat label="Statements reconciled" value={count(it.reconciliations)} />
+        <Stat label={t({ message: "People", comment: "Label on the household page" })} value={count(it.members)} />
+        <Stat label={t({ message: "Statements reconciled", comment: "Label on the household page" })} value={count(it.reconciliations)} />
         {/* The span, as two figures rather than only as the sentence below.
             It was in the prose and nowhere else, which meant the one question
             this grid is scanned for -- how far back does this ledger go --
@@ -143,38 +155,45 @@ function Stats({ household }: { household: Household }) {
             sentence keeps it too: it is the place that says what it means
             when there is nothing in the register at all. */}
         <Stat
-          label="Oldest transaction"
-          value={it.first_transaction ?? "—"}
-          note={it.first_transaction ? undefined : "nothing recorded yet"}
+          label={t({ message: "Oldest transaction", comment: "Label on the household page" })}
+          value={it.first_transaction ? formatDate(it.first_transaction) : "—"}
+          note={it.first_transaction ? undefined : t`nothing recorded yet`}
         />
-        <Stat label="Newest transaction" value={it.last_transaction ?? "—"} />
+        <Stat
+          label={t({ message: "Newest transaction", comment: "Label on the household page" })}
+          value={it.last_transaction ? formatDate(it.last_transaction) : "—"}
+        />
       </dl>
 
       <p className="muted small" style={{ marginTop: 12, marginBottom: 0 }}>
         {it.first_transaction ? (
-          <>
-            The register runs from {it.first_transaction} to {it.last_transaction}.
-          </>
+          t`The register runs from ${formatDate(it.first_transaction)} to ${formatDate(it.last_transaction ?? "")}.`
         ) : (
-          <>Nothing in the register yet.</>
+          <Trans>Nothing in the register yet.</Trans>
         )}{" "}
-        These are counts, not amounts: this ledger never converts one currency into another, so
-        there is no such thing as a household total. Balances live on the Accounts screen, one per
-        account.
+        <Trans>
+          These are counts, not amounts: this ledger never converts one currency into another, so
+          there is no such thing as a household total. Balances live on the Accounts screen, one
+          per account.
+        </Trans>
       </p>
 
       {it.currencies.length > 0 && (
         <>
           <h3 className="section-title" style={{ marginTop: 18 }}>
-            By currency
+            <Trans comment="Heading on the household page">
+              By currency
+            </Trans>
           </h3>
           <div className="table-scroll">
             <table>
               <thead>
                 <tr>
-                  <th>Currency</th>
-                  <th className="amount">Accounts</th>
-                  <th className="amount">Transactions</th>
+                  <th><Trans comment="Column heading on the household page: noun. See GLOSSARY.md">Currency</Trans></th>
+                  <th className="amount"><Trans comment="Column heading on the household page: noun, bank or cash accounts. See GLOSSARY.md">Accounts</Trans></th>
+                  <th className="amount">
+                    <Trans comment="Column heading on the household page. See GLOSSARY.md">Transactions</Trans>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -183,13 +202,13 @@ function Stats({ household }: { household: Household }) {
                     <td data-primary="true" className="mono">
                       {one.currency}
                       {one.currency === household.base_currency ? (
-                        <span className="muted small"> (main)</span>
+                        <span className="muted small"> {t({ message: "(main)", comment: "Table cell on the household page" })}</span>
                       ) : null}
                     </td>
-                    <td className="amount" data-label="Accounts">
+                    <td className="amount" data-label={t({ message: "Accounts", comment: "Column name shown beside a value on phones on the household page: noun, bank or cash accounts. See GLOSSARY.md" })}>
                       {count(one.accounts)}
                     </td>
-                    <td className="amount" data-label="Transactions">
+                    <td className="amount" data-label={t({ message: "Transactions", comment: "Column name shown beside a value on phones on the household page. See GLOSSARY.md" })}>
                       {count(one.transactions)}
                     </td>
                   </tr>
@@ -260,15 +279,15 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
 
   return (
     <section className="card config-card">
-      <div className="config-badge">Settings</div>
+      <div className="config-badge"><Trans comment="Text on the household page">Settings</Trans></div>
       <Problem error={save.error} />
 
-      <h2 className="section-title">Settings</h2>
-      <Field label="Name">
+      <h2 className="section-title"><Trans comment="Heading on the household page">Settings</Trans></h2>
+      <Field label={t({ message: "Name", comment: "Label of a form field on the household page: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} />
       </Field>
       <p />
-      <Field label="Main currency">
+      <Field label={t({ message: "Main currency", comment: "Label of a form field on the household page" })}>
         <input
           value={currency}
           maxLength={3}
@@ -276,27 +295,33 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
         />
       </Field>
       <p className="muted small">
-        Only used for totals across accounts. Each account keeps its own, and nothing in the ledger
-        is ever converted.
+        <Trans>
+          Only used for totals across accounts. Each account keeps its own, and nothing in the ledger
+          is ever converted.
+        </Trans>
       </p>
-      <Field label="Note">
+      <Field label={t({ message: "Note", comment: "Label of a form field on the household page. See GLOSSARY.md" })}>
         <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       </Field>
 
       <hr className="rule" />
 
       <h3 className="section-title">
-        Colour
-        <Hint label="why households have colours">
+        <Trans comment="Heading on the household page">Colour</Trans>
+        <Hint label={t`why households have colours`}>
           <p>
-            Two households open in one browser look identical, and that is how a statement gets
-            posted into the wrong one. The colour is on every screen, needs no reading, and you
-            notice it changed before you notice anything else.
+            <Trans>
+              Two households open in one browser look identical, and that is how a statement gets
+              posted into the wrong one. The colour is on every screen, needs no reading, and you
+              notice it changed before you notice anything else.
+            </Trans>
           </p>
           <p className="muted small" style={{ marginBottom: 0 }}>
-            You can pick a palette and one accent of your own. You cannot reach the text and
-            background colours, so no household can be made unreadable — and the accent is checked
-            for contrast before it is saved.
+            <Trans>
+              You can pick a palette and one accent of your own. You cannot reach the text and
+              background colours, so no household can be made unreadable — and the accent is checked
+              for contrast before it is saved.
+            </Trans>
           </p>
         </Hint>
       </h3>
@@ -321,11 +346,11 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
         ))}
       </div>
 
-      <Field label="Your own accent (optional)">
+      <Field label={t`Your own accent (optional)`}>
         <div className="row" style={{ gap: 8 }}>
           <input
             type="color"
-            aria-label="Pick an accent colour"
+            aria-label={t`Pick an accent colour`}
             value={accent || chosen?.light.accent || "#15705c"}
             onChange={(e) => setAccent(e.target.value)}
             style={{ width: 48, padding: 2, flex: "0 0 auto" }}
@@ -336,16 +361,24 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
             onChange={(e) => setAccent(e.target.value)}
             className="mono"
           />
-          {accent ? <button onClick={() => setAccent("")}>Use the palette's</button> : null}
+          {accent ? (
+            <button onClick={() => setAccent("")}>
+              <Trans>Use the palette's</Trans>
+            </button>
+          ) : null}
         </div>
       </Field>
       <p className="muted small">
-        Your hue, worn at the weight each mode needs — one colour cannot sit on both a white page
-        and a dark one, so the brightness is worked out for you and the result is always readable.
+        <Trans>
+          Your hue, worn at the weight each mode needs — one colour cannot sit on both a white page
+          and a dark one, so the brightness is worked out for you and the result is always readable.
+        </Trans>
       </p>
 
       <h3 id={receiptsHeading} className="section-title" style={{ marginTop: 18 }}>
-        Receipts
+        <Trans comment="Heading on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md">
+          Receipts
+        </Trans>
       </h3>
       {/* Two cards rather than one checkbox (#162). A box labelled "keep the
           original as well" hid the thing worth knowing -- what it costs --
@@ -369,10 +402,14 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
           />
           <span>
             <strong>
-              Readable copies only <span className="pill storage-recommended">Recommended</span>
+              <Trans>
+                Readable copies only <span className="pill storage-recommended">Recommended</span>
+              </Trans>
             </strong>
             <span className="small muted">
-              A screen copy and a thumbnail. About <strong>33&nbsp;KB</strong> per receipt.
+              <Trans>
+                A screen copy and a thumbnail. About <strong>33&nbsp;KB</strong> per receipt.
+              </Trans>
             </span>
           </span>
         </label>
@@ -385,18 +422,24 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
             onChange={() => setKeepOriginal(true)}
           />
           <span>
-            <strong>Also keep the original file</strong>
+            <strong>
+              <Trans>Also keep the original file</Trans>
+            </strong>
             <span className="small muted">
-              The exact file your camera or scanner produced, as well. About{" "}
-              <strong>2&nbsp;MB</strong> per receipt, roughly 70&times; the space.
+              <Trans>
+                The exact file your camera or scanner produced, as well. About{" "}
+                <strong>2&nbsp;MB</strong> per receipt, roughly 70&times; the space.
+              </Trans>
             </span>
           </span>
         </label>
       </fieldset>
       {forced ? (
         <p className="muted small">
-          Turned on for every household by whoever runs this server, so it cannot be changed
-          here.
+          <Trans>
+            Turned on for every household by whoever runs this server, so it cannot be changed
+            here.
+          </Trans>
         </p>
       ) : keeping ? (
         /* The sizes are measured, not estimated -- see issue #62. One short
@@ -404,16 +447,19 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
            so this says what it means for the database and what it leaves alone. */
         <div className="banner warn" role="status">
           <p className="small" style={{ margin: 0 }}>
-            Every new receipt will take about <strong>70&times; more space</strong> in the
-            database. Only worth it if you need the exact file. Existing receipts are not
-            changed.
+            <Trans>
+              Every new receipt will take about <strong>70&times; more space</strong> in the
+              database. Only worth it if you need the exact file. Existing receipts are not
+              changed.
+            </Trans>
           </p>
         </div>
       ) : stored > 0 ? (
         <p className="muted small">
-          The {stored.toLocaleString()} receipt{stored === 1 ? "" : "s"} that already{" "}
-          {stored === 1 ? "has" : "have"} an original {stored === 1 ? "keeps" : "keep"} it &mdash;
-          nothing here deletes anything.
+          {plural(stored, {
+            one: `The ${formatCount(stored)} receipt that already has an original keeps it — nothing here deletes anything.`,
+            other: `The ${formatCount(stored)} receipts that already have an original keep it — nothing here deletes anything.`,
+          })}
         </p>
       ) : null}
 
@@ -423,7 +469,9 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
         disabled={save.isPending || !name.trim()}
         onClick={() => save.mutate()}
       >
-        Save
+        <Trans comment="Button on the household page: verb">
+          Save
+        </Trans>
       </button>
     </section>
   );
@@ -451,21 +499,21 @@ function People({ household, user }: { household: Household; user: User }) {
 
   return (
     <section className="card">
-      <h2 className="section-title">Who is in it</h2>
+      <h2 className="section-title"><Trans>Who is in it</Trans></h2>
       <Problem error={members.error} />
       <div className="table-scroll">
         <table>
           <thead>
             <tr>
               <SortHeading
-                label="Name"
+                label={t({ message: "Name", comment: "Column heading on the household page: noun" })}
                 column="name"
                 sort={order.sort}
                 direction={order.direction}
                 onSort={order.onSort}
               />
               <SortHeading
-                label="Role"
+                label={t({ message: "Role", comment: "Column heading on the household page: noun, owner or member" })}
                 column="role"
                 sort={order.sort}
                 direction={order.direction}
@@ -476,7 +524,7 @@ function People({ household, user }: { household: Household; user: User }) {
                   getting one. A key's work is counted under the person whose
                   key it is, because that is exactly what a key borrows. */}
               <SortHeading
-                label="Transactions"
+                label={t({ message: "Transactions", comment: "Column heading on the household page. See GLOSSARY.md" })}
                 column="logged"
                 sort={order.sort}
                 direction={order.direction}
@@ -490,17 +538,17 @@ function People({ household, user }: { household: Household; user: User }) {
               <tr key={member.user_id}>
                 <td data-primary="true">
                   {member.display_name}
-                  {member.user_id === user.id ? <span className="muted"> (you)</span> : null}
+                  {member.user_id === user.id ? <span className="muted"> {t({ message: "(you)", comment: "Table cell on the household page" })}</span> : null}
                   <div className="small muted">{member.email}</div>
                 </td>
-                <td className="small muted" data-label="Role">
+                <td className="small muted" data-label={t({ message: "Role", comment: "Column name shown beside a value on phones on the household page: noun, owner or member" })}>
                   {roleLabel(member.role)}
                 </td>
-                <td className="amount" data-label="Transactions">
+                <td className="amount" data-label={t({ message: "Transactions", comment: "Column name shown beside a value on phones on the household page. See GLOSSARY.md" })}>
                   {count(member.transactions_logged)}
                   {member.transactions_by_agent > 0 ? (
                     <div className="small muted">
-                      {count(member.transactions_by_agent)} by an agent
+                      {t`${count(member.transactions_by_agent)} by an agent`}
                     </div>
                   ) : null}
                 </td>
@@ -510,10 +558,12 @@ function People({ household, user }: { household: Household; user: User }) {
         </table>
       </div>
       <p className="muted small" style={{ marginTop: 14, marginBottom: 0 }}>
-        Everyone in a household can do everything in it. Only the owner can change who is in it,
-        from the Admin screen. The count is transactions still in the register that each person
-        entered — by hand, by import, or by an agent key of theirs — read from the History, so a
-        row somebody has since deleted is not counted against anyone.
+        <Trans>
+          Everyone in a household can do everything in it. Only the owner can change who is in it,
+          from the Admin screen. The count is transactions still in the register that each person
+          entered — by hand, by import, or by an agent key of theirs — read from the History, so a
+          row somebody has since deleted is not counted against anyone.
+        </Trans>
       </p>
     </section>
   );
