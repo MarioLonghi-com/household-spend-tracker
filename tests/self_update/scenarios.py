@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import functools
 import json
 import os
 import re
@@ -268,10 +269,17 @@ def check_rolled_back(
     r.check(after["Image"] == s.image_id(s.app_ref(frm)), f"{s.app_name} runs {frm}'s digest")
     want = ((b.app.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
     got = ((after.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
-    r.check(
-        after["Id"] == b.app["Id"] and got == want,
-        f"the previous container is back under its name, with its own restart policy ({got}, was {want})",
-    )
+    took_back = any("took back over" in n for n in record.get("notes") or [])
+    if took_back and contains(s.releases[A]["revision"], PARKING) is False:
+        # 6.6: the successor died and A's updater rolled back -- code from
+        # before the parking, which does not know to undo it.
+        r.check(after["Id"] == b.app["Id"], "the previous container is back under its name")
+        print(f"   (A's updater took the rollback back and predates {PARKING[:7]}: restart policy {got} not checked)")
+    else:
+        r.check(
+            after["Id"] == b.app["Id"] and got == want,
+            f"the previous container is back under its name, with its own restart policy ({got}, was {want})",
+        )
     if b.sidecar is not None:
         check_sidecar(r, s, b, after, engine_restarted)
 
@@ -852,6 +860,11 @@ NEEDS_IN_A = {
 }
 
 
+#: The commit that parks -previous with restart policy `no` (#169).
+PARKING = "858eb410e39016630daa5d818cd53ed0bdc6a244"
+
+
+@functools.cache
 def contains(revision: str, commit: str) -> bool | None:
     """Whether `revision` has `commit` in its history; None when git cannot say."""
     import subprocess
