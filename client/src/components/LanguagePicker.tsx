@@ -36,7 +36,7 @@ export function LanguagePicker({ served = SERVED_LOCALES }: { served?: readonly 
 
   return (
     <label className="field">
-      <span>{t`Language`}</span>
+      <span>{t({ message: "Language", comment: "Label of a choice on the language picker" })}</span>
       <select value={i18n.locale} disabled={busy} onChange={(e) => void choose(e.target.value)}>
         {served.map((locale) => (
           <option key={locale} value={locale} lang={locale}>

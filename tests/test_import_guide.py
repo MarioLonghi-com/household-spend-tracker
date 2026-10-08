@@ -38,11 +38,12 @@ def test_the_page_uses_the_words_the_preview_shows(page):
     import re
 
     labels = LABELS.read_text(encoding="utf-8")
+    # Each getter returns `t({ message: "…", … })`: the message carries a
+    # translator note since #228, and "New" a context of its own.
     shown = dict(
         re.findall(
-            r"^\s+get (\w+)\(\) \{ return t`([^`]+)`; \},$",
-            labels.split("IMPORT_OUTCOME_WORDS")[1].split("};")[0],
-            re.M,
+            r'get (\w+)\(\)\s*\{\s*return t\(\{\s*message: "([^"]+)"',
+            labels.split("IMPORT_OUTCOME_WORDS")[1].split("\n};")[0],
         )
     )
     explained = dict(re.findall(r'code: "(\w+)",\s+label: "([^"]+)"', page))
