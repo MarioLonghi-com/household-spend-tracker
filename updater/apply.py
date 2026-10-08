@@ -56,7 +56,7 @@ import os
 from dataclasses import replace
 from pathlib import Path
 
-from updater import contract, health, journal, oneoff, pin, prepare, shapes, survey, verify, volume
+from updater import contract, health, hook, journal, oneoff, pin, prepare, shapes, survey, verify, volume
 from updater import engine as eng
 from updater.clock import Deadline
 from updater.handover import goes_first, protocol_window, stays_newer
@@ -314,30 +314,29 @@ class Apply:
         )
 
     def step2(self) -> None:
-        hook_dir = self.kit.site.hook_dir
-        config = volume.read_own_json(hook_dir / "hook.json") if hook_dir else None
+        """6.5. Skipped, and logged as skipped, unless `/hook/hook.json` exists."""
+        config = hook.configured(self.kit.site.hook_dir)
         if config is None:
-            self.records.say("No pre-update hook is configured; skipped.")
+            self.remember(hook="skipped")
+            self.records.say(hook.SKIPPED)
             return
         self.start("2", "Running the pre-update hook.")
-        timeout = config.get("timeout_seconds", HOOK_DEFAULT_SECONDS)
-        timeout = timeout if isinstance(timeout, int) and 0 < timeout <= 3600 else HOOK_DEFAULT_SECONDS
-        assert hook_dir is not None
-        volume.write_json(
-            hook_dir / f"{self.id}.request",
-            {"id": self.id, "from": self.ctx["from_version"], "to": self.to},
+        assert self.kit.site.hook_dir is not None
+        outcome = hook.run(
+            self.kit.site.hook_dir,
+            config,
+            self.id,
+            str(self.ctx["from_version"]),
+            self.to,
+            clock=self.kit.clock,
+            sleep=self.kit.sleep,
+            poll=self.kit.poll,
         )
-        deadline = Deadline(self.kit.clock, timeout)
-        while True:
-            result = volume.read_own_json(hook_dir / f"{self.id}.result")
-            if result is not None:
-                if result.get("exit") == 0:
-                    self.records.say("The pre-update hook succeeded.")
-                    return
-                raise survey.NotStarted("the pre-update hook failed.")
-            if deadline.expired():
-                raise survey.NotStarted("the pre-update hook did not answer in time.")
-            self.kit.sleep(self.kit.poll)
+        self.remember(hook=outcome.to_dict())
+        if not outcome.ok:
+            self.notes.append(outcome.sentence)
+            raise survey.NotStarted(hook.FAILED)
+        self.records.say(outcome.sentence)
 
     def step2a(self) -> bool:
         """C1. True when the successor took the request over."""
