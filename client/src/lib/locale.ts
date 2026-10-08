@@ -21,6 +21,11 @@
  * and the options.
  */
 
+// The Lingui singleton itself, not `./i18n`: that module imports the English
+// catalog, and this one has to load anywhere `money.ts` does -- including the
+// server's agreement test, which runs it under plain Node.
+import { i18n } from "@lingui/core";
+
 /** What the words are in until a catalog is served. */
 export const SOURCE_LANGUAGE = "en";
 
@@ -35,9 +40,12 @@ function browserLocale(): string {
   }
 }
 
-/** The language the words are in. English until #58 ships another. */
+/**
+ * The language the words are in: the active Lingui catalog's (`lib/i18n.ts`).
+ * English until #58 ships another; `en-XA` under the pseudo-locale.
+ */
 export function uiLanguage(): string {
-  return SOURCE_LANGUAGE;
+  return i18n.locale || SOURCE_LANGUAGE;
 }
 
 /** Whether the words are English, so a screen keeps the English it had. */

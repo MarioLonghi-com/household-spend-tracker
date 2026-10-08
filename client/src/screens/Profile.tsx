@@ -36,6 +36,7 @@ import {
   storedAppearance,
 } from "../lib/appearance";
 import type { AgentKey, AuthenticatorStatus, Household, User } from "../lib/types";
+import { LanguagePicker } from "../components/LanguagePicker";
 
 type Offer = { token: string; secret: string; uri: string };
 
@@ -120,6 +121,8 @@ function AppearanceSection() {
           ? `Following this device, which is ${effectiveScheme("system")} right now.`
           : `Held in ${choice}, whatever this device is set to.`}
       </p>
+
+      <LanguagePicker />
     </section>
   );
 }
