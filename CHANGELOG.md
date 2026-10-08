@@ -32,7 +32,7 @@ history this repository does not have.
 
 ## Unreleased
 
-## 0.9.0 — 2026-10-08
+## 0.9.0 — 2026-10-09
 
 **Reversible: none** — no migration in this release. To go back, run
 `0.8.0` again (`SPENDTRACKER_VERSION=0.8.0` in `.env`, then
