@@ -163,6 +163,8 @@ ENDPOINTS: tuple[Endpoint, ...] = (
     # The updater's own one-offs only: the check's JSON, the floors (8.5).
     Endpoint("logs", "GET", "/containers/{id}/logs", False),
     Endpoint("pull", "POST", "/images/create", True),
+    # By repository digest, this repository's two images only -- or (R27) by
+    # the image id a container of this project runs: `inspect_image_id`.
     Endpoint("image_inspect", "GET", "/images/{image}/json", False),
     Endpoint("image_remove", "DELETE", "/images/{image}", True),
 )

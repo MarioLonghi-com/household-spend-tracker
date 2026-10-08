@@ -37,7 +37,7 @@ from dataclasses import replace
 import pytest
 
 from tests.self_update.compare import ALLOWED, differences
-from tests.updater_world import APP, HEAD, PROJECT, UPD, A, B, C, World, digest, ref
+from tests.updater_world import APP, HEAD, PROJECT, REVISION, UPD, A, B, C, World, digest, ref
 from updater import contract, pin, volume
 from updater import engine as eng
 from updater.handover import Outcome
@@ -99,7 +99,7 @@ def test_prepare_resolves_verifies_pulls_and_asks_the_new_image_without_touching
     assert report["digest"] == digest(APP, B) and report["updater_digest"] == digest(UPD, B)
     assert [m["revision"] for m in report["pending"]] == ["b2c3d4e5f6a1", "c3d4e5f6a1b2"]
     assert report["database_stamp"] == HEAD[A] and report["code_head"] == HEAD[B]
-    assert report["attestations"]["app"]["commit"] == report["attestations"]["app"]["commit"] != ""
+    assert report["attestations"]["app"]["commit"] == REVISION[B] == report["attestations"]["updater"]["commit"]
     assert contract.parse_iso(report["expires_at"]) - world.clock.now() == pytest.approx(24 * 3600, abs=5)
     # Both images are on the engine now, by digest; A's are still there.
     assert {ref(APP, B), ref(UPD, B), ref(APP, A)} <= set(world.fake.images)

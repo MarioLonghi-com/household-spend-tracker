@@ -8,10 +8,18 @@ calls, and writes back what happened. Design notes, Parts 5 and 6.
 This package is the core: the file contract (`contract`), the volume and its
 atomic, group-shared writes (`volume`), the journal and what to do after a
 crash (`journal`), deadlines that do not count sleep (`clock`), and the
-restricted engine client (`engine`). The orchestration that strings them into
-prepare, apply and rollback is built on top of it.
+restricted engine client (`engine`).
 
-Standard library only. Nothing here imports `app`: the updater image carries
-this package, not the application, and the less it carries the less there is
-to trust beside a root-equivalent socket.
+On top of it, the orchestration (#161): `prepare` (4.4), `apply` (steps 0-10
+of 4.2, the rollback of 4.3 and resuming after a crash, 5.6), the container
+shapes it creates and the allowlist copy of the app (`shapes`), finding the
+app and the sidecar (`survey`), one-offs (`oneoff`), health from where
+requests arrive (`health`), the pin (`pin`), the handover interface
+(`handover`, its mechanics are #162's), and the request loop (`service`,
+`python -m updater`).
+
+Standard library only, except `verify`, which uses sigstore. Nothing here
+imports `app`: the updater image carries this package, not the application,
+and the less it carries the less there is to trust beside a root-equivalent
+socket.
 """

@@ -160,6 +160,31 @@ history this repository does not have.
   lock. Tested offline against the real 0.7.0, 0.7.1 and 0.8.0 bundles and
   tampered copies of them. Nothing calls it yet.
 
+- **The self-updater can prepare, apply and roll back an update** (#161).
+  *Prepare* resolves both images of the release to digests without pulling,
+  checks free disk and memory, verifies both attestations, pulls them by
+  digest, compares their labels with what was verified, and asks the new
+  image's `scripts.upgrade --check --json` what it would do to this ledger,
+  with the app serving throughout. *Apply* runs the steps of the design one
+  journal entry at a time: it stops the app and parks it as
+  `<name>-previous`, runs the drill from the new image (backup first, then
+  the migration), starts the new version as a copy of the previous container
+  that changes only the image and `SPENDTRACKER_AUTO_MIGRATE=0`, checks
+  health from where requests arrive (the Tailscale sidecar, or the published
+  port), writes the pin into the project's `.env` and `pin/release.env`, and
+  prunes update backups beyond the newest five. A failed migration or health
+  check **rolls back on its own**: the backup restored with the old image,
+  the old version started again under its name; after three failed attempts
+  the update needs recovery and nothing serves the ledger. After a crash, a
+  laptop sleeping or the engine restarting, the updater resumes from its
+  journal and never runs the drill twice. The Tailscale sidecar is never
+  stopped or restarted, and an app in a Podman pod is refused with a
+  sentence. The handover to a newer updater (#162) and the maintenance page
+  (#163) are not built yet: the updater carries on without them. CI gains a
+  `self-update` job, advisory for now, that updates release A to B through
+  the updater against a real Docker Engine. No image or compose service runs
+  the updater yet (#164).
+
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
