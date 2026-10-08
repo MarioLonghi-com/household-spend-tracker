@@ -9,7 +9,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 vi.mock("../lib/api", () => ({
   api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), del: vi.fn(), upload: vi.fn() },
@@ -19,6 +19,7 @@ vi.mock("../lib/api", () => ({
 import { activate } from "../lib/i18n";
 import type { Account, Household } from "../lib/types";
 import { untranslated } from "../test-pseudo";
+import { Accounts, SuggestedIdentifiers } from "./Accounts";
 import { Transfer } from "./Transfer";
 import { UnprovenSection, WaitingSection } from "./TransferSections";
 import { api } from "../lib/api";
@@ -132,6 +133,54 @@ describe("in en-XA, the register's screens show no English", () => {
         </>,
       ),
     );
+    expect(untranslated(container)).toEqual([]);
+  });
+
+  it("the accounts list, a new account and an account's settings", async () => {
+    const casa = { ...account("a", "Casa", "EUR"), transaction_count: 12, oldest_transaction: "2026-01-02", newest_transaction: "2026-03-02", closed: true, is_liability: true, type: "credit_card" as const };
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path === "/countries") return [{ code: "ES", name: "Spain", flag: "" }];
+      if (path.includes("/accounts")) return [casa, account("b", "Doe", "SEK")];
+      if (path.endsWith("/identifiers")) return [{ id: "i1", account_id: "a", kind: "iban", value: "ES0012" }];
+      return [];
+    });
+    render(withQueries(<Accounts household={HOUSEHOLD} />));
+    await screen.findByText("Doe");
+    expect(untranslated(document.body)).toEqual([]);
+
+    // The header's primary button opens the new-account panel.
+    fireEvent.click(document.querySelector("button.primary")!);
+    await waitFor(() => expect(document.querySelector(".panel")).not.toBeNull());
+    expect(untranslated(document.body)).toEqual([]);
+  });
+
+  it("an account's settings, with its identifiers", async () => {
+    const casa = { ...account("a", "Casa", "EUR"), opening_transaction_id: "t1", opening_balance: 1000, warnings: [] };
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path === "/countries") return [{ code: "ES", name: "Spain", flag: "" }];
+      if (path.includes("/accounts")) return [casa];
+      if (path.endsWith("/identifiers")) return [{ id: "i1", account_id: "a", kind: "iban", value: "ES0012" }];
+      return [];
+    });
+    render(withQueries(<Accounts household={HOUSEHOLD} onOpenRegister={vi.fn()} />));
+    await screen.findByText("Casa");
+    const [, settings] = Array.from(document.querySelectorAll("td.row-actions button.link"));
+    fireEvent.click(settings);
+    await screen.findByText("ES0012");
+    expect(untranslated(document.body)).toEqual([]);
+  });
+
+  it("the suggested identifiers", async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      items: [
+        { kind: "alias", value: "Sam", account_id: null, account_name: null, source: "pattern", why: "Sam", mentions: 3, unit: "rows", sample: "Casa", would_link: 2 },
+        { kind: "file_tag", value: "X1", account_id: "a", account_name: "Casa", source: "file_name", why: "Sam", mentions: 1, unit: "files", sample: null, would_link: null },
+      ],
+    });
+    const { container } = render(
+      withQueries(<SuggestedIdentifiers household={HOUSEHOLD} accounts={[account("a", "Casa", "EUR")]} />),
+    );
+    await screen.findByText("Sam", { selector: ".mono" });
     expect(untranslated(container)).toEqual([]);
   });
 });
