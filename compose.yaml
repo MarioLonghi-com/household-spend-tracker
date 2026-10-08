@@ -8,6 +8,14 @@
 # the setup wizard, which looks exactly like data loss. deploy/UPGRADING.md.
 name: spend-tracker
 
+# **No pod under podman-compose** (design notes S19). It otherwise puts every
+# service in one pod, and Podman refuses `network_mode: container:<id>` into a
+# pod member from a container outside it -- which is every container the
+# updater creates through the Docker-compatible API, since that API cannot
+# join a pod. Docker Compose ignores `x-` keys.
+x-podman:
+  in_pod: false
+
 services:
   app:
     # The published image, the release named in `.env`:
@@ -15,7 +23,12 @@ services:
     # `docker compose pull` fetches it; unset, it is whatever `latest` was when
     # it was pulled. Every release is built, attested and published by
     # .github/workflows/release.yml. deploy/DOCKER.md.
-    image: ghcr.io/mariolonghi-com/household-spend-tracker:${SPENDTRACKER_VERSION:-latest}
+    #
+    # SPENDTRACKER_IMAGE is the updater's: after an update from the browser it
+    # writes the release it installed into `.env`, by digest, so a later
+    # `docker compose up` starts that image and not the older one this line
+    # would otherwise name. Leave it to the updater.
+    image: ${SPENDTRACKER_IMAGE:-ghcr.io/mariolonghi-com/household-spend-tracker:${SPENDTRACKER_VERSION:-latest}}
     # The fallback: when that tag cannot be pulled, Compose builds this
     # checkout instead -- and `docker compose build` always does. Build with
     # SPENDTRACKER_VERSION=local so a local image never carries a release's
@@ -80,8 +93,11 @@ services:
       # in a working tree can be `git clean -xdf`'d out from under it -- which
       # is the hazard the old `./data` default carried.
       - ledger:/var/lib/spend-tracker
-    # No new privileges, read-only root, and the one writable path named.
-    # The app writes to the volume and to nothing else.
+      # What the app shares with the updater: requests in, status and reports
+      # out. Files only -- the app never holds the engine's socket.
+      - update:/var/lib/spend-tracker-update
+    # No new privileges, read-only root, and the writable paths named.
+    # The app writes to the volumes and to nothing else.
     read_only: true
     tmpfs:
       - /tmp
@@ -90,5 +106,64 @@ services:
     cap_drop:
       - ALL
 
+  # The self-updater (design notes, Part 6): the one container that holds the
+  # engine's socket, so the app can be updated from the browser without
+  # holding it itself. It listens on nothing; the app talks to it through
+  # files in the `update` volume.
+  updater:
+    # The updater of the same release as the app. SPENDTRACKER_UPDATER_IMAGE is
+    # written into `.env` by the updater, by digest, when it replaces itself.
+    image: ${SPENDTRACKER_UPDATER_IMAGE:-ghcr.io/mariolonghi-com/household-spend-tracker-updater:${SPENDTRACKER_VERSION:-latest}}
+    # The same fallback as the app's: built from this checkout when the tag
+    # cannot be pulled -- a release older than the updater has none.
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: updater
+    # On every engine. podman-restart, which the launcher enables, restores
+    # `unless-stopped` as well as `always`, and a hand-stopped one stays
+    # stopped (S2, S20).
+    restart: unless-stopped
+    # 65532 on rootful engines, Docker Desktop and podman machine. 0:0 under
+    # rootless Docker and rootless Podman on Linux (S17, S18): there the
+    # container's uid 0 is the unprivileged host user, and the only user that
+    # both reaches the socket and owns the project directory.
+    user: "${SPENDTRACKER_UPDATER_USER:-65532:65532}"
+    # The socket's group, and the `update` volume's (C11). 0 is the socket's
+    # group under Docker Desktop and Podman; rootful Docker Engine on Linux
+    # needs the docker group's own gid in SPENDTRACKER_SOCKET_GID (S12):
+    #   echo SPENDTRACKER_SOCKET_GID=$(stat -c %g /var/run/docker.sock) >> .env
+    group_add:
+      - "${SPENDTRACKER_SOCKET_GID:-0}"
+      - "65532"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+      # SELinux confinement off for this container alone. Under Podman with
+      # SELinux on it is what lets it open the socket (S4, S18), and the
+      # socket already makes it root-equivalent, so the label protected
+      # nothing. A no-op where SELinux is off and on Docker.
+      - label=disable
+    cap_drop:
+      - ALL
+    # Standard library, sigstore and a JSON file at a time: 128m is room, and
+    # a ceiling on what a runaway verification could take from the host.
+    mem_limit: 128m
+    volumes:
+      - update:/update
+      # Read-write, because a `:ro` socket mount does not make the API
+      # read-only; the restrictions are in updater/engine.py's call list.
+      - ${SPENDTRACKER_ENGINE_SOCKET:-/var/run/docker.sock}:/run/engine.sock
+      # This directory: the updater writes SPENDTRACKER_IMAGE and
+      # SPENDTRACKER_UPDATER_IMAGE into `.env` here (S1), by a rename, which a
+      # single-file mount would not allow, and keeps `pin/release.env` as the
+      # record. `.env` holds nothing the socket does not already reach.
+      - .:/project
+    # No `ports:`, and never in another service's network: it has its own
+    # default network, for egress to ghcr.io, api.github.com and Sigstore.
+
 volumes:
   ledger:
+  update:

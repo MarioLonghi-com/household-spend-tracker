@@ -427,22 +427,20 @@ substituted in, and prints `OK` only if every required value is present. If
 one is missing it names it, for example *"put a tagged Tailscale auth key in
 deploy/tailnet/.env"*.
 
-#### 4. Build the image
+#### 4. Pull the images
 
 ```bash
-(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
-docker compose build
-docker image ls household-spend-tracker
+docker compose pull
+docker image ls 'ghcr.io/mariolonghi-com/household-spend-tracker*'
 ```
 
-The first line is not optional, though nothing fails without it: it is what
-lets the Application screen and `/api/health` name the commit instead of
-saying *unknown*. [Naming what runs](#naming-what-runs) says why.
-
-Builds the app's image from the checkout (two levels up). It takes a few
-minutes the first time. The listing should show a tag equal to
+Fetches the release `SPENDTRACKER_VERSION` names, as section 1 does: the app,
+and the self-updater that ships with it, both built, smoke-tested and attested
+by `release.yml`. The listing should show both at a tag equal to
 `SPENDTRACKER_VERSION`, so `docker image ls` on this box always says which
-release it is running.
+release it is running. This file has no `build:`: a pull that fails is an
+error to read rather than a silent local build, because the updater will not
+update an image that names no release.
 
 #### 5. Start both containers, creating the database
 
@@ -559,7 +557,7 @@ health answer are the same release.
 
 ```bash
 git describe --tags
-docker image ls household-spend-tracker
+docker image ls 'ghcr.io/mariolonghi-com/household-spend-tracker*'
 docker compose exec app python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8848/api/health').read().decode())"
 ```
 
@@ -871,7 +869,8 @@ docker compose run --rm -T -v "$PWD/backups:/backups" \
 # 2. Get the new image: name the new release in .env
 #    (SPENDTRACKER_VERSION=X.Y.Z), then
 docker compose pull
-#    Or, building it yourself (section 3, the sidecar, always builds):
+#    Or, building it yourself (sections 1 and 2 only; the sidecar's file
+#    has no `build:`):
 #    git fetch --tags && git checkout vX.Y.Z
 #    (cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
 #    docker compose build
