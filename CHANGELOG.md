@@ -34,6 +34,26 @@ history this repository does not have.
 
 ### Fixed
 
+- **Starting the previous app by hand no longer spoils an update.** While an
+  update runs, the stopped app is kept as `…-previous`; started from Docker
+  Desktop's list, its `unless-stopped` policy kept it coming back and it
+  held the port the new version needed, so the update rolled back. The
+  updater now parks it with restart policy `no`, stops it once if it is in
+  the way and starts the new version again, and gives it its own policy back
+  if the update rolls back. The updater's engine client gains one call for
+  this, which changes the app's restart policy and nothing else. (#169)
+
+- **The updater starts under rootless Podman.** Running as in-container root
+  without capabilities, it tried to change the mode of the `update`
+  volume's directory, which it does not own, and exited before its first
+  heartbeat. It now leaves a directory that is already right alone. (#169)
+
+- **Updates work on a Podman that shares the host's IPC and UTS namespaces**
+  by default (containers.conf, as in Podman's own image). The copy of the app
+  and of the updater carried a shared-memory size and a hostname that such a
+  Podman refuses in a create, so step 7 and the handover to the new updater
+  failed; neither is carried beside a shared namespace any more. (#169)
+
 - **Safari can sign in at `http://localhost`.** The cookies carried the
   `__Host-` prefix, which Safari refuses on plain-HTTP `localhost` while
   keeping an unprefixed `Secure` cookie, so the container on your own
@@ -353,8 +373,8 @@ history this repository does not have.
   again afterwards, refreshing the updater alone, and the release zip's
   launcher repairing an install whose updater is older than the zip's. A
   weekly canary runs an update and the handover on the newest Docker Engine
-  (stable and test channel) and Podman, and opens an issue when one breaks. Nothing changes
-  for an installation.
+  (stable and test channel) and Podman, and opens an issue when one breaks.
+  The three bugs it found are under *Fixed*.
 
 ## 0.8.0 — 2026-10-08
 

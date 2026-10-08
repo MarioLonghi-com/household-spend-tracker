@@ -70,7 +70,10 @@ It cannot make the updater run anything else. The updater's own engine
 client is a list of calls, checked before a byte reaches the socket and held
 by a test: containers of its own compose project only; images of this
 repository's two packages only, by digest; never the sidecar except to read
-it and run its health check; no build, no volume or network calls, no prune.
+it and run its health check; no build, no volume or network calls, no prune;
+and the one setting of an existing container it changes is the app's restart
+policy (`no` while it is parked as `-previous`, its own again on a rollback),
+in a request that may carry nothing else.
 Every container it creates is refused if it asks for `Privileged`, added
 capabilities, the host's PID, IPC, UTS, user or network namespace, devices,
 or any host path other than the socket and the compose directory the updater

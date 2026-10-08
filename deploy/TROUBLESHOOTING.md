@@ -909,7 +909,7 @@ stopped, and the app kept serving. The usual reasons:
 | *Updating from this screen needs the updater* | No heartbeat for two minutes. | [The updater is not running](#the-updater-is-not-running). |
 | *… is newer than this updater (N) can work with* | The engine updated past the updater. | [The updater is too old for the engine](#the-updater-is-too-old-for-the-engine). |
 | The maintenance page, with no recovery link, for minutes after the update | The update is still running; the page is from the previous version. | Wait. It goes when the new version answers, or after a rollback. |
-| A container called `…-previous` in Docker Desktop's list | The previous app or updater, kept stopped after an update until the next one. | Leave it stopped. Starting the previous **app** by hand mid-update is what the rename is there to prevent; if it happens, the update rolls back. |
+| A container called `…-previous` in Docker Desktop's list | The previous app or updater, kept stopped after an update until the next one. | Leave it stopped. Its restart policy is `no` while it is parked. If the previous **app** is started by hand mid-update, the updater stops it once and starts the new version; a rollback gives it its own restart policy back. |
 | Containers named like the app plus `-placard-…`, `-drill-…`, `-restore-…` or `-probe-…` | One-off containers of an update, removed when they finish. | Leave them while an update runs. Afterwards, a stopped one can be removed. |
 | You closed the tab mid-update | Nothing: the update does not need it. | Open *Updates* again. The outcome waits there until you dismiss it. |
 
