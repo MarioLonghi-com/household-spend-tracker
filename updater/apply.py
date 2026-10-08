@@ -75,6 +75,8 @@ KEEP_BACKUPS = 5
 SAVE_DEADLINE_EVERY = 30.0
 
 DRILL_REPORT = "drill.json"
+#: How much of the restore's output is kept for the recovery page.
+RESTORE_LOG_LINES = 40
 
 #: The owner's sentences for each way an apply ends (Part 12).
 NOT_MIGRATED = "nothing was migrated"
@@ -706,7 +708,9 @@ class Apply:
             ledger_volume=str(self.ctx["ledger_volume"]),
             image_config=(survey.image_of(self.client, prev) or {}).get("Config"),
         )
-        result = self.runner.run(self.name("restore"), body, RESTORE_SECONDS)
+        result = self.runner.run(self.name("restore"), body, RESTORE_SECONDS, stderr=True)
+        # The recovery page shows this tail to the owner (11.3, #163).
+        self.remember(restore_log=result.output.splitlines()[-RESTORE_LOG_LINES:])
         if result.exit_code != 0:
             raise StepFailed(f"the backup could not be restored (exit {result.exit_code})")
         self.remember(restored=True)
@@ -755,24 +759,38 @@ class Apply:
             failed_step=self.ctx.get("failed_step"),
         )
 
-    def needs_recovery(self, why: str) -> str:
-        """4.3: the rollback failed three times. Nothing serves; the code stays valid."""
-        try:
+    def recovery_page(self, stop_app: bool = True) -> None:
+        """The maintenance page in recovery mode (Part 11), for this update.
+
+        `recovery/mode.json` names the update first, so the page knows which
+        one it is for. With `stop_app`, whatever runs under the app's name is
+        stopped first: nothing serves the ledger while recovery is open.
+        """
+        volume.write_json(
+            self.vol.recovery_mode, contract.recovery_mode("recovery", self.id, self.kit.clock.now())
+        )
+        if stop_app:
             current = survey.find(self.client, self.app_name)
             if current is not None and survey.running(current):
                 self.client.stop(current["Id"], grace=STOP_GRACE_SECONDS)
-            prev = self.previous()
-            sidecar = self.sidecar_now(prev) if self.ctx.get("layout") == "sidecar" else None
-            body = shapes.placard(
-                prev,
-                str(self.ctx["old_ref"]),
-                self.id,
-                ledger_volume=str(self.ctx["ledger_volume"]),
-                update_volume=self.kit.site.update_volume,
-                sidecar_id=sidecar.id if sidecar else None,
-                recovery=True,
-            )
-            self.runner.launch(self.name("placard"), body)
+        prev = self.previous()
+        sidecar = self.sidecar_now(prev) if self.ctx.get("layout") == "sidecar" else None
+        body = shapes.placard(
+            prev,
+            str(self.ctx["old_ref"]),
+            self.id,
+            ledger_volume=str(self.ctx["ledger_volume"]),
+            update_volume=self.kit.site.update_volume,
+            sidecar_id=sidecar.id if sidecar else None,
+            recovery=True,
+            image_config=(survey.image_of(self.client, prev) or {}).get("Config"),
+        )
+        self.runner.launch(self.name("placard"), body)
+
+    def needs_recovery(self, why: str) -> str:
+        """4.3: the rollback failed three times. Nothing serves; the code stays valid."""
+        try:
+            self.recovery_page()
         except _STEP_ERRORS as e:
             self.notes.append(f"The recovery page did not start ({e}).")
         return self._finish(
