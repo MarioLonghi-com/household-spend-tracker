@@ -211,7 +211,7 @@ jobs:
           \.py$
           ^requirements[^/]*\.txt$
           ^(pyproject\.toml|alembic\.ini|Makefile)$
-          ^(app|statements|tests|migrations|scripts)/
+          ^(app|statements|updater|tests|migrations|scripts)/
           ^client/src/lib/appearance\.ts$
           PATHS
 
@@ -312,7 +312,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install "$(grep -oE '^ruff==[^ ]+' requirements-dev.txt)"
       - name: ruff
-        run: ruff check app/ statements/ tests/ scripts/
+        run: ruff check app/ statements/ updater/ tests/ scripts/
       - name: no bulk statements against audited tables
         run: ./scripts/no-bulk-statements.sh
 

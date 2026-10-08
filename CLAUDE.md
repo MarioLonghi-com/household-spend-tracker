@@ -91,6 +91,8 @@ sharing a checkout with a session you cannot see.
     app/api/       deps.py holds current_user / current_household / require_owner
     client/        Vite + React + TS, built into app/static/dist
     migrations/    Alembic, from the first commit
+    updater/       the self-updater's own container: file contract, journal,
+                   restricted engine client -- standard library, no import of app/
 
 ## Security posture, in one place
 

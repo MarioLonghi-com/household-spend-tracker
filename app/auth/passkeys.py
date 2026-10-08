@@ -64,7 +64,7 @@ from webauthn.helpers.structs import (
 
 from .. import config
 from ..errors import Conflict, NotFound, TooManyAttempts, Unauthorized, ValidationError
-from ..hosts import _host_of, _is_ip_literal
+from ..hosts import _is_ip_literal, request_host
 from ..models import Passkey, User, WebAuthnChallenge, utcnow
 from . import ratelimit
 
@@ -113,7 +113,7 @@ class PasskeyState:
 
 
 def _request_host(request: Request) -> str:
-    return _host_of(request.headers.get("host", "")).lower().rstrip(".")
+    return request_host(request)
 
 
 def _public_origin() -> str | None:

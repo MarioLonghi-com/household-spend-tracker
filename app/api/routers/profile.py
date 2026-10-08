@@ -64,7 +64,7 @@ def change_password(
     This browser keeps its session: signing someone out of the act they just
     completed reads as the change having failed.
     """
-    value = cookies.session_value(request.cookies)
+    value = cookies.session_value(request)
     keep = tokens.fingerprint(value) if value else None
     with batch(session, kind=BatchKind.manual, actor_id=user.id):
         done = profile_service.change_password(
@@ -123,7 +123,7 @@ def confirm_reenrolment(
 
     The current factor is `current_code`, or in recovery mode the `grant` a
     recovery sign-in in this same session returned (#287)."""
-    value = cookies.session_value(request.cookies)
+    value = cookies.session_value(request)
     keep = tokens.fingerprint(value) if value else None
     with batch(session, kind=BatchKind.manual, actor_id=user.id):
         done = profile_service.complete_reenrolment(
