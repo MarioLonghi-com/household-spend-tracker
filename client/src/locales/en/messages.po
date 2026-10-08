@@ -119,6 +119,7 @@ msgstr "Grouped by what the bank sent, with the per-transaction reference taken 
 msgid "To month"
 msgstr "To month"
 
+#. Column heading on the Admin screen: noun, which thing
 #: src/screens/Admin.tsx
 msgid "What"
 msgstr "What"
@@ -300,6 +301,7 @@ msgstr "Copy this link now — it is shown once."
 msgid "What happens"
 msgstr "What happens"
 
+#. Label on the Admin screen
 #. Label on the household page
 #: src/screens/Admin.tsx
 #: src/screens/Household.tsx
@@ -319,6 +321,7 @@ msgstr "More currencies"
 msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 msgstr "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 
+#. Column heading on the Admin screen: noun, the time
 #: src/screens/Admin.tsx
 msgid "When"
 msgstr "When"
@@ -351,6 +354,7 @@ msgstr "What each payee has been filed under, and what a new transaction for it 
 msgid "This browser does not support passkeys yet."
 msgstr "This browser does not support passkeys yet."
 
+#. Option in a dropdown on the Admin screen
 #: src/screens/Admin.tsx
 msgid "YYYY-MM-DD"
 msgstr "YYYY-MM-DD"
@@ -528,7 +532,9 @@ msgstr "Every transaction and every rule that names <0>{0}</0> will name <1>{1}<
 msgid "Set the category on {done} row and skipped 1 transfer leg — a transfer has no category."
 msgstr "Set the category on {done} row and skipped 1 transfer leg — a transfer has no category."
 
+#. Button on the Admin screen
 #. Menu item and the name of its screen
+#. Title of a panel on the Admin screen
 #: src/App.tsx
 #: src/screens/Admin.tsx
 msgid "New household"
@@ -556,6 +562,7 @@ msgstr "delimiter"
 msgid "Keep editing"
 msgstr "Keep editing"
 
+#. Table cell on the Admin screen
 #. Table cell on the household page
 #: src/screens/Admin.tsx
 #: src/screens/Household.tsx
@@ -575,6 +582,7 @@ msgstr "{0, plural, one {({1} line)} other {({2} lines)}}"
 msgid "Opening date"
 msgstr "Opening date"
 
+#. Table cell on the Admin screen
 #: src/screens/Admin.tsx
 msgid "nobody"
 msgstr "nobody"
@@ -782,6 +790,7 @@ msgstr "Nobody yet, which should be impossible while you are reading this."
 msgid "Spellings"
 msgstr "Spellings"
 
+#. Table cell on the Admin screen
 #. placeholder {0}: one.recovery_codes_left
 #: src/screens/Admin.tsx
 msgid "{0} left"
@@ -803,6 +812,7 @@ msgstr "{keys, plural, one {{keys} agent key still works — revoke it below if 
 msgid "Call the payee"
 msgstr "Call the payee"
 
+#. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Copied"
 msgstr "Copied"
@@ -811,11 +821,14 @@ msgstr "Copied"
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr "This file only. The payee’s rule is left as it is for future statements."
 
+#. Column heading on the Admin screen: noun
+#. Column heading on the Admin screen: noun
 #. Column heading on the Payees screen: noun
 #. Column heading on the household page: noun
 #. Column heading on the passkeys panel: noun
 #. Label of a form field on the Accounts screen: noun
 #. Label of a form field on the Accounts screen: noun
+#. Label of a form field on the Admin screen: noun
 #. Label of a form field on the Categories screen: noun
 #. Label of a form field on the Categories screen: noun
 #. Label of a form field on the Categories screen: noun
@@ -1021,6 +1034,7 @@ msgid "The recovery code you signed in with in this tab covers it — no other c
 msgstr "The recovery code you signed in with in this tab covers it — no other code is needed."
 
 #. Heading on the Your account panel: noun. See GLOSSARY.md
+#. Label of a choice on the Admin screen: noun. See GLOSSARY.md
 #. Label of a form field on the account reset page: noun. See GLOSSARY.md
 #. Label of a form field on the first-run setup: noun. See GLOSSARY.md
 #. Label of a form field on the invitation page: noun. See GLOSSARY.md
@@ -1051,10 +1065,12 @@ msgstr "Spellings of one name"
 msgid "Somebody reset {user}'s authenticator"
 msgstr "Somebody reset {user}'s authenticator"
 
+#. Column heading on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Whom"
 msgstr "Whom"
 
+#. Column heading on the Admin screen: when it was created and handed out
 #: src/screens/Admin.tsx
 msgid "Issued"
 msgstr "Issued"
@@ -1160,6 +1176,7 @@ msgstr "None yet"
 msgid "Account"
 msgstr "Account"
 
+#. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Revoking…"
 msgstr "Revoking…"
@@ -1349,6 +1366,7 @@ msgstr "Can't scan? Enter this key by hand: <0>{0}</0>"
 msgid "Add a group"
 msgstr "Add a group"
 
+#. Screen-reader name on the Admin screen
 #. placeholder {0}: one.display_name
 #: src/screens/Admin.tsx
 msgid "Role for {0}"
@@ -1509,6 +1527,7 @@ msgstr "Delete"
 msgid "Held in dark, whatever this device is set to."
 msgstr "Held in dark, whatever this device is set to."
 
+#. Button on the Admin screen: verb, stop an account signing in
 #: src/screens/Admin.tsx
 msgid "Disable"
 msgstr "Disable"
@@ -1551,6 +1570,8 @@ msgstr "Payee Merge"
 msgid "Click to edit"
 msgstr "Click to edit"
 
+#. Column heading on the Admin screen
+#. Label of a form field on the Admin screen
 #. Label of a form field on the app's menu and frame
 #. Label of a form field on the household page
 #: src/App.tsx
@@ -1559,6 +1580,7 @@ msgstr "Click to edit"
 msgid "Main currency"
 msgstr "Main currency"
 
+#. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Reset sign-in…"
 msgstr "Reset sign-in…"
@@ -1614,6 +1636,8 @@ msgstr "If you no longer have the old authenticator, use one of your recovery co
 msgid "And then"
 msgstr "And then"
 
+#. Button on the Admin screen
+#. Button on the Admin screen
 #. Button on the Import screen
 #. Button on the Register screen
 #. Button on the Your account panel
@@ -1667,6 +1691,7 @@ msgstr "Needs a look"
 msgid "Make {0} a member?"
 msgstr "Make {0} a member?"
 
+#. Button on the Admin screen: finish and close
 #. Button on the Register screen: finish and close
 #. Button on the Your account panel: finish and close
 #. Screen title on the account reset page
@@ -1712,6 +1737,7 @@ msgstr "Those two don't match."
 msgid "Amount arriving ({0})"
 msgstr "Amount arriving ({0})"
 
+#. Table cell on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Disabled"
 msgstr "Disabled"
@@ -2022,10 +2048,14 @@ msgstr "Staged through the agent API by <0>{0}</0>."
 msgid "<0>{0}</0> leaves {1} and the same arrives in {2}."
 msgstr "<0>{0}</0> leaves {1} and the same arrives in {2}."
 
+#. Table cell on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Active"
 msgstr "Active"
 
+#. Column heading on the Admin screen
+#. Column heading on the Admin screen
+#. Label on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Households"
 msgstr "Households"
@@ -2150,6 +2180,7 @@ msgstr "{0} selected"
 msgid "The file itself"
 msgstr "The file itself"
 
+#. Button on the Admin screen: verb, let an account sign in again
 #: src/screens/Admin.tsx
 msgid "Re-enable"
 msgstr "Re-enable"
@@ -2188,6 +2219,7 @@ msgstr "{0} will always be {1} — and the payee was added"
 msgid "Received"
 msgstr "Received"
 
+#. Title of a panel on the Admin screen
 #. placeholder {0}: confirming.user.display_name
 #: src/screens/Admin.tsx
 msgid "Disable {0}?"
@@ -2197,6 +2229,7 @@ msgstr "Disable {0}?"
 msgid "Auto-categorise based on payee history"
 msgstr "Auto-categorise based on payee history"
 
+#. Column heading on the Admin screen: preposition, done by a person
 #: src/screens/Admin.tsx
 msgid "By"
 msgstr "By"
@@ -2240,6 +2273,7 @@ msgstr "Ignore"
 msgid "Plan"
 msgstr "Plan"
 
+#. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Create household"
 msgstr "Create household"
@@ -2249,8 +2283,11 @@ msgstr "Create household"
 msgid "Your account"
 msgstr "Your account"
 
+#. Column heading on the Admin screen: noun, owner or member
+#. Column heading on the Admin screen: noun, owner or member
 #. Column heading on the household page: noun, owner or member
 #. Column name shown beside a value on phones on the household page: noun, owner or member
+#. Label of a form field on the Admin screen: noun, owner or member
 #: src/screens/Admin.tsx
 #: src/screens/Household.tsx
 msgid "Role"
@@ -2286,6 +2323,7 @@ msgstr "Reset sign-in for {name}?"
 msgid "Splitting…"
 msgstr "Splitting…"
 
+#. Column heading on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Issued by"
 msgstr "Issued by"
@@ -2338,6 +2376,7 @@ msgstr "The password alone cannot replace your second factor — otherwise it wo
 msgid "{inviter} invited you to {PRODUCT} as an owner."
 msgstr "{inviter} invited you to {PRODUCT} as an owner."
 
+#. Table cell on the Admin screen: nothing so far
 #: src/screens/Admin.tsx
 msgid "none yet"
 msgstr "none yet"
@@ -2360,6 +2399,7 @@ msgstr "Recent sign-in changes"
 msgid "Deleting…"
 msgstr "Deleting…"
 
+#. Button on the Admin screen: verb, stop a key or device from working
 #. Button on the Your account panel: verb, stop a key or device from working
 #: src/screens/Admin.tsx
 #: src/screens/Profile.tsx
@@ -2423,6 +2463,7 @@ msgstr "Set up {PRODUCT}"
 msgid "The name looks like its number."
 msgstr "The name looks like its number."
 
+#. Button on the Admin screen: verb, copy to the clipboard
 #: src/screens/Admin.tsx
 msgid "Copy"
 msgstr "Copy"
@@ -2512,6 +2553,7 @@ msgstr "{0} left to account for"
 msgid "this payee"
 msgstr "this payee"
 
+#. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Withdrawing…"
 msgstr "Withdrawing…"
@@ -2681,6 +2723,7 @@ msgstr "Each one works once, and they are shown only now. They are how you get b
 msgid "Your new authenticator is the only one that works now."
 msgstr "Your new authenticator is the only one that works now."
 
+#. Label on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Invitation link"
 msgstr "Invitation link"
@@ -2764,6 +2807,7 @@ msgstr "Withdraw the reset link for {0}"
 msgid "{text} — edit the memo"
 msgstr "{text} — edit the memo"
 
+#. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Changing…"
 msgstr "Changing…"
@@ -3036,6 +3080,8 @@ msgstr "(main)"
 msgid "Colour"
 msgstr "Colour"
 
+#. Column heading on the Admin screen: when it stops working
+#. Column heading on the Admin screen: when it stops working
 #: src/screens/Admin.tsx
 msgid "Expires"
 msgstr "Expires"
@@ -3165,6 +3211,7 @@ msgstr "Where the account is held. Optional, and separate from the currency — 
 msgid "The line exactly as it arrived"
 msgstr "The line exactly as it arrived"
 
+#. Label of a form field on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Date format"
 msgstr "Date format"
@@ -3247,6 +3294,7 @@ msgstr "It is recorded as a real transaction on that date, not a hidden number, 
 msgid "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
 msgstr "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
 
+#. Option in a dropdown on the Admin screen: role, manages the household. See GLOSSARY.md
 #: src/screens/Admin.tsx
 msgid "Owner"
 msgstr "Owner"
@@ -3495,6 +3543,7 @@ msgstr "C — Cleared"
 msgid "Yes, disable them"
 msgstr "Yes, disable them"
 
+#. Table cell on the Admin screen: adjective, no longer works
 #: src/screens/Admin.tsx
 msgid "expired"
 msgstr "expired"
@@ -3609,6 +3658,7 @@ msgstr "Reset: authenticator"
 msgid "This lands as one entry in History, so the whole import can be undone in one go."
 msgstr "This lands as one entry in History, so the whole import can be undone in one go."
 
+#. Column heading on the Admin screen: noun, an email address
 #. Label of a form field on the first-run setup: noun, an email address
 #. Label of a form field on the invitation page: noun, an email address
 #. Label of a form field on the sign-in page: noun, an email address
@@ -3620,6 +3670,7 @@ msgid "Email"
 msgstr "Email"
 
 #. Stands in for who made a change when the name is not known. Lower case
+#. Table cell on the Admin screen
 #: src/lib/signInChanges.ts
 #: src/screens/Admin.tsx
 msgid "somebody"
@@ -3787,6 +3838,7 @@ msgstr "Staged by"
 msgid "Split this transaction"
 msgstr "Split this transaction"
 
+#. Button on the Admin screen: verb, cancel an invitation
 #: src/screens/Admin.tsx
 msgid "Withdraw"
 msgstr "Withdraw"
@@ -3799,6 +3851,8 @@ msgstr "Apply rules to what is already here"
 msgid "Withdraw this reset link?"
 msgstr "Withdraw this reset link?"
 
+#. Option in a dropdown on the Admin screen: role, can use the household but not manage it. See GLOSSARY.md
+#. Option in a dropdown on the Admin screen: role, can use the household but not manage it. See GLOSSARY.md
 #: src/screens/Admin.tsx
 msgid "Member"
 msgstr "Member"
@@ -4041,10 +4095,12 @@ msgstr "Your name"
 msgid "{by} reset {user}'s authenticator"
 msgstr "{by} reset {user}'s authenticator"
 
+#. Text on the Admin screen: nothing so far
 #: src/screens/Admin.tsx
 msgid "None yet."
 msgstr "None yet."
 
+#. Label of a form field on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Email (optional)"
 msgstr "Email (optional)"
@@ -4149,6 +4205,7 @@ msgstr "A transfer moves money between your own accounts, so it is not spending 
 msgid "{count, plural, other {{shown} rows}}"
 msgstr "{count, plural, other {{shown} rows}}"
 
+#. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Leave it"
 msgstr "Leave it"
@@ -4174,6 +4231,7 @@ msgstr "Authenticator, with its recovery codes"
 msgid "A reset link for {name} is already pending. This one replaces it, and what that one reset stays reset."
 msgstr "A reset link for {name} is already pending. This one replaces it, and what that one reset stays reset."
 
+#. Table cell on the Admin screen: nothing; shown in place of a list
 #: src/screens/Admin.tsx
 msgid "none"
 msgstr "none"
@@ -4245,6 +4303,7 @@ msgstr "Out ({currency})"
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so its next statement picks the account itself?"
 msgstr "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so its next statement picks the account itself?"
 
+#. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Disabling…"
 msgstr "Disabling…"
@@ -4304,6 +4363,8 @@ msgstr "Sign-in changes in the last 14 days, by somebody other than you:"
 msgid "Every category this payee has been filed under, biggest first. The transactions with no category are listed too, because they are what this payee still costs you to classify."
 msgstr "Every category this payee has been filed under, biggest first. The transactions with no category are listed too, because they are what this payee still costs you to classify."
 
+#. Button on the Admin screen
+#. Button on the Admin screen
 #. Button on the Categories screen
 #. Button on the Categories screen
 #. Button on the Import screen
@@ -4376,6 +4437,7 @@ msgstr "Money in within {PAYMENT_PICKER_DAYS} days either side of {0}. Either si
 msgid "Out of"
 msgstr "Out of"
 
+#. Column heading on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Resets"
 msgstr "Resets"
@@ -4528,6 +4590,8 @@ msgstr "{0, plural, one {{who} is here too} other {{who} are here too}}"
 msgid "Remove"
 msgstr "Remove"
 
+#. Button on the Admin screen
+#. Title of a panel on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Invite somebody"
 msgstr "Invite somebody"
@@ -4765,6 +4829,7 @@ msgid "Show closed"
 msgstr "Show closed"
 
 #. Menu item and the name of its screen
+#. Screen title on the Admin screen
 #: src/App.tsx
 #: src/screens/Admin.tsx
 msgid "Admin"
@@ -4796,6 +4861,7 @@ msgstr "No accounts yet. Add the one you use most and import a statement into it
 msgid "call it one payee"
 msgstr "call it one payee"
 
+#. Column heading on the Admin screen: noun
 #: src/screens/Admin.tsx
 msgid "Status"
 msgstr "Status"
@@ -4810,6 +4876,7 @@ msgstr "Already have it"
 msgid "Holder's name"
 msgstr "Holder's name"
 
+#. Column heading on the Admin screen: noun, a date range
 #: src/screens/Admin.tsx
 msgid "Dates"
 msgstr "Dates"
@@ -4942,6 +5009,7 @@ msgstr "Change a part, or add another."
 msgid "and {0} more."
 msgstr "and {0} more."
 
+#. Label on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Reset link"
 msgstr "Reset link"
@@ -5062,6 +5130,7 @@ msgstr "In {code}"
 msgid "{0} of the selected rows are outside the current filter and are not in the figures above — they are still selected, and a change made here still reaches them."
 msgstr "{0} of the selected rows are outside the current filter and are not in the figures above — they are still selected, and a change made here still reaches them."
 
+#. Button on the Admin screen: verb, let an account sign in again
 #. placeholder {0}: one.display_name
 #: src/screens/Admin.tsx
 msgid "Re-enable {0}"
@@ -5172,6 +5241,7 @@ msgstr "Enter again to edit"
 msgid "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
 msgstr "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
 
+#. Column heading on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Members"
 msgstr "Members"
@@ -5235,6 +5305,7 @@ msgstr "Show archived"
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 msgstr "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 
+#. Column heading on the Admin screen: noun, the person
 #: src/screens/Admin.tsx
 msgid "Who"
 msgstr "Who"
@@ -5256,6 +5327,7 @@ msgstr "Kept on this device only, so a phone and a laptop can differ. Nothing is
 msgid "No payee matches “{0}”."
 msgstr "No payee matches “{0}”."
 
+#. Column heading on the Admin screen. See GLOSSARY.md
 #. Heading on the Your account panel. See GLOSSARY.md
 #. Heading on the Your account panel. See GLOSSARY.md
 #. Label on the Your account panel. See GLOSSARY.md
@@ -5344,6 +5416,7 @@ msgstr "from the server"
 msgid "Every new transaction for this payee gets a category without you choosing one. Which one depends on the setting below."
 msgstr "Every new transaction for this payee gets a category without you choosing one. Which one depends on the setting below."
 
+#. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Resetting…"
 msgstr "Resetting…"
@@ -5399,6 +5472,7 @@ msgstr "This year"
 msgid "Give a program a key"
 msgstr "Give a program a key"
 
+#. Button on the Admin screen: verb, stop an account signing in
 #. placeholder {0}: one.display_name
 #: src/screens/Admin.tsx
 msgid "Disable {0}"
@@ -5445,6 +5519,7 @@ msgid "New codes"
 msgstr "New codes"
 
 #. Column heading on the Accounts screen
+#. Column heading on the Admin screen
 #. Column name shown beside a value on phones on the Accounts screen
 #: src/screens/Accounts.tsx
 #: src/screens/Admin.tsx
@@ -5624,6 +5699,7 @@ msgstr "This account started empty, so there is no opening balance row. Type a f
 msgid "{unused, plural, one {{unused} unused recovery code left.} other {{unused} unused recovery codes left.}}"
 msgstr "{unused, plural, one {{unused} unused recovery code left.} other {{unused} unused recovery codes left.}}"
 
+#. Label on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Invitations"
 msgstr "Invitations"
