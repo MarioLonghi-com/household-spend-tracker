@@ -21,6 +21,8 @@
  * showing a button that does nothing.
  */
 
+import { t } from "@lingui/core/macro";
+
 export type SaveRoute = "share" | "folder" | "download";
 
 /**
@@ -45,7 +47,7 @@ export type Grant = () => Promise<string>;
  */
 async function requestZip(name: string, includeKey: boolean, grant?: Grant): Promise<Response> {
   if (!includeKey) return fetch(backupDownloadUrl(name), { credentials: "same-origin" });
-  if (!grant) throw new Error("a zip with secret.key needs your password and a code");
+  if (!grant) throw new Error(t`a zip with secret.key needs your password and a code`);
   const token = await grant();
   return fetch(backupDownloadUrl(name), {
     method: "POST",
@@ -160,7 +162,7 @@ export async function saveZipToFolder(
   }
   if (!response.ok || !response.body) {
     await writable.abort?.();
-    throw new Error(response.ok ? "the server sent no file" : await refusal(response));
+    throw new Error(response.ok ? t`the server sent no file` : await refusal(response));
   }
   // pipeTo closes the writable when the body ends, which is what commits it.
   await response.body.pipeTo(writable);
@@ -174,11 +176,22 @@ async function refusal(response: Response): Promise<string> {
   } catch {
     // Not JSON: fall through to the status line.
   }
-  return response.statusText || `the server answered ${response.status}`;
+  return response.statusText || t`the server answered ${response.status}`;
 }
 
 /** Where to drop the file for the third route. Opened in a new tab, never fetched. */
+// Getters, so each label is read in the language active when it is shown.
 export const CLOUD_PAGES = [
-  { label: "Open Google Drive", href: "https://drive.google.com/drive/my-drive" },
-  { label: "Open Dropbox", href: "https://www.dropbox.com/home" },
+  {
+    get label() {
+      return t`Open Google Drive`;
+    },
+    href: "https://drive.google.com/drive/my-drive",
+  },
+  {
+    get label() {
+      return t({ message: "Open Dropbox", comment: "Label used on several screens (saveBackup)" });
+    },
+    href: "https://www.dropbox.com/home",
+  },
 ] as const;
