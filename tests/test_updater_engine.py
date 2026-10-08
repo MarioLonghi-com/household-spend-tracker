@@ -451,6 +451,42 @@ def test_a_missing_socket_is_unreachable():
     assert client.negotiated is None
 
 
+def test_an_engine_that_stops_answering_past_the_timeout_is_unavailable():
+    """A socket that is open but silent: `TimeoutError` is the engine going away (8.6, #247)."""
+    fake = FakeEngine(engine_fixture("docker-desktop"), engine_fixture("docker-desktop", "info"))
+    fake.add_container("spend-tracker-app-1", PROJECT, labels={"com.docker.compose.service": "app"})
+    with Running(fake) as running:
+        client = EngineClient(running.socket_path, scope(), timeout=0.2)
+        client.negotiate()
+        assert [c["Names"] for c in client.containers()] == [["/spend-tracker-app-1"]]
+        fake.delay = 0.6
+        with pytest.raises(engine.EngineUnavailable) as e:
+            client.containers()
+        assert e.value.socket_state == "unreachable"
+        assert isinstance(e.value.__cause__, TimeoutError)
+
+
+def test_a_socket_timeout_while_sending_is_unavailable_too(monkeypatch):
+    """`socket.timeout` is the same class since Python 3.10; raised while the
+    request is still being sent, it is mapped like a silent answer (#247)."""
+    import socket
+
+    assert socket.timeout is TimeoutError
+    fake = FakeEngine(engine_fixture("docker-desktop"), engine_fixture("docker-desktop", "info"))
+    with Running(fake) as running:
+        client = EngineClient(running.socket_path, scope())
+        client.negotiate()
+
+        def times_out(self):
+            raise socket.timeout("timed out")  # noqa: UP041 -- the alias is what is under test
+
+        monkeypatch.setattr(engine.UnixHTTPConnection, "connect", times_out)
+        with pytest.raises(engine.EngineUnavailable) as e:
+            client.info()
+        assert e.value.socket_state == "unreachable"
+        assert isinstance(e.value.__cause__, socket.timeout)  # noqa: UP041
+
+
 def test_the_module_never_reads_the_docker_environment():
     source = engine.__file__
     with open(source) as fh:

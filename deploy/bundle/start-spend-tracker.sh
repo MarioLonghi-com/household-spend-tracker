@@ -11,7 +11,8 @@
 #
 # What it does, in order: finds `docker compose` or `podman compose`; finds the
 # engine's socket; asks the bundle's own updater image what to start
-# (updater/launch.py: the engine, the pin, the settings, written into .env);
+# (updater/launch.py: the engine, the pin, the settings, written into .env,
+# and which compose created the project, so the same one runs it again);
 # makes sure the containers come back after a restart (podman-restart,
 # lingering); on a rootful Linux engine, lets the updater write this folder;
 # removes a leftover maintenance page; starts the project; waits for it to
@@ -143,7 +144,7 @@ say "Checking $PRODUCT and this folder..."
 answer="$("$ENGINE" "$@")"
 status=$?
 
-KIND="" PODMAN_RESTART="" LINGER="0" CHGRP="" APP="" UPDATER="" PLACARD=""
+KIND="" PODMAN_RESTART="" LINGER="0" CHGRP="" APP="" UPDATER="" PLACARD="" MADE_BY=""
 while IFS= read -r line; do
   case "$line" in
     ENGINE=*) KIND="${line#ENGINE=}" ;;
@@ -153,6 +154,7 @@ while IFS= read -r line; do
     APP=*) APP="${line#APP=}" ;;
     UPDATER=*) UPDATER="${line#UPDATER=}" ;;
     PLACARD=*) PLACARD="${line#PLACARD=}" ;;
+    COMPOSE=*) MADE_BY="${line#COMPOSE=}" ;;
     SAY=*) say "${line#SAY=}" ;;
   esac
 done <<EOF
@@ -166,6 +168,31 @@ if [ "$status" -ne 0 ] || [ -z "$KIND" ] || [ -z "$PLACARD" ]; then
   stop "Spend Tracker was not started."
 fi
 say "Engine: $KIND. Starting ${APP##*/} with ${UPDATER##*/}."
+
+# --------------------------------------------------------------------------- #
+# Which compose (#247): the one that created the project, which
+# updater/launch.py reads from its containers' labels. `podman compose` hands
+# the work to docker-compose whenever that is installed, and docker-compose
+# refuses a stack podman-compose made; Podman takes the provider it runs from
+# PODMAN_COMPOSE_PROVIDER. Nothing made yet (a first install): its own choice.
+# --------------------------------------------------------------------------- #
+
+case "$MADE_BY" in
+  podman-compose)
+    provider="$(command -v podman-compose 2>/dev/null)" \
+      || stop "This Spend Tracker was created with podman-compose, which was not found. Install it (your system's podman-compose package, or pip install podman-compose), then open this launcher again."
+    PODMAN_COMPOSE_PROVIDER="$provider"
+    export PODMAN_COMPOSE_PROVIDER
+    say "Using podman-compose, which created this Spend Tracker."
+    ;;
+  docker-compose)
+    if [ "$ENGINE" = podman ] && provider="$(command -v docker-compose 2>/dev/null)"; then
+      PODMAN_COMPOSE_PROVIDER="$provider"
+      export PODMAN_COMPOSE_PROVIDER
+      say "Using docker-compose, which created this Spend Tracker."
+    fi
+    ;;
+esac
 
 # --------------------------------------------------------------------------- #
 # Coming back after a restart (S2, S20, S21)

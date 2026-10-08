@@ -96,8 +96,10 @@ def _update_backups() -> None:
         folder = backups / stamp
         folder.mkdir()
         (folder / "spendtracker.sqlite3").write_bytes(data)
-        # The releases before this one, oldest first.
-        version = f"{major}.{max(minor - UPDATE_BACKUPS + 1 + at, 0)}.0"
+        # The releases before this one, oldest first, and the newest is the
+        # running version exactly -- a patch release included.
+        last = at == UPDATE_BACKUPS - 1
+        version = __version__ if last else f"{major}.{max(minor - UPDATE_BACKUPS + 1 + at, 0)}.0"
         (folder / "manifest.json").write_text(
             json.dumps(
                 {"taken_at": when.isoformat(), "app_version": version, "alembic_revision": revision},

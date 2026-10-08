@@ -48,6 +48,7 @@ from tests.self_update.world import (
     Stack,
     new_code,
 )
+from updater.engine import REQUEST_LABEL, ROLE_LABEL
 
 A, B, B1, B2, B3, B4, C = "98.0.0", "99.0.0", "99.0.1", "99.0.2", "99.0.3", "99.1.0", "100.0.0"
 SMOKE = Path(__file__).with_name("updater_smoke.py")
@@ -644,20 +645,31 @@ class Run:
         self.interrupted(r, restart, "the engine restarted", engine_restarted=True)
 
     def E7(self, r: Result) -> None:
-        """`-previous` started by hand as soon as it is parked -- Docker Desktop's Start button -- and E1 holds.
+        """`-previous` started by hand -- Docker Desktop's Start button -- twice, and E1 holds.
 
-        Before #169's fix it held the port (or, in the sidecar layout, 8848 in
-        the shared namespace) when the new app needed it, and `unless-stopped`
-        kept it coming back. Now step 3 parks it with restart policy `no`, and
-        steps 7 and 8 stop it once and start the new app again. Clicked until it
-        has run once, and not after step 7 starts: a person, not a loop racing
-        the updater for the port."""
+        **Once as soon as it is parked** (step 3). Before #169's fix it held the
+        port (or, in the sidecar layout, 8848 in the shared namespace) when the
+        new app needed it, and `unless-stopped` kept it coming back. Step 3 now
+        parks it with restart policy `no`, and since #246 the check before
+        step 5 stops it before the drill starts; steps 7 and 8 would stop it
+        once and start the new app again.
+
+        **Once while the drill runs** (#246): the old app against the ledger
+        the drill is backing up and migrating. The drill's poll stops it at
+        once. The drill is created only after the check before step 5, so
+        clicking once it exists reaches the poll's check and no other.
+
+        Both clicks are made with the apply's owner paused -- and the second
+        with the drill paused too, when it still runs -- so the person is
+        always quicker than the updater, as the scenario needs: a person, not
+        a loop racing the updater."""
         s = self.s
         s.up(A)
         b = before(s)
-        seen: dict = {"clicks": 0, "refused": [], "ran": False}
+        seen: dict = {"clicks": 0, "refused": [], "ran": False, "drill_ran": False, "drill_paused": False}
 
-        def press() -> None:
+        def press(since: str) -> bool:
+            """Start pressed on -previous; True once it has started since `since`."""
             seen["clicks"] += 1
             with contextlib.suppress(api.Unreachable):
                 try:
@@ -666,8 +678,11 @@ class Run:
                 except api.Failed as e:
                     seen["refused"].append(str(e).split("/start: ", 1)[-1][:200])
             with contextlib.suppress(api.Failed, api.Unreachable):
-                state = s.engine.inspect(b.app["Id"])["State"]
-                seen["ran"] = state.get("StartedAt") != b.app["State"]["StartedAt"]
+                return s.engine.inspect(b.app["Id"])["State"].get("StartedAt") != since
+            return False
+
+        def started_at() -> str:
+            return str(s.engine.inspect(b.app["Id"])["State"].get("StartedAt"))
 
         def stopped() -> bool:
             return not s.engine.inspect(b.app["Id"])["State"].get("Running")
@@ -680,27 +695,86 @@ class Run:
             # paused the moment the app has stopped, for the click, so the
             # maintenance page has not taken the port yet. Clicking only once
             # `-previous` appeared landed behind the page most of the time.
+            since = b.app["State"]["StartedAt"]
             s.engine.pause(owner)
             try:
                 # Podman can refuse a start for a moment after a stop, while it
                 # cleans the container up: the updater waits, so clicking again
                 # costs nothing.
                 for _ in range(30):
-                    press()
+                    seen["ran"] = press(since)
                     if seen["ran"]:
                         break
                     time.sleep(0.1)
             finally:
                 s.engine.unpause(owner)
-            while not seen["ran"] and s.journal(rid).get("step") in ("3", "4", "5", "6"):
+            while not seen["ran"] and s.journal(rid).get("step") in ("3", "4"):
                 time.sleep(0.5)
-                press()
+                seen["ran"] = press(since)
+            click_during_the_drill(rid)
+
+        def the_drill(rid: str) -> dict | None:
+            for c in s.engine.containers(f"{REQUEST_LABEL}={rid}"):
+                if (c.get("Labels") or {}).get(ROLE_LABEL) == "drill":
+                    return c
+            return None
+
+        def click_during_the_drill(rid: str) -> None:
+            # Not `wait_for`, which waits out a Failure: an apply that ended
+            # before its drill fails the scenario now, with its record dumped.
+            deadline, looked, drill_c = time.monotonic() + 600, 0, None
+            while drill_c is None:
+                with contextlib.suppress(api.Unreachable, api.Failed):
+                    drill_c = the_drill(rid)
+                looked += 1
+                if drill_c is None and looked % 50 == 0 and s.vol.exists(f"/u/history/{rid}.json"):
+                    raise Failure("the apply ended before its drill was created")
+                if drill_c is None and time.monotonic() > deadline:
+                    raise Failure("timed out after 600 s waiting for the drill to be created")
+                if drill_c is None:
+                    time.sleep(0.02)
+            owner = self.owner_container(rid)["Id"]
+            # The drill first, while it still runs: the click then lands while
+            # the drill holds the ledger, however quick the drill is.
+            with contextlib.suppress(api.Failed, api.Unreachable):
+                s.engine.pause(drill_c["Id"])
+                seen["drill_paused"] = True
+            s.engine.pause(owner)
+            try:
+                s.wait_for(stopped, "-previous to be stopped before the second click", 60, every=0.1)
+                since = started_at()
+                for _ in range(30):
+                    seen["drill_ran"] = press(since)
+                    if seen["drill_ran"]:
+                        break
+                    time.sleep(0.1)
+            finally:
+                s.engine.unpause(owner)
+            try:
+                if seen["drill_ran"] and seen["drill_paused"]:
+                    # The updater's next poll stops it; the drill is still frozen.
+                    s.wait_for(stopped, "the updater to stop -previous during the drill", 120, every=0.1)
+            finally:
+                if seen["drill_paused"]:
+                    with contextlib.suppress(api.Failed, api.Unreachable):
+                        s.engine.unpause(drill_c["Id"])
 
         req, record = s.update(A, B, during=click)
-        print(f"   {seen['clicks']} clicks, ran: {seen['ran']}, refused: {sorted(set(seen['refused']))[:2]}")
-        r.check(seen["ran"], f"-previous was started by hand while the apply ran ({seen['clicks']} clicks)")
+        print(
+            f"   {seen['clicks']} clicks, ran at step 3: {seen['ran']}, during the drill: {seen['drill_ran']} "
+            f"(drill paused: {seen['drill_paused']}), refused: {sorted(set(seen['refused']))[:2]}"
+        )
+        r.check(seen["ran"], f"-previous was started by hand at step 3 ({seen['clicks']} clicks)")
+        r.check(seen["drill_ran"], "-previous was started by hand again while the drill ran")
+        guard = (s.journal(req["id"]).get("context") or {}).get("ledger_holders_stopped") or []
+        print(f"   stopped by the drill's guard: {guard}")
+        if seen["drill_paused"]:
+            r.check(
+                any(h.get("id") == b.app["Id"] and h.get("during_drill") for h in guard),
+                "the updater stopped -previous while the drill held the ledger (#246)",
+            )
         note = [n for n in record.get("notes") or [] if "started while the update ran" in n]
-        print(f"   the updater's note: {note[0] if note else '(none: -previous had exited by itself)'}")
+        print(f"   the updater's notes: {note or '(none: -previous had exited by itself)'}")
         check_updated(r, s, b, req, record, B, updater_to=B)
 
     def E8(self, r: Result) -> None:
@@ -890,15 +964,13 @@ class Run:
             (shim / "docker").write_text("#!/bin/sh\nexit 127\n")
             (shim / "docker").chmod(0o755)
             env["PATH"] = f"{shim}:{env.get('PATH', '')}"
-            # And `podman compose` takes Docker's compose plugin over
-            # podman-compose when both are installed, as on the runner; the
-            # stack was made by podman-compose, whose network docker-compose
-            # refuses ("incorrect label com.docker.compose.network").
-            import shutil
-
-            provider = shutil.which("podman-compose")
-            if provider:
-                env["PODMAN_COMPOSE_PROVIDER"] = provider
+            # `podman compose` takes Docker's compose plugin over
+            # podman-compose when both are installed, as on the runner, and
+            # docker-compose refuses the stack podman-compose made ("incorrect
+            # label com.docker.compose.network"). The launcher now runs the
+            # compose that made the project (#247), so nothing is set here:
+            # this leg is that machine with both installed.
+            env.pop("PODMAN_COMPOSE_PROVIDER", None)
         else:
             env["DOCKER_HOST"] = f"unix://{self.leg.socket}"
         env["SPENDTRACKER_HEALTH_TIMEOUT"] = "240"
@@ -908,6 +980,11 @@ class Run:
         )  # fmt: skip
         print("   " + (done.stdout + done.stderr).strip().replace("\n", "\n   ")[-4000:])
         r.check(done.returncode == 0, f"the launcher, run headless, exits 0 ({done.returncode})")
+        if self.leg.compose[0].startswith("podman"):
+            r.check(
+                "Using podman-compose, which created this Spend Tracker." in done.stdout,
+                "the launcher chose podman-compose, which made the stack (#247)",
+            )
         apps = s.running("app")
         upds = s.running("updater")
         r.check(
@@ -966,7 +1043,7 @@ SCENARIOS = {
     "E4": "rollback: health answers 500",
     "E5": "the updater killed mid-drill, started again",
     "E6": "the engine restarted mid-drill",
-    "E7": "-previous started by hand during the apply",
+    "E7": "-previous started by hand at step 3 and during the drill",
     "E8": "corrupt backup, failed health: recovery over HTTP",
     "E9": "stale and duplicate requests",
     "E14": "updater only (C2)",
