@@ -342,9 +342,7 @@ export function WorkMark({ txn }: { txn: Pick<Transaction, "reimbursement" | "re
   const { className, word } = WORK_PILLS[state];
   return (
     <span className={className} title={word} aria-label={word}>
-      <Trans>
-        W
-      </Trans>
+      W
     </span>
   );
 }
