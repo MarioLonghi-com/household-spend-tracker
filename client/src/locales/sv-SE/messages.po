@@ -46,7 +46,9 @@ msgid "No payees yet. They appear as you enter or import transactions."
 msgstr ""
 
 #. Menu item and the name of its screen. See GLOSSARY.md
+#. Screen title on the Application management screen. See GLOSSARY.md
 #: src/App.tsx
+#: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Application management"
 msgstr "Hantering av appen"
@@ -144,7 +146,9 @@ msgid "To month"
 msgstr "Till månad"
 
 #. Column heading on the Admin screen: noun, which thing
+#. Column heading on the Application management screen: noun, which thing
 #: src/screens/Admin.tsx
+#: src/screens/ApplicationManagement.tsx
 msgid "What"
 msgstr ""
 
@@ -265,6 +269,10 @@ msgstr ""
 msgid "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot mean “whatever comes after it” — choose <2>take this bit off</2> for that."
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "what this list is"
+msgstr ""
+
 #. placeholder {0}: offer.name
 #. placeholder {1}: offer.payee
 #: src/screens/Import.tsx
@@ -277,6 +285,11 @@ msgstr "Det första gäller bara den här filen. Det andra gör också <0>{0}</0
 #, fuzzy
 msgid "no memo"
 msgstr "ingen beskrivning"
+
+#. Name of a fact on the Application management screen: noun, the operating-system process id
+#: src/screens/ApplicationManagement.tsx
+msgid "Process"
+msgstr ""
 
 #. What the import detected: which column holds the date. Lower case, inside a list
 #: src/lib/labels.ts
@@ -357,6 +370,11 @@ msgstr ""
 msgid "Open"
 msgstr "Öppna"
 
+#. Name of a fact on the Application management screen: noun, the database software
+#: src/screens/ApplicationManagement.tsx
+msgid "Engine"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Copy this link now — it is shown once."
 msgstr ""
@@ -366,6 +384,10 @@ msgstr ""
 #, fuzzy
 msgid "What happens"
 msgstr "Vad som händer"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "The end of {open}"
+msgstr ""
 
 #. Label on the Admin screen
 #. Label on the household page
@@ -477,6 +499,10 @@ msgstr "Längd betyder mer än specialtecken. Fyra orelaterade ord som du faktis
 msgid "<0>{0}</0> goes to the receipts inbox and stays there until it is attached again or deleted."
 msgstr "<0>{0}</0> hamnar i kvittoinkorgen och stannar där tills det bifogas igen eller raderas."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Reading this instance…"
+msgstr ""
+
 #. Button on the passkeys panel
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -492,6 +518,10 @@ msgstr "Jag har min autentiseringsapp ändå"
 #, fuzzy
 msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 msgstr "Ingen nyckel kan radera något, ångra något, ändra vilka som ingår i ett hushåll, röra lösenord eller autentiseringsappar eller skapa en ny nyckel – vad du än väljer här."
+
+#: src/screens/ApplicationManagement.tsx
+msgid "this path does not exist"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -738,11 +768,13 @@ msgstr "Vad den får göra"
 msgid "Skip to transactions"
 msgstr "Hoppa till transaktionerna"
 
+#. Column heading on the Application management screen. See GLOSSARY.md
 #. Column heading on the Categories screen. See GLOSSARY.md
 #. Column heading on the Payee Categorisation screen. See GLOSSARY.md
 #. Column heading on the Payees screen. See GLOSSARY.md
 #. Column heading on the household page. See GLOSSARY.md
 #. Column heading on the household page. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Application management screen. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Payees screen. See GLOSSARY.md
 #. Column name shown beside a value on phones on the household page. See GLOSSARY.md
 #. Column name shown beside a value on phones on the household page. See GLOSSARY.md
@@ -750,6 +782,7 @@ msgstr "Hoppa till transaktionerna"
 #. Menu item and the name of its screen. See GLOSSARY.md
 #. Screen title on the Register screen. See GLOSSARY.md
 #: src/App.tsx
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
 #: src/screens/PayeeCategorisation.tsx
@@ -848,6 +881,12 @@ msgstr ""
 #, fuzzy
 msgid "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
 msgstr "Bara för en bank vars kontoutdrag har flera konton i en fil, åtskilda av en Product-kolumn (Revoluts kontoutdrag). Det här kontot tar raderna med det här värdet; de andra hoppas över. Ett lönekonto tar Current-raderna om du inte anger något annat."
+
+#. placeholder {0}: bytes(me.size.main_bytes)
+#. placeholder {1}: bytes(me.size.wal_bytes)
+#: src/screens/ApplicationManagement.tsx
+msgid "{0} + {1} not yet checkpointed"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1200,6 +1239,11 @@ msgstr "Inskriven för hand"
 msgid "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
 msgstr "Varje stavning en bank använder för någon i hushållet. En betalning som nämner en av dem är dina egna pengar som flyttas, inte en inkomst eller utgift."
 
+#. Tag beside a name on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "missing"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Add a part"
@@ -1269,6 +1313,11 @@ msgstr ""
 #, fuzzy
 msgid "That isn't an amount in {currency}."
 msgstr "Det är inte ett belopp i {currency}."
+
+#. placeholder {0}: me.database_url_scheme
+#: src/screens/ApplicationManagement.tsx
+msgid "{0} — not a local file"
+msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
@@ -1460,6 +1509,12 @@ msgstr "Utseende"
 msgid "None yet"
 msgstr "Inga än"
 
+#. placeholder {0}: upstream.data.latest
+#. placeholder {1}: upstream.data.running
+#: src/screens/ApplicationManagement.tsx
+msgid "<0>{0}</0> is available. This instance is running {1}."
+msgstr ""
+
 #. Column heading on the Accounts screen: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the accounts import: noun, a bank or cash account. See GLOSSARY.md
@@ -1474,6 +1529,11 @@ msgstr "Inga än"
 #, fuzzy
 msgid "Account"
 msgstr "Konto"
+
+#. Button on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "Writing…"
+msgstr ""
 
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
@@ -1513,6 +1573,10 @@ msgstr "Pengar som sparas på banken. Som ett lönekonto, men hålls isär så a
 
 #: src/screens/History.tsx
 msgid "Nothing recorded against this one."
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "with uncommitted changes"
 msgstr ""
 
 #. Text on the household page
@@ -1573,6 +1637,11 @@ msgstr "Dölj menyn"
 msgid "No categories yet — add some on the Categories screen."
 msgstr "Inga kategorier än – lägg till några på skärmen Kategorier."
 
+#. Name of a fact on the Application management screen: noun, development or production
+#: src/screens/ApplicationManagement.tsx
+msgid "Environment"
+msgstr ""
+
 #. placeholder {0}: passkey.label
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -1607,6 +1676,11 @@ msgstr "När du byter det loggas alla andra webbläsare ut och alla betrodda gl�
 #, fuzzy
 msgid "saving…"
 msgstr "sparar…"
+
+#. Heading on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "Operations"
+msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -1721,6 +1795,12 @@ msgstr ""
 #. placeholder {0}: one.display_name
 #: src/screens/Admin.tsx
 msgid "Role for {0}"
+msgstr ""
+
+#. Label on the Application management screen
+#. placeholder {0}: formatInstant(build.committed_at)
+#: src/screens/ApplicationManagement.tsx
+msgid "committed {0}"
 msgstr ""
 
 #. placeholder {0}: formatCount(rows.length)
@@ -1858,6 +1938,10 @@ msgstr "Dessa nämner ett av dina konton eller någon i hushållet, och deras an
 msgid "Attach receipts"
 msgstr "Bifoga kvitton"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "This writes the ledger's own values into a file in plain text. Turn it off when you are done."
+msgstr ""
+
 #. Label on the household page
 #: src/screens/Household.tsx
 msgid "Newest transaction"
@@ -1878,8 +1962,14 @@ msgstr "{revoked, plural, one {{revoked} betrodd webbläsare kommer att fråga e
 msgid "Changing your own role would close this screen; ask the other owner"
 msgstr ""
 
+#. Column heading on the Application management screen: noun, size of a file
+#. Column heading on the Application management screen: noun, size of a file
 #. Column heading on the Backups screen: noun, size of a file
+#. Column name shown beside a value on phones on the Application management screen: noun, size of a file
+#. Column name shown beside a value on phones on the Application management screen: noun, size of a file
 #. Column name shown beside a value on phones on the Backups screen: noun, size of a file
+#. Name of a fact on the Application management screen: noun, size of a file
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Backups.tsx
 msgid "Size"
 msgstr ""
@@ -1922,6 +2012,16 @@ msgstr "Låst i mörkt, oavsett vad enheten är inställd på."
 #. Button on the Admin screen: verb, stop an account signing in
 #: src/screens/Admin.tsx
 msgid "Disable"
+msgstr ""
+
+#. Button on the Application management screen: verb, show the file's contents
+#: src/screens/ApplicationManagement.tsx
+msgid "Read"
+msgstr ""
+
+#. placeholder {0}: it?.directory ?? "…"
+#: src/screens/ApplicationManagement.tsx
+msgid "Written to <0>{0}</0>, rotated at a megabyte and five files deep. A rotated file is named for the moment it was closed — <1>app-20260923-131545.log</1> — so it keeps its name instead of shuffling along behind a number."
 msgstr ""
 
 #. Button on the Register screen
@@ -2012,6 +2112,10 @@ msgstr "Ta bort <0>{0}</0>? Den slutar fungera direkt."
 msgid "System"
 msgstr "System"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Check the repository"
+msgstr ""
+
 #. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -2091,6 +2195,18 @@ msgstr "Varför"
 #. placeholder {4}: formatCount(stat.payee_count)
 #: src/screens/Categories.tsx
 msgid "{0, plural, one {and {1} more payee — {2} in all.} other {and {3} more payees — {4} in all.}}"
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Changing the setting below writes a line into <0>all three</0>, on both sides of the change — including when you turn it <1>down</1>, which is the one that used to leave no trace at all."
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Writes a complete, compacted copy into the backups directory above, with this instance still serving. It does <0>not</0> copy <1>secret.key</1> there: without that key every authenticator is refused, so a copy that leaves this machine either carries it (tick the box below) or travels with it separately."
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Where the files are"
 msgstr ""
 
 #. Import outcome: something changed, so the person has to decide. See GLOSSARY.md
@@ -2213,6 +2329,11 @@ msgstr ""
 msgid "Who was paid"
 msgstr "Vem som fick betalt"
 
+#. Name of a fact on the Application management screen: noun, the software version
+#: src/screens/ApplicationManagement.tsx
+msgid "Version"
+msgstr ""
+
 #. Label on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2271,6 +2392,11 @@ msgstr ""
 msgid "Smaller text in the table"
 msgstr "Mindre text i tabellen"
 
+#. Heading on the Application management screen: noun, the running program
+#: src/screens/ApplicationManagement.tsx
+msgid "Runtime"
+msgstr ""
+
 #. Heading on the Accounts screen
 #. Screen-reader name on the Accounts screen
 #: src/screens/Accounts.tsx
@@ -2301,6 +2427,11 @@ msgstr ""
 #. Button on the Categories screen: verb
 #: src/screens/Categories.tsx
 msgid "Edit"
+msgstr ""
+
+#. Column heading on the Application management screen: noun, the people who share one ledger. See GLOSSARY.md
+#: src/screens/ApplicationManagement.tsx
+msgid "Household"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -2456,6 +2587,12 @@ msgstr ""
 msgid "error.update.updater_outdated"
 msgstr ""
 
+#. Column heading on the Application management screen
+#. Column name shown beside a value on phones on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "Last written"
+msgstr ""
+
 #: src/screens/Reconcile.tsx
 msgid "Tick every row"
 msgstr ""
@@ -2469,6 +2606,10 @@ msgstr ""
 #, fuzzy
 msgid "a household"
 msgstr "ett hushåll"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Counts, never amounts — this ledger never converts one currency into another, so there is no such thing as an instance-wide total. For the full picture, <0>download every table with its row count and size</0>. That report scans the database, which is why it is a download rather than a block here."
+msgstr ""
 
 #. Button on the Register screen: verb, make a copy of this transaction
 #: src/screens/Register.tsx
@@ -2497,6 +2638,10 @@ msgstr "Kod"
 #, fuzzy
 msgid "state column"
 msgstr "statuskolumn"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Back the database up"
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "No households yet."
@@ -2715,6 +2860,10 @@ msgstr "planen <0>{0}</0>"
 msgid "Latest 12 months"
 msgstr "Senaste 12 månaderna"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Nothing written yet. The file appears the next time this instance starts."
+msgstr ""
+
 #. placeholder {0}: done.payee_name
 #. placeholder {1}: done.category_name
 #: src/screens/Import.tsx
@@ -2931,11 +3080,20 @@ msgstr "Välj två olika konton – pengar kan inte flyttas till samma konto."
 msgid "No minus signs — the direction is the two accounts above."
 msgstr "Inga minustecken – riktningen avgörs av de två kontona ovan."
 
+#. Button on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "Show them"
+msgstr ""
+
 #: src/components/SignInNotice.tsx
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Recent sign-in changes"
 msgstr "Senaste ändringar av inloggning"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
+msgstr ""
 
 #. Button on the Backups screen
 #. Button on the Register screen
@@ -3017,6 +3175,11 @@ msgstr "Installera {PRODUCT}"
 #, fuzzy
 msgid "The name looks like its number."
 msgstr "Namnet ser ut att vara dess nummer."
+
+#. Name of a fact on the Application management screen: noun, the computer it runs on
+#: src/screens/ApplicationManagement.tsx
+msgid "Machine"
+msgstr ""
 
 #. Button on the Admin screen: verb, copy to the clipboard
 #: src/screens/Admin.tsx
@@ -3145,6 +3308,12 @@ msgstr ""
 msgid "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
 msgstr "<0>{purgingName}</0> och dess {0} rader raderas. Inget i den har nått registret, så det finns inget att ångra efteråt – och filen kan importeras igen från början."
 
+#. placeholder {0}: me.repository
+#. placeholder {1}: me.version
+#: src/screens/ApplicationManagement.tsx
+msgid "Asks {0} for its published releases and compares them with the {1} this is running. Nothing leaves this instance unless an owner presses a button like this one, nothing is asked on a timer, and no request says anything about this instance."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Confirm and replace"
@@ -3221,6 +3390,12 @@ msgstr ""
 #, fuzzy
 msgid "No single category matches that."
 msgstr "Ingen enskild kategori matchar det."
+
+#. Column heading on the Application management screen: noun, a place in the file system
+#. Column name shown beside a value on phones on the Application management screen: noun, a place in the file system
+#: src/screens/ApplicationManagement.tsx
+msgid "Path"
+msgstr ""
 
 #. Button on the Register screen: verb, divide one transaction into parts. See GLOSSARY.md
 #: src/screens/Register.tsx
@@ -3335,6 +3510,12 @@ msgstr "Lägg till fler"
 msgid "New payee rule"
 msgstr ""
 
+#. Note on the Application management screen
+#. placeholder {0}: me.python
+#: src/screens/ApplicationManagement.tsx
+msgid "Python {0}"
+msgstr ""
+
 #: src/components/RecoveryCodes.tsx
 #, fuzzy
 msgid "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
@@ -3396,8 +3577,14 @@ msgstr ""
 msgid "Category: no category needed, this is one leg of a transfer"
 msgstr "Kategori: behövs inte, det här är ena delen av en överföring"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "no git history and no build stamp to ask"
+msgstr ""
+
+#. Column heading on the Application management screen
 #. Label of a form field on the Import screen
 #. Label on the Import screen
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "File"
@@ -3458,6 +3645,11 @@ msgstr "{text} – redigera beskrivningen"
 msgid "Changing…"
 msgstr ""
 
+#. Name of a fact on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "Started"
+msgstr ""
+
 #. A sign-in change in Admin's list: the person's password was reset
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -3488,6 +3680,10 @@ msgstr "de fyra sista, eller den del banken skriver ut"
 
 #: src/screens/Admin.tsx
 msgid "A suggestion, not a restriction: it fills in the address on the acceptance screen and the person can change it. <0>The link is the credential</0> — whoever opens it gets this role, so treat it like a password."
+msgstr ""
+
+#: src/screens/ApplicationManagement.tsx
+msgid "The source, on GitHub"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -3577,6 +3773,11 @@ msgstr ""
 #, fuzzy
 msgid "Gather the accounts by country"
 msgstr "Samla kontona per land"
+
+#. Heading on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "Database"
+msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "Put this back instead (leave empty to remove it)"
@@ -3858,6 +4059,10 @@ msgstr ""
 msgid "running"
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "How much to write down"
+msgstr ""
+
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Waiting for the other statement"
@@ -3956,6 +4161,10 @@ msgstr "Var kontot finns. Valfritt, och skilt från valutan – ett eurokonto ka
 msgid "The line exactly as it arrived"
 msgstr "Raden exakt som den kom"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Where it can be reached"
+msgstr ""
+
 #. Label of a form field on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Date format"
@@ -4029,6 +4238,10 @@ msgstr "Större text"
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so one Out column holding {0} would be a column nobody could add up."
 msgstr "Den här boken räknar aldrig om. Valutan hör till kontot och ingen växelkurs sparas någonstans, så en Ut-kolumn med {0} vore en kolumn som ingen kunde summera."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "The process answering this request."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Uncleared — the bank has not seen this yet"
@@ -4060,6 +4273,11 @@ msgstr "Det registreras som en riktig transaktion det datumet, inte som en dold 
 #, fuzzy
 msgid "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
 msgstr "Ha en av dina återställningskoder redo: den bevisar att det är du i stället för den gamla autentiseringsappen. (Återställningskoden du loggade in med täcker det bara i fliken där du använde den, så länge du är inloggad och i ett dygn.)"
+
+#. Tag beside a name on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "your data"
+msgstr ""
 
 #. Option in a dropdown on the Admin screen: role, manages the household. See GLOSSARY.md
 #: src/screens/Admin.tsx
@@ -4198,10 +4416,19 @@ msgstr "dubbelklicka för att redigera"
 msgid "New authenticator"
 msgstr "Ny autentiseringsapp"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "use the button below"
+msgstr ""
+
 #: src/components/StepUp.tsx
 #, fuzzy
 msgid "Your account is under your name in the menu."
 msgstr "Ditt konto finns under ditt namn i menyn."
+
+#. Button on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "Asking…"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -4303,6 +4530,11 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Yes, withdraw it"
+msgstr ""
+
+#. Name of a fact on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "Last backup"
 msgstr ""
 
 #. State of the password: it has been chosen. Shown beside the word Password
@@ -4517,6 +4749,13 @@ msgstr "Detta hamnar som en enda post i Historik, så hela importen kan ångras 
 msgid "Email"
 msgstr "E-post"
 
+#. placeholder {0}: packages.length
+#. placeholder {1}: count(packages.length)
+#. placeholder {2}: count(packages.length)
+#: src/screens/ApplicationManagement.tsx
+msgid "{0, plural, one {{1} packages.} other {{2} packages.}}"
+msgstr ""
+
 #: src/screens/Reconcile.tsx
 msgid "The difference has to be zero first"
 msgstr ""
@@ -4628,6 +4867,10 @@ msgstr "Övriga tillgångar"
 #, fuzzy
 msgid "4. Recovery codes"
 msgstr "4. Återställningskoder"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Every distribution installed in this environment, with the version that is actually loaded — not what <0>requirements.txt</0> locked, which an install may not have followed. When a dependency is the suspect, this is the list that answers it."
+msgstr ""
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -4987,6 +5230,10 @@ msgstr "Ignorera och fortsätt"
 msgid "Loading…"
 msgstr "Läser in…"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "How much data, per household"
+msgstr ""
+
 #: src/components/ReenrolmentDue.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -5120,6 +5367,11 @@ msgstr "{others, plural, one {Du kan fortfarande logga in med din andra lösenny
 msgid "Every rule of this kind gets a turn, in this order, each one working on what the last one left."
 msgstr ""
 
+#. Name of a fact on the Application management screen: noun, the database's migration revision
+#: src/screens/ApplicationManagement.tsx
+msgid "Schema"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Owner — can administer this instance"
 msgstr ""
@@ -5146,6 +5398,10 @@ msgstr "3. Återställningskoder"
 #, fuzzy
 msgid "e.g. {0}"
 msgstr "t.ex. {0}"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "What it depends on"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -5260,6 +5516,10 @@ msgstr ""
 msgid "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} den {1}. Delarna ersätter den, så de måste bli samma belopp. Inga minustecken – varje del går åt samma håll som originalet."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "The ledger this process is serving."
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
 msgstr ""
@@ -5355,6 +5615,11 @@ msgstr "Inhämtad av <0>Engångsimport</0> från {how}, den {when}."
 msgid "From year"
 msgstr "Från år"
 
+#. Name of a fact on the Application management screen: noun, the git commit the software was built from
+#: src/screens/ApplicationManagement.tsx
+msgid "Commit"
+msgstr ""
+
 #: src/screens/Reconcile.tsx
 msgid "Type the closing balance"
 msgstr ""
@@ -5399,6 +5664,10 @@ msgstr "Ändringar av inloggning de senaste 14 dagarna, gjorda av någon annan �
 msgid "Every category this payee has been filed under, biggest first. The transactions with no category are listed too, because they are what this payee still costs you to classify."
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "hand this to kill or lsof"
+msgstr ""
+
 #. Button on the Admin screen
 #. Button on the Admin screen
 #. Button on the Backups screen
@@ -5438,6 +5707,11 @@ msgstr "Inga pengar in mellan de datumen. Vidga dem ovan – en ersättning kan 
 #, fuzzy
 msgid "Work expenses"
 msgstr "Jobbutlägg"
+
+#. Text on the Application management screen: not known
+#: src/screens/ApplicationManagement.tsx
+msgid "unknown"
+msgstr ""
 
 #. Label on the household page
 #: src/screens/Household.tsx
@@ -5851,6 +6125,11 @@ msgstr "Spara"
 msgid "One row from each account's statement, made the two sides of one transfer"
 msgstr "En rad från varje kontos kontoutdrag, gjorda till de två sidorna av en överföring"
 
+#. Heading on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "Log files"
+msgstr ""
+
 #: src/App.tsx
 #, fuzzy
 msgid "Couldn't load your households"
@@ -5908,6 +6187,10 @@ msgstr ""
 msgid "If <0>Google Drive for desktop</0> or the Dropbox app is installed, it keeps a folder in sync — usually <1>Google Drive</1> or <2>Dropbox</2> in your home folder. Pick it, and the app uploads the zip from there."
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "The second one is what a phone on this network types in. Location on the Snap page needs an https address — a browser will not offer it over plain http, whatever this app sends."
+msgstr ""
+
 #. Row state in the one-time import's mapping: YNAB's own bucket, cannot be changed
 #. Row state in the one-time import's mapping: YNAB's own bucket, cannot be changed
 #: src/lib/labels.ts
@@ -5925,11 +6208,19 @@ msgstr "Vad är det här? {label}"
 msgid "The server keeps only a hash of it, so nobody — you included — can read it back."
 msgstr ""
 
+#: src/screens/ApplicationManagement.tsx
+msgid "the migration this database is at"
+msgstr ""
+
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
 msgid "Payee Categorisation"
 msgstr "Kategorisering av mottagare"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Back up now"
+msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Choose a category…"
@@ -6152,11 +6443,22 @@ msgstr ""
 msgid "{0} of 10 left"
 msgstr "{0} av 10 kvar"
 
+#. placeholder {0}: upstream.data.running
+#. placeholder {1}: upstream.data.latest
+#: src/screens/ApplicationManagement.tsx
+msgid "This is the newest there is: {0}, and the repository's latest release is {1}."
+msgstr ""
+
 #. A sign-in change, as a sentence; the placeholder is a person's name
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody re-enabled {user}"
 msgstr "Någon återaktiverade {user}"
+
+#. Heading on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "About"
+msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "The first rule that matches wins; the rest are not tried."
@@ -6214,6 +6516,10 @@ msgstr "Ja, radera den"
 #, fuzzy
 msgid "Every part of the original is accounted for."
 msgstr "Varje del av originalet är fördelad."
+
+#: src/screens/ApplicationManagement.tsx
+msgid "Is there a newer version?"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -6278,6 +6584,11 @@ msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
+msgstr ""
+
+#. Link on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "see it"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -6400,6 +6711,12 @@ msgstr "{0} av de markerade raderna ligger utanför det aktuella filtret och ing
 msgid "Re-enable {0}"
 msgstr ""
 
+#. Text on the Application management screen
+#. placeholder {0}: me.engine.journal_mode
+#: src/screens/ApplicationManagement.tsx
+msgid "{0} journal"
+msgstr ""
+
 #. placeholder {0}: entry.filename
 #: src/screens/Import.tsx
 #, fuzzy
@@ -6515,6 +6832,11 @@ msgstr ""
 msgid "Enter again to edit"
 msgstr "Enter igen för att redigera"
 
+#. Label on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "no branch"
+msgstr ""
+
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
 msgid "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
@@ -6570,6 +6892,11 @@ msgstr "Någon lade till {user} som ägare"
 #. Button on the Rules screen
 #: src/screens/Rules.tsx
 msgid "Trying…"
+msgstr ""
+
+#. Name of a fact on the Application management screen: noun, database pages
+#: src/screens/ApplicationManagement.tsx
+msgid "Pages"
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -6634,6 +6961,10 @@ msgstr "Ställ in igen"
 msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
 msgstr "En överföring behöver två öppna konton. Lägg till ett till på skärmen Konton först."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "A download is a zip with a README for whoever opens it next: what the file is, how to read it, and how to put it back with <0>make restore</0>. Delete removes one file when you say so and confirm. Nothing here deletes a backup on its own — no pruning and no timer."
+msgstr ""
+
 #. placeholder {0}: household.name
 #: src/screens/Import.tsx
 #, fuzzy
@@ -6693,6 +7024,10 @@ msgstr "{hiddenByCurrency, plural, one {Alla rader här har en valuta som välja
 msgid "All categories"
 msgstr "Alla kategorier"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "No households on this instance yet."
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Used for totals only. Each account keeps its own currency, and nothing is ever converted."
 msgstr ""
@@ -6744,6 +7079,11 @@ msgstr ""
 msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
 msgstr "Inget sparas förrän i sista steget. Om du stänger sidan är instansen fortfarande orörd och du kan börja om."
 
+#. Note on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "this process"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "the number other statements quote"
@@ -6793,6 +7133,11 @@ msgstr "Ge ett program en nyckel"
 msgid "Disable {0}"
 msgstr ""
 
+#. Text on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "not migrated"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "A code from your current authenticator"
@@ -6813,6 +7158,10 @@ msgstr "från kopian i den här webbläsaren, inte från servern – själva fil
 msgid "Yes, discard it"
 msgstr "Ja, kasta den"
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Where it is"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Following this device, which is light right now."
@@ -6831,6 +7180,8 @@ msgid "{0} will always be {1}"
 msgstr "{0} blir alltid {1}"
 
 #. Button on the Import screen
+#. Text on the Application management screen
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Reading…"
@@ -6910,6 +7261,10 @@ msgstr "Återkallad {0}"
 msgid "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
 msgstr "Typen säger vad för slags konto det är. Den sorterar listan och markerar vilka saldon som är pengar du <0>är skyldig</0> snarare än pengar du har."
 
+#: src/screens/ApplicationManagement.tsx
+msgid "Its author, and their other projects"
+msgstr ""
+
 #. Sentence on the Payees screen
 #. placeholder {0}: rows.length
 #. placeholder {1}: payees.data?.length ?? 0
@@ -6936,19 +7291,24 @@ msgstr "Mindre text, fler rader på skärmen"
 msgid "Notes and coins in a wallet or a tin. Nothing imports into it — you enter what you spend."
 msgstr "Sedlar och mynt i en plånbok eller en burk. Inget importeras hit – du för in det du spenderar."
 
+#. Button on the Application management screen: verb, close this panel
 #. Button on the Your account panel: verb, close this panel
 #. Screen-reader name of a button on the shared controls
 #. Screen-reader name of a button on the shared controls
 #: src/components/bits.tsx
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Close"
 msgstr "Stäng"
 
+#. Column heading on the Application management screen: noun, photos or PDFs of receipts. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Application management screen: noun, photos or PDFs of receipts. Se…
 #. Heading on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md
 #. Label on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md
 #. Menu item and the name of its screen: noun, photos or PDFs of receipts. See GLOSSARY.md
 #: src/App.tsx
+#: src/screens/ApplicationManagement.tsx
 #: src/screens/Household.tsx
 #, fuzzy
 msgid "Receipts"
@@ -6964,6 +7324,11 @@ msgstr "Koppla"
 #, fuzzy
 msgid "Choose the replacement"
 msgstr "Välj ersättaren"
+
+#. Button on the Application management screen
+#: src/screens/ApplicationManagement.tsx
+msgid "Hide them"
+msgstr ""
 
 #. placeholder {0}: found.payee_original
 #: src/screens/Register.tsx
@@ -7002,6 +7367,13 @@ msgstr "den importen kastades – inget skrevs"
 
 #: src/screens/History.tsx
 msgid "Putting it back…"
+msgstr ""
+
+#. Text on the Application management screen
+#. placeholder {0}: bytes(me.size.page_size)
+#. placeholder {1}: count(me.size.free_pages ?? 0)
+#: src/screens/ApplicationManagement.tsx
+msgid "{0} each, {1} free"
 msgstr ""
 
 #. placeholder {0}: rule.pattern
@@ -7115,10 +7487,21 @@ msgstr ""
 msgid "Oldest"
 msgstr "Äldsta"
 
+#. placeholder {0}: me.app_name
+#. placeholder {1}: me.version
+#: src/screens/ApplicationManagement.tsx
+msgid "{0} {1} — a self-hosted, multi-currency spend tracker for one household, under the AGPL."
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Open that import"
 msgstr "Öppna den importen"
+
+#. Text on the Application management screen: has never happened
+#: src/screens/ApplicationManagement.tsx
+msgid "never"
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "DD/MM/YYYY"

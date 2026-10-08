@@ -32,6 +32,9 @@ import { Empty, Hint, Problem, SortHeading, sortRows, useSort } from "../compone
 import { bytes } from "../lib/bytes";
 import { BackupList, type Backup } from "./Backups";
 import { formatInstant } from "../lib/time";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { formatCount } from "../lib/locale";
 
 // --------------------------------------------------------------------------- //
 // What the server sends. `InstanceOut` and friends in `app/schemas.py`.
@@ -168,7 +171,7 @@ interface Instance {
   author: string;
 }
 
-const count = (n: number) => n.toLocaleString();
+const count = (n: number) => formatCount(n);
 
 export function ApplicationManagement() {
   const client = useQueryClient();
@@ -179,7 +182,12 @@ export function ApplicationManagement() {
 
   const refresh = () => client.invalidateQueries({ queryKey: ["application"] });
 
-  if (it.isLoading) return <div className="card muted">Reading this instance…</div>;
+  if (it.isLoading)
+    return (
+      <div className="card muted">
+        <Trans>Reading this instance…</Trans>
+      </div>
+    );
   if (it.isError)
     return (
       <div className="card">
@@ -191,12 +199,14 @@ export function ApplicationManagement() {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1>Application management</h1>
+        <h1><Trans comment="Screen title on the Application management screen. See GLOSSARY.md">Application management</Trans></h1>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
-        This installation, rather than any of the ledgers in it. Only an owner can open this
-        screen, and only an owner can reach anything on it — the paths, the logs and the counts
-        below are about every household on this instance.
+        <Trans>
+          This installation, rather than any of the ledgers in it. Only an owner can open this
+          screen, and only an owner can reach anything on it — the paths, the logs and the counts
+          below are about every household on this instance.
+        </Trans>
       </p>
 
       <Runtime me={me} />
@@ -224,34 +234,38 @@ export function ApplicationManagement() {
 function Runtime({ me }: { me: Instance }) {
   return (
     <section className="card">
-      <h2 className="section-title">Runtime</h2>
+      <h2 className="section-title"><Trans comment="Heading on the Application management screen: noun, the running program">Runtime</Trans></h2>
       <p className="muted small" style={{ marginTop: 0 }}>
-        The process answering this request.
+        <Trans>
+          The process answering this request.
+        </Trans>
       </p>
       <dl className="stat-grid application-facts">
-        <Fact label="Version" value={me.version} note={me.app_name} />
+        <Fact label={t({ message: "Version", comment: "Name of a fact on the Application management screen: noun, the software version" })} value={me.version} note={me.app_name} />
         {/* The version only moves at a release, so main and a dev far ahead of
             it both say the same thing. The commit is what tells them apart. */}
         <Fact
-          label="Commit"
-          value={me.build.commit ? me.build.commit.slice(0, 7) : "unknown"}
+          label={t({ message: "Commit", comment: "Name of a fact on the Application management screen: noun, the git commit the software was built from" })}
+          value={me.build.commit ? me.build.commit.slice(0, 7) : t({ message: "unknown", comment: "Text on the Application management screen: not known" })}
           note={<BuildNote build={me.build} repository={me.repository} />}
         />
-        <Fact label="Environment" value={me.environment} note={`Python ${me.python}`} />
-        <Fact label="Machine" value={me.platform} />
+        <Fact label={t({ message: "Environment", comment: "Name of a fact on the Application management screen: noun, development or production" })} value={me.environment} note={t({ message: `Python ${me.python}`, comment: "Note on the Application management screen" })} />
+        <Fact label={t({ message: "Machine", comment: "Name of a fact on the Application management screen: noun, the computer it runs on" })} value={me.platform} />
         {/* The one number that tells two instances on one machine apart. A dev
             run and the real one look identical on every other fact here, and
             this is what you hand to `kill` or `lsof`. */}
-        <Fact label="Process" value={String(me.process_id)} note="hand this to kill or lsof" />
+        <Fact label={t({ message: "Process", comment: "Name of a fact on the Application management screen: noun, the operating-system process id" })} value={String(me.process_id)} note={t`hand this to kill or lsof`} />
         <Fact
-          label="Started"
+          label={t({ message: "Started", comment: "Name of a fact on the Application management screen" })}
           value={me.started_at ? formatInstant(me.started_at) : "—"}
-          note="this process"
+          note={t({ message: "this process", comment: "Note on the Application management screen" })}
         />
       </dl>
 
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        Where it can be reached
+        <Trans>
+          Where it can be reached
+        </Trans>
       </h3>
       <ul className="plain-list mono small">
         {me.addresses.map((one) => (
@@ -259,8 +273,10 @@ function Runtime({ me }: { me: Instance }) {
         ))}
       </ul>
       <p className="muted small">
-        The second one is what a phone on this network types in. Location on the Snap page needs
-        an https address — a browser will not offer it over plain http, whatever this app sends.
+        <Trans>
+          The second one is what a phone on this network types in. Location on the Snap page needs
+          an https address — a browser will not offer it over plain http, whatever this app sends.
+        </Trans>
       </p>
 
       <PlacesTable places={me.places} />
@@ -271,18 +287,20 @@ function Runtime({ me }: { me: Instance }) {
 
 function BuildNote({ build, repository }: { build: Build; repository: string }) {
   if (!build.commit) {
-    return <>no git history and no build stamp to ask</>;
+    return <Trans>no git history and no build stamp to ask</Trans>;
   }
   const said = [
-    build.branch ?? "no branch",
-    build.committed_at ? `committed ${formatInstant(build.committed_at)}` : null,
-    build.dirty ? "with uncommitted changes" : null,
+    build.branch ?? t({ message: "no branch", comment: "Label on the Application management screen" }),
+    build.committed_at ? t({ message: `committed ${formatInstant(build.committed_at)}`, comment: "Label on the Application management screen" }) : null,
+    build.dirty ? t`with uncommitted changes` : null,
   ].filter(Boolean);
   return (
     <>
       {said.join(" · ")} ·{" "}
       <a href={`${repository}/commit/${build.commit}`} target="_blank" rel="noreferrer noopener">
-        see it
+        <Trans comment="Link on the Application management screen">
+          see it
+        </Trans>
       </a>
     </>
   );
@@ -313,28 +331,30 @@ function HouseholdTable({ households }: { households: HouseholdData[] }) {
   return (
     <>
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        How much data, per household
+        <Trans>
+          How much data, per household
+        </Trans>
       </h3>
       {rows.length === 0 ? (
-        <Empty>No households on this instance yet.</Empty>
+        <Empty><Trans>No households on this instance yet.</Trans></Empty>
       ) : (
         <div className="table-scroll">
           <table>
             <thead>
               <tr>
-                <SortHeading label="Household" column="name" {...order} />
-                <SortHeading label="Transactions" column="transactions" align="right" {...order} />
-                <SortHeading label="Receipts" column="receipts" align="right" {...order} />
+                <SortHeading label={t({ message: "Household", comment: "Column heading on the Application management screen: noun, the people who share one ledger. See GLOSSARY.md" })} column="name" {...order} />
+                <SortHeading label={t({ message: "Transactions", comment: "Column heading on the Application management screen. See GLOSSARY.md" })} column="transactions" align="right" {...order} />
+                <SortHeading label={t({ message: "Receipts", comment: "Column heading on the Application management screen: noun, photos or PDFs of receipts. See GLOSSARY.md" })} column="receipts" align="right" {...order} />
               </tr>
             </thead>
             <tbody>
               {rows.map((house) => (
                 <tr key={house.id}>
                   <td data-primary="true">{house.name}</td>
-                  <td className="amount" data-label="Transactions">
+                  <td className="amount" data-label={t({ message: "Transactions", comment: "Column name shown beside a value on phones on the Application management screen. See GLOSSARY.md" })}>
                     {count(house.transactions)}
                   </td>
-                  <td className="amount" data-label="Receipts">
+                  <td className="amount" data-label={t({ message: "Receipts", comment: "Column name shown beside a value on phones on the Application management screen: noun, photos or PDFs of receipts. Se…" })}>
                     {count(house.receipts)}
                   </td>
                 </tr>
@@ -344,12 +364,15 @@ function HouseholdTable({ households }: { households: HouseholdData[] }) {
         </div>
       )}
       <p className="muted small">
-        Counts, never amounts — this ledger never converts one currency into another, so there is
-        no such thing as an instance-wide total. For the full picture,{" "}
-        <a href="/api/admin/application/tables.csv" download>
-          download every table with its row count and size
-        </a>
-        . That report scans the database, which is why it is a download rather than a block here.
+        <Trans>
+          Counts, never amounts — this ledger never converts one currency into another, so there
+          is no such thing as an instance-wide total. For the full picture,{" "}
+          <a href="/api/admin/application/tables.csv" download>
+            download every table with its row count and size
+          </a>
+          . That report scans the database, which is why it is a download rather than a block
+          here.
+        </Trans>
       </p>
     </>
   );
@@ -359,15 +382,17 @@ function PlacesTable({ places }: { places: Place[] }) {
   return (
     <>
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        Where the files are
+        <Trans>
+          Where the files are
+        </Trans>
       </h3>
       <div className="table-scroll">
         <table>
           <thead>
             <tr>
-              <th>What</th>
-              <th>Path</th>
-              <th className="amount">Size</th>
+              <th><Trans comment="Column heading on the Application management screen: noun, which thing">What</Trans></th>
+              <th><Trans comment="Column heading on the Application management screen: noun, a place in the file system">Path</Trans></th>
+              <th className="amount"><Trans comment="Column heading on the Application management screen: noun, size of a file">Size</Trans></th>
             </tr>
           </thead>
           <tbody>
@@ -382,16 +407,18 @@ function PlacesTable({ places }: { places: Place[] }) {
                       the healthy state: a screen that reports two faults on a
                       working instance is one nobody reads the third time. */}
                   {one.exists || one.optional ? null : (
-                    <span className="tag" title="this path does not exist">
-                      missing
+                    <span className="tag" title={t`this path does not exist`}>
+                      <Trans comment="Tag beside a name on the Application management screen">
+                        missing
+                      </Trans>
                     </span>
                   )}
                   <div className="small muted">{one.note}</div>
                 </td>
-                <td className="mono small" data-label="Path">
+                <td className="mono small" data-label={t({ message: "Path", comment: "Column name shown beside a value on phones on the Application management screen: noun, a place in the file system" })}>
                   {one.path}
                 </td>
-                <td className="amount muted" data-label="Size">
+                <td className="amount muted" data-label={t({ message: "Size", comment: "Column name shown beside a value on phones on the Application management screen: noun, size of a file" })}>
                   {bytes(one.bytes)}
                 </td>
               </tr>
@@ -408,19 +435,24 @@ function PackagesTable({ packages }: { packages: Package[] }) {
   return (
     <>
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        What it depends on
-        <Hint label="what this list is">
+        <Trans>What it depends on</Trans>
+        <Hint label={t`what this list is`}>
           <p>
-            Every distribution installed in this environment, with the version that is actually
-            loaded — not what <code>requirements.txt</code> locked, which an install may not have followed.
-            When a dependency is the suspect, this is the list that answers it.
+            <Trans>
+              Every distribution installed in this environment, with the version that is actually
+              loaded — not what <code>requirements.txt</code> locked, which an install may not have followed.
+              When a dependency is the suspect, this is the list that answers it.
+            </Trans>
           </p>
         </Hint>
       </h3>
       <p className="muted small">
-        {count(packages.length)} packages.{" "}
+        {plural(packages.length, {
+          one: `${count(packages.length)} packages.`,
+          other: `${count(packages.length)} packages.`,
+        })}{" "}
         <button className="link" onClick={() => setOpen(!open)}>
-          {open ? "Hide them" : "Show them"}
+          {open ? t({ message: "Hide them", comment: "Button on the Application management screen" }) : t({ message: "Show them", comment: "Button on the Application management screen" })}
         </button>
       </p>
       {open && (
@@ -482,13 +514,15 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
 
   return (
     <section className="card">
-      <h2 className="section-title">Log files</h2>
+      <h2 className="section-title"><Trans comment="Heading on the Application management screen">Log files</Trans></h2>
       <Problem error={state.error ?? choose.error} />
       <p className="muted small" style={{ marginTop: 0 }}>
-        Written to <span className="mono">{it?.directory ?? "…"}</span>, rotated at a megabyte and
-        five files deep. A rotated file is named for the moment it was closed &mdash;{" "}
-        <span className="mono">app-20260923-131545.log</span> &mdash; so it keeps its name instead
-        of shuffling along behind a number.
+        <Trans>
+          Written to <span className="mono">{it?.directory ?? "…"}</span>, rotated at a megabyte
+          and five files deep. A rotated file is named for the moment it was closed &mdash;{" "}
+          <span className="mono">app-20260923-131545.log</span> &mdash; so it keeps its name
+          instead of shuffling along behind a number.
+        </Trans>
       </p>
 
       {/* What is in each file, and which one is not safe to send anybody. */}
@@ -499,7 +533,9 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
               {stream.filename}
               {stream.holds_ledger_values ? (
                 <span className="pill danger" style={{ marginLeft: 6 }}>
-                  your data
+                  <Trans comment="Tag beside a name on the Application management screen">
+                    your data
+                  </Trans>
                 </span>
               ) : null}
             </dt>
@@ -508,21 +544,23 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
         ))}
       </dl>
       <p className="muted small">
-        Changing the setting below writes a line into <strong>all three</strong>, on both sides of
-        the change &mdash; including when you turn it <em>down</em>, which is the one that used to
-        leave no trace at all.
+        <Trans>
+          Changing the setting below writes a line into <strong>all three</strong>, on both sides of
+          the change &mdash; including when you turn it <em>down</em>, which is the one that used to
+          leave no trace at all.
+        </Trans>
       </p>
 
       {it && it.files.length === 0 ? (
-        <Empty>Nothing written yet. The file appears the next time this instance starts.</Empty>
+        <Empty><Trans>Nothing written yet. The file appears the next time this instance starts.</Trans></Empty>
       ) : (
         <div className="table-scroll">
           <table>
             <thead>
               <tr>
-                <th>File</th>
-                <th>Last written</th>
-                <th className="amount">Size</th>
+                <th><Trans comment="Column heading on the Application management screen">File</Trans></th>
+                <th><Trans comment="Column heading on the Application management screen">Last written</Trans></th>
+                <th className="amount"><Trans comment="Column heading on the Application management screen: noun, size of a file">Size</Trans></th>
                 <th className="amount row-actions" />
               </tr>
             </thead>
@@ -532,10 +570,10 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
                   <td data-primary="true" className="mono small">
                     {one.name}
                   </td>
-                  <td className="small muted" data-label="Last written">
+                  <td className="small muted" data-label={t({ message: "Last written", comment: "Column name shown beside a value on phones on the Application management screen" })}>
                     {formatInstant(one.modified)}
                   </td>
-                  <td className="amount muted" data-label="Size">
+                  <td className="amount muted" data-label={t({ message: "Size", comment: "Column name shown beside a value on phones on the Application management screen: noun, size of a file" })}>
                     {bytes(one.bytes)}
                   </td>
                   <td className="amount row-actions">
@@ -543,7 +581,7 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
                       className="link"
                       onClick={() => setOpen(open === one.name ? null : one.name)}
                     >
-                      {open === one.name ? "Close" : "Read"}
+                      {open === one.name ? t({ message: "Close", comment: "Button on the Application management screen: verb, close this panel" }) : t({ message: "Read", comment: "Button on the Application management screen: verb, show the file's contents" })}
                     </button>
                   </td>
                 </tr>
@@ -571,15 +609,17 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
             className="log-dump"
             tabIndex={0}
             aria-live="polite"
-            aria-label={`The end of ${open}`}
+            aria-label={t`The end of ${open}`}
           >
-            {body.isLoading ? "Reading…" : (body.data?.text ?? "")}
+            {body.isLoading ? t({ message: "Reading…", comment: "Text on the Application management screen" }) : (body.data?.text ?? "")}
           </pre>
         </>
       )}
 
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        How much to write down
+        <Trans>
+          How much to write down
+        </Trans>
       </h3>
       <div className="logging-styles">
         {(it?.styles ?? []).map((style) => (
@@ -602,8 +642,10 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
               <>
                 {" "}
                 <strong>
-                  This writes the ledger's own values into a file in plain text. Turn it off when
-                  you are done.
+                  <Trans>
+                    This writes the ledger's own values into a file in plain text. Turn it off when
+                    you are done.
+                  </Trans>
                 </strong>
               </>
             ) : null}
@@ -628,32 +670,35 @@ function Operations({ me }: { me: Instance }) {
 
   return (
     <section className="card">
-      <h2 className="section-title">Operations</h2>
+      <h2 className="section-title"><Trans comment="Heading on the Application management screen">Operations</Trans></h2>
       <Problem error={upstream.error} />
 
-      <h3 className="section-title">Is there a newer version?</h3>
+      <h3 className="section-title"><Trans>Is there a newer version?</Trans></h3>
       <p className="muted small">
-        Asks {me.repository} for its published releases and compares them with the {me.version}{" "}
-        this is running. Nothing leaves this instance unless an owner presses a button like this
-        one, nothing is asked on a timer, and no request says anything about this instance.
+        <Trans>
+          Asks {me.repository} for its published releases and compares them with the{" "}
+          {me.version} this is running. Nothing leaves this instance unless an owner presses a
+          button like this one, nothing is asked on a timer, and no request says anything about
+          this instance.
+        </Trans>
       </p>
       <button onClick={() => upstream.mutate()} disabled={upstream.isPending}>
-        {upstream.isPending ? "Asking…" : "Check the repository"}
+        {upstream.isPending ? t({ message: "Asking…", comment: "Button on the Application management screen" }) : t`Check the repository`}
       </button>
       {upstream.data ? (
         <div className={upstream.data.newer ? "banner warn" : "banner"} style={{ marginTop: 10 }}>
           {upstream.data.problem ? (
             upstream.data.problem
           ) : upstream.data.newer ? (
-            <>
+            <Trans>
               <strong>{upstream.data.latest}</strong> is available. This instance is running{" "}
               {upstream.data.running}.
-            </>
+            </Trans>
           ) : (
-            <>
+            <Trans>
               This is the newest there is: {upstream.data.running}, and the repository's latest
               release is {upstream.data.latest}.
-            </>
+            </Trans>
           )}
         </div>
       ) : null}
@@ -681,9 +726,11 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
 
   return (
     <section className="card">
-      <h2 className="section-title">Database</h2>
+      <h2 className="section-title"><Trans comment="Heading on the Application management screen">Database</Trans></h2>
       <p className="muted small" style={{ marginTop: 0 }}>
-        The ledger this process is serving.
+        <Trans>
+          The ledger this process is serving.
+        </Trans>
       </p>
       <Problem error={backup.error} />
       <dl className="stat-grid application-facts">
@@ -692,37 +739,37 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
             mode, although the WAL and SHM entries in Places already assumed
             it was. */}
         <Fact
-          label="Engine"
+          label={t({ message: "Engine", comment: "Name of a fact on the Application management screen: noun, the database software" })}
           value={me.engine.version ? `${me.engine.name} ${me.engine.version}` : me.engine.name}
-          note={me.engine.journal_mode ? `${me.engine.journal_mode} journal` : undefined}
+          note={me.engine.journal_mode ? t({ message: `${me.engine.journal_mode} journal`, comment: "Text on the Application management screen" }) : undefined}
         />
         <Fact
-          label="Schema"
+          label={t({ message: "Schema", comment: "Name of a fact on the Application management screen: noun, the database's migration revision" })}
           value={me.schema_revision ?? "—"}
-          note={me.schema_revision ? "the migration this database is at" : "not migrated"}
+          note={me.schema_revision ? t`the migration this database is at` : t({ message: "not migrated", comment: "Text on the Application management screen" })}
         />
         <Fact
-          label="Size"
+          label={t({ message: "Size", comment: "Name of a fact on the Application management screen: noun, size of a file" })}
           value={bytes(me.size.total_bytes)}
           note={
             me.size.wal_bytes > 0
-              ? `${bytes(me.size.main_bytes)} + ${bytes(me.size.wal_bytes)} not yet checkpointed`
+              ? t`${bytes(me.size.main_bytes)} + ${bytes(me.size.wal_bytes)} not yet checkpointed`
               : undefined
           }
         />
         <Fact
-          label="Pages"
+          label={t({ message: "Pages", comment: "Name of a fact on the Application management screen: noun, database pages" })}
           value={me.size.page_count === null ? "—" : count(me.size.page_count)}
           note={
             me.size.page_size === null
               ? undefined
-              : `${bytes(me.size.page_size)} each, ${count(me.size.free_pages ?? 0)} free`
+              : t({ message: `${bytes(me.size.page_size)} each, ${count(me.size.free_pages ?? 0)} free`, comment: "Text on the Application management screen" })
           }
         />
         <Fact
-          label="Last backup"
-          value={me.latest_backup ? formatInstant(me.latest_backup.made_at) : "never"}
-          note={me.latest_backup ? bytes(me.latest_backup.bytes) : "use the button below"}
+          label={t({ message: "Last backup", comment: "Name of a fact on the Application management screen" })}
+          value={me.latest_backup ? formatInstant(me.latest_backup.made_at) : t({ message: "never", comment: "Text on the Application management screen: has never happened" })}
+          note={me.latest_backup ? bytes(me.latest_backup.bytes) : t`use the button below`}
         />
       </dl>
 
@@ -731,32 +778,38 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
           look for the database. It comes from `database_path()`, never from
           `settings.database_url`, which can carry a password. */}
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        Where it is
+        <Trans>
+          Where it is
+        </Trans>
       </h3>
       <p className="mono small" style={{ marginTop: 0 }}>
-        {me.engine.path ?? `${me.database_url_scheme} — not a local file`}
+        {me.engine.path ?? t`${me.database_url_scheme} — not a local file`}
       </p>
 
       <HouseholdTable households={me.households} />
 
       <hr className="rule" />
 
-      <h3 className="section-title">Back the database up</h3>
+      <h3 className="section-title"><Trans>Back the database up</Trans></h3>
       <p className="muted small">
-        Writes a complete, compacted copy into the backups directory above, with this instance
-        still serving. It does <strong>not</strong> copy <span className="mono">secret.key</span>{" "}
-        there: without that key every authenticator is refused, so a copy that leaves this machine
-        either carries it (tick the box below) or travels with it separately.
+        <Trans>
+          Writes a complete, compacted copy into the backups directory above, with this instance
+          still serving. It does <strong>not</strong> copy <span className="mono">secret.key</span>{" "}
+          there: without that key every authenticator is refused, so a copy that leaves this
+          machine either carries it (tick the box below) or travels with it separately.
+        </Trans>
       </p>
       <button className="primary" onClick={() => backup.mutate()} disabled={backup.isPending}>
-        {backup.isPending ? "Writing…" : "Back up now"}
+        {backup.isPending ? t({ message: "Writing…", comment: "Button on the Application management screen" }) : t`Back up now`}
       </button>
       <BackupList backups={backups.data ?? []} onChanged={onChanged} />
       <p className="muted small" style={{ marginBottom: 0 }}>
-        A download is a zip with a README for whoever opens it next: what the file is, how to
-        read it, and how to put it back with <span className="mono">make restore</span>. Delete
-        removes one file when you say so and confirm. Nothing here deletes a backup on its own —
-        no pruning and no timer.
+        <Trans>
+          A download is a zip with a README for whoever opens it next: what the file is, how to
+          read it, and how to put it back with <span className="mono">make restore</span>. Delete
+          removes one file when you say so and confirm. Nothing here deletes a backup on its own —
+          no pruning and no timer.
+        </Trans>
       </p>
     </section>
   );
@@ -769,20 +822,26 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
 function About({ me }: { me: Instance }) {
   return (
     <section className="card">
-      <h2 className="section-title">About</h2>
+      <h2 className="section-title"><Trans comment="Heading on the Application management screen">About</Trans></h2>
       <p className="muted small" style={{ marginTop: 0 }}>
-        {me.app_name} {me.version} — a self-hosted, multi-currency spend tracker for one household,
-        under the AGPL.
+        <Trans>
+          {me.app_name} {me.version} — a self-hosted, multi-currency spend tracker for one
+          household, under the AGPL.
+        </Trans>
       </p>
       <ul className="plain-list">
         <li>
           <a href={me.repository} target="_blank" rel="noreferrer noopener">
-            The source, on GitHub
+            <Trans>
+              The source, on GitHub
+            </Trans>
           </a>
         </li>
         <li>
           <a href={me.author} target="_blank" rel="noreferrer noopener">
-            Its author, and their other projects
+            <Trans>
+              Its author, and their other projects
+            </Trans>
           </a>
         </li>
       </ul>
