@@ -47,6 +47,15 @@ history this repository does not have.
 
 ### Changed
 
+- **Short messages carry a note for the translator.** Every message of one
+  or two words, and any whose English alone is ambiguous, says in one line
+  what it is -- a button, a column heading, a state, which sense of
+  "Balance" -- through Lingui's own `comment`, so it reaches every
+  language's catalog. "New" and the authenticator's "Set up" now have a
+  context of their own, because they need different words in other
+  languages. The rule is in `client/src/locales/README.md`, and the catalog
+  tests refuse a bare short message. English is unchanged. (#228)
+
 - **The remaining screens' words go into the catalogs one screen at a time**,
   starting with Categories. English is unchanged; each screen has a test
   that renders it in the `en-XA` pseudo-locale and finds no English left.

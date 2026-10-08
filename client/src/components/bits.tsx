@@ -181,10 +181,10 @@ export function Panel({
       >
         <header>
           <div>
-            {config ? <div className="config-badge">{t`Settings`}</div> : null}
+            {config ? <div className="config-badge">{t({ message: "Settings", comment: "Text on the shared controls" })}</div> : null}
             <h2>{title}</h2>
           </div>
-          <button onClick={onClose} aria-label={t`Close`}>
+          <button onClick={onClose} aria-label={t({ message: "Close", comment: "Screen-reader name of a button on the shared controls" })}>
             ✕
           </button>
         </header>
@@ -239,7 +239,7 @@ export function Hint({ label, children }: { label: string; children: ReactNode }
         type="button"
         className="hint-open"
         aria-expanded={open}
-        aria-label={open ? t`Hide help: ${label}` : t`What's this? ${label}`}
+        aria-label={open ? t({ message: `Hide help: ${label}`, comment: "Button on the shared controls" }) : t({ message: `What's this? ${label}`, comment: "Button on the shared controls" })}
         onClick={() => setOpen((was) => !was)}
       >
         ?
@@ -374,7 +374,7 @@ export function SortHeading<K extends string>({
         .join(" ")}
       aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : "none"}
     >
-      <button type="button" onClick={() => onSort(column, next)} title={t`Sort by ${label}`}>
+      <button type="button" onClick={() => onSort(column, next)} title={t({ message: `Sort by ${label}`, comment: "Tooltip on the shared controls" })}>
         {short ? (
           <>
             <span aria-hidden="true">{short}</span>
@@ -483,7 +483,7 @@ export function Dialog({
       >
         <header>
           <h2>{title}</h2>
-          <button onClick={onClose} aria-label={t`Close`}>
+          <button onClick={onClose} aria-label={t({ message: "Close", comment: "Screen-reader name of a button on the shared controls" })}>
             ✕
           </button>
         </header>
