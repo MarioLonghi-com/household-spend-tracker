@@ -37,6 +37,7 @@ REQUEST_KINDS = ("prepare", "apply", "discard", "update_updater", "ping")
 FROZEN_KINDS = ("ping", "update_updater")
 #: Part 11's actions, sent by the recovery page as `recovery/request.json`.
 RECOVERY_KINDS = (
+    "open",
     "retry_rollback",
     "restore_backup",
     "start_matching",
@@ -136,6 +137,9 @@ FIELDS: dict[str, tuple[str, ...]] = {
 _RECOVERY_COMMON = ("protocol", "id", "kind", "created_at", "code")
 #: Part 11's actions. `id` is the id of the update that needs recovery.
 RECOVERY_FIELDS: dict[str, tuple[str, ...]] = {
+    # Unlocking the page: the code checked, nothing done. Without it the page
+    # could not show the history to the owner and to nobody else (#163).
+    "open": _RECOVERY_COMMON,
     "retry_rollback": _RECOVERY_COMMON,
     "restore_backup": (*_RECOVERY_COMMON, "backup"),
     "start_matching": (*_RECOVERY_COMMON, "revision"),
@@ -496,6 +500,47 @@ def validate_recovery(raw: object, now: float) -> RecoveryRequest:
     if "include_key" in raw and type(raw["include_key"]) is not bool:
         raise Refusal("include_key", "include_key is true or false.")
     return RecoveryRequest(**raw)
+
+
+#: Why the maintenance page is in recovery mode (`recovery/mode.json`): an
+#: update needing recovery (Part 11), or an app started on an image older than
+#: the ledger, with no code in existence (9.2).
+RECOVERY_MODES = ("recovery", "ledger_ahead")
+#: What the updater answers a recovery request with (`recovery/answer.json`).
+#: `accepted` comes first for an action that then runs; `done` or `failed`
+#: when it has finished; `refused` when it never started.
+RECOVERY_ANSWERS = ("accepted", "done", "failed", "refused")
+
+
+def recovery_mode(mode: str, update_id: str | None, at: float) -> dict:
+    """`recovery/mode.json`: what the page started with `--recovery` is for."""
+    if mode not in RECOVERY_MODES:
+        raise ValueError(f"mode {mode!r}")
+    return {"protocol": FROZEN_PROTOCOL, "mode": mode, "id": update_id, "at": iso(at)}
+
+
+def recovery_answer(
+    request: RecoveryRequest | dict | None, state: str, sentence: str, at: float, code: str | None = None
+) -> dict:
+    """`recovery/answer.json`. Echoes the request's `id`, `kind` and `created_at`, never its code."""
+    if state not in RECOVERY_ANSWERS:
+        raise ValueError(f"state {state!r}")
+    if isinstance(request, RecoveryRequest):
+        echo = {"id": request.id, "kind": request.kind, "created_at": request.created_at}
+    else:
+        raw = request if isinstance(request, dict) else {}
+        echo = {
+            k: raw.get(k) if isinstance(raw.get(k), str) and len(raw.get(k)) <= 64 else None
+            for k in ("id", "kind", "created_at")
+        }
+    return {
+        "protocol": FROZEN_PROTOCOL,
+        **echo,
+        "state": state,
+        "sentence": sentence,
+        "code": code,
+        "at": iso(at),
+    }
 
 
 # --------------------------------------------------------------------------- #
