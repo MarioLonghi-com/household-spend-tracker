@@ -217,6 +217,14 @@ def check_updated(
         b.app, after, b.app_image.get("Config") or {}, s.engine.image(after["Image"]).get("Config") or {}
     )
     extra = {k: v for k, v in diff.items() if k not in ALLOWED}
+    raised = extra.get("HostConfig.OomScoreAdj")
+    if s.leg.name.startswith("podman-rootless") and raised and (raised[0] or 0) < (raised[1] or 0):
+        # Rootless Podman: a container created through the API service gets
+        # the service's own oom_score_adj (systemd gives user services 200),
+        # and an unprivileged process cannot lower it again; compose's CLI ran
+        # from a shell at 0. The engine's, not the copy's (#169).
+        print(f"   HostConfig.OomScoreAdj {raised[0]} -> {raised[1]}: rootless Podman's API service; set aside")
+        extra.pop("HostConfig.OomScoreAdj")
     r.check(
         not extra,
         f"the copy differs from the previous container only in its image and AUTO_MIGRATE: {sorted(diff)}",
@@ -617,7 +625,7 @@ class Run:
                     # By id: the same container, whether the rename has happened yet or not.
                     s.engine.start(b.app["Id"])
                 except api.Failed as e:
-                    seen["refused"].append(str(e)[:160])
+                    seen["refused"].append(str(e).split("/start: ", 1)[-1][:200])
             with contextlib.suppress(api.Failed, api.Unreachable):
                 state = s.engine.inspect(b.app["Id"])["State"]
                 seen["ran"] = state.get("StartedAt") != b.app["State"]["StartedAt"]
@@ -635,7 +643,14 @@ class Run:
             # `-previous` appeared landed behind the page most of the time.
             s.engine.pause(owner)
             try:
-                press()
+                # Podman can refuse a start for a moment after a stop, while it
+                # cleans the container up: the updater waits, so clicking again
+                # costs nothing.
+                for _ in range(30):
+                    press()
+                    if seen["ran"]:
+                        break
+                    time.sleep(0.1)
             finally:
                 s.engine.unpause(owner)
             while not seen["ran"] and s.journal(rid).get("step") in ("3", "4", "5", "6"):
@@ -827,6 +842,15 @@ class Run:
         env = dict(os.environ)
         if self.leg.compose[0].startswith("podman"):
             env.pop("DOCKER_HOST", None)
+            # The launcher takes `docker compose` when there is one, and the
+            # runner has Docker beside Podman: an owner on rootless Podman has
+            # no `docker`, so this leg hides it (first E15 run on this leg
+            # started the bundle on the runner's Docker instead).
+            shim = s.dir.parent / f"{s.dir.name}-no-docker"
+            shim.mkdir(exist_ok=True)
+            (shim / "docker").write_text("#!/bin/sh\nexit 127\n")
+            (shim / "docker").chmod(0o755)
+            env["PATH"] = f"{shim}:{env.get('PATH', '')}"
         else:
             env["DOCKER_HOST"] = f"unix://{self.leg.socket}"
         env["SPENDTRACKER_HEALTH_TIMEOUT"] = "240"

@@ -344,3 +344,22 @@ def test_the_successor_updater_in_the_hosts_ipc_namespace_sets_no_shm_size():
         app_of("podman-rootless-fedora/loopback-app.json"), UPDATER_NEW, "4f1c2b3a-0000-4000-8000-000000000001"
     )
     assert private["HostConfig"]["ShmSize"] == 65536000
+
+
+def test_the_images_own_healthcheck_is_left_to_the_new_image_and_a_compose_one_is_carried():
+    """Podman 4's compat create splits a CMD healthcheck on every space (#169):
+    the image's own is not sent at all; the new image brings its own."""
+    prev = app_of("podman-rootless-fedora/loopback-app.json")
+    check = {
+        "Test": ["CMD", "python", "-c", "import sys; sys.exit(0)"],
+        "Interval": 30_000_000_000,
+        "Retries": 3,
+    }
+    prev = {**prev, "Config": {**prev["Config"], "Healthcheck": check}}
+    assert "Healthcheck" not in shapes.copy_app(prev, NEW, image_config={"Healthcheck": dict(check)})
+    assert "Healthcheck" not in shapes.successor(
+        prev, UPDATER_NEW, "4f1c2b3a-0000-4000-8000-000000000001", image_config={"Healthcheck": dict(check)}
+    )
+    other = {"Test": ["CMD", "python", "-c", "import sys; sys.exit(1)"]}
+    assert shapes.copy_app(prev, NEW, image_config={"Healthcheck": other})["Healthcheck"] == check
+    assert shapes.copy_app(prev, NEW)["Healthcheck"] == check  # the image unknown: carried
