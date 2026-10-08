@@ -166,7 +166,7 @@ def test_the_successor_is_a_copy_of_the_running_updater_with_its_image_and_one_a
     own = world.fake.inspect_of(world.fake.containers[world.updater_id])
     assert body["Image"] == ref(UPD, B)
     assert body["Cmd"][-2:] == ["--successor", load(world.volume, next(iter_requests(world)))["id"]]
-    for key in ("Binds", "GroupAdd", "RestartPolicy", "Memory", "ReadonlyRootfs", "CapDrop", "SecurityOpt"):
+    for key in ("Binds", "GroupAdd", "RestartPolicy", "Memory", "ReadonlyRootfs", "Tmpfs", "CapDrop", "SecurityOpt"):
         assert body["HostConfig"][key] == own["HostConfig"][key], key
     assert body["User"] == own["Config"]["User"]
     assert body["Labels"]["com.docker.compose.service"] == "updater"
@@ -224,6 +224,42 @@ def test_without_a_hook_the_successor_binds_no_hook_directory(world):
         "/var/run/docker.sock",
         str(world.project_dir),
     )
+
+
+#: Each key the compose files give the `updater` service, and the inspect
+#: field it becomes, which the successor's copy must carry (6.6, H2). `image`
+#: is the one thing that changes; `build` never reaches the engine.
+COMPOSE_TO_INSPECT = {
+    "image": None,
+    "build": None,
+    "restart": ("HostConfig", "RestartPolicy"),
+    "user": ("Config", "User"),
+    "group_add": ("HostConfig", "GroupAdd"),
+    "read_only": ("HostConfig", "ReadonlyRootfs"),
+    "tmpfs": ("HostConfig", "Tmpfs"),
+    "security_opt": ("HostConfig", "SecurityOpt"),
+    "cap_drop": ("HostConfig", "CapDrop"),
+    "mem_limit": ("HostConfig", "Memory"),
+    "volumes": ("HostConfig", "Binds"),
+}
+
+
+@pytest.mark.parametrize("compose_file", ["compose.yaml", "deploy/tailnet/compose.yaml"])
+def test_every_setting_of_the_compose_updater_service_is_carried_to_the_successor(compose_file):
+    import pathlib
+
+    import yaml
+
+    root = pathlib.Path(__file__).resolve().parent.parent
+    service = yaml.safe_load((root / compose_file).read_text())["services"]["updater"]
+    # A key nobody has mapped is a decision to make here, not a setting to lose.
+    assert set(service) <= set(COMPOSE_TO_INSPECT), set(service) - set(COMPOSE_TO_INSPECT)
+    for key in service:
+        where = COMPOSE_TO_INSPECT[key]
+        if where is None:
+            continue
+        section, field = where
+        assert field in (shapes.HOST_FIELDS if section == "HostConfig" else shapes.CONFIG_FIELDS), key
 
 
 def iter_requests(w: World):

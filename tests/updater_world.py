@@ -547,8 +547,9 @@ class World(_Fleet):
                     "RestartPolicy": {"Name": "unless-stopped", "MaximumRetryCount": 0},
                     "Memory": 134217728,
                     "ReadonlyRootfs": True,
+                    "Tmpfs": {"/tmp": ""},
                     "CapDrop": ["ALL"],
-                    "SecurityOpt": ["label=disable", "no-new-privileges:true"],
+                    "SecurityOpt": ["no-new-privileges:true", "label=disable"],
                 },
                 "NetworkSettings": {
                     "Networks": {f"{PROJECT}_default": {"Aliases": [f"{PROJECT}-updater-1", "updater"]}}
