@@ -29,7 +29,6 @@ import os
 import re
 import shlex
 import sys
-import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -138,9 +137,20 @@ def backup_verifies(s: Stack, version: str, folder: str) -> bool:
 
 
 def check_updated(
-    r: Result, s: Stack, b: Before, req: dict, record: dict, to: str, *, updater_to: str | None
+    r: Result,
+    s: Stack,
+    b: Before,
+    req: dict,
+    record: dict,
+    to: str,
+    *,
+    updater_to: str | None,
+    engine_restarted: bool = False,
 ) -> None:
-    """E1's assertions, for an update to `to`. `updater_to`: the release whose updater should now run."""
+    """E1's assertions, for an update to `to`. `updater_to`: the release whose updater should now run.
+
+    `engine_restarted`: the engine restarted mid-update (E6), which restarts
+    every container -- the sidecar too, same container, new `StartedAt`."""
     rid = req["id"]
     r.check(record.get("state") == "succeeded", f"the apply succeeded: {record.get('sentence')}")
     health = s.health()
@@ -171,10 +181,17 @@ def check_updated(
         f"the backup {folder} verifies, read by {to}'s code",
     )
     r.check(record.get("backup") == folder, "the history names that backup")
-    previous = s.engine.inspect(s.app_name + "-previous")
+    # By id: if the apply did not succeed, the name is the app's again.
+    previous = s.engine.inspect(b.app["Id"])
     r.check(
-        previous["Id"] == b.app["Id"] and not previous["State"]["Running"],
-        "the previous container is kept, stopped, as -previous",
+        previous["Name"].lstrip("/") == s.app_name + "-previous" and not previous["State"]["Running"],
+        f"the previous container is kept, stopped, as -previous ({previous['Name'].lstrip('/')})",
+    )
+    policy = ((previous.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
+    unable = [n for n in record.get("notes") or [] if "could not be set to `no`" in n]
+    r.check(
+        policy == "no" or bool(unable),
+        f"and parked with restart policy no ({policy}{'; the engine could not: ' + unable[0] if unable else ''})",
     )
     pin = pinned(s)
     want = f"{APP_REPO}:{to}@{s.releases[to]['app']}"
@@ -206,14 +223,29 @@ def check_updated(
         env.get("SPENDTRACKER_AUTO_MIGRATE") == "0", "the new container has SPENDTRACKER_AUTO_MIGRATE=0"
     )
     if b.sidecar is not None:
-        side = s.engine.inspect(b.sidecar["Id"])
+        check_sidecar(r, s, b, after, engine_restarted)
+
+
+def check_sidecar(r: Result, s: Stack, b: Before, app: dict, engine_restarted: bool) -> None:
+    """The sidecar layout: the sidecar untouched, and the app in its namespace as it is now (8.4)."""
+    assert b.sidecar is not None
+    side = s.engine.inspect(b.sidecar["Id"])
+    if engine_restarted:
+        # An engine restart restarts every container: the sidecar keeps its
+        # id and gets a new StartedAt, which is not the updater's doing.
+        r.check(side["State"]["Running"], "the sidecar is the same container, running again")
+    else:
         r.check(
             side["State"]["StartedAt"] == b.sidecar["State"]["StartedAt"] and side["State"]["Running"],
             "the sidecar is untouched: same container, same StartedAt, running",
         )
+    mode = (app.get("HostConfig") or {}).get("NetworkMode")
+    r.check(mode == f"container:{side['Id']}", f"the app is in the sidecar's namespace as it is now ({mode})")
 
 
-def check_rolled_back(r: Result, s: Stack, b: Before, req: dict, record: dict, frm: str) -> None:
+def check_rolled_back(
+    r: Result, s: Stack, b: Before, req: dict, record: dict, frm: str, *, engine_restarted: bool = False
+) -> None:
     """E3's common part: back at `frm`, its stamp, the rows as the drill's backup counted them."""
     r.check(record.get("state") == "rolled_back", f"the apply rolled back: {record.get('sentence')}")
     health = s.health()
@@ -234,9 +266,14 @@ def check_rolled_back(r: Result, s: Stack, b: Before, req: dict, record: dict, f
     )
     after = s.engine.inspect(s.app_name)
     r.check(after["Image"] == s.image_id(s.app_ref(frm)), f"{s.app_name} runs {frm}'s digest")
+    want = ((b.app.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
+    got = ((after.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
+    r.check(
+        after["Id"] == b.app["Id"] and got == want,
+        f"the previous container is back under its name, with its own restart policy ({got}, was {want})",
+    )
     if b.sidecar is not None:
-        side = s.engine.inspect(b.sidecar["Id"])
-        r.check(side["State"]["StartedAt"] == b.sidecar["State"]["StartedAt"], "the sidecar is untouched")
+        check_sidecar(r, s, b, after, engine_restarted)
 
 
 def restored_aside(s: Stack) -> list[str]:
@@ -492,7 +529,9 @@ class Run:
         r.check(column not in s.vol.columns(table), f"{table}.{column}, which B2 added, is absent")
         r.check(record.get("failed_step") == "8", f"it failed at health, step {record.get('failed_step')}")
 
-    def interrupted(self, r: Result, act: Callable[[str], None], what: str) -> None:
+    def interrupted(
+        self, r: Result, act: Callable[[str], None], what: str, engine_restarted: bool = False
+    ) -> None:
         """E5 and E6: interrupt the drill, then E1 or E3 holds, and the drill ran once."""
         s = self.s
         s.up(A)
@@ -501,9 +540,9 @@ class Run:
         state = record.get("state")
         print(f"   after {what}: {state}")
         if state == "succeeded":
-            check_updated(r, s, b, req, record, B, updater_to=None)
+            check_updated(r, s, b, req, record, B, updater_to=None, engine_restarted=engine_restarted)
         else:
-            check_rolled_back(r, s, b, req, record, A)
+            check_rolled_back(r, s, b, req, record, A, engine_restarted=engine_restarted)
         made = sorted(set(s.vol.backups()) - set(b.backups))
         r.check(len(made) == 1, f"the drill ran once: one backup folder for the request {made}")
 
@@ -538,61 +577,44 @@ class Run:
             subprocess.run(self.leg.restart, check=True)
             s.engine.wait_answering()
 
-        self.interrupted(r, restart, "the engine restarted")
+        self.interrupted(r, restart, "the engine restarted", engine_restarted=True)
 
     def E7(self, r: Result) -> None:
-        """`-previous` started by hand, as fast as the engine answers, from step 3 to the outcome.
+        """`-previous` started by hand as soon as it is parked -- Docker Desktop's Start button -- and E1 holds.
 
-        It never runs -- its `StartedAt` never moves -- and E1 holds."""
+        Before #169's fix it held the port (or, in the sidecar layout, 8848 in
+        the shared namespace) when the new app needed it, and `unless-stopped`
+        kept it coming back. Now step 3 parks it with restart policy `no`, and
+        steps 7 and 8 stop it once and start the new app again. Clicked until it
+        has run once, and not after step 7 starts: a person, not a loop racing
+        the updater for the port."""
         s = self.s
         s.up(A)
         b = before(s)
         prev = s.app_name + "-previous"
-        seen: dict = {"tries": 0, "refused": 0, "running": 0, "said": set()}
-        done = threading.Event()
+        seen: dict = {"clicks": 0, "refused": [], "ran": False}
 
-        def loop(rid: str) -> None:
-            s.wait_step(rid, ("3", "4", "5", "6", "7", "8", "9", "10"))
-            while not done.is_set():
-                try:
-                    s.engine.start(prev)
-                    seen["tries"] += 1
-                except api.Failed as e:
-                    seen["tries"] += 1
-                    seen["refused"] += 1
-                    seen["said"].add(str(e)[:160])
-                except api.Unreachable:
-                    pass
+        def click(rid: str) -> None:
+            s.wait_for(lambda: s.engine.exists(prev), "the app to be parked as -previous", 600, every=0.1)
+            while not seen["ran"] and s.journal(rid).get("step") in ("3", "4", "5", "6"):
+                seen["clicks"] += 1
+                with contextlib.suppress(api.Unreachable):
+                    try:
+                        s.engine.start(prev)
+                    except api.Failed as e:
+                        seen["refused"].append(str(e)[:160])
                 with contextlib.suppress(api.Failed, api.Unreachable):
-                    if s.engine.inspect(prev)["State"].get("Running"):
-                        seen["running"] += 1
+                    state = s.engine.inspect(b.app["Id"])["State"]
+                    seen["ran"] = state.get("StartedAt") != b.app["State"]["StartedAt"]
+                if not seen["ran"]:
+                    time.sleep(0.5)
 
-        thread = threading.Thread(target=lambda: None)
-
-        def during(rid: str) -> None:
-            nonlocal thread
-            thread = threading.Thread(target=loop, args=(rid,), daemon=True)
-            thread.start()
-
-        try:
-            req, record = s.update(A, B, during=during)
-        finally:
-            done.set()
-            if thread.ident is not None:
-                thread.join(10)
-        # By id: after a rollback the old app has its own name back.
-        after = s.engine.inspect(b.app["Id"])
-        print(f"   {seen['tries']} starts tried, {seen['refused']} refused: {sorted(seen['said'])[:3]}")
-        r.check(seen["tries"] > 0, "-previous was started by hand while the apply ran")
-        r.check(
-            after["State"]["StartedAt"] == b.app["State"]["StartedAt"] and not seen["running"],
-            f"-previous never ran: StartedAt {b.app['State']['StartedAt']} -> {after['State']['StartedAt']}, "
-            f"seen running {seen['running']} times",
-        )
-        if record.get("state") == "succeeded":
-            check_updated(r, s, b, req, record, B, updater_to=B)
-        else:
-            r.check(False, f"E1 holds: the apply {record.get('state')}: {record.get('sentence')}")
+        req, record = s.update(A, B, during=click)
+        print(f"   {seen['clicks']} clicks, ran: {seen['ran']}, refused: {sorted(set(seen['refused']))[:2]}")
+        r.check(seen["ran"], f"-previous was started by hand while the apply ran ({seen['clicks']} clicks)")
+        stopped = [n for n in record.get("notes") or [] if "started while the update ran" in n]
+        print(f"   the updater's note: {stopped[0] if stopped else '(none: -previous had exited by itself)'}")
+        check_updated(r, s, b, req, record, B, updater_to=B)
 
     def E8(self, r: Result) -> None:
         """Corrupt backup and failed health -> needs_recovery; recovery over HTTP through the page."""
@@ -803,13 +825,34 @@ class Run:
 #: Scenarios that fail today for a reason in the updater, not in the test: each
 #: still runs and prints every assertion, and its failure does not fail the
 #: leg. When one passes, the summary says so -- take it out of here then.
-KNOWN_GAPS = {
-    "E7": (
-        "nothing stops `docker start` of the parked app: between step 6 (maintenance page "
-        "stopped) and step 7 (new app started) the port is free, the old app starts and "
-        "holds it, and the new app cannot bind"
+KNOWN_GAPS: dict[str, str] = {}
+
+#: Scenarios in which **A's** updater (the merge base's) runs steps 3-10 on a
+#: layout, and the fix that layout needs, by the commit that made it: until
+#: the merge base contains that commit, A's updater cannot pass there, and the
+#: scenario is skipped with the reason. It runs again by itself on the first
+#: pull request whose merge base has the fix.
+NEEDS_IN_A = {
+    ("E11b", "sidecar"): (
+        "51926060257c831732734c67a6cba6a6e36a8f88",
+        "A's updater (the merge base) runs this apply and predates 5192606, the sidecar copy "
+        "without ExposedPorts, so Docker refuses its step 7; it runs once the merge base has it",
     ),
 }
+
+
+def contains(revision: str, commit: str) -> bool | None:
+    """Whether `revision` has `commit` in its history; None when git cannot say."""
+    import subprocess
+
+    try:
+        done = subprocess.run(
+            ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", commit, revision],
+            capture_output=True,
+        )
+    except OSError:
+        return None
+    return {0: True, 1: False}.get(done.returncode)
 
 SCENARIOS = {
     # One stack: E1, then what reads the state E1 left.
@@ -824,7 +867,7 @@ SCENARIOS = {
     "E4": "rollback: health answers 500",
     "E5": "the updater killed mid-drill, started again",
     "E6": "the engine restarted mid-drill",
-    "E7": "-previous started by hand during the drill",
+    "E7": "-previous started by hand during the apply",
     "E8": "corrupt backup, failed health: recovery over HTTP",
     "E9": "stale and duplicate requests",
     "E14": "updater only (C2)",
@@ -872,6 +915,15 @@ def main(argv: list[str] | None = None) -> int:
     print(f"leg {leg.name}, {leg.layout}: {version.get('Platform', {}).get('Name') or version.get('Components', [{}])[0].get('Name')} "
           f"{version.get('Version')}, API {version.get('MinAPIVersion')}-{version.get('ApiVersion')}")  # fmt: skip
     stack = Stack(leg, engine, args.project_dir.resolve(), args.staged.resolve())
+    for (name, layout), (commit, why) in NEEDS_IN_A.items():
+        if layout == leg.layout and contains(stack.releases[A]["revision"], commit) is False:
+            leg.skips.setdefault(name, why)
+    # The engine resolves ghcr.io to the job's registry only once its own
+    # resolver has read /etc/hosts again (Go caches it for 5 s): the first
+    # compose up once went to the real ghcr.io and was `denied`. Pulling A by
+    # digest until it comes is the wait, and saves the first `up` the pull.
+    for ref in (stack.app_ref(A), stack.updater_ref(A)):
+        Stack.wait_for(lambda ref=ref: engine.pull(ref) is None, f"the registry to serve {ref}", 120, every=3)
     run = Run(stack, leg)
     wanted = [n for n in SCENARIOS if not args.only or n in args.only.split(",")]
     results: list[Result] = []

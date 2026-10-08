@@ -1111,19 +1111,6 @@ jobs:
       - name: a registry that answers as ghcr.io
         run: python -m tests.self_update.stage registry --out "$STAGED" --publish 0.0.0.0:443
 
-      - name: build and push the releases (A from the merge base, B from this change, B's variants)
-        env:
-          BASE_REF: ${{ github.base_ref }}
-          VARIANTS: ${{ matrix.variants }}
-        run: |
-          set -eu
-          if [ -n "$BASE_REF" ]; then base="$(git merge-base HEAD "origin/${BASE_REF}")"
-          else base="$(git rev-parse -q --verify 'HEAD^' || git rev-parse HEAD)"; fi
-          echo "A is $base, B is $(git rev-parse HEAD)"
-          started=$(date +%s)
-          python -m tests.self_update.stage build --out "$STAGED" --base "$base" --only "$VARIANTS"
-          echo "BUILD_SECONDS=$(( $(date +%s) - started ))" >> "$GITHUB_ENV"
-
       # The engine under test resolves ghcr.io to the registry and trusts its
       # certificate. Loopback for engines that pull from the runner's own
       # namespace; the runner's address for rootless Docker, whose daemon
@@ -1196,6 +1183,12 @@ jobs:
           # The rootless daemon makes its own NAT chains inside RootlessKit's
           # namespace, through the legacy modules the runner does not load.
           sudo modprobe -a ip_tables iptable_nat ip6_tables ip6table_nat
+          # The first run failed to make them anyway ("failed to create NAT
+          # chain DOCKER"). Without iptables the daemon makes no NAT chains;
+          # ports are published by RootlessKit's port driver, and nothing the
+          # scenarios run needs a container to reach out past the engine.
+          mkdir -p "$HOME/.config/docker"
+          echo '{"iptables": false, "ip6tables": false}' > "$HOME/.config/docker/daemon.json"
           dockerd-rootless-setuptool.sh install --force \
             || { journalctl --user -n 60 --no-pager --unit docker.service; dockerd --version; exit 1; }
           sock="$XDG_RUNTIME_DIR/docker.sock"
@@ -1209,6 +1202,21 @@ jobs:
           } >> "$GITHUB_ENV"
           DOCKER_HOST="unix://$sock" docker version --format 'rootless Docker {{.Server.Version}}, API {{.Server.MinAPIVersion}}-{{.Server.APIVersion}}'
           echo "rootless Docker set up in $(( $(date +%s) - started )) s"
+
+      # After the engine is set up: its resolver caches /etc/hosts for a few
+      # seconds, and the first pull once went to the real ghcr.io (`denied`).
+      - name: build and push the releases (A from the merge base, B from this change, B's variants)
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          VARIANTS: ${{ matrix.variants }}
+        run: |
+          set -eu
+          if [ -n "$BASE_REF" ]; then base="$(git merge-base HEAD "origin/${BASE_REF}")"
+          else base="$(git rev-parse -q --verify 'HEAD^' || git rev-parse HEAD)"; fi
+          echo "A is $base, B is $(git rev-parse HEAD)"
+          started=$(date +%s)
+          python -m tests.self_update.stage build --out "$STAGED" --base "$base" --only "$VARIANTS"
+          echo "BUILD_SECONDS=$(( $(date +%s) - started ))" >> "$GITHUB_ENV"
 
       - name: the scenarios
         env:

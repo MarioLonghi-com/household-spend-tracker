@@ -137,6 +137,15 @@ class Engine:
     def image(self, ref: str) -> dict:
         return self.call("GET", f"/images/{urllib.parse.quote(ref, safe='')}/json")
 
+    def pull(self, ref: str) -> None:
+        """Pull `ref` (a repository by digest or tag); an error inside the stream is a Failed."""
+        repo, sep, digest = ref.partition("@")
+        query = {"fromImage": ref} if sep else {"fromImage": ref.rsplit(":", 1)[0], "tag": ref.rsplit(":", 1)[1]}
+        events = self.call("POST", "/images/create", query, timeout=600)
+        for event in events if isinstance(events, list) else [events or {}]:
+            if isinstance(event, dict) and (event.get("error") or event.get("errorDetail")):
+                raise Failed(500, f"pull {ref}: {event.get('error') or event.get('errorDetail')}")
+
     def start(self, ref: str) -> None:
         self.call("POST", f"/containers/{urllib.parse.quote(ref, safe='')}/start")
 
