@@ -88,6 +88,7 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | balance | [Accounts](../screens/Accounts.tsx), [Reconcile](../screens/Reconcile.tsx) | saldo | saldo | saldo | | draft |
 | bank (account's institution) | [History field names](../../../app/services/describing.py) | banco | banco | bank | Stored as `institution`; History calls it "bank" | draft |
 | base currency | [Household](../screens/Household.tsx) | moeda base | divisa base | basvaluta | | draft |
+| batch (History) | [History](../screens/History.tsx) | lote | lote | omgång | One act in History, undone as a whole | draft |
 | Cash (account type `cash`) | [Accounts `TYPES`](../screens/Accounts.tsx) | Dinheiro | Efectivo | Kontanter | | draft |
 | category | [Categories](../screens/Categories.tsx) | categoria | categoría | kategori | | draft |
 | category group | [Categories](../screens/Categories.tsx) | grupo de categorias | grupo de categorías | kategorigrupp | | draft |
@@ -100,6 +101,7 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | date | [Register](../screens/Register.tsx) | data | fecha | datum | | draft |
 | default category | [Payee categorisation](../screens/PayeeCategorisation.tsx) | categoria padrão | categoría predeterminada | standardkategori | | draft |
 | device, this device | [Profile](../screens/Profile.tsx) | dispositivo, este dispositivo | dispositivo, este dispositivo | enhet, den här enheten | Language and format are chosen per device (#48) | draft |
+| disable, re-enable (a person's sign-in) | [Admin](../screens/Admin.tsx) | desativar, reativar | desactivar, reactivar | inaktivera, återaktivera | Stops or allows signing in; nothing is deleted | draft |
 | exchange rate | [Transfer](../screens/Transfer.tsx) | taxa de câmbio | tipo de cambio | växelkurs | | draft |
 | History | [History](../screens/History.tsx) | Histórico | Historial | Historik | The household's record of every change, with Undo | draft |
 | household | [Household](../screens/Household.tsx) | casa | hogar | hushåll | The shared ledger of the people who live together. pt-BR *domicílio* is a census word; *família* assumes too much | draft |
@@ -109,12 +111,16 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | import (noun) | [Import](../screens/Import.tsx) | importação | importación | import | | draft |
 | Import a statement | [Import](../screens/Import.tsx) | Importar um extrato | Importar un extracto | Importera ett kontoutdrag | | draft |
 | Income vs Expense (report) | [Reports `REPORTS`](../screens/Reports.tsx) | Receitas e despesas | Ingresos y gastos | Inkomster och utgifter | The English says "Income vs Expense" in the menu and "Income v Expense" in its own heading and in prose; translate both as this row | draft |
+| instance | [Application management](../screens/ApplicationManagement.tsx) | instância | instancia | instans | One installation of the app, holding every household | draft |
 | invite, invitation | [Household](../screens/Household.tsx), [AcceptInvite](../screens/AcceptInvite.tsx) | convidar, convite | invitar, invitación | bjuda in, inbjudan | | draft |
 | Keys for programs | [Profile](../screens/Profile.tsx) | Chaves para programas | Claves para programas | Nycklar för program | API keys for agents. es-ES: *clave*, kept apart from the passkey's *llave* | draft |
+| ledger | many sentences | livro-caixa | libro | boken | Everything recorded for a household; sv takes the definite form in a sentence | draft |
+| leg (of a transfer) | [History field names](../../../app/services/describing.py), refusals | lado | lado | ben | One of the two rows a transfer is made of; also said "side" | draft |
 | Locked (state `reconciled`) | [Register `CLEARED_PILLS`](../screens/Register.tsx) | Bloqueada | Bloqueada | Låst | The stored value is `reconciled`; the screen says "Locked" | draft |
 | match (verb, import and transfers) | [ImportGuide](../screens/importGuide/en.tsx) | corresponder | emparejar | matcha | Two rows found to be the same thing | draft |
 | member (role `member`) | [Household](../screens/Household.tsx) | membro | miembro | medlem | | draft |
 | memo | [Register](../screens/Register.tsx) | descrição | concepto | beskrivning | es-ES statements call the bank's text *concepto*, which is what an import puts here. Not *nota*: that is **note** | draft |
+| merge (payees) | [Payees](../screens/Payees.tsx) | unir; união | fusionar; fusión | slå ihop; sammanslagning | Two payees become one | draft |
 | Needs a look (import outcome `needs_review`) | [Import `OUTCOME_WORDS`](../screens/Import.tsx) | Precisa de revisão | Hay que revisarla | Behöver granskas | | draft |
 | New (import outcome `created`) | [Import `OUTCOME_WORDS`](../screens/Import.tsx) | Nova | Nueva | Ny | Agrees with *transação* / *transacción* / *transaktion* | draft |
 | Not a work expense | [`REIMBURSEMENT_LABELS`](../lib/reimbursement.ts) | Não é despesa de trabalho | No es un gasto de trabajo | Inget jobbutlägg | | draft |
@@ -135,9 +141,13 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | reconcile, reconciliation | [Reconcile](../screens/Reconcile.tsx) | conciliar, conciliação | conciliar, conciliación | stämma av, avstämning | Checking the ledger against a statement and locking what matched | draft |
 | recovery code | [RecoveryCodes](../components/RecoveryCodes.tsx), [SignIn](../screens/SignIn.tsx) | código de recuperação | código de recuperación | återställningskod | sv-SE: *återställ* also means restore; context separates them | draft |
 | Register (menu section) | [App menu](../App.tsx) | Registro | Registro | Register | The section holding Transactions, Import and Receipts | draft |
+| regular expression, pattern | [Payee Naming Rules](../screens/Rules.tsx) | expressão regular, padrão | expresión regular, patrón | reguljärt uttryck, mönster | A rule's text to match | draft |
 | Reimbursements (report) | [Reports `REPORTS`](../screens/Reports.tsx) | Reembolsos | Reembolsos | Utlägg | sv-SE: *utlägg* is the word for an expense an employer pays back | draft |
 | Reports | [Reports](../screens/Reports.tsx) | Relatórios | Informes | Rapporter | es-ES *informes*; *reportes* is Latin American | draft |
+| reset link | [Admin](../screens/Admin.tsx) | link de redefinição | enlace de restablecimiento | återställningslänk | One-time link for choosing a new password or authenticator | draft |
 | restore (a backup) | [Backups](../screens/Backups.tsx) | restaurar | restaurar | återställa | | draft |
+| revoke | [Profile](../screens/Profile.tsx) | revogar | revocar | återkalla | A key or device stops working at once | draft |
+| role | [Household](../screens/Household.tsx), [Admin](../screens/Admin.tsx) | função | rol | roll | Owner or member | draft |
 | rule | [Rules](../screens/Rules.tsx) | regra | regla | regel | | draft |
 | Savings (account type `savings`) | [Accounts `TYPES`](../screens/Accounts.tsx) | Poupança | Ahorro | Sparkonto | | draft |
 | setup token | [Setup](../screens/Setup.tsx) | token de configuração | token de configuración | installationstoken | | draft |

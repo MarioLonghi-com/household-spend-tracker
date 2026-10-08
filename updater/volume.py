@@ -62,6 +62,21 @@ class Volume:
         return self.root / "recovery" / "request.json"
 
     @property
+    def recovery_mode(self) -> Path:
+        """What the page in recovery mode is for; written by the updater (#163)."""
+        return self.root / "recovery" / "mode.json"
+
+    @property
+    def recovery_answer(self) -> Path:
+        """The updater's verdict on the last recovery request it took."""
+        return self.root / "recovery" / "answer.json"
+
+    @property
+    def recovery_attempts(self) -> Path:
+        """The wrong-code counter, kept by the updater, read by the page (11.2)."""
+        return self.root / "recovery" / "attempts.json"
+
+    @property
     def heartbeat(self) -> Path:
         return self.root / "updater.json"
 

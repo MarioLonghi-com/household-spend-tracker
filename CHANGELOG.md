@@ -47,6 +47,13 @@ history this repository does not have.
 
 ### Changed
 
+- **A hundred more refusals carry a code for translation.** Transactions,
+  transfers, splits and work expenses, payees and their naming rules,
+  categories, money and the profile panel now answer with a stable `code`
+  and raw `params` beside the same English `detail`, and the client has a
+  catalog message for each. The English a person or an agent reads is
+  unchanged, byte for byte, and agents still get no codes. (#57)
+
 - **A fresh install starts without `SPENDTRACKER_AUTO_MIGRATE=1`.** A first
   `docker compose up -d` against a new volume used to be refused until you
   passed the flag once from a terminal. A database with no tables at all --
@@ -116,6 +123,26 @@ history this repository does not have.
   behind the source. Nothing an English reader sees changes. (#53)
 
 ### Added
+
+- **Self-update: the maintenance page and browser recovery** (#163).
+  While an update runs, whoever opens Spend Tracker sees only "Spend Tracker
+  is being updated. It will be back in a few minutes." and `/api/health`
+  answers 503: no version, no step, no log. If the update fails *and*
+  putting the previous version back fails three times, the page switches to
+  recovery mode and adds a small "Owner: open recovery" link. `/recovery`
+  asks for the one-time recovery code shown when *Update* was pressed; the
+  updater, not the page, checks it against the hash it holds, refuses for 15
+  minutes after five wrong codes (doubling after each further five), and
+  forgets the hash once the update settles. With the code the page shows the
+  failed update's steps and logs and offers: retry the rollback, restore one
+  of the newest five update backups with the version that took it, start the
+  version that matches the ledger (never a migration), download a backup as
+  a zip (`secret.key` only behind an unticked box with the Backups screen's
+  warning), download the diagnostics (no ledger data, no key), or stop and
+  leave it to a terminal, with the commands. Every action is recorded in the
+  update's history. The same page, without a code, also covers an app that
+  compose started on an image older than the pin: it says the ledger is
+  ahead and to run the launcher again.
 
 - **The Updates section on Admin → Application** (#166), where *Is there a
   newer version?* was. It says which case this instance is in: a checkout
@@ -221,6 +248,21 @@ history this repository does not have.
   `self-update` job, advisory for now, that updates release A to B through
   the updater against a real Docker Engine. No image or compose service runs
   the updater yet (#164).
+
+- **An optional pre-update hook for servers** (#168). An operator can have a
+  command of their own run **on the host** before every update -- a Proxmox
+  snapshot of the VM, say -- by installing the systemd path unit, service and
+  runner in `deploy/updater/host-hook/` and mounting their directory into the
+  updater from a server-only `compose.override.yaml` (the README has both,
+  and the snapshot as an example). The updater writes a request naming only
+  the two versions; the runner runs the one root-owned command configured on
+  the host, never anything from the request, and never twice for one update.
+  **A failing hook stops the update before anything changes**: a non-zero
+  exit, a timeout, or no runner answering is *Not started: the pre-update
+  hook failed.*, with the reason and the end of the command's output in the
+  update's history. Without a `hook.json` in that directory the step is
+  skipped and says so; nothing changes for an installation without a hook.
+
 - **The self-updater has an image and runs beside the app** (#164).
   `docker build --target updater .` builds it from the same Dockerfile and
   the same Chainguard digests as the app: the updater's hashed lock in a
@@ -661,7 +703,6 @@ published image as what `compose.yaml` runs.
   holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
   each language uses, and how each writes money and dates. Nothing in the app
   changes. (#174)
-
 ## 0.7.1 — 2026-10-05
 
 **Reversible: none** — no migration in this release. To go back, check out

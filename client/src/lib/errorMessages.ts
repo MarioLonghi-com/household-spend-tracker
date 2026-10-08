@@ -37,11 +37,55 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
         "{name} is one of the newest five update backups. They are kept so an update can be undone, and the updater removes older ones itself",
     }),
   },
+  "category.archived_default": {
+    message: msg({ id: "error.category.archived_default", message: "{name} is archived, so it cannot be a default" }),
+  },
+  "category.choose_default": {
+    message: msg({ id: "error.category.choose_default", message: "Choose the category to always use" }),
+  },
+  "category.group_name_taken": {
+    message: msg({ id: "error.category.group_name_taken", message: "There is already a group called {name}" }),
+  },
+  "category.group_needs_name": {
+    message: msg({ id: "error.category.group_needs_name", message: "A group needs a name" }),
+  },
+  "category.group_not_empty": {
+    message: msg({
+      id: "error.category.group_not_empty",
+      message:
+        "A group can only be deleted when there are no categories under it. {name} still holds {held, plural, one {# category} other {# categories}}{archived, plural, =0 {} other {, # of them archived}}. Move or delete them first.",
+    }),
+  },
+  "category.group_not_found": {
+    message: msg({ id: "error.category.group_not_found", message: "No such category group" }),
+  },
+  "category.in_use": {
+    message: msg({
+      id: "error.category.in_use",
+      message:
+        "{count, plural, one {# transaction is} other {# transactions are}} categorised as {name}. Archive it instead, and they keep their category.",
+    }),
+  },
+  "category.name_taken": {
+    message: msg({ id: "error.category.name_taken", message: "There is already a category called {name}" }),
+  },
+  "category.needs_name": {
+    message: msg({ id: "error.category.needs_name", message: "A category needs a name" }),
+  },
+  "category.not_found": {
+    message: msg({ id: "error.category.not_found", message: "No such category" }),
+  },
+  "category.other_household": {
+    message: msg({ id: "error.category.other_household", message: "That category belongs to a different household" }),
+  },
   "currency.not_iso_4217": {
     message: msg({
       id: "error.currency.not_iso_4217",
       message: "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR",
     }),
+  },
+  "money.amount_too_large": {
+    message: msg({ id: "error.money.amount_too_large", message: "That amount is too large to record as money" }),
   },
   "money.decimals_in_whole_currency": {
     message: msg({
@@ -49,11 +93,21 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
       message: "{value} has decimals, and {currency} has none",
     }),
   },
+  "money.not_a_value": {
+    message: msg({ id: "error.money.not_a_value", message: "{value} is not a monetary value" }),
+  },
   "money.not_an_amount": {
     message: msg({
       id: "error.money.not_an_amount",
       message:
         "{value} is not an amount this can read. Write it with a point before the decimals and no thousands separators, like 1234.56 or -80",
+    }),
+  },
+  "money.not_whole_minor_units": {
+    message: msg({
+      id: "error.money.not_whole_minor_units",
+      message:
+        "{milliunits} thousandths is not a whole number of {currency} minor units",
     }),
   },
   "money.too_large": {
@@ -70,6 +124,131 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
       id: "error.money.too_many_digits",
       message: "An amount {digits} digits long is too large to record as money",
     }),
+  },
+  "payee.merge_different_households": {
+    message: msg({
+      id: "error.payee.merge_different_households",
+      message:
+        "Those payees are in different households",
+    }),
+  },
+  "payee.merge_into_itself": {
+    message: msg({ id: "error.payee.merge_into_itself", message: "A payee cannot be merged into itself" }),
+  },
+  "payee.needs_name": {
+    message: msg({ id: "error.payee.needs_name", message: "A payee needs a name" }),
+  },
+  "payee.other_household": {
+    message: msg({ id: "error.payee.other_household", message: "That payee belongs to a different household" }),
+  },
+  "payee.rule_needs_pattern": {
+    message: msg({ id: "error.payee.rule_needs_pattern", message: "A rule needs something to match on" }),
+  },
+  "payee.rule_needs_payee": {
+    message: msg({
+      id: "error.payee.rule_needs_payee",
+      message:
+        "A rule that names a payee needs a payee to point at",
+    }),
+  },
+  "payee.rule_not_a_regex": {
+    message: msg({ id: "error.payee.rule_not_a_regex", message: "That is not a valid regular expression: {reason}" }),
+  },
+  "payee.rule_pattern_too_long": {
+    message: msg({
+      id: "error.payee.rule_pattern_too_long",
+      message:
+        "That pattern is too long (max {max} characters)",
+    }),
+  },
+  "payee.rule_replacement_on_map": {
+    message: msg({
+      id: "error.payee.rule_replacement_on_map",
+      message:
+        "A replacement only means something on a rule that rewrites; this one names a payee",
+    }),
+  },
+  "payee.rule_replacement_too_long": {
+    message: msg({
+      id: "error.payee.rule_replacement_too_long",
+      message:
+        "That replacement is too long (max {max} characters)",
+    }),
+  },
+  "payee.rule_template_no_groups": {
+    message: msg({
+      id: "error.payee.rule_template_no_groups",
+      message:
+        "That replacement uses {reference}, and the pattern has no bracketed groups. Put brackets round the part you want to keep.",
+    }),
+  },
+  "payee.rule_template_no_such_group": {
+    message: msg({
+      id: "error.payee.rule_template_no_such_group",
+      message:
+        "That replacement uses {reference}, and the pattern has no group called {name}",
+    }),
+  },
+  "payee.rule_template_too_few_groups": {
+    message: msg({
+      id: "error.payee.rule_template_too_few_groups",
+      message:
+        "That replacement uses {reference}, and the pattern has only {groups} bracketed groups",
+    }),
+  },
+  "profile.current_factor_refused": {
+    message: msg({
+      id: "error.profile.current_factor_refused",
+      message:
+        "That is not a working code from your current authenticator, or an unused recovery code",
+    }),
+  },
+  "profile.needs_authenticator": {
+    message: msg({
+      id: "error.profile.needs_authenticator",
+      message:
+        "Set up an authenticator before making new recovery codes",
+    }),
+  },
+  "profile.new_code_wrong": {
+    message: msg({
+      id: "error.profile.new_code_wrong",
+      message:
+        "That code is not right. Check the time on your phone and try again.",
+    }),
+  },
+  "profile.recovery_grant_not_needed": {
+    message: msg({
+      id: "error.profile.recovery_grant_not_needed",
+      message:
+        "Your current authenticator can be checked again, so prove it with a code from it (or an unused recovery code) rather than the permission from signing in.",
+    }),
+  },
+  "profile.recovery_grant_refused": {
+    message: msg({
+      id: "error.profile.recovery_grant_refused",
+      message:
+        "That permission to set up a new authenticator has expired, or is not for this session. Use an unused recovery code in its place.",
+    }),
+  },
+  "profile.reenrolment_expired": {
+    message: msg({ id: "error.profile.reenrolment_expired", message: "That re-enrolment has expired; start again" }),
+  },
+  "profile.reenrolment_not_yours": {
+    message: msg({ id: "error.profile.reenrolment_not_yours", message: "That re-enrolment belongs to somebody else" }),
+  },
+  "profile.regenerate_refused": {
+    message: msg({
+      id: "error.profile.regenerate_refused",
+      message:
+        "That password and authenticator code do not prove it is you",
+    }),
+  },
+  "profile.same_password": {
+    message: msg({ id: "error.profile.same_password", message: "That is already your password" }),
+  },
+  "profile.wrong_password": {
+    message: msg({ id: "error.profile.wrong_password", message: "That is not your current password" }),
   },
   "receipt.no_such_copy": {
     message: msg({ id: "error.receipt.no_such_copy", message: "That receipt has no copy of that kind" }),
@@ -89,6 +268,86 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
     }),
     dates: ["row_date", "statement_date"],
   },
+  "reimbursement.not_a_work_expense_cannot_be_paid": {
+    message: msg({
+      id: "error.reimbursement.not_a_work_expense_cannot_be_paid",
+      message:
+        "A row that is not a work expense cannot have been paid back by anything",
+    }),
+  },
+  "reimbursement.not_money_in": {
+    message: msg({
+      id: "error.reimbursement.not_money_in",
+      message:
+        "A reimbursement is money arriving, so pick money coming in",
+    }),
+  },
+  "reimbursement.not_money_out": {
+    message: msg({
+      id: "error.reimbursement.not_money_out",
+      message:
+        "Only money leaving an account can be a work expense; this row is money coming in",
+    }),
+  },
+  "reimbursement.paid_cannot_be_written_off": {
+    message: msg({
+      id: "error.reimbursement.paid_cannot_be_written_off",
+      message:
+        "This has been paid back. Take the payment off it before writing it off.",
+    }),
+  },
+  "reimbursement.payment_cannot_be_expense": {
+    message: msg({
+      id: "error.reimbursement.payment_cannot_be_expense",
+      message:
+        "This row paid work expenses back, so it cannot be one itself",
+    }),
+  },
+  "reimbursement.reimburses_itself": {
+    message: msg({ id: "error.reimbursement.reimburses_itself", message: "A transaction cannot reimburse itself" }),
+  },
+  "reimbursement.settlement_is_work_expense": {
+    message: msg({
+      id: "error.reimbursement.settlement_is_work_expense",
+      message:
+        "That row is itself a work expense, so it cannot also be what paid one back",
+    }),
+  },
+  "reimbursement.sign_change_on_payment": {
+    message: msg({
+      id: "error.reimbursement.sign_change_on_payment",
+      message:
+        "This row paid work expenses back, so it has to stay money coming in. Take the expenses off it first if the amount really changed direction.",
+    }),
+  },
+  "reimbursement.sign_change_on_work_expense": {
+    message: msg({
+      id: "error.reimbursement.sign_change_on_work_expense",
+      message:
+        "This is a work expense, so it has to stay money going out. Set it to not a work expense first if the amount really changed direction.",
+    }),
+  },
+  "reimbursement.transfer_is_not_a_reimbursement": {
+    message: msg({
+      id: "error.reimbursement.transfer_is_not_a_reimbursement",
+      message:
+        "A transfer between your own accounts is not a reimbursement",
+    }),
+  },
+  "reimbursement.transfer_is_not_a_work_expense": {
+    message: msg({
+      id: "error.reimbursement.transfer_is_not_a_work_expense",
+      message:
+        "This is one leg of a transfer, money moving between your own accounts. Flag the purchase it paid for instead.",
+    }),
+  },
+  "reimbursement.written_off_cannot_be_paid": {
+    message: msg({
+      id: "error.reimbursement.written_off_cannot_be_paid",
+      message:
+        "This was written off. Set it back to expected before recording a payment for it.",
+    }),
+  },
   "split.does_not_add_up": {
     message: msg({
       id: "error.split.does_not_add_up",
@@ -97,14 +356,149 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
     }),
     money: ["total", "amount"],
   },
+  "split.part_count": {
+    message: msg({ id: "error.split.part_count", message: "A split is between {min} and {max} parts" }),
+  },
+  "split.repaid_work_expenses": {
+    message: msg({
+      id: "error.split.repaid_work_expenses",
+      message:
+        "This payment repaid work expenses. Take them off it before splitting it, then link each one to the part that paid it.",
+    }),
+  },
+  "split.transfer_leg": {
+    message: msg({
+      id: "error.split.transfer_leg",
+      message:
+        "This is one leg of a transfer, which is a single movement of money recorded twice. Split the other side of the transfer too, or undo it first.",
+    }),
+  },
+  "split.work_expense_money_in": {
+    message: msg({
+      id: "error.split.work_expense_money_in",
+      message:
+        "Every part of a work expense has to be money going out, because each part stays a work expense",
+    }),
+  },
+  "split.zero_part": {
+    message: msg({ id: "error.split.zero_part", message: "A part of a split cannot be zero" }),
+  },
+  "transaction.import_line_exists": {
+    message: msg({
+      id: "error.transaction.import_line_exists",
+      message:
+        "That statement line is already in this account",
+    }),
+  },
+  "transaction.locked": {
+    message: msg({
+      id: "error.transaction.locked",
+      message:
+        "That transaction is locked; set it back to cleared before editing it",
+    }),
+  },
+  "transaction.not_found": {
+    message: msg({ id: "error.transaction.not_found", message: "No such transaction" }),
+  },
+  "transfer.amount_not_positive": {
+    message: msg({ id: "error.transfer.amount_not_positive", message: "A transfer amount must be positive" }),
+  },
+  "transfer.arriving_not_positive": {
+    message: msg({ id: "error.transfer.arriving_not_positive", message: "The amount arriving must be positive" }),
+  },
+  "transfer.different_households": {
+    message: msg({ id: "error.transfer.different_households", message: "Those accounts are in different households" }),
+  },
+  "transfer.duplicate_leg": {
+    message: msg({
+      id: "error.transfer.duplicate_leg",
+      message:
+        "Make a new transfer from the register, not a copy of one leg of this one",
+    }),
+  },
+  "transfer.edit_cross_currency_leg": {
+    message: msg({
+      id: "error.transfer.edit_cross_currency_leg",
+      message:
+        "Edit each leg of a cross-currency transfer on its own; we will not re-derive a rate",
+    }),
+  },
+  "transfer.has_no_category": {
+    message: msg({ id: "error.transfer.has_no_category", message: "A transfer has no category" }),
+  },
+  "transfer.link_already_a_transfer": {
+    message: msg({
+      id: "error.transfer.link_already_a_transfer",
+      message:
+        "One of those is already a transfer; unlink it first",
+    }),
+  },
+  "transfer.link_no_money": {
+    message: msg({
+      id: "error.transfer.link_no_money",
+      message:
+        "A row with no money in it cannot be a transfer leg",
+    }),
+  },
+  "transfer.link_repayment": {
+    message: msg({
+      id: "error.transfer.link_repayment",
+      message:
+        "One of those is the payment that repaid a work expense, not a transfer. Take it off the expenses it repaid first if it really is a transfer.",
+    }),
+  },
+  "transfer.link_same_account": {
+    message: msg({
+      id: "error.transfer.link_same_account",
+      message:
+        "Both of those are in the same account; a transfer moves between two",
+    }),
+  },
+  "transfer.link_split_part": {
+    message: msg({ id: "error.transfer.link_split_part", message: "A part of a split cannot be a transfer leg" }),
+  },
+  "transfer.link_work_expense": {
+    message: msg({
+      id: "error.transfer.link_work_expense",
+      message:
+        "One of those is a work expense, which is money spent, not moved. Take the work-expense flag off it first if it really is a transfer.",
+    }),
+  },
   "transfer.needs_amount_arriving": {
     message: msg({
       id: "error.transfer.needs_amount_arriving",
       message: "A {from_currency} to {to_currency} transfer needs the amount that arrives; we never invent a rate",
     }),
   },
+  "transfer.not_a_transfer": {
+    message: msg({ id: "error.transfer.not_a_transfer", message: "That transaction is not a transfer" }),
+  },
+  "transfer.pair_in_two_households": {
+    message: msg({
+      id: "error.transfer.pair_in_two_households",
+      message:
+        "Those transactions are in different households",
+    }),
+  },
+  "transfer.pair_same_direction": {
+    message: msg({
+      id: "error.transfer.pair_same_direction",
+      message:
+        "A transfer takes money out of one account and into the other",
+    }),
+  },
+  "transfer.pair_with_itself": {
+    message: msg({ id: "error.transfer.pair_with_itself", message: "A transaction cannot be a transfer with itself" }),
+  },
   "transfer.same_account": {
     message: msg({ id: "error.transfer.same_account", message: "An account cannot transfer to itself" }),
+  },
+  "transfer.sides_differ": {
+    message: msg({
+      id: "error.transfer.sides_differ",
+      message:
+        "Both sides of a same-currency transfer must be the same amount",
+    }),
   },
   "update.digest_mismatch": {
     message: msg({

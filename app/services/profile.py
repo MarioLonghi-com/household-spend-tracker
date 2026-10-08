@@ -89,7 +89,7 @@ def _check_current_password(
     """
     held = ratelimit.reserve(engine, email_canonical=user.email_canonical, ip=ip, kind=KIND)
     if not passwords.verify_password(user.password_hash, current):
-        raise ProofRefused("that isn't your current password")
+        raise ProofRefused("that isn't your current password", code="profile.wrong_password")
     ratelimit.release(engine, held)
 
 
@@ -155,7 +155,7 @@ def change_password(
     if problems:
         raise ValidationError(problems[0])
     if passwords.verify_password(user.password_hash, replacement):
-        raise ValidationError("that is already your password")
+        raise ValidationError("that is already your password", code="profile.same_password")
 
     user.password_hash = passwords.hash_password(replacement)
     ended = sessions.revoke_all_for(session, user.id, except_hash=keep_session_hash)
@@ -229,13 +229,13 @@ def _honour_key_recovery_grant(user: User, grant: str, *, session_hash: str | No
         )
         held = KeyRecoveryGrant(**payload)
     except Exception as exc:  # noqa: BLE001 -- expired, tampered or not a grant: one answer
-        raise ProofRefused(_GRANT_REFUSED) from exc
+        raise ProofRefused(_GRANT_REFUSED, code="profile.recovery_grant_refused") from exc
     if held.user_id != user.id or session_hash is None or held.session != session_hash:
-        raise ProofRefused(_GRANT_REFUSED)
+        raise ProofRefused(_GRANT_REFUSED, code="profile.recovery_grant_refused")
     # Computed now, not when the grant was sealed: the original key may be
     # back, or this grant may already have paid for a re-enrolment.
     if not keycheck.locked_by_key(user):
-        raise ProofRefused(_GRANT_NOT_NEEDED)
+        raise ProofRefused(_GRANT_NOT_NEEDED, code="profile.recovery_grant_not_needed")
 
 
 @dataclass(frozen=True, slots=True)
@@ -284,7 +284,8 @@ def _prove_current_factor(
         proved = matched is not None
     if not proved:
         raise ProofRefused(
-            "that isn't a working code from your current authenticator, or an unused recovery code"
+            "that isn't a working code from your current authenticator, or an unused recovery code",
+            code="profile.current_factor_refused",
         )
     ratelimit.release(engine, held)
 
@@ -325,16 +326,23 @@ def complete_reenrolment(
         )
         pending = Reenrolment(**payload)
     except Exception as exc:  # noqa: BLE001 -- any failure here means "start again"
-        raise ValidationError("that re-enrolment has expired; start again") from exc
+        raise ValidationError(
+            "that re-enrolment has expired; start again", code="profile.reenrolment_expired"
+        ) from exc
 
     if pending.user_id != user.id:
-        raise ValidationError("that re-enrolment belongs to somebody else")
+        raise ValidationError(
+            "that re-enrolment belongs to somebody else", code="profile.reenrolment_not_yours"
+        )
 
     # The new code first: it costs nothing to check, and checking it second
     # would burn the current authenticator's code on a typo in the new one.
     step = totp.code_matches(pending.secret, code)
     if step is None:
-        raise ValidationError("that code is not right. Check the time on your phone and try again.")
+        raise ValidationError(
+            "that code is not right. Check the time on your phone and try again.",
+            code="profile.new_code_wrong",
+        )
 
     if grant is not None:
         _honour_key_recovery_grant(user, grant, session_hash=keep_session_hash)
@@ -396,19 +404,22 @@ def regenerate_recovery_codes(
     if user.totp_secret is None:
         # Nothing to prove the second factor with. Refused before the budget is
         # touched: it is a fact about the account, not a guess.
-        raise ValidationError("set up an authenticator before making new recovery codes")
+        raise ValidationError(
+            "set up an authenticator before making new recovery codes",
+            code="profile.needs_authenticator",
+        )
     auth_service.refuse_a_replaced_key(
         user, signed_in=True, sentence=auth_service.KEY_REPLACED_STEP_UP
     )
 
     held = ratelimit.reserve(engine, email_canonical=user.email_canonical, ip=ip, kind=KIND)
     if not passwords.verify_password(user.password_hash, password):
-        raise ProofRefused(_REGENERATE_REFUSAL)
+        raise ProofRefused(_REGENERATE_REFUSAL, code="profile.regenerate_refused")
     candidate = (code or "").strip().replace(" ", "")
     if not (candidate.isdigit() and len(candidate) == 6):
-        raise ProofRefused(_REGENERATE_REFUSAL)
+        raise ProofRefused(_REGENERATE_REFUSAL, code="profile.regenerate_refused")
     if not totp.verify_and_consume(user, candidate):
-        raise ProofRefused(_REGENERATE_REFUSAL)
+        raise ProofRefused(_REGENERATE_REFUSAL, code="profile.regenerate_refused")
     ratelimit.release(engine, held)
 
     for old in session.scalars(select(RecoveryCode).where(RecoveryCode.user_id == user.id)):

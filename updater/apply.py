@@ -56,7 +56,7 @@ import os
 from dataclasses import replace
 from pathlib import Path
 
-from updater import contract, health, journal, oneoff, pin, prepare, shapes, survey, verify, volume
+from updater import contract, health, hook, journal, oneoff, pin, prepare, shapes, survey, verify, volume
 from updater import engine as eng
 from updater.clock import Deadline
 from updater.handover import goes_first, protocol_window, stays_newer
@@ -75,6 +75,8 @@ KEEP_BACKUPS = 5
 SAVE_DEADLINE_EVERY = 30.0
 
 DRILL_REPORT = "drill.json"
+#: How much of the restore's output is kept for the recovery page.
+RESTORE_LOG_LINES = 40
 
 #: The owner's sentences for each way an apply ends (Part 12).
 NOT_MIGRATED = "nothing was migrated"
@@ -312,30 +314,29 @@ class Apply:
         )
 
     def step2(self) -> None:
-        hook_dir = self.kit.site.hook_dir
-        config = volume.read_own_json(hook_dir / "hook.json") if hook_dir else None
+        """6.5. Skipped, and logged as skipped, unless `/hook/hook.json` exists."""
+        config = hook.configured(self.kit.site.hook_dir)
         if config is None:
-            self.records.say("No pre-update hook is configured; skipped.")
+            self.remember(hook="skipped")
+            self.records.say(hook.SKIPPED)
             return
         self.start("2", "Running the pre-update hook.")
-        timeout = config.get("timeout_seconds", HOOK_DEFAULT_SECONDS)
-        timeout = timeout if isinstance(timeout, int) and 0 < timeout <= 3600 else HOOK_DEFAULT_SECONDS
-        assert hook_dir is not None
-        volume.write_json(
-            hook_dir / f"{self.id}.request",
-            {"id": self.id, "from": self.ctx["from_version"], "to": self.to},
+        assert self.kit.site.hook_dir is not None
+        outcome = hook.run(
+            self.kit.site.hook_dir,
+            config,
+            self.id,
+            str(self.ctx["from_version"]),
+            self.to,
+            clock=self.kit.clock,
+            sleep=self.kit.sleep,
+            poll=self.kit.poll,
         )
-        deadline = Deadline(self.kit.clock, timeout)
-        while True:
-            result = volume.read_own_json(hook_dir / f"{self.id}.result")
-            if result is not None:
-                if result.get("exit") == 0:
-                    self.records.say("The pre-update hook succeeded.")
-                    return
-                raise survey.NotStarted("the pre-update hook failed.")
-            if deadline.expired():
-                raise survey.NotStarted("the pre-update hook did not answer in time.")
-            self.kit.sleep(self.kit.poll)
+        self.remember(hook=outcome.to_dict())
+        if not outcome.ok:
+            self.notes.append(outcome.sentence)
+            raise survey.NotStarted(hook.FAILED)
+        self.records.say(outcome.sentence)
 
     def step2a(self) -> bool:
         """C1. True when the successor took the request over."""
@@ -706,7 +707,9 @@ class Apply:
             ledger_volume=str(self.ctx["ledger_volume"]),
             image_config=(survey.image_of(self.client, prev) or {}).get("Config"),
         )
-        result = self.runner.run(self.name("restore"), body, RESTORE_SECONDS)
+        result = self.runner.run(self.name("restore"), body, RESTORE_SECONDS, stderr=True)
+        # The recovery page shows this tail to the owner (11.3, #163).
+        self.remember(restore_log=result.output.splitlines()[-RESTORE_LOG_LINES:])
         if result.exit_code != 0:
             raise StepFailed(f"the backup could not be restored (exit {result.exit_code})")
         self.remember(restored=True)
@@ -755,24 +758,38 @@ class Apply:
             failed_step=self.ctx.get("failed_step"),
         )
 
-    def needs_recovery(self, why: str) -> str:
-        """4.3: the rollback failed three times. Nothing serves; the code stays valid."""
-        try:
+    def recovery_page(self, stop_app: bool = True) -> None:
+        """The maintenance page in recovery mode (Part 11), for this update.
+
+        `recovery/mode.json` names the update first, so the page knows which
+        one it is for. With `stop_app`, whatever runs under the app's name is
+        stopped first: nothing serves the ledger while recovery is open.
+        """
+        volume.write_json(
+            self.vol.recovery_mode, contract.recovery_mode("recovery", self.id, self.kit.clock.now())
+        )
+        if stop_app:
             current = survey.find(self.client, self.app_name)
             if current is not None and survey.running(current):
                 self.client.stop(current["Id"], grace=STOP_GRACE_SECONDS)
-            prev = self.previous()
-            sidecar = self.sidecar_now(prev) if self.ctx.get("layout") == "sidecar" else None
-            body = shapes.placard(
-                prev,
-                str(self.ctx["old_ref"]),
-                self.id,
-                ledger_volume=str(self.ctx["ledger_volume"]),
-                update_volume=self.kit.site.update_volume,
-                sidecar_id=sidecar.id if sidecar else None,
-                recovery=True,
-            )
-            self.runner.launch(self.name("placard"), body)
+        prev = self.previous()
+        sidecar = self.sidecar_now(prev) if self.ctx.get("layout") == "sidecar" else None
+        body = shapes.placard(
+            prev,
+            str(self.ctx["old_ref"]),
+            self.id,
+            ledger_volume=str(self.ctx["ledger_volume"]),
+            update_volume=self.kit.site.update_volume,
+            sidecar_id=sidecar.id if sidecar else None,
+            recovery=True,
+            image_config=(survey.image_of(self.client, prev) or {}).get("Config"),
+        )
+        self.runner.launch(self.name("placard"), body)
+
+    def needs_recovery(self, why: str) -> str:
+        """4.3: the rollback failed three times. Nothing serves; the code stays valid."""
+        try:
+            self.recovery_page()
         except _STEP_ERRORS as e:
             self.notes.append(f"The recovery page did not start ({e}).")
         return self._finish(
