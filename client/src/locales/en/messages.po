@@ -1,0 +1,1371 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-10-08 00:14+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+
+#: src/screens/Profile.tsx
+msgid "Creating…"
+msgstr "Creating…"
+
+#: src/App.tsx
+msgid "Application management"
+msgstr "Application management"
+
+#: src/screens/Profile.tsx
+msgid "New password"
+msgstr "New password"
+
+#: src/screens/ResetAccount.tsx
+msgid "Your new password is set. Sign in with it and your authenticator as usual."
+msgstr "Your new password is set. Sign in with it and your authenticator as usual."
+
+#: src/screens/Profile.tsx
+msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
+msgstr "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
+
+#: src/screens/Profile.tsx
+msgid "Add this to your authenticator app, then type the six digits it shows."
+msgstr "Add this to your authenticator app, then type the six digits it shows."
+
+#: src/screens/Profile.tsx
+msgid "No browsers were being trusted."
+msgstr "No browsers were being trusted."
+
+#: src/App.tsx
+msgid "History"
+msgstr "History"
+
+#: src/screens/Profile.tsx
+msgid "You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own."
+msgstr "You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own."
+
+#. placeholder {0}: passkey.label
+#: src/screens/Passkeys.tsx
+msgid "Rename {0}"
+msgstr "Rename {0}"
+
+#: src/screens/ResetAccount.tsx
+msgid "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+msgstr "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+
+#: src/screens/Profile.tsx
+msgid "what a key can never do"
+msgstr "what a key can never do"
+
+#: src/screens/Profile.tsx
+msgid "Light"
+msgstr "Light"
+
+#: src/lib/api.ts
+msgid "the server's answer could not be read"
+msgstr "the server's answer could not be read"
+
+#: src/components/SignInNotice.tsx
+#: src/screens/Passkeys.tsx
+msgid "Dismiss"
+msgstr "Dismiss"
+
+#: src/components/StepUp.tsx
+msgid "{why} So this asks for your password and a code — the same as signing in."
+msgstr "{why} So this asks for your password and a code — the same as signing in."
+
+#: src/screens/SignIn.tsx
+msgid "You're signed in. This server's secret key was replaced, so the authenticator you had no longer works here. Scan this with your authenticator app and type the six digits it shows — the recovery code you just used covers this, so it costs no other. Then delete the old entry for this account from your app."
+msgstr "You're signed in. This server's secret key was replaced, so the authenticator you had no longer works here. Scan this with your authenticator app and type the six digits it shows — the recovery code you just used covers this, so it costs no other. Then delete the old entry for this account from your app."
+
+#: src/screens/SignIn.tsx
+msgid "This server's secret key has been replaced. Use one of your recovery codes."
+msgstr "This server's secret key has been replaced. Use one of your recovery codes."
+
+#: src/screens/Passkeys.tsx
+msgid "This browser does not support passkeys yet."
+msgstr "This browser does not support passkeys yet."
+
+#: src/screens/ResetAccount.tsx
+msgid "Reset links work once and they expire. Ask an owner of this instance for a new one."
+msgstr "Reset links work once and they expire. Ask an owner of this instance for a new one."
+
+#: src/screens/Profile.tsx
+msgid "Sign-in methods"
+msgstr "Sign-in methods"
+
+#: src/screens/Profile.tsx
+msgid "This server cannot check a code from the authenticator you have, so one of your recovery codes proves it is you instead; it is spent."
+msgstr "This server cannot check a code from the authenticator you have, so one of your recovery codes proves it is you instead; it is spent."
+
+#: src/screens/Profile.tsx
+msgid "Length does more than symbols do. Four unrelated words you can actually remember beats a short one with punctuation in it."
+msgstr "Length does more than symbols do. Four unrelated words you can actually remember beats a short one with punctuation in it."
+
+#: src/screens/Passkeys.tsx
+msgid "Rename"
+msgstr "Rename"
+
+#: src/screens/SignIn.tsx
+msgid "I have my authenticator after all"
+msgstr "I have my authenticator after all"
+
+#: src/screens/Profile.tsx
+msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
+msgstr "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
+
+#: src/components/ReenrolmentDue.tsx
+msgid "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
+msgstr "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
+
+#: src/screens/ResetAccount.tsx
+msgid "Looking up your reset link…"
+msgstr "Looking up your reset link…"
+
+#: src/screens/Profile.tsx
+msgid "Let it apply an import without anybody reviewing it"
+msgstr "Let it apply an import without anybody reviewing it"
+
+#: src/screens/Setup.tsx
+msgid "2. You"
+msgstr "2. You"
+
+#: src/App.tsx
+msgid "Your household"
+msgstr "Your household"
+
+#: src/screens/Passkeys.tsx
+msgid "Passkeys need this app opened at its HTTPS address, {address}."
+msgstr "Passkeys need this app opened at its HTTPS address, {address}."
+
+#: src/App.tsx
+msgid "New household"
+msgstr "New household"
+
+#: src/screens/Profile.tsx
+msgid "What it may do"
+msgstr "What it may do"
+
+#: src/App.tsx
+msgid "Transactions"
+msgstr "Transactions"
+
+#. placeholder {0}: formatInstant(key.expires_at)
+#: src/screens/Profile.tsx
+msgid "Expired {0}"
+msgstr "Expired {0}"
+
+#: src/screens/ResetAccount.tsx
+#: src/screens/SignIn.tsx
+msgid "Check the code and finish"
+msgstr "Check the code and finish"
+
+#: src/lib/signInChanges.ts
+msgid "Somebody gave {user} a new authenticator"
+msgstr "Somebody gave {user} a new authenticator"
+
+#: src/App.tsx
+#: src/screens/ResetAccount.tsx
+#: src/screens/SignIn.tsx
+msgid "Sign in"
+msgstr "Sign in"
+
+#: src/lib/signInChanges.ts
+msgid "{by} added {user} as an owner"
+msgstr "{by} added {user} as an owner"
+
+#: src/screens/Profile.tsx
+msgid "Or open <0>the enrolment link</0> on the device with the app."
+msgstr "Or open <0>the enrolment link</0> on the device with the app."
+
+#: src/App.tsx
+msgid "You're already signed in"
+msgstr "You're already signed in"
+
+#: src/components/ReenrolmentDue.tsx
+msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
+msgstr "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
+
+#: src/lib/signInChanges.ts
+msgid "Somebody reset {user}'s password and authenticator"
+msgstr "Somebody reset {user}'s password and authenticator"
+
+#: src/lib/signInChanges.ts
+msgid "password and authenticator"
+msgstr "password and authenticator"
+
+#: src/screens/Profile.tsx
+msgid "{keys, plural, one {{keys} agent key still works — revoke it below if it should stop.} other {{keys} agent keys still work — revoke them below if they should stop.}}"
+msgstr "{keys, plural, one {{keys} agent key still works — revoke it below if it should stop.} other {{keys} agent keys still work — revoke them below if they should stop.}}"
+
+#: src/App.tsx
+#: src/screens/Passkeys.tsx
+msgid "Name"
+msgstr "Name"
+
+#: src/screens/Profile.tsx
+msgid "Authenticator"
+msgstr "Authenticator"
+
+#: src/screens/Profile.tsx
+msgid "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
+msgstr "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
+
+#: src/screens/Passkeys.tsx
+msgid "Actions"
+msgstr "Actions"
+
+#: src/screens/Profile.tsx
+msgid "Password changed."
+msgstr "Password changed."
+
+#: src/screens/Passkeys.tsx
+msgid "Kept"
+msgstr "Kept"
+
+#: src/screens/Profile.tsx
+msgid "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
+msgstr "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
+
+#: src/screens/AcceptInvite.tsx
+#: src/screens/ResetAccount.tsx
+#: src/screens/Setup.tsx
+#: src/screens/SignIn.tsx
+msgid "The six digits"
+msgstr "The six digits"
+
+#: src/screens/Profile.tsx
+msgid "The recovery code you signed in with in this tab covers it — no other code is needed."
+msgstr "The recovery code you signed in with in this tab covers it — no other code is needed."
+
+#: src/screens/AcceptInvite.tsx
+#: src/screens/Profile.tsx
+#: src/screens/ResetAccount.tsx
+#: src/screens/Setup.tsx
+#: src/screens/SignIn.tsx
+msgid "Password"
+msgstr "Password"
+
+#: src/screens/Passkeys.tsx
+msgid "Waiting for the passkey…"
+msgstr "Waiting for the passkey…"
+
+#: src/lib/signInChanges.ts
+msgid "Somebody reset {user}'s authenticator"
+msgstr "Somebody reset {user}'s authenticator"
+
+#: src/screens/AcceptInvite.tsx
+msgid "Invitations are single-use and they expire. Ask whoever sent it for a fresh one."
+msgstr "Invitations are single-use and they expire. Ask whoever sent it for a fresh one."
+
+#: src/components/StepUp.tsx
+#: src/screens/Profile.tsx
+msgid "Your password"
+msgstr "Your password"
+
+#: src/screens/Profile.tsx
+msgid "Making…"
+msgstr "Making…"
+
+#: src/components/bits.tsx
+msgid "Sort by {label}"
+msgstr "Sort by {label}"
+
+#: src/App.tsx
+msgid "Show the menu"
+msgstr "Show the menu"
+
+#: src/screens/Profile.tsx
+msgid "Appearance"
+msgstr "Appearance"
+
+#: src/screens/Profile.tsx
+msgid "None yet"
+msgstr "None yet"
+
+#: src/screens/Profile.tsx
+msgid "never used"
+msgstr "never used"
+
+#: src/screens/AcceptInvite.tsx
+#: src/screens/Setup.tsx
+msgid "Check the code"
+msgstr "Check the code"
+
+#: src/App.tsx
+msgid "Hide the menu"
+msgstr "Hide the menu"
+
+#. placeholder {0}: passkey.label
+#: src/screens/Passkeys.tsx
+msgid "New name for {0}"
+msgstr "New name for {0}"
+
+#: src/screens/Profile.tsx
+msgid "Changing it signs out every other browser and forgets every trusted one, so if you are changing it because somebody else knows it, they are out too. Agent keys are separate credentials and keep working until you revoke them."
+msgstr "Changing it signs out every other browser and forgets every trusted one, so if you are changing it because somebody else knows it, they are out too. Agent keys are separate credentials and keep working until you revoke them."
+
+#: src/lib/signInChanges.ts
+msgid "{by} reset {user}'s password and authenticator"
+msgstr "{by} reset {user}'s password and authenticator"
+
+#: src/screens/Passkeys.tsx
+msgid "Add a second on another device. If you lose this one, you will need your password and code."
+msgstr "Add a second on another device. If you lose this one, you will need your password and code."
+
+#: src/screens/ResetAccount.tsx
+msgid "Your new recovery codes"
+msgstr "Your new recovery codes"
+
+#. placeholder {0}: offer.secret
+#. placeholder {0}: owed.offer.secret
+#. placeholder {0}: started.secret
+#: src/screens/AcceptInvite.tsx
+#: src/screens/ResetAccount.tsx
+#: src/screens/Setup.tsx
+#: src/screens/SignIn.tsx
+msgid "Can't scan? Enter this key by hand: <0>{0}</0>"
+msgstr "Can't scan? Enter this key by hand: <0>{0}</0>"
+
+#: src/lib/signInChanges.ts
+msgid "The server added {user} as an owner"
+msgstr "The server added {user} as an owner"
+
+#: src/App.tsx
+msgid "Accounts"
+msgstr "Accounts"
+
+#: src/screens/Profile.tsx
+msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
+msgstr "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
+
+#: src/screens/SignIn.tsx
+msgid "or"
+msgstr "or"
+
+#: src/screens/Profile.tsx
+msgid "receipt filer"
+msgstr "receipt filer"
+
+#: src/screens/Profile.tsx
+msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
+msgstr "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
+
+#: src/screens/Profile.tsx
+msgid "Held in dark, whatever this device is set to."
+msgstr "Held in dark, whatever this device is set to."
+
+#: src/screens/AcceptInvite.tsx
+#: src/screens/ResetAccount.tsx
+msgid "That link doesn't work"
+msgstr "That link doesn't work"
+
+#: src/App.tsx
+msgid "Payee Merge"
+msgstr "Payee Merge"
+
+#: src/App.tsx
+msgid "Main currency"
+msgstr "Main currency"
+
+#: src/screens/ResetAccount.tsx
+msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
+msgstr "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
+
+#: src/App.tsx
+msgid "Close the menu"
+msgstr "Close the menu"
+
+#. placeholder {0}: removing.label
+#: src/screens/Passkeys.tsx
+msgid "Remove <0>{0}</0>? It stops working at once."
+msgstr "Remove <0>{0}</0>? It stops working at once."
+
+#: src/screens/Profile.tsx
+msgid "System"
+msgstr "System"
+
+#: src/App.tsx
+#: src/screens/Profile.tsx
+msgid "Set up"
+msgstr "Set up"
+
+#: src/screens/SignIn.tsx
+msgid "You're back in"
+msgstr "You're back in"
+
+#: src/screens/Profile.tsx
+msgid "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
+msgstr "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
+
+#: src/screens/Passkeys.tsx
+#: src/screens/Profile.tsx
+msgid "Cancel"
+msgstr "Cancel"
+
+#: src/screens/Profile.tsx
+#: src/screens/ResetAccount.tsx
+msgid "Done"
+msgstr "Done"
+
+#: src/screens/Profile.tsx
+msgid "Those two don't match."
+msgstr "Those two don't match."
+
+#: src/screens/AcceptInvite.tsx
+#: src/screens/Setup.tsx
+msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in."
+msgstr "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in."
+
+#: src/App.tsx
+msgid "Open the menu"
+msgstr "Open the menu"
+
+#: src/lib/signInChanges.ts
+msgid "Reset: password and authenticator"
+msgstr "Reset: password and authenticator"
+
+#: src/screens/Passkeys.tsx
+msgid "The passkey prompt was closed, so nothing was added."
+msgstr "The passkey prompt was closed, so nothing was added."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.currency.not_iso_4217"
+msgstr "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.decimals_in_whole_currency"
+msgstr "{value} has decimals, and {currency} has none"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.not_an_amount"
+msgstr "{value} is not an amount this can read. Write it with a point before the decimals and no thousands separators, like 1234.56 or -80"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.too_large"
+msgstr "{value} is too large to record as money"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.too_many_decimals"
+msgstr "{value} has more decimals than {currency} has ({places})"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.too_many_digits"
+msgstr "An amount {digits} digits long is too large to record as money"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.receipt.no_such_copy"
+msgstr "That receipt has no copy of that kind"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reconcile.does_not_balance"
+msgstr "That does not balance: {difference} out. Tick or untick rows until the difference is zero, or add the transaction the statement has and the register does not."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reconcile.row_after_statement"
+msgstr "A row dated {row_date} is after the statement closes on {statement_date}, so it cannot be on it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.does_not_add_up"
+msgstr "The parts come to {total} and the transaction is {amount}. A split has to add up, or it moves the balance."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.needs_amount_arriving"
+msgstr "A {from_currency} to {to_currency} transfer needs the amount that arrives; we never invent a rate"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.same_account"
+msgstr "An account cannot transfer to itself"
+
+#: src/screens/Profile.tsx
+msgid "a household"
+msgstr "a household"
+
+#: src/screens/SignIn.tsx
+msgid "Code"
+msgstr "Code"
+
+#: src/screens/Profile.tsx
+msgid "what makes a good one"
+msgstr "what makes a good one"
+
+#: src/App.tsx
+msgid "Sign out"
+msgstr "Sign out"
+
+#: src/screens/Passkeys.tsx
+msgid "A passkey is a way in that keeps working after this browser is closed."
+msgstr "A passkey is a way in that keeps working after this browser is closed."
+
+#: src/App.tsx
+msgid "Register"
+msgstr "Register"
+
+#: src/screens/Profile.tsx
+msgid "This server's secret key was replaced, so the authenticator you have no longer works here, and nothing that asks for a code from it can be done until you set up a new one."
+msgstr "This server's secret key was replaced, so the authenticator you have no longer works here, and nothing that asks for a code from it can be done until you set up a new one."
+
+#: src/App.tsx
+msgid "A household holds the accounts and the register. The currency here is only used for totals; each account keeps its own."
+msgstr "A household holds the accounts and the register. The currency here is only used for totals; each account keeps its own."
+
+#: src/App.tsx
+msgid "Transfers"
+msgstr "Transfers"
+
+#: src/screens/Profile.tsx
+msgid "Cleared"
+msgstr "Cleared"
+
+#: src/screens/ResetAccount.tsx
+msgid "A new password"
+msgstr "A new password"
+
+#: src/screens/AcceptInvite.tsx
+msgid "Filled in from the invitation. Change it if you would rather use another address."
+msgstr "Filled in from the invitation. Change it if you would rather use another address."
+
+#: src/screens/Profile.tsx
+msgid "Which household"
+msgstr "Which household"
+
+#: src/screens/Profile.tsx
+msgid "Your account"
+msgstr "Your account"
+
+#: src/screens/SignIn.tsx
+msgid "I've lost my authenticator — use a recovery code"
+msgstr "I've lost my authenticator — use a recovery code"
+
+#: src/screens/Profile.tsx
+msgid "Change password"
+msgstr "Change password"
+
+#: src/screens/Profile.tsx
+msgid "Normally a program stages an import and you review it before anything lands in the register. This skips that."
+msgstr "Normally a program stages an import and you review it before anything lands in the register. This skips that."
+
+#: src/screens/Profile.tsx
+msgid "The password alone cannot replace your second factor — otherwise it would not be a second factor."
+msgstr "The password alone cannot replace your second factor — otherwise it would not be a second factor."
+
+#: src/screens/AcceptInvite.tsx
+msgid "{inviter} invited you to {PRODUCT} as an owner."
+msgstr "{inviter} invited you to {PRODUCT} as an owner."
+
+#: src/components/SignInNotice.tsx
+msgid "Recent sign-in changes"
+msgstr "Recent sign-in changes"
+
+#: src/screens/Profile.tsx
+msgid "Revoke"
+msgstr "Revoke"
+
+#: src/screens/SignIn.tsx
+msgid "Don't ask on this browser for 30 days"
+msgstr "Don't ask on this browser for 30 days"
+
+#: src/screens/AcceptInvite.tsx
+msgid "Looking up your invitation…"
+msgstr "Looking up your invitation…"
+
+#: src/screens/ResetAccount.tsx
+msgid "Reset your sign-in"
+msgstr "Reset your sign-in"
+
+#: src/screens/Setup.tsx
+msgid "Set up {PRODUCT}"
+msgstr "Set up {PRODUCT}"
+
+#: src/screens/Profile.tsx
+msgid "Close: {name}"
+msgstr "Close: {name}"
+
+#: src/lib/signInChanges.ts
+msgid "Added as an owner"
+msgstr "Added as an owner"
+
+#: src/lib/signInChanges.ts
+msgid "The server reset {user}'s authenticator"
+msgstr "The server reset {user}'s authenticator"
+
+#: src/screens/Passkeys.tsx
+msgid "Added"
+msgstr "Added"
+
+#: src/screens/Profile.tsx
+msgid "Confirm and replace"
+msgstr "Confirm and replace"
+
+#: src/screens/AcceptInvite.tsx
+msgid "{inviter} invited you to {PRODUCT} as an owner, in {households}."
+msgstr "{inviter} invited you to {PRODUCT} as an owner, in {households}."
+
+#: src/screens/Passkeys.tsx
+msgid "Passkeys are not set up on this server."
+msgstr "Passkeys are not set up on this server."
+
+#: src/screens/Profile.tsx
+msgid "New codes made. Every earlier code, used or not, has stopped working."
+msgstr "New codes made. Every earlier code, used or not, has stopped working."
+
+#: src/screens/AcceptInvite.tsx
+msgid "You've been invited"
+msgstr "You've been invited"
+
+#: src/components/RecoveryCodes.tsx
+msgid "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
+msgstr "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
+
+#: src/screens/Profile.tsx
+msgid "Your new authenticator is the only one that works now."
+msgstr "Your new authenticator is the only one that works now."
+
+#: src/App.tsx
+msgid "Create it"
+msgstr "Create it"
+
+#: src/screens/Profile.tsx
+msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
+msgstr "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
+
+#: src/screens/ResetAccount.tsx
+#: src/screens/SignIn.tsx
+msgid "Show a code to scan"
+msgstr "Show a code to scan"
+
+#: src/screens/Passkeys.tsx
+msgid "Passkeys need this app opened at its HTTPS address."
+msgstr "Passkeys need this app opened at its HTTPS address."
+
+#: src/lib/signInChanges.ts
+msgid "Reset: password"
+msgstr "Reset: password"
+
+#: src/screens/ResetAccount.tsx
+msgid "{by} reset your password and your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
+msgstr "{by} reset your password and your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
+
+#: src/screens/Passkeys.tsx
+msgid "Last used"
+msgstr "Last used"
+
+#. placeholder {0}: user.display_name
+#: src/App.tsx
+msgid "This browser is signed in as {0}. An invitation makes a new account, so sign out first if the link is meant for somebody else."
+msgstr "This browser is signed in as {0}. An invitation makes a new account, so sign out first if the link is meant for somebody else."
+
+#: src/screens/AcceptInvite.tsx
+msgid "Finish"
+msgstr "Finish"
+
+#: src/screens/Profile.tsx
+msgid "Not available here"
+msgstr "Not available here"
+
+#: src/screens/SignIn.tsx
+msgid "Recovery code"
+msgstr "Recovery code"
+
+#: src/screens/SignIn.tsx
+msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
+msgstr "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
+
+#: src/App.tsx
+msgid "{waiting} waiting"
+msgstr "{waiting} waiting"
+
+#: src/lib/signInChanges.ts
+msgid "The server reset {user}'s password"
+msgstr "The server reset {user}'s password"
+
+#: src/App.tsx
+msgid "Try again"
+msgstr "Try again"
+
+#: src/App.tsx
+msgid "Invitation"
+msgstr "Invitation"
+
+#: src/lib/signInChanges.ts
+msgid "{user} set up this instance as its owner"
+msgstr "{user} set up this instance as its owner"
+
+#: src/App.tsx
+msgid "How import works"
+msgstr "How import works"
+
+#: src/screens/SignIn.tsx
+msgid "Until you do, every sign-in will ask for another recovery code. To do it later, open your account — your name in the menu — and set up a new authenticator there. In this tab, while you stay signed in and for up to a day, the code you just used still covers it; after that, or anywhere else, it takes one more recovery code."
+msgstr "Until you do, every sign-in will ask for another recovery code. To do it later, open your account — your name in the menu — and set up a new authenticator there. In this tab, while you stay signed in and for up to a day, the code you just used still covers it; after that, or anywhere else, it takes one more recovery code."
+
+#: src/components/ReenrolmentDue.tsx
+msgid "Setting it up takes one of your recovery codes."
+msgstr "Setting it up takes one of your recovery codes."
+
+#: src/screens/Passkeys.tsx
+msgid "Continue to the passkey"
+msgstr "Continue to the passkey"
+
+#: src/lib/signInChanges.ts
+msgid "The server made {user} an owner"
+msgstr "The server made {user} an owner"
+
+#: src/App.tsx
+msgid "Import"
+msgstr "Import"
+
+#: src/screens/Setup.tsx
+msgid "Finish setup"
+msgstr "Finish setup"
+
+#: src/components/RecoveryCodes.tsx
+#: src/screens/ResetAccount.tsx
+msgid "I have stored these somewhere that is not this browser"
+msgstr "I have stored these somewhere that is not this browser"
+
+#: src/screens/ResetAccount.tsx
+msgid "Each one works once, and they are shown only now. Your old ones no longer work. They are how you get back in if you lose your phone but still know your password."
+msgstr "Each one works once, and they are shown only now. Your old ones no longer work. They are how you get back in if you lose your phone but still know your password."
+
+#: src/screens/Profile.tsx
+msgid "You sign in with a passkey, or with your password and authenticator code."
+msgstr "You sign in with a passkey, or with your password and authenticator code."
+
+#. placeholder {0}: user.display_name
+#. placeholder {1}: user.email
+#: src/screens/Profile.tsx
+msgid "Signed in as <0>{0}</0> ({1})."
+msgstr "Signed in as <0>{0}</0> ({1})."
+
+#: src/screens/ResetAccount.tsx
+#: src/screens/SignIn.tsx
+msgid "A new authenticator"
+msgstr "A new authenticator"
+
+#: src/screens/AcceptInvite.tsx
+msgid "1. You"
+msgstr "1. You"
+
+#: src/screens/Profile.tsx
+msgid "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
+msgstr "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
+
+#: src/screens/Passkeys.tsx
+msgid "You will still be able to sign in with your password and code."
+msgstr "You will still be able to sign in with your password and code."
+
+#: src/screens/Profile.tsx
+msgid "read"
+msgstr "read"
+
+#: src/App.tsx
+msgid "Only you right now"
+msgstr "Only you right now"
+
+#: src/lib/signInChanges.ts
+msgid "Re-enabled"
+msgstr "Re-enabled"
+
+#: src/screens/SignIn.tsx
+msgid "One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key."
+msgstr "One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key."
+
+#: src/components/bits.tsx
+msgid "{wait, plural, other {Try again in {wait} seconds.}}"
+msgstr "{wait, plural, other {Try again in {wait} seconds.}}"
+
+#: src/lib/signInChanges.ts
+msgid "The server reset {user}'s password and authenticator"
+msgstr "The server reset {user}'s password and authenticator"
+
+#: src/screens/Profile.tsx
+msgid "The six digits from the new one"
+msgstr "The six digits from the new one"
+
+#: src/lib/signInChanges.ts
+msgid "New authenticator"
+msgstr "New authenticator"
+
+#: src/components/StepUp.tsx
+msgid "Your account is under your name in the menu."
+msgstr "Your account is under your name in the menu."
+
+#: src/lib/signInChanges.ts
+msgid "The server gave {user} a new authenticator"
+msgstr "The server gave {user} a new authenticator"
+
+#: src/lib/signInChanges.ts
+msgid "Somebody reset {user}'s password"
+msgstr "Somebody reset {user}'s password"
+
+#: src/screens/Passkeys.tsx
+msgid "Synced"
+msgstr "Synced"
+
+#: src/screens/Profile.tsx
+msgid "Set"
+msgstr "Set"
+
+#: src/screens/Profile.tsx
+msgid "The recovery code you signed in with covers this, so no other code is asked for."
+msgstr "The recovery code you signed in with covers this, so no other code is asked for."
+
+#: src/screens/ResetAccount.tsx
+msgid "If you did not expect this, tell an owner of this instance before you go on."
+msgstr "If you did not expect this, tell an owner of this instance before you go on."
+
+#: src/App.tsx
+msgid "Categories"
+msgstr "Categories"
+
+#: src/screens/SignIn.tsx
+msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked 1 agent key. A program that was using it will be refused from now on; issue a new key on your profile if it should keep working."
+msgstr "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked 1 agent key. A program that was using it will be refused from now on; issue a new key on your profile if it should keep working."
+
+#: src/screens/Profile.tsx
+msgid "about appearance"
+msgstr "about appearance"
+
+#: src/lib/signInChanges.ts
+msgid "The server re-enabled {user}"
+msgstr "The server re-enabled {user}"
+
+#: src/screens/Setup.tsx
+msgid "In Docker:"
+msgstr "In Docker:"
+
+#: src/screens/Profile.tsx
+msgid "Change"
+msgstr "Change"
+
+#. placeholder {0}: recovered.passkeys
+#: src/screens/SignIn.tsx
+msgid "You still have {0} passkeys, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
+msgstr "You still have {0} passkeys, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
+
+#: src/lib/signInChanges.ts
+msgid "Reset: authenticator"
+msgstr "Reset: authenticator"
+
+#: src/screens/AcceptInvite.tsx
+#: src/screens/Setup.tsx
+#: src/screens/SignIn.tsx
+msgid "Email"
+msgstr "Email"
+
+#: src/lib/signInChanges.ts
+msgid "somebody"
+msgstr "somebody"
+
+#: src/screens/Passkeys.tsx
+msgid "It could not be used here anyway."
+msgstr "It could not be used here anyway."
+
+#: src/screens/Profile.tsx
+msgid "Make new codes"
+msgstr "Make new codes"
+
+#: src/screens/Passkeys.tsx
+msgid "Add a passkey"
+msgstr "Add a passkey"
+
+#: src/screens/Profile.tsx
+msgid "One household per key. Two households means two keys."
+msgstr "One household per key. Two households means two keys."
+
+#: src/App.tsx
+msgid "Reset"
+msgstr "Reset"
+
+#: src/screens/Profile.tsx
+msgid "Following this device, which is dark right now."
+msgstr "Following this device, which is dark right now."
+
+#: src/screens/Setup.tsx
+msgid "4. Recovery codes"
+msgstr "4. Recovery codes"
+
+#: src/lib/signInChanges.ts
+msgid "password"
+msgstr "password"
+
+#: src/App.tsx
+msgid "Snap a Receipt"
+msgstr "Snap a Receipt"
+
+#. placeholder {0}: formatInstant(key.expires_at)
+#: src/screens/Profile.tsx
+msgid "Expires {0}"
+msgstr "Expires {0}"
+
+#: src/screens/Profile.tsx
+msgid "A recovery code cannot be used here. If somebody else has seen your codes, one of them must not be enough to make the next set."
+msgstr "A recovery code cannot be used here. If somebody else has seen your codes, one of them must not be enough to make the next set."
+
+#: src/screens/ResetAccount.tsx
+msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+msgstr "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+
+#. placeholder {0}: passkey.rp_id
+#: src/screens/Passkeys.tsx
+msgid "Made for {0}, cannot be used here."
+msgstr "Made for {0}, cannot be used here."
+
+#: src/screens/SignIn.tsx
+msgid "Not now"
+msgstr "Not now"
+
+#: src/screens/Passkeys.tsx
+msgid "This device only"
+msgstr "This device only"
+
+#: src/components/SignInNotice.tsx
+msgid "See them in Admin"
+msgstr "See them in Admin"
+
+#: src/components/bits.tsx
+msgid "Hide help: {label}"
+msgstr "Hide help: {label}"
+
+#: src/screens/Profile.tsx
+msgid "Current password"
+msgstr "Current password"
+
+#: src/screens/ResetAccount.tsx
+msgid "Set the password"
+msgstr "Set the password"
+
+#: src/App.tsx
+msgid "Sign out and accept the invitation"
+msgstr "Sign out and accept the invitation"
+
+#: src/screens/Passkeys.tsx
+msgid "You signed in with a recovery code, and your passkeys still work. If one of them was on the device you lost, remove it here."
+msgstr "You signed in with a recovery code, and your passkeys still work. If one of them was on the device you lost, remove it here."
+
+#: src/screens/Profile.tsx
+msgid "Dark"
+msgstr "Dark"
+
+#: src/App.tsx
+msgid "Ignore it and carry on"
+msgstr "Ignore it and carry on"
+
+#: src/App.tsx
+msgid "Loading…"
+msgstr "Loading…"
+
+#: src/components/ReenrolmentDue.tsx
+#: src/screens/Profile.tsx
+msgid "Set up a new authenticator"
+msgstr "Set up a new authenticator"
+
+#. placeholder {0}: response.status
+#: src/lib/api.ts
+msgid "the server answered {0}"
+msgstr "the server answered {0}"
+
+#: src/components/StepUp.tsx
+#: src/screens/Profile.tsx
+msgid "The six digits from your authenticator"
+msgstr "The six digits from your authenticator"
+
+#: src/screens/AcceptInvite.tsx
+#: src/screens/Setup.tsx
+msgid "Your name"
+msgstr "Your name"
+
+#: src/lib/signInChanges.ts
+msgid "{by} reset {user}'s authenticator"
+msgstr "{by} reset {user}'s authenticator"
+
+#: src/screens/ResetAccount.tsx
+msgid "Your password and your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
+msgstr "Your password and your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
+
+#: src/screens/Passkeys.tsx
+msgid "{others, plural, one {You will still be able to sign in with your other passkey, or with your password and code.} other {You will still be able to sign in with your other {others} passkeys, or with your password and code.}}"
+msgstr "{others, plural, one {You will still be able to sign in with your other passkey, or with your password and code.} other {You will still be able to sign in with your other {others} passkeys, or with your password and code.}}"
+
+#: src/screens/AcceptInvite.tsx
+msgid "3. Recovery codes"
+msgstr "3. Recovery codes"
+
+#: src/screens/Profile.tsx
+msgid "One of your recovery codes"
+msgstr "One of your recovery codes"
+
+#: src/screens/Passkeys.tsx
+msgid "Never"
+msgstr "Never"
+
+#: src/screens/Profile.tsx
+msgid "{usable, plural, one {{usable} passkey} other {{usable} passkeys}}"
+msgstr "{usable, plural, one {{usable} passkey} other {{usable} passkeys}}"
+
+#: src/lib/signInChanges.ts
+msgid "{by} gave {user} a new authenticator"
+msgstr "{by} gave {user} a new authenticator"
+
+#: src/screens/SignIn.tsx
+msgid "A recovery code"
+msgstr "A recovery code"
+
+#: src/screens/ResetAccount.tsx
+msgid "{by} reset your password for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+msgstr "{by} reset your password for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+
+#: src/screens/AcceptInvite.tsx
+msgid "2. Your authenticator"
+msgstr "2. Your authenticator"
+
+#: src/App.tsx
+msgid "Payee Naming Rules"
+msgstr "Payee Naming Rules"
+
+#: src/lib/signInChanges.ts
+msgid "{by} made {user} an owner"
+msgstr "{by} made {user} an owner"
+
+#: src/screens/Profile.tsx
+msgid "<0>Copy this now.</0> It is the only time it is shown — only a fingerprint of it is stored, so there is nothing to show again."
+msgstr "<0>Copy this now.</0> It is the only time it is shown — only a fingerprint of it is stored, so there is nothing to show again."
+
+#: src/lib/signInChanges.ts
+msgid "Made an owner"
+msgstr "Made an owner"
+
+#: src/screens/ResetAccount.tsx
+msgid "Show a new code to scan"
+msgstr "Show a new code to scan"
+
+#: src/screens/Profile.tsx
+msgid "Replacing it also un-trusts every browser, including this one, and signs out every other browser — they were let in on the strength of the old authenticator, and that is exactly what you are replacing."
+msgstr "Replacing it also un-trusts every browser, including this one, and signs out every other browser — they were let in on the strength of the old authenticator, and that is exactly what you are replacing."
+
+#: src/components/ReenrolmentDue.tsx
+#: src/screens/SignIn.tsx
+msgid "Your authenticator"
+msgstr "Your authenticator"
+
+#: src/components/SignInNotice.tsx
+msgid "Sign-in changes in the last 14 days, by somebody other than you:"
+msgstr "Sign-in changes in the last 14 days, by somebody other than you:"
+
+#: src/screens/Passkeys.tsx
+msgid "Keep it"
+msgstr "Keep it"
+
+#: src/screens/Profile.tsx
+msgid "You have not given a key to anything."
+msgstr "You have not given a key to anything."
+
+#: src/screens/Profile.tsx
+msgid "write"
+msgstr "write"
+
+#: src/screens/Profile.tsx
+msgid "{action}: {name}"
+msgstr "{action}: {name}"
+
+#: src/screens/Profile.tsx
+msgid "Held in light, whatever this device is set to."
+msgstr "Held in light, whatever this device is set to."
+
+#: src/lib/signInChanges.ts
+msgid "{by} reset {user}'s password"
+msgstr "{by} reset {user}'s password"
+
+#. placeholder {0}: recovered.keys
+#: src/screens/SignIn.tsx
+msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
+msgstr "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
+
+#: src/screens/Profile.tsx
+msgid "Needs setting up again"
+msgstr "Needs setting up again"
+
+#: src/screens/SignIn.tsx
+msgid "This browser hasn't been used here recently, so we need the six digits."
+msgstr "This browser hasn't been used here recently, so we need the six digits."
+
+#: src/screens/Profile.tsx
+msgid "why this is asked"
+msgstr "why this is asked"
+
+#. placeholder {0}: names.length
+#: src/App.tsx
+msgid "{0, plural, one {{who} is here too} other {{who} are here too}}"
+msgstr "{0, plural, one {{who} is here too} other {{who} are here too}}"
+
+#: src/screens/Passkeys.tsx
+msgid "Remove"
+msgstr "Remove"
+
+#: src/App.tsx
+msgid "Payee"
+msgstr "Payee"
+
+#: src/screens/Profile.tsx
+msgid "No other browsers were signed in."
+msgstr "No other browsers were signed in."
+
+#: src/screens/Profile.tsx
+msgid "What is it for"
+msgstr "What is it for"
+
+#: src/screens/Profile.tsx
+msgid "Nothing has changed yet — your current authenticator keeps working until a code proves the new one pairs."
+msgstr "Nothing has changed yet — your current authenticator keeps working until a code proves the new one pairs."
+
+#: src/App.tsx
+msgid "Reports"
+msgstr "Reports"
+
+#: src/screens/Profile.tsx
+msgid "Let it add and change transactions, not only read them"
+msgstr "Let it add and change transactions, not only read them"
+
+#: src/screens/Passkeys.tsx
+msgid "Save"
+msgstr "Save"
+
+#: src/App.tsx
+msgid "Couldn't load your households"
+msgstr "Couldn't load your households"
+
+#: src/components/bits.tsx
+msgid "What's this? {label}"
+msgstr "What's this? {label}"
+
+#: src/App.tsx
+msgid "Payee Categorisation"
+msgstr "Payee Categorisation"
+
+#: src/screens/AcceptInvite.tsx
+#: src/screens/ResetAccount.tsx
+#: src/screens/Setup.tsx
+msgid "At least 12 characters. Length is what matters."
+msgstr "At least 12 characters. Length is what matters."
+
+#: src/components/bits.tsx
+msgid "Settings"
+msgstr "Settings"
+
+#: src/App.tsx
+msgid "Admin"
+msgstr "Admin"
+
+#: src/screens/Profile.tsx
+msgid "New password again"
+msgstr "New password again"
+
+#: src/screens/Profile.tsx
+msgid "why not a recovery code"
+msgstr "why not a recovery code"
+
+#: src/screens/Passkeys.tsx
+msgid "this device"
+msgstr "this device"
+
+#: src/screens/Profile.tsx
+msgid "Keys for programs"
+msgstr "Keys for programs"
+
+#. placeholder {0}: recovery.data.unused
+#: src/screens/Profile.tsx
+msgid "{0} of 10 left"
+msgstr "{0} of 10 left"
+
+#: src/lib/signInChanges.ts
+msgid "Somebody re-enabled {user}"
+msgstr "Somebody re-enabled {user}"
+
+#: src/screens/Profile.tsx
+msgid "Passkeys"
+msgstr "Passkeys"
+
+#. placeholder {0}: owed.length - SHOWN
+#: src/components/SignInNotice.tsx
+msgid "and {0} more."
+msgstr "and {0} more."
+
+#: src/screens/Profile.tsx
+msgid "What is holding it (optional)"
+msgstr "What is holding it (optional)"
+
+#: src/screens/Profile.tsx
+msgid "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
+msgstr "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
+
+#. placeholder {0}: tokenPath ?? t`the data directory`
+#: src/screens/Setup.tsx
+msgid "It was printed to the server log when this instance started, and written to <0>{0}</0>. It changes every time the server restarts until setup is finished."
+msgstr "It was printed to the server log when this instance started, and written to <0>{0}</0>. It changes every time the server restarts until setup is finished."
+
+#: src/screens/Setup.tsx
+msgid "3. Your authenticator"
+msgstr "3. Your authenticator"
+
+#: src/screens/Setup.tsx
+msgid "1. The setup token"
+msgstr "1. The setup token"
+
+#: src/components/LanguagePicker.tsx
+msgid "Language"
+msgstr "Language"
+
+#: src/screens/AcceptInvite.tsx
+msgid "{inviter} invited you to {PRODUCT} as a member."
+msgstr "{inviter} invited you to {PRODUCT} as a member."
+
+#: src/screens/Setup.tsx
+msgid "the data directory"
+msgstr "the data directory"
+
+#. placeholder {0}: passkey.label
+#. placeholder {0}: removing.label
+#: src/screens/Passkeys.tsx
+msgid "Remove {0}"
+msgstr "Remove {0}"
+
+#: src/screens/Profile.tsx
+msgid "Create the key"
+msgstr "Create the key"
+
+#: src/screens/SignIn.tsx
+msgid "Sign in with a passkey"
+msgstr "Sign in with a passkey"
+
+#: src/lib/signInChanges.ts
+msgid "authenticator"
+msgstr "authenticator"
+
+#: src/screens/Profile.tsx
+msgid "may apply imports"
+msgstr "may apply imports"
+
+#: src/components/RecoveryModeBanner.tsx
+msgid "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
+msgstr "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
+
+#: src/lib/signInChanges.ts
+msgid "Somebody added {user} as an owner"
+msgstr "Somebody added {user} as an owner"
+
+#: src/screens/Profile.tsx
+msgid "Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the server, and clearing this browser's site data forgets it -- which returns you to following the system."
+msgstr "Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the server, and clearing this browser's site data forgets it -- which returns you to following the system."
+
+#: src/screens/Profile.tsx
+msgid "Recovery codes"
+msgstr "Recovery codes"
+
+#: src/screens/Profile.tsx
+msgid "Set up again"
+msgstr "Set up again"
+
+#: src/components/RecoveryModeBanner.tsx
+msgid "<0>secret.key</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Putting the original key back ends this for everyone who has not re-enrolled yet."
+msgstr "<0>secret.key</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Putting the original key back ends this for everyone who has not re-enrolled yet."
+
+#: src/screens/Profile.tsx
+msgid "You sign in with your password and authenticator code."
+msgstr "You sign in with your password and authenticator code."
+
+#: src/screens/AcceptInvite.tsx
+#: src/screens/Setup.tsx
+#: src/screens/SignIn.tsx
+msgid "Continue"
+msgstr "Continue"
+
+#: src/lib/signInChanges.ts
+msgid "from the server"
+msgstr "from the server"
+
+#: src/screens/AcceptInvite.tsx
+msgid "An owner can administer this instance: people, households and invitations."
+msgstr "An owner can administer this instance: people, households and invitations."
+
+#: src/screens/Setup.tsx
+msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
+msgstr "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
+
+#. placeholder {0}: formatInstant(key.last_used_at)
+#: src/screens/Profile.tsx
+msgid "last used {0}"
+msgstr "last used {0}"
+
+#: src/screens/Setup.tsx
+msgid "Setup token"
+msgstr "Setup token"
+
+#: src/screens/Profile.tsx
+msgid "Give a program a key"
+msgstr "Give a program a key"
+
+#: src/screens/Profile.tsx
+msgid "A code from your current authenticator"
+msgstr "A code from your current authenticator"
+
+#: src/screens/Profile.tsx
+msgid "Following this device, which is light right now."
+msgstr "Following this device, which is light right now."
+
+#: src/screens/Profile.tsx
+msgid "New codes"
+msgstr "New codes"
+
+#: src/lib/signInChanges.ts
+msgid "Somebody made {user} an owner"
+msgstr "Somebody made {user} an owner"
+
+#. placeholder {0}: formatInstant(key.revoked_at)
+#: src/screens/Profile.tsx
+msgid "Revoked {0}"
+msgstr "Revoked {0}"
+
+#: src/screens/Profile.tsx
+msgid "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
+msgstr "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
+
+#: src/components/bits.tsx
+#: src/screens/Profile.tsx
+msgid "Close"
+msgstr "Close"
+
+#: src/App.tsx
+msgid "Receipts"
+msgstr "Receipts"
+
+#: src/screens/AcceptInvite.tsx
+msgid "{inviter} invited you to {PRODUCT} as a member, in {households}."
+msgstr "{inviter} invited you to {PRODUCT} as a member, in {households}."
+
+#: src/screens/Profile.tsx
+msgid "I have saved it"
+msgstr "I have saved it"
+
+#: src/lib/signInChanges.ts
+msgid "{by} re-enabled {user}"
+msgstr "{by} re-enabled {user}"
+
+#: src/screens/Profile.tsx
+msgid "{unused, plural, one {{unused} unused recovery code left.} other {{unused} unused recovery codes left.}}"
+msgstr "{unused, plural, one {{unused} unused recovery code left.} other {{unused} unused recovery codes left.}}"
+
+#: src/screens/ResetAccount.tsx
+msgid "Your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+msgstr "Your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."

@@ -39,7 +39,7 @@ export default defineConfig({
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "desktop",
-      testIgnore: /passkeys\.spec\.ts/,
+      testIgnore: /(passkeys|pseudo-locale)\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 1280, height: 800 },
@@ -49,7 +49,16 @@ export default defineConfig({
     },
     {
       name: "mobile",
-      testIgnore: /passkeys\.spec\.ts/,
+      testIgnore: /(passkeys|pseudo-locale)\.spec\.ts/,
+      use: { ...devices["Pixel 5"], storageState: "./e2e/.auth/state.json" },
+      dependencies: ["setup"],
+    },
+    // The en-XA pseudo-locale (#53): one pass, at the phone's width, where a
+    // longer word is likeliest to break the layout. Every other project stays
+    // pinned to English.
+    {
+      name: "pseudo-locale",
+      testMatch: /pseudo-locale\.spec\.ts/,
       use: { ...devices["Pixel 5"], storageState: "./e2e/.auth/state.json" },
       dependencies: ["setup"],
     },

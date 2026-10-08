@@ -12,6 +12,10 @@ import { api } from "../lib/api";
 import { Field, Problem } from "../components/bits";
 import type { InviteState, User } from "../lib/types";
 import { RecoveryCodeSheet } from "../components/RecoveryCodes";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
+import { listText } from "../lib/locale";
 
 interface Started {
   blob: string;
@@ -20,7 +24,26 @@ interface Started {
   recovery_codes: string[];
 }
 
+/** The product's name, which stays as it is in every language. */
+const PRODUCT = "Spend Tracker";
+
+/** Who invited you, as what, and to which households: one sentence per case. */
+function invitedText(state: InviteState): string {
+  const inviter = state.invited_by;
+  const households = listText(state.households);
+  if (state.role === "owner") {
+    return state.households.length > 0
+      ? t`${inviter} invited you to ${PRODUCT} as an owner, in ${households}.`
+      : t`${inviter} invited you to ${PRODUCT} as an owner.`;
+  }
+  return state.households.length > 0
+    ? t`${inviter} invited you to ${PRODUCT} as a member, in ${households}.`
+    : t`${inviter} invited you to ${PRODUCT} as a member.`;
+}
+
 export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: User) => void }) {
+  // Re-renders in a language that arrives after the first render.
+  useLingui();
   const [state, setState] = useState<InviteState | null>(null);
   const [looking, setLooking] = useState(true);
   const [error, setError] = useState<unknown>(null);
@@ -90,28 +113,35 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
       onDone(user);
     });
 
-  if (looking) return <div className="centred muted">Looking up your invitation…</div>;
+  if (looking)
+    return (
+      <div className="centred muted">
+        <Trans>Looking up your invitation…</Trans>
+      </div>
+    );
 
   if (!state)
     return (
       <div className="centred">
-        <h1>That link doesn't work</h1>
+        <h1>
+          <Trans>That link doesn't work</Trans>
+        </h1>
         <Problem error={error} />
         <p className="muted small">
-          Invitations are single-use and they expire. Ask whoever sent it for a fresh one.
+          <Trans>Invitations are single-use and they expire. Ask whoever sent it for a fresh one.</Trans>
         </p>
       </div>
     );
 
   return (
     <div className="centred">
-      <h1>You've been invited</h1>
+      <h1>
+        <Trans>You've been invited</Trans>
+      </h1>
       <p className="muted small">
-        {state.invited_by} invited you to Spend Tracker as
-        {state.role === "owner" ? " an owner" : " a member"}
-        {state.households.length > 0 ? `, in ${state.households.join(" and ")}` : null}.
+        {invitedText(state)}
         {state.role === "owner"
-          ? " An owner can administer this instance: people, households and invitations."
+          ? ` ${t`An owner can administer this instance: people, households and invitations.`}`
           : null}
       </p>
 
@@ -119,8 +149,10 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
 
       {step === 1 && (
         <div className="card">
-          <h2>1. You</h2>
-          <Field label="Email">
+          <h2>
+            <Trans>1. You</Trans>
+          </h2>
+          <Field label={t`Email`}>
             <input
               type="email"
               name="email"
@@ -132,12 +164,14 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
           </Field>
           {state.email ? (
             <p className="muted small">
-              Filled in from the invitation. Change it if you would rather use another address.
+              <Trans>
+                Filled in from the invitation. Change it if you would rather use another address.
+              </Trans>
             </p>
           ) : (
             <p />
           )}
-          <Field label="Your name">
+          <Field label={t`Your name`}>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -145,7 +179,7 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
             />
           </Field>
           <p />
-          <Field label="Password">
+          <Field label={t`Password`}>
             <input
               type="password"
               name="new-password"
@@ -154,31 +188,39 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
               autoComplete="new-password"
             />
           </Field>
-          <p className="muted small">At least 12 characters. Length is what matters.</p>
+          <p className="muted small">
+            <Trans>At least 12 characters. Length is what matters.</Trans>
+          </p>
           <button
             className="primary"
             disabled={busy || !email || !name || password.length < 12}
             onClick={begin}
           >
-            Continue
+            <Trans>Continue</Trans>
           </button>
         </div>
       )}
 
       {step === 2 && started && (
         <div className="card">
-          <h2>2. Your authenticator</h2>
+          <h2>
+            <Trans>2. Your authenticator</Trans>
+          </h2>
           <p className="muted small">
-            Scan this with your authenticator app, then type the six digits it shows. We check the
-            code now, so you find out it works here rather than the next time you sign in.
+            <Trans>
+              Scan this with your authenticator app, then type the six digits it shows. We check
+              the code now, so you find out it works here rather than the next time you sign in.
+            </Trans>
           </p>
           <div style={{ background: "#fff", padding: 12, width: "fit-content", margin: "8px 0" }}>
             <QRCodeSVG value={started.otpauth_uri} size={168} />
           </div>
           <p className="small muted">
-            Can't scan? Enter this key by hand: <span className="mono">{started.secret}</span>
+            <Trans>
+              Can't scan? Enter this key by hand: <span className="mono">{started.secret}</span>
+            </Trans>
           </p>
-          <Field label="The six digits">
+          <Field label={t`The six digits`}>
             <input
               name="one-time-code"
               value={code}
@@ -191,17 +233,19 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
           </Field>
           <p />
           <button className="primary" disabled={busy || code.length < 6} onClick={enrol}>
-            Check the code
+            <Trans>Check the code</Trans>
           </button>
         </div>
       )}
 
       {step === 3 && started && (
         <div className="card">
-          <h2>3. Recovery codes</h2>
+          <h2>
+            <Trans>3. Recovery codes</Trans>
+          </h2>
           <RecoveryCodeSheet
             codes={started.recovery_codes}
-            action="Finish"
+            action={t`Finish`}
             busy={busy}
             onStored={finish}
           />

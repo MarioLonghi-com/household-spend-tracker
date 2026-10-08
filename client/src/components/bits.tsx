@@ -6,6 +6,9 @@ import { ApiError } from "../lib/api";
 import { fixed, moneyKey, sortRows } from "../lib/sorting";
 import type { FixedGroup, SortDirection, SortKeyPart, SortValue } from "../lib/sorting";
 import { format } from "../lib/money";
+import { problemText } from "../lib/errorMessages";
+import { plural, t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 
 export function Field({
   label,
@@ -41,14 +44,24 @@ export function Field({
   );
 }
 
+/**
+ * A refusal, in words.
+ *
+ * The server's sentence in English; in another language, the catalog's
+ * message for the refusal's `code`, falling back to the sentence when there is
+ * none (`lib/errorMessages.ts`). The wait is a plural for the languages that
+ * need one. English keeps its single form, "1 seconds" included, because this
+ * lane changes nothing an English reader sees; #58 can give English its "one".
+ */
 export function Problem({ error }: { error: unknown }) {
+  useLingui();
   if (!error) return null;
-  const message = error instanceof Error ? error.message : String(error);
+  const message = problemText(error);
   const wait = error instanceof ApiError ? error.retryAfter : undefined;
   return (
     <div className="banner" role="alert">
       {message}
-      {wait ? ` Try again in ${wait} seconds.` : null}
+      {wait ? ` ${plural(wait, { other: `Try again in ${wait} seconds.` })}` : null}
     </div>
   );
 }
@@ -85,6 +98,8 @@ export function Panel({
   dirty?: boolean;
   children: ReactNode;
 }) {
+  // Re-renders its words when the language changes.
+  useLingui();
   const panel = useRef<HTMLElement>(null);
 
   // A click goes to the nearest element holding both the press and the
@@ -166,10 +181,10 @@ export function Panel({
       >
         <header>
           <div>
-            {config ? <div className="config-badge">Settings</div> : null}
+            {config ? <div className="config-badge">{t`Settings`}</div> : null}
             <h2>{title}</h2>
           </div>
-          <button onClick={onClose} aria-label="Close">
+          <button onClick={onClose} aria-label={t`Close`}>
             ✕
           </button>
         </header>
@@ -193,6 +208,8 @@ export function Money({ minor, currency }: { minor: number; currency: string }) 
  * anywhere else, so it never sits on top of the form you are trying to fill in.
  */
 export function Hint({ label, children }: { label: string; children: ReactNode }) {
+  // Re-renders its words when the language changes.
+  useLingui();
   const [open, setOpen] = useState(false);
   const holder = useRef<HTMLSpanElement>(null);
 
@@ -222,7 +239,7 @@ export function Hint({ label, children }: { label: string; children: ReactNode }
         type="button"
         className="hint-open"
         aria-expanded={open}
-        aria-label={open ? `Hide help: ${label}` : `What's this? ${label}`}
+        aria-label={open ? t`Hide help: ${label}` : t`What's this? ${label}`}
         onClick={() => setOpen((was) => !was)}
       >
         ?
@@ -341,6 +358,8 @@ export function SortHeading<K extends string>({
    */
   children?: ReactNode;
 }) {
+  // Re-renders the heading when the language changes; `t` reads the active one.
+  useLingui();
   const active = sort === column;
   // Generic over the key so the register and the import preview share one
   // heading: the register's sort is a server round trip, the preview's is a
@@ -355,7 +374,7 @@ export function SortHeading<K extends string>({
         .join(" ")}
       aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : "none"}
     >
-      <button type="button" onClick={() => onSort(column, next)} title={`Sort by ${label}`}>
+      <button type="button" onClick={() => onSort(column, next)} title={t`Sort by ${label}`}>
         {short ? (
           <>
             <span aria-hidden="true">{short}</span>
@@ -396,6 +415,8 @@ export function Dialog({
   onClose: () => void;
   children: ReactNode;
 }) {
+  // Re-renders its words when the language changes.
+  useLingui();
   const box = useRef<HTMLDivElement>(null);
   // The same rule as `Panel`'s backdrop (#27): a drag that starts in the box
   // and ends on the backdrop is a click on the backdrop, and must not close a
@@ -462,7 +483,7 @@ export function Dialog({
       >
         <header>
           <h2>{title}</h2>
-          <button onClick={onClose} aria-label="Close">
+          <button onClick={onClose} aria-label={t`Close`}>
             ✕
           </button>
         </header>

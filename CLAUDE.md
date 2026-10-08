@@ -69,6 +69,13 @@ sharing a checkout with a session you cannot see.
   exempt. Sort on the meaning, not the glyph: the country column sorts by
   country name, not by the flag. Money across mixed currencies sorts by
   currency first, then figure.
+- **The client's words come from Lingui catalogs** (`client/src/locales/`,
+  `lib/i18n.ts`). A message written with the `t`, `msg` or `plural` macros or
+  `<Trans>` is extracted by `npm run extract`, and CI fails when the catalogs
+  are behind the source. Only English is served: a translated catalog holds
+  `#, fuzzy` drafts and has no loader until #58 ships it, and the picker stays
+  hidden until then. A new error code needs its message in
+  `client/src/lib/errorMessages.ts` as well as `app/error_codes.py`.
 - **An enum value with no designed behaviour is a bug with a menu item.** The
   previous build shipped twelve account types with three behaviours and five
   loan types it never modelled.

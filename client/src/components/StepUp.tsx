@@ -13,13 +13,15 @@
  * authenticator -- no code can be checked, and a recovery code is not taken
  * here either. The refusal says so, with `key_replaced`, and says to set up a
  * new authenticator from the account first; this adds where the account is
- * (`SET_UP_A_NEW_ONE`). It used to carry the sign-in's sentence, "use one of
+ * (`setUpANewOne`). It used to carry the sign-in's sentence, "use one of
  * your recovery codes", which sent the member to type one into a field that
  * would only refuse it again.
  */
 
 import { ApiError, api } from "../lib/api";
 import { Field } from "./bits";
+import { t } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export interface StepUpProof {
   password: string;
@@ -32,8 +34,14 @@ export function stepUpReady(proof: StepUpProof): boolean {
   return proof.password.length > 0 && proof.code.trim().length >= 6;
 }
 
-/** Said after the server's sentence when the key cannot open your authenticator. */
-export const SET_UP_A_NEW_ONE = "Your account is under your name in the menu.";
+/**
+ * Said after the server's sentence when the key cannot open your
+ * authenticator. A function, so it is read in the language active when it is
+ * said rather than the one active when this module loaded.
+ */
+export function setUpANewOne(): string {
+  return t`Your account is under your name in the menu.`;
+}
 
 /** Buy one grant. Spend it on the very next request. */
 export async function stepUpToken(proof: StepUpProof): Promise<string> {
@@ -46,7 +54,7 @@ export async function stepUpToken(proof: StepUpProof): Promise<string> {
   } catch (problem) {
     const body = (problem as { body?: Record<string, unknown> } | null)?.body;
     if (problem instanceof Error && body?.key_replaced === true) {
-      throw new ApiError(`${problem.message} ${SET_UP_A_NEW_ONE}`, 401, undefined, body);
+      throw new ApiError(`${problem.message} ${setUpANewOne()}`, 401, undefined, body);
     }
     throw problem;
   }
@@ -67,12 +75,13 @@ export function StepUpFields({
   /** One sentence on why this act asks for both. */
   why: string;
 }) {
+  const { t } = useLingui();
   return (
     <>
       <p className="small muted" style={{ marginTop: 0 }}>
-        {why} So this asks for your password and a code — the same as signing in.
+        <Trans>{why} So this asks for your password and a code — the same as signing in.</Trans>
       </p>
-      <Field label="Your password">
+      <Field label={t`Your password`}>
         <input
           type="password"
           value={proof.password}
@@ -81,7 +90,7 @@ export function StepUpFields({
         />
       </Field>
       <p />
-      <Field label="The six digits from your authenticator">
+      <Field label={t`The six digits from your authenticator`}>
         <input
           value={proof.code}
           inputMode="numeric"
