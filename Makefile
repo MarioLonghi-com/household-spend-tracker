@@ -94,6 +94,7 @@ LOCK  = $(UV) pip compile --universal --python-version 3.12 --generate-hashes \
 	--custom-compile-command 'make lock' --quiet $(if $(UPGRADE),--upgrade)
 lock:  ## rewrite requirements*.txt from the .in files (UPGRADE=1 to move versions)
 	$(LOCK) requirements.in -o requirements.txt
+	$(LOCK) requirements-updater.in -o requirements-updater.txt
 	$(LOCK) requirements-dev.in -o requirements-dev.txt
 
 install-client: preflight  ## node_modules for the SPA
@@ -250,7 +251,7 @@ upgrade:  ## the drill: backup, placard, migrate, verify, log
 # when the first one finds something, because "python is clean" is not an
 # answer to "is the client clean".
 audit:  ## known advisories against the pinned dependencies, Python and npm
-	-./.venv/bin/python -m pip_audit --require-hashes --disable-pip -r requirements.txt -r requirements-dev.txt
+	-./.venv/bin/python -m pip_audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt
 	-cd client && npm audit --audit-level=high
 
 # Standalone, for poking at the file without running the app. 127.0.0.1 on

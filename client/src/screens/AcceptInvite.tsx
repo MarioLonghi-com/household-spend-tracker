@@ -150,9 +150,9 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
       {step === 1 && (
         <div className="card">
           <h2>
-            <Trans>1. You</Trans>
+            <Trans comment="Heading on the invitation page">1. You</Trans>
           </h2>
-          <Field label={t`Email`}>
+          <Field label={t({ message: "Email", comment: "Label of a form field on the invitation page: noun, an email address" })}>
             <input
               type="email"
               name="email"
@@ -171,7 +171,7 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
           ) : (
             <p />
           )}
-          <Field label={t`Your name`}>
+          <Field label={t({ message: "Your name", comment: "Label of a form field on the invitation page" })}>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -179,7 +179,7 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
             />
           </Field>
           <p />
-          <Field label={t`Password`}>
+          <Field label={t({ message: "Password", comment: "Label of a form field on the invitation page: noun. See GLOSSARY.md" })}>
             <input
               type="password"
               name="new-password"
@@ -196,7 +196,7 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
             disabled={busy || !email || !name || password.length < 12}
             onClick={begin}
           >
-            <Trans>Continue</Trans>
+            <Trans comment="Button on the invitation page: go on to the next step">Continue</Trans>
           </button>
         </div>
       )}
@@ -204,7 +204,7 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
       {step === 2 && started && (
         <div className="card">
           <h2>
-            <Trans>2. Your authenticator</Trans>
+            <Trans comment="Heading on the invitation page">2. Your authenticator</Trans>
           </h2>
           <p className="muted small">
             <Trans>
@@ -241,11 +241,11 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
       {step === 3 && started && (
         <div className="card">
           <h2>
-            <Trans>3. Recovery codes</Trans>
+            <Trans comment="Heading on the invitation page">3. Recovery codes</Trans>
           </h2>
           <RecoveryCodeSheet
             codes={started.recovery_codes}
-            action={t`Finish`}
+            action={t({ message: "Finish", comment: "Button on the invitation page: finish the steps" })}
             busy={busy}
             onStored={finish}
           />

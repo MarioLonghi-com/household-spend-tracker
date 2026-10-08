@@ -1,0 +1,24 @@
+# What the updater image needs beyond the standard library, as floors. **Edit
+# this file, then run `make lock`** -- requirements-updater.txt is compiled from
+# it exactly as requirements.txt is from requirements.in, every package pinned
+# and hashed (#46).
+#
+# Not the app's runtime lock: the app never verifies an image, so sigstore and
+# what it brings stay out of requirements.txt and out of the app image. The
+# updater image installs this file alone (sub-issue 10). `-c requirements.txt`
+# holds the packages both share (cryptography, pydantic, certifi, ...) at the
+# version the app's lock chose, so the suite, which installs both through
+# requirements-dev.txt, tests the versions each image runs.
+-c requirements.txt
+
+# Verifying the release attestations of the app and updater images:
+# updater/verify.py, the one updater module that imports anything outside the
+# standard library (design notes 7.4). Held to the 4.x API that module is
+# written against; the trusted root the updater embeds is the copy this wheel
+# carries, and tests/test_updater_verify.py fails when the two drift (7.5).
+sigstore>=4.5.0,<5
+
+# The trust store for the registry requests updater/verify.py makes, for the
+# same reason the app declares it in requirements.in: the python.org macOS
+# build reads no system store. Already pinned by requirements.txt.
+certifi>=2026.7.22

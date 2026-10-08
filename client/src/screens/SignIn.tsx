@@ -323,7 +323,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
               finish(owed.user, owed.keys);
             }}
           >
-            <Trans>Not now</Trans>
+            <Trans comment="Button on the sign-in page">Not now</Trans>
           </button>
           <p className="muted small">
             <Trans>
@@ -381,7 +381,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
             </p>
           )}
           <button className="primary" autoFocus onClick={() => onDone(recovered.user)}>
-            <Trans>Continue</Trans>
+            <Trans comment="Button on the sign-in page: go on to the next step">Continue</Trans>
           </button>
         </div>
       </div>
@@ -396,7 +396,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
       <div className="card">
         {!needsCode ? (
           <>
-            <Field label={t`Email`}>
+            <Field label={t({ message: "Email", comment: "Label of a form field on the sign-in page: noun, an email address" })}>
               <input
                 type="email"
                 value={email}
@@ -408,7 +408,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
               />
             </Field>
             <p />
-            <Field label={t`Password`}>
+            <Field label={t({ message: "Password", comment: "Label of a form field on the sign-in page: noun. See GLOSSARY.md" })}>
               <input
                 type="password"
                 value={password}
@@ -418,12 +418,12 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
             </Field>
             <p />
             <button className="primary" type="submit" disabled={busy || !email || !password}>
-              <Trans>Sign in</Trans>
+              <Trans comment="Button on the sign-in page. See GLOSSARY.md">Sign in</Trans>
             </button>
             {passkeysHere && (
               <>
                 <p className="muted small">
-                  <Trans>or</Trans>
+                  <Trans comment="Sentence on the sign-in page: conjunction between two choices">or</Trans>
                 </p>
                 <button type="button" disabled={busy} onClick={passkeyNow}>
                   <Trans>Sign in with a passkey</Trans>
@@ -433,7 +433,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
           </>
         ) : (
           <>
-            <h2>{useRecovery ? t`A recovery code` : t`Your authenticator`}</h2>
+            <h2>{useRecovery ? t`A recovery code` : t({ message: "Your authenticator", comment: "Heading on the sign-in page" })}</h2>
             {replaced && (
               <div className="banner warn" role="alert">
                 {replaced}
@@ -444,7 +444,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
                 ? t`One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key.`
                 : t`This browser hasn't been used here recently, so we need the six digits.`}
             </p>
-            <Field label={useRecovery ? t`Recovery code` : t`Code`}>
+            <Field label={useRecovery ? t({ message: "Recovery code", comment: "Text on the sign-in page. See GLOSSARY.md" }) : t({ message: "Code", comment: "Text on the sign-in page: noun, a code typed in" })}>
               <input
                 name={useRecovery ? "recovery-code" : "one-time-code"}
                 value={code}
@@ -472,7 +472,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
               </>
             )}
             <button className="primary" type="submit" disabled={busy || code.length < 6}>
-              <Trans>Continue</Trans>
+              <Trans comment="Button on the sign-in page: go on to the next step">Continue</Trans>
             </button>
             {/* Not after the key was replaced: no code from it can work here. */}
             {!replaced && (
