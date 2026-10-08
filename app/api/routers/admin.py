@@ -13,7 +13,6 @@ import io
 import logging
 from dataclasses import asdict
 from datetime import UTC, datetime
-from pathlib import Path
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import FileResponse, PlainTextResponse
@@ -23,7 +22,7 @@ from starlette.background import BackgroundTask
 from ... import __version__, config, db, logging_setup
 from ...audit.batch import batch
 from ...auth import keycheck, stepup
-from ...errors import NotFound, ValidationError
+from ...errors import Conflict, NotFound, ValidationError
 from ...models import AccountReset, BatchKind, HouseholdMember, Role, User, utcnow
 from ...schemas import (
     AdminHouseholdCreate,
@@ -429,7 +428,7 @@ def _bundle_response(name: str, owner: User, *, with_key: bool) -> FileResponse:
         raise NotFound("no such backup")
     try:
         bundle = backup_bundle.build(
-            Path(found.path),
+            found.database,
             into=platform_service.backup_dir(),
             version=__version__,
             repository=platform_service.REPOSITORY,
@@ -490,15 +489,28 @@ def download_backup_with_choice(
 
 @router.delete("/application/backups/{name}", status_code=204)
 def delete_backup(name: str, owner: OwnerOnly) -> Response:
-    """Remove one backup. The screen asks first; this does not ask again.
+    """Remove one backup -- a file, or a folder. The screen asks first; this
+    does not ask again.
 
     A file, not a row, so there is no batch and no undo -- the log line is the
     record, and it names who. The newest and the last one left are deletable
     too (#133): the confirmation says so in words rather than the server
     refusing, because the person may be removing it precisely because it holds
     something that should not exist.
+
+    **Except the newest five update backups** (design notes 8.7): 409, and it
+    stays. Those are what a failed update is undone from and what the recovery
+    page restores, and the updater prunes the older ones itself.
     """
-    gone = platform_service.delete_backup(name)
+    try:
+        gone = platform_service.delete_backup(name)
+    except platform_service.BackupProtected:
+        raise Conflict(
+            f"{name} is one of the newest five update backups. They are kept so an update "
+            "can be undone, and the updater removes older ones itself",
+            code="backup.protected",
+            params={"name": name},
+        ) from None
     if gone is None:
         raise NotFound("no such backup")
     log.warning("backup %s deleted by %s", gone.name, owner.email)
@@ -507,13 +519,13 @@ def delete_backup(name: str, owner: OwnerOnly) -> Response:
 
 @router.post("/application/upstream", response_model=UpstreamOut)
 def check_upstream(owner: OwnerOnly) -> UpstreamOut:
-    """Ask the repository whether there is a newer version than this one.
+    """Ask the repository for its published releases newer than this one.
 
-    A `POST` for a read, deliberately: it is the only request this application
-    ever makes to anything outside itself, and it happens when an owner presses
-    a button and at no other time. Making it a `GET` invites a prefetch, a
-    reload or a monitoring check to turn "no telemetry" into a periodic call
-    home that nobody chose.
+    A `POST` for a read, deliberately: it reaches outside the instance, and it
+    happens when an owner presses a button and at no other time. Making it a
+    `GET` invites a prefetch, a reload or a monitoring check to turn "no
+    telemetry" into a periodic call home that nobody chose. `outbound.py` lists
+    every request that leaves the instance, and the rule they all keep.
 
     A failure is an answer, not a 500. An instance on a network with no route
     out is the normal case for this app.

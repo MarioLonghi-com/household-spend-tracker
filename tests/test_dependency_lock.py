@@ -43,7 +43,7 @@ def _packages(lock: str) -> list[list[str]]:
     return entries
 
 
-@pytest.mark.parametrize("name", ["requirements.txt", "requirements-dev.txt"])
+@pytest.mark.parametrize("name", ["requirements.txt", "requirements-updater.txt", "requirements-dev.txt"])
 def test_every_package_in_a_lock_is_pinned_exactly_and_hashed(name):
     entries = _packages((ROOT / name).read_text(encoding="utf-8"))
     assert len(entries) > 30, f"{name} has {len(entries)} packages; is it a lock at all?"
@@ -58,6 +58,17 @@ def test_the_runtime_lock_is_what_the_dev_lock_installs_too():
     dev = locked((ROOT / "requirements-dev.txt").read_text(encoding="utf-8"), LINUX)
     drifted = {n: (v, dev.get(n)) for n, v in runtime.items() if dev.get(n) != v}
     assert drifted == {}, f"the suite would test other versions than a deployment runs: {drifted}"
+
+
+def test_the_updater_lock_shares_the_runtime_pins_and_the_suite_installs_it():
+    """The updater's lock (sigstore) is its own, but where it overlaps the app's it agrees,
+    and the dev lock -- what the suite runs on -- holds every pin of it."""
+    runtime = locked((ROOT / "requirements.txt").read_text(encoding="utf-8"), LINUX)
+    updater = locked((ROOT / "requirements-updater.txt").read_text(encoding="utf-8"), LINUX)
+    dev = locked((ROOT / "requirements-dev.txt").read_text(encoding="utf-8"), LINUX)
+    assert "sigstore" in updater and "sigstore" not in runtime
+    assert {n: (v, runtime[n]) for n, v in updater.items() if n in runtime and runtime[n] != v} == {}
+    assert {n: (v, dev.get(n)) for n, v in updater.items() if dev.get(n) != v} == {}
 
 
 def test_what_the_app_imports_directly_is_declared_directly():

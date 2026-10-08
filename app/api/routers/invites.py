@@ -173,6 +173,6 @@ def complete(
             "that email address cannot be used for a new account here, and this link is now "
             "spent. Ask whoever invited you for a new one."
         ) from None
-    cookies.set_session(response, session_value)
-    cookies.set_device(response, device_value)
+    cookies.set_session(response, request, session_value)
+    cookies.set_device(response, request, device_value)
     return UserOut.model_validate(user)

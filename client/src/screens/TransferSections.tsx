@@ -185,11 +185,11 @@ export function WaitingSection({
                       style={{ width: "auto" }}
                     />
                   </th>
-                  <SortHeading label={t`Account`} column="account" {...heading} />
-                  <SortHeading label={t`Date`} column="date" {...heading} />
-                  <SortHeading label={t`Amount`} column="amount" align="right" {...heading} />
-                  <SortHeading label={t`Description`} column="description" {...heading} />
-                  <SortHeading label={t`Why`} column="why" {...heading} />
+                  <SortHeading label={t({ message: "Account", comment: "Column heading on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md" })} column="account" {...heading} />
+                  <SortHeading label={t({ message: "Date", comment: "Column heading on the Transfers screen: noun. See GLOSSARY.md" })} column="date" {...heading} />
+                  <SortHeading label={t({ message: "Amount", comment: "Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md" })} column="amount" align="right" {...heading} />
+                  <SortHeading label={t({ message: "Description", comment: "Column heading on the Transfers screen" })} column="description" {...heading} />
+                  <SortHeading label={t({ message: "Why", comment: "Column heading on the Transfers screen: noun, the reason" })} column="why" {...heading} />
                   <th aria-label={t`Not a transfer`} />
                 </tr>
               </thead>
@@ -199,7 +199,7 @@ export function WaitingSection({
                     <td data-select="true">
                       <input
                         type="checkbox"
-                        aria-label={t`Select ${leg.account_name} ${formatDate(leg.date)}`}
+                        aria-label={t({ message: `Select ${leg.account_name} ${formatDate(leg.date)}`, comment: "Screen-reader name on the Transfers screen" })}
                         checked={ticked.has(leg.id)}
                         disabled={busy}
                         onChange={() =>
@@ -213,17 +213,17 @@ export function WaitingSection({
                         style={{ width: "auto" }}
                       />
                     </td>
-                    <td data-label={t`Account`}>
+                    <td data-label={t({ message: "Account", comment: "Column name shown beside a value on phones on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md" })}>
                       <strong>{leg.account_name}</strong>
                     </td>
-                    <td data-label={t`Date`}>{formatDate(leg.date)}</td>
-                    <td className="amount" data-label={t`Amount`}>
+                    <td data-label={t({ message: "Date", comment: "Column name shown beside a value on phones on the Transfers screen: noun. See GLOSSARY.md" })}>{formatDate(leg.date)}</td>
+                    <td className="amount" data-label={t({ message: "Amount", comment: "Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md" })}>
                       <Money minor={leg.amount} currency={leg.currency} />
                     </td>
-                    <td className="small" data-label={t`Description`}>
+                    <td className="small" data-label={t({ message: "Description", comment: "Column name shown beside a value on phones on the Transfers screen" })}>
                       {leg.description ?? "—"}
                     </td>
-                    <td className="small muted" data-label={t`Why`}>
+                    <td className="small muted" data-label={t({ message: "Why", comment: "Column name shown beside a value on phones on the Transfers screen: noun, the reason" })}>
                       {why}
                     </td>
                     <td className="row-actions">
@@ -249,7 +249,7 @@ export function WaitingSection({
         </>
       ) : (
         <Empty>
-          <Trans>Nothing waiting.</Trans>
+          <Trans comment="Shown when a list is empty on the Transfers screen">Nothing waiting.</Trans>
         </Empty>
       )}
     </div>
@@ -335,34 +335,34 @@ export function UnprovenSection({
           <table>
             <thead>
               <tr>
-                <SortHeading label={t`Out of`} column="out" {...heading} />
-                <SortHeading label={t`Into`} column="into" {...heading} />
-                <SortHeading label={t`Amount`} column="amount" align="right" {...heading} />
-                <SortHeading label={t`Why`} column="why" {...heading} />
-                <th aria-label={t`Actions`} />
+                <SortHeading label={t({ message: "Out of", comment: "Column heading on the Transfers screen: preposition, the account money leaves" })} column="out" {...heading} />
+                <SortHeading label={t({ message: "Into", comment: "Column heading on the Transfers screen: preposition, the account money arrives in" })} column="into" {...heading} />
+                <SortHeading label={t({ message: "Amount", comment: "Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md" })} column="amount" align="right" {...heading} />
+                <SortHeading label={t({ message: "Why", comment: "Column heading on the Transfers screen: noun, the reason" })} column="why" {...heading} />
+                <th aria-label={t({ message: "Actions", comment: "Screen-reader name on the Transfers screen" })} />
               </tr>
             </thead>
             <tbody>
               {rows.map((pair) => (
                 <tr key={`${pair.out_leg.id}-${pair.in_leg.id}`}>
-                  <td data-label={t`Out of`}>
+                  <td data-label={t({ message: "Out of", comment: "Column name shown beside a value on phones on the Transfers screen: preposition, the account money leaves" })}>
                     <LegCell leg={pair.out_leg} />
                   </td>
-                  <td data-label={t`Into`}>
+                  <td data-label={t({ message: "Into", comment: "Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in" })}>
                     <LegCell leg={pair.in_leg} />
                   </td>
-                  <td className="amount" data-label={t`Amount`}>
+                  <td className="amount" data-label={t({ message: "Amount", comment: "Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md" })}>
                     <Money minor={pair.in_leg.amount} currency={pair.in_leg.currency} />
                   </td>
-                  <td className="small" data-label={t`Why`}>
+                  <td className="small" data-label={t({ message: "Why", comment: "Column name shown beside a value on phones on the Transfers screen: noun, the reason" })}>
                     {pair.why}
                   </td>
                   <td className="amount row-actions">
                     <button className="link" disabled={busy} onClick={() => unlink.mutate(pair)}>
-                      <Trans>Unlink</Trans>
+                      <Trans comment="Button on the Transfers screen: verb, undo a link between two rows">Unlink</Trans>
                     </button>
                     <button className="link" disabled={busy} onClick={() => keep.mutate(pair)}>
-                      <Trans>Keep</Trans>
+                      <Trans comment="Button on the Transfers screen: verb, leave it as it is">Keep</Trans>
                     </button>
                   </td>
                 </tr>

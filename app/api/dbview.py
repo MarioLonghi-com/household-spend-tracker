@@ -35,6 +35,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from starlette.requests import HTTPConnection
+
 from ..auth import cookies as cookie_names
 from ..auth import sessions as session_service
 from ..config import settings
@@ -138,8 +140,11 @@ class GuardedDatasette:
         if scope["type"] != "http":  # pragma: no cover - no websockets here
             return
 
-        cookies = _cookies(scope)
-        refusal = await asyncio.to_thread(_who, cookie_names.session_value(cookies))
+        # Starlette's own parsing, and the request's host: the session cookie's
+        # name depends on it (#196), so this reads it the way every route does.
+        refusal = await asyncio.to_thread(
+            _who, cookie_names.session_value(HTTPConnection(scope))
+        )
         if refusal is not None:
             await _send_json(send, *refusal)
             return
@@ -166,23 +171,6 @@ class GuardedDatasette:
             )
             return
         await inner(scope, receive, send)
-
-
-def _cookies(scope: dict) -> dict[str, str]:
-    raw = dict(scope.get("headers") or {}).get(b"cookie")
-    if raw is None:
-        for key, value in scope.get("headers") or []:
-            if key.lower() == b"cookie":
-                raw = value
-                break
-    if not raw:
-        return {}
-    out: dict[str, str] = {}
-    for part in raw.decode("latin-1").split(";"):
-        name, _, value = part.strip().partition("=")
-        if name:
-            out[name] = value
-    return out
 
 
 async def _send_json(send: Any, status: int, body: bytes) -> None:
