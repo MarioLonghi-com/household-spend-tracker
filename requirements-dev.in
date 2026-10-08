@@ -4,6 +4,10 @@
 # deployment runs.
 -r requirements.in
 -c requirements.txt
+# The updater's own dependencies (sigstore), so the suite runs its
+# verification tests; held to requirements-updater.txt the same way.
+-r requirements-updater.in
+-c requirements-updater.txt
 pytest>=9.1.1
 pytest-cov>=7.1.0
 # `pytest -n auto --dist loadfile` in CI; tests/conftest.py gives each worker

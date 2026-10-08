@@ -410,7 +410,7 @@ def test_the_upstream_check_answers_rather_than_failing_when_there_is_no_route(c
         platform_service.check_upstream = original
 
 
-def test_a_newer_tag_upstream_is_reported_as_newer(client):
+def test_a_newer_release_upstream_is_reported_as_newer(client):
     from datetime import UTC, datetime
 
     from app.services import platform as platform_service
@@ -420,13 +420,13 @@ def test_a_newer_tag_upstream_is_reported_as_newer(client):
         platform_service.check_upstream = lambda: platform_service.Upstream(
             checked_at=datetime.now(UTC),
             running="0.1.0",
-            latest="v0.2.0",
+            latest="0.2.0",
             newer=True,
             problem=None,
         )
         _setup_owner(client)
         answer = client.post("/api/admin/application/upstream", headers=HEADERS).json()
-        assert (answer["latest"], answer["newer"], answer["problem"]) == ("v0.2.0", True, None)
+        assert (answer["latest"], answer["newer"], answer["problem"]) == ("0.2.0", True, None)
     finally:
         platform_service.check_upstream = original
 

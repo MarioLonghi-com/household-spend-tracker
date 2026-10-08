@@ -30,6 +30,13 @@ interface ErrorMessage {
 }
 
 export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
+  "backup.protected": {
+    message: msg({
+      id: "error.backup.protected",
+      message:
+        "{name} is one of the newest five update backups. They are kept so an update can be undone, and the updater removes older ones itself",
+    }),
+  },
   "currency.not_iso_4217": {
     message: msg({
       id: "error.currency.not_iso_4217",
@@ -98,6 +105,97 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   },
   "transfer.same_account": {
     message: msg({ id: "error.transfer.same_account", message: "An account cannot transfer to itself" }),
+  },
+  "update.digest_mismatch": {
+    message: msg({
+      id: "error.update.digest_mismatch",
+      message:
+        "The image digests are not the ones the prepare report verified. Prepare the update again",
+    }),
+  },
+  "update.engine_refused": {
+    message: msg({
+      id: "error.update.engine_refused",
+      message:
+        "The updater cannot use the container engine ({socket}), so it cannot update anything",
+    }),
+  },
+  "update.in_flight": {
+    message: msg({
+      id: "error.update.in_flight",
+      message:
+        "Another update request is waiting or running. Wait for it to finish, then try again",
+    }),
+  },
+  "update.lossy_mismatch": {
+    message: msg({
+      id: "error.update.lossy_mismatch",
+      message:
+        "Tick every migration that cannot be undone, and only those: the update needs exactly the ones the report lists",
+    }),
+  },
+  "update.no_report": {
+    message: msg({
+      id: "error.update.no_report",
+      message:
+        "There is no prepared update with that id for this version. Check for updates and prepare it again",
+    }),
+  },
+  "update.no_updater": {
+    message: msg({
+      id: "error.update.no_updater",
+      message:
+        "Updating from this screen needs the updater, and none has answered in the last two minutes",
+    }),
+  },
+  "update.not_a_version": {
+    message: msg({
+      id: "error.update.not_a_version",
+      message:
+        "{version} is not a release version like 1.2.3",
+    }),
+  },
+  "update.not_newer": {
+    message: msg({
+      id: "error.update.not_newer",
+      message:
+        "{to_version} is not newer than {running}, which this instance runs. An update never goes back",
+    }),
+  },
+  "update.outcome_not_found": {
+    message: msg({
+      id: "error.update.outcome_not_found",
+      message:
+        "There is no update outcome with that id",
+    }),
+  },
+  "update.recovery_code_unknown": {
+    message: msg({
+      id: "error.update.recovery_code_unknown",
+      message:
+        "That recovery code has expired or belongs to another confirmation. Draw the confirmation again for a new one",
+    }),
+  },
+  "update.updater_not_newer": {
+    message: msg({
+      id: "error.update.updater_not_newer",
+      message:
+        "The updater already runs {updater_version}, which is not older than {to_version}",
+    }),
+  },
+  "update.updater_older_than_app": {
+    message: msg({
+      id: "error.update.updater_older_than_app",
+      message:
+        "The updater of {to_version} is older than this instance, which runs {running}, so it would not accept its requests",
+    }),
+  },
+  "update.updater_outdated": {
+    message: msg({
+      id: "error.update.updater_outdated",
+      message:
+        "The updater is too old for this container engine. Update the updater first, then try again",
+    }),
   },
 };
 

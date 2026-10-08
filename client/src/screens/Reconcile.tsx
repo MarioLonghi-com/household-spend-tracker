@@ -119,7 +119,7 @@ export function Reconcile({
   }
 
   return (
-    <Panel title={t`Reconcile ${account.name}`} onClose={onClose} wide>
+    <Panel title={t({ message: `Reconcile ${account.name}`, comment: "Title of the panel: reconcile (verb) the named account against a statement. See GLOSSARY.md" })} onClose={onClose} wide>
       <Problem error={sheet.error ?? finish.error} />
 
       <p className="muted small" style={{ marginTop: 0 }}>
@@ -151,7 +151,7 @@ export function Reconcile({
           />
         </Field>
         <Field
-          label={t`Closing balance (${account.currency})`}
+          label={t({ message: `Closing balance (${account.currency})`, comment: "Label of a form field on the Reconcile screen" })}
           hint={
             <Hint label={t`the closing balance`}>
               <p>
@@ -208,28 +208,28 @@ export function Reconcile({
                   />
                 </th>
                 <SortHeading
-                  label={t`Date`}
+                  label={t({ message: "Date", comment: "Column heading on the Reconcile screen: noun. See GLOSSARY.md" })}
                   column="date"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Payee`}
+                  label={t({ message: "Payee", comment: "Column heading on the Reconcile screen: noun, who was paid or who paid. See GLOSSARY.md" })}
                   column="payee"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Memo`}
+                  label={t({ message: "Memo", comment: "Column heading on the Reconcile screen: noun, the free-text line of a transaction. See GLOSSARY.md" })}
                   column="memo"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Amount`}
+                  label={t({ message: "Amount", comment: "Column heading on the Reconcile screen: noun, a sum of money. See GLOSSARY.md" })}
                   column="amount"
                   sort={order.sort}
                   direction={order.direction}
@@ -244,7 +244,7 @@ export function Reconcile({
                   <td>
                     <input
                       type="checkbox"
-                      aria-label={t`Tick ${formatDate(row.date)}`}
+                      aria-label={t({ message: `Tick ${formatDate(row.date)}`, comment: "Screen-reader name on the Reconcile screen" })}
                       checked={ticked.has(row.id)}
                       onChange={() => toggle(row.id)}
                       style={{ width: "auto" }}
@@ -275,7 +275,7 @@ export function Reconcile({
             other: `Finish and lock ${ticked.size} rows`,
           })}
         </button>
-        <button onClick={onClose}><Trans>Not now</Trans></button>
+        <button onClick={onClose}><Trans comment="Button on the Reconcile screen">Not now</Trans></button>
       </div>
       <p className="small muted" style={{ marginTop: 10 }}>
         <Trans>
@@ -287,7 +287,7 @@ export function Reconcile({
       {(past.data ?? []).length > 0 && (
         <>
           <hr className="rule" />
-          <h3 className="section-title"><Trans>Already proved</Trans></h3>
+          <h3 className="section-title"><Trans comment="Heading on the Reconcile screen">Already proved</Trans></h3>
           <table>
             <tbody>
               {(past.data ?? []).map((one) => (
@@ -342,7 +342,7 @@ function Difference({
   return (
     <div className={balanced ? "difference agreed" : "difference apart"}>
       <div>
-        <strong>{balanced ? t`It balances` : t`${format(difference, currency)} out`}</strong>
+        <strong>{balanced ? t({ message: "It balances", comment: "Text on the Reconcile screen" }) : t({ message: `${format(difference, currency)} out`, comment: "Text on the Reconcile screen" })}</strong>
         <span className="small">
           {balanced
             ? t`Every row on this statement is accounted for.`
@@ -352,9 +352,9 @@ function Difference({
         </span>
       </div>
       <dl className="difference-sum">
-        <dt><Trans>Already locked</Trans></dt>
+        <dt><Trans comment="Name of a fact on the Reconcile screen">Already locked</Trans></dt>
         <dd className="amount">{format(locked, currency)}</dd>
-        <dt><Trans>Ticked here</Trans></dt>
+        <dt><Trans comment="Name of a fact on the Reconcile screen">Ticked here</Trans></dt>
         <dd className="amount">{format(ticked, currency)}</dd>
       </dl>
     </div>

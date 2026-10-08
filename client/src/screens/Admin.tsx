@@ -71,19 +71,19 @@ const SECTIONS: { key: Section; label: string }[] = [
   {
     key: "people",
     get label() {
-      return t`People`;
+      return t({ message: "People", comment: "Label on the Admin screen" });
     },
   },
   {
     key: "households",
     get label() {
-      return t`Households`;
+      return t({ message: "Households", comment: "Label on the Admin screen" });
     },
   },
   {
     key: "invitations",
     get label() {
-      return t`Invitations`;
+      return t({ message: "Invitations", comment: "Label on the Admin screen" });
     },
   },
 ];
@@ -103,7 +103,7 @@ export function Admin({ user }: { user: User }) {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1><Trans>Admin</Trans></h1>
+        <h1><Trans comment="Screen title on the Admin screen">Admin</Trans></h1>
       </div>
       <p className="muted small">
         <Trans>
@@ -257,42 +257,42 @@ function People({
             <thead>
               <tr>
                 <SortHeading
-                  label={t`Name`}
+                  label={t({ message: "Name", comment: "Column heading on the Admin screen: noun" })}
                   column="name"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Email`}
+                  label={t({ message: "Email", comment: "Column heading on the Admin screen: noun, an email address" })}
                   column="email"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Role`}
+                  label={t({ message: "Role", comment: "Column heading on the Admin screen: noun, owner or member" })}
                   column="role"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Households`}
+                  label={t({ message: "Households", comment: "Column heading on the Admin screen" })}
                   column="households"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Recovery codes`}
+                  label={t({ message: "Recovery codes", comment: "Column heading on the Admin screen. See GLOSSARY.md" })}
                   column="codes"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Status`}
+                  label={t({ message: "Status", comment: "Column heading on the Admin screen: noun" })}
                   column="status"
                   sort={order.sort}
                   direction={order.direction}
@@ -306,13 +306,13 @@ function People({
                 <tr key={one.id}>
                   <td>
                     {one.display_name}
-                    {one.id === me.id ? <span className="muted small"> {t`(you)`}</span> : null}
+                    {one.id === me.id ? <span className="muted small"> {t({ message: "(you)", comment: "Table cell on the Admin screen" })}</span> : null}
                   </td>
                   <td className="small muted">{one.email}</td>
                   <td>
                     <select
                       value={one.role}
-                      aria-label={t`Role for ${one.display_name}`}
+                      aria-label={t({ message: `Role for ${one.display_name}`, comment: "Screen-reader name on the Admin screen" })}
                       // Demoting yourself is allowed by the server while another
                       // owner exists -- and the next refetch of this screen then
                       // 403s, leaving a stale table under an error. Make it a
@@ -331,25 +331,25 @@ function People({
                         else setConfirming({ user: one, role });
                       }}
                     >
-                      <option value="member"><Trans>Member</Trans></option>
-                      <option value="owner"><Trans>Owner</Trans></option>
+                      <option value="member"><Trans comment="Option in a dropdown on the Admin screen: role, can use the household but not manage it. See GLOSSARY.md">Member</Trans></option>
+                      <option value="owner"><Trans comment="Option in a dropdown on the Admin screen: role, manages the household. See GLOSSARY.md">Owner</Trans></option>
                     </select>
                   </td>
                   <td className="small muted">
                     {one.households.length === 0
-                      ? t`none`
+                      ? t({ message: "none", comment: "Table cell on the Admin screen: nothing; shown in place of a list" })
                       : one.households.map(householdName).join(", ")}
                   </td>
                   <td className="small">
                     <span className={one.recovery_codes_left === 0 ? "neg" : "muted"}>
-                      {t`${one.recovery_codes_left} left`}
+                      {t({ message: `${one.recovery_codes_left} left`, comment: "Table cell on the Admin screen" })}
                     </span>
                   </td>
                   <td className="small">
                     {one.disabled_at ? (
-                      <span className="neg">{t`Disabled`}</span>
+                      <span className="neg">{t({ message: "Disabled", comment: "Table cell on the Admin screen" })}</span>
                     ) : (
-                      <span className="muted">{t`Active`}</span>
+                      <span className="muted">{t({ message: "Active", comment: "Table cell on the Admin screen" })}</span>
                     )}
                   </td>
                   <td style={{ whiteSpace: "nowrap" }}>
@@ -369,7 +369,7 @@ function People({
                       }
                       onClick={() => setResetting(one)}
                     >
-                      <Trans>
+                      <Trans comment="Button on the Admin screen">
                         Reset sign-in…
                       </Trans>
                     </button>
@@ -377,8 +377,8 @@ function People({
                       className={one.disabled_at ? "link" : "link danger"}
                       aria-label={
                         one.disabled_at
-                          ? t`Re-enable ${one.display_name}`
-                          : t`Disable ${one.display_name}`
+                          ? t({ message: `Re-enable ${one.display_name}`, comment: "Button on the Admin screen: verb, let an account sign in again" })
+                          : t({ message: `Disable ${one.display_name}`, comment: "Button on the Admin screen: verb, stop an account signing in" })
                       }
                       disabled={one.id === me.id && !one.disabled_at}
                       title={
@@ -392,7 +392,7 @@ function People({
                           : setConfirming({ user: one, disable: true })
                       }
                     >
-                      {one.disabled_at ? t`Re-enable` : t`Disable`}
+                      {one.disabled_at ? t({ message: "Re-enable", comment: "Button on the Admin screen: verb, let an account sign in again" }) : t({ message: "Disable", comment: "Button on the Admin screen: verb, stop an account signing in" })}
                     </button>
                   </td>
                 </tr>
@@ -410,7 +410,7 @@ function People({
 
       {confirming && "disable" in confirming ? (
         <Dialog
-          title={t`Disable ${confirming.user.display_name}?`}
+          title={t({ message: `Disable ${confirming.user.display_name}?`, comment: "Title of a panel on the Admin screen" })}
           onClose={() => setConfirming(null)}
         >
           <p style={{ marginTop: 0 }}>
@@ -425,7 +425,7 @@ function People({
               disabled={setDisabled.isPending}
               onClick={() => setDisabled.mutate({ id: confirming.user.id, disabled: true })}
             >
-              {setDisabled.isPending ? t`Disabling…` : t`Yes, disable them`}
+              {setDisabled.isPending ? t({ message: "Disabling…", comment: "Button on the Admin screen" }) : t`Yes, disable them`}
             </button>
             <button disabled={setDisabled.isPending} onClick={() => setConfirming(null)}>
               <Trans>
@@ -456,13 +456,13 @@ function People({
               onClick={() => setRole.mutate({ id: confirming.user.id, role: confirming.role })}
             >
               {setRole.isPending
-                ? t`Changing…`
+                ? t({ message: "Changing…", comment: "Button on the Admin screen" })
                 : confirming.role === "owner"
                   ? t`Yes, make them an owner`
                   : t`Yes, make them a member`}
             </button>
             <button disabled={setRole.isPending} onClick={() => setConfirming(null)}>
-              <Trans>
+              <Trans comment="Button on the Admin screen">
                 Leave it
               </Trans>
             </button>
@@ -537,7 +537,7 @@ function PromoteToOwner({
           {promote.isPending ? t`Making them an owner…` : t`Make them an owner`}
         </button>
         <button disabled={promote.isPending} onClick={onClose}>
-          <Trans>
+          <Trans comment="Button on the Admin screen">
             Cancel
           </Trans>
         </button>
@@ -629,7 +629,7 @@ function ResetSignIn({
         )}
         <FreshLink
           link={issued.link}
-          label={t`Reset link`}
+          label={t({ message: "Reset link", comment: "Label on the Admin screen" })}
           onDismiss={onClose}
           onCopied={() => setCopied(true)}
         >
@@ -662,7 +662,7 @@ function ResetSignIn({
           onChange={(e) => setPassword(e.target.checked)}
           style={{ width: "auto", marginRight: 8 }}
         />
-        <Trans>
+        <Trans comment="Label of a choice on the Admin screen: noun. See GLOSSARY.md">
           Password
         </Trans>
       </label>
@@ -708,10 +708,10 @@ function ResetSignIn({
           disabled={!chosen || issue.isPending}
           onClick={send}
         >
-          {issue.isPending ? t`Resetting…` : t`Reset and make the link`}
+          {issue.isPending ? t({ message: "Resetting…", comment: "Button on the Admin screen" }) : t`Reset and make the link`}
         </button>
         <button disabled={issue.isPending} onClick={closeUnlessSending}>
-          <Trans>
+          <Trans comment="Button on the Admin screen">
             Cancel
           </Trans>
         </button>
@@ -777,35 +777,35 @@ function PendingResets() {
             <thead>
               <tr>
                 <SortHeading
-                  label={t`Who`}
+                  label={t({ message: "Who", comment: "Column heading on the Admin screen: noun, the person" })}
                   column="who"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Resets`}
+                  label={t({ message: "Resets", comment: "Column heading on the Admin screen" })}
                   column="resets"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Issued by`}
+                  label={t({ message: "Issued by", comment: "Column heading on the Admin screen" })}
                   column="by"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Issued`}
+                  label={t({ message: "Issued", comment: "Column heading on the Admin screen: when it was created and handed out" })}
                   column="date"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Expires`}
+                  label={t({ message: "Expires", comment: "Column heading on the Admin screen: when it stops working" })}
                   column="expires"
                   sort={order.sort}
                   direction={order.direction}
@@ -828,7 +828,7 @@ function PendingResets() {
                   <td className="small">
                     {one.expired ? (
                       <>
-                        <span className="neg">{t`expired`}</span>{" "}
+                        <span className="neg">{t({ message: "expired", comment: "Table cell on the Admin screen: adjective, no longer works" })}</span>{" "}
                         <span className="muted">{formatInstant(one.expires_at)}</span>
                       </>
                     ) : (
@@ -841,7 +841,7 @@ function PendingResets() {
                       aria-label={t`Withdraw the reset link for ${one.display_name}`}
                       onClick={() => setWithdrawing(one)}
                     >
-                      <Trans>
+                      <Trans comment="Button on the Admin screen: verb, cancel an invitation">
                         Withdraw
                       </Trans>
                     </button>
@@ -874,10 +874,10 @@ function PendingResets() {
               disabled={withdraw.isPending}
               onClick={() => withdraw.mutate(withdrawing.id)}
             >
-              {withdraw.isPending ? t`Withdrawing…` : t`Yes, withdraw it`}
+              {withdraw.isPending ? t({ message: "Withdrawing…", comment: "Button on the Admin screen" }) : t`Yes, withdraw it`}
             </button>
             <button disabled={withdraw.isPending} onClick={() => setWithdrawing(null)}>
-              <Trans>
+              <Trans comment="Button on the Admin screen">
                 Keep it
               </Trans>
             </button>
@@ -944,28 +944,28 @@ function RecentSignInChanges() {
             <thead>
               <tr>
                 <SortHeading
-                  label={t`When`}
+                  label={t({ message: "When", comment: "Column heading on the Admin screen: noun, the time" })}
                   column="date"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`What`}
+                  label={t({ message: "What", comment: "Column heading on the Admin screen: noun, which thing" })}
                   column="what"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`Whom`}
+                  label={t({ message: "Whom", comment: "Column heading on the Admin screen" })}
                   column="whom"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label={t`By`}
+                  label={t({ message: "By", comment: "Column heading on the Admin screen: preposition, done by a person" })}
                   column="by"
                   sort={order.sort}
                   direction={order.direction}
@@ -1040,7 +1040,7 @@ function Households({
           </Trans>
         </p>
         <button className="primary" onClick={() => setAdding(true)}>
-          <Trans>
+          <Trans comment="Button on the Admin screen">
             New household
           </Trans>
         </button>
@@ -1055,28 +1055,28 @@ function Households({
               <thead>
                 <tr>
                   <SortHeading
-                    label={t`Name`}
+                    label={t({ message: "Name", comment: "Column heading on the Admin screen: noun" })}
                     column="name"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label={t`Main currency`}
+                    label={t({ message: "Main currency", comment: "Column heading on the Admin screen" })}
                     column="currency"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label={t`Dates`}
+                    label={t({ message: "Dates", comment: "Column heading on the Admin screen: noun, a date range" })}
                     column="dates"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label={t`Members`}
+                    label={t({ message: "Members", comment: "Column heading on the Admin screen" })}
                     column="members"
                     sort={order.sort}
                     direction={order.direction}
@@ -1092,11 +1092,11 @@ function Households({
                     <td className="mono small muted">{one.date_format}</td>
                     <td className="small muted">
                       {one.member_ids.length === 0
-                        ? t`nobody`
+                        ? t({ message: "nobody", comment: "Table cell on the Admin screen" })
                         : one.member_ids
                             .map(
                               (id) =>
-                                users.find((u) => u.id === id)?.display_name ?? t`somebody`,
+                                users.find((u) => u.id === id)?.display_name ?? t({ message: "somebody", comment: "Table cell on the Admin screen" }),
                             )
                             .join(", ")}
                     </td>
@@ -1154,13 +1154,13 @@ function NewHousehold({
     );
 
   return (
-    <Panel title={t`New household`} onClose={onClose} config>
+    <Panel title={t({ message: "New household", comment: "Title of a panel on the Admin screen" })} onClose={onClose} config>
       <Problem error={create.error} />
-      <Field label={t`Name`}>
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Admin screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p />
-      <Field label={t`Main currency`}>
+      <Field label={t({ message: "Main currency", comment: "Label of a form field on the Admin screen" })}>
         <input
           value={currency}
           onChange={(e) => setCurrency(e.target.value)}
@@ -1173,9 +1173,9 @@ function NewHousehold({
           Used for totals only. Each account keeps its own currency, and nothing is ever converted.
         </Trans>
       </p>
-      <Field label={t`Date format`}>
+      <Field label={t({ message: "Date format", comment: "Label of a form field on the Admin screen" })}>
         <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)}>
-          <option value="YYYY-MM-DD"><Trans>YYYY-MM-DD</Trans></option>
+          <option value="YYYY-MM-DD"><Trans comment="Option in a dropdown on the Admin screen">YYYY-MM-DD</Trans></option>
           <option value="DD/MM/YYYY"><Trans>DD/MM/YYYY</Trans></option>
           <option value="MM/DD/YYYY"><Trans>MM/DD/YYYY</Trans></option>
         </select>
@@ -1207,7 +1207,7 @@ function NewHousehold({
         disabled={create.isPending || !name.trim() || currency.trim().length !== 3}
         onClick={() => create.mutate()}
       >
-        <Trans>
+        <Trans comment="Button on the Admin screen">
           Create household
         </Trans>
       </button>
@@ -1282,14 +1282,14 @@ function Invitations({ households }: { households: AdminHousehold[] }) {
           </Trans>
         </p>
         <button className="primary" onClick={() => setCreating(true)}>
-          <Trans>
+          <Trans comment="Button on the Admin screen">
             Invite somebody
           </Trans>
         </button>
       </div>
 
       {fresh && (
-        <FreshLink link={fresh.link} label={t`Invitation link`} onDismiss={() => setFresh(null)} />
+        <FreshLink link={fresh.link} label={t({ message: "Invitation link", comment: "Label on the Admin screen" })} onDismiss={() => setFresh(null)} />
       )}
 
       <Problem error={invitations.error ?? (revoking ? null : revoke.error)} />
@@ -1303,28 +1303,28 @@ function Invitations({ households }: { households: AdminHousehold[] }) {
               <thead>
                 <tr>
                   <SortHeading
-                    label={t`For`}
+                    label={t({ message: "For", comment: "Column heading on the Admin screen" })}
                     column="for"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label={t`Role`}
+                    label={t({ message: "Role", comment: "Column heading on the Admin screen: noun, owner or member" })}
                     column="role"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label={t`Households`}
+                    label={t({ message: "Households", comment: "Column heading on the Admin screen" })}
                     column="households"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label={t`Expires`}
+                    label={t({ message: "Expires", comment: "Column heading on the Admin screen: when it stops working" })}
                     column="expires"
                     sort={order.sort}
                     direction={order.direction}
@@ -1342,13 +1342,13 @@ function Invitations({ households }: { households: AdminHousehold[] }) {
                     <td className="small">{roleLabel(one.role)}</td>
                     <td className="small muted">
                       {(one.household_ids ?? []).length === 0
-                        ? t`none yet`
+                        ? t({ message: "none yet", comment: "Table cell on the Admin screen: nothing so far" })
                         : (one.household_ids ?? []).map(householdName).join(", ")}
                     </td>
                     <td className="small muted">{formatInstant(one.expires_at)}</td>
                     <td>
                       <button className="link danger" onClick={() => setRevoking(one)}>
-                        <Trans>
+                        <Trans comment="Button on the Admin screen: verb, stop a key or device from working">
                           Revoke
                         </Trans>
                       </button>
@@ -1372,10 +1372,10 @@ function Invitations({ households }: { households: AdminHousehold[] }) {
               disabled={revoke.isPending}
               onClick={() => revoke.mutate(revoking.id)}
             >
-              {revoke.isPending ? t`Revoking…` : t`Yes, revoke it`}
+              {revoke.isPending ? t({ message: "Revoking…", comment: "Button on the Admin screen" }) : t`Yes, revoke it`}
             </button>
             <button disabled={revoke.isPending} onClick={() => setRevoking(null)}>
-              <Trans>
+              <Trans comment="Button on the Admin screen">
                 Keep it
               </Trans>
             </button>
@@ -1449,7 +1449,7 @@ function FreshLink({
           value={link}
           onFocus={(e) => e.target.select()}
         />
-        <button onClick={copy}>{copied === "yes" ? t`Copied` : t`Copy`}</button>
+        <button onClick={copy}>{copied === "yes" ? t({ message: "Copied", comment: "Button on the Admin screen" }) : t({ message: "Copy", comment: "Button on the Admin screen: verb, copy to the clipboard" })}</button>
         <button
           onClick={() => {
             if (copied === "yes" || window.confirm(t`Dismiss without copying? The link cannot be shown again.`)) {
@@ -1457,7 +1457,7 @@ function FreshLink({
             }
           }}
         >
-          <Trans>
+          <Trans comment="Button on the Admin screen: finish and close">
             Done
           </Trans>
         </button>
@@ -1514,16 +1514,16 @@ function NewInvitation({
     );
 
   return (
-    <Panel title={t`Invite somebody`} onClose={onClose} config>
+    <Panel title={t({ message: "Invite somebody", comment: "Title of a panel on the Admin screen" })} onClose={onClose} config>
       <Problem error={create.error} />
-      <Field label={t`Role`}>
+      <Field label={t({ message: "Role", comment: "Label of a form field on the Admin screen: noun, owner or member" })}>
         <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
-          <option value="member"><Trans>Member</Trans></option>
+          <option value="member"><Trans comment="Option in a dropdown on the Admin screen: role, can use the household but not manage it. See GLOSSARY.md">Member</Trans></option>
           <option value="owner"><Trans>Owner — can administer this instance</Trans></option>
         </select>
       </Field>
       <p />
-      <Field label={t`Email (optional)`}>
+      <Field label={t({ message: "Email (optional)", comment: "Label of a form field on the Admin screen" })}>
         <input
           type="email"
           value={email}
@@ -1546,7 +1546,7 @@ function NewInvitation({
         </span>
         <div style={{ marginTop: 6 }}>
           {households.length === 0 ? (
-            <span className="muted small">{t`None yet.`}</span>
+            <span className="muted small">{t({ message: "None yet.", comment: "Text on the Admin screen: nothing so far" })}</span>
           ) : (
             households.map((one) => (
               <label key={one.id} className="small" style={{ display: "block", marginBottom: 4 }}>

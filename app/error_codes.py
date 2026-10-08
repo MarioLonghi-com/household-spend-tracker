@@ -35,6 +35,11 @@ class Code:
 
 
 REGISTRY: dict[str, Code] = {
+    # -- backup: app/services/platform.py `delete_backup` (#165) ------------- #
+    "backup.protected": Code(
+        "{name} is one of the newest five update backups. They are kept so an update can be undone, and the updater removes older ones itself",
+        ("name",)
+    ),
     # -- currency: app/currencies.py `check_new` (#110) ---------------------- #
     "currency.not_iso_4217": Code(
         "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR",
@@ -84,4 +89,49 @@ REGISTRY: dict[str, Code] = {
         ("from_currency", "to_currency"),
     ),
     "transfer.same_account": Code("An account cannot transfer to itself"),
+    # -- update: app/api/routers/updates.py, the self-update endpoints (#165) - #
+    "update.digest_mismatch": Code(
+        "The image digests are not the ones the prepare report verified. Prepare the update again"
+    ),
+    "update.engine_refused": Code(
+        "The updater cannot use the container engine ({socket}), so it cannot update anything",
+        ("socket",)
+    ),
+    "update.in_flight": Code(
+        "Another update request is waiting or running. Wait for it to finish, then try again"
+    ),
+    "update.lossy_mismatch": Code(
+        "Tick every migration that cannot be undone, and only those: the update needs exactly the ones the report lists"
+    ),
+    "update.no_report": Code(
+        "There is no prepared update with that id for this version. Check for updates and prepare it again"
+    ),
+    "update.no_updater": Code(
+        "Updating from this screen needs the updater, and none has answered in the last two minutes"
+    ),
+    "update.not_a_version": Code(
+        "{version} is not a release version like 1.2.3",
+        ("version",)
+    ),
+    "update.not_newer": Code(
+        "{to_version} is not newer than {running}, which this instance runs. An update never goes back",
+        ("to_version", "running")
+    ),
+    "update.outcome_not_found": Code(
+        "There is no update outcome with that id"
+    ),
+    "update.recovery_code_unknown": Code(
+        "That recovery code has expired or belongs to another confirmation. Draw the confirmation again for a new one"
+    ),
+    "update.updater_not_newer": Code(
+        "The updater already runs {updater_version}, which is not older than {to_version}",
+        ("to_version", "updater_version")
+    ),
+    "update.updater_older_than_app": Code(
+        "The updater of {to_version} is older than this instance, which runs {running}, so it would not accept its requests",
+        ("to_version", "running")
+    ),
+    "update.updater_outdated": Code(
+        "The updater is too old for this container engine. Update the updater first, then try again"
+    ),
 }
