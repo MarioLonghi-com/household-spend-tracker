@@ -82,6 +82,10 @@ msgstr "Sua nova senha foi definida. Entre com ela e com seu aplicativo autentic
 msgid "payee, memo, or the bank's own words"
 msgstr "favorecido, descrição ou as palavras do próprio banco"
 
+#: src/lib/saveBackup.ts
+msgid "Open Dropbox"
+msgstr ""
+
 #: src/screens/Rules.tsx
 msgid "One act, so History has one entry and undo puts every row back together."
 msgstr ""
@@ -108,6 +112,10 @@ msgstr "Uma chave permite que um programa — um script, uma automação, um ass
 #: src/screens/Rules.tsx
 msgctxt "rule list"
 msgid "contains"
+msgstr ""
+
+#: src/screens/Backups.tsx
+msgid "Opens your device's share sheet. Pick Drive or Dropbox there, and choose the folder in that app."
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -147,6 +155,7 @@ msgid "No browsers were being trusted."
 msgstr "Nenhum navegador estava sendo considerado confiável."
 
 #: src/App.tsx
+#: src/screens/History.tsx
 #, fuzzy
 msgid "History"
 msgstr "Histórico"
@@ -338,6 +347,7 @@ msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show mor
 msgstr "{unloaded, plural, one {Mostrando {0} — falta carregar {1} linha — mostrar mais} other {Mostrando {2} — faltam carregar {3} linhas — mostrar mais}}"
 
 #: src/screens/Admin.tsx
+#: src/screens/History.tsx
 msgid "When"
 msgstr ""
 
@@ -381,6 +391,10 @@ msgstr ""
 
 #: src/screens/Household.tsx
 msgid "What is in it"
+msgstr ""
+
+#: src/screens/Backups.tsx
+msgid "Downloading…"
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -432,6 +446,11 @@ msgstr "Nenhuma chave pode excluir nada, desfazer nada, mudar quem está em uma 
 #, fuzzy
 msgid "Group accounts by"
 msgstr "Agrupar contas por"
+
+#. placeholder {0}: changes.length
+#: src/screens/History.tsx
+msgid "The first {0} of {count}, in the order they were changed. Undo puts back all {count}."
+msgstr ""
 
 #: src/lib/labels.ts
 #, fuzzy
@@ -519,6 +538,10 @@ msgstr "2. Você"
 
 #: src/screens/Admin.tsx
 msgid "Keep them active"
+msgstr ""
+
+#: src/screens/Backups.tsx
+msgid "Handed to the share sheet."
 msgstr ""
 
 #: src/screens/Categories.tsx
@@ -787,6 +810,10 @@ msgstr ""
 msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
 msgstr "A chave secreta deste servidor foi substituída, então seu autenticador não funciona mais aqui e, até você configurar um novo, cada entrada vai pedir outro código de recuperação."
 
+#: src/screens/History.tsx
+msgid "Everything recorded about this"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Yes, detach it"
@@ -809,6 +836,10 @@ msgstr "Definir a categoria…"
 
 #: src/screens/Household.tsx
 msgid "Statements reconciled"
+msgstr ""
+
+#: src/screens/Backups.tsx
+msgid "Include <0>secret.key</0> in downloads"
 msgstr ""
 
 #: src/screens/TransferSections.tsx
@@ -940,13 +971,27 @@ msgstr ""
 msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
 msgstr "Dinheiro que você deve e que não é cartão — um financiamento imobiliário, um financiamento de carro, dinheiro devido a alguém. Os pagamentos são transferências para ela."
 
+#: src/screens/Backups.tsx
+msgid "Drag the zip from your downloads onto that page, into the folder you keep it in."
+msgstr ""
+
 #: src/screens/Accounts.tsx
+#: src/screens/Backups.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Actions"
 msgstr "Ações"
+
+#: src/screens/History.tsx
+msgid "failed"
+msgstr ""
+
+#. placeholder {0}: prepared.name
+#: src/screens/Backups.tsx
+msgid "Share {0}…"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -984,6 +1029,10 @@ msgstr "{ended, plural, one {{ended} outro navegador foi desconectado.} other {{
 
 #: src/screens/Household.tsx
 msgid "Turned on for every household by whoever runs this server, so it cannot be changed here."
+msgstr ""
+
+#: src/screens/History.tsx
+msgid "undone later"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -1026,6 +1075,10 @@ msgstr "Dinheiro do dia a dia no banco. Entra o salário, saem o cartão e os d�
 
 #: src/screens/Reconcile.tsx
 msgid "Already proved"
+msgstr ""
+
+#: src/screens/History.tsx
+msgid "Yes, undo it"
 msgstr ""
 
 #: src/screens/Import.tsx
@@ -1103,8 +1156,16 @@ msgstr "Aguardando a chave de acesso…"
 msgid "Name as the bank writes it"
 msgstr "Nome como o banco escreve"
 
+#: src/screens/Backups.tsx
+msgid "Nothing backed up yet."
+msgstr ""
+
 #: src/screens/Payees.tsx
 msgid "Spellings of one name"
+msgstr ""
+
+#: src/lib/saveBackup.ts
+msgid "the server sent no file"
 msgstr ""
 
 #: src/lib/signInChanges.ts
@@ -1118,6 +1179,10 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Issued"
+msgstr ""
+
+#: src/screens/Backups.tsx
+msgid "A zip with secret.key opens every member's authenticator, wherever it ends up, long after this browser is closed."
 msgstr ""
 
 #: src/screens/Household.tsx
@@ -1172,6 +1237,10 @@ msgstr "Gerando…"
 #, fuzzy
 msgid "e.g. the code after _en_"
 msgstr "ex.: o código depois de _en_"
+
+#: src/screens/Backups.tsx
+msgid "Sharing and saving straight into a folder need this page on https or on localhost. Over plain http on a network address the browser switches both off, which is why only the download is offered here."
+msgstr ""
 
 #: src/components/bits.tsx
 #, fuzzy
@@ -1252,6 +1321,10 @@ msgstr "Verificar o código"
 #, fuzzy
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Dinheiro guardado no banco. Igual a uma conta corrente, mantido à parte para o registro ficar claro."
+
+#: src/screens/History.tsx
+msgid "Nothing recorded against this one."
+msgstr ""
 
 #: src/screens/Household.tsx
 msgid "Counting…"
@@ -1345,6 +1418,10 @@ msgstr "{by} redefiniu a senha e o autenticador de {user}"
 msgid "Your own accent (optional)"
 msgstr ""
 
+#: src/screens/History.tsx
+msgid "What happened"
+msgstr ""
+
 #: src/screens/Import.tsx
 #: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
@@ -1389,12 +1466,18 @@ msgstr "O banco chamou de <0>{0}</0>, como o {app} guardou."
 msgid "Nothing recorded. Rows created before the audit log existed have no history."
 msgstr "Nada registrado. Linhas criadas antes de existir o registro de auditoria não têm histórico."
 
+#. placeholder {0}: zipName(backup.name)
+#: src/screens/Backups.tsx
+msgid "Download {0}"
+msgstr ""
+
 #. placeholder {0}: withdrawing.display_name
 #. placeholder {1}: withdrawing.email
 #: src/screens/Admin.tsx
 msgid "The link for {0} ({1}) stops working at once. Their password and authenticator stays reset, so they cannot sign in until you make them a new link."
 msgstr ""
 
+#: src/screens/History.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Reading the log…"
@@ -1490,6 +1573,7 @@ msgstr "{0} caracteres"
 msgid "Source app"
 msgstr "App de origem"
 
+#: src/screens/Backups.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "or"
@@ -1565,6 +1649,10 @@ msgstr "{revoked, plural, one {{revoked} navegador confiável vai pedir um códi
 msgid "Changing your own role would close this screen; ask the other owner"
 msgstr ""
 
+#: src/screens/Backups.tsx
+msgid "Size"
+msgstr ""
+
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Select every waiting row"
@@ -1583,6 +1671,7 @@ msgstr "Isso não é um valor"
 msgid "Yes, revoke it"
 msgstr ""
 
+#: src/screens/Backups.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 #: src/screens/Rules.tsx
@@ -1779,6 +1868,10 @@ msgstr "Mais recente"
 msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and that payee will be gone. Each merge is one act in History, so it can be undone there."
 msgstr ""
 
+#: src/components/bits.tsx
+msgid "Through the agent key {via}"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "another app"
@@ -1807,11 +1900,19 @@ msgstr ""
 msgid "Choose a payee…"
 msgstr ""
 
+#: src/screens/History.tsx
+msgid "Include single edits made in the register"
+msgstr ""
+
 #. placeholder {0}: format(-difference, currency)
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Work paid {0} less than these expenses. If it will not pay the rest, split that part off and write it off."
 msgstr "O trabalho pagou {0} a menos que estas despesas. Se não vai pagar o resto, separe essa parte e dê como perdida."
+
+#: src/screens/History.tsx
+msgid "Leave it alone"
+msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
@@ -2049,6 +2150,10 @@ msgstr ""
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "{done} linha alterada e {skipped} deixadas como estavam — só uma saída de dinheiro que não seja transferência pode ser despesa de trabalho."
 
+#: src/screens/History.tsx
+msgid "preview"
+msgstr ""
+
 #: src/screens/Payees.tsx
 msgid "Add payee"
 msgstr ""
@@ -2237,6 +2342,7 @@ msgid "Auto-categorise based on payee history"
 msgstr ""
 
 #: src/screens/Admin.tsx
+#: src/screens/History.tsx
 msgid "By"
 msgstr ""
 
@@ -2409,6 +2515,7 @@ msgstr "Sem sinal de menos — o sentido vem das duas contas acima."
 msgid "Recent sign-in changes"
 msgstr "Mudanças recentes nas formas de entrar"
 
+#: src/screens/Backups.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Deleting…"
@@ -2535,6 +2642,7 @@ msgid "date format"
 msgstr "formato de data"
 
 #: src/screens/Accounts.tsx
+#: src/screens/History.tsx
 #: src/screens/Import.tsx
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -2618,6 +2726,10 @@ msgstr "Itens de trabalho e seus reembolsos"
 #, fuzzy
 msgid "A running balance needs one account, newest-first by date, and no filters — it is a sum down the page, so in any other order or with rows hidden it would not mean anything."
 msgstr "Um saldo acumulado precisa de uma conta, ordem por data com as mais recentes primeiro e nenhum filtro — é uma soma descendo a página, então em outra ordem ou com linhas ocultas não significaria nada."
+
+#: src/screens/History.tsx
+msgid "Undo this"
+msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
@@ -2724,6 +2836,10 @@ msgstr ""
 msgid "Work will not pay this. It counts as your spending."
 msgstr "O trabalho não vai pagar isto. Conta como gasto seu."
 
+#: src/screens/Backups.tsx
+msgid "Save to Google Drive or Dropbox"
+msgstr ""
+
 #: src/screens/Rules.tsx
 msgid "Call it"
 msgstr ""
@@ -2773,6 +2889,10 @@ msgstr "Nova"
 #, fuzzy
 msgid "Date range"
 msgstr "Período"
+
+#: src/screens/History.tsx
+msgid "Everything that has changed this household, grouped by the act that changed it. An import of two hundred rows is one entry here, and undoing it puts all two hundred back."
+msgstr ""
 
 #. placeholder {0}: index + 1
 #: src/screens/Register.tsx
@@ -2952,6 +3072,10 @@ msgstr "Ignorar {0}"
 msgid "Link as transfer"
 msgstr "Vincular como transferência"
 
+#: src/screens/Backups.tsx
+msgid "Save to Drive/Dropbox…"
+msgstr ""
+
 #. placeholder {0}: formatCount(proposed.considered)
 #: src/screens/Rules.tsx
 msgid "Nothing would change. {0} rows carry the bank’s words and today’s rules already agree with all of them."
@@ -2971,6 +3095,10 @@ msgstr ""
 msgid "Drag to resize · double-click to reset every column"
 msgstr "Arraste para redimensionar · clique duas vezes para redefinir todas as colunas"
 
+#: src/screens/Backups.tsx
+msgid "Saving…"
+msgstr ""
+
 #: src/screens/Categories.tsx
 msgid "Delete group"
 msgstr ""
@@ -2982,6 +3110,10 @@ msgstr "Código de recuperação"
 
 #: src/screens/Categories.tsx
 msgid "New group"
+msgstr ""
+
+#: src/screens/Backups.tsx
+msgid "Prepare the zip"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -3104,6 +3236,10 @@ msgstr "Como funciona a importação"
 msgid "Transfer between your own accounts"
 msgstr "Transferência entre suas próprias contas"
 
+#: src/screens/Backups.tsx
+msgid "Choose a folder…"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Bank"
@@ -3166,6 +3302,14 @@ msgstr "Dada como perdida — o trabalho não vai pagar"
 msgid "Kind"
 msgstr "Tipo"
 
+#: src/screens/Backups.tsx
+msgid "<0>This is the only backup.</0> After this there is none: nothing on this instance could put the ledger back if it were damaged."
+msgstr ""
+
+#: src/screens/History.tsx
+msgid "running"
+msgstr ""
+
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Waiting for the other statement"
@@ -3213,6 +3357,10 @@ msgstr "proprietário"
 #, fuzzy
 msgid "Undo in History brings it back."
 msgstr "Desfazer no Histórico a traz de volta."
+
+#: src/screens/History.tsx
+msgid "The whole row as it was before it went"
+msgstr ""
 
 #: src/App.tsx
 #: src/screens/Register.tsx
@@ -3334,6 +3482,11 @@ msgstr "Não compensada — o banco ainda não viu isto"
 msgid "A new authenticator"
 msgstr "Um novo autenticador"
 
+#. placeholder {0}: ++step
+#: src/screens/Backups.tsx
+msgid "{0}. Save it into your synced Drive or Dropbox folder"
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "1. You"
@@ -3365,6 +3518,10 @@ msgstr "Qualquer"
 
 #: src/screens/Rules.tsx
 msgid "What would this match?"
+msgstr ""
+
+#: src/screens/Backups.tsx
+msgid "{step}. Download it, then upload it"
 msgstr ""
 
 #: src/screens/Reconcile.tsx
@@ -3424,6 +3581,10 @@ msgstr "Reativado"
 msgid "One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key."
 msgstr "Um dos dez que você guardou quando esta conta foi configurada. Cada um funciona uma vez, e usar um desconecta você em todos os lugares, esquece todos os navegadores confiáveis e revoga todas as chaves de agente."
 
+#: src/screens/Backups.tsx
+msgid "Open the service in a new tab:"
+msgstr ""
+
 #: src/components/bits.tsx
 #, fuzzy
 msgid "{wait, plural, other {Try again in {wait} seconds.}}"
@@ -3442,6 +3603,10 @@ msgstr "O servidor redefiniu a senha e o autenticador de {user}"
 #: src/screens/Admin.tsx
 #: src/screens/Household.tsx
 msgid "Who is in it"
+msgstr ""
+
+#: src/screens/History.tsx
+msgid "The whole row as it was written"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -3503,6 +3668,7 @@ msgstr ""
 msgid "Required. No two accounts can share one."
 msgstr ""
 
+#: src/screens/Backups.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Download"
@@ -3708,6 +3874,10 @@ msgstr "<0>{0} outra linha tem o mesmo favorecido</0> e nenhuma categoria própr
 msgid "Change"
 msgstr "Alterar"
 
+#: src/screens/History.tsx
+msgid "Undoing puts back <0>{count}</0> row exactly as they were before. Anything changed since is overwritten, and undoing the undo is the only way back."
+msgstr ""
+
 #. placeholder {0}: recovered.passkeys
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -3808,6 +3978,13 @@ msgstr "Redefinição"
 
 #: src/screens/Rules.tsx
 msgid "Order (lower runs first)"
+msgstr ""
+
+#. placeholder {0}: zipName(backup.name)
+#. placeholder {1}: formatInstant(backup.made_at)
+#. placeholder {2}: bytes(backup.bytes)
+#: src/screens/Backups.tsx
+msgid "<0>{0}</0>, from a backup made {1} ({2} before zipping), without secret.key. This page never talks to Google or Dropbox and needs no key or sign-in of theirs: the file goes through your own browser, apps and accounts."
 msgstr ""
 
 #. placeholder {0}: count(it.receipts_unattached)
@@ -4041,6 +4218,14 @@ msgstr "De onde veio isto?"
 msgid "This device only"
 msgstr "Só neste dispositivo"
 
+#: src/screens/Backups.tsx
+msgid "Saved. Your sync app will upload it from there."
+msgstr ""
+
+#: src/lib/saveBackup.ts
+msgid "a zip with secret.key needs your password and a code"
+msgstr ""
+
 #: src/components/SignInNotice.tsx
 #, fuzzy
 msgid "See them in Admin"
@@ -4050,6 +4235,11 @@ msgstr "Ver em Administração"
 #, fuzzy
 msgid "Hide help: {label}"
 msgstr "Ocultar ajuda: {label}"
+
+#. placeholder {0}: formatInstant(batch.started_at)
+#: src/screens/History.tsx
+msgid "<0>Last check.</0> {count} rows go back to how they were {0}."
+msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "how this works"
@@ -4140,6 +4330,7 @@ msgstr "Configurar um novo autenticador"
 
 #. placeholder {0}: response.status
 #: src/lib/api.ts
+#: src/lib/saveBackup.ts
 #, fuzzy
 msgid "the server answered {0}"
 msgstr "o servidor respondeu {0}"
@@ -4286,6 +4477,12 @@ msgstr "saldo inicial"
 msgid "Never"
 msgstr "Nunca"
 
+#. placeholder {0}: entry.change_count
+#. placeholder {1}: entry.change_count
+#: src/screens/History.tsx
+msgid "{0, plural, one {1 row} other {{1} rows}}"
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Not the same thing — add it separately"
@@ -4361,6 +4558,10 @@ msgstr ""
 msgid "Working out what would change…"
 msgstr ""
 
+#: src/screens/Backups.tsx
+msgid "Download…"
+msgstr ""
+
 #. placeholder {0}: format(txn.amount, currency)
 #. placeholder {1}: formatDate(txn.date)
 #: src/screens/Register.tsx
@@ -4391,6 +4592,10 @@ msgstr "{by} tornou {user} proprietário"
 #, fuzzy
 msgid "Preview"
 msgstr "Prévia"
+
+#: src/screens/Backups.tsx
+msgid "The zip will hold the key that decrypts every authenticator. With it and a member's password, anyone holding the zip can sign in as that member once it is restored. Keep it somewhere only you can open. Each download asks for your password and a code."
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -4453,6 +4658,10 @@ msgstr "Ano inicial"
 msgid "Type the closing balance"
 msgstr ""
 
+#: src/screens/Backups.tsx
+msgid "Backup"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Replacing it also un-trusts every browser, including this one, and signs out every other browser — they were let in on the strength of the old authenticator, and that is exactly what you are replacing."
@@ -4487,6 +4696,7 @@ msgid "Every category this payee has been filed under, biggest first. The transa
 msgstr ""
 
 #: src/screens/Admin.tsx
+#: src/screens/Backups.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
@@ -4494,6 +4704,14 @@ msgstr ""
 #, fuzzy
 msgid "Keep it"
 msgstr "Manter"
+
+#: src/screens/History.tsx
+msgid "State"
+msgstr ""
+
+#: src/screens/History.tsx
+msgid "Batch"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -4526,6 +4744,14 @@ msgstr ""
 #. placeholder {0}: accountName(one.transfer_account_id)
 #: src/screens/Payees.tsx
 msgid "Transfer to {0}"
+msgstr ""
+
+#: src/screens/Backups.tsx
+msgid "Left out, the zip restores onto this instance as it is. Anywhere else, every authenticator is refused unless you supply the key separately, and the zip's README says how."
+msgstr ""
+
+#: src/screens/History.tsx
+msgid "Nothing has happened here yet."
 msgstr ""
 
 #. placeholder {0}: formatDate(it.first_transaction)
@@ -4573,6 +4799,17 @@ msgstr "escrever"
 #, fuzzy
 msgid "Money you owe the card issuer. Spending makes the balance more negative; paying the bill is a transfer from the account that pays it."
 msgstr "Dinheiro que você deve ao emissor do cartão. Gastar deixa o saldo mais negativo; pagar a fatura é uma transferência da conta que a paga."
+
+#. placeholder {0}: zipName(backup.name)
+#. placeholder {1}: formatInstant(backup.made_at)
+#. placeholder {2}: bytes(backup.bytes)
+#: src/screens/Backups.tsx
+msgid "<0>{0}</0>, from a backup made {1} ({2} before zipping), <1>with secret.key</1>. This page never talks to Google or Dropbox and needs no key or sign-in of theirs: the file goes through your own browser, apps and accounts."
+msgstr ""
+
+#: src/lib/saveBackup.ts
+msgid "Open Google Drive"
+msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Nothing to go on yet, so new transactions stay uncategorised."
@@ -4651,6 +4888,10 @@ msgstr "S — Partes de divisão"
 msgid "whatever is left"
 msgstr ""
 
+#: src/screens/History.tsx
+msgid "Undoing puts back <0>{count}</0> rows exactly as they were before. Anything changed since is overwritten, and undoing the undo is the only way back."
+msgstr ""
+
 #: src/screens/Categories.tsx
 msgid "Nothing in this group yet."
 msgstr ""
@@ -4688,10 +4929,19 @@ msgstr ""
 msgid "Staged"
 msgstr "Preparada em"
 
+#: src/screens/Backups.tsx
+msgid "Delete this backup?"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Needs setting up again"
 msgstr "Precisa ser configurado de novo"
+
+#. placeholder {0}: formatInstant(batch.started_at)
+#: src/screens/History.tsx
+msgid "<0>Last check.</0> {count} row goes back to how they were {0}."
+msgstr ""
 
 #. placeholder {0}: kept?.name ?? "…"
 #: src/screens/Payees.tsx
@@ -4729,6 +4979,10 @@ msgstr "{0, plural, one {{who} também está aqui} other {{who} também estão a
 #, fuzzy
 msgid "Remove"
 msgstr "Remover"
+
+#: src/screens/History.tsx
+msgid "Rows touched"
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Invite somebody"
@@ -4885,6 +5139,10 @@ msgstr ""
 msgid "No invitations outstanding."
 msgstr ""
 
+#: src/screens/Backups.tsx
+msgid "If <0>Google Drive for desktop</0> or the Dropbox app is installed, it keeps a folder in sync — usually <1>Google Drive</1> or <2>Dropbox</2> in your home folder. Pick it, and the app uploads the zip from there."
+msgstr ""
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Fixed"
@@ -4984,6 +5242,10 @@ msgstr "por que não um código de recuperação"
 #, fuzzy
 msgid "Clear filters"
 msgstr "Limpar filtros"
+
+#: src/screens/Backups.tsx
+msgid "Made"
+msgstr ""
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -5139,6 +5401,7 @@ msgstr ""
 msgid "Its two-letter code, like <0>ES</0>."
 msgstr ""
 
+#: src/screens/Backups.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Yes, delete it"
@@ -5162,6 +5425,10 @@ msgstr "e mais {0}."
 
 #: src/screens/Admin.tsx
 msgid "Reset link"
+msgstr ""
+
+#: src/screens/History.tsx
+msgid "No, go back"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -5249,6 +5516,7 @@ msgstr ""
 
 #. placeholder {0}: formatCount(page.shown)
 #. placeholder {1}: formatCount(page.total)
+#: src/screens/History.tsx
 #: src/screens/Import.tsx
 #: src/screens/PayeeCategorisation.tsx
 #: src/screens/Register.tsx
@@ -5266,6 +5534,10 @@ msgstr "3. Seu autenticador"
 msgid "1. The setup token"
 msgstr "1. O token de configuração"
 
+#: src/screens/History.tsx
+msgid "Every row it changed"
+msgstr ""
+
 #: src/screens/Reconcile.tsx
 msgid "Already locked"
 msgstr ""
@@ -5277,6 +5549,14 @@ msgstr "Idioma"
 
 #: src/screens/Admin.tsx
 msgid "Change your own password or authenticator from your profile"
+msgstr ""
+
+#: src/screens/History.tsx
+msgid "undone"
+msgstr ""
+
+#: src/components/bits.tsx
+msgid "via {via}"
 msgstr ""
 
 #: src/screens/AcceptInvite.tsx
@@ -5714,6 +5994,15 @@ msgstr "Novos códigos"
 msgid "For"
 msgstr "Para"
 
+#: src/screens/Backups.tsx
+msgid "Downloaded."
+msgstr ""
+
+#. placeholder {0}: change.redacted.join(", ")
+#: src/screens/History.tsx
+msgid "Kept out of the log: {0}. Absent rather than starred over — an undo writes back what is stored, and \"***\" would become the password."
+msgstr ""
+
 #. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
 #: src/screens/Import.tsx
 #, fuzzy
@@ -5728,10 +6017,18 @@ msgstr "mostrando os primeiros {0}"
 msgid "{0} more currencies: {1}. {2} shown."
 msgstr "Mais {0} moedas: {1}. {2} mostradas."
 
+#: src/screens/History.tsx
+msgid "applied"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody made {user} an owner"
 msgstr "Alguém tornou {user} proprietário"
+
+#: src/screens/Backups.tsx
+msgid "<0>This is the newest backup.</0> The next newest is older, so a restore would lose everything since then."
+msgstr ""
 
 #: src/screens/Transfer.tsx
 #, fuzzy
@@ -5806,6 +6103,10 @@ msgstr "Escolher o substituto"
 msgid "The bank called it <0>{0}</0>."
 msgstr "O banco chamou de <0>{0}</0>."
 
+#: src/screens/Backups.tsx
+msgid "{step}. Or download it and upload it"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "{count, plural, one {Linked {count} expense to the payment of {paid} on {on}.} other {Linked {count} expenses to the payment of {paid} on {on}.}}"
@@ -5829,6 +6130,10 @@ msgstr "{inviter} convidou você para o {PRODUCT} como membro, em {households}."
 #, fuzzy
 msgid "that import was discarded — nothing was written"
 msgstr "essa importação foi descartada — nada foi gravado"
+
+#: src/screens/History.tsx
+msgid "Putting it back…"
+msgstr ""
 
 #. placeholder {0}: rule.pattern
 #: src/screens/Rules.tsx
@@ -5893,6 +6198,22 @@ msgstr "{by} reativou {user}"
 #, fuzzy
 msgid "The whole import is one entry in History, and undoing it there takes every row it brought in back out."
 msgstr "A importação inteira é um único registro no Histórico, e desfazê-la ali retira todas as linhas que ela trouxe."
+
+#. placeholder {0}: ++step
+#: src/screens/Backups.tsx
+msgid "{0}. Share it to the Drive or Dropbox app"
+msgstr ""
+
+#. placeholder {0}: deleting.name
+#. placeholder {1}: formatInstant(deleting.made_at)
+#. placeholder {2}: bytes(deleting.bytes)
+#: src/screens/Backups.tsx
+msgid "<0>{0}</0>, made {1}, {2}. The file is removed from the backups directory and <1>cannot be brought back</1> — a backup is a file, not a ledger row, so there is no undo in History."
+msgstr ""
+
+#: src/screens/Backups.tsx
+msgid "Preparing the zip…"
+msgstr ""
 
 #: src/screens/Transfer.tsx
 #, fuzzy

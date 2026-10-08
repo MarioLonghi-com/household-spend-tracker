@@ -31,6 +31,8 @@ import { HouseholdPage } from "./Household";
 import { Admin } from "./Admin";
 import { Reconcile } from "./Reconcile";
 import { AccountImport } from "./AccountImport";
+import { History } from "./History";
+import { BackupList, SavePanel } from "./Backups";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -291,5 +293,40 @@ describe("in en-XA, the remaining screens show no English", () => {
     // The template's own column names stay as the file writes them.
     const left2 = left().filter((word) => !/^(name|type|currency|country|opening_balance|opening_date|checking|savings|cash|credit_card|other_asset|other_liability|boat|accounts|csv|Spain)$/.test(word));
     expect(left2).toEqual([]);
+  });
+
+  it("History's list and a batch's panel; its sentences are the server's until #57", async () => {
+    const batch = {
+      id: "b1", kind: "import", status: "applied", actor_id: "u1", started_at: "2026-03-01T10:00:00",
+      finished_at: null, source: null, summary: null, undone_by_id: null,
+      headline: "Sam", detail: "Doe", actor_name: "Sam", via: "Casa", change_count: 3,
+    };
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path.includes("/batches/b1"))
+        return {
+          ...batch,
+          change_count: 3,
+          changed_rows: [{ seq: 1, op: "update", table: "transactions", row_id: "t1", summary: "Sam", fields: [], snapshot: [{ field: "memo", now: "Doe" }], redacted: ["password_hash"] }],
+        };
+      return [batch];
+    });
+    render(withQueries(<History household={HOUSEHOLD} />));
+    await screen.findByText("Doe");
+    const dates = (word: string) => !/^(AM|PM|at|transactions|update|memo|password|hash)$/.test(word);
+    expect(left().filter(dates)).toEqual([]);
+    fireEvent.click(document.querySelector("tbody td.editable button, tbody button")!);
+    await screen.findByRole("dialog");
+    await new Promise((done) => setTimeout(done, 0));
+    expect(left().filter(dates)).toEqual([]);
+  });
+
+  it("the backups list, with and without the key, and the save panel", () => {
+    const backup = { name: "casa-2026-03-01.sqlite3", path: "/x", bytes: 1536, made_at: "2026-03-01T10:00:00" };
+    render(withQueries(<BackupList backups={[backup]} onChanged={vi.fn()} />));
+    const dates = (word: string) => !/^(AM|PM|at|casa|sqlite|KiB|zip|key|secret|README)$/.test(word);
+    expect(left().filter(dates)).toEqual([]);
+    cleanup();
+    render(withQueries(<SavePanel backup={backup} withKey routes={["share", "folder", "download"]} onClose={vi.fn()} />));
+    expect(left().filter(dates).filter((word) => !/^(Google|Drive|Dropbox|desktop)$/.test(word))).toEqual([]);
   });
 });
