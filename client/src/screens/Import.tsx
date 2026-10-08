@@ -26,7 +26,7 @@ import type {
 import { IMPORT_OUTCOME_WORDS } from "../lib/labels";
 import { formatCount, formatLocale } from "../lib/locale";
 import { plural, t } from "@lingui/core/macro";
-import { Plural, Trans } from "@lingui/react/macro";
+import { Trans } from "@lingui/react/macro";
 import { detectedLabel } from "../lib/labels";
 
 /**
@@ -459,6 +459,8 @@ export function Import({
   const [queueSort, setQueueSort] = useState<QueueSort>("staged_at");
   const [queueDirection, setQueueDirection] = useState<SortDirection>("desc");
   const [purging, setPurging] = useState<StagedImport | null>(null);
+  // The staged file's name, or words for one that has none.
+  const purgingName = purging?.filename ?? t`This import`;
 
   //: Imports staged and never committed. The refusal to stage a file twice
   //: says one "is waiting to be reviewed"; this is how it gets reached.
@@ -809,23 +811,19 @@ export function Import({
       {purging && (
         <Dialog title={t`Discard this staged import?`} onClose={() => setPurging(null)}>
           <p style={{ marginTop: 0 }}>
-            <Plural
-              value={purging.row_count}
-              one={
-                <>
-                  <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} line
-                  will be deleted. Nothing in it has reached the register, so there is nothing to undo
-                  afterwards — and the file can be imported again from scratch.
-                </>
-              }
-              other={
-                <>
-                  <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} lines
-                  will be deleted. Nothing in it has reached the register, so there is nothing to undo
-                  afterwards — and the file can be imported again from scratch.
-                </>
-              }
-            />
+            {purging.row_count === 1 ? (
+              <Trans>
+                <strong>{purgingName}</strong> and its {purging.row_count} line will be deleted.
+                Nothing in it has reached the register, so there is nothing to undo afterwards — and
+                the file can be imported again from scratch.
+              </Trans>
+            ) : (
+              <Trans>
+                <strong>{purgingName}</strong> and its {purging.row_count} lines will be deleted.
+                Nothing in it has reached the register, so there is nothing to undo afterwards — and
+                the file can be imported again from scratch.
+              </Trans>
+            )}
           </p>
           <div className="dialog-choices">
             <button
@@ -982,21 +980,17 @@ export function Import({
       {offer && (
         <Dialog title={t`The rest of this payee?`} onClose={() => setOffer(null)}>
           <p style={{ marginTop: 0 }}>
-            <Plural
-              value={offer.count}
-              one={
-                <>
-                  <strong>{offer.count} other line has the same payee</strong> and no category of
-                  their own.
-                </>
-              }
-              other={
-                <>
-                  <strong>{offer.count} other lines have the same payee</strong> and no category of
-                  their own.
-                </>
-              }
-            />{" "}
+            {offer.count === 1 ? (
+              <Trans>
+                <strong>{offer.count} other line has the same payee</strong> and no category of
+                their own.
+              </Trans>
+            ) : (
+              <Trans>
+                <strong>{offer.count} other lines have the same payee</strong> and no category of
+                their own.
+              </Trans>
+            )}{" "}
             {offer.uncategorised ? (
               <Trans>
                 Leave them <strong>uncategorised</strong> too?
