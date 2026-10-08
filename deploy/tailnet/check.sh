@@ -39,7 +39,19 @@ if [ ! -f .env ]; then
     exit 1
 fi
 mode=$(stat -c '%a' .env 2>/dev/null || stat -f '%Lp' .env)
-if [ "$mode" = "600" ]; then ok ".env" "present, mode 600"; else fail ".env" "mode $mode: chmod 600 .env (it holds the auth key)"; fi
+group=$(stat -c '%g' .env 2>/dev/null || stat -f '%g' .env)
+gid=$(setting SPENDTRACKER_SOCKET_GID)
+# 600, or 660 shared with the socket's group: the updater, which carries that
+# group, rewrites .env when it pins a release (DOCKER.md, "The updater, on a
+# server"). That group can read every container's environment through the
+# socket already, the auth key included.
+if [ "$mode" = "600" ]; then
+    ok ".env" "present, mode 600"
+elif [ "$mode" = "660" ] && [ -n "$gid" ] && [ "$group" = "$gid" ]; then
+    ok ".env" "present, mode 660, group $gid (the socket's)"
+else
+    fail ".env" "mode $mode, group $group: chmod 600 .env, or chgrp the socket's group and chmod 660 for the updater (it holds the auth key)"
+fi
 if grep -q 'REPLACE-ME' .env; then fail ".env" "still has a REPLACE-ME placeholder"; fi
 
 public=$(setting SPENDTRACKER_PUBLIC_URL)

@@ -377,10 +377,15 @@ _RULES: dict[tuple[str, bool], NotRoot] = {
         "podman", True, "0:0", (UPDATE_GROUP,), "user", True,
         "/run/user/${UID}/podman/podman.sock", True,
     ),
-    # Not yet run: a rootful machine is taken to behave as rootful Podman.
+    # S21, observed on macOS with a machine made as Podman Desktop makes one
+    # (rootful, its default): the socket is /run/podman/podman.sock, root:root
+    # 660, and `/var/run/docker.sock` links to it, so the bundle's default
+    # mount is right here too. 65532 with group 0 reaches it under
+    # label=disable. podman-restart is off, system and user; the **system**
+    # unit, enabled, brings `unless-stopped` back after a machine restart.
     ("podman-machine", False): NotRoot(
         "podman-machine", False, "65532:65532", ("0", UPDATE_GROUP), "system", False,
-        "/run/podman/podman.sock", False,
+        "/var/run/docker.sock", True,
     ),
     # S4, observed on macOS: unlike Linux, the project directory is shared
     # over VirtioFS and 65532 writes it; `/var/run/docker.sock` in the

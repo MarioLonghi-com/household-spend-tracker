@@ -31,6 +31,7 @@ page is for the moment something is not what you expected.
 - [`database is locked`, or two apps on one ledger](#database-is-locked-or-two-apps-on-one-ledger)
 - [A 502 for a second, then it carries on](#a-502-for-a-second-then-it-carries-on)
 - [A 502 that does not go away](#a-502-that-does-not-go-away)
+- [Updates from the browser](#updates-from-the-browser): the recovery page, the updater, and every failure by what you see
 - [It will not start](#it-will-not-start)
 - [Backups, by route](#backups-by-route)
 - [Asking for help](#asking-for-help)
@@ -721,6 +722,196 @@ automatic, run a small job every minute on the server. It should read
 restart the app when that says `unhealthy`, and not restart it again for
 ten minutes. Have it tell you when it acts, because an app that keeps
 failing needs a person. #37.
+
+---
+
+## Updates from the browser
+
+How an update from *Application management → Updates* works is in
+[UPGRADING.md](UPGRADING.md#from-the-browser-container-installs). This is for
+when it did not go as that page says. The first rule is the same as
+everywhere here: **the update keeps a backup of the ledger as it was when the
+app stopped**, in the data volume, and nothing on this page deletes it.
+
+### The recovery page
+
+**When it appears.** An update that fails puts the previous version back by
+itself. The recovery page is for the rare case where that fails too: the
+rollback was tried three times, or the update has been unfinished for an
+hour with the app stopped. Then nothing serves the ledger, and the address
+the app had shows *"Spend Tracker is being updated. It will be back in a few
+minutes."* with a small **Owner: open recovery** link. The link goes to
+`/recovery`, on the same address: `http://localhost:8848/recovery` on a
+personal computer, your tailnet address on a server.
+
+**The code.** It asks for the recovery code shown on the confirmation when
+*Update* was pressed: seven groups of four characters. Case, hyphens and
+spaces do not matter, and `O`/`0`, `I`/`L`/`1` are read alike. It works
+**only for the update it was shown for**, and only until that update has
+finished one way or another: a code from an earlier update opens nothing.
+Five wrong codes pause the page for 15 minutes, and each further five double
+the pause; a right code resets the count. The page never decides whether a
+code is right: it passes it to the updater, which holds only its hash.
+
+Once open, the page shows the update from and to which version, the step it
+failed at, what the updater said, and the last lines of the drill's and the
+restore's logs. Then the actions:
+
+| Action | What it does | When to press it |
+|---|---|---|
+| **Retry the rollback** | Removes the new version, restores the update's backup with the previous version, starts the previous version and checks it. | First, almost always. Something passing (a full disk freed, an engine that came back) is the usual reason a second try works. |
+| **Restore a different backup** | Lists the update backups in the volume, newest first, each with the version that took it. The one you choose is restored **with that version's image**, if that image is still on the machine and still verifies, and that version is started. | When the newest backup is the problem, or you want the state before an earlier update. Everything written since that backup is lost. |
+| **Start *X.Y.Z*** | Shown only when the ledger turns out to be intact at a revision one of the two versions of this update runs. Starts that version as it is, after it confirms the ledger's revision itself. Never migrates. | When the logs say the ledger was never touched, or the restore finished and only the start failed. |
+| **Download a backup** | A zip of the chosen update backup, as *Application management* makes them, which `make restore` takes as it is. `secret.key` only if you tick its box, with the same warning as there. | Before anything else, if you want a copy in your own hands. Untick the key unless the zip goes somewhere only you can open. |
+| **Download the diagnostics** | A zip of the update's records and logs and the engine the updater detected. No ledger data, no key, no recovery code. | To ask for help (attach it to an issue), or to read at leisure. |
+| **Stop and leave it to me** | Marks the update as left to you. The page stops acting on it: from then on only the two downloads work, and it shows the commands below. | When you have a terminal and want to finish by hand, and do not want a button pressed later to undo what you did. |
+
+After *Retry*, *Restore* or *Start* the page says the updater accepted it and
+goes away while the updater works. Reload after a minute or two: you see
+Spend Tracker again, or this page with what happened. The Updates section
+afterwards says what recovery did, from which backup, and which version now
+runs.
+
+**From a terminal**, which is what *Stop and leave it to me* shows, from the
+compose directory:
+
+```bash
+docker ps -a --filter label=com.docker.compose.oneoff=True
+docker rm -f <the placard container listed above>
+docker compose run --rm -T --entrypoint python app -m scripts.restore /var/lib/spend-tracker/backups/<stamp> --yes
+docker compose run --rm -T --entrypoint python app -m scripts.upgrade --check
+docker compose up -d
+```
+
+The first two remove the maintenance page, a one-off container named after
+the app with `-placard-` and eight characters of the update's id. The restore runs with the image `.env` names, which is
+the version from before the update, because a failed update never pins the
+new one. The check says whether that image and the restored ledger agree,
+before `up` starts it. [UPGRADING.md](UPGRADING.md#in-a-container) has the
+rest of the manual drill.
+
+**The code is lost.** The page cannot be opened, and *Stop and leave it to
+me* cannot be reached either. On a personal computer, run the release zip's
+launcher again: it removes the maintenance page and starts the version your
+ledger was pinned at. That is enough when the ledger is at that version; if
+it is not, the page that comes up says so, and the route left is the
+terminal one above. On a server, the terminal one above.
+
+### The updater is not running
+
+The Updates section says *"Updating from this screen needs the updater"* and
+names a container to start: the updater's heartbeat is more than two minutes
+old.
+
+1. **Start the one it names.** In Docker Desktop or Podman Desktop: open
+   *Containers*, find it in the `spend-tracker` group, press *Start*. On a
+   server, `docker compose up -d updater` from the compose directory.
+2. **If it stops again, or keeps restarting**, the updater most likely
+   replaced itself with a release whose updater does not work here. Start
+   the **old** one instead, the container whose name ends in `-previous`
+   (`spend-tracker-updater-1-previous` under Docker Compose), the same way, or
+   `docker start spend-tracker-updater-1-previous` on a server. It sees the
+   broken updater has gone quiet, stops it, renames it `…-next`, takes the
+   updater's name and carries on. If the current updater was in fact
+   healthy, the `-previous` one stops itself again after five minutes and
+   changes nothing.
+3. **With no `-previous` container**, run the newest release zip's launcher
+   on a personal computer (below), or `docker compose up -d` on a server.
+
+A stopped updater changes nothing about the app, which keeps running.
+
+### The updater is too old for the engine
+
+*"Docker Desktop 4.x is newer than this updater (N) can work with. It will
+try to replace itself with a newer one: [Update the updater]"*. Docker
+Desktop and Podman update themselves, and an engine can stop accepting the
+API version an old updater speaks. The heartbeat then says `outdated`: the
+updater refuses to prepare or apply, but can still try to replace itself.
+
+1. Press **Update the updater**. It looks for the newest updater that works
+   with the version of Spend Tracker you run, checks where it came from,
+   and hands over to it. The ledger is not touched, and no password is
+   asked.
+2. **If that fails**, download the newest release's
+   `spend-tracker-<version>-compose.zip`, unzip it anywhere, and run its
+   launcher. With a pin it starts **the app at the release your ledger is
+   at**, whatever the zip ships, and **the newer of the two updaters**, so it
+   replaces only the updater; it finds your old folder from the running
+   containers and carries its settings over. Your data and version are kept,
+   and the app update stays the browser's job.
+3. **On a server**, put the newer updater in `.env` and recreate it:
+   `SPENDTRACKER_UPDATER_IMAGE=ghcr.io/mariolonghi-com/household-spend-tracker-updater:X.Y.Z`,
+   then `docker compose up -d updater`.
+
+### "Started on an older version than the one its data was last used with"
+
+*"Spend Tracker was started on an older version than the one its data was
+last used with, so it will not open. Run the launcher again: it starts the
+right version."*
+
+Something started the app with an image older than the release the ledger
+was updated to: `docker compose up` from an older copy of the folder, a
+`.env` that lost its `SPENDTRACKER_IMAGE=` line, a zip unzipped elsewhere and
+started without its launcher. The app refuses to open a ledger that is ahead
+of it, and the updater shows this page in its place. It does not act on its
+own, and there is no recovery code for it.
+
+**Run the launcher again**, from the folder you use. It removes this page
+first, then starts the pinned release. On a server: remove the page
+(`docker ps -a --filter label=com.docker.compose.oneoff=True`, then
+`docker rm -f` it), make sure `.env` has the `SPENDTRACKER_IMAGE=` line that
+`pin/release.env` has, and `docker compose up -d`.
+
+### The update did not start
+
+*"The update did not start: <reason> Nothing was changed."* Nothing was
+stopped, and the app kept serving. The usual reasons:
+
+- **The pre-update hook failed** (servers). It exited non-zero, ran past its
+  timeout, or nothing picked the request up within 60 seconds, which means
+  `spend-tracker-hook.path` is not running on the host.
+  `journalctl -u spend-tracker-hook.service` on the host, and the
+  `<id>.result` file in the hook directory, say which.
+  [`deploy/updater/host-hook/README.md`](updater/host-hook/README.md#check-it).
+  To update without it, remove `hook.json` from the hook directory; the
+  updater then skips the hook and says so.
+- **The sidecar is not running** (section 3 of DOCKER.md). The updater never
+  starts or restarts it. `docker compose up -d` in `deploy/tailnet`, then
+  `deploy/tailnet/check.sh`.
+- **The app is not the version that was prepared**, or the prepared images
+  are gone: prepare again.
+- **Not enough disk or memory**: below.
+
+### Everything else, by what you see
+
+| What you see | Why | What to do |
+|---|---|---|
+| *could not reach the repository* after *Check the repository* | The app could not reach `api.github.com`. | Check the machine's connection, then press it again. |
+| A release you know exists is not offered | It is a tag without a published release yet, or a prerelease. Only published releases are offered. | Wait for the release. |
+| *Preparing failed: ghcr.io could not be reached.* | No route to the registry, or it was down. | *Try again* later. Nothing was changed. |
+| *Preparing failed: the image's origin could not be proven: …* | The release image's build attestation does not say it was built by this repository's release workflow from that tag. Nothing was downloaded. | Do not install it. Report it ([SECURITY.md](../SECURITY.md)), with the sentence. |
+| *Preparing failed: the downloaded image is not the one that was verified.* | The engine pulled something other than the verified digest. It was deleted. | *Try again*. If it repeats, report it as above. |
+| *Needs about N GB free, there is M* | Not enough disk for the images, the backup and a margin. On Docker Desktop and a Podman machine it is the VM's disk that counts. | Delete older update backups under *Database*, or raise Docker Desktop's disk limit in *Settings → Resources*, or give the Podman machine a larger disk. |
+| *Needs about N MB of memory free, there is M* | The new app and the updater would not fit. | Raise Docker Desktop's memory in *Settings → Resources*, `podman machine set --memory` for a Podman machine, or close other programs. |
+| *The updater cannot use the container engine: permission denied on its socket.* | A server without `SPENDTRACKER_SOCKET_GID`, or with the wrong one. On a personal computer, an install from an older bundle. | [DOCKER.md, The updater, on a server](DOCKER.md#on-a-server); on a personal computer, run the newest zip's launcher. |
+| *Docker Desktop's Enhanced Container Isolation stops containers using the Docker socket…*, or no updater at all under ECI | Docker Business's ECI is on. | [DOCKER.md, Enhanced Container Isolation](DOCKER.md#enhanced-container-isolation). |
+| *Docker Desktop is in Windows containers mode.* | Self-update needs Linux containers. | Switch Docker Desktop to Linux containers. |
+| *…over a unix socket only, not over TCP.* | `DOCKER_HOST` points at a TCP engine. | Run the containers on the engine's own machine. |
+| *Podman 4.3 is too old for self-update; 4.4 or newer is needed.* (or an engine API too old) | The engine is older than the updater supports. | Update Podman or Docker, then the updater picks it up within five minutes. |
+| *The updater does not recognise the container engine …* | Neither Docker nor Podman. | Update from a terminal ([UPGRADING.md](UPGRADING.md#in-a-container)). |
+| *This instance runs a locally built image. Self-update starts only from a published release.* | The app was built on the box (`docker compose build`, or the fallback build), so there is no release to verify it against. | Switch to a published release once, by hand ([DOCKER.md, Upgrading](DOCKER.md#upgrading)), or keep upgrading from a terminal. |
+| *Preparing failed: the new version could not read this ledger.* | The new image's check of your ledger failed. Nothing was changed. | Report it with the sentence, and stay on your version. |
+| A prepared update is gone, or *Update* is refused as stale | A prepared update lasts 24 hours, and only while the version it was prepared from runs. | *Prepare* again. |
+| *that password and code do not match* | The step-up was refused. | Type them again, with a fresh code. |
+| **Rolled back**: *The update failed at …, so it was undone. You are on X.Y.Z, with the ledger exactly as it was at …* | The drill could not back up, a migration failed, the result did not verify, or the new version did not start or answer. The step and the end of its log are shown. | Nothing is lost. Read the log lines; *Prepare* again later, or report it with them. The image is kept for another try. |
+| The tab says the app has not come back yet | The update is still running, the computer slept, or the engine restarted. | [UPGRADING.md, When the app has not come back](UPGRADING.md#when-the-app-has-not-come-back). |
+| *The updater stayed on X.Y.Z and will try again: [Retry updater update]* | The app updated; the new updater did not prove it could work, so the old one kept going. | Press *Retry updater update*, now or later. The app is not affected. |
+| *Updating from this screen needs the updater* | No heartbeat for two minutes. | [The updater is not running](#the-updater-is-not-running). |
+| *… is newer than this updater (N) can work with* | The engine updated past the updater. | [The updater is too old for the engine](#the-updater-is-too-old-for-the-engine). |
+| The maintenance page, with no recovery link, for minutes after the update | The update is still running; the page is from the previous version. | Wait. It goes when the new version answers, or after a rollback. |
+| A container called `…-previous` in Docker Desktop's list | The previous app or updater, kept stopped after an update until the next one. | Leave it stopped. Starting the previous **app** by hand mid-update is what the rename is there to prevent; if it happens, the update rolls back. |
+| Containers named like the app plus `-placard-…`, `-drill-…`, `-restore-…` or `-probe-…` | One-off containers of an update, removed when they finish. | Leave them while an update runs. Afterwards, a stopped one can be removed. |
+| You closed the tab mid-update | Nothing: the update does not need it. | Open *Updates* again. The outcome waits there until you dismiss it. |
 
 ---
 
