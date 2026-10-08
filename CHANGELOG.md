@@ -47,6 +47,16 @@ history this repository does not have.
 
 ### Changed
 
+- **A fresh install starts without `SPENDTRACKER_AUTO_MIGRATE=1`.** A first
+  `docker compose up -d` against a new volume used to be refused until you
+  passed the flag once from a terminal. A database with no tables at all --
+  or none yet -- is now migrated on its first start, with one line in the log
+  saying so, because there is nothing in it to lose. Every other mismatch is
+  still refused, including a database with tables but no migration stamp and
+  one stamped at a revision the code does not know. The flag keeps its
+  default (off) and its meaning: a deliberate migration of an existing ledger,
+  which `make upgrade` does with a backup first (#167).
+
 - **Short messages carry a note for the translator.** Every message of one
   or two words, and any whose English alone is ambiguous, says in one line
   what it is -- a button, a column heading, a state, which sense of
