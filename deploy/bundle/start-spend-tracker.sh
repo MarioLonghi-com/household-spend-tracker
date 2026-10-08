@@ -140,7 +140,7 @@ set -- "$@" --entrypoint python "$UPDATER_IMAGE" -m updater.launch \
 [ -n "$GID" ] && set -- "$@" --socket-gid "$GID"
 [ -n "$PREVIOUS" ] && set -- "$@" --previous /previous
 
-say "Checking $PRODUCT and this folder (the first time, this downloads the updater)..."
+say "Checking $PRODUCT and this folder..."
 answer="$("$ENGINE" "$@")"
 status=$?
 

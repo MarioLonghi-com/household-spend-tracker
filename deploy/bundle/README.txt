@@ -15,6 +15,11 @@ Spend Tracker @VERSION@ -- on this computer
    The first start downloads Spend Tracker, which takes a few minutes. When it
    is ready, your browser opens http://localhost:8848, where the setup wizard
    creates the first account.
+4. The wizard asks for a one-time setup token. It is in the app's log: in
+   Docker Desktop, Containers -> spend-tracker -> app -> Logs (in Podman
+   Desktop, Containers -> spend-tracker-app -> Logs). Look for the line
+   "Finish setup at /setup with this one-time token" and copy the token
+   printed just below it.
 
 After that, Spend Tracker starts with Docker or Podman, and updates are made
 in the browser, under Application. Nothing else needs this folder's launcher.

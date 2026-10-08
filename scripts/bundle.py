@@ -119,7 +119,7 @@ def build(
     version: str, app_image: str, updater_image: str, out_dir: Path, epoch: int | None = None
 ) -> Path:
     """Write the zip into `out_dir`; returns its path."""
-    when = time.gmtime(epoch if epoch is not None else time.time())[:6]
+    when = time.localtime(epoch if epoch is not None else time.time())[:6]
     when = (max(when[0], 1980), *when[1:])
     top = folder(version)
     out_dir.mkdir(parents=True, exist_ok=True)

@@ -281,6 +281,22 @@ Three routes. They are not exclusive, and the container is the recommended one
 because it makes the upgrade story trivial and separates data from code by
 force rather than by documentation.
 
+### On a computer of your own, without a terminal
+
+Install Docker Desktop or Podman Desktop, download
+`spend-tracker-<version>-compose.zip` from the releases page, unzip it, and
+double-click the launcher inside: `Start Spend Tracker.command` on macOS,
+`Start Spend Tracker.bat` on Windows (shipped, not yet tested on a Windows
+machine), `start-spend-tracker.sh` on Linux. It sets up the container
+engine, starts the app and its updater, and opens `http://localhost:8848`
+at the setup wizard. After that, updates happen in the browser. The first
+double-click of an unsigned download meets a prompt from the operating
+system (on macOS 15 and later, System Settings → Privacy & Security →
+*Open Anyway*; on Windows, *More info → Run anyway*), and running the
+launcher again later is how it is restarted or repaired:
+[`deploy/DOCKER.md`](deploy/DOCKER.md#without-a-terminal-the-release-zip)
+has both.
+
 ### A container
 
 ```bash

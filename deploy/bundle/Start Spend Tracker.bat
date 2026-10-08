@@ -82,7 +82,7 @@ if defined PREVIOUS (
   set "EXTRA=--previous /previous"
 )
 
-echo Checking %PRODUCT% and this folder (the first time, this downloads the updater)...
+echo Checking %PRODUCT% and this folder...
 set "ANSWER=%TEMP%\spend-tracker-launch-%RANDOM%.txt"
 %ENGINE% run --rm --network none --user 0:0 --security-opt label=disable !MOUNTS! --entrypoint python "%UPDATER_IMAGE%" -m updater.launch --bundle-app "%APP_IMAGE%" --bundle-updater "%UPDATER_IMAGE%" --host-dir "%HERE%" --engine-socket "%SOCK%" !EXTRA! > "%ANSWER%"
 set "STATUS=%ERRORLEVEL%"
