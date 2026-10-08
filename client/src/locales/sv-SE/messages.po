@@ -18,8 +18,9 @@ msgid "Application management"
 msgstr "Hantering av appen"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "To"
-msgstr ""
+msgstr "Till"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -425,8 +426,9 @@ msgid "or"
 msgstr "eller"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Add transfer"
-msgstr ""
+msgstr "Lägg till överföring"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -515,8 +517,9 @@ msgstr "De två stämmer inte överens."
 
 #. placeholder {0}: to!.currency
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Amount arriving ({0})"
-msgstr ""
+msgstr "Belopp som kommer in ({0})"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
@@ -535,8 +538,9 @@ msgid "Reset: password and authenticator"
 msgstr "Återställning: lösenord och autentiseringsapp"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "From"
-msgstr ""
+msgstr "Från"
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -629,8 +633,9 @@ msgstr "Kod"
 #. placeholder {1}: from.name
 #. placeholder {2}: to?.name
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "<0>{0}</0> leaves {1} and the same arrives in {2}."
-msgstr ""
+msgstr "<0>{0}</0> lämnar {1} och samma belopp kommer in på {2}."
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -670,7 +675,7 @@ msgstr "Överföringar"
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Cleared"
-msgstr "Rensad"
+msgstr "Bokfört"
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
@@ -718,12 +723,14 @@ msgid "{inviter} invited you to {PRODUCT} as an owner."
 msgstr "{inviter} har bjudit in dig till {PRODUCT} som ägare."
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Pick two different accounts — money cannot move to itself."
-msgstr ""
+msgstr "Välj två olika konton – pengar kan inte flyttas till samma konto."
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "No minus signs — the direction is the two accounts above."
-msgstr ""
+msgstr "Inga minustecken – riktningen avgörs av de två kontona ovan."
 
 #: src/components/SignInNotice.tsx
 #, fuzzy
@@ -756,8 +763,9 @@ msgid "Set up {PRODUCT}"
 msgstr "Installera {PRODUCT}"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Amount"
-msgstr ""
+msgstr "Belopp"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -877,8 +885,9 @@ msgid "You still have 1 passkey, and a recovery code leaves them working. If one
 msgstr "Du har fortfarande 1 lösennyckel, och en återställningskod låter dem fortsätta fungera. Om en fanns på enheten du tappade bort, ta bort den under Inloggningsmetoder i din profil – ditt namn i menyn."
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Memo"
-msgstr ""
+msgstr "Beskrivning"
 
 #: src/App.tsx
 #, fuzzy
@@ -906,8 +915,9 @@ msgid "{user} set up this instance as its owner"
 msgstr "{user} installerade den här instansen som ägare"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "This writes both rows as one act, so undoing it from History takes both back together."
-msgstr ""
+msgstr "Detta sparar båda raderna som en enda handling, så att ångra den i Historik tar bort båda tillsammans."
 
 #: src/App.tsx
 #, fuzzy
@@ -968,8 +978,9 @@ msgid "Signed in as <0>{0}</0> ({1})."
 msgstr "Inloggad som <0>{0}</0> ({1})."
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
-msgstr ""
+msgstr "Båda, eftersom kontona har olika valutor och vi inte hittar på en växelkurs – ta beloppet som banken faktiskt satte in."
 
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
@@ -1038,8 +1049,9 @@ msgid "Your account is under your name in the menu."
 msgstr "Ditt konto finns under ditt namn i menyn."
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -1073,8 +1085,9 @@ msgstr "Om du inte väntade dig detta, säg till en ägare av instansen innan du
 
 #. placeholder {0}: from.currency
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Amount leaving ({0})"
-msgstr ""
+msgstr "Belopp som går ut ({0})"
 
 #: src/App.tsx
 #, fuzzy
@@ -1521,8 +1534,9 @@ msgid "Keys for programs"
 msgstr "Nycklar för program"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "12,34"
-msgstr ""
+msgstr "12,34"
 
 #. placeholder {0}: recovery.data.unused
 #: src/screens/Profile.tsx
@@ -1559,8 +1573,9 @@ msgstr "Alla koder du har nu, använda eller inte, slutar fungera och tio nya er
 #. placeholder {0}: to!.currency
 #. placeholder {1}: from!.currency
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "That works out at <0>{impliedRate}</0> {0} per {1}."
-msgstr ""
+msgstr "Det blir <0>{impliedRate}</0> {0} per {1}."
 
 #. placeholder {0}: tokenPath ?? t`the data directory`
 #: src/screens/Setup.tsx
@@ -1646,8 +1661,9 @@ msgid "Set up again"
 msgstr "Ställ in igen"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
-msgstr ""
+msgstr "En överföring behöver två öppna konton. Lägg till ett till på skärmen Konton först."
 
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
@@ -1718,8 +1734,9 @@ msgid "Somebody made {user} an owner"
 msgstr "Någon gjorde {user} till ägare"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Add transfer between accounts"
-msgstr ""
+msgstr "Lägg till överföring mellan konton"
 
 #. placeholder {0}: formatInstant(key.revoked_at)
 #: src/screens/Profile.tsx
@@ -1759,8 +1776,9 @@ msgid "{by} re-enabled {user}"
 msgstr "{by} återaktiverade {user}"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Transfer"
-msgstr ""
+msgstr "För över"
 
 #: src/screens/Profile.tsx
 #, fuzzy
