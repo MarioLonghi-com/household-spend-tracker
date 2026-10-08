@@ -1,0 +1,20 @@
+{
+  "_hand_written": true,
+  "ID": "00000000-0000-4000-8000-0000000000f3",
+  "Driver": "overlay",
+  "OperatingSystem": "debian",
+  "OSVersion": "12",
+  "OSType": "linux",
+  "Architecture": "amd64",
+  "DockerRootDir": "/home/user/.local/share/containers/storage",
+  "Name": "server-f",
+  "ServerVersion": "4.3.1",
+  "SecurityOptions": [
+    "name=apparmor",
+    "name=seccomp,profile=default",
+    "name=rootless"
+  ],
+  "Rootless": true,
+  "Uptime": "5h 1m 0.00s",
+  "Warnings": []
+}

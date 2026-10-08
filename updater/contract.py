@@ -62,6 +62,12 @@ STATES = (
 UNKNOWN_STATE_READS_AS = "running"
 
 ENGINES = ("docker-engine", "docker-desktop", "podman", "podman-machine")
+#: What the heartbeat says before an engine has been identified: the socket
+#: does not answer, or answers as no engine the updater knows (8.3).
+UNKNOWN_ENGINE = "unknown"
+#: S2: whether `podman-restart.service` is known to be on. Off Podman it does
+#: not apply; on Podman the updater can only infer `enabled`, never `disabled`.
+PODMAN_RESTART = ("enabled", "unknown", "not_applicable")
 LAYOUTS = ("sidecar", "loopback")
 ROLES = ("current", "successor", "standby")
 #: `ok`, `outdated` (C3), or one of 8.3's refusal reasons.
@@ -240,6 +246,8 @@ class Context:
     socket: str = "ok"
     busy: bool = False
     protocols: tuple[int, int] = PROTOCOLS
+    #: Detection's sentence for a refused socket (8.3), quoted in the refusal.
+    socket_sentence: str | None = None
 
 
 # --------------------------------------------------------------------------- #
@@ -367,7 +375,7 @@ def validate(raw: object, ctx: Context, now: float, report: dict | None = None) 
             "The updater is too old for this container engine. Update the updater first, then try again.",
         )
     if ctx.socket not in ("ok", "outdated"):
-        raise Refusal("socket", f"The updater cannot use the container engine ({ctx.socket}).")
+        raise Refusal("socket", ctx.socket_sentence or f"The updater cannot use the container engine ({ctx.socket}).")
 
     if kind == "discard":
         if not is_uuid4(raw["prepared_id"]):
@@ -522,10 +530,16 @@ class Heartbeat:
     engine_api: str
     container: str
     protocols: str = _window(str(PROTOCOLS[0]), str(PROTOCOLS[1]))
+    #: Gained within protocol 1 (C4): the refusal's sentence when `socket` is
+    #: one, and whether podman-restart is known to be on (S2).
+    socket_sentence: str | None = None
+    podman_restart: str = "not_applicable"
     protocol: int = FROZEN_PROTOCOL
 
     def __post_init__(self) -> None:
-        if self.engine not in ENGINES:
+        if self.podman_restart not in PODMAN_RESTART:
+            raise ValueError(f"podman_restart {self.podman_restart!r}")
+        if self.engine not in (*ENGINES, UNKNOWN_ENGINE):
             raise ValueError(f"engine {self.engine!r}")
         if self.layout not in LAYOUTS:
             raise ValueError(f"layout {self.layout!r}")

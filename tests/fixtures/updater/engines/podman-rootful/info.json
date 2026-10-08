@@ -1,0 +1,24 @@
+{
+  "_hand_written": true,
+  "ID": "00000000-0000-4000-8000-0000000000f1",
+  "Driver": "overlay",
+  "KernelVersion": "6.12.48-1-amd64",
+  "OperatingSystem": "debian",
+  "OSVersion": "13",
+  "OSType": "linux",
+  "Architecture": "amd64",
+  "NCPU": 4,
+  "MemTotal": 8227254272,
+  "DockerRootDir": "/var/lib/containers/storage",
+  "Name": "server-c",
+  "ServerVersion": "5.4.2",
+  "CgroupDriver": "systemd",
+  "CgroupVersion": "2",
+  "SecurityOptions": [
+    "name=apparmor",
+    "name=seccomp,profile=default"
+  ],
+  "Rootless": false,
+  "Uptime": "71h 3m 12.00s",
+  "Warnings": []
+}

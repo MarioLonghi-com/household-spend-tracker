@@ -1,0 +1,16 @@
+{
+  "_hand_written": true,
+  "Platform": {"Name": "linux/amd64/debian-13"},
+  "Components": [
+    {"Name": "Podman Engine", "Version": "5.4.2",
+     "Details": {"APIVersion": "5.4.2", "MinAPIVersion": "4.0.0", "Os": "linux", "Arch": "amd64", "KernelVersion": "6.12.48-1-amd64"}},
+    {"Name": "Conmon", "Version": "conmon version 2.1.12, commit: ", "Details": {"Package": "conmon_2.1.12-4_amd64"}},
+    {"Name": "OCI Runtime (crun)", "Version": "crun version 1.21", "Details": {"Package": "crun_1.21-1_amd64"}}
+  ],
+  "Version": "5.4.2",
+  "ApiVersion": "1.41",
+  "MinAPIVersion": "1.24",
+  "Os": "linux",
+  "Arch": "amd64",
+  "KernelVersion": "6.12.48-1-amd64"
+}

@@ -277,6 +277,8 @@ class EngineClient:
         self.scope = scope
         self.timeout = timeout
         self.negotiated: Negotiated | None = None
+        #: The last `GET /version` answer, kept for detection (`updater.detect`).
+        self.version_doc: dict | None = None
 
     # ------------------------------------------------------------------ #
     # The one way out
@@ -374,9 +376,11 @@ class EngineClient:
     def negotiate(self) -> Negotiated:
         """`GET /version`, unversioned, then fix the version for every other call."""
         self.negotiated = None
+        self.version_doc = None
         doc = self._call("version")
         if not isinstance(doc, dict):
             raise EngineUnavailable("unknown_engine", "The engine's /version answer is not a JSON object.")
+        self.version_doc = doc
         self.negotiated = negotiate(doc)
         return self.negotiated
 

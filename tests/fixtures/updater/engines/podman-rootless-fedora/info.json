@@ -1,0 +1,25 @@
+{
+  "_hand_written": true,
+  "ID": "00000000-0000-4000-8000-0000000000f2",
+  "Driver": "overlay",
+  "KernelVersion": "7.1.10-200.fc44.x86_64",
+  "OperatingSystem": "fedora",
+  "OSVersion": "44",
+  "OSType": "linux",
+  "Architecture": "amd64",
+  "NCPU": 8,
+  "MemTotal": 16654532608,
+  "DockerRootDir": "/home/user/.local/share/containers/storage",
+  "Name": "workstation-d",
+  "ServerVersion": "6.1.3",
+  "CgroupDriver": "systemd",
+  "CgroupVersion": "2",
+  "SecurityOptions": [
+    "name=seccomp,profile=default",
+    "name=rootless",
+    "name=selinux"
+  ],
+  "Rootless": true,
+  "Uptime": "2h 40m 5.00s",
+  "Warnings": []
+}
