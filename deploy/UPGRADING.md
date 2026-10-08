@@ -105,6 +105,7 @@ and nothing is fetched until the owner presses a button.
 | 3 | Stops the app, and renames it `…-previous` so nothing restarts it by name | The app is started again. *Not started*. |
 | 4 | Starts the maintenance page where the app was, from the old image | |
 | 5 | Runs the drill from the **new** image against your ledger: a verified backup, the migrations, the checks | Rolled back |
+| 6 | Stops the maintenance page | |
 | 7 | Starts the new app: a copy of the previous container, with the new image | Rolled back |
 | 8 | Checks its health from where the browser's requests arrive, and that it reports the new version and commit | Rolled back |
 | 9 | Pins the new release (below), keeps a record of the previous container, prunes older update backups, and makes the recovery code useless | Logged only |
