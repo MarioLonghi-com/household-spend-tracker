@@ -27,7 +27,6 @@ set "PROJECT=spend-tracker"
 set "URL=http://localhost:8848"
 set "PROBE=http://127.0.0.1:8848/api/health"
 set "HEALTH_TIMEOUT=180"
-set "PLACARD_LABEL=com.github.mariolonghi-com.spend-tracker.updater-role=placard"
 
 rem Env-file paths are relative to where compose runs (S1): this folder.
 cd /d "%~dp0" || (set "WHY=This launcher cannot open its own folder." & goto :stop)
@@ -87,12 +86,13 @@ set "ANSWER=%TEMP%\spend-tracker-launch-%RANDOM%.txt"
 %ENGINE% run --rm --network none --user 0:0 --security-opt label=disable !MOUNTS! --entrypoint python "%UPDATER_IMAGE%" -m updater.launch --bundle-app "%APP_IMAGE%" --bundle-updater "%UPDATER_IMAGE%" --host-dir "%HERE%" --engine-socket "%SOCK%" !EXTRA! > "%ANSWER%"
 set "STATUS=%ERRORLEVEL%"
 
-set "KIND=" & set "PODMAN_RESTART=" & set "APP=" & set "UPDATER="
+set "KIND=" & set "PODMAN_RESTART=" & set "APP=" & set "UPDATER=" & set "PLACARD="
 for /f "usebackq tokens=1,* delims==" %%a in ("%ANSWER%") do (
   if "%%a"=="ENGINE" set "KIND=%%b"
   if "%%a"=="PODMAN_RESTART" set "PODMAN_RESTART=%%b"
   if "%%a"=="APP" set "APP=%%b"
   if "%%a"=="UPDATER" set "UPDATER=%%b"
+  if "%%a"=="PLACARD" set "PLACARD=%%b"
   if "%%a"=="SAY" echo %%b
 )
 del "%ANSWER%" >nul 2>&1
@@ -101,6 +101,7 @@ if not "%STATUS%"=="0" (
   set "WHY=Spend Tracker was not started."
   goto :stop
 )
+if not defined PLACARD set "KIND="
 if not defined KIND (
   set "WHY=The updater image could not be run. Check the internet connection, then open this launcher again."
   goto :stop
@@ -140,7 +141,7 @@ rem ---------------------------------------------------------------------------
 rem The updater's "ahead" page holds the app's port when compose once started
 rem an older release than the pin (9.2, R30); `up` would collide with it.
 for %%k in (com.docker.compose.project io.podman.compose.project) do (
-  for /f "delims=" %%i in ('%ENGINE% ps -aq --filter "label=%%k=%PROJECT%" --filter "label=com.docker.compose.oneoff=True" --filter "label=%PLACARD_LABEL%" 2^>nul') do (
+  for /f "delims=" %%i in ('%ENGINE% ps -aq --filter "label=%%k=%PROJECT%" --filter "label=com.docker.compose.oneoff=True" --filter "label=%PLACARD%" 2^>nul') do (
     %ENGINE% rm -f %%i >nul 2>&1
   )
 )

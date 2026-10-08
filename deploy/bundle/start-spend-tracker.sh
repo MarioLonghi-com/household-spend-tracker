@@ -28,7 +28,6 @@ PROJECT='spend-tracker'
 URL='http://localhost:8848'
 PROBE='http://127.0.0.1:8848/api/health'
 HEALTH_TIMEOUT="${SPENDTRACKER_HEALTH_TIMEOUT:-180}"
-PLACARD_LABEL='com.github.mariolonghi-com.spend-tracker.updater-role=placard'
 
 say() { printf '%s\n' "$*"; }
 
@@ -144,7 +143,7 @@ say "Checking $PRODUCT and this folder..."
 answer="$("$ENGINE" "$@")"
 status=$?
 
-KIND="" PODMAN_RESTART="" LINGER="0" CHGRP="" APP="" UPDATER=""
+KIND="" PODMAN_RESTART="" LINGER="0" CHGRP="" APP="" UPDATER="" PLACARD=""
 while IFS= read -r line; do
   case "$line" in
     ENGINE=*) KIND="${line#ENGINE=}" ;;
@@ -153,13 +152,14 @@ while IFS= read -r line; do
     CHGRP=*) CHGRP="${line#CHGRP=}" ;;
     APP=*) APP="${line#APP=}" ;;
     UPDATER=*) UPDATER="${line#UPDATER=}" ;;
+    PLACARD=*) PLACARD="${line#PLACARD=}" ;;
     SAY=*) say "${line#SAY=}" ;;
   esac
 done <<EOF
 $answer
 EOF
 
-if [ "$status" -ne 0 ] || [ -z "$KIND" ]; then
+if [ "$status" -ne 0 ] || [ -z "$KIND" ] || [ -z "$PLACARD" ]; then
   if [ -z "$answer" ]; then
     stop "The updater image could not be run. Check the internet connection, then open this launcher again."
   fi
@@ -223,7 +223,7 @@ fi
 # older release than the pin (9.2, R30). It goes once the right one runs, but
 # `up` would collide with it first.
 for key in com.docker.compose.project io.podman.compose.project; do
-  for id in $("$ENGINE" ps -aq --filter "label=$key=$PROJECT" --filter "label=com.docker.compose.oneoff=True" --filter "label=$PLACARD_LABEL" 2>/dev/null); do
+  for id in $("$ENGINE" ps -aq --filter "label=$key=$PROJECT" --filter "label=com.docker.compose.oneoff=True" --filter "label=$PLACARD" 2>/dev/null); do
     "$ENGINE" rm -f "$id" >/dev/null 2>&1
   done
 done

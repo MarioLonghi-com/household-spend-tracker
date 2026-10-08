@@ -25,7 +25,7 @@ from pathlib import Path
 import pytest
 
 from tests.updater_fake_engine import ENGINES, FakeEngine, Running, engine_fixture
-from updater import detect, launch, pin
+from updater import detect, engine, launch, pin
 
 APP = "ghcr.io/mariolonghi-com/household-spend-tracker"
 UPD = "ghcr.io/mariolonghi-com/household-spend-tracker-updater"
@@ -169,16 +169,16 @@ def test_no_pin_anywhere_is_a_first_install(tmp_path):
 
 #: fixture, working dir, socket gid -> engine, user, SOCKET_GID, podman-restart, linger, chgrp
 SETTINGS = [
-    ("docker-desktop", "/Users/someone/spend-tracker", None, "docker-desktop", "65532:65532", "0", None, False, None),
+    ("docker-desktop", "/Users/Shared/spend-tracker", None, "docker-desktop", "65532:65532", "0", None, False, None),
     ("docker-engine-rootful", "/home/user/st", "989", "docker-engine", "65532:65532", "989", None, False, "989"),
     ("docker-engine-rootful", "/srv/st", "998", "docker-engine", "65532:65532", "998", None, False, "998"),
     ("docker-engine-rootless", "/home/user/st", "1000", "docker-engine", "0:0", "0", None, True, None),
     ("podman-rootful-fedora", "/root/st", "0", "podman", "65532:65532", "0", "system", False, "0"),
     ("podman-rootless-fedora", "/home/user/st", "1000", "podman", "0:0", "0", "user", True, None),
-    ("podman-machine", "/Users/someone/spend-tracker", None, "podman-machine", "65532:65532", "0", "user", False, None),
+    ("podman-machine", "/Users/Shared/spend-tracker", None, "podman-machine", "65532:65532", "0", "user", False, None),
     # Podman Desktop's default machine is rootful (S21): its storage is a
     # rootful host's, and only the macOS path says it is a machine.
-    ("podman-rootful-fedora", "/Users/someone/spend-tracker", None, "podman-machine", "65532:65532", "0", "system", False, None),
+    ("podman-rootful-fedora", "/Users/Shared/spend-tracker", None, "podman-machine", "65532:65532", "0", "system", False, None),
 ]  # fmt: skip
 
 
@@ -212,7 +212,7 @@ def _args(
     socket: str,
     previous: Path | None = None,
     gid: str | None = None,
-    host: str = "/Users/someone/st",
+    host: str = "/Users/Shared/st",
 ):
     return launch.parser().parse_args(
         [
@@ -251,6 +251,7 @@ def test_a_first_install_on_docker_desktop_writes_the_settings_and_no_pin(tmp_pa
         ("CHGRP", ""),
         ("APP", ref(APP, "0.9.0", "a")),
         ("UPDATER", ref(UPD, "0.9.0", "b")),
+        ("PLACARD", f"{engine.ROLE_LABEL}=placard"),
     ]
 
 

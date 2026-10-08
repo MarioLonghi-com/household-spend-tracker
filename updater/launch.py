@@ -60,7 +60,7 @@ GID_KEY = "SPENDTRACKER_SOCKET_GID"
 USER_KEY = "SPENDTRACKER_UPDATER_USER"
 
 #: The lines a launcher reads, in the order they are printed. `SAY` repeats.
-ANSWER_KEYS = ("ENGINE", "PODMAN_RESTART", "LINGER", "CHGRP", "APP", "UPDATER", "SAY")
+ANSWER_KEYS = ("ENGINE", "PODMAN_RESTART", "LINGER", "CHGRP", "APP", "UPDATER", "PLACARD", "SAY")
 
 #: Detections the launcher stops on: nothing about the engine can be decided.
 #: `too_old` and `outdated` are said and passed: the app runs, and the
@@ -297,6 +297,9 @@ def run(args: argparse.Namespace, detection: detect.Detection | None = None) -> 
         ("CHGRP", settings.chgrp or ""),
         ("APP", choice.app or args.bundle_app),
         ("UPDATER", choice.updater or args.bundle_updater),
+        # The label filter that finds the updater's maintenance page (R30),
+        # spelt where the updater spells it rather than in three launchers.
+        ("PLACARD", f"{eng.ROLE_LABEL}=placard"),
     ]
     if detection.sentence:
         lines.append(("SAY", detection.sentence))

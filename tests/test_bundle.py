@@ -182,7 +182,7 @@ def test_each_launcher_cds_first_and_clears_placards_before_up(text, cd, placard
     assert _first(body, cd) < _first(body, "updater.launch")
     assert _first(body, "updater.launch") < _first(body, placards) < _first(body, up)
     assert "com.docker.compose.oneoff=True" in text
-    assert "updater-role=placard" in text
+    assert "PLACARD" in text
 
 
 @pytest.mark.parametrize("text", [LAUNCHER, BAT], ids=["sh", "bat"])
