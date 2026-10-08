@@ -176,14 +176,28 @@ class Ledger:
 
 
 class FakeTime:
+    """Two clocks: the wall clock, and a monotonic one that stands still while "asleep"."""
+
     def __init__(self) -> None:
         self.t = time.time()
+        self.away = 0.0
+        #: Called on every sleep: a test's way in while the updater polls.
+        self.on_sleep = None
 
     def __call__(self) -> float:
+        return self.t + self.away
+
+    def monotonic(self) -> float:
         return self.t
 
     def sleep(self, seconds: float) -> None:
         self.t += max(seconds, 0.01)
+        if self.on_sleep is not None:
+            self.on_sleep()
+
+    def doze(self, seconds: float) -> None:
+        """The machine sleeps: the wall clock moves, the monotonic one does not (8.6)."""
+        self.away += seconds
 
 
 class FakeTrust:
@@ -224,6 +238,7 @@ class World:
         updater_protocols: str = "1-1",
     ) -> None:
         self.tmp = tmp_path
+        tmp_path.mkdir(parents=True, exist_ok=True)
         self.fake = FakeEngine(engine_fixture(fixture), engine_fixture(fixture, "info"))
         self.fake.on_start = self._on_start
         self.fake.on_exec = self._on_exec
@@ -241,10 +256,14 @@ class World:
         #: (the container is gone, as after an engine restart), hang.
         self.drill = "ok"
         self.restore_fails = 0
+        #: Called when an app container (not a one-off) starts.
+        self.on_app_start = None
+        #: Called when the drill starts, before it does anything.
+        self.on_drill = None
         self.placard_runs = True
         self.measured = {"free": 40 * 1024**3, "mem_available": 3 * 1024**3, "database": 20 * 1024**2}
         self.time = FakeTime()
-        self.clock = GapClock(self.time, self.time)
+        self.clock = GapClock(self.time, self.time.monotonic)
         self.volume = Volume(tmp_path / "update")
         self.volume.init()
         self.project_dir = tmp_path / "project"
@@ -262,6 +281,9 @@ class World:
             self.fake.images[ref(repo, A)] = image_doc(repo, A)
 
         self.sidecar_id = None
+        #: Each sidecar restart is a new network namespace; an app that joined
+        #: an older one is stranded (#37, 8.4).
+        self.epoch = 0
         if layout == "sidecar":
             sidecar = {
                 "Id": os.urandom(32).hex(),
@@ -332,6 +354,7 @@ class World:
             project_dir=self.project_dir,
             me=kw.pop("me", self.me),
             engine=self.engine,
+            hook_dir=kw.pop("hook_dir", None),
         )
         return Kit(
             client=client,
@@ -379,8 +402,8 @@ class World:
             "recovery_hash": RECOVERY_HASH,
         }
 
-    def prepared(self, service: Service, to: str = B) -> dict:
-        req = self.prepare_request(to)
+    def prepared(self, service: Service, to: str = B, frm: str = A) -> dict:
+        req = self.prepare_request(to, frm)
         self.write_request(req)
         service.tick()
         report = volume.read_own_json(self.volume.prepared(req["id"]))
@@ -426,12 +449,20 @@ class World:
     def running_apps(self) -> list[dict]:
         return [c for c in self.apps() if c["State"] == "running"]
 
+    def restart_sidecar(self) -> None:
+        """The sidecar restarts (not by the updater): same id, a new namespace."""
+        c = self.fake.containers[self.sidecar_id]
+        self.fake.set_state(c, "exited")
+        self.fake.set_state(c, "running")
+        self.epoch += 1
+
     def _on_exec(self, fake: FakeEngine, c: dict, cmd: list) -> tuple[int, str]:
         if cmd and cmd[0] == "wget":
             inside = [
                 a
                 for a in self.running_apps()
                 if (fake.inspect_of(a)["HostConfig"].get("NetworkMode") or "") == f"container:{c['Id']}"
+                and a.get("_epoch", 0) == self.epoch
             ]
             return self.answer(inside[0]) if inside else (1, "")
         return self.answer(c)
@@ -439,6 +470,9 @@ class World:
     def _on_start(self, fake: FakeEngine, c: dict) -> None:
         role = c["Labels"].get(eng.ROLE_LABEL)
         if role is None:
+            c["_epoch"] = self.epoch
+            if self.on_app_start is not None:
+                self.on_app_start(c)
             return
         seen = fake.inspect_of(c)
         cmd = [*(seen["Config"].get("Entrypoint") or []), *(seen["Config"].get("Cmd") or [])]
@@ -451,6 +485,8 @@ class World:
 
     def _drill(self, fake: FakeEngine, c: dict, cmd: list, version: str) -> None:
         self.ledger.drills += 1
+        if self.on_drill is not None:
+            self.on_drill(c)
         report_path = Path(
             str(self.volume.root)
             + cmd[cmd.index("--report") + 1].removeprefix("/var/lib/spend-tracker-update")

@@ -16,8 +16,13 @@ HOST = (*shapes.HOST_FIELDS, "NetworkMode")
 CONFIG = ("User", "ExposedPorts", "Healthcheck", "StopSignal", "Tty", "OpenStdin")
 
 
+#: Environment an engine writes for each container itself: Podman's
+#: `HOSTNAME` names the container's own short id, so it always differs.
+ENGINE_ENV = ("HOSTNAME=",)
+
+
 def _own(values: list[str], image: list[str]) -> set[str]:
-    return set(values) - set(image)
+    return {v for v in values if not v.startswith(ENGINE_ENV)} - set(image)
 
 
 def _aliases(inspect: Mapping) -> dict[str, list[str]]:

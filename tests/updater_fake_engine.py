@@ -88,7 +88,9 @@ class FakeEngine:
     on_start: Callable[[FakeEngine, dict], None] | None = None
     #: What an exec prints: `on_exec(engine, container, cmd) -> (exit code, output)`.
     on_exec: Callable[[FakeEngine, dict, list], tuple[int, str]] | None = None
-    #: Paths that answer as if the socket went away (an engine restart).
+    #: Refuse a create: `refuse_create(name, body)` returns the engine's message, or None.
+    refuse_create: Callable[[str, dict], str | None] | None = None
+    #: Every request closes without an answer, as if the engine went away.
     gone: bool = False
     lock: threading.RLock = field(default_factory=threading.RLock)
 
@@ -188,6 +190,10 @@ class FakeEngine:
         env = list(image_cfg.get("Env") or [])
         keys = {e.split("=", 1)[0] for e in payload.get("Env") or []}
         env = [e for e in env if e.split("=", 1)[0] not in keys] + list(payload.get("Env") or [])
+        if (self.version_doc.get("Components") or [{}])[0].get("Name") == "Podman Engine":
+            # Podman writes these for every container it creates.
+            env += [e for e in ("container=podman", "HOME=/home/nonroot") if e.split("=", 1)[0] not in keys]
+            env.append(f"HOSTNAME={cid[:12]}")
         labels = {**(image_cfg.get("Labels") or {}), **(payload.get("Labels") or {})}
         config = {k: v for k, v in payload.items() if k not in ("HostConfig", "NetworkingConfig")}
         config.update({"Image": image_ref, "Env": env, "Labels": labels})
@@ -275,6 +281,10 @@ class FakeEngine:
             name = query.get("name", "")
             if any(f"/{name}" in c["Names"] for c in self.containers.values()):
                 return 409, {"message": f'Conflict. The container name "/{name}" is already in use.'}
+            if self.refuse_create is not None:
+                message = self.refuse_create(name, payload or {})
+                if message:
+                    return 500, {"message": message}
             made = self._created(name or secrets.token_hex(6), payload or {})
             self.containers[made["Id"]] = made
             return 201, {"Id": made["Id"], "Warnings": []}

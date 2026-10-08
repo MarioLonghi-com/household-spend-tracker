@@ -1,0 +1,391 @@
+[
+  {
+    "Id": "b38720850221381f697daa55c48978deb68d43c75ee11be947105c6a5d9c085a",
+    "Created": "2026-10-08T07:53:30.157197349Z",
+    "Path": "python",
+    "Args": [
+      "deploy/entrypoint.py"
+    ],
+    "State": {
+      "OciVersion": "1.2.1",
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 13043,
+      "ConmonPid": 13041,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-08T07:53:30.954537268Z",
+      "FinishedAt": "0001-01-01T00:00:00Z",
+      "Health": {
+        "Status": "starting",
+        "FailingStreak": 0,
+        "Log": [
+          {
+            "Start": "2026-10-08T07:53:31.00006645Z",
+            "End": "2026-10-08T07:53:31.129513195Z",
+            "ExitCode": 1,
+            "Output": "Traceback (most recent call last):\n  File \"/usr/lib/python3.14/urllib/request.py\", line 1333, in do_open\n    h.request(req.get_method(), req.selector, req.data, headers,\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n              encode_chunked=req.has_header('Transfer-encoding'))\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/http/client.py\", line 1386, in request\n    self._send_request(method, url, body, headers, encode_chunked)"
+          }
+        ]
+      },
+      "CgroupPath": "/user.slice/user-1000.slice/user@1000.service/user.slice/user-libpod_pod_3c49fca595dcd61d05f97787b2ed5ee8fd2c7618f5112d8d09dd72e44c02eef9.slice/libpod-b38720850221381f697daa55c48978deb68d43c75ee11be947105c6a5d9c085a.scope",
+      "CheckpointedAt": "0001-01-01T00:00:00Z",
+      "RestoredAt": "0001-01-01T00:00:00Z"
+    },
+    "Image": "0a4f448352d7f1e005c45175e74f2f06d0806acd0ca2239362e6df52b3a48d88",
+    "ImageDigest": "sha256:b0fe07bb811d183c4c03199999a551b9e9850ccf9b245fa2c0673e1aa2ffc144",
+    "ImageName": "ghcr.io/mariolonghi-com/household-spend-tracker:0.8.0",
+    "Rootfs": "",
+    "Pod": "3c49fca595dcd61d05f97787b2ed5ee8fd2c7618f5112d8d09dd72e44c02eef9",
+    "ResolvConfPath": "/run/user/1000/containers/overlay-containers/b38720850221381f697daa55c48978deb68d43c75ee11be947105c6a5d9c085a/userdata/resolv.conf",
+    "HostnamePath": "/run/user/1000/containers/overlay-containers/b38720850221381f697daa55c48978deb68d43c75ee11be947105c6a5d9c085a/userdata/hostname",
+    "HostsPath": "/run/user/1000/containers/overlay-containers/b38720850221381f697daa55c48978deb68d43c75ee11be947105c6a5d9c085a/userdata/hosts",
+    "StaticDir": "/home/user/.local/share/containers/storage/overlay-containers/b38720850221381f697daa55c48978deb68d43c75ee11be947105c6a5d9c085a/userdata",
+    "OCIConfigPath": "/home/user/.local/share/containers/storage/overlay-containers/b38720850221381f697daa55c48978deb68d43c75ee11be947105c6a5d9c085a/userdata/config.json",
+    "OCIRuntime": "crun",
+    "ConmonPidFile": "/run/user/1000/containers/overlay-containers/b38720850221381f697daa55c48978deb68d43c75ee11be947105c6a5d9c085a/userdata/conmon.pid",
+    "PidFile": "/run/user/1000/containers/overlay-containers/b38720850221381f697daa55c48978deb68d43c75ee11be947105c6a5d9c085a/userdata/pidfile",
+    "Name": "spike157_app_1",
+    "RestartCount": 0,
+    "Driver": "overlay",
+    "MountLabel": "system_u:object_r:container_file_t:s0:c348,c588",
+    "ProcessLabel": "system_u:system_r:container_t:s0:c348,c588",
+    "AppArmorProfile": "",
+    "EffectiveCaps": null,
+    "BoundingCaps": null,
+    "ExecIDs": [],
+    "Mounts": [
+      {
+        "Type": "volume",
+        "Name": "spike157_ledger",
+        "Source": "/home/user/.local/share/containers/storage/volumes/spike157_ledger/_data",
+        "Destination": "/var/lib/spend-tracker",
+        "Driver": "local",
+        "Mode": "",
+        "Options": [
+          "nosuid",
+          "nodev",
+          "rbind"
+        ],
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ],
+    "Dependencies": [],
+    "NetworkSettings": {
+      "EndpointID": "",
+      "Gateway": "",
+      "IPAddress": "",
+      "IPPrefixLen": 0,
+      "IPv6Gateway": "",
+      "GlobalIPv6Address": "",
+      "GlobalIPv6PrefixLen": 0,
+      "MacAddress": "",
+      "Bridge": "",
+      "SandboxID": "",
+      "HairpinMode": false,
+      "LinkLocalIPv6Address": "",
+      "LinkLocalIPv6PrefixLen": 0,
+      "Ports": {
+        "8848/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "18848"
+          }
+        ]
+      },
+      "SandboxKey": "/run/user/1000/netns/netns-a5d1475c-0413-32c7-9e21-bc0b5e8cf4e4",
+      "Networks": {
+        "spike157_default": {
+          "EndpointID": "",
+          "Gateway": "192.0.2.10",
+          "IPAddress": "192.0.2.11",
+          "IPPrefixLen": 24,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:c0:00:02:0a",
+          "NetworkID": "b5a33f38047115d3b276210601cdff9a9960e7d842e3920cdbe644ffa9a32d85",
+          "DriverOpts": null,
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "app",
+            "b38720850221"
+          ]
+        }
+      }
+    },
+    "Namespace": "",
+    "IsInfra": false,
+    "IsService": false,
+    "KubeExitCodePropagation": "invalid",
+    "lockNumber": 2,
+    "Config": {
+      "Hostname": "b38720850221",
+      "Domainname": "",
+      "User": "65532:65532",
+      "AttachStdin": false,
+      "AttachStdout": false,
+      "AttachStderr": false,
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": [
+        "PATH=/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin",
+        "container=podman",
+        "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYTHONUNBUFFERED=1",
+        "SPENDTRACKER_DATA_DIR=/var/lib/spend-tracker",
+        "SPENDTRACKER_AUTO_MIGRATE=1",
+        "SPENDTRACKER_COOKIE_SECURE=on",
+        "HOME=/home/nonroot",
+        "HOSTNAME=b38720850221"
+      ],
+      "Cmd": null,
+      "Image": "ghcr.io/mariolonghi-com/household-spend-tracker:0.8.0",
+      "Volumes": null,
+      "WorkingDir": "/app",
+      "Entrypoint": [
+        "python",
+        "deploy/entrypoint.py"
+      ],
+      "OnBuild": null,
+      "Labels": {
+        "PODMAN_SYSTEMD_UNIT": "podman-compose@spike157.service",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.project": "spike157",
+        "com.docker.compose.project.config_files": "compose.yaml",
+        "com.docker.compose.project.working_dir": "/home/user/spike157-out/podman-rootless-fedora44/project",
+        "com.docker.compose.service": "app",
+        "dev.chainguard.image.title": "python",
+        "dev.chainguard.package.main": "",
+        "io.podman.compose.config-hash": "aa3d47f52ed7d09d4bf847b79d6af45fe1daffc093c2533f8d9c88231cbb47c2",
+        "io.podman.compose.project": "spike157",
+        "io.podman.compose.service": "app",
+        "io.podman.compose.version": "1.6.0",
+        "org.opencontainers.image.authors": "Chainguard Team https://www.chainguard.dev/",
+        "org.opencontainers.image.created": "2026-10-06T19:04:03Z",
+        "org.opencontainers.image.description": "A self-hosted, multi-currency spend tracker for one household",
+        "org.opencontainers.image.documentation": "https://github.com/MarioLonghi-com/household-spend-tracker/blob/main/deploy/DOCKER.md",
+        "org.opencontainers.image.licenses": "AGPL-3.0-or-later",
+        "org.opencontainers.image.revision": "e4f252002fd6bd2d3c6c3265cbc883a1e660151e",
+        "org.opencontainers.image.source": "https://github.com/MarioLonghi-com/household-spend-tracker",
+        "org.opencontainers.image.title": "Spend Tracker",
+        "org.opencontainers.image.url": "https://github.com/MarioLonghi-com/household-spend-tracker",
+        "org.opencontainers.image.vendor": "Chainguard",
+        "org.opencontainers.image.version": "v0.8.0"
+      },
+      "Annotations": {
+        "io.container.manager": "libpod",
+        "io.kubernetes.cri-o.SandboxID": "3c49fca595dcd61d05f97787b2ed5ee8fd2c7618f5112d8d09dd72e44c02eef9",
+        "org.opencontainers.image.stopSignal": "15",
+        "org.systemd.property.KillSignal": "15",
+        "org.systemd.property.TimeoutStopUSec": "uint64 10000000"
+      },
+      "StopSignal": "SIGTERM",
+      "Healthcheck": {
+        "Test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8848/api/health', timeout=4).status==200 else 1)"
+        ],
+        "StartPeriod": 20000000000,
+        "Interval": 30000000000,
+        "Timeout": 5000000000,
+        "Retries": 3
+      },
+      "HealthcheckOnFailureAction": "none",
+      "HealthLogDestination": "local",
+      "HealthcheckMaxLogCount": 5,
+      "HealthcheckMaxLogSize": 500,
+      "CreateCommand": [
+        "podman",
+        "create",
+        "--name=spike157_app_1",
+        "--pod=pod_spike157",
+        "--security-opt",
+        "no-new-privileges:true",
+        "--read-only",
+        "--label",
+        "io.podman.compose.project=spike157",
+        "--label",
+        "io.podman.compose.version=1.6.0",
+        "--label",
+        "PODMAN_SYSTEMD_UNIT=podman-compose@spike157.service",
+        "--label",
+        "com.docker.compose.project=spike157",
+        "--label",
+        "com.docker.compose.project.working_dir=/home/user/spike157-out/podman-rootless-fedora44/project",
+        "--label",
+        "com.docker.compose.project.config_files=compose.yaml",
+        "--label",
+        "io.podman.compose.config-hash=aa3d47f52ed7d09d4bf847b79d6af45fe1daffc093c2533f8d9c88231cbb47c2",
+        "--label",
+        "com.docker.compose.container-number=1",
+        "--label",
+        "io.podman.compose.service=app",
+        "--label",
+        "com.docker.compose.service=app",
+        "--cap-drop",
+        "ALL",
+        "-e",
+        "SPENDTRACKER_AUTO_MIGRATE=1",
+        "-e",
+        "SPENDTRACKER_COOKIE_SECURE=on",
+        "--tmpfs",
+        "/tmp",
+        "--mount",
+        "type=volume,source=spike157_ledger,destination=/var/lib/spend-tracker",
+        "--network=spike157_default:alias=app",
+        "-p",
+        "127.0.0.1:18848:8848",
+        "--restart",
+        "unless-stopped",
+        "-m",
+        "768m",
+        "ghcr.io/mariolonghi-com/household-spend-tracker:0.8.0"
+      ],
+      "Umask": "0022",
+      "Timeout": 0,
+      "StopTimeout": 10,
+      "Passwd": true,
+      "sdNotifyMode": "container",
+      "ExposedPorts": {
+        "8848/tcp": {}
+      }
+    },
+    "HostConfig": {
+      "Binds": [
+        "spike157_ledger:/var/lib/spend-tracker:rprivate,nosuid,nodev,rbind"
+      ],
+      "CgroupManager": "systemd",
+      "CgroupMode": "private",
+      "ContainerIDFile": "",
+      "LogConfig": {
+        "Type": "journald",
+        "Config": null,
+        "Path": "",
+        "Tag": "",
+        "Size": "-1B"
+      },
+      "NetworkMode": "bridge",
+      "PortBindings": {
+        "8848/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "18848"
+          }
+        ]
+      },
+      "RestartPolicy": {
+        "Name": "unless-stopped",
+        "MaximumRetryCount": 0
+      },
+      "AutoRemove": false,
+      "AutoRemoveImage": false,
+      "Annotations": {
+        "io.container.manager": "libpod",
+        "io.kubernetes.cri-o.SandboxID": "3c49fca595dcd61d05f97787b2ed5ee8fd2c7618f5112d8d09dd72e44c02eef9",
+        "org.opencontainers.image.stopSignal": "15",
+        "org.systemd.property.KillSignal": "15",
+        "org.systemd.property.TimeoutStopUSec": "uint64 10000000"
+      },
+      "VolumeDriver": "",
+      "VolumesFrom": null,
+      "CapAdd": [],
+      "CapDrop": [
+        "CAP_CHOWN",
+        "CAP_DAC_OVERRIDE",
+        "CAP_FOWNER",
+        "CAP_FSETID",
+        "CAP_KILL",
+        "CAP_NET_BIND_SERVICE",
+        "CAP_SETFCAP",
+        "CAP_SETGID",
+        "CAP_SETPCAP",
+        "CAP_SETUID",
+        "CAP_SYS_CHROOT"
+      ],
+      "Dns": [],
+      "DnsOptions": [],
+      "DnsSearch": [],
+      "ExtraHosts": [],
+      "HostsFile": "",
+      "GroupAdd": [],
+      "IpcMode": "shareable",
+      "Cgroup": "",
+      "Cgroups": "default",
+      "Links": null,
+      "OomScoreAdj": 0,
+      "PidMode": "private",
+      "Privileged": false,
+      "PublishAllPorts": false,
+      "ReadonlyRootfs": true,
+      "SecurityOpt": [
+        "no-new-privileges"
+      ],
+      "Tmpfs": {
+        "/tmp": "rprivate,nosuid,nodev,tmpcopyup"
+      },
+      "UTSMode": "private",
+      "UsernsMode": "",
+      "ShmSize": 65536000,
+      "Runtime": "oci",
+      "ConsoleSize": [
+        0,
+        0
+      ],
+      "Isolation": "",
+      "CpuShares": 0,
+      "Memory": 805306368,
+      "NanoCpus": 0,
+      "CgroupParent": "user.slice/user-1000.slice/user@1000.service/user.slice/user-libpod_pod_3c49fca595dcd61d05f97787b2ed5ee8fd2c7618f5112d8d09dd72e44c02eef9.slice",
+      "BlkioWeight": 0,
+      "BlkioWeightDevice": null,
+      "BlkioDeviceReadBps": null,
+      "BlkioDeviceWriteBps": null,
+      "BlkioDeviceReadIOps": null,
+      "BlkioDeviceWriteIOps": null,
+      "CpuPeriod": 0,
+      "CpuQuota": 0,
+      "CpuRealtimePeriod": 0,
+      "CpuRealtimeRuntime": 0,
+      "CpusetCpus": "",
+      "CpusetMems": "",
+      "Devices": [],
+      "DiskQuota": 0,
+      "KernelMemory": 0,
+      "MemoryReservation": 0,
+      "MemorySwap": 1610612736,
+      "MemorySwappiness": -1,
+      "OomKillDisable": false,
+      "PidsLimit": 2048,
+      "Ulimits": [
+        {
+          "Name": "RLIMIT_NOFILE",
+          "Soft": 524288,
+          "Hard": 524288
+        },
+        {
+          "Name": "RLIMIT_NPROC",
+          "Soft": 7600,
+          "Hard": 7600
+        }
+      ],
+      "CpuCount": 0,
+      "CpuPercent": 0,
+      "IOMaximumIOps": 0,
+      "IOMaximumBandwidth": 0,
+      "CgroupConf": null
+    },
+    "UseImageHosts": false,
+    "UseImageHostname": false
+  }
+]
