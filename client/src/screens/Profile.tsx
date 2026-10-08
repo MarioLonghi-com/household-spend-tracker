@@ -54,7 +54,7 @@ export function Profile({
 }) {
   const { t } = useLingui();
   return (
-    <Panel title={t`Your account`} onClose={onClose} config>
+    <Panel title={t({ message: "Your account", comment: "Title of a panel on the Your account panel" })} onClose={onClose} config>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
           Signed in as <strong>{user.display_name}</strong> ({user.email}).
@@ -93,16 +93,16 @@ function AppearanceSection() {
   };
 
   const options: { key: Appearance; label: string; icon: string }[] = [
-    { key: "light", label: t`Light`, icon: "\u2600\ufe0f" },
-    { key: "dark", label: t`Dark`, icon: "\ud83c\udf19" },
-    { key: "system", label: t`System`, icon: "\ud83d\udcbb" },
+    { key: "light", label: t({ message: "Light", comment: "Label on the Your account panel: colour scheme" }), icon: "\u2600\ufe0f" },
+    { key: "dark", label: t({ message: "Dark", comment: "Label on the Your account panel: colour scheme" }), icon: "\ud83c\udf19" },
+    { key: "system", label: t({ message: "System", comment: "Label on the Your account panel: colour scheme: follow the device" }), icon: "\ud83d\udcbb" },
   ];
 
   return (
     <section>
       <h3>
-        <Trans>Appearance</Trans>{" "}
-        <Hint label={t`about appearance`}>
+        <Trans comment="Heading on the Your account panel. See GLOSSARY.md">Appearance</Trans>{" "}
+        <Hint label={t({ message: "about appearance", comment: "Screen-reader name of a help button on the Your account panel" })}>
           <Trans>
             Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the
             server, and clearing this browser's site data forgets it -- which returns you to
@@ -111,7 +111,7 @@ function AppearanceSection() {
         </Hint>
       </h3>
 
-      <div className="appearance-choices" role="group" aria-label={t`Appearance`}>
+      <div className="appearance-choices" role="group" aria-label={t({ message: "Appearance", comment: "Screen-reader name on the Your account panel. See GLOSSARY.md" })}>
         {options.map((one) => (
           <button
             key={one.key}
@@ -178,13 +178,13 @@ function SignInMethods({ user }: { user: User }) {
       ? plural(usable, { one: `${usable} passkey`, other: `${usable} passkeys` })
       : state.data && !state.data.available
         ? t`Not available here`
-        : t`None yet`
+        : t({ message: "None yet", comment: "Label on the Your account panel: nothing so far" })
     : "";
 
   return (
     <section aria-labelledby="sign-in-methods">
       <h3 className="section-title" id="sign-in-methods">
-        <Trans>Sign-in methods</Trans>
+        <Trans comment="Heading on the Your account panel. See GLOSSARY.md">Sign-in methods</Trans>
       </h3>
       <p className="small" style={{ marginTop: 0 }}>
         {summary}
@@ -192,9 +192,9 @@ function SignInMethods({ user }: { user: User }) {
       <ul className="plain-list methods">
         <MethodRow
           slug="password"
-          name={t`Password`}
-          state={t`Set`}
-          action={t`Change`}
+          name={t({ message: "Password", comment: "Label on the Your account panel: noun. See GLOSSARY.md" })}
+          state={t({ message: "Set", comment: "State of the password: it has been chosen. Shown beside the word Password" })}
+          action={t({ message: "Change", comment: "Button on the Your account panel: verb" })}
           open={open === "password"}
           onToggle={() => toggle("password")}
         >
@@ -202,8 +202,8 @@ function SignInMethods({ user }: { user: User }) {
         </MethodRow>
         <MethodRow
           slug="authenticator"
-          name={t`Authenticator`}
-          state={!enrolled ? t({ message: "Cleared", context: "authenticator state" }) : locked ? t`Needs setting up again` : t`Set up`}
+          name={t({ message: "Authenticator", comment: "Label on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md" })}
+          state={!enrolled ? t({ message: "Cleared", context: "authenticator state", comment: "State of the authenticator: it was removed and has to be set up again" }) : locked ? t`Needs setting up again` : t({ message: "Set up", context: "authenticator state", comment: "State of the authenticator: it is enrolled and working. See GLOSSARY.md" })}
           warn={locked || !enrolled}
           // In recovery mode (#287) this row is the one thing to do, so it
           // stays open and offers no way to close it.
@@ -213,15 +213,15 @@ function SignInMethods({ user }: { user: User }) {
         >
           <AuthenticatorSection user={user} titled={false} />
         </MethodRow>
-        <MethodRow slug="passkeys" name={t`Passkeys`} state={passkeyState} open>
+        <MethodRow slug="passkeys" name={t({ message: "Passkeys", comment: "Label on the Your account panel. See GLOSSARY.md" })} state={passkeyState} open>
           <PasskeysSection />
         </MethodRow>
         <MethodRow
           slug="recovery-codes"
-          name={t`Recovery codes`}
-          state={recovery.data ? t`${recovery.data.unused} of 10 left` : ""}
+          name={t({ message: "Recovery codes", comment: "Label on the Your account panel. See GLOSSARY.md" })}
+          state={recovery.data ? t({ message: `${recovery.data.unused} of 10 left`, comment: "Text on the Your account panel" }) : ""}
           warn={recovery.data?.unused === 0}
-          action={t`New codes`}
+          action={t({ message: "New codes", comment: "Button on the Your account panel" })}
           open={open === "recovery"}
           onToggle={() => toggle("recovery")}
         >
@@ -267,10 +267,10 @@ function MethodRow({
             type="button"
             aria-expanded={open}
             // The visible word alone ("Change") is ambiguous in a list of four.
-            aria-label={open ? t`Close: ${name}` : t`${action}: ${name}`}
+            aria-label={open ? t({ message: `Close: ${name}`, comment: "Button on the Your account panel" }) : t`${action}: ${name}`}
             onClick={onToggle}
           >
-            {open ? t`Close` : action}
+            {open ? t({ message: "Close", comment: "Button on the Your account panel: verb, close this panel" }) : action}
           </button>
         )}
       </div>
@@ -342,18 +342,18 @@ function PasswordSection({ titled = true }: { titled?: boolean }) {
     <section>
       {titled && (
         <h3 className="section-title">
-          <Trans>Password</Trans>
+          <Trans comment="Heading on the Your account panel: noun. See GLOSSARY.md">Password</Trans>
         </h3>
       )}
       <Problem error={change.error} />
       {change.isSuccess && (
         <div className="banner info">
-          <Trans>Password changed.</Trans>{" "}
+          <Trans comment="Text on the Your account panel">Password changed.</Trans>{" "}
           {passwordChangedText(change.data)}
         </div>
       )}
 
-      <Field label={t`Current password`}>
+      <Field label={t({ message: "Current password", comment: "Label of a form field on the Your account panel" })}>
         <input
           type="password"
           value={current}
@@ -363,7 +363,7 @@ function PasswordSection({ titled = true }: { titled?: boolean }) {
       </Field>
       <p />
       <Field
-        label={t`New password`}
+        label={t({ message: "New password", comment: "Label of a form field on the Your account panel" })}
         hint={
           <Hint label={t`what makes a good one`}>
             <p>
@@ -410,7 +410,7 @@ function PasswordSection({ titled = true }: { titled?: boolean }) {
         disabled={!ready || change.isPending}
         onClick={() => change.mutate()}
       >
-        <Trans>Change password</Trans>
+        <Trans comment="Button on the Your account panel">Change password</Trans>
       </button>
     </section>
   );
@@ -502,7 +502,7 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
       <section>
         {titled && (
           <h3 className="section-title">
-            <Trans>Authenticator</Trans>
+            <Trans comment="Heading on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md">Authenticator</Trans>
           </h3>
         )}
         <div className="banner info">
@@ -520,7 +520,7 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
       <section>
         {titled && (
           <h3 className="section-title">
-            <Trans>Authenticator</Trans>
+            <Trans comment="Heading on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md">Authenticator</Trans>
           </h3>
         )}
         <Problem error={confirm.error} />
@@ -591,7 +591,7 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
             <Trans>Confirm and replace</Trans>
           </button>
           <button onClick={() => setOffer(null)}>
-            <Trans>Cancel</Trans>
+            <Trans comment="Button on the Your account panel">Cancel</Trans>
           </button>
         </div>
         <p className="small muted" style={{ marginTop: 10 }}>
@@ -609,7 +609,7 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
     <section>
       {titled && (
         <h3 className="section-title">
-          <Trans>Authenticator</Trans>
+          <Trans comment="Heading on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md">Authenticator</Trans>
         </h3>
       )}
       <Problem error={start.error} />
@@ -631,7 +631,7 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
           </Trans>
         </p>
       )}
-      <Field label={t`Current password`}>
+      <Field label={t({ message: "Current password", comment: "Label of a form field on the Your account panel" })}>
         <input
           type="password"
           value={password}
@@ -691,13 +691,13 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
       <section>
         {titled && (
           <h3 className="section-title">
-            <Trans>Recovery codes</Trans>
+            <Trans comment="Heading on the Your account panel. See GLOSSARY.md">Recovery codes</Trans>
           </h3>
         )}
         <div className="banner info">
           <Trans>New codes made. Every earlier code, used or not, has stopped working.</Trans>
         </div>
-        <RecoveryCodeSheet codes={fresh} action={t`Done`} onStored={() => setFresh(null)} />
+        <RecoveryCodeSheet codes={fresh} action={t({ message: "Done", comment: "Button on the Your account panel: finish and close" })} onStored={() => setFresh(null)} />
       </section>
     );
   }
@@ -709,7 +709,7 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
     <section>
       {titled && (
         <h3 className="section-title">
-          <Trans>Recovery codes</Trans>
+          <Trans comment="Heading on the Your account panel. See GLOSSARY.md">Recovery codes</Trans>
         </h3>
       )}
       <Problem error={left.error} />
@@ -733,7 +733,7 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
               Nobody is signed out.
             </Trans>
           </p>
-          <Field label={t`Your password`}>
+          <Field label={t({ message: "Your password", comment: "Label of a form field on the Your account panel" })}>
             <input
               type="password"
               value={password}
@@ -768,7 +768,7 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
               disabled={!ready || make.isPending}
               onClick={() => make.mutate()}
             >
-              {make.isPending ? t`Making…` : t`Make new codes`}
+              {make.isPending ? t({ message: "Making…", comment: "Button on the Your account panel" }) : t`Make new codes`}
             </button>
             <button
               onClick={() => {
@@ -778,7 +778,7 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
                 make.reset();
               }}
             >
-              <Trans>Cancel</Trans>
+              <Trans comment="Button on the Your account panel">Cancel</Trans>
             </button>
           </div>
         </div>
@@ -806,8 +806,8 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
  */
 /** A key's scope, as the list says it. */
 function scopeWord(scope: string): string {
-  if (scope === "read") return t`read`;
-  if (scope === "write") return t`write`;
+  if (scope === "read") return t({ message: "read", comment: "Scope of a key for programs: it may only read. Lower case, inside a sentence" });
+  if (scope === "write") return t({ message: "write", comment: "Scope of a key for programs: it may also change data. Lower case, inside a sentence" });
   return scope;
 }
 
@@ -827,7 +827,7 @@ function KeysSection({ households }: { households: Household[] }) {
     onSuccess: () => queries.invalidateQueries({ queryKey: ["agent-keys"] }),
   });
 
-  const named = (id: string) => households.find((h) => h.id === id)?.name ?? t`a household`;
+  const named = (id: string) => households.find((h) => h.id === id)?.name ?? t({ message: "a household", comment: "Stands in for a household's name the panel no longer knows. Lower case" });
 
   return (
     <section>
@@ -880,13 +880,13 @@ function KeysSection({ households }: { households: Household[] }) {
                 </div>
                 <div className="small muted">
                   {key.revoked_at
-                    ? t`Revoked ${formatInstant(key.revoked_at)}`
+                    ? t({ message: `Revoked ${formatInstant(key.revoked_at)}`, comment: "Text on the Your account panel" })
                     : key.live
-                      ? t`Expires ${formatInstant(key.expires_at)}`
-                      : t`Expired ${formatInstant(key.expires_at)}`}
+                      ? t({ message: `Expires ${formatInstant(key.expires_at)}`, comment: "Text on the Your account panel: verb, stops working on a date" })
+                      : t({ message: `Expired ${formatInstant(key.expires_at)}`, comment: "Text on the Your account panel: adjective, no longer works" })}
                   {key.last_used_at
-                    ? ` · ${t`last used ${formatInstant(key.last_used_at)}`}`
-                    : ` · ${t`never used`}`}
+                    ? ` · ${t({ message: `last used ${formatInstant(key.last_used_at)}`, comment: "Text on the Your account panel" })}`
+                    : ` · ${t({ message: "never used", comment: "Text on the Your account panel" })}`}
                 </div>
               </div>
               {key.live ? (
@@ -895,7 +895,7 @@ function KeysSection({ households }: { households: Household[] }) {
                   disabled={revoke.isPending}
                   onClick={() => revoke.mutate(key.id)}
                 >
-                  <Trans>Revoke</Trans>
+                  <Trans comment="Button on the Your account panel: verb, stop a key or device from working">Revoke</Trans>
                 </button>
               ) : null}
             </li>
@@ -976,7 +976,7 @@ function IssueKey({
         <input
           value={label}
           autoFocus
-          placeholder={t`receipt filer`}
+          placeholder={t({ message: "receipt filer", comment: "Placeholder in an empty field on the Your account panel" })}
           onChange={(e) => setLabel(e.target.value)}
         />
       </Field>
@@ -989,7 +989,7 @@ function IssueKey({
         />
       </Field>
       <p />
-      <Field label={t`Which household`}>
+      <Field label={t({ message: "Which household", comment: "Label of a form field on the Your account panel" })}>
         <select value={householdId} onChange={(e) => setHouseholdId(e.target.value)}>
           {households.map((house) => (
             <option key={house.id} value={house.id}>
@@ -1066,7 +1066,7 @@ function IssueKey({
           for your password and a code — the same as signing in.
         </Trans>
       </p>
-      <Field label={t`Your password`}>
+      <Field label={t({ message: "Your password", comment: "Label of a form field on the Your account panel" })}>
         <input
           type="password"
           value={password}
@@ -1086,10 +1086,10 @@ function IssueKey({
 
       <div className="row" style={{ marginTop: 12 }}>
         <button className="primary" disabled={!ready || issue.isPending} onClick={() => issue.mutate()}>
-          {issue.isPending ? t`Creating…` : t`Create the key`}
+          {issue.isPending ? t({ message: "Creating…", comment: "Button on the Your account panel" }) : t`Create the key`}
         </button>
         <button onClick={onCancel}>
-          <Trans>Cancel</Trans>
+          <Trans comment="Button on the Your account panel">Cancel</Trans>
         </button>
       </div>
     </div>

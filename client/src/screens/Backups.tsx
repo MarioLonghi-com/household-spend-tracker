@@ -51,6 +51,12 @@ export interface Backup {
   path: string;
   bytes: number;
   made_at: string;
+  /** `file` from this screen, `update` from an update's drill, `folder` by hand. */
+  kind?: "file" | "update" | "folder";
+  version?: string | null;
+  revision?: string | null;
+  /** One of the newest five update backups: the server will not delete it. */
+  protected?: boolean;
 }
 
 export function BackupList({
@@ -120,12 +126,12 @@ export function BackupList({
         <table>
           <thead>
             <tr>
-              <SortHeading label={t`Backup`} column="name" {...order} />
-              <SortHeading label={t`Made`} column="date" {...order} />
-              <SortHeading label={t`Size`} column="size" align="right" {...order} />
+              <SortHeading label={t({ message: "Backup", comment: "Column heading on the Backups screen. See GLOSSARY.md" })} column="name" {...order} />
+              <SortHeading label={t({ message: "Made", comment: "Column heading on the Backups screen" })} column="date" {...order} />
+              <SortHeading label={t({ message: "Size", comment: "Column heading on the Backups screen: noun, size of a file" })} column="size" align="right" {...order} />
               <th className="row-actions backup-actions">
                 <span className="sr-only">
-                  <Trans>Actions</Trans>
+                  <Trans comment="Screen-reader text on the Backups screen">Actions</Trans>
                 </span>
               </th>
             </tr>
@@ -136,10 +142,10 @@ export function BackupList({
                 <td data-primary="true" className="mono small">
                   {one.name}
                 </td>
-                <td className="small muted" data-label={t`Made`}>
+                <td className="small muted" data-label={t({ message: "Made", comment: "Column name shown beside a value on phones on the Backups screen" })}>
                   {formatInstant(one.made_at)}
                 </td>
-                <td className="amount muted" data-label={t`Size`}>
+                <td className="amount muted" data-label={t({ message: "Size", comment: "Column name shown beside a value on phones on the Backups screen: noun, size of a file" })}>
                   {bytes(one.bytes)}
                 </td>
                 <td className="row-actions backup-actions">
@@ -147,13 +153,13 @@ export function BackupList({
                     // No link can carry a step-up grant, so the key's download
                     // goes through the panel that asks for one.
                     <button className="link" onClick={() => setSaving(one)}>
-                      <Trans>
+                      <Trans comment="Button on the Backups screen: verb">
                         Download…
                       </Trans>
                     </button>
                   ) : (
                     <a href={backupDownloadUrl(one.name)} download={zipName(one.name)}>
-                      <Trans>
+                      <Trans comment="Link on the Backups screen">
                         Download
                       </Trans>
                     </a>
@@ -164,7 +170,7 @@ export function BackupList({
                     </Trans>
                   </button>
                   <button className="link danger" onClick={() => setDeleting(one)}>
-                    <Trans>
+                    <Trans comment="Button on the Backups screen: verb">
                       Delete
                     </Trans>
                   </button>
@@ -210,10 +216,10 @@ export function BackupList({
               disabled={remove.isPending}
               onClick={() => remove.mutate(deleting)}
             >
-              {remove.isPending ? t`Deleting…` : t`Yes, delete it`}
+              {remove.isPending ? t({ message: "Deleting…", comment: "Button on the Backups screen" }) : t`Yes, delete it`}
             </button>
             <button disabled={remove.isPending} onClick={() => setDeleting(null)}>
-              <Trans>
+              <Trans comment="Button on the Backups screen">
                 Keep it
               </Trans>
             </button>
@@ -287,7 +293,7 @@ export function SavePanel({
   });
   const download = useMutation({
     mutationFn: () => downloadZip(backup.name, withKey, grant),
-    onSuccess: () => setDone(t`Downloaded.`),
+    onSuccess: () => setDone(t({ message: "Downloaded.", comment: "Label on the Backups screen" })),
   });
 
   const secure = typeof window !== "undefined" && window.isSecureContext;
@@ -341,7 +347,7 @@ export function SavePanel({
               disabled={share.isPending}
               onClick={() => share.mutate(prepared)}
             >
-              {t`Share ${prepared.name}…`}
+              {t({ message: `Share ${prepared.name}…`, comment: "Button on the Backups screen" })}
             </button>
           ) : (
             <button disabled={!ready || prepare.isPending} onClick={() => prepare.mutate()}>
@@ -366,7 +372,7 @@ export function SavePanel({
             </Trans>
           </p>
           <button disabled={!ready || folder.isPending} onClick={() => folder.mutate()}>
-            {folder.isPending ? t`Saving…` : t`Choose a folder…`}
+            {folder.isPending ? t({ message: "Saving…", comment: "Button on the Backups screen" }) : t`Choose a folder…`}
           </button>
           <Problem error={folder.error} />
         </section>
@@ -387,14 +393,14 @@ export function SavePanel({
                   disabled={!ready || download.isPending}
                   onClick={() => download.mutate()}
                 >
-                  {download.isPending ? t`Downloading…` : t`Download ${zipName(backup.name)}`}
+                  {download.isPending ? t({ message: "Downloading…", comment: "Button on the Backups screen" }) : t({ message: `Download ${zipName(backup.name)}`, comment: "Button on the Backups screen: verb" })}
                 </button>
                 <Problem error={download.error} />
               </>
             ) : (
               <>
                 <a href={backupDownloadUrl(backup.name)} download={zipName(backup.name)}>
-                  {t`Download ${zipName(backup.name)}`}
+                  {t({ message: `Download ${zipName(backup.name)}`, comment: "Link on the Backups screen" })}
                 </a>
                 .
               </>
@@ -404,7 +410,7 @@ export function SavePanel({
             {t`Open the service in a new tab:`}{" "}
             {CLOUD_PAGES.map((page, index) => (
               <span key={page.href}>
-                {index > 0 ? ` ${t`or`} ` : ""}
+                {index > 0 ? ` ${t({ message: "or", comment: "List item on the Backups screen: conjunction between two choices" })} ` : ""}
                 <a href={page.href} target="_blank" rel="noopener noreferrer">
                   {page.label}
                 </a>

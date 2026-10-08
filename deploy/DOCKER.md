@@ -91,7 +91,13 @@ Then open <http://localhost:8848> and go to **The setup token** below.
 
 `docker compose pull` fetches the published image,
 `ghcr.io/mariolonghi-com/household-spend-tracker:X.Y.Z`, which
-`release.yml` built, smoke-tested and attested from that release's tag.
+`release.yml` built, smoke-tested and attested from that release's tag. It is
+one index of two platforms, `linux/amd64` and `linux/arm64`, each built and
+started natively on a runner of that architecture, so Docker Desktop on an
+Apple-silicon Mac runs it as is rather than emulated. The release goes
+public only after the image is on the registry and has been pulled back
+with no credentials, and `X.Y` and `latest` move after that: a release you
+can see is one whose image you can pull.
 Use the number of the release you want from the repository's releases page;
 without `SPENDTRACKER_VERSION` it is whatever `latest` was when you pulled.
 
@@ -119,6 +125,9 @@ Three things worth knowing about this mode:
   here. It would not at `http://192.168.1.50:8848`: the browser silently drops
   the cookie and the sign-in loops with nothing in any log. That is why the
   port is published to `127.0.0.1` and why this mode is for one machine.
+  Safari included: it refuses a `__Host-` cookie from `http://localhost`, so
+  at `localhost`, `127.0.0.1` and `[::1]` the app names its cookies without
+  that prefix (still `Secure`). Every other address keeps it.
 - **For other devices in the house, use a server.** Sections 2 and 3 give you
   HTTPS and a name. For one evening on the sofa the README's `make lan`
   exists, with its warnings.
@@ -999,6 +1008,10 @@ The browser refused to store the `Secure` session cookie because the page is
 plain HTTP at an address that is not `localhost`. Reach the app over HTTPS
 (sections 2 and 3) or at `http://localhost:8848` (section 1). Nothing is
 written to any log when this happens.
+
+In Safari at `http://localhost:8848` on a release before the fix for #196,
+the same loop came from the cookie's `__Host-` prefix, which Safari refuses
+on plain-HTTP `localhost`. Upgrade; until then, Chrome or Firefox work there.
 
 ### The sidecar node never appears in the admin console (section 3)
 

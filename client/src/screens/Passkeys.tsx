@@ -171,7 +171,7 @@ export function PasskeysSection() {
               setReminder(0);
             }}
           >
-            <Trans>Dismiss</Trans>
+            <Trans comment="Button on the passkeys panel: verb, hide this notice">Dismiss</Trans>
           </button>
         </div>
       )}
@@ -181,13 +181,13 @@ export function PasskeysSection() {
           <table className="passkeys">
             <thead>
               <tr>
-                <SortHeading label={t`Name`} column="label" sort={sort} direction={direction} onSort={onSort} />
-                <SortHeading label={t`Kept`} column="kind" sort={sort} direction={direction} onSort={onSort} />
-                <SortHeading label={t`Added`} column="created" sort={sort} direction={direction} onSort={onSort} />
-                <SortHeading label={t`Last used`} column="used" sort={sort} direction={direction} onSort={onSort} />
+                <SortHeading label={t({ message: "Name", comment: "Column heading on the passkeys panel: noun" })} column="label" sort={sort} direction={direction} onSort={onSort} />
+                <SortHeading label={t({ message: "Kept", comment: "Column heading on the passkeys panel: where the passkey is kept (synced, or this device only)" })} column="kind" sort={sort} direction={direction} onSort={onSort} />
+                <SortHeading label={t({ message: "Added", comment: "Column heading on the passkeys panel: the date the passkey was added" })} column="created" sort={sort} direction={direction} onSort={onSort} />
+                <SortHeading label={t({ message: "Last used", comment: "Column heading on the passkeys panel" })} column="used" sort={sort} direction={direction} onSort={onSort} />
                 <th>
                   <span className="sr-only">
-                    <Trans>Actions</Trans>
+                    <Trans comment="Screen-reader text on the passkeys panel">Actions</Trans>
                   </span>
                 </th>
               </tr>
@@ -214,7 +214,7 @@ export function PasskeysSection() {
       )}
 
       {removing && (
-        <div className="card" role="alertdialog" aria-label={t`Remove ${removing.label}`} style={{ marginTop: 12 }}>
+        <div className="card" role="alertdialog" aria-label={t({ message: `Remove ${removing.label}`, comment: "Screen-reader name on the passkeys panel" })} style={{ marginTop: 12 }}>
           <p style={{ marginTop: 0 }}>
             <Trans>
               Remove <strong>{removing.label}</strong>? It stops working at once.
@@ -223,10 +223,10 @@ export function PasskeysSection() {
           </p>
           <div className="row">
             <button className="danger" disabled={remove.isPending} onClick={() => remove.mutate(removing.id)}>
-              <Trans>Remove</Trans>
+              <Trans comment="Button on the passkeys panel: verb">Remove</Trans>
             </button>
             <button onClick={() => setRemoving(null)}>
-              <Trans>Keep it</Trans>
+              <Trans comment="Button on the passkeys panel">Keep it</Trans>
             </button>
           </div>
         </div>
@@ -267,7 +267,7 @@ export function PasskeysSection() {
                 add.reset();
               }}
             >
-              <Trans>Cancel</Trans>
+              <Trans comment="Button on the passkeys panel">Cancel</Trans>
             </button>
           </div>
         </div>
@@ -331,10 +331,10 @@ function PasskeyRow({
               />
             </Field>
             <button type="submit" className="primary" disabled={busy || renaming.trim() === ""}>
-              <Trans>Save</Trans>
+              <Trans comment="Button on the passkeys panel: verb">Save</Trans>
             </button>
             <button type="button" onClick={onRenameCancel}>
-              <Trans>Cancel</Trans>
+              <Trans comment="Button on the passkeys panel">Cancel</Trans>
             </button>
           </form>
         ) : (
@@ -342,7 +342,7 @@ function PasskeyRow({
             <strong>{passkey.label}</strong>
             {thisDevice && (
               <span className="tag">
-                <Trans>this device</Trans>
+                <Trans comment="Tag beside a name on the passkeys panel">this device</Trans>
               </span>
             )}
             {!passkey.usable_here && (
@@ -353,19 +353,19 @@ function PasskeyRow({
           </>
         )}
       </td>
-      <td className="small">{passkey.synced ? t`Synced` : t`This device only`}</td>
+      <td className="small">{passkey.synced ? t({ message: "Synced", comment: "Table cell on the passkeys panel" }) : t`This device only`}</td>
       <td className="small">{formatInstant(passkey.created_at)}</td>
-      <td className="small">{passkey.last_used_at ? formatInstant(passkey.last_used_at) : t`Never`}</td>
+      <td className="small">{passkey.last_used_at ? formatInstant(passkey.last_used_at) : t({ message: "Never", comment: "Table cell on the passkeys panel: has never happened" })}</td>
       <td className="actions">
         {renaming === null && (
           <div className="row">
             {passkey.usable_here && (
-              <button disabled={busy} onClick={onRenameStart} aria-label={t`Rename ${passkey.label}`}>
-                <Trans>Rename</Trans>
+              <button disabled={busy} onClick={onRenameStart} aria-label={t({ message: `Rename ${passkey.label}`, comment: "Screen-reader name of a button on the passkeys panel" })}>
+                <Trans comment="Button on the passkeys panel">Rename</Trans>
               </button>
             )}
-            <button className="danger" disabled={busy} onClick={onRemove} aria-label={t`Remove ${passkey.label}`}>
-              <Trans>Remove</Trans>
+            <button className="danger" disabled={busy} onClick={onRemove} aria-label={t({ message: `Remove ${passkey.label}`, comment: "Screen-reader name of a button on the passkeys panel" })}>
+              <Trans comment="Button on the passkeys panel: verb">Remove</Trans>
             </button>
           </div>
         )}
