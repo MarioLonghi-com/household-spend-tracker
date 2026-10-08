@@ -194,7 +194,6 @@ history this repository does not have.
   `self-update` job, advisory for now, that updates release A to B through
   the updater against a real Docker Engine. No image or compose service runs
   the updater yet (#164).
-
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.

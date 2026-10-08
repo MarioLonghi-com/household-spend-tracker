@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 // The One-time Import's card is its own screen, extracted on its own.
-vi.mock("./OneTimeImport", () => ({ OneTimeImport: () => null }));
+vi.mock("./OneTimeImport", () => ({ OneTimeImport: () => null, NEW_ISSUE_URL: "https://example.com/new" }));
 
 vi.mock("../lib/api", () => ({
   api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), del: vi.fn(), upload: vi.fn() },
@@ -35,6 +35,8 @@ import { History } from "./History";
 import { BackupList, SavePanel } from "./Backups";
 import { ApplicationManagement } from "./ApplicationManagement";
 import { Receipts } from "./Receipts";
+import { ImportGuide, guideFor } from "./ImportGuide";
+import { ImportGuideDocument } from "./importGuide/en";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -417,5 +419,29 @@ describe("in en-XA, the remaining screens show no English", () => {
     fireEvent.click(thumbs.find((one) => one.closest("tr")!.textContent!.includes("2026-03-01"))!);
     await screen.findByText("Doe");
     expect(left().filter(data)).toEqual([]);
+  });
+
+  it("the import guide: no document in this language, so the English one, marked as English", () => {
+    render(<ImportGuide />);
+    expect(left()).toEqual([]);
+    const english = document.querySelector('[lang="en"]') as HTMLElement;
+    expect(english.textContent).toContain("How import works");
+    expect(document.querySelector(".banner.info")!.textContent).not.toMatch(/^[\x20-\x7e]+$/);
+  });
+});
+
+describe("the import guide in English", () => {
+  it("is the English document exactly, with no notice and no language mark", async () => {
+    await activate("en");
+    const { container: picked } = render(<ImportGuide />);
+    const shown = picked.innerHTML;
+    cleanup();
+    const { container: direct } = render(<ImportGuideDocument />);
+    expect(shown).toBe(direct.innerHTML);
+    expect(shown).not.toContain('lang="en"');
+    expect(guideFor("en")).toBe(ImportGuideDocument);
+    expect(guideFor("en-GB")).toBe(ImportGuideDocument);
+    expect(guideFor("en-XA")).toBeUndefined();
+    expect(guideFor("sv-SE")).toBeUndefined();
   });
 });

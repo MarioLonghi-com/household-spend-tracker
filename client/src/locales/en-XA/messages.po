@@ -761,6 +761,7 @@ msgstr ""
 msgid "{0} now tells a file it is for {1}"
 msgstr ""
 
+#. Screen-reader name on the one-time import's mapping step
 #. Text on the one-time import's mapping step
 #. placeholder {0}: account.name
 #. placeholder {0}: category.name || t({ message: "no category", comment: "Text on the one-time import's mapping step" })
@@ -5079,6 +5080,10 @@ msgstr ""
 
 #: src/screens/ResetAccount.tsx
 msgid "If you did not expect this, tell an owner of this instance before you go on."
+msgstr ""
+
+#: src/screens/ImportGuide.tsx
+msgid "This guide has not been written in your language yet, so here it is in English."
 msgstr ""
 
 #. Text on the Transfers screen

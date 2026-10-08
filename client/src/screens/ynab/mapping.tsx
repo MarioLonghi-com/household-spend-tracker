@@ -495,7 +495,7 @@ export function MapCategories({
                     <div className="ynab-target-body">
                       <div className="ynab-target-pick">
                         <select
-                          aria-label={t`Target for ${category.name || t({ message: "no category", comment: "Text on the one-time import's mapping step" })}`}
+                          aria-label={t({ message: `Target for ${category.name || t({ message: "no category", comment: "Text on the one-time import's mapping step" })}`, comment: "Screen-reader name on the one-time import's mapping step" })}
                           value={categoryValue(choice)}
                           disabled={category.fixed_uncategorised}
                           onChange={(event) => {

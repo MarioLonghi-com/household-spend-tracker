@@ -839,6 +839,7 @@ msgstr ""
 msgid "{0} now tells a file it is for {1}"
 msgstr "{0} agora indica que um arquivo é de {1}"
 
+#. Screen-reader name on the one-time import's mapping step
 #. Text on the one-time import's mapping step
 #. placeholder {0}: account.name
 #. placeholder {0}: category.name || t({ message: "no category", comment: "Text on the one-time import's mapping step" })
@@ -5597,6 +5598,10 @@ msgstr ""
 #, fuzzy
 msgid "If you did not expect this, tell an owner of this instance before you go on."
 msgstr "Se você não esperava por isso, avise um proprietário desta instância antes de continuar."
+
+#: src/screens/ImportGuide.tsx
+msgid "This guide has not been written in your language yet, so here it is in English."
+msgstr ""
 
 #. Text on the Transfers screen
 #. placeholder {0}: from.currency
