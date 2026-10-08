@@ -64,7 +64,7 @@ export const REPORTS: {
   {
     key: "reimbursements",
     get label() {
-      return t`Reimbursements`;
+      return t({ message: "Reimbursements", comment: "Label on the Reports screen. See GLOSSARY.md" });
     },
     get blurb() {
       return t`What work owes you, what came back, and what was written off.`;
@@ -90,7 +90,7 @@ export function Reports({
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1><Trans>Reports</Trans></h1>
+        <h1><Trans comment="Screen title on the Reports screen. See GLOSSARY.md">Reports</Trans></h1>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
@@ -137,7 +137,7 @@ export function Report({
     // still not a blank screen if one of them ever stops.
     return (
       <>
-        <h1><Trans>Reports</Trans></h1>
+        <h1><Trans comment="Screen title on the Reports screen. See GLOSSARY.md">Reports</Trans></h1>
         <p className="muted small"><Trans>That report does not exist.</Trans></p>
         <button onClick={onBack}><Trans>Back to the reports</Trans></button>
       </>
@@ -148,7 +148,7 @@ export function Report({
     <>
       <nav className="crumbs" aria-label={t`Where you are`}>
         <button type="button" className="link" onClick={onBack}>
-          <Trans>
+          <Trans comment="Button on the Reports screen. See GLOSSARY.md">
             Reports
           </Trans>
         </button>

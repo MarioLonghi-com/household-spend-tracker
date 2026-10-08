@@ -291,7 +291,7 @@ export function Reimbursements({
       <Problem error={error} />
 
       {loading ? (
-        <div className="muted"><Trans>Loading…</Trans></div>
+        <div className="muted"><Trans comment="Text on the Reimbursements report">Loading…</Trans></div>
       ) : !reports ? null : nothingFlagged ? (
         <Empty>
           <Trans>
@@ -333,9 +333,9 @@ function CurrencyChecks({
   return (
     <div className="currency-toggle reimb-currencies">
       <span className="daterange-label">
-        <Trans>Currency</Trans>
+        <Trans comment="Text on the Reimbursements report: noun. See GLOSSARY.md">Currency</Trans>
       </span>
-      <div role="group" aria-label={t`Currency`} className="daterange-presets">
+      <div role="group" aria-label={t({ message: "Currency", comment: "Screen-reader name on the Reimbursements report: noun. See GLOSSARY.md" })} className="daterange-presets">
         {options.map((code) => {
           const on = ticked.includes(code);
           const last = on && ticked.length === 1;
@@ -465,16 +465,16 @@ export function ReimbursementsBody({
               one,
               one.outstanding,
               one.outstanding_count === 0
-                ? t`Nothing owed`
+                ? t({ message: "Nothing owed", comment: "Text on the Reimbursements report" })
                 : `${expenses(one.outstanding_count)}${
-                    oldest !== null ? ` · ${t`oldest ${days(oldest)}`}` : ""
+                    oldest !== null ? ` · ${t({ message: `oldest ${days(oldest)}`, comment: "Text on the Reimbursements report" })}` : ""
                   }`,
               one.outstanding > 0,
             );
           })}
         />
         <Figure
-          label={t`Recovered`}
+          label={t({ message: "Recovered", comment: "Name of a figure on the Reimbursements report: paid back by work" })}
           lines={reports.map((one) =>
             line(
               one,
@@ -487,13 +487,13 @@ export function ReimbursementsBody({
           )}
         />
         <Figure
-          label={t`Written off`}
+          label={t({ message: "Written off", comment: "Name of a figure on the Reimbursements report: a work expense work will not pay; counted as your own spending. See GL…" })}
           lines={reports.map((one) =>
             line(
               one,
               one.written_off,
               one.written_off_count === 0
-                ? t({ message: "None", context: "written off" })
+                ? t({ message: "None", context: "written off", comment: "Text on the Reimbursements report (written off)" })
                 : plural(one.written_off_count, {
                     one: `${one.written_off_count} expense, counted as your spending`,
                     other: `${one.written_off_count} expenses, counted as your spending`,
@@ -603,7 +603,7 @@ function Details({
   onClose: () => void;
 }) {
   const describe = (one: { date: string; payee_name: string | null }, amount: string) =>
-    `${formatDate(one.date)} · ${one.payee_name ?? t`no payee`} · ${amount}`;
+    `${formatDate(one.date)} · ${one.payee_name ?? t({ message: "no payee", comment: "Label on the Reimbursements report" })} · ${amount}`;
 
   let row: {
     id: string;
@@ -621,7 +621,7 @@ function Details({
   if (picked.kind === "owed") {
     const waited = ageInDays(picked.row.date, asOf);
     row = picked.row;
-    amountLabel = t`Spent`;
+    amountLabel = t({ message: "Spent", comment: "Label on the Reimbursements report: money that went out" });
     amount = format(picked.row.amount, picked.row.currency);
     state = plural(waited, {
       one: `Work should pay this back — not repaid yet, ${waited} day waiting`,
@@ -636,14 +636,14 @@ function Details({
   } else if (picked.kind === "repaid") {
     const pay = picked.claim.settlement;
     row = picked.expense;
-    amountLabel = t`Spent`;
+    amountLabel = t({ message: "Spent", comment: "Label on the Reimbursements report: money that went out" });
     amount = format(picked.expense.amount, picked.expense.currency);
     state = t`Work should pay this back — repaid`;
     const others = picked.claim.expenses.length - 1;
     const payment = describe(pay, format(pay.amount, pay.currency));
     link = (
       <>
-        {t`Repaid by ${payment}`}
+        {t({ message: `Repaid by ${payment}`, comment: "Label on the Reimbursements report" })}
         {others > 0 ? (
           <span className="muted">
             {" "}
@@ -659,7 +659,7 @@ function Details({
   } else {
     const claim = picked.claim;
     row = claim.settlement;
-    amountLabel = t`Received`;
+    amountLabel = t({ message: "Received", comment: "Label on the Reimbursements report: money that came in" });
     amount = format(claim.settlement.amount, claim.settlement.currency);
     state = t`A payment from work`;
     link = (
@@ -670,7 +670,7 @@ function Details({
           ))}
         </ul>
         <span className="small">
-          <Trans>
+          <Trans comment="Text on the Reimbursements report">
             Difference: <DifferenceText claim={claim} />
           </Trans>
         </span>
@@ -681,23 +681,23 @@ function Details({
 
   const blank = <span className="muted">—</span>;
   return (
-    <Dialog title={`${row.payee_name ?? t`No payee`} · ${formatDate(row.date)}`} onClose={onClose}>
+    <Dialog title={`${row.payee_name ?? t({ message: "No payee", comment: "Text in a dialog on the Reimbursements report" })} · ${formatDate(row.date)}`} onClose={onClose}>
       <dl className="reimb-detail">
-        <dt><Trans>Date</Trans></dt>
+        <dt><Trans comment="Name of a fact on the Reimbursements report: noun. See GLOSSARY.md">Date</Trans></dt>
         <dd className="mono">{formatDate(row.date)}</dd>
-        <dt><Trans>Account</Trans></dt>
+        <dt><Trans comment="Name of a fact on the Reimbursements report: noun, a bank or cash account. See GLOSSARY.md">Account</Trans></dt>
         <dd>{row.account_name}</dd>
-        <dt><Trans>Payee</Trans></dt>
+        <dt><Trans comment="Name of a fact on the Reimbursements report: noun, who was paid or who paid. See GLOSSARY.md">Payee</Trans></dt>
         <dd>{row.payee_name ?? blank}</dd>
-        <dt><Trans>Memo</Trans></dt>
+        <dt><Trans comment="Name of a fact on the Reimbursements report: noun, the free-text line of a transaction. See GLOSSARY.md">Memo</Trans></dt>
         <dd>{row.memo ?? blank}</dd>
-        <dt><Trans>Category</Trans></dt>
+        <dt><Trans comment="Name of a fact on the Reimbursements report: noun, what a transaction was for. See GLOSSARY.md">Category</Trans></dt>
         <dd>{row.category_name ?? blank}</dd>
         <dt>{amountLabel}</dt>
         <dd className="amount">{amount}</dd>
-        <dt><Trans>Reimbursement</Trans></dt>
+        <dt><Trans comment="Name of a fact on the Reimbursements report: noun, being paid back by work">Reimbursement</Trans></dt>
         <dd>{state}</dd>
-        <dt>{picked.kind === "payment" ? t`Repaid` : t`Linked to`}</dt>
+        <dt>{picked.kind === "payment" ? t({ message: "Repaid", comment: "Name of a fact on the Reimbursements report: paid back by work" }) : t({ message: "Linked to", comment: "Name of a fact on the Reimbursements report" })}</dt>
         <dd>{link}</dd>
       </dl>
       <div className="row" style={{ justifyContent: "flex-end" }}>
@@ -803,7 +803,7 @@ function Outstanding({
   return (
     <section className="reimb-section" aria-labelledby="reimb-outstanding">
       <h2 id="reimb-outstanding" className="section-title">
-        <Trans>Outstanding</Trans>{" "}
+        <Trans comment="Heading on the Reimbursements report: still owed">Outstanding</Trans>{" "}
         <span className="muted small">
           <Trans>
             Click one for its details, or its date to find its payment or write it off.
@@ -817,12 +817,12 @@ function Outstanding({
           <table>
             <thead>
               <tr>
-                {heading(t`Date`, "date")}
-                {heading(t`Payee`, "payee")}
-                {heading(t`Account`, "account")}
-                {heading(t`Memo`, "memo")}
-                {heading(t`Owed`, "amount", true)}
-                {heading(t`Waiting`, "waiting", true)}
+                {heading(t({ message: "Date", comment: "Column heading on the Reimbursements report: noun. See GLOSSARY.md" }), "date")}
+                {heading(t({ message: "Payee", comment: "Column heading on the Reimbursements report: noun, who was paid or who paid. See GLOSSARY.md" }), "payee")}
+                {heading(t({ message: "Account", comment: "Column heading on the Reimbursements report: noun, a bank or cash account. See GLOSSARY.md" }), "account")}
+                {heading(t({ message: "Memo", comment: "Column heading on the Reimbursements report: noun, the free-text line of a transaction. See GLOSSARY.md" }), "memo")}
+                {heading(t({ message: "Owed", comment: "Column heading on the Reimbursements report: adjective, still to be paid back by work" }), "amount", true)}
+                {heading(t({ message: "Waiting", comment: "Column heading on the Reimbursements report: how long it has waited, or a queue state" }), "waiting", true)}
               </tr>
             </thead>
             <tbody>
@@ -834,7 +834,7 @@ function Outstanding({
                     className="row-pick"
                     {...pickable(() => onPick({ kind: "owed", row }))}
                   >
-                    <td data-label={t`Date`} data-detail-first="true">
+                    <td data-label={t({ message: "Date", comment: "Column name shown beside a value on phones on the Reimbursements report: noun. See GLOSSARY.md" })} data-detail-first="true">
                       <button
                         className="link"
                         onClick={(event) => {
@@ -850,10 +850,10 @@ function Outstanding({
                       {row.payee_name ?? <span className="muted">—</span>}
                       {row.has_receipt ? <ReceiptMark /> : null}
                     </td>
-                    <td className="small muted" data-label={t`Account`}>
+                    <td className="small muted" data-label={t({ message: "Account", comment: "Column name shown beside a value on phones on the Reimbursements report: noun, a bank or cash account. See GLOSSARY.md" })}>
                       {row.account_name}
                     </td>
-                    <td className="small reimb-memo" data-label={t`Memo`}>
+                    <td className="small reimb-memo" data-label={t({ message: "Memo", comment: "Column name shown beside a value on phones on the Reimbursements report: noun, the free-text line of a transaction. S…" })}>
                       {row.memo ?? ""}
                     </td>
                     <td className="amount" data-figure="true">
@@ -861,7 +861,7 @@ function Outstanding({
                     </td>
                     <td
                       className={waited > 30 ? "amount work-waiting" : "amount"}
-                      data-label={t`Waiting`}
+                      data-label={t({ message: "Waiting", comment: "Column name shown beside a value on phones on the Reimbursements report: how long it has waited, or a queue state" })}
                     >
                       {days(waited)}
                     </td>
@@ -956,13 +956,13 @@ function Payments({
           <table className="reimb-claims">
             <thead>
               <tr>
-                {heading(t`Paid on`, "date")}
-                {heading(t`From`, "payee")}
-                {heading(t`Into`, "account")}
-                {heading(t`Memo`, "memo")}
-                {heading(t`Received`, "amount", true)}
-                <th className="amount"><Trans>Covered</Trans></th>
-                {heading(t`Difference`, "difference", true)}
+                {heading(t({ message: "Paid on", comment: "Column heading on the Reimbursements report" }), "date")}
+                {heading(t({ message: "From", comment: "Column heading on the Reimbursements report: the start of a range, or where money comes from" }), "payee")}
+                {heading(t({ message: "Into", comment: "Column heading on the Reimbursements report: where it goes, or what it is merged into" }), "account")}
+                {heading(t({ message: "Memo", comment: "Column heading on the Reimbursements report: noun, the free-text line of a transaction. See GLOSSARY.md" }), "memo")}
+                {heading(t({ message: "Received", comment: "Column heading on the Reimbursements report: money that came in" }), "amount", true)}
+                <th className="amount"><Trans comment="Column heading on the Reimbursements report: how much of the payment the expenses account for">Covered</Trans></th>
+                {heading(t({ message: "Difference", comment: "Column heading on the Reimbursements report: noun, what is left after subtracting" }), "difference", true)}
               </tr>
             </thead>
             <tbody>
@@ -1082,7 +1082,7 @@ function ByMonth({
   return (
     <section className="reimb-section" aria-labelledby="reimb-months">
       <h2 id="reimb-months" className="section-title">
-        <Trans>By month</Trans>{" "}
+        <Trans comment="Heading on the Reimbursements report">By month</Trans>{" "}
         <span className="muted small">
           <Trans>By when the expense happened.</Trans>
         </span>
@@ -1094,11 +1094,11 @@ function ByMonth({
           <table>
             <thead>
               <tr>
-                {heading(t`Month`, "month", false)}
-                {heading(t`Flagged`, "flagged")}
-                {heading(t`Recovered`, "recovered")}
-                {heading(t`Written off`, "written_off")}
-                {heading(t`Still owed`, "outstanding")}
+                {heading(t({ message: "Month", comment: "Column heading on the Reimbursements report: noun, a calendar month" }), "month", false)}
+                {heading(t({ message: "Flagged", comment: "Column heading on the Reimbursements report: marked as a work expense" }), "flagged")}
+                {heading(t({ message: "Recovered", comment: "Column heading on the Reimbursements report: paid back by work" }), "recovered")}
+                {heading(t({ message: "Written off", comment: "Column heading on the Reimbursements report: a work expense work will not pay; counted as your own spending. See GLOS…" }), "written_off")}
+                {heading(t({ message: "Still owed", comment: "Column heading on the Reimbursements report: still to be paid back by work" }), "outstanding")}
               </tr>
             </thead>
             <tbody>

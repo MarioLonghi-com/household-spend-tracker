@@ -99,7 +99,7 @@ function Stats({ household }: { household: Household }) {
   if (stats.isLoading)
     return (
       <div className="card muted">
-        <Trans>Counting…</Trans>
+        <Trans comment="Text on the household page">Counting…</Trans>
       </div>
     );
   if (stats.isError)
@@ -115,39 +115,39 @@ function Stats({ household }: { household: Household }) {
       <h2 className="section-title"><Trans>What is in it</Trans></h2>
 
       <dl className="stat-grid">
-        <Stat label={t`Accounts`} value={count(it.accounts)}
-          note={it.accounts_closed > 0 ? t`${count(it.accounts_closed)} closed` : undefined} />
-        <Stat label={t`Transactions`} value={count(it.transactions)}
+        <Stat label={t({ message: "Accounts", comment: "Label on the household page: noun, bank or cash accounts. See GLOSSARY.md" })} value={count(it.accounts)}
+          note={it.accounts_closed > 0 ? t({ message: `${count(it.accounts_closed)} closed`, comment: "Text on the household page" }) : undefined} />
+        <Stat label={t({ message: "Transactions", comment: "Label on the household page. See GLOSSARY.md" })} value={count(it.transactions)}
           note={
             it.transactions_uncleared > 0
               ? t`${count(it.transactions_uncleared)} not yet cleared`
               : undefined
           } />
-        <Stat label={t`Receipts`} value={count(it.receipts)}
+        <Stat label={t({ message: "Receipts", comment: "Label on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md" })} value={count(it.receipts)}
           note={
             it.receipts_unattached > 0
               ? t`${count(it.receipts_unattached)} waiting to be attached`
               : undefined
           } />
-        <Stat label={t`Payees`} value={count(it.payees)} />
-        <Stat label={t`Payee rules`} value={count(it.payee_rules)}
+        <Stat label={t({ message: "Payees", comment: "Label on the household page: noun, who was paid or who paid. See GLOSSARY.md" })} value={count(it.payees)} />
+        <Stat label={t({ message: "Payee rules", comment: "Label on the household page. See GLOSSARY.md" })} value={count(it.payee_rules)}
           note={
             it.payee_rules > it.payee_rules_enabled
-              ? t`${count(it.payee_rules - it.payee_rules_enabled)} turned off`
+              ? t({ message: `${count(it.payee_rules - it.payee_rules_enabled)} turned off`, comment: "Text on the household page" })
               : undefined
           } />
-        <Stat label={t`Categories`} value={count(it.categories)}
+        <Stat label={t({ message: "Categories", comment: "Label on the household page. See GLOSSARY.md" })} value={count(it.categories)}
           note={
             it.categories_archived > 0
               ? t`in ${count(it.category_groups)} groups, ${count(it.categories_archived)} archived`
-              : t`in ${count(it.category_groups)} groups`
+              : t({ message: `in ${count(it.category_groups)} groups`, comment: "Text on the household page" })
           } />
-        <Stat label={t`Currencies`} value={count(it.currencies.length)}
+        <Stat label={t({ message: "Currencies", comment: "Label on the household page: noun" })} value={count(it.currencies.length)}
           note={it.currencies.map((one) => one.currency).join(" · ") || undefined} />
-        <Stat label={t`Countries`} value={count(it.countries.length)}
+        <Stat label={t({ message: "Countries", comment: "Label on the household page" })} value={count(it.countries.length)}
           note={it.countries.map((one) => `${one.flag} ${one.code}`).join(" ") || undefined} />
-        <Stat label={t`People`} value={count(it.members)} />
-        <Stat label={t`Statements reconciled`} value={count(it.reconciliations)} />
+        <Stat label={t({ message: "People", comment: "Label on the household page" })} value={count(it.members)} />
+        <Stat label={t({ message: "Statements reconciled", comment: "Label on the household page" })} value={count(it.reconciliations)} />
         {/* The span, as two figures rather than only as the sentence below.
             It was in the prose and nowhere else, which meant the one question
             this grid is scanned for -- how far back does this ledger go --
@@ -155,12 +155,12 @@ function Stats({ household }: { household: Household }) {
             sentence keeps it too: it is the place that says what it means
             when there is nothing in the register at all. */}
         <Stat
-          label={t`Oldest transaction`}
+          label={t({ message: "Oldest transaction", comment: "Label on the household page" })}
           value={it.first_transaction ? formatDate(it.first_transaction) : "—"}
           note={it.first_transaction ? undefined : t`nothing recorded yet`}
         />
         <Stat
-          label={t`Newest transaction`}
+          label={t({ message: "Newest transaction", comment: "Label on the household page" })}
           value={it.last_transaction ? formatDate(it.last_transaction) : "—"}
         />
       </dl>
@@ -181,7 +181,7 @@ function Stats({ household }: { household: Household }) {
       {it.currencies.length > 0 && (
         <>
           <h3 className="section-title" style={{ marginTop: 18 }}>
-            <Trans>
+            <Trans comment="Heading on the household page">
               By currency
             </Trans>
           </h3>
@@ -189,10 +189,10 @@ function Stats({ household }: { household: Household }) {
             <table>
               <thead>
                 <tr>
-                  <th><Trans>Currency</Trans></th>
-                  <th className="amount"><Trans>Accounts</Trans></th>
+                  <th><Trans comment="Column heading on the household page: noun. See GLOSSARY.md">Currency</Trans></th>
+                  <th className="amount"><Trans comment="Column heading on the household page: noun, bank or cash accounts. See GLOSSARY.md">Accounts</Trans></th>
                   <th className="amount">
-                    <Trans>Transactions</Trans>
+                    <Trans comment="Column heading on the household page. See GLOSSARY.md">Transactions</Trans>
                   </th>
                 </tr>
               </thead>
@@ -202,13 +202,13 @@ function Stats({ household }: { household: Household }) {
                     <td data-primary="true" className="mono">
                       {one.currency}
                       {one.currency === household.base_currency ? (
-                        <span className="muted small"> {t`(main)`}</span>
+                        <span className="muted small"> {t({ message: "(main)", comment: "Table cell on the household page" })}</span>
                       ) : null}
                     </td>
-                    <td className="amount" data-label={t`Accounts`}>
+                    <td className="amount" data-label={t({ message: "Accounts", comment: "Column name shown beside a value on phones on the household page: noun, bank or cash accounts. See GLOSSARY.md" })}>
                       {count(one.accounts)}
                     </td>
-                    <td className="amount" data-label={t`Transactions`}>
+                    <td className="amount" data-label={t({ message: "Transactions", comment: "Column name shown beside a value on phones on the household page. See GLOSSARY.md" })}>
                       {count(one.transactions)}
                     </td>
                   </tr>
@@ -279,15 +279,15 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
 
   return (
     <section className="card config-card">
-      <div className="config-badge"><Trans>Settings</Trans></div>
+      <div className="config-badge"><Trans comment="Text on the household page">Settings</Trans></div>
       <Problem error={save.error} />
 
-      <h2 className="section-title"><Trans>Settings</Trans></h2>
-      <Field label={t`Name`}>
+      <h2 className="section-title"><Trans comment="Heading on the household page">Settings</Trans></h2>
+      <Field label={t({ message: "Name", comment: "Label of a form field on the household page: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} />
       </Field>
       <p />
-      <Field label={t`Main currency`}>
+      <Field label={t({ message: "Main currency", comment: "Label of a form field on the household page" })}>
         <input
           value={currency}
           maxLength={3}
@@ -300,14 +300,14 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
           is ever converted.
         </Trans>
       </p>
-      <Field label={t`Note`}>
+      <Field label={t({ message: "Note", comment: "Label of a form field on the household page. See GLOSSARY.md" })}>
         <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       </Field>
 
       <hr className="rule" />
 
       <h3 className="section-title">
-        <Trans>Colour</Trans>
+        <Trans comment="Heading on the household page">Colour</Trans>
         <Hint label={t`why households have colours`}>
           <p>
             <Trans>
@@ -376,7 +376,7 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
       </p>
 
       <h3 id={receiptsHeading} className="section-title" style={{ marginTop: 18 }}>
-        <Trans>
+        <Trans comment="Heading on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md">
           Receipts
         </Trans>
       </h3>
@@ -469,7 +469,7 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
         disabled={save.isPending || !name.trim()}
         onClick={() => save.mutate()}
       >
-        <Trans>
+        <Trans comment="Button on the household page: verb">
           Save
         </Trans>
       </button>
@@ -506,14 +506,14 @@ function People({ household, user }: { household: Household; user: User }) {
           <thead>
             <tr>
               <SortHeading
-                label={t`Name`}
+                label={t({ message: "Name", comment: "Column heading on the household page: noun" })}
                 column="name"
                 sort={order.sort}
                 direction={order.direction}
                 onSort={order.onSort}
               />
               <SortHeading
-                label={t`Role`}
+                label={t({ message: "Role", comment: "Column heading on the household page: noun, owner or member" })}
                 column="role"
                 sort={order.sort}
                 direction={order.direction}
@@ -524,7 +524,7 @@ function People({ household, user }: { household: Household; user: User }) {
                   getting one. A key's work is counted under the person whose
                   key it is, because that is exactly what a key borrows. */}
               <SortHeading
-                label={t`Transactions`}
+                label={t({ message: "Transactions", comment: "Column heading on the household page. See GLOSSARY.md" })}
                 column="logged"
                 sort={order.sort}
                 direction={order.direction}
@@ -538,13 +538,13 @@ function People({ household, user }: { household: Household; user: User }) {
               <tr key={member.user_id}>
                 <td data-primary="true">
                   {member.display_name}
-                  {member.user_id === user.id ? <span className="muted"> {t`(you)`}</span> : null}
+                  {member.user_id === user.id ? <span className="muted"> {t({ message: "(you)", comment: "Table cell on the household page" })}</span> : null}
                   <div className="small muted">{member.email}</div>
                 </td>
-                <td className="small muted" data-label={t`Role`}>
+                <td className="small muted" data-label={t({ message: "Role", comment: "Column name shown beside a value on phones on the household page: noun, owner or member" })}>
                   {roleLabel(member.role)}
                 </td>
-                <td className="amount" data-label={t`Transactions`}>
+                <td className="amount" data-label={t({ message: "Transactions", comment: "Column name shown beside a value on phones on the household page. See GLOSSARY.md" })}>
                   {count(member.transactions_logged)}
                   {member.transactions_by_agent > 0 ? (
                     <div className="small muted">

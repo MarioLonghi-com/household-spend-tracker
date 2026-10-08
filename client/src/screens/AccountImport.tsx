@@ -201,7 +201,7 @@ export function AccountImport({
           written.
         </Trans>
       </p>
-      <Field label={t`Accounts file`}>
+      <Field label={t({ message: "Accounts file", comment: "Label of a form field on the accounts import" })}>
         <input
           type="file"
           accept=".csv,text/csv"
@@ -240,43 +240,43 @@ export function AccountImport({
             <table>
               <thead>
                 <tr>
-                  <SortHeading label={t`Line`} column="line" align="right" {...heading} />
-                  <SortHeading label={t`Account`} column="name" {...heading} />
-                  <SortHeading label={t`Type`} column="type" {...heading} />
-                  <SortHeading label={t`Currency`} column="currency" {...heading} />
+                  <SortHeading label={t({ message: "Line", comment: "Column heading on the accounts import: noun, a line of a file" })} column="line" align="right" {...heading} />
+                  <SortHeading label={t({ message: "Account", comment: "Column heading on the accounts import: noun, a bank or cash account. See GLOSSARY.md" })} column="name" {...heading} />
+                  <SortHeading label={t({ message: "Type", comment: "Column heading on the accounts import: noun, account type" })} column="type" {...heading} />
+                  <SortHeading label={t({ message: "Currency", comment: "Column heading on the accounts import: noun. See GLOSSARY.md" })} column="currency" {...heading} />
                   <SortHeading
-                    label={t`Country`}
+                    label={t({ message: "Country", comment: "Column heading on the accounts import: noun. See GLOSSARY.md" })}
                     column="country"
                     className="flag-col"
                     {...heading}
                   />
                   <SortHeading
-                    label={t`Opening balance`}
+                    label={t({ message: "Opening balance", comment: "Column heading on the accounts import: noun, what the account held on the day it starts. See GLOSSARY.md" })}
                     column="opening_balance"
                     align="right"
                     {...heading}
                   />
-                  <SortHeading label={t`Opening date`} column="opening_date" {...heading} />
-                  <SortHeading label={t`IBAN`} column="iban" {...heading} />
-                  <SortHeading label={t`Problems`} column="problems" {...heading} />
+                  <SortHeading label={t({ message: "Opening date", comment: "Column heading on the accounts import" })} column="opening_date" {...heading} />
+                  <SortHeading label={t({ message: "IBAN", comment: "Column heading on the accounts import: International Bank Account Number; keep as is. See GLOSSARY.md" })} column="iban" {...heading} />
+                  <SortHeading label={t({ message: "Problems", comment: "Column heading on the accounts import" })} column="problems" {...heading} />
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.line}>
-                    <td className="amount muted" data-label={t`Line`} data-detail-first="true">
+                    <td className="amount muted" data-label={t({ message: "Line", comment: "Column name shown beside a value on phones on the accounts import: noun, a line of a file" })} data-detail-first="true">
                       {row.line}
                     </td>
                     <td data-primary="true">{row.name || <span className="muted">—</span>}</td>
-                    <td className="small muted" data-label={t`Type`}>
+                    <td className="small muted" data-label={t({ message: "Type", comment: "Column name shown beside a value on phones on the accounts import: noun, account type" })}>
                       {rowType(row) || "—"}
                     </td>
-                    <td className="small muted mono" data-label={t`Currency`}>
+                    <td className="small muted mono" data-label={t({ message: "Currency", comment: "Column name shown beside a value on phones on the accounts import: noun. See GLOSSARY.md" })}>
                       {row.currency}
                     </td>
                     <td
                       className="flag-col"
-                      data-label={t`Country`}
+                      data-label={t({ message: "Country", comment: "Column name shown beside a value on phones on the accounts import: noun. See GLOSSARY.md" })}
                       data-empty={row.country ? undefined : "true"}
                     >
                       <span className="flag" title={countryName(countries.data, row.country)}>
@@ -298,21 +298,21 @@ export function AccountImport({
                     </td>
                     <td
                       className="small muted mono span-col"
-                      data-label={t`Opening date`}
+                      data-label={t({ message: "Opening date", comment: "Column name shown beside a value on phones on the accounts import" })}
                       data-empty={row.opening_date ? undefined : "true"}
                     >
                       {row.opening_date ? formatDate(row.opening_date) : "—"}
                     </td>
                     <td
                       className="small mono"
-                      data-label={t`IBAN`}
+                      data-label={t({ message: "IBAN", comment: "Column name shown beside a value on phones on the accounts import: International Bank Account Number; keep as is. See…" })}
                       data-empty={row.iban ? undefined : "true"}
                     >
                       {row.iban ?? <span className="muted">—</span>}
                     </td>
                     <td
                       className="small"
-                      data-label={t`Problems`}
+                      data-label={t({ message: "Problems", comment: "Column name shown beside a value on phones on the accounts import" })}
                       data-empty={row.problems.length ? undefined : "true"}
                     >
                       {row.problems.length === 0 ? (

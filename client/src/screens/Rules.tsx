@@ -149,28 +149,28 @@ export function Rules({ household }: { household: Household }) {
                     onSort={ruleOrder.onSort}
                   />
                   <SortHeading
-                    label={t`Match`}
+                    label={t({ message: "Match", comment: "Column heading on the Rules screen: how a rule compares the bank's text (contains, starts with…)" })}
                     column="match"
                     sort={ruleOrder.sort}
                     direction={ruleOrder.direction}
                     onSort={ruleOrder.onSort}
                   />
                   <SortHeading
-                    label={t`Call it`}
+                    label={t({ message: "Call it", comment: "Column heading on the Rules screen" })}
                     column="payee"
                     sort={ruleOrder.sort}
                     direction={ruleOrder.direction}
                     onSort={ruleOrder.onSort}
                   />
                   <SortHeading
-                    label={t`Order`}
+                    label={t({ message: "Order", comment: "Column heading on the Rules screen: noun, sort order" })}
                     column="priority"
                     sort={ruleOrder.sort}
                     direction={ruleOrder.direction}
                     onSort={ruleOrder.onSort}
                   />
                   <SortHeading
-                    label={t`On`}
+                    label={t({ message: "On", comment: "Column heading on the Rules screen: switched on" })}
                     column="enabled"
                     sort={ruleOrder.sort}
                     direction={ruleOrder.direction}
@@ -185,13 +185,13 @@ export function Rules({ household }: { household: Household }) {
                     {/* The pattern is what a rule *is*; the payee it produces
                         is the figure on the right of the card. */}
                     <td className="mono small" data-primary="true">{rule.pattern}</td>
-                    <td className="small muted" data-label={t`Match`} data-detail-first="true">
+                    <td className="small muted" data-label={t({ message: "Match", comment: "Column heading on the Rules screen: how a rule compares the bank's text (contains, starts with…)" })} data-detail-first="true">
                       {rule.action === "rewrite"
-                        ? t`${matchWord(rule.match_type)}, then strip`
+                        ? t({ message: `${matchWord(rule.match_type)}, then strip`, comment: "Table cell on the Rules screen" })
                         : matchWord(rule.match_type)}
                     </td>
                     <td data-figure="true">{becomes(rule)}</td>
-                    <td className="small muted" data-label={t`Priority`}>{rule.priority}</td>
+                    <td className="small muted" data-label={t({ message: "Priority", comment: "Column name shown beside a value on phones on the Rules screen: noun, which rule is tried first" })}>{rule.priority}</td>
                     <td>
                       <input
                         type="checkbox"
@@ -205,7 +205,7 @@ export function Rules({ household }: { household: Household }) {
                     </td>
                     <td>
                       <button className="link danger" onClick={() => remove.mutate(rule.id)}>
-                        <Trans>
+                        <Trans comment="Button on the Rules screen: verb">
                           Delete
                         </Trans>
                       </button>
@@ -338,7 +338,7 @@ function RuleForm({
 
       {/* The choice this panel could not previously offer, and the reason a
           rail needed a rule per shop. Issue #58. */}
-      <Field label={t`And then`}>
+      <Field label={t({ message: "And then", comment: "Label of a form field on the Rules screen" })}>
         <select value={action} onChange={(e) => setAction(e.target.value as RuleAction)}>
           <option value="map"><Trans>call it one payee</Trans></option>
           <option value="rewrite"><Trans>take this bit off, and see what is left</Trans></option>
@@ -381,14 +381,14 @@ function RuleForm({
           value={matchType}
           onChange={(e) => setMatchType(e.target.value as PayeeRule["match_type"])}
         >
-          <option value="contains"><Trans>contains</Trans></option>
-          <option value="prefix"><Trans>starts with</Trans></option>
-          <option value="equals"><Trans>is exactly</Trans></option>
+          <option value="contains"><Trans comment="How a rule matches, inside the rule list: the bank's text contains the pattern">contains</Trans></option>
+          <option value="prefix"><Trans comment="Option in a dropdown on the Rules screen: a rule's match: the text starts with this">starts with</Trans></option>
+          <option value="equals"><Trans comment="Option in a dropdown on the Rules screen: a rule's match: the text is exactly this">is exactly</Trans></option>
           <option value="regex"><Trans>matches the pattern</Trans></option>
         </select>
       </Field>
       <p />
-      <Field label={t`This text`}>
+      <Field label={t({ message: "This text", comment: "Label of a form field on the Rules screen" })}>
         <input value={pattern} onChange={(e) => setPattern(e.target.value)} autoFocus />
       </Field>
       <p />
@@ -398,7 +398,7 @@ function RuleForm({
             <input
               value={replacement}
               onChange={(e) => setReplacement(e.target.value)}
-              placeholder={t`usually nothing`}
+              placeholder={t({ message: "usually nothing", comment: "Placeholder in an empty field on the Rules screen" })}
             />
           </Field>
           <p className="muted small">
@@ -451,7 +451,7 @@ function RuleForm({
           regex that backtracks being discovered by an import going quiet. */}
       <div className="row" style={{ gap: 8 }}>
         <button disabled={!pattern.trim() || trial.isPending} onClick={() => trial.mutate()}>
-          {trial.isPending ? t`Trying…` : t`What would this match?`}
+          {trial.isPending ? t({ message: "Trying…", comment: "Button on the Rules screen" }) : t`What would this match?`}
         </button>
         <button
           className="primary"
@@ -460,7 +460,7 @@ function RuleForm({
           }
           onClick={() => save.mutate()}
         >
-          <Trans>
+          <Trans comment="Button on the Rules screen: verb">
             Create
           </Trans>
         </button>
@@ -537,13 +537,13 @@ function RuleForm({
 function matchWord(type: string): string {
   switch (type) {
     case "contains":
-      return t({ message: "contains", context: "rule list" });
+      return t({ message: "contains", context: "rule list", comment: "How a rule matches, inside the rule list: the bank's text contains the pattern" });
     case "prefix":
-      return t({ message: "prefix", context: "rule list" });
+      return t({ message: "prefix", context: "rule list", comment: "How a rule matches, inside the rule list: the bank's text starts with the pattern" });
     case "equals":
-      return t({ message: "equals", context: "rule list" });
+      return t({ message: "equals", context: "rule list", comment: "How a rule matches, inside the rule list: the bank's text is exactly the pattern" });
     case "regex":
-      return t({ message: "regex", context: "rule list" });
+      return t({ message: "regex", context: "rule list", comment: "How a rule matches, inside the rule list: the pattern is a regular expression" });
     default:
       return type;
   }
@@ -588,9 +588,9 @@ function Suggestions({
           <thead>
             <tr>
               <th><Trans>The bank keeps saying</Trans></th>
-              <th className="amount"><Trans>Spellings</Trans></th>
-              <th className="amount"><Trans>Payees</Trans></th>
-              <th className="amount"><Trans>Rows</Trans></th>
+              <th className="amount"><Trans comment="Column heading on the Rules screen">Spellings</Trans></th>
+              <th className="amount"><Trans comment="Column heading on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md">Payees</Trans></th>
+              <th className="amount"><Trans comment="Column heading on the Rules screen: noun, lines of a file or table">Rows</Trans></th>
               <th />
             </tr>
           </thead>
@@ -603,16 +603,16 @@ function Suggestions({
                     {one.examples.slice(0, 2).join(" · ")}
                   </span>
                 </td>
-                <td className="amount" data-label={t`Spellings`}>
+                <td className="amount" data-label={t({ message: "Spellings", comment: "Column name shown beside a value on phones on the Rules screen" })}>
                   {one.strings}
                 </td>
                 {/* The number that makes the case. Four payees becoming one is
                     worth a click; one payee becoming one is not, and those are
                     filtered out server-side. */}
-                <td className="amount" data-label={t`Payees`}>
+                <td className="amount" data-label={t({ message: "Payees", comment: "Column name shown beside a value on phones on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md" })}>
                   {one.payees}
                 </td>
-                <td className="amount" data-label={t`Rows`}>
+                <td className="amount" data-label={t({ message: "Rows", comment: "Column name shown beside a value on phones on the Rules screen: noun, lines of a file or table" })}>
                   {one.transactions}
                 </td>
                 <td className="row-actions">
@@ -773,7 +773,7 @@ function ReapplyPanel({
             </Trans>
           </p>
           <button className="primary" disabled={run.isPending} onClick={() => run.mutate()}>
-            {run.isPending ? t`Applying…` : t`Move ${formatCount(proposed.changing)} rows`}
+            {run.isPending ? t({ message: "Applying…", comment: "Button on the Rules screen" }) : t({ message: `Move ${formatCount(proposed.changing)} rows`, comment: "Button on the Rules screen" })}
           </button>
         </>
       ) : null}

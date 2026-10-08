@@ -143,7 +143,7 @@ export function Categories({ household }: { household: Household }) {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
-        <h1><Trans>Categories</Trans></h1>
+        <h1><Trans comment="Screen title on the Categories screen. See GLOSSARY.md">Categories</Trans></h1>
         <label className="small muted" style={{ flex: "0 0 auto" }}>
           <input
             type="checkbox"
@@ -151,7 +151,7 @@ export function Categories({ household }: { household: Household }) {
             onChange={(e) => setShowArchived(e.target.checked)}
             style={{ width: "auto", marginRight: 6 }}
           />
-          <Trans>
+          <Trans comment="Label of a choice on the Categories screen">
             Show archived
           </Trans>
         </label>
@@ -240,14 +240,14 @@ export function Categories({ household }: { household: Household }) {
                 <thead>
                   <tr>
                     <SortHeading
-                      label={t`Category`}
+                      label={t({ message: "Category", comment: "Column heading on the Categories screen: noun, what a transaction was for. See GLOSSARY.md" })}
                       column="name"
                       sort={order.sort}
                       direction={order.direction}
                       onSort={order.onSort}
                     />
                     <SortHeading
-                      label={t`Transactions`}
+                      label={t({ message: "Transactions", comment: "Column heading on the Categories screen. See GLOSSARY.md" })}
                       column="usage"
                       sort={order.sort}
                       direction={order.direction}
@@ -255,7 +255,7 @@ export function Categories({ household }: { household: Household }) {
                       align="right"
                     />
                     <SortHeading
-                      label={t`Payees`}
+                      label={t({ message: "Payees", comment: "Column heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md" })}
                       column="payees"
                       sort={order.sort}
                       direction={order.direction}
@@ -272,8 +272,8 @@ export function Categories({ household }: { household: Household }) {
                       <td data-primary="true">
                         {category.name}
                         {category.archived ? (
-                          <span className="tag closed" title={t`archived`}>
-                            <Trans>
+                          <span className="tag closed" title={t({ message: "archived", comment: "Tooltip on the Categories screen: adjective, kept but hidden from pickers. See GLOSSARY.md" })}>
+                            <Trans comment="Tag beside a name on the Categories screen: adjective, kept but hidden from pickers. See GLOSSARY.md">
                               Archived
                             </Trans>
                           </span>
@@ -285,11 +285,11 @@ export function Categories({ household }: { household: Household }) {
                             comes with the tree, so it is there before the stat
                             request lands and never disagrees with it -- both
                             are the same grouped count on the server. */}
-                        {category.used_by === 0 ? t`unused` : formatCount(category.used_by)}
+                        {category.used_by === 0 ? t({ message: "unused", comment: "Table cell on the Categories screen" }) : formatCount(category.used_by)}
                       </td>
                       <td
                         className="small muted amount"
-                        data-label={t`Payees`}
+                        data-label={t({ message: "Payees", comment: "Column name shown beside a value on phones on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md" })}
                         data-detail-first="true"
                       >
                         {/* How many different payees are behind that figure.
@@ -303,7 +303,7 @@ export function Categories({ household }: { household: Household }) {
                       </td>
                       <td className="amount">
                         <button className="link" onClick={() => setEditing(category)}>
-                          <Trans>
+                          <Trans comment="Button on the Categories screen: verb">
                             Edit
                           </Trans>
                         </button>
@@ -381,9 +381,9 @@ function GroupForm({
   });
 
   return (
-    <Panel title={t`New group`} onClose={onClose} config>
+    <Panel title={t({ message: "New group", comment: "Title of a panel on the Categories screen" })} onClose={onClose} config>
       <Problem error={save.error} />
-      <Field label={t`Name`}>
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Categories screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p className="muted small">
@@ -393,7 +393,7 @@ function GroupForm({
         </Trans>
       </p>
       <button className="primary" disabled={!name.trim() || save.isPending} onClick={() => save.mutate()}>
-        <Trans>
+        <Trans comment="Button on the Categories screen: verb">
           Create
         </Trans>
       </button>
@@ -436,7 +436,7 @@ export function GroupSettings({
     <Panel title={group.name} onClose={onClose} config>
       {/* While the confirmation is open it shows the refusal itself. */}
       <Problem error={save.error ?? (confirming ? null : remove.error)} />
-      <Field label={t`Name`}>
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Categories screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <div className="row" style={{ marginTop: 16 }}>
@@ -448,7 +448,7 @@ export function GroupSettings({
             save.mutate();
           }}
         >
-          <Trans>
+          <Trans comment="Button on the Categories screen: verb">
             Save
           </Trans>
         </button>
@@ -461,7 +461,7 @@ export function GroupSettings({
             setConfirming(true);
           }}
         >
-          <Trans>
+          <Trans comment="Button on the Categories screen">
             Delete group
           </Trans>
         </button>
@@ -480,7 +480,7 @@ export function GroupSettings({
               {remove.isPending ? "Deleting…" : "Yes, delete it"}
             </button>
             <button disabled={remove.isPending} onClick={() => setConfirming(false)}>
-              <Trans>
+              <Trans comment="Button on the Categories screen">
                 Keep it
               </Trans>
             </button>
@@ -513,11 +513,11 @@ function CategoryForm({
   return (
     <Panel title={t`New category in ${group.name}`} onClose={onClose} config>
       <Problem error={save.error} />
-      <Field label={t`Name`}>
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Categories screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <button className="primary" disabled={!name.trim() || save.isPending} onClick={() => save.mutate()}>
-        <Trans>
+        <Trans comment="Button on the Categories screen: verb">
           Create
         </Trans>
       </button>
@@ -537,7 +537,7 @@ function PayeeBreakdown({ stat }: { stat: CategoryStat | undefined }) {
   if (!stat || stat.payees.length === 0) return null;
   return (
     <>
-      <h3 className="section-title"><Trans>Payees</Trans></h3>
+      <h3 className="section-title"><Trans comment="Heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md">Payees</Trans></h3>
       <ul className="breakdown">
         {stat.payees.map((one) => (
           <li key={one.key ?? "none"}>
@@ -592,11 +592,11 @@ export function CategorySettings({
     <Panel title={category.name} onClose={onClose} config>
       {/* While the confirmation is open it shows the refusal itself. */}
       <Problem error={save.error ?? (confirming ? null : remove.error)} />
-      <Field label={t`Name`}>
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Categories screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p />
-      <Field label={t`Group`}>
+      <Field label={t({ message: "Group", comment: "Label of a form field on the Categories screen: noun, a category group" })}>
         <select value={groupId} onChange={(e) => setGroupId(e.target.value)}>
           {groups.map((one) => (
             <option key={one.id} value={one.id}>
@@ -626,7 +626,7 @@ export function CategorySettings({
 
       <div className="row" style={{ marginTop: 16 }}>
         <button className="primary" disabled={!name.trim() || save.isPending} onClick={() => save.mutate()}>
-          <Trans>
+          <Trans comment="Button on the Categories screen: verb">
             Save
           </Trans>
         </button>
@@ -641,7 +641,7 @@ export function CategorySettings({
               setConfirming(true);
             }}
           >
-            <Trans>
+            <Trans comment="Button on the Categories screen: verb">
               Delete
             </Trans>
           </button>
@@ -655,7 +655,7 @@ export function CategorySettings({
               {remove.isPending ? "Deleting…" : "Yes, delete it"}
             </button>
             <button disabled={remove.isPending} onClick={() => setConfirming(false)}>
-              <Trans>
+              <Trans comment="Button on the Categories screen">
                 Keep it
               </Trans>
             </button>
@@ -726,14 +726,14 @@ export function PayeeCategorisationPanel({
     },
   });
 
-  const name = rule.data?.payee_name ?? t`this payee`;
+  const name = rule.data?.payee_name ?? t({ message: "this payee", comment: "Label on the Categories screen" });
 
   return (
     <Panel title={name} onClose={onClose} config>
       <Problem error={rule.error ?? tree.error ?? save.error} />
 
       <h3 className="section-title">
-        <Trans>Categorisation</Trans>
+        <Trans comment="Heading on the Categories screen">Categorisation</Trans>
         <Hint label={t`how this works`}>
           <p>
             <Trans>
@@ -843,7 +843,7 @@ export function PayeeCategorisationPanel({
         disabled={save.isPending || (chosenMode === "fixed" && !chosenCategory)}
         onClick={() => save.mutate()}
       >
-        <Trans>
+        <Trans comment="Button on the Categories screen: verb">
           Save
         </Trans>
       </button>

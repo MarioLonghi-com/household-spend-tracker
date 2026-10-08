@@ -111,6 +111,28 @@ def resolve_data_dir() -> Path:
     return _user_data_dir().resolve()
 
 
+#: Where the container mounts the `update` volume it shares with the updater.
+CONTAINER_UPDATE_DIR = Path("/var/lib/spend-tracker-update")
+
+
+def resolve_update_dir(data_dir: Path) -> Path:
+    """The self-updater's shared volume, as this process sees it.
+
+    `SPENDTRACKER_UPDATE_DIR` if set; the container's mount point if it is
+    there; otherwise `update/` inside the data directory -- which nothing
+    writes to on a checkout, so a dev run and the test suite read "no
+    updater" from it, and a test that wants one points this at its own
+    directory. Never created here: the updater makes the layout (C11), and
+    a directory this app made would look like a volume with no updater in it.
+    """
+    named = (os.environ.get("SPENDTRACKER_UPDATE_DIR") or "").strip()
+    if named:
+        return Path(named)
+    if CONTAINER_UPDATE_DIR.is_dir():
+        return CONTAINER_UPDATE_DIR
+    return data_dir / "update"
+
+
 #: Written in place of a name in `SPENDTRACKER_ALLOWED_HOSTS` to mean "any
 #: address typed as an IP literal": `192.168.1.50`, `100.101.102.103`, `[::1]`.
 IP_LITERALS = "ip"
@@ -271,6 +293,11 @@ class Settings:
     #: the one thing the app was ignoring.
     secret_key_from_env: bool = False
 
+    #: The self-updater's shared volume (design notes, Part 5): where this app
+    #: writes its one request at a time and reads the updater's heartbeat,
+    #: status, reports and history. See `resolve_update_dir`.
+    update_dir: Path = Path("/var/lib/spend-tracker-update")
+
     @property
     def secret_key_source(self) -> str:
         """Where the key this process runs with came from, as an operator
@@ -302,6 +329,7 @@ class Settings:
             allowed_hosts=_hosts(os.environ.get("SPENDTRACKER_ALLOWED_HOSTS")),
             public_url=public_url,
             rp_id=_rp_id(os.environ.get("SPENDTRACKER_RP_ID"), public_url, environment),
+            update_dir=resolve_update_dir(data_dir),
         )
 
 

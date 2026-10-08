@@ -20,14 +20,14 @@ export function Counts({ report }: { report: ImportReport }) {
   // The third field marks the one count that is bad news when it is not zero.
   const lines: [string, number, boolean?][] = [
     [t`Rows in the source`, it.rows_in_file],
-    [done ? t`Imported` : t`Will be imported`, it.imported],
-    [t`Transfers linked`, it.transfers_linked],
-    [t`Duplicates skipped`, it.duplicates_skipped],
+    [done ? t({ message: "Imported", comment: "Label on the one-time import's results: brought in by an import" }) : t`Will be imported`, it.imported],
+    [t({ message: "Transfers linked", comment: "Label on the one-time import's results" }), it.transfers_linked],
+    [t({ message: "Duplicates skipped", comment: "Label on the one-time import's results" }), it.duplicates_skipped],
     [t`Duplicates imported anyway`, it.duplicates_imported],
     [t`Skipped: account set to Skip`, it.skipped_account],
     [t`Skipped: outside the date range`, it.skipped_date_range],
     [t`Skipped: YNAB Starting Balance`, it.skipped_starting_balance],
-    [t`Failed`, it.failed, true],
+    [t({ message: "Failed", comment: "Label on the one-time import's results: it did not work" }), it.failed, true],
   ];
   return (
     <dl className="facts ynab-counts">
@@ -112,11 +112,11 @@ export function Duplicates({
         <table>
           <thead>
             <tr>
-              <th><Trans>Import anyway</Trans></th>
-              <SortHeading label={t`Date`} column="date" {...heading} />
-              <SortHeading label={t`Account`} column="account" {...heading} />
-              <SortHeading label={t`Payee`} column="payee" {...heading} />
-              <SortHeading label={t`Amount`} column="amount" align="right" {...heading} />
+              <th><Trans comment="Column heading on the one-time import's results">Import anyway</Trans></th>
+              <SortHeading label={t({ message: "Date", comment: "Column heading on the one-time import's results: noun. See GLOSSARY.md" })} column="date" {...heading} />
+              <SortHeading label={t({ message: "Account", comment: "Column heading on the one-time import's results: noun, a bank or cash account. See GLOSSARY.md" })} column="account" {...heading} />
+              <SortHeading label={t({ message: "Payee", comment: "Column heading on the one-time import's results: noun, who was paid or who paid. See GLOSSARY.md" })} column="payee" {...heading} />
+              <SortHeading label={t({ message: "Amount", comment: "Column heading on the one-time import's results: noun, a sum of money. See GLOSSARY.md" })} column="amount" align="right" {...heading} />
               <th><Trans>Already in the ledger</Trans></th>
             </tr>
           </thead>
@@ -126,16 +126,16 @@ export function Duplicates({
                 <td data-select="true">
                   <input
                     type="checkbox"
-                    aria-label={t`Import anyway: ${formatDate(row.date)} ${row.payee ?? ""} ${money(row.amount_minor, currency)}`}
+                    aria-label={t({ message: `Import anyway: ${formatDate(row.date)} ${row.payee ?? ""} ${money(row.amount_minor, currency)}`, comment: "Screen-reader name on the one-time import's results" })}
                     checked={importAll || chosen.has(row.row_ref)}
                     disabled={importAll}
                     onChange={(event) => onToggle(row.row_ref, event.target.checked)}
                   />
                 </td>
-                <td className="small mono" data-label={t`Date`} data-detail-first="true">
+                <td className="small mono" data-label={t({ message: "Date", comment: "Column name shown beside a value on phones on the one-time import's results: noun. See GLOSSARY.md" })} data-detail-first="true">
                   {formatDate(row.date)}
                 </td>
-                <td className="small" data-label={t`Account`}>
+                <td className="small" data-label={t({ message: "Account", comment: "Column name shown beside a value on phones on the one-time import's results: noun, a bank or cash account. See GLOSSA…" })}>
                   {row.account}
                 </td>
                 <td data-primary="true">
@@ -147,7 +147,7 @@ export function Duplicates({
                     {money(row.amount_minor, currency)}
                   </span>
                 </td>
-                <td className="small muted" data-label={t`Existing`}>
+                <td className="small muted" data-label={t({ message: "Existing", comment: "Column name shown beside a value on phones on the one-time import's results: adjective, already in the ledger" })}>
                   {formatDate(row.existing.date)} · {row.existing.payee ?? "—"} ·{" "}
                   {money(row.existing.amount_minor, currency)}
                 </td>
@@ -188,20 +188,20 @@ export function NotImportedTable({ rows, currency }: { rows: NotImported[]; curr
       <table>
         <thead>
           <tr>
-            <SortHeading label={t`Date`} column="date" {...heading} />
-            <SortHeading label={t`Account`} column="account" {...heading} />
-            <SortHeading label={t`Payee`} column="payee" {...heading} />
-            <SortHeading label={t`Amount`} column="amount" align="right" {...heading} />
-            <SortHeading label={t`Why`} column="reason" {...heading} />
+            <SortHeading label={t({ message: "Date", comment: "Column heading on the one-time import's results: noun. See GLOSSARY.md" })} column="date" {...heading} />
+            <SortHeading label={t({ message: "Account", comment: "Column heading on the one-time import's results: noun, a bank or cash account. See GLOSSARY.md" })} column="account" {...heading} />
+            <SortHeading label={t({ message: "Payee", comment: "Column heading on the one-time import's results: noun, who was paid or who paid. See GLOSSARY.md" })} column="payee" {...heading} />
+            <SortHeading label={t({ message: "Amount", comment: "Column heading on the one-time import's results: noun, a sum of money. See GLOSSARY.md" })} column="amount" align="right" {...heading} />
+            <SortHeading label={t({ message: "Why", comment: "Column heading on the one-time import's results: noun, the reason" })} column="reason" {...heading} />
           </tr>
         </thead>
         <tbody>
           {sorted.map((row) => (
             <tr key={row.row_ref}>
-              <td className="small mono" data-label={t`Date`} data-detail-first="true">
+              <td className="small mono" data-label={t({ message: "Date", comment: "Column name shown beside a value on phones on the one-time import's results: noun. See GLOSSARY.md" })} data-detail-first="true">
                 {row.date ?? row.date_text ?? "—"}
               </td>
-              <td className="small" data-label={t`Account`}>
+              <td className="small" data-label={t({ message: "Account", comment: "Column name shown beside a value on phones on the one-time import's results: noun, a bank or cash account. See GLOSSA…" })}>
                 {row.account ?? "—"}
               </td>
               <td data-primary="true">
@@ -217,7 +217,7 @@ export function NotImportedTable({ rows, currency }: { rows: NotImported[]; curr
                   </span>
                 )}
               </td>
-              <td className="small" data-label={t`Why`}>
+              <td className="small" data-label={t({ message: "Why", comment: "Column name shown beside a value on phones on the one-time import's results: noun, the reason" })}>
                 {row.reason}
               </td>
             </tr>
@@ -383,24 +383,24 @@ export function Report({
       <Counts report={report} />
 
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        <Trans>
+        <Trans comment="Heading on the one-time import's results">
           Created
         </Trans>
       </h3>
       <dl className="facts">
-        <dt><Trans>Accounts</Trans></dt>
+        <dt><Trans comment="Name of a fact on the one-time import's results: noun, bank or cash accounts. See GLOSSARY.md">Accounts</Trans></dt>
         <dd>
           {created.accounts.length === 0
-            ? t({ message: "None", context: "created" })
+            ? t({ message: "None", context: "created", comment: "Value of a fact on the one-time import's results (created)" })
             : created.accounts.map((one) => one.name).join(", ")}
         </dd>
-        <dt><Trans>Categories</Trans></dt>
+        <dt><Trans comment="Name of a fact on the one-time import's results. See GLOSSARY.md">Categories</Trans></dt>
         <dd>
           {created.categories.length === 0
-            ? t({ message: "None", context: "created" })
+            ? t({ message: "None", context: "created", comment: "Value of a fact on the one-time import's results (created)" })
             : created.categories.map((one) => one.name).join(", ")}
         </dd>
-        <dt><Trans>Payees</Trans></dt>
+        <dt><Trans comment="Name of a fact on the one-time import's results: noun, who was paid or who paid. See GLOSSARY.md">Payees</Trans></dt>
         <dd>{formatCount(created.payees)}</dd>
       </dl>
 
@@ -416,7 +416,7 @@ export function Report({
                 <a href={hrefFor("accounts")} target="_blank" rel="noopener">
                   {one.name}
                 </a>{" "}
-                <span className="small muted">{t`opened ${formatDate(one.opening_date)}`}</span>
+                <span className="small muted">{t({ message: `opened ${formatDate(one.opening_date)}`, comment: "List item on the one-time import's results" })}</span>
               </li>
             ))}
           </ul>
@@ -469,7 +469,7 @@ export function Report({
       <UnpairedTransfers rows={report.unpaired_transfers ?? []} currency={currency} committed />
       <p>
         <button type="button" onClick={() => downloadReport(report.report_text)}>
-          <Trans>
+          <Trans comment="Button on the one-time import's results">
             Download .txt
           </Trans>
         </button>{" "}

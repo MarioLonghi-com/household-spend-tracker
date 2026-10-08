@@ -34,7 +34,15 @@ import {
   type SaveRoute,
 } from "../lib/saveBackup";
 import { formatInstant } from "../lib/time";
-import { Dialog, Panel, Problem, SortHeading, sortRows, useSort } from "../components/bits";
+import {
+  Dialog,
+  Panel,
+  Problem,
+  SortHeading,
+  sortRows,
+  useSort,
+  type SortKeyPart,
+} from "../components/bits";
 import {
   NO_PROOF,
   spent,
@@ -43,14 +51,20 @@ import {
   stepUpToken,
   type StepUpProof,
 } from "../components/StepUp";
-import { t } from "@lingui/core/macro";
-import { Trans } from "@lingui/react/macro";
+import { plural, t } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export interface Backup {
   name: string;
   path: string;
   bytes: number;
   made_at: string;
+  /** `file` from this screen, `update` from an update's drill, `folder` by hand. */
+  kind?: "file" | "update" | "folder";
+  version?: string | null;
+  revision?: string | null;
+  /** One of the newest five update backups: the server will not delete it. */
+  protected?: boolean;
 }
 
 export function BackupList({
@@ -120,12 +134,12 @@ export function BackupList({
         <table>
           <thead>
             <tr>
-              <SortHeading label={t`Backup`} column="name" {...order} />
-              <SortHeading label={t`Made`} column="date" {...order} />
-              <SortHeading label={t`Size`} column="size" align="right" {...order} />
+              <SortHeading label={t({ message: "Backup", comment: "Column heading on the Backups screen. See GLOSSARY.md" })} column="name" {...order} />
+              <SortHeading label={t({ message: "Made", comment: "Column heading on the Backups screen" })} column="date" {...order} />
+              <SortHeading label={t({ message: "Size", comment: "Column heading on the Backups screen: noun, size of a file" })} column="size" align="right" {...order} />
               <th className="row-actions backup-actions">
                 <span className="sr-only">
-                  <Trans>Actions</Trans>
+                  <Trans comment="Screen-reader text on the Backups screen">Actions</Trans>
                 </span>
               </th>
             </tr>
@@ -136,10 +150,10 @@ export function BackupList({
                 <td data-primary="true" className="mono small">
                   {one.name}
                 </td>
-                <td className="small muted" data-label={t`Made`}>
+                <td className="small muted" data-label={t({ message: "Made", comment: "Column name shown beside a value on phones on the Backups screen" })}>
                   {formatInstant(one.made_at)}
                 </td>
-                <td className="amount muted" data-label={t`Size`}>
+                <td className="amount muted" data-label={t({ message: "Size", comment: "Column name shown beside a value on phones on the Backups screen: noun, size of a file" })}>
                   {bytes(one.bytes)}
                 </td>
                 <td className="row-actions backup-actions">
@@ -147,13 +161,13 @@ export function BackupList({
                     // No link can carry a step-up grant, so the key's download
                     // goes through the panel that asks for one.
                     <button className="link" onClick={() => setSaving(one)}>
-                      <Trans>
+                      <Trans comment="Button on the Backups screen: verb">
                         Download…
                       </Trans>
                     </button>
                   ) : (
                     <a href={backupDownloadUrl(one.name)} download={zipName(one.name)}>
-                      <Trans>
+                      <Trans comment="Link on the Backups screen">
                         Download
                       </Trans>
                     </a>
@@ -164,7 +178,7 @@ export function BackupList({
                     </Trans>
                   </button>
                   <button className="link danger" onClick={() => setDeleting(one)}>
-                    <Trans>
+                    <Trans comment="Button on the Backups screen: verb">
                       Delete
                     </Trans>
                   </button>
@@ -210,10 +224,10 @@ export function BackupList({
               disabled={remove.isPending}
               onClick={() => remove.mutate(deleting)}
             >
-              {remove.isPending ? t`Deleting…` : t`Yes, delete it`}
+              {remove.isPending ? t({ message: "Deleting…", comment: "Button on the Backups screen" }) : t`Yes, delete it`}
             </button>
             <button disabled={remove.isPending} onClick={() => setDeleting(null)}>
-              <Trans>
+              <Trans comment="Button on the Backups screen">
                 Keep it
               </Trans>
             </button>
@@ -287,7 +301,7 @@ export function SavePanel({
   });
   const download = useMutation({
     mutationFn: () => downloadZip(backup.name, withKey, grant),
-    onSuccess: () => setDone(t`Downloaded.`),
+    onSuccess: () => setDone(t({ message: "Downloaded.", comment: "Label on the Backups screen" })),
   });
 
   const secure = typeof window !== "undefined" && window.isSecureContext;
@@ -341,7 +355,7 @@ export function SavePanel({
               disabled={share.isPending}
               onClick={() => share.mutate(prepared)}
             >
-              {t`Share ${prepared.name}…`}
+              {t({ message: `Share ${prepared.name}…`, comment: "Button on the Backups screen" })}
             </button>
           ) : (
             <button disabled={!ready || prepare.isPending} onClick={() => prepare.mutate()}>
@@ -366,7 +380,7 @@ export function SavePanel({
             </Trans>
           </p>
           <button disabled={!ready || folder.isPending} onClick={() => folder.mutate()}>
-            {folder.isPending ? t`Saving…` : t`Choose a folder…`}
+            {folder.isPending ? t({ message: "Saving…", comment: "Button on the Backups screen" }) : t`Choose a folder…`}
           </button>
           <Problem error={folder.error} />
         </section>
@@ -387,14 +401,14 @@ export function SavePanel({
                   disabled={!ready || download.isPending}
                   onClick={() => download.mutate()}
                 >
-                  {download.isPending ? t`Downloading…` : t`Download ${zipName(backup.name)}`}
+                  {download.isPending ? t({ message: "Downloading…", comment: "Button on the Backups screen" }) : t({ message: `Download ${zipName(backup.name)}`, comment: "Button on the Backups screen: verb" })}
                 </button>
                 <Problem error={download.error} />
               </>
             ) : (
               <>
                 <a href={backupDownloadUrl(backup.name)} download={zipName(backup.name)}>
-                  {t`Download ${zipName(backup.name)}`}
+                  {t({ message: `Download ${zipName(backup.name)}`, comment: "Link on the Backups screen" })}
                 </a>
                 .
               </>
@@ -404,7 +418,7 @@ export function SavePanel({
             {t`Open the service in a new tab:`}{" "}
             {CLOUD_PAGES.map((page, index) => (
               <span key={page.href}>
-                {index > 0 ? ` ${t`or`} ` : ""}
+                {index > 0 ? ` ${t({ message: "or", comment: "List item on the Backups screen: conjunction between two choices" })} ` : ""}
                 <a href={page.href} target="_blank" rel="noopener noreferrer">
                   {page.label}
                 </a>
@@ -432,5 +446,187 @@ export function SavePanel({
         </p>
       )}
     </Panel>
+  );
+}
+
+// --------------------------------------------------------------------------- //
+// Update backups (#166, design notes 8.7)
+// --------------------------------------------------------------------------- //
+
+/** `X.Y.Z` as numbers, so 0.10.0 sorts after 0.9.0. */
+function versionKey(version: string | null | undefined): SortKeyPart[] | null {
+  if (!version) return null;
+  return version.split(".").map((part) => Number(part) || 0);
+}
+
+/**
+ * The folders an update's drill took before it migrated, listed apart from
+ * the backups an owner makes, with the version and the migration each holds.
+ *
+ * **The newest five are kept**: they are what a failed update is undone from
+ * and what the recovery page restores, and the updater prunes the older ones
+ * itself after a successful update. So *Delete* is offered only on the older
+ * ones, and the server refuses the newest five whatever is sent
+ * (`backup.protected`).
+ */
+export function UpdateBackupList({
+  backups,
+  onChanged,
+}: {
+  backups: Backup[];
+  onChanged: () => void;
+}) {
+  const { t } = useLingui();
+  const client = useQueryClient();
+  const [deleting, setDeleting] = useState<Backup | null>(null);
+  const order = useSort<"name" | "version" | "revision" | "date" | "size">("date", "desc");
+  const rows = useMemo(
+    () =>
+      sortRows(backups, order.sort, order.direction, (one, column) =>
+        column === "name"
+          ? one.name
+          : column === "version"
+            ? versionKey(one.version)
+            : column === "revision"
+              ? (one.revision ?? null)
+              : column === "date"
+                ? one.made_at
+                : one.bytes,
+      ),
+    [backups, order.sort, order.direction],
+  );
+  const remove = useMutation({
+    mutationFn: (one: Backup) =>
+      api.del<null>(`/admin/application/backups/${encodeURIComponent(one.name)}`),
+    onSuccess: () => {
+      setDeleting(null);
+      client.invalidateQueries({ queryKey: ["application", "backups"] });
+      onChanged();
+    },
+  });
+
+  if (backups.length === 0) return null;
+  const kept = backups.filter((one) => one.protected).length;
+
+  return (
+    <div className="update-backups">
+      <h3 className="section-title" style={{ marginTop: 18 }}>
+        <Trans>Backups taken by updates</Trans>
+      </h3>
+      <p className="muted small" style={{ marginTop: 0 }}>
+        {plural(kept, {
+          one: "Each update backs the ledger up after the app stops and before it migrates. The newest one is kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.",
+          other: "Each update backs the ledger up after the app stops and before it migrates. The newest # are kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.",
+        })}
+      </p>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <SortHeading
+                label={t({ message: "Backup", comment: "Column heading: the backup folder's name" })}
+                column="name"
+                {...order}
+              />
+              <SortHeading
+                label={t({ message: "Version", comment: "Column heading: the app version that took the backup" })}
+                column="version"
+                {...order}
+              />
+              <SortHeading
+                label={t({ message: "Revision", comment: "Column heading: the database migration the backup is at" })}
+                column="revision"
+                {...order}
+              />
+              <SortHeading
+                label={t({ message: "Made", comment: "Column heading: when the backup was taken" })}
+                column="date"
+                {...order}
+              />
+              <SortHeading
+                label={t({ message: "Size", comment: "Column heading: the backup's size on disk" })}
+                column="size"
+                align="right"
+                {...order}
+              />
+              <th className="row-actions backup-actions">
+                <span className="sr-only">
+                  {t({ message: "Actions", comment: "Hidden column heading over row buttons" })}
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((one) => (
+              <tr key={one.name} data-protected={one.protected ? "true" : "false"}>
+                <td data-primary="true" className="mono small">
+                  {one.name}
+                </td>
+                <td className="small" data-label={t({ message: "Version", comment: "Column heading: the app version that took the backup" })}>
+                  {one.version ?? "—"}
+                </td>
+                <td className="mono small" data-label={t({ message: "Revision", comment: "Column heading: the database migration the backup is at" })}>
+                  {one.revision ?? "—"}
+                </td>
+                <td className="small muted" data-label={t({ message: "Made", comment: "Column heading: when the backup was taken" })}>
+                  {formatInstant(one.made_at)}
+                </td>
+                <td className="amount muted" data-label={t({ message: "Size", comment: "Column heading: the backup's size on disk" })}>
+                  {bytes(one.bytes)}
+                </td>
+                <td className="row-actions backup-actions">
+                  <a href={backupDownloadUrl(one.name)} download={zipName(one.name)}>
+                    {t({ message: "Download", comment: "Link: download this backup as a zip" })}
+                  </a>
+                  {one.protected ? (
+                    <span
+                      className="tag"
+                      title={t`One of the newest five update backups: kept so an update can be undone`}
+                    >
+                      {t({ message: "kept", comment: "Tag on an update backup that cannot be deleted" })}
+                    </span>
+                  ) : (
+                    <button className="link danger" onClick={() => setDeleting(one)}>
+                      {t({ message: "Delete", comment: "Button: delete this backup" })}
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {deleting && (
+        <Dialog
+          title={t`Delete this update backup?`}
+          onClose={() => setDeleting(null)}
+        >
+          <p style={{ marginTop: 0 }}>
+            <Trans>
+              <span className="mono">{deleting.name}</span>, taken by the update from{" "}
+              {deleting.version ?? "?"}, {bytes(deleting.bytes)}. The folder is removed and{" "}
+              <strong>cannot be brought back</strong>. The five newest update backups are kept
+              whatever happens to this one.
+            </Trans>
+          </p>
+          <div className="dialog-choices">
+            <button
+              className="danger"
+              disabled={remove.isPending}
+              onClick={() => remove.mutate(deleting)}
+            >
+              {remove.isPending
+                ? t({ message: "Deleting…", comment: "Button while a backup is deleted" })
+                : t({ message: "Yes, delete it", comment: "Button confirming a backup's deletion" })}
+            </button>
+            <button disabled={remove.isPending} onClick={() => setDeleting(null)}>
+              {t({ message: "Keep it", comment: "Button cancelling a backup's deletion" })}
+            </button>
+          </div>
+          <Problem error={remove.error} />
+        </Dialog>
+      )}
+    </div>
   );
 }
