@@ -194,6 +194,28 @@ history this repository does not have.
   `self-update` job, advisory for now, that updates release A to B through
   the updater against a real Docker Engine. No image or compose service runs
   the updater yet (#164).
+- **The self-updater has an image and runs beside the app** (#164).
+  `docker build --target updater .` builds it from the same Dockerfile and
+  the same Chainguard digests as the app: the updater's hashed lock in a
+  venv, `updater/` and nothing else, no shell, no package manager (pip
+  included) and no engine CLI, uid 65532, listening on nothing. Both compose
+  files gain the `updater` service, which alone holds the engine socket,
+  shares an `update` volume with the app and mounts the project directory to
+  pin what it installs in `.env`; it is never in the Tailscale sidecar's
+  network. `SPENDTRACKER_UPDATER_USER=0:0` is for rootless Docker and
+  Podman on Linux, and rootful Docker Engine on Linux needs
+  `SPENDTRACKER_SOCKET_GID` set to the socket's group. Both files carry
+  `x-podman: { in_pod: false }` for podman-compose. **The sidecar's
+  `deploy/tailnet/compose.yaml` now pulls the published images instead of
+  building the checkout,** and has no `build:`: name a release that ships
+  an updater in `.env` (`SPENDTRACKER_VERSION`), then `docker compose pull`.
+  The root `compose.yaml` keeps its build fallback, for the updater too.
+  Every release now builds, smoke-tests, attests and publishes
+  `ghcr.io/mariolonghi-com/household-spend-tracker-updater` for linux/amd64
+  and linux/arm64 beside the app, and the app image carries the
+  `updater-protocol` label. `deploy/tailnet/check.sh` checks the updater:
+  outside the sidecar's namespace, the only holder of the socket, able to
+  reach it, and whether an update is in progress.
 
 ## 0.8.0 — 2026-10-08
 
