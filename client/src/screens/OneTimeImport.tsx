@@ -9,7 +9,9 @@
  * calls, so every call carries the source again (see `ynab/calls.ts`). That is
  * also what keeps a YNAB token short-lived: it lives in this component, goes up
  * as a form field, and is dropped when the import finishes or the wizard
- * closes. Nothing here decides whether a row can be imported; the preview is
+ * closes. The four calls' mutations carry it too, as their `variables`, and
+ * TanStack keeps a finished mutation for five minutes after its component
+ * unmounts -- so each says `gcTime: 0`, and closing the wizard drops them (#93). Nothing here decides whether a row can be imported; the preview is
  * the server running the real import and rolling it back.
  */
 
@@ -36,6 +38,7 @@ import type {
   Via,
   YnabPlan,
 } from "./ynab/types";
+import { YNAB_STEP_LABELS } from "../lib/labels";
 
 export const NEW_ISSUE_URL = "https://github.com/MarioLonghi-com/household-spend-tracker/issues/new";
 export const YNAB_DEVELOPER_URL = "https://app.ynab.com/settings/developer";
@@ -102,17 +105,7 @@ type Step =
   | "preview"
   | "report";
 
-const STEP_LABELS: Record<Step, string> = {
-  source: "Source app",
-  connect: "Connect",
-  plan: "Plan",
-  review: "Review",
-  accounts: "Accounts",
-  categories: "Categories",
-  options: "Flags & options",
-  preview: "Preview",
-  report: "Report",
-};
+const STEP_LABELS: Record<Step, string> = YNAB_STEP_LABELS;
 
 const COMMON_CURRENCIES = ["GBP", "EUR", "USD", "CAD", "AUD", "NZD", "CHF", "SEK", "NOK", "DKK", "JPY"];
 
@@ -196,6 +189,7 @@ function YnabWizard({
   }
 
   const plansCall = useMutation({
+    gcTime: 0,
     mutationFn: (key: string) => calls.listPlans(hid, key),
     onSuccess: (data) => {
       setPlans(data.plans);
@@ -205,6 +199,7 @@ function YnabWizard({
   });
 
   const analyseCall = useMutation({
+    gcTime: 0,
     mutationFn: (vars: { source: Source; currency: string | null; dateFormat: string | null }) =>
       calls.analyse(hid, vars.source, { currency: vars.currency, dateFormat: vars.dateFormat }),
     onSuccess: (data) => {
@@ -312,6 +307,7 @@ function YnabWizard({
   }
 
   const previewCall = useMutation({
+    gcTime: 0,
     mutationFn: (vars: { source: Source; plan: ImportPlan }) =>
       calls.preview(hid, vars.source, vars.plan),
     onMutate: () => setRefusal(null),
@@ -325,6 +321,7 @@ function YnabWizard({
   });
 
   const commitCall = useMutation({
+    gcTime: 0,
     mutationFn: (vars: { source: Source; plan: ImportPlan }) =>
       calls.commit(hid, vars.source, vars.plan),
     onMutate: () => setRefusal(null),

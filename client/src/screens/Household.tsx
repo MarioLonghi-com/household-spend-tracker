@@ -21,6 +21,7 @@ import { api } from "../lib/api";
 import { Field, Hint, Problem, SortHeading, sortRows, useSort } from "../components/bits";
 import type { Household, Member, Palette, User } from "../lib/types";
 import { OneTimeImport } from "./OneTimeImport";
+import { roleLabel } from "../lib/labels";
 
 /** One currency this household keeps accounts in. Counts, never a figure. */
 interface CurrencyRows {
@@ -493,7 +494,7 @@ function People({ household, user }: { household: Household; user: User }) {
                   <div className="small muted">{member.email}</div>
                 </td>
                 <td className="small muted" data-label="Role">
-                  {member.role}
+                  {roleLabel(member.role)}
                 </td>
                 <td className="amount" data-label="Transactions">
                   {count(member.transactions_logged)}

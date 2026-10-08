@@ -13,12 +13,28 @@
  * turn it into two: the profile spends it later. A reload never shows the
  * "Not now" copy that says so, which is why the shell says it to any member
  * the key still cannot open (`ReenrolmentDue`).
+ *
+ * Passkeys (#121) are offered only where both the server's state answer and
+ * this browser say they can work (#47, decision 4): then there is a "Sign in
+ * with a passkey" button, and the email field offers passkeys itself
+ * (conditional UI) where the browser supports that. Anywhere else the screen
+ * is exactly as it was. A passkey is both factors, so it signs in at once.
+ * After a recovery code, the screen says how many passkeys still work, since
+ * one may be on the device that was lost (decision 1).
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { api } from "../lib/api";
 import { Field, Problem } from "../components/bits";
+import {
+  conditionalMediationAvailable,
+  getPasskey,
+  noteRecoveryReminder,
+  passkeyState,
+  rememberThisDevice,
+  wasDismissed,
+} from "../lib/passkeys";
 import { dropGrant, keepGrant } from "../lib/recoveryGrant";
 import type { User } from "../lib/types";
 
@@ -37,6 +53,10 @@ interface SignInState {
    */
   key_replaced?: boolean;
   detail?: string | null;
+  /** Only after a recovery code: passkeys that still work here (#121). */
+  passkeys_live?: number;
+  /** Only after a passkey sign-in: which one, for "this device" (#47 §3). */
+  passkey_id?: string | null;
 }
 
 interface Offer {
@@ -70,17 +90,81 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
   const [busy, setBusy] = useState(false);
   // A recovery code that revoked keys holds the screen long enough to say so:
   // a key found not working a week later reads as a bug, not as this.
-  const [recovered, setRecovered] = useState<{ user: User; keys: number } | null>(null);
+  const [recovered, setRecovered] = useState<{
+    user: User;
+    keys: number;
+    passkeys: number;
+  } | null>(null);
+  // Offered only when the server and this browser both say passkeys work here.
+  const [passkeysHere, setPasskeysHere] = useState(false);
+  // The email field's passkey suggestions, waiting in the background.
+  const waiting = useRef<AbortController | null>(null);
   // The server's sentence when its key cannot open this member's authenticator.
   const [replaced, setReplaced] = useState<string | null>(null);
   const [owed, setOwed] = useState<Owed | null>(null);
   const [newCode, setNewCode] = useState("");
 
-  /** Signed in: say what the recovery code revoked, if it revoked anything. */
-  function finish(user: User, keys: number) {
-    if (keys > 0) setRecovered({ user, keys });
+  /**
+   * Signed in: say what the recovery code revoked, and which passkeys it left
+   * working, if either is anything.
+   */
+  function finish(user: User, keys: number, passkeys = 0) {
+    waiting.current?.abort();
+    if (passkeys > 0) noteRecoveryReminder(passkeys);
+    if (keys > 0 || passkeys > 0) setRecovered({ user, keys, passkeys });
     else onDone(user);
   }
+
+  /** A passkey's answer, to the server; both factors in one. */
+  async function withPasskey(credential: unknown) {
+    const state = await api.post<SignInState>("/session/passkey", { credential });
+    if (state.authenticated && state.user) {
+      if (state.passkey_id) rememberThisDevice(state.passkey_id);
+      finish(state.user, 0);
+    }
+  }
+
+  useEffect(() => {
+    let gone = false;
+    (async () => {
+      const state = await passkeyState();
+      if (gone || !state.available) return;
+      setPasskeysHere(true);
+      if (!(await conditionalMediationAvailable()) || gone) return;
+      // The email field offers this browser's passkeys for this site. The
+      // request waits until one is picked, and is abandoned when the member
+      // signs in some other way or leaves.
+      const controller = new AbortController();
+      waiting.current = controller;
+      try {
+        const options = await api.post<unknown>("/session/passkey/options", {});
+        const credential = await getPasskey(options, { conditional: true, signal: controller.signal });
+        if (!gone) await run(() => withPasskey(credential));
+      } catch (problem) {
+        if (!gone && !wasDismissed(problem) && !controller.signal.aborted) setError(problem);
+      }
+    })();
+    return () => {
+      gone = true;
+      waiting.current?.abort();
+    };
+    // Once, on arrival. `run` and `withPasskey` only read setters.
+  }, []);
+
+  /** The button: one prompt, now, instead of waiting in the email field. */
+  const passkeyNow = () =>
+    run(async () => {
+      waiting.current?.abort();
+      const options = await api.post<unknown>("/session/passkey/options", {});
+      let credential: unknown;
+      try {
+        credential = await getPasskey(options);
+      } catch (problem) {
+        if (wasDismissed(problem)) return;
+        throw problem;
+      }
+      await withPasskey(credential);
+    });
 
   /**
    * A new authenticator to scan, asked for with the password this screen
@@ -124,6 +208,8 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
+    // Signing in with the password: the email field's passkey offer is done.
+    waiting.current?.abort();
     return run(async () => {
       const state = !needsCode
         ? await api.post<SignInState>("/session", { email, password })
@@ -140,7 +226,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
           grant: state.reenrolment_grant,
         });
       } else if (state.authenticated && state.user) {
-        finish(state.user, state.keys_revoked ?? 0);
+        finish(state.user, state.keys_revoked ?? 0, state.passkeys_live ?? 0);
       } else if (state.needs_code) {
         setNeedsCode(true);
         if (state.key_replaced) {
@@ -248,12 +334,22 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
         <h1>Spend Tracker</h1>
         <div className="card" role="status">
           <h2>You're back in</h2>
-          <p>
-            Using a recovery code signed you out everywhere, forgot every trusted browser and
-            revoked {recovered.keys === 1 ? "1 agent key" : `${recovered.keys} agent keys`}. A
-            program that was using {recovered.keys === 1 ? "it" : "one"} will be refused from now
-            on; issue a new key on your profile if it should keep working.
-          </p>
+          {recovered.keys > 0 && (
+            <p>
+              Using a recovery code signed you out everywhere, forgot every trusted browser and
+              revoked {recovered.keys === 1 ? "1 agent key" : `${recovered.keys} agent keys`}. A
+              program that was using {recovered.keys === 1 ? "it" : "one"} will be refused from
+              now on; issue a new key on your profile if it should keep working.
+            </p>
+          )}
+          {recovered.passkeys > 0 && (
+            <p>
+              You still have{" "}
+              {recovered.passkeys === 1 ? "1 passkey" : `${recovered.passkeys} passkeys`}, and a
+              recovery code leaves them working. If one was on the device you lost, remove it in
+              Sign-in methods on your profile — your name in the menu.
+            </p>
+          )}
           <button className="primary" autoFocus onClick={() => onDone(recovered.user)}>
             Continue
           </button>
@@ -276,7 +372,9 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoFocus
-                autoComplete="username"
+                // `webauthn` lets the browser offer passkeys from this field,
+                // and only where passkeys can work at all.
+                autoComplete={passkeysHere ? "username webauthn" : "username"}
               />
             </Field>
             <p />
@@ -292,6 +390,14 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
             <button className="primary" type="submit" disabled={busy || !email || !password}>
               Sign in
             </button>
+            {passkeysHere && (
+              <>
+                <p className="muted small">or</p>
+                <button type="button" disabled={busy} onClick={passkeyNow}>
+                  Sign in with a passkey
+                </button>
+              </>
+            )}
           </>
         ) : (
           <>

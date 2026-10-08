@@ -1,17 +1,72 @@
-"""Domain errors carry their own status code and their own words.
+"""Domain errors carry their own status code, their own words, and a code.
 
-One handler in ``main`` turns any of these into ``{"detail": "<sentence>"}``, so
-every raise site writes a full sentence — the message *is* what the user reads.
-An ``Unauthorized`` may add ``fields`` beside it, for a program to act on.
+One handler in ``main`` turns any of these into ``{"detail": "<sentence>"}``.
+``detail`` is the English sentence a person, an agent and the logs read, so
+every raise site still writes a full one.
+
+It is not what a translated screen shows. A raise may also carry a ``code`` --
+a stable dotted name registered in ``app/error_codes.py`` -- and ``params``,
+the raw values that sentence was built from, and the handler sends both beside
+``detail`` (#65). The client translates from the code, so ``params`` are never
+pre-formatted text: money is integer minor units plus an ISO currency code,
+a date is ``YYYY-MM-DD``, an enum is its value, a name is as stored.
+``tests/test_error_codes.py`` counts the raises that carry no code and fails if
+that number goes up.
+
+An ``Unauthorized`` may also add ``fields`` beside ``detail``, for a program to
+act on.
 """
 
 from __future__ import annotations
+
+from datetime import date as Date
+from decimal import Decimal
+
+#: What a ``params`` value may be. Money is ``int`` minor units beside a
+#: currency code, never a ``float`` or a ``Decimal``; a date is passed as one
+#: and sent as ISO.
+ParamValue = str | int | bool | None | Date
 
 
 class DomainError(Exception):
     """Base for anything the user could reasonably have caused."""
 
     status_code = 400
+
+    def __init__(
+        self,
+        message: str = "",
+        *,
+        code: str | None = None,
+        params: dict[str, ParamValue] | None = None,
+    ) -> None:
+        super().__init__(message)
+        #: A stable dotted name from `app.error_codes.REGISTRY`, for the client
+        #: to translate from. None on a raise not converted yet.
+        self.code = code
+        #: The raw values `message` was built from. Checked here, because a
+        #: float or a formatted amount in a param is exactly the value no
+        #: locale can render correctly.
+        self.params = dict(params or {})
+        for key, value in self.params.items():
+            if isinstance(value, float | Decimal) or not isinstance(
+                value, str | int | bool | Date | type(None)
+            ):
+                raise TypeError(f"param {key!r} must be a raw value, not {type(value).__name__}")
+        if self.params and code is None:
+            raise TypeError("params without a code cannot be translated")
+
+    def wire(self) -> dict[str, object]:
+        """``code`` and ``params`` as the response carries them, or nothing."""
+        if self.code is None:
+            return {}
+        return {
+            "code": self.code,
+            "params": {
+                key: value.isoformat() if isinstance(value, Date) else value
+                for key, value in self.params.items()
+            },
+        }
 
 
 class Unauthorized(DomainError):
@@ -23,8 +78,10 @@ class Unauthorized(DomainError):
         *,
         headers: dict[str, str] | None = None,
         fields: dict[str, object] | None = None,
+        code: str | None = None,
+        params: dict[str, ParamValue] | None = None,
     ) -> None:
-        super().__init__(message)
+        super().__init__(message, code=code, params=params)
         #: Response headers this particular refusal wants. `WWW-Authenticate`
         #: is the one that matters: it is how HTTP says *which* credential a
         #: route wants, and without it a program has to guess.
@@ -52,8 +109,21 @@ class ProofRefused(Unauthorized):
     (#287), and the session survives it like any other refused proof.
     """
 
-    def __init__(self, message: str, *, fields: dict[str, object] | None = None) -> None:
-        super().__init__(message, headers={PROOF_REFUSED_HEADER: "proof"}, fields=fields)
+    def __init__(
+        self,
+        message: str,
+        *,
+        fields: dict[str, object] | None = None,
+        code: str | None = None,
+        params: dict[str, ParamValue] | None = None,
+    ) -> None:
+        super().__init__(
+            message,
+            headers={PROOF_REFUSED_HEADER: "proof"},
+            fields=fields,
+            code=code,
+            params=params,
+        )
 
 
 class Forbidden(DomainError):
@@ -117,6 +187,13 @@ class TooManyAttempts(DomainError):
 
     status_code = 429
 
-    def __init__(self, message: str, *, retry_after: int) -> None:
-        super().__init__(message)
+    def __init__(
+        self,
+        message: str,
+        *,
+        retry_after: int,
+        code: str | None = None,
+        params: dict[str, ParamValue] | None = None,
+    ) -> None:
+        super().__init__(message, code=code, params=params)
         self.retry_after = retry_after

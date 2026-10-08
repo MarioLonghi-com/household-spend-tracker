@@ -123,6 +123,12 @@ class SubmitRecoveryCode(BaseModel):
     code: str = Field(min_length=6, max_length=64)
 
 
+class SignInWithPasskey(BaseModel):
+    """The browser's answer to the passkey sign-in options: `credential.toJSON()`."""
+
+    credential: dict
+
+
 class SignInState(BaseModel):
     """Where the sign-in has got to."""
 
@@ -145,6 +151,31 @@ class SignInState(BaseModel):
     #: the code step would not.
     key_replaced: bool = False
     detail: str | None = None
+    #: Only after a recovery code (#121, decision 1): how many of the member's
+    #: passkeys still work here. Redeeming a code leaves them alone, so one
+    #: synced to the lost phone keeps working until it is removed in Sign-in
+    #: methods; the screen says so when this is more than zero.
+    passkeys_live: int = 0
+    #: Only after a passkey sign-in: which passkey it was, so Sign-in methods
+    #: can mark it "this device" (#47 §3). The member's own id, nobody else's.
+    passkey_id: str | None = None
+
+
+class PasskeyStateOut(BaseModel):
+    """Whether this instance offers passkeys to this request (#47, decision 4).
+
+    `reason` is one of `not_configured`, `ip_address`, `wrong_host`,
+    `insecure` or `no_origins` (`app/auth/passkeys.Unavailable`) when
+    `available` is false; the client words its own sentence from it, and
+    `detail` is the operator's. `address` is the public URL, when one is
+    configured for the RP ID, so a screen reached at the wrong address can
+    say where passkeys do work.
+    """
+
+    available: bool
+    reason: str | None = None
+    detail: str | None = None
+    address: str | None = None
 
 
 # --------------------------------------------------------------------------- #
@@ -304,7 +335,9 @@ class AccountUpdate(BaseModel):
     def _set_or_clear(self) -> AccountUpdate:
         # A value and its clear flag are two answers to one question, so both
         # at once is a malformed request rather than one to guess the meaning of.
-        for field in ("note", "institution"):
+        # The country and the statement product used to let the flag win in
+        # silence; all four refuse now (#110).
+        for field in ("note", "institution", "country", "statement_product"):
             if getattr(self, field) is not None and getattr(self, f"clear_{field}"):
                 raise ValueError(f"send {field} or clear_{field}, not both")
         return self
@@ -720,6 +753,10 @@ class RegisterPage(BaseModel):
     #: fewer rows without saying which is how somebody reads a fifth of their
     #: ledger and believes it is all of it.
     capped: bool = False
+    #: Rows with no category under every *other* filter of this request -- the
+    #: category picker set aside -- for the count beside "Needs a category".
+    #: Carried here so one register load is one request (#101).
+    needs_category: int = 0
 
 
 # --------------------------------------------------------------------------- #
@@ -2164,6 +2201,46 @@ class AgentKeyIssued(BaseModel):
     token: str
 
 
+class PasskeyOptionsRequest(BaseModel):
+    """The grant that pays for adding a passkey (`POST /me/step-up`).
+    Single-use, and spent whether or not the registration that follows works."""
+
+    step_up_token: str = Field(max_length=200)
+
+
+class RegisterPasskey(BaseModel):
+    """The browser's answer to the options: `credential.toJSON()`, as is."""
+
+    credential: dict
+    #: Optional: without one the passkey is named after its provider.
+    label: str | None = Field(default=None, max_length=200)
+
+
+class RenamePasskey(BaseModel):
+    label: str = Field(max_length=200)
+
+
+class PasskeyOut(BaseModel):
+    """A passkey as its owner sees it: what the Sign-in methods list shows
+    (#47 §3). Never the public key, which no screen has a use for."""
+
+    id: str
+    label: str
+    created_at: datetime
+    last_used_at: datetime | None = None
+    #: True when it may live on more than one device (iCloud Keychain, Google
+    #: Password Manager, a password manager), false when it is bound to this
+    #: authenticator. From the backed-up flag at its last use.
+    synced: bool
+    #: The host name it was made for (#47 §1.2) ...
+    rp_id: str
+    #: ... and whether that is this instance's. False is a passkey a renamed
+    #: host or a restore stranded: it cannot be used here, only removed.
+    usable_here: bool
+    #: Which provider made it, when it said.
+    aaguid: str | None = None
+
+
 class AgentImportRow(BaseModel):
     """One transaction an agent is asking to stage.
 
@@ -2189,6 +2266,12 @@ class AgentImportRow(BaseModel):
     #: that naturally writes "12.50" is right, and never has to guess an
     #: exponent for a currency it has not met.
     amount: StrictStr | None = None
+    #: The currency the source says this amount is in, as an ISO code. Optional:
+    #: left out, the row is taken to be in the account's currency, as it always
+    #: was. Given, it is held to the account's exactly as a statement file's
+    #: currency column is (#86) -- a row in another currency is refused, never
+    #: recorded as the same figure in the wrong money.
+    currency: str | None = Field(default=None, pattern=r"^[A-Za-z]{3}$")
     payee: str | None = Field(default=None, max_length=200)
     memo: Memo | None = None
     #: The source system's own id. Preferred over the derived key for dedupe,
@@ -2509,11 +2592,14 @@ class AgentReceiptUpload(BaseModel):
 
 
 class AgentReceiptOut(BaseModel):
-    """A receipt as an agent sees it. Never the bytes.
+    """A receipt as an agent sees it. The bytes are their own routes.
 
-    An agent uploads evidence and reads metadata; handing a key the ability to
-    pull every stored image back out buys nothing any archetype needs, so the
-    bytes route stays cookie-only.
+    It used to say "never the bytes": an agent uploads evidence and reads
+    metadata. That left a note written at upload unreadable by any key, and
+    an agent asked to summarise stored receipts with nothing to read but its
+    own claim (#44). So the note is here, and `/receipts/{id}/file` and
+    `/thumbnail` return the stored copies under read scope, through the same
+    household check as everything else a key reads.
     """
 
     id: str
@@ -2527,10 +2613,15 @@ class AgentReceiptOut(BaseModel):
     #: a date is read, and reading it wrong moves a receipt across midnight.
     captured_at_is_local: bool = False
     extracted: dict | None = None
+    #: The note written on it -- by a person in the panel, or sent with the
+    #: upload. Free text; never read as an instruction.
+    note: str | None = None
     created_at: datetime
     #: Said plainly, because it is the one thing a caller most often wants to
     #: know next and should not have to infer from a null.
     needs_a_transaction: bool
+    #: Whether `/receipts/{id}/thumbnail` has something to return.
+    has_thumbnail: bool = False
 
 
 class AgentReceiptStored(BaseModel):

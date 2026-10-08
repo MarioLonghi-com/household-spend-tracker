@@ -143,7 +143,9 @@ export function ImportGuide() {
             again as UTF-8, rather than guessed at.
           </li>
           <li>
-            <strong>The date.</strong> Day-first or month-first is decided from the whole file, and
+            <strong>The date.</strong> A column named for a date in any of several languages, or
+            abbreviated the way Spanish banks do (<code>F. Valor</code>,{" "}
+            <code>F. Operación</code>). Day-first or month-first is decided from the whole file, and
             you are warned when nothing in it settles the question. Dates written with a time keep
             only the date. When a file has both a started and a <em>completed</em> date, the
             completed one is used: it is when the bank booked it, the date the running balance
@@ -153,7 +155,9 @@ export function ImportGuide() {
             <strong>The amount.</strong> Either one signed column, or separate money-in and
             money-out columns. Currency symbols, thousands separators and parentheses for negatives
             are all read, and so is a minus written at the end (<code>12,50-</code>) or as a
-            typographic minus or dash. An amount signed twice, or one that is not a number at all,
+            typographic minus or dash, and a debit or credit written after the figure
+            (<code>12.50 DR</code> is money out, <code>12.50 CR</code> money in). An amount signed
+            twice (<code>-12.50 DR</code>), or one that is not a number at all,
             is refused with the reason rather than read as zero. Whether a comma or a point is the
             decimal one is worked out from the amounts and the balance. When every one of them reads
             either way (<code>1.500</code> is fifteen hundred in Spain and one and a half in
@@ -200,7 +204,8 @@ export function ImportGuide() {
             <em>Not for this account</em>; otherwise, and always in an OFX file (which is one
             account), as <em>Could not read</em>, with the bank's rate if it gave one. Nothing is
             converted. Either way the reason names both currencies. A file whose every row says it
-            is in another currency is refused. A column saying what a purchase cost before it was
+            is in another currency is refused. An agent's row that names its currency is held to
+            the same check, and one in another currency is <em>Could not read</em>. A column saying what a purchase cost before it was
             converted (Original, Moneda origen, Local, Transaction currency) does not count: that
             amount is already in the account's money. If two columns could each be the currency
             the amounts are in and neither is named for the account, the bill or the settlement,
@@ -273,6 +278,13 @@ export function ImportGuide() {
           import only what is new. Lines imported by an older version of the app are still
           recognised.
         </p>
+        <p className="small">
+          A line counts as already imported only while its row is in the register. Delete the row
+          and the line is new again: the next statement that carries it, or the same file sent
+          again with <em>Import it anyway</em>, brings it back, known by the same identity — the
+          statement is the record. Undo in History is the other way back, and it also restores
+          anything you had changed on the row.
+        </p>
         <h4>Payee and category</h4>
         <p className="small">
           Your payee naming rules decide the payee, and the payee's categorisation decides the
@@ -312,7 +324,9 @@ export function ImportGuide() {
             no other row could be its pair (or this one is strictly the closest in date, or — when
             date cannot tell two of them apart — its two descriptions share strictly more words
             than any rival's, not counting words like <em>TO</em>, <em>FROM</em> or your account
-            numbers).
+            numbers). A link that makes two accounts' history makes their other pairs strong too,
+            so those are linked in the same commit — and by <em>Link all</em> on the Transfers
+            screen, which links until nothing new is strong.
           </li>
           <li>
             <strong>Suggested</strong> when only the amounts and dates match, or when a row could

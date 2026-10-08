@@ -20,6 +20,7 @@ import { format } from "../lib/money";
 import { sortRows } from "../lib/sorting";
 import { Empty, Field, Panel, Problem, SortHeading, useSort } from "./bits";
 import type { Account, Household, RegisterPage, Transaction } from "../lib/types";
+import { formatDate } from "../lib/locale";
 
 /** An ISO date moved by whole days, read and written as UTC so no DST shift. */
 export function shiftDays(iso: string, days: number): string {
@@ -143,7 +144,7 @@ export function RowPicker({
               <tr key={txn.id}>
                 {/* Payee first on a phone, then the amount: matching a row is
                     looking for who the money went to or came from. */}
-                <td data-label="Date" data-detail-first="true">{txn.date}</td>
+                <td data-label="Date" data-detail-first="true">{formatDate(txn.date)}</td>
                 <td data-primary="true">
                   {txn.payee_name ?? <span className="muted">—</span>}
                   {txn.has_receipt ? <span className="receipt-mark">📎</span> : null}

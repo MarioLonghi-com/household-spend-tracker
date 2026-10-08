@@ -1,0 +1,52 @@
+# What the app needs, as floors. **Edit this file, then run `make lock`** --
+# requirements.txt is generated from it by `uv pip compile --universal
+# --generate-hashes`, with every package, transitive ones included, pinned
+# exactly and hashed, and that generated file is what every install reads
+# (#46). CI re-runs the compile and fails a pull request whose lock does not
+# match this file.
+
+fastapi>=0.141.1
+# Declared rather than left to FastAPI's range: app/hosts.py subclasses
+# Starlette's TrustedHostMiddleware and nine more modules import from it, and a
+# fresh install once broke when a Starlette release FastAPI's floor allowed
+# lacked something hosts.py used. The ceiling is the next major, because a
+# subclass is the tightest coupling there is.
+starlette>=1.7.0,<2
+uvicorn[standard]>=0.54.0
+SQLAlchemy>=2.1.1
+alembic>=1.20.0
+pydantic>=2.13.5
+python-multipart>=0.0.32
+argon2-cffi>=25.1.0
+pyotp>=2.10.0
+cryptography>=50.0.1
+qrcode>=8.2
+regex>=2026.9.10
+
+# Reading a bank .xls export; see app/services/spreadsheet.py
+xlrd>=2.0.2
+
+# Reading a statement out of a PDF; see app/services/pdf_statement.py
+pdfplumber>=0.11.10
+
+# Receipts: decode, downscale and encode to AVIF, and rasterise page 1 of a PDF
+# for the preview. Pillow and pypdfium2 were present for the life of the build
+# only because pdfplumber happens to require them -- a pdfplumber release that
+# dropped pypdfium2 would have removed PDF previews with no failing test and no
+# error until somebody uploaded one. A dependency you rely on directly is one
+# you declare directly.
+Pillow>=12.3.0
+pypdfium2>=5.13.0
+# iPhone's default format. A manylinux wheel with libheif bundled, so this is a
+# pip install and not an apt-get -- and it is imported inside a try, so an
+# install without it refuses HEIC with a sentence instead of failing at startup.
+pillow-heif>=1.8.0
+
+# The trust store for the outgoing https requests (the YNAB import, the update
+# check): app/services/platform.py uses it directly because the python.org
+# macOS build does not read the system's. It used to arrive only through
+# httpx, a dev dependency, so a deployment silently fell back.
+certifi>=2026.7.22
+
+# Passkeys (WebAuthn): registration and sign-in ceremonies. See app/auth/passkeys.py.
+webauthn>=3.0.1

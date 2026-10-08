@@ -378,7 +378,7 @@ def test_the_migration_refolds_keys_but_leaves_a_collision_for_a_person(tmp_path
     cfg = _config(url)
     command.upgrade(cfg, "89c099d8239c")
 
-    engine = create_engine(url, future=True)
+    engine = create_engine(url)
     now = "2026-01-01 00:00:00"
     with engine.begin() as conn:
         for house in ("h1", "h2"):

@@ -15,6 +15,12 @@ sharing a checkout with a session you cannot see.
 
 - **Money is integer minor units.** Never a float, anywhere, ever. `app/money.py`
   owns every conversion.
+- **A `DomainError` carries a `code`; `params` are raw values, never formatted
+  text.** `detail` stays the English sentence; the code, registered in
+  `app/error_codes.py`, is what a translated screen reads. Money goes as minor
+  units beside its currency code, a date as ISO, an enum as its value.
+  `tests/test_error_codes.py` fails if the number of raises without a code
+  goes up -- convert a site, lower the number.
 - **Store deliberate acts. Compute consequences.** One stored number per concept.
 - **A test that does not assert a changed value is not a test.** Asserting a 200,
   or that a mechanism fired, is not asserting what it did to the data. Four of
@@ -123,7 +129,7 @@ branch, which is minutes each time, and the checks it ran now run in CI.
 > The `push: main` trigger fires *after* the merge, so on its own it reports on
 > `main` rather than protecting it. The `pull_request` triggers are what
 > protect. Branch protection is a repository setting, not a workflow one: a
-> ruleset on `main` requiring the `tests` and `release-ready` checks is what
+> ruleset on `main` requiring the `ci-ok` and `release-ready` checks is what
 > stops a direct push.
 
 ### The upgrade rehearsal is the one that is easy to skip
@@ -164,6 +170,7 @@ passed a file containing an undefined name.
     make upgrade     backup, maintenance page, migrate, verify, log
     make restore     FROM=backups/<stamp>, a downloaded .zip or a .sqlite3 [KEY=]
     make audit       pip-audit and npm audit against what is pinned
+    make lock        requirements*.txt from requirements*.in, pinned and hashed
 
 **Never back up by copying the database file.** WAL mode keeps recent writes in
 `spendtracker.sqlite3-wal`; the main file has been 4 KB while the WAL held

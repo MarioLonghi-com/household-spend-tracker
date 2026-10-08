@@ -81,13 +81,30 @@ The app answers on this machine only, at `http://localhost:8848`. Nothing on
 your network can reach it, and no Tailscale is involved.
 
 ```bash
-(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
-docker compose build
+echo SPENDTRACKER_VERSION=X.Y.Z >> .env
+docker compose pull
 SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
 curl -s localhost:8848/api/health
 ```
 
 Then open <http://localhost:8848> and go to **The setup token** below.
+
+`docker compose pull` fetches the published image,
+`ghcr.io/mariolonghi-com/household-spend-tracker:X.Y.Z`, which
+`release.yml` built, smoke-tested and attested from that release's tag.
+Use the number of the release you want from the repository's releases page;
+without `SPENDTRACKER_VERSION` it is whatever `latest` was when you pulled.
+
+**Building it yourself instead.** `compose.yaml` keeps `build:` as the
+fallback: Compose builds this checkout when the image cannot be pulled, and
+`docker compose build` always does. Give a local build its own name so it is
+never mistaken for a release:
+
+```bash
+(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
+echo SPENDTRACKER_VERSION=local >> .env
+docker compose build
+```
 
 Three things worth knowing about this mode:
 
@@ -120,13 +137,16 @@ Every device on your tailnet reaches the app at
 the tailnet in the admin console (DNS → HTTPS Certificates).
 
 ```bash
-(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
-docker compose build
+echo SPENDTRACKER_VERSION=X.Y.Z >> .env
+docker compose pull
 SPENDTRACKER_PUBLIC_URL=https://<server>.<tailnet>.ts.net \
 SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
 curl -s localhost:8848/api/health
 sudo tailscale serve --bg 8848
 ```
+
+`X.Y.Z` is the release to run, as in section 1, which also says how to build
+the image yourself instead.
 
 Then open `https://<server>.<tailnet>.ts.net` from any device on the tailnet
 and go to **The setup token** below. `tailscale serve --bg` persists across
@@ -152,12 +172,28 @@ What the compose file already does for you, and why:
   If a different reverse proxy reaches it under a name of its own, set
   `SPENDTRACKER_ALLOWED_HOSTS`; it replaces the default rather than adding to
   it, so include the entries you still use.
+- **Request sizes.** The app sets its own limit on each request body and
+  answers `413` with a sentence when one is too large. The largest are about
+  33 MB, for a YNAB export and an agent's receipt batch. A receipt from the
+  browser can be 25 MB, a statement 8 MB, and ordinary JSON 1 MB. A reverse
+  proxy in front of the app usually has a limit of its own (nginx's
+  `client_max_body_size` is 1 MB by default). Set it at least as high as the
+  app's, or the proxy refuses uploads and agent batches, often by dropping
+  the connection rather than answering.
 - **Forwarded addresses.** Requests arrive from Docker's bridge, so
   `FORWARDED_ALLOW_IPS` trusts that range and the per-address sign-in limits
   apply per tailnet peer rather than to everybody at once. Narrow it to your
   bridge's gateway if you know it; never set it to `*`.
 - **`SPENDTRACKER_PUBLIC_URL`** is where invitation links point. Set it to the
   address people actually use.
+- **Passkeys** are bound to the host of `SPENDTRACKER_PUBLIC_URL`, which is
+  `SPENDTRACKER_RP_ID` unless you set that to something else. Boot refuses
+  any value other than that host. **Choose the name before anyone registers a
+  passkey.** Moving later to the sidecar in section 3 changes the name from
+  `<server>.<tailnet>.ts.net` to `spend-tracker.<tailnet>.ts.net`, and so
+  does renaming the machine or the tailnet. After such a move, every member
+  signs in with password and code and registers again. See *Passkeys, and
+  choosing the host name first* in the README.
 
 > **Never `tailscale funnel`.** Funnel publishes the app to the open internet.
 > Everything on this page assumes the only way in is your tailnet.
@@ -818,11 +854,13 @@ copy and counts its rows before reporting success.
 docker compose run --rm -T -v "$PWD/backups:/backups" \
   --entrypoint python app -m scripts.backup --into /backups
 
-# 2. Get the new code and build it.
-#    On a server built from a tag:  git fetch --tags && git checkout v0.5.2
-git pull
-(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
-docker compose build
+# 2. Get the new image: name the new release in .env
+#    (SPENDTRACKER_VERSION=X.Y.Z), then
+docker compose pull
+#    Or, building it yourself (section 3, the sidecar, always builds):
+#    git fetch --tags && git checkout vX.Y.Z
+#    (cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
+#    docker compose build
 
 # 3. Ask the NEW image what it would do to your CURRENT volume.
 docker compose run --rm -T --entrypoint python app -m scripts.upgrade --check
@@ -853,9 +891,10 @@ changing the pinned tag and running `docker compose up -d`; it owns no data.
 
 ```bash
 docker compose stop app
-git checkout <the previous tag>
-(cd "$(git rev-parse --show-toplevel)" && python3 -m scripts.build_stamp)
-docker compose build
+# The previous release in .env (SPENDTRACKER_VERSION=X.Y.Z), then
+docker compose pull
+# -- or, building it yourself: git checkout <the previous tag>, build_stamp,
+#    docker compose build
 docker compose run --rm -T -v "$PWD/backups:/backups:ro" \
   --entrypoint python app -m scripts.restore /backups/<the stamp from step 1>
 docker compose up -d

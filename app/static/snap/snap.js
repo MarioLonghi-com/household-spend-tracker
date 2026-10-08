@@ -156,9 +156,16 @@ function schemeNow() {
   }
 }
 
+// The same lock as `client/src/lib/theme.ts`, which a test holds this to. The
+// server validates the accent as hex before storing it; this is the second
+// lock, so a server bug, an old row or a tampered response is never pasted
+// into the header's style (#92). Anything else leaves the header as it is.
+const HEX = /^#[0-9a-fA-F]{6}$/;
+
 function accentOf(house) {
   const scheme = house.colours && house.colours[schemeNow()];
-  return scheme ? scheme.accent : null;
+  const accent = scheme ? scheme.accent : null;
+  return typeof accent === "string" && HEX.test(accent) ? accent : null;
 }
 
 function paint() {
@@ -744,12 +751,12 @@ async function send(id, item) {
  */
 const LANDED_STATE = {
   in: "✓ in the inbox",
-  saving: "saving the note…",
+  saving: "saving the receipt notes…",
   // A confirmation that stays put. The note is the one thing on this page
   // that can silently not have happened, and a message that vanishes after
   // three seconds is a message somebody at a till misses.
-  saved: "✓ in the inbox · note saved",
-  failed: "✓ in the inbox · the note did not save — type it again to retry",
+  saved: "✓ in the inbox · receipt notes saved",
+  failed: "✓ in the inbox · the receipt notes did not save — type them again to retry",
 };
 
 /**
@@ -820,7 +827,7 @@ function landedRender() {
       note.type = "text";
       note.placeholder = "What was it for? (optional)";
       note.value = one.note;
-      note.setAttribute("aria-label", `Note for ${one.name}`);
+      note.setAttribute("aria-label", `Receipt notes for ${one.name}`);
       // On the way out of the field, like everywhere else in this app that
       // saves without a button.
       note.onchange = () => saveNote(one, note.value);

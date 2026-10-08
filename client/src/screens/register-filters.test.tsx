@@ -55,9 +55,12 @@ const CATEGORIES = [
     ],
   },
 ];
-//: What the badge beside Needs a category asks for, and what it is told.
+//: What the badge beside Needs a category is told: by the register's own
+//: answer (#101), or -- with nothing ticked, when the register is not asked --
+//: by a request of its own, recorded in `counted`.
 let counted: URLSearchParams[] = [];
 const BACKLOG = 7;
+const BACKLOG_ALONE = 4;
 
 let asked: URLSearchParams[] = [];
 
@@ -68,16 +71,27 @@ beforeEach(() => {
   counted = [];
   vi.mocked(api.get).mockReset();
   vi.mocked(api.get).mockImplementation(((path: string) => {
-    // The badge's count beside Needs a category (#188) asks for one row;
-    // it is not the register's request.
+    // The badge's own count, asked only when nothing is ticked (#101).
     if (path.includes("/transactions?") && path.includes("limit=1")) {
       counted.push(new URLSearchParams(path.split("?")[1]));
-      return Promise.resolve({ transactions: [], total: BACKLOG, has_running_balance: false, capped: false });
+      return Promise.resolve({
+        transactions: [],
+        total: BACKLOG_ALONE,
+        has_running_balance: false,
+        capped: false,
+        needs_category: BACKLOG_ALONE,
+      });
     }
     if (path.endsWith("/categories")) return Promise.resolve(CATEGORIES);
     if (path.includes("/transactions?") && !path.includes("limit=1")) {
       asked.push(new URLSearchParams(path.split("?")[1]));
-      return Promise.resolve({ transactions: [], total: 0, has_running_balance: false, capped: false });
+      return Promise.resolve({
+        transactions: [],
+        total: 0,
+        has_running_balance: false,
+        capped: false,
+        needs_category: BACKLOG,
+      });
     }
     if (path.endsWith("/reports/currencies")) return Promise.resolve({ currencies: CURRENCIES });
     if (path.endsWith("/accounts"))
@@ -350,7 +364,7 @@ describe("the category picker", () => {
     expect(asked.length).toBe(before);
   });
 
-  it("shows how many rows need a category, ticked or not, under the other filters", async () => {
+  it("shows how many rows need a category from the register's own answer", async () => {
     mount();
     const pop = await open();
     await waitFor(() =>
@@ -362,10 +376,30 @@ describe("the category picker", () => {
     fireEvent.change(screen.getByPlaceholderText("in or out, any currency"), {
       target: { value: "12" },
     });
-    await waitFor(() => expect(counted.at(-1)?.get("amount")).toBe("12"), { timeout: 2000 });
-    const count = counted.at(-1)!;
+    await waitFor(() => expect(last().get("amount")).toBe("12"), { timeout: 2000 });
+    // One request per view: the count came with the rows (#101).
+    expect(counted).toEqual([]);
+  });
+
+  it("asks for the count alone when nothing is ticked, under the other filters", async () => {
+    mount();
+    const pop = await open();
+    fireEvent.change(screen.getByPlaceholderText("in or out, any currency"), {
+      target: { value: "12" },
+    });
+    await waitFor(() => expect(last().get("amount")).toBe("12"), { timeout: 2000 });
+    fireEvent.click(within(pop).getByRole("button", { name: "Select none" }));
+    tick(pop, "Needs a category");
+    await waitFor(() => expect(counted.length).toBe(1));
+    const count = counted[0];
     expect(count.get("uncategorised")).toBe("true");
     expect(count.getAll("category_id")).toEqual([]);
+    expect(count.get("amount")).toBe("12");
     expect(count.get("limit")).toBe("1");
+    await waitFor(() =>
+      expect(within(pop).getByText("Needs a category").closest("label")?.textContent).toContain(
+        String(BACKLOG_ALONE),
+      ),
+    );
   });
 });

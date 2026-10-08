@@ -161,7 +161,9 @@ def _row_dicts(
     ]
 
 
-def _register_page(shown: list[dict], *, total: int, capped: bool, balance: bool) -> Response:
+def _register_page(
+    shown: list[dict], *, total: int, capped: bool, balance: bool, needs_category: int
+) -> Response:
     """The page as JSON, written straight from the dictionaries (#237).
 
     Returned as a `Response`, the route's `response_model` still documents it
@@ -177,6 +179,7 @@ def _register_page(shown: list[dict], *, total: int, capped: bool, balance: bool
                 "total": total,
                 "has_running_balance": balance,
                 "capped": capped,
+                "needs_category": needs_category,
             }
         ),
         media_type="application/json",
@@ -377,8 +380,10 @@ def register(
     The default is everything the filter matches, not a page of it. It used to
     be 200 and the client never asked for more, so a household with a thousand
     rows saw two hundred of them with nothing on screen to say which two
-    hundred. `limit` survives for a caller that wants less; nothing in the app
-    sends it.
+    hundred. The register screen pages now (#100): it sends `limit=500` and an
+    `offset`, reads `total` to know there is more, and asks for the next page
+    when the end of what it holds is reached -- so the default is for a caller
+    that did not ask, and `total` is what keeps a page from passing for all.
 
     `account_id` repeats, the way the income-and-expense report's does: the
     register's account filter is a grouped picker, so "the three Spanish
@@ -400,6 +405,7 @@ def register(
     # because the amount lookup needs it to know what "45.20" means in each.
     currencies = txn_service.account_currencies(session, household.id)
     typed_amount = (amount or "").strip()
+    amount_spans = txn_service.amount_lookup(currencies, typed_amount) if typed_amount else None
     stmt = txn_service.filtered(
         household.id,
         account_ids=account_id,
@@ -410,13 +416,38 @@ def register(
         uncategorised=uncategorised,
         category_ids=category_id,
         categorised=categorised,
-        amount=txn_service.amount_lookup(currencies, typed_amount) if typed_amount else None,
+        amount=amount_spans,
         source=source,
         reimbursement=reimbursement,
     )
 
     total = session.execute(
         select(func.count()).select_from(stmt.subquery())
+    ).scalar_one()
+
+    # The badge beside "Needs a category" (#188): how many of *these* rows --
+    # every other filter applied, the category picker set aside -- have no
+    # category. It used to be a second request from the screen, to this same
+    # path with `uncategorised=true&limit=1`, fired in the same tick as the
+    # first. `access.log` drops the query string, so every register load and
+    # every refresh showed up as two identical GETs a few milliseconds apart,
+    # and each of them ran the filter, the count and the lookups again (#101).
+    # One more count here is cheaper than a second request.
+    needs_category = session.execute(
+        select(func.count()).select_from(
+            txn_service.filtered(
+                household.id,
+                account_ids=account_id,
+                since=since,
+                until=until,
+                search=search,
+                cleared=cleared,
+                uncategorised=True,
+                amount=amount_spans,
+                source=source,
+                reimbursement=reimbursement,
+            ).subquery()
+        )
     ).scalar_one()
 
     ordered, joins = _ordering(stmt, sort, direction)
@@ -465,7 +496,11 @@ def register(
     if not whole_account:
         shown = _row_dicts(rows, names, cats, currencies, receipted=receipted)
         return _register_page(
-            shown, total=total, capped=total > len(shown) + offset, balance=False
+            shown,
+            total=total,
+            capped=total > len(shown) + offset,
+            balance=False,
+            needs_category=needs_category,
         )
 
     # The running balance needs the rows in date order with their created_at,
@@ -495,7 +530,13 @@ def register(
         by_id[row[0]] = running
 
     shown = _row_dicts(rows, names, cats, currencies, balances=by_id, receipted=receipted)
-    return _register_page(shown, total=total, capped=total > len(shown) + offset, balance=True)
+    return _register_page(
+        shown,
+        total=total,
+        capped=total > len(shown) + offset,
+        balance=True,
+        needs_category=needs_category,
+    )
 
 
 @router.post(

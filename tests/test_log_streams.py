@@ -269,6 +269,41 @@ def test_the_ledger_never_reaches_the_console_even_at_the_sql_style(client, caps
     assert "INSERT INTO households" in _read(client, "sql.log")
 
 
+def test_the_sql_style_gives_sqlalchemy_no_console_of_its_own(client):
+    """#108: what made the test above order-dependent was a real leak.
+
+    `engine.echo = True` has SQLAlchemy attach a `StreamHandler(sys.stdout)`
+    to `sqlalchemy.engine.Engine` when that logger has none, and that handler
+    sits below the `propagate = False` meant to keep the ledger off the
+    console. Run alone the test above saw the INSERT on stdout; after another
+    test it passed only because that test's stale handler was already there.
+    So: no handler on the Engine logger at the `sql` style, and one put there
+    the way `create_engine(echo=True)` does is taken off.
+    """
+    import sys
+
+    from app.db import engine
+
+    _setup_owner(client)
+    sql_engine = logging.getLogger("sqlalchemy.engine.Engine")
+    stray = logging.StreamHandler(sys.stdout)
+    sql_engine.addHandler(stray)
+    try:
+        _set_style(client, "sql")
+        assert stray not in sql_engine.handlers
+        assert sql_engine.handlers == []
+        assert engine.echo is False
+        assert logging.getLogger("sqlalchemy.engine").isEnabledFor(logging.INFO)
+
+        house = client.post("/api/households", json={"name": "Quiet"}, headers=HEADERS)
+        assert house.status_code == 201, house.text
+        assert sql_engine.handlers == [], "and running a statement does not add one back"
+        assert "'Quiet'" in _read(client, "sql.log")
+    finally:
+        sql_engine.removeHandler(stray)
+        _set_style(client, "normal")
+
+
 def test_a_style_change_is_visible_in_the_console_too(client, capsys):
     """So `docker logs` explains its own change of volume, like the files do."""
     _setup_owner(client)

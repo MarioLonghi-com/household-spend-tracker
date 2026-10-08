@@ -46,8 +46,10 @@ name: release
 # Started by hand (`workflow_dispatch`) from a branch it is a dry run: it
 # builds and smoke-tests both artefacts and publishes nothing.
 #
-# The Python lockfile with hashes is still to come: it is the Phase 4 release
-# artefact, as decided earlier, and issue #96 records it.
+# The Python dependencies are locked with hashes (#46): `make install-prod`
+# installs requirements.txt with `--require-hashes`, so a tarball installs
+# exactly the set it was tested with. Each release also carries an SBOM of that
+# set, in CycloneDX.
 on:
   push:
     tags: ["v*"]
@@ -186,8 +188,8 @@ jobs:
           staging="household-spend-tracker-${VERSION}"
           mkdir -p "dist/${staging}"
           cp -R app statements scripts migrations \
-                Makefile alembic.ini pyproject.toml requirements.txt \
-                requirements-dev.txt README.md LICENSE SECURITY.md \
+                Makefile alembic.ini pyproject.toml requirements.in requirements.txt \
+                requirements-dev.in requirements-dev.txt README.md LICENSE SECURITY.md \
                 CHANGELOG.md CONTRIBUTING.md deploy Dockerfile compose.yaml \
                 "dist/${staging}/"
           # No tests, no client sources, no node_modules, no .git. Somebody who
@@ -206,10 +208,27 @@ jobs:
             (cd dist && sha256sum "$tarball") | tee "dist/${tarball}.sha256"
           done
 
+      # What `make install-prod` installs from this tarball, as CycloneDX: the
+      # runtime lock, read as written (`--disable-pip`), nothing resolved. The
+      # auditor is the version the dev lock pins. pip-audit exits non-zero when
+      # it also finds an advisory; that is the audit job's to report, so the
+      # check here is only that the SBOM was written.
+      - name: the SBOM of the runtime dependencies
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          pip install "$(grep -oE '^pip-audit==[^ ]+' requirements-dev.txt)"
+          sbom="dist/household-spend-tracker-${VERSION}.cdx.json"
+          pip-audit --require-hashes --disable-pip -r requirements.txt \
+            --format cyclonedx-json --output "$sbom" || true
+          test -s "$sbom" || { echo "no SBOM was written"; exit 1; }
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: tarball
-          path: dist/*.tar.gz*
+          path: |
+            dist/*.tar.gz*
+            dist/*.cdx.json
           if-no-files-found: error
 
   # The default (Chainguard) image, built from nothing -- no layer cache, so a
@@ -317,6 +336,7 @@ jobs:
           files: |
             dist/*.tar.gz
             dist/*.tar.gz.sha256
+            dist/*.cdx.json
           body: |
             Needs Python 3.12+ and nothing else — the client is prebuilt inside.
 

@@ -8,6 +8,8 @@
  * held in one order whichever way the column points (#129).
  */
 
+import { collator } from "./locale";
+
 export type SortDirection = "asc" | "desc";
 
 /** One cell's worth of sortable value. An array sorts on the first, then the next. */
@@ -61,7 +63,7 @@ function one(a: SortValue, b: SortValue, sign: number): number {
   if (aEmpty || bEmpty) return aEmpty && bEmpty ? 0 : (aEmpty ? 1 : -1) * sign;
   if (typeof a === "number" && typeof b === "number") return a - b;
   if (typeof a === "boolean" && typeof b === "boolean") return Number(a) - Number(b);
-  return String(a).localeCompare(String(b), undefined, { sensitivity: "base" });
+  return collator({ sensitivity: "base" }).compare(String(a), String(b));
 }
 
 /**

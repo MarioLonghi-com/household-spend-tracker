@@ -8,5 +8,6 @@
 - [ ] `make e2e`, if this touches the UI
 - [ ] A new migration declares `Reversible: clean|lossy -- <what>` in its docstring
 - [ ] A line under `## Unreleased` in `CHANGELOG.md`
+- [ ] The design doc or guide this touches re-read against the code -- if the doc and the code disagree, both are suspect until one is proven
 - [ ] No real data: no real names, IBANs, card or account numbers, amounts or statements in fixtures, tests, docs or this description
 - [ ] No tool-generated trailers (`Co-Authored-By:` for an assistant, "Generated with …") in the commits or here

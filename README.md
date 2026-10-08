@@ -8,6 +8,10 @@
 **Spend Tracker** is a self-hosted spend tracker for one household.
 Multi-currency, fully audited, and meant to be reachable only over a tailnet.
 
+![The register of the demo household: two currencies, each with its own Out and In columns, work expenses flagged, and a transfer between two accounts](docs/screenshots/register.png)
+
+*The demo household that `make seed` creates. Every name and figure in it is invented.*
+
 ## What it is, and what it is not
 
 It is a ledger for one household's accounts and transactions, and the
@@ -56,7 +60,7 @@ documentation:
 
 | | | |
 |---|---|---|
-| **Python** | >= 3.12 | CI runs 3.12; 3.14 works |
+| **Python** | >= 3.12 | CI tests 3.12 only |
 | **Node** | ^22.22.2, ^24.15 or >= 26 | jsdom 30's floor (vite 8 needs less); CI runs 22, and so does `.nvmrc` |
 | SQLite | bundled with Python | nothing to install |
 
@@ -183,6 +187,68 @@ which behind a proxy that is not trusted comes out as `http://` and the
 proxy's address: an invitation link `tailscale serve` does not answer. A value
 that is not an `http(s)://host[:port]` origin stops the app at boot.
 
+### Passkeys, and choosing the host name first
+
+Members can sign in with a passkey as well as with their password and
+authenticator code. That only works under two conditions:
+
+- the app is opened over HTTPS, or at `localhost`;
+- the address people type is a host name, not an IP address.
+
+Where either condition fails, nobody is offered a passkey, and password plus
+code work exactly as before.
+
+| How the instance is reached | Passkeys |
+| --- | --- |
+| `tailscale serve`, `https://<server>.<tailnet>.ts.net` ([DOCKER.md](deploy/DOCKER.md) section 2) | yes |
+| the Tailscale sidecar, `https://spend-tracker.<tailnet>.ts.net` (section 3) | yes |
+| a reverse proxy with a publicly trusted certificate on your own domain | yes |
+| `http://localhost:8848` (`make dev`, `make serve`, the container on your own computer) | on that computer only, with `SPENDTRACKER_PUBLIC_URL=http://localhost:8848` -- or, in development, `SPENDTRACKER_RP_ID=localhost` |
+| `make lan`, `http://192.168.x.y:8848` | no: plain HTTP, and an IP address |
+| a tailnet `100.x.y.z` address, even over HTTPS | no: an IP address |
+| a `.local` name over plain HTTP | no: plain HTTP |
+| HTTPS with a self-signed or private-CA certificate | only if every household device trusts that certificate |
+
+**`SPENDTRACKER_RP_ID`** is the host name passkeys are bound to.
+- **Default:** the host of `SPENDTRACKER_PUBLIC_URL`, so in practice you set
+  the public URL and leave this unset.
+- **Neither set:** there are no passkeys. The name is never taken from the
+  request, because the request says whatever the browser wrote.
+- **Any other value:** the app refuses to start unless the value is that same
+  host, or `localhost` in development. That includes a wider name such as
+  `<tailnet>.ts.net`. That name would survive a rename, but any other node on
+  your tailnet could then ask for this app's passkeys.
+- **Checking it:** `GET /api/session/passkey/state` says whether a given
+  browser is offered passkeys, and if not, why.
+
+> [!IMPORTANT]
+> **Pick the host name before anyone registers a passkey.** A passkey only
+> ever works for the name it was made under. Changing that name strands every
+> passkey, and nothing on the sign-in screen says why. Each of these changes
+> the name:
+>
+> - renaming the machine or the tailnet;
+> - moving between DOCKER.md sections 2 and 3, because `<server>.…` and
+>   `spend-tracker.…` are different names;
+> - moving to a custom domain;
+> - restoring a backup onto a host with another name.
+>
+> After any of these, every member signs in with password and code and
+> registers their passkeys again. `make doctor`, `make upgrade-check` and
+> `make restore` each name any passkeys made for another host name, and
+> Sign-in methods marks them so members can remove them.
+
+**What household devices need.** Recent iPhones, iPads and Macs keep passkeys
+in iCloud Keychain. Android keeps them in Google Password Manager. Windows
+uses Windows Hello. Chrome on Linux needs a signed-in Chrome profile. A
+password manager such as 1Password or Bitwarden, or a FIDO2 security key,
+works anywhere.
+
+You can also sign in on a laptop with a phone, by scanning a QR code. That
+needs Bluetooth on the laptop and internet access on both devices, so a
+household on an offline network cannot use it. A tailnet-only instance is
+fine.
+
 > [!IMPORTANT]
 > **Back up `secret.key` with the database.** It sits beside
 > `spendtracker.sqlite3` in the data directory (see below). It is generated on first
@@ -218,12 +284,20 @@ force rather than by documentation.
 ### A container
 
 ```bash
+echo SPENDTRACKER_VERSION=X.Y.Z >> .env
+docker compose pull
 SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
 docker compose up -d
 ```
 
+- `SPENDTRACKER_VERSION=X.Y.Z` — the release to run, from the releases page
+- `docker compose pull` — fetches the published image,
+  `ghcr.io/mariolonghi-com/household-spend-tracker`, at the release `.env` names
 - `SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d` — first run only
 - `docker compose up -d` — every time after
+
+To build this checkout instead, `SPENDTRACKER_VERSION=local docker compose build`;
+Compose also builds it when the image cannot be pulled.
 
 **[`deploy/DOCKER.md`](deploy/DOCKER.md) is the full guide** — seeding a demo
 database, attaching a ledger you already have, backing up, upgrading, and what
@@ -251,6 +325,13 @@ docker compose build --build-arg PY_BASE=python:3.12-slim \
 ```
 
 Both are built in CI, so the bypass is tested rather than promised.
+
+Both Chainguard bases are pinned by digest, and Dependabot moves the pins. The
+free tier offers only a moving `:latest` tag, so the digest is what makes a
+build name its input. The release attestation says which workflow built an
+image from which commit; it does not make the build reproducible, and two
+builds of one commit on different days can differ by whatever a base moved
+between them.
 
 ### A release tarball
 
@@ -401,7 +482,9 @@ because `tests/test_version.py` fails when the three files drift apart.
 one, and CI's `release-ready` job refuses it until it looks like one
 (`scripts/release_check.py`):
 
-1. On a branch off `dev`: `make version BUMP=minor` (or `technical`, `major`).
+1. On a branch off `dev`: `make version BUMP=minor` (or `technical`, `major`),
+   and `./.venv/bin/python -m scripts.common_passwords --refresh` to take the
+   newest copy of the common-password list (it says if nothing changed).
 2. In `CHANGELOG.md`, retitle `## Unreleased` to `## X.Y.Z — YYYY-MM-DD` and
    put an empty `## Unreleased` above it. The section needs a
    `**Reversible: none|clean|lossy**` line naming **every migration added since
@@ -564,3 +647,10 @@ that if you run a **modified** version and let other people use it over a
 network, those users must be offered the source of the version they are talking
 to. Running it unmodified for your own household — which is what this is for —
 asks nothing of you. Publishing a fork and inviting others onto it does.
+
+**One file in it is somebody else's data.** `app/auth/common_passwords.txt`,
+the list a new password is checked against, is the top 100,000 of the ten
+million passwords Mark Burnett released into the public domain in 2015, as
+distributed in [SecLists](https://github.com/danielmiessler/SecLists) (MIT
+licence, Daniel Miessler). `app/auth/common_passwords.py` pins the commit it
+came from and its digest.

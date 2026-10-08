@@ -19,7 +19,8 @@ from statements import sniffing
 pytestmark = pytest.mark.repo_wide
 
 PAGE = pathlib.Path(__file__).resolve().parent.parent / "client/src/screens/ImportGuide.tsx"
-IMPORT_SCREEN = PAGE.parent / "Import.tsx"
+#: Where the Import screen's outcome words live since #52.
+LABELS = PAGE.parent.parent / "lib/labels.ts"
 
 
 @pytest.fixture(scope="module")
@@ -36,8 +37,10 @@ def test_the_page_uses_the_words_the_preview_shows(page):
     """The label on the guide is the label on the Import screen, exactly."""
     import re
 
-    screen = IMPORT_SCREEN.read_text(encoding="utf-8")
-    shown = dict(re.findall(r'^\s+(\w+): "([^"]+)",$', screen.split("OUTCOME_WORDS")[1].split("};")[0], re.M))
+    labels = LABELS.read_text(encoding="utf-8")
+    shown = dict(
+        re.findall(r'^\s+(\w+): "([^"]+)",$', labels.split("IMPORT_OUTCOME_WORDS")[1].split("};")[0], re.M)
+    )
     explained = dict(re.findall(r'code: "(\w+)",\s+label: "([^"]+)"', page))
     assert shown == explained
 

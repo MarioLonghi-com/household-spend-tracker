@@ -299,7 +299,7 @@ export function Receipts({ household }: { household: Household }) {
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label="Note"
+                    label="Receipt notes"
                     column="note"
                     sort={order.sort}
                     direction={order.direction}
@@ -346,11 +346,11 @@ export function Receipts({ household }: { household: Household }) {
                         <span className="muted small"> (uploaded)</span>
                       )}
                     </td>
-                    <td data-label="Note" data-primary="true">
+                    <td data-label="Receipt notes" data-primary="true">
                       <NoteCell
                         receipt={one}
                         onSaved={() => {
-                          toasts.say("Note saved.");
+                          toasts.say("Receipt notes saved.");
                           void client.invalidateQueries({ queryKey: ["receipts"] });
                         }}
                       />
@@ -466,7 +466,7 @@ function NoteCell({
           if (event.key === "Enter") event.currentTarget.blur();
         }}
         placeholder="What was it for?"
-        aria-label="Note"
+        aria-label="Receipt notes"
       />
       {save.isPending ? (
         <span className="small muted">saving…</span>
@@ -530,13 +530,13 @@ function ReceiptPanel({
           very often the only thing that identifies it. */}
       <MoreInfo receipt={receipt} />
 
-      <Field label="Note">
+      <Field label="Receipt notes">
         <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       </Field>
 
       <div className="row" style={{ marginTop: 14 }}>
         <button className="primary" disabled={save.isPending} onClick={() => save.mutate()}>
-          Save note
+          Save receipt notes
         </button>
         {receipt.transaction_id ? (
           <button disabled={detach.isPending} onClick={() => detach.mutate()}>

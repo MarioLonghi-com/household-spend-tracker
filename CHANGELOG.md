@@ -22,9 +22,398 @@ Issue numbers written in backticks (`` `#NNN` ``) refer to the project's
 original private tracker and are kept for the record; they are not issues in
 this repository.
 
+**Public releases start at 0.6.2**, the first one tagged and published from
+this repository. The sections from 0.6.1 down were released from the project's
+earlier, private repository and are kept here as history: they have no tag
+and no release on this one, deliberately, because a tag would point at
+history this repository does not have.
+
 ---
 
 ## Unreleased
+
+## 0.8.0 — 2026-10-08
+
+**Reversible: lossy** — one migration.
+
+- `2de003489b79` — lossy: adds the `passkeys` and `webauthn_challenges` tables
+  and `users.webauthn_user_handle` (#120). Rolling it back drops every
+  registered passkey. Members then sign in with password + code, as before
+  passkeys existed, and register their passkeys again after upgrading back.
+  The sign-in challenges it drops expire within minutes anyway.
+
+Passkeys: registering them, signing in with one, and one "Sign-in methods"
+section in your account to manage them. Alongside them, security and
+data-integrity fixes, a locked and hashed Python dependency set, and the
+published image as what `compose.yaml` runs.
+
+### Security
+
+- **The `sql` logging style no longer prints the ledger to the console.**
+  Turning it on set SQLAlchemy's `echo`, which attaches SQLAlchemy's own
+  handler writing every statement and its values to standard output -- that
+  is, to `docker logs` -- below the guard meant to keep them in `sql.log`
+  alone. The style now works by log level, never `echo`, and takes off any
+  such handler it finds. Found through a test that only failed when run on its
+  own. (#108)
+
+- **The container's Chainguard bases are pinned by digest.** The free tier
+  has only a moving `:latest`, so the image named an input that changed under
+  it. Both bases are now their own pinned stages, which Dependabot's weekly
+  Docker check can move; `PY_BASE=`/`PY_RUN=` still build on any other base.
+  The README says what the release attestation does and does not cover. (#95)
+
+- **A new password is checked against the 100,000 most common.** Length was
+  the only rule, so `qwertyuiopasdfgh` passed it. The setup wizard, changing
+  your password and a reset link now refuse any of the top 100,000 passwords
+  of a public-domain breach corpus, ignoring case, and say why. The list ships
+  with the app -- it never calls out -- and is refreshed when a release is cut
+  (`python -m scripts.common_passwords --refresh`). Existing passwords are not
+  checked. (#97)
+
+- **A YNAB key is gone from the browser's memory when the one-time import
+  closes.** The wizard dropped it from its own state, but the query library
+  kept each finished call -- key included -- for five minutes after the
+  wizard closed. Those calls are now discarded as soon as it does. (#93)
+
+- **The Content Security Policy no longer allows `data:` images.** Nothing
+  in the client uses one (the QR code is SVG), so `img-src` is `'self' blob:`.
+  (#94)
+
+- **`/snap` paints the household's accent only when it is a `#rrggbb` colour.**
+  The server already validates it before storing it; the capture page now
+  checks it again before setting the header's background, as the app's own
+  theme does. Defence in depth. (#92)
+
+### Fixed
+
+- **A currency code has to be a real one.** Only the shape was checked, so a
+  typo like `GPB` opened an account in a currency that does not exist. A new
+  account or a household's currency must now be an ISO 4217 code: a current
+  one, or one withdrawn since 1999 such as `HRK` or `DEM`, for accounts with
+  history. A code the household already holds from before this check is still
+  accepted, so no existing ledger stops working. Nothing stored changes. (#110)
+
+- **An agent's oversized receipt batch is answered `413`, not a dropped
+  connection.** The app refused a body over its limit from the declared
+  length and closed the socket at once. Most clients write the whole body
+  before reading the answer, so they saw a broken pipe, which looks like a
+  network fault and does not say whether anything was stored. A body up to
+  five times over its limit is now read and discarded first, so the client
+  reads the sentence. Nothing in it is kept. `agent/README.md` and the route's
+  OpenAPI description give the batch's whole-request limit of 32 MB, and
+  `deploy/DOCKER.md` says a reverse proxy needs a body limit at least as
+  high. (#40)
+
+- **A burst of requests can no longer use more memory than a small host
+  has.** Each SQLite connection had a 32 MiB page cache whatever the machine,
+  and the connection pool is unbounded on purpose. On a 95 MiB ledger, ten
+  connections reading at once held 456 MiB. SQLite now has a process-wide soft
+  heap limit of an eighth of the memory the process may use (the container's
+  limit, or the machine's), and each connection's cache is a sixty-fourth of
+  it, between 2 and 32 MiB. The same ten connections measured 178 MiB. (#102)
+
+- **A Spanish statement whose date column is headed `F. Valor` imports.**
+  Spanish banks abbreviate *fecha* to "F.". "F. Valor" matched no date name
+  and did match the amount name "valor", so the file had no date column and
+  its dates were taken as the amount. A header of "F." followed by a word is
+  now a date. Three synthetic statements are kept as regression fixtures:
+  this header; `1,234` beside `1,234.56`; and a blank debit cell next to a
+  balance column. A new test checks that undoing an import gives a
+  hand-entered row it absorbed back exactly as it was. (#90)
+
+- **A register load is one request for its rows, not two.** The count beside
+  "Needs a category" was a second `GET …/transactions` fired in the same tick
+  as the register's own, and `access.log` drops the query string, so every
+  load and every refresh showed up as two identical requests a few
+  milliseconds apart -- each one running the filter, the count and the
+  lookups again. The register's answer now carries the count
+  (`needs_category`); the badge asks on its own only when nothing is ticked
+  and the register is not asked at all. (#101)
+
+- **The test that every household-scoped route checks membership was
+  checking nine routes.** Its walk of the route table predated how this
+  FastAPI version nests included routers, so it found only the routes declared
+  on the app itself and passed by looking at almost nothing. It now walks all
+  of them -- every non-agent route passed -- and holds agent routes to their
+  own check (`current_agent`, then the key's household). The empty-household
+  test walks the same table instead of a hand-kept list of eleven paths, so
+  reports, receipts, transfers and categories are covered. (#106)
+
+- **An agent's import row can say its currency, and one in another currency
+  is refused.** Rows posted to `POST /imports` had no currency field, so the
+  check a statement file's currency column gets (0.5.0) never ran for them:
+  a row an agent pulled from a yen account and sent to a euro one was
+  recorded as the same figure in euros. A row may now carry `currency`; one
+  that is not the account's is rejected with the sentence a file's row gets,
+  and an import whose every row names another currency is refused. Rows that
+  leave it out are read in the account's currency, as before. (#86)
+
+- **"Link all" links everything that is strong, not just what was strong
+  before it started.** A link made because a row names the other account
+  makes those two accounts' history, and that history makes their other
+  pairs strong -- but "Link all", and the link on commit at import, asked
+  once and stopped, so a second press of "Link all" found more. Both now link
+  until nothing new is strong, still as one batch and one undo, and "Link
+  all" says how many it linked in all. (#88)
+
+- **"Make new codes" tells a member whose authenticator the server can no
+  longer check what to do.** After `secret.key` was replaced, it answered with
+  the generic "that password and authenticator code do not prove it is you".
+  It now says what a step-up says: the key was replaced, a recovery code does
+  not stand in here, and setting up a new authenticator is the way on. (#98)
+
+- **An amount typed as "1,234" is a thousand again, not 1.23.** Amount fields
+  read the last separator as the decimal mark, so a thousands comma with no
+  decimals was taken as a decimal comma and the third digit rounded away -- a
+  transaction, transfer or opening balance saved a thousand times too small,
+  with no warning. A lone `,` or `.` before exactly three digits now means
+  what it means in the browser's number format ("1,234" is a thousand in
+  English, "1.234" is one in German); a mark that format does not use either
+  way is refused rather than guessed. "1,234.56", "1.234,56" and "12,34" read
+  as before. An amount put back into a box for editing uses the same decimal
+  mark, so a three-decimal currency round-trips. (#45)
+
+- **A statement amount written `12.50 DR` imports as money out.** The letters
+  were dropped as decoration, so a debit came in as money in. `DR` after the
+  figure is now a minus and `CR` a plus, in CSV, spreadsheet and PDF
+  statements, with or without a space and in either case; one that also
+  carries a minus sign or brackets is refused as signed twice. The import
+  guide says so. (#84)
+
+### Changed
+
+- **An invariant suite over randomised ledgers.** Twelve seeds each build a
+  ledger in two households: rows, transfers within and across currencies,
+  edits, splits and deletes. The suite then holds four things true of any
+  ledger: every balance is the sum of its rows, by every route that reports
+  one; transfer pairs point at each other and net to zero within a currency;
+  undoing a run of acts gives back every column of every row; and no total
+  crosses currencies. A failing seed is reproduced by its number. (#107)
+
+- **The database file is looked after, not only its rows.** Every
+  housekeeping sweep now ends with a `wal_checkpoint(TRUNCATE)`, so the
+  `-wal` file goes back to zero instead of staying at the size the biggest
+  import ever left it, and it runs `VACUUM` when more than half the file is
+  free pages, such as after a household is deleted or a large import is
+  undone. Planner statistics are refreshed straight after any commit that
+  writes 1,000 rows or more, and after `make restore`, rather than waiting up
+  to six hours for the next sweep. (#103)
+
+- **The register loads five hundred rows at a time.** It used to ask for
+  everything the filter matched, up to 25,000 rows, and refetch all of it
+  after every edit. It now asks for the first 500, says how many the filter
+  matched and how many are loaded, and asks for the next 500 when you reach
+  the end of what is there. Sorting at a column heading is still done by the
+  server, from the first page. The heading's tick box selects the rows that
+  are loaded. (#100)
+
+- **The client asks one module which locale it is in** (`lib/locale.ts`):
+  the words stay English, and numbers, money and dates follow the browser's
+  own formatting locale as they always did. Money is formatted from its
+  digits rather than a divided float, sorting by name goes through one
+  collator, and the labels for account types, import outcomes, roles and the
+  YNAB import's steps live in `lib/labels.ts`. Typed amounts now also read
+  the minus sign, spaces and apostrophes other locales write. Nothing an
+  English reader sees changes; tests compare the old and new output. (#52)
+
+- **Small fixes left from reviews** (#110): History headlines a bulk delete
+  of receipts as *Bulk delete*, not *Bulk edit*; an account update that sends
+  a country or statement product together with its clear flag is refused, as
+  the note and the bank already were, rather than the flag winning in silence;
+  `make version` works in a worktree without a `.venv`; the accounts filter's
+  grouping is one shared copy for the register and the income-and-expense
+  report; opening a screen from `?open=` no longer depends on React running
+  the reader once; and three deprecation warnings are gone from the test run.
+
+- **A receipt photo over 4 MB from an agent is told how to shrink it.** The
+  `413` from the agent receipt routes pointed at the multipart route, which no
+  key can use. It now says to shrink the photo below 4 MB as JPEG or AVIF,
+  keeping its EXIF `DateTimeOriginal` and GPS, and names the section of
+  `agent/README.md` that says how. The 4 MB ceiling is unchanged. (#39)
+
+- **Five statements in the docs and comments now match the code** (#109):
+  CLAUDE.md names `ci-ok`, not a `tests` check, as what a ruleset requires;
+  the setup router says it answers `409` once set up, not `404`; `/db`'s
+  docstring says it shows an owner every household's ledger, which is more
+  than the admin screen; `scripts/db_view.py` says receipts are carried whole,
+  GPS and EXIF included, as are payee rule patterns; and old-tracker issue
+  numbers in the `Makefile` and `tests.yml` are marked as such.
+
+- **`agent/README.md` fills three gaps an agent found by trial:** the range
+  and default of `window_days` on `/transactions/match` (0 to 14, default 4),
+  that the register's `amount` filter matches the figure without its sign,
+  and the `receipts/binary` door with its query parameters, its 4 MB ceiling
+  and that it takes no `extracted`. Tests hold each to the code. (#41)
+
+- **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
+  every CI job runs 3.12, and nothing tests 3.14. (#105)
+
+- **The CHANGELOG says public releases start at 0.6.2**, and that the
+  sections below it are history from the earlier private repository, with no
+  tag or release here. (#117)
+
+- **`compose.yaml` runs the published image.** It names
+  `ghcr.io/mariolonghi-com/household-spend-tracker` at the release
+  `SPENDTRACKER_VERSION` in `.env` says, and `docker compose pull` fetches it;
+  `build:` stays as the fallback, and a local build is told to call itself
+  `local`. The README and `deploy/DOCKER.md` start, upgrade and roll back that
+  way. The Tailscale sidecar setup still builds from its checkout. `/llms.txt`
+  names the source repository and its licence, and the pull request template
+  asks for the design doc to be re-read against the code. (#111)
+
+- **The import guide says what happens to a statement line whose row you
+  deleted:** it is new again, so the next statement that carries it -- or the
+  same file sent again with *Import it anyway* -- brings it back. Undo in
+  History is the other way back. Nothing about importing changed; it is now
+  written down and tested. (#91)
+
+- **Why any member may import accounts from a file is written down**, beside
+  the route, with a test: it only adds accounts, each in the audit log, and
+  History undoes the whole file. Nothing about who may run it changed. (#115)
+
+- **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
+  The action only scores the default branch, which is `dev`, so on `main` it
+  failed every release without measuring anything. (#36)
+
+- **A receipt's free-text field is now headed "Receipt notes"**, on the
+  Receipts screen and on `/snap`. It used to say "Note". A transaction's field
+  is a *memo*, and the old heading read as if the two were the same thing.
+  Only the wording changed: it is still the receipt's `note` field, and the API
+  and the agent are unchanged. (#114)
+
+- **The Python dependencies are locked, with hashes.** `requirements.in` and
+  `requirements-dev.in` hold the floors you edit; `make lock` compiles them
+  with `uv pip compile --universal --generate-hashes` into `requirements.txt`
+  and `requirements-dev.txt`, every package pinned exactly, transitive ones
+  included. `make install-py`, `make install-prod`, the container image and CI
+  install them with `--require-hashes`, so two installs of one tag get the same
+  set. CI fails a pull request whose locks do not match its `.in` files, and
+  checks that the image holds exactly the runtime lock. `starlette` and
+  `certifi`, which the app imports directly, are now declared. `make audit`
+  audits the locks as written, a release carries a CycloneDX SBOM of the
+  runtime set, and Dependabot reads the locks through its `uv` ecosystem. The
+  client's `tsx`, which one test ran unpinned through `npx`, is a dev
+  dependency. **For an operator:** nothing to do beyond the usual
+  `make install-prod`. (#46)
+
+- **One "Sign-in methods" section in your account.** Password,
+  authenticator, passkeys and recovery codes are now rows of one section
+  instead of four separate blocks. Each row says its state in words, such as
+  "Set", "Needs setting up again" or "7 of 10 left", and offers its own
+  action. A line at the top says what currently gets you in. Keys for
+  programs stay a separate section.
+  - **Your passkeys** are listed with their name, whether each is synced or on
+    this device only, when it was added and last used, and "this device" on
+    the one you signed in with. The list sorts at its headers.
+  - **Renaming** is done in place, and **removing** asks once and says what
+    you can still sign in with.
+  - **A passkey made for another host name** is marked as such and can only
+    be removed.
+  - **Adding a passkey** asks for your password and code in the same panel,
+    then hands over to the browser's prompt. The new passkey appears
+    highlighted, with its name ready to edit.
+  - **Where passkeys cannot work** there is no Add button, only one line
+    saying why.
+  (#122)
+
+### Added
+
+- **An agent key can read a stored receipt back.** Receipts in the agent API
+  now carry their `note`, and there are new read-scope routes for one
+  receipt, its stored file and its thumbnail:
+  `GET /api/agent/v1/receipts/{id}`, `…/file` and `…/thumbnail`. The listing
+  also takes `transaction_id=` to go from a row to its receipts. A note sent
+  at upload used to be write-only, and an agent summarising receipts filed
+  the day before had nothing to read but its own claim. Another household's
+  receipt is a `404`, and every read is in the request log. (#44)
+
+- **A weekly upgrade rehearsal on a bench-sized ledger** (`bench.yml`,
+  Mondays and by hand). It is not a pull-request check. It builds the demo
+  seed with the last release's code, grows it to about 100 MiB with
+  `scripts/bench_ledger.py`, and times `alembic upgrade head`, a backup and
+  the `/db` snapshot. It still fails if a row is lost. On a 93 MiB,
+  129,024-row ledger, the slowest migration in the project's history (one
+  that rebuilds `transactions`) took 5.8 s, and the whole chain about 25 s.
+  The upgrade from 0.7.1 took under 2 s. (#104)
+
+- **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
+  can offer them.** Nothing on the sign-in screen changes yet. The new
+  setting is the host name passkeys will be bound to. It defaults to the host
+  of `SPENDTRACKER_PUBLIC_URL`, and it is never taken from the request. Boot
+  refuses any other value, because a passkey only ever works for the name it
+  was made under: a wider name such as the whole tailnet's is refused, and
+  `localhost` is accepted in development only. `GET
+  /api/session/passkey/state` says whether this request may be offered
+  passkeys, or why not: no public URL set, an IP address, the app opened at
+  another address, or plain HTTP. The `Permissions-Policy` now names the two
+  passkey features, allowed on this origin and refused on `/snap`. The
+  `webauthn` library is added, locked. **For an operator:** nothing to do. If
+  `SPENDTRACKER_PUBLIC_URL` is set, leave `SPENDTRACKER_RP_ID` unset. (#119)
+
+- **A member can register passkeys, and list, rename and remove them**,
+  through the API so far. The screens come with #122. Adding a passkey costs
+  a fresh password and authenticator code, the same step-up that issuing an
+  agent key costs. The passkey has to be discoverable and must verify the
+  user. Each one records the host name it was made for. `make doctor`,
+  `make upgrade-check` and `make restore` now name any passkeys made for
+  another host name than this instance's, which is what a renamed machine or
+  a restore onto another host leaves behind. Adding, renaming and removing a
+  passkey are in History. Undo never brings one back. **Migration
+  `2de003489b79`** adds the `passkeys` and `webauthn_challenges` tables and
+  `users.webauthn_user_handle`. **Reversible: lossy**: rolling it back drops
+  every registered passkey, and members then sign in with password + code as
+  before. (#120)
+
+- **Signing in with a passkey.** Where passkeys can work, the sign-in screen
+  offers "Sign in with a passkey", and the email field suggests your passkeys
+  itself in browsers that support that. Both the server and the browser
+  must agree that passkeys can work here; anywhere else the screen is as it
+  was. A passkey is both factors at once, so it signs you in with no code
+  step and does not mark the browser as trusted. Every refusal says the same
+  thing: an unknown passkey, a disabled member, a passkey made for another
+  host name, a replayed challenge and a bad signature all read alike.
+  Failed passkey sign-ins have their own rate limit. **What else changes:**
+  - **Account resets remove the account's passkeys.** That covers an owner's
+    reset link, `scripts.reset_account` and `scripts.reset_authenticator`.
+  - **A recovery code leaves passkeys in place**, and the screen now says how
+    many still work, so you can remove one that was on a lost phone.
+  - **A password change leaves passkeys in place**, as it leaves agent keys.
+  (#121)
+
+- **Refusals can carry a stable code and raw values beside the sentence.**
+  A converted refusal answers `{"detail", "code", "params"}`: `detail` is the
+  same English sentence as before, `code` a name from `app/error_codes.py`,
+  and `params` the raw values -- money as minor units with its currency, dates
+  as ISO -- so a translated screen can say it in its own words and format.
+  Ten refusals are converted (the exact money parser, transfers to the same
+  account or across currencies, a reconciliation that does not balance or
+  holds a later row, a split that does not add up); the rest follow with the
+  translations. Agent answers are unchanged: they carry no code yet. A test
+  stops new refusals arriving without one. (#65)
+
+### Documentation
+
+- **The README shows the register**, from the demo household `make seed`
+  creates, so every name and figure in it is invented. There is also a
+  `CITATION.cff`. The data-hygiene test now lets screenshots live under
+  `docs/screenshots/` if they are PNGs with no metadata chunks. It skips
+  `CITATION.cff`'s two author lines, as it already skipped the copyright
+  line. (#111)
+
+- **Passkeys for operators:** the README section *Passkeys, and choosing the
+  host name first* says how an instance can be reached for passkeys to work,
+  and what `SPENDTRACKER_RP_ID` defaults to and refuses. It also says why the
+  host name has to be chosen before anyone registers a passkey, and what
+  household devices need, including that signing in on a laptop with a phone
+  needs Bluetooth and internet on both. `deploy/DOCKER.md` and
+  `deploy/UPGRADING.md` each add a paragraph on what changes the name and
+  what to do afterwards. (#123)
+
+- **A glossary for the first translations:** `client/src/locales/GLOSSARY.md`
+  holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
+  each language uses, and how each writes money and dates. Nothing in the app
+  changes. (#174)
 
 ## 0.7.1 — 2026-10-05
 
@@ -1240,7 +1629,7 @@ back past any of those.
   bases, not just builds it.
 - **`make serve`** (`#63`) — uvicorn without `--reload`, keeping the loopback
   bind that makes `tailscale serve` the only way in. **`make install-prod`**
-  installs the runtime dependencies alone (`#96`).
+  installs the runtime dependencies alone (a first step toward #46).
 - **`make version`** (`#63`), moving every copy of the version together — the
   three files and, since 0.2.0, the two in `client/package-lock.json` — with
   `tests/test_version.py` failing when they drift.
@@ -1294,7 +1683,7 @@ back past any of those.
 - CI now checks pull requests into `dev` as well as `main`, and no longer
   leaves a usable token in `.git/config` for every step after checkout. The
   release job that holds a write token installs and runs nothing, and the
-  Node build stage is pinned by digest (`#96`).
+  Node build stage is pinned by digest (a first step toward #46).
 - **Dependencies** (`#135`–`#141`, applied on `dev` rather than the `main`
   branches Dependabot opened them against): uvicorn >=0.53.0, SQLAlchemy
   >=2.0.54 (resolves to 2.1), python-multipart >=0.0.32, argon2-cffi >=25.1.0,
@@ -1358,7 +1747,7 @@ back past any of those.
   on in the repository settings. None of these is a commit.
 - The Chainguard base is not pinned by digest. The free tier is `:latest` only,
   so the tag moves; pinning wants a digest Dependabot then maintains.
-- Python dependencies have no lockfile with hashes yet (`#96`).
+- Python dependencies have no lockfile with hashes yet (done since in #46).
 
 ---
 

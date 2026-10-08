@@ -20,6 +20,13 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:8850",
     trace: "retain-on-failure",
+    // Pinned, so what a spec reads -- "€1,234.56", a date, a sort order -- does
+    // not depend on the machine that runs it. The en-XA pass in #53 is the one
+    // place another locale is meant to show. UTC, because the server under test
+    // decides "today" in its own zone, and a browser a day ahead of it would
+    // have a date refused as in the future.
+    locale: "en-US",
+    timezoneId: "UTC",
   },
   // Both projects are Chromium, deliberately. `Desktop Chrome` wants a real
   // Chrome install and `iPhone 13` wants WebKit, so the pair needed three
@@ -32,6 +39,7 @@ export default defineConfig({
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "desktop",
+      testIgnore: /passkeys\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 1280, height: 800 },
@@ -41,8 +49,26 @@ export default defineConfig({
     },
     {
       name: "mobile",
+      testIgnore: /passkeys\.spec\.ts/,
       use: { ...devices["Pixel 5"], storageState: "./e2e/.auth/state.json" },
       dependencies: ["setup"],
+    },
+    // Passkeys (#121): registered once, after the sign-in above has spent its
+    // code window, then signed in with at both widths -- signed out, so these
+    // projects carry no stored session. Their own projects, so a passkey
+    // failure never skips the rest of the suite.
+    { name: "passkey-setup", testMatch: /passkey\.setup\.ts/, dependencies: ["setup"] },
+    {
+      name: "passkeys-desktop",
+      testMatch: /passkeys\.spec\.ts/,
+      use: { browserName: "chromium", viewport: { width: 1280, height: 800 } },
+      dependencies: ["passkey-setup"],
+    },
+    {
+      name: "passkeys-mobile",
+      testMatch: /passkeys\.spec\.ts/,
+      use: { ...devices["Pixel 5"] },
+      dependencies: ["passkey-setup"],
     },
   ],
   webServer: {

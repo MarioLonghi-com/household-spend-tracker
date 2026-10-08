@@ -34,6 +34,7 @@ from app.models import (
     StepUpGrant,
     TrustedDevice,
     User,
+    WebAuthnChallenge,
     WebSession,
     utcnow,
 )
@@ -47,7 +48,7 @@ def db(tmp_path):
     in a thread the *same* DBAPI connection, which would hide exactly the
     cross-transaction behaviour this module is about.
     """
-    eng = create_engine(f"sqlite:///{tmp_path / 'sweep.sqlite3'}", future=True)
+    eng = create_engine(f"sqlite:///{tmp_path / 'sweep.sqlite3'}")
 
     @event.listens_for(eng, "connect")
     def _pragmas(dbapi_connection, _record):  # pragma: no cover - driver glue
@@ -58,7 +59,7 @@ def db(tmp_path):
 
     Base.metadata.create_all(eng)
     factory = sessionmaker(
-        class_=AuditedSession, bind=eng, expire_on_commit=False, future=True
+        class_=AuditedSession, bind=eng, expire_on_commit=False
     )
     with factory() as s:
         user = User(
@@ -371,6 +372,8 @@ def test_the_sweep_leaves_everything_that_is_still_live(db, household_id):
                            kind="password", at=now))
         s.add(StepUpGrant(id_hash="unspent", user_id=user.id, created_at=now,
                           expires_at=now + timedelta(minutes=4)))
+        s.add(WebAuthnChallenge(id_hash="unanswered", user_id=user.id, purpose="register",
+                                created_at=now, expires_at=now + timedelta(minutes=4)))
         with batch(s, kind=BatchKind.admin, actor_id=user.id, household_id=household_id):
             s.add(_a_key(user, household_id, n=9))
         # Unaudited, so no batch -- and inside the retention window, so it stays.
@@ -383,9 +386,12 @@ def test_the_sweep_leaves_everything_that_is_still_live(db, household_id):
     _invitation(factory, user, created_at=now, expires_at=now + timedelta(hours=48))
 
     removed = housekeeping.sweep(engine)
+    # The file (#103): whatever the fixture's own writes left in the WAL is
+    # checkpointed, which is not a row deleted.
+    assert removed.pop("wal_pages") >= 0
 
     assert removed == {"sessions": 0, "pending_sign_ins": 0, "trusted_devices": 0,
-                       "step_up_grants": 0, "agent_requests": 0, "agent_replays": 0,
+                       "step_up_grants": 0, "webauthn_challenges": 0, "agent_requests": 0, "agent_replays": 0,
                        "receipt_blobs": 0, "login_attempts": 0, "agent_keys": 0,
                        # An agent's staged-and-forgotten imports. A person's
                        # are never touched -- see `sweep_stale_agent_previews`.
@@ -393,7 +399,9 @@ def test_the_sweep_leaves_everything_that_is_still_live(db, household_id):
                        # A backup's download zip a crash left behind (#133).
                        "backup_downloads": 0,
                        "invitations": 0,
-                       "account_resets": 0}
+                       "account_resets": 0,
+                       # Nothing deleted here, so no free pages to reclaim.
+                       "free_pages": 0}
     for model in (WebSession, PendingSignIn, TrustedDevice, LoginAttempt, StepUpGrant,
                   AgentKey, AgentRequest, Invitation):
         assert _count(factory, model) == 1, f"{model.__tablename__} lost a live row"
@@ -578,3 +586,170 @@ def test_reset_links_lapsed_past_the_retention_window_are_deleted_and_the_rest_k
     # Actored by the account the link was for: the issuer may be nobody.
     assert swept_by.actor_id == user.id
     assert "token_hash" in (deleted.redacted or [])
+
+
+# --------------------------------------------------------------------------- #
+# The file itself: WAL checkpoint, VACUUM, ANALYZE after a large write (#103)
+# --------------------------------------------------------------------------- #
+
+
+@pytest.fixture()
+def wal_db(tmp_path):
+    """A file database in WAL mode, the way `app/db.py` opens the real one."""
+    path = tmp_path / "tend.sqlite3"
+    eng = create_engine(f"sqlite:///{path}")
+
+    @event.listens_for(eng, "connect")
+    def _pragmas(dbapi_connection, _record):  # pragma: no cover - driver glue
+        cur = dbapi_connection.cursor()
+        cur.execute("PRAGMA journal_mode=WAL")
+        cur.execute("PRAGMA busy_timeout=5000")
+        cur.close()
+
+    with eng.begin() as conn:
+        conn.execute(text("CREATE TABLE filler (id INTEGER PRIMARY KEY, body BLOB)"))
+    yield eng, path
+    eng.dispose()
+
+
+def _fill(eng, rows: int, size: int = 4000) -> None:
+    with eng.begin() as conn:
+        conn.execute(
+            text("INSERT INTO filler (body) VALUES (randomblob(:size))"),
+            [{"size": size}] * rows,
+        )
+
+
+def _rows(eng) -> int:
+    with eng.connect() as conn:
+        return conn.execute(text("SELECT count(*) FROM filler")).scalar_one()
+
+
+def test_the_checkpoint_empties_the_wal_and_keeps_every_row(wal_db):
+    eng, path = wal_db
+    _fill(eng, 300)
+    wal = path.with_name(path.name + "-wal")
+    before = wal.stat().st_size
+
+    done = housekeeping.tend_the_file(eng)
+
+    assert before > 1_000_000, "the import left the WAL at its high-water mark"
+    assert wal.stat().st_size == 0
+    assert done["wal_pages"] > 0
+    assert _rows(eng) == 300
+
+
+def test_a_file_that_is_mostly_free_pages_is_vacuumed(wal_db):
+    eng, path = wal_db
+    _fill(eng, 3000)
+    with eng.begin() as conn:
+        conn.execute(text("DELETE FROM filler WHERE id > 200"))
+    # The deletes reach the main file's free list only at a checkpoint.
+    with eng.connect() as conn:
+        conn.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)")
+        free_before = conn.execute(text("PRAGMA freelist_count")).scalar_one()
+    size_before = path.stat().st_size
+
+    done = housekeeping.tend_the_file(eng)
+
+    with eng.connect() as conn:
+        free_after = conn.execute(text("PRAGMA freelist_count")).scalar_one()
+    assert free_before >= housekeeping.VACUUM_MIN_FREE_PAGES
+    assert free_after == 0
+    assert done["free_pages"] == free_before
+    assert path.stat().st_size < size_before / 3
+    assert _rows(eng) == 200, "a VACUUM rewrites the file; it must not lose a row"
+
+
+def test_a_file_with_a_few_free_pages_is_left_alone(wal_db):
+    eng, path = wal_db
+    _fill(eng, 3000)
+    with eng.begin() as conn:
+        conn.execute(text("DELETE FROM filler WHERE id > 2900"))
+    with eng.connect() as conn:
+        conn.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)")
+        free_before = conn.execute(text("PRAGMA freelist_count")).scalar_one()
+
+    done = housekeeping.tend_the_file(eng)
+
+    with eng.connect() as conn:
+        free_after = conn.execute(text("PRAGMA freelist_count")).scalar_one()
+    assert free_before > 0
+    assert free_after == free_before, "a tenth free is not worth rewriting the file"
+    assert done["free_pages"] == 0
+    assert _rows(eng) == 2900
+
+
+def test_the_sweep_ends_by_tending_the_file(db, monkeypatch):
+    eng, _factory, _user = db
+    seen: list[object] = []
+    monkeypatch.setattr(
+        housekeeping, "tend_the_file", lambda engine: seen.append(engine) or {"wal_pages": 7}
+    )
+    removed = housekeeping.sweep(eng)
+    assert seen == [eng]
+    assert removed["wal_pages"] == 7
+
+
+def _analysed(eng) -> int:
+    with eng.connect() as conn:
+        exists = conn.execute(
+            text("SELECT count(*) FROM sqlite_master WHERE name = 'sqlite_stat1'")
+        ).scalar_one()
+        if not exists:
+            return 0
+        return conn.execute(
+            text("SELECT count(*) FROM sqlite_stat1 WHERE tbl = 'login_attempts'")
+        ).scalar_one()
+
+
+def _attempts(factory, count: int) -> None:
+    with factory() as s:
+        for n in range(count):
+            s.add(LoginAttempt(email_canonical=f"someone{n}@example.com", ip="192.0.2.1"))
+        s.commit()
+
+
+def test_a_commit_below_the_threshold_leaves_the_statistics_alone(db, monkeypatch):
+    eng, factory, _user = db
+    monkeypatch.setattr(housekeeping, "LARGE_WRITE_ROWS", 20)
+    _attempts(factory, 19)
+    assert _analysed(eng) == 0
+
+
+def test_a_large_commit_refreshes_the_statistics_at_once(db, monkeypatch):
+    eng, factory, _user = db
+    monkeypatch.setattr(housekeeping, "LARGE_WRITE_ROWS", 20)
+    before = _analysed(eng)
+    _attempts(factory, 20)
+    assert before == 0
+    assert _analysed(eng) > 0
+
+
+def test_rows_written_across_flushes_count_together(db, monkeypatch):
+    eng, factory, _user = db
+    monkeypatch.setattr(housekeeping, "LARGE_WRITE_ROWS", 20)
+    with factory() as s:
+        for n in range(10):
+            s.add(LoginAttempt(email_canonical=f"first{n}@example.com", ip="192.0.2.3"))
+        s.flush()
+        for n in range(10):
+            s.add(LoginAttempt(email_canonical=f"second{n}@example.com", ip="192.0.2.4"))
+        s.commit()
+    assert _count(factory, LoginAttempt) == 20
+    assert _analysed(eng) > 0
+
+
+def test_rows_rolled_back_do_not_count(db, monkeypatch):
+    eng, factory, _user = db
+    monkeypatch.setattr(housekeeping, "LARGE_WRITE_ROWS", 20)
+    with factory() as s:
+        for n in range(15):
+            s.add(LoginAttempt(email_canonical=f"gone{n}@example.com", ip="192.0.2.2"))
+        s.flush()
+        s.rollback()
+        for n in range(10):
+            s.add(LoginAttempt(email_canonical=f"kept{n}@example.com", ip="192.0.2.3"))
+        s.commit()
+    assert _count(factory, LoginAttempt) == 10
+    assert _analysed(eng) == 0

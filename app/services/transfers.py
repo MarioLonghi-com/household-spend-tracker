@@ -1110,6 +1110,33 @@ def link_strong(session: Session, findings: Findings) -> int:
     return count
 
 
+def link_until_settled(
+    session: Session, household_id: str, *, among: list[Transaction] | None = None
+) -> int:
+    """Link every strong pair, then ask again, until nothing new is strong.
+    Returns how many were linked.
+
+    One pass is not enough (#88). A `named` link makes its two accounts a
+    lane, and a lane is evidence: a pair between them that was a suggestion
+    a moment ago is strong now. Asking once left exactly those for a second
+    press of "Link all", or for nobody at import. Each round links at least
+    one pair or ends, so this stops; a `history` link adds no lane, so in
+    practice it is two rounds.
+
+    ``among`` is `find`'s: the rows an import has just written.
+    """
+    total = 0
+    while True:
+        session.flush()
+        rows = None if among is None else [t for t in among if _is_candidate(t)]
+        if rows is not None and not rows:
+            return total
+        linked = link_strong(session, find(session, household_id, among=rows))
+        if not linked:
+            return total
+        total += linked
+
+
 def link_on_evidence(session: Session, household_id: str, pairs: list[tuple[Transaction, Transaction]]) -> int:
     """Link pairs a person did not look at one by one -- "Link all" on the
     Transfers screen -- each recorded as what its evidence is *now*: `named`
@@ -1117,6 +1144,10 @@ def link_on_evidence(session: Session, household_id: str, pairs: list[tuple[Tran
 
     Clicking "Link all" is not a person vouching for each pair, and recording
     it as one is how a history-only link would come to count as history.
+
+    Then whatever those links made strong, the same way, until nothing new is
+    (#88): "Link all" is "link what is strong", and a second press finding
+    more meant the first had not. Returns how many were linked in all.
     """
     ctx = _context(session, household_id)
     for first, second in pairs:
@@ -1125,7 +1156,7 @@ def link_on_evidence(session: Session, household_id: str, pairs: list[tuple[Tran
             session, first, second,
             source=LinkSource.named if _names_other(ctx, out_leg, in_leg) else LinkSource.history,
         )
-    return len(pairs)
+    return len(pairs) + link_until_settled(session, household_id)
 
 
 def _names_other(

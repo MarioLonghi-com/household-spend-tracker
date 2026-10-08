@@ -253,33 +253,55 @@ def test_a_currency_code_that_is_not_three_letters_is_refused(client, code):
     assert {h["name"] for h in client.get("/api/households").json()} == {"Doe-Smith", "Second"}
 
 
+#: A value for each required query parameter a household read takes. A new
+#: required parameter fails the test below until it is given one here -- the
+#: walk does not skip what it cannot call.
+EMPTY_HOUSEHOLD_QUERY = {
+    # The household's own base currency: the reports are per currency.
+    "currency": "EUR",
+    # The history of one row: asked about a row id that is not there, which an
+    # empty household's every id is.
+    "table": "transactions",
+    "row_id": "f" * 32,
+}
+
+
 def test_every_screen_works_on_a_brand_new_household(client):
     """An empty household is the first thing anyone sees.
 
     A division by zero or a missing key in any of these is a blank screen on
-    day one.
+    day one. Every GET the app serves under `/api/households/{household_id}` is
+    called -- walked from the route table, as the membership check below is,
+    rather than from a list somebody keeps: the list this replaced had eleven
+    paths and missed the reports, receipts, transfers and categories (#106).
     """
     _setup_owner(client)
     house = client.post("/api/households", json={"name": "Empty"}, headers=HEADERS).json()
 
-    for path in (
-        "/api/me",
-        "/api/presence",
-        "/api/households",
-        f"/api/households/{house['id']}",
-        f"/api/households/{house['id']}/accounts",
-        f"/api/households/{house['id']}/members",
-        # The Plan says *every* read endpoint; these four were missing, and the
-        # register and batch list are the two screens a new household opens on.
-        f"/api/households/{house['id']}/transactions",
-        f"/api/households/{house['id']}/payees",
-        f"/api/households/{house['id']}/payee-rules",
-        f"/api/households/{house['id']}/batches",
-        # A household with no accounts has no currencies, and the Reports
-        # screen has to say so rather than divide by zero on its way to a
-        # blank page.
-        f"/api/households/{house['id']}/reports/currencies",
-    ):
+    prefix = "/api/households/{household_id}"
+    reads = [
+        route
+        for route in _api_routes(client.app_module.app)
+        if "GET" in route.methods
+        and (route.served_path == prefix or route.served_path.startswith(prefix + "/"))
+        and set(re.findall(r"\{(\w+)\}", route.served_path)) == {"household_id"}
+    ]
+    assert len(reads) >= 20, f"the walk found {len(reads)} household reads; it is not walking"
+
+    failed = []
+    for route in reads:
+        wanted = [p.alias for p in route.dependant.query_params if p.field_info.is_required()]
+        unknown = [name for name in wanted if name not in EMPTY_HOUSEHOLD_QUERY]
+        if unknown:
+            failed.append(f"{route.served_path} needs {unknown}: add them to EMPTY_HOUSEHOLD_QUERY")
+            continue
+        path = route.served_path.replace("{household_id}", house["id"])
+        response = client.get(path, params={name: EMPTY_HOUSEHOLD_QUERY[name] for name in wanted})
+        if response.status_code != 200:
+            failed.append(f"{route.served_path} -> {response.status_code} {response.text[:200]}")
+    assert not failed, "\n".join(failed)
+
+    for path in ("/api/me", "/api/presence", "/api/households"):
         response = client.get(path)
         assert response.status_code == 200, f"{path} -> {response.status_code} {response.text}"
 
@@ -288,6 +310,11 @@ def test_every_screen_works_on_a_brand_new_household(client):
     register = client.get(f"/api/households/{house['id']}/transactions").json()
     assert register["transactions"] == []
     assert register["total"] == 0
+    assert client.get(f"/api/households/{house['id']}/accounts").json() == []
+    income = client.get(
+        f"/api/households/{house['id']}/reports/income-expense", params={"currency": "EUR"}
+    )
+    assert income.status_code == 200 and income.json()
 
 
 def test_presence_shows_who_is_here(client):
@@ -302,20 +329,18 @@ def test_presence_shows_who_is_here(client):
 
 
 def _api_routes(app) -> list[APIRoute]:
-    """Every APIRoute, including those inside included routers."""
-    found: list[APIRoute] = []
+    """Every APIRoute, including those inside included routers.
 
-    def walk(routes):
-        for route in routes:
-            if isinstance(route, APIRoute):
-                found.append(route)
-            elif hasattr(route, "routes"):
-                walk(route.routes)
-            elif hasattr(route, "router"):
-                walk(route.router.routes)
+    The walk in `test_agent_access`, which knows this FastAPI's included
+    routers: each is one opaque `_IncludedRouter` whose endpoints hang off
+    `original_router`, unprefixed. The walk that used to be here only knew
+    `.routes` and `.router`, found the nine routes declared on the app itself,
+    and so the membership check below passed by looking at almost nothing
+    (found with #106). Each route carries `served_path`, the URL it answers on.
+    """
+    from tests.test_agent_access import _api_routes as walk
 
-    walk(app.routes)
-    return found
+    return walk(app)
 
 
 #: Path parameters that name an object rather than a household. Each one must be
@@ -325,11 +350,25 @@ OBJECT_ID_PARAMS = {"account_id", "transaction_id", "payee_id", "rule_id", "batc
 
 def test_every_household_scoped_route_declares_the_check(client):
     """Structural, so it cannot be fooled by a 422 that never reached the check."""
-    from app.api.deps import current_household
+    from app.api.deps import current_agent, current_household
+    from tests.test_agent_access import _dependencies_of
 
     offenders = []
-    for route in _api_routes(client.app_module.app):
+    routes = _api_routes(client.app_module.app)
+    assert len(routes) > 150, f"the walk found {len(routes)} routes; it is not walking"
+    for route in routes:
         names = set(re.findall(r"\{(\w+)\}", route.path))
+        if route.served_path.startswith("/api/agent/"):
+            # A key is bound to one household, and an agent route reaches it
+            # through `current_agent` and then `_house(...)` or `.load(...)`,
+            # which refuse any other -- not through `current_household`, which
+            # reads a session. `test_agent_access` holds the rest of that door.
+            source = inspect.getsource(route.endpoint)
+            if current_agent not in _dependencies_of(route):
+                offenders.append(f"{sorted(route.methods)} {route.served_path} (no current_agent)")
+            elif names and not re.search(r"_house\(|\.load\(|\.household\.id", source):
+                offenders.append(f"{sorted(route.methods)} {route.served_path} (no household check)")
+            continue
         if "household_id" in names:
             declared = {d.call for d in route.dependant.dependencies}
             sub = {

@@ -566,6 +566,61 @@ def test_a_step_up_by_a_member_the_key_cannot_open_says_why_and_keeps_the_sessio
     assert _secret(world["owner_id"]) == owner_sealed
 
 
+def test_making_new_codes_as_a_member_the_key_cannot_open_says_why_and_changes_nothing(
+    client, monkeypatch, clock
+):
+    """#98: "Make new codes" gave the generic "that password and authenticator
+    code do not prove it is you" -- true, and no help. It now says what the
+    step-up says, with the flag, because the position is the same: no code
+    from that authenticator can be checked and no recovery code is taken.
+    Whatever password came with it, nothing is counted and not one code row
+    changes. The member the key opens makes new codes as always."""
+    from app.auth import service
+
+    world = _one_locked_one_not(client, monkeypatch, clock)
+    partner = _browser(client)
+    _recover(partner, PARTNER, PARTNER_PASSWORD, PARTNER_CODES[0])
+    codes_before = _rows(
+        "SELECT id, code_hash, used_at FROM recovery_codes WHERE user_id = ? ORDER BY id",
+        world["partner_id"],
+    )
+    sealed_before = _sealed(world["partner_id"])
+    attempts = _rows("SELECT count(*) FROM login_attempts WHERE kind = 'stepup'")[0][0]
+
+    old_code = pyotp.TOTP(world["partner_secret"]).at(int(time.time()))
+    for password in (PARTNER_PASSWORD, "not the password"):
+        refused = partner.post(
+            "/api/me/recovery-codes", json={"password": password, "code": old_code}, headers=HEADERS
+        )
+        assert refused.status_code == 401, refused.text
+        assert refused.json() == {"detail": service.KEY_REPLACED_STEP_UP, "key_replaced": True}
+
+    assert _rows(
+        "SELECT id, code_hash, used_at FROM recovery_codes WHERE user_id = ? ORDER BY id",
+        world["partner_id"],
+    ) == codes_before
+    assert len(codes_before) == len(PARTNER_CODES)
+    assert _rows("SELECT count(*) FROM login_attempts WHERE kind = 'stepup'")[0][0] == attempts
+    assert _sealed(world["partner_id"]) == sealed_before
+    assert partner.get("/api/me").status_code == 200, "a refused proof is not a signed-out session"
+
+    owner_before = _rows(
+        "SELECT code_hash FROM recovery_codes WHERE user_id = ?", world["owner_id"]
+    )
+    made = world["owner"].post(
+        "/api/me/recovery-codes",
+        json={
+            "password": PASSWORD,
+            "code": pyotp.TOTP(world["owner_new_secret"]).at(int(time.time())),
+        },
+        headers=HEADERS,
+    )
+    assert made.status_code == 200, made.text
+    assert len(made.json()["codes"]) == 10
+    owner_after = _rows("SELECT code_hash FROM recovery_codes WHERE user_id = ?", world["owner_id"])
+    assert len(owner_after) == 10 and not set(owner_after) & set(owner_before)
+
+
 def test_without_the_grant_the_profile_takes_a_recovery_code_and_says_why_not_six_digits(
     client, monkeypatch, clock
 ):

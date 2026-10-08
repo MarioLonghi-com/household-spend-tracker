@@ -1,6 +1,11 @@
 /**
- * Your own account: the password, the second factor, and the keys you have
- * given to programs.
+ * Your own account: how you sign in, and the keys you have given to programs.
+ *
+ * **Sign-in methods** (#122, decision 5 in #47) is one section, not four: the
+ * password, the authenticator, passkeys and recovery codes are rows, each
+ * saying its state in words and offering its one or two actions, under a line
+ * that says what currently gets you in. Keys for programs stay apart -- they
+ * are for programs, not for signing in.
  *
  * The first two ask for the current password even though you are already
  * signed in. A session proves this browser was signed in at some point; it
@@ -21,6 +26,7 @@ import { api } from "../lib/api";
 import { Empty, Field, Hint, Panel, Problem } from "../components/bits";
 import { stepUpToken } from "../components/StepUp";
 import { RecoveryCodeSheet } from "../components/RecoveryCodes";
+import { PasskeysSection, usePasskeys, usePasskeyState } from "./Passkeys";
 import { formatInstant } from "../lib/time";
 import { dropGrant, heldGrant } from "../lib/recoveryGrant";
 import {
@@ -49,11 +55,7 @@ export function Profile({
       </p>
       <AppearanceSection />
       <hr className="rule" />
-      <PasswordSection />
-      <hr className="rule" />
-      <AuthenticatorSection user={user} />
-      <hr className="rule" />
-      <RecoveryCodesSection />
+      <SignInMethods user={user} />
       <hr className="rule" />
       <KeysSection households={households} />
     </Panel>
@@ -122,7 +124,138 @@ function AppearanceSection() {
   );
 }
 
-function PasswordSection() {
+type Method = "password" | "authenticator" | "recovery";
+
+/**
+ * Every way into this account, in one place (#47 §3).
+ *
+ * The password, authenticator and recovery-code rows open their forms in
+ * place, one at a time; the passkeys row is its own list. The summary line at
+ * the top changes as methods are added or removed, so it always says what
+ * currently gets you in.
+ */
+function SignInMethods({ user }: { user: User }) {
+  const [open, setOpen] = useState<Method | null>(null);
+  const authenticator = useQuery({
+    queryKey: ["authenticator"],
+    queryFn: () => api.get<AuthenticatorStatus>("/me/authenticator"),
+  });
+  const recovery = useQuery({
+    queryKey: ["recovery-codes"],
+    queryFn: () => api.get<{ unused: number }>("/me/recovery-codes"),
+  });
+  const passkeys = usePasskeys();
+  const state = usePasskeyState();
+
+  const usable = (passkeys.data ?? []).filter((one) => one.usable_here).length;
+  const locked = authenticator.data?.locked_by_key === true;
+  const enrolled = authenticator.data?.enrolled !== false;
+  const summary =
+    usable > 0
+      ? "You sign in with a passkey, or with your password and authenticator code."
+      : "You sign in with your password and authenticator code.";
+
+  const toggle = (method: Method) => setOpen((was) => (was === method ? null : method));
+  const passkeyState = passkeys.data
+    ? usable > 0
+      ? `${usable} ${usable === 1 ? "passkey" : "passkeys"}`
+      : state.data && !state.data.available
+        ? "Not available here"
+        : "None yet"
+    : "";
+
+  return (
+    <section aria-labelledby="sign-in-methods">
+      <h3 className="section-title" id="sign-in-methods">
+        Sign-in methods
+      </h3>
+      <p className="small" style={{ marginTop: 0 }}>
+        {summary}
+      </p>
+      <ul className="plain-list methods">
+        <MethodRow
+          name="Password"
+          state="Set"
+          action="Change"
+          open={open === "password"}
+          onToggle={() => toggle("password")}
+        >
+          <PasswordSection titled={false} />
+        </MethodRow>
+        <MethodRow
+          name="Authenticator"
+          state={!enrolled ? "Cleared" : locked ? "Needs setting up again" : "Set up"}
+          warn={locked || !enrolled}
+          // In recovery mode (#287) this row is the one thing to do, so it
+          // stays open and offers no way to close it.
+          action={locked ? undefined : "Set up again"}
+          open={open === "authenticator" || locked}
+          onToggle={() => toggle("authenticator")}
+        >
+          <AuthenticatorSection user={user} titled={false} />
+        </MethodRow>
+        <MethodRow name="Passkeys" state={passkeyState} open>
+          <PasskeysSection />
+        </MethodRow>
+        <MethodRow
+          name="Recovery codes"
+          state={recovery.data ? `${recovery.data.unused} of 10 left` : ""}
+          warn={recovery.data?.unused === 0}
+          action="New codes"
+          open={open === "recovery"}
+          onToggle={() => toggle("recovery")}
+        >
+          <RecoveryCodesSection titled={false} />
+        </MethodRow>
+      </ul>
+    </section>
+  );
+}
+
+/** One sign-in method: its name, its state in words, its action. */
+function MethodRow({
+  name,
+  state,
+  warn = false,
+  action,
+  open,
+  onToggle,
+  children,
+}: {
+  name: string;
+  state: string;
+  warn?: boolean;
+  action?: string;
+  open: boolean;
+  onToggle?: () => void;
+  children: React.ReactNode;
+}) {
+  const id = `method-${name.toLowerCase().replace(/\s+/g, "-")}`;
+  return (
+    <li className="method-row" aria-labelledby={id}>
+      <div className="method-head">
+        <div>
+          <strong id={id}>{name}</strong>{" "}
+          <span className={warn ? "small neg" : "small muted"}>{state}</span>
+        </div>
+        {action && onToggle && (
+          <button
+            type="button"
+            aria-expanded={open}
+            // The visible word alone ("Change") is ambiguous in a list of four.
+            aria-label={`${open ? "Close" : action}: ${name}`}
+            onClick={onToggle}
+          >
+            {open ? "Close" : action}
+          </button>
+        )}
+      </div>
+      {open && <div className="method-body">{children}</div>}
+    </li>
+  );
+}
+
+function PasswordSection({ titled = true }: { titled?: boolean }) {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [again, setAgain] = useState("");
@@ -150,7 +283,7 @@ function PasswordSection() {
 
   return (
     <section>
-      <h3 className="section-title">Password</h3>
+      {titled && <h3 className="section-title">Password</h3>}
       <Problem error={change.error} />
       {change.isSuccess && (
         <div className="banner info">
@@ -241,7 +374,7 @@ function PasswordSection() {
  * a session that has since ended -- is dropped, and the screen asks for a
  * recovery code instead.
  */
-function AuthenticatorSection({ user }: { user: User }) {
+function AuthenticatorSection({ user, titled = true }: { user: User; titled?: boolean }) {
   const queries = useQueryClient();
   const [password, setPassword] = useState("");
   const [offer, setOffer] = useState<Offer | null>(null);
@@ -294,7 +427,7 @@ function AuthenticatorSection({ user }: { user: User }) {
   if (confirm.isSuccess) {
     return (
       <section>
-        <h3 className="section-title">Authenticator</h3>
+        {titled && <h3 className="section-title">Authenticator</h3>}
         <div className="banner info">
           Your new authenticator is the only one that works now.{" "}
           {confirm.data.devices_revoked > 0
@@ -317,7 +450,7 @@ function AuthenticatorSection({ user }: { user: User }) {
   if (offer) {
     return (
       <section>
-        <h3 className="section-title">Authenticator</h3>
+        {titled && <h3 className="section-title">Authenticator</h3>}
         <Problem error={confirm.error} />
         <p className="small">
           Add this to your authenticator app, then type the six digits it shows.{" "}
@@ -392,7 +525,7 @@ function AuthenticatorSection({ user }: { user: User }) {
 
   return (
     <section>
-      <h3 className="section-title">Authenticator</h3>
+      {titled && <h3 className="section-title">Authenticator</h3>}
       <Problem error={start.error} />
       {locked ? (
         <div className="banner warn" role="status">
@@ -439,7 +572,7 @@ function AuthenticatorSection({ user }: { user: User }) {
  * setup, and the form is gone before they appear so the code that proved it
  * does not sit next to them.
  */
-export function RecoveryCodesSection() {
+export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
   const queries = useQueryClient();
   const left = useQuery({
     queryKey: ["recovery-codes"],
@@ -465,7 +598,7 @@ export function RecoveryCodesSection() {
   if (fresh) {
     return (
       <section>
-        <h3 className="section-title">Recovery codes</h3>
+        {titled && <h3 className="section-title">Recovery codes</h3>}
         <div className="banner info">
           New codes made. Every earlier code, used or not, has stopped working.
         </div>
@@ -479,7 +612,7 @@ export function RecoveryCodesSection() {
 
   return (
     <section>
-      <h3 className="section-title">Recovery codes</h3>
+      {titled && <h3 className="section-title">Recovery codes</h3>}
       <Problem error={left.error} />
       {unused !== undefined ? (
         <p className={unused === 0 ? "small neg" : "small muted"}>

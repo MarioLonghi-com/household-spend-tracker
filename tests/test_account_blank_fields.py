@@ -131,14 +131,28 @@ def test_a_blank_value_is_stored_as_null_never_as_an_empty_string(client):
 def test_a_value_and_its_clear_flag_together_are_refused_and_change_nothing(client):
     euros, pounds = _two_accounts(client)
 
+    set_up = client.patch(
+        f"/api/accounts/{euros['id']}",
+        json={"country": "ES", "statement_product": "Current"},
+        headers=HEADERS,
+    )
+    assert set_up.status_code == 200, set_up.text
+
     for body in (
         {"institution": "New Bank", "clear_institution": True},
         {"note": "a note", "clear_note": True},
+        # These two let the flag win in silence until #110.
+        {"country": "PT", "clear_country": True},
+        {"statement_product": "Savings", "clear_statement_product": True},
     ):
         refused = client.patch(f"/api/accounts/{euros['id']}", json=body, headers=HEADERS)
         assert refused.status_code == 422, refused.text
+        assert "not both" in refused.text
 
     assert _stored(client, euros) == ("Example Bank", "The one the salaries land in")
+    got = client.get(f"/api/accounts/{euros['id']}").json()
+    assert (got["country"], got["statement_product"]) == ("ES", "Current")
+    assert client.get(f"/api/accounts/{pounds['id']}").json()["country"] is None
 
 
 def test_the_length_limit_is_on_the_value_as_sent(client):
@@ -178,7 +192,7 @@ def test_the_migration_folds_blank_banks_and_notes_to_null_and_trims_the_rest(
     cfg = _config(url)
     command.upgrade(cfg, BEFORE)
 
-    engine = create_engine(url, future=True)
+    engine = create_engine(url)
     now = "2026-01-01 00:00:00"
     rows = {
         # id: (household, currency, institution, note)

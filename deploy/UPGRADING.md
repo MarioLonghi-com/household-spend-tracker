@@ -284,6 +284,34 @@ With the key and a member's password, the zip is enough to sign in as that
 member once restored. That is why the box is off by default and not
 remembered.
 
+## Passkeys and the host name
+
+A passkey works only for the host name it was registered under. That name is
+`SPENDTRACKER_RP_ID`, which by default is the host of `SPENDTRACKER_PUBLIC_URL`.
+An upgrade does not change it, and nor does a restore onto the same host.
+**These do change it**:
+
+- a restore onto a machine with another name;
+- a renamed machine or tailnet;
+- a move between the two Tailscale layouts in DOCKER.md;
+- a move to a custom domain.
+
+The passkey rows come back with the ledger in every case, but none of them
+works any more, and the sign-in screen does not say why.
+
+`make upgrade-check` and `make restore` say so before you go ahead, and
+`make doctor` says so afterwards. Each prints one line per name, for example
+"2 passkeys registered for old.example.ts.net, this instance is
+new.example.ts.net".
+
+Nothing is lost that cannot be redone:
+
+1. Each member signs in with their password and code.
+2. They remove the stranded passkeys in Sign-in methods, where they are marked.
+3. They register new ones.
+
+If you can, choose the name before anyone registers a passkey, and keep it.
+
 ## Rehearse a restore, once, for real
 
 Before the first deployment that matters: take a backup, deliberately destroy

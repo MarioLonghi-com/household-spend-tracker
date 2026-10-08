@@ -232,16 +232,26 @@ function returnTo(): string | null {
 const OPENS_IN_NEW_TAB = ["accounts", "history", "rules"] as const;
 type OpensInNewTab = (typeof OPENS_IN_NEW_TAB)[number];
 
+/**
+ * What `?open=` asked for. Reads the address and changes nothing: it runs as a
+ * `useState` initialiser, which Strict Mode calls twice, and when it also put
+ * the address back the second call found `?open=` gone and answered "nothing"
+ * (#110). `putTheAddressBack` does that half, from an effect.
+ */
 export function openedAt(): { screen: OpensInNewTab | null; household: string } {
   const query = new URLSearchParams(window.location.search);
   const wanted = query.get("open");
   const screen = OPENS_IN_NEW_TAB.find((one) => one === wanted) ?? null;
-  if (screen) window.history.replaceState(null, "", "/");
   // An id, not a path: `../me` arrived in a query string and went straight
   // into an API path (#197). The shell still checks it against the member's
   // households before using it; this is the fence at the door.
   const household = screen ? (query.get("household") ?? "") : "";
   return { screen, household: /^[\w-]{1,64}$/.test(household) ? household : "" };
+}
+
+/** Once a screen has been opened from `?open=`, the address goes back to `/`. */
+export function putTheAddressBack(opened: { screen: OpensInNewTab | null }): void {
+  if (opened.screen) window.history.replaceState(null, "", "/");
 }
 
 /** `/invite/<token>` is a real URL people are handed, so the shell reads it first. */
@@ -458,6 +468,7 @@ const NAV_COLLAPSED_KEY = "spendtracker.shell.navCollapsed";
 function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }) {
   const client = useQueryClient();
   const [opened] = useState(openedAt);
+  useEffect(() => putTheAddressBack(opened), [opened]);
   const [screen, setScreen] = useState<Screen>(opened.screen ?? "register");
   //: Where the register should open when a report sends somebody there: a
   //: Work expenses view, and maybe one row's panel. Held here because the
@@ -709,7 +720,15 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
           <div style={{ marginTop: 8 }}>
             {/* Your name is the way into your own settings -- the same place
                 every other app puts them, and the reason nobody hunts for it. */}
-            <button className="link" onClick={() => setProfileOpen(true)}>
+            {/* Closes the drawer as every page button does: on a phone the
+                drawer sits above the account sheet and would cover it. */}
+            <button
+              className="link"
+              onClick={() => {
+                setNavOpen(false);
+                setProfileOpen(true);
+              }}
+            >
               {user.display_name}
             </button>
             <button className="link" onClick={() => signOut.mutate()}>

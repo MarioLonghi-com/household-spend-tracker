@@ -50,6 +50,8 @@ import type {
   SignInChange,
   User,
 } from "../lib/types";
+import { roleLabel } from "../lib/labels";
+import { compareNames } from "../lib/locale";
 
 type Section = "people" | "households" | "invitations";
 
@@ -204,7 +206,7 @@ function People({
               return one.disabled_at ? 1 : 0;
           }
         },
-        (a, b) => a.display_name.localeCompare(b.display_name),
+        (a, b) => compareNames(a.display_name, b.display_name),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [users, households, order.sort, order.direction],
@@ -592,7 +594,7 @@ function ResetSignIn({
   }
 
   const consequences = [
-    "every session, trusted browser and agent key ends",
+    "every session, trusted browser, agent key and passkey ends",
     password && "their password stops working",
     authenticator && "their authenticator and recovery codes are cleared",
   ].filter(Boolean);
@@ -951,7 +953,7 @@ function Households({
               return one.name;
           }
         },
-        (a, b) => a.name.localeCompare(b.name),
+        (a, b) => compareNames(a.name, b.name),
       ),
     [households, order.sort, order.direction],
   );
@@ -1249,7 +1251,7 @@ function Invitations({ households }: { households: AdminHousehold[] }) {
                 {rows.map((one) => (
                   <tr key={one.id}>
                     <td className="small">{one.email ?? <span className="muted">anyone with the link</span>}</td>
-                    <td className="small">{one.role}</td>
+                    <td className="small">{roleLabel(one.role)}</td>
                     <td className="small muted">
                       {(one.household_ids ?? []).length === 0
                         ? "none yet"
@@ -1272,7 +1274,7 @@ function Invitations({ households }: { households: AdminHousehold[] }) {
       {revoking && (
         <Dialog title="Revoke this invitation?" onClose={() => setRevoking(null)}>
           <p style={{ marginTop: 0 }}>
-            The link for {revoking.email ?? "anyone with the link"} ({revoking.role}) stops working
+            The link for {revoking.email ?? "anyone with the link"} ({roleLabel(revoking.role)}) stops working
             at once. To invite them again, make a new one.
           </p>
           <div className="dialog-choices">

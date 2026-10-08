@@ -1,0 +1,161 @@
+name: bench
+
+# The upgrade rehearsal on a bench-sized ledger, weekly and by hand (#104).
+#
+# `tests.yml`'s rehearsal seeds three months -- a few hundred rows -- and asks
+# whether an upgrade keeps them. It times nothing, and a migration that copies
+# `transactions` (every `batch_alter_table` that has to rebuild it) costs in
+# proportion to the ledger. This builds the demo seed with the LAST RELEASE's
+# code, grows it to about 100 MiB (`scripts/bench_ledger.py grow`), and times
+# `alembic upgrade head` to this commit, then a `VACUUM INTO` backup and the
+# `/db` snapshot on the result. The numbers go in the run's summary.
+#
+# Not a pull-request check and not part of `ci-ok`: it answers "how long will
+# the upgrade take on a real ledger", which is a figure for the CHANGELOG and
+# the operator, not a gate. It still fails if the upgrade loses a row.
+
+on:
+  schedule:
+    - cron: "41 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      before:
+        description: "the release to upgrade from (default: the newest tag)"
+        required: false
+      target_mib:
+        description: "how large to grow the ledger, in MiB"
+        required: false
+        default: "100"
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: work out what "before" is
+        id: before
+        env:
+          ASKED: ${{ inputs.before }}
+        run: |
+          # The newest release by version, not `git describe`: a release is
+          # tagged on `main`'s merge commit, which `dev` never contains, so
+          # describe from `dev` finds no tag at all.
+          before="${ASKED:-$(git tag --list 'v*' --sort=-v:refname | head -n 1)}"
+          if [ -z "$before" ]; then echo "no release tag to upgrade from"; exit 1; fi
+          echo "ref=$before" >> "$GITHUB_OUTPUT"
+          echo "upgrading from $before"
+
+      # The grower is this commit's, kept aside: the old checkout may not have
+      # it, and it reads the table's columns rather than naming them.
+      - name: build the bench ledger with the previous release
+        env:
+          BEFORE: ${{ steps.before.outputs.ref }}
+          TARGET_MIB: ${{ inputs.target_mib || '100' }}
+          SPENDTRACKER_DATA_DIR: ./bench-data
+          DATABASE_URL: sqlite:///./bench-data/bench.sqlite3
+        run: |
+          cp scripts/bench_ledger.py "$RUNNER_TEMP/bench_ledger.py"
+          # This commit's locked requirements, installed before the checkout
+          # and used for the old code too: releases before the lock (0.7.1
+          # and earlier) pin without hashes, and `--require-hashes` refuses
+          # them. The old migrations and seed run on the newer libraries.
+          pip install --require-hashes -r requirements.txt
+          git checkout --detach "$BEFORE"
+          python -m alembic upgrade head
+          python -m scripts.seed_demo --reset --months 24 > /dev/null
+          python "$RUNNER_TEMP/bench_ledger.py" grow bench-data/bench.sqlite3 \
+            --target-mib "$TARGET_MIB" | tee grown.json
+          python - <<'PY' > before.json
+          import json, sqlite3
+          conn = sqlite3.connect("bench-data/bench.sqlite3")
+          tables = [r[0] for r in conn.execute(
+              # Not SQLite's own tables: `sqlite_stat1` is planner statistics,
+              # which the ANALYZE after the upgrade rewrites, not ledger rows.
+              "SELECT name FROM sqlite_master WHERE type='table' AND name != 'alembic_version' "
+              "AND name NOT LIKE 'sqlite_%'")]
+          print(json.dumps({t: conn.execute(f'SELECT count(*) FROM "{t}"').fetchone()[0]
+                            for t in sorted(tables)}))
+          PY
+
+      - name: time the upgrade to this commit
+        env:
+          SPENDTRACKER_DATA_DIR: ./bench-data
+          DATABASE_URL: sqlite:///./bench-data/bench.sqlite3
+        run: |
+          git checkout --detach "$GITHUB_SHA"
+          pip install --require-hashes -r requirements.txt
+          start=$(date +%s.%N)
+          python -m alembic upgrade head 2>&1 | tee upgrade.log
+          end=$(date +%s.%N)
+          python -c "print(round($end - $start, 2))" > upgrade-seconds.txt
+
+      - name: the rows are still there
+        run: |
+          python - <<'PY'
+          import json, sqlite3, sys
+          before = json.load(open("before.json"))
+          conn = sqlite3.connect("bench-data/bench.sqlite3")
+          lost = [f"{t}: {was} before, {conn.execute(f'SELECT count(*) FROM \"{t}\"').fetchone()[0]} after"
+                  for t, was in before.items()
+                  if conn.execute(f'SELECT count(*) FROM \"{t}\"').fetchone()[0] < was]
+          if lost:
+              print("THE UPGRADE LOST DATA:", *lost, sep="\n  ")
+              sys.exit(1)
+          print(f"{len(before)} tables, every row still present")
+          PY
+
+      - name: time a backup and the /db snapshot on the upgraded ledger
+        env:
+          SPENDTRACKER_DATA_DIR: ./bench-data
+          DATABASE_URL: sqlite:///./bench-data/bench.sqlite3
+        run: |
+          python - <<'PY' > after.json
+          import json, pathlib, time
+          from scripts import backup, db_view
+          out = {}
+          t = time.perf_counter(); backup.take(pathlib.Path("bench-backups"))
+          out["backup_seconds"] = round(time.perf_counter() - t, 2)
+          t = time.perf_counter()
+          db_view.build(pathlib.Path("bench-data/bench.sqlite3"), pathlib.Path("bench-snapshot.sqlite3"))
+          out["snapshot_seconds"] = round(time.perf_counter() - t, 2)
+          print(json.dumps(out))
+          PY
+          python -m scripts.bench_ledger fsync ./bench-data --commits 300 > fsync.json
+
+      - name: summary
+        if: always()
+        env:
+          BEFORE: ${{ steps.before.outputs.ref }}
+        run: |
+          {
+            echo "## Upgrade on a bench ledger, from $BEFORE"
+            echo
+            echo '```json'
+            cat grown.json 2>/dev/null || echo "the bench was not built"
+            echo '```'
+            echo
+            echo "**alembic upgrade head:** $(cat upgrade-seconds.txt 2>/dev/null || echo 'did not finish') s"
+            echo
+            echo '```'
+            grep "Running upgrade" upgrade.log 2>/dev/null || echo "no migration between $BEFORE and this commit"
+            echo '```'
+            echo
+            echo "**After:** $(cat after.json 2>/dev/null)"
+            echo
+            echo "**fsync on the runner's disk** (not the target's): $(tr -d '\n ' < fsync.json 2>/dev/null || true)"
+          } >> "$GITHUB_STEP_SUMMARY"

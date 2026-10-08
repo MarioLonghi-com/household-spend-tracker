@@ -19,6 +19,7 @@ import { Field, Panel, Problem } from "../components/bits";
 import { exponent, format, parse } from "../lib/money";
 import { localToday } from "../lib/time";
 import type { Account, Household } from "../lib/types";
+import { formatFixed } from "../lib/locale";
 
 export function Transfer({
   household,
@@ -74,7 +75,7 @@ export function Transfer({
   // What the two amounts imply, shown before it is saved rather than after.
   const impliedRate =
     crossCurrency && out && inn
-      ? (inn / 10 ** exponent(to!.currency) / (out / 10 ** exponent(from!.currency))).toFixed(4)
+      ? formatFixed(inn / 10 ** exponent(to!.currency) / (out / 10 ** exponent(from!.currency)), 4)
       : null;
 
   if (open.length < 2) {

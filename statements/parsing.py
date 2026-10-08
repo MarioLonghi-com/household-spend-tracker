@@ -56,7 +56,7 @@ class ParsedRow:
     #: which is all any row was before issue #260.
     currency: str | None = None
     #: Where `currency` came from: ``"column"`` for a table's currency column,
-    #: ``"ofx"`` for an OFX file. It matters to the caller: a table may hold
+    #: ``"ofx"`` for an OFX file, ``"agent"`` for a row an agent posted. It matters to the caller: a table may hold
     #: several accounts' rows in several currencies, while an OFX file is one
     #: account (one `ACCTID`), so a row in another currency there is still that
     #: account's money.

@@ -13,6 +13,8 @@ import secrets
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
 
+from . import common_passwords
+
 #: argon2-cffi's defaults are argon2id, and current.
 _hasher = PasswordHasher()
 
@@ -43,13 +45,19 @@ def needs_rehash(stored_hash: str) -> bool:
 def complaints(password: str, *, email: str = "") -> list[str]:
     """What is wrong with this password, in words the user can act on.
 
-    Length is the rule that works. Composition rules ("one capital, one digit")
-    were retired by NIST 800-63B because they push people toward Passw0rd! and
-    nothing else.
+    Length is the rule that works, with a check against the passwords people
+    actually choose (#97, `common_passwords`). Composition rules ("one capital,
+    one digit") were retired by NIST 800-63B because they push people toward
+    Passw0rd! and nothing else.
     """
     problems: list[str] = []
     if len(password) < MIN_LENGTH:
         problems.append(f"it needs at least {MIN_LENGTH} characters")
+    elif common_passwords.is_common(password, min_length=MIN_LENGTH):
+        problems.append(
+            "it is one of the 100,000 most common passwords, which are the first ones "
+            "anybody guessing tries"
+        )
     if email and password.strip().lower() == email.strip().lower():
         problems.append("it cannot be your email address")
     return problems

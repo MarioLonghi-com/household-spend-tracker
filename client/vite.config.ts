@@ -18,6 +18,9 @@ export default defineConfig(({ mode }) => ({
   test: {
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     exclude: ["e2e/**", "node_modules/**"],
+    // Pins the formatting locale to en-US, so a test's expected "€1,234.56"
+    // does not depend on the machine running it (#52).
+    setupFiles: ["./src/test-setup.ts"],
   },
   server: {
     port: 5173,

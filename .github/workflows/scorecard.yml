@@ -8,15 +8,18 @@ name: scorecard
 #
 # Two of its checks will always score low here and can be ignored: Fuzzing
 # (no fuzz target, none warranted) and CII-Best-Practices (a self-assessment
-# badge). Pinned-Dependencies will complain about `>=` floors in
-# requirements*.txt until issue #96's lockfile lands.
+# badge). The Python dependencies are locked with hashes in requirements*.txt
+# since #46, so Pinned-Dependencies reads those rather than floors.
 
 on:
   branch_protection_rule:
   schedule:
     - cron: "23 7 * * 1"
+  # The default branch, which is `dev`: the action refuses any other with
+  # "Only the default branch dev is supported", so on `main` it failed every
+  # release without measuring anything (#36).
   push:
-    branches: [main]
+    branches: [dev]
   workflow_dispatch:
 
 permissions: read-all

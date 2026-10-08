@@ -9,11 +9,13 @@ from .auth import (
     Instance,
     Invitation,
     LoginAttempt,
+    Passkey,
     PendingSignIn,
     RecoveryCode,
     StepUpGrant,
     TrustedDevice,
     User,
+    WebAuthnChallenge,
     WebSession,
 )
 from .base import NAMING_CONVENTION, Base, EnumStr, Timestamped, UUIDPrimaryKey, new_id, utcnow
@@ -62,6 +64,6 @@ __all__ = [
     "Category", "CategoryGroup", "Change", "ChangeOp",
     "ClearedState", "EnumStr", "IdentifierKind", "Household", "HouseholdMember", "IgnoredIdentifierSuggestion", "ImportLine", "ImportOutcome",
     "Instance", "InstanceState", "Invitation", "LinkSource", "LoginAttempt", "MatchType", "NAMING_CONVENTION", "Payee", "Reconciliation",
-    "PayeeRule", "PendingSignIn", "StepUpGrant", "Receipt", "ReceiptBlob", "RecoveryCode", "RegisterSort", "RegisterSource", "ReimbursementState", "ReimbursementView", "RuleAction", "SortDirection", "Role", "SystemPayee", "Timestamped", "Transaction", "TransferRejection", "TrustedDevice",
-    "UUIDPrimaryKey", "User", "WebSession", "new_id", "utcnow",
+    "Passkey", "PayeeRule", "PendingSignIn", "StepUpGrant", "Receipt", "ReceiptBlob", "RecoveryCode", "RegisterSort", "RegisterSource", "ReimbursementState", "ReimbursementView", "RuleAction", "SortDirection", "Role", "SystemPayee", "Timestamped", "Transaction", "TransferRejection", "TrustedDevice",
+    "UUIDPrimaryKey", "User", "WebAuthnChallenge", "WebSession", "new_id", "utcnow",
 ]

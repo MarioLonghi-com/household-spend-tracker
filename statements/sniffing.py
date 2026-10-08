@@ -73,6 +73,17 @@ DATE_FORMATS = (
 #: Swedish is in here because a Swedbank export was the first file that failed
 #: on nothing but vocabulary: "Belopp", "Bokforingsdag", "Beskrivning".
 _DATE_NEEDLES = ("date", "fecha", "datum", "data", "dag")
+#: "F. Valor", "F. Operación", "F.Contable": Spanish banks abbreviate *fecha*
+#: to "F." in a header, and "F. Valor" -- the value date -- then matched none
+#: of the date needles and *did* match the amount needle "valor". A file with
+#: "F. Valor;Concepto;Importe" had no date column and its dates as amounts
+#: (#90). An "F." followed by a word is a date.
+_ABBREVIATED_DATE = re.compile(r"^f\.\s*[a-záéíóú]")
+
+
+def _names_a_date(header: str) -> bool:
+    low = header.strip().lower()
+    return any(needle in low for needle in _DATE_NEEDLES) or bool(_ABBREVIATED_DATE.match(low))
 _PAYEE_NEEDLES = (
     "payee", "descrip", "concepto", "merchant", "name", "beneficiar", "detalle",
     "beskrivning", "referens", "lancamento", "lançamento", "meddelande",
@@ -366,8 +377,8 @@ def _header_score(cells: list[str]) -> int:
     low = [c.strip().lower() for c in cells if c and c.strip()]
     if len(low) < 2:
         return 0
-    groups = (_DATE_NEEDLES, _PAYEE_NEEDLES, _AMOUNT_NEEDLES, _OUTFLOW_NEEDLES, _INFLOW_NEEDLES)
-    return sum(
+    groups = (_PAYEE_NEEDLES, _AMOUNT_NEEDLES, _OUTFLOW_NEEDLES, _INFLOW_NEEDLES)
+    return int(any(_names_a_date(cell) for cell in low)) + sum(
         1 for needles in groups if any(needle in cell for cell in low for needle in needles)
     )
 
@@ -422,7 +433,7 @@ def _pick(
         # "FECHA VALOR" -- the value date -- matching the amount needle "valor"
         # and becoming the amount column, which is the same mistake as
         # "Transaction/Value date" in another language.
-        if money and any(needle in low for needle in _DATE_NEEDLES):
+        if money and _names_a_date(low):
             continue
         if any(needle in low for needle in needles):
             return header
@@ -516,7 +527,8 @@ def _settle(samples: list[str]) -> tuple[str | None, str | None]:
     for value in samples:
         # A trailing sign is not part of the tail: "12,50-" has a two-digit
         # fraction, not the three-character one that reads as thousands (#261).
-        cleaned = signs.ascii_minus(value or "").strip().rstrip("-+ ")
+        # Nor are the letters of "12,500 DR" (#84).
+        cleaned = signs.debit_credit(signs.ascii_minus(value or ""))[0].strip().rstrip("-+ ")
         if not cleaned:
             continue
         last_comma, last_dot = cleaned.rfind(","), cleaned.rfind(".")
@@ -607,16 +619,17 @@ def parse_amount(text: str, *, decimal_separator: str = ".") -> Decimal:
     Handles accounting parentheses, currency symbols, thin and non-breaking
     spaces, either separator convention, a minus sign written at the end
     (``12.50-``, issue #261) and a minus written as a dash or a real minus sign
-    (`signs.MINUS_SIGNS`, issue #262). An empty cell is zero, which is what
-    makes separate outflow and inflow columns work, and so is a cell holding
-    nothing but a dash.
+    (`signs.MINUS_SIGNS`, issue #262), and a debit or credit said in letters
+    after the figure (``12.50 DR``, ``12.50 CR``, #84). An empty cell is zero,
+    which is what makes separate outflow and inflow columns work, and so is a
+    cell holding nothing but a dash.
 
     A cell that says something and is not a number raises `ValueError` with a
-    reason, and so does one signed twice (``-12.50-``, ``(-12.50)``): which
-    sign the bank meant is a guess. Reading either as zero is what hid #261 --
+    reason, and so does one signed twice (``-12.50-``, ``(-12.50)``,
+    ``-12.50 DR``): which sign the bank meant is a guess. Reading either as zero is what hid #261 --
     the row was skipped as "moves no money" with the debit still in it.
     """
-    cleaned = signs.ascii_minus(text or "").strip()
+    cleaned, marker = signs.debit_credit(signs.ascii_minus(text or "").strip())
     cleaned = cleaned.replace(" ", "").replace("\u00a0", "").replace("\u202f", "")
     cleaned = cleaned.replace("\u2009", "")
     if not cleaned:
@@ -635,7 +648,11 @@ def parse_amount(text: str, *, decimal_separator: str = ".") -> Decimal:
 
     leading = digits[0] if digits[0] in "-+" else ""
     trailing = digits[-1] if digits[-1] in "-+" else ""
-    if (leading and trailing) or (bracketed and (leading or trailing)):
+    if (
+        (leading and trailing)
+        or (bracketed and (leading or trailing))
+        or (marker and (leading or trailing or bracketed))
+    ):
         raise ValueError(
             f"{text!r} is signed twice, so whether it is money in or money out would be a guess"
         )
@@ -648,7 +665,7 @@ def parse_amount(text: str, *, decimal_separator: str = ".") -> Decimal:
         value = Decimal(body)
     except InvalidOperation:
         raise ValueError(f"could not read {text!r} as an amount") from None
-    negative = bracketed or "-" in (leading, trailing)
+    negative = bracketed or "-" in (leading, trailing, marker)
     return -value if negative else value
 
 
@@ -772,9 +789,8 @@ def sniff(
     # Date first, and every later pick excludes what is already spoken for.
     # The booking date when there is one, so the date agrees with the running
     # balance and with the other leg of a transfer.
-    date_column = _pick(
-        [h for h in headers if any(n in h.lower() for n in _DATE_NEEDLES)], _BOOKED_NEEDLES
-    ) or _pick(headers, _DATE_NEEDLES)
+    dated = [h for h in headers if _names_a_date(h)]
+    date_column = _pick(dated, _BOOKED_NEEDLES) or (dated[0] if dated else None)
     outflow_column = _pick(headers, _OUTFLOW_NEEDLES, taken=(date_column,), money=True)
     inflow_column = _pick(
         headers, _INFLOW_NEEDLES, taken=(date_column, outflow_column), money=True

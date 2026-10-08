@@ -502,7 +502,12 @@ BASE_SECURITY_HEADERS = {
     # An invitation link carries its token in the path, so no referrer may
     # leave this origin carrying it.
     "Referrer-Policy": "no-referrer",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+    # Passkeys (#47 §1.4): `self` is already the default for both, written
+    # out so the policy says in one place what this origin may use.
+    "Permissions-Policy": (
+        "camera=(), microphone=(), geolocation=(), payment=(), "
+        "publickey-credentials-get=(self), publickey-credentials-create=(self)"
+    ),
 }
 
 #: `/snap` is the one document allowed to ask the browser where it is, and only
@@ -524,7 +529,11 @@ BASE_SECURITY_HEADERS = {
 #: one carrying the toggle.
 SNAP_SECURITY_HEADERS = {
     **BASE_SECURITY_HEADERS,
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=(self), payment=()",
+    # `/snap` signs nobody in, so it is the one page that may not use a passkey.
+    "Permissions-Policy": (
+        "camera=(), microphone=(), geolocation=(self), payment=(), "
+        "publickey-credentials-get=(), publickey-credentials-create=()"
+    ),
 }
 
 #: Everything is same-origin and self-hosted: the SPA is built into
@@ -540,6 +549,10 @@ SNAP_SECURITY_HEADERS = {
 #: URLs it minted for itself; a ``blob:`` URL cannot be pointed at another
 #: origin and cannot outlive the document that created it.
 #:
+#: No ``data:`` (#94). Nothing uses one -- the QR code is SVG, and the client
+#: imports no images -- and a ``data:`` image is the one kind of image source
+#: whose bytes are whatever the markup that names it says.
+#:
 #: ``style-src`` is the one concession. ``client/src/lib/theme.ts`` paints a
 #: household's palette by setting a ``<style>`` element's ``textContent``, which
 #: is an inline stylesheet however it got there. A nonce would mean the server
@@ -552,7 +565,7 @@ CONTENT_SECURITY_POLICY = "; ".join(
         "default-src 'self'",
         "script-src 'self'",
         "style-src 'self' 'unsafe-inline'",
-        "img-src 'self' data: blob:",
+        "img-src 'self' blob:",
         "font-src 'self'",
         "connect-src 'self'",
         "object-src 'none'",
@@ -632,13 +645,32 @@ async def add_security_headers(request: Request, call_next):
     return response
 
 
+def _speaks_to_agent(request: Request) -> bool:
+    """Whether this answer goes to a program holding an agent key.
+
+    The codes exist for the client's translations. An agent reads ``detail``,
+    and the localisation work promised it byte-identical answers (#48), so it
+    gets none of them yet. Offering them is this one condition plus the
+    descriptor and `/llms.txt` saying what they are.
+    """
+    return request.url.path.startswith(f"{API_PREFIX}/agent/") or _carries_a_key(request)
+
+
 @app.exception_handler(DomainError)
 def handle_domain_error(request: Request, exc: DomainError) -> JSONResponse:
-    """Domain rules answer with their own status code and their own words."""
+    """Domain rules answer with their own status code and their own words.
+
+    A raise that carries a ``code`` also sends it, with its ``params`` nested
+    beside ``detail`` so they can never collide with ``fields`` (#65). Not to
+    an agent: its answers stay byte-identical until the codes are documented
+    for agents in `/llms.txt` -- see `_speaks_to_agent`.
+    """
     headers = dict(getattr(exc, "headers", {}) or {})
     if isinstance(exc, TooManyAttempts):
         headers["Retry-After"] = str(exc.retry_after)
     content = {"detail": str(exc), **(getattr(exc, "fields", None) or {})}
+    if not _speaks_to_agent(request):
+        content.update(exc.wire())
     return JSONResponse(status_code=exc.status_code, content=content, headers=headers)
 
 

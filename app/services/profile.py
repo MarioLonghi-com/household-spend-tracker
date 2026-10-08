@@ -142,6 +142,12 @@ def change_password(
     not). A **pending sign-in** is the old password one code away from a
     session, and a **step-up grant** is the old password and a code, one key
     away from a credential that outlives all of this. All three go.
+
+    **Passkeys stay** (#121), as agent keys do. A passkey was never bought
+    with the password: it is its own pair of factors, held on the member's
+    device, and changing a password someone else learned says nothing about
+    that device. A member who suspects one of those removes it in Sign-in
+    methods; an account reset (`shut_every_door`) is what removes them all.
     """
     _check_current_password(session, engine, user, current, ip=ip)
 
@@ -369,6 +375,15 @@ def regenerate_recovery_codes(
     of either is a spent attempt, and a code is not burned for a caller who
     does not have the password.
 
+    A member the server's key cannot open (#287) is refused first, with
+    `key_replaced` and the step-up's sentence (#98): no code from that
+    authenticator can be checked, a recovery code is not taken here either,
+    and a new authenticator set up from the profile is the way on -- the same
+    position as a step-up, so the same words. Before the limiter and the
+    password, as there, so nothing is counted and nothing about the password
+    is said. It used to be the generic refusal, which told them nothing they
+    could act on.
+
     Every existing code goes, used or not, and the new ones are stored only as
     hashes. Sessions, trusted browsers and agent keys are left alone: this is a
     deliberate act from a browser the person holds, like changing a password,
@@ -382,6 +397,9 @@ def regenerate_recovery_codes(
         # Nothing to prove the second factor with. Refused before the budget is
         # touched: it is a fact about the account, not a guess.
         raise ValidationError("set up an authenticator before making new recovery codes")
+    auth_service.refuse_a_replaced_key(
+        user, signed_in=True, sentence=auth_service.KEY_REPLACED_STEP_UP
+    )
 
     held = ratelimit.reserve(engine, email_canonical=user.email_canonical, ip=ip, kind=KIND)
     if not passwords.verify_password(user.password_hash, password):
@@ -409,19 +427,23 @@ class DoorsShut:
     sessions_ended: int
     devices_revoked: int
     keys_revoked: int
+    passkeys_removed: int = 0
 
 
 def shut_every_door(session: Session, user: User) -> DoorsShut:
     """End everything a credential of this account had already bought.
 
     Every session, trusted browser, half-finished sign-in, step-up grant and
-    live agent key. What replacing a factor that may be in somebody else's
+    live agent key -- and every passkey (#121), which is a way in on its own:
+    a reset account that a passkey still opened would not be reset. What replacing a factor that may be in somebody else's
     hands has to do, and the same list wherever it is done -- an operator's
     reset here, a reset link (`services/account_resets.py`) -- so the two
     cannot drift into ending different things.
 
-    Call inside a batch: `agent_keys` is audited.
+    Call inside a batch: `agent_keys` and `passkeys` are audited.
     """
+    from ..auth import passkeys
+
     ended = sessions.revoke_all_for(session, user.id)
     revoked = devices.revoke_all_for(session, user.id)
     sessions.drop_pending_for(session, user.id)
@@ -431,7 +453,10 @@ def shut_every_door(session: Session, user: User) -> DoorsShut:
         if key.live():
             agent_keys.revoke(session, key, by=user)
             keys += 1
-    return DoorsShut(sessions_ended=ended, devices_revoked=revoked, keys_revoked=keys)
+    removed = passkeys.remove_all_for(session, user)
+    return DoorsShut(
+        sessions_ended=ended, devices_revoked=revoked, keys_revoked=keys, passkeys_removed=removed
+    )
 
 
 def delete_recovery_codes(session: Session, user: User) -> None:
@@ -463,6 +488,7 @@ class OperatorReset:
     sessions_ended: int
     devices_revoked: int
     keys_revoked: int
+    passkeys_removed: int = 0
 
 
 def reset_authenticator_from_the_server(
@@ -501,4 +527,5 @@ def reset_authenticator_from_the_server(
         sessions_ended=shut.sessions_ended,
         devices_revoked=shut.devices_revoked,
         keys_revoked=shut.keys_revoked,
+        passkeys_removed=shut.passkeys_removed,
     )
