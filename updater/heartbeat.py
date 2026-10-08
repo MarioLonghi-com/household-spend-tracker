@@ -23,7 +23,7 @@ import contextlib
 import threading
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from updater import detect as det
 from updater import engine as eng
@@ -95,12 +95,18 @@ class Beat:
         busy: Callable[[], bool] = lambda: False,
         mountinfo: str | None = None,
         hostname: str | None = None,
+        role: Callable[[], str | None] | None = None,
     ) -> None:
         self.client = client
         self.volume = volume
         self.me = me
         self.hook = hook
         self.busy = busy
+        #: The role to write, asked at every beat (6.6): `current`, `standby`
+        #: while a successor proves itself, or None while another updater owns
+        #: `updater.json` -- the successor before it takes over, the standby
+        #: after `go`, a `-previous` watching the canonical one.
+        self.role = role
         self._mountinfo = mountinfo
         self._hostname = hostname
         self.detection: det.Detection | None = None
@@ -145,10 +151,10 @@ class Beat:
         if app is not None:
             self.layout = det.layout_of(self.client.inspect(det.container_name(app)))
 
-    def heartbeat(self, now: float) -> Heartbeat:
+    def heartbeat(self, now: float, role: str | None = None) -> Heartbeat:
         assert self.detection is not None
         return assemble(
-            self.me,
+            replace(self.me, role=role) if role else self.me,
             self.detection,
             container=self.container,
             layout=self.layout,
@@ -158,10 +164,14 @@ class Beat:
             now=now,
         )
 
-    def tick(self, now: float) -> Heartbeat:
+    def tick(self, now: float) -> Heartbeat | None:
+        role = self.role() if self.role is not None else self.me.role
+        if role is None:
+            # Another updater writes `updater.json` now (6.6): not a word.
+            return None
         if self.due(now):
             self.redetect(now)
-        beat = self.heartbeat(now)
+        beat = self.heartbeat(now, role)
         write_json(self.volume.heartbeat, beat.to_dict())
         return beat
 

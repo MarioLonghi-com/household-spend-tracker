@@ -12,7 +12,7 @@ import stat
 import pytest
 
 from tests.updater_fake_engine import FakeEngine, Running, engine_fixture, frame
-from tests.updater_world import PROJECT, UPD, A, B, C, World, digest, ref
+from tests.updater_world import APP, PROJECT, UPD, A, B, C, World, digest, ref
 from updater import __main__ as main
 from updater import engine as eng
 from updater import health, oneoff, pin, prepare, shapes, trust
@@ -301,6 +301,7 @@ def test_the_entry_point_builds_its_kit_with_sigstore_and_no_way_to_change_it(tm
             "project_dir",
             "project",
             "hook",
+            "successor",
         }
         assert isinstance(args, argparse.Namespace) and identity.updater_version in ("0.0.0", A)
 
@@ -310,7 +311,7 @@ def test_the_entry_point_builds_its_kit_with_sigstore_and_no_way_to_change_it(tm
 # --------------------------------------------------------------------------- #
 
 
-def test_update_updater_is_answered_as_not_available_and_changes_nothing(tmp_path):
+def test_update_updater_without_a_handover_pulls_only_the_updater_and_stays(tmp_path):
     with World(tmp_path) as w:
         service = w.service()
         service.startup()
@@ -319,7 +320,11 @@ def test_update_updater_is_answered_as_not_available_and_changes_nothing(tmp_pat
         service.tick()
         record = w.history(req["id"])
         assert record["state"] == "not_started" and "not available" in record["sentence"]
-        assert not any(c.method != "GET" for c in w.fake.calls)
+        assert record["sentence"].startswith("The updater stayed on 0.7.1")
+        # The short prepare pulled the updater image of B, and nothing else changed.
+        changing = [c for c in w.fake.calls if c.method != "GET"]
+        assert [(c.bare, c.query.get("fromImage")) for c in changing] == [("/images/create", ref(UPD, B))]
+        assert ref(APP, B) not in w.fake.images
 
 
 def test_a_request_a_crash_left_half_taken_is_answered_at_start(tmp_path):

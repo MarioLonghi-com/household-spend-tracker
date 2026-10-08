@@ -1,6 +1,6 @@
-"""Every container the updater creates, as a create body (design notes 4.2, 6.2, 6.4, 8.4, C10).
+"""Every container the updater creates, as a create body (design notes 4.2, 6.2, 6.4, 6.6, 8.4, C10).
 
-Five shapes, and nothing else:
+Six shapes, and nothing else:
 
 - **The new app** (step 7): a copy of the previous app container.
 - **A ledger one-off** (`check`, `drill`, `restore`, `measure`, `find-backup`,
@@ -9,7 +9,9 @@ Five shapes, and nothing else:
 - **The maintenance page** (6.4): the old image, the app's network and port
   binding, the `update` volume read-write and the ledger read-only.
 - **The port probe** (8.4): the app's image on the default bridge, no mounts.
-- The successor updater (6.6) is #162's.
+- **The successor updater** (6.6, H2): a copy of the running updater's own
+  container -- mounts, user, groups, restart policy, labels -- with the
+  image changed and `--successor <id>` added to its arguments.
 
 The engine client's create guard (`engine.guard_create`) checks the same
 shapes again, from the other side: whatever this module builds, the guard is
@@ -297,6 +299,72 @@ def copy_app(
         hostname = cfg.get("Hostname")
         if isinstance(hostname, str) and hostname and hostname != short_id(previous):
             body["Hostname"] = hostname
+    body["HostConfig"] = host
+    return body
+
+
+#: The argument a successor updater is started with (6.6, H2).
+SUCCESSOR_ARG = "--successor"
+
+
+def successor(
+    own: Mapping,
+    image: str,
+    request_id: str,
+    *,
+    image_config: Mapping | None = None,
+    new_image_config: Mapping | None = None,
+) -> dict:
+    """The successor updater (6.6, H2): the running updater's container with its image changed.
+
+    The same allowlist as the app's copy (C10) -- mounts (the engine socket and
+    the project directory included, which the create guard allows only to a
+    container that is not a one-off), user, groups, restart policy, limits,
+    security options, network and compose labels -- with two changes: the
+    image, by digest, and `--successor <request id>` at the end of the
+    arguments, replacing one a predecessor started with. What came from the
+    running updater's own image (its labels, environment, entrypoint) is left
+    to the new image, as for the app.
+    """
+    cfg = _dict(own.get("Config"))
+    old_host = _dict(own.get("HostConfig"))
+    image_cfg = _dict(image_config) if image_config is not None else None
+    body: dict = {"Image": image}
+    for key in CONFIG_FIELDS:
+        if cfg.get(key) not in (None, "", [], {}):
+            body[key] = cfg[key]
+    for key in ("Entrypoint", "WorkingDir"):
+        value = cfg.get(key)
+        if value in (None, "", []) or (image_cfg is not None and image_cfg.get(key) == value):
+            continue
+        body[key] = value
+    # Arguments the compose file gave are carried; ones that came from the old
+    # image are the new image's to give.
+    from_image = image_cfg is not None and image_cfg.get("Cmd") == cfg.get("Cmd")
+    source = _dict(new_image_config).get("Cmd") if from_image else cfg.get("Cmd")
+    args = [a for a in source or [] if isinstance(a, str)]
+    if SUCCESSOR_ARG in args:
+        at = args.index(SUCCESSOR_ARG)
+        del args[at : at + 2]
+    body["Cmd"] = [*args, SUCCESSOR_ARG, request_id]
+    env = own_env(own, image_config)
+    if env:
+        body["Env"] = env
+    body["Labels"] = own_labels(own, image_config)
+    host: dict = {}
+    for key in HOST_FIELDS:
+        value = old_host.get(key)
+        if value is not None:
+            host[key] = value
+    log = _dict(old_host.get("LogConfig"))
+    if log.get("Type"):
+        host["LogConfig"] = {"Type": log["Type"], "Config": _dict(log.get("Config"))}
+    mode, endpoints = network_of(own)
+    if mode.startswith(("container:", "service:")):
+        raise ValueError("the updater does not share another container's network")
+    host["NetworkMode"] = mode
+    if endpoints:
+        body["NetworkingConfig"] = {"EndpointsConfig": endpoints}
     body["HostConfig"] = host
     return body
 

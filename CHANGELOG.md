@@ -54,6 +54,12 @@ history this repository does not have.
   catalog message for each. The English a person or an agent reads is
   unchanged, byte for byte, and agents still get no codes. (#57)
 
+- **History says what kind of act, which field and which table as keys,**
+  beside the English it always sent (`headline_key`, a field's `column`, a
+  row's `table_key`), and a screen in another language words them from its
+  own catalog. English shows the server's words exactly as before; the
+  sentences themselves are still the server's. (#57)
+
 - **A fresh install starts without `SPENDTRACKER_AUTO_MIGRATE=1`.** A first
   `docker compose up -d` against a new volume used to be refused until you
   passed the flag once from a terminal. A database with no tables at all --
@@ -88,20 +94,28 @@ history this repository does not have.
   behind it, as 0.3.1's did. Still one request, only when the button is
   pressed, saying nothing about the instance. (#165)
 
-- **The remaining screens' words go into the catalogs one screen at a time**,
-  starting with Categories. English is unchanged; each screen has a test
-  that renders it in the `en-XA` pseudo-locale and finds no English left.
-  (#56)
+- **Every remaining screen's words are in the catalogs**, one screen per
+  pull request: categories, payees, payee categorisation and the naming
+  rules, the household page, Admin, reconciling and importing accounts,
+  History and backups, application management, receipts, the reports and
+  the one-time YNAB import. Each has a test that renders it in the `en-XA`
+  pseudo-locale and finds no English left. The import guide is a document
+  per language instead: until one is written for a language it shows the
+  English one, marked as English, under a line saying so. `/snap` keeps
+  its words in a small dictionary of its own, keyed by the language chosen
+  on the device. Outside English the desktop menu grows to its widest item,
+  up to 240px, and breaks a word too long for it rather than spilling past
+  the edge. English is unchanged throughout. (#56)
 
-- **The transfer panel's words are in the catalogs.** English is unchanged;
-  a test renders it in the `en-XA` pseudo-locale and finds no English left.
-  (#55)
+- **The register, the transfer screens, Accounts and Import have their
+  words in the catalogs**, each with a test that renders it in the `en-XA`
+  pseudo-locale and finds no English left. English is unchanged. (#55)
 
-- **Draft translations of the first screens** in pt-BR, es-ES and sv-SE:
-  every message extracted so far, each marked `#, fuzzy` until a native
-  speaker reviews it (#58). None is served or selectable; a test checks every
-  catalog entry is valid ICU and keeps the English placeholders. (#175, #176,
-  #177)
+- **Draft translations of every screen** in pt-BR, es-ES and sv-SE, kept as
+  fuzzy drafts and never served until a native speaker has reviewed them
+  (#58). Every catalog entry is valid ICU and keeps the English
+  placeholders, and the drafts were re-checked against the translator
+  notes. (#175, #176, #177)
 
 - **The first screens' words are in the catalogs:** the shell and its menu,
   signing in, step-up, recovery codes, resetting a sign-in, the profile and
@@ -267,6 +281,27 @@ history this repository does not have.
   the updater against a real Docker Engine. No image or compose service runs
   the updater yet (#164).
 
+- **The self-updater hands over to its successor** (#162). When an update
+  brings a newer updater, the running one verifies it, starts it beside
+  itself as a copy of its own container, and lets it prove it can work --
+  the engine socket, the project's containers, a file written and read back
+  in the `update` volume, and its own image digest -- before stepping aside.
+  The newer updater **goes first**, before the app is stopped, and runs the
+  rest of the update; if it cannot, nothing has been stopped, the old one
+  runs the update and tries again afterwards. The old updater stays on
+  standby for ten minutes and takes back over if the new one stops or falls
+  silent -- rolling back, rather than finishing, an update the newer one had
+  started -- then stops itself and stays as `<name>-previous`. Started by
+  hand from Docker Desktop or Podman Desktop, a `-previous` updater takes over
+  from a canonical one that has been silent for two minutes, and otherwise
+  leaves it alone. After an engine restart, or either updater dying at any
+  point, exactly one of them carries on. *Update the updater only* now works:
+  it verifies and pulls the updater image of a newer release alone, refuses
+  one that does not speak the app's protocol, changes only the updater's
+  line in the pin, and still works when the engine has moved past the
+  updater's tested API versions. The updater is never replaced by an older
+  one. No image or compose service runs the updater yet (#164).
+
 - **An optional pre-update hook for servers** (#168). An operator can have a
   command of their own run **on the host** before every update -- a Proxmox
   snapshot of the VM, say -- by installing the systemd path unit, service and
@@ -280,6 +315,7 @@ history this repository does not have.
   hook failed.*, with the reason and the end of the command's output in the
   update's history. Without a `hook.json` in that directory the step is
   skipped and says so; nothing changes for an installation without a hook.
+
 
 - **The self-updater has an image and runs beside the app** (#164).
   `docker build --target updater .` builds it from the same Dockerfile and
@@ -302,9 +338,7 @@ history this repository does not have.
   and linux/arm64 beside the app, and the app image carries the
   `updater-protocol` label. `deploy/tailnet/check.sh` checks the updater:
   outside the sidecar's namespace, the only holder of the socket, able to
-  reach it, and whether an update is in progress.
-
-## 0.8.0 — 2026-10-08
+  reach it, and whether an update is in progress.## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
 

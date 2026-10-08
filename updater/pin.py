@@ -87,28 +87,44 @@ def set_env(project_dir: Path, values: dict[str, str]) -> None:
     _replace(env, merged_env(existing, values).encode(), mode)
 
 
-def write(project_dir: Path, app: str, updater: str | None) -> dict[str, str]:
+def write(project_dir: Path, app: str | None, updater: str | None) -> dict[str, str]:
     """Pin `app` (and `updater`, when known) in `.env` and record them in `pin/release.env`.
 
     Returns what was pinned. Idempotent: writing the same pin twice leaves the
-    same files (step 9 is repeated after a crash, 5.6).
+    same files (step 9 is repeated after a crash, 5.6). With `app` None only
+    the updater's line changes -- an updater-only refresh or a handover (6.6)
+    -- and the record keeps the app line it had.
     """
-    values = {APP_KEY: app}
+    values: dict[str, str] = {}
+    if app:
+        values[APP_KEY] = app
     if updater:
         values[UPDATER_KEY] = updater
+    if not values:
+        return {}
     set_env(project_dir, values)
 
     record_dir = Path(project_dir) / "pin"
     record_dir.mkdir(mode=0o775, exist_ok=True)
-    lines = [RECORD_HEADER, *(f"{k}={values[k]}\n" for k in KEYS if k in values)]
+    recorded = {**_read_keys(record_dir / "release.env"), **values}
+    lines = [RECORD_HEADER, *(f"{k}={recorded[k]}\n" for k in KEYS if k in recorded)]
     _replace(record_dir / "release.env", "".join(lines).encode(), 0o664)
     return values
 
 
+def write_updater(project_dir: Path, updater: str) -> dict[str, str]:
+    """Only the updater's line (6.6): the app's pin is left exactly as it was."""
+    return write(project_dir, None, updater)
+
+
 def read(project_dir: Path) -> dict[str, str]:
     """The pinned keys as `.env` holds them now."""
+    return _read_keys(Path(project_dir) / ".env")
+
+
+def _read_keys(path: Path) -> dict[str, str]:
     try:
-        text = (Path(project_dir) / ".env").read_text(encoding="utf-8")
+        text = Path(path).read_text(encoding="utf-8")
     except FileNotFoundError:
         return {}
     out = {}
