@@ -32,6 +32,32 @@ history this repository does not have.
 
 ## Unreleased
 
+### Fixed
+
+- **The previous updater exits cleanly when its ten minutes of standby are
+  up.** It asked the engine to stop its own container and then waited for the
+  answer, which the engine gives only once the container has exited, so the
+  updater could not see its own stop signal and was killed ten seconds later:
+  every handover ended with the previous updater shown as Exited (137). It now
+  asks without waiting and exits 0. (#257)
+
+- **An update no longer hands the updater over to a copy of itself.** After
+  *Update the updater only*, updating the app to the same release started a
+  second updater from the same image, removed the previous updater that was
+  still standing by, and recorded a takeover the confirmation had said would
+  not happen. An updater is now known by its image digest: the one already
+  running the target's image stays as it is, and says so in the record.
+  (#258)
+
+- **A `compose up` while the previous updater stands by no longer makes it
+  crash.** When compose replaced the new updater with a container of another
+  image, the replacement mistook itself for the previous updater and went
+  quiet for minutes, and the previous updater then tried to take back over
+  under a name that was in use, and died. The replacement now starts as the
+  updater and keeps its heartbeat; the previous one records that it stood
+  down, rather than a take-back that did not happen, and stops itself. A
+  take-back the engine refuses ends the same way. (#259)
+
 ## 0.9.1 — 2026-10-09
 
 **Reversible: none** — no migration in this release. To go back, run
