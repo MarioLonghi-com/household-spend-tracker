@@ -24,6 +24,9 @@ import {
 } from "../components/bits";
 import { countryName, TYPES, TypeHelp, typeLabel, useCountries } from "./Accounts";
 import type { AccountImportOut, AccountImportRow, AccountType, Household } from "../lib/types";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { formatDate } from "../lib/locale";
 
 type ImportSort =
   | "line"
@@ -139,22 +142,25 @@ export function AccountImport({
   const heading = { sort, direction, onSort };
 
   return (
-    <Panel title="Import accounts from a file" onClose={onClose} config wide>
+    <Panel title={t`Import accounts from a file`} onClose={onClose} config wide>
       <p className="small">
-        One row per account, under the template's header row.{" "}
-        <a href={`/api/households/${household.id}/accounts/import-template.csv`} download>
-          Download the template
-        </a>
-        , fill it in with a spreadsheet, and save it as CSV.
+        <Trans>
+          One row per account, under the template's header row.{" "}
+          <a href={`/api/households/${household.id}/accounts/import-template.csv`} download>
+            Download the template
+          </a>
+          , fill it in with a spreadsheet, and save it as CSV.
+        </Trans>
       </p>
       <dl className="facts">
+        {/* The template's column names, which are the same in every language. */}
         <dt>name</dt>
-        <dd>Required. No two accounts can share one.</dd>
+        <dd><Trans>Required. No two accounts can share one.</Trans></dd>
         <dt>
           type <TypeHelp />
         </dt>
         <dd>
-          Required, one of{" "}
+          {t`Required, one of`}{" "}
           {TYPES.map((one, at) => (
             <span key={one.value}>
               {at > 0 ? ", " : null}
@@ -164,28 +170,38 @@ export function AccountImport({
           .
         </dd>
         <dt>currency</dt>
-        <dd>A three-letter code. Leave it blank for {household.base_currency}.</dd>
+        <dd>
+          <Trans>A three-letter code. Leave it blank for {household.base_currency}.</Trans>
+        </dd>
         <dt>country</dt>
         <dd>
-          Its two-letter code, like <span className="mono">ES</span>.
+          <Trans>
+            Its two-letter code, like <span className="mono">ES</span>.
+          </Trans>
         </dd>
         <dt>opening_balance</dt>
         <dd>
-          A plain figure like <span className="mono">1234.56</span> or{" "}
-          <span className="mono">-80.00</span> — a point for the decimals and no thousands
-          separator. Blank for an account that starts empty.
+          <Trans>
+            A plain figure like <span className="mono">1234.56</span> or{" "}
+            <span className="mono">-80.00</span> — a point for the decimals and no thousands
+            separator. Blank for an account that starts empty.
+          </Trans>
         </dd>
         <dt>opening_date</dt>
         <dd>
-          <span className="mono">YYYY-MM-DD</span>, like <span className="mono">2026-01-31</span>.
-          Blank for today.
+          <Trans>
+            <span className="mono">YYYY-MM-DD</span>, like <span className="mono">2026-01-31</span>.
+            Blank for today.
+          </Trans>
         </dd>
       </dl>
       <p className="small muted">
-        Every column but name and type can be left blank. Institution, iban and note are kept as
-        written.
+        <Trans>
+          Every column but name and type can be left blank. Institution, iban and note are kept as
+          written.
+        </Trans>
       </p>
-      <Field label="Accounts file">
+      <Field label={t`Accounts file`}>
         <input
           type="file"
           accept=".csv,text/csv"
@@ -201,58 +217,66 @@ export function AccountImport({
       {file && <p className="small muted">{file.name}</p>}
 
       <Problem error={preview.error ?? commit.error} />
-      {preview.isPending && <p className="small muted">Reading the file…</p>}
+      {preview.isPending && (
+        <p className="small muted">
+          <Trans>Reading the file…</Trans>
+        </p>
+      )}
 
       {read && (
         <>
           <p className="small">
             {refused === 0
-              ? `${count} ${count === 1 ? "account" : "accounts"} ready to import. ` +
-                "Nothing has been created yet."
-              : `${refused} of ${count} ${count === 1 ? "row has" : "rows have"} a problem, ` +
-                "so nothing can be imported yet. Correct the file and choose it again."}
+              ? plural(count, {
+                  one: `${count} account ready to import. Nothing has been created yet.`,
+                  other: `${count} accounts ready to import. Nothing has been created yet.`,
+                })
+              : plural(count, {
+                  one: `${refused} of ${count} row has a problem, so nothing can be imported yet. Correct the file and choose it again.`,
+                  other: `${refused} of ${count} rows have a problem, so nothing can be imported yet. Correct the file and choose it again.`,
+                })}
           </p>
           <div className="table-scroll">
             <table>
               <thead>
                 <tr>
-                  <SortHeading label="Line" column="line" align="right" {...heading} />
-                  <SortHeading label="Account" column="name" {...heading} />
-                  <SortHeading label="Type" column="type" {...heading} />
-                  <SortHeading label="Currency" column="currency" {...heading} />
+                  <SortHeading label={t`Line`} column="line" align="right" {...heading} />
+                  <SortHeading label={t`Account`} column="name" {...heading} />
+                  <SortHeading label={t`Type`} column="type" {...heading} />
+                  <SortHeading label={t`Currency`} column="currency" {...heading} />
                   <SortHeading
-                    label="Country"
+                    label={t`Country`}
                     column="country"
                     className="flag-col"
                     {...heading}
                   />
                   <SortHeading
-                    label="Opening balance"
+                    label={t`Opening balance`}
                     column="opening_balance"
                     align="right"
                     {...heading}
                   />
-                  <SortHeading label="Opening date" column="opening_date" {...heading} />
-                  <SortHeading label="IBAN" column="iban" {...heading} />
-                  <SortHeading label="Problems" column="problems" {...heading} />
+                  <SortHeading label={t`Opening date`} column="opening_date" {...heading} />
+                  <SortHeading label={t`IBAN`} column="iban" {...heading} />
+                  <SortHeading label={t`Problems`} column="problems" {...heading} />
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.line}>
-                    <td className="amount muted" data-label="Line" data-detail-first="true">
+                    <td className="amount muted" data-label={t`Line`} data-detail-first="true">
                       {row.line}
                     </td>
                     <td data-primary="true">{row.name || <span className="muted">—</span>}</td>
-                    <td className="small muted" data-label="Type">
+                    <td className="small muted" data-label={t`Type`}>
                       {rowType(row) || "—"}
                     </td>
-                    <td className="small muted mono" data-label="Currency">
+                    <td className="small muted mono" data-label={t`Currency`}>
                       {row.currency}
                     </td>
                     <td
                       className="flag-col"
-                      data-label="Country"
+                      data-label={t`Country`}
                       data-empty={row.country ? undefined : "true"}
                     >
                       <span className="flag" title={countryName(countries.data, row.country)}>
@@ -274,21 +298,21 @@ export function AccountImport({
                     </td>
                     <td
                       className="small muted mono span-col"
-                      data-label="Opening date"
+                      data-label={t`Opening date`}
                       data-empty={row.opening_date ? undefined : "true"}
                     >
-                      {row.opening_date ?? "—"}
+                      {row.opening_date ? formatDate(row.opening_date) : "—"}
                     </td>
                     <td
                       className="small mono"
-                      data-label="IBAN"
+                      data-label={t`IBAN`}
                       data-empty={row.iban ? undefined : "true"}
                     >
                       {row.iban ?? <span className="muted">—</span>}
                     </td>
                     <td
                       className="small"
-                      data-label="Problems"
+                      data-label={t`Problems`}
                       data-empty={row.problems.length ? undefined : "true"}
                     >
                       {row.problems.length === 0 ? (
@@ -312,7 +336,7 @@ export function AccountImport({
             disabled={!file || refused > 0 || commit.isPending || preview.isPending}
             onClick={() => file && commit.mutate(file)}
           >
-            Import {count} {count === 1 ? "account" : "accounts"}
+            {plural(count, { one: `Import ${count} account`, other: `Import ${count} accounts` })}
           </button>
         </>
       )}

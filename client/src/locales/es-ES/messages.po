@@ -128,6 +128,7 @@ msgstr ""
 msgid "Add this to your authenticator app, then type the six digits it shows."
 msgstr "Añade esto a tu aplicación de autenticación y escribe los seis dígitos que muestre."
 
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
@@ -149,6 +150,12 @@ msgstr "No había ningún navegador de confianza."
 #, fuzzy
 msgid "History"
 msgstr "Historial"
+
+#. placeholder {0}: formatDate(sheet.data.last_statement_date)
+#. placeholder {1}: format(sheet.data.last_statement_balance ?? 0, account.currency)
+#: src/screens/Reconcile.tsx
+msgid "Last proved to <0>{0}</0> at {1}. Everything up to there is locked and is not counted again."
+msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "Match"
@@ -207,6 +214,11 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Nothing in the last 14 days."
+msgstr ""
+
+#. placeholder {0}: household.base_currency
+#: src/screens/AccountImport.tsx
+msgid "A three-letter code. Leave it blank for {0}."
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -531,6 +543,10 @@ msgstr "Tu hogar"
 msgid "Passkeys need this app opened at its HTTPS address, {address}."
 msgstr "Las llaves de acceso necesitan que abras esta aplicación en su dirección HTTPS, {address}."
 
+#: src/screens/AccountImport.tsx
+msgid "Accounts file"
+msgstr ""
+
 #. placeholder {0}: tagOffer.value
 #. placeholder {1}: account.name
 #: src/screens/Import.tsx
@@ -595,6 +611,7 @@ msgstr ""
 msgid "{0, plural, one {({1} line)} other {({2} lines)}}"
 msgstr "{0, plural, one {({1} línea)} other {({2} líneas)}}"
 
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Opening date"
@@ -695,6 +712,11 @@ msgstr "Gasto de trabajo: sin reembolsar todavía"
 #, fuzzy
 msgid "Somebody gave {user} a new authenticator"
 msgstr "Alguien dio a {user} una nueva aplicación de autenticación"
+
+#. placeholder {0}: formatDate(row.date)
+#: src/screens/Reconcile.tsx
+msgid "Tick {0}"
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Revoke this invitation?"
@@ -798,6 +820,14 @@ msgstr "Desvincular"
 #, fuzzy
 msgid "Remove this part"
 msgstr "Quitar esta parte"
+
+#: src/screens/Reconcile.tsx
+msgid "the closing balance"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "Nothing left to prove on or before that date. Everything up to here is already locked."
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Nobody yet, which should be impossible while you are reading this."
@@ -994,10 +1024,19 @@ msgstr "Cubierto"
 msgid "Day-to-day money at a bank. Salary in, card and direct debits out."
 msgstr "El dinero del día a día en un banco. Entra la nómina, salen la tarjeta y los recibos domiciliados."
 
+#: src/screens/Reconcile.tsx
+msgid "Already proved"
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Undo — add as new instead"
 msgstr "Deshacer: añadir como nuevo"
+
+#. placeholder {0}: account.name
+#: src/screens/Reconcile.tsx
+msgid "Reconcile {0}"
+msgstr ""
 
 #. placeholder {0}: recognised.account_name
 #. placeholder {1}: recognised.how
@@ -1172,6 +1211,7 @@ msgstr "Apariencia"
 msgid "None yet"
 msgstr "Ninguna todavía"
 
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #: src/screens/TransferSections.tsx
@@ -1192,6 +1232,10 @@ msgstr "nunca usada"
 #, fuzzy
 msgid "why the currencies are not added"
 msgstr "por qué no se suman las divisas"
+
+#: src/screens/AccountImport.tsx
+msgid "{count, plural, one {{refused} of {count} row has a problem, so nothing can be imported yet. Correct the file and choose it again.} other {{refused} of {count} rows have a problem, so nothing can be imported yet. Correct the file and choose it again.}}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1457,6 +1501,10 @@ msgstr "o"
 msgid "Discard"
 msgstr "Descartar"
 
+#: src/screens/Reconcile.tsx
+msgid "Locking is one act, so History undoes the whole reconciliation in one click if you got the statement wrong."
+msgstr ""
+
 #: src/screens/Transfer.tsx
 #, fuzzy
 msgid "Add transfer"
@@ -1521,6 +1569,10 @@ msgstr ""
 #, fuzzy
 msgid "Select every waiting row"
 msgstr "Seleccionar todas las filas pendientes"
+
+#: src/screens/Reconcile.tsx
+msgid "The bank says there is more than you have ticked — a payment in you have not entered?"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1831,6 +1883,10 @@ msgstr "sin contar"
 msgid "The passkey prompt was closed, so nothing was added."
 msgstr "Se cerró la ventana de la llave de acceso, así que no se añadió nada."
 
+#: src/screens/Reconcile.tsx
+msgid "It balances"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Smaller text in the table"
@@ -1945,6 +2001,10 @@ msgstr "Una transferencia de {from_currency} a {to_currency} necesita el importe
 #, fuzzy
 msgid "error.transfer.same_account"
 msgstr "Una cuenta no puede transferir a sí misma"
+
+#: src/screens/Reconcile.tsx
+msgid "Tick every row"
+msgstr ""
 
 #: src/screens/Payees.tsx
 msgid "No payees yet. One appears the first time you name somebody on a transaction."
@@ -2257,6 +2317,11 @@ msgstr "Movimiento único"
 msgid "Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it."
 msgstr "Números y nombres que usan los extractos para esta cuenta. Un archivo que lleve uno se asocia a esta cuenta en la pantalla Importar, y una transferencia que nombre uno, también."
 
+#. placeholder {0}: account.currency
+#: src/screens/Reconcile.tsx
+msgid "Closing balance ({0})"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Reset sign-in for {name}?"
 msgstr ""
@@ -2420,6 +2485,7 @@ msgid "Copy"
 msgstr ""
 
 #: src/screens/Import.tsx
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
@@ -2438,6 +2504,10 @@ msgstr "Fecha;Concepto;Importe\n"
 #, fuzzy
 msgid "Close: {name}"
 msgstr "Cerrar: {name}"
+
+#: src/screens/AccountImport.tsx
+msgid "<0>YYYY-MM-DD</0>, like <1>2026-01-31</1>. Blank for today."
+msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -2470,6 +2540,10 @@ msgstr "formato de fecha"
 #, fuzzy
 msgid "Rows"
 msgstr "Filas"
+
+#: src/screens/Reconcile.tsx
+msgid "This account has never been reconciled, so you are starting from the beginning of its history."
+msgstr ""
 
 #. placeholder {0}: list.length
 #: src/screens/Register.tsx
@@ -2637,6 +2711,10 @@ msgstr "Ya importada"
 msgid "Checking"
 msgstr "Cuentas corrientes"
 
+#: src/screens/Reconcile.tsx
+msgid "Ticked here"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "You are a member of anything you create, whether or not you tick yourself."
 msgstr ""
@@ -2648,6 +2726,10 @@ msgstr "El trabajo no va a pagar esto. Cuenta como gasto tuyo."
 
 #: src/screens/Rules.tsx
 msgid "Call it"
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "You have ticked more than the bank says — a row that is not on this statement?"
 msgstr ""
 
 #: src/screens/Categories.tsx
@@ -2728,6 +2810,13 @@ msgstr "Archivo"
 #, fuzzy
 msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
 msgstr "Configura una nueva aplicación de autenticación: un móvil nuevo, o una que ya no tienes. La actual sigue funcionando hasta que se compruebe la nueva."
+
+#. placeholder {0}: ticked.size
+#. placeholder {1}: ticked.size
+#. placeholder {2}: ticked.size
+#: src/screens/Reconcile.tsx
+msgid "{0, plural, one {Finish and lock {1} row} other {Finish and lock {2} rows}}"
+msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
@@ -2820,6 +2909,7 @@ msgstr "Año final"
 msgid "Finish"
 msgstr "Terminar"
 
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2912,6 +3002,7 @@ msgid "You still have 1 passkey, and a recovery code leaves them working. If one
 msgstr "Todavía tienes 1 llave de acceso, y un código de recuperación no las desactiva. Si una estaba en el dispositivo que perdiste, quítala en Métodos de inicio de sesión de tu perfil: tu nombre en el menú."
 
 #: src/screens/Import.tsx
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
 #, fuzzy
@@ -3058,6 +3149,7 @@ msgstr "Cada vínculo tiene un nombre o una persona detrás."
 msgid "Account for {0}"
 msgstr "Cuenta para {0}"
 
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Opening balance"
@@ -3275,6 +3367,10 @@ msgstr "Cualquiera"
 msgid "What would this match?"
 msgstr ""
 
+#: src/screens/Reconcile.tsx
+msgid "Every row on this statement is accounted for."
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "You will still be able to sign in with your password and code."
@@ -3386,6 +3482,7 @@ msgid "This file looks like it is for <0>{0}</0> ({1}), not the account chosen a
 msgstr "Este archivo parece ser de <0>{0}</0> ({1}), no de la cuenta elegida arriba."
 
 #: src/screens/Import.tsx
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
@@ -3400,6 +3497,10 @@ msgstr "columna de concepto"
 
 #: src/screens/Categories.tsx
 msgid "How to categorise {name}"
+msgstr ""
+
+#: src/screens/AccountImport.tsx
+msgid "Required. No two accounts can share one."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -3631,6 +3732,10 @@ msgstr "Esto queda como una sola entrada en el Historial, así que toda la impor
 msgid "Email"
 msgstr "Correo electrónico"
 
+#: src/screens/Reconcile.tsx
+msgid "The difference has to be zero first"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -3825,6 +3930,10 @@ msgstr ""
 msgid "Withdraw this reset link?"
 msgstr ""
 
+#: src/screens/AccountImport.tsx
+msgid "{count, plural, one {Import {count} account} other {Import {count} accounts}}"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Member"
 msgstr ""
@@ -3833,6 +3942,10 @@ msgstr ""
 #, fuzzy
 msgid "This month"
 msgstr "Este mes"
+
+#: src/screens/AccountImport.tsx
+msgid "Problems"
+msgstr ""
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -3854,6 +3967,14 @@ msgstr "Borrada"
 msgid "{hiddenByCurrency, plural, one {{0} row is not shown: the currency toggle is showing {1}, and that row is in another.} other {{2} rows are not shown: the currency toggle is showing {3}, and those rows are in another.}}"
 msgstr "{hiddenByCurrency, plural, one {{0} fila no se muestra: el selector de divisas muestra {1}, y esa fila está en otra.} other {{2} filas no se muestran: el selector de divisas muestra {3}, y esas filas están en otra.}}"
 
+#: src/screens/Reconcile.tsx
+msgid "then tick the rows that are on it"
+msgstr ""
+
+#: src/screens/AccountImport.tsx
+msgid "{count, plural, one {{count} account ready to import. Nothing has been created yet.} other {{count} accounts ready to import. Nothing has been created yet.}}"
+msgstr ""
+
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
@@ -3870,6 +3991,7 @@ msgstr "Esta importación"
 msgid "Made for {0}, cannot be used here."
 msgstr "Creada para {0}, no se puede usar aquí."
 
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -3990,6 +4112,10 @@ msgstr ""
 msgid "Out {code}"
 msgstr "Salida {code}"
 
+#: src/screens/AccountImport.tsx
+msgid "Required, one of"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Dark"
@@ -4044,6 +4170,7 @@ msgstr "Los seis dígitos de tu aplicación de autenticación"
 msgid "fee column"
 msgstr "columna de comisión"
 
+#: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
 #: src/screens/Register.tsx
@@ -4069,6 +4196,10 @@ msgstr "{by} restableció la aplicación de autenticación de {user}"
 
 #: src/screens/Admin.tsx
 msgid "None yet."
+msgstr ""
+
+#: src/screens/Reconcile.tsx
+msgid "The figure printed on the statement for the day it closes — what the bank says you had, not what this app thinks."
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -4297,6 +4428,7 @@ msgstr ""
 msgid "Move {0} rows"
 msgstr ""
 
+#: src/screens/AccountImport.tsx
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Line"
@@ -4316,6 +4448,10 @@ msgstr "Traído por la <0>Importación única</0> desde {how}, el {when}."
 #, fuzzy
 msgid "From year"
 msgstr "Año inicial"
+
+#: src/screens/Reconcile.tsx
+msgid "Type the closing balance"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -4398,10 +4534,15 @@ msgstr ""
 msgid "The register runs from {0} to {1}."
 msgstr ""
 
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "That isn't an amount in {currency}"
 msgstr "Eso no es un importe en {currency}"
+
+#: src/screens/AccountImport.tsx
+msgid "Import accounts from a file"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -4468,6 +4609,10 @@ msgstr ""
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
 msgstr "Usar un código de recuperación ha cerrado tu sesión en todas partes, ha olvidado todos los navegadores de confianza y ha revocado {0} claves de agente. Un programa que usara una de ellas será rechazado a partir de ahora; crea una clave nueva en tu perfil si debe seguir funcionando."
 
+#: src/screens/AccountImport.tsx
+msgid "IBAN"
+msgstr ""
+
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "All dates"
@@ -4533,6 +4678,10 @@ msgstr "{app}, mediante su exportación CSV"
 #, fuzzy
 msgid "Unlink transfer"
 msgstr "Desvincular transferencia"
+
+#: src/screens/Reconcile.tsx
+msgid "Statement closing date"
+msgstr ""
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -4604,6 +4753,7 @@ msgstr "Diferencia"
 #: src/screens/Import.tsx
 #: src/screens/PayeeCategorisation.tsx
 #: src/screens/Payees.tsx
+#: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Payee"
@@ -4726,6 +4876,10 @@ msgstr "Dado por perdido: el trabajo no lo pagará"
 #, fuzzy
 msgid "What this would do"
 msgstr "Lo que haría esto"
+
+#: src/screens/AccountImport.tsx
+msgid "Every column but name and type can be left blank. Institution, iban and note are kept as written."
+msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "No invitations outstanding."
@@ -4879,6 +5033,11 @@ msgstr "Dados por perdidos"
 msgid "12,34"
 msgstr "12,34"
 
+#. placeholder {0}: format(difference, currency)
+#: src/screens/Reconcile.tsx
+msgid "{0} out"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "a negative balance here is money you owe"
@@ -4976,6 +5135,10 @@ msgstr "U — Pendientes"
 msgid "contains"
 msgstr ""
 
+#: src/screens/AccountImport.tsx
+msgid "Its two-letter code, like <0>ES</0>."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Yes, delete it"
@@ -5065,6 +5228,10 @@ msgstr ""
 msgid "It was printed to the server log when this instance started, and written to <0>{0}</0>. It changes every time the server restarts until setup is finished."
 msgstr "Se imprimió en el registro del servidor cuando arrancó esta instancia y se escribió en <0>{0}</0>. Cambia cada vez que se reinicia el servidor hasta que termine la configuración."
 
+#: src/screens/AccountImport.tsx
+msgid "Reading the file…"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Set the category on {done} rows and skipped 1 transfer leg — a transfer has no category."
@@ -5098,6 +5265,10 @@ msgstr "3. Tu aplicación de autenticación"
 #, fuzzy
 msgid "1. The setup token"
 msgstr "1. El token de configuración"
+
+#: src/screens/Reconcile.tsx
+msgid "Already locked"
+msgstr ""
 
 #: src/components/LanguagePicker.tsx
 #, fuzzy
@@ -5476,6 +5647,10 @@ msgstr "<0>▾</0> marca los dos cuyo saldo suele ser negativo: lo debes. Nada m
 msgid "This year"
 msgstr "Este año"
 
+#: src/screens/AccountImport.tsx
+msgid "One row per account, under the template's header row. <0>Download the template</0>, fill it in with a spreadsheet, and save it as CSV."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Give a program a key"
@@ -5668,6 +5843,10 @@ msgstr ""
 msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new authenticator."
 msgstr ""
 
+#: src/screens/Reconcile.tsx
+msgid "For a credit card, type what you owe as a negative."
+msgstr ""
+
 #. placeholder {0}: one.transaction_count
 #. placeholder {1}: one.transaction_count
 #. placeholder {2}: one.transaction_count
@@ -5679,6 +5858,10 @@ msgstr ""
 #, fuzzy
 msgid "Gather the accounts by type: checking, savings, cards…"
 msgstr "Agrupar las cuentas por tipo: corrientes, ahorro, tarjetas…"
+
+#: src/screens/AccountImport.tsx
+msgid "A plain figure like <0>1234.56</0> or <1>-80.00</1> — a point for the decimals and no thousands separator. Blank for an account that starts empty."
+msgstr ""
 
 #. placeholder {0}: account?.name ?? ""
 #: src/screens/Import.tsx

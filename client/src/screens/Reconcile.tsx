@@ -29,6 +29,8 @@ import {
 } from "../components/bits";
 import type { Account, Reconciliation, Worksheet } from "../lib/types";
 import { formatDate } from "../lib/locale";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 type WorksheetSort = "date" | "payee" | "memo" | "amount";
 
@@ -117,26 +119,26 @@ export function Reconcile({
   }
 
   return (
-    <Panel title={`Reconcile ${account.name}`} onClose={onClose} wide>
+    <Panel title={t`Reconcile ${account.name}`} onClose={onClose} wide>
       <Problem error={sheet.error ?? finish.error} />
 
       <p className="muted small" style={{ marginTop: 0 }}>
         {sheet.data?.last_statement_date ? (
-          <>
+          <Trans>
             Last proved to <strong>{formatDate(sheet.data.last_statement_date)}</strong> at{" "}
             {format(sheet.data.last_statement_balance ?? 0, account.currency)}. Everything up to
             there is locked and is not counted again.
-          </>
+          </Trans>
         ) : (
-          <>
+          <Trans>
             This account has never been reconciled, so you are starting from the beginning of its
             history.
-          </>
+          </Trans>
         )}
       </p>
 
       <div className="row">
-        <Field label="Statement closing date">
+        <Field label={t`Statement closing date`}>
           <input
             type="date"
             value={closingDate}
@@ -149,15 +151,19 @@ export function Reconcile({
           />
         </Field>
         <Field
-          label={`Closing balance (${account.currency})`}
+          label={t`Closing balance (${account.currency})`}
           hint={
-            <Hint label="the closing balance">
+            <Hint label={t`the closing balance`}>
               <p>
-                The figure printed on the statement for the day it closes — what the bank says you
-                had, not what this app thinks.
+                <Trans>
+                  The figure printed on the statement for the day it closes — what the bank says you
+                  had, not what this app thinks.
+                </Trans>
               </p>
               <p className="muted small" style={{ marginBottom: 0 }}>
-                For a credit card, type what you owe as a negative.
+                <Trans>
+                  For a credit card, type what you owe as a negative.
+                </Trans>
               </p>
             </Hint>
           }
@@ -183,7 +189,9 @@ export function Reconcile({
 
       {rows.length === 0 ? (
         <Empty>
-          Nothing left to prove on or before that date. Everything up to here is already locked.
+          <Trans>
+            Nothing left to prove on or before that date. Everything up to here is already locked.
+          </Trans>
         </Empty>
       ) : (
         <div className="table-scroll">
@@ -193,35 +201,35 @@ export function Reconcile({
                 <th style={{ width: 28 }}>
                   <input
                     type="checkbox"
-                    aria-label="Tick every row"
+                    aria-label={t`Tick every row`}
                     checked={ticked.size === rows.length && rows.length > 0}
                     onChange={tickEverything}
                     style={{ width: "auto" }}
                   />
                 </th>
                 <SortHeading
-                  label="Date"
+                  label={t`Date`}
                   column="date"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Payee"
+                  label={t`Payee`}
                   column="payee"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Memo"
+                  label={t`Memo`}
                   column="memo"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Amount"
+                  label={t`Amount`}
                   column="amount"
                   sort={order.sort}
                   direction={order.direction}
@@ -236,7 +244,7 @@ export function Reconcile({
                   <td>
                     <input
                       type="checkbox"
-                      aria-label={`Tick ${formatDate(row.date)}`}
+                      aria-label={t`Tick ${formatDate(row.date)}`}
                       checked={ticked.has(row.id)}
                       onChange={() => toggle(row.id)}
                       style={{ width: "auto" }}
@@ -260,21 +268,26 @@ export function Reconcile({
           className="primary"
           disabled={!balanced || finish.isPending}
           onClick={() => finish.mutate()}
-          title={balanced ? "" : "The difference has to be zero first"}
+          title={balanced ? "" : t`The difference has to be zero first`}
         >
-          Finish and lock {ticked.size} {ticked.size === 1 ? "row" : "rows"}
+          {plural(ticked.size, {
+            one: `Finish and lock ${ticked.size} row`,
+            other: `Finish and lock ${ticked.size} rows`,
+          })}
         </button>
-        <button onClick={onClose}>Not now</button>
+        <button onClick={onClose}><Trans>Not now</Trans></button>
       </div>
       <p className="small muted" style={{ marginTop: 10 }}>
-        Locking is one act, so History undoes the whole reconciliation in one click if you got the
-        statement wrong.
+        <Trans>
+          Locking is one act, so History undoes the whole reconciliation in one click if you got the
+          statement wrong.
+        </Trans>
       </p>
 
       {(past.data ?? []).length > 0 && (
         <>
           <hr className="rule" />
-          <h3 className="section-title">Already proved</h3>
+          <h3 className="section-title"><Trans>Already proved</Trans></h3>
           <table>
             <tbody>
               {(past.data ?? []).map((one) => (
@@ -316,9 +329,11 @@ function Difference({
   if (difference === null) {
     return (
       <div className="difference waiting">
-        <strong>Type the closing balance</strong>
+        <strong>
+          <Trans>Type the closing balance</Trans>
+        </strong>
         <span className="small muted">
-          {typed ? "That isn't an amount in " + currency : "then tick the rows that are on it"}
+          {typed ? t`That isn't an amount in ${currency}` : t`then tick the rows that are on it`}
         </span>
       </div>
     );
@@ -327,19 +342,19 @@ function Difference({
   return (
     <div className={balanced ? "difference agreed" : "difference apart"}>
       <div>
-        <strong>{balanced ? "It balances" : `${format(difference, currency)} out`}</strong>
+        <strong>{balanced ? t`It balances` : t`${format(difference, currency)} out`}</strong>
         <span className="small">
           {balanced
-            ? "Every row on this statement is accounted for."
+            ? t`Every row on this statement is accounted for.`
             : difference > 0
-              ? "The bank says there is more than you have ticked — a payment in you have not entered?"
-              : "You have ticked more than the bank says — a row that is not on this statement?"}
+              ? t`The bank says there is more than you have ticked — a payment in you have not entered?`
+              : t`You have ticked more than the bank says — a row that is not on this statement?`}
         </span>
       </div>
       <dl className="difference-sum">
-        <dt>Already locked</dt>
+        <dt><Trans>Already locked</Trans></dt>
         <dd className="amount">{format(locked, currency)}</dd>
-        <dt>Ticked here</dt>
+        <dt><Trans>Ticked here</Trans></dt>
         <dd className="amount">{format(ticked, currency)}</dd>
       </dl>
     </div>
