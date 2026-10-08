@@ -84,7 +84,10 @@ jobs:
           import json, sqlite3
           conn = sqlite3.connect("bench-data/bench.sqlite3")
           tables = [r[0] for r in conn.execute(
-              "SELECT name FROM sqlite_master WHERE type='table' AND name != 'alembic_version'")]
+              # Not SQLite's own tables: `sqlite_stat1` is planner statistics,
+              # which the ANALYZE after the upgrade rewrites, not ledger rows.
+              "SELECT name FROM sqlite_master WHERE type='table' AND name != 'alembic_version' "
+              "AND name NOT LIKE 'sqlite_%'")]
           print(json.dumps({t: conn.execute(f'SELECT count(*) FROM "{t}"').fetchone()[0]
                             for t in sorted(tables)}))
           PY
