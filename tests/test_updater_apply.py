@@ -532,6 +532,40 @@ def test_row_20_the_engine_going_away_mid_drill_resumes_from_the_journal(world):
     world.no_running_app_at_a_mismatched_stamp()
 
 
+def test_row_20_an_engine_that_stops_answering_mid_drill_is_resumed_like_a_lost_socket(world):
+    """The socket stays open and nothing answers: a `TimeoutError`, which is
+    `EngineUnavailable` like a closed socket (8.6, #247). The apply is left in
+    its journal and resumed when the engine answers again -- not recorded as
+    a failure, and the drill is not started twice."""
+    service = world.service()
+    service.startup()
+    report = world.prepared(service)
+    service.kit.client.timeout = 0.2
+
+    def engine_hangs(c):
+        world.drill = "hang"
+        world.time.on_sleep = lambda: setattr(world.fake, "delay", 0.5)
+
+    world.on_drill = engine_hangs
+    req = world.apply_request(report)
+    world.write_request(req)
+    assert service.tick() is not None
+    # Not a failed step: no record, the journal still at the drill, resume owed.
+    assert world.history(req["id"]) is None and service.resume_pending
+    assert world.journal(req["id"]).step == "5"
+    # The engine answers again, and the drill finished while it was away.
+    world.time.on_sleep = None
+    world.fake.delay = 0.0
+    world.on_drill = None
+    world.finish_hung_drill()
+    service.tick()
+    record = world.history(req["id"])
+    # 5.6 R13: a report with a verified backup, after a gap, is R1: restored.
+    assert record["state"] == "rolled_back" and world.ledger.drills == 1
+    assert world.ledger.stamp == A and world.ledger.aside == [B]
+    world.no_running_app_at_a_mismatched_stamp()
+
+
 def test_row_19_a_laptop_asleep_mid_drill_does_not_expire_it(world):
     """U7 through the orchestration: an hour asleep inside a 30-minute drill."""
     service = world.service()

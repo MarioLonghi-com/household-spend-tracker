@@ -388,11 +388,17 @@ class EngineClient:
                 raise EngineUnavailable("permission_denied", "Permission denied on the engine socket.") from e
             except (FileNotFoundError, ConnectionRefusedError) as e:
                 raise EngineUnavailable("unreachable", "The engine socket does not answer.") from e
+            except TimeoutError as e:
+                # `socket.timeout` is `TimeoutError` (3.10+). Not an `OSError`
+                # the lines above name, so it used to escape as a plain
+                # exception, past the gap and resume logic (#247).
+                raise EngineUnavailable("unreachable", "The engine socket did not answer in time.") from e
             try:
                 resp = conn.getresponse()
                 data = resp.read()
-            except (ConnectionError, http.client.HTTPException) as e:
-                # The engine went away mid-call: 8.6 counts that as an engine restart.
+            except (ConnectionError, TimeoutError, http.client.HTTPException) as e:
+                # The engine went away mid-call, or stopped answering for longer
+                # than the socket waits: 8.6 counts either as an engine restart.
                 raise EngineUnavailable("unreachable", "The engine stopped answering.") from e
             return resp.status, data
         finally:

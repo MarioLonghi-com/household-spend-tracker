@@ -92,6 +92,11 @@ class FakeEngine:
     refuse_create: Callable[[str, dict], str | None] | None = None
     #: Every request closes without an answer, as if the engine went away.
     gone: bool = False
+    #: Seconds every request waits before it is answered: an engine that has
+    #: stopped answering without closing the socket (#247).
+    delay: float = 0.0
+    #: Container ids whose stop the engine refuses, as when it cannot kill one (#246).
+    refuse_stop: set = field(default_factory=set)
     #: An engine whose compat API has no `POST /containers/{id}/update` (#169).
     no_update: bool = False
     #: Seconds a stop takes to answer: a container that ignores SIGTERM is
@@ -337,6 +342,8 @@ class FakeEngine:
                 if self.on_start is not None:
                     self.on_start(self, c)
                 return 204, b""
+            if method == "POST" and action == "/stop" and c["Id"] in self.refuse_stop:
+                return 500, {"message": f"cannot stop container {c['Id']}: permission denied"}
             if method == "POST" and action == "/stop":
                 if self.stop_delay:
                     import time
@@ -409,17 +416,25 @@ class _Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length") or 0)
         body = self.rfile.read(length) if length else b""
         engine = self.server.engine  # type: ignore[attr-defined]
+        if engine.delay:
+            import time
+
+            time.sleep(engine.delay)
         if engine.gone:
             # The engine went away mid-call: close without an answer.
             self.close_connection = True
             return
         status, answer = engine.handle(self.command, self.path, body)
         data = answer if isinstance(answer, bytes) else json.dumps(answer).encode()
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        try:
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        except (BrokenPipeError, ConnectionResetError):
+            # The client gave up first (`delay` past its timeout).
+            self.close_connection = True
 
     do_GET = do_POST = do_DELETE = do_HEAD = do_PUT = _any
 
