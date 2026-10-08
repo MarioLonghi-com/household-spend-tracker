@@ -84,8 +84,6 @@ jobs:
           - engine: podman
             kind: podman
             image: quay.io/podman/stable:latest
-    env:
-      STAGED: ${{ github.workspace }}/../canary-staged
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -96,6 +94,9 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
       - run: pip install --require-hashes -r requirements-dev.txt
+      # Outside the checkout (the releases' build context), and not a `..`
+      # path: upload-artifact refuses those, which failed every leg once.
+      - run: echo "STAGED=$RUNNER_TEMP/canary-staged" >> "$GITHUB_ENV"
 
       # The policy above: the floating tag, resolved to one digest for this run.
       - name: the newest image, pinned for this run
