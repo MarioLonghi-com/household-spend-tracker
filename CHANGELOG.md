@@ -32,6 +32,21 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.8.0 — 2026-10-08
+
+**Reversible: lossy** — one migration.
+
+- `2de003489b79` — lossy: adds the `passkeys` and `webauthn_challenges` tables
+  and `users.webauthn_user_handle` (#120). Rolling it back drops every
+  registered passkey. Members then sign in with password + code, as before
+  passkeys existed, and register their passkeys again after upgrading back.
+  The sign-in challenges it drops expire within minutes anyway.
+
+Passkeys: registering them, signing in with one, and one "Sign-in methods"
+section in your account to manage them. Alongside them, security and
+data-integrity fixes, a locked and hashed Python dependency set, and the
+published image as what `compose.yaml` runs.
+
 ### Security
 
 - **The `sql` logging style no longer prints the ledger to the console.**
@@ -394,6 +409,7 @@ history this repository does not have.
   needs Bluetooth and internet on both. `deploy/DOCKER.md` and
   `deploy/UPGRADING.md` each add a paragraph on what changes the name and
   what to do afterwards. (#123)
+
 - **A glossary for the first translations:** `client/src/locales/GLOSSARY.md`
   holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
   each language uses, and how each writes money and dates. Nothing in the app
