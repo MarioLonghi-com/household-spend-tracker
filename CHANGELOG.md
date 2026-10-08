@@ -173,8 +173,9 @@ history this repository does not have.
   a test renders it in the `en-XA` pseudo-locale and finds no English left.
   (#55)
 
-- **Draft translations of the first screens, the transfer screens and
-  Accounts** in pt-BR, es-ES and sv-SE: every message extracted so far, each marked `#, fuzzy` until a native
+- **Draft translations of the first screens, the transfer screens,
+  Accounts, Import and the register** in pt-BR, es-ES and sv-SE: every
+  message extracted so far, each marked `#, fuzzy` until a native
   speaker reviews it (#58). None is served or selectable; a test checks every
   catalog entry is valid ICU and keeps the English placeholders. (#175, #176,
   #177)
