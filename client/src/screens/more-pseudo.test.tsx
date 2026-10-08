@@ -34,6 +34,7 @@ import { AccountImport } from "./AccountImport";
 import { History } from "./History";
 import { BackupList, SavePanel } from "./Backups";
 import { ApplicationManagement } from "./ApplicationManagement";
+import { Receipts } from "./Receipts";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -391,6 +392,47 @@ describe("in en-XA, the remaining screens show no English", () => {
     fireEvent.click(sections[3].querySelector("button")!);
     await screen.findByRole("option", { name: "9.9.10" });
     screen.getByText("fastapi");
+    expect(left().filter(data)).toEqual([]);
+  });
+
+  it("Receipts: both views, a selection and its dialog, and a receipt's panel", async () => {
+    const one = {
+      id: "r1", household_id: "house-1", transaction_id: null, content_sha256: "0123456789abcdef",
+      original_filename: "casa.pdf", media_type: "application/pdf", byte_size: 2048, width: 600, height: 800,
+      page_count: 3, captured_at: "2026-03-01T10:00:00", captured_at_is_local: true,
+      gps_lat: 40.4, gps_lon: -3.7, gps_accuracy_m: 2500, gps_bearing: 90, camera: "Doe",
+      exif: { SpendTrackerLocationSource: "device" }, client_encoded: true, note: null,
+      uploaded_by_id: "u1", uploaded_by_name: "Sam", created_at: "2026-03-02T10:00:00",
+      download_name: "casa/2026-03-01.pdf", has_original: true, download_bytes: 1536, also_on: 0,
+    };
+    const two = { ...one, id: "r2", transaction_id: "t1", captured_at: null, gps_lat: null, gps_lon: null, camera: null, page_count: 1 };
+    vi.mocked(api.get).mockResolvedValue([one, two]);
+    render(withQueries(<Receipts household={HOUSEHOLD} />));
+    await screen.findAllByRole("checkbox");
+    const data = (word: string) =>
+      !/^(AM|PM|at|PDF|SHA|casa|pdf|application|KB|km|Google|Maps)$/.test(word);
+    expect(left().filter(data)).toEqual([]);
+
+    // Pick both, then ask to delete them.
+    for (const box of Array.from(document.querySelectorAll<HTMLInputElement>(".card-pick input")))
+      fireEvent.click(box);
+    expect(left().filter(data)).toEqual([]);
+    fireEvent.click(document.querySelector(".banner button.danger")!);
+    await screen.findByRole("dialog");
+    expect(left().filter(data)).toEqual([]);
+    cleanup();
+
+    // The list view, and the first receipt's panel with everything the camera wrote.
+    render(withQueries(<Receipts household={HOUSEHOLD} />));
+    await screen.findAllByRole("checkbox");
+    const views = Array.from(document.querySelectorAll<HTMLButtonElement>(".receipts-bar .row:nth-child(2) button"));
+    fireEvent.click(views[1]);
+    await screen.findByRole("table");
+    expect(left().filter(data)).toEqual([]);
+    // The receipt with a camera and a place, wherever the sort put it.
+    const thumbs = Array.from(document.querySelectorAll<HTMLButtonElement>("button.thumb"));
+    fireEvent.click(thumbs.find((one) => one.closest("tr")!.textContent!.includes("2026-03-01"))!);
+    await screen.findByText("Doe");
     expect(left().filter(data)).toEqual([]);
   });
 });

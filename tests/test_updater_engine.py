@@ -52,13 +52,34 @@ def world():
         yield fake, client
 
 
+DRILL_LABELS = {
+    "com.docker.compose.project": PROJECT,
+    "com.docker.compose.oneoff": "True",
+    engine.ROLE_LABEL: "drill",
+    engine.REQUEST_LABEL: "5d3c0b8e-7f0a-4b8e-9f43-0f6f1a2b9c11",
+}
+
+
 def good_body(**host) -> dict:
+    """A drill one-off: a named volume, no network, no host path."""
     return {
         "Image": APP_IMAGE,
-        "Labels": {"com.docker.compose.project": PROJECT, "com.docker.compose.oneoff": "True"},
+        "Labels": dict(DRILL_LABELS),
         "HostConfig": {
-            "Binds": ["spend-tracker_data:/data", f"{SOCKET_HOST_PATH}:/run/engine.sock"],
+            "Binds": ["spend-tracker_data:/data"],
             "NetworkMode": "none",
+            **host,
+        },
+    }
+
+
+def successor_body(**host) -> dict:
+    """Not a one-off: the successor updater, which may bind the socket and the project directory."""
+    return {
+        "Image": UPDATER_IMAGE,
+        "Labels": {"com.docker.compose.project": PROJECT},
+        "HostConfig": {
+            "Binds": ["spend-tracker_update:/update", f"{SOCKET_HOST_PATH}:/run/engine.sock"],
             **host,
         },
     }
@@ -85,6 +106,9 @@ DESIGN_TABLE = {
     ("POST", "/containers/{id}/exec", True),
     ("POST", "/exec/{id}/start", True),
     ("GET", "/exec/{id}/json", True),
+    # Added in #161: the check's JSON and the floors' figures arrive on a
+    # one-off's standard output, and nothing else's output is read.
+    ("GET", "/containers/{id}/logs", True),
     ("POST", "/images/create", True),
     ("GET", "/images/{image}/json", True),
     ("DELETE", "/images/{image}", True),
@@ -131,6 +155,7 @@ def test_every_call_the_client_makes_is_in_the_table_and_versioned_when_it_mutat
     client.inspect("spend-tracker-app-1")
     cid = client.create("spend-tracker-drill", good_body())
     client.start(cid)
+    client.logs("spend-tracker-drill")
     client.probe("spend-tracker-app-1", ["python", "-c", "print(1)"])
     client.probe("spend-tracker-tailscale-1", ["wget", "-q", "-O-", "http://127.0.0.1:8848/api/health"])
     client.stop("spend-tracker-drill", grace=5)
@@ -204,11 +229,13 @@ def test_a_foreign_image_or_a_container_outside_the_project_is_not_created(world
 
 def test_the_allowed_shapes_are_created_with_the_body_unchanged(world):
     fake, client = world
-    # A one-off with the socket (the successor updater), and one with the
-    # project directory and a named volume (the drill writing `.env`).
-    successor = good_body(SecurityOpt=["label=disable", "no-new-privileges:true"])
-    successor["Image"] = UPDATER_IMAGE
-    drill = good_body(Mounts=[{"Type": "bind", "Source": PROJECT_DIR, "Target": "/project"}])
+    # The successor updater with the socket and the project directory, and a
+    # drill with a named volume and no network.
+    successor = successor_body(
+        SecurityOpt=["label=disable", "no-new-privileges:true"],
+        Mounts=[{"Type": "bind", "Source": PROJECT_DIR, "Target": "/project"}],
+    )
+    drill = good_body(Mounts=[{"Type": "volume", "Source": "spend-tracker_ledger", "Target": "/l"}])
     first = client.create("spend-tracker-updater-1-next", successor)
     second = client.create("spend-tracker-drill", drill)
     assert fake.containers[first]["Config"] == successor
@@ -353,9 +380,7 @@ def test_an_outdated_updater_still_has_the_handover_calls_and_nothing_else():
         client.inspect("spend-tracker-updater-1")
         client.pull(UPDATER_IMAGE)
         client.inspect_image(UPDATER_IMAGE)
-        body = good_body()
-        body["Image"] = UPDATER_IMAGE
-        nid = client.create("spend-tracker-updater-1-next", body)
+        nid = client.create("spend-tracker-updater-1-next", successor_body())
         client.start(nid)
         client.rename("spend-tracker-updater-1", "spend-tracker-updater-1-previous")
         client.stop("spend-tracker-updater-1-previous")

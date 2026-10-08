@@ -77,6 +77,7 @@ _KNOWN = (
     "recovery_hash",
     "rollback_attempts",
     "created_at",
+    "context",
 )
 
 
@@ -94,6 +95,10 @@ class Journal:
     owners: list[dict] = field(default_factory=list)
     rollback_attempts: int = 0
     protocol: int = FROZEN_PROTOCOL
+    #: What the orchestration learnt and must not learn twice: the app's name
+    #: and the previous container's id, the sidecar as preflight found it, the
+    #: drill's backup folder. Only ever gains keys (frozen at protocol 1).
+    context: dict = field(default_factory=dict)
     #: Keys a newer updater wrote, kept as they were.
     extra: dict = field(default_factory=dict)
 
@@ -111,6 +116,7 @@ class Journal:
                 "recovery_hash": self.recovery_hash,
                 "rollback_attempts": self.rollback_attempts,
                 "created_at": self.created_at,
+                "context": dict(self.context),
             }
         )
         return d
@@ -129,6 +135,7 @@ class Journal:
             recovery_hash=d.get("recovery_hash"),
             rollback_attempts=int(d.get("rollback_attempts") or 0),
             created_at=str(d.get("created_at", "")),
+            context=dict(d.get("context") or {}),
             extra={k: v for k, v in d.items() if k not in _KNOWN},
         )
 
@@ -168,6 +175,13 @@ def start_step(vol: Volume, j: Journal, step: str, now: float) -> Journal:
         j.rollback_attempts += 1
     j.step = step
     j.started.append({"step": step, "at": contract.iso(now)})
+    save(vol, j)
+    return j
+
+
+def remember(vol: Volume, j: Journal, **facts: object) -> Journal:
+    """Add facts to the journal's context, durably, before acting on them."""
+    j.context.update(facts)
     save(vol, j)
     return j
 

@@ -38,7 +38,7 @@ import {
   isTicked,
   mergeClaims,
 } from "./Reimbursements";
-import { REPORTS, reportScreen } from "../Reports";
+import { REPORTS, Report, Reports, reportScreen } from "../Reports";
 import { format } from "../../lib/money";
 import { stickyKey, writeSticky } from "../../lib/sticky";
 import type { Household, ReimbursementsReport } from "../../lib/types";
@@ -627,3 +627,101 @@ describe("where the report is listed", () => {
     expect(chooseCurrencies(null, [], "EUR")).toEqual(["EUR"]);
   });
 });
+
+describe("in en-XA, the report shows no English", () => {
+  /** The fixtures' own words: payees, accounts, memos and categories are data. */
+  function fixtureWords(reports: ReimbursementsReport[]): Set<string> {
+    const said: (string | null)[] = [];
+    for (const one of reports) {
+      for (const row of one.outstanding_rows) said.push(row.payee_name, row.account_name, row.memo, row.category_name);
+      for (const claim of one.claims)
+        for (const row of [claim.settlement, ...claim.expenses])
+          said.push(row.payee_name, row.account_name, row.memo, row.category_name);
+    }
+    return new Set(said.flatMap((text) => (text ?? "").split(/[\s,]+/)).concat(["Ours"]));
+  }
+
+  it("the figures, the three tables, every kind of detail, and the index", async () => {
+    const { activate } = await import("../../lib/i18n");
+    const { untranslated } = await import("../../test-pseudo");
+    await activate("en-XA");
+    try {
+      const reports = [aReport(), aGbpReport()];
+      const data = fixtureWords(reports);
+      const left = () => untranslated(document.body).filter((word) => !data.has(word));
+      render(<ReimbursementsBody household="house-1" reports={reports} onOpen={() => {}} asOf="2026-09-25" />);
+      expect(left()).toEqual([]);
+
+      // An owed row, a payment, and an expense a payment repaid.
+      for (const pick of [
+        () => screen.getByText("Cabify").closest("tr")!,
+        () => document.querySelector<HTMLElement>("tr.reimb-claim")!,
+        () => document.querySelector<HTMLElement>("tr.reimb-claim-expense")!,
+      ]) {
+        fireEvent.click(pick());
+        await screen.findByRole("dialog");
+        expect(left()).toEqual([]);
+        fireEvent.keyDown(document, { key: "Escape" });
+        cleanup();
+        render(<ReimbursementsBody household="house-1" reports={reports} onOpen={() => {}} asOf="2026-09-25" />);
+      }
+      cleanup();
+
+      // Nothing in either table, and the index of reports with one open.
+      render(
+        <ReimbursementsBody
+          household="house-1"
+          reports={[aReport({ outstanding_rows: [], outstanding_count: 0, claims: [], months: [], written_off_count: 0, unmatched: 0 })]}
+          onOpen={() => {}}
+        />,
+      );
+      expect(left()).toEqual([]);
+      cleanup();
+      render(<Reports household={HOUSEHOLD} onOpen={() => {}} />);
+      expect(left()).toEqual([]);
+    } finally {
+      await activate("en");
+    }
+  });
+
+  it("the currency checks and their hint, and the screen with nothing flagged", async () => {
+    const { activate } = await import("../../lib/i18n");
+    const { untranslated } = await import("../../test-pseudo");
+    await activate("en-XA");
+    try {
+      vi.mocked(api.get).mockImplementation(((path: string) => {
+        if (path.endsWith("/reports/currencies")) return Promise.resolve({ currencies: ["EUR", "GBP"] });
+        return Promise.resolve(aReport({ available_currencies: [] }));
+      }) as typeof api.get);
+      const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      render(
+        <QueryClientProvider client={client}>
+          <Report household={HOUSEHOLD} screen={reportScreen("reimbursements")} onBack={() => {}} onOpenRegister={() => {}} />
+        </QueryClientProvider>,
+      );
+      // Nothing flagged yet: the empty state.
+      await waitFor(() => expect(document.querySelector(".empty")).not.toBeNull());
+      expect(untranslated(document.body).filter((word) => word !== "Ours")).toEqual([]);
+      cleanup();
+
+      // Something flagged in two currencies: the checks, and the hint beside them.
+      vi.mocked(api.get).mockImplementation(((path: string) => {
+        if (path.endsWith("/reports/currencies")) return Promise.resolve({ currencies: ["EUR", "GBP"] });
+        return Promise.resolve(aReport());
+      }) as typeof api.get);
+      render(
+        <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+          <Report household={HOUSEHOLD} screen={reportScreen("reimbursements")} onBack={() => {}} onOpenRegister={() => {}} />
+        </QueryClientProvider>,
+      );
+      await screen.findByText("Cabify");
+      expect(document.querySelectorAll(".reimb-currencies input")).toHaveLength(2);
+      fireEvent.click(document.querySelector<HTMLButtonElement>(".reimb-currencies .hint-open")!);
+      const data = fixtureWords([aReport()]);
+      expect(untranslated(document.body).filter((word) => word !== "Ours" && !data.has(word))).toEqual([]);
+    } finally {
+      await activate("en");
+    }
+  });
+});
+

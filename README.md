@@ -286,15 +286,15 @@ force rather than by documentation.
 ```bash
 echo SPENDTRACKER_VERSION=X.Y.Z >> .env
 docker compose pull
-SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
 docker compose up -d
 ```
 
 - `SPENDTRACKER_VERSION=X.Y.Z` — the release to run, from the releases page
 - `docker compose pull` — fetches the published image,
   `ghcr.io/mariolonghi-com/household-spend-tracker`, at the release `.env` names
-- `SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d` — first run only
-- `docker compose up -d` — every time after
+- `docker compose up -d` — the first time and every time after. A brand-new
+  volume has no tables, so the first start creates the schema by itself; an
+  existing ledger is never migrated by a start (`make upgrade` does that)
 
 To build this checkout instead, `SPENDTRACKER_VERSION=local docker compose build`;
 Compose also builds it when the image cannot be pulled.

@@ -94,7 +94,8 @@ sharing a checkout with a session you cannot see.
     client/        Vite + React + TS, built into app/static/dist
     migrations/    Alembic, from the first commit
     updater/       the self-updater's own container: file contract, journal,
-                   restricted engine client -- standard library, no import of app/
+                   restricted engine client, and prepare/apply/rollback on top
+                   (apply.py) -- standard library and sigstore, no import of app/
 
 ## Security posture, in one place
 

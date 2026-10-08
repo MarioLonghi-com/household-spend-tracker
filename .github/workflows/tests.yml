@@ -92,6 +92,7 @@ jobs:
       rehearsal: ${{ steps.diff.outputs.rehearsal }}
       audit: ${{ steps.diff.outputs.audit }}
       lock: ${{ steps.diff.outputs.lock }}
+      selfupdate: ${{ steps.diff.outputs.selfupdate }}
       tree: ${{ steps.green.outputs.tree }}
       # The id of an earlier successful run of this workflow on the identical
       # tree, or empty. The heavy jobs skip when it is set.
@@ -185,7 +186,7 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
         run: |
-          jobs="python client code image rehearsal audit lock"
+          jobs="python client code image rehearsal audit lock selfupdate"
           everything() {
             echo "$1: everything runs"
             for job in $jobs; do echo "$job=true" >> "$GITHUB_OUTPUT"; done
@@ -265,6 +266,19 @@ jobs:
           decide lock <<'PATHS'
           ^requirements[^/]*\.(in|txt)$
           ^Makefile$
+          PATHS
+
+          # The end-to-end self-update (design notes 15.5): the updater, what
+          # it runs in the app's image -- the drill, the restore, the
+          # maintenance page, the migrations -- what the image is built from,
+          # and the job's own driver.
+          decide selfupdate <<'PATHS'
+          ^updater/
+          ^deploy/
+          ^scripts/(upgrade|restore|backup|placard)\.py$
+          ^migrations/
+          ^(Dockerfile|compose\.yaml|requirements(-updater)?\.txt)$
+          ^tests/self_update/
           PATHS
 
   # --------------------------------------------------------------------------- #
@@ -898,6 +912,151 @@ jobs:
         env:
           NAME: ${{ matrix.name }}
         run: docker logs "st-$NAME" || true
+
+  # --------------------------------------------------------------------------- #
+  # The end-to-end self-update (design notes 15.5, #169), E1 alone for now
+  # --------------------------------------------------------------------------- #
+  #
+  # A -> B through the updater's own code, against the runner's Docker
+  # Engine, loopback layout. Release A is built from the merge base and B from
+  # this change, both with release labels (a bare X.Y.Z version and the
+  # revision), and pushed to a registry that answers as ghcr.io on this
+  # runner -- the engine client pulls only ghcr.io references by digest, and
+  # only a pushed image has one. No updater image exists yet (#164), so the
+  # updater runs as a Python process on the runner, as root because it reads
+  # the `update` volume at its mountpoint. The one thing replaced is
+  # verification: nothing built here has an attestation, so the test-only
+  # trust policy in tests/self_update/ci_trust.py "verifies" exactly the
+  # digests this job pushed. The first step proves updater/ cannot reach it.
+  #
+  # **Advisory for now: not in `ci-ok`'s needs.** It joins them once it has
+  # run green on enough pull requests to be trusted not to flake.
+  self-update:
+    needs: changes
+    if: >-
+      github.event_name == 'schedule'
+      || github.event_name == 'workflow_dispatch'
+      || (github.event_name == 'pull_request'
+          && needs.changes.outputs.selfupdate == 'true'
+          && needs.changes.outputs.green == '')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      APP_REPO: ghcr.io/mariolonghi-com/household-spend-tracker
+      VERSION_A: "98.0.0"
+      VERSION_B: "99.0.0"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install --require-hashes -r requirements-dev.txt
+
+      - name: the test-only trust policy is out of the updater's reach
+        run: |
+          if grep -rnE 'self_update|ci_trust|CiTrust' updater/; then
+            echo "updater/ names the CI-only trust policy; it must never ship"
+            exit 1
+          fi
+
+      # dockerd resolves ghcr.io through /etc/hosts and trusts the CA in
+      # certs.d, so a push and a pull by digest go to this registry.
+      - name: a registry that answers as ghcr.io
+        run: |
+          set -eu
+          docker pull -q registry:2@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=ghcr.io" \
+            -addext "subjectAltName=DNS:ghcr.io" \
+            -keyout "$RUNNER_TEMP/ghcr.key" -out "$RUNNER_TEMP/ghcr.crt" 2>/dev/null
+          chmod 644 "$RUNNER_TEMP/ghcr.key"
+          sudo mkdir -p /etc/docker/certs.d/ghcr.io
+          sudo cp "$RUNNER_TEMP/ghcr.crt" /etc/docker/certs.d/ghcr.io/ca.crt
+          echo "127.0.0.1 ghcr.io" | sudo tee -a /etc/hosts > /dev/null
+          docker run -d --name ci-registry -p 127.0.0.1:443:443 -v "$RUNNER_TEMP:/certs:ro" \
+            -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
+            -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/ghcr.crt \
+            -e REGISTRY_HTTP_TLS_KEY=/certs/ghcr.key \
+            registry:2@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373 > /dev/null
+          for _ in $(seq 1 30); do
+            curl -fsS --cacert "$RUNNER_TEMP/ghcr.crt" https://ghcr.io/v2/ > /dev/null && exit 0
+            sleep 1
+          done
+          docker logs ci-registry; exit 1
+
+      - name: build and push release A (the merge base) and B (this change)
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -eu
+          if [ -n "$BASE_REF" ]; then base="$(git merge-base HEAD "origin/${BASE_REF}")"
+          else base="$(git rev-parse -q --verify 'HEAD^' || git rev-parse HEAD)"; fi
+          echo "A is $base, B is $(git rev-parse HEAD)"
+          git worktree add --detach "$RUNNER_TEMP/a" "$base"
+          build() {  # dir version
+            ( cd "$1" && python3 -m scripts.build_stamp \
+              && sed -i "s/^__version__ = .*/__version__ = \"$2\"/" app/__init__.py )
+            docker build -q -t "$APP_REPO:$2" \
+              --label "org.opencontainers.image.version=$2" \
+              --label "org.opencontainers.image.revision=$(git -C "$1" rev-parse HEAD)" "$1"
+            docker push -q "$APP_REPO:$2"
+          }
+          build "$RUNNER_TEMP/a" "$VERSION_A"
+          build "$GITHUB_WORKSPACE" "$VERSION_B"
+          git checkout -- app/__init__.py
+          # No updater image yet (#164): B's app image stands in at the updater
+          # repository, so prepare resolves, verifies and pulls a second image.
+          docker tag "$APP_REPO:$VERSION_B" "$APP_REPO-updater:$VERSION_B"
+          docker push -q "$APP_REPO-updater:$VERSION_B"
+          python3 - <<'PY'
+          import json, os, subprocess
+          def entry(repo, version):
+              ref = f"{repo}:{version}"
+              digests = subprocess.run(["docker", "inspect", "-f", "{{json .RepoDigests}}", ref],
+                                       check=True, capture_output=True, text=True).stdout
+              digest = next(d.split("@", 1)[1] for d in json.loads(digests) if d.startswith(repo + "@"))
+              labels = json.loads(subprocess.run(["docker", "inspect", "-f", "{{json .Config.Labels}}", ref],
+                                                 check=True, capture_output=True, text=True).stdout)
+              return {"digest": digest, "revision": labels["org.opencontainers.image.revision"], "size": 0}
+          app, upd = os.environ["APP_REPO"], os.environ["APP_REPO"] + "-updater"
+          a, b = os.environ["VERSION_A"], os.environ["VERSION_B"]
+          table = {app: {a: entry(app, a), b: entry(app, b)}, upd: {b: entry(upd, b)}}
+          path = os.path.join(os.environ["RUNNER_TEMP"], "digests.json")
+          json.dump(table, open(path, "w"), indent=2)
+          print(json.dumps(table, indent=2))
+          PY
+
+      - name: release A runs, with a ledger
+        run: |
+          set -eu
+          printf 'SPENDTRACKER_VERSION=%s\nSPENDTRACKER_AUTO_MIGRATE=1\n' "$VERSION_A" > .env
+          docker compose up -d --no-build app
+          for _ in $(seq 1 60); do
+            sleep 2
+            curl -fsS http://127.0.0.1:8848/api/health && echo && break
+          done
+          docker compose exec -T app python -m scripts.seed_demo --months 1 > /dev/null \
+            || echo "the demo seed did not run; E1 goes on with the empty ledger"
+          docker volume create spend-tracker_update > /dev/null
+
+      - name: E1, A to B through the updater
+        run: |
+          root="$(docker volume inspect -f '{{.Mountpoint}}' spend-tracker_update)"
+          sudo "$(command -v python)" -m tests.self_update.e1 \
+            --table "$RUNNER_TEMP/digests.json" --update-root "$root" \
+            --project-dir "$GITHUB_WORKSPACE" --from "$VERSION_A" --to "$VERSION_B"
+
+      - name: what the containers said
+        if: failure()
+        run: |
+          docker ps -a
+          for c in $(docker ps -aq); do
+            echo "--- $(docker inspect -f '{{.Name}}' "$c")"
+            docker logs --tail 60 "$c" 2>&1 || true
+          done
 
   # --------------------------------------------------------------------------- #
   # The one check a ruleset requires
