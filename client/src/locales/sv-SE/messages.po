@@ -184,11 +184,20 @@ msgstr "Du har inga oanvända återställningskoder. Om du tappar bort din auten
 msgid "Not reimbursed after all"
 msgstr "Inte ersatt ändå"
 
+#: src/screens/Household.tsx
+msgid "You can pick a palette and one accent of your own. You cannot reach the text and background colours, so no household can be made unreadable — and the accent is checked for contrast before it is saved."
+msgstr ""
+
 #. Screen-reader name of a help button on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "account types"
 msgstr "kontotyper"
+
+#. placeholder {0}: count(it.category_groups)
+#: src/screens/Household.tsx
+msgid "in {0} groups"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -305,6 +314,10 @@ msgstr "Öppna"
 msgid "What happens"
 msgstr "Vad som händer"
 
+#: src/screens/Household.tsx
+msgid "People"
+msgstr ""
+
 #. Screen-reader name on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
@@ -353,6 +366,10 @@ msgstr ""
 #, fuzzy
 msgid "This browser does not support passkeys yet."
 msgstr "Den här webbläsaren har inte stöd för lösennycklar än."
+
+#: src/screens/Household.tsx
+msgid "What is in it"
+msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
@@ -581,6 +598,10 @@ msgstr "avgränsare"
 msgid "Keep editing"
 msgstr "Fortsätt redigera"
 
+#: src/screens/Household.tsx
+msgid "(you)"
+msgstr ""
+
 #. placeholder {0}: sum.count
 #. placeholder {1}: sum.count
 #. placeholder {2}: sum.count
@@ -618,6 +639,7 @@ msgstr "Hoppa till transaktionerna"
 #. Screen title on the Register screen. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/Categories.tsx
+#: src/screens/Household.tsx
 #: src/screens/PayeeCategorisation.tsx
 #: src/screens/Payees.tsx
 #: src/screens/Register.tsx
@@ -784,6 +806,10 @@ msgstr "Alla transaktioner"
 msgid "Set the category…"
 msgstr "Ange kategori…"
 
+#: src/screens/Household.tsx
+msgid "Statements reconciled"
+msgstr ""
+
 #. Button on the Transfers screen: verb, undo a link between two rows
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -840,6 +866,7 @@ msgstr "Bara den här filen. Mottagarens regel lämnas som den är för framtida
 #: src/App.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
+#: src/screens/Household.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Payees.tsx
 #, fuzzy
@@ -961,6 +988,10 @@ msgstr "Ut"
 msgid "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
 msgstr "{ended, plural, one {{ended} annan webbläsare loggades ut.} other {{ended} andra webbläsare loggades ut.}}"
 
+#: src/screens/Household.tsx
+msgid "Turned on for every household by whoever runs this server, so it cannot be changed here."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Entered by hand"
@@ -976,10 +1007,18 @@ msgstr "Varje stavning en bank använder för någon i hushållet. En betalning 
 msgid "Add a part"
 msgstr "Lägg till en del"
 
+#: src/screens/Household.tsx
+msgid "Also keep the original file"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Set the category"
 msgstr "Ange kategori"
+
+#: src/screens/Household.tsx
+msgid "A screen copy and a thumbnail. About <0>33 KB</0> per receipt."
+msgstr ""
 
 #. Name of a fact on the Register screen: how much of the payment the expenses account for
 #: src/screens/Register.tsx
@@ -1072,6 +1111,10 @@ msgstr ""
 #, fuzzy
 msgid "Somebody reset {user}'s authenticator"
 msgstr "Någon återställde autentiseringsappen för {user}"
+
+#: src/screens/Household.tsx
+msgid "Everyone in a household can do everything in it. Only the owner can change who is in it, from the Admin screen. The count is transactions still in the register that each person entered — by hand, by import, or by an agent key of theirs — read from the History, so a row somebody has since deleted is not counted against anyone."
+msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
@@ -1196,6 +1239,10 @@ msgstr "Kontrollera koden"
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Pengar som sparas på banken. Som ett lönekonto, men hålls isär så att registret blir tydligt."
 
+#: src/screens/Household.tsx
+msgid "Counting…"
+msgstr ""
+
 #. placeholder {0}: formatCount(ordered.length)
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1289,6 +1336,10 @@ msgstr "sparar…"
 msgid "{by} reset {user}'s password and authenticator"
 msgstr "{by} återställde lösenordet och autentiseringsappen för {user}"
 
+#: src/screens/Household.tsx
+msgid "Your own accent (optional)"
+msgstr ""
+
 #. Column heading on the Transfers screen: preposition, the account money arrives in
 #. Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in
 #. Label of a form field on the Payees screen: where it goes, or what it is merged into
@@ -1305,6 +1356,12 @@ msgstr "Till"
 #, fuzzy
 msgid "Discarding…"
 msgstr "Kastar…"
+
+#. placeholder {0}: formatCount(stored)
+#. placeholder {1}: formatCount(stored)
+#: src/screens/Household.tsx
+msgid "{stored, plural, one {The {0} receipt that already has an original keeps it — nothing here deletes anything.} other {The {1} receipts that already have an original keep it — nothing here deletes anything.}}"
+msgstr ""
 
 #. Account type `savings`, and the heading of its group. See GLOSSARY.md
 #. Account type `savings`, and the heading of its group. See GLOSSARY.md
@@ -1375,6 +1432,10 @@ msgstr "de första {0} inlästa"
 msgid "The server added {user} as an owner"
 msgstr "Servern lade till {user} som ägare"
 
+#: src/screens/Household.tsx
+msgid "Two households open in one browser look identical, and that is how a statement gets posted into the wrong one. The colour is on every screen, needs no reading, and you notice it changed before you notice anything else."
+msgstr ""
+
 #. Menu item and the name of its screen: noun, bank or cash accounts. See GLOSSARY.md
 #. Screen title on the Accounts screen: noun, bank or cash accounts. See GLOSSARY.md
 #. Step name in the one-time import: map the other app's accounts. See GLOSSARY.md
@@ -1382,6 +1443,7 @@ msgstr "Servern lade till {user} som ägare"
 #: src/App.tsx
 #: src/lib/labels.ts
 #: src/screens/Accounts.tsx
+#: src/screens/Household.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Accounts"
@@ -1480,6 +1542,10 @@ msgstr "Dessa nämner ett av dina konton eller någon i hushållet, och deras an
 msgid "Attach receipts"
 msgstr "Bifoga kvitton"
 
+#: src/screens/Household.tsx
+msgid "Newest transaction"
+msgstr ""
+
 #. Text on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -1554,6 +1620,7 @@ msgstr "Klicka för att redigera"
 
 #. Label of a form field on the app's menu and frame
 #: src/App.tsx
+#: src/screens/Household.tsx
 #, fuzzy
 msgid "Main currency"
 msgstr "Huvudvaluta"
@@ -1770,6 +1837,10 @@ msgstr "Varje väg ett kontoutdrag kan ta, och varje sätt en rad kan hamna, fö
 
 #: src/screens/Rules.tsx
 msgid "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
+msgstr ""
+
+#: src/screens/Household.tsx
+msgid "Pick an accent colour"
 msgstr ""
 
 #. Label of a form field on the Transfers screen: the start of a range, or where money comes from
@@ -2111,6 +2182,10 @@ msgstr ""
 msgid "This server's secret key was replaced, so the authenticator you have no longer works here, and nothing that asks for a code from it can be done until you set up a new one."
 msgstr "Serverns hemliga nyckel har bytts ut, så din autentiseringsapp fungerar inte längre här, och inget som kräver en kod från den kan göras förrän du har ställt in en ny."
 
+#: src/screens/Household.tsx
+msgid "Use the palette's"
+msgstr ""
+
 #. Tooltip on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
@@ -2233,6 +2308,10 @@ msgstr ""
 msgid "A new password"
 msgstr "Ett nytt lösenord"
 
+#: src/screens/Household.tsx
+msgid "Every new receipt will take about <0>70× more space</0> in the database. Only worth it if you need the exact file. Existing receipts are not changed."
+msgstr ""
+
 #. Button on the Register screen
 #. placeholder {0}: rest.join(", ")
 #: src/screens/Register.tsx
@@ -2275,6 +2354,10 @@ msgstr "Plan"
 #, fuzzy
 msgid "Your account"
 msgstr "Ditt konto"
+
+#: src/screens/Household.tsx
+msgid "Role"
+msgstr ""
 
 #. Screen title on the Payee Categorisation screen. See GLOSSARY.md
 #: src/screens/PayeeCategorisation.tsx
@@ -2418,6 +2501,10 @@ msgstr "Slår upp din inbjudan…"
 msgid "Reset your sign-in"
 msgstr "Återställ din inloggning"
 
+#: src/screens/Household.tsx
+msgid "By currency"
+msgstr ""
+
 #. Screen title on the first-run setup
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -2539,6 +2626,10 @@ msgstr "<0>{purgingName}</0> och dess {0} rader raderas. Inget i den har nått r
 msgid "Confirm and replace"
 msgstr "Bekräfta och ersätt"
 
+#: src/screens/Household.tsx
+msgid "Your hue, worn at the weight each mode needs — one colour cannot sit on both a white page and a dark one, so the brightness is worked out for you and the result is always readable."
+msgstr ""
+
 #. placeholder {0}: format(left, currency)
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2614,6 +2705,11 @@ msgstr ""
 msgid "Import from a file"
 msgstr "Importera från en fil"
 
+#. placeholder {0}: count(it.accounts_closed)
+#: src/screens/Household.tsx
+msgid "{0} closed"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "New codes made. Every earlier code, used or not, has stopped working."
@@ -2630,6 +2726,11 @@ msgstr "ett kontoutdrag"
 msgid "You've been invited"
 msgstr "Du har blivit inbjuden"
 
+#. placeholder {0}: count(it.payee_rules - it.payee_rules_enabled)
+#: src/screens/Household.tsx
+msgid "{0} turned off"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "mixed currencies, not compared"
@@ -2640,6 +2741,10 @@ msgstr "blandade valutor, inte jämförda"
 #, fuzzy
 msgid "Came from a statement. Its line key is <0>{0}</0>, which is what stops the same line being imported twice."
 msgstr "Kom från ett kontoutdrag. Dess radnyckel är <0>{0}</0>, och det är den som hindrar att samma rad importeras två gånger."
+
+#: src/screens/Household.tsx
+msgid "Payee rules"
+msgstr ""
 
 #. Import outcome: the row came in with an earlier statement. See GLOSSARY.md
 #: src/lib/labels.ts
@@ -3032,6 +3137,7 @@ msgstr "Detta sparar båda raderna som en enda handling, så att ångra den i Hi
 #. Label of a form field on the Accounts screen. See GLOSSARY.md
 #. Label of a form field on the Accounts screen. See GLOSSARY.md
 #: src/screens/Accounts.tsx
+#: src/screens/Household.tsx
 #, fuzzy
 msgid "Note"
 msgstr "Anteckning"
@@ -3052,6 +3158,14 @@ msgstr "Överföring mellan dina egna konton"
 #, fuzzy
 msgid "Bank"
 msgstr "Bank"
+
+#: src/screens/Household.tsx
+msgid "(main)"
+msgstr ""
+
+#: src/screens/Household.tsx
+msgid "Colour"
+msgstr ""
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -3129,6 +3243,10 @@ msgstr "Markera alla visade rader"
 #, fuzzy
 msgid "The server made {user} an owner"
 msgstr "Servern gjorde {user} till ägare"
+
+#: src/screens/Household.tsx
+msgid "Readable copies only <0>Recommended</0>"
+msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "Applied as a statement is read, so <0>CARREFOUR MADRID 4432</0> arrives as Carrefour. The bank's own words are kept on the transaction either way."
@@ -3371,10 +3489,19 @@ msgstr "En av de tio du sparade när kontot ställdes in. Varje kod fungerar en 
 msgid "{wait, plural, other {Try again in {wait} seconds.}}"
 msgstr "{wait, plural, one {Försök igen om {wait} sekund.} other {Försök igen om {wait} sekunder.}}"
 
+#. placeholder {0}: count(it.transactions_uncleared)
+#: src/screens/Household.tsx
+msgid "{0} not yet cleared"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "The server reset {user}'s password and authenticator"
 msgstr "Servern återställde lösenordet och autentiseringsappen för {user}"
+
+#: src/screens/Household.tsx
+msgid "Who is in it"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -3469,6 +3596,10 @@ msgstr "Någon återställde lösenordet för {user}"
 msgid "Synced"
 msgstr "Synkad"
 
+#: src/screens/Household.tsx
+msgid "These are counts, not amounts: this ledger never converts one currency into another, so there is no such thing as a household total. Balances live on the Accounts screen, one per account."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "a pocket's or a card product's name"
@@ -3562,6 +3693,7 @@ msgstr "Beskrivning"
 #: src/App.tsx
 #: src/lib/labels.ts
 #: src/screens/Categories.tsx
+#: src/screens/Household.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Categories"
@@ -3576,6 +3708,10 @@ msgstr "Det som visas hamnar i inkorgen, och den nya filen tar dess plats. En å
 #, fuzzy
 msgid "type to search — leave empty for none"
 msgstr "skriv för att söka – lämna tomt för inget"
+
+#: src/screens/Household.tsx
+msgid "Countries"
+msgstr ""
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -3606,6 +3742,10 @@ msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "No categories yet. Categories say what a transaction was <0>for</0> — they group the register and let a payee fill itself in."
+msgstr ""
+
+#: src/screens/Household.tsx
+msgid "nothing recorded yet"
 msgstr ""
 
 #. Sentence on the first-run setup
@@ -3718,6 +3858,10 @@ msgstr "Ett hushåll per nyckel. Två hushåll betyder två nycklar."
 msgid "why each currency has its own columns"
 msgstr "varför varje valuta har egna kolumner"
 
+#: src/screens/Household.tsx
+msgid "Only used for totals across accounts. Each account keeps its own, and nothing in the ledger is ever converted."
+msgstr ""
+
 #. Menu item and the name of its screen
 #: src/App.tsx
 #, fuzzy
@@ -3726,6 +3870,11 @@ msgstr "Återställning"
 
 #: src/screens/Rules.tsx
 msgid "Order (lower runs first)"
+msgstr ""
+
+#. placeholder {0}: count(it.receipts_unattached)
+#: src/screens/Household.tsx
+msgid "{0} waiting to be attached"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -3760,6 +3909,10 @@ msgstr "Kasta den här förberedda importen?"
 #, fuzzy
 msgid "Uncategorised"
 msgstr "Okategoriserad"
+
+#: src/screens/Household.tsx
+msgid "why households have colours"
+msgstr ""
 
 #. What was reset, inside a sentence: the password. Lower case. See GLOSSARY.md
 #: src/lib/signInChanges.ts
@@ -3898,6 +4051,7 @@ msgstr "utflödeskolumn"
 #. Heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen title on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md
 #: src/screens/Categories.tsx
+#: src/screens/Household.tsx
 #: src/screens/Payees.tsx
 #: src/screens/Rules.tsx
 msgid "Payees"
@@ -4076,6 +4230,7 @@ msgstr "avgiftskolumn"
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
 #. Text on the Register screen: noun. See GLOSSARY.md
 #: src/screens/Accounts.tsx
+#: src/screens/Household.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Currency"
@@ -4380,6 +4535,10 @@ msgstr "Inga pengar in mellan de datumen. Vidga dem ovan – en ersättning kan 
 msgid "Work expenses"
 msgstr "Jobbutlägg"
 
+#: src/screens/Household.tsx
+msgid "Oldest transaction"
+msgstr ""
+
 #. Button on the Payee Categorisation screen
 #. placeholder {0}: formatCount(rest)
 #: src/screens/PayeeCategorisation.tsx
@@ -4399,6 +4558,12 @@ msgstr ""
 #. placeholder {0}: accountName(one.transfer_account_id)
 #: src/screens/Payees.tsx
 msgid "Transfer to {0}"
+msgstr ""
+
+#. placeholder {0}: formatDate(it.first_transaction)
+#. placeholder {1}: formatDate(it.last_transaction ?? "")
+#: src/screens/Household.tsx
+msgid "The register runs from {0} to {1}."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -4453,6 +4618,12 @@ msgstr "Låst i ljust, oavsett vad enheten är inställd på."
 #, fuzzy
 msgid "{by} reset {user}'s password"
 msgstr "{by} återställde lösenordet för {user}"
+
+#. placeholder {0}: count(it.category_groups)
+#. placeholder {1}: count(it.categories_archived)
+#: src/screens/Household.tsx
+msgid "in {0} groups, {1} archived"
+msgstr ""
 
 #. placeholder {0}: recovered.keys
 #: src/screens/SignIn.tsx
@@ -4690,6 +4861,7 @@ msgstr "Större text i tabellen"
 #. Button on the passkeys panel: verb
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
+#: src/screens/Household.tsx
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Save"
@@ -4799,6 +4971,7 @@ msgstr "Senaste 6 månaderna"
 #. Text on the shared controls
 #: src/components/bits.tsx
 #: src/screens/Accounts.tsx
+#: src/screens/Household.tsx
 #, fuzzy
 msgid "Settings"
 msgstr "Inställningar"
@@ -4923,6 +5096,10 @@ msgstr ""
 msgid "A heading the categories sit under — Bills, Everyday, whatever divides your spending in a way you recognise."
 msgstr ""
 
+#: src/screens/Household.tsx
+msgid "One ledger: its accounts, its register, its receipts and the people who can reach them."
+msgstr ""
+
 #. placeholder {0}: group.name
 #: src/screens/Categories.tsx
 msgid "New category in {0}"
@@ -5037,6 +5214,10 @@ msgstr "Skicka den till inkorgen. Den stannar där tills du raderar den."
 msgid "That works out at <0>{impliedRate}</0> {0} per {1}."
 msgstr "Det blir <0>{impliedRate}</0> {0} per {1}."
 
+#: src/screens/Household.tsx
+msgid "Nothing in the register yet."
+msgstr ""
+
 #: src/screens/Categories.tsx
 msgid "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
 msgstr ""
@@ -5050,6 +5231,10 @@ msgstr "Kasta den här uppdelningen?"
 #, fuzzy
 msgid "Work should pay this back"
 msgstr "Jobbet ska betala tillbaka detta"
+
+#: src/screens/Household.tsx
+msgid "The exact file your camera or scanner produced, as well. About <0>2 MB</0> per receipt, roughly 70× the space."
+msgstr ""
 
 #. placeholder {0}: tokenPath ?? t`the data directory`
 #: src/screens/Setup.tsx
@@ -5154,6 +5339,10 @@ msgstr "Ta bort {0}"
 #, fuzzy
 msgid "Create the key"
 msgstr "Skapa nyckeln"
+
+#: src/screens/Household.tsx
+msgid "Currencies"
+msgstr ""
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -5449,6 +5638,11 @@ msgstr "senast använd {0}"
 msgid "Setup token"
 msgstr "Installationstoken"
 
+#. placeholder {0}: count(member.transactions_by_agent)
+#: src/screens/Household.tsx
+msgid "{0} by an agent"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "<0>▾</0> marks the two whose balance is normally negative — you owe it. Nothing else changes: every account holds transactions the same way, and no arithmetic depends on the type. Pick the one that describes it, because it can't be changed afterwards."
@@ -5594,6 +5788,7 @@ msgstr "Stäng"
 
 #. Menu item and the name of its screen: noun, photos or PDFs of receipts. See GLOSSARY.md
 #: src/App.tsx
+#: src/screens/Household.tsx
 #, fuzzy
 msgid "Receipts"
 msgstr "Kvitton"
