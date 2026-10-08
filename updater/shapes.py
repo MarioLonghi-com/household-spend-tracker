@@ -433,6 +433,20 @@ def volume_at(inspect: Mapping, destination: str) -> str | None:
     return None
 
 
+def mounts_volume(inspect: Mapping, name: str) -> bool:
+    """Whether the named volume `name` is mounted anywhere in the container, read-only or not.
+
+    From `Mounts`, and from `HostConfig.Binds` too: an engine that leaves a
+    mount out of one has not been seen, and missing a holder of the ledger
+    is the costly mistake (#246).
+    """
+    for m in inspect.get("Mounts") or []:
+        if isinstance(m, dict) and m.get("Type") == "volume" and m.get("Name") == name:
+            return True
+    binds = _dict(inspect.get("HostConfig")).get("Binds") or []
+    return any(isinstance(b, str) and b.split(":", 1)[0] == name for b in binds)
+
+
 def _oneoff_labels(app: Mapping, role: str, request_id: str) -> dict[str, str]:
     return {**project_labels(app), ONEOFF_LABEL: "True", ROLE_LABEL: role, REQUEST_LABEL: request_id}
 

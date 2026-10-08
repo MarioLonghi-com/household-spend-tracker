@@ -12,7 +12,7 @@ Each step is written to the journal **before** it starts.
 | 2a | **Updater first** (C1), through the handover interface (`updater.handover`). | the old updater carries on from 3 |
 | 3 | Stop the app (30 s), rename it `<name>-previous` at once, and park it with restart policy `no` (its own is in the journal). | started again under its name; not started |
 | 4 | The maintenance page, from the **old** image (6.4). | logged |
-| 5 | **The drill** from the new image: `scripts.upgrade --yes --report`. | no verified backup: R3; else R1 |
+| 5 | **The drill** from the new image: `scripts.upgrade --yes --report`. Before it starts and at every poll while it runs, nothing else of the project runs with the ledger mounted (#246). | no verified backup: R3; else R1 |
 | 6 | Stop the maintenance page. | removed by force |
 | 7 | The new app: an allowlist copy of the previous one (C10). Once, if `-previous` is running: stop it and start again. | R1 |
 | 8 | Health from where requests arrive (8.4); once, if `-previous` is running, stop it and recreate; one extra recreate if the sidecar restarted. | R1 |
@@ -58,6 +58,19 @@ first; step 7, and step 8 for the sidecar layout where the clash is inside the
 shared namespace, stop a running `-previous` once and try again; and R3 puts
 the original policy back. An engine that cannot change a restart policy is
 noted, not fatal: the retry still stands.
+
+**During the drill** (#246) the danger is the ledger, not the port: the old
+app would read and write it while the drill backs it up and migrates it. So
+before step 5 starts the drill, and at every poll while it runs, the updater
+lists the project's running containers and inspects each: any that has the
+ledger volume mounted, other than this request's drill and maintenance page
+(which mounts it read-only), is stopped at once -- `-previous` started by
+hand, or an app a `compose up` created under the free name. One that cannot
+be stopped means the drill is not started (R3: nothing migrated), or is
+removed and judged as an interrupted drill by 5.6's rules (a verified backup:
+R1, restored; none: R3). Either way the ledger ends as E1 or as a rollback
+leaves it, never a mix. A start between two polls, or after the drill's last,
+is the poll interval's to lose; steps 7 and 8 still catch the port.
 
 **The engine going away** (`EngineUnavailable`) is not a failure of a step:
 it propagates, and the service resumes the journal when the engine answers
@@ -124,6 +137,23 @@ def previous_name(app_name: str) -> str:
 
 #: What `-previous` is parked with from step 3 on (#169).
 PARKED_POLICY = {"Name": "no"}
+
+#: The grace given to a container found running with the ledger while the
+#: drill has it (#246). Short: it should not be running at all, and SQLite
+#: survives the kill.
+HOLDER_GRACE_SECONDS = 5
+#: This request's own one-offs that may run with the ledger while the drill
+#: does: the drill itself, and the maintenance page, which mounts it read-only.
+OWN_LEDGER_ROLES = ("drill", "placard")
+LEDGER_HELD = "the previous version was started by hand during the update and could not be stopped"
+
+
+class LedgerHeld(Exception):
+    """Something runs with the ledger while the drill has it, and could not be stopped (#246)."""
+
+    def __init__(self, sentence: str) -> None:
+        super().__init__(sentence)
+        self.sentence = sentence
 
 
 def restart_policy(inspect: dict) -> dict:
@@ -546,6 +576,11 @@ class Apply:
         """The drill. None when it succeeded; else where the rollback starts, and why."""
         self.start("5", "Backing up and migrating the ledger.")
         self.remember(drill_started=self.kit.clock.now())
+        try:
+            self.ledger_to_the_drill(during=False)
+        except LedgerHeld as e:
+            # Nothing ran: no backup, nothing migrated (5.6, row 5 with no report).
+            return "R3", e.sentence
         volume.make_shared_dir(self.vol.work(self.id))
         prev = self.previous()
         report = f"{shapes.UPDATE_PATH}/work/{self.id}/{DRILL_REPORT}"
@@ -572,18 +607,29 @@ class Apply:
         )
         name = self.name("drill")
         code: int | None
+        held = None
         try:
             code = self._wait_saving(name, deadline)
         except oneoff.TimedOut:
             code = None
+        except LedgerHeld as e:
+            # The drill is stopped (removed below) and judged as one that was
+            # interrupted: by its report, or by the backup it left (5.6).
+            held, code = e.sentence, None
         with contextlib.suppress(_STEP_ERRORS):
             self.runner.discard(name)
-        return self.judge_drill(code)
+        verdict = self.judge_drill(code)
+        if held is not None:
+            return (verdict or ("R1", held))[0], held
+        return verdict
 
     def _wait_saving(self, name: str, deadline: Deadline) -> int:
         """`Runner.wait`, saving what the deadline has spent so a restart carries on from it."""
         saved = self.kit.clock.now()
         while True:
+            # First, so a start that came while the updater waited is stopped
+            # before the drill's exit is read, as well as while it runs.
+            self.ledger_to_the_drill(during=True)
             state = self.runner.state(name)
             if state is None:
                 raise oneoff.TimedOut(f"{name} is gone")
@@ -597,6 +643,63 @@ class Apply:
                 self.remember(drill_deadline=deadline.to_dict())
                 saved = self.kit.clock.now()
             self.kit.sleep(self.kit.poll)
+
+    def ledger_holders(self) -> list[dict]:
+        """The project's running containers with the ledger mounted, but for this request's own (#246).
+
+        Inspected one by one: a listing's `Mounts` is not something every
+        engine fills in.
+        """
+        ledger = str(self.ctx["ledger_volume"])
+        found = []
+        for c in self.client.containers():
+            if not survey.running(c):
+                continue
+            labels = c.get("Labels") if isinstance(c.get("Labels"), dict) else {}
+            if labels.get(eng.REQUEST_LABEL) == self.id and labels.get(eng.ROLE_LABEL) in OWN_LEDGER_ROLES:
+                continue
+            try:
+                seen = self.client.inspect(str(c["Id"]))
+            except eng.NotAllowed:
+                continue  # gone since the listing
+            except eng.EngineError as e:
+                if e.status == 404:
+                    continue
+                raise
+            if survey.running(seen) and shapes.mounts_volume(seen, ledger):
+                found.append(seen)
+        return found
+
+    def ledger_to_the_drill(self, during: bool) -> None:
+        """#246: nothing but the drill runs with the ledger. Stops what does; `LedgerHeld` if it cannot."""
+        try:
+            holders = self.ledger_holders()
+        except (eng.EngineError, eng.NotAllowed) as e:
+            raise LedgerHeld(f"the containers using the ledger could not be checked ({e})") from None
+        for seen in holders:
+            cid = str(seen["Id"])
+            who = "The previous version" if cid == self.ctx.get("previous_id") else shapes.name_of(seen)
+            self.records.say(f"{who} was started while the update ran; stopping it.")
+            held = (
+                LEDGER_HELD
+                if cid == self.ctx.get("previous_id")
+                else f"{who} was running with the ledger during the update and could not be stopped"
+            )
+            try:
+                self.client.stop(cid, grace=HOLDER_GRACE_SECONDS)
+                still = survey.running(self.by_id(cid))
+            except (eng.EngineError, eng.NotAllowed) as e:
+                raise LedgerHeld(f"{held} ({e})") from None
+            if still:
+                raise LedgerHeld(held)
+            stopped = list(self.ctx.get("ledger_holders_stopped") or [])
+            stopped.append({"id": cid, "during_drill": during, "at": self.kit.clock.now()})
+            self.remember(ledger_holders_stopped=stopped)
+            self.notes.append(
+                f"{who} was started while the update ran, with the ledger "
+                f"{'the drill was moving' if during else 'about to be backed up'}; "
+                f"the updater stopped it {'during' if during else 'before'} the drill."
+            )
 
     def judge_drill(self, code: int | None) -> tuple[str, str] | None:
         report = volume.read_own_json(self.drill_report_path())
@@ -680,6 +783,7 @@ class Apply:
 
     def step7(self) -> None:
         self.start("7", f"Starting {self.to}.")
+        self.clear_stopped_squatter()
         try:
             self.create_new_app()
         except _STEP_ERRORS as e:
@@ -690,6 +794,18 @@ class Apply:
                 self.client.start(str(new_id))
             else:
                 self.create_new_app()
+
+    def clear_stopped_squatter(self) -> None:
+        """A container the drill's guard stopped that took the app's free name -- a `compose up`
+        while the app was parked -- is removed, as R1 would, so the new app can have the name (#246).
+
+        Only one this update stopped, and only while it is still stopped.
+        """
+        stopped = {h.get("id") for h in self.ctx.get("ledger_holders_stopped") or [] if isinstance(h, dict)}
+        stopped.discard(self.ctx.get("previous_id"))
+        squatter = survey.find(self.client, self.app_name)
+        if squatter is not None and squatter.get("Id") in stopped and not survey.running(squatter):
+            self.client.remove(str(squatter["Id"]), force=True)
 
     def step8(self) -> str | None:
         self.start("8", f"Checking {self.to} answers.")
