@@ -310,7 +310,7 @@ def test_redeeming_a_recovery_code_revokes_every_live_key_and_says_how_many(
 
     # Lost phone: an untrusted browser, the password, then a recovery code.
     client.delete("/api/session", headers=HEADERS)
-    client.cookies.delete(cookies.device_name())
+    client.cookies.delete(cookies.device_name("testserver"))
     first = client.post(
         "/api/session",
         json={"email": "janedoe@gmail.com", "password": PASSWORD},
