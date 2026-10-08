@@ -193,6 +193,7 @@ msgstr ""
 msgid "Light"
 msgstr ""
 
+#. Button on the Payees screen: verb, look over before going on
 #: src/screens/Payees.tsx
 msgid "Review…"
 msgstr ""
@@ -480,6 +481,9 @@ msgid "Skip to transactions"
 msgstr ""
 
 #. Column heading on the Categories screen. See GLOSSARY.md
+#. Column heading on the Payee Categorisation screen. See GLOSSARY.md
+#. Column heading on the Payees screen. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Payees screen. See GLOSSARY.md
 #. Menu item and the name of its screen. See GLOSSARY.md
 #. Screen title on the Register screen. See GLOSSARY.md
 #: src/App.tsx
@@ -622,6 +626,7 @@ msgstr ""
 msgid "Remove this part"
 msgstr ""
 
+#. Column heading on the Payees screen
 #: src/screens/Payees.tsx
 msgid "Spellings"
 msgstr ""
@@ -642,6 +647,7 @@ msgstr ""
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr ""
 
+#. Column heading on the Payees screen: noun
 #. Column heading on the passkeys panel: noun
 #. Label of a form field on the Accounts screen: noun
 #. Label of a form field on the Accounts screen: noun
@@ -649,6 +655,7 @@ msgstr ""
 #. Label of a form field on the Categories screen: noun
 #. Label of a form field on the Categories screen: noun
 #. Label of a form field on the Categories screen: noun
+#. Label of a form field on the Payees screen: noun
 #. Label of a form field on the app's menu and frame: noun
 #: src/App.tsx
 #: src/screens/Accounts.tsx
@@ -709,6 +716,8 @@ msgid "New"
 msgstr ""
 
 #. Screen-reader name on the Accounts screen
+#. Screen-reader name on the Payees screen
+#. Screen-reader name on the Payees screen
 #. Screen-reader name on the Transfers screen
 #. Screen-reader text on the passkeys panel
 #: src/screens/Accounts.tsx
@@ -963,6 +972,7 @@ msgstr ""
 msgid "Reimbursement"
 msgstr ""
 
+#. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
 msgid "Merge…"
 msgstr ""
@@ -1023,6 +1033,7 @@ msgstr ""
 
 #. Column heading on the Transfers screen: preposition, the account money arrives in
 #. Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in
+#. Label of a form field on the Payees screen: where it goes, or what it is merged into
 #. Label on the Import screen: preposition, the account money arrives in
 #: src/screens/Import.tsx
 #: src/screens/Payees.tsx
@@ -1108,6 +1119,7 @@ msgstr ""
 msgid "Needs a category"
 msgstr ""
 
+#. Text on the Payees screen
 #: src/screens/Payees.tsx
 msgid "Folded into {kept}"
 msgstr ""
@@ -1469,6 +1481,7 @@ msgstr ""
 msgid "No single category matches that. Keep typing, or empty it."
 msgstr ""
 
+#. Title of a panel on the Payees screen
 #. placeholder {0}: payee.name
 #: src/screens/Payees.tsx
 msgid "Merge {0}"
@@ -1640,6 +1653,7 @@ msgstr ""
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr ""
 
+#. Button on the Payees screen
 #: src/screens/Payees.tsx
 msgid "Add payee"
 msgstr ""
@@ -1844,6 +1858,7 @@ msgstr ""
 msgid "Your account"
 msgstr ""
 
+#. Screen title on the Payee Categorisation screen. See GLOSSARY.md
 #: src/screens/PayeeCategorisation.tsx
 msgid "Payee categorisation"
 msgstr ""
@@ -2065,6 +2080,7 @@ msgstr ""
 msgid "Add a part for the {0}"
 msgstr ""
 
+#. Screen-reader text on the Payee Categorisation screen
 #: src/screens/PayeeCategorisation.tsx
 msgid "Search payees"
 msgstr ""
@@ -2434,6 +2450,9 @@ msgstr ""
 msgid "Invitation"
 msgstr ""
 
+#. Column heading on the Payee Categorisation screen
+#. Column name shown beside a value on phones on the Payee Categorisation screen
+#. Heading on the Payee Categorisation screen
 #: src/screens/PayeeCategorisation.tsx
 msgid "Categorised as"
 msgstr ""
@@ -2505,7 +2524,9 @@ msgid "Written off — work will not pay"
 msgstr ""
 
 #. Column heading on the Accounts screen: noun, what sort of thing
+#. Column heading on the Payees screen: noun, what sort of thing
 #. Column name shown beside a value on phones on the Accounts screen: noun, what sort of thing
+#. Column name shown beside a value on phones on the Payees screen: noun, what sort of thing
 #. Label of a form field on the Accounts screen: noun, what sort of thing
 #: src/screens/Accounts.tsx
 #: src/screens/Payees.tsx
@@ -2549,6 +2570,7 @@ msgstr ""
 msgid "Import"
 msgstr ""
 
+#. Label on the Payees screen
 #. placeholder {0}: kept.name
 #: src/screens/Payees.tsx
 msgid "Folded into {0}"
@@ -2689,6 +2711,7 @@ msgstr ""
 #. Button on the Accounts screen: verb
 #. Button on the Accounts screen: verb
 #. Button on the Import screen: verb
+#. Button on the Payees screen: verb
 #. Button on the Register screen: verb
 #. Column heading on the Import screen
 #. Screen-reader name on the Register screen
@@ -3151,6 +3174,7 @@ msgstr ""
 #. Column heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Screen title on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md
 #: src/screens/Categories.tsx
 #: src/screens/Payees.tsx
 msgid "Payees"
@@ -3230,6 +3254,7 @@ msgstr ""
 msgid "Rename or delete this group"
 msgstr ""
 
+#. Label on the Payees screen
 #: src/screens/Payees.tsx
 msgid "another account"
 msgstr ""
@@ -3250,6 +3275,7 @@ msgstr ""
 msgid "Ignore it and carry on"
 msgstr ""
 
+#. Sentence on the Payees screen
 #. Text on the app's menu and frame
 #. Text on the app's menu and frame
 #. Text on the app's menu and frame
@@ -3269,6 +3295,7 @@ msgid "the server answered {0}"
 msgstr ""
 
 #. Button on the Transfers screen: verb, leave it as it is
+#. Heading of a group of choices on the Payees screen: verb
 #: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 msgid "Keep"
@@ -3323,6 +3350,7 @@ msgstr ""
 msgid "type any part"
 msgstr ""
 
+#. Button on the Payee Categorisation screen
 #. Heading on the Categories screen
 #: src/screens/Categories.tsx
 #: src/screens/PayeeCategorisation.tsx
@@ -3530,6 +3558,7 @@ msgstr ""
 msgid "Work expenses"
 msgstr ""
 
+#. Button on the Payee Categorisation screen
 #. placeholder {0}: formatCount(rest)
 #: src/screens/PayeeCategorisation.tsx
 msgid "+{0} more"
@@ -3539,6 +3568,7 @@ msgstr ""
 msgid "Read the file"
 msgstr ""
 
+#. Table cell on the Payees screen
 #. placeholder {0}: accountName(one.transfer_account_id)
 #: src/screens/Payees.tsx
 msgid "Transfer to {0}"
@@ -3651,6 +3681,7 @@ msgstr ""
 msgid "Needs setting up again"
 msgstr ""
 
+#. Button on the Payees screen
 #. placeholder {0}: kept?.name ?? "…"
 #: src/screens/Payees.tsx
 msgid "Merge into {0}"
@@ -3697,6 +3728,7 @@ msgstr ""
 msgid "Difference"
 msgstr ""
 
+#. Column heading on the Payee Categorisation screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Heading on the app's menu and frame: noun, who was paid or who paid. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
@@ -3705,6 +3737,7 @@ msgstr ""
 #. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen-reader name on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Table cell on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Table cell on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/Import.tsx
@@ -3938,6 +3971,7 @@ msgstr ""
 msgid "What has happened to this"
 msgstr ""
 
+#. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
 msgid "Merge"
 msgstr ""
@@ -4435,6 +4469,7 @@ msgstr ""
 msgid "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
 msgstr ""
 
+#. Sentence on the Payees screen
 #. placeholder {0}: rows.length
 #. placeholder {1}: payees.data?.length ?? 0
 #: src/screens/Payees.tsx
