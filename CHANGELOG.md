@@ -61,6 +61,16 @@ history this repository does not have.
   written for the `update` volume's group, like every other file the app
   writes there. (#169)
 
+- **On Podman 4 the new app keeps a healthcheck that can pass.** Podman 4's
+  Docker-compatible API split the copied healthcheck command on every space,
+  so the updated app was reported unhealthy for good. The updater now sends
+  it in the form Podman 4 reads back unchanged. (#169)
+
+- **The release zip's launcher replaces the updater under Podman.**
+  podman-compose cannot replace a running container and said nothing, so a
+  newer zip's launcher left the old updater running. The launcher now stops
+  and removes the app and the updater before starting them again. (#169)
+
 - **Updates work on a Podman that shares the host's IPC and UTS namespaces**
   by default (containers.conf, as in Podman's own image). The copy of the app
   and of the updater carried a shared-memory size and a hostname that such a
