@@ -55,14 +55,14 @@ from .api.routers import (
     transactions,
     transfers,
 )
-from .auth import housekeeping, keycheck
+from .auth import cookies, housekeeping, keycheck
 from .auth import setup as setup_service
 from .body_limit import BodyLimit
 from .config import SECRET_KEY_ENV, settings
 from .db import SessionLocal, session_scope
 from .db import engine as db_engine
 from .errors import DomainError, TooManyAttempts
-from .hosts import AllowedHosts
+from .hosts import AllowedHosts, request_host
 from .services import agent_keys as agent_key_service
 from .services import agent_requests, backup_bundle
 
@@ -638,7 +638,16 @@ async def add_security_headers(request: Request, call_next):
     # HTTPS **for that host and port, for a year**, and the app becomes
     # unreachable at the address it just told them to use. The user-facing cure
     # is a trip into chrome://net-internals, per device.
-    if not _DEV and settings.cookie_secure:
+    #
+    # Nor over plain HTTP to loopback (#196): the container on somebody's own
+    # computer is production, at `http://localhost:8848`. A browser ignores
+    # HSTS that arrives over HTTP anyway, so this only stops sending noise.
+    # The host is the one the cookie names are chosen by; this middleware runs
+    # outside the host check, but a request the check refuses gets no cookie.
+    plain_loopback = request.url.scheme == "http" and cookies.is_loopback(
+        request_host(request)
+    )
+    if not _DEV and settings.cookie_secure and not plain_loopback:
         response.headers.setdefault(
             "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
         )
@@ -841,7 +850,6 @@ def snap(request: Request):
     person is standing at a till holding a piece of paper, so they come back
     *here* once they are signed in.
     """
-    from .auth import cookies
     from .auth import sessions as session_service
 
     # Its own short session rather than the request dependency: this route
@@ -849,7 +857,7 @@ def snap(request: Request):
     # is a write on a page load that changes nothing.
     with session_scope() as db_session:
         row = session_service.lookup(
-            db_session, cookies.session_value(request.cookies)
+            db_session, cookies.session_value(request)
         )
     if row is None:
         return RedirectResponse("/?next=%2Fsnap", status_code=303)

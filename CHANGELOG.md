@@ -32,6 +32,19 @@ history this repository does not have.
 
 ## Unreleased
 
+### Fixed
+
+- **Safari can sign in at `http://localhost`.** The cookies carried the
+  `__Host-` prefix, which Safari refuses on plain-HTTP `localhost` while
+  keeping an unprefixed `Secure` cookie, so the container on your own
+  computer answered the sign-in, lost the cookie and showed the sign-in
+  screen again, with nothing in any log. At `localhost`, `127.0.0.1` and
+  `[::1]` the cookies are now named without the prefix and are still
+  `Secure`; every other address, the tailnet included, keeps it. HSTS is no
+  longer sent over plain HTTP to those three, where browsers ignore it.
+  After upgrading, expect to sign in at `localhost` once more, code
+  included, in any browser: the old names are no longer read there. (#196)
+
 ### Changed
 
 - **Draft translations of the first screens** in pt-BR, es-ES and sv-SE:
@@ -58,6 +71,22 @@ history this repository does not have.
   `en-XA` pseudo-locale is reachable for CI and development, and one
   Playwright pass runs in it at phone width. CI fails when the catalogs are
   behind the source. Nothing an English reader sees changes. (#53)
+
+### Added
+
+- **The self-updater's core, not yet wired to anything** (#158). A new
+  top-level package, `updater/`, standard library only: the file contract
+  between the app and the updater in the shared `update` volume (requests,
+  heartbeat, status, prepare reports, history), strict request validation that
+  refuses anything but a published release newer than the running one and
+  makes no engine call when it refuses, a journal that records which step of
+  an apply has started and which updater owns it, deadlines that do not count
+  time the machine slept, and an engine client that can make only a listed set
+  of calls, negotiates the engine's API version, and refuses privileged
+  containers, host mounts and host networking whoever asks. Tested against a
+  recording fake engine on a real unix socket and `/version` answers recorded
+  from Docker Desktop and Podman. No image, compose service or screen uses it
+  yet.
 
 ## 0.8.0 — 2026-10-08
 
