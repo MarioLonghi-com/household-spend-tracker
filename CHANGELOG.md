@@ -363,7 +363,8 @@ history this repository does not have.
 - **Self-update is tested end to end on every engine it supports** (#169).
   CI's `self-update` job is now a matrix: rootful Docker Engine in the
   loopback and the sidecar layouts, rootless Podman (podman-compose, the
-  updater as `0:0`), rootless Docker, and Docker on arm64. Each leg runs the
+  updater as `0:0`), and Docker on arm64 (rootless Docker stays in the
+  manual matrix: it cannot make its bridge on a hosted runner). Each leg runs the
   updater in its own container -- the release's real updater image, with
   only CI's trust policy added on top -- through an update, a skipped
   release, a rollback on a failed migration and on failed health, the

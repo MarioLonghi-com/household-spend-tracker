@@ -30,6 +30,7 @@ Rows 1, 2, 9, 10 and 24 belong to the app or to intake (U1, A1-A11); 21 is U5
 
 from __future__ import annotations
 
+import copy
 import os
 import stat
 import uuid
@@ -221,7 +222,8 @@ def test_discard_deletes_the_report(world):
 
 
 def test_apply_moves_the_ledger_and_the_app_to_b_and_records_it(world):
-    before = world.fake.inspect_of(the_app(world))
+    # A copy: the fake's inspect is live, and parking changes -previous's policy.
+    before = copy.deepcopy(world.fake.inspect_of(the_app(world)))
     old_image = world.fake.images[ref(APP, A)]["Config"]
     req, record = apply(world)
 
@@ -709,8 +711,10 @@ def test_e7_the_parked_app_is_parked_with_restart_policy_no_and_the_journal_keep
     assert parked["Id"] == world.app_id and parked["State"] == "exited"
     assert policy_of(world, world.app_id) == {"Name": "no"}
     assert [c.body for c in updates(world)] == [{"RestartPolicy": {"Name": "no"}}]
+    # The new app has the app's own policy, not the parked one.
+    assert policy_of(world, the_app(world)["Id"])["Name"] == "unless-stopped"
     ctx = world.journal(req["id"]).context
-    assert ctx["previous_restart_policy"] == {"Name": "unless-stopped"}
+    assert ctx["previous_restart_policy"] == {"Name": "unless-stopped", "MaximumRetryCount": 0}
     assert ctx["restart_policy_parked"] is True
 
 
@@ -751,7 +755,7 @@ def test_e7_the_retry_is_bounded_then_rolled_back_with_the_restart_policy_put_ba
     assert len(refused) == 2 and len(set(refused)) == 1 and len(creates(world, world.app_name)) == 1
     # A is home, running, with its own restart policy back.
     assert the_app(world)["Id"] == world.app_id and the_app(world)["State"] == "running"
-    assert policy_of(world, world.app_id) == {"Name": "unless-stopped"}
+    assert policy_of(world, world.app_id)["Name"] == "unless-stopped"
     assert [c.body["RestartPolicy"]["Name"] for c in updates(world)] == ["no", "unless-stopped"]
     assert world.journal(req["id"]).context["restart_policy_parked"] is False
 
@@ -761,7 +765,7 @@ def test_e7_any_rollback_puts_the_previous_restart_policy_back(world):
     _, record = apply(world)
     assert record["state"] == "rolled_back"
     assert the_app(world)["Id"] == world.app_id
-    assert policy_of(world, world.app_id) == {"Name": "unless-stopped"}
+    assert policy_of(world, world.app_id)["Name"] == "unless-stopped"
 
 
 def test_e7_in_the_sidecar_layout_a_previous_answering_in_the_namespace_is_stopped_and_b_recreated(tmp_path):

@@ -262,7 +262,8 @@ would see: after each of E1-E15 (`tests/self_update/scenarios.py`) it reads
 row counts, the ledger's stamp, which digest each container runs, a
 container's `StartedAt` and the pin in `.env`. It runs on rootful Docker
 (loopback and the Tailscale sidecar layout, with a stand-in for Tailscale),
-rootless Podman, rootless Docker, and Docker on arm64.
+rootless Podman, and Docker on arm64. Rootless Docker is in the manual
+matrix instead: its daemon cannot make its bridge network on a hosted runner.
 
 The only thing replaced is verification: nothing built on a runner has an
 attestation. The CI updater image (`tests/self_update/ci-updater.Dockerfile`)
@@ -285,7 +286,11 @@ own engine, images and containers are left alone; it leaves behind the images
 it built (`spend-tracker-ci*`), two registry containers (`st-ci-registry*`)
 and `.self-update/` in the checkout. E6, which restarts the engine, cannot run
 there. A scenario the updater is known not to pass yet is listed in
-`KNOWN_GAPS` in `scenarios.py`: it runs and prints, and does not fail the job.
+`KNOWN_GAPS` in `scenarios.py`: it runs and prints, and does not fail the job
+(the list is empty). A scenario in which release A's updater -- the merge
+base's -- does the work, on a layout or engine whose fix A does not have yet,
+is in `NEEDS_IN_A` with the fixing commit: it is skipped, saying so, until A
+contains that commit, and then runs by itself.
 
 **The engine canary** (`engine-canary.yml`, weekly, never a pull-request
 check) runs an update and the handover on the newest Docker Engine stable and

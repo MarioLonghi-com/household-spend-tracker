@@ -39,7 +39,7 @@ KINDS = {
         "socket": "/var/run/docker.sock",
         "certs": "/etc/docker/certs.d/ghcr.io",
         "compose": "docker compose",
-        "setup": "apk add --no-cache python3 >/dev/null",
+        "setup": "apk add --no-cache python3 git >/dev/null",
         "run": [],
         "after": "true",
         "env": ["-e", "DOCKER_TLS_CERTDIR="],
@@ -49,7 +49,7 @@ KINDS = {
         "socket": "/run/podman/podman.sock",
         "certs": "/etc/containers/certs.d/ghcr.io",
         "compose": "podman-compose",
-        "setup": "dnf -y -q install python3 podman-compose >/dev/null",
+        "setup": "dnf -y -q install python3 podman-compose git-core >/dev/null",
         # The socket as podman.socket makes it on a host (SocketMode=0660,
         # S18): `podman system service` alone makes it 0600, root only.
         "run": ["sh", "-c", "mkdir -p /run/podman && exec podman system service --time=0 unix:///run/podman/podman.sock"],

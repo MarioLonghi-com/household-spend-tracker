@@ -1035,8 +1035,10 @@ jobs:
   #     `systemctl --user` with lingering on, podman-restart enabled,
   #     podman-compose (x-podman: in_pod: false is in compose.yaml), the
   #     updater as 0:0 (S18) and label=disable (S4).
-  #   - docker-rootless: rootless Docker from dockerd-rootless-setuptool.sh,
-  #     the updater as 0:0 (S17).
+  #   - rootless Docker is not a leg: its daemon cannot make its bridge on a
+  #     hosted runner (NAT chains, then with iptables off "error creating
+  #     default bridge network: operation not permitted"). The manual matrix
+  #     covers it (design notes 15.5), on the test VM.
   #   - docker-arm: E1 on ubuntu-24.04-arm (C6).
   #
   # **Advisory: not in `ci-ok`'s needs** until the matrix has run green
@@ -1074,12 +1076,6 @@ jobs:
             runner: ubuntu-latest
             only: ""
             variants: ""
-          - leg: docker-rootless
-            engine: docker-rootless
-            layout: loopback
-            runner: ubuntu-latest
-            only: ""
-            variants: ""
           - leg: docker-arm
             engine: docker
             layout: loopback
@@ -1112,9 +1108,7 @@ jobs:
         run: python -m tests.self_update.stage registry --out "$STAGED" --publish 0.0.0.0:443
 
       # The engine under test resolves ghcr.io to the registry and trusts its
-      # certificate. Loopback for engines that pull from the runner's own
-      # namespace; the runner's address for rootless Docker, whose daemon
-      # pulls from inside RootlessKit's.
+      # certificate, at the runner's loopback, where both engines pull from.
       - name: "engine: Docker Engine, rootful"
         if: matrix.engine == 'docker'
         run: |
@@ -1156,52 +1150,6 @@ jobs:
           } >> "$GITHUB_ENV"
           podman version
           podman-compose version
-
-      - name: "engine: Docker, rootless"
-        if: matrix.engine == 'docker-rootless'
-        run: |
-          set -eu
-          started=$(date +%s)
-          addr="$(hostname -I | awk '{print $1}')"
-          echo "$addr ghcr.io" | sudo tee -a /etc/hosts > /dev/null
-          mkdir -p "$HOME/.config/docker/certs.d/ghcr.io"
-          cp "$STAGED/ghcr.crt" "$HOME/.config/docker/certs.d/ghcr.io/ca.crt"
-          # The runner's Docker comes without the rootless extras, and Docker's
-          # apt repository would replace the runner's engine to add them. The
-          # static archive holds only the setup tool, its script and
-          # RootlessKit; pinned by hash, like every download here.
-          sudo apt-get install -y -qq uidmap slirp4netns > /dev/null
-          curl -fsSLo "$RUNNER_TEMP/extras.tgz" \
-            https://download.docker.com/linux/static/stable/x86_64/docker-rootless-extras-29.8.1.tgz
-          want="sha256:8f1ed16fc6913241e599af6234a7f30502bde6e73bebbbc7176b17802d967d49"
-          echo "${want#sha256:}  $RUNNER_TEMP/extras.tgz" | sha256sum -c -
-          sudo tar -xzf "$RUNNER_TEMP/extras.tgz" -C /usr/local/bin --strip-components=1
-          # Ubuntu 24.04 confines unprivileged user namespaces to programs
-          # AppArmor names; RootlessKit is not one of them on this runner.
-          sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
-          sudo loginctl enable-linger "$(id -un)"
-          # The rootless daemon makes its own NAT chains inside RootlessKit's
-          # namespace, through the legacy modules the runner does not load.
-          sudo modprobe -a ip_tables iptable_nat ip6_tables ip6table_nat
-          # The first run failed to make them anyway ("failed to create NAT
-          # chain DOCKER"). Without iptables the daemon makes no NAT chains;
-          # ports are published by RootlessKit's port driver, and nothing the
-          # scenarios run needs a container to reach out past the engine.
-          mkdir -p "$HOME/.config/docker"
-          echo '{"iptables": false, "ip6tables": false}' > "$HOME/.config/docker/daemon.json"
-          dockerd-rootless-setuptool.sh install --force \
-            || { journalctl --user -n 60 --no-pager --unit docker.service; dockerd --version; exit 1; }
-          sock="$XDG_RUNTIME_DIR/docker.sock"
-          for _ in $(seq 1 60); do DOCKER_HOST="unix://$sock" docker version > /dev/null 2>&1 && break; sleep 1; done
-          {
-            echo "SOCKET=$sock"
-            echo "COMPOSE=docker --host unix://$sock compose"
-            echo "RESTART=systemctl --user restart docker"
-            echo "UPDATER_USER=0:0"
-            echo "SOCKET_GID=0"
-          } >> "$GITHUB_ENV"
-          DOCKER_HOST="unix://$sock" docker version --format 'rootless Docker {{.Server.Version}}, API {{.Server.MinAPIVersion}}-{{.Server.APIVersion}}'
-          echo "rootless Docker set up in $(( $(date +%s) - started )) s"
 
       # After the engine is set up: its resolver caches /etc/hosts for a few
       # seconds, and the first pull once went to the real ghcr.io (`denied`).

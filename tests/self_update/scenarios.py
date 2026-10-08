@@ -827,17 +827,28 @@ class Run:
 #: leg. When one passes, the summary says so -- take it out of here then.
 KNOWN_GAPS: dict[str, str] = {}
 
-#: Scenarios in which **A's** updater (the merge base's) runs steps 3-10 on a
-#: layout, and the fix that layout needs, by the commit that made it: until
-#: the merge base contains that commit, A's updater cannot pass there, and the
-#: scenario is skipped with the reason. It runs again by itself on the first
-#: pull request whose merge base has the fix.
+#: Scenarios in which **A's** updater (the merge base's) does work a layout or
+#: an engine needs a fix for -- keyed by the layout or the leg's name -- and
+#: the commit that made the fix: until A contains it, A's updater cannot pass
+#: there, and the scenario is skipped with the reason. It runs again by itself
+#: on the first run whose A has the fix.
 NEEDS_IN_A = {
     ("E11b", "sidecar"): (
         "51926060257c831732734c67a6cba6a6e36a8f88",
         "A's updater (the merge base) runs this apply and predates 5192606, the sidecar copy "
         "without ExposedPorts, so Docker refuses its step 7; it runs once the merge base has it",
     ),
+    # The canary's Podman shares the host's IPC and UTS namespaces; A's
+    # updater creates the successor (2a) and, when that fails, the new app.
+    **{
+        (name, "podman"): (
+            "173cc44781f837815157d12b7c9466759a022c76",
+            "A's updater creates the successor and the new app, and predates 173cc44, which leaves "
+            "ShmSize and Hostname out beside the host's IPC and UTS namespaces; this Podman refuses "
+            "them. It runs once A has the fix",
+        )
+        for name in ("E1", "E11")
+    },
 }
 
 
@@ -847,7 +858,8 @@ def contains(revision: str, commit: str) -> bool | None:
 
     try:
         done = subprocess.run(
-            ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", commit, revision],
+            # safe.directory: inside an engine box the checkout is another uid's.
+            ["git", "-c", "safe.directory=*", "-C", str(ROOT), "merge-base", "--is-ancestor", commit, revision],
             capture_output=True,
         )
     except OSError:
@@ -915,8 +927,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"leg {leg.name}, {leg.layout}: {version.get('Platform', {}).get('Name') or version.get('Components', [{}])[0].get('Name')} "
           f"{version.get('Version')}, API {version.get('MinAPIVersion')}-{version.get('ApiVersion')}")  # fmt: skip
     stack = Stack(leg, engine, args.project_dir.resolve(), args.staged.resolve())
-    for (name, layout), (commit, why) in NEEDS_IN_A.items():
-        if layout == leg.layout and contains(stack.releases[A]["revision"], commit) is False:
+    for (name, where), (commit, why) in NEEDS_IN_A.items():
+        if where in (leg.layout, leg.name) and contains(stack.releases[A]["revision"], commit) is False:
             leg.skips.setdefault(name, why)
     # The engine resolves ghcr.io to the job's registry only once its own
     # resolver has read /etc/hosts again (Go caches it for 5 s): the first

@@ -135,8 +135,10 @@ def restart_policy(inspect: dict) -> dict:
     name = policy.get("Name") or "no"
     out: dict = {"Name": name}
     count = policy.get("MaximumRetryCount")
-    if name == "on-failure" and isinstance(count, int) and not isinstance(count, bool) and count > 0:
-        out["MaximumRetryCount"] = count
+    if isinstance(count, int) and not isinstance(count, bool) and count >= 0:
+        # Kept as the engine reported it: Docker refuses a count above 0 on
+        # any policy but on-failure, and never reports one there.
+        out["MaximumRetryCount"] = count if name == "on-failure" else 0
     return out
 
 
@@ -639,6 +641,11 @@ class Apply:
             image_config=(image or {}).get("Config") if image else None,
             sidecar_id=sidecar.id if sidecar else None,
         )
+        own = self.ctx.get("previous_restart_policy")
+        if isinstance(own, dict) and own.get("Name"):
+            # The app's own policy, not the `no` it is parked with (#169):
+            # the copy is of the container as it was before step 3.
+            body["HostConfig"]["RestartPolicy"] = dict(own)
         new_id = self.client.create(self.app_name, body)
         self.remember(new_id=new_id)
         self.client.start(new_id)
