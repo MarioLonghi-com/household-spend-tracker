@@ -190,10 +190,14 @@ def check_updated(
     )
     policy = ((previous.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
     unable = [n for n in record.get("notes") or [] if "could not be set to `no`" in n]
-    r.check(
-        policy == "no" or bool(unable),
-        f"and parked with restart policy no ({policy}{'; the engine could not: ' + unable[0] if unable else ''})",
-    )
+    owner = (s.journal(rid).get("owner") or {}).get("image_digest")
+    if owner == s.releases[A]["updater"] and contains(s.releases[A]["revision"], PARKING) is False:
+        print(f"   (A's updater ran the apply and predates {PARKING[:7]}: restart policy {policy} not checked)")
+    else:
+        r.check(
+            policy == "no" or bool(unable),
+            f"and parked with restart policy no ({policy}{'; the engine could not: ' + unable[0] if unable else ''})",
+        )
     pin = pinned(s)
     want = f"{APP_REPO}:{to}@{s.releases[to]['app']}"
     r.check(pin.get("SPENDTRACKER_IMAGE") == want, f".env pins the app at {pin.get('SPENDTRACKER_IMAGE')}")
@@ -559,12 +563,7 @@ class Run:
 
         def kill(rid: str) -> None:
             s.wait_step(rid, ("5",))
-            owner = (s.journal(rid).get("owner") or {}).get("image_digest")
-            ref = f"{UPDATER_REPO}@{owner}"
-            target = next(
-                c for c in s.project_containers()
-                if c.get("State") == "running" and s.engine.inspect(c["Id"])["Image"] == s.image_id(ref)
-            )  # fmt: skip
+            target = self.owner_container(rid)
             print(f"   killing {s.name(target)} (the apply's owner) at step 5")
             s.engine.kill(target["Id"])
             time.sleep(3)
@@ -572,6 +571,16 @@ class Run:
             s.engine.start(target["Id"])
 
         self.interrupted(r, kill, "the updater was killed and started again")
+
+    def owner_container(self, rid: str) -> dict:
+        """The running updater container that owns the apply, by its image (a handover renames)."""
+        s = self.s
+        owner = (s.journal(rid).get("owner") or {}).get("image_digest")
+        ref = f"{UPDATER_REPO}@{owner}"
+        return next(
+            c for c in s.project_containers()
+            if c.get("State") == "running" and s.engine.inspect(c["Id"])["Image"] == s.image_id(ref)
+        )  # fmt: skip
 
     def E6(self, r: Result) -> None:
         s = self.s
@@ -602,18 +611,30 @@ class Run:
         prev = s.app_name + "-previous"
         seen: dict = {"clicks": 0, "refused": [], "ran": False}
 
+        def press() -> None:
+            seen["clicks"] += 1
+            with contextlib.suppress(api.Unreachable):
+                try:
+                    s.engine.start(prev)
+                except api.Failed as e:
+                    seen["refused"].append(str(e)[:160])
+            with contextlib.suppress(api.Failed, api.Unreachable):
+                state = s.engine.inspect(b.app["Id"])["State"]
+                seen["ran"] = state.get("StartedAt") != b.app["State"]["StartedAt"]
+
         def click(rid: str) -> None:
-            s.wait_for(lambda: s.engine.exists(prev), "the app to be parked as -previous", 600, every=0.1)
+            s.wait_for(lambda: s.engine.exists(prev), "the app to be parked as -previous", 600, every=0.05)
+            # The person is quicker than the updater: it is paused for the
+            # click, so the maintenance page has not taken the port yet. Not
+            # pausing made the click land behind the page about half the time.
+            owner = self.owner_container(rid)["Id"]
+            s.engine.pause(owner)
+            try:
+                press()
+            finally:
+                s.engine.unpause(owner)
             while not seen["ran"] and s.journal(rid).get("step") in ("3", "4", "5", "6"):
-                seen["clicks"] += 1
-                with contextlib.suppress(api.Unreachable):
-                    try:
-                        s.engine.start(prev)
-                    except api.Failed as e:
-                        seen["refused"].append(str(e)[:160])
-                with contextlib.suppress(api.Failed, api.Unreachable):
-                    state = s.engine.inspect(b.app["Id"])["State"]
-                    seen["ran"] = state.get("StartedAt") != b.app["State"]["StartedAt"]
+                press()
                 if not seen["ran"]:
                     time.sleep(0.5)
 
@@ -835,31 +856,6 @@ class Run:
 #: leg. When one passes, the summary says so -- take it out of here then.
 KNOWN_GAPS: dict[str, str] = {}
 
-#: Scenarios in which **A's** updater (the merge base's) does work a layout or
-#: an engine needs a fix for -- keyed by the layout or the leg's name -- and
-#: the commit that made the fix: until A contains it, A's updater cannot pass
-#: there, and the scenario is skipped with the reason. It runs again by itself
-#: on the first run whose A has the fix.
-NEEDS_IN_A = {
-    ("E11b", "sidecar"): (
-        "51926060257c831732734c67a6cba6a6e36a8f88",
-        "A's updater (the merge base) runs this apply and predates 5192606, the sidecar copy "
-        "without ExposedPorts, so Docker refuses its step 7; it runs once the merge base has it",
-    ),
-    # The canary's Podman shares the host's IPC and UTS namespaces; A's
-    # updater creates the successor (2a) and, when that fails, the new app.
-    **{
-        (name, "podman"): (
-            "173cc44781f837815157d12b7c9466759a022c76",
-            "A's updater creates the successor and the new app, and predates 173cc44, which leaves "
-            "ShmSize and Hostname out beside the host's IPC and UTS namespaces; this Podman refuses "
-            "them. It runs once A has the fix",
-        )
-        for name in ("E1", "E11")
-    },
-}
-
-
 #: The commit that parks -previous with restart policy `no` (#169).
 PARKING = "858eb410e39016630daa5d818cd53ed0bdc6a244"
 
@@ -940,9 +936,6 @@ def main(argv: list[str] | None = None) -> int:
     print(f"leg {leg.name}, {leg.layout}: {version.get('Platform', {}).get('Name') or version.get('Components', [{}])[0].get('Name')} "
           f"{version.get('Version')}, API {version.get('MinAPIVersion')}-{version.get('ApiVersion')}")  # fmt: skip
     stack = Stack(leg, engine, args.project_dir.resolve(), args.staged.resolve())
-    for (name, where), (commit, why) in NEEDS_IN_A.items():
-        if where in (leg.layout, leg.name) and contains(stack.releases[A]["revision"], commit) is False:
-            leg.skips.setdefault(name, why)
     # The engine resolves ghcr.io to the job's registry only once its own
     # resolver has read /etc/hosts again (Go caches it for 5 s): the first
     # compose up once went to the real ghcr.io and was `denied`. Pulling A by

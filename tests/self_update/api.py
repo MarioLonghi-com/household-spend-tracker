@@ -152,6 +152,12 @@ class Engine:
     def stop(self, ref: str, seconds: int = 10) -> None:
         self.call("POST", f"/containers/{urllib.parse.quote(ref, safe='')}/stop", {"t": seconds})
 
+    def pause(self, ref: str) -> None:
+        self.call("POST", f"/containers/{urllib.parse.quote(ref, safe='')}/pause")
+
+    def unpause(self, ref: str) -> None:
+        self.call("POST", f"/containers/{urllib.parse.quote(ref, safe='')}/unpause")
+
     def kill(self, ref: str) -> None:
         self.call("POST", f"/containers/{urllib.parse.quote(ref, safe='')}/kill")
 

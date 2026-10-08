@@ -287,10 +287,10 @@ it built (`spend-tracker-ci*`), two registry containers (`st-ci-registry*`)
 and `.self-update/` in the checkout. E6, which restarts the engine, cannot run
 there. A scenario the updater is known not to pass yet is listed in
 `KNOWN_GAPS` in `scenarios.py`: it runs and prints, and does not fail the job
-(the list is empty). A scenario in which release A's updater -- the merge
-base's -- does the work, on a layout or engine whose fix A does not have yet,
-is in `NEEDS_IN_A` with the fixing commit: it is skipped, saying so, until A
-contains that commit, and then runs by itself.
+(the list is empty). A leg whose engine or layout needs a fix in release A's
+updater -- the merge base's -- names the fixing commit as its `a_floor` in
+the matrix: while the merge base predates it, A is built from that commit
+instead, and the run says so in a notice. The engine canary does the same.
 
 **The engine canary** (`engine-canary.yml`, weekly, never a pull-request
 check) runs an update and the handover on the newest Docker Engine stable and

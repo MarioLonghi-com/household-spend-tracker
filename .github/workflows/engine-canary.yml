@@ -84,6 +84,10 @@ jobs:
           - engine: podman
             kind: podman
             image: quay.io/podman/stable:latest
+            # A must contain the copy that leaves ShmSize and Hostname out
+            # beside the host's IPC and UTS namespaces, which this image
+            # defaults to; until dev's previous commit does, A is this one.
+            a_floor: 173cc44781f837815157d12b7c9466759a022c76
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -124,9 +128,15 @@ jobs:
           python -m tests.self_update.stage registry --out "$STAGED" --network st-ci
 
       - name: build and push A (dev's previous commit) and B (dev's tip)
+        env:
+          A_FLOOR: ${{ matrix.a_floor }}
         run: |
           set -eu
           base="$(git rev-parse -q --verify 'HEAD^1' || git rev-parse HEAD)"
+          if [ -n "$A_FLOOR" ] && ! git merge-base --is-ancestor "$A_FLOOR" "$base"; then
+            echo "::notice::A is the leg's floor $A_FLOOR, not $base, which predates it"
+            base="$A_FLOOR"
+          fi
           python -m tests.self_update.stage build --out "$STAGED" --base "$base" --only none
 
       - name: E1 and E11 on the engine
