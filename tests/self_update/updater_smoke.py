@@ -77,6 +77,13 @@ def problems() -> list[str]:
 
 
 if __name__ == "__main__":
+    if os.environ.get("SMOKE_LISTENERS_ONLY") == "1":
+        # The end-to-end scenarios' E10, in whichever updater runs now and as
+        # whichever user the engine needs: only what listens, as JSON.
+        import json
+
+        print(json.dumps(listeners()))
+        sys.exit(0)
     print(f"uid {os.getuid()} gid {os.getgid()} groups {sorted(os.getgroups())}")
     print(f"listening: {listeners() or 'nothing'}")
     bad = problems()
