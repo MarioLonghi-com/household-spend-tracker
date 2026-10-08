@@ -172,7 +172,9 @@ history this repository does not have.
   starting with Categories, Payees, Payee categorisation and the payee
   naming rules, the household page, Admin, reconciling and importing
   accounts, History and backups, application management, receipts, the
-  reports and the one-time YNAB import. English is unchanged; each screen has a test
+  reports and the one-time YNAB import. The import guide is a document per
+  language instead: until one is written for a language, it shows the English
+  one, marked as English, under a line saying so. English is unchanged; each screen has a test
   that renders it in the `en-XA` pseudo-locale and finds no English left.
   (#56)
 

@@ -4829,6 +4829,10 @@ msgstr ""
 msgid "If you did not expect this, tell an owner of this instance before you go on."
 msgstr "Om du inte väntade dig detta, säg till en ägare av instansen innan du fortsätter."
 
+#: src/screens/ImportGuide.tsx
+msgid "This guide has not been written in your language yet, so here it is in English."
+msgstr ""
+
 #. placeholder {0}: from.currency
 #: src/screens/Transfer.tsx
 #, fuzzy

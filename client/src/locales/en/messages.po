@@ -4315,6 +4315,10 @@ msgstr "expired"
 msgid "If you did not expect this, tell an owner of this instance before you go on."
 msgstr "If you did not expect this, tell an owner of this instance before you go on."
 
+#: src/screens/ImportGuide.tsx
+msgid "This guide has not been written in your language yet, so here it is in English."
+msgstr "This guide has not been written in your language yet, so here it is in English."
+
 #. placeholder {0}: from.currency
 #: src/screens/Transfer.tsx
 msgid "Amount leaving ({0})"

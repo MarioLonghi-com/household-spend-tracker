@@ -41,11 +41,13 @@ export function untranslated(root: HTMLElement): string[] {
   const shown: string[] = [];
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    // Code to type, not words to read.
-    if ((node.parentElement?.closest(".mono, .codes, svg") ?? null) !== null) continue;
+    // Code to type, not words to read -- and a block that says which language
+    // it is in, like a guide not yet written in this one, is in that language.
+    if ((node.parentElement?.closest(".mono, .codes, svg, [lang]:not(html)") ?? null) !== null) continue;
     shown.push(node.textContent ?? "");
   }
   for (const element of Array.from(root.querySelectorAll("[aria-label], [title], [placeholder], [data-label]"))) {
+    if (element.closest("[lang]:not(html)")) continue;
     // data-label is what a phone shows beside each cell of a table row.
     for (const name of ["aria-label", "title", "placeholder", "data-label"]) {
       const value = element.getAttribute(name);
