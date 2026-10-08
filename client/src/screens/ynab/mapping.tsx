@@ -25,8 +25,10 @@ import type {
   YnabAccount,
   YnabCategory,
 } from "./types";
-import { compareNames } from "../../lib/locale";
+import { compareNames, formatCount } from "../../lib/locale";
 import { YNAB_ACCOUNT_WORDS, YNAB_CATEGORY_WORDS } from "../../lib/labels";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * An amount, or the bare figure when the code is not one `Intl` knows.
@@ -45,8 +47,6 @@ export function range(first: string | null, last: string | null): string {
   return `${first ?? "…"} – ${last ?? "…"}`;
 }
 
-const plural = (n: number, one: string, many = `${one}s`) =>
-  `${n.toLocaleString()} ${n === 1 ? one : many}`;
 
 // --------------------------------------------------------------------------- //
 // Match state: the row's tint, its word and the legend above each table
@@ -85,7 +85,7 @@ function StateWord({ state, word }: { state: MatchState; word: string }) {
 
 function StateLegend({ items }: { items: [MatchState, string, string][] }) {
   return (
-    <ul className="ynab-legend" aria-label="Row colours">
+    <ul className="ynab-legend" aria-label={t({ message: "Row colours", comment: "Screen-reader name on the one-time import's mapping step" })}>
       {items.map(([state, word, meaning]) => (
         <li key={state} className={`ynab-legend-item ynab-row-${state}`}>
           <StateWord state={state} word={word} />
@@ -111,9 +111,12 @@ export function describeTarget(target: TargetAccount): string {
     target.institution,
     target.identifiers_masked.length ? target.identifiers_masked.join(" ") : null,
     money(target.balance_minor, target.currency),
-    plural(target.txn_count, "txn"),
+    plural(target.txn_count, {
+      one: `${formatCount(target.txn_count)} txn`,
+      other: `${formatCount(target.txn_count)} txns`,
+    }),
     target.txn_count > 0 ? range(target.first_date, target.last_date) : null,
-    target.closed ? "(closed)" : null,
+    target.closed ? t({ message: "(closed)", comment: "Label on the one-time import's mapping step" }) : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -192,26 +195,28 @@ export function MapAccounts({
   return (
     <>
       <p className="small">
-        Each YNAB account goes to one Spend Tracker account in {currency}, to a new one, or is
-        skipped. An account can take only one YNAB account, so one chosen on a row is not offered
-        on the others.
+        <Trans>
+          Each YNAB account goes to one Spend Tracker account in {currency}, to a new one, or is
+          skipped. An account can take only one YNAB account, so one chosen on a row is not
+          offered on the others.
+        </Trans>
       </p>
       <StateLegend
         items={[
-          ["matched", ACCOUNT_WORD.matched, "an existing account"],
-          ["create", ACCOUNT_WORD.create, "a new account"],
-          ["unmatched", ACCOUNT_WORD.unmatched, "left out"],
+          ["matched", ACCOUNT_WORD.matched, t`an existing account`],
+          ["create", ACCOUNT_WORD.create, t`a new account`],
+          ["unmatched", ACCOUNT_WORD.unmatched, t({ message: "left out", comment: "Text on the one-time import's mapping step" })],
         ]}
       />
       <div className="table-scroll">
         <table className="ynab-map">
           <thead>
             <tr>
-              <SortHeading label="YNAB account" column="name" {...heading} />
-              <SortHeading label="Rows" column="rows" align="right" {...heading} />
-              <SortHeading label="Dates" column="range" {...heading} />
-              <SortHeading label="Balance" column="balance" align="right" {...heading} />
-              <th>Goes to</th>
+              <SortHeading label={t({ message: "YNAB account", comment: "Column heading on the one-time import's mapping step" })} column="name" {...heading} />
+              <SortHeading label={t({ message: "Rows", comment: "Column heading on the one-time import's mapping step: noun, lines of a file or table" })} column="rows" align="right" {...heading} />
+              <SortHeading label={t({ message: "Dates", comment: "Column heading on the one-time import's mapping step: noun, a date range" })} column="range" {...heading} />
+              <SortHeading label={t({ message: "Balance", comment: "Column heading on the one-time import's mapping step: noun, the amount an account holds. See GLOSSARY.md" })} column="balance" align="right" {...heading} />
+              <th><Trans comment="Column heading on the one-time import's mapping step">Goes to</Trans></th>
             </tr>
           </thead>
           <tbody>
@@ -220,19 +225,23 @@ export function MapAccounts({
               const suggested = accountFromSuggestion(account.suggestion, account);
               const isSuggested = sameAccountChoice(choice, suggested);
               const chosen = choice.kind === "existing" ? byId.get(choice.account_id) : undefined;
-              const label = `Target for ${account.name}`;
+              const label = t({ message: `Target for ${account.name}`, comment: "Text on the one-time import's mapping step" });
               const state = accountState(choice);
               return (
                 <tr key={account.key} className={`ynab-row-${state}`} data-state={state}>
                   <td data-primary="true">
                     {account.name}
-                    {account.closed ? <span className="tag closed">closed</span> : null}
+                    {account.closed ? (
+                      <span className="tag closed">
+                        <Trans comment="Tag beside a name on the one-time import's mapping step: adjective, an account no longer in use. See GLOSSARY.md">closed</Trans>
+                      </span>
+                    ) : null}
                     <StateWord state={state} word={ACCOUNT_WORD[state]} />
                   </td>
-                  <td className="amount small" data-label="Rows" data-detail-first="true">
-                    {account.rows.toLocaleString()}
+                  <td className="amount small" data-label={t({ message: "Rows", comment: "Column name shown beside a value on phones on the one-time import's mapping step: noun, lines of a file or table" })} data-detail-first="true">
+                    {formatCount(account.rows)}
                   </td>
-                  <td className="small muted mono" data-label="Dates">
+                  <td className="small muted mono" data-label={t({ message: "Dates", comment: "Column name shown beside a value on phones on the one-time import's mapping step: noun, a date range" })}>
                     {range(account.date_min, account.date_max)}
                   </td>
                   <td className="amount" data-figure="true">
@@ -240,7 +249,7 @@ export function MapAccounts({
                       {money(account.balance_minor, currency)}
                     </span>
                   </td>
-                  <td className="ynab-target" data-label="Goes to">
+                  <td className="ynab-target" data-label={t({ message: "Goes to", comment: "Column name shown beside a value on phones on the one-time import's mapping step" })}>
                     <div className="ynab-target-body">
                       <div className="ynab-target-pick">
                         <select
@@ -266,7 +275,7 @@ export function MapAccounts({
                               });
                           }}
                         >
-                          <optgroup label={`Existing accounts in ${currency}`}>
+                          <optgroup label={t`Existing accounts in ${currency}`}>
                             {eligible.map((target) => {
                               const heldBy = holder.get(target.id);
                               const taken = heldBy !== undefined && heldBy !== account.key;
@@ -280,18 +289,19 @@ export function MapAccounts({
                                   disabled={taken}
                                 >
                                   {describeTarget(target)}
-                                  {isSuggestion ? " — suggested" : ""}
-                                  {taken ? ` — used by ${nameOf.get(heldBy!) ?? heldBy}` : ""}
+                                  {isSuggestion ? ` — ${t({ message: "suggested", comment: "Option in a dropdown on the one-time import's mapping step" })}` : ""}
+                                  {taken ? ` — ${t({ message: `used by ${nameOf.get(heldBy!) ?? heldBy}`, comment: "Option in a dropdown on the one-time import's mapping step" })}` : ""}
                                 </option>
                               );
                             })}
                           </optgroup>
                           <option value="create">
-                            Create new…{account.suggestion.kind === "create" ? " — suggested" : ""}
+                            {t({ message: "Create new…", comment: "Option in a dropdown on the one-time import's mapping step" })}
+                            {account.suggestion.kind === "create" ? ` — ${t({ message: "suggested", comment: "Option in a dropdown on the one-time import's mapping step" })}` : ""}
                           </option>
-                          <option value="skip">Skip</option>
+                          <option value="skip"><Trans comment="Option in a dropdown on the one-time import's mapping step">Skip</Trans></option>
                         </select>
-                        {isSuggested ? <span className="pill">suggested</span> : null}
+                        {isSuggested ? <span className="pill">{t({ message: "suggested", comment: "Tag beside a name on the one-time import's mapping step" })}</span> : null}
                       </div>
                       {chosen ? (
                         <div className="small muted ynab-detail">{describeTarget(chosen)}</div>
@@ -299,14 +309,14 @@ export function MapAccounts({
                       {choice.kind === "create" ? (
                         <div className="ynab-create">
                           <input
-                            aria-label={`New account name for ${account.name}`}
+                            aria-label={t`New account name for ${account.name}`}
                             value={choice.name}
                             onChange={(event) =>
                               onChoose(account.key, { ...choice, name: event.target.value })
                             }
                           />
                           <select
-                            aria-label={`New account type for ${account.name}`}
+                            aria-label={t`New account type for ${account.name}`}
                             value={choice.type}
                             onChange={(event) =>
                               onChoose(account.key, {
@@ -322,14 +332,19 @@ export function MapAccounts({
                             ))}
                           </select>
                           <div className="small muted">
-                            In {currency}, opening balance 0, opened the day before its first
-                            imported transaction.
+                            <Trans>
+                              In {currency}, opening balance 0, opened the day before its first
+                              imported transaction.
+                            </Trans>
                           </div>
                         </div>
                       ) : null}
                       {choice.kind === "skip" ? (
                         <div className="small muted ynab-detail">
-                          Its {plural(account.rows, "row")} are left out and listed in the report.
+                          {plural(account.rows, {
+                            one: `Its ${formatCount(account.rows)} row are left out and listed in the report.`,
+                            other: `Its ${formatCount(account.rows)} rows are left out and listed in the report.`,
+                          })}
                         </div>
                       ) : null}
                     </div>
@@ -425,25 +440,27 @@ export function MapCategories({
   return (
     <>
       <p className="small">
-        YNAB's category groups are not kept: each YNAB category goes to one category here, and
-        several may share one.
+        <Trans>
+          YNAB's category groups are not kept: each YNAB category goes to one category here, and
+          several may share one.
+        </Trans>
       </p>
       <StateLegend
         items={[
-          ["matched", CATEGORY_WORD.matched, "an existing category"],
-          ["create", CATEGORY_WORD.create, "a new category"],
-          ["unmatched", CATEGORY_WORD.unmatched, "no category"],
-          ["fixed", CATEGORY_WORD.fixed, "YNAB's own bucket, always uncategorised"],
+          ["matched", CATEGORY_WORD.matched, t`an existing category`],
+          ["create", CATEGORY_WORD.create, t`a new category`],
+          ["unmatched", CATEGORY_WORD.unmatched, t({ message: "no category", comment: "Text on the one-time import's mapping step" })],
+          ["fixed", CATEGORY_WORD.fixed, t`YNAB's own bucket, always uncategorised`],
         ]}
       />
       <div className="table-scroll">
         <table className="ynab-map">
           <thead>
             <tr>
-              <SortHeading label="YNAB category" column="name" {...heading} />
-              <SortHeading label="YNAB groups" column="groups" {...heading} />
-              <SortHeading label="Rows" column="rows" align="right" {...heading} />
-              <th>Goes to</th>
+              <SortHeading label={t({ message: "YNAB category", comment: "Column heading on the one-time import's mapping step" })} column="name" {...heading} />
+              <SortHeading label={t({ message: "YNAB groups", comment: "Column heading on the one-time import's mapping step" })} column="groups" {...heading} />
+              <SortHeading label={t({ message: "Rows", comment: "Column heading on the one-time import's mapping step: noun, lines of a file or table" })} column="rows" align="right" {...heading} />
+              <th><Trans comment="Column heading on the one-time import's mapping step">Goes to</Trans></th>
             </tr>
           </thead>
           <tbody>
@@ -460,25 +477,25 @@ export function MapCategories({
               return (
                 <tr key={category.key} className={`ynab-row-${state}`} data-state={state}>
                   <td data-primary="true">
-                    {category.name || <span className="muted">(none)</span>}
+                    {category.name || <span className="muted">{t({ message: "(none)", comment: "Table cell on the one-time import's mapping step" })}</span>}
                     <StateWord state={state} word={CATEGORY_WORD[state]} />
                   </td>
                   <td
                     className="small muted"
-                    data-label="YNAB groups"
+                    data-label={t({ message: "YNAB groups", comment: "Column name shown beside a value on phones on the one-time import's mapping step" })}
                     data-detail-first="true"
                     data-empty={category.groups.length ? undefined : "true"}
                   >
                     {category.groups.join(", ") || "—"}
                   </td>
                   <td className="amount" data-figure="true">
-                    {category.rows.toLocaleString()}
+                    {formatCount(category.rows)}
                   </td>
-                  <td className="ynab-target" data-label="Goes to">
+                  <td className="ynab-target" data-label={t({ message: "Goes to", comment: "Column name shown beside a value on phones on the one-time import's mapping step" })}>
                     <div className="ynab-target-body">
                       <div className="ynab-target-pick">
                         <select
-                          aria-label={`Target for ${category.name || "no category"}`}
+                          aria-label={t`Target for ${category.name || t({ message: "no category", comment: "Text on the one-time import's mapping step" })}`}
                           value={categoryValue(choice)}
                           disabled={category.fixed_uncategorised}
                           onChange={(event) => {
@@ -505,44 +522,48 @@ export function MapCategories({
                               {group.list.map((target) => (
                                 <option key={target.id} value={`existing:${target.id}`}>
                                   {target.name}
-                                  {target.archived ? " (archived)" : ""}
-                                  {target.id === suggestedId ? " — suggested" : ""}
+                                  {target.archived ? ` ${t({ message: "(archived)", comment: "Option in a dropdown on the one-time import's mapping step" })}` : ""}
+                                  {target.id === suggestedId ? ` — ${t({ message: "suggested", comment: "Option in a dropdown on the one-time import's mapping step" })}` : ""}
                                 </option>
                               ))}
                             </optgroup>
                           ))}
                           <option value="create">
-                            Create new…
-                            {category.suggestion.kind === "create" ? " — suggested" : ""}
+                            {t({ message: "Create new…", comment: "Option in a dropdown on the one-time import's mapping step" })}
+                            {category.suggestion.kind === "create" ? ` — ${t({ message: "suggested", comment: "Option in a dropdown on the one-time import's mapping step" })}` : ""}
                           </option>
                           <option value="uncategorised">
-                            Uncategorised
+                            {t({ message: "Uncategorised", comment: "Option in a dropdown on the one-time import's mapping step: having no category. See GLOSSARY.md" })}
                             {!category.fixed_uncategorised &&
                             category.suggestion.kind === "uncategorised"
-                              ? " — suggested"
+                              ? ` — ${t({ message: "suggested", comment: "Option in a dropdown on the one-time import's mapping step" })}`
                               : ""}
                           </option>
                         </select>
-                        {isSuggested ? <span className="pill">suggested</span> : null}
+                        {isSuggested ? <span className="pill">{t({ message: "suggested", comment: "Tag beside a name on the one-time import's mapping step" })}</span> : null}
                       </div>
                       {category.fixed_uncategorised ? (
                         <div className="small muted ynab-detail">
-                          Fixed: this is YNAB's own bucket rather than a category of yours
-                          (Uncategorized, or Inflow: Ready to Assign), so its rows always arrive
-                          uncategorised.
+                          <Trans>
+                            Fixed: this is YNAB's own bucket rather than a category of yours
+                            (Uncategorized, or Inflow: Ready to Assign), so its rows always arrive
+                            uncategorised.
+                          </Trans>
                         </div>
                       ) : null}
                       {choice.kind === "create" ? (
                         <div className="ynab-create">
                           <input
-                            aria-label={`New category name for ${category.name}`}
+                            aria-label={t`New category name for ${category.name}`}
                             value={choice.name}
                             onChange={(event) =>
                               onChoose(category.key, { ...choice, name: event.target.value })
                             }
                           />
                           <div className="small muted">
-                            Created in a group called "Imported from YNAB".
+                            <Trans>
+                              Created in a group called "Imported from YNAB".
+                            </Trans>
                           </div>
                         </div>
                       ) : null}

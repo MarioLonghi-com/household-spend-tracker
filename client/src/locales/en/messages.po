@@ -11,6 +11,11 @@ msgstr ""
 msgid "The name looks like its IBAN."
 msgstr "The name looks like its IBAN."
 
+#. placeholder {0}: formatCount(analysis.totals.starting_balance_rows)
+#: src/screens/OneTimeImport.tsx
+msgid "YNAB Starting Balance rows ({0})"
+msgstr "YNAB Starting Balance rows ({0})"
+
 #. What the import detected: the running balance column. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "balance column"
@@ -36,6 +41,18 @@ msgstr "Creating…"
 msgid "Uploading"
 msgstr "Uploading"
 
+#: src/screens/ynab/results.tsx
+msgid "Skipped: account set to Skip"
+msgstr "Skipped: account set to Skip"
+
+#: src/screens/OneTimeImport.tsx
+msgid "A personal access token from your YNAB account."
+msgstr "A personal access token from your YNAB account."
+
+#: src/screens/OneTimeImport.tsx
+msgid "No duplicates of transactions already in the ledger."
+msgstr "No duplicates of transactions already in the ledger."
+
 #. placeholder {0}: tagOffer.value
 #: src/screens/Import.tsx
 msgid "{0} now tells a file it is for that account"
@@ -53,8 +70,10 @@ msgid "Application management"
 msgstr "Application management"
 
 #. Label of a form field on the Transfers screen: the end of a range, or where money goes
+#. Label of a form field on the one-time import: the end of a range, or where money goes
 #. Text on the date range picker: the end of a range, or where money goes
 #: src/components/DateRange.tsx
+#: src/screens/OneTimeImport.tsx
 #: src/screens/Transfer.tsx
 msgid "To"
 msgstr "To"
@@ -66,8 +85,11 @@ msgstr "starts with"
 
 #. Option in a dropdown on the Accounts screen
 #. Option in a dropdown on the Import screen
+#. Option in a dropdown on the one-time import
+#. Option in a dropdown on the one-time import
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
+#: src/screens/OneTimeImport.tsx
 msgid "Choose…"
 msgstr "Choose…"
 
@@ -108,6 +130,11 @@ msgstr "Open Dropbox"
 msgid "Send back to the inbox"
 msgstr "Send back to the inbox"
 
+#. Sentence on the one-time import
+#: src/screens/OneTimeImport.tsx
+msgid "From <0>{where}</0>."
+msgstr "From <0>{where}</0>."
+
 #: src/screens/Rules.tsx
 msgid "One act, so History has one entry and undo puts every row back together."
 msgstr "One act, so History has one entry and undo puts every row back together."
@@ -130,6 +157,10 @@ msgstr "this account is closed"
 #: src/screens/Reports.tsx
 msgid "Where you are"
 msgstr "Where you are"
+
+#: src/screens/ynab/mapping.tsx
+msgid "Existing accounts in {currency}"
+msgstr "Existing accounts in {currency}"
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "Payments from work"
@@ -231,6 +262,10 @@ msgstr "You have no unused recovery codes. If you lose your authenticator, you h
 msgid "Not reimbursed after all"
 msgstr "Not reimbursed after all"
 
+#: src/screens/ynab/mapping.tsx
+msgid "Fixed: this is YNAB's own bucket rather than a category of yours (Uncategorized, or Inflow: Ready to Assign), so its rows always arrive uncategorised."
+msgstr "Fixed: this is YNAB's own bucket rather than a category of yours (Uncategorized, or Inflow: Ready to Assign), so its rows always arrive uncategorised."
+
 #: src/screens/Household.tsx
 msgid "You can pick a palette and one accent of your own. You cannot reach the text and background colours, so no household can be made unreadable — and the accent is checked for contrast before it is saved."
 msgstr "You can pick a palette and one accent of your own. You cannot reach the text and background colours, so no household can be made unreadable — and the accent is checked for contrast before it is saved."
@@ -239,6 +274,12 @@ msgstr "You can pick a palette and one accent of your own. You cannot reach the 
 #: src/screens/Accounts.tsx
 msgid "account types"
 msgstr "account types"
+
+#. placeholder {0}: formatCount(importing)
+#. placeholder {1}: formatCount(duplicates.length)
+#: src/screens/ynab/results.tsx
+msgid "{0} of {1} will be imported."
+msgstr "{0} of {1} will be imported."
 
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Net — whole period"
@@ -355,12 +396,24 @@ msgstr "Review…"
 msgid "the server's answer could not be read"
 msgstr "the server's answer could not be read"
 
+#: src/screens/ynab/results.tsx
+msgid "{keptText}, so {rules} may now suggest rules from it."
+msgstr "{keptText}, so {rules} may now suggest rules from it."
+
 #. Button on the passkeys panel: verb, hide this notice
 #. Button, SignInNotice (shared): verb, hide this notice
 #: src/components/SignInNotice.tsx
 #: src/screens/Passkeys.tsx
 msgid "Dismiss"
 msgstr "Dismiss"
+
+#. placeholder {0}: one.account
+#. placeholder {1}: money(one.ynab_balance_minor, one.currency)
+#. placeholder {2}: money(one.imported_minor, one.currency)
+#. placeholder {3}: money(Math.abs(one.difference_minor), one.currency)
+#: src/screens/ynab/results.tsx
+msgid "{0}: YNAB’s balance is {1}, and this import accounts for {2}, {3} less."
+msgstr "{0}: YNAB’s balance is {1}, and this import accounts for {2}, {3} less."
 
 #: src/components/StepUp.tsx
 msgid "{why} So this asks for your password and a code — the same as signing in."
@@ -505,6 +558,10 @@ msgstr "This server cannot check a code from the authenticator you have, so one 
 msgid "Length does more than symbols do. Four unrelated words you can actually remember beats a short one with punctuation in it."
 msgstr "Length does more than symbols do. Four unrelated words you can actually remember beats a short one with punctuation in it."
 
+#: src/screens/OneTimeImport.tsx
+msgid "Bring your history over from the app you used before, once: transactions, accounts, categories and transfers, mapped onto what this household already has. YNAB is the one workflow so far. Other budgeting and spend tracker app import workflows can be added to this, just suggest it via <0>GitHub</0>."
+msgstr "Bring your history over from the app you used before, once: transactions, accounts, categories and transfers, mapped onto what this household already has. YNAB is the one workflow so far. Other budgeting and spend tracker app import workflows can be added to this, just suggest it via <0>GitHub</0>."
+
 #. placeholder {0}: detaching.download_name.split("/").pop()
 #: src/screens/Register.tsx
 msgid "<0>{0}</0> goes to the receipts inbox and stays there until it is attached again or deleted."
@@ -518,6 +575,10 @@ msgstr "Reading this instance…"
 #: src/screens/Passkeys.tsx
 msgid "Rename"
 msgstr "Rename"
+
+#: src/screens/OneTimeImport.tsx
+msgid "Asking YNAB for your plans…"
+msgstr "Asking YNAB for your plans…"
 
 #: src/screens/SignIn.tsx
 msgid "I have my authenticator after all"
@@ -552,6 +613,12 @@ msgstr "The first {0} of {count}, in the order they were changed. Undo puts back
 msgid "Credit cards"
 msgstr "Credit cards"
 
+#. Option in a dropdown on the one-time import's mapping step
+#. Option in a dropdown on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "Create new…"
+msgstr "Create new…"
+
 #: src/components/DateRange.tsx
 msgid "Earlier: the same length of time, just before"
 msgstr "Earlier: the same length of time, just before"
@@ -571,6 +638,10 @@ msgstr "Edit the payee"
 #: src/screens/Register.tsx
 msgid "Not seen by the bank yet"
 msgstr "Not seen by the bank yet"
+
+#: src/screens/ynab/results.tsx
+msgid "Every row that was not imported, and why."
+msgstr "Every row that was not imported, and why."
 
 #. Label of a form field on the Register screen
 #. Label of a form field on the Register screen
@@ -690,6 +761,13 @@ msgstr "Accounts file"
 msgid "{0} now tells a file it is for {1}"
 msgstr "{0} now tells a file it is for {1}"
 
+#. Text on the one-time import's mapping step
+#. placeholder {0}: account.name
+#. placeholder {0}: category.name || t({ message: "no category", comment: "Text on the one-time import's mapping step" })
+#: src/screens/ynab/mapping.tsx
+msgid "Target for {0}"
+msgstr "Target for {0}"
+
 #: src/screens/Rules.tsx
 msgid "Write this rule"
 msgstr "Write this rule"
@@ -708,6 +786,18 @@ msgstr "Set the category on {done} row and skipped 1 transfer leg — a transfer
 #: src/screens/Receipts.tsx
 msgid "What was it for?"
 msgstr "What was it for?"
+
+#: src/screens/ynab/results.tsx
+msgid "Every row was imported."
+msgstr "Every row was imported."
+
+#. Screen-reader name on the one-time import's results
+#. placeholder {0}: formatDate(row.date)
+#. placeholder {1}: row.payee ?? ""
+#. placeholder {2}: money(row.amount_minor, currency)
+#: src/screens/ynab/results.tsx
+msgid "Import anyway: {0} {1} {2}"
+msgstr "Import anyway: {0} {1} {2}"
 
 #. Button on the Admin screen
 #. Menu item and the name of its screen
@@ -775,6 +865,10 @@ msgstr "nobody"
 msgid "It matters most on an import: a statement of three hundred rows is three hundred categories you did not have to type, or three hundred corrections if it guesses badly."
 msgstr "It matters most on an import: a statement of three hundred rows is three hundred categories you did not have to type, or three hundred corrections if it guesses badly."
 
+#: src/screens/OneTimeImport.tsx
+msgid "A YNAB plan has one currency. Only accounts here in that currency can take its rows."
+msgstr "A YNAB plan has one currency. Only accounts here in that currency can take its rows."
+
 #: src/screens/Profile.tsx
 msgid "What it may do"
 msgstr "What it may do"
@@ -795,11 +889,13 @@ msgstr "Skip to transactions"
 #. Column name shown beside a value on phones on the household page. See GLOSSARY.md
 #. Label on the household page. See GLOSSARY.md
 #. Menu item and the name of its screen. See GLOSSARY.md
+#. Name of a fact on the one-time import. See GLOSSARY.md
 #. Screen title on the Register screen. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
+#: src/screens/OneTimeImport.tsx
 #: src/screens/PayeeCategorisation.tsx
 #: src/screens/Payees.tsx
 #: src/screens/Register.tsx
@@ -844,6 +940,10 @@ msgstr "A rule only runs as a statement is read, so writing one changes nothing 
 #: src/screens/SignIn.tsx
 msgid "Check the code and finish"
 msgstr "Check the code and finish"
+
+#: src/screens/ynab/results.tsx
+msgid "1 group of bank strings looks like one payee; make a rule in {rules}?"
+msgstr "1 group of bank strings looks like one payee; make a rule in {rules}?"
 
 #. Button on the Import screen
 #. Button on the Import screen
@@ -911,6 +1011,11 @@ msgstr "Add an account"
 msgid "Couldn't reach the clipboard. Select the link above and copy it by hand."
 msgstr "Couldn't reach the clipboard. Select the link above and copy it by hand."
 
+#. Column name shown beside a value on phones on the one-time import's results: adjective, already in the ledger
+#: src/screens/ynab/results.tsx
+msgid "Existing"
+msgstr "Existing"
+
 #. Button on the account reset page. See GLOSSARY.md
 #. Button on the account reset page. See GLOSSARY.md
 #. Button on the sign-in page. See GLOSSARY.md
@@ -958,6 +1063,10 @@ msgstr "(rows with no category yet)"
 msgid "Everything recorded about this"
 msgstr "Everything recorded about this"
 
+#: src/screens/ynab/results.tsx
+msgid "(the {RULES_LISTED} largest are listed)"
+msgstr "(the {RULES_LISTED} largest are listed)"
+
 #: src/screens/Register.tsx
 msgid "Yes, detach it"
 msgstr "Yes, detach it"
@@ -979,6 +1088,10 @@ msgstr "Set the category…"
 #: src/screens/Household.tsx
 msgid "Statements reconciled"
 msgstr "Statements reconciled"
+
+#: src/screens/OneTimeImport.tsx
+msgid "You Need A Budget: from its export file or its API."
+msgstr "You Need A Budget: from its export file or its API."
 
 #: src/screens/Backups.tsx
 msgid "Include <0>secret.key</0> in downloads"
@@ -1010,6 +1123,10 @@ msgstr "Nothing left to prove on or before that date. Everything up to here is a
 msgid "Nobody yet, which should be impossible while you are reading this."
 msgstr "Nobody yet, which should be impossible while you are reading this."
 
+#: src/screens/OneTimeImport.tsx
+msgid "I understand YNAB's Reconciled, Cleared and Uncleared states will be reset — everything arrives uncleared."
+msgstr "I understand YNAB's Reconciled, Cleared and Uncleared states will be reset — everything arrives uncleared."
+
 #. Column heading on the Payees screen
 #. Column heading on the Rules screen
 #. Column name shown beside a value on phones on the Rules screen
@@ -1039,6 +1156,11 @@ msgstr "{keys, plural, one {{keys} agent key still works — revoke it below if 
 #: src/screens/Rules.tsx
 msgid "Call the payee"
 msgstr "Call the payee"
+
+#. Option in a dropdown on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "Skip"
+msgstr "Skip"
 
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
@@ -1077,6 +1199,10 @@ msgstr "Name"
 #: src/screens/Admin.tsx
 msgid "Dismiss without copying? The link cannot be shown again."
 msgstr "Dismiss without copying? The link cannot be shown again."
+
+#: src/screens/ynab/results.tsx
+msgid "Already in the ledger"
+msgstr "Already in the ledger"
 
 #: src/screens/Reports.tsx
 msgid "What came in, what went out, and what it was for — month by month."
@@ -1125,6 +1251,11 @@ msgstr "Authenticator"
 msgid "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
 msgstr "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
 
+#. Label on the one-time import's results: it did not work
+#: src/screens/ynab/results.tsx
+msgid "Failed"
+msgstr "Failed"
+
 #: src/screens/Rules.tsx
 msgid "With <0>matches the pattern</0> this is a template, so <1>\\1</1> is the first bracketed group: <2>^SQ \\*(.+)$</2> with <3>\\1</3> keeps what follows."
 msgstr "With <0>matches the pattern</0> this is a template, so <1>\\1</1> is the first bracketed group: <2>^SQ \\*(.+)$</2> with <3>\\1</3> keeps what follows."
@@ -1138,6 +1269,11 @@ msgstr "Cut off at {0} characters. Every line of it was still read — the table
 #: src/screens/Payees.tsx
 msgid "Everyone {0} has paid or been paid by. Most arrive on their own, from a transaction or an import; two spellings of the same shop are merged here."
 msgstr "Everyone {0} has paid or been paid by. Most arrive on their own, from a transaction or an import; two spellings of the same shop are merged here."
+
+#. Label on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "(closed)"
+msgstr "(closed)"
 
 #: src/lib/labels.ts
 msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
@@ -1211,6 +1347,14 @@ msgstr "Nothing — check you are matching what the bank wrote rather than what 
 msgid "Out"
 msgstr "Out"
 
+#. placeholder {0}: one.account
+#. placeholder {1}: money(one.ynab_balance_minor, one.currency)
+#. placeholder {2}: money(one.imported_minor, one.currency)
+#. placeholder {3}: money(Math.abs(one.difference_minor), one.currency)
+#: src/screens/ynab/results.tsx
+msgid "{0}: YNAB’s balance is {1}, and this import accounts for {2}, {3} more."
+msgstr "{0}: YNAB’s balance is {1}, and this import accounts for {2}, {3} more."
+
 #: src/screens/Profile.tsx
 msgid "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
 msgstr "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
@@ -1231,6 +1375,10 @@ msgstr "Entered by hand"
 #: src/screens/Accounts.tsx
 msgid "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
 msgstr "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
+
+#: src/screens/ynab/results.tsx
+msgid "Skipped: outside the date range"
+msgstr "Skipped: outside the date range"
 
 #. Tag beside a name on the Application management screen
 #: src/screens/ApplicationManagement.tsx
@@ -1288,6 +1436,11 @@ msgstr "Reconcile {0}"
 #: src/screens/Import.tsx
 msgid "Chose <0>{0}</0> for you: {1}."
 msgstr "Chose <0>{0}</0> for you: {1}."
+
+#. placeholder {0}: range(analysis.totals.date_min, analysis.totals.date_max)
+#: src/screens/OneTimeImport.tsx
+msgid "Leave both empty to import everything ({0})."
+msgstr "Leave both empty to import everything ({0})."
 
 #: src/screens/Accounts.tsx
 msgid "Closed — hide it from the accounts list"
@@ -1468,6 +1621,11 @@ msgstr "their password stops working"
 msgid "Work expense — reimbursed"
 msgstr "Work expense — reimbursed"
 
+#. Screen-reader name on the one-time import
+#: src/screens/OneTimeImport.tsx
+msgid "Steps"
+msgstr "Steps"
+
 #: src/screens/Admin.tsx
 msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password and authenticator."
 msgstr "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password and authenticator."
@@ -1489,6 +1647,10 @@ msgstr "None yet"
 msgid "<0>{0}</0> is available. This instance is running {1}."
 msgstr "<0>{0}</0> is available. This instance is running {1}."
 
+#: src/screens/OneTimeImport.tsx
+msgid "Currency of the plan"
+msgstr "Currency of the plan"
+
 #: src/screens/reports/Reimbursements.tsx
 msgid "By when the expense happened."
 msgstr "By when the expense happened."
@@ -1498,9 +1660,13 @@ msgstr "By when the expense happened."
 #. Column heading on the Reimbursements report: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the accounts import: noun, a bank or cash account. See GLOSSARY.md
+#. Column heading on the one-time import's results: noun, a bank or cash account. See GLOSSARY.md
+#. Column heading on the one-time import's results: noun, a bank or cash account. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, a bank or cash account. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Reimbursements report: noun, a bank or cash account. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
+#. Column name shown beside a value on phones on the one-time import's results: noun, a bank or cash account. See GLOSSA…
+#. Column name shown beside a value on phones on the one-time import's results: noun, a bank or cash account. See GLOSSA…
 #. Label of a form field on the Register screen: noun, a bank or cash account. See GLOSSARY.md
 #. Label on the Register screen: noun, a bank or cash account. See GLOSSARY.md
 #. Name of a fact on the Reimbursements report: noun, a bank or cash account. See GLOSSARY.md
@@ -1510,6 +1676,7 @@ msgstr "By when the expense happened."
 #: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/Reimbursements.tsx
 #: src/screens/TransferSections.tsx
+#: src/screens/ynab/results.tsx
 msgid "Account"
 msgstr "Account"
 
@@ -1652,6 +1819,11 @@ msgstr "Last year"
 msgid "a payment outside what the register can show"
 msgstr "a payment outside what the register can show"
 
+#. Table cell on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "(none)"
+msgstr "(none)"
+
 #: src/screens/Profile.tsx
 msgid "Changing it signs out every other browser and forgets every trusted one, so if you are changing it because somebody else knows it, they are out too. Agent keys are separate credentials and keep working until you revoke them."
 msgstr "Changing it signs out every other browser and forgets every trusted one, so if you are changing it because somebody else knows it, they are out too. Agent keys are separate credentials and keep working until you revoke them."
@@ -1676,6 +1848,13 @@ msgstr "Operations"
 #: src/lib/signInChanges.ts
 msgid "{by} reset {user}'s password and authenticator"
 msgstr "{by} reset {user}'s password and authenticator"
+
+#. placeholder {0}: formatCount(totals.cleared.reconciled)
+#. placeholder {1}: formatCount(totals.cleared.cleared)
+#. placeholder {2}: formatCount(totals.cleared.uncleared)
+#: src/screens/OneTimeImport.tsx
+msgid "{0} reconciled · {1} cleared · {2} uncleared"
+msgstr "{0} reconciled · {1} cleared · {2} uncleared"
 
 #: src/screens/Household.tsx
 msgid "Your own accent (optional)"
@@ -1718,6 +1897,11 @@ msgstr "Savings"
 #: src/screens/Register.tsx
 msgid "A split needs at least two parts"
 msgstr "A split needs at least two parts"
+
+#. Screen-reader name on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "Row colours"
+msgstr "Row colours"
 
 #: src/screens/Passkeys.tsx
 msgid "Add a second on another device. If you lose this one, you will need your password and code."
@@ -1810,6 +1994,8 @@ msgstr "Open in Transactions"
 #. Column name shown beside a value on phones on the household page: noun, bank or cash accounts. See GLOSSARY.md
 #. Label on the household page: noun, bank or cash accounts. See GLOSSARY.md
 #. Menu item and the name of its screen: noun, bank or cash accounts. See GLOSSARY.md
+#. Name of a fact on the one-time import's results: noun, bank or cash accounts. See GLOSSARY.md
+#. Name of a fact on the one-time import: noun, bank or cash accounts. See GLOSSARY.md
 #. Screen title on the Accounts screen: noun, bank or cash accounts. See GLOSSARY.md
 #. Step name in the one-time import: map the other app's accounts. See GLOSSARY.md
 #. Text on the Register screen: noun, bank or cash accounts. See GLOSSARY.md
@@ -1817,7 +2003,9 @@ msgstr "Open in Transactions"
 #: src/lib/labels.ts
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
+#: src/screens/OneTimeImport.tsx
 #: src/screens/Register.tsx
+#: src/screens/ynab/results.tsx
 msgid "Accounts"
 msgstr "Accounts"
 
@@ -1854,8 +2042,10 @@ msgstr "Waiting to be reviewed"
 msgid "{0} characters"
 msgstr "{0} characters"
 
+#. Heading of a group of choices on the one-time import
 #. Step name in the one-time import: which app the history comes from
 #: src/lib/labels.ts
+#: src/screens/OneTimeImport.tsx
 msgid "Source app"
 msgstr "Source app"
 
@@ -1877,6 +2067,11 @@ msgstr "or"
 #: src/screens/Register.tsx
 msgid "Discard"
 msgstr "Discard"
+
+#. Button on the one-time import's results
+#: src/screens/ynab/results.tsx
+msgid "Download .txt"
+msgstr "Download .txt"
 
 #: src/screens/Reconcile.tsx
 msgid "Locking is one act, so History undoes the whole reconciliation in one click if you got the statement wrong."
@@ -1927,6 +2122,15 @@ msgstr "All dates: {0} to {1}."
 msgid "Attach receipts"
 msgstr "Attach receipts"
 
+#. Option in a dropdown on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "(archived)"
+msgstr "(archived)"
+
+#: src/screens/OneTimeImport.tsx
+msgid "Which plan to import"
+msgstr "Which plan to import"
+
 #: src/screens/ApplicationManagement.tsx
 msgid "This writes the ledger's own values into a file in plain text. Turn it off when you are done."
 msgstr "This writes the ledger's own values into a file in plain text. Turn it off when you are done."
@@ -1966,6 +2170,11 @@ msgstr "Size"
 #: src/screens/reports/IncomeExpense.tsx
 msgid "There are no accounts yet, so there is nothing to report on. Add one on the Accounts screen and the figures will follow."
 msgstr "There are no accounts yet, so there is nothing to report on. Add one on the Accounts screen and the figures will follow."
+
+#. placeholder {0}: report.balance_differences!.length
+#: src/screens/ynab/results.tsx
+msgid "{0, plural, one {This account does not add up to YNAB’s balance.} other {These accounts do not add up to YNAB’s balance.}}"
+msgstr "{0, plural, one {This account does not add up to YNAB’s balance.} other {These accounts do not add up to YNAB’s balance.}}"
 
 #: src/screens/TransferSections.tsx
 msgid "Select every waiting row"
@@ -2018,6 +2227,14 @@ msgstr "Read"
 #: src/screens/ApplicationManagement.tsx
 msgid "Written to <0>{0}</0>, rotated at a megabyte and five files deep. A rotated file is named for the moment it was closed — <1>app-20260923-131545.log</1> — so it keeps its name instead of shuffling along behind a number."
 msgstr "Written to <0>{0}</0>, rotated at a megabyte and five files deep. A rotated file is named for the moment it was closed — <1>app-20260923-131545.log</1> — so it keeps its name instead of shuffling along behind a number."
+
+#. Text on the one-time import
+#. placeholder {0}: at + 1
+#. placeholder {1}: steps.length
+#. placeholder {2}: STEP_LABELS[step]
+#: src/screens/OneTimeImport.tsx
+msgid "Step {0} of {1} — <0>{2}</0>"
+msgstr "Step {0} of {1} — <0>{2}</0>"
 
 #. Button on the Register screen
 #: src/screens/Register.tsx
@@ -2081,6 +2298,11 @@ msgstr "Scan this with your authenticator app, then type the six digits it shows
 msgid "Import these"
 msgstr "Import these"
 
+#. Heading on the one-time import's results
+#: src/screens/ynab/results.tsx
+msgid "Created"
+msgstr "Created"
+
 #: src/App.tsx
 msgid "Close the menu"
 msgstr "Close the menu"
@@ -2110,6 +2332,10 @@ msgstr "Closed"
 msgid "added by {0}"
 msgstr "added by {0}"
 
+#: src/screens/ynab/results.tsx
+msgid "The rows that failed, listed below, are where to look."
+msgstr "The rows that failed, listed below, are where to look."
+
 #. Menu item and the name of its screen
 #: src/App.tsx
 msgid "Set up"
@@ -2133,6 +2359,13 @@ msgstr "If you no longer have the old authenticator, use one of your recovery co
 #: src/screens/reports/Reimbursements.tsx
 msgid "Tick several and each figure gets a line per currency; the lists show every amount in its own. Nothing on this screen ever adds two together."
 msgstr "Tick several and each figure gets a line per currency; the lists show every amount in its own. Nothing on this screen ever adds two together."
+
+#. placeholder {0}: duplicates.length
+#. placeholder {1}: formatCount(duplicates.length)
+#. placeholder {2}: formatCount(duplicates.length)
+#: src/screens/ynab/results.tsx
+msgid "{0, plural, one {{1} possible duplicate} other {{2} possible duplicates}}"
+msgstr "{0, plural, one {{1} possible duplicate} other {{2} possible duplicates}}"
 
 #. Label of a form field on the Rules screen
 #: src/screens/Rules.tsx
@@ -2180,11 +2413,14 @@ msgstr "Yes, all of them and set the rule"
 #. Column heading on the Accounts screen: noun, the reason
 #. Column heading on the Transfers screen: noun, the reason
 #. Column heading on the Transfers screen: noun, the reason
+#. Column heading on the one-time import's results: noun, the reason
 #. Column name shown beside a value on phones on the Accounts screen: noun, the reason
 #. Column name shown beside a value on phones on the Transfers screen: noun, the reason
 #. Column name shown beside a value on phones on the Transfers screen: noun, the reason
+#. Column name shown beside a value on phones on the one-time import's results: noun, the reason
 #: src/screens/Accounts.tsx
 #: src/screens/TransferSections.tsx
+#: src/screens/ynab/results.tsx
 msgid "Why"
 msgstr "Why"
 
@@ -2222,8 +2458,10 @@ msgstr "Make {0} a member?"
 #. Button on the Admin screen: finish and close
 #. Button on the Register screen: finish and close
 #. Button on the Your account panel: finish and close
+#. Button on the one-time import: finish and close
 #. Screen title on the account reset page
 #: src/screens/Admin.tsx
+#: src/screens/OneTimeImport.tsx
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
 #: src/screens/ResetAccount.tsx
@@ -2259,6 +2497,10 @@ msgstr "Through the agent key {via}"
 #: src/screens/Receipts.tsx
 msgid "{0, plural, one {1 receipt deleted. The History screen can put it back.} other {{1} receipts deleted, as one act. The History screen can put them all back.}}"
 msgstr "{0, plural, one {1 receipt deleted. The History screen can put it back.} other {{1} receipts deleted, as one act. The History screen can put them all back.}}"
+
+#: src/screens/ynab/results.tsx
+msgid "No row failed here, so compare the account in YNAB with what arrived."
+msgstr "No row failed here, so compare the account in YNAB with what arrived."
 
 #. Label on the Register screen
 #: src/screens/Register.tsx
@@ -2355,13 +2597,26 @@ msgstr "T — Transfers"
 msgid "Reset: password and authenticator"
 msgstr "Reset: password and authenticator"
 
+#: src/screens/OneTimeImport.tsx
+msgid "Running the import without keeping it…"
+msgstr "Running the import without keeping it…"
+
 #: src/screens/Import.tsx
 msgid "Every path a statement can take, and every way a line can go, is explained in <0>How import works</0>."
 msgstr "Every path a statement can take, and every way a line can go, is explained in <0>How import works</0>."
 
+#: src/screens/OneTimeImport.tsx
+msgid "Make one in YNAB under <0>Account settings → Developer settings</0>."
+msgstr "Make one in YNAB under <0>Account settings → Developer settings</0>."
+
 #: src/screens/Receipts.tsx
 msgid "Delete these receipts?"
 msgstr "Delete these receipts?"
+
+#. placeholder {0}: formatCount(dryRun.not_imported.length)
+#: src/screens/OneTimeImport.tsx
+msgid "{0} will not be imported, with the reason for each"
+msgstr "{0} will not be imported, with the reason for each"
 
 #: src/screens/Rules.tsx
 msgid "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
@@ -2373,8 +2628,10 @@ msgstr "Pick an accent colour"
 
 #. Column heading on the Reimbursements report: the start of a range, or where money comes from
 #. Label of a form field on the Transfers screen: the start of a range, or where money comes from
+#. Label of a form field on the one-time import: the start of a range, or where money comes from
 #. Text on the date range picker: the start of a range, or where money comes from
 #: src/components/DateRange.tsx
+#: src/screens/OneTimeImport.tsx
 #: src/screens/reports/Reimbursements.tsx
 #: src/screens/Transfer.tsx
 msgid "From"
@@ -2388,6 +2645,10 @@ msgstr "No category needed"
 #: src/screens/Accounts.tsx
 msgid "not counted"
 msgstr "not counted"
+
+#: src/screens/OneTimeImport.tsx
+msgid "Close the import? Everything chosen so far will be lost."
+msgstr "Close the import? Everything chosen so far will be lost."
 
 #: src/screens/Passkeys.tsx
 msgid "The passkey prompt was closed, so nothing was added."
@@ -2599,6 +2860,11 @@ msgstr "Tick every row"
 msgid "No payees yet. One appears the first time you name somebody on a transaction."
 msgstr "No payees yet. One appears the first time you name somebody on a transaction."
 
+#. placeholder {0}: category.name
+#: src/screens/ynab/mapping.tsx
+msgid "New category name for {0}"
+msgstr "New category name for {0}"
+
 #. Stands in for a household's name the panel no longer knows. Lower case
 #: src/screens/Profile.tsx
 msgid "a household"
@@ -2612,6 +2878,17 @@ msgstr "Counts, never amounts — this ledger never converts one currency into a
 #: src/screens/Register.tsx
 msgid "Duplicate"
 msgstr "Duplicate"
+
+#. Option in a dropdown on the one-time import's mapping step
+#. Option in a dropdown on the one-time import's mapping step
+#. Option in a dropdown on the one-time import's mapping step
+#. Option in a dropdown on the one-time import's mapping step
+#. Option in a dropdown on the one-time import's mapping step
+#. Tag beside a name on the one-time import's mapping step
+#. Tag beside a name on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "suggested"
+msgstr "suggested"
 
 #: src/screens/Register.tsx
 msgid "{app}, via the {app} API"
@@ -2668,6 +2945,10 @@ msgstr "{0, plural, one {{1} category folded away — the total is on the line b
 #: src/screens/Register.tsx
 msgid "Staged through the agent API by <0>{0}</0>."
 msgstr "Staged through the agent API by <0>{0}</0>."
+
+#: src/screens/ynab/results.tsx
+msgid "Will be imported"
+msgstr "Will be imported"
 
 #. placeholder {0}: format(out, from.currency)
 #. placeholder {1}: from.name
@@ -2767,7 +3048,9 @@ msgid "Other asset"
 msgstr "Other asset"
 
 #. Menu item and the name of its screen: noun, money moved between your own accounts. See GLOSSARY.md
+#. Name of a fact on the one-time import: noun, money moved between your own accounts. See GLOSSARY.md
 #: src/App.tsx
+#: src/screens/OneTimeImport.tsx
 msgid "Transfers"
 msgstr "Transfers"
 
@@ -2803,10 +3086,12 @@ msgstr "Replace"
 
 #. Column heading on the Accounts screen: noun, the amount an account holds. See GLOSSARY.md
 #. Column heading on the Register screen: noun, the amount an account holds. See GLOSSARY.md
+#. Column heading on the one-time import's mapping step: noun, the amount an account holds. See GLOSSARY.md
 #. Column name for resizing the column on the Register screen: noun, the amount an account holds. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, the amount an account holds. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
+#: src/screens/ynab/mapping.tsx
 msgid "Balance"
 msgstr "Balance"
 
@@ -2894,6 +3179,10 @@ msgstr "By"
 msgid "A new password"
 msgstr "A new password"
 
+#: src/screens/ynab/mapping.tsx
+msgid "Each YNAB account goes to one Spend Tracker account in {currency}, to a new one, or is skipped. An account can take only one YNAB account, so one chosen on a row is not offered on the others."
+msgstr "Each YNAB account goes to one Spend Tracker account in {currency}, to a new one, or is skipped. An account can take only one YNAB account, so one chosen on a row is not offered on the others."
+
 #: src/screens/Household.tsx
 msgid "Every new receipt will take about <0>70× more space</0> in the database. Only worth it if you need the exact file. Existing receipts are not changed."
 msgstr "Every new receipt will take about <0>70× more space</0> in the database. Only worth it if you need the exact file. Existing receipts are not changed."
@@ -2921,10 +3210,18 @@ msgstr "Which household"
 msgid "Keep it here"
 msgstr "Keep it here"
 
+#. Column heading on the one-time import's mapping step
+#. Column name shown beside a value on phones on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "YNAB groups"
+msgstr "YNAB groups"
+
 #. Button on the Accounts screen
 #. Button on the Import screen
+#. Label of a choice on the one-time import
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
+#: src/screens/OneTimeImport.tsx
 msgid "Ignore"
 msgstr "Ignore"
 
@@ -3156,9 +3453,18 @@ msgstr "Looking up your invitation…"
 msgid "Every household on this instance, including ones you are not in. Joining one is still an explicit act."
 msgstr "Every household on this instance, including ones you are not in. Joining one is still an explicit act."
 
+#. placeholder {0}: account.name
+#: src/screens/ynab/mapping.tsx
+msgid "New account type for {0}"
+msgstr "New account type for {0}"
+
 #: src/screens/ResetAccount.tsx
 msgid "Reset your sign-in"
 msgstr "Reset your sign-in"
+
+#: src/screens/ynab/results.tsx
+msgid "{imported} The whole import — transactions, accounts, categories and payees — can be undone from <0>History</0> as one entry."
+msgstr "{imported} The whole import — transactions, accounts, categories and payees — can be undone from <0>History</0> as one entry."
 
 #. Heading on the household page
 #: src/screens/Household.tsx
@@ -3179,6 +3485,10 @@ msgstr "Month"
 msgid "The name looks like its number."
 msgstr "The name looks like its number."
 
+#: src/screens/ynab/mapping.tsx
+msgid "a new category"
+msgstr "a new category"
+
 #. Name of a fact on the Application management screen: noun, the computer it runs on
 #: src/screens/ApplicationManagement.tsx
 msgid "Machine"
@@ -3198,6 +3508,8 @@ msgstr "{others, plural, one {with {others} other expense} other {with {others} 
 #. Column heading on the Reconcile screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
+#. Column heading on the one-time import's results: noun, a sum of money. See GLOSSARY.md
+#. Column heading on the one-time import's results: noun, a sum of money. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Label of a choice on the Register screen: noun, a sum of money. See GLOSSARY.md
@@ -3208,6 +3520,7 @@ msgstr "{others, plural, one {with {others} other expense} other {with {others} 
 #: src/screens/reports/IncomeExpense.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
+#: src/screens/ynab/results.tsx
 msgid "Amount"
 msgstr "Amount"
 
@@ -3220,6 +3533,11 @@ msgstr "Fecha;Concepto;Importe\n"
 #: src/screens/Reports.tsx
 msgid "Back to the reports"
 msgstr "Back to the reports"
+
+#. Text on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "left out"
+msgstr "left out"
 
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
@@ -3256,12 +3574,16 @@ msgstr "date format"
 #. Column heading on the History screen: noun, lines of a file or table
 #. Column heading on the Import screen: noun, lines of a file or table
 #. Column heading on the Rules screen: noun, lines of a file or table
+#. Column heading on the one-time import's mapping step: noun, lines of a file or table
+#. Column heading on the one-time import's mapping step: noun, lines of a file or table
 #. Column name shown beside a value on phones on the Accounts screen: noun, lines of a file or table
 #. Column name shown beside a value on phones on the Rules screen: noun, lines of a file or table
+#. Column name shown beside a value on phones on the one-time import's mapping step: noun, lines of a file or table
 #: src/screens/Accounts.tsx
 #: src/screens/History.tsx
 #: src/screens/Import.tsx
 #: src/screens/Rules.tsx
+#: src/screens/ynab/mapping.tsx
 msgid "Rows"
 msgstr "Rows"
 
@@ -3274,6 +3596,10 @@ msgstr "This account has never been reconciled, so you are starting from the beg
 #: src/screens/Register.tsx
 msgid "Receipts ({0})"
 msgstr "Receipts ({0})"
+
+#: src/screens/ynab/mapping.tsx
+msgid "a new account"
+msgstr "a new account"
 
 #: src/screens/TransferSections.tsx
 msgid "Not a transfer"
@@ -3312,9 +3638,20 @@ msgstr "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it ha
 msgid "Asks {0} for its published releases and compares them with the {1} this is running. Nothing leaves this instance unless an owner presses a button like this one, nothing is asked on a timer, and no request says anything about this instance."
 msgstr "Asks {0} for its published releases and compares them with the {1} this is running. Nothing leaves this instance unless an owner presses a button like this one, nothing is asked on a timer, and no request says anything about this instance."
 
+#. Label of a choice on the one-time import (starting balance rows)
+#: src/screens/OneTimeImport.tsx
+msgctxt "starting balance rows"
+msgid "Skip"
+msgstr "Skip"
+
 #: src/screens/Profile.tsx
 msgid "Confirm and replace"
 msgstr "Confirm and replace"
+
+#. Label on the one-time import's results: brought in by an import
+#: src/screens/ynab/results.tsx
+msgid "Imported"
+msgstr "Imported"
 
 #: src/screens/Household.tsx
 msgid "Your hue, worn at the weight each mode needs — one colour cannot sit on both a white page and a dark one, so the brightness is worked out for you and the result is always readable."
@@ -3329,6 +3666,11 @@ msgstr "Add a part for the {0}"
 #: src/screens/PayeeCategorisation.tsx
 msgid "Search payees"
 msgstr "Search payees"
+
+#. Button on the one-time import: go to the next step
+#: src/screens/OneTimeImport.tsx
+msgid "Next"
+msgstr "Next"
 
 #. Button on the Accounts screen: verb
 #. Button on the Categories screen: verb
@@ -3436,6 +3778,11 @@ msgstr "You've been invited"
 msgid "Attach"
 msgstr "Attach"
 
+#. Button on the one-time import: go to the previous step
+#: src/screens/OneTimeImport.tsx
+msgid "Back"
+msgstr "Back"
+
 #. Text on the household page
 #. placeholder {0}: count(it.payee_rules - it.payee_rules_enabled)
 #: src/screens/Household.tsx
@@ -3510,11 +3857,30 @@ msgstr "Add more"
 msgid "New payee rule"
 msgstr "New payee rule"
 
+#. Label of a choice on the one-time import
+#: src/screens/OneTimeImport.tsx
+msgid "API key"
+msgstr "API key"
+
+#. Label of a choice on the one-time import
+#: src/screens/OneTimeImport.tsx
+msgid "Export file"
+msgstr "Export file"
+
+#. Column heading on the one-time import's results
+#: src/screens/ynab/results.tsx
+msgid "Import anyway"
+msgstr "Import anyway"
+
 #. Note on the Application management screen
 #. placeholder {0}: me.python
 #: src/screens/ApplicationManagement.tsx
 msgid "Python {0}"
 msgstr "Python {0}"
+
+#: src/screens/OneTimeImport.tsx
+msgid "Your key is used only for this import. It stays in this browser tab and is never stored or logged by Spend Tracker."
+msgstr "Your key is used only for this import. It stays in this browser tab and is never stored or logged by Spend Tracker."
 
 #: src/components/RecoveryCodes.tsx
 msgid "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
@@ -3534,8 +3900,10 @@ msgstr "Invitation link"
 msgid "Connect"
 msgstr "Connect"
 
+#. Heading on the one-time import
 #. Screen-reader name on the date range picker
 #: src/components/DateRange.tsx
+#: src/screens/OneTimeImport.tsx
 msgid "Date range"
 msgstr "Date range"
 
@@ -3695,6 +4063,10 @@ msgstr "To year"
 msgid "Add receipts"
 msgstr "Add receipts"
 
+#: src/screens/OneTimeImport.tsx
+msgid "As ordinary transactions."
+msgstr "As ordinary transactions."
+
 #. Button on the invitation page: finish the steps
 #: src/screens/AcceptInvite.tsx
 msgid "Finish"
@@ -3734,6 +4106,12 @@ msgstr "Not available here"
 msgid "One line per currency, and no total across them."
 msgstr "One line per currency, and no total across them."
 
+#. Screen-reader text on the one-time import
+#. placeholder {0}: index + 1
+#: src/screens/OneTimeImport.tsx
+msgid "Step {0}:"
+msgstr "Step {0}:"
+
 #. Screen-reader name of a button on the Accounts screen
 #. placeholder {0}: one.value
 #: src/screens/Accounts.tsx
@@ -3743,6 +4121,10 @@ msgstr "Ignore {0}"
 #: src/screens/Register.tsx
 msgid "Link as transfer"
 msgstr "Link as transfer"
+
+#: src/screens/ynab/results.tsx
+msgid "Rules can be suggested after the first statement import: this import brought no bank text to suggest them from."
+msgstr "Rules can be suggested after the first statement import: this import brought no bank text to suggest them from."
 
 #: src/screens/Backups.tsx
 msgid "Save to Drive/Dropbox…"
@@ -3757,10 +4139,24 @@ msgstr "Nothing would change. {0} rows carry the bank’s words and today’s ru
 msgid "Gather the accounts by country"
 msgstr "Gather the accounts by country"
 
+#. Label of a form field on the one-time import
+#: src/screens/OneTimeImport.tsx
+msgid "YNAB export"
+msgstr "YNAB export"
+
+#. Column heading on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "YNAB account"
+msgstr "YNAB account"
+
 #. Heading on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Database"
 msgstr "Database"
+
+#: src/screens/OneTimeImport.tsx
+msgid "Start a one-time import"
+msgstr "Start a one-time import"
 
 #: src/screens/Rules.tsx
 msgid "Put this back instead (leave empty to remove it)"
@@ -3789,6 +4185,20 @@ msgstr "Recovery code"
 #: src/screens/Categories.tsx
 msgid "New group"
 msgstr "New group"
+
+#: src/screens/ynab/mapping.tsx
+msgid "an existing account"
+msgstr "an existing account"
+
+#: src/screens/ynab/results.tsx
+msgid "Payee Naming Rules (opens in a new tab)"
+msgstr "Payee Naming Rules (opens in a new tab)"
+
+#. Screen-reader text on the one-time import
+#. placeholder {0}: index + 1
+#: src/screens/OneTimeImport.tsx
+msgid "Step {0}, done:"
+msgstr "Step {0}, done:"
 
 #: src/components/Receipts.tsx
 #: src/screens/Receipts.tsx
@@ -3852,9 +4262,12 @@ msgid "Memo"
 msgstr "Memo"
 
 #. Button on the Import screen
+#. Heading on the one-time import
 #. Label on the Import screen
 #. Screen-reader name on the Import screen
+#. Title of a panel on the one-time import
 #: src/screens/Import.tsx
+#: src/screens/OneTimeImport.tsx
 msgid "One-time Import"
 msgstr "One-time Import"
 
@@ -4066,13 +4479,26 @@ msgstr "Select every row shown"
 msgid "By month"
 msgstr "By month"
 
+#: src/screens/OneTimeImport.tsx
+msgid "Use this plan"
+msgstr "Use this plan"
+
 #: src/lib/signInChanges.ts
 msgid "The server made {user} an owner"
 msgstr "The server made {user} an owner"
 
+#. Tag beside a name on the one-time import's mapping step: adjective, an account no longer in use. See GLOSSARY.md
+#: src/screens/ynab/mapping.tsx
+msgid "closed"
+msgstr "closed"
+
 #: src/screens/Household.tsx
 msgid "Readable copies only <0>Recommended</0>"
 msgstr "Readable copies only <0>Recommended</0>"
+
+#: src/screens/OneTimeImport.tsx
+msgid "Starting Balance rows"
+msgstr "Starting Balance rows"
 
 #: src/screens/Rules.tsx
 msgid "Applied as a statement is read, so <0>CARREFOUR MADRID 4432</0> arrives as Carrefour. The bank's own words are kept on the transaction either way."
@@ -4103,8 +4529,10 @@ msgid "The whole row as it was before it went"
 msgstr "The whole row as it was before it went"
 
 #. Button on the Register screen: verb, bring the rows in. See GLOSSARY.md
+#. Button on the one-time import: verb, run the import
 #. Menu item and the name of its screen: noun, one import of a statement. See GLOSSARY.md
 #: src/App.tsx
+#: src/screens/OneTimeImport.tsx
 #: src/screens/Register.tsx
 msgid "Import"
 msgstr "Import"
@@ -4129,6 +4557,13 @@ msgstr "The picture itself is kept for a day after nothing points at it, which i
 msgid "Group"
 msgstr "Group"
 
+#. placeholder {0}: rows.length
+#. placeholder {1}: formatCount(rows.length)
+#. placeholder {2}: formatCount(rows.length)
+#: src/screens/ynab/results.tsx
+msgid "{0, plural, one {{1} transfer will be imported as ordinary transactions, with the reason for each} other {{2} transfers will be imported as ordinary transactions, with the reason for each}}"
+msgstr "{0, plural, one {{1} transfer will be imported as ordinary transactions, with the reason for each} other {{2} transfers will be imported as ordinary transactions, with the reason for each}}"
+
 #: src/screens/Register.tsx
 msgid "Import is in the menu on the left — this screen was given no way to navigate"
 msgstr "Import is in the menu on the left — this screen was given no way to navigate"
@@ -4148,6 +4583,10 @@ msgstr "The line exactly as it arrived"
 #: src/screens/ApplicationManagement.tsx
 msgid "Where it can be reached"
 msgstr "Where it can be reached"
+
+#: src/screens/OneTimeImport.tsx
+msgid "Flags are left behind."
+msgstr "Flags are left behind."
 
 #. Label of a form field on the Admin screen
 #: src/screens/Admin.tsx
@@ -4307,6 +4746,10 @@ msgstr "(uploaded)"
 msgid "Each currency is totalled on its own instead. Nothing on this screen ever adds two together."
 msgstr "Each currency is totalled on its own instead. Nothing on this screen ever adds two together."
 
+#: src/screens/ynab/results.tsx
+msgid "Rows in the source"
+msgstr "Rows in the source"
+
 #. Button on the Accounts screen: verb
 #. Button on the Accounts screen: verb
 #. Button on the Import screen: verb
@@ -4329,6 +4772,13 @@ msgstr "Only you right now"
 #: src/lib/labels.ts
 msgid "Other debt"
 msgstr "Other debt"
+
+#. placeholder {0}: report.counts.imported
+#. placeholder {1}: formatCount(report.counts.imported)
+#. placeholder {2}: formatCount(report.counts.imported)
+#: src/screens/ynab/results.tsx
+msgid "{0, plural, one {Imported {1} transaction in one batch.} other {Imported {2} transactions in one batch.}}"
+msgstr "{0, plural, one {Imported {1} transaction in one batch.} other {Imported {2} transactions in one batch.}}"
 
 #: src/screens/Register.tsx
 msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
@@ -4357,6 +4807,10 @@ msgstr "One of the ten you stored when this account was set up. Each works once,
 #: src/screens/Backups.tsx
 msgid "Open the service in a new tab:"
 msgstr "Open the service in a new tab:"
+
+#: src/screens/OneTimeImport.tsx
+msgid "YNAB personal access token"
+msgstr "YNAB personal access token"
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "An advance not spent yet, or an overpayment"
@@ -4387,6 +4841,13 @@ msgstr "The whole row as it was written"
 #: src/screens/Profile.tsx
 msgid "The six digits from the new one"
 msgstr "The six digits from the new one"
+
+#. placeholder {0}: totals.transfers
+#. placeholder {1}: formatCount(totals.transfers)
+#. placeholder {2}: formatCount(totals.transfers)
+#: src/screens/OneTimeImport.tsx
+msgid "{0, plural, one {{1} legs} other {{2} legs}}"
+msgstr "{0, plural, one {{1} legs} other {{2} legs}}"
 
 #: src/screens/Register.tsx
 msgid "double click to edit"
@@ -4435,9 +4896,13 @@ msgstr "This file looks like it is for <0>{0}</0> ({1}), not the account chosen 
 #. Column heading on the Reconcile screen: noun. See GLOSSARY.md
 #. Column heading on the Reimbursements report: noun. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun. See GLOSSARY.md
+#. Column heading on the one-time import's results: noun. See GLOSSARY.md
+#. Column heading on the one-time import's results: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Reimbursements report: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun. See GLOSSARY.md
+#. Column name shown beside a value on phones on the one-time import's results: noun. See GLOSSARY.md
+#. Column name shown beside a value on phones on the one-time import's results: noun. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun. See GLOSSARY.md
 #. Label of a form field on the Transfers screen: noun. See GLOSSARY.md
 #. Label on the Import screen: noun. See GLOSSARY.md
@@ -4451,6 +4916,7 @@ msgstr "This file looks like it is for <0>{0}</0> ({1}), not the account chosen 
 #: src/screens/reports/Reimbursements.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
+#: src/screens/ynab/results.tsx
 msgid "Date"
 msgstr "Date"
 
@@ -4512,6 +4978,12 @@ msgstr "All"
 msgid "a pocket's or a card product's name"
 msgstr "a pocket's or a card product's name"
 
+#. Button on the one-time import: verb, run the import
+#: src/screens/OneTimeImport.tsx
+msgctxt "starting balance rows"
+msgid "Import"
+msgstr "Import"
+
 #. placeholder {0}: rule.data?.history_window ?? 3
 #: src/screens/Categories.tsx
 msgid "The category is chosen from how the last {0} transactions for {name} were categorised — the most common of them, most recent winning a tie. It updates as you add and edit transactions."
@@ -4552,6 +5024,10 @@ msgstr "uncategorised (chosen)"
 #: src/lib/labels.ts
 msgid "kind"
 msgstr "kind"
+
+#: src/screens/ynab/results.tsx
+msgid "Skipped: YNAB Starting Balance"
+msgstr "Skipped: YNAB Starting Balance"
 
 #: src/screens/Profile.tsx
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
@@ -4612,6 +5088,14 @@ msgstr "If you did not expect this, tell an owner of this instance before you go
 msgid "Amount leaving ({0})"
 msgstr "Amount leaving ({0})"
 
+#. Column heading on the one-time import's mapping step
+#. Column heading on the one-time import's mapping step
+#. Column name shown beside a value on phones on the one-time import's mapping step
+#. Column name shown beside a value on phones on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "Goes to"
+msgstr "Goes to"
+
 #. placeholder {0}: picked.size
 #: src/screens/Receipts.tsx
 msgid "<0>{0} selected.</0> Deleting them is one act, so one undo brings the whole selection back."
@@ -4625,6 +5109,8 @@ msgstr "Description"
 
 #. Label on the household page. See GLOSSARY.md
 #. Menu item and the name of its screen. See GLOSSARY.md
+#. Name of a fact on the one-time import's results. See GLOSSARY.md
+#. Name of a fact on the one-time import. See GLOSSARY.md
 #. Screen title on the Categories screen. See GLOSSARY.md
 #. Step name in the one-time import: map the other app's categories. See GLOSSARY.md
 #. Text on the Register screen. See GLOSSARY.md
@@ -4632,7 +5118,9 @@ msgstr "Description"
 #: src/lib/labels.ts
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
+#: src/screens/OneTimeImport.tsx
 #: src/screens/Register.tsx
+#: src/screens/ynab/results.tsx
 msgid "Categories"
 msgstr "Categories"
 
@@ -4688,6 +5176,10 @@ msgstr "nothing recorded yet"
 #: src/screens/Setup.tsx
 msgid "In Docker:"
 msgstr "In Docker:"
+
+#: src/screens/OneTimeImport.tsx
+msgid "How to connect"
+msgstr "How to connect"
 
 #. placeholder {0}: confirming.user.display_name
 #. placeholder {0}: person.display_name
@@ -4851,11 +5343,13 @@ msgstr "Discard this staged import?"
 #. Label on the Income vs Expense report: having no category. See GLOSSARY.md
 #. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
 #. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
+#. Option in a dropdown on the one-time import's mapping step: having no category. See GLOSSARY.md
 #. Row state in the one-time import's category mapping: no category. See GLOSSARY.md
 #: src/lib/labels.ts
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
+#: src/screens/ynab/mapping.tsx
 msgid "Uncategorised"
 msgstr "Uncategorised"
 
@@ -4948,6 +5442,10 @@ msgstr "Split this transaction"
 msgid "Withdraw"
 msgstr "Withdraw"
 
+#: src/screens/ynab/mapping.tsx
+msgid "YNAB's category groups are not kept: each YNAB category goes to one category here, and several may share one."
+msgstr "YNAB's category groups are not kept: each YNAB category goes to one category here, and several may share one."
+
 #: src/screens/Rules.tsx
 msgid "Apply rules to what is already here"
 msgstr "Apply rules to what is already here"
@@ -5025,6 +5523,13 @@ msgstr "Linked as transfers although no person chose them — because the two ac
 msgid "This import"
 msgstr "This import"
 
+#. Value of a fact on the one-time import's results (created)
+#. Value of a fact on the one-time import's results (created)
+#: src/screens/ynab/results.tsx
+msgctxt "created"
+msgid "None"
+msgstr "None"
+
 #. placeholder {0}: passkey.rp_id
 #: src/screens/Passkeys.tsx
 msgid "Made for {0}, cannot be used here."
@@ -5054,11 +5559,13 @@ msgstr "Each one with the expenses linked to it."
 #. Column name shown beside a value on phones on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Label on the household page: noun, who was paid or who paid. See GLOSSARY.md
+#. Name of a fact on the one-time import's results: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen title on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
 #: src/screens/Payees.tsx
 #: src/screens/Rules.tsx
+#: src/screens/ynab/results.tsx
 msgid "Payees"
 msgstr "Payees"
 
@@ -5117,6 +5624,10 @@ msgstr "Hide help: {label}"
 #: src/screens/History.tsx
 msgid "<0>Last check.</0> {count} rows go back to how they were {0}."
 msgstr "<0>Last check.</0> {count} rows go back to how they were {0}."
+
+#: src/screens/ynab/results.tsx
+msgid "Duplicates imported anyway"
+msgstr "Duplicates imported anyway"
 
 #: src/screens/Categories.tsx
 msgid "how this works"
@@ -5245,6 +5756,13 @@ msgstr "Five parts is the most"
 msgid "The six digits from your authenticator"
 msgstr "The six digits from your authenticator"
 
+#. placeholder {0}: target.txn_count
+#. placeholder {1}: formatCount(target.txn_count)
+#. placeholder {2}: formatCount(target.txn_count)
+#: src/screens/ynab/mapping.tsx
+msgid "{0, plural, one {{1} txn} other {{2} txns}}"
+msgstr "{0, plural, one {{1} txn} other {{2} txns}}"
+
 #. What the import detected: which column holds fees. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "fee column"
@@ -5262,6 +5780,7 @@ msgstr "Recovered"
 #. Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the accounts import: noun. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
+#. Name of a fact on the one-time import: noun. See GLOSSARY.md
 #. Screen-reader name on the Income vs Expense report: noun. See GLOSSARY.md
 #. Screen-reader name on the Reimbursements report: noun. See GLOSSARY.md
 #. Text on the Income vs Expense report: noun. See GLOSSARY.md
@@ -5270,11 +5789,18 @@ msgstr "Recovered"
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
+#: src/screens/OneTimeImport.tsx
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/Reimbursements.tsx
 msgid "Currency"
 msgstr "Currency"
+
+#. placeholder {0}: formatCount(kept)
+#. placeholder {1}: formatCount(kept)
+#: src/screens/ynab/results.tsx
+msgid "{kept, plural, one {{0} transaction kept the bank’s own text} other {{1} transactions kept the bank’s own text}}"
+msgstr "{kept, plural, one {{0} transaction kept the bank’s own text} other {{1} transactions kept the bank’s own text}}"
 
 #. What the import detected: comma or point before decimals. Lower case, inside a list
 #: src/lib/labels.ts
@@ -5485,6 +6011,11 @@ msgstr "Working out what would change…"
 msgid "Download…"
 msgstr "Download…"
 
+#. placeholder {0}: formatCount(totals.splits)
+#: src/screens/OneTimeImport.tsx
+msgid "{0}, each imported as its own transaction"
+msgstr "{0}, each imported as its own transaction"
+
 #. placeholder {0}: format(txn.amount, currency)
 #. placeholder {1}: formatDate(txn.date)
 #: src/screens/Register.tsx
@@ -5505,6 +6036,7 @@ msgid "2. Your authenticator"
 msgstr "2. Your authenticator"
 
 #: src/App.tsx
+#: src/screens/ynab/results.tsx
 msgid "Payee Naming Rules"
 msgstr "Payee Naming Rules"
 
@@ -5512,8 +6044,10 @@ msgstr "Payee Naming Rules"
 msgid "{by} made {user} an owner"
 msgstr "{by} made {user} an owner"
 
+#. Button on the one-time import: verb, see what the import would do without doing it
 #. Step name in the one-time import: what the import would do, not yet done
 #: src/lib/labels.ts
+#: src/screens/OneTimeImport.tsx
 msgid "Preview"
 msgstr "Preview"
 
@@ -5700,6 +6234,10 @@ msgstr "+{0} more"
 msgid "Read the file"
 msgstr "Read the file"
 
+#: src/screens/ynab/results.tsx
+msgid "These look like transactions already in the ledger: same account, same amount, dates within a few days. They are skipped unless you tick them. Either way the report lists them."
+msgstr "These look like transactions already in the ledger: same account, same amount, dates within a few days. They are skipped unless you tick them. Either way the report lists them."
+
 #: src/screens/Rules.tsx
 msgid "take this bit off, and see what is left"
 msgstr "take this bit off, and see what is left"
@@ -5709,6 +6247,12 @@ msgstr "take this bit off, and see what is left"
 #: src/screens/Payees.tsx
 msgid "Transfer to {0}"
 msgstr "Transfer to {0}"
+
+#. Option in a dropdown on the one-time import's mapping step
+#. placeholder {0}: nameOf.get(heldBy!) ?? heldBy
+#: src/screens/ynab/mapping.tsx
+msgid "used by {0}"
+msgstr "used by {0}"
 
 #: src/screens/Backups.tsx
 msgid "Left out, the zip restores onto this instance as it is. Anywhere else, every authenticator is refused unless you supply the key separately, and the zip's README says how."
@@ -5753,6 +6297,10 @@ msgstr "Out of"
 msgid "Resets"
 msgstr "Resets"
 
+#: src/screens/OneTimeImport.tsx
+msgid "Reading what YNAB holds…"
+msgstr "Reading what YNAB holds…"
+
 #. Scope of a key for programs: it may also change data. Lower case, inside a sentence
 #: src/screens/Profile.tsx
 msgid "write"
@@ -5795,6 +6343,10 @@ msgstr "{by} reset {user}'s password"
 msgid "in {0} groups, {1} archived"
 msgstr "in {0} groups, {1} archived"
 
+#: src/screens/ynab/mapping.tsx
+msgid "YNAB's own bucket, always uncategorised"
+msgstr "YNAB's own bucket, always uncategorised"
+
 #. Text on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
 msgid "Difference: <0/>"
@@ -5820,6 +6372,11 @@ msgstr "IBAN"
 msgid "All dates"
 msgstr "All dates"
 
+#. Label on the one-time import's results
+#: src/screens/ynab/results.tsx
+msgid "Transfers linked"
+msgstr "Transfers linked"
+
 #: src/screens/Admin.tsx
 msgid "Yes, make them an owner"
 msgstr "Yes, make them an owner"
@@ -5833,7 +6390,9 @@ msgid "Empty it to go back to the suggestion."
 msgstr "Empty it to go back to the suggestion."
 
 #. Button on the Import screen
+#. Sentence on the one-time import
 #: src/screens/Import.tsx
+#: src/screens/OneTimeImport.tsx
 msgid "Importing…"
 msgstr "Importing…"
 
@@ -5853,6 +6412,12 @@ msgstr "whatever is left"
 #: src/screens/History.tsx
 msgid "Undoing puts back <0>{count}</0> rows exactly as they were before. Anything changed since is overwritten, and undoing the undo is the only way back."
 msgstr "Undoing puts back <0>{count}</0> rows exactly as they were before. Anything changed since is overwritten, and undoing the undo is the only way back."
+
+#. Value of a fact on the one-time import (flags)
+#: src/screens/OneTimeImport.tsx
+msgctxt "flags"
+msgid "None"
+msgstr "None"
 
 #: src/screens/Categories.tsx
 msgid "Nothing in this group yet."
@@ -5883,6 +6448,10 @@ msgstr "Unlink transfer"
 #: src/screens/Reconcile.tsx
 msgid "Statement closing date"
 msgstr "Statement closing date"
+
+#: src/screens/OneTimeImport.tsx
+msgid "The .zip YNAB exports, or the CSV inside it."
+msgstr "The .zip YNAB exports, or the CSV inside it."
 
 #. Label on the Import screen: prepared, not yet written
 #: src/screens/Import.tsx
@@ -5981,6 +6550,8 @@ msgstr "Difference"
 #. Column heading on the Payee Categorisation screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Column heading on the Reconcile screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Column heading on the Reimbursements report: noun, who was paid or who paid. See GLOSSARY.md
+#. Column heading on the one-time import's results: noun, who was paid or who paid. See GLOSSARY.md
+#. Column heading on the one-time import's results: noun, who was paid or who paid. See GLOSSARY.md
 #. Heading on the app's menu and frame: noun, who was paid or who paid. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md
@@ -6000,6 +6571,7 @@ msgstr "Difference"
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/Reimbursements.tsx
+#: src/screens/ynab/results.tsx
 msgid "Payee"
 msgstr "Payee"
 
@@ -6112,6 +6684,12 @@ msgstr "Linked to"
 msgid "Recorded as {0} on the date below."
 msgstr "Recorded as {0} on the date below."
 
+#. Label of a choice on the one-time import
+#. placeholder {0}: one.last_modified_on.slice(0, 10)
+#: src/screens/OneTimeImport.tsx
+msgid "last changed {0}"
+msgstr "last changed {0}"
+
 #. Button on the Register screen: show only the rows with no category. See GLOSSARY.md
 #. Label on the Import screen: having no category. See GLOSSARY.md
 #. Text on the Import screen: having no category. See GLOSSARY.md
@@ -6190,6 +6768,11 @@ msgctxt "new account"
 msgid "New"
 msgstr "New"
 
+#. Column heading on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "YNAB category"
+msgstr "YNAB category"
+
 #. placeholder {0}: waiting.length
 #. placeholder {1}: waiting.length
 #: src/screens/Import.tsx
@@ -6227,6 +6810,11 @@ msgstr "Households they join on arrival"
 msgid "Settings"
 msgstr "Settings"
 
+#. Name of a fact on the one-time import: noun, the parts of split transactions
+#: src/screens/OneTimeImport.tsx
+msgid "Split parts"
+msgstr "Split parts"
+
 #: src/screens/Register.tsx
 msgid "Link as reimbursement"
 msgstr "Link as reimbursement"
@@ -6250,6 +6838,10 @@ msgstr "Admin"
 #: src/screens/Profile.tsx
 msgid "New password again"
 msgstr "New password again"
+
+#: src/screens/ynab/results.tsx
+msgid "OK for all — import every one of them anyway"
+msgstr "OK for all — import every one of them anyway"
 
 #: src/components/Receipts.tsx
 msgid "(local time, no zone recorded)"
@@ -6299,7 +6891,12 @@ msgid "Holder's name"
 msgstr "Holder's name"
 
 #. Column heading on the Admin screen: noun, a date range
+#. Column heading on the one-time import's mapping step: noun, a date range
+#. Column name shown beside a value on phones on the one-time import's mapping step: noun, a date range
+#. Name of a fact on the one-time import: noun, a date range
 #: src/screens/Admin.tsx
+#: src/screens/OneTimeImport.tsx
+#: src/screens/ynab/mapping.tsx
 msgid "Dates"
 msgstr "Dates"
 
@@ -6325,6 +6922,10 @@ msgstr "Written off"
 #: src/screens/Transfer.tsx
 msgid "12,34"
 msgstr "12,34"
+
+#: src/screens/ynab/mapping.tsx
+msgid "Created in a group called \"Imported from YNAB\"."
+msgstr "Created in a group called \"Imported from YNAB\"."
 
 #. Text on the Reconcile screen
 #. placeholder {0}: format(difference, currency)
@@ -6452,6 +7053,10 @@ msgstr "U — Uncleared"
 msgid "contains"
 msgstr "contains"
 
+#: src/screens/OneTimeImport.tsx
+msgid "No flagged rows were found."
+msgstr "No flagged rows were found."
+
 #. Text on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
 msgid "Nothing owed"
@@ -6492,6 +7097,14 @@ msgstr "Reset link"
 #: src/screens/History.tsx
 msgid "No, go back"
 msgstr "No, go back"
+
+#: src/screens/OneTimeImport.tsx
+msgid "Leave them out; they are listed in the report."
+msgstr "Leave them out; they are listed in the report."
+
+#: src/screens/ynab/results.tsx
+msgid "The other side of each was not imported, so there is nothing here to link it to."
+msgstr "The other side of each was not imported, so there is nothing here to link it to."
 
 #: src/screens/Profile.tsx
 msgid "What is holding it (optional)"
@@ -6652,6 +7265,12 @@ msgstr "Add an account before entering transactions."
 msgid "No work expenses in {0} yet."
 msgstr "No work expenses in {0} yet."
 
+#. Text on the one-time import's mapping step
+#. Text on the one-time import's mapping step
+#: src/screens/ynab/mapping.tsx
+msgid "no category"
+msgstr "no category"
+
 #. Column name for resizing the column on the Register screen: money coming in
 #. Table cell on the Register screen: money coming in
 #. Text on the Register screen: money coming in
@@ -6694,6 +7313,10 @@ msgstr "Thumbnails"
 msgid "the data directory"
 msgstr "the data directory"
 
+#: src/screens/ynab/mapping.tsx
+msgid "In {currency}, opening balance 0, opened the day before its first imported transaction."
+msgstr "In {currency}, opening balance 0, opened the day before its first imported transaction."
+
 #: src/screens/Rules.tsx
 msgid "When the bank says"
 msgstr "When the bank says"
@@ -6734,6 +7357,14 @@ msgstr "Sign in with a passkey"
 #: src/lib/signInChanges.ts
 msgid "authenticator"
 msgstr "authenticator"
+
+#: src/screens/OneTimeImport.tsx
+msgid "YNAB returned no plans for this key."
+msgstr "YNAB returned no plans for this key."
+
+#: src/screens/OneTimeImport.tsx
+msgid "Append to memo as 'Flag: <name>'"
+msgstr "Append to memo as 'Flag: <name>'"
 
 #: src/screens/Register.tsx
 msgid "Set the category on {done} row and skipped {skipped} transfer legs — a transfer has no category."
@@ -6896,6 +7527,10 @@ msgstr "Who"
 msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 msgstr "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 
+#: src/screens/OneTimeImport.tsx
+msgid "If you mean to replace an earlier run, undo it from History first."
+msgstr "If you mean to replace an earlier run, undo it from History first."
+
 #: src/screens/Import.tsx
 msgid "The memo this row will carry"
 msgstr "The memo this row will carry"
@@ -6958,6 +7593,12 @@ msgstr "<0>secret.key</0> does not open {locked, plural, one {1 member's authent
 msgid "You sign in with your password and authenticator code."
 msgstr "You sign in with your password and authenticator code."
 
+#. Heading on the one-time import: noun, YNAB's coloured markers on rows
+#. Name of a fact on the one-time import: noun, YNAB's coloured markers on rows
+#: src/screens/OneTimeImport.tsx
+msgid "Flags"
+msgstr "Flags"
+
 #. Button on the first-run setup: go on to the next step
 #. Button on the first-run setup: go on to the next step
 #. Button on the invitation page: go on to the next step
@@ -7005,6 +7646,10 @@ msgstr "No households on this instance yet."
 msgid "Used for totals only. Each account keeps its own currency, and nothing is ever converted."
 msgstr "Used for totals only. Each account keeps its own currency, and nothing is ever converted."
 
+#: src/screens/OneTimeImport.tsx
+msgid "<0>This household has been imported into from YNAB before.</0> Running it again adds the same history twice unless the rows are recognised as duplicates. Earlier runs:"
+msgstr "<0>This household has been imported into from YNAB before.</0> Running it again adds the same history twice unless the rows are recognised as duplicates. Earlier runs:"
+
 #: src/screens/Accounts.tsx
 msgid "Bank or institution"
 msgstr "Bank or institution"
@@ -7027,6 +7672,11 @@ msgstr "Every new transaction for this payee gets a category without you choosin
 #: src/screens/Admin.tsx
 msgid "Resetting…"
 msgstr "Resetting…"
+
+#. placeholder {0}: formatCount(report.not_imported.length)
+#: src/screens/ynab/results.tsx
+msgid "{0} not imported, with the reason for each"
+msgstr "{0} not imported, with the reason for each"
 
 #: src/screens/AcceptInvite.tsx
 msgid "An owner can administer this instance: people, households and invitations."
@@ -7097,6 +7747,11 @@ msgstr "One row per account, under the template's header row. <0>Download the te
 #: src/screens/Profile.tsx
 msgid "Give a program a key"
 msgstr "Give a program a key"
+
+#. placeholder {0}: account.name
+#: src/screens/ynab/mapping.tsx
+msgid "New account name for {0}"
+msgstr "New account name for {0}"
 
 #. Button on the Admin screen: verb, stop an account signing in
 #. placeholder {0}: one.display_name
@@ -7176,6 +7831,10 @@ msgstr "For"
 msgid "Downloaded."
 msgstr "Downloaded."
 
+#: src/screens/OneTimeImport.tsx
+msgid "Nothing has been imported yet. This is what the import will do, worked out by running it and throwing the result away."
+msgstr "Nothing has been imported yet. This is what the import will do, worked out by running it and throwing the result away."
+
 #. placeholder {0}: change.redacted.join(", ")
 #: src/screens/History.tsx
 msgid "Kept out of the log: {0}. Absent rather than starred over — an undo writes back what is stored, and \"***\" would become the password."
@@ -7193,6 +7852,11 @@ msgstr "showing the first {0}"
 msgid "{0} more currencies: {1}. {2} shown."
 msgstr "{0} more currencies: {1}. {2} shown."
 
+#. Label on the one-time import's results
+#: src/screens/ynab/results.tsx
+msgid "Duplicates skipped"
+msgstr "Duplicates skipped"
+
 #. Label on the History screen: written to the ledger
 #: src/screens/History.tsx
 msgid "applied"
@@ -7206,6 +7870,10 @@ msgstr "Somebody made {user} an owner"
 msgid "<0>This is the newest backup.</0> The next newest is older, so a restore would lose everything since then."
 msgstr "<0>This is the newest backup.</0> The next newest is older, so a restore would lose everything since then."
 
+#: src/screens/ynab/results.tsx
+msgid "{groupsText} groups of bank strings look like one payee each{cap}; make rules in {rules}?"
+msgstr "{groupsText} groups of bank strings look like one payee each{cap}; make rules in {rules}?"
+
 #: src/screens/Transfer.tsx
 msgid "Add transfer between accounts"
 msgstr "Add transfer between accounts"
@@ -7214,15 +7882,32 @@ msgstr "Add transfer between accounts"
 msgid "their authenticator and recovery codes are cleared"
 msgstr "their authenticator and recovery codes are cleared"
 
+#. Label of a choice on the one-time import
+#. placeholder {0}: one.first_month ?? "…"
+#. placeholder {1}: one.last_month ?? "…"
+#: src/screens/OneTimeImport.tsx
+msgid "{0} to {1}"
+msgstr "{0} to {1}"
+
 #. Text on the Your account panel
 #. placeholder {0}: formatInstant(key.revoked_at)
 #: src/screens/Profile.tsx
 msgid "Revoked {0}"
 msgstr "Revoked {0}"
 
+#. Name of a fact on the one-time import
+#: src/screens/OneTimeImport.tsx
+msgid "Cleared states"
+msgstr "Cleared states"
+
 #: src/screens/Accounts.tsx
 msgid "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
 msgstr "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
+
+#. Value of a fact on the one-time import
+#: src/screens/OneTimeImport.tsx
+msgid "Not detected"
+msgstr "Not detected"
 
 #: src/screens/ApplicationManagement.tsx
 msgid "Its author, and their other projects"
@@ -7316,6 +8001,14 @@ msgstr "{count, plural, one {Linked {count} expense to the payment of {paid} on 
 msgid "Keep them"
 msgstr "Keep them"
 
+#: src/screens/OneTimeImport.tsx
+msgid "Date format in the file"
+msgstr "Date format in the file"
+
+#: src/screens/ynab/mapping.tsx
+msgid "an existing category"
+msgstr "an existing category"
+
 #. Column heading on the Rules screen: switched on
 #: src/screens/Rules.tsx
 msgid "On"
@@ -7361,6 +8054,10 @@ msgstr "{name} is signed out everywhere and cannot sign in until they follow thi
 msgid "For a credit card, type what you owe as a negative."
 msgstr "For a credit card, type what you owe as a negative."
 
+#: src/screens/ynab/results.tsx
+msgid "New accounts were created with an opening balance of 0 dated the day before their first transaction — open each one and fix its opening balance."
+msgstr "New accounts were created with an opening balance of 0 dated the day before their first transaction — open each one and fix its opening balance."
+
 #. placeholder {0}: one.transaction_count
 #. placeholder {0}: rows.data.count
 #. placeholder {1}: one.transaction_count
@@ -7403,6 +8100,12 @@ msgstr "OK"
 msgid "Linked by history only"
 msgstr "Linked by history only"
 
+#. List item on the one-time import's results
+#. placeholder {0}: formatDate(one.opening_date)
+#: src/screens/ynab/results.tsx
+msgid "opened {0}"
+msgstr "opened {0}"
+
 #: src/screens/reports/Reimbursements.tsx
 msgid "At least one currency stays ticked"
 msgstr "At least one currency stays ticked"
@@ -7415,6 +8118,13 @@ msgstr "{by} re-enabled {user}"
 #: src/screens/Register.tsx
 msgid "The whole import is one entry in History, and undoing it there takes every row it brought in back out."
 msgstr "The whole import is one entry in History, and undoing it there takes every row it brought in back out."
+
+#. placeholder {0}: rows.length
+#. placeholder {1}: formatCount(rows.length)
+#. placeholder {2}: formatCount(rows.length)
+#: src/screens/ynab/results.tsx
+msgid "{0, plural, one {{1} transfer imported as ordinary transactions, with the reason for each} other {{2} transfers imported as ordinary transactions, with the reason for each}}"
+msgstr "{0, plural, one {{1} transfer imported as ordinary transactions, with the reason for each} other {{2} transfers imported as ordinary transactions, with the reason for each}}"
 
 #. placeholder {0}: ++step
 #: src/screens/Backups.tsx
@@ -7471,6 +8181,13 @@ msgstr "Open that import"
 msgid "never"
 msgstr "never"
 
+#. placeholder {0}: account.rows
+#. placeholder {1}: formatCount(account.rows)
+#. placeholder {2}: formatCount(account.rows)
+#: src/screens/ynab/mapping.tsx
+msgid "{0, plural, one {Its {1} row are left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
+msgstr "{0, plural, one {Its {1} row are left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
+
 #. Label on the receipts
 #: src/components/Receipts.tsx
 msgid "Stored as"
@@ -7484,6 +8201,10 @@ msgstr "Select the receipt from {0}"
 #: src/screens/Admin.tsx
 msgid "DD/MM/YYYY"
 msgstr "DD/MM/YYYY"
+
+#: src/screens/OneTimeImport.tsx
+msgid "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."
+msgstr "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."
 
 #. Button on the Register screen
 #. placeholder {0}: parts.length
