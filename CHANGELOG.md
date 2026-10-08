@@ -47,6 +47,13 @@ history this repository does not have.
 
 ### Changed
 
+- **A hundred more refusals carry a code for translation.** Transactions,
+  transfers, splits and work expenses, payees and their naming rules,
+  categories, money and the profile panel now answer with a stable `code`
+  and raw `params` beside the same English `detail`, and the client has a
+  catalog message for each. The English a person or an agent reads is
+  unchanged, byte for byte, and agents still get no codes. (#57)
+
 - **"Check the repository" reads published releases, not tags,** and returns
   every release newer than the running one, newest first, each with its
   notes: the release's CHANGELOG section where the release body leads with

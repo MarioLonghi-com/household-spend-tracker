@@ -1492,9 +1492,69 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.category.archived_default"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.choose_default"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_name_taken"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_needs_name"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_not_empty"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_not_found"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.in_use"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.name_taken"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.needs_name"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.not_found"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.other_household"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.currency.not_iso_4217"
 msgstr "{code} não é um código de moeda ISO 4217. Confira a grafia, como GBP ou EUR"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.amount_too_large"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -1504,9 +1564,19 @@ msgstr "{value} tem casas decimais, e {currency} não tem nenhuma"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.money.not_a_value"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.money.not_an_amount"
 msgstr "{value} não é um valor que possamos ler. Escreva com ponto antes das casas decimais e sem separador de milhar, como 1234.56 ou -80"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.not_whole_minor_units"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -1528,6 +1598,121 @@ msgstr "Um valor com {digits} dígitos é grande demais para registrar como dinh
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.payee.merge_different_households"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.merge_into_itself"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.needs_name"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.other_household"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_needs_pattern"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_needs_payee"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_not_a_regex"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_pattern_too_long"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_replacement_on_map"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_replacement_too_long"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_template_no_groups"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_template_no_such_group"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_template_too_few_groups"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.current_factor_refused"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.needs_authenticator"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.new_code_wrong"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.recovery_grant_not_needed"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.recovery_grant_refused"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.reenrolment_expired"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.reenrolment_not_yours"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.regenerate_refused"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.same_password"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.wrong_password"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.receipt.no_such_copy"
 msgstr "Esse comprovante não tem uma cópia desse tipo"
@@ -1546,9 +1731,169 @@ msgstr "Uma linha com data {row_date} é posterior ao fechamento do extrato em {
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.reimbursement.not_a_work_expense_cannot_be_paid"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.not_money_in"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.not_money_out"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.paid_cannot_be_written_off"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.payment_cannot_be_expense"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.reimburses_itself"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.settlement_is_work_expense"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.sign_change_on_payment"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.sign_change_on_work_expense"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.transfer_is_not_a_reimbursement"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.transfer_is_not_a_work_expense"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.written_off_cannot_be_paid"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.split.does_not_add_up"
 msgstr "As partes somam {total} e a transação é de {amount}. Uma divisão precisa fechar, senão altera o saldo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.part_count"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.repaid_work_expenses"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.transfer_leg"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.work_expense_money_in"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.zero_part"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transaction.import_line_exists"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transaction.locked"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transaction.not_found"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.amount_not_positive"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.arriving_not_positive"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.different_households"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.duplicate_leg"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.edit_cross_currency_leg"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.has_no_category"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_already_a_transfer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_no_money"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_repayment"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_same_account"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_split_part"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_work_expense"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -1558,9 +1903,34 @@ msgstr "Uma transferência de {from_currency} para {to_currency} precisa do valo
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.transfer.not_a_transfer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.pair_in_two_households"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.pair_same_direction"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.pair_with_itself"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.transfer.same_account"
 msgstr "Uma conta não pode transferir para si mesma"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.sides_differ"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
