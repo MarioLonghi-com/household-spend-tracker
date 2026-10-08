@@ -51,6 +51,12 @@ router = APIRouter(tags=["admin"], prefix="/admin/application/update")
 
 log = logging.getLogger("spendtracker")
 
+
+def _one_line(value: object) -> str:
+    """A value for a log line, with no line breaks: what reaches these lines is
+    validated first, but a log line should not depend on that to stay one line."""
+    return str(value).replace("\r", "").replace("\n", "")
+
 #: The socket states under which the updater still works (C3): `outdated`
 #: refuses prepare and apply but still attempts `update_updater`.
 _USABLE = ("ok", "outdated")
@@ -182,7 +188,12 @@ def prepare(body: UpdatePrepare, owner: OwnerOnly) -> UpdateRequestOut:
     _nothing_in_flight()
     doc = updates.prepare_request(to_version, requested_by=owner.id)
     _write(doc)
-    log.warning("update to %s prepared (request %s) by %s", to_version, doc["id"], owner.email)
+    log.warning(
+        "update to %s prepared (request %s) by %s",
+        _one_line(to_version),
+        doc["id"],
+        _one_line(owner.email),
+    )
     return UpdateRequestOut(id=doc["id"], kind="prepare", to_version=to_version)
 
 
@@ -266,11 +277,11 @@ def apply(body: UpdateApply, owner: OwnerOnly) -> UpdateRequestOut:
     _write(doc)
     log.warning(
         "update to %s confirmed (request %s, report %s), accepting lossy migrations [%s], by %s",
-        found.to_version,
+        _one_line(found.to_version),
         doc["id"],
         found.id,
-        ", ".join(sorted(accepted)) or "none",
-        owner.email,
+        _one_line(", ".join(sorted(accepted)) or "none"),
+        _one_line(owner.email),
     )
     return UpdateRequestOut(id=doc["id"], kind="apply", to_version=found.to_version)
 
@@ -291,10 +302,10 @@ def discard(body: UpdateDiscard, owner: OwnerOnly) -> UpdateRequestOut:
     _write(doc)
     log.warning(
         "prepared update to %s discarded (report %s, request %s) by %s",
-        found.to_version,
+        _one_line(found.to_version),
         found.id,
         doc["id"],
-        owner.email,
+        _one_line(owner.email),
     )
     return UpdateRequestOut(id=doc["id"], kind="discard", to_version=found.to_version)
 
@@ -331,7 +342,12 @@ def update_updater(owner: OwnerOnly, body: UpdateUpdater | None = None) -> Updat
     _nothing_in_flight()
     doc = updates.update_updater_request(to_version, requested_by=owner.id)
     _write(doc)
-    log.warning("updater update to %s requested (request %s) by %s", to_version, doc["id"], owner.email)
+    log.warning(
+        "updater update to %s requested (request %s) by %s",
+        _one_line(to_version),
+        doc["id"],
+        _one_line(owner.email),
+    )
     return UpdateRequestOut(id=doc["id"], kind="update_updater", to_version=to_version)
 
 

@@ -32,6 +32,29 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.9.0 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back, run
+`0.8.0` again (`SPENDTRACKER_VERSION=0.8.0` in `.env`, then
+`docker compose up -d`) or check out `v0.8.0` and restart.
+
+**Updates from the browser.** A container install can now update itself from
+Admin → Application → Updates: check for a release, see every skipped
+release's notes and each migration's `Reversible:` line, confirm with your
+password and code, and save a one-time recovery code. A small updater
+container beside the app verifies the release's build attestation, takes a
+verified backup after the app stops, migrates, checks the new version's
+health, and rolls back to the backup and the previous version by itself if
+anything fails; if even that fails, a recovery page opens in the browser
+behind the recovery code. The updater replaces itself with each release's
+updater, before the app stops when it is newer. It works on Docker Desktop
+(macOS, Windows), Docker Engine (rootful and rootless) and Podman (rootful,
+rootless, and Podman Desktop), with the Tailscale sidecar or without; a
+release zip with double-click launchers installs it without a terminal.
+Release images are now built for amd64 and arm64. Alongside it: Safari signs
+in at `http://localhost`, and a fresh install no longer needs
+`SPENDTRACKER_AUTO_MIGRATE=1` for its first start.
+
 ### Fixed
 
 - **Starting the previous app by hand during the drill no longer touches the
