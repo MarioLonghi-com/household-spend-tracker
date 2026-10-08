@@ -82,7 +82,7 @@ export function Transfer({
 
   if (open.length < 2) {
     return (
-      <Panel title={t`Add transfer`} onClose={onClose}>
+      <Panel title={t({ message: "Add transfer", comment: "Title of a panel on the Transfers screen" })} onClose={onClose}>
         <p className="muted small">
           <Trans>A transfer needs two open accounts. Add another on the Accounts screen first.</Trans>
         </p>
@@ -94,7 +94,7 @@ export function Transfer({
     <Panel title={t`Add transfer between accounts`} onClose={onClose}>
       <Problem error={send.error} />
 
-      <Field label={t`From`}>
+      <Field label={t({ message: "From", comment: "Label of a form field on the Transfers screen: the start of a range, or where money comes from" })}>
         <select value={fromId} onChange={(e) => setFromId(e.target.value)} autoFocus>
           {open.map((one) => (
             <option key={one.id} value={one.id}>
@@ -104,7 +104,7 @@ export function Transfer({
         </select>
       </Field>
       <p />
-      <Field label={t`To`}>
+      <Field label={t({ message: "To", comment: "Label of a form field on the Transfers screen: the end of a range, or where money goes" })}>
         <select value={toId} onChange={(e) => setToId(e.target.value)}>
           {open.map((one) => (
             <option key={one.id} value={one.id}>
@@ -121,12 +121,12 @@ export function Transfer({
         <p />
       )}
 
-      <Field label={t`Date`}>
+      <Field label={t({ message: "Date", comment: "Label of a form field on the Transfers screen: noun. See GLOSSARY.md" })}>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       </Field>
       <p />
 
-      <Field label={from ? t`Amount leaving (${from.currency})` : t`Amount`}>
+      <Field label={from ? t({ message: `Amount leaving (${from.currency})`, comment: "Text on the Transfers screen" }) : t({ message: "Amount", comment: "Text on the Transfers screen: noun, a sum of money. See GLOSSARY.md" })}>
         <input
           value={leaving}
           onChange={(e) => setLeaving(e.target.value)}
@@ -139,7 +139,7 @@ export function Transfer({
           <p className="muted small">
             <Trans>No minus signs — the direction is the two accounts above.</Trans>
           </p>
-          <Field label={t`Amount arriving (${to!.currency})`}>
+          <Field label={t({ message: `Amount arriving (${to!.currency})`, comment: "Label of a form field on the Transfers screen" })}>
             <input
               value={arriving}
               onChange={(e) => setArriving(e.target.value)}
@@ -178,13 +178,13 @@ export function Transfer({
         </p>
       )}
 
-      <Field label={t`Memo`}>
+      <Field label={t({ message: "Memo", comment: "Label of a form field on the Transfers screen: noun, the free-text line of a transaction. See GLOSSARY.md" })}>
         <input value={memo} onChange={(e) => setMemo(e.target.value)} />
       </Field>
       <p />
 
       <button className="primary" disabled={!ready || send.isPending} onClick={() => send.mutate()}>
-        <Trans>Transfer</Trans>
+        <Trans comment="Button on the Transfers screen: verb, move money between two of your accounts. See GLOSSARY.md">Transfer</Trans>
       </button>
       <p className="muted small" style={{ marginTop: 10 }}>
         <Trans>

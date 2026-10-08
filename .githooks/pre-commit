@@ -17,7 +17,7 @@ cd "$root" || exit 1
 fail() { printf '\n\033[31m%s\033[0m\n' "$1"; echo "To commit anyway: git commit --no-verify"; exit 1; }
 
 if [ -x .venv/bin/ruff ]; then
-  .venv/bin/ruff check app/ statements/ tests/ scripts/ || fail "ruff found something."
+  .venv/bin/ruff check app/ statements/ updater/ tests/ scripts/ || fail "ruff found something."
 else
   echo "no .venv -- skipping ruff (run: make install-py)"
 fi

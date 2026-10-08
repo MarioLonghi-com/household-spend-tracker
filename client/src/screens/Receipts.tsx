@@ -159,7 +159,7 @@ export function Receipts({ household }: { household: Household }) {
 
   return (
     <div>
-      <h1><Trans>Receipts</Trans></h1>
+      <h1><Trans comment="Screen title on the receipts: noun, photos or PDFs of receipts. See GLOSSARY.md">Receipts</Trans></h1>
       <p className="muted small">
         <Trans>
           Anything without a transaction waits here. Photograph a receipt at the till and
@@ -188,7 +188,7 @@ export function Receipts({ household }: { household: Household }) {
                   setPicked(new Set());
                 }}
               >
-                {one === "unattached" ? t`Inbox` : one === "attached" ? t`Matched` : t`All`}
+                {one === "unattached" ? t({ message: "Inbox", comment: "Filter button on the Receipts screen: show the receipts not on a transaction yet" }) : one === "attached" ? t({ message: "Matched", comment: "Filter button on the Receipts screen: show the receipts already on a transaction" }) : t({ message: "All", comment: "Button on the receipts" })}
               </button>
             ))}
           </div>
@@ -200,13 +200,13 @@ export function Receipts({ household }: { household: Household }) {
                 aria-pressed={view === one}
                 onClick={() => setView(one)}
               >
-                {one === "grid" ? t`Thumbnails` : t`List`}
+                {one === "grid" ? t({ message: "Thumbnails", comment: "Button on the receipts" }) : t({ message: "List", comment: "Button on the receipts" })}
               </button>
             ))}
           </div>
           <ReceiptDrop
             target={{ householdId: household.id }}
-            label={t`Add receipts`}
+            label={t({ message: "Add receipts", comment: "Button on the receipts" })}
             icon="＋"
             primary
             onDone={refresh}
@@ -233,7 +233,7 @@ export function Receipts({ household }: { household: Household }) {
                 })}
               </button>
               <button className="link" onClick={() => setPicked(new Set())}>
-                <Trans>
+                <Trans comment="Button on the receipts">
                   Clear selection
                 </Trans>
               </button>
@@ -302,25 +302,25 @@ export function Receipts({ household }: { household: Household }) {
                       headings after it. */}
                   <th className="thumb-column">
                     <span className="sr-only">
-                      <Trans>Receipt</Trans>
+                      <Trans comment="Screen-reader text on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md">Receipt</Trans>
                     </span>
                   </th>
                   <SortHeading
-                    label={t`Taken`}
+                    label={t({ message: "Taken", comment: "Column heading on the receipts" })}
                     column="taken"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label={t`Receipt notes`}
+                    label={t({ message: "Receipt notes", comment: "Column heading on the receipts" })}
                     column="note"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label={t`Size`}
+                    label={t({ message: "Size", comment: "Column heading on the receipts: noun, size of a file" })}
                     column="size"
                     sort={order.sort}
                     direction={order.direction}
@@ -328,7 +328,7 @@ export function Receipts({ household }: { household: Household }) {
                     align="right"
                   />
                   <SortHeading
-                    label={t`Where`}
+                    label={t({ message: "Where", comment: "Column heading on the receipts: noun, where it is" })}
                     column="where"
                     sort={order.sort}
                     direction={order.direction}
@@ -351,16 +351,16 @@ export function Receipts({ household }: { household: Household }) {
                         style={{ width: "auto" }}
                       />
                     </td>
-                    <td className="thumb-column" data-label={t`Receipt`}>
+                    <td className="thumb-column" data-label={t({ message: "Receipt", comment: "Column name shown beside a value on phones on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md" })}>
                       <ReceiptPeek receipt={one} onOpen={() => setOpened(one)} />
                     </td>
-                    <td data-label={t`Taken`} data-detail-first="true">
+                    <td data-label={t({ message: "Taken", comment: "Column name shown beside a value on phones on the receipts" })} data-detail-first="true">
                       {(one.captured_at ?? one.created_at).slice(0, 10)}
                       {one.captured_at ? null : (
-                        <span className="muted small"> {t`(uploaded)`}</span>
+                        <span className="muted small"> {t({ message: "(uploaded)", comment: "Table cell on the receipts" })}</span>
                       )}
                     </td>
-                    <td data-label={t`Receipt notes`} data-primary="true">
+                    <td data-label={t({ message: "Receipt notes", comment: "Column name shown beside a value on phones on the receipts" })} data-primary="true">
                       <NoteCell
                         receipt={one}
                         onSaved={() => {
@@ -372,8 +372,8 @@ export function Receipts({ household }: { household: Household }) {
                     <td className="amount" data-figure="true">
                       {sizeText(one.download_bytes)}
                     </td>
-                    <td data-label={t`Where`} className="small muted">
-                      {one.transaction_id ? t`On a transaction` : t`Inbox`}
+                    <td data-label={t({ message: "Where", comment: "Column name shown beside a value on phones on the receipts: noun, where it is" })} className="small muted">
+                      {one.transaction_id ? t`On a transaction` : t({ message: "Inbox", comment: "Filter button on the Receipts screen: show the receipts not on a transaction yet" })}
                     </td>
                   </tr>
                 ))}
@@ -405,11 +405,11 @@ export function Receipts({ household }: { household: Household }) {
               onClick={() => removeMany.mutate([...picked])}
             >
               {removeMany.isPending
-                ? t`Deleting…`
+                ? t({ message: "Deleting…", comment: "Button on the receipts" })
                 : plural(picked.size, { one: "Delete it", other: `Delete all ${picked.size}` })}
             </button>
             <button onClick={() => setConfirming(false)}>
-              <Trans>Keep them</Trans>
+              <Trans comment="Button on the receipts">Keep them</Trans>
             </button>
           </div>
           <Problem error={removeMany.error} />
@@ -483,11 +483,11 @@ function NoteCell({
           if (event.key === "Enter") event.currentTarget.blur();
         }}
         placeholder={t`What was it for?`}
-        aria-label={t`Receipt notes`}
+        aria-label={t({ message: "Receipt notes", comment: "Screen-reader name on the receipts" })}
       />
       {save.isPending ? (
         <span className="small muted">
-          <Trans>saving…</Trans>
+          <Trans comment="Text on the receipts">saving…</Trans>
         </span>
       ) : save.isError ? (
         <span className="small danger-text">
@@ -533,7 +533,7 @@ function ReceiptPanel({
   });
 
   return (
-    <Panel title={receipt.download_name.split("/").pop() ?? t`Receipt`} onClose={onClose}>
+    <Panel title={receipt.download_name.split("/").pop() ?? t({ message: "Receipt", comment: "Text in a panel on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md" })} onClose={onClose}>
       <Problem error={save.error ?? remove.error ?? detach.error} />
 
       <ReceiptFrame receipt={receipt} onEnlarge={() => setEnlarged(true)} />
@@ -541,11 +541,11 @@ function ReceiptPanel({
       <p className="small muted" style={{ marginTop: 8 }}>
         {sizeText(receipt.download_bytes)} ·{" "}
         <a href={`/api/receipts/${receipt.id}/${receipt.has_original ? "original" : "display"}`}>
-          <Trans>
+          <Trans comment="Link on the receipts">
             Download
           </Trans>
         </a>
-        {receipt.uploaded_by_name ? ` · ${t`added by ${receipt.uploaded_by_name}`}` : null}
+        {receipt.uploaded_by_name ? ` · ${t({ message: `added by ${receipt.uploaded_by_name}`, comment: "Sentence on the receipts" })}` : null}
       </p>
 
       {/* It matters more here than in the register: an inbox receipt has no
@@ -553,7 +553,7 @@ function ReceiptPanel({
           very often the only thing that identifies it. */}
       <MoreInfo receipt={receipt} />
 
-      <Field label={t`Receipt notes`}>
+      <Field label={t({ message: "Receipt notes", comment: "Label of a form field on the receipts" })}>
         <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       </Field>
 
@@ -575,7 +575,7 @@ function ReceiptPanel({
           </button>
         )}
         <button className="danger" disabled={remove.isPending} onClick={() => remove.mutate()}>
-          <Trans>
+          <Trans comment="Button on the receipts: verb">
             Delete
           </Trans>
         </button>
@@ -633,7 +633,7 @@ export function Matcher({
   return (
     <RowPicker
       household={household}
-      title={t`Which transaction?`}
+      title={t({ message: "Which transaction?", comment: "Title of a panel on the receipts" })}
       anchor={receipt.captured_at ?? receipt.created_at}
       days={PICKER_DAYS}
       intro={
@@ -641,7 +641,7 @@ export function Matcher({
           ? t`Taken ${formatInstant(receipt.captured_at)}, so this opens on the ten days either side.`
           : t`This receipt carries no date of its own, so the window is around when it was uploaded.`
       }
-      action={t`Attach`}
+      action={t({ message: "Attach", comment: "Button on the receipts: verb, attach a receipt to a transaction" })}
       busy={attach.isPending}
       error={attach.error}
       onPick={(txn) => attach.mutate(txn.id)}

@@ -98,7 +98,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
   return (
     <div className="centred">
       <h1>
-        <Trans>Set up {PRODUCT}</Trans>
+        <Trans comment="Screen title on the first-run setup">Set up {PRODUCT}</Trans>
       </h1>
       <p className="muted small">
         <Trans>
@@ -125,13 +125,13 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
               not work in it. This one uses the interpreter that is always
               there. */}
           <p className="muted small">
-            <Trans>In Docker:</Trans>{" "}
+            <Trans comment="Sentence on the first-run setup">In Docker:</Trans>{" "}
             <span className="mono">
               docker compose exec app python -c &quot;print(open(&apos;
               {tokenPath ?? "/var/lib/spend-tracker/setup-token"}&apos;).read())&quot;
             </span>
           </p>
-          <Field label={t`Setup token`}>
+          <Field label={t({ message: "Setup token", comment: "Label of a form field on the first-run setup. See GLOSSARY.md" })}>
             <input
               name="setup-token"
               value={token}
@@ -143,7 +143,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
           </Field>
           <p />
           <button className="primary" disabled={!token.trim()} onClick={() => setStep(2)}>
-            <Trans>Continue</Trans>
+            <Trans comment="Button on the first-run setup: go on to the next step">Continue</Trans>
           </button>
         </div>
       )}
@@ -151,9 +151,9 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
       {step === 2 && (
         <div className="card">
           <h2>
-            <Trans>2. You</Trans>
+            <Trans comment="Heading on the first-run setup">2. You</Trans>
           </h2>
-          <Field label={t`Email`}>
+          <Field label={t({ message: "Email", comment: "Label of a form field on the first-run setup: noun, an email address" })}>
             <input
               type="email"
               name="email"
@@ -164,11 +164,11 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
             />
           </Field>
           <p />
-          <Field label={t`Your name`}>
+          <Field label={t({ message: "Your name", comment: "Label of a form field on the first-run setup" })}>
             <input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
           <p />
-          <Field label={t`Password`}>
+          <Field label={t({ message: "Password", comment: "Label of a form field on the first-run setup: noun. See GLOSSARY.md" })}>
             <input
               type="password"
               name="new-password"
@@ -185,7 +185,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
             disabled={busy || !email || !name || password.length < 12}
             onClick={begin}
           >
-            <Trans>Continue</Trans>
+            <Trans comment="Button on the first-run setup: go on to the next step">Continue</Trans>
           </button>
         </div>
       )}
@@ -193,7 +193,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
       {step === 3 && started && (
         <div className="card">
           <h2>
-            <Trans>3. Your authenticator</Trans>
+            <Trans comment="Heading on the first-run setup">3. Your authenticator</Trans>
           </h2>
           <p className="muted small">
             <Trans>
@@ -230,11 +230,11 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
       {step === 4 && started && (
         <div className="card">
           <h2>
-            <Trans>4. Recovery codes</Trans>
+            <Trans comment="Heading on the first-run setup">4. Recovery codes</Trans>
           </h2>
           <RecoveryCodeSheet
             codes={started.recovery_codes}
-            action={t`Finish setup`}
+            action={t({ message: "Finish setup", comment: "Button on the first-run setup" })}
             busy={busy}
             onStored={finish}
           />

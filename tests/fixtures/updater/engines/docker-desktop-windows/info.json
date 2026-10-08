@@ -1,0 +1,18 @@
+{
+  "_hand_written": true,
+  "ID": "00000000-0000-4000-8000-0000000000d3",
+  "Driver": "windowsfilter",
+  "KernelVersion": "10.0 26100 (26100.1.amd64fre.ge_release.240331-1435)",
+  "OperatingSystem": "Microsoft Windows Version 24H2 (OS Build 26100.6584)",
+  "OSVersion": "10.0 26100 (26100.1.amd64fre.ge_release.240331-1435)",
+  "OSType": "windows",
+  "Architecture": "x86_64",
+  "NCPU": 8,
+  "MemTotal": 34184441856,
+  "DockerRootDir": "C:\\ProgramData\\Docker",
+  "Name": "desktop-e",
+  "ServerVersion": "29.8.1",
+  "Isolation": "hyperv",
+  "SecurityOptions": null,
+  "Warnings": null
+}

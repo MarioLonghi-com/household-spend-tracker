@@ -13,7 +13,7 @@ import { t } from "@lingui/core/macro";
 /** What a reset link resets, as a phrase: "password", "authenticator", or both. */
 export function switchesText(password: boolean, authenticator: boolean): string {
   if (password && authenticator) return t`password and authenticator`;
-  return password ? t`password` : t`authenticator`;
+  return password ? t({ message: "password", comment: "What was reset, inside a sentence: the password. Lower case. See GLOSSARY.md" }) : t({ message: "authenticator", comment: "What was reset, inside a sentence: the authenticator. Lower case. See GLOSSARY.md" });
 }
 
 /** The What column: a label, not a sentence. */
@@ -21,13 +21,13 @@ export function whatText(change: SignInChange): string {
   switch (change.what) {
     case "reset":
       if (change.password && change.authenticator) return t`Reset: password and authenticator`;
-      return change.password ? t`Reset: password` : t`Reset: authenticator`;
+      return change.password ? t({ message: "Reset: password", comment: "A sign-in change in Admin's list: the person's password was reset" }) : t({ message: "Reset: authenticator", comment: "A sign-in change in Admin's list: the person's authenticator was reset" });
     case "promoted":
       return t`Made an owner`;
     case "authenticator_replaced":
-      return t`New authenticator`;
+      return t({ message: "New authenticator", comment: "A sign-in change in Admin's list: the person was given a new authenticator" });
     case "reenabled":
-      return t`Re-enabled`;
+      return t({ message: "Re-enabled", comment: "A sign-in change in Admin's list: the person may sign in again" });
     default:
       return t`Added as an owner`;
   }
@@ -35,7 +35,7 @@ export function whatText(change: SignInChange): string {
 
 /** The By column. A command run beside the ledger is nobody's account. */
 export function byText(change: SignInChange): string {
-  return change.from_server ? t`from the server` : (change.by_name ?? t`somebody`);
+  return change.from_server ? t`from the server` : (change.by_name ?? t({ message: "somebody", comment: "Stands in for who made a change when the name is not known. Lower case" }));
 }
 
 /**
@@ -83,7 +83,7 @@ export function sentence(change: SignInChange): string {
       case "authenticator_replaced":
         return t`Somebody gave ${user} a new authenticator`;
       case "reenabled":
-        return t`Somebody re-enabled ${user}`;
+        return t({ message: `Somebody re-enabled ${user}`, comment: "A sign-in change, as a sentence; the placeholder is a person's name" });
       default:
         return t`Somebody added ${user} as an owner`;
     }
@@ -99,7 +99,7 @@ export function sentence(change: SignInChange): string {
     case "authenticator_replaced":
       return t`${by} gave ${user} a new authenticator`;
     case "reenabled":
-      return t`${by} re-enabled ${user}`;
+      return t({ message: `${by} re-enabled ${user}`, comment: "A sign-in change, as a sentence: who re-enabled whom; both are people's names" });
     default:
       return t`${by} added ${user} as an owner`;
   }
