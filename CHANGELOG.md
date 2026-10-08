@@ -87,7 +87,6 @@ history this repository does not have.
   recording fake engine on a real unix socket and `/version` answers recorded
   from Docker Desktop and Podman. No image, compose service or screen uses it
   yet.
-
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
