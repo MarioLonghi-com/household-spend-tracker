@@ -168,6 +168,11 @@ history this repository does not have.
 
 ### Changed
 
+- **The remaining screens' words go into the catalogs one screen at a time**,
+  starting with Categories. English is unchanged; each screen has a test
+  that renders it in the `en-XA` pseudo-locale and finds no English left.
+  (#56)
+
 - **The register's, the transfer screens', the Accounts screen's and the
   Import screen's words are in the catalogs**, with the labels in `lib/labels.ts`. English is unchanged;
   a test renders it in the `en-XA` pseudo-locale and finds no English left.
