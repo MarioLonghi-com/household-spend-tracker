@@ -101,7 +101,7 @@ export const TYPES: { value: AccountType; label: string; owed: boolean; blurb: s
 /** What the six types mean, as one bubble. */
 export function TypeHelp() {
   return (
-    <Hint label={t`account types`}>
+    <Hint label={t({ message: "account types", comment: "Screen-reader name of a help button on the Accounts screen" })}>
       <p>
         <Trans>
           The type says what kind of thing the account is. It sorts the list and marks which
@@ -284,7 +284,7 @@ function CountryPicker({ value, onChange }: { value: string; onChange: (code: st
         aria-controls={showing ? listId : undefined}
         aria-autocomplete="list"
         aria-activedescendant={showing && active >= 0 ? `${listId}-${active}` : undefined}
-        aria-label={t`Country`}
+        aria-label={t({ message: "Country", comment: "Screen-reader name on the Accounts screen: noun. See GLOSSARY.md" })}
         autoComplete="off"
         spellCheck={false}
         placeholder={t`type to search — leave empty for none`}
@@ -440,7 +440,7 @@ export function Accounts({
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
-        <h1><Trans>Accounts</Trans></h1>
+        <h1><Trans comment="Screen title on the Accounts screen: noun, bank or cash accounts. See GLOSSARY.md">Accounts</Trans></h1>
         <label className="small muted" style={{ flex: "0 0 auto" }}>
           <input
             type="checkbox"
@@ -448,7 +448,7 @@ export function Accounts({
             onChange={(e) => setShowClosed(e.target.checked)}
             style={{ width: "auto", marginRight: 6 }}
           />
-          <Trans>Show closed</Trans>
+          <Trans comment="Label of a choice on the Accounts screen">Show closed</Trans>
         </label>
         <div className="row" style={{ flex: "0 0 auto" }}>
           <button onClick={() => setImporting(true)}>
@@ -475,28 +475,28 @@ export function Accounts({
                   {/* Every column sorts. The one exception is the actions cell,
                       which holds buttons rather than a fact about the row. */}
                   <SortHeading
-                    label={t`Account`}
+                    label={t({ message: "Account", comment: "Column heading on the Accounts screen: noun, a bank or cash account. See GLOSSARY.md" })}
                     column="name"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label={t`Type`}
+                    label={t({ message: "Type", comment: "Column heading on the Accounts screen: noun, account type" })}
                     column="type"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label={t`Bank`}
+                    label={t({ message: "Bank", comment: "Column heading on the Accounts screen: noun, the institution that holds an account. See GLOSSARY.md" })}
                     column="institution"
                     sort={sort}
                     direction={direction}
                     onSort={onSort}
                   />
                   <SortHeading
-                    label={t`Country`}
+                    label={t({ message: "Country", comment: "Column heading on the Accounts screen: noun. See GLOSSARY.md" })}
                     column="country"
                     sort={sort}
                     direction={direction}
@@ -504,7 +504,7 @@ export function Accounts({
                     className="flag-col"
                   />
                   <SortHeading
-                    label={t`Currency`}
+                    label={t({ message: "Currency", comment: "Column heading on the Accounts screen: noun. See GLOSSARY.md" })}
                     column="currency"
                     sort={sort}
                     direction={direction}
@@ -517,7 +517,7 @@ export function Accounts({
                       want the span of, and an account with nothing in it since
                       March is the one nobody has imported. */}
                   <SortHeading
-                    label={t`Oldest`}
+                    label={t({ message: "Oldest", comment: "Column heading on the Accounts screen" })}
                     column="oldest"
                     sort={sort}
                     direction={direction}
@@ -525,7 +525,7 @@ export function Accounts({
                     className="span-col"
                   />
                   <SortHeading
-                    label={t`Newest`}
+                    label={t({ message: "Newest", comment: "Column heading on the Accounts screen" })}
                     column="newest"
                     sort={sort}
                     direction={direction}
@@ -533,7 +533,7 @@ export function Accounts({
                     className="span-col"
                   />
                   <SortHeading
-                    label={t`Rows`}
+                    label={t({ message: "Rows", comment: "Column heading on the Accounts screen: noun, lines of a file or table" })}
                     column="rows"
                     sort={sort}
                     direction={direction}
@@ -541,7 +541,7 @@ export function Accounts({
                     align="right"
                   />
                   <SortHeading
-                    label={t`Cleared`}
+                    label={t({ message: "Cleared", comment: "Column heading on the Accounts screen: state, the bank has the row. See GLOSSARY.md" })}
                     column="cleared"
                     sort={sort}
                     direction={direction}
@@ -549,7 +549,7 @@ export function Accounts({
                     align="right"
                   />
                   <SortHeading
-                    label={t`Balance`}
+                    label={t({ message: "Balance", comment: "Column heading on the Accounts screen: noun, the amount an account holds. See GLOSSARY.md" })}
                     column="balance"
                     sort={sort}
                     direction={direction}
@@ -573,13 +573,13 @@ export function Accounts({
                           reconciles against an account that is gone. */}
                       {account.closed ? (
                         <span className="tag closed" title={t`this account is closed`}>
-                          <Trans>
+                          <Trans comment="Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md">
                             Closed
                           </Trans>
                         </span>
                       ) : null}
                     </td>
-                    <td className="small muted" data-label={t`Type`} data-detail-first="true">
+                    <td className="small muted" data-label={t({ message: "Type", comment: "Column name shown beside a value on phones on the Accounts screen: noun, account type" })} data-detail-first="true">
                       {TYPES.find((t) => t.value === account.type)?.label ?? account.type}
                       {account.is_liability ? (
                         <span className="neg" title={t`a negative balance here is money you owe`}>
@@ -593,7 +593,7 @@ export function Accounts({
                         bank each was at — which is exactly when you need it. */}
                     <td
                       className="small muted"
-                      data-label={t`Bank`}
+                      data-label={t({ message: "Bank", comment: "Column name shown beside a value on phones on the Accounts screen: noun, the institution that holds an account. See G…" })}
                       data-empty={account.institution ? undefined : "true"}
                     >
                       {account.institution || <span className="muted">—</span>}
@@ -605,7 +605,7 @@ export function Accounts({
                         in it that reads as a rendering fault. */}
                     <td
                       className="flag-col"
-                      data-label={t`Country`}
+                      data-label={t({ message: "Country", comment: "Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md" })}
                       data-empty={account.country ? undefined : "true"}
                     >
                       <span className="flag" title={countryName(countries.data, account.country)}>
@@ -615,7 +615,7 @@ export function Accounts({
                     {/* Its own column: the ledger never converts, so which
                         currency a figure is in is a fact about the row, not a
                         footnote under the name. */}
-                    <td className="small muted mono" data-label={t`Currency`}>
+                    <td className="small muted mono" data-label={t({ message: "Currency", comment: "Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md" })}>
                       {account.currency}
                     </td>
                     {/* An em dash, not an empty cell: a blank here reads as a
@@ -623,22 +623,22 @@ export function Accounts({
                         transactions" is a fact worth stating. */}
                     <td
                       className="small muted mono span-col"
-                      data-label={t`Oldest`}
+                      data-label={t({ message: "Oldest", comment: "Column name shown beside a value on phones on the Accounts screen" })}
                       data-empty={account.oldest_transaction ? undefined : "true"}
                     >
                       {account.oldest_transaction ?? "—"}
                     </td>
                     <td
                       className="small muted mono span-col"
-                      data-label={t`Newest`}
+                      data-label={t({ message: "Newest", comment: "Column name shown beside a value on phones on the Accounts screen" })}
                       data-empty={account.newest_transaction ? undefined : "true"}
                     >
                       {account.newest_transaction ?? "—"}
                     </td>
-                    <td className="amount muted" data-label={t`Rows`}>
+                    <td className="amount muted" data-label={t({ message: "Rows", comment: "Column name shown beside a value on phones on the Accounts screen: noun, lines of a file or table" })}>
                       {formatCount(account.transaction_count)}
                     </td>
-                    <td className="amount muted" data-label={t`Cleared`}>
+                    <td className="amount muted" data-label={t({ message: "Cleared", comment: "Column name shown beside a value on phones on the Accounts screen: state, the bank has the row. See GLOSSARY.md" })}>
                       {format(account.cleared, account.currency)}
                     </td>
                     <td className="amount" data-figure="true">
@@ -649,12 +649,12 @@ export function Accounts({
                           starts from the account, not from a screen of its own
                           that would then have to ask which one you meant. */}
                       <button className="link" onClick={() => setReconciling(account)}>
-                        <Trans>
+                        <Trans comment="Button on the Accounts screen: verb, check an account against a bank statement. See GLOSSARY.md">
                           Reconcile
                         </Trans>
                       </button>{" "}
                       <button className="link" onClick={() => setEditing(account)}>
-                        <Trans>
+                        <Trans comment="Button on the Accounts screen">
                           Settings
                         </Trans>
                       </button>
@@ -778,13 +778,13 @@ function AccountForm({
   });
 
   return (
-    <Panel title={t`New account`} onClose={onClose} config>
+    <Panel title={t({ message: "New account", comment: "Title of a panel on the Accounts screen" })} onClose={onClose} config>
       <Problem error={save.error} />
-      <Field label={t`Name`}>
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Accounts screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p />
-      <Field label={t`Type`} hint={<TypeHelp />}>
+      <Field label={t({ message: "Type", comment: "Label of a form field on the Accounts screen: noun, account type" })} hint={<TypeHelp />}>
         <select value={type} onChange={(e) => setType(e.target.value as AccountType)}>
           {TYPES.map((one) => (
             <option key={one.value} value={one.value}>
@@ -796,7 +796,7 @@ function AccountForm({
       <p className="muted small" style={{ marginTop: 4 }}>
         {TYPES.find((one) => one.value === type)?.blurb}
       </p>
-      <Field label={t`Currency`}>
+      <Field label={t({ message: "Currency", comment: "Label of a form field on the Accounts screen: noun. See GLOSSARY.md" })}>
         <input
           value={currency}
           onChange={(e) => setCurrency(e.target.value.toUpperCase())}
@@ -809,7 +809,7 @@ function AccountForm({
         </Trans>
       </p>
 
-      <Field label={t`Country`}>
+      <Field label={t({ message: "Country", comment: "Label of a form field on the Accounts screen: noun. See GLOSSARY.md" })}>
         <CountryPicker value={country} onChange={setCountry} />
       </Field>
       <p className="muted small">
@@ -826,7 +826,7 @@ function AccountForm({
         />
       </Field>
       <p />
-      <Field label={t`Note`}>
+      <Field label={t({ message: "Note", comment: "Label of a form field on the Accounts screen. See GLOSSARY.md" })}>
         <textarea
           value={note}
           rows={3}
@@ -837,9 +837,9 @@ function AccountForm({
       <p />
 
       <Field
-        label={t`Opening balance`}
+        label={t({ message: "Opening balance", comment: "Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md" })}
         hint={
-          <Hint label={t`opening balance`}>
+          <Hint label={t({ message: "opening balance", comment: "Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md" })}>
             <p>
               <Trans>
                 What was in the account on the day you started tracking it — usually a date in the
@@ -875,7 +875,7 @@ function AccountForm({
         </p>
       )}
 
-      <Field label={t`Opening date`}>
+      <Field label={t({ message: "Opening date", comment: "Label of a form field on the Accounts screen" })}>
         <input
           type="date"
           value={openingDate}
@@ -889,7 +889,7 @@ function AccountForm({
         disabled={!name.trim() || openingBad || !openingDate || save.isPending}
         onClick={() => save.mutate()}
       >
-        <Trans>Create</Trans>
+        <Trans comment="Button on the Accounts screen: verb">Create</Trans>
       </button>
     </Panel>
   );
@@ -968,11 +968,11 @@ function AccountSettings({
   return (
     <Panel title={account.name} onClose={onClose} config>
       <Problem error={save.error} />
-      <Field label={t`Name`}>
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Accounts screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p />
-      <Field label={t`Country`}>
+      <Field label={t({ message: "Country", comment: "Label of a form field on the Accounts screen: noun. See GLOSSARY.md" })}>
         <CountryPicker value={country} onChange={setCountry} />
       </Field>
       <p />
@@ -984,7 +984,7 @@ function AccountSettings({
         />
       </Field>
       <p />
-      <Field label={t`Note`}>
+      <Field label={t({ message: "Note", comment: "Label of a form field on the Accounts screen. See GLOSSARY.md" })}>
         <textarea
           value={note}
           rows={3}
@@ -993,11 +993,11 @@ function AccountSettings({
         />
       </Field>
       <p />
-      <Field label={t`Statement product`}>
+      <Field label={t({ message: "Statement product", comment: "Label of a form field on the Accounts screen" })}>
         <input
           value={product}
           // Revolut's own Product values, which are English in every file it writes.
-          placeholder={account.type === "checking" ? "Current" : t`e.g. ${"Savings"}`}
+          placeholder={account.type === "checking" ? "Current" : t({ message: `e.g. ${"Savings"}`, comment: "Text on the Accounts screen" })}
           onChange={(e) => setProduct(e.target.value)}
         />
       </Field>
@@ -1009,7 +1009,7 @@ function AccountSettings({
           say otherwise.
         </Trans>
       </p>
-      <Field label={t`Opening balance`}>
+      <Field label={t({ message: "Opening balance", comment: "Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md" })}>
         <input
           value={opening}
           onChange={(e) => setOpening(e.target.value)}
@@ -1022,7 +1022,7 @@ function AccountSettings({
           <Trans>That isn't an amount in {account.currency}.</Trans>
         </p>
       )}
-      <Field label={t`Opening date`}>
+      <Field label={t({ message: "Opening date", comment: "Label of a form field on the Accounts screen" })}>
         <input
           type="date"
           value={openingDate}
@@ -1096,7 +1096,7 @@ function AccountSettings({
         disabled={save.isPending || openingBad || openingFuture}
         onClick={() => save.mutate(body())}
       >
-        <Trans>Save</Trans>
+        <Trans comment="Button on the Accounts screen: verb">Save</Trans>
       </button>
       <hr />
       <Identifiers household={household} account={account} />
@@ -1110,7 +1110,7 @@ const IDENTIFIER_KINDS: { value: IdentifierKind; label: string; example: string 
   {
     value: "number",
     get label() {
-      return t`Account number`;
+      return t({ message: "Account number", comment: "Label on the Accounts screen" });
     },
     get example() {
       return t`the number other statements quote`;
@@ -1119,7 +1119,7 @@ const IDENTIFIER_KINDS: { value: IdentifierKind; label: string; example: string 
   {
     value: "card",
     get label() {
-      return t`Card number`;
+      return t({ message: "Card number", comment: "Label on the Accounts screen" });
     },
     get example() {
       return t`the last four, or the part the bank prints`;
@@ -1146,7 +1146,7 @@ const IDENTIFIER_KINDS: { value: IdentifierKind; label: string; example: string 
 ];
 
 function kindLabel(kind: IdentifierKind): string {
-  if (kind === "holder") return t`Holder's name`;
+  if (kind === "holder") return t({ message: "Holder's name", comment: "Label on the Accounts screen" });
   return IDENTIFIER_KINDS.find((one) => one.value === kind)?.label ?? kind;
 }
 
@@ -1228,9 +1228,9 @@ export function Identifiers({
                 className="link"
                 disabled={remove.isPending}
                 onClick={() => remove.mutate(row.id)}
-                aria-label={t`Remove ${row.value}`}
+                aria-label={t({ message: `Remove ${row.value}`, comment: "Screen-reader name of a button on the Accounts screen" })}
               >
-                <Trans>Remove</Trans>
+                <Trans comment="Button on the Accounts screen: verb">Remove</Trans>
               </button>
               {!account && <HolderSamples household={household} identifierId={row.id} />}
             </li>
@@ -1241,7 +1241,7 @@ export function Identifiers({
         <p className="small">
           {suggested.kind === "iban" ? t`The name looks like its IBAN.` : t`The name looks like its number.`}{" "}
           <button className="link" onClick={() => add.mutate(suggested)}>
-            <Trans>
+            <Trans comment="Button on the Accounts screen">
               Add <span className="mono">{suggested.value}</span>
             </Trans>
           </button>
@@ -1249,7 +1249,7 @@ export function Identifiers({
       )}
       <div className="row">
         {account && (
-          <Field label={t`Kind`}>
+          <Field label={t({ message: "Kind", comment: "Label of a form field on the Accounts screen: noun, what sort of thing" })}>
             <select value={kind} onChange={(e) => setKind(e.target.value as IdentifierKind)}>
               {IDENTIFIER_KINDS.map((one) => (
                 <option key={one.value} value={one.value}>
@@ -1259,13 +1259,13 @@ export function Identifiers({
             </select>
           </Field>
         )}
-        <Field label={account ? t`Value` : t`Name as the bank writes it`}>
+        <Field label={account ? t({ message: "Value", comment: "Text on the Accounts screen" }) : t`Name as the bank writes it`}>
           <input
             value={value}
             placeholder={
               account
                 ? IDENTIFIER_KINDS.find((one) => one.value === kind)?.example
-                : t`DOE JANE`
+                : t({ message: "DOE JANE", comment: "Text on the Accounts screen" })
             }
             onChange={(e) => setValue(e.target.value)}
           />
@@ -1275,7 +1275,7 @@ export function Identifiers({
         disabled={!value.trim() || add.isPending}
         onClick={() => add.mutate({ kind: account ? kind : "holder", value })}
       >
-        <Trans>Add</Trans>
+        <Trans comment="Button on the Accounts screen: verb">Add</Trans>
       </button>
     </section>
   );
@@ -1434,8 +1434,8 @@ export function SuggestedIdentifiers({
   const busy = add.isPending || ignore.isPending;
 
   return (
-    <section aria-label={t`Suggested identifiers`}>
-      <h3 style={{ marginBottom: 4 }}><Trans>Suggested identifiers</Trans></h3>
+    <section aria-label={t({ message: "Suggested identifiers", comment: "Screen-reader name on the Accounts screen" })}>
+      <h3 style={{ marginBottom: 4 }}><Trans comment="Heading on the Accounts screen">Suggested identifiers</Trans></h3>
       <p className="small muted" style={{ marginTop: 0 }}>
         <Trans>
           Numbers and names your statements already use for your accounts, read off the register.
@@ -1452,13 +1452,13 @@ export function SuggestedIdentifiers({
           <table>
             <thead>
               <tr>
-                <SortHeading label={t`Value`} column="value" {...heading} />
-                <SortHeading label={t`Kind`} column="kind" {...heading} />
-                <SortHeading label={t`For`} column="account" {...heading} />
-                <SortHeading label={t`Mentions`} column="mentions" align="right" {...heading} />
-                <SortHeading label={t`Would link`} column="would_link" align="right" {...heading} />
-                <SortHeading label={t`Why`} column="why" {...heading} />
-                <th aria-label={t`Actions`} />
+                <SortHeading label={t({ message: "Value", comment: "Column heading on the Accounts screen" })} column="value" {...heading} />
+                <SortHeading label={t({ message: "Kind", comment: "Column heading on the Accounts screen: noun, what sort of thing" })} column="kind" {...heading} />
+                <SortHeading label={t({ message: "For", comment: "Column heading on the Accounts screen" })} column="account" {...heading} />
+                <SortHeading label={t({ message: "Mentions", comment: "Column heading on the Accounts screen" })} column="mentions" align="right" {...heading} />
+                <SortHeading label={t({ message: "Would link", comment: "Column heading on the Accounts screen" })} column="would_link" align="right" {...heading} />
+                <SortHeading label={t({ message: "Why", comment: "Column heading on the Accounts screen: noun, the reason" })} column="why" {...heading} />
+                <th aria-label={t({ message: "Actions", comment: "Screen-reader name on the Accounts screen" })} />
               </tr>
             </thead>
             <tbody>
@@ -1470,21 +1470,21 @@ export function SuggestedIdentifiers({
                       <span className="mono">{one.value}</span>
                       {one.sample && (
                         <div className="small muted">
-                          <Trans>e.g. {one.sample}</Trans>
+                          <Trans comment="Text on the Accounts screen">e.g. {one.sample}</Trans>
                         </div>
                       )}
                     </td>
-                    <td className="small muted" data-label={t`Kind`}>
+                    <td className="small muted" data-label={t({ message: "Kind", comment: "Column name shown beside a value on phones on the Accounts screen: noun, what sort of thing" })}>
                       {kindLabel(one.kind)}
                     </td>
-                    <td className="small" data-label={t`For`}>
+                    <td className="small" data-label={t({ message: "For", comment: "Column name shown beside a value on phones on the Accounts screen" })}>
                       {one.account_name ?? (
                         <select
-                          aria-label={t`Account for ${one.value}`}
+                          aria-label={t({ message: `Account for ${one.value}`, comment: "Screen-reader name on the Accounts screen" })}
                           value={chosen[key] ?? ""}
                           onChange={(e) => setChosen({ ...chosen, [key]: e.target.value })}
                         >
-                          <option value=""><Trans>Choose…</Trans></option>
+                          <option value=""><Trans comment="Option in a dropdown on the Accounts screen">Choose…</Trans></option>
                           {accounts.map((account) => (
                             <option key={account.id} value={account.id}>
                               {account.name}
@@ -1493,12 +1493,12 @@ export function SuggestedIdentifiers({
                         </select>
                       )}
                     </td>
-                    <td className="amount muted" data-label={t`Mentions`}>
+                    <td className="amount muted" data-label={t({ message: "Mentions", comment: "Column name shown beside a value on phones on the Accounts screen" })}>
                       {mentionsText(one.mentions, one.unit)}
                     </td>
-                    <td className="amount" data-label={t`Would link`}>
+                    <td className="amount" data-label={t({ message: "Would link", comment: "Column name shown beside a value on phones on the Accounts screen" })}>
                       {one.would_link === null ? (
-                        <span className="muted" title={t`not counted`}>
+                        <span className="muted" title={t({ message: "not counted", comment: "Tooltip on the Accounts screen" })}>
                           —
                         </span>
                       ) : (
@@ -1508,7 +1508,7 @@ export function SuggestedIdentifiers({
                         })
                       )}
                     </td>
-                    <td className="small muted" data-label={t`Why`}>
+                    <td className="small muted" data-label={t({ message: "Why", comment: "Column name shown beside a value on phones on the Accounts screen: noun, the reason" })}>
                       {one.why}
                     </td>
                     <td className="amount row-actions">
@@ -1516,17 +1516,17 @@ export function SuggestedIdentifiers({
                         className="link"
                         disabled={busy || !(one.account_id ?? chosen[key])}
                         onClick={() => add.mutate(one)}
-                        aria-label={t`Add ${one.value}`}
+                        aria-label={t({ message: `Add ${one.value}`, comment: "Screen-reader name of a button on the Accounts screen" })}
                       >
-                        <Trans>Add</Trans>
+                        <Trans comment="Button on the Accounts screen: verb">Add</Trans>
                       </button>{" "}
                       <button
                         className="link"
                         disabled={busy}
                         onClick={() => ignore.mutate(one)}
-                        aria-label={t`Ignore ${one.value}`}
+                        aria-label={t({ message: `Ignore ${one.value}`, comment: "Screen-reader name of a button on the Accounts screen" })}
                       >
-                        <Trans>Ignore</Trans>
+                        <Trans comment="Button on the Accounts screen">Ignore</Trans>
                       </button>
                     </td>
                   </tr>
