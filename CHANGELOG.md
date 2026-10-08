@@ -32,6 +32,22 @@ history this repository does not have.
 
 ## Unreleased
 
+### Added
+
+- **The self-updater's core, not yet wired to anything** (#158). A new
+  top-level package, `updater/`, standard library only: the file contract
+  between the app and the updater in the shared `update` volume (requests,
+  heartbeat, status, prepare reports, history), strict request validation that
+  refuses anything but a published release newer than the running one and
+  makes no engine call when it refuses, a journal that records which step of
+  an apply has started and which updater owns it, deadlines that do not count
+  time the machine slept, and an engine client that can make only a listed set
+  of calls, negotiates the engine's API version, and refuses privileged
+  containers, host mounts and host networking whoever asks. Tested against a
+  recording fake engine on a real unix socket and `/version` answers recorded
+  from Docker Desktop and Podman. No image, compose service or screen uses it
+  yet.
+
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
