@@ -170,6 +170,7 @@ msgstr "You can pick a palette and one accent of your own. You cannot reach the 
 msgid "account types"
 msgstr "account types"
 
+#. Text on the household page
 #. placeholder {0}: count(it.category_groups)
 #: src/screens/Household.tsx
 msgid "in {0} groups"
@@ -273,6 +274,7 @@ msgstr "Open"
 msgid "What happens"
 msgstr "What happens"
 
+#. Label on the household page
 #: src/screens/Household.tsx
 msgid "People"
 msgstr "People"
@@ -514,6 +516,7 @@ msgstr "delimiter"
 msgid "Keep editing"
 msgstr "Keep editing"
 
+#. Table cell on the household page
 #: src/screens/Household.tsx
 msgid "(you)"
 msgstr "(you)"
@@ -546,7 +549,12 @@ msgstr "Skip to transactions"
 #. Column heading on the Categories screen. See GLOSSARY.md
 #. Column heading on the Payee Categorisation screen. See GLOSSARY.md
 #. Column heading on the Payees screen. See GLOSSARY.md
+#. Column heading on the household page. See GLOSSARY.md
+#. Column heading on the household page. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Payees screen. See GLOSSARY.md
+#. Column name shown beside a value on phones on the household page. See GLOSSARY.md
+#. Column name shown beside a value on phones on the household page. See GLOSSARY.md
+#. Label on the household page. See GLOSSARY.md
 #. Menu item and the name of its screen. See GLOSSARY.md
 #. Screen title on the Register screen. See GLOSSARY.md
 #: src/App.tsx
@@ -691,6 +699,7 @@ msgstr "All transactions"
 msgid "Set the category…"
 msgstr "Set the category…"
 
+#. Label on the household page
 #: src/screens/Household.tsx
 msgid "Statements reconciled"
 msgstr "Statements reconciled"
@@ -733,6 +742,7 @@ msgid "This file only. The payee’s rule is left as it is for future statements
 msgstr "This file only. The payee’s rule is left as it is for future statements."
 
 #. Column heading on the Payees screen: noun
+#. Column heading on the household page: noun
 #. Column heading on the passkeys panel: noun
 #. Label of a form field on the Accounts screen: noun
 #. Label of a form field on the Accounts screen: noun
@@ -742,6 +752,7 @@ msgstr "This file only. The payee’s rule is left as it is for future statement
 #. Label of a form field on the Categories screen: noun
 #. Label of a form field on the Payees screen: noun
 #. Label of a form field on the app's menu and frame: noun
+#. Label of a form field on the household page: noun
 #: src/App.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
@@ -1063,6 +1074,7 @@ msgstr "Check the code"
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 
+#. Text on the household page
 #: src/screens/Household.tsx
 msgid "Counting…"
 msgstr "Counting…"
@@ -1232,6 +1244,9 @@ msgstr "The server added {user} as an owner"
 msgid "Two households open in one browser look identical, and that is how a statement gets posted into the wrong one. The colour is on every screen, needs no reading, and you notice it changed before you notice anything else."
 msgstr "Two households open in one browser look identical, and that is how a statement gets posted into the wrong one. The colour is on every screen, needs no reading, and you notice it changed before you notice anything else."
 
+#. Column heading on the household page: noun, bank or cash accounts. See GLOSSARY.md
+#. Column name shown beside a value on phones on the household page: noun, bank or cash accounts. See GLOSSARY.md
+#. Label on the household page: noun, bank or cash accounts. See GLOSSARY.md
 #. Menu item and the name of its screen: noun, bank or cash accounts. See GLOSSARY.md
 #. Screen title on the Accounts screen: noun, bank or cash accounts. See GLOSSARY.md
 #. Step name in the one-time import: map the other app's accounts. See GLOSSARY.md
@@ -1323,6 +1338,7 @@ msgstr "These name one of your accounts or a member of the household, and their 
 msgid "Attach receipts"
 msgstr "Attach receipts"
 
+#. Label on the household page
 #: src/screens/Household.tsx
 msgid "Newest transaction"
 msgstr "Newest transaction"
@@ -1388,6 +1404,7 @@ msgid "Click to edit"
 msgstr "Click to edit"
 
 #. Label of a form field on the app's menu and frame
+#. Label of a form field on the household page
 #: src/App.tsx
 #: src/screens/Household.tsx
 msgid "Main currency"
@@ -2031,6 +2048,8 @@ msgstr "Plan"
 msgid "Your account"
 msgstr "Your account"
 
+#. Column heading on the household page: noun, owner or member
+#. Column name shown beside a value on phones on the household page: noun, owner or member
 #: src/screens/Household.tsx
 msgid "Role"
 msgstr "Role"
@@ -2153,6 +2172,7 @@ msgstr "Looking up your invitation…"
 msgid "Reset your sign-in"
 msgstr "Reset your sign-in"
 
+#. Heading on the household page
 #: src/screens/Household.tsx
 msgid "By currency"
 msgstr "By currency"
@@ -2329,6 +2349,7 @@ msgstr "is exactly"
 msgid "Import from a file"
 msgstr "Import from a file"
 
+#. Text on the household page
 #. placeholder {0}: count(it.accounts_closed)
 #: src/screens/Household.tsx
 msgid "{0} closed"
@@ -2347,6 +2368,7 @@ msgstr "a statement"
 msgid "You've been invited"
 msgstr "You've been invited"
 
+#. Text on the household page
 #. placeholder {0}: count(it.payee_rules - it.payee_rules_enabled)
 #: src/screens/Household.tsx
 msgid "{0} turned off"
@@ -2361,6 +2383,7 @@ msgstr "mixed currencies, not compared"
 msgid "Came from a statement. Its line key is <0>{0}</0>, which is what stops the same line being imported twice."
 msgstr "Came from a statement. Its line key is <0>{0}</0>, which is what stops the same line being imported twice."
 
+#. Label on the household page. See GLOSSARY.md
 #: src/screens/Household.tsx
 msgid "Payee rules"
 msgstr "Payee rules"
@@ -2699,6 +2722,7 @@ msgstr "This writes both rows as one act, so undoing it from History takes both 
 
 #. Label of a form field on the Accounts screen. See GLOSSARY.md
 #. Label of a form field on the Accounts screen. See GLOSSARY.md
+#. Label of a form field on the household page. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
 msgid "Note"
@@ -2718,10 +2742,12 @@ msgstr "Transfer between your own accounts"
 msgid "Bank"
 msgstr "Bank"
 
+#. Table cell on the household page
 #: src/screens/Household.tsx
 msgid "(main)"
 msgstr "(main)"
 
+#. Heading on the household page
 #: src/screens/Household.tsx
 msgid "Colour"
 msgstr "Colour"
@@ -3168,6 +3194,7 @@ msgstr "Amount leaving ({0})"
 msgid "Description"
 msgstr "Description"
 
+#. Label on the household page. See GLOSSARY.md
 #. Menu item and the name of its screen. See GLOSSARY.md
 #. Screen title on the Categories screen. See GLOSSARY.md
 #. Step name in the one-time import: map the other app's categories. See GLOSSARY.md
@@ -3188,6 +3215,7 @@ msgstr "The one on screen goes to the inbox, and the new file takes its place. O
 msgid "type to search — leave empty for none"
 msgstr "type to search — leave empty for none"
 
+#. Label on the household page
 #: src/screens/Household.tsx
 msgid "Countries"
 msgstr "Countries"
@@ -3478,6 +3506,7 @@ msgstr "outflow column"
 #. Column name shown beside a value on phones on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
+#. Label on the household page: noun, who was paid or who paid. See GLOSSARY.md
 #. Screen title on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
@@ -3630,6 +3659,7 @@ msgid "fee column"
 msgstr "fee column"
 
 #. Column heading on the Accounts screen: noun. See GLOSSARY.md
+#. Column heading on the household page: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
 #. Text on the Register screen: noun. See GLOSSARY.md
@@ -3895,6 +3925,7 @@ msgstr "No money in between those dates. Widen them above — a repayment can ta
 msgid "Work expenses"
 msgstr "Work expenses"
 
+#. Label on the household page
 #: src/screens/Household.tsx
 msgid "Oldest transaction"
 msgstr "Oldest transaction"
@@ -4176,6 +4207,7 @@ msgstr "Larger text in the table"
 #. Button on the Categories screen: verb
 #. Button on the Categories screen: verb
 #. Button on the Categories screen: verb
+#. Button on the household page: verb
 #. Button on the passkeys panel: verb
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
@@ -4270,6 +4302,8 @@ msgid "Latest 6 months"
 msgstr "Latest 6 months"
 
 #. Button on the Accounts screen
+#. Heading on the household page
+#. Text on the household page
 #. Text on the shared controls
 #: src/components/bits.tsx
 #: src/screens/Accounts.tsx
@@ -4591,6 +4625,7 @@ msgstr "Remove {0}"
 msgid "Create the key"
 msgstr "Create the key"
 
+#. Label on the household page: noun
 #: src/screens/Household.tsx
 msgid "Currencies"
 msgstr "Currencies"
@@ -4974,6 +5009,8 @@ msgstr "Notes and coins in a wallet or a tin. Nothing imports into it — you en
 msgid "Close"
 msgstr "Close"
 
+#. Heading on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md
+#. Label on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md
 #. Menu item and the name of its screen: noun, photos or PDFs of receipts. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/Household.tsx
