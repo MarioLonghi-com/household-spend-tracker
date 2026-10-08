@@ -207,6 +207,12 @@ def now_iso(now: float) -> str:
     return dt.datetime.fromtimestamp(now, dt.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
+def iso_from_us(us: int) -> str:
+    """`now_iso` from whole microseconds, exactly: no float on the way."""
+    whole = dt.datetime.fromtimestamp(us // 1_000_000, dt.UTC).replace(microsecond=us % 1_000_000)
+    return whole.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
 def parse_iso(value: object) -> float | None:
     if not isinstance(value, str):
         return None
@@ -240,7 +246,7 @@ class Place:
     answer_seconds: float = ANSWER_SECONDS
     sessions: dict[str, Session] = field(default_factory=dict)
     lock: threading.Lock = field(default_factory=threading.Lock)
-    _last_sent: float = 0.0
+    _last_sent_us: int = 0
 
     @property
     def recovery_dir(self) -> Path:
@@ -281,14 +287,20 @@ class Place:
         """
         with self.lock:
             # Each request's time is its own, to the microsecond: it is how
-            # its answer is told from the last one's.
-            stamp = max(self.clock(), self._last_sent + 0.000001)
-            self._last_sent = stamp
+            # its answer is told from the last one's. Kept as a whole number
+            # of microseconds and formatted from that, never from a float:
+            # near today's epoch a float holds a microsecond only to about a
+            # quarter of one, so `last + 0.000001` formatted to the same
+            # string about one time in twenty when the clock had not moved,
+            # and the page then took the previous request's answer for this
+            # one's (a right code shown as the wrong code's refusal).
+            stamp_us = max(round(self.clock() * 1_000_000), self._last_sent_us + 1)
+            self._last_sent_us = stamp_us
             request = {
                 "protocol": 1,
                 "id": update_id,
                 "kind": kind,
-                "created_at": now_iso(stamp),
+                "created_at": iso_from_us(stamp_us),
                 "code": code,
                 **fields,
             }
