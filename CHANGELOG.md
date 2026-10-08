@@ -735,6 +735,33 @@ published image as what `compose.yaml` runs.
 
 ### Documentation
 
+- **Self-update, for operators and owners.** `deploy/UPGRADING.md` makes the
+  browser the default way to update a container install -- prepare,
+  confirm with the recovery code, what happens, the automatic rollback, the
+  pin in `.env`, update backups, going back by hand -- and keeps the
+  terminal drill for checkouts and as the fallback, with screenshots of the
+  Updates section. `deploy/DOCKER.md` covers the updater on a server
+  (`SPENDTRACKER_SOCKET_GID`, the project directory and `.env` writable by
+  the socket's group, the pre-update hook), Docker Desktop and Podman Desktop,
+  Podman (`x-podman: { in_pod: false }`, `label=disable`, `podman-restart`
+  and lingering, the updater's user on each engine), Enhanced Container
+  Isolation's allowlist, and where the setup token is without a terminal.
+  `deploy/TROUBLESHOOTING.md` has the recovery page, the updater that is
+  not running, an updater the engine has outgrown, and every failure by what
+  the owner sees. `SECURITY.md` says what the updater may and may not do,
+  how images are verified, and suggests an egress firewall. The README says
+  what to do when the first release with the updater finds its package
+  private. Placeholders mark where the macOS and Windows first-open
+  screenshots go. (#171)
+
+- **`deploy/tailnet/check.sh` accepts a `.env` of mode 660** shared with the
+  socket's group, which the updater needs to pin a release; 600 still
+  passes. (#171)
+
+- **A rootful Podman machine, Podman Desktop's default, is a confirmed
+  engine** in the updater's per-engine rules: the system `podman-restart`
+  unit and the default socket, as the engine spike observed. (#171)
+
 - **The README shows the register**, from the demo household `make seed`
   creates, so every name and figure in it is invented. There is also a
   `CITATION.cff`. The data-hygiene test now lets screenshots live under

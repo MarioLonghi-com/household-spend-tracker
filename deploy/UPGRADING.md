@@ -77,6 +77,14 @@ and nothing is fetched until the owner presses a button.
 7. Press *Prepare X.Y.Z*. Wait. The app stays up. Nothing in the ledger
    changes.
 
+![The Updates section after a check: the updater it runs in, 0.9.0 offered with Prepare, and its notes](../docs/screenshots/updates-check-desktop.png)
+
+<details><summary>The same at a phone's width</summary>
+
+![The Updates section after a check, at a phone's width](../docs/screenshots/updates-check-mobile.png)
+
+</details>
+
 ### Confirm
 
 8. Read the confirmation. Read the line `rolling back:` for each migration.
@@ -86,6 +94,8 @@ and nothing is fetched until the owner presses a button.
 11. Tick *I have saved the recovery code*.
 12. Type your password and a code from your authenticator.
 13. Press *Update to X.Y.Z*.
+
+![The confirmation: what runs now and what will run, the origin, the migrations with their rolling-back lines, the box for the lossy one, the recovery code, and the password and code](../docs/screenshots/updates-confirm-desktop.png)
 
 ### Wait
 
