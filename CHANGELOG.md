@@ -286,7 +286,6 @@ history this repository does not have.
   `updater-protocol` label. `deploy/tailnet/check.sh` checks the updater:
   outside the sidecar's namespace, the only holder of the socket, able to
   reach it, and whether an update is in progress.
-
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
