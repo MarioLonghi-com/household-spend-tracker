@@ -128,6 +128,13 @@ MANIFEST_TYPES = (
     "application/vnd.oci.image.index.v1+json",
     "application/vnd.oci.image.manifest.v1+json",
 )
+#: What a release tag may resolve to (P2): an OCI index or manifest, or the
+#: Docker schema 2 equivalents a single-platform push still produces.
+RESOLVE_TYPES = (
+    *MANIFEST_TYPES,
+    "application/vnd.docker.distribution.manifest.list.v2+json",
+    "application/vnd.docker.distribution.manifest.v2+json",
+)
 
 
 class Refused(Exception):
@@ -252,9 +259,10 @@ class Registry:
             raise Refused("attestation", "the registry gave no pull token")
         return token
 
-    def manifest(self, path: str, reference: str, token: str) -> bytes:
+    def manifest(self, path: str, reference: str, token: str,
+                 types: tuple[str, ...] = MANIFEST_TYPES) -> bytes:
         return self._get(f"{self.base}/v2/{path}/manifests/{reference}", token=token,
-                         accept=", ".join(MANIFEST_TYPES), cap=MAX_MANIFEST)
+                         accept=", ".join(types), cap=MAX_MANIFEST)
 
     def blob(self, path: str, digest: str, token: str) -> bytes:
         return self._get(f"{self.base}/v2/{path}/blobs/{digest}", token=token, accept=None,
@@ -314,6 +322,76 @@ def fetch_bundles(repository: str, digest: str, registry: Registry | None = None
             raise Refused("attestation", "the bundle's layer has no digest")
         bundles.append(_by_digest(registry.blob(path, layer, token), layer, "the bundle"))
     return bundles
+
+
+# --------------------------------------------------------------------------- #
+# Resolving a release to a digest, without pulling (4.4 P2, P3)
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(frozen=True)
+class Resolved:
+    """What a release tag names: the digest to verify and pull, and how big it is."""
+
+    repository: str
+    version: str
+    #: The index digest for a multi-arch release (C6), else the manifest's.
+    digest: str
+    #: Compressed bytes of the platform image the engine would pull: its
+    #: layers and config, from the manifest. A registry says nothing of the
+    #: unpacked size; `updater.prepare` estimates that from this.
+    size: int
+    platform: str
+
+
+def resolve(
+    repository: str, version: str, arch: str = "amd64", registry: Registry | None = None
+) -> Resolved:
+    """The digest the tag `version` names in `repository`, and its size, without pulling.
+
+    The digest is the hash of the manifest the registry returned, computed
+    here; for an index, the `linux/<arch>` entry's manifest is read by digest
+    and hashed too. Raises `Refused` (`unreachable` when the registry cannot
+    be reached).
+    """
+    path = _repository_path(repository)
+    _check_version(version)
+    registry = registry or Registry()
+    token = registry.token(path)
+    body = registry.manifest(path, version, token, RESOLVE_TYPES)
+    digest = "sha256:" + hashlib.sha256(body).hexdigest()
+    doc = _json(body, "the release's manifest")
+    if not isinstance(doc, dict):
+        raise Refused("manifest", "the release's manifest is not an object")
+    platform = "single"
+    if isinstance(doc.get("manifests"), list):
+        entries = [
+            m
+            for m in doc["manifests"]
+            if isinstance(m, dict)
+            and isinstance(m.get("platform"), dict)
+            and m["platform"].get("os") == "linux"
+            and m["platform"].get("architecture") == arch
+            and isinstance(m.get("digest"), str)
+            and DIGEST.fullmatch(m["digest"])
+        ]
+        if not entries:
+            raise Refused("platform", f"the release has no linux/{arch} image")
+        inner = entries[0]["digest"]
+        doc = _json(
+            _by_digest(
+                registry.manifest(path, inner, token, RESOLVE_TYPES), inner, "the platform manifest"
+            ),
+            "the platform manifest",
+        )
+        platform = f"linux/{arch}"
+        if not isinstance(doc, dict):
+            raise Refused("manifest", "the platform manifest is not an object")
+    size = 0
+    for part in [doc.get("config"), *(doc.get("layers") or [])]:
+        if isinstance(part, dict) and isinstance(part.get("size"), int):
+            size += part["size"]
+    return Resolved(repository=repository, version=version, digest=digest, size=size, platform=platform)
 
 
 # --------------------------------------------------------------------------- #
