@@ -58,7 +58,10 @@ def is_transfer_leg(txn: Transaction) -> bool:
 
 def _assert_editable(txn: Transaction) -> None:
     if txn.cleared is ClearedState.reconciled:
-        raise Conflict("that transaction is locked; set it back to cleared before editing it")
+        raise Conflict(
+            "that transaction is locked; set it back to cleared before editing it",
+            code="transaction.locked",
+        )
 
 
 def get_for_household(session: Session, transaction_id: str, household_id: str) -> Transaction:
@@ -68,7 +71,7 @@ def get_for_household(session: Session, transaction_id: str, household_id: str) 
         )
     ).scalar_one_or_none()
     if txn is None:
-        raise NotFound("no such transaction")
+        raise NotFound("no such transaction", code="transaction.not_found")
     return txn
 
 
@@ -104,7 +107,9 @@ def create(
       pointed at before it is written.
     """
     if payee is not None and payee.household_id != account.household_id:
-        raise ValidationError("that payee belongs to a different household")
+        raise ValidationError(
+            "that payee belongs to a different household", code="payee.other_household"
+        )
 
     # UNSET, not None: "no category was given, work one out from the payee" and
     # "deliberately leave this uncategorised" are different requests, and only
@@ -112,7 +117,9 @@ def create(
     if category is UNSET:
         category = category_service.decide(session, payee)
     if category is not None and category.household_id != account.household_id:
-        raise ValidationError("that category belongs to a different household")
+        raise ValidationError(
+            "that category belongs to a different household", code="category.other_household"
+        )
 
     if import_id is not None and not import_id_checked:
         clash = session.execute(
@@ -121,7 +128,10 @@ def create(
             )
         ).scalar_one_or_none()
         if clash is not None:
-            raise Conflict("that statement line is already in this account")
+            raise Conflict(
+                "that statement line is already in this account",
+                code="transaction.import_line_exists",
+            )
 
     txn = Transaction(
         household_id=account.household_id,
@@ -183,18 +193,22 @@ def update(
         txn.memo = memo
     if payee is not UNSET:
         if payee is not None and payee.household_id != txn.household_id:
-            raise ValidationError("that payee belongs to a different household")
+            raise ValidationError(
+                "that payee belongs to a different household", code="payee.other_household"
+            )
         txn.payee_id = payee.id if payee else None
     if category is not UNSET:
         if category is not None and category.household_id != txn.household_id:
-            raise ValidationError("that category belongs to a different household")
+            raise ValidationError(
+                "that category belongs to a different household", code="category.other_household"
+            )
         # A transfer is not spending, which is why linking clears the category
         # (`transfers.link`). Letting one be set again afterwards made the leg
         # count as spending in every report, and broke "a categorised row is not
         # a transfer" (#124, #125). Emptying one is still allowed: that is only
         # ever a leg being put right.
         if category is not None and is_transfer_leg(txn):
-            raise ValidationError(TRANSFER_HAS_NO_CATEGORY)
+            raise ValidationError(TRANSFER_HAS_NO_CATEGORY, code="transfer.has_no_category")
         txn.category_id = category.id if category else None
     if cleared is not None:
         txn.cleared = ClearedState(cleared)
@@ -205,9 +219,13 @@ def update(
         # rather than silently producing one.
         flips = (amount > 0) != (txn.amount > 0) or amount == 0
         if flips and txn.reimbursement is not None:
-            raise ValidationError(SIGN_CHANGE_ON_WORK_EXPENSE)
+            raise ValidationError(
+                SIGN_CHANGE_ON_WORK_EXPENSE, code="reimbursement.sign_change_on_work_expense"
+            )
         if flips and is_payment(session, txn):
-            raise ValidationError(SIGN_CHANGE_ON_PAYMENT)
+            raise ValidationError(
+                SIGN_CHANGE_ON_PAYMENT, code="reimbursement.sign_change_on_payment"
+            )
         txn.amount = amount
         _mirror(session, txn, amount=amount)
     if date is not None:
@@ -308,9 +326,12 @@ def set_reimbursement(
     if linking:
         _assert_settleable(txn, settled_by)
         if final is ReimbursementState.written_off:
-            raise Conflict(WRITTEN_OFF_CANNOT_BE_PAID)
+            raise Conflict(WRITTEN_OFF_CANNOT_BE_PAID, code="reimbursement.written_off_cannot_be_paid")
         if state is None:
-            raise ValidationError(NOT_A_WORK_EXPENSE_CANNOT_BE_PAID)
+            raise ValidationError(
+                NOT_A_WORK_EXPENSE_CANNOT_BE_PAID,
+                code="reimbursement.not_a_work_expense_cannot_be_paid",
+            )
         if final is None:
             # Linking a row nobody had flagged is the common way round: the
             # payment is found first and worked back from. It is the flag.
@@ -321,7 +342,9 @@ def set_reimbursement(
         and txn.reimbursed_by_id is not None
         and not unlinking
     ):
-        raise Conflict(PAID_CANNOT_BE_WRITTEN_OFF)
+        raise Conflict(
+            PAID_CANNOT_BE_WRITTEN_OFF, code="reimbursement.paid_cannot_be_written_off"
+        )
 
     if state is not UNSET:
         txn.reimbursement = state
@@ -349,12 +372,15 @@ def _assert_claimable(session: Session, txn: Transaction, *, payments: set[str] 
     repayment makes every figure in the report ambiguous.
     """
     if is_transfer_leg(txn):
-        raise ValidationError(TRANSFER_IS_NOT_A_WORK_EXPENSE)
+        raise ValidationError(
+            TRANSFER_IS_NOT_A_WORK_EXPENSE, code="reimbursement.transfer_is_not_a_work_expense"
+        )
     if txn.amount >= 0:
-        raise ValidationError(NOT_MONEY_OUT)
+        raise ValidationError(NOT_MONEY_OUT, code="reimbursement.not_money_out")
     if (txn.id in payments) if payments is not None else is_payment(session, txn):
         raise ValidationError(
-            "this row paid work expenses back, so it cannot be one itself"
+            "this row paid work expenses back, so it cannot be one itself",
+            code="reimbursement.payment_cannot_be_expense",
         )
 
 
@@ -366,19 +392,28 @@ def _assert_settleable(txn: Transaction, settlement: Transaction) -> None:
     shown they can see it, so they do not learn that it exists.
     """
     if settlement.household_id != txn.household_id:
-        raise NotFound("no such transaction")
+        raise NotFound("no such transaction", code="transaction.not_found")
     if settlement.id == txn.id:
-        raise ValidationError("a transaction cannot reimburse itself")
+        raise ValidationError(
+            "a transaction cannot reimburse itself", code="reimbursement.reimburses_itself"
+        )
     if is_transfer_leg(settlement):
-        raise ValidationError("a transfer between your own accounts is not a reimbursement")
+        raise ValidationError(
+            "a transfer between your own accounts is not a reimbursement",
+            code="reimbursement.transfer_is_not_a_reimbursement",
+        )
     # Before the sign: a flagged row is money going out, so it would otherwise
     # be refused as "not money arriving", which is true and misses the point.
     if settlement.reimbursement is not None:
         raise ValidationError(
-            "that row is itself a work expense, so it cannot also be what paid one back"
+            "that row is itself a work expense, so it cannot also be what paid one back",
+            code="reimbursement.settlement_is_work_expense",
         )
     if settlement.amount <= 0:
-        raise ValidationError("a reimbursement is money arriving, so pick money coming in")
+        raise ValidationError(
+            "a reimbursement is money arriving, so pick money coming in",
+            code="reimbursement.not_money_in",
+        )
 
 
 def claimable(session: Session, txn: Transaction, *, payments: set[str] | None = None) -> bool:
@@ -420,7 +455,7 @@ def link_reimbursements(
             _assert_settleable(txn, settlement)
             _assert_claimable(session, txn, payments=payments)
             if txn.reimbursement is ReimbursementState.written_off:
-                raise Conflict(WRITTEN_OFF_CANNOT_BE_PAID)
+                raise Conflict(WRITTEN_OFF_CANNOT_BE_PAID, code="reimbursement.written_off_cannot_be_paid")
         except NotFound:
             raise
         except (ValidationError, Conflict) as refused:
@@ -501,7 +536,8 @@ def _mirror(session: Session, txn: Transaction, *, amount: int | None = None, da
     destination = session.get(Account, other.account_id)
     if source and destination and source.currency != destination.currency:
         raise ValidationError(
-            "edit each leg of a cross-currency transfer on its own; we will not re-derive a rate"
+            "edit each leg of a cross-currency transfer on its own; we will not re-derive a rate",
+            code="transfer.edit_cross_currency_leg",
         )
     other.amount = -txn.amount
 
@@ -526,9 +562,13 @@ def create_transfer(
     if source.id == destination.id:
         raise ValidationError("an account cannot transfer to itself", code="transfer.same_account")
     if source.household_id != destination.household_id:
-        raise ValidationError("those accounts are in different households")
+        raise ValidationError(
+            "those accounts are in different households", code="transfer.different_households"
+        )
     if amount <= 0:
-        raise ValidationError("a transfer amount must be positive")
+        raise ValidationError(
+            "a transfer amount must be positive", code="transfer.amount_not_positive"
+        )
 
     rate: str | None = None
     if source.currency != destination.currency:
@@ -540,14 +580,19 @@ def create_transfer(
                 params={"from_currency": source.currency, "to_currency": destination.currency},
             )
         if to_amount <= 0:
-            raise ValidationError("the amount arriving must be positive")
+            raise ValidationError(
+                "the amount arriving must be positive", code="transfer.arriving_not_positive"
+            )
         rate = str(
             (Decimal(to_amount) / minor_factor(destination.currency))
             / (Decimal(amount) / minor_factor(source.currency))
         )
     else:
         if to_amount is not None and to_amount != amount:
-            raise ValidationError("both sides of a same-currency transfer must match")
+            raise ValidationError(
+                "both sides of a same-currency transfer must match",
+                code="transfer.sides_differ",
+            )
         to_amount = amount
 
     state = ClearedState(cleared)
@@ -594,7 +639,8 @@ def duplicate(session: Session, txn: Transaction, *, date: Date | None = None) -
     """
     if txn.transfer_transaction_id:
         raise ValidationError(
-            "make a new transfer from the register, not a copy of one leg of this one"
+            "make a new transfer from the register, not a copy of one leg of this one",
+            code="transfer.duplicate_leg",
         )
 
     copy = Transaction(
@@ -674,24 +720,30 @@ def split(
     if txn.transfer_account_id is not None:
         raise ValidationError(
             "this is one leg of a transfer, which is a single movement of money "
-            "recorded twice. Split the transfer's other side too, or undo it first."
+            "recorded twice. Split the transfer's other side too, or undo it first.",
+            code="split.transfer_leg",
         )
     # Splitting a payment deletes it, and deleting it releases every expense it
     # repaid back to outstanding -- logged, but not what anybody splitting a
     # payment meant. Which part repaid which expense is a person's call.
     if is_payment(session, txn):
-        raise ValidationError(SPLIT_A_PAYMENT)
+        raise ValidationError(SPLIT_A_PAYMENT, code="split.repaid_work_expenses")
     if not MIN_PARTS <= len(parts) <= MAX_PARTS:
-        raise ValidationError(f"a split is between {MIN_PARTS} and {MAX_PARTS} parts")
+        raise ValidationError(
+            f"a split is between {MIN_PARTS} and {MAX_PARTS} parts",
+            code="split.part_count",
+            params={"min": MIN_PARTS, "max": MAX_PARTS},
+        )
     if any(part.amount == 0 for part in parts):
-        raise ValidationError("a part of a split cannot be zero")
+        raise ValidationError("a part of a split cannot be zero", code="split.zero_part")
 
     # Every part carries the flag, so a part of a work expense that is money
     # coming in would be a work expense that is not money out.
     if txn.reimbursement is not None and any(part.amount > 0 for part in parts):
         raise ValidationError(
             "every part of a work expense has to be money going out, because each "
-            "part stays a work expense"
+            "part stays a work expense",
+            code="split.work_expense_money_in",
         )
 
     total = sum(part.amount for part in parts)
@@ -709,7 +761,9 @@ def split(
         )
     for part in parts:
         if part.category is not None and part.category.household_id != txn.household_id:
-            raise ValidationError("that category belongs to a different household")
+            raise ValidationError(
+                "that category belongs to a different household", code="category.other_household"
+            )
 
     group = split_id or new_id()
     # Read off before the original goes, so the parts carry what it carried.

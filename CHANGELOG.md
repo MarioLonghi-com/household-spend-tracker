@@ -47,6 +47,13 @@ history this repository does not have.
 
 ### Changed
 
+- **A hundred more refusals carry a code for translation.** Transactions,
+  transfers, splits and work expenses, payees and their naming rules,
+  categories, money and the profile panel now answer with a stable `code`
+  and raw `params` beside the same English `detail`, and the client has a
+  catalog message for each. The English a person or an agent reads is
+  unchanged, byte for byte, and agents still get no codes. (#57)
+
 - **A fresh install starts without `SPENDTRACKER_AUTO_MIGRATE=1`.** A first
   `docker compose up -d` against a new volume used to be refused until you
   passed the flag once from a terminal. A database with no tables at all --
@@ -657,7 +664,6 @@ published image as what `compose.yaml` runs.
   holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
   each language uses, and how each writes money and dates. Nothing in the app
   changes. (#174)
-
 ## 0.7.1 — 2026-10-05
 
 **Reversible: none** — no migration in this release. To go back, check out

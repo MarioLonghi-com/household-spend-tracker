@@ -76,9 +76,17 @@ def to_minor(value: str | int | float | Decimal, currency: str) -> int:
         try:
             dec = Decimal(str(value).strip())
         except (InvalidOperation, AttributeError) as exc:  # pragma: no cover - defensive
-            raise MoneyError(f"not a monetary value: {value!r}") from exc
+            raise MoneyError(
+                f"not a monetary value: {value!r}",
+                code="money.not_a_value",
+                params={"value": str(value)},
+            ) from exc
     if not dec.is_finite():
-        raise MoneyError(f"not a monetary value: {value!r}")
+        raise MoneyError(
+            f"not a monetary value: {value!r}",
+            code="money.not_a_value",
+            params={"value": str(value)},
+        )
     try:
         scaled = dec * minor_factor(currency)
         minor = int(scaled.quantize(Decimal(1), rounding=ROUND_HALF_UP))
@@ -86,7 +94,11 @@ def to_minor(value: str | int | float | Decimal, currency: str) -> int:
         # An amount too large to represent is one bad row, not a broken file.
         # Raising MoneyError makes it a 422 that the importer can turn into a
         # rejected line, rather than a 500 that loses the whole statement.
-        raise MoneyError(f"{value!r} is too large to record as money") from exc
+        raise MoneyError(
+            f"{value!r} is too large to record as money",
+            code="money.too_large",
+            params={"value": str(value)},
+        ) from exc
 
     # Python integers are unbounded, so nothing above raises -- the failure
     # surfaced later, as an OverflowError out of the SQLite driver, which took
@@ -94,7 +106,11 @@ def to_minor(value: str | int | float | Decimal, currency: str) -> int:
     # a 64-bit integer, so that is where the limit actually is; say so here,
     # where it is still one rejected row with a reason.
     if not MIN_MINOR <= minor <= MAX_MINOR:
-        raise MoneyError(f"{value!r} is too large to record as money")
+        raise MoneyError(
+            f"{value!r} is too large to record as money",
+            code="money.too_large",
+            params={"value": str(value)},
+        )
     return minor
 
 
@@ -222,11 +238,15 @@ def from_milliunits(milliunits: int, currency: str) -> int:
     step = 10 ** (MILLIUNIT_EXPONENT - places)
     if milliunits % step:
         raise MoneyError(
-            f"{milliunits} thousandths is not a whole number of {currency.upper()} minor units"
+            f"{milliunits} thousandths is not a whole number of {currency.upper()} minor units",
+            code="money.not_whole_minor_units",
+            params={"milliunits": milliunits, "currency": currency.upper()},
         )
     minor = milliunits // step
     if not MIN_MINOR <= minor <= MAX_MINOR:
-        raise MoneyError("that amount is too large to record as money")
+        raise MoneyError(
+            "that amount is too large to record as money", code="money.amount_too_large"
+        )
     return minor
 
 
