@@ -1,7 +1,7 @@
 {
   "name": "household-spend-tracker-client",
   "private": true,
-  "version": "0.7.1",
+  "version": "0.8.0",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "engines": {
@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
-    "extract": "lingui extract --clean",
+    "extract": "lingui extract --clean --workers 1",
     "e2e": "npm run build && playwright test",
     "e2e:ui": "npm run build && playwright test --ui"
   },
