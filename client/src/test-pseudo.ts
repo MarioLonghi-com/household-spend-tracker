@@ -50,5 +50,7 @@ export function untranslated(root: HTMLElement): string[] {
     .map((text) => text.replace(/\S+@\S+/g, " "))
     .flatMap((text) => text.split(/[\s.,;:!?()"'…·—–/-]+/))
     // A currency code is data, in every language.
-    .filter((word) => /^[A-Za-z]{3,}$/.test(word) && !/^[A-Z]{3}$/.test(word) && !DATA.has(word));
+    // Two letters and up: "of", "to" and "in" are English too. A code in
+    // capitals (EUR, ES) is data.
+    .filter((word) => /^[A-Za-z]{2,}$/.test(word) && !/^[A-Z]{2,3}$/.test(word) && !DATA.has(word));
 }
