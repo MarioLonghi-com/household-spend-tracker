@@ -677,3 +677,110 @@ def test_step_10_is_skipped_when_the_running_updater_is_newer(tmp_path):
             and "The updater stays on 0.9.0, which is newer." in record["notes"]
         )
         assert pin.read(w.project_dir)[pin.UPDATER_KEY] == f"{UPD}:{C}@{digest(UPD, C)}"
+
+
+# --------------------------------------------------------------------------- #
+# E7 (#169): the parked app started by hand
+# --------------------------------------------------------------------------- #
+
+
+def policy_of(w: World, cid: str) -> dict:
+    return w.fake.inspect_of(w.fake.containers[cid])["HostConfig"]["RestartPolicy"]
+
+
+def updates(w: World) -> list:
+    return [c for c in w.fake.calls if c.bare.endswith("/update")]
+
+
+def started_by_hand_during_the_drill(w: World) -> None:
+    """Docker Desktop's Start button on `-previous`, while the drill runs: the
+    engine starts it whatever its restart policy, and it holds its port."""
+
+    def start_it(_drill):
+        w.fake.set_state(w.fake.containers[w.app_id], "running")
+
+    w.on_drill = start_it
+
+
+def test_e7_the_parked_app_is_parked_with_restart_policy_no_and_the_journal_keeps_its_own(world):
+    req, record = apply(world)
+    assert record["state"] == "succeeded"
+    parked = world.by_name(f"{world.app_name}-previous")
+    assert parked["Id"] == world.app_id and parked["State"] == "exited"
+    assert policy_of(world, world.app_id) == {"Name": "no"}
+    assert [c.body for c in updates(world)] == [{"RestartPolicy": {"Name": "no"}}]
+    ctx = world.journal(req["id"]).context
+    assert ctx["previous_restart_policy"] == {"Name": "unless-stopped"}
+    assert ctx["restart_policy_parked"] is True
+
+
+def test_e7_a_previous_started_by_hand_holding_the_port_is_stopped_once_and_b_starts(world):
+    started_by_hand_during_the_drill(world)
+    req, record = apply(world)
+    assert record["state"] == "succeeded", record
+    # E1 holds: B runs under the name, A is parked, stopped, with policy no.
+    new = world.fake.inspect_of(the_app(world))
+    assert new["Config"]["Image"] == ref(APP, B) and new["State"]["Running"]
+    assert world.ledger.stamp == B and world.running_apps() == [the_app(world)]
+    assert world.fake.containers[world.app_id]["State"] == "exited"
+    assert policy_of(world, world.app_id) == {"Name": "no"}
+    # Once: the first start was refused for the port, the second went through.
+    starts = [c for c in world.fake.calls if c.bare == f"/containers/{new['Id']}/start"]
+    assert len(starts) == 2 and len(creates(world, world.app_name)) == 1
+    assert any("started while the update ran" in n for n in record["notes"])
+    assert world.journal(req["id"]).context["previous_stopped_for_new"] is True
+    world.no_running_app_at_a_mismatched_stamp()
+
+
+def test_e7_the_retry_is_bounded_then_rolled_back_with_the_restart_policy_put_back(world):
+    started_by_hand_during_the_drill(world)
+    # The port stays taken for B's app whatever is stopped: something else holds it.
+    refused = []
+
+    def taken(c):
+        if world.version_of(c) == B and eng.ROLE_LABEL not in c["Labels"]:
+            refused.append(c["Id"])
+            return "127.0.0.1:8848"
+        return None
+
+    world.fake._port_taken = taken
+    req, record = apply(world)
+    assert record["state"] == "rolled_back" and record["failed_step"] == "7"
+    assert "the new version did not start" in record["sentence"]
+    # Two starts of the one B container, then the rollback: no third.
+    assert len(refused) == 2 and len(set(refused)) == 1 and len(creates(world, world.app_name)) == 1
+    # A is home, running, with its own restart policy back.
+    assert the_app(world)["Id"] == world.app_id and the_app(world)["State"] == "running"
+    assert policy_of(world, world.app_id) == {"Name": "unless-stopped"}
+    assert [c.body["RestartPolicy"]["Name"] for c in updates(world)] == ["no", "unless-stopped"]
+    assert world.journal(req["id"]).context["restart_policy_parked"] is False
+
+
+def test_e7_any_rollback_puts_the_previous_restart_policy_back(world):
+    world.broken.add(B)
+    _, record = apply(world)
+    assert record["state"] == "rolled_back"
+    assert the_app(world)["Id"] == world.app_id
+    assert policy_of(world, world.app_id) == {"Name": "unless-stopped"}
+
+
+def test_e7_in_the_sidecar_layout_a_previous_answering_in_the_namespace_is_stopped_and_b_recreated(tmp_path):
+    with World(tmp_path, layout="sidecar") as w:
+        started_by_hand_during_the_drill(w)
+        req, record = apply(w)
+        assert record["state"] == "succeeded", record
+        assert w.version_of(the_app(w)) == B and w.running_apps() == [the_app(w)]
+        assert w.fake.containers[w.app_id]["State"] == "exited"
+        assert policy_of(w, w.app_id) == {"Name": "no"}
+        assert len(creates(w, w.app_name)) == 2
+        assert w.journal(req["id"]).context["previous_stopped_for_new"] is True
+
+
+def test_e7_an_engine_that_cannot_change_a_restart_policy_is_noted_and_the_update_goes_on(world):
+    world.fake.no_update = True
+    started_by_hand_during_the_drill(world)
+    req, record = apply(world)
+    assert record["state"] == "succeeded"
+    assert any("could not be set to `no`" in n for n in record["notes"])
+    assert "restart_policy_parked" not in world.journal(req["id"]).context
+    assert world.fake.containers[world.app_id]["State"] == "exited"

@@ -23,6 +23,12 @@ On top of the list:
 - **Images are only this repository's two**, and pulled by digest.
 - **The sidecar is never stopped, started, renamed or removed**, and its only
   exec is `wget`.
+- **`update` changes a restart policy and nothing else**, and only the app's:
+  the body is exactly `{"RestartPolicy": {...}}` (`guard_update`), checked at
+  the one way out as well as by the method, and the container must be the
+  project's `app` service, not a one-off. It parks the stopped app with
+  restart policy `no` at step 3, so a `-previous` started by hand does not
+  keep coming back, and puts the original back on a rollback (4.2, #169).
 - **Create bodies come in named shapes (6.2).** A container carrying
   `com.docker.compose.oneoff=True` is one of the updater's own one-offs and
   must say which (`ROLE_LABEL`, one of `ONEOFF_ROLES`): the drill, the check,
@@ -132,6 +138,10 @@ REQUEST_LABEL = f"{_LABEL_NS}.updater-request"
 LEDGER_ROLES = ("check", "drill", "restore", "measure", "find-backup", "prune")
 #: Every role a one-off may have: those, the port probe and the maintenance page.
 ONEOFF_ROLES = (*LEDGER_ROLES, "probe", "placard")
+#: The compose service whose restart policy `update` may change, under either scheme (S5).
+APP_SERVICE = "app"
+SERVICE_LABELS = ("com.docker.compose.service", "io.podman.compose.service")
+RESTART_POLICIES = ("no", "always", "unless-stopped", "on-failure")
 
 
 @dataclass(frozen=True)
@@ -156,6 +166,9 @@ ENDPOINTS: tuple[Endpoint, ...] = (
     Endpoint("start", "POST", "/containers/{id}/start", True),
     Endpoint("stop", "POST", "/containers/{id}/stop", True),
     Endpoint("rename", "POST", "/containers/{id}/rename", True),
+    # The restart policy of the app's container, and nothing else (#169):
+    # `guard_update` refuses any other field before a byte is sent.
+    Endpoint("update", "POST", "/containers/{id}/update", True),
     Endpoint("remove", "DELETE", "/containers/{id}", True),
     Endpoint("exec_create", "POST", "/containers/{id}/exec", True),
     Endpoint("exec_start", "POST", "/exec/{id}/start", True),
@@ -356,6 +369,8 @@ class EngineClient:
         if endpoint is None:
             raise NotAllowed(f"{method} {path} is not a call this updater makes.")
         self._permitted(endpoint)
+        if endpoint.name == "update":
+            guard_update(body)
         if endpoint.mutating and not _VERSION_PREFIX.fullmatch(path):
             raise NotAllowed(f"{method} {path} would be an unversioned mutating call.")
         target = path + ("?" + urlencode(query, doseq=True) if query else "")
@@ -493,6 +508,18 @@ class EngineClient:
         c = self._resolve(ref)
         self._not_sidecar(c, "renames")
         self._call("rename", query={"name": new_name}, id=c["Id"])
+
+    def set_restart_policy(self, ref: str, policy: Mapping) -> None:
+        """The app container's restart policy, and nothing else about it (#169)."""
+        body = {"RestartPolicy": dict(policy)}
+        guard_update(body)
+        c = self._resolve(ref)
+        self._not_sidecar(c, "updates")
+        labels = c.get("Labels") or {}
+        service = next((labels[k] for k in SERVICE_LABELS if isinstance(labels.get(k), str)), None)
+        if service != APP_SERVICE or labels.get(ONEOFF_LABEL) == "True":
+            raise NotAllowed("Only the app's own container has its restart policy changed.")
+        self._call("update", body=body, id=c["Id"])
 
     def remove(self, ref: str, force: bool = False) -> None:
         c = self._resolve(ref)
@@ -706,6 +733,22 @@ def _guard_shape(body: dict, labels: dict, host: dict) -> None:
         image = IMAGE_BY_DIGEST.fullmatch(str(body.get("Image")))
         if not image or image.group(1) != REPOSITORIES[0]:
             raise NotAllowed("The port probe runs the app's image.")
+
+
+def guard_update(body: object) -> None:
+    """Refuse an update body that is anything but a restart policy (#169)."""
+    if not isinstance(body, dict) or set(body) != {"RestartPolicy"}:
+        raise NotAllowed("An update changes the restart policy and nothing else.")
+    policy = body["RestartPolicy"]
+    if (
+        not isinstance(policy, dict)
+        or not set(policy) <= {"Name", "MaximumRetryCount"}
+        or policy.get("Name") not in RESTART_POLICIES
+    ):
+        raise NotAllowed(f"{policy!r} is not a restart policy.")
+    count = policy.get("MaximumRetryCount", 0)
+    if not isinstance(count, int) or isinstance(count, bool) or count < 0:
+        raise NotAllowed(f"{count!r} is not a retry count.")
 
 
 def endpoints_table() -> Iterable[tuple[str, str, bool]]:

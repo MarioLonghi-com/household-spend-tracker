@@ -38,8 +38,8 @@ def scope(**kw) -> Scope:
 def world():
     """Two projects, two containers each, and a sidecar in ours."""
     fake = FakeEngine(engine_fixture("docker-desktop"), engine_fixture("docker-desktop", "info"))
-    fake.add_container("spend-tracker-app-1", PROJECT)
-    fake.add_container("spend-tracker-updater-1", PROJECT)
+    fake.add_container("spend-tracker-app-1", PROJECT, labels={"com.docker.compose.service": "app"})
+    fake.add_container("spend-tracker-updater-1", PROJECT, labels={"com.docker.compose.service": "updater"})
     fake.add_container("spend-tracker-tailscale-1", PROJECT)
     # podman-compose labels its containers with its own scheme as well (S5).
     fake.add_container("spend-tracker_maintenance_1", PROJECT, label="io.podman.compose.project")
@@ -102,6 +102,9 @@ DESIGN_TABLE = {
     ("POST", "/containers/{id}/start", True),
     ("POST", "/containers/{id}/stop", True),
     ("POST", "/containers/{id}/rename", True),
+    # Added in #169: the app's restart policy, parked at `no` while it is
+    # `-previous` and put back on a rollback. Nothing else (`guard_update`).
+    ("POST", "/containers/{id}/update", True),
     ("DELETE", "/containers/{id}", True),
     ("POST", "/containers/{id}/exec", True),
     ("POST", "/exec/{id}/start", True),
@@ -131,6 +134,7 @@ def test_the_callable_endpoints_are_exactly_the_design_table():
         ("POST", "/v1.52/images/prune"),
         ("POST", "/v1.52/plugins/pull"),
         ("POST", "/v1.52/containers/abc/kill"),
+        # Listed, but only with a restart policy for a body (#169): bare, refused.
         ("POST", "/v1.52/containers/abc/update"),
         ("GET", "/v1.52/containers/abc/archive"),
         ("PUT", "/v1.52/containers/abc/archive"),
@@ -160,6 +164,7 @@ def test_every_call_the_client_makes_is_in_the_table_and_versioned_when_it_mutat
     client.probe("spend-tracker-tailscale-1", ["wget", "-q", "-O-", "http://127.0.0.1:8848/api/health"])
     client.stop("spend-tracker-drill", grace=5)
     client.rename("spend-tracker-drill", "spend-tracker-drill-old")
+    client.set_restart_policy("spend-tracker-app-1", {"Name": "no"})
     client.remove("spend-tracker-drill-old")
     client.pull(APP_IMAGE)
     client.inspect_image(APP_IMAGE)
@@ -453,3 +458,70 @@ def test_the_module_never_reads_the_docker_environment():
     body = code.split('"""', 2)[2]  # past the module docstring, which names them
     assert "DOCKER_API_VERSION" not in body and "DOCKER_HOST" not in body
     assert "environ" not in body and "getenv" not in body
+
+
+# --------------------------------------------------------------------------- #
+# #169: `update` is a restart policy, on the app, and nothing else
+# --------------------------------------------------------------------------- #
+
+
+def test_the_apps_restart_policy_is_changed_with_a_body_of_exactly_that(world):
+    fake, client = world
+    app = fake.by_name("spend-tracker-app-1")
+    client.set_restart_policy("spend-tracker-app-1", {"Name": "no"})
+    client.set_restart_policy(app["Id"], {"Name": "on-failure", "MaximumRetryCount": 3})
+    sent = [c for c in fake.calls if c.bare.endswith("/update")]
+    assert [c.body for c in sent] == [
+        {"RestartPolicy": {"Name": "no"}},
+        {"RestartPolicy": {"Name": "on-failure", "MaximumRetryCount": 3}},
+    ]
+    assert all(c.bare == f"/containers/{app['Id']}/update" and c.version == "1.52" for c in sent)
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {"RestartPolicy": {"Name": "no"}, "Memory": 1 << 30},
+        {"RestartPolicy": {"Name": "always"}, "CpuShares": 2},
+        {"Memory": 1 << 30},
+        {"RestartPolicy": {"Name": "always", "Privileged": True}},
+        {"RestartPolicy": {"Name": "sometimes"}},
+        {"RestartPolicy": {"Name": "on-failure", "MaximumRetryCount": -1}},
+        {"RestartPolicy": {"Name": "on-failure", "MaximumRetryCount": True}},
+        {"RestartPolicy": "no"},
+        {},
+        None,
+        ["RestartPolicy"],
+    ],
+)
+def test_an_update_with_anything_but_a_restart_policy_is_refused_and_never_sent(world, body):
+    fake, client = world
+    app = fake.by_name("spend-tracker-app-1")
+    with pytest.raises(NotAllowed):
+        client._send("POST", f"/v1.52/containers/{app['Id']}/update", body=body)
+    if isinstance(body, dict) and set(body) == {"RestartPolicy"} and isinstance(body["RestartPolicy"], dict):
+        with pytest.raises(NotAllowed):
+            client.set_restart_policy("spend-tracker-app-1", body["RestartPolicy"])
+    assert not any(c.bare.endswith("/update") for c in fake.calls)
+
+
+@pytest.mark.parametrize(
+    "ref", ["spend-tracker-updater-1", "spend-tracker-tailscale-1", "other-db-1", "spend-tracker_maintenance_1"]
+)
+def test_only_the_apps_own_container_has_its_restart_policy_changed(world, ref):
+    fake, client = world
+    with pytest.raises(NotAllowed):
+        client.set_restart_policy(ref, {"Name": "no"})
+    assert not any(c.bare.endswith("/update") for c in fake.calls)
+
+
+def test_a_one_off_of_the_app_service_is_not_updated(world):
+    fake, client = world
+    fake.add_container(
+        "spend-tracker-app-run-1",
+        PROJECT,
+        labels={"com.docker.compose.service": "app", "com.docker.compose.oneoff": "True"},
+    )
+    with pytest.raises(NotAllowed):
+        client.set_restart_policy("spend-tracker-app-run-1", {"Name": "no"})
+    assert not any(c.bare.endswith("/update") for c in fake.calls)

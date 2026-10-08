@@ -10,19 +10,20 @@ Each step is written to the journal **before** it starts.
 | 1 | **Preflight**: the app runs the prepared `from` version; both prepared images are present and still verify; the sidecar runs; disk and memory (8.5); the copy of the app is a shape the engine client accepts. | not started |
 | 2 | The pre-update hook, if one is configured (6.5). | not started |
 | 2a | **Updater first** (C1), through the handover interface (`updater.handover`). | the old updater carries on from 3 |
-| 3 | Stop the app (30 s) and rename it `<name>-previous` at once. | started again under its name; not started |
+| 3 | Stop the app (30 s), rename it `<name>-previous` at once, and park it with restart policy `no` (its own is in the journal). | started again under its name; not started |
 | 4 | The maintenance page, from the **old** image (6.4). | logged |
 | 5 | **The drill** from the new image: `scripts.upgrade --yes --report`. | no verified backup: R3; else R1 |
 | 6 | Stop the maintenance page. | removed by force |
-| 7 | The new app: an allowlist copy of the previous one (C10). | R1 |
-| 8 | Health from where requests arrive (8.4); one extra recreate if the sidecar restarted. | R1 |
+| 7 | The new app: an allowlist copy of the previous one (C10). Once, if `-previous` is running: stop it and start again. | R1 |
+| 8 | Health from where requests arrive (8.4); once, if `-previous` is running, stop it and recreate; one extra recreate if the sidecar restarted. | R1 |
 | 9 | The pin, the previous container's configuration, pruning, the recovery code invalidated. | logged |
 | 10 | The handover, unless 2a did it or this updater is newer (never downgrade). | the updater stays behind |
 
 ## Rollback (4.3)
 
 R1 removes the new app and the maintenance page; R2 restores the drill's
-backup **with the old image**; R3 renames `-previous` back and starts it; R4
+backup **with the old image**; R3 renames `-previous` back, gives it back its
+own restart policy, and starts it; R4
 checks its health against the old version and commit; R5 records *rolled
 back*. A failure inside the rollback is retried from the step that failed;
 **three attempts in all** (entering the rollback is one, each resumption
@@ -42,6 +43,21 @@ applies; this module carries it out. The drill is never started twice: a
 drill container still running is waited for, a finished one is judged by its
 report, and a vanished one by the backup folder it left (one backup folder
 per request).
+
+## The parked app started by hand (#169, E7)
+
+The rename at step 3 keeps `-previous` out of reach of a restart *by name*,
+but not of a person: Docker Desktop's Start button starts it, and its own
+`unless-stopped` policy then keeps it coming back -- exiting on
+`schema_check` once the ledger has moved, but holding the port while it
+runs. Between step 6 (the maintenance page stopped) and step 7 the port is
+free, and the new app could not bind. So step 3 sets the parked container's
+restart policy to `no` (`EngineClient.set_restart_policy`, the one field the
+engine client's `update` may change), recording the original in the journal
+first; step 7, and step 8 for the sidecar layout where the clash is inside the
+shared namespace, stop a running `-previous` once and try again; and R3 puts
+the original policy back. An engine that cannot change a restart policy is
+noted, not fatal: the retry still stands.
 
 **The engine going away** (`EngineUnavailable`) is not a failure of a step:
 it propagates, and the service resumes the journal when the engine answers
@@ -104,6 +120,24 @@ _STEP_ERRORS = (eng.EngineError, eng.NotAllowed, oneoff.TimedOut, StepFailed, Va
 
 def previous_name(app_name: str) -> str:
     return app_name + shapes.PREVIOUS_SUFFIX
+
+
+#: What `-previous` is parked with from step 3 on (#169).
+PARKED_POLICY = {"Name": "no"}
+
+
+def restart_policy(inspect: dict) -> dict:
+    """A container's restart policy as the engine's `update` takes it back.
+
+    An empty name is how some engines report no policy; it is `no`.
+    """
+    policy = (inspect.get("HostConfig") or {}).get("RestartPolicy") or {}
+    name = policy.get("Name") or "no"
+    out: dict = {"Name": name}
+    count = policy.get("MaximumRetryCount")
+    if name == "on-failure" and isinstance(count, int) and not isinstance(count, bool) and count > 0:
+        out["MaximumRetryCount"] = count
+    return out
 
 
 class Apply:
@@ -401,8 +435,63 @@ class Apply:
             # Kept until the next successful update (8.7); this is that update,
             # and its configuration is in an earlier history/<id>.previous.json.
             self.client.remove(stale["Id"], force=True)
+        if "previous_restart_policy" not in self.ctx:
+            # Recorded before anything changes, so a rollback after a crash
+            # anywhere from here on knows what to put back.
+            self.remember(previous_restart_policy=restart_policy(self.previous()))
         self.client.stop(self.ctx["previous_id"], grace=STOP_GRACE_SECONDS)
         self.client.rename(self.ctx["previous_id"], parked)
+        self.park_restart_policy()
+
+    def park_restart_policy(self) -> None:
+        """`-previous` with restart policy `no`: a hand start does not keep it coming back."""
+        policy = self.ctx.get("previous_restart_policy") or {}
+        if policy.get("Name") in (None, "no"):
+            return
+        try:
+            self.client.set_restart_policy(str(self.ctx["previous_id"]), PARKED_POLICY)
+        except (eng.EngineError, eng.NotAllowed) as e:
+            self.notes.append(
+                f"The previous version's restart policy could not be set to `no` ({e}); "
+                "if it is started by hand it may come back by itself."
+            )
+            return
+        self.remember(restart_policy_parked=True)
+
+    def unpark_restart_policy(self) -> None:
+        """R3: the previous container's own restart policy, back (#169)."""
+        if not self.ctx.get("restart_policy_parked"):
+            return
+        policy = self.ctx.get("previous_restart_policy") or {}
+        try:
+            self.client.set_restart_policy(str(self.ctx["previous_id"]), policy)
+        except (eng.EngineError, eng.NotAllowed) as e:
+            self.notes.append(
+                f"The previous version's restart policy could not be put back to "
+                f"`{policy.get('Name')}` ({e}); set it again with `docker update --restart`."
+            )
+            return
+        self.remember(restart_policy_parked=False)
+
+    def previous_in_the_way(self, why: str) -> bool:
+        """`-previous` running when the new app needs its place: stopped, once. True if it was.
+
+        Bounded by the journal: a second time, or after a restart that already
+        did it, the step fails as it would have.
+        """
+        if self.ctx.get("previous_stopped_for_new"):
+            return False
+        prev = self.by_id(str(self.ctx["previous_id"]))
+        if not survey.running(prev):
+            return False
+        self.remember(previous_stopped_for_new=True)
+        self.notes.append(
+            f"The previous version had been started while the update ran, and was in the way "
+            f"({why}); the updater stopped it and started {self.to} again."
+        )
+        self.records.say("The previous version was started while the update ran; stopping it and trying again.")
+        self.client.stop(str(self.ctx["previous_id"]), grace=STOP_GRACE_SECONDS)
+        return True
 
     def step4(self) -> None:
         self.start("4", "Starting the maintenance page.")
@@ -557,12 +646,30 @@ class Apply:
 
     def step7(self) -> None:
         self.start("7", f"Starting {self.to}.")
-        self.create_new_app()
+        try:
+            self.create_new_app()
+        except _STEP_ERRORS as e:
+            if not self.previous_in_the_way(str(e)):
+                raise
+            new_id = self.ctx.get("new_id")
+            if new_id and self.by_id(str(new_id)) is not None:
+                self.client.start(str(new_id))
+            else:
+                self.create_new_app()
 
     def step8(self) -> str | None:
         self.start("8", f"Checking {self.to} answers.")
         expect = health.Expect(self.to, self.ctx.get("new_revision"))
         problem = self.check_health(expect, self.new_ref)
+        if problem and self.previous_in_the_way(problem):
+            # The sidecar layout: no host port to clash on, so the new app
+            # started, and lost the namespace's 8848 to `-previous`.
+            try:
+                self.client.remove(str(self.ctx["new_id"]), force=True)
+                self.create_new_app()
+            except _STEP_ERRORS as e:
+                return f"it could not be started again ({e})"
+            problem = self.check_health(expect, self.new_ref)
         if problem and self.ctx.get("layout") == "sidecar" and not self.ctx.get("sidecar_recreated"):
             recorded = self.ctx.get("sidecar") or {}
             now = self.sidecar_now(self.previous())
@@ -719,6 +826,7 @@ class Apply:
             if squatter is not None and squatter.get("Id") != pid:
                 self.client.remove(squatter["Id"], force=True)
             self.client.rename(pid, self.app_name)
+        self.unpark_restart_policy()
         if not survey.running(self.by_id(pid)):
             self.client.start(pid)
 
