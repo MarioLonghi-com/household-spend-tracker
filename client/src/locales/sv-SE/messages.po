@@ -1846,63 +1846,75 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.backup.protected"
-msgstr ""
+msgstr "{name} är en av de fem senaste säkerhetskopiorna från uppdateringar. De sparas så att en uppdatering kan ångras, och uppdateraren tar själv bort äldre"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.archived_default"
-msgstr ""
+msgstr "{name} är arkiverad, så den kan inte vara standard"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.choose_default"
-msgstr ""
+msgstr "Välj kategorin som alltid ska användas"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.group_name_taken"
-msgstr ""
+msgstr "Det finns redan en grupp som heter {name}"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.group_needs_name"
-msgstr ""
+msgstr "En grupp behöver ett namn"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.group_not_empty"
-msgstr ""
+msgstr "En grupp kan bara raderas när det inte finns några kategorier under den. {name} innehåller fortfarande {held, plural, one {# kategori} other {# kategorier}}{archived, plural, =0 {} one {, varav # arkiverad} other {, varav # arkiverade}}. Flytta eller radera dem först."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.group_not_found"
-msgstr ""
+msgstr "Den kategorigruppen finns inte"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.in_use"
-msgstr ""
+msgstr "{count, plural, one {# transaktion är kategoriserad} other {# transaktioner är kategoriserade}} som {name}. Arkivera den i stället, så behåller transaktionerna sin kategori."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.name_taken"
-msgstr ""
+msgstr "Det finns redan en kategori som heter {name}"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.needs_name"
-msgstr ""
+msgstr "En kategori behöver ett namn"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.not_found"
-msgstr ""
+msgstr "Den kategorin finns inte"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.category.other_household"
-msgstr ""
+msgstr "Den kategorin tillhör ett annat hushåll"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -1912,8 +1924,9 @@ msgstr "{code} är inte en valutakod enligt ISO 4217. Kontrollera stavningen, so
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.amount_too_large"
-msgstr ""
+msgstr "Det beloppet är för stort för att registreras som pengar"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -1923,8 +1936,9 @@ msgstr "{value} har decimaler, och {currency} har inga"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.not_a_value"
-msgstr ""
+msgstr "{value} är inte ett penningvärde"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -1934,8 +1948,9 @@ msgstr "{value} är inte ett belopp som kan läsas. Skriv det med punkt före de
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.not_whole_minor_units"
-msgstr ""
+msgstr "{milliunits} tusendelar är inte ett helt antal minsta enheter i {currency}"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -1957,118 +1972,141 @@ msgstr "Ett belopp med {digits} siffror är för stort för att registreras som 
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.merge_different_households"
-msgstr ""
+msgstr "De mottagarna finns i olika hushåll"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.merge_into_itself"
-msgstr ""
+msgstr "En mottagare kan inte slås ihop med sig själv"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.needs_name"
-msgstr ""
+msgstr "En mottagare behöver ett namn"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.other_household"
-msgstr ""
+msgstr "Den mottagaren tillhör ett annat hushåll"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.rule_needs_pattern"
-msgstr ""
+msgstr "En regel behöver något att matcha mot"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.rule_needs_payee"
-msgstr ""
+msgstr "En regel som anger en mottagare behöver en mottagare att peka på"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.rule_not_a_regex"
-msgstr ""
+msgstr "Det är inte ett giltigt reguljärt uttryck: {reason}"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.rule_pattern_too_long"
-msgstr ""
+msgstr "Det mönstret är för långt (högst {max} tecken)"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.rule_replacement_on_map"
-msgstr ""
+msgstr "En ersättning betyder bara något i en regel som skriver om; den här anger en mottagare"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.rule_replacement_too_long"
-msgstr ""
+msgstr "Den ersättningen är för lång (högst {max} tecken)"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.rule_template_no_groups"
-msgstr ""
+msgstr "Den ersättningen använder {reference}, och mönstret har inga grupper inom parentes. Sätt parenteser runt den del du vill behålla."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.rule_template_no_such_group"
-msgstr ""
+msgstr "Den ersättningen använder {reference}, och mönstret har ingen grupp som heter {name}"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.payee.rule_template_too_few_groups"
-msgstr ""
+msgstr "Den ersättningen använder {reference}, och mönstret har bara {groups} grupper inom parentes"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.profile.current_factor_refused"
-msgstr ""
+msgstr "Det är varken en giltig kod från din nuvarande autentiseringsapp eller en oanvänd återställningskod"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.profile.needs_authenticator"
-msgstr ""
+msgstr "Ställ in en autentiseringsapp innan du skapar nya återställningskoder"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.profile.new_code_wrong"
-msgstr ""
+msgstr "Den koden stämmer inte. Kontrollera tiden i telefonen och försök igen."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.profile.recovery_grant_not_needed"
-msgstr ""
+msgstr "Din nuvarande autentiseringsapp kan fortfarande kontrolleras, så bekräfta med en kod från den (eller en oanvänd återställningskod) i stället för behörigheten från inloggningen."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.profile.recovery_grant_refused"
-msgstr ""
+msgstr "Den behörigheten att ställa in en ny autentiseringsapp har gått ut eller gäller inte den här sessionen. Använd en oanvänd återställningskod i stället."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.profile.reenrolment_expired"
-msgstr ""
+msgstr "Den nya registreringen har gått ut; börja om"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.profile.reenrolment_not_yours"
-msgstr ""
+msgstr "Den nya registreringen tillhör någon annan"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.profile.regenerate_refused"
-msgstr ""
+msgstr "Det lösenordet och den koden från autentiseringsappen bevisar inte att det är du"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.profile.same_password"
-msgstr ""
+msgstr "Det är redan ditt lösenord"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.profile.wrong_password"
-msgstr ""
+msgstr "Det är inte ditt nuvarande lösenord"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -2090,63 +2128,75 @@ msgstr "En rad daterad {row_date} ligger efter att kontoutdraget stänger den {s
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.not_a_work_expense_cannot_be_paid"
-msgstr ""
+msgstr "En rad som inte är ett jobbutlägg kan inte ha betalats tillbaka av något"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.not_money_in"
-msgstr ""
+msgstr "En ersättning är pengar som kommer in, så välj pengar som kommer in"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.not_money_out"
-msgstr ""
+msgstr "Bara pengar som lämnar ett konto kan vara ett jobbutlägg; den här raden är pengar som kommer in"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.paid_cannot_be_written_off"
-msgstr ""
+msgstr "Det här har betalats tillbaka. Ta bort betalningen från det innan du skriver av det."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.payment_cannot_be_expense"
-msgstr ""
+msgstr "Den här raden betalade tillbaka jobbutlägg, så den kan inte själv vara ett"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.reimburses_itself"
-msgstr ""
+msgstr "En transaktion kan inte ersätta sig själv"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.settlement_is_work_expense"
-msgstr ""
+msgstr "Den raden är själv ett jobbutlägg, så den kan inte också vara det som betalade tillbaka ett"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.sign_change_on_payment"
-msgstr ""
+msgstr "Den här raden betalade tillbaka jobbutlägg, så den måste förbli pengar som kommer in. Ta bort utläggen från den först om beloppet verkligen har bytt riktning."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.sign_change_on_work_expense"
-msgstr ""
+msgstr "Det här är ett jobbutlägg, så det måste förbli pengar som går ut. Ändra det först till ”Inget jobbutlägg” om beloppet verkligen har bytt riktning."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.transfer_is_not_a_reimbursement"
-msgstr ""
+msgstr "En överföring mellan dina egna konton är ingen ersättning"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.transfer_is_not_a_work_expense"
-msgstr ""
+msgstr "Det här är ena benet i en överföring, pengar som flyttas mellan dina egna konton. Markera i stället köpet som den betalade."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reimbursement.written_off_cannot_be_paid"
-msgstr ""
+msgstr "Det här är avskrivet. Ändra tillbaka till ”Jobbet ska betala tillbaka” innan du registrerar en betalning för det."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -2156,103 +2206,123 @@ msgstr "Delarna blir {total} och transaktionen är {amount}. En uppdelning måst
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.split.part_count"
-msgstr ""
+msgstr "En uppdelning har mellan {min} och {max} delar"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.split.repaid_work_expenses"
-msgstr ""
+msgstr "Den här betalningen betalade tillbaka jobbutlägg. Ta bort dem från den innan du delar upp den, och koppla sedan varje utlägg till delen som betalade det."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.split.transfer_leg"
-msgstr ""
+msgstr "Det här är ena benet i en överföring, som är en enda penningrörelse registrerad två gånger. Dela upp den andra sidan av överföringen också, eller ångra den först."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.split.work_expense_money_in"
-msgstr ""
+msgstr "Varje del av ett jobbutlägg måste vara pengar som går ut, eftersom varje del förblir ett jobbutlägg"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.split.zero_part"
-msgstr ""
+msgstr "En del av en uppdelning kan inte vara noll"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transaction.import_line_exists"
-msgstr ""
+msgstr "Den raden i kontoutdraget finns redan i det här kontot"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transaction.locked"
-msgstr ""
+msgstr "Den transaktionen är låst; ändra tillbaka den till Bokförd innan du redigerar den"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transaction.not_found"
-msgstr ""
+msgstr "Den transaktionen finns inte"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.amount_not_positive"
-msgstr ""
+msgstr "Beloppet i en överföring måste vara positivt"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.arriving_not_positive"
-msgstr ""
+msgstr "Beloppet som kommer fram måste vara positivt"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.different_households"
-msgstr ""
+msgstr "De kontona finns i olika hushåll"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.duplicate_leg"
-msgstr ""
+msgstr "Skapa en ny överföring från registret, inte en kopia av ena benet i den här"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.edit_cross_currency_leg"
-msgstr ""
+msgstr "Redigera varje ben i en överföring mellan valutor för sig; vi räknar inte fram en växelkurs på nytt"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.has_no_category"
-msgstr ""
+msgstr "En överföring har ingen kategori"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.link_already_a_transfer"
-msgstr ""
+msgstr "En av dem är redan en överföring; koppla loss den först"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.link_no_money"
-msgstr ""
+msgstr "En rad utan pengar kan inte vara ett ben i en överföring"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.link_repayment"
-msgstr ""
+msgstr "En av dem är betalningen som betalade tillbaka ett jobbutlägg, inte en överföring. Ta först bort den från utläggen den betalade tillbaka om det verkligen är en överföring."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.link_same_account"
-msgstr ""
+msgstr "Båda finns i samma konto; en överföring går mellan två"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.link_split_part"
-msgstr ""
+msgstr "En del av en uppdelning kan inte vara ett ben i en överföring"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.link_work_expense"
-msgstr ""
+msgstr "En av dem är ett jobbutlägg, som är pengar som spenderats, inte flyttats. Ta först bort markeringen som jobbutlägg om det verkligen är en överföring."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -2262,23 +2332,27 @@ msgstr "En överföring från {from_currency} till {to_currency} behöver belopp
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.not_a_transfer"
-msgstr ""
+msgstr "Den transaktionen är ingen överföring"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.pair_in_two_households"
-msgstr ""
+msgstr "De transaktionerna finns i olika hushåll"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.pair_same_direction"
-msgstr ""
+msgstr "En överföring tar pengar ur det ena kontot och för in dem på det andra"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.pair_with_itself"
-msgstr ""
+msgstr "En transaktion kan inte vara en överföring med sig själv"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -2288,73 +2362,87 @@ msgstr "Ett konto kan inte föra över till sig självt"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.sides_differ"
-msgstr ""
+msgstr "Båda sidorna av en överföring i samma valuta måste ha samma belopp"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.digest_mismatch"
-msgstr ""
+msgstr "Avbildningarnas digest är inte de som förberedelserapporten verifierade. Förbered uppdateringen igen"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.engine_refused"
-msgstr ""
+msgstr "Uppdateraren kan inte använda containermotorn ({socket}), så den kan inte uppdatera något"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.in_flight"
-msgstr ""
+msgstr "En annan uppdateringsbegäran väntar eller pågår. Vänta tills den är klar och försök sedan igen"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.lossy_mismatch"
-msgstr ""
+msgstr "Markera varje migrering som inte kan ångras, och bara dem: uppdateringen behöver exakt de som rapporten listar"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.no_report"
-msgstr ""
+msgstr "Det finns ingen förberedd uppdatering med det id:t för den här versionen. Sök efter uppdateringar och förbered den igen"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.no_updater"
-msgstr ""
+msgstr "Att uppdatera från den här skärmen kräver uppdateraren, och ingen har svarat de senaste två minuterna"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.not_a_version"
-msgstr ""
+msgstr "{version} är inte en versionsbeteckning som 1.2.3"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.not_newer"
-msgstr ""
+msgstr "{to_version} är inte nyare än {running}, som den här instansen kör. En uppdatering går aldrig bakåt"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.outcome_not_found"
-msgstr ""
+msgstr "Det finns inget uppdateringsresultat med det id:t"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.recovery_code_unknown"
-msgstr ""
+msgstr "Den återställningskoden har gått ut eller hör till en annan bekräftelse. Ta fram bekräftelsen igen för att få en ny"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.updater_not_newer"
-msgstr ""
+msgstr "Uppdateraren kör redan {updater_version}, som inte är äldre än {to_version}"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.updater_older_than_app"
-msgstr ""
+msgstr "Uppdateraren i {to_version} är äldre än den här instansen, som kör {running}, så den skulle inte ta emot dess begäranden"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.updater_outdated"
-msgstr ""
+msgstr "Uppdateraren är för gammal för den här containermotorn. Uppdatera uppdateraren först och försök sedan igen"
 
 #: src/screens/Payees.tsx
 msgid "No payees yet. One appears the first time you name somebody on a transaction."
