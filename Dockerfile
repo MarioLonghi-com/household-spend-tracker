@@ -146,8 +146,12 @@ WORKDIR /build
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
 COPY requirements-updater.txt ./
 # requirements-updater.txt alone: sigstore and what it brings, nothing of the
-# app's (requirements-updater.in says why the two locks are separate).
-RUN python -m venv /venv && /venv/bin/pip install --require-hashes -r requirements-updater.txt
+# app's (requirements-updater.in says why the two locks are separate). Then
+# pip itself goes: the venv is on PATH, and a package manager in the one
+# image that holds the engine's socket is a tool for whoever gets into it.
+RUN python -m venv /venv \
+ && /venv/bin/pip install --require-hashes -r requirements-updater.txt \
+ && /venv/bin/python -m pip uninstall --yes --quiet pip
 # `/update`, the `update` volume's mount point here, made exactly as the app
 # image makes its own -- 65532:65532, 2770, under /mounts so the copy keeps
 # the mode. See the `deps` stage for both.
