@@ -829,7 +829,7 @@ def _grant_for(user_id: str, browser) -> str:
     from app.models import User
     from app.services import profile
 
-    value = browser.cookies.get(cookies.session_name())
+    value = browser.cookies.get(cookies.session_name("testserver"))
     assert value
     with db.session_scope() as session:
         return profile.grant_key_recovery(session.get(User, user_id), session_value=value)
