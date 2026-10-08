@@ -16,8 +16,8 @@
  * - **Database** — what it is serving: engine and version, journal mode,
  *   schema revision, size and pages, where the file is, how much of it is
  *   which household — and backing it up, which is an action on *this*.
- * - **Operations** — what is about the installation rather than about either
- *   of the above: check the repository for a newer version.
+ * - **Updates** — what is about the installation rather than about either
+ *   of the above: is there a newer version, and installing it (#166).
  * - **About** — where the code and its author live.
  *
  * Nothing here is polled. Every figure is read when the screen opens and after
@@ -30,7 +30,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { Empty, Hint, Problem, SortHeading, sortRows, useSort } from "../components/bits";
 import { bytes } from "../lib/bytes";
-import { BackupList, type Backup } from "./Backups";
+import { BackupList, UpdateBackupList, type Backup } from "./Backups";
+import { Updates } from "./Updates";
 import { formatInstant } from "../lib/time";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
@@ -102,32 +103,6 @@ interface LoggingState {
   files: LogFile[];
   directory: string;
   streams: LogStream[];
-}
-
-interface Release {
-  version: string;
-  tag: string;
-  name: string | null;
-  published_at: string | null;
-  /** Plain text: render it as text, never as HTML. */
-  notes: string;
-  notes_from: "changelog" | "release";
-}
-
-interface UpdaterOffer {
-  version: string | null;
-  compatible: boolean | null;
-  note: string;
-}
-
-interface Upstream {
-  checked_at: string;
-  running: string;
-  latest: string | null;
-  newer: boolean;
-  problem: string | null;
-  releases: Release[];
-  updater: UpdaterOffer | null;
 }
 
 interface DatabaseEngine {
@@ -657,51 +632,20 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
 }
 
 // --------------------------------------------------------------------------- //
-// Operations
+// Updates
 // --------------------------------------------------------------------------- //
 
 function Operations({ me }: { me: Instance }) {
-  // Backing up moved to Database, where the thing it acts on is described.
-  // What is left is the one operation that is about the *installation* rather
-  // than about either the process or the ledger.
-  const upstream = useMutation({
-    mutationFn: () => api.post<Upstream>("/admin/application/upstream"),
-  });
-
+  // What used to be *Is there a newer version?*, grown into the owner's side
+  // of the self-updater (#166). Everything it says and does is in Updates.tsx.
   return (
-    <section className="card">
-      <h2 className="section-title"><Trans comment="Heading on the Application management screen">Operations</Trans></h2>
-      <Problem error={upstream.error} />
-
-      <h3 className="section-title"><Trans>Is there a newer version?</Trans></h3>
-      <p className="muted small">
-        <Trans>
-          Asks {me.repository} for its published releases and compares them with the{" "}
-          {me.version} this is running. Nothing leaves this instance unless an owner presses a
-          button like this one, nothing is asked on a timer, and no request says anything about
-          this instance.
+    <section className="card" aria-labelledby="updates-title">
+      <h2 className="section-title" id="updates-title">
+        <Trans comment="Heading on the Application management screen: new versions and installing them">
+          Updates
         </Trans>
-      </p>
-      <button onClick={() => upstream.mutate()} disabled={upstream.isPending}>
-        {upstream.isPending ? t({ message: "Asking…", comment: "Button on the Application management screen" }) : t`Check the repository`}
-      </button>
-      {upstream.data ? (
-        <div className={upstream.data.newer ? "banner warn" : "banner"} style={{ marginTop: 10 }}>
-          {upstream.data.problem ? (
-            upstream.data.problem
-          ) : upstream.data.newer ? (
-            <Trans>
-              <strong>{upstream.data.latest}</strong> is available. This instance is running{" "}
-              {upstream.data.running}.
-            </Trans>
-          ) : (
-            <Trans>
-              This is the newest there is: {upstream.data.running}, and the repository's latest
-              release is {upstream.data.latest}.
-            </Trans>
-          )}
-        </div>
-      ) : null}
+      </h2>
+      <Updates repository={me.repository} commit={me.build.commit} />
     </section>
   );
 }
@@ -802,15 +746,22 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
       <button className="primary" onClick={() => backup.mutate()} disabled={backup.isPending}>
         {backup.isPending ? t({ message: "Writing…", comment: "Button on the Application management screen" }) : t`Back up now`}
       </button>
-      <BackupList backups={backups.data ?? []} onChanged={onChanged} />
+      <BackupList
+        backups={(backups.data ?? []).filter((one) => one.kind !== "update")}
+        onChanged={onChanged}
+      />
       <p className="muted small" style={{ marginBottom: 0 }}>
         <Trans>
           A download is a zip with a README for whoever opens it next: what the file is, how to
           read it, and how to put it back with <span className="mono">make restore</span>. Delete
-          removes one file when you say so and confirm. Nothing here deletes a backup on its own —
-          no pruning and no timer.
+          removes one file when you say so and confirm. Nothing here deletes one of these on its own
+          — no pruning and no timer.
         </Trans>
       </p>
+      <UpdateBackupList
+        backups={(backups.data ?? []).filter((one) => one.kind === "update")}
+        onChanged={onChanged}
+      />
     </section>
   );
 }
