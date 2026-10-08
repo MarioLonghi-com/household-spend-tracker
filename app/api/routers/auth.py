@@ -70,7 +70,9 @@ def sign_in(
         # A row, not just a sealed cookie. The sealed value alone was a bearer
         # token: replayable, and portable to any browser.
         cookies.set_pending(
-            response, session_service.issue_pending(session, user, seconds=PENDING_MAX_AGE)
+            response,
+            request,
+            session_service.issue_pending(session, user, seconds=PENDING_MAX_AGE),
         )
         # In recovery mode the answer says so already (#287), and the screen
         # asks for a recovery code without first asking for a code that
@@ -92,7 +94,7 @@ def sign_in(
         ip=client_ip(request),
         user_agent=request.headers.get("user-agent"),
     )
-    cookies.set_session(response, result.session_value)
+    cookies.set_session(response, request, result.session_value)
     return SignInState(authenticated=True, user=UserOut.model_validate(user))
 
 
@@ -116,7 +118,7 @@ def passkey_state(request: Request) -> PasskeyStateOut:
 def submit_code(
     body: SubmitCode, request: Request, response: Response, session: SessionDep
 ) -> SignInState:
-    pending = cookies.pending_value(request.cookies)
+    pending = cookies.pending_value(request)
     # Recovery mode (#287), before the claim: no code from the authenticator
     # can be right, so none is tried and the half-finished sign-in is left for
     # the recovery code the refusal sends them to.
@@ -141,10 +143,10 @@ def submit_code(
         ip=client_ip(request),
         user_agent=request.headers.get("user-agent"),
     )
-    cookies.set_session(response, result.session_value)
+    cookies.set_session(response, request, result.session_value)
     if result.device_value:
-        cookies.set_device(response, result.device_value)
-    cookies.clear_pending(response)
+        cookies.set_device(response, request, result.device_value)
+    cookies.clear_pending(response, request)
     return SignInState(authenticated=True, user=UserOut.model_validate(user))
 
 
@@ -165,7 +167,7 @@ def submit_recovery_code(
     authenticator (#287) -- the answer also carries a `reenrolment_grant`, so
     setting up a new authenticator does not cost a second recovery code.
     """
-    user_id = session_service.claim_pending(db.engine, cookies.pending_value(request.cookies))
+    user_id = session_service.claim_pending(db.engine, cookies.pending_value(request))
     user = session.get(User, user_id) if user_id else None
     if user is None or user.disabled_at is not None:
         raise Unauthorized("start again from the sign-in page")
@@ -183,8 +185,8 @@ def submit_recovery_code(
         ip=client_ip(request),
         user_agent=request.headers.get("user-agent"),
     )
-    cookies.set_session(response, result.session_value)
-    cookies.clear_pending(response)
+    cookies.set_session(response, request, result.session_value)
+    cookies.clear_pending(response, request)
     grant = (
         profile_service.grant_key_recovery(user, session_value=result.session_value)
         if keycheck.locked_by_key(user)
@@ -238,16 +240,16 @@ def sign_in_with_passkey(
         ip=client_ip(request),
         user_agent=request.headers.get("user-agent"),
     )
-    cookies.set_session(response, result.session_value)
+    cookies.set_session(response, request, result.session_value)
     return SignInState(authenticated=True, user=UserOut.model_validate(user), passkey_id=passkey.id)
 
 
 @router.delete("/session", status_code=204)
 def sign_out(request: Request, response: Response, session: SessionDep, user: CurrentUser) -> None:
-    value = cookies.session_value(request.cookies)
+    value = cookies.session_value(request)
     if value:
         session_service.revoke(session, value)
-    cookies.clear_session(response)
+    cookies.clear_session(response, request)
 
 
 @router.get("/me", response_model=UserOut)

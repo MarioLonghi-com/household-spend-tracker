@@ -17,6 +17,7 @@ from ipaddress import ip_address
 
 from starlette.datastructures import Headers
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.requests import HTTPConnection
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from .config import IP_LITERALS
@@ -31,6 +32,16 @@ def _host_of(header: str) -> str:
     if header.startswith("["):
         return header[1:].partition("]")[0]
     return header.rpartition(":")[0] if header.count(":") == 1 else header
+
+
+def request_host(request: HTTPConnection) -> str:
+    """The host a request named, port dropped, lower-cased, no trailing dot.
+
+    Only meaningful once `AllowedHosts` has let the request through: before
+    that it is whatever the client wrote. The passkey checks and the cookie
+    names both read it from here, so they cannot parse it two ways.
+    """
+    return _host_of(request.headers.get("host", "")).lower().rstrip(".")
 
 
 def _is_ip_literal(host: str) -> bool:
