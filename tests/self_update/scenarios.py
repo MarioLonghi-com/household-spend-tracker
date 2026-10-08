@@ -608,41 +608,45 @@ class Run:
         s = self.s
         s.up(A)
         b = before(s)
-        prev = s.app_name + "-previous"
         seen: dict = {"clicks": 0, "refused": [], "ran": False}
 
         def press() -> None:
             seen["clicks"] += 1
             with contextlib.suppress(api.Unreachable):
                 try:
-                    s.engine.start(prev)
+                    # By id: the same container, whether the rename has happened yet or not.
+                    s.engine.start(b.app["Id"])
                 except api.Failed as e:
                     seen["refused"].append(str(e)[:160])
             with contextlib.suppress(api.Failed, api.Unreachable):
                 state = s.engine.inspect(b.app["Id"])["State"]
                 seen["ran"] = state.get("StartedAt") != b.app["State"]["StartedAt"]
 
+        def stopped() -> bool:
+            return not s.engine.inspect(b.app["Id"])["State"].get("Running")
+
         def click(rid: str) -> None:
-            s.wait_for(lambda: s.engine.exists(prev), "the app to be parked as -previous", 600, every=0.05)
-            # The person is quicker than the updater: it is paused for the
-            # click, so the maintenance page has not taken the port yet. Not
-            # pausing made the click land behind the page about half the time.
+            s.wait_step(rid, ("3",))
             owner = self.owner_container(rid)["Id"]
+            s.wait_for(stopped, "step 3 to stop the app", 120, every=0.02)
+            # The person is quicker than the updater: the apply's owner is
+            # paused the moment the app has stopped, for the click, so the
+            # maintenance page has not taken the port yet. Clicking only once
+            # `-previous` appeared landed behind the page most of the time.
             s.engine.pause(owner)
             try:
                 press()
             finally:
                 s.engine.unpause(owner)
             while not seen["ran"] and s.journal(rid).get("step") in ("3", "4", "5", "6"):
+                time.sleep(0.5)
                 press()
-                if not seen["ran"]:
-                    time.sleep(0.5)
 
         req, record = s.update(A, B, during=click)
         print(f"   {seen['clicks']} clicks, ran: {seen['ran']}, refused: {sorted(set(seen['refused']))[:2]}")
         r.check(seen["ran"], f"-previous was started by hand while the apply ran ({seen['clicks']} clicks)")
-        stopped = [n for n in record.get("notes") or [] if "started while the update ran" in n]
-        print(f"   the updater's note: {stopped[0] if stopped else '(none: -previous had exited by itself)'}")
+        note = [n for n in record.get("notes") or [] if "started while the update ran" in n]
+        print(f"   the updater's note: {note[0] if note else '(none: -previous had exited by itself)'}")
         check_updated(r, s, b, req, record, B, updater_to=B)
 
     def E8(self, r: Result) -> None:

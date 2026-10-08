@@ -69,6 +69,7 @@ import datetime as dt
 import html
 import http.server
 import json
+import os
 import pathlib
 import re
 import socket
@@ -457,14 +458,28 @@ KEY_DOES_NOT_OPEN = 5
 ROWS_DROPPED = 6
 
 
+#: The report's mode: the `update` volume's group reads it (C11).
+REPORT_MODE = 0o660
+
+
 def _write_report(path: pathlib.Path, outcome: dict) -> None:
     """The outcome, as one document. Written whole or not at all.
 
     An updater reads this after the process has gone, so it must never find
     half a file: the write goes beside the target and is renamed into place.
+
+    It is the updater's to read, through the `update` volume's group: under a
+    rootless engine the updater is in-container root without capabilities,
+    which cannot read a 0600 file the drill's user owns (#169's rootless
+    Podman leg, where every apply stalled at step 5). So 0660 whatever the
+    umask, as every other file the app writes there.
     """
     scratch = path.with_name(path.name + ".tmp")
-    scratch.write_text(json.dumps(outcome, indent=2) + "\n")
+    scratch.unlink(missing_ok=True)
+    fd = os.open(scratch, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, REPORT_MODE)
+    with os.fdopen(fd, "w") as f:
+        os.fchmod(f.fileno(), REPORT_MODE)  # whatever the umask took away
+        f.write(json.dumps(outcome, indent=2) + "\n")
     scratch.replace(path)
 
 

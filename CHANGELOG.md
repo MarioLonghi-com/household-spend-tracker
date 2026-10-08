@@ -48,6 +48,13 @@ history this repository does not have.
   volume's directory, which it does not own, and exited before its first
   heartbeat. It now leaves a directory that is already right alone. (#169)
 
+- **Updates finish under rootless Podman.** The drill wrote its report
+  readable by its own user only, and the updater -- root inside its
+  container, without capabilities -- could not read it, so the apply stalled
+  at the drill and the updater restarted over and over. The report is now
+  written for the `update` volume's group, like every other file the app
+  writes there. (#169)
+
 - **Updates work on a Podman that shares the host's IPC and UTS namespaces**
   by default (containers.conf, as in Podman's own image). The copy of the app
   and of the updater carried a shared-memory size and a hostname that such a

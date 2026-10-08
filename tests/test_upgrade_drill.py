@@ -538,3 +538,24 @@ def test_the_flags_belong_to_their_modes(capsys):
     with pytest.raises(SystemExit) as refused:
         upgrade.main(["--check", "--report", "x.json"])
     assert refused.value.code == 2
+
+
+def test_the_report_is_written_0660_for_the_updates_group_whatever_the_umask(tmp_path):
+    """The updater reads it through the `update` volume's group; under a rootless
+    engine it is root without capabilities and cannot read a 0600 file (#169)."""
+    import os
+    import stat
+
+    report = tmp_path / "work" / "drill.json"
+    report.parent.mkdir()
+    old = os.umask(0o077)
+    try:
+        from scripts import upgrade as drill
+
+        drill._write_report(report, {"exit": 0})
+        drill._write_report(report, {"exit": 3})  # again, over the first
+    finally:
+        os.umask(old)
+    assert stat.S_IMODE(report.stat().st_mode) == 0o660
+    assert json.loads(report.read_text()) == {"exit": 3}
+    assert sorted(p.name for p in report.parent.iterdir()) == ["drill.json"]

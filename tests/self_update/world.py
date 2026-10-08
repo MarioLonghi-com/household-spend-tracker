@@ -395,7 +395,10 @@ class Stack:
         envfile.write_text("\n".join(env) + "\n")
         # R34: the project directory and `.env` writable by the updater's
         # group -- the socket's -- where it does not run as the user (rootful).
-        if self.leg.socket_gid != "0":
+        # Under any updater user but 0:0, which owns everything on a rootless
+        # engine -- with group 0 too (an engine box's rootful Podman, whose
+        # socket is root's): the pin was "Permission denied" there.
+        if self.leg.updater_user != "0:0":
             gid = int(self.leg.socket_gid)
             for path in (self.dir, envfile):
                 with contextlib.suppress(PermissionError):
