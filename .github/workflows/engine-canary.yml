@@ -1,0 +1,222 @@
+name: engine canary
+
+# The weekly engine canary (design notes 2d C3, 15.5; #169). **Not part of
+# `ci-ok`, and never a pull-request check.**
+#
+# Container engines update on laptops without anybody deciding to: Docker
+# Engine 29 raised its API floor from 1.24 to 1.44 one release and broke
+# every client that pinned an older one. The updater negotiates its API
+# version inside a window it was tested with (updater/engine.py), and this is
+# where a new engine meets that window first -- E1 (an update) and E11 (the
+# updater handing over to its successor) on:
+#
+#   - the newest Docker Engine stable release (`docker:dind`);
+#   - the newest Docker Engine test-channel release (`docker:rc-dind`), which
+#     is what reaches the stable channel next;
+#   - the newest Podman (`quay.io/podman/stable`, upstream's own image).
+#
+# Each engine runs in its own privileged container on the runner, and the
+# scenarios run inside it (tests/self_update/engine_box.py), against releases
+# built here from `dev`: A is the first parent of its tip, B the tip.
+#
+# **The pinning policy is the canary's own.** Every other image a workflow
+# here pulls is pinned by digest. These three are not, on purpose: a canary
+# pinned to a digest tests last month's engine, which is the one thing it
+# exists not to do. So each run resolves the floating tag to a digest once,
+# runs only that digest, and records the tag, the digest, the engine's version
+# and its API window (`GET /version`) in the run's artifact -- and in the
+# issue, when one is opened -- so a failure names exactly the image that
+# failed, and starting this workflow by hand with that digest as `image`
+# reproduces it.
+#
+# A failure opens one issue labelled `docker`, or comments on the one that is
+# already open, with every failing engine and its window. The fix ships in a
+# release; C1 and C2 then bring the fixed updater to every instance.
+on:
+  schedule:
+    # Wednesday morning: after Docker's and Podman's usual Tuesday releases.
+    - cron: "37 5 * * 3"
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "Run only this engine image (a tag or tag@digest), e.g. to reproduce a failure"
+        required: false
+        default: ""
+      kind:
+        description: "docker or podman, for `image`"
+        required: false
+        default: "docker"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: engine-canary
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  canary:
+    name: canary (${{ matrix.engine }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: docker-stable
+            kind: docker
+            image: docker:dind
+          - engine: docker-test
+            kind: docker
+            image: docker:rc-dind
+          - engine: podman
+            kind: podman
+            image: quay.io/podman/stable:latest
+    env:
+      STAGED: ${{ github.workspace }}/../canary-staged
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install --require-hashes -r requirements-dev.txt
+
+      # The policy above: the floating tag, resolved to one digest for this run.
+      - name: the newest image, pinned for this run
+        id: image
+        env:
+          FLOATING: ${{ matrix.image }}
+          KIND: ${{ matrix.kind }}
+          ASKED: ${{ inputs.image }}
+          ASKED_KIND: ${{ inputs.kind }}
+        run: |
+          set -eu
+          image="$FLOATING"; kind="$KIND"
+          if [ -n "$ASKED" ]; then image="$ASKED"; kind="$ASKED_KIND"; fi
+          docker pull -q "$image" > /dev/null
+          pinned="$(docker inspect -f '{{index .RepoDigests 0}}' "$image")"
+          echo "pinned=$pinned" >> "$GITHUB_OUTPUT"
+          echo "kind=$kind" >> "$GITHUB_OUTPUT"
+          mkdir -p "$STAGED"
+          printf '{"tag": "%s", "pinned": "%s"}\n' "$image" "$pinned" > "$STAGED/image.json"
+          echo "$image is $pinned"
+
+      - name: a registry that answers as ghcr.io
+        run: |
+          docker network create st-ci
+          python -m tests.self_update.stage registry --out "$STAGED" --network st-ci
+
+      - name: build and push A (dev's previous commit) and B (dev's tip)
+        run: |
+          set -eu
+          base="$(git rev-parse -q --verify 'HEAD^1' || git rev-parse HEAD)"
+          python -m tests.self_update.stage build --out "$STAGED" --base "$base" --only none
+
+      - name: E1 and E11 on the engine
+        env:
+          KIND: ${{ steps.image.outputs.kind }}
+          PINNED: ${{ steps.image.outputs.pinned }}
+          ENGINE: ${{ matrix.engine }}
+        run: |
+          python -m tests.self_update.engine_box --kind "$KIND" --image "$PINNED" --leg "$ENGINE" \
+            --staged "$STAGED" --only E1,E11 \
+            --version-out "$STAGED/version.json" --report "$STAGED/report.json"
+
+      - name: summary
+        if: always()
+        env:
+          ENGINE: ${{ matrix.engine }}
+        run: |
+          python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY" || true
+          import json, os
+          staged = os.environ["STAGED"]
+          def load(name):
+              try:
+                  return json.load(open(f"{staged}/{name}"))
+              except (OSError, ValueError):
+                  return None
+          image, version, report = load("image.json") or {}, load("version.json") or {}, load("report.json") or []
+          print(f"### {os.environ['ENGINE']}: {image.get('pinned', '?')}")
+          print(f"{version.get('Version', '?')}, API {version.get('MinAPIVersion', '?')}-{version.get('ApiVersion', '?')}\n")
+          for r in report:
+              print(f"- {r['scenario']} {r['title']}: {r['result']}" + (f" -- {r['error']}" if r.get("error") else ""))
+          PY
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: canary-${{ matrix.engine }}
+          path: |
+            ${{ env.STAGED }}/image.json
+            ${{ env.STAGED }}/version.json
+            ${{ env.STAGED }}/report.json
+          if-no-files-found: warn
+          retention-days: 90
+
+  # One issue for every failing engine of the run: open it, or comment on the
+  # one already open. Its own job, so two failing engines never race to open
+  # two issues.
+  issue:
+    needs: canary
+    if: always() && needs.canary.result == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          pattern: canary-*
+          path: results
+      - name: open or update the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -eu
+          python3 - <<'PY' > body.md
+          import json, os, pathlib
+          out = ["The weekly engine canary failed on a container engine the updater has not met before.", ""]
+          out.append(f"Run: {os.environ['RUN_URL']}")
+          out.append("")
+          out.append("| engine | image | version | API window | failed |")
+          out.append("|---|---|---|---|---|")
+          for folder in sorted(pathlib.Path("results").glob("canary-*")):
+              def load(name):
+                  try:
+                      return json.loads((folder / name).read_text())
+                  except (OSError, ValueError):
+                      return None
+              image, version, report = load("image.json") or {}, load("version.json") or {}, load("report.json")
+              failed = "the run did not get as far as the scenarios" if report is None else ", ".join(
+                  f"{r['scenario']} ({r.get('error') or '; '.join(r.get('failed') or [])[:200]})"
+                  for r in report if r.get("result") in ("FAILED",))
+              if not failed:
+                  continue
+              window = f"{version.get('MinAPIVersion', '?')}-{version.get('ApiVersion', '?')}"
+              out.append(f"| {folder.name[len('canary-'):]} | `{image.get('pinned', '?')}` | "
+                         f"{version.get('Version', '?')} | {window} | {failed} |")
+          out.append("")
+          out.append("The updater negotiates inside its tested window (`TESTED_FLOOR`-`TESTED_MAX` in "
+                     "updater/engine.py). Reproduce with *Run workflow* on `engine canary`, `image` set to the "
+                     "pinned image above.")
+          print("\n".join(out))
+          PY
+          title="Engine canary: self-update fails on a new container engine"
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --label docker --state open \
+            --search "\"$title\" in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body-file body.md
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --label docker --body-file body.md
+          fi
