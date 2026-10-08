@@ -600,7 +600,7 @@ function CheckResult({
   onUpdaterOnly: (version: string) => void;
   updatingUpdater: boolean;
 }) {
-  const releases = check.releases;
+  const releases = check.releases ?? [];
   const [chosen, setChosen] = useState<string | null>(releases[0]?.version ?? null);
   const target = releases.find((one) => one.version === chosen) ?? releases[0] ?? null;
   // Every release up to the one chosen: its migrations all run (3.2).

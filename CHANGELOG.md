@@ -185,9 +185,7 @@ history this repository does not have.
   verified. Any doubt is a refusal and nothing skips it. sigstore lives in a
   lock of its own, `requirements-updater.txt`, never in the app's runtime
   lock. Tested offline against the real 0.7.0, 0.7.1 and 0.8.0 bundles and
-  tampered copies of them. Nothing calls it yet.
-
-## 0.8.0 — 2026-10-08
+  tampered copies of them. Nothing calls it yet.## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
 
@@ -438,6 +436,15 @@ published image as what `compose.yaml` runs.
 - **Why any member may import accounts from a file is written down**, beside
   the route, with a test: it only adds accounts, each in the audit log, and
   History undoes the whole file. Nothing about who may run it changed. (#115)
+
+- **A release waits for one approval before anything is published.**
+  `release.yml`'s `publish` job runs in a `release` environment, and the other
+  two publishing jobs depend on it, so once the repository gives that
+  environment a required reviewer, a pushed `v*` tag builds and smoke-tests as
+  before and then waits for a single click before anything reaches Releases
+  or ghcr.io. `tests/test_release_workflow.py` fails if a publishing job stops
+  depending on the gated one. Until the reviewer is set, it behaves as it did.
+  (#96)
 
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
