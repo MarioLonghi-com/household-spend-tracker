@@ -44,17 +44,23 @@ import type {
 } from "../../lib/types";
 import type { RegisterPreset } from "../Register";
 import { HeadSlot } from "./IncomeExpense";
-import { formatDate, monthLabel } from "../../lib/locale";
+import { formatDate, listText, monthLabel, orText } from "../../lib/locale";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** "1 expense", "3 expenses". */
 function expenses(count: number): string {
-  return `${count} ${count === 1 ? "expense" : "expenses"}`;
+  return plural(count, { one: `${count} expense`, other: `${count} expenses` });
+}
+
+/** "3 days": how long something has waited. */
+function days(count: number): string {
+  return plural(count, { one: `${count} day`, other: `${count} days` });
 }
 
 /** "EUR", "EUR or GBP", "EUR, GBP or USD" -- for "nothing outstanding in …". */
 function either(codes: string[]): string {
-  if (codes.length <= 1) return codes[0] ?? "";
-  return `${codes.slice(0, -1).join(", ")} or ${codes[codes.length - 1]}`;
+  return orText(codes);
 }
 
 /**
@@ -265,7 +271,9 @@ export function Reimbursements({
           {/* Where you act on what this shows. The filter is the owed view,
               which is the list a person works through. */}
           <button type="button" onClick={() => onOpenRegister?.({ reimbursement: "owed" })}>
-            Show in Transactions
+            <Trans>
+              Show in Transactions
+            </Trans>
           </button>
         </div>
         <div className="report-filters">
@@ -274,19 +282,23 @@ export function Reimbursements({
       </div>
       {range.since || range.until ? (
         <p className="muted small" style={{ marginTop: 0 }}>
-          Dates narrow by when the expense happened, not when it was repaid.
+          <Trans>
+            Dates narrow by when the expense happened, not when it was repaid.
+          </Trans>
         </p>
       ) : null}
 
       <Problem error={error} />
 
       {loading ? (
-        <div className="muted">Loading…</div>
+        <div className="muted"><Trans>Loading…</Trans></div>
       ) : !reports ? null : nothingFlagged ? (
         <Empty>
-          Nothing is marked as a work expense yet. Open a transaction in the register and set
-          Reimbursement to “Work should pay this back” — or tick several and use Work expense in
-          the bar that appears.
+          <Trans>
+            Nothing is marked as a work expense yet. Open a transaction in the register and set
+            Reimbursement to “Work should pay this back” — or tick several and use Work expense in
+            the bar that appears.
+          </Trans>
         </Empty>
       ) : (
         <ReimbursementsBody
@@ -320,8 +332,10 @@ function CurrencyChecks({
 }) {
   return (
     <div className="currency-toggle reimb-currencies">
-      <span className="daterange-label">Currency</span>
-      <div role="group" aria-label="Currency" className="daterange-presets">
+      <span className="daterange-label">
+        <Trans>Currency</Trans>
+      </span>
+      <div role="group" aria-label={t`Currency`} className="daterange-presets">
         {options.map((code) => {
           const on = ticked.includes(code);
           const last = on && ticked.length === 1;
@@ -329,7 +343,7 @@ function CurrencyChecks({
             <label
               key={code}
               className={on ? "chip active" : "chip"}
-              title={last ? "At least one currency stays ticked" : undefined}
+              title={last ? t`At least one currency stays ticked` : undefined}
             >
               <input
                 type="checkbox"
@@ -343,15 +357,19 @@ function CurrencyChecks({
         })}
       </div>
       {options.length > 1 && (
-        <Hint label="why the currencies are never added up">
+        <Hint label={t`why the currencies are never added up`}>
           <p>
-            This ledger never converts. Currency lives on the account, and there is no exchange
-            rate stored anywhere — so a total mixing {options.join(" and ")} would be a number
-            with nothing behind it.
+            <Trans>
+              This ledger never converts. Currency lives on the account, and there is no exchange
+              rate stored anywhere — so a total mixing {listText(options)} would be a number with
+              nothing behind it.
+            </Trans>
           </p>
           <p className="muted small" style={{ marginBottom: 0 }}>
-            Tick several and each figure gets a line per currency; the lists show every amount
-            in its own. Nothing on this screen ever adds two together.
+            <Trans>
+              Tick several and each figure gets a line per currency; the lists show every amount
+              in its own. Nothing on this screen ever adds two together.
+            </Trans>
           </p>
         </Hint>
       )}
@@ -439,7 +457,7 @@ export function ReimbursementsBody({
     <>
       <div className="reimb-figures">
         <Figure
-          label="Work owes you"
+          label={t`Work owes you`}
           lines={reports.map((one) => {
             const oldest =
               one.oldest_outstanding !== null ? ageInDays(one.oldest_outstanding, asOf) : null;
@@ -447,41 +465,51 @@ export function ReimbursementsBody({
               one,
               one.outstanding,
               one.outstanding_count === 0
-                ? "Nothing owed"
+                ? t`Nothing owed`
                 : `${expenses(one.outstanding_count)}${
-                    oldest !== null ? ` · oldest ${oldest} ${oldest === 1 ? "day" : "days"}` : ""
+                    oldest !== null ? ` · ${t`oldest ${days(oldest)}`}` : ""
                   }`,
               one.outstanding > 0,
             );
           })}
         />
         <Figure
-          label="Recovered"
+          label={t`Recovered`}
           lines={reports.map((one) =>
-            line(one, one.recovered, `${expenses(one.recovered_count)} repaid`),
+            line(
+              one,
+              one.recovered,
+              plural(one.recovered_count, {
+                one: `${one.recovered_count} expense repaid`,
+                other: `${one.recovered_count} expenses repaid`,
+              }),
+            ),
           )}
         />
         <Figure
-          label="Written off"
+          label={t`Written off`}
           lines={reports.map((one) =>
             line(
               one,
               one.written_off,
               one.written_off_count === 0
-                ? "None"
-                : `${expenses(one.written_off_count)}, counted as your spending`,
+                ? t({ message: "None", context: "written off" })
+                : plural(one.written_off_count, {
+                    one: `${one.written_off_count} expense, counted as your spending`,
+                    other: `${one.written_off_count} expenses, counted as your spending`,
+                  }),
             ),
           )}
         />
         <Figure
-          label="Paid, not matched"
+          label={t`Paid, not matched`}
           lines={reports.map((one) =>
             line(
               one,
               one.unmatched,
               one.unmatched > 0
-                ? "An advance not spent yet, or an overpayment"
-                : "Every payment is accounted for",
+                ? t`An advance not spent yet, or an overpayment`
+                : t`Every payment is accounted for`,
             ),
           )}
         />
@@ -500,9 +528,11 @@ export function ReimbursementsBody({
       <ByMonth household={household} months={months} codes={codes} base={baseCurrency} />
 
       <p className="muted small">
-        Each currency keeps its own figures and nothing here adds two together — the ledger
-        stores no exchange rates. A claim repaid in another currency is listed once, with every
-        amount in its own currency and no difference worked out between them.
+        <Trans>
+          Each currency keeps its own figures and nothing here adds two together — the ledger
+          stores no exchange rates. A claim repaid in another currency is listed once, with every
+          amount in its own currency and no difference worked out between them.
+        </Trans>
       </p>
 
       {picked ? (
@@ -573,7 +603,7 @@ function Details({
   onClose: () => void;
 }) {
   const describe = (one: { date: string; payee_name: string | null }, amount: string) =>
-    `${formatDate(one.date)} · ${one.payee_name ?? "no payee"} · ${amount}`;
+    `${formatDate(one.date)} · ${one.payee_name ?? t`no payee`} · ${amount}`;
 
   let row: {
     id: string;
@@ -591,25 +621,36 @@ function Details({
   if (picked.kind === "owed") {
     const waited = ageInDays(picked.row.date, asOf);
     row = picked.row;
-    amountLabel = "Spent";
+    amountLabel = t`Spent`;
     amount = format(picked.row.amount, picked.row.currency);
-    state = `Work should pay this back — not repaid yet, ${waited} ${waited === 1 ? "day" : "days"} waiting`;
-    link = <span className="muted">No payment linked yet</span>;
+    state = plural(waited, {
+      one: `Work should pay this back — not repaid yet, ${waited} day waiting`,
+      other: `Work should pay this back — not repaid yet, ${waited} days waiting`,
+    });
+    link = (
+      <span className="muted">
+        <Trans>No payment linked yet</Trans>
+      </span>
+    );
     view = "owed";
   } else if (picked.kind === "repaid") {
     const pay = picked.claim.settlement;
     row = picked.expense;
-    amountLabel = "Spent";
+    amountLabel = t`Spent`;
     amount = format(picked.expense.amount, picked.expense.currency);
-    state = "Work should pay this back — repaid";
+    state = t`Work should pay this back — repaid`;
+    const others = picked.claim.expenses.length - 1;
+    const payment = describe(pay, format(pay.amount, pay.currency));
     link = (
       <>
-        Repaid by {describe(pay, format(pay.amount, pay.currency))}
-        {picked.claim.expenses.length > 1 ? (
+        {t`Repaid by ${payment}`}
+        {others > 0 ? (
           <span className="muted">
             {" "}
-            with {picked.claim.expenses.length - 1} other{" "}
-            {picked.claim.expenses.length === 2 ? "expense" : "expenses"}
+            {plural(others, {
+              one: `with ${others} other expense`,
+              other: `with ${others} other expenses`,
+            })}
           </span>
         ) : null}
       </>
@@ -618,9 +659,9 @@ function Details({
   } else {
     const claim = picked.claim;
     row = claim.settlement;
-    amountLabel = "Received";
+    amountLabel = t`Received`;
     amount = format(claim.settlement.amount, claim.settlement.currency);
-    state = "A payment from work";
+    state = t`A payment from work`;
     link = (
       <>
         <ul className="reimb-detail-list">
@@ -629,7 +670,9 @@ function Details({
           ))}
         </ul>
         <span className="small">
-          Difference: <DifferenceText claim={claim} />
+          <Trans>
+            Difference: <DifferenceText claim={claim} />
+          </Trans>
         </span>
       </>
     );
@@ -638,23 +681,23 @@ function Details({
 
   const blank = <span className="muted">—</span>;
   return (
-    <Dialog title={`${row.payee_name ?? "No payee"} · ${formatDate(row.date)}`} onClose={onClose}>
+    <Dialog title={`${row.payee_name ?? t`No payee`} · ${formatDate(row.date)}`} onClose={onClose}>
       <dl className="reimb-detail">
-        <dt>Date</dt>
+        <dt><Trans>Date</Trans></dt>
         <dd className="mono">{formatDate(row.date)}</dd>
-        <dt>Account</dt>
+        <dt><Trans>Account</Trans></dt>
         <dd>{row.account_name}</dd>
-        <dt>Payee</dt>
+        <dt><Trans>Payee</Trans></dt>
         <dd>{row.payee_name ?? blank}</dd>
-        <dt>Memo</dt>
+        <dt><Trans>Memo</Trans></dt>
         <dd>{row.memo ?? blank}</dd>
-        <dt>Category</dt>
+        <dt><Trans>Category</Trans></dt>
         <dd>{row.category_name ?? blank}</dd>
         <dt>{amountLabel}</dt>
         <dd className="amount">{amount}</dd>
-        <dt>Reimbursement</dt>
+        <dt><Trans>Reimbursement</Trans></dt>
         <dd>{state}</dd>
-        <dt>{picked.kind === "payment" ? "Repaid" : "Linked to"}</dt>
+        <dt>{picked.kind === "payment" ? t`Repaid` : t`Linked to`}</dt>
         <dd>{link}</dd>
       </dl>
       <div className="row" style={{ justifyContent: "flex-end" }}>
@@ -665,7 +708,9 @@ function Details({
             onOpen(row.id, view);
           }}
         >
-          Open in Transactions
+          <Trans>
+            Open in Transactions
+          </Trans>
         </button>
       </div>
     </Dialog>
@@ -758,24 +803,26 @@ function Outstanding({
   return (
     <section className="reimb-section" aria-labelledby="reimb-outstanding">
       <h2 id="reimb-outstanding" className="section-title">
-        Outstanding{" "}
+        <Trans>Outstanding</Trans>{" "}
         <span className="muted small">
-          Click one for its details, or its date to find its payment or write it off.
+          <Trans>
+            Click one for its details, or its date to find its payment or write it off.
+          </Trans>
         </span>
       </h2>
       {rows.length === 0 ? (
-        <Empty>Nothing outstanding in {either(codes)}.</Empty>
+        <Empty>{t`Nothing outstanding in ${either(codes)}.`}</Empty>
       ) : (
         <div className="table-scroll">
           <table>
             <thead>
               <tr>
-                {heading("Date", "date")}
-                {heading("Payee", "payee")}
-                {heading("Account", "account")}
-                {heading("Memo", "memo")}
-                {heading("Owed", "amount", true)}
-                {heading("Waiting", "waiting", true)}
+                {heading(t`Date`, "date")}
+                {heading(t`Payee`, "payee")}
+                {heading(t`Account`, "account")}
+                {heading(t`Memo`, "memo")}
+                {heading(t`Owed`, "amount", true)}
+                {heading(t`Waiting`, "waiting", true)}
               </tr>
             </thead>
             <tbody>
@@ -787,14 +834,14 @@ function Outstanding({
                     className="row-pick"
                     {...pickable(() => onPick({ kind: "owed", row }))}
                   >
-                    <td data-label="Date" data-detail-first="true">
+                    <td data-label={t`Date`} data-detail-first="true">
                       <button
                         className="link"
                         onClick={(event) => {
                           event.stopPropagation();
                           onOpen(row.id);
                         }}
-                        title="Open it in Transactions"
+                        title={t`Open it in Transactions`}
                       >
                         {formatDate(row.date)}
                       </button>
@@ -803,10 +850,10 @@ function Outstanding({
                       {row.payee_name ?? <span className="muted">—</span>}
                       {row.has_receipt ? <ReceiptMark /> : null}
                     </td>
-                    <td className="small muted" data-label="Account">
+                    <td className="small muted" data-label={t`Account`}>
                       {row.account_name}
                     </td>
-                    <td className="small reimb-memo" data-label="Memo">
+                    <td className="small reimb-memo" data-label={t`Memo`}>
                       {row.memo ?? ""}
                     </td>
                     <td className="amount" data-figure="true">
@@ -814,9 +861,9 @@ function Outstanding({
                     </td>
                     <td
                       className={waited > 30 ? "amount work-waiting" : "amount"}
-                      data-label="Waiting"
+                      data-label={t`Waiting`}
                     >
-                      {waited} {waited === 1 ? "day" : "days"}
+                      {days(waited)}
                     </td>
                   </tr>
                 );
@@ -837,7 +884,11 @@ type PaymentColumn = Exclude<(typeof PAYMENT_COLUMNS)[number], "server">;
 export function DifferenceText({ claim }: { claim: ReimbursementClaim }) {
   const own = claim.settlement.currency;
   if (claim.difference === null)
-    return <span className="work-waiting">mixed currencies, not compared</span>;
+    return (
+      <span className="work-waiting">
+        <Trans>mixed currencies, not compared</Trans>
+      </span>
+    );
   if (claim.difference === 0) return <>{format(0, own)}</>;
   return <span className="work-waiting">{format(claim.difference, own)}</span>;
 }
@@ -893,23 +944,25 @@ function Payments({
   return (
     <section className="reimb-section" aria-labelledby="reimb-payments">
       <h2 id="reimb-payments" className="section-title">
-        Payments from work{" "}
-        <span className="muted small">Each one with the expenses linked to it.</span>
+        <Trans>Payments from work</Trans>{" "}
+        <span className="muted small">
+          <Trans>Each one with the expenses linked to it.</Trans>
+        </span>
       </h2>
       {claims.length === 0 ? (
-        <Empty>No payments linked yet.</Empty>
+        <Empty><Trans>No payments linked yet.</Trans></Empty>
       ) : (
         <div className="matrix-scroll">
           <table className="reimb-claims">
             <thead>
               <tr>
-                {heading("Paid on", "date")}
-                {heading("From", "payee")}
-                {heading("Into", "account")}
-                {heading("Memo", "memo")}
-                {heading("Received", "amount", true)}
-                <th className="amount">Covered</th>
-                {heading("Difference", "difference", true)}
+                {heading(t`Paid on`, "date")}
+                {heading(t`From`, "payee")}
+                {heading(t`Into`, "account")}
+                {heading(t`Memo`, "memo")}
+                {heading(t`Received`, "amount", true)}
+                <th className="amount"><Trans>Covered</Trans></th>
+                {heading(t`Difference`, "difference", true)}
               </tr>
             </thead>
             <tbody>
@@ -1029,20 +1082,23 @@ function ByMonth({
   return (
     <section className="reimb-section" aria-labelledby="reimb-months">
       <h2 id="reimb-months" className="section-title">
-        By month <span className="muted small">By when the expense happened.</span>
+        <Trans>By month</Trans>{" "}
+        <span className="muted small">
+          <Trans>By when the expense happened.</Trans>
+        </span>
       </h2>
       {months.length === 0 ? (
-        <Empty>No work expenses in {either(codes)} yet.</Empty>
+        <Empty>{t`No work expenses in ${either(codes)} yet.`}</Empty>
       ) : (
         <div className="matrix-scroll">
           <table>
             <thead>
               <tr>
-                {heading("Month", "month", false)}
-                {heading("Flagged", "flagged")}
-                {heading("Recovered", "recovered")}
-                {heading("Written off", "written_off")}
-                {heading("Still owed", "outstanding")}
+                {heading(t`Month`, "month", false)}
+                {heading(t`Flagged`, "flagged")}
+                {heading(t`Recovered`, "recovered")}
+                {heading(t`Written off`, "written_off")}
+                {heading(t`Still owed`, "outstanding")}
               </tr>
             </thead>
             <tbody>

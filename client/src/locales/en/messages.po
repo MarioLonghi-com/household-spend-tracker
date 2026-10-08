@@ -63,6 +63,10 @@ msgstr "Choose…"
 msgid "New password"
 msgstr "New password"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Expense"
+msgstr "Expense"
+
 #: src/components/Receipts.tsx
 msgid "{count, plural, one {has {count} receipts} other {has {count} receipts}}"
 msgstr "{count, plural, one {has {count} receipts} other {has {count} receipts}}"
@@ -91,6 +95,10 @@ msgstr "Send back to the inbox"
 msgid "One act, so History has one entry and undo puts every row back together."
 msgstr "One act, so History has one entry and undo puts every row back together."
 
+#: src/screens/Reports.tsx
+msgid "Reimbursements"
+msgstr "Reimbursements"
+
 #. placeholder {0}: receipt.download_name
 #: src/components/Receipts.tsx
 msgid "Receipt, {0}"
@@ -99,6 +107,14 @@ msgstr "Receipt, {0}"
 #: src/screens/Accounts.tsx
 msgid "this account is closed"
 msgstr "this account is closed"
+
+#: src/screens/Reports.tsx
+msgid "Where you are"
+msgstr "Where you are"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Payments from work"
+msgstr "Payments from work"
 
 #: src/screens/Admin.tsx
 msgid "An owner can administer this instance, and stays one whatever you later do to your own password or authenticator."
@@ -189,6 +205,10 @@ msgstr "You can pick a palette and one accent of your own. You cannot reach the 
 msgid "account types"
 msgstr "account types"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Net — whole period"
+msgstr "Net — whole period"
+
 #. placeholder {0}: count(it.category_groups)
 #: src/screens/Household.tsx
 msgid "in {0} groups"
@@ -248,6 +268,12 @@ msgstr "Process"
 msgid "date column"
 msgstr "date column"
 
+#. placeholder {0}: rows.data.entries.length
+#. placeholder {1}: rows.data.count
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Showing the {0} most recent of {1}. The total above is over all of them — narrow the report, or open one month rather than the whole period."
+msgstr "Showing the {0} most recent of {1}. The total above is over all of them — narrow the report, or open one month rather than the whole period."
+
 #. placeholder {0}: account.currency
 #: src/screens/Accounts.tsx
 msgid "That isn't an amount in {0}."
@@ -260,6 +286,10 @@ msgstr "what a key can never do"
 #: src/screens/Rules.tsx
 msgid "Priority"
 msgstr "Priority"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Owed"
+msgstr "Owed"
 
 #: src/screens/Accounts.tsx
 msgid "Name the bank uses"
@@ -379,6 +409,10 @@ msgstr "This browser does not support passkeys yet."
 msgid "YYYY-MM-DD"
 msgstr "YYYY-MM-DD"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Work owes you"
+msgstr "Work owes you"
+
 #: src/screens/Household.tsx
 msgid "What is in it"
 msgstr "What is in it"
@@ -390,6 +424,10 @@ msgstr "Downloading…"
 #: src/screens/ResetAccount.tsx
 msgid "Reset links work once and they expire. Ask an owner of this instance for a new one."
 msgstr "Reset links work once and they expire. Ask an owner of this instance for a new one."
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Each currency gets its own report instead. Nothing on this screen ever adds two together."
+msgstr "Each currency gets its own report instead. Nothing on this screen ever adds two together."
 
 #: src/screens/Profile.tsx
 msgid "Sign-in methods"
@@ -433,8 +471,14 @@ msgid "this path does not exist"
 msgstr "this path does not exist"
 
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 msgid "Group accounts by"
 msgstr "Group accounts by"
+
+#. placeholder {0}: monthLabel(period)
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Net — {0}"
+msgstr "Net — {0}"
 
 #. placeholder {0}: changes.length
 #: src/screens/History.tsx
@@ -506,9 +550,21 @@ msgstr "Add a rule"
 msgid "One part of a split"
 msgstr "One part of a split"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Each currency keeps its own figures and nothing here adds two together — the ledger stores no exchange rates. A claim repaid in another currency is listed once, with every amount in its own currency and no difference worked out between them."
+msgstr "Each currency keeps its own figures and nothing here adds two together — the ledger stores no exchange rates. A claim repaid in another currency is listed once, with every amount in its own currency and no difference worked out between them."
+
 #: src/screens/Setup.tsx
 msgid "2. You"
 msgstr "2. You"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Average"
+msgstr "Average"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Flagged"
+msgstr "Flagged"
 
 #: src/screens/Admin.tsx
 msgid "Keep them active"
@@ -517,6 +573,10 @@ msgstr "Keep them active"
 #: src/components/Receipts.tsx
 msgid "Uploaded"
 msgstr "Uploaded"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Nothing went into this one."
+msgstr "Nothing went into this one."
 
 #: src/screens/Backups.tsx
 msgid "Handed to the share sheet."
@@ -702,6 +762,10 @@ msgstr "Somebody gave {user} a new authenticator"
 msgid "Tick {0}"
 msgstr "Tick {0}"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Work should pay this back — repaid"
+msgstr "Work should pay this back — repaid"
+
 #: src/screens/Admin.tsx
 msgid "Revoke this invitation?"
 msgstr "Revoke this invitation?"
@@ -765,6 +829,10 @@ msgstr "Withdrawing a link stops it working. It does not undo the reset: the acc
 #: src/components/ReenrolmentDue.tsx
 msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
 msgstr "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "(rows with no category yet)"
+msgstr "(rows with no category yet)"
 
 #: src/screens/History.tsx
 msgid "Everything recorded about this"
@@ -872,9 +940,17 @@ msgstr "Name"
 msgid "Dismiss without copying? The link cannot be shown again."
 msgstr "Dismiss without copying? The link cannot be shown again."
 
+#: src/screens/Reports.tsx
+msgid "What came in, what went out, and what it was for — month by month."
+msgstr "What came in, what went out, and what it was for — month by month."
+
 #: src/screens/Import.tsx
 msgid "Discard the staged one"
 msgstr "Discard the staged one"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Total"
+msgstr "Total"
 
 #: src/screens/Admin.tsx
 msgid "{name} is told on the link page that you reset them, and every owner sees it under Recent sign-in changes."
@@ -1012,6 +1088,7 @@ msgid "A screen copy and a thumbnail. About <0>33 KB</0> per receipt."
 msgstr "A screen copy and a thumbnail. About <0>33 KB</0> per receipt."
 
 #: src/screens/Register.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "Covered"
 msgstr "Covered"
 
@@ -1148,6 +1225,10 @@ msgstr "Latest 3 months"
 msgid "Make them an owner"
 msgstr "Make them an owner"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Total expense"
+msgstr "Total expense"
+
 #: src/lib/labels.ts
 msgid "Skipped"
 msgstr "Skipped"
@@ -1215,9 +1296,15 @@ msgstr "None yet"
 msgid "<0>{0}</0> is available. This instance is running {1}."
 msgstr "<0>{0}</0> is available. This instance is running {1}."
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "By when the expense happened."
+msgstr "By when the expense happened."
+
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/Reimbursements.tsx
 #: src/screens/TransferSections.tsx
 msgid "Account"
 msgstr "Account"
@@ -1251,6 +1338,10 @@ msgstr "Delete this transaction?"
 msgid "Check the code"
 msgstr "Check the code"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Outstanding"
+msgstr "Outstanding"
+
 #: src/lib/labels.ts
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
@@ -1271,6 +1362,10 @@ msgstr "with uncommitted changes"
 msgid "Counting…"
 msgstr "Counting…"
 
+#: src/screens/Reports.tsx
+msgid "Income vs Expense"
+msgstr "Income vs Expense"
+
 #. placeholder {0}: formatCount(ordered.length)
 #: src/screens/Register.tsx
 msgid "Tick all {0} rows the filter shows"
@@ -1286,8 +1381,13 @@ msgid "use the bank's: {0}"
 msgstr "use the bank's: {0}"
 
 #: src/screens/Register.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "Reimbursement"
 msgstr "Reimbursement"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Repaid"
+msgstr "Repaid"
 
 #: src/screens/Payees.tsx
 msgid "Merge…"
@@ -1363,6 +1463,7 @@ msgstr "What happened"
 
 #: src/screens/Import.tsx
 #: src/screens/Payees.tsx
+#: src/screens/reports/Reimbursements.tsx
 #: src/screens/TransferSections.tsx
 msgid "Into"
 msgstr "Into"
@@ -1388,6 +1489,10 @@ msgstr "A split needs at least two parts"
 #: src/screens/Passkeys.tsx
 msgid "Add a second on another device. If you lose this one, you will need your password and code."
 msgstr "Add a second on another device. If you lose this one, you will need your password and code."
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Total income"
+msgstr "Total income"
 
 #. placeholder {0}: found.payee_original
 #: src/screens/Register.tsx
@@ -1459,6 +1564,10 @@ msgstr "The server added {user} as an owner"
 msgid "Two households open in one browser look identical, and that is how a statement gets posted into the wrong one. The colour is on every screen, needs no reading, and you notice it changed before you notice anything else."
 msgstr "Two households open in one browser look identical, and that is how a statement gets posted into the wrong one. The colour is on every screen, needs no reading, and you notice it changed before you notice anything else."
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Open in Transactions"
+msgstr "Open in Transactions"
+
 #: src/App.tsx
 #: src/lib/labels.ts
 #: src/screens/Accounts.tsx
@@ -1501,6 +1610,10 @@ msgstr "{0} characters"
 #: src/lib/labels.ts
 msgid "Source app"
 msgstr "Source app"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Repaid by {payment}"
+msgstr "Repaid by {payment}"
 
 #: src/screens/Backups.tsx
 #: src/screens/SignIn.tsx
@@ -1548,6 +1661,12 @@ msgstr "{0, plural, one {{1} transaction carries this category, so it cannot be 
 msgid "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
 msgstr "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
 
+#. placeholder {0}: report.data.since
+#. placeholder {1}: report.data.until
+#: src/screens/reports/IncomeExpense.tsx
+msgid "All dates: {0} to {1}."
+msgstr "All dates: {0} to {1}."
+
 #: src/screens/Register.tsx
 msgid "Attach receipts"
 msgstr "Attach receipts"
@@ -1577,6 +1696,10 @@ msgstr "Changing your own role would close this screen; ask the other owner"
 #: src/screens/Receipts.tsx
 msgid "Size"
 msgstr "Size"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "There are no accounts yet, so there is nothing to report on. Add one on the Accounts screen and the figures will follow."
+msgstr "There are no accounts yet, so there is nothing to report on. Add one on the Accounts screen and the figures will follow."
 
 #: src/screens/TransferSections.tsx
 msgid "Select every waiting row"
@@ -1709,6 +1832,7 @@ msgid "Set up"
 msgstr "Set up"
 
 #: src/screens/Register.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "No payee"
 msgstr "No payee"
 
@@ -1720,9 +1844,20 @@ msgstr "You're back in"
 msgid "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
 msgstr "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Tick several and each figure gets a line per currency; the lists show every amount in its own. Nothing on this screen ever adds two together."
+msgstr "Tick several and each figure gets a line per currency; the lists show every amount in its own. Nothing on this screen ever adds two together."
+
 #: src/screens/Rules.tsx
 msgid "And then"
 msgstr "And then"
+
+#. placeholder {0}: group.rows.length
+#. placeholder {1}: group.rows.length
+#. placeholder {2}: group.rows.length
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{0, plural, one {{1} category folded away} other {{2} categories folded away}}"
+msgstr "{0, plural, one {{1} category folded away} other {{2} categories folded away}}"
 
 #: src/screens/Admin.tsx
 #: src/screens/Import.tsx
@@ -1832,6 +1967,10 @@ msgstr "Amount arriving ({0})"
 msgid "Disabled"
 msgstr "Disabled"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Paid on"
+msgstr "Paid on"
+
 #: src/screens/Admin.tsx
 msgid "Reset and make the link"
 msgstr "Reset and make the link"
@@ -1879,6 +2018,10 @@ msgstr "Not a work expense"
 msgid "Leave a payee somebody set by hand alone. Turning this off lets the rules overrule those too, which is occasionally what you want and never what you want by accident."
 msgstr "Leave a payee somebody set by hand alone. Turning this off lets the rules overrule those too, which is occasionally what you want and never what you want by accident."
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Net"
+msgstr "Net"
+
 #: src/screens/Register.tsx
 msgid "Who was paid"
 msgstr "Who was paid"
@@ -1912,6 +2055,7 @@ msgid "Pick an accent colour"
 msgstr "Pick an accent colour"
 
 #: src/components/DateRange.tsx
+#: src/screens/reports/Reimbursements.tsx
 #: src/screens/Transfer.tsx
 msgid "From"
 msgstr "From"
@@ -1977,6 +2121,10 @@ msgstr "No single category matches that. Keep typing, or empty it."
 #: src/screens/Payees.tsx
 msgid "Merge {0}"
 msgstr "Merge {0}"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "No payments linked yet."
+msgstr "No payments linked yet."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -2066,6 +2214,10 @@ msgstr "Duplicate"
 msgid "{app}, via the {app} API"
 msgstr "{app}, via the {app} API"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Paid, not matched"
+msgstr "Paid, not matched"
+
 #: src/screens/Register.tsx
 msgid "Read a statement file into this register"
 msgstr "Read a statement file into this register"
@@ -2098,6 +2250,13 @@ msgstr "preview"
 msgid "Add payee"
 msgstr "Add payee"
 
+#. placeholder {0}: section.rows.length
+#. placeholder {1}: section.rows.length
+#. placeholder {2}: section.rows.length
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{0, plural, one {{1} category folded away — the total is on the line below.} other {{2} categories folded away — the total is on the line below.}}"
+msgstr "{0, plural, one {{1} category folded away — the total is on the line below.} other {{2} categories folded away — the total is on the line below.}}"
+
 #. placeholder {0}: found.via
 #: src/screens/Register.tsx
 msgid "Staged through the agent API by <0>{0}</0>."
@@ -2117,6 +2276,10 @@ msgstr "Active"
 #: src/screens/Admin.tsx
 msgid "Households"
 msgstr "Households"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "why the currencies are never added up"
+msgstr "why the currencies are never added up"
 
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
@@ -2201,6 +2364,10 @@ msgstr "Other liabilities"
 msgid "{0} by {1}"
 msgstr "{0} by {1}"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{count, plural, one {{count} opening balance} other {{count} opening balances}}"
+msgstr "{count, plural, one {{count} opening balance} other {{count} opening balances}}"
+
 #: src/screens/Register.tsx
 msgid "Replace"
 msgstr "Replace"
@@ -2253,6 +2420,7 @@ msgid "{0} will always be {1} — and the payee was added"
 msgstr "{0} will always be {1} — and the payee was added"
 
 #: src/screens/Register.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "Received"
 msgstr "Received"
 
@@ -2286,6 +2454,10 @@ msgstr "{0} — all hidden"
 #: src/screens/AcceptInvite.tsx
 msgid "Filled in from the invitation. Change it if you would rather use another address."
 msgstr "Filled in from the invitation. Change it if you would rather use another address."
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Nothing in this window."
+msgstr "Nothing in this window."
 
 #: src/screens/Profile.tsx
 msgid "Which household"
@@ -2349,6 +2521,10 @@ msgstr "Closing balance ({0})"
 msgid "Reset sign-in for {name}?"
 msgstr "Reset sign-in for {name}?"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "A payment from work"
+msgstr "A payment from work"
+
 #: src/screens/Register.tsx
 msgid "Splitting…"
 msgstr "Splitting…"
@@ -2364,6 +2540,10 @@ msgstr "Report"
 #: src/screens/Register.tsx
 msgid "Loading the next rows…"
 msgstr "Loading the next rows…"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "{count, plural, one {{count} expense} other {{count} expenses}}"
+msgstr "{count, plural, one {{count} expense} other {{count} expenses}}"
 
 #: src/screens/Register.tsx
 msgid "No accounts are ticked, so there is nothing to show. Tick one in the accounts filter — or Select all, which is not the same as ticking every one of them."
@@ -2504,6 +2684,10 @@ msgstr "By currency"
 msgid "Set up {PRODUCT}"
 msgstr "Set up {PRODUCT}"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Month"
+msgstr "Month"
+
 #: src/screens/Accounts.tsx
 msgid "The name looks like its number."
 msgstr "The name looks like its number."
@@ -2516,9 +2700,14 @@ msgstr "Machine"
 msgid "Copy"
 msgstr "Copy"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "{others, plural, one {with {others} other expense} other {with {others} other expenses}}"
+msgstr "{others, plural, one {with {others} other expense} other {with {others} other expenses}}"
+
 #: src/screens/Import.tsx
 #: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
 msgid "Amount"
@@ -2529,6 +2718,10 @@ msgid "Fecha;Concepto;Importe\n"
 "05/01/2026;MERCADONA;-45,20"
 msgstr "Fecha;Concepto;Importe\n"
 "05/01/2026;MERCADONA;-45,20"
+
+#: src/screens/Reports.tsx
+msgid "Back to the reports"
+msgstr "Back to the reports"
 
 #: src/screens/Profile.tsx
 msgid "Close: {name}"
@@ -2713,8 +2906,13 @@ msgid "{0} turned off"
 msgstr "{0} turned off"
 
 #: src/screens/Register.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "mixed currencies, not compared"
 msgstr "mixed currencies, not compared"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Click one for its details, or its date to find its payment or write it off."
+msgstr "Click one for its details, or its date to find its payment or write it off."
 
 #. placeholder {0}: txn.import_id
 #: src/screens/Register.tsx
@@ -2859,6 +3057,10 @@ msgstr "Passkeys need this app opened at its HTTPS address."
 msgid "One part is still empty"
 msgstr "One part is still empty"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "{waited, plural, one {Work should pay this back — not repaid yet, {waited} day waiting} other {Work should pay this back — not repaid yet, {waited} days waiting}}"
+msgstr "{waited, plural, one {Work should pay this back — not repaid yet, {waited} day waiting} other {Work should pay this back — not repaid yet, {waited} days waiting}}"
+
 #: src/lib/labels.ts
 msgid "Current account"
 msgstr "Current account"
@@ -2873,6 +3075,11 @@ msgstr "Every transaction and every rule that names <0>{0}</0> will name <1>{1}<
 #: src/screens/Admin.tsx
 msgid "Withdraw the reset link for {0}"
 msgstr "Withdraw the reset link for {0}"
+
+#. placeholder {0}: household.name
+#: src/screens/Reports.tsx
+msgid "Questions about {0}'s ledger. Nothing here changes anything: a report reads the register and is gone, which is why none of them appear in History."
+msgstr "Questions about {0}'s ledger. Nothing here changes anything: a report reads the register and is gone, which is why none of them appear in History."
 
 #: src/screens/Register.tsx
 msgid "{text} — edit the memo"
@@ -3027,6 +3234,7 @@ msgstr "Detach this receipt?"
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "Category"
 msgstr "Category"
 
@@ -3037,6 +3245,8 @@ msgstr "You still have 1 passkey, and a recovery code leaves them working. If on
 #: src/screens/Import.tsx
 #: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/Reimbursements.tsx
 #: src/screens/Transfer.tsx
 msgid "Memo"
 msgstr "Memo"
@@ -3217,6 +3427,10 @@ msgstr "Continue to the passkey"
 msgid "Select every row shown"
 msgstr "Select every row shown"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "By month"
+msgstr "By month"
+
 #: src/lib/signInChanges.ts
 msgid "The server made {user} an owner"
 msgstr "The server made {user} an owner"
@@ -3359,6 +3573,11 @@ msgstr "This ledger never converts. Currency lives on the account and there is n
 msgid "The process answering this request."
 msgstr "The process answering this request."
 
+#. placeholder {0}: cell.title
+#: src/screens/reports/IncomeExpense.tsx
+msgid "What went into {0}"
+msgstr "What went into {0}"
+
 #: src/screens/Register.tsx
 msgid "Uncleared — the bank has not seen this yet"
 msgstr "Uncleared — the bank has not seen this yet"
@@ -3452,6 +3671,15 @@ msgstr "Other debt"
 msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
 msgstr "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
 
+#: src/screens/reports/Reimbursements.tsx
+msgctxt "written off"
+msgid "None"
+msgstr "None"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "surplus"
+msgstr "surplus"
+
 #: src/lib/signInChanges.ts
 msgid "Re-enabled"
 msgstr "Re-enabled"
@@ -3463,6 +3691,10 @@ msgstr "One of the ten you stored when this account was set up. Each works once,
 #: src/screens/Backups.tsx
 msgid "Open the service in a new tab:"
 msgstr "Open the service in a new tab:"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "An advance not spent yet, or an overpayment"
+msgstr "An advance not spent yet, or an overpayment"
 
 #: src/components/bits.tsx
 msgid "{wait, plural, other {Try again in {wait} seconds.}}"
@@ -3514,7 +3746,12 @@ msgstr "Asking…"
 msgid "no country set"
 msgstr "no country set"
 
+#: src/screens/Reports.tsx
+msgid "That report does not exist."
+msgstr "That report does not exist."
+
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 msgid "All accounts"
 msgstr "All accounts"
 
@@ -3527,6 +3764,8 @@ msgstr "This file looks like it is for <0>{0}</0> ({1}), not the account chosen 
 #: src/screens/Import.tsx
 #: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/Reimbursements.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
 msgid "Date"
@@ -3599,6 +3838,10 @@ msgstr "Yes, withdraw it"
 #: src/screens/ApplicationManagement.tsx
 msgid "Last backup"
 msgstr "Last backup"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Every payment is accounted for"
+msgstr "Every payment is accounted for"
 
 #: src/screens/Profile.tsx
 msgid "Set"
@@ -3707,6 +3950,10 @@ msgstr "Using a recovery code signed you out everywhere, forgot every trusted br
 #: src/lib/labels.ts
 msgid "member"
 msgstr "member"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Open it in Transactions"
+msgstr "Open it in Transactions"
 
 #: src/screens/Profile.tsx
 msgid "about appearance"
@@ -3879,6 +4126,7 @@ msgstr "Discard this staged import?"
 #: src/lib/labels.ts
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 msgid "Uncategorised"
 msgstr "Uncategorised"
 
@@ -3906,6 +4154,10 @@ msgstr "Imported from a statement or a one-time import"
 #: src/App.tsx
 msgid "Snap a Receipt"
 msgstr "Snap a Receipt"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{count, plural, one {{count} transfer leg} other {{count} transfer legs}}"
+msgstr "{count, plural, one {{count} transfer leg} other {{count} transfer legs}}"
 
 #: src/screens/Admin.tsx
 msgid "Create the link"
@@ -3964,6 +4216,15 @@ msgstr "Apply rules to what is already here"
 msgid "Withdraw this reset link?"
 msgstr "Withdraw this reset link?"
 
+#. placeholder {0}: report.coverage.months_in_range
+#. placeholder {1}: report.coverage.months_with_activity
+#. placeholder {2}: report.coverage.months_in_range
+#. placeholder {3}: report.coverage.months_with_activity
+#. placeholder {4}: report.coverage.months_in_range
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{0, plural, one {{1} of {2} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.} other {{3} of {4} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.}}"
+msgstr "{0, plural, one {{1} of {2} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.} other {{3} of {4} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.}}"
+
 #: src/screens/AccountImport.tsx
 msgid "{count, plural, one {Import {count} account} other {Import {count} accounts}}"
 msgstr "{count, plural, one {Import {count} account} other {Import {count} accounts}}"
@@ -3975,6 +4236,10 @@ msgstr "Member"
 #: src/components/DateRange.tsx
 msgid "This month"
 msgstr "This month"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "{count, plural, one {{count} day} other {{count} days}}"
+msgstr "{count, plural, one {{count} day} other {{count} days}}"
 
 #: src/screens/AccountImport.tsx
 msgid "Problems"
@@ -4028,6 +4293,10 @@ msgstr "Not now"
 msgid "outflow column"
 msgstr "outflow column"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Each one with the expenses linked to it."
+msgstr "Each one with the expenses linked to it."
+
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
 #: src/screens/Payees.tsx
@@ -4063,6 +4332,13 @@ msgstr "This device only"
 #: src/screens/Backups.tsx
 msgid "Saved. Your sync app will upload it from there."
 msgstr "Saved. Your sync app will upload it from there."
+
+#. placeholder {0}: one.recovered_count
+#. placeholder {1}: one.recovered_count
+#. placeholder {2}: one.recovered_count
+#: src/screens/reports/Reimbursements.tsx
+msgid "{0, plural, one {{1} expense repaid} other {{2} expenses repaid}}"
+msgstr "{0, plural, one {{1} expense repaid} other {{2} expenses repaid}}"
 
 #: src/lib/saveBackup.ts
 msgid "a zip with secret.key needs your password and a code"
@@ -4148,6 +4424,8 @@ msgstr "Ignore it and carry on"
 
 #: src/App.tsx
 #: src/screens/Payees.tsx
+#: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "Loading…"
 msgstr "Loading…"
 
@@ -4192,10 +4470,16 @@ msgstr "The six digits from your authenticator"
 msgid "fee column"
 msgstr "fee column"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Recovered"
+msgstr "Recovered"
+
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "Currency"
 msgstr "Currency"
 
@@ -4293,6 +4577,10 @@ msgstr "What it depends on"
 msgid "One of your recovery codes"
 msgstr "One of your recovery codes"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Show in Transactions"
+msgstr "Show in Transactions"
+
 #: src/screens/Accounts.tsx
 msgid "opening balance"
 msgstr "opening balance"
@@ -4351,9 +4639,17 @@ msgstr "Whoever opens an owner link can administer this instance, and stays an o
 msgid "Authenticator, with its recovery codes"
 msgstr "Authenticator, with its recovery codes"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "by country"
+msgstr "by country"
+
 #: src/screens/Admin.tsx
 msgid "A reset link for {name} is already pending. This one replaces it, and what that one reset stays reset."
 msgstr "A reset link for {name} is already pending. This one replaces it, and what that one reset stays reset."
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "No payment linked yet"
+msgstr "No payment linked yet"
 
 #: src/screens/Admin.tsx
 msgid "none"
@@ -4493,6 +4789,10 @@ msgstr "Your authenticator"
 #: src/screens/Receipts.tsx
 msgid "Taken"
 msgstr "Taken"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Nothing is marked as a work expense yet. Open a transaction in the register and set Reimbursement to “Work should pay this back” — or tick several and use Work expense in the bar that appears."
+msgstr "Nothing is marked as a work expense yet. Open a transaction in the register and set Reimbursement to “Work should pay this back” — or tick several and use Work expense in the bar that appears."
 
 #: src/screens/Register.tsx
 msgid "Nothing here yet. Add a row above, or import a statement from the Import screen."
@@ -4646,6 +4946,10 @@ msgstr "{by} reset {user}'s password"
 msgid "in {0} groups, {1} archived"
 msgstr "in {0} groups, {1} archived"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Difference: <0/>"
+msgstr "Difference: <0/>"
+
 #: src/screens/Admin.tsx
 msgid "Choose at least one."
 msgstr "Choose at least one."
@@ -4746,6 +5050,11 @@ msgstr "<0>Last check.</0> {count} row goes back to how they were {0}."
 msgid "Merge into {0}"
 msgstr "Merge into {0}"
 
+#. placeholder {0}: either(codes)
+#: src/screens/reports/Reimbursements.tsx
+msgid "Nothing outstanding in {0}."
+msgstr "Nothing outstanding in {0}."
+
 #: src/screens/SignIn.tsx
 msgid "This browser hasn't been used here recently, so we need the six digits."
 msgstr "This browser hasn't been used here recently, so we need the six digits."
@@ -4753,6 +5062,10 @@ msgstr "This browser hasn't been used here recently, so we need the six digits."
 #: src/screens/Profile.tsx
 msgid "why this is asked"
 msgstr "why this is asked"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "no payee"
+msgstr "no payee"
 
 #: src/screens/Register.tsx
 msgid "The money out, repaid by the one payment in"
@@ -4790,6 +5103,7 @@ msgid "inflow column"
 msgstr "inflow column"
 
 #: src/screens/Register.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "Difference"
 msgstr "Difference"
 
@@ -4799,6 +5113,8 @@ msgstr "Difference"
 #: src/screens/Payees.tsx
 #: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "Payee"
 msgstr "Payee"
 
@@ -4823,6 +5139,7 @@ msgid "Nothing has changed yet — your current authenticator keeps working unti
 msgstr "Nothing has changed yet — your current authenticator keeps working until a code proves the new one pairs."
 
 #: src/App.tsx
+#: src/screens/Reports.tsx
 msgid "Reports"
 msgstr "Reports"
 
@@ -4886,6 +5203,10 @@ msgstr "{0} will no longer be able to administer this instance."
 #: src/screens/Rules.tsx
 msgid "Also delete the {0} payees left empty"
 msgstr "Also delete the {0} payees left empty"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Linked to"
+msgstr "Linked to"
 
 #. placeholder {0}: format(openingMinor, currency)
 #: src/screens/Accounts.tsx
@@ -5060,11 +5381,18 @@ msgstr "Holder's name"
 msgid "Dates"
 msgstr "Dates"
 
+#. placeholder {0}: listText(options)
+#: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/Reimbursements.tsx
+msgid "This ledger never converts. Currency lives on the account, and there is no exchange rate stored anywhere — so a total mixing {0} would be a number with nothing behind it."
+msgstr "This ledger never converts. Currency lives on the account, and there is no exchange rate stored anywhere — so a total mixing {0} would be a number with nothing behind it."
+
 #: src/screens/Profile.tsx
 msgid "Keys for programs"
 msgstr "Keys for programs"
 
 #: src/screens/Register.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "Written off"
 msgstr "Written off"
 
@@ -5081,6 +5409,10 @@ msgstr "{0} out"
 #: src/screens/Accounts.tsx
 msgid "a negative balance here is money you owe"
 msgstr "a negative balance here is money you owe"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Still owed"
+msgstr "Still owed"
 
 #: src/screens/Payees.tsx
 msgid "Merge spellings of one name"
@@ -5108,6 +5440,7 @@ msgid "{0}, then strip"
 msgstr "{0}, then strip"
 
 #: src/components/Receipts.tsx
+#: src/screens/reports/Reimbursements.tsx
 msgid "Waiting"
 msgstr "Waiting"
 
@@ -5172,6 +5505,10 @@ msgstr "U — Uncleared"
 #: src/screens/Rules.tsx
 msgid "contains"
 msgstr "contains"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "Nothing owed"
+msgstr "Nothing owed"
 
 #: src/screens/AccountImport.tsx
 msgid "Its two-letter code, like <0>ES</0>."
@@ -5301,9 +5638,20 @@ msgstr "Showing {0} of {1} — show more"
 msgid "3. Your authenticator"
 msgstr "3. Your authenticator"
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Spent"
+msgstr "Spent"
+
 #: src/screens/Setup.tsx
 msgid "1. The setup token"
 msgstr "1. The setup token"
+
+#. placeholder {0}: one.written_off_count
+#. placeholder {1}: one.written_off_count
+#. placeholder {2}: one.written_off_count
+#: src/screens/reports/Reimbursements.tsx
+msgid "{0, plural, one {{1} expense, counted as your spending} other {{2} expenses, counted as your spending}}"
+msgstr "{0, plural, one {{1} expense, counted as your spending} other {{2} expenses, counted as your spending}}"
 
 #: src/screens/History.tsx
 msgid "Every row it changed"
@@ -5341,6 +5689,11 @@ msgstr "{inviter} invited you to {PRODUCT} as a member."
 msgid "Add an account before entering transactions."
 msgstr "Add an account before entering transactions."
 
+#. placeholder {0}: either(codes)
+#: src/screens/reports/Reimbursements.tsx
+msgid "No work expenses in {0} yet."
+msgstr "No work expenses in {0} yet."
+
 #: src/screens/Register.tsx
 msgid "In {code}"
 msgstr "In {code}"
@@ -5359,6 +5712,10 @@ msgstr "Re-enable {0}"
 #: src/screens/ApplicationManagement.tsx
 msgid "{0} journal"
 msgstr "{0} journal"
+
+#: src/screens/Reports.tsx
+msgid "What work owes you, what came back, and what was written off."
+msgstr "What work owes you, what came back, and what was written off."
 
 #. placeholder {0}: entry.filename
 #: src/screens/Import.tsx
@@ -5429,6 +5786,12 @@ msgstr "Applying…"
 #: src/screens/Register.tsx
 msgid "Source"
 msgstr "Source"
+
+#. placeholder {0}: legs(report.excluded.transfers)
+#. placeholder {1}: openings(report.excluded.opening_balances)
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Not counted: {0} and {1}. Moving money between your own accounts is not income or spending, and what an account held when you started is not money you earned."
+msgstr "Not counted: {0} and {1}. Moving money between your own accounts is not income or spending, and what an account held when you started is not money you earned."
 
 #: src/screens/Profile.tsx
 msgid "may apply imports"
@@ -5522,6 +5885,10 @@ msgstr "These look like the same shop"
 msgid "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
 
+#: src/screens/reports/Reimbursements.tsx
+msgid "Dates narrow by when the expense happened, not when it was repaid."
+msgstr "Dates narrow by when the expense happened, not when it was repaid."
+
 #: src/components/Receipts.tsx
 msgid "compressed on the device before sending"
 msgstr "compressed on the device before sending"
@@ -5545,6 +5912,10 @@ msgstr "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar 
 #: src/screens/Import.tsx
 msgid "The memo this row will carry"
 msgstr "The memo this row will carry"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "shortfall"
+msgstr "shortfall"
 
 #: src/screens/Profile.tsx
 msgid "Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the server, and clearing this browser's site data forgets it -- which returns you to following the system."
@@ -5576,6 +5947,11 @@ msgstr "A download is a zip with a README for whoever opens it next: what the fi
 #: src/screens/Import.tsx
 msgid "<0>Coming from another budgeting app?</0> Statements go in one at a time here. To bring your whole history across at once — YNAB so far — use the {link} on the {0} page. The household’s owner runs it, once."
 msgstr "<0>Coming from another budgeting app?</0> Statements go in one at a time here. To bring your whole history across at once — YNAB so far — use the {link} on the {0} page. The household’s owner runs it, once."
+
+#. placeholder {0}: days(oldest)
+#: src/screens/reports/Reimbursements.tsx
+msgid "oldest {0}"
+msgstr "oldest {0}"
 
 #: src/screens/Register.tsx
 msgid "Double click, or press Enter twice, to edit"
@@ -5612,8 +5988,13 @@ msgid "{hiddenByCurrency, plural, one {Every row here is in a currency the toggl
 msgstr "{hiddenByCurrency, plural, one {Every row here is in a currency the toggle is hiding. Turn one back on to see them — {hiddenByCurrency} row is waiting.} other {Every row here is in a currency the toggle is hiding. Turn one back on to see them — {hiddenByCurrency} rows are waiting.}}"
 
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 msgid "All categories"
 msgstr "All categories"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
+msgstr "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
 
 #: src/screens/ApplicationManagement.tsx
 msgid "No households on this instance yet."
@@ -5670,6 +6051,10 @@ msgstr "this process"
 msgid "the number other statements quote"
 msgstr "the number other statements quote"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "by type"
+msgstr "by type"
+
 #. placeholder {0}: formatInstant(key.last_used_at)
 #: src/screens/Profile.tsx
 msgid "last used {0}"
@@ -5678,6 +6063,10 @@ msgstr "last used {0}"
 #: src/screens/Setup.tsx
 msgid "Setup token"
 msgstr "Setup token"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Income"
+msgstr "Income"
 
 #. placeholder {0}: count(member.transactions_by_agent)
 #: src/screens/Household.tsx
@@ -5742,6 +6131,10 @@ msgstr "Which payment repaid this?"
 #: src/screens/Import.tsx
 msgid "{0} will always be {1}"
 msgstr "{0} will always be {1}"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "why one currency at a time"
+msgstr "why one currency at a time"
 
 #: src/components/Receipts.tsx
 msgid "From the photograph's own metadata."
@@ -5929,9 +6322,13 @@ msgid "For a credit card, type what you owe as a negative."
 msgstr "For a credit card, type what you owe as a negative."
 
 #. placeholder {0}: one.transaction_count
+#. placeholder {0}: rows.data.count
 #. placeholder {1}: one.transaction_count
+#. placeholder {1}: rows.data.count
 #. placeholder {2}: one.transaction_count
+#. placeholder {2}: rows.data.count
 #: src/screens/Payees.tsx
+#: src/screens/reports/IncomeExpense.tsx
 msgid "{0, plural, one {{1} transaction} other {{2} transactions}}"
 msgstr "{0, plural, one {{1} transaction} other {{2} transactions}}"
 
@@ -5963,6 +6360,10 @@ msgstr "OK"
 #: src/screens/TransferSections.tsx
 msgid "Linked by history only"
 msgstr "Linked by history only"
+
+#: src/screens/reports/Reimbursements.tsx
+msgid "At least one currency stays ticked"
+msgstr "At least one currency stays ticked"
 
 #: src/lib/signInChanges.ts
 msgid "{by} re-enabled {user}"

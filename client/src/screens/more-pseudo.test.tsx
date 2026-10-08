@@ -393,7 +393,7 @@ describe("in en-XA, the remaining screens show no English", () => {
     render(withQueries(<Receipts household={HOUSEHOLD} />));
     await screen.findAllByRole("checkbox");
     const data = (word: string) =>
-      !/^(AM|PM|at|PDF|SHA|casa|pdf|application|KB|km|Google|Maps|January|February|March|April|May|June|July|August|September|October|November|December)$/.test(word);
+      !/^(AM|PM|at|PDF|SHA|casa|pdf|application|KB|km|Google|Maps)$/.test(word);
     expect(left().filter(data)).toEqual([]);
 
     // Pick both, then ask to delete them.
