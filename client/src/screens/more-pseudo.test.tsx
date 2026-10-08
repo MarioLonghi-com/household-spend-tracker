@@ -28,6 +28,7 @@ import { PayeeCategorisation } from "./PayeeCategorisation";
 import { Payees } from "./Payees";
 import { Rules } from "./Rules";
 import { HouseholdPage } from "./Household";
+import { Admin } from "./Admin";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -224,5 +225,33 @@ describe("in en-XA, the remaining screens show no English", () => {
     await screen.findByText("doe@example.com");
     await screen.findByText("SEK");
     expect(left()).toEqual([]);
+  });
+
+  it("Admin: people, households and invitations, with their dialogs", async () => {
+    const sam = { id: "u1", email: "sam@example.com", display_name: "Sam", role: "owner", created_at: "2026-01-02T10:00:00", disabled_at: null, recovery_codes_left: 7, households: ["h1"] };
+    const doe = { ...sam, id: "u2", email: "doe@example.com", display_name: "Doe", role: "member", disabled_at: "2026-02-02T10:00:00", recovery_codes_left: 0, households: [] };
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path === "/admin/users") return [sam, doe];
+      if (path === "/admin/households") return [{ id: "h1", name: "Casa", base_currency: "EUR", date_format: "YYYY-MM-DD", created_at: "2026-01-02T10:00:00", member_ids: ["u1"] }];
+      if (path === "/admin/resets")
+        return [{ id: "r1", user_id: "u2", display_name: "Doe", email: "doe@example.com", password: true, authenticator: false, issued_by: null, created_at: "2026-03-01T10:00:00", expires_at: "2026-03-02T10:00:00", expired: true }];
+      if (path === "/admin/sign-in-changes")
+        return [{ id: 1, key: "k1", what: "promoted", password: false, authenticator: false, user_id: "u2", user_name: "Doe", by_id: "u1", by_name: "Sam", from_server: false, at: "2026-03-01T10:00:00" }];
+      if (path === "/admin/invitations")
+        return [{ id: "i1", email: null, role: "member", invited_by_id: "u1", household_ids: null, created_at: "2026-03-01T10:00:00", expires_at: "2026-03-08T10:00:00", accepted_at: null }];
+      return [];
+    });
+    const dates = (word: string) => !/^(AM|PM|at)$/.test(word);
+    render(withQueries(<Admin user={sam as never} />));
+    await screen.findByText("doe@example.com");
+    expect(left().filter(dates)).toEqual([]);
+
+    // Each tab in turn.
+    const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".row button")).slice(0, 3);
+    for (const tab of tabs.slice(1)) {
+      fireEvent.click(tab);
+      await new Promise((done) => setTimeout(done, 0));
+      expect(left().filter(dates)).toEqual([]);
+    }
   });
 });

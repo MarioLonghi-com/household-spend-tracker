@@ -52,6 +52,8 @@ import type {
 } from "../lib/types";
 import { roleLabel } from "../lib/labels";
 import { compareNames } from "../lib/locale";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 type Section = "people" | "households" | "invitations";
 
@@ -64,10 +66,26 @@ type ChangeSort = "date" | "what" | "whom" | "by";
 const PENDING_KEY = ["admin", "resets"];
 const readPending = () => api.get<PendingReset[]>("/admin/resets");
 
+// Getters, so each tab's name is read in the language active when it is shown.
 const SECTIONS: { key: Section; label: string }[] = [
-  { key: "people", label: "People" },
-  { key: "households", label: "Households" },
-  { key: "invitations", label: "Invitations" },
+  {
+    key: "people",
+    get label() {
+      return t`People`;
+    },
+  },
+  {
+    key: "households",
+    get label() {
+      return t`Households`;
+    },
+  },
+  {
+    key: "invitations",
+    get label() {
+      return t`Invitations`;
+    },
+  },
 ];
 
 export function Admin({ user }: { user: User }) {
@@ -85,11 +103,13 @@ export function Admin({ user }: { user: User }) {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1>Admin</h1>
+        <h1><Trans>Admin</Trans></h1>
       </div>
       <p className="muted small">
-        Everything on this screen is recorded as a batch with your name on it. These are
-        instance-wide rather than household changes, so they are kept out of a household's History.
+        <Trans>
+          Everything on this screen is recorded as a batch with your name on it. These are
+          instance-wide rather than household changes, so they are kept out of a household's History.
+        </Trans>
       </p>
 
       <div className="row" style={{ gap: 6, marginBottom: 16 }}>
@@ -221,56 +241,58 @@ function People({
           by the person it belongs to, from a link, so they choose their own
           password and nobody else ever knows it. */}
       <p className="muted small" style={{ marginTop: 0 }}>
-        To create a new user, use the{" "}
-        <button className="link" onClick={onInvite}>
-          Invitation link
-        </button>
-        .
+        <Trans>
+          To create a new user, use the{" "}
+          <button className="link" onClick={onInvite}>
+            Invitation link
+          </button>
+          .
+        </Trans>
       </p>
       {users.length === 0 ? (
-        <Empty>Nobody yet, which should be impossible while you are reading this.</Empty>
+        <Empty><Trans>Nobody yet, which should be impossible while you are reading this.</Trans></Empty>
       ) : (
         <div className="table-scroll">
           <table>
             <thead>
               <tr>
                 <SortHeading
-                  label="Name"
+                  label={t`Name`}
                   column="name"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Email"
+                  label={t`Email`}
                   column="email"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Role"
+                  label={t`Role`}
                   column="role"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Households"
+                  label={t`Households`}
                   column="households"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Recovery codes"
+                  label={t`Recovery codes`}
                   column="codes"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Status"
+                  label={t`Status`}
                   column="status"
                   sort={order.sort}
                   direction={order.direction}
@@ -284,13 +306,13 @@ function People({
                 <tr key={one.id}>
                   <td>
                     {one.display_name}
-                    {one.id === me.id ? <span className="muted small"> (you)</span> : null}
+                    {one.id === me.id ? <span className="muted small"> {t`(you)`}</span> : null}
                   </td>
                   <td className="small muted">{one.email}</td>
                   <td>
                     <select
                       value={one.role}
-                      aria-label={`Role for ${one.display_name}`}
+                      aria-label={t`Role for ${one.display_name}`}
                       // Demoting yourself is allowed by the server while another
                       // owner exists -- and the next refetch of this screen then
                       // 403s, leaving a stale table under an error. Make it a
@@ -298,7 +320,7 @@ function People({
                       disabled={one.id === me.id}
                       title={
                         one.id === me.id
-                          ? "Changing your own role would close this screen; ask the other owner"
+                          ? t`Changing your own role would close this screen; ask the other owner`
                           : undefined
                       }
                       onChange={(e) => {
@@ -309,53 +331,59 @@ function People({
                         else setConfirming({ user: one, role });
                       }}
                     >
-                      <option value="member">Member</option>
-                      <option value="owner">Owner</option>
+                      <option value="member"><Trans>Member</Trans></option>
+                      <option value="owner"><Trans>Owner</Trans></option>
                     </select>
                   </td>
                   <td className="small muted">
                     {one.households.length === 0
-                      ? "none"
+                      ? t`none`
                       : one.households.map(householdName).join(", ")}
                   </td>
                   <td className="small">
                     <span className={one.recovery_codes_left === 0 ? "neg" : "muted"}>
-                      {one.recovery_codes_left} left
+                      {t`${one.recovery_codes_left} left`}
                     </span>
                   </td>
                   <td className="small">
                     {one.disabled_at ? (
-                      <span className="neg">Disabled</span>
+                      <span className="neg">{t`Disabled`}</span>
                     ) : (
-                      <span className="muted">Active</span>
+                      <span className="muted">{t`Active`}</span>
                     )}
                   </td>
                   <td style={{ whiteSpace: "nowrap" }}>
                     <button
                       className="link"
                       style={{ marginRight: 12 }}
-                      aria-label={`Reset sign-in for ${one.display_name}`}
+                      aria-label={t`Reset sign-in for ${one.display_name}`}
                       // Your own goes through the profile, with proof you hold
                       // it; a disabled account could not follow a link.
                       disabled={one.id === me.id || Boolean(one.disabled_at)}
                       title={
                         one.id === me.id
-                          ? "Change your own password or authenticator from your profile"
+                          ? t`Change your own password or authenticator from your profile`
                           : one.disabled_at
-                            ? "Re-enable them first: a disabled account cannot follow a link"
+                            ? t`Re-enable them first: a disabled account cannot follow a link`
                             : undefined
                       }
                       onClick={() => setResetting(one)}
                     >
-                      Reset sign-in…
+                      <Trans>
+                        Reset sign-in…
+                      </Trans>
                     </button>
                     <button
                       className={one.disabled_at ? "link" : "link danger"}
-                      aria-label={`${one.disabled_at ? "Re-enable" : "Disable"} ${one.display_name}`}
+                      aria-label={
+                        one.disabled_at
+                          ? t`Re-enable ${one.display_name}`
+                          : t`Disable ${one.display_name}`
+                      }
                       disabled={one.id === me.id && !one.disabled_at}
                       title={
                         one.id === me.id && !one.disabled_at
-                          ? "You cannot disable yourself"
+                          ? t`You cannot disable yourself`
                           : undefined
                       }
                       onClick={() =>
@@ -364,7 +392,7 @@ function People({
                           : setConfirming({ user: one, disable: true })
                       }
                     >
-                      {one.disabled_at ? "Re-enable" : "Disable"}
+                      {one.disabled_at ? t`Re-enable` : t`Disable`}
                     </button>
                   </td>
                 </tr>
@@ -374,18 +402,22 @@ function People({
         </div>
       )}
       <p className="muted small" style={{ marginTop: 12 }}>
-        Disabling somebody signs them out everywhere and forgets their trusted browsers. It leaves
-        their work alone — their name stays on every batch they ran.
+        <Trans>
+          Disabling somebody signs them out everywhere and forgets their trusted browsers. It leaves
+          their work alone — their name stays on every batch they ran.
+        </Trans>
       </p>
 
       {confirming && "disable" in confirming ? (
         <Dialog
-          title={`Disable ${confirming.user.display_name}?`}
+          title={t`Disable ${confirming.user.display_name}?`}
           onClose={() => setConfirming(null)}
         >
           <p style={{ marginTop: 0 }}>
-            {confirming.user.display_name} ({confirming.user.email}) is signed out everywhere and
-            their trusted browsers are forgotten. Re-enable brings the account back.
+            <Trans>
+              {confirming.user.display_name} ({confirming.user.email}) is signed out everywhere and
+              their trusted browsers are forgotten. Re-enable brings the account back.
+            </Trans>
           </p>
           <div className="dialog-choices">
             <button
@@ -393,23 +425,29 @@ function People({
               disabled={setDisabled.isPending}
               onClick={() => setDisabled.mutate({ id: confirming.user.id, disabled: true })}
             >
-              {setDisabled.isPending ? "Disabling…" : "Yes, disable them"}
+              {setDisabled.isPending ? t`Disabling…` : t`Yes, disable them`}
             </button>
             <button disabled={setDisabled.isPending} onClick={() => setConfirming(null)}>
-              Keep them active
+              <Trans>
+                Keep them active
+              </Trans>
             </button>
           </div>
           <Problem error={setDisabled.error} />
         </Dialog>
       ) : confirming ? (
         <Dialog
-          title={`Make ${confirming.user.display_name} ${confirming.role === "owner" ? "an owner" : "a member"}?`}
+          title={
+            confirming.role === "owner"
+              ? t`Make ${confirming.user.display_name} an owner?`
+              : t`Make ${confirming.user.display_name} a member?`
+          }
           onClose={() => setConfirming(null)}
         >
           <p style={{ marginTop: 0 }}>
             {confirming.role === "owner"
-              ? `${confirming.user.display_name} will be able to administer this instance: people, households and invitations.`
-              : `${confirming.user.display_name} will no longer be able to administer this instance.`}
+              ? t`${confirming.user.display_name} will be able to administer this instance: people, households and invitations.`
+              : t`${confirming.user.display_name} will no longer be able to administer this instance.`}
           </p>
           <div className="dialog-choices">
             <button
@@ -418,11 +456,15 @@ function People({
               onClick={() => setRole.mutate({ id: confirming.user.id, role: confirming.role })}
             >
               {setRole.isPending
-                ? "Changing…"
-                : `Yes, make them ${confirming.role === "owner" ? "an owner" : "a member"}`}
+                ? t`Changing…`
+                : confirming.role === "owner"
+                  ? t`Yes, make them an owner`
+                  : t`Yes, make them a member`}
             </button>
             <button disabled={setRole.isPending} onClick={() => setConfirming(null)}>
-              Leave it
+              <Trans>
+                Leave it
+              </Trans>
             </button>
           </div>
           <Problem error={setRole.error} />
@@ -479,12 +521,12 @@ function PromoteToOwner({
   });
 
   return (
-    <Dialog title={`Make ${person.display_name} an owner?`} onClose={onClose}>
+    <Dialog title={t`Make ${person.display_name} an owner?`} onClose={onClose}>
       <Problem error={promote.error} />
       <StepUpFields
         proof={proof}
         onChange={setProof}
-        why="An owner can administer this instance, and stays one whatever you later do to your own password or authenticator."
+        why={t`An owner can administer this instance, and stays one whatever you later do to your own password or authenticator.`}
       />
       <div className="dialog-choices">
         <button
@@ -492,10 +534,12 @@ function PromoteToOwner({
           disabled={!stepUpReady(proof) || promote.isPending}
           onClick={() => promote.mutate()}
         >
-          {promote.isPending ? "Making them an owner…" : "Make them an owner"}
+          {promote.isPending ? t`Making them an owner…` : t`Make them an owner`}
         </button>
         <button disabled={promote.isPending} onClick={onClose}>
-          Cancel
+          <Trans>
+            Cancel
+          </Trans>
         </button>
       </div>
     </Dialog>
@@ -562,31 +606,35 @@ function ResetSignIn({
     // Escape and the ✕ ask the question Done asks: the link is in this
     // dialog and nowhere else.
     const leave = () => {
-      if (copied || window.confirm("Close without copying? The link cannot be shown again.")) {
+      if (copied || window.confirm(t`Close without copying? The link cannot be shown again.`)) {
         onClose();
       }
     };
     return (
-      <Dialog title={`Reset link for ${name}`} onClose={leave}>
+      <Dialog title={t`Reset link for ${name}`} onClose={leave}>
         <p style={{ marginTop: 0 }}>
-          {name} is signed out everywhere and cannot sign in until they follow this link. It sets
-          a new {switchesText(issued.password, issued.authenticator)}.
+          {issued.password && issued.authenticator
+            ? t`${name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password and authenticator.`
+            : issued.password
+              ? t`${name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password.`
+              : t`${name} is signed out everywhere and cannot sign in until they follow this link. It sets a new authenticator.`}
         </p>
         {(issued.password !== password || issued.authenticator !== authenticator) && (
           <p className="small muted">
-            That is more than you chose: what was already reset for them stays reset, so the link
-            has to set it too.
+            <Trans>
+              That is more than you chose: what was already reset for them stays reset, so the link
+              has to set it too.
+            </Trans>
           </p>
         )}
         <FreshLink
           link={issued.link}
-          label="Reset link"
+          label={t`Reset link`}
           onDismiss={onClose}
           onCopied={() => setCopied(true)}
         >
           <div className="small" style={{ marginTop: 6 }}>
-            Expires {formatInstant(issued.expires_at)}. Hand it over yourself; it is not sent
-            anywhere.
+            {t`Expires ${formatInstant(issued.expires_at)}. Hand it over yourself; it is not sent anywhere.`}
           </div>
         </FreshLink>
       </Dialog>
@@ -594,16 +642,18 @@ function ResetSignIn({
   }
 
   const consequences = [
-    "every session, trusted browser, agent key and passkey ends",
-    password && "their password stops working",
-    authenticator && "their authenticator and recovery codes are cleared",
+    t`every session, trusted browser, agent key and passkey ends`,
+    password && t`their password stops working`,
+    authenticator && t`their authenticator and recovery codes are cleared`,
   ].filter(Boolean);
 
   return (
-    <Dialog title={`Reset sign-in for ${name}?`} onClose={closeUnlessSending}>
+    <Dialog title={t`Reset sign-in for ${name}?`} onClose={closeUnlessSending}>
       <Problem error={issue.error} />
       <p style={{ marginTop: 0 }}>
-        Choose what {name} sets again. They do it themselves, from a one-time link you hand over.
+        <Trans>
+          Choose what {name} sets again. They do it themselves, from a one-time link you hand over.
+        </Trans>
       </p>
       <label className="small" style={{ display: "block", marginBottom: 4 }}>
         <input
@@ -612,7 +662,9 @@ function ResetSignIn({
           onChange={(e) => setPassword(e.target.checked)}
           style={{ width: "auto", marginRight: 8 }}
         />
-        Password
+        <Trans>
+          Password
+        </Trans>
       </label>
       <label className="small" style={{ display: "block", marginBottom: 4 }}>
         <input
@@ -621,26 +673,34 @@ function ResetSignIn({
           onChange={(e) => setAuthenticator(e.target.checked)}
           style={{ width: "auto", marginRight: 8 }}
         />
-        Authenticator, with its recovery codes
+        <Trans>
+          Authenticator, with its recovery codes
+        </Trans>
       </label>
       {chosen ? (
         <p className="small">
-          <strong>At once, not when the link is followed:</strong> {name} is signed out
-          everywhere — {consequences.join("; ")}. They cannot sign in again until they follow the
-          link.
+          <Trans>
+            <strong>At once, not when the link is followed:</strong> {name} is signed out
+            everywhere — {consequences.join("; ")}. They cannot sign in again until they follow
+            the link.
+          </Trans>
         </p>
       ) : (
-        <p className="small muted">Choose at least one.</p>
+        <p className="small muted"><Trans>Choose at least one.</Trans></p>
       )}
       {pending && (
         <p className="small muted">
-          A reset link for {name} is already pending. This one replaces it, and what that one reset
-          stays reset.
+          <Trans>
+            A reset link for {name} is already pending. This one replaces it, and what that one
+            reset stays reset.
+          </Trans>
         </p>
       )}
       <p className="small muted">
-        {name} is told on the link page that you reset them, and every owner sees it under Recent
-        sign-in changes.
+        <Trans>
+          {name} is told on the link page that you reset them, and every owner sees it under
+          Recent sign-in changes.
+        </Trans>
       </p>
       <div className="dialog-choices">
         <button
@@ -648,10 +708,12 @@ function ResetSignIn({
           disabled={!chosen || issue.isPending}
           onClick={send}
         >
-          {issue.isPending ? "Resetting…" : "Reset and make the link"}
+          {issue.isPending ? t`Resetting…` : t`Reset and make the link`}
         </button>
         <button disabled={issue.isPending} onClick={closeUnlessSending}>
-          Cancel
+          <Trans>
+            Cancel
+          </Trans>
         </button>
       </div>
     </Dialog>
@@ -691,7 +753,7 @@ function PendingResets() {
             case "resets":
               return switchesText(one.password, one.authenticator);
             case "by":
-              return one.issued_by ?? "from the server";
+              return one.issued_by ?? t`from the server`;
             case "expires":
               return one.expires_at;
             default:
@@ -705,45 +767,45 @@ function PendingResets() {
 
   return (
     <div className="card" style={{ marginTop: 16 }}>
-      <h2 style={{ marginTop: 0 }}>Pending reset links</h2>
+      <h2 style={{ marginTop: 0 }}><Trans>Pending reset links</Trans></h2>
       <Problem error={pending.error ?? (withdrawing ? null : withdraw.error)} />
       {resets.length === 0 ? (
-        <Empty>No reset links pending.</Empty>
+        <Empty><Trans>No reset links pending.</Trans></Empty>
       ) : (
         <div className="table-scroll">
-          <table aria-label="Pending reset links">
+          <table aria-label={t`Pending reset links`}>
             <thead>
               <tr>
                 <SortHeading
-                  label="Who"
+                  label={t`Who`}
                   column="who"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Resets"
+                  label={t`Resets`}
                   column="resets"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Issued by"
+                  label={t`Issued by`}
                   column="by"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Issued"
+                  label={t`Issued`}
                   column="date"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Expires"
+                  label={t`Expires`}
                   column="expires"
                   sort={order.sort}
                   direction={order.direction}
@@ -760,13 +822,13 @@ function PendingResets() {
                   </td>
                   <td className="small">{switchesText(one.password, one.authenticator)}</td>
                   <td className="small">
-                    {one.issued_by ?? <span className="muted">from the server</span>}
+                    {one.issued_by ?? <span className="muted">{t`from the server`}</span>}
                   </td>
                   <td className="small muted">{formatInstant(one.created_at)}</td>
                   <td className="small">
                     {one.expired ? (
                       <>
-                        <span className="neg">expired</span>{" "}
+                        <span className="neg">{t`expired`}</span>{" "}
                         <span className="muted">{formatInstant(one.expires_at)}</span>
                       </>
                     ) : (
@@ -776,10 +838,12 @@ function PendingResets() {
                   <td>
                     <button
                       className="link danger"
-                      aria-label={`Withdraw the reset link for ${one.display_name}`}
+                      aria-label={t`Withdraw the reset link for ${one.display_name}`}
                       onClick={() => setWithdrawing(one)}
                     >
-                      Withdraw
+                      <Trans>
+                        Withdraw
+                      </Trans>
                     </button>
                   </td>
                 </tr>
@@ -789,16 +853,20 @@ function PendingResets() {
         </div>
       )}
       <p className="muted small" style={{ marginTop: 12 }}>
-        Withdrawing a link stops it working. It does not undo the reset: the account stays shut,
-        and the way back in is a new link.
+        <Trans>
+          Withdrawing a link stops it working. It does not undo the reset: the account stays shut,
+          and the way back in is a new link.
+        </Trans>
       </p>
 
       {withdrawing && (
-        <Dialog title="Withdraw this reset link?" onClose={() => setWithdrawing(null)}>
+        <Dialog title={t`Withdraw this reset link?`} onClose={() => setWithdrawing(null)}>
           <p style={{ marginTop: 0 }}>
-            The link for {withdrawing.display_name} ({withdrawing.email}) stops working at once.
-            Their {switchesText(withdrawing.password, withdrawing.authenticator)} stays reset, so
-            they cannot sign in until you make them a new link.
+            {withdrawing.password && withdrawing.authenticator
+              ? t`The link for ${withdrawing.display_name} (${withdrawing.email}) stops working at once. Their password and authenticator stays reset, so they cannot sign in until you make them a new link.`
+              : withdrawing.password
+                ? t`The link for ${withdrawing.display_name} (${withdrawing.email}) stops working at once. Their password stays reset, so they cannot sign in until you make them a new link.`
+                : t`The link for ${withdrawing.display_name} (${withdrawing.email}) stops working at once. Their authenticator stays reset, so they cannot sign in until you make them a new link.`}
           </p>
           <div className="dialog-choices">
             <button
@@ -806,10 +874,12 @@ function PendingResets() {
               disabled={withdraw.isPending}
               onClick={() => withdraw.mutate(withdrawing.id)}
             >
-              {withdraw.isPending ? "Withdrawing…" : "Yes, withdraw it"}
+              {withdraw.isPending ? t`Withdrawing…` : t`Yes, withdraw it`}
             </button>
             <button disabled={withdraw.isPending} onClick={() => setWithdrawing(null)}>
-              Keep it
+              <Trans>
+                Keep it
+              </Trans>
             </button>
           </div>
           <Problem error={withdraw.error} />
@@ -858,42 +928,44 @@ function RecentSignInChanges() {
 
   return (
     <div className="card" style={{ marginTop: 16 }}>
-      <h2 style={{ marginTop: 0 }}>Recent sign-in changes</h2>
+      <h2 style={{ marginTop: 0 }}><Trans>Recent sign-in changes</Trans></h2>
       <p className="muted small" style={{ marginTop: 0 }}>
-        Every reset link, every new owner, and anything the server did to an account's way in,
-        in the last 14 days, by anyone. Read from the audit log.
+        <Trans>
+          Every reset link, every new owner, and anything the server did to an account's way in,
+          in the last 14 days, by anyone. Read from the audit log.
+        </Trans>
       </p>
       <Problem error={recent.error} />
       {changes.length === 0 ? (
-        <Empty>Nothing in the last 14 days.</Empty>
+        <Empty><Trans>Nothing in the last 14 days.</Trans></Empty>
       ) : (
         <div className="table-scroll">
-          <table aria-label="Recent sign-in changes">
+          <table aria-label={t`Recent sign-in changes`}>
             <thead>
               <tr>
                 <SortHeading
-                  label="When"
+                  label={t`When`}
                   column="date"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="What"
+                  label={t`What`}
                   column="what"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="Whom"
+                  label={t`Whom`}
                   column="whom"
                   sort={order.sort}
                   direction={order.direction}
                   onSort={order.onSort}
                 />
                 <SortHeading
-                  label="By"
+                  label={t`By`}
                   column="by"
                   sort={order.sort}
                   direction={order.direction}
@@ -962,45 +1034,49 @@ function Households({
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 12 }}>
         <p className="muted small" style={{ margin: 0 }}>
-          Every household on this instance, including ones you are not in. Joining one is still an
-          explicit act.
+          <Trans>
+            Every household on this instance, including ones you are not in. Joining one is still an
+            explicit act.
+          </Trans>
         </p>
         <button className="primary" onClick={() => setAdding(true)}>
-          New household
+          <Trans>
+            New household
+          </Trans>
         </button>
       </div>
 
       <div className="card">
         {households.length === 0 ? (
-          <Empty>No households yet.</Empty>
+          <Empty><Trans>No households yet.</Trans></Empty>
         ) : (
           <div className="table-scroll">
             <table>
               <thead>
                 <tr>
                   <SortHeading
-                    label="Name"
+                    label={t`Name`}
                     column="name"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label="Main currency"
+                    label={t`Main currency`}
                     column="currency"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label="Dates"
+                    label={t`Dates`}
                     column="dates"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label="Members"
+                    label={t`Members`}
                     column="members"
                     sort={order.sort}
                     direction={order.direction}
@@ -1016,11 +1092,11 @@ function Households({
                     <td className="mono small muted">{one.date_format}</td>
                     <td className="small muted">
                       {one.member_ids.length === 0
-                        ? "nobody"
+                        ? t`nobody`
                         : one.member_ids
                             .map(
                               (id) =>
-                                users.find((u) => u.id === id)?.display_name ?? "somebody",
+                                users.find((u) => u.id === id)?.display_name ?? t`somebody`,
                             )
                             .join(", ")}
                     </td>
@@ -1078,13 +1154,13 @@ function NewHousehold({
     );
 
   return (
-    <Panel title="New household" onClose={onClose} config>
+    <Panel title={t`New household`} onClose={onClose} config>
       <Problem error={create.error} />
-      <Field label="Name">
+      <Field label={t`Name`}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
       <p />
-      <Field label="Main currency">
+      <Field label={t`Main currency`}>
         <input
           value={currency}
           onChange={(e) => setCurrency(e.target.value)}
@@ -1093,18 +1169,22 @@ function NewHousehold({
         />
       </Field>
       <p className="muted small">
-        Used for totals only. Each account keeps its own currency, and nothing is ever converted.
+        <Trans>
+          Used for totals only. Each account keeps its own currency, and nothing is ever converted.
+        </Trans>
       </p>
-      <Field label="Date format">
+      <Field label={t`Date format`}>
         <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)}>
-          <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-          <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-          <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+          <option value="YYYY-MM-DD"><Trans>YYYY-MM-DD</Trans></option>
+          <option value="DD/MM/YYYY"><Trans>DD/MM/YYYY</Trans></option>
+          <option value="MM/DD/YYYY"><Trans>MM/DD/YYYY</Trans></option>
         </select>
       </Field>
       <p />
       <div className="field">
-        <span style={{ fontWeight: 600, fontSize: 13, color: "var(--muted)" }}>Who is in it</span>
+        <span style={{ fontWeight: 600, fontSize: 13, color: "var(--muted)" }}>
+          <Trans>Who is in it</Trans>
+        </span>
         <div style={{ marginTop: 6 }}>
           {users
             .filter((one) => !one.disabled_at)
@@ -1121,13 +1201,15 @@ function NewHousehold({
             ))}
         </div>
       </div>
-      <p className="muted small">You are a member of anything you create, whether or not you tick yourself.</p>
+      <p className="muted small"><Trans>You are a member of anything you create, whether or not you tick yourself.</Trans></p>
       <button
         className="primary"
         disabled={create.isPending || !name.trim() || currency.trim().length !== 3}
         onClick={() => create.mutate()}
       >
-        Create household
+        <Trans>
+          Create household
+        </Trans>
       </button>
     </Panel>
   );
@@ -1194,51 +1276,55 @@ function Invitations({ households }: { households: AdminHousehold[] }) {
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 12 }}>
         <p className="muted small" style={{ margin: 0 }}>
-          A one-time link. The role travels on it, so you can hand somebody ownership without ever
-          holding their password.
+          <Trans>
+            A one-time link. The role travels on it, so you can hand somebody ownership without ever
+            holding their password.
+          </Trans>
         </p>
         <button className="primary" onClick={() => setCreating(true)}>
-          Invite somebody
+          <Trans>
+            Invite somebody
+          </Trans>
         </button>
       </div>
 
       {fresh && (
-        <FreshLink link={fresh.link} label="Invitation link" onDismiss={() => setFresh(null)} />
+        <FreshLink link={fresh.link} label={t`Invitation link`} onDismiss={() => setFresh(null)} />
       )}
 
       <Problem error={invitations.error ?? (revoking ? null : revoke.error)} />
 
       <div className="card">
         {(invitations.data ?? []).length === 0 ? (
-          <Empty>No invitations outstanding.</Empty>
+          <Empty><Trans>No invitations outstanding.</Trans></Empty>
         ) : (
           <div className="table-scroll">
             <table>
               <thead>
                 <tr>
                   <SortHeading
-                    label="For"
+                    label={t`For`}
                     column="for"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label="Role"
+                    label={t`Role`}
                     column="role"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label="Households"
+                    label={t`Households`}
                     column="households"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label="Expires"
+                    label={t`Expires`}
                     column="expires"
                     sort={order.sort}
                     direction={order.direction}
@@ -1250,17 +1336,21 @@ function Invitations({ households }: { households: AdminHousehold[] }) {
               <tbody>
                 {rows.map((one) => (
                   <tr key={one.id}>
-                    <td className="small">{one.email ?? <span className="muted">anyone with the link</span>}</td>
+                    <td className="small">
+                      {one.email ?? <span className="muted">{t`anyone with the link`}</span>}
+                    </td>
                     <td className="small">{roleLabel(one.role)}</td>
                     <td className="small muted">
                       {(one.household_ids ?? []).length === 0
-                        ? "none yet"
+                        ? t`none yet`
                         : (one.household_ids ?? []).map(householdName).join(", ")}
                     </td>
                     <td className="small muted">{formatInstant(one.expires_at)}</td>
                     <td>
                       <button className="link danger" onClick={() => setRevoking(one)}>
-                        Revoke
+                        <Trans>
+                          Revoke
+                        </Trans>
                       </button>
                     </td>
                   </tr>
@@ -1272,10 +1362,9 @@ function Invitations({ households }: { households: AdminHousehold[] }) {
       </div>
 
       {revoking && (
-        <Dialog title="Revoke this invitation?" onClose={() => setRevoking(null)}>
+        <Dialog title={t`Revoke this invitation?`} onClose={() => setRevoking(null)}>
           <p style={{ marginTop: 0 }}>
-            The link for {revoking.email ?? "anyone with the link"} ({roleLabel(revoking.role)}) stops working
-            at once. To invite them again, make a new one.
+            {t`The link for ${revoking.email ?? t`anyone with the link`} (${roleLabel(revoking.role)}) stops working at once. To invite them again, make a new one.`}
           </p>
           <div className="dialog-choices">
             <button
@@ -1283,10 +1372,12 @@ function Invitations({ households }: { households: AdminHousehold[] }) {
               disabled={revoke.isPending}
               onClick={() => revoke.mutate(revoking.id)}
             >
-              {revoke.isPending ? "Revoking…" : "Yes, revoke it"}
+              {revoke.isPending ? t`Revoking…` : t`Yes, revoke it`}
             </button>
             <button disabled={revoke.isPending} onClick={() => setRevoking(null)}>
-              Keep it
+              <Trans>
+                Keep it
+              </Trans>
             </button>
           </div>
           <Problem error={revoke.error} />
@@ -1347,7 +1438,9 @@ function FreshLink({
 
   return (
     <div className="banner info">
-      <strong>Copy this link now — it is shown once.</strong>
+      <strong>
+        <Trans>Copy this link now — it is shown once.</Trans>
+      </strong>
       <div className="row" style={{ marginTop: 8 }}>
         <input
           className="mono"
@@ -1356,25 +1449,31 @@ function FreshLink({
           value={link}
           onFocus={(e) => e.target.select()}
         />
-        <button onClick={copy}>{copied === "yes" ? "Copied" : "Copy"}</button>
+        <button onClick={copy}>{copied === "yes" ? t`Copied` : t`Copy`}</button>
         <button
           onClick={() => {
-            if (copied === "yes" || window.confirm("Dismiss without copying? The link cannot be shown again.")) {
+            if (copied === "yes" || window.confirm(t`Dismiss without copying? The link cannot be shown again.`)) {
               onDismiss();
             }
           }}
         >
-          Done
+          <Trans>
+            Done
+          </Trans>
         </button>
       </div>
       {copied === "failed" && (
         <div className="small neg" style={{ marginTop: 6 }}>
-          Couldn't reach the clipboard. Select the link above and copy it by hand.
+          <Trans>
+            Couldn't reach the clipboard. Select the link above and copy it by hand.
+          </Trans>
         </div>
       )}
       {children}
       <div className="small muted" style={{ marginTop: 6 }}>
-        The server keeps only a hash of it, so nobody — you included — can read it back.
+        <Trans>
+          The server keeps only a hash of it, so nobody — you included — can read it back.
+        </Trans>
       </div>
     </div>
   );
@@ -1415,35 +1514,39 @@ function NewInvitation({
     );
 
   return (
-    <Panel title="Invite somebody" onClose={onClose} config>
+    <Panel title={t`Invite somebody`} onClose={onClose} config>
       <Problem error={create.error} />
-      <Field label="Role">
+      <Field label={t`Role`}>
         <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
-          <option value="member">Member</option>
-          <option value="owner">Owner — can administer this instance</option>
+          <option value="member"><Trans>Member</Trans></option>
+          <option value="owner"><Trans>Owner — can administer this instance</Trans></option>
         </select>
       </Field>
       <p />
-      <Field label="Email (optional)">
+      <Field label={t`Email (optional)`}>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="fills in the acceptance screen"
+          placeholder={t`fills in the acceptance screen`}
         />
       </Field>
       <p className="muted small">
-        A suggestion, not a restriction: it fills in the address on the acceptance screen and the
-        person can change it. <strong>The link is the credential</strong> — whoever opens it gets
-        this role, so treat it like a password.
+        <Trans>
+          A suggestion, not a restriction: it fills in the address on the acceptance screen and the
+          person can change it. <strong>The link is the credential</strong> — whoever opens it gets
+          this role, so treat it like a password.
+        </Trans>
       </p>
       <div className="field">
         <span style={{ fontWeight: 600, fontSize: 13, color: "var(--muted)" }}>
-          Households they join on arrival
+          <Trans>
+            Households they join on arrival
+          </Trans>
         </span>
         <div style={{ marginTop: 6 }}>
           {households.length === 0 ? (
-            <span className="muted small">None yet.</span>
+            <span className="muted small">{t`None yet.`}</span>
           ) : (
             households.map((one) => (
               <label key={one.id} className="small" style={{ display: "block", marginBottom: 4 }}>
@@ -1465,7 +1568,7 @@ function NewInvitation({
           <StepUpFields
             proof={proof}
             onChange={setProof}
-            why="Whoever opens an owner link can administer this instance, and stays an owner whatever you later do to your own password or authenticator."
+            why={t`Whoever opens an owner link can administer this instance, and stays an owner whatever you later do to your own password or authenticator.`}
           />
           <p />
         </>
@@ -1475,7 +1578,9 @@ function NewInvitation({
         disabled={!ready || create.isPending}
         onClick={() => create.mutate()}
       >
-        Create the link
+        <Trans>
+          Create the link
+        </Trans>
       </button>
     </Panel>
   );

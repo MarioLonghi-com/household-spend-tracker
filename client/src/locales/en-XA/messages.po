@@ -78,6 +78,10 @@ msgstr ""
 msgid "this account is closed"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "An owner can administer this instance, and stays one whatever you later do to your own password or authenticator."
+msgstr ""
+
 #. placeholder {0}: group.name
 #: src/screens/Categories.tsx
 msgid "Delete the group {0}?"
@@ -98,6 +102,10 @@ msgstr ""
 
 #: src/components/DateRange.tsx
 msgid "To month"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "What"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -162,6 +170,16 @@ msgstr ""
 
 #: src/screens/ResetAccount.tsx
 msgid "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+msgstr ""
+
+#. placeholder {0}: confirming.user.display_name
+#. placeholder {1}: confirming.user.email
+#: src/screens/Admin.tsx
+msgid "{0} ({1}) is signed out everywhere and their trusted browsers are forgotten. Re-enable brings the account back."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Nothing in the last 14 days."
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -231,14 +249,23 @@ msgstr ""
 msgid "{0, plural, one {{1} pair} other {{2} pairs}}"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Every reset link, every new owner, and anything the server did to an account's way in, in the last 14 days, by anyone. Read from the audit log."
+msgstr ""
+
 #: src/screens/Import.tsx
 msgid "Open"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Copy this link now — it is shown once."
 msgstr ""
 
 #: src/screens/Import.tsx
 msgid "What happens"
 msgstr ""
 
+#: src/screens/Admin.tsx
 #: src/screens/Household.tsx
 msgid "People"
 msgstr ""
@@ -253,6 +280,10 @@ msgstr ""
 #. placeholder {3}: formatCount(unloaded)
 #: src/screens/Register.tsx
 msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "When"
 msgstr ""
 
 #: src/screens/SignIn.tsx
@@ -281,6 +312,10 @@ msgstr ""
 
 #: src/screens/Passkeys.tsx
 msgid "This browser does not support passkeys yet."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "YYYY-MM-DD"
 msgstr ""
 
 #: src/screens/Household.tsx
@@ -397,6 +432,10 @@ msgstr ""
 msgid "2. You"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Keep them active"
+msgstr ""
+
 #: src/screens/Categories.tsx
 msgid "Start with a common set"
 msgstr ""
@@ -438,6 +477,7 @@ msgid "Set the category on {done} row and skipped 1 transfer leg — a transfer 
 msgstr ""
 
 #: src/App.tsx
+#: src/screens/Admin.tsx
 msgid "New household"
 msgstr ""
 
@@ -459,6 +499,7 @@ msgstr ""
 msgid "Keep editing"
 msgstr ""
 
+#: src/screens/Admin.tsx
 #: src/screens/Household.tsx
 msgid "(you)"
 msgstr ""
@@ -472,6 +513,10 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "Opening date"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "nobody"
 msgstr ""
 
 #: src/screens/Categories.tsx
@@ -552,6 +597,10 @@ msgstr ""
 msgid "Somebody gave {user} a new authenticator"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Revoke this invitation?"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
 msgstr ""
@@ -566,6 +615,10 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "Add an account"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Couldn't reach the clipboard. Select the link above and copy it by hand."
 msgstr ""
 
 #: src/App.tsx
@@ -592,6 +645,10 @@ msgstr ""
 
 #: src/App.tsx
 msgid "You're already signed in"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Withdrawing a link stops it working. It does not undo the reset: the account stays shut, and the way back in is a new link."
 msgstr ""
 
 #: src/components/ReenrolmentDue.tsx
@@ -626,9 +683,18 @@ msgstr ""
 msgid "Remove this part"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Nobody yet, which should be impossible while you are reading this."
+msgstr ""
+
 #: src/screens/Payees.tsx
 #: src/screens/Rules.tsx
 msgid "Spellings"
+msgstr ""
+
+#. placeholder {0}: one.recovery_codes_left
+#: src/screens/Admin.tsx
+msgid "{0} left"
 msgstr ""
 
 #: src/lib/signInChanges.ts
@@ -647,12 +713,17 @@ msgstr ""
 msgid "Call the payee"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Copied"
+msgstr ""
+
 #: src/screens/Import.tsx
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr ""
 
 #: src/App.tsx
 #: src/screens/Accounts.tsx
+#: src/screens/Admin.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Household.tsx
 #: src/screens/Passkeys.tsx
@@ -660,8 +731,16 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Dismiss without copying? The link cannot be shown again."
+msgstr ""
+
 #: src/screens/Import.tsx
 msgid "Discard the staged one"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "{name} is told on the link page that you reset them, and every owner sees it under Recent sign-in changes."
 msgstr ""
 
 #: src/lib/labels.ts
@@ -787,6 +866,10 @@ msgstr ""
 msgid "Closed — hide it from the accounts list"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Choose what {name} sets again. They do it themselves, from a one-time link you hand over."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "That isn't an amount in {currency}."
 msgstr ""
@@ -812,6 +895,7 @@ msgid "The recovery code you signed in with in this tab covers it — no other c
 msgstr ""
 
 #: src/screens/AcceptInvite.tsx
+#: src/screens/Admin.tsx
 #: src/screens/Profile.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/Setup.tsx
@@ -835,6 +919,14 @@ msgstr ""
 msgid "Somebody reset {user}'s authenticator"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Whom"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Issued"
+msgstr ""
+
 #: src/screens/Household.tsx
 msgid "Everyone in a household can do everything in it. Only the owner can change who is in it, from the Admin screen. The count is transactions still in the register that each person entered — by hand, by import, or by an agent key of theirs — read from the History, so a row somebody has since deleted is not counted against anyone."
 msgstr ""
@@ -851,8 +943,16 @@ msgstr ""
 msgid "Latest 3 months"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Make them an owner"
+msgstr ""
+
 #: src/lib/labels.ts
 msgid "Skipped"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "That is more than you chose: what was already reset for them stays reset, so the link has to set it too."
 msgstr ""
 
 #: src/components/StepUp.tsx
@@ -884,8 +984,16 @@ msgstr ""
 msgid "Show the menu"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "their password stops working"
+msgstr ""
+
 #: src/lib/reimbursement.ts
 msgid "Work expense — reimbursed"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password and authenticator."
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -900,6 +1008,10 @@ msgstr ""
 #: src/screens/Register.tsx
 #: src/screens/TransferSections.tsx
 msgid "Account"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Revoking…"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -1037,6 +1149,12 @@ msgstr ""
 msgid "Nothing recorded. Rows created before the audit log existed have no history."
 msgstr ""
 
+#. placeholder {0}: withdrawing.display_name
+#. placeholder {1}: withdrawing.email
+#: src/screens/Admin.tsx
+msgid "The link for {0} ({1}) stops working at once. Their password and authenticator stays reset, so they cannot sign in until you make them a new link."
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Reading the log…"
 msgstr ""
@@ -1061,6 +1179,11 @@ msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Add a group"
+msgstr ""
+
+#. placeholder {0}: one.display_name
+#: src/screens/Admin.tsx
+msgid "Role for {0}"
 msgstr ""
 
 #. placeholder {0}: formatCount(rows.length)
@@ -1127,6 +1250,11 @@ msgstr ""
 msgid "Add transfer"
 msgstr ""
 
+#. placeholder {0}: one.display_name
+#: src/screens/Admin.tsx
+msgid "Reset sign-in for {0}"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "This one was entered by hand."
 msgstr ""
@@ -1166,12 +1294,20 @@ msgstr ""
 msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Changing your own role would close this screen; ask the other owner"
+msgstr ""
+
 #: src/screens/TransferSections.tsx
 msgid "Select every waiting row"
 msgstr ""
 
 #: src/screens/Register.tsx
 msgid "That isn't an amount"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Yes, revoke it"
 msgstr ""
 
 #: src/screens/Categories.tsx
@@ -1184,8 +1320,20 @@ msgstr ""
 msgid "Held in dark, whatever this device is set to."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Disable"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Filters"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Disabling somebody signs them out everywhere and forgets their trusted browsers. It leaves their work alone — their name stays on every batch they ran."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "every session, trusted browser, agent key and passkey ends"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -1213,8 +1361,13 @@ msgid "Click to edit"
 msgstr ""
 
 #: src/App.tsx
+#: src/screens/Admin.tsx
 #: src/screens/Household.tsx
 msgid "Main currency"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Reset sign-in…"
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -1263,6 +1416,7 @@ msgstr ""
 msgid "And then"
 msgstr ""
 
+#: src/screens/Admin.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Profile.tsx
@@ -1296,10 +1450,20 @@ msgstr ""
 msgid "Needs a look"
 msgstr ""
 
+#. placeholder {0}: confirming.user.display_name
+#: src/screens/Admin.tsx
+msgid "Make {0} a member?"
+msgstr ""
+
+#: src/screens/Admin.tsx
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
 #: src/screens/ResetAccount.tsx
 msgid "Done"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Re-enable them first: a disabled account cannot follow a link"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -1327,6 +1491,14 @@ msgstr ""
 #. placeholder {0}: to!.currency
 #: src/screens/Transfer.tsx
 msgid "Amount arriving ({0})"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Disabled"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Reset and make the link"
 msgstr ""
 
 #: src/screens/Payees.tsx
@@ -1523,6 +1695,10 @@ msgstr ""
 msgid "state column"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "No households yet."
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr ""
@@ -1541,6 +1717,14 @@ msgstr ""
 #. placeholder {2}: to?.name
 #: src/screens/Transfer.tsx
 msgid "<0>{0}</0> leaves {1} and the same arrives in {2}."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Active"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Households"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -1642,6 +1826,10 @@ msgstr ""
 msgid "The file itself"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Re-enable"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 msgid "Cleared"
@@ -1666,8 +1854,17 @@ msgstr ""
 msgid "Received"
 msgstr ""
 
+#. placeholder {0}: confirming.user.display_name
+#: src/screens/Admin.tsx
+msgid "Disable {0}?"
+msgstr ""
+
 #: src/screens/Categories.tsx
 msgid "Auto-categorise based on payee history"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "By"
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -1704,10 +1901,15 @@ msgstr ""
 msgid "Plan"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Create household"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Your account"
 msgstr ""
 
+#: src/screens/Admin.tsx
 #: src/screens/Household.tsx
 msgid "Role"
 msgstr ""
@@ -1731,8 +1933,16 @@ msgstr ""
 msgid "Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Reset sign-in for {name}?"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Splitting…"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Issued by"
 msgstr ""
 
 #: src/lib/labels.ts
@@ -1745,6 +1955,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "No accounts are ticked, so there is nothing to show. Tick one in the accounts filter — or Select all, which is not the same as ticking every one of them."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "fills in the acceptance screen"
 msgstr ""
 
 #: src/screens/SignIn.tsx
@@ -1763,12 +1977,21 @@ msgstr ""
 msgid "Normally a program stages an import and you review it before anything lands in the register. This skips that."
 msgstr ""
 
+#. placeholder {0}: consequences.join("; ")
+#: src/screens/Admin.tsx
+msgid "<0>At once, not when the link is followed:</0> {name} is signed out everywhere — {0}. They cannot sign in again until they follow the link."
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "The password alone cannot replace your second factor — otherwise it would not be a second factor."
 msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as an owner."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "none yet"
 msgstr ""
 
 #: src/screens/Transfer.tsx
@@ -1780,6 +2003,7 @@ msgid "No minus signs — the direction is the two accounts above."
 msgstr ""
 
 #: src/components/SignInNotice.tsx
+#: src/screens/Admin.tsx
 msgid "Recent sign-in changes"
 msgstr ""
 
@@ -1787,6 +2011,7 @@ msgstr ""
 msgid "Deleting…"
 msgstr ""
 
+#: src/screens/Admin.tsx
 #: src/screens/Profile.tsx
 msgid "Revoke"
 msgstr ""
@@ -1803,6 +2028,10 @@ msgstr ""
 msgid "part of a name"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Everything on this screen is recorded as a batch with your name on it. These are instance-wide rather than household changes, so they are kept out of a household's History."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Would link"
 msgstr ""
@@ -1811,8 +2040,16 @@ msgstr ""
 msgid "Nothing waiting."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password."
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 msgid "Looking up your invitation…"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Every household on this instance, including ones you are not in. Joining one is still an explicit act."
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -1829,6 +2066,10 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "The name looks like its number."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Copy"
 msgstr ""
 
 #: src/screens/Import.tsx
@@ -1896,6 +2137,10 @@ msgstr ""
 msgid "this payee"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Withdrawing…"
+msgstr ""
+
 #. placeholder {0}: purging.row_count
 #: src/screens/Import.tsx
 msgid "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
@@ -1938,6 +2183,10 @@ msgstr ""
 
 #: src/screens/Passkeys.tsx
 msgid "Passkeys are not set up on this server."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "anyone with the link"
 msgstr ""
 
 #: src/lib/labels.ts
@@ -2007,6 +2256,10 @@ msgstr ""
 msgid "Checking"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "You are a member of anything you create, whether or not you tick yourself."
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Work will not pay this. It counts as your spending."
 msgstr ""
@@ -2035,6 +2288,10 @@ msgstr ""
 msgid "Your new authenticator is the only one that works now."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Invitation link"
+msgstr ""
+
 #: src/lib/labels.ts
 msgid "Connect"
 msgstr ""
@@ -2058,6 +2315,12 @@ msgstr ""
 
 #: src/lib/labels.ts
 msgid "amount column"
+msgstr ""
+
+#. placeholder {0}: withdrawing.display_name
+#. placeholder {1}: withdrawing.email
+#: src/screens/Admin.tsx
+msgid "The link for {0} ({1}) stops working at once. Their authenticator stays reset, so they cannot sign in until you make them a new link."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -2095,8 +2358,17 @@ msgstr ""
 msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and those payees will be gone. Each merge is one act in History, so it can be undone there."
 msgstr ""
 
+#. placeholder {0}: one.display_name
+#: src/screens/Admin.tsx
+msgid "Withdraw the reset link for {0}"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "{text} — edit the memo"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Changing…"
 msgstr ""
 
 #: src/lib/signInChanges.ts
@@ -2118,6 +2390,10 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "the last four, or the part the bank prints"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "A suggestion, not a restriction: it fills in the address on the acceptance screen and the person can change it. <0>The link is the credential</0> — whoever opens it gets this role, so treat it like a password."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -2239,6 +2515,10 @@ msgstr ""
 msgid "Try again"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "You cannot disable yourself"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "M — Entered by hand"
 msgstr ""
@@ -2247,6 +2527,10 @@ msgstr ""
 #. placeholder {1}: account.name
 #: src/screens/Import.tsx
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Yes, make them a member"
 msgstr ""
 
 #: src/lib/labels.ts
@@ -2302,6 +2586,10 @@ msgstr ""
 msgid "Colour"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Expires"
+msgstr ""
+
 #: src/screens/SignIn.tsx
 msgid "Until you do, every sign-in will ask for another recovery code. To do it later, open your account — your name in the menu — and set up a new authenticator there. In this tab, while you stay signed in and for up to a day, the code you just used still covers it; after that, or anywhere else, it takes one more recovery code."
 msgstr ""
@@ -2344,6 +2632,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Brought in by the <0>One-time Import</0> from {how}, reading {what}, on {when}."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Making them an owner…"
 msgstr ""
 
 #: src/screens/Passkeys.tsx
@@ -2407,6 +2699,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "The line exactly as it arrived"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Date format"
 msgstr ""
 
 #: src/screens/Setup.tsx
@@ -2483,6 +2779,10 @@ msgstr ""
 msgid "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Owner"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "What was in the account on the day you started tracking it — usually a date in the past, the one your first statement opens with."
 msgstr ""
@@ -2551,6 +2851,7 @@ msgstr ""
 msgid "The server reset {user}'s password and authenticator"
 msgstr ""
 
+#: src/screens/Admin.tsx
 #: src/screens/Household.tsx
 msgid "Who is in it"
 msgstr ""
@@ -2634,6 +2935,14 @@ msgstr ""
 msgid "The category is chosen from how the last {0} transactions for {name} were categorised — the most common of them, most recent winning a tie. It updates as you add and edit transactions."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "No reset links pending."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Yes, withdraw it"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Set"
 msgstr ""
@@ -2662,6 +2971,10 @@ msgstr ""
 msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "To create a new user, use the <0>Invitation link</0>."
+msgstr ""
+
 #: src/screens/Payees.tsx
 msgid "Find a payee"
 msgstr ""
@@ -2676,6 +2989,14 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "C — Cleared"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Yes, disable them"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "expired"
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -2743,6 +3064,12 @@ msgstr ""
 msgid "In Docker:"
 msgstr ""
 
+#. placeholder {0}: confirming.user.display_name
+#. placeholder {0}: person.display_name
+#: src/screens/Admin.tsx
+msgid "Make {0} an owner?"
+msgstr ""
+
 #. placeholder {0}: offer.count
 #: src/screens/Import.tsx
 msgid "<0>{0} other line has the same payee</0> and no category of their own."
@@ -2767,12 +3094,14 @@ msgid "This lands as one entry in History, so the whole import can be undone in 
 msgstr ""
 
 #: src/screens/AcceptInvite.tsx
+#: src/screens/Admin.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 msgid "Email"
 msgstr ""
 
 #: src/lib/signInChanges.ts
+#: src/screens/Admin.tsx
 msgid "somebody"
 msgstr ""
 
@@ -2884,6 +3213,10 @@ msgstr ""
 msgid "Snap a Receipt"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Create the link"
+msgstr ""
+
 #. placeholder {0}: formatInstant(key.expires_at)
 #: src/screens/Profile.tsx
 msgid "Expires {0}"
@@ -2901,6 +3234,12 @@ msgstr ""
 msgid "Receipt"
 msgstr ""
 
+#. placeholder {0}: withdrawing.display_name
+#. placeholder {1}: withdrawing.email
+#: src/screens/Admin.tsx
+msgid "The link for {0} ({1}) stops working at once. Their password stays reset, so they cannot sign in until you make them a new link."
+msgstr ""
+
 #: src/screens/ResetAccount.tsx
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr ""
@@ -2913,8 +3252,20 @@ msgstr ""
 msgid "Split this transaction"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Withdraw"
+msgstr ""
+
 #: src/screens/Rules.tsx
 msgid "Apply rules to what is already here"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Withdraw this reset link?"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Member"
 msgstr ""
 
 #: src/components/DateRange.tsx
@@ -3006,6 +3357,11 @@ msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "The bank keeps saying"
+msgstr ""
+
+#. placeholder {0}: confirming.user.display_name
+#: src/screens/Admin.tsx
+msgid "{0} will be able to administer this instance: people, households and invitations."
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -3112,6 +3468,14 @@ msgstr ""
 msgid "{by} reset {user}'s authenticator"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "None yet."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Email (optional)"
+msgstr ""
+
 #. placeholder {0}: purging.row_count
 #: src/screens/Import.tsx
 msgid "<0>{purgingName}</0> and its {0} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
@@ -3145,6 +3509,10 @@ msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "Every rule of this kind gets a turn, in this order, each one working on what the last one left."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Owner — can administer this instance"
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -3201,12 +3569,32 @@ msgstr ""
 msgid "{count, plural, other {{shown} rows}}"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Leave it"
+msgstr ""
+
 #: src/screens/SignIn.tsx
 msgid "A recovery code"
 msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Hide filters"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Whoever opens an owner link can administer this instance, and stays an owner whatever you later do to your own password or authenticator."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Authenticator, with its recovery codes"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "A reset link for {name} is already pending. This one replaces it, and what that one reset stays reset."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "none"
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -3228,6 +3616,10 @@ msgstr ""
 #. placeholder {1}: formatDate(txn.date)
 #: src/screens/Register.tsx
 msgid "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
 msgstr ""
 
 #: src/screens/AcceptInvite.tsx
@@ -3268,6 +3660,10 @@ msgstr ""
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so its next statement picks the account itself?"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Disabling…"
+msgstr ""
+
 #. placeholder {0}: formatCount(proposed.changing)
 #: src/screens/Rules.tsx
 msgid "Move {0} rows"
@@ -3297,6 +3693,10 @@ msgstr ""
 msgid "For a <0>payment rail</0> rather than a shop. <1>SQ *</1>, <2>PAGO MOVIL</2> and <3>COMPRA INTERNET</3> are how the money travelled, not who was paid — every shop that takes Square appears behind <4>SQ *</4>. There is no single payee to point at, so this kind of rule takes the rail off and lets whatever is left be the shop."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Reset link for {name}"
+msgstr ""
+
 #: src/components/ReenrolmentDue.tsx
 #: src/screens/SignIn.tsx
 msgid "Your authenticator"
@@ -3314,6 +3714,7 @@ msgstr ""
 msgid "Every category this payee has been filed under, biggest first. The transactions with no category are listed too, because they are what this payee still costs you to classify."
 msgstr ""
 
+#: src/screens/Admin.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
@@ -3374,6 +3775,10 @@ msgstr ""
 msgid "Out of"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Resets"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "write"
 msgstr ""
@@ -3404,6 +3809,10 @@ msgstr ""
 msgid "in {0} groups, {1} archived"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Choose at least one."
+msgstr ""
+
 #. placeholder {0}: recovered.keys
 #: src/screens/SignIn.tsx
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
@@ -3411,6 +3820,10 @@ msgstr ""
 
 #: src/components/DateRange.tsx
 msgid "All dates"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Yes, make them an owner"
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -3500,6 +3913,10 @@ msgstr ""
 #: src/screens/Passkeys.tsx
 #: src/screens/Register.tsx
 msgid "Remove"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Invite somebody"
 msgstr ""
 
 #: src/screens/Import.tsx
@@ -3593,6 +4010,11 @@ msgstr ""
 msgid "Work expense — written off"
 msgstr ""
 
+#. placeholder {0}: confirming.user.display_name
+#: src/screens/Admin.tsx
+msgid "{0} will no longer be able to administer this instance."
+msgstr ""
+
 #. placeholder {0}: formatCount(proposed.orphaned.length)
 #: src/screens/Rules.tsx
 msgid "Also delete the {0} payees left empty"
@@ -3616,12 +4038,20 @@ msgstr ""
 msgid "What this would do"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "No invitations outstanding."
+msgstr ""
+
 #: src/lib/labels.ts
 msgid "Fixed"
 msgstr ""
 
 #: src/components/bits.tsx
 msgid "What's this? {label}"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "The server keeps only a hash of it, so nobody — you included — can read it back."
 msgstr ""
 
 #: src/App.tsx
@@ -3652,6 +4082,16 @@ msgstr ""
 msgid "Latest 6 months"
 msgstr ""
 
+#. placeholder {0}: revoking.email ?? t`anyone with the link`
+#. placeholder {1}: roleLabel(revoking.role)
+#: src/screens/Admin.tsx
+msgid "The link for {0} ({1}) stops working at once. To invite them again, make a new one."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Households they join on arrival"
+msgstr ""
+
 #: src/components/bits.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Household.tsx
@@ -3671,6 +4111,7 @@ msgid "Show closed"
 msgstr ""
 
 #: src/App.tsx
+#: src/screens/Admin.tsx
 msgid "Admin"
 msgstr ""
 
@@ -3698,12 +4139,20 @@ msgstr ""
 msgid "call it one payee"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Status"
+msgstr ""
+
 #: src/lib/labels.ts
 msgid "Already have it"
 msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "Holder's name"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Dates"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -3759,6 +4208,10 @@ msgstr ""
 #. placeholder {0}: group.name
 #: src/screens/Categories.tsx
 msgid "New category in {0}"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "MM/DD/YYYY"
 msgstr ""
 
 #. placeholder {0}: recovery.data.unused
@@ -3819,6 +4272,10 @@ msgstr ""
 msgid "and {0} more."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Reset link"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "What is holding it (optional)"
 msgstr ""
@@ -3829,6 +4286,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Close without copying? The link cannot be shown again."
 msgstr ""
 
 #. placeholder {0}: category.name
@@ -3904,6 +4365,10 @@ msgstr ""
 msgid "Language"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Change your own password or authenticator from your profile"
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as a member."
 msgstr ""
@@ -3919,6 +4384,11 @@ msgstr ""
 #. placeholder {0}: selected.size - counted
 #: src/screens/Register.tsx
 msgid "{0} of the selected rows are outside the current filter and are not in the figures above — they are still selected, and a change made here still reaches them."
+msgstr ""
+
+#. placeholder {0}: one.display_name
+#: src/screens/Admin.tsx
+msgid "Re-enable {0}"
 msgstr ""
 
 #. placeholder {0}: entry.filename
@@ -3948,6 +4418,10 @@ msgstr ""
 
 #: src/screens/Household.tsx
 msgid "Currencies"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Pending reset links"
 msgstr ""
 
 #: src/screens/SignIn.tsx
@@ -4009,12 +4483,21 @@ msgstr ""
 msgid "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Members"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "An account cannot have been opened in the future."
 msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "Value"
+msgstr ""
+
+#. placeholder {0}: formatInstant(issued.expires_at)
+#: src/screens/Admin.tsx
+msgid "Expires {0}. Hand it over yourself; it is not sent anywhere."
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -4058,6 +4541,10 @@ msgstr ""
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Who"
+msgstr ""
+
 #: src/screens/Rules.tsx
 msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 msgstr ""
@@ -4075,6 +4562,7 @@ msgstr ""
 msgid "No payee matches “{0}”."
 msgstr ""
 
+#: src/screens/Admin.tsx
 #: src/screens/Profile.tsx
 msgid "Recovery codes"
 msgstr ""
@@ -4130,6 +4618,10 @@ msgstr ""
 msgid "All categories"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Used for totals only. Each account keeps its own currency, and nothing is ever converted."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Bank or institution"
 msgstr ""
@@ -4139,11 +4631,16 @@ msgid "L — Locked"
 msgstr ""
 
 #: src/lib/signInChanges.ts
+#: src/screens/Admin.tsx
 msgid "from the server"
 msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Every new transaction for this payee gets a category without you choosing one. Which one depends on the setting below."
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "Resetting…"
 msgstr ""
 
 #: src/screens/AcceptInvite.tsx
@@ -4194,6 +4691,11 @@ msgstr ""
 msgid "Give a program a key"
 msgstr ""
 
+#. placeholder {0}: one.display_name
+#: src/screens/Admin.tsx
+msgid "Disable {0}"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "A code from your current authenticator"
 msgstr ""
@@ -4233,6 +4735,7 @@ msgid "New codes"
 msgstr ""
 
 #: src/screens/Accounts.tsx
+#: src/screens/Admin.tsx
 msgid "For"
 msgstr ""
 
@@ -4254,6 +4757,10 @@ msgstr ""
 
 #: src/screens/Transfer.tsx
 msgid "Add transfer between accounts"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "their authenticator and recovery codes are cleared"
 msgstr ""
 
 #. placeholder {0}: formatInstant(key.revoked_at)
@@ -4339,6 +4846,10 @@ msgstr ""
 msgid "They were only ever the bank’s reference numbers. Leaving them is what makes a payee list that is still three hundred long afterwards."
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new authenticator."
+msgstr ""
+
 #. placeholder {0}: one.transaction_count
 #. placeholder {1}: one.transaction_count
 #. placeholder {2}: one.transaction_count
@@ -4387,12 +4898,20 @@ msgstr ""
 msgid "{unused, plural, one {{unused} unused recovery code left.} other {{unused} unused recovery codes left.}}"
 msgstr ""
 
+#: src/screens/Admin.tsx
+msgid "Invitations"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Oldest"
 msgstr ""
 
 #: src/screens/Import.tsx
 msgid "Open that import"
+msgstr ""
+
+#: src/screens/Admin.tsx
+msgid "DD/MM/YYYY"
 msgstr ""
 
 #. placeholder {0}: parts.length
