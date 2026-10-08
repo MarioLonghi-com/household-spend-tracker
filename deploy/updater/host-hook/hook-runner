@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+"""Run the operator's pre-update command for each request the updater wrote.
+
+Installed on the **host** (never in a container) and started by
+spend-tracker-hook.service whenever spend-tracker-hook.path sees a
+`*.request` in the hook directory. See README.md beside this file.
+
+For each `<id>.request`:
+
+1. Take it: hard-link it to `<id>.taken`, then remove the request. The link
+   fails if `<id>.taken` already exists, so one id is never run twice, and
+   removing every request is what keeps the path unit from triggering again.
+2. Read it without following a symlink, at most 4 KiB: `id`, `from`, `to`.
+   The id must be a UUID4 and match the file name; each version must be
+   X.Y.Z in ASCII digits.
+3. Run the command the operator configured -- a file, by default
+   /etc/spend-tracker/pre-update-hook, that is owned by root (or by whoever
+   runs this), executable, not writable by group or others, and not a
+   symlink. **The request supplies nothing but the versions and the id**,
+   as SPENDTRACKER_HOOK_FROM, SPENDTRACKER_HOOK_TO and SPENDTRACKER_HOOK_ID.
+4. Write `<id>.result` atomically: the exit status and the last 4 KiB of
+   the command's output. A refused request gets a result too, with a
+   non-zero exit and `refused`, so the update stops at once rather than
+   waiting out its timeout.
+
+Python 3.9+ and its standard library only, rather than POSIX sh: the result
+has to carry arbitrary output as JSON, and the request has to be read
+without following a symlink; sh does neither reliably.
+"""
+
+from __future__ import annotations
+
+import argparse
+import contextlib
+import errno
+import json
+import os
+import re
+import secrets
+import signal
+import stat
+import subprocess
+import sys
+import tempfile
+import time
+
+VERSION = re.compile(r"[0-9]{1,6}\.[0-9]{1,6}\.[0-9]{1,6}")
+UUID4 = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
+MAX_REQUEST_BYTES = 4096
+MAX_OUTPUT_BYTES = 4096
+DEFAULT_TIMEOUT = 300
+MAX_TIMEOUT = 3600
+#: The exits the runner itself gives: refused before running, and timed out.
+REFUSED_EXIT = 125
+TIMED_OUT_EXIT = 124
+PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+
+class Refused(Exception):
+    pass
+
+
+def log(message: str) -> None:
+    print(f"hook-runner: {message}", file=sys.stderr, flush=True)
+
+
+def read_capped(path: str, limit: int) -> bytes:
+    flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | getattr(os, "O_CLOEXEC", 0)
+    try:
+        fd = os.open(path, flags)
+    except OSError as e:
+        if e.errno in (errno.ELOOP, errno.EMLINK):
+            raise Refused("the request is a symbolic link") from None
+        raise Refused(f"the request could not be opened ({e.strerror})") from None
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode):
+            raise Refused("the request is not a regular file")
+        data = os.read(fd, limit + 1)
+        if len(data) > limit:
+            raise Refused(f"the request is larger than {limit} bytes")
+        return data
+    finally:
+        os.close(fd)
+
+
+def timeout_of(hook_dir: str) -> int:
+    """`timeout_seconds` from hook.json, the same file the updater waits by."""
+    try:
+        doc = json.loads(read_capped(os.path.join(hook_dir, "hook.json"), 4096))
+        value = doc.get("timeout_seconds", DEFAULT_TIMEOUT)
+    except (Refused, ValueError, AttributeError):
+        return DEFAULT_TIMEOUT
+    if isinstance(value, bool) or not isinstance(value, int) or not 0 < value <= MAX_TIMEOUT:
+        return DEFAULT_TIMEOUT
+    return value
+
+
+def check_command(path: str) -> None:
+    try:
+        st = os.lstat(path)
+    except FileNotFoundError:
+        raise Refused(f"no command is configured at {path}") from None
+    if stat.S_ISLNK(st.st_mode):
+        raise Refused(f"{path} is a symbolic link; put the command itself there")
+    if not stat.S_ISREG(st.st_mode):
+        raise Refused(f"{path} is not a regular file")
+    if st.st_uid not in (0, os.geteuid()):
+        raise Refused(f"{path} is owned by uid {st.st_uid}, not by root")
+    if st.st_mode & 0o022:
+        raise Refused(f"{path} is writable by group or others")
+    if not st.st_mode & 0o100:
+        raise Refused(f"{path} is not executable")
+
+
+def write_result(hook_dir: str, rid: str, doc: dict) -> None:
+    """Atomically: a new temporary file (never through a symlink), fsync, rename, fsync the directory."""
+    final = os.path.join(hook_dir, f"{rid}.result")
+    tmp = os.path.join(hook_dir, f".{rid}.result.{secrets.token_hex(6)}.tmp")
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0)
+    fd = os.open(tmp, flags, 0o644)
+    try:
+        # 0644 inside a 2770 directory: only root and the updater's group reach it,
+        # and a rootless engine's mapped user can still read it.
+        os.fchmod(fd, 0o644)
+        os.write(fd, (json.dumps(doc, indent=2, sort_keys=True) + "\n").encode())
+        os.fsync(fd)
+    except BaseException:
+        os.close(fd)
+        with contextlib.suppress(OSError):
+            os.unlink(tmp)
+        raise
+    os.close(fd)
+    os.replace(tmp, final)
+    dfd = os.open(hook_dir, os.O_RDONLY)
+    try:
+        os.fsync(dfd)
+    finally:
+        os.close(dfd)
+
+
+def take(hook_dir: str, rid: str) -> bool:
+    """Claim `<id>.request` as `<id>.taken`. False when it was already taken or handled."""
+    request = os.path.join(hook_dir, f"{rid}.request")
+    taken = os.path.join(hook_dir, f"{rid}.taken")
+    result = os.path.join(hook_dir, f"{rid}.result")
+    try:
+        if os.path.lexists(result) or os.path.lexists(taken):
+            log(f"{rid} was handled before; not running it again")
+            return False
+        try:
+            os.link(request, taken, follow_symlinks=False)
+        except FileExistsError:
+            log(f"{rid} was taken by another run; not running it again")
+            return False
+        except FileNotFoundError:
+            return False
+        return True
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            os.unlink(request)
+
+
+def run_command(command: str, env: dict, timeout: int) -> tuple[int, str]:
+    with tempfile.TemporaryFile() as out:
+        proc = subprocess.Popen(
+            [command],
+            stdin=subprocess.DEVNULL,
+            stdout=out,
+            stderr=subprocess.STDOUT,
+            env=env,
+            cwd="/",
+            start_new_session=True,
+        )
+        note = ""
+        try:
+            code = proc.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            with contextlib.suppress(ProcessLookupError):
+                os.killpg(proc.pid, signal.SIGTERM)
+            try:
+                proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                with contextlib.suppress(ProcessLookupError):
+                    os.killpg(proc.pid, signal.SIGKILL)
+                proc.wait()
+            code = TIMED_OUT_EXIT
+            note = f"\n[hook-runner] stopped after {timeout} seconds.\n"
+        if code < 0:
+            code = 128 - code
+        size = out.seek(0, os.SEEK_END)
+        out.seek(max(size - MAX_OUTPUT_BYTES, 0))
+        output = out.read().decode("utf-8", errors="replace") + note
+    return code, output[-MAX_OUTPUT_BYTES:]
+
+
+def handle(hook_dir: str, rid: str, command: str, timeout: int) -> None:
+    if not take(hook_dir, rid):
+        return
+    started = time.time()
+    result: dict = {"id": rid, "started_at": started}
+    try:
+        try:
+            doc = json.loads(read_capped(os.path.join(hook_dir, f"{rid}.taken"), MAX_REQUEST_BYTES))
+        except ValueError:
+            raise Refused("the request is not JSON") from None
+        if not isinstance(doc, dict) or doc.get("id") != rid:
+            raise Refused("the request's id does not match its file name")
+        frm, to = doc.get("from"), doc.get("to")
+        for name, value in (("from", frm), ("to", to)):
+            if not isinstance(value, str) or not VERSION.fullmatch(value):
+                raise Refused(f"the request's {name!r} is not a version X.Y.Z")
+        check_command(command)
+    except Refused as e:
+        log(f"{rid} refused: {e}")
+        result.update(exit=REFUSED_EXIT, output="", refused=str(e), finished_at=time.time())
+        write_result(hook_dir, rid, result)
+        return
+    env = {
+        "PATH": PATH,
+        "LANG": "C.UTF-8",
+        "HOME": "/root" if os.geteuid() == 0 else os.environ.get("HOME", "/"),
+        "SPENDTRACKER_HOOK_ID": rid,
+        "SPENDTRACKER_HOOK_FROM": frm,
+        "SPENDTRACKER_HOOK_TO": to,
+    }
+    log(f"{rid}: running {command} for {frm} -> {to}")
+    try:
+        code, output = run_command(command, env, timeout)
+    except OSError as e:
+        code, output = 126, f"[hook-runner] {command} could not be run: {e.strerror or e}\n"
+    log(f"{rid}: exit {code}")
+    result.update(exit=code, output=output, finished_at=time.time())
+    write_result(hook_dir, rid, result)
+
+
+def main(argv: list[str] | None = None) -> int:
+    p = argparse.ArgumentParser(prog="hook-runner", description=__doc__.splitlines()[0])
+    p.add_argument("--dir", default="/var/lib/spend-tracker/hook")
+    p.add_argument("--command", default="/etc/spend-tracker/pre-update-hook")
+    args = p.parse_args(argv)
+    hook_dir = args.dir
+    timeout = timeout_of(hook_dir)
+    for name in sorted(os.listdir(hook_dir)):
+        if not name.endswith(".request"):
+            continue
+        rid = name[: -len(".request")]
+        if not UUID4.fullmatch(rid):
+            log(f"{name!r} is not a request the updater writes; removed")
+            with contextlib.suppress(OSError):
+                os.unlink(os.path.join(hook_dir, name))
+            continue
+        handle(hook_dir, rid, args.command, timeout)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
