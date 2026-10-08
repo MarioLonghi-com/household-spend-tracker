@@ -106,6 +106,84 @@ RUN python -m venv /venv && /venv/bin/pip install --require-hashes -r requiremen
 # treated.
 RUN mkdir -p /var/lib/spend-tracker && touch /var/lib/spend-tracker/.keep
 
+# The mount point of the `update` volume the app shares with the updater
+# (design notes 5.1, C11): group 65532, mode 2770, setgid so everything made
+# inside it keeps the group. The updater runs as 65532 on most engines and as
+# in-container root on rootless ones, where `cap_drop: ALL` takes away the
+# override that would let root write a directory it does not own -- so the
+# volume is shared by *group*, and both images ship the mount point that way.
+# Docker and Podman initialise a fresh named volume from whichever image
+# mounts it first, ownership and mode included, and compose does not promise
+# which of the two containers that is.
+#
+# Made under /mounts and copied as a *child* of what is copied: a COPY of a
+# directory copies its contents into a destination it creates at 0755, which
+# loses both the group write and the setgid bit, and `--chmod` drops setgid
+# too. A directory inside the copied tree keeps its mode and owner.
+RUN mkdir -p /mounts/var/lib/spend-tracker-update \
+ && chown 65532:65532 /mounts/var/lib/spend-tracker-update \
+ && chmod 2770 /mounts/var/lib/spend-tracker-update
+
+# --------------------------------------------------------------------------- #
+# The self-updater's image (design notes 6.3): a second target of this file,
+#
+#     docker build --target updater .
+#
+# rather than a second Dockerfile, so it stands on exactly the two Chainguard
+# digests above and Dependabot moves them for both images in one change. The
+# app is still the last stage, so a build that names no target -- compose's
+# fallback, the release, every `docker build .` -- builds the app, and a build
+# of this target never touches Node or the client.
+#
+# The same discipline as the app's: a venv built from a hashed lock in a `-dev`
+# stage and copied, so the runtime has no shell, no package manager and no
+# Docker CLI. The engine is reached over its socket by updater/engine.py, the
+# standard library and a restricted call list, not by a client binary.
+FROM ${PY_BASE} AS updater-deps
+# root for the same reason as `deps`: /venv has to be the venv's final path.
+USER root
+WORKDIR /build
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
+COPY requirements-updater.txt ./
+# requirements-updater.txt alone: sigstore and what it brings, nothing of the
+# app's (requirements-updater.in says why the two locks are separate).
+RUN python -m venv /venv && /venv/bin/pip install --require-hashes -r requirements-updater.txt
+# `/update`, the `update` volume's mount point here, made exactly as the app
+# image makes its own -- 65532:65532, 2770, under /mounts so the copy keeps
+# the mode. See the `deps` stage for both.
+RUN mkdir -p /mounts/update && chown 65532:65532 /mounts/update && chmod 2770 /mounts/update
+
+FROM ${PY_RUN} AS updater
+# `version` and `revision` are added by release.yml, as for the app. The
+# protocols label is the window this updater accepts (C4): `PROTOCOLS` in
+# updater/contract.py, written `low-high`. tests/test_updater_image.py holds
+# the two together.
+LABEL org.opencontainers.image.title="Spend Tracker updater" \
+      org.opencontainers.image.description="Updates a Spend Tracker instance from the browser: verifies, pulls and swaps its images" \
+      org.opencontainers.image.source="https://github.com/MarioLonghi-com/household-spend-tracker" \
+      org.opencontainers.image.url="https://github.com/MarioLonghi-com/household-spend-tracker" \
+      org.opencontainers.image.licenses="AGPL-3.0-or-later" \
+      com.github.mariolonghi-com.spend-tracker.updater-protocols="1-1"
+# `python -m updater` finds the package in the working directory.
+WORKDIR /opt/spend-tracker-updater
+ENV PATH="/venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+COPY --from=updater-deps /venv /venv
+COPY --from=updater-deps /mounts/ /
+# Only the updater. It imports nothing from app/, scripts/ or statements/
+# (CLAUDE.md, Layout), and anything else here would be code the socket's
+# holder could be talked into running.
+COPY updater/ ./updater/
+# No EXPOSE and no HEALTHCHECK: it listens on nothing (6.3, E10) -- the app
+# talks to it through files in the volume -- and its liveness is the
+# heartbeat file the app reads, not a probe the engine runs.
+#
+# 65532 is the default. Compose overrides it with SPENDTRACKER_UPDATER_USER,
+# 0:0 under rootless engines on Linux (compose.yaml says why).
+USER 65532:65532
+ENTRYPOINT ["python", "-m", "updater"]
+
 # --------------------------------------------------------------------------- #
 FROM ${PY_RUN} AS runtime
 # OCI annotations. `source` is what links a published image back to this
@@ -116,6 +194,13 @@ LABEL org.opencontainers.image.title="Spend Tracker" \
       org.opencontainers.image.url="https://github.com/MarioLonghi-com/household-spend-tracker" \
       org.opencontainers.image.documentation="https://github.com/MarioLonghi-com/household-spend-tracker/blob/main/deploy/DOCKER.md" \
       org.opencontainers.image.licenses="AGPL-3.0-or-later"
+# The protocol this app writes its update requests in (C4), the same number
+# as `PROTOCOL` in app/services/updates.py -- tests/test_updater_image.py
+# holds the two together. The updater reads it off the image before it agrees
+# to run an apply, and a successor updater goes first only when its own
+# `…updater-protocols` window includes it. The name is the reverse of the
+# ghcr namespace, as updater/detect.py builds it.
+LABEL com.github.mariolonghi-com.spend-tracker.updater-protocol="1"
 WORKDIR /app
 ENV PATH="/venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -126,6 +211,8 @@ COPY --from=deps /venv /venv
 # Owned by the user that will run, so the fresh volume is too. See the deps
 # stage for why this is not a `RUN mkdir` here.
 COPY --from=deps --chown=65532:65532 /var/lib/spend-tracker /var/lib/spend-tracker
+# Not --chown: the tree carries 65532:65532 and 2770 itself (see `deps`).
+COPY --from=deps /mounts/ /
 COPY app/ ./app/
 COPY statements/ ./statements/
 COPY scripts/ ./scripts/
