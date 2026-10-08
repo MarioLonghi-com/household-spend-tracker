@@ -305,6 +305,16 @@ def test_not_root_rules_follow_the_spikes():
     rootful_docker = detect.not_root("docker-engine", False)
     assert (desktop.user, desktop.group_add, desktop.confirmed) == ("65532:65532", ("0", "65532"), True)
     assert (machine.user, machine.podman_restart, machine.linger) == ("65532:65532", "user", False)
+    # S21: a rootful machine, Podman Desktop's default, observed -- the
+    # system podman-restart unit, not the user one, and the default socket.
+    rootful_machine = detect.not_root("podman-machine", False)
+    assert (rootful_machine.user, rootful_machine.group_add, rootful_machine.podman_restart) == (
+        "65532:65532", ("0", "65532"), "system",
+    )  # fmt: skip
+    assert (rootful_machine.socket, rootful_machine.linger, rootful_machine.confirmed) == (
+        "/var/run/docker.sock", False, True,
+    )  # fmt: skip
+    assert all(rule.confirmed for rule in detect._RULES.values())
     # B11: rootless Docker, observed: only in-container uid 0 reaches the socket.
     assert (rootless_docker.user, rootless_docker.linger, rootless_docker.confirmed) == ("0:0", True, True)
     # Rootful Docker: the host's docker group, never 0 (observed: gid 0 is refused).
