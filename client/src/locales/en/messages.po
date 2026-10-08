@@ -83,6 +83,7 @@ msgstr "Your new password is set. Sign in with it and your authenticator as usua
 msgid "payee, memo, or the bank's own words"
 msgstr "payee, memo, or the bank's own words"
 
+#. Label used on several screens (saveBackup)
 #: src/lib/saveBackup.ts
 msgid "Open Dropbox"
 msgstr "Open Dropbox"
@@ -159,6 +160,7 @@ msgid "No browsers were being trusted."
 msgstr "No browsers were being trusted."
 
 #. Menu item and the name of its screen. See GLOSSARY.md
+#. Screen title on the History screen. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/History.tsx
 msgid "History"
@@ -345,6 +347,9 @@ msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show mor
 msgstr "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 
 #. Column heading on the Admin screen: noun, the time
+#. Column heading on the History screen: noun, the time
+#. Column name shown beside a value on phones on the History screen: noun, the time
+#. Name of a fact on the History screen: noun, the time
 #: src/screens/Admin.tsx
 #: src/screens/History.tsx
 msgid "When"
@@ -387,6 +392,7 @@ msgstr "YYYY-MM-DD"
 msgid "What is in it"
 msgstr "What is in it"
 
+#. Button on the Backups screen
 #: src/screens/Backups.tsx
 msgid "Downloading…"
 msgstr "Downloading…"
@@ -983,6 +989,7 @@ msgstr "New"
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Transfers screen
+#. Screen-reader text on the Backups screen
 #. Screen-reader text on the passkeys panel
 #: src/screens/Accounts.tsx
 #: src/screens/Backups.tsx
@@ -992,10 +999,12 @@ msgstr "New"
 msgid "Actions"
 msgstr "Actions"
 
+#. Label on the History screen: it did not work
 #: src/screens/History.tsx
 msgid "failed"
 msgstr "failed"
 
+#. Button on the Backups screen
 #. placeholder {0}: prepared.name
 #: src/screens/Backups.tsx
 msgid "Share {0}…"
@@ -1038,6 +1047,7 @@ msgstr "{ended, plural, one {{ended} other browser was signed out.} other {{ende
 msgid "Turned on for every household by whoever runs this server, so it cannot be changed here."
 msgstr "Turned on for every household by whoever runs this server, so it cannot be changed here."
 
+#. Value of a fact on the History screen
 #: src/screens/History.tsx
 msgid "undone later"
 msgstr "undone later"
@@ -1416,6 +1426,7 @@ msgstr "{by} reset {user}'s password and authenticator"
 msgid "Your own accent (optional)"
 msgstr "Your own accent (optional)"
 
+#. Column heading on the History screen
 #: src/screens/History.tsx
 msgid "What happened"
 msgstr "What happened"
@@ -1464,6 +1475,8 @@ msgstr "The bank called it <0>{0}</0>, as {app} kept it."
 msgid "Nothing recorded. Rows created before the audit log existed have no history."
 msgstr "Nothing recorded. Rows created before the audit log existed have no history."
 
+#. Button on the Backups screen: verb
+#. Link on the Backups screen
 #. placeholder {0}: zipName(backup.name)
 #: src/screens/Backups.tsx
 msgid "Download {0}"
@@ -1569,6 +1582,7 @@ msgstr "{0} characters"
 msgid "Source app"
 msgstr "Source app"
 
+#. List item on the Backups screen: conjunction between two choices
 #. Sentence on the sign-in page: conjunction between two choices
 #: src/screens/Backups.tsx
 #: src/screens/SignIn.tsx
@@ -1643,6 +1657,8 @@ msgstr "{revoked, plural, one {{revoked} trusted browser will ask for a code aga
 msgid "Changing your own role would close this screen; ask the other owner"
 msgstr "Changing your own role would close this screen; ask the other owner"
 
+#. Column heading on the Backups screen: noun, size of a file
+#. Column name shown beside a value on phones on the Backups screen: noun, size of a file
 #: src/screens/Backups.tsx
 msgid "Size"
 msgstr "Size"
@@ -1663,6 +1679,7 @@ msgstr "That isn't an amount"
 msgid "Yes, revoke it"
 msgstr "Yes, revoke it"
 
+#. Button on the Backups screen: verb
 #. Button on the Categories screen: verb
 #. Button on the Register screen: verb
 #. Button on the Rules screen: verb
@@ -2202,6 +2219,7 @@ msgstr "No households yet."
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 
+#. Label on the History screen: noun or step name: what would happen, not yet done
 #: src/screens/History.tsx
 msgid "preview"
 msgstr "preview"
@@ -2405,6 +2423,9 @@ msgid "Auto-categorise based on payee history"
 msgstr "Auto-categorise based on payee history"
 
 #. Column heading on the Admin screen: preposition, done by a person
+#. Column heading on the History screen: preposition, done by a person
+#. Column name shown beside a value on phones on the History screen: preposition, done by a person
+#. Name of a fact on the History screen: preposition, done by a person
 #: src/screens/Admin.tsx
 #: src/screens/History.tsx
 msgid "By"
@@ -2576,6 +2597,7 @@ msgstr "No minus signs — the direction is the two accounts above."
 msgid "Recent sign-in changes"
 msgstr "Recent sign-in changes"
 
+#. Button on the Backups screen
 #. Button on the Register screen
 #: src/screens/Backups.tsx
 #: src/screens/Register.tsx
@@ -2705,6 +2727,7 @@ msgid "date format"
 msgstr "date format"
 
 #. Column heading on the Accounts screen: noun, lines of a file or table
+#. Column heading on the History screen: noun, lines of a file or table
 #. Column heading on the Import screen: noun, lines of a file or table
 #. Column heading on the Rules screen: noun, lines of a file or table
 #. Column name shown beside a value on phones on the Accounts screen: noun, lines of a file or table
@@ -2793,6 +2816,7 @@ msgstr "Work items and their repayments"
 msgid "A running balance needs one account, newest-first by date, and no filters — it is a sum down the page, so in any other order or with rows hidden it would not mean anything."
 msgstr "A running balance needs one account, newest-first by date, and no filters — it is a sum down the page, so in any other order or with rows hidden it would not mean anything."
 
+#. Button on the History screen
 #: src/screens/History.tsx
 msgid "Undo this"
 msgstr "Undo this"
@@ -3144,6 +3168,7 @@ msgstr "Put this back instead (leave empty to remove it)"
 msgid "Drag to resize · double-click to reset every column"
 msgstr "Drag to resize · double-click to reset every column"
 
+#. Button on the Backups screen
 #: src/screens/Backups.tsx
 msgid "Saving…"
 msgstr "Saving…"
@@ -3379,6 +3404,7 @@ msgstr "Kind"
 msgid "<0>This is the only backup.</0> After this there is none: nothing on this instance could put the ledger back if it were damaged."
 msgstr "<0>This is the only backup.</0> After this there is none: nothing on this instance could put the ledger back if it were damaged."
 
+#. Label on the History screen
 #: src/screens/History.tsx
 msgid "running"
 msgstr "running"
@@ -3725,6 +3751,7 @@ msgstr "How to categorise {name}"
 msgid "Required. No two accounts can share one."
 msgstr "Required. No two accounts can share one."
 
+#. Link on the Backups screen
 #. Link on the Register screen
 #: src/screens/Backups.tsx
 #: src/screens/Register.tsx
@@ -4602,6 +4629,7 @@ msgstr "{0, plural, one {{1} rule} other {{2} rules}}"
 msgid "Working out what would change…"
 msgstr "Working out what would change…"
 
+#. Button on the Backups screen: verb
 #: src/screens/Backups.tsx
 msgid "Download…"
 msgstr "Download…"
@@ -4698,6 +4726,7 @@ msgstr "From year"
 msgid "Type the closing balance"
 msgstr "Type the closing balance"
 
+#. Column heading on the Backups screen. See GLOSSARY.md
 #: src/screens/Backups.tsx
 msgid "Backup"
 msgstr "Backup"
@@ -4735,6 +4764,7 @@ msgstr "Every category this payee has been filed under, biggest first. The trans
 
 #. Button on the Admin screen
 #. Button on the Admin screen
+#. Button on the Backups screen
 #. Button on the Categories screen
 #. Button on the Categories screen
 #. Button on the Import screen
@@ -4749,10 +4779,13 @@ msgstr "Every category this payee has been filed under, biggest first. The trans
 msgid "Keep it"
 msgstr "Keep it"
 
+#. Column heading on the History screen: noun, a row's status
+#. Name of a fact on the History screen: noun, a row's status
 #: src/screens/History.tsx
 msgid "State"
 msgstr "State"
 
+#. Name of a fact on the History screen: noun, one act in History, undone as a whole
 #: src/screens/History.tsx
 msgid "Batch"
 msgstr "Batch"
@@ -5016,6 +5049,7 @@ msgstr "{0, plural, one {{who} is here too} other {{who} are here too}}"
 msgid "Remove"
 msgstr "Remove"
 
+#. Name of a fact on the History screen
 #: src/screens/History.tsx
 msgid "Rows touched"
 msgstr "Rows touched"
@@ -5288,6 +5322,8 @@ msgstr "why not a recovery code"
 msgid "Clear filters"
 msgstr "Clear filters"
 
+#. Column heading on the Backups screen
+#. Column name shown beside a value on phones on the Backups screen
 #: src/screens/Backups.tsx
 msgid "Made"
 msgstr "Made"
@@ -5583,10 +5619,12 @@ msgstr "Language"
 msgid "Change your own password or authenticator from your profile"
 msgstr "Change your own password or authenticator from your profile"
 
+#. Label on the History screen: taken back with undo
 #: src/screens/History.tsx
 msgid "undone"
 msgstr "undone"
 
+#. Text on the shared controls
 #: src/components/bits.tsx
 msgid "via {via}"
 msgstr "via {via}"
@@ -6011,6 +6049,7 @@ msgstr "New codes"
 msgid "For"
 msgstr "For"
 
+#. Label on the Backups screen
 #: src/screens/Backups.tsx
 msgid "Downloaded."
 msgstr "Downloaded."
@@ -6032,6 +6071,7 @@ msgstr "showing the first {0}"
 msgid "{0} more currencies: {1}. {2} shown."
 msgstr "{0} more currencies: {1}. {2} shown."
 
+#. Label on the History screen: written to the ledger
 #: src/screens/History.tsx
 msgid "applied"
 msgstr "applied"

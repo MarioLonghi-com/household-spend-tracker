@@ -315,7 +315,7 @@ export function Actor({ name, via }: { name: string | null; via?: string | null 
       {name ?? "—"}
       {via ? (
         <span className="via" title={t`Through the agent key ${via}`}>
-          {` · ${t`via ${via}`}`}
+          {` · ${t({ message: `via ${via}`, comment: "Text on the shared controls" })}`}
         </span>
       ) : null}
     </>
