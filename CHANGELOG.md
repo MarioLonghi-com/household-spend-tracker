@@ -221,6 +221,20 @@ history this repository does not have.
   `self-update` job, advisory for now, that updates release A to B through
   the updater against a real Docker Engine. No image or compose service runs
   the updater yet (#164).
+
+- **An optional pre-update hook for servers** (#168). An operator can have a
+  command of their own run **on the host** before every update -- a Proxmox
+  snapshot of the VM, say -- by installing the systemd path unit, service and
+  runner in `deploy/updater/host-hook/` and mounting their directory into the
+  updater from a server-only `compose.override.yaml` (the README has both,
+  and the snapshot as an example). The updater writes a request naming only
+  the two versions; the runner runs the one root-owned command configured on
+  the host, never anything from the request, and never twice for one update.
+  **A failing hook stops the update before anything changes**: a non-zero
+  exit, a timeout, or no runner answering is *Not started: the pre-update
+  hook failed.*, with the reason and the end of the command's output in the
+  update's history. Without a `hook.json` in that directory the step is
+  skipped and says so; nothing changes for an installation without a hook.
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
