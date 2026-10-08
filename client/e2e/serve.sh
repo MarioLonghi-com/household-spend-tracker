@@ -12,6 +12,10 @@ export SPENDTRACKER_ENV=development
 # Passkeys work at http://localhost:8850 and nowhere else here (#121): the
 # suite's own address, 127.0.0.1, is an IP and is never offered them.
 export SPENDTRACKER_RP_ID=localhost
+# A checkout, whatever the machine running it: the Updates section's
+# `not_container` case is what the suite expects (#166). Without this a CI
+# runner that happens to be a container would read as one with no updater.
+export SPENDTRACKER_IN_CONTAINER=0
 
 # The venv locally; whatever interpreter CI installed into, there. Both go
 # through `-m uvicorn` rather than the console script, so one variable covers

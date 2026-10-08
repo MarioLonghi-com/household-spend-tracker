@@ -57,6 +57,13 @@ history this repository does not have.
   default (off) and its meaning: a deliberate migration of an existing ledger,
   which `make upgrade` does with a backup first (#167).
 
+- **The recovery code for an update is issued by `POST`**
+  (`/api/admin/application/update/recovery-code`), not `GET`. Issuing one
+  replaces the code held for the prepared update, so a cross-site `GET` could
+  rotate it and make *Update* fail; as a `POST` it is behind the Origin check.
+- **The updater's heartbeat sentence reaches the screen**: `GET
+  /api/admin/application/update` carries `heartbeat.socket_sentence`.
+
 - **Short messages carry a note for the translator.** Every message of one
   or two words, and any whose English alone is ambiguous, says in one line
   what it is -- a button, a column heading, a state, which sense of
@@ -109,6 +116,26 @@ history this repository does not have.
   behind the source. Nothing an English reader sees changes. (#53)
 
 ### Added
+
+- **The Updates section on Admin → Application** (#166), where *Is there a
+  newer version?* was. It says which case this instance is in: a checkout
+  (update from the terminal), a container with no updater (how to start it,
+  naming the container the heartbeat named), an updater the engine refuses
+  (the updater's own sentence), one the engine has outgrown (*Update the
+  updater*), or a working one. A check offers the newest release with every
+  skipped release's notes as plain text, and any other newer release from a
+  menu; *Update the updater only* when a newer updater exists. Preparing shows
+  the updater's progress every two seconds. The confirmation lists the
+  migrations with one tick-box per migration a downgrade cannot undo, shows a
+  one-time recovery code with *Download as a file* and *I have saved it*, and
+  asks for the password and a code; *Update* stays disabled until every box is
+  ticked. While it updates a full-width panel watches `/api/health`, reloads
+  when the app is back, and after 30 minutes points at the recovery page. The
+  outcome stays at the top of the section until dismissed.
+- **Update backups are listed under Database** with their version and
+  migration, apart from the backups made by hand. Each downloads; only those
+  older than the newest five can be deleted, and the server still refuses
+  the five.
 
 - **The app's side of self-update, API only** (#165). Owner-only endpoints
   under `/admin/application/update` -- a member gets 403 and nothing is

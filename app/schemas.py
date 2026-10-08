@@ -1451,6 +1451,9 @@ class UpdateHeartbeatOut(BaseModel):
     api_version: str | None = None
     engine_api: str | None = None
     container: str | None = None
+    #: Why the updater cannot use the engine, in one sentence, when `socket`
+    #: is a refusal (R24). The screen says it as it is.
+    socket_sentence: str | None = None
 
 
 class UpdateStatusOut(BaseModel):
@@ -1534,7 +1537,7 @@ class UpdateApply(BaseModel):
     digest: str = Field(max_length=100)
     updater_digest: str = Field(max_length=100)
     accepted_lossy: list[str] = Field(default_factory=list, max_length=200)
-    #: From `GET …/recovery-code`; the hash it holds goes in the request.
+    #: From `POST …/recovery-code`; the hash it holds goes in the request.
     recovery_code_id: str = Field(max_length=64)
     #: From `POST /me/step-up`. Spent first, whatever happens next.
     step_up_token: str | None = Field(default=None, max_length=200)
