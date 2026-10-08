@@ -2966,6 +2966,7 @@ msgid "Net"
 msgstr ""
 
 #. Button: install the prepared release
+#. Heading on the Updates screen
 #: src/screens/Updates.tsx
 msgid "Update to {to}"
 msgstr ""

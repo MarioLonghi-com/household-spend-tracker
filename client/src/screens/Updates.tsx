@@ -907,7 +907,7 @@ export function Confirm({
   return (
     <div className="update-confirm">
       <h3 className="section-title">
-        <Trans>Update to {to}</Trans>
+        <Trans comment="Heading on the Updates screen">Update to {to}</Trans>
       </h3>
       <div className="table-scroll">
         <table className="update-facts">
