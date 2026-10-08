@@ -47,6 +47,15 @@ history this repository does not have.
 
 ### Changed
 
+- **The remaining screens' words go into the catalogs one screen at a time**,
+  starting with Categories. English is unchanged; each screen has a test
+  that renders it in the `en-XA` pseudo-locale and finds no English left.
+  (#56)
+
+- **The transfer panel's words are in the catalogs.** English is unchanged;
+  a test renders it in the `en-XA` pseudo-locale and finds no English left.
+  (#55)
+
 - **Draft translations of the first screens** in pt-BR, es-ES and sv-SE:
   every message extracted so far, each marked `#, fuzzy` until a native
   speaker reviews it (#58). None is served or selectable; a test checks every
@@ -100,6 +109,7 @@ history this repository does not have.
   writes `updater.json` every 30 seconds with the negotiated API version, the
   engine's window and the updater's real container name, under Docker
   Compose's and podman-compose's naming alike. Nothing runs it yet.
+
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.

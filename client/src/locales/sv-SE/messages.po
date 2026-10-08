@@ -7,35 +7,109 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: sv-SE\n"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "The name looks like its IBAN."
+msgstr "Namnet ser ut att vara dess IBAN."
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "balance column"
+msgstr "saldokolumn"
+
+#: src/screens/Categories.tsx
+msgid "Always use my choice"
+msgstr ""
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Mentions"
+msgstr "Omnämnanden"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Creating…"
 msgstr "Skapar…"
+
+#. placeholder {0}: tagOffer.value
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0} now tells a file it is for that account"
+msgstr "{0} visar nu att en fil hör till det kontot"
 
 #: src/App.tsx
 #, fuzzy
 msgid "Application management"
 msgstr "Hantering av appen"
 
+#: src/components/DateRange.tsx
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "To"
+msgstr "Till"
+
+#: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Choose…"
+msgstr "Välj…"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "New password"
 msgstr "Nytt lösenord"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Cash"
+msgstr "Kontanter"
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Your new password is set. Sign in with it and your authenticator as usual."
 msgstr "Ditt nya lösenord är sparat. Logga in med det och din autentiseringsapp som vanligt."
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "payee, memo, or the bank's own words"
+msgstr "mottagare, beskrivning eller bankens egna ord"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "this account is closed"
+msgstr "det här kontot är avslutat"
+
+#. placeholder {0}: group.name
+#: src/screens/Categories.tsx
+msgid "Delete the group {0}?"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
 msgstr "En nyckel låter ett program – ett skript, en automatisering, en AI-assistent – läsa och, om du tillåter det, lägga till i ett hushåll åt dig. Allt det gör syns i hushållets Historik under ditt och nyckelns namn."
 
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "To month"
+msgstr "Till månad"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Add this to your authenticator app, then type the six digits it shows."
 msgstr "Lägg till detta i din autentiseringsapp och skriv sedan de sex siffror den visar."
+
+#: src/screens/Accounts.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Type"
+msgstr "Typ"
+
+#. placeholder {0}: formatDate(txn.date)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Select {0}"
+msgstr "Markera {0}"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -47,10 +121,30 @@ msgstr "Inga webbläsare var betrodda."
 msgid "History"
 msgstr "Historik"
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Or paste the rows, if your bank only lets you copy them from a page:"
+msgstr "Eller klistra in raderna, om banken bara låter dig kopiera dem från en sida:"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own."
 msgstr "Du har inga oanvända återställningskoder. Om du tappar bort din autentiseringsapp kan du inte ta dig in igen på egen hand."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Not reimbursed after all"
+msgstr "Inte ersatt ändå"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "account types"
+msgstr "kontotyper"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Locked — checked against the bank, refuse every change"
+msgstr "Låst – avstämd mot banken, neka alla ändringar"
 
 #. placeholder {0}: passkey.label
 #: src/screens/Passkeys.tsx
@@ -63,10 +157,43 @@ msgstr "Byt namn på {0}"
 msgid "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "{by} återställde din autentiseringsapp för {email} den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in den igen nedan."
 
+#. placeholder {0}: offer.name
+#. placeholder {1}: offer.payee
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "The first is this file only. The second also makes <0>{0}</0> the rule for <1>{1}</1>, so every future statement follows without asking."
+msgstr "Det första gäller bara den här filen. Det andra gör också <0>{0}</0> till regeln för <1>{1}</1>, så att alla framtida kontoutdrag följer den utan att fråga."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "no memo"
+msgstr "ingen beskrivning"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "date column"
+msgstr "datumkolumn"
+
+#. placeholder {0}: account.currency
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "That isn't an amount in {0}."
+msgstr "Det är inte ett belopp i {0}."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "what a key can never do"
 msgstr "vad en nyckel aldrig kan göra"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Name the bank uses"
+msgstr "Namn som banken använder"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Finish the category you are editing first"
+msgstr "Gör klart kategorin du redigerar först"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -89,15 +216,62 @@ msgstr "Stäng"
 msgid "{why} So this asks for your password and a code — the same as signing in."
 msgstr "{why} Därför frågar vi efter ditt lösenord och en kod – samma som när du loggar in."
 
+#. placeholder {0}: one.would_link
+#. placeholder {1}: one.would_link
+#. placeholder {2}: one.would_link
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} pair} other {{2} pairs}}"
+msgstr "{0, plural, one {{1} par} other {{2} par}}"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Open"
+msgstr "Öppna"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "What happens"
+msgstr "Vad som händer"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "More currencies"
+msgstr "Fler valutor"
+
+#. placeholder {0}: formatCount(page.shown)
+#. placeholder {1}: formatCount(unloaded)
+#. placeholder {2}: formatCount(page.shown)
+#. placeholder {3}: formatCount(unloaded)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
+msgstr "{unloaded, plural, one {Visar {0} – {1} rad till att läsa in – visa fler} other {Visar {2} – {3} rader till att läsa in – visa fler}}"
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "You're signed in. This server's secret key was replaced, so the authenticator you had no longer works here. Scan this with your authenticator app and type the six digits it shows — the recovery code you just used covers this, so it costs no other. Then delete the old entry for this account from your app."
 msgstr "Du är inloggad. Serverns hemliga nyckel har bytts ut, så autentiseringsappen du hade fungerar inte längre här. Skanna detta med din autentiseringsapp och skriv de sex siffror den visar – återställningskoden du just använde täcker detta, så ingen annan går åt. Ta sedan bort den gamla posten för kontot i appen."
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Import a statement"
+msgstr "Importera ett kontoutdrag"
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "This server's secret key has been replaced. Use one of your recovery codes."
 msgstr "Serverns hemliga nyckel har bytts ut. Använd en av dina återställningskoder."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Work should pay these back"
+msgstr "Jobbet ska betala tillbaka dessa"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Each payment from work is followed by the expenses it repaid, marked ↳. The rest are in the order the headings say."
+msgstr "Varje betalning från jobbet följs av utgifterna den ersatte, markerade med ↳. Resten står i den ordning rubrikerna anger."
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -114,6 +288,10 @@ msgstr "Återställningslänkar fungerar en gång och slutar gälla. Be en ägar
 msgid "Sign-in methods"
 msgstr "Inloggningsmetoder"
 
+#: src/screens/Categories.tsx
+msgid "Add a category"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "This server cannot check a code from the authenticator you have, so one of your recovery codes proves it is you instead; it is spent."
@@ -123,6 +301,12 @@ msgstr "Den här servern kan inte kontrollera en kod från din autentiseringsapp
 #, fuzzy
 msgid "Length does more than symbols do. Four unrelated words you can actually remember beats a short one with punctuation in it."
 msgstr "Längd betyder mer än specialtecken. Fyra orelaterade ord som du faktiskt kommer ihåg slår ett kort lösenord med skiljetecken."
+
+#. placeholder {0}: detaching.download_name.split("/").pop()
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "<0>{0}</0> goes to the receipts inbox and stays there until it is attached again or deleted."
+msgstr "<0>{0}</0> hamnar i kvittoinkorgen och stannar där tills det bifogas igen eller raderas."
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -139,10 +323,66 @@ msgstr "Jag har min autentiseringsapp ändå"
 msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 msgstr "Ingen nyckel kan radera något, ångra något, ändra vilka som ingår i ett hushåll, röra lösenord eller autentiseringsappar eller skapa en ny nyckel – vad du än väljer här."
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Group accounts by"
+msgstr "Gruppera konton efter"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Credit cards"
+msgstr "Kreditkort"
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "Earlier: the same length of time, just before"
+msgstr "Tidigare: lika lång period, strax före"
+
 #: src/components/ReenrolmentDue.tsx
 #, fuzzy
 msgid "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
 msgstr "Återställningskoden du loggade in med i den här fliken täcker det, så länge du är inloggad och i högst ett dygn."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Edit the payee"
+msgstr "Redigera mottagaren"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Not seen by the bank yet"
+msgstr "Inte sedd av banken än"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "In ({currency})"
+msgstr "In ({currency})"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "currency column"
+msgstr "valutakolumn"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Set the category on the selected rows"
+msgstr "Ange kategori för de markerade raderna"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "It adds up"
+msgstr "Det går jämnt ut"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{waited, plural, one {Not reimbursed yet · {waited} day} other {Not reimbursed yet · {waited} days}}"
+msgstr "{waited, plural, one {Inte ersatt än · {waited} dag} other {Inte ersatt än · {waited} dagar}}"
+
+#. placeholder {0}: one.value
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Add {0}"
+msgstr "Lägg till {0}"
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
@@ -154,10 +394,27 @@ msgstr "Slår upp din återställningslänk…"
 msgid "Let it apply an import without anybody reviewing it"
 msgstr "Låt den genomföra en import utan att någon granskar den"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "One part of a split"
+msgstr "En del av en uppdelning"
+
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "2. You"
 msgstr "2. Du"
+
+#: src/screens/Categories.tsx
+msgid "Start with a common set"
+msgstr ""
+
+#. placeholder {0}: found.filename ?? t`a statement`
+#. placeholder {1}: found.line_no
+#. placeholder {2}: formatInstant(found.imported_at)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Imported from <0>{0}</0>, line {1}, on {2}."
+msgstr "Importerad från <0>{0}</0>, rad {1}, den {2}."
 
 #: src/App.tsx
 #, fuzzy
@@ -169,20 +426,89 @@ msgstr "Ditt hushåll"
 msgid "Passkeys need this app opened at its HTTPS address, {address}."
 msgstr "Lösennycklar kräver att appen öppnas på sin HTTPS-adress, {address}."
 
+#. placeholder {0}: tagOffer.value
+#. placeholder {1}: account.name
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0} now tells a file it is for {1}"
+msgstr "{0} visar nu att en fil hör till {1}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Set the category on {done} row and skipped 1 transfer leg — a transfer has no category."
+msgstr "Kategorin angavs på {done} rad och 1 överföringsdel hoppades över – en överföring har ingen kategori."
+
 #: src/App.tsx
 #, fuzzy
 msgid "New household"
 msgstr "Nytt hushåll"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Mark cleared"
+msgstr "Markera som bokförd"
+
+#. placeholder {0}: leg.account_name
+#. placeholder {1}: formatDate(leg.date)
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Select {0} {1}"
+msgstr "Markera {0} {1}"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "delimiter"
+msgstr "avgränsare"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Keep editing"
+msgstr "Fortsätt redigera"
+
+#. placeholder {0}: sum.count
+#. placeholder {1}: sum.count
+#. placeholder {2}: sum.count
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0, plural, one {({1} line)} other {({2} lines)}}"
+msgstr "{0, plural, one {({1} rad)} other {({2} rader)}}"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Opening date"
+msgstr "Startdatum"
+
+#: src/screens/Categories.tsx
+msgid "It matters most on an import: a statement of three hundred rows is three hundred categories you did not have to type, or three hundred corrections if it guesses badly."
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "What it may do"
 msgstr "Vad den får göra"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Skip to transactions"
+msgstr "Hoppa till transaktionerna"
+
 #: src/App.tsx
+#: src/screens/Categories.tsx
+#: src/screens/Register.tsx
 #, fuzzy
 msgid "Transactions"
 msgstr "Transaktioner"
+
+#. placeholder {0}: found.filename
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "the file <0>{0}</0>"
+msgstr "filen <0>{0}</0>"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "The type and currency are fixed once an account exists, because every transaction on it is recorded in that currency."
+msgstr "Typ och valuta låses när kontot väl finns, eftersom varje transaktion på det registreras i den valutan."
 
 #. placeholder {0}: formatInstant(key.expires_at)
 #: src/screens/Profile.tsx
@@ -190,16 +516,67 @@ msgstr "Transaktioner"
 msgid "Expired {0}"
 msgstr "Gick ut {0}"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "The table needs at least one currency column"
+msgstr "Tabellen behöver minst en valutakolumn"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Split equally"
+msgstr "Dela lika"
+
+#. placeholder {0}: format(difference, currency)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0} of this payment is not matched to an expense yet. For an advance, that is the part still unspent."
+msgstr "{0} av den här betalningen är inte kopplat till en utgift än. För ett förskott är det den del som inte har spenderats."
+
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Check the code and finish"
 msgstr "Kontrollera koden och slutför"
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Opening…"
+msgstr "Öppnar…"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Account number"
+msgstr "Kontonummer"
+
+#: src/lib/reimbursement.ts
+#, fuzzy
+msgid "Work expense — not reimbursed yet"
+msgstr "Jobbutlägg – inte ersatt än"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody gave {user} a new authenticator"
 msgstr "Någon gav {user} en ny autentiseringsapp"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
+msgstr "Bara för en bank vars kontoutdrag har flera konton i en fil, åtskilda av en Product-kolumn (Revoluts kontoutdrag). Det här kontot tar raderna med det här värdet; de andra hoppas över. Ett lönekonto tar Current-raderna om du inte anger något annat."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Put the number in Out or In — no minus signs. Press Enter to add and go straight to the next row."
+msgstr "Skriv beloppet under Ut eller In – inga minustecken. Tryck Enter för att lägga till och gå direkt till nästa rad."
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Review"
+msgstr "Granskning"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Add an account"
+msgstr "Lägg till ett konto"
 
 #: src/App.tsx
 #: src/screens/ResetAccount.tsx
@@ -212,6 +589,16 @@ msgstr "Logga in"
 #, fuzzy
 msgid "{by} added {user} as an owner"
 msgstr "{by} lade till {user} som ägare"
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "Earlier"
+msgstr "Tidigare"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Something you own that holds value and that you want in the totals — a deposit held by a landlord, an investment you track by hand."
+msgstr "Något du äger som har ett värde och som du vill ha med i summorna – en deposition hos hyresvärden, en investering du följer för hand."
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -228,6 +615,36 @@ msgstr "Du är redan inloggad"
 msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
 msgstr "Serverns hemliga nyckel har bytts ut, så din autentiseringsapp fungerar inte längre här, och tills du ställer in en ny kommer varje inloggning att kräva en ny återställningskod."
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Yes, detach it"
+msgstr "Ja, koppla loss det"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "{count, plural, other {{shown} files}}"
+msgstr "{count, plural, one {{shown} fil} other {{shown} filer}}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "All transactions"
+msgstr "Alla transaktioner"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Set the category…"
+msgstr "Ange kategori…"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Unlink"
+msgstr "Koppla isär"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Remove this part"
+msgstr "Ta bort den här delen"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody reset {user}'s password and authenticator"
@@ -243,11 +660,38 @@ msgstr "lösenord och autentiseringsapp"
 msgid "{keys, plural, one {{keys} agent key still works — revoke it below if it should stop.} other {{keys} agent keys still work — revoke them below if they should stop.}}"
 msgstr "{keys, plural, one {{keys} agentnyckel fungerar fortfarande – återkalla den nedan om den ska sluta.} other {{keys} agentnycklar fungerar fortfarande – återkalla dem nedan om de ska sluta.}}"
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "This file only. The payee’s rule is left as it is for future statements."
+msgstr "Bara den här filen. Mottagarens regel lämnas som den är för framtida kontoutdrag."
+
 #: src/App.tsx
+#: src/screens/Accounts.tsx
+#: src/screens/Categories.tsx
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Name"
 msgstr "Namn"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Discard the staged one"
+msgstr "Kasta den förberedda"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Flags & options"
+msgstr "Flaggor och alternativ"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "encoding"
+msgstr "teckenkodning"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "One part of a split. The others are in the register on the same date, and the transaction they replaced is in History."
+msgstr "En del av en uppdelning. De andra finns i registret samma datum, och transaktionen de ersatte finns i Historik."
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -259,7 +703,20 @@ msgstr "Autentiseringsapp"
 msgid "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
 msgstr "När den är bekräftad, behåll bara den här posten för kontot i appen: den gamla kan inte fungera här, och inte heller en som du skannade tidigare men aldrig bekräftade."
 
+#. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Cut off at {0} characters. Every line of it was still read — the table above is the whole file."
+msgstr "Avkortat vid {0} tecken. Alla rader lästes ändå – tabellen ovan är hela filen."
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
+msgstr "Pengar du är skyldig som inte är ett kort – ett bolån, ett billån, pengar du är skyldig någon. Avbetalningar är överföringar in på det."
+
+#: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Actions"
 msgstr "Åtgärder"
@@ -274,10 +731,77 @@ msgstr "Lösenordet har ändrats."
 msgid "Kept"
 msgstr "Sparad"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Looking…"
+msgstr "Letar…"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "One row, typed in by hand"
+msgstr "En rad, inskriven för hand"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Out"
+msgstr "Ut"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
 msgstr "{ended, plural, one {{ended} annan webbläsare loggades ut.} other {{ended} andra webbläsare loggades ut.}}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Entered by hand"
+msgstr "Inskriven för hand"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
+msgstr "Varje stavning en bank använder för någon i hushållet. En betalning som nämner en av dem är dina egna pengar som flyttas, inte en inkomst eller utgift."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Add a part"
+msgstr "Lägg till en del"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Set the category"
+msgstr "Ange kategori"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Covered"
+msgstr "Täckt"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Day-to-day money at a bank. Salary in, card and direct debits out."
+msgstr "Vardagspengar på banken. Lönen in, kort och autogiro ut."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Undo — add as new instead"
+msgstr "Ångra – lägg till som ny i stället"
+
+#. placeholder {0}: recognised.account_name
+#. placeholder {1}: recognised.how
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Chose <0>{0}</0> for you: {1}."
+msgstr "Valde <0>{0}</0> åt dig: {1}."
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Closed — hide it from the accounts list"
+msgstr "Avslutat – dölj det i kontolistan"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "That isn't an amount in {currency}."
+msgstr "Det är inte ett belopp i {currency}."
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
@@ -286,6 +810,17 @@ msgstr "{ended, plural, one {{ended} annan webbläsare loggades ut.} other {{end
 #, fuzzy
 msgid "The six digits"
 msgstr "De sex siffrorna"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Find the payment…"
+msgstr "Hitta betalningen…"
+
+#. placeholder {0}: restOn.join(", ")
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Also showing {0}"
+msgstr "Visar också {0}"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -306,6 +841,11 @@ msgstr "Lösenord"
 msgid "Waiting for the passkey…"
 msgstr "Väntar på lösennyckeln…"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Name as the bank writes it"
+msgstr "Namnet som banken skriver det"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody reset {user}'s authenticator"
@@ -316,26 +856,61 @@ msgstr "Någon återställde autentiseringsappen för {user}"
 msgid "Invitations are single-use and they expire. Ask whoever sent it for a fresh one."
 msgstr "Inbjudningar kan bara användas en gång och slutar gälla. Be den som skickade den om en ny."
 
+#: src/lib/labels.ts
+#, fuzzy
+msgid "payee column"
+msgstr "mottagarkolumn"
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "Latest 3 months"
+msgstr "Senaste 3 månaderna"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Skipped"
+msgstr "Överhoppad"
+
 #: src/components/StepUp.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Your password"
 msgstr "Ditt lösenord"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Anything you change here is recorded, and can be put back from the History screen."
+msgstr "Allt du ändrar här registreras och kan återställas från skärmen Historik."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Making…"
 msgstr "Skapar…"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "e.g. the code after _en_"
+msgstr "t.ex. koden efter _en_"
 
 #: src/components/bits.tsx
 #, fuzzy
 msgid "Sort by {label}"
 msgstr "Sortera efter {label}"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Search"
+msgstr "Sök"
+
 #: src/App.tsx
 #, fuzzy
 msgid "Show the menu"
 msgstr "Visa menyn"
+
+#: src/lib/reimbursement.ts
+#, fuzzy
+msgid "Work expense — reimbursed"
+msgstr "Jobbutlägg – ersatt"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -347,10 +922,27 @@ msgstr "Utseende"
 msgid "None yet"
 msgstr "Inga än"
 
+#: src/screens/Accounts.tsx
+#: src/screens/Register.tsx
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Account"
+msgstr "Konto"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "never used"
 msgstr "aldrig använd"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "why the currencies are not added"
+msgstr "varför valutorna inte läggs ihop"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Delete this transaction?"
+msgstr "Radera den här transaktionen?"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
@@ -358,10 +950,54 @@ msgstr "aldrig använd"
 msgid "Check the code"
 msgstr "Kontrollera koden"
 
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
+msgstr "Pengar som sparas på banken. Som ett lönekonto, men hålls isär så att registret blir tydligt."
+
+#. placeholder {0}: formatCount(ordered.length)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Tick all {0} rows the filter shows"
+msgstr "Markera alla {0} rader som filtret visar"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Into which account"
+msgstr "Till vilket konto"
+
+#. placeholder {0}: String(bank)
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "use the bank's: {0}"
+msgstr "använd bankens: {0}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Reimbursement"
+msgstr "Ersättning"
+
+#. placeholder {0}: selected.size
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "<0>{0} selected.</0> Changing them is one act, so undo puts all of them back together."
+msgstr "<0>{0} markerade.</0> Att ändra dem är en enda handling, så att ångra återställer alla tillsammans."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgctxt "noun"
+msgid "Transfer"
+msgstr "Överföring"
+
 #: src/App.tsx
 #, fuzzy
 msgid "Hide the menu"
 msgstr "Dölj menyn"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "No categories yet — add some on the Categories screen."
+msgstr "Inga kategorier än – lägg till några på skärmen Kategorier."
 
 #. placeholder {0}: passkey.label
 #: src/screens/Passkeys.tsx
@@ -369,25 +1005,87 @@ msgstr "Dölj menyn"
 msgid "New name for {0}"
 msgstr "Nytt namn på {0}"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Sum"
+msgstr "Summa"
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "Last year"
+msgstr "Förra året"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "a payment outside what the register can show"
+msgstr "en betalning utanför det registret kan visa"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Changing it signs out every other browser and forgets every trusted one, so if you are changing it because somebody else knows it, they are out too. Agent keys are separate credentials and keep working until you revoke them."
 msgstr "När du byter det loggas alla andra webbläsare ut och alla betrodda glöms, så om du byter för att någon annan känner till det är de också ute. Agentnycklar är separata inloggningsuppgifter och fortsätter fungera tills du återkallar dem."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "saving…"
+msgstr "sparar…"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "{by} reset {user}'s password and authenticator"
 msgstr "{by} återställde lösenordet och autentiseringsappen för {user}"
 
+#: src/screens/Import.tsx
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Into"
+msgstr "Till"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Discarding…"
+msgstr "Kastar…"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Savings"
+msgstr "Sparkonto"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "A split needs at least two parts"
+msgstr "En uppdelning behöver minst två delar"
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Add a second on another device. If you lose this one, you will need your password and code."
 msgstr "Lägg till en till på en annan enhet. Om du tappar bort den här behöver du ditt lösenord och en kod."
 
+#. placeholder {0}: found.payee_original
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "The bank called it <0>{0}</0>, as {app} kept it."
+msgstr "Banken kallade den <0>{0}</0>, som {app} sparade det."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Nothing recorded. Rows created before the audit log existed have no history."
+msgstr "Inget registrerat. Rader som skapades innan granskningsloggen fanns har ingen historik."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Reading the log…"
+msgstr "Läser loggen…"
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Your new recovery codes"
 msgstr "Dina nya återställningskoder"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Not a transfer — categorise as…"
+msgstr "Ingen överföring – kategorisera som…"
 
 #. placeholder {0}: offer.secret
 #. placeholder {0}: owed.offer.secret
@@ -400,40 +1098,149 @@ msgstr "Dina nya återställningskoder"
 msgid "Can't scan? Enter this key by hand: <0>{0}</0>"
 msgstr "Går det inte att skanna? Skriv in nyckeln för hand: <0>{0}</0>"
 
+#: src/screens/Categories.tsx
+msgid "Add a group"
+msgstr ""
+
+#. placeholder {0}: formatCount(rows.length)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "the first {0} loaded"
+msgstr "de första {0} inlästa"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "The server added {user} as an owner"
 msgstr "Servern lade till {user} som ägare"
 
 #: src/App.tsx
+#: src/lib/labels.ts
+#: src/screens/Accounts.tsx
+#: src/screens/Register.tsx
 #, fuzzy
 msgid "Accounts"
 msgstr "Konton"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Needs a category"
+msgstr "Behöver kategori"
+
+#. placeholder {0}: offer.name
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Put them in <0>{0}</0> too?"
+msgstr "Lägga dem i <0>{0}</0> också?"
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
 msgstr "Allt ett program gör fel måste kunna ångras av en människa, och därför är det bara en människa som kan ångra."
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Waiting to be reviewed"
+msgstr "Väntar på granskning"
+
+#. placeholder {0}: formatCount(raw.total)
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0} characters"
+msgstr "{0} tecken"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Source app"
+msgstr "Källapp"
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "or"
 msgstr "eller"
+
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Discard"
+msgstr "Kasta"
+
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "Add transfer"
+msgstr "Lägg till överföring"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "This one was entered by hand."
+msgstr "Den här skrevs in för hand."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{count, plural, one {{shown} transaction match the filters} other {{shown} transactions match the filters}}"
+msgstr "{count, plural, one {{shown} transaktion matchar filtren} other {{shown} transaktioner matchar filtren}}"
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "receipt filer"
 msgstr "kvittoarkiverare"
 
+#. placeholder {0}: category.used_by
+#. placeholder {1}: category.used_by
+#. placeholder {2}: category.used_by
+#: src/screens/Categories.tsx
+msgid "{0, plural, one {{1} transaction carries this category, so it cannot be deleted. Archive it instead.} other {{2} transactions carry this category, so it cannot be deleted. Archive it instead.}}"
+msgstr ""
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
+msgstr "Dessa nämner ett av dina konton eller någon i hushållet, och deras andra sida finns inte i boken än. De kopplas ihop när det kontoutdraget importeras. Ge raden en kategori om det inte är en överföring."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Attach receipts"
+msgstr "Bifoga kvitton"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "DOE JANE"
+msgstr "ANDERSSON ANNA"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
 msgstr "{revoked, plural, one {{revoked} betrodd webbläsare kommer att fråga efter en kod igen.} other {{revoked} betrodda webbläsare kommer att fråga efter en kod igen.}}"
 
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Select every waiting row"
+msgstr "Markera alla väntande rader"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "That isn't an amount"
+msgstr "Det är inte ett belopp"
+
+#: src/screens/Categories.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Delete"
+msgstr "Radera"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Held in dark, whatever this device is set to."
 msgstr "Låst i mörkt, oavsett vad enheten är inställd på."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Filters"
+msgstr "Filter"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{label} — {display}. Double click, or press Enter twice, to edit."
+msgstr "{label} – {display}. Dubbelklicka, eller tryck Enter två gånger, för att redigera."
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
@@ -441,10 +1248,23 @@ msgstr "Låst i mörkt, oavsett vad enheten är inställd på."
 msgid "That link doesn't work"
 msgstr "Den länken fungerar inte"
 
+#. placeholder {0}: current.also_on
+#. placeholder {1}: current.also_on
+#. placeholder {2}: current.also_on
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
+msgstr "{0, plural, one {Även på {1} annan transaktion – samma fil, sparad en gång.} other {Även på {2} andra transaktioner – samma fil, sparad en gång.}}"
+
 #: src/App.tsx
 #, fuzzy
 msgid "Payee Merge"
 msgstr "Slå ihop mottagare"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Click to edit"
+msgstr "Klicka för att redigera"
 
 #: src/App.tsx
 #, fuzzy
@@ -455,6 +1275,11 @@ msgstr "Huvudvaluta"
 #, fuzzy
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
 msgstr "Skanna detta med din autentiseringsapp och skriv sedan de sex siffror den visar. Vi kontrollerar koden nu, så att du vet att den fungerar här i stället för att märka det nästa gång du loggar in. Posten som appen hade för kontot fungerar inte längre; ta bort den."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Import these"
+msgstr "Importera dessa"
 
 #: src/App.tsx
 #, fuzzy
@@ -472,11 +1297,21 @@ msgstr "Ta bort <0>{0}</0>? Den slutar fungera direkt."
 msgid "System"
 msgstr "System"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Closed"
+msgstr "Avslutat"
+
 #: src/App.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Set up"
 msgstr "Installation"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "No payee"
+msgstr "Ingen mottagare"
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -488,22 +1323,77 @@ msgstr "Du är inne igen"
 msgid "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
 msgstr "Om du inte längre har den gamla autentiseringsappen kan du använda en av dina återställningskoder här i stället; den förbrukas."
 
+#: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Profile.tsx
+#: src/screens/Register.tsx
 #, fuzzy
 msgid "Cancel"
 msgstr "Avbryt"
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Yes, all of them and set the rule"
+msgstr "Ja, alla och ställ in regeln"
+
+#: src/screens/Accounts.tsx
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Why"
+msgstr "Varför"
+
+#. placeholder {0}: stat.more_payees
+#. placeholder {1}: formatCount(stat.more_payees)
+#. placeholder {2}: formatCount(stat.payee_count)
+#. placeholder {3}: formatCount(stat.more_payees)
+#. placeholder {4}: formatCount(stat.payee_count)
+#: src/screens/Categories.tsx
+msgid "{0, plural, one {and {1} more payee — {2} in all.} other {and {3} more payees — {4} in all.}}"
+msgstr ""
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Needs a look"
+msgstr "Behöver granskas"
+
 #: src/screens/Profile.tsx
+#: src/screens/Register.tsx
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Done"
 msgstr "Klart"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Add a transaction"
+msgstr "Lägg till en transaktion"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Newest"
+msgstr "Senaste"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "another app"
+msgstr "en annan app"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Those two don't match."
 msgstr "De två stämmer inte överens."
+
+#. placeholder {0}: to!.currency
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "Amount arriving ({0})"
+msgstr "Belopp som kommer in ({0})"
+
+#. placeholder {0}: format(-difference, currency)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Work paid {0} less than these expenses. If it will not pay the rest, split that part off and write it off."
+msgstr "Jobbet betalade {0} mindre än de här utgifterna. Om det inte betalar resten, dela av den delen och skriv av den."
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
@@ -516,15 +1406,84 @@ msgstr "Skanna detta med din autentiseringsapp och skriv sedan de sex siffror de
 msgid "Open the menu"
 msgstr "Öppna menyn"
 
+#: src/lib/reimbursement.ts
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Not a work expense"
+msgstr "Inget jobbutlägg"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Who was paid"
+msgstr "Vem som fick betalt"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "T — Transfers"
+msgstr "T – Överföringar"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Reset: password and authenticator"
 msgstr "Återställning: lösenord och autentiseringsapp"
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Every path a statement can take, and every way a line can go, is explained in <0>How import works</0>."
+msgstr "Varje väg ett kontoutdrag kan ta, och varje sätt en rad kan hamna, förklaras i <0>Så fungerar importen</0>."
+
+#: src/components/DateRange.tsx
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "From"
+msgstr "Från"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "No category needed"
+msgstr "Ingen kategori behövs"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "not counted"
+msgstr "inte räknat"
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "The passkey prompt was closed, so nothing was added."
 msgstr "Rutan för lösennyckeln stängdes, så inget lades till."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Smaller text in the table"
+msgstr "Mindre text i tabellen"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Suggested identifiers"
+msgstr "Föreslagna identifierare"
+
+#. placeholder {0}: repays.length
+#. placeholder {1}: repays.length
+#. placeholder {2}: repays.length
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0, plural, one {Repays {1} expense} other {Repays {2} expenses}}"
+msgstr "{0, plural, one {Ersätter {1} utgift} other {Ersätter {2} utgifter}}"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "skip rows"
+msgstr "överhoppade rader"
+
+#: src/screens/Categories.tsx
+msgid "Edit"
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "No single category matches that. Keep typing, or empty it."
+msgstr "Ingen enskild kategori matchar det. Fortsätt skriva eller töm fältet."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -603,15 +1562,64 @@ msgstr "Ett konto kan inte föra över till sig självt"
 msgid "a household"
 msgstr "ett hushåll"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Duplicate"
+msgstr "Duplicera"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{app}, via the {app} API"
+msgstr "{app}, via {app}s API"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Read a statement file into this register"
+msgstr "Läs in en kontoutdragsfil i det här registret"
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Code"
 msgstr "Kod"
 
+#: src/lib/labels.ts
+#, fuzzy
+msgid "state column"
+msgstr "statuskolumn"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
+msgstr "Ändrade {done} rad och lämnade {skipped} orörda – bara pengar ut som inte är en överföring kan vara ett jobbutlägg."
+
+#. placeholder {0}: found.via
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Staged through the agent API by <0>{0}</0>."
+msgstr "Förberedd via agent-API:t av <0>{0}</0>."
+
+#. placeholder {0}: format(out, from.currency)
+#. placeholder {1}: from.name
+#. placeholder {2}: to?.name
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "<0>{0}</0> leaves {1} and the same arrives in {2}."
+msgstr "<0>{0}</0> lämnar {1} och samma belopp kommer in på {2}."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Clear selection"
+msgstr "Rensa markeringen"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "what makes a good one"
 msgstr "vad som gör ett bra lösenord"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "one part of a split; the other parts stay."
+msgstr "en del av en uppdelning; de andra delarna finns kvar."
 
 #: src/App.tsx
 #, fuzzy
@@ -623,6 +1631,14 @@ msgstr "Logga ut"
 msgid "A passkey is a way in that keeps working after this browser is closed."
 msgstr "En lösennyckel är ett sätt att komma in som fortsätter fungera efter att webbläsaren har stängts."
 
+#. placeholder {0}: format(txn.amount, currency)
+#. placeholder {1}: txn.payee_name
+#. placeholder {2}: formatDate(txn.date)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0} · {1} on {2}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
+msgstr "{0} · {1} den {2}. Delarna ersätter den, så de måste bli samma belopp. Inga minustecken – varje del går åt samma håll som originalet."
+
 #: src/App.tsx
 #, fuzzy
 msgid "Register"
@@ -633,25 +1649,112 @@ msgstr "Register"
 msgid "This server's secret key was replaced, so the authenticator you have no longer works here, and nothing that asks for a code from it can be done until you set up a new one."
 msgstr "Serverns hemliga nyckel har bytts ut, så din autentiseringsapp fungerar inte längre här, och inget som kräver en kod från den kan göras förrän du har ställt in en ny."
 
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "Later"
+msgstr "Senare"
+
 #: src/App.tsx
 #, fuzzy
 msgid "A household holds the accounts and the register. The currency here is only used for totals; each account keeps its own."
 msgstr "Ett hushåll samlar kontona och registret. Valutan här används bara för summor; varje konto behåller sin egen."
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Other asset"
+msgstr "Övrig tillgång"
 
 #: src/App.tsx
 #, fuzzy
 msgid "Transfers"
 msgstr "Överföringar"
 
-#: src/screens/Profile.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Click to change"
+msgstr "Klicka för att ändra"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Detach"
+msgstr "Koppla loss"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Other liabilities"
+msgstr "Övriga skulder"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Replace"
+msgstr "Ersätt"
+
+#: src/screens/Accounts.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Balance"
+msgstr "Saldo"
+
+#. placeholder {0}: ticked.size
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Categorise {0} selected as…"
+msgstr "Kategorisera {0} markerade som…"
+
+#. placeholder {0}: formatCount(selected.size)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0} selected"
+msgstr "{0} markerade"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "The file itself"
+msgstr "Själva filen"
+
+#: src/screens/Accounts.tsx
+#: src/screens/Register.tsx
 #, fuzzy
 msgid "Cleared"
-msgstr "Rensad"
+msgstr "Bokfört"
+
+#. placeholder {0}: found.plan_name
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "the plan <0>{0}</0>"
+msgstr "planen <0>{0}</0>"
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "Latest 12 months"
+msgstr "Senaste 12 månaderna"
+
+#. placeholder {0}: done.payee_name
+#. placeholder {1}: done.category_name
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0} will always be {1} — and the payee was added"
+msgstr "{0} blir alltid {1} – och mottagaren lades till"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Received"
+msgstr "Mottaget"
+
+#: src/screens/Categories.tsx
+msgid "Auto-categorise based on payee history"
+msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "A new password"
 msgstr "Ett nytt lösenord"
+
+#. placeholder {0}: rest.join(", ")
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0} — all hidden"
+msgstr "{0} – alla dolda"
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
@@ -663,15 +1766,74 @@ msgstr "Ifylld från inbjudan. Ändra den om du hellre vill använda en annan ad
 msgid "Which household"
 msgstr "Vilket hushåll"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Keep it here"
+msgstr "Behåll det här"
+
+#: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Ignore"
+msgstr "Ignorera"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Plan"
+msgstr "Plan"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Your account"
 msgstr "Ditt konto"
 
+#. placeholder {0}: mine.rows
+#. placeholder {1}: mine.rows
+#. placeholder {2}: mine.rows
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "{0, plural, one {Matches {1} row, such as:} other {Matches {2} rows, such as:}}"
+msgstr "{0, plural, one {Matchar {1} rad, till exempel:} other {Matchar {2} rader, till exempel:}}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Single transaction"
+msgstr "Enskild transaktion"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it."
+msgstr "Nummer och namn som kontoutdrag använder för det här kontot. En fil som innehåller ett av dem kopplas till kontot på skärmen Importera, och en överföring som nämner ett av dem kopplas också hit."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Splitting…"
+msgstr "Delar upp…"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Report"
+msgstr "Rapport"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Loading the next rows…"
+msgstr "Läser in nästa rader…"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "No accounts are ticked, so there is nothing to show. Tick one in the accounts filter — or Select all, which is not the same as ticking every one of them."
+msgstr "Inga konton är markerade, så det finns inget att visa. Markera ett i kontofiltret – eller Välj alla, vilket inte är samma sak som att markera vart och ett."
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "I've lost my authenticator — use a recovery code"
 msgstr "Jag har tappat bort min autentiseringsapp – använd en återställningskod"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Could not read"
+msgstr "Kunde inte läsas"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -693,10 +1855,25 @@ msgstr "Lösenordet ensamt kan inte ersätta din andra faktor – då vore det i
 msgid "{inviter} invited you to {PRODUCT} as an owner."
 msgstr "{inviter} har bjudit in dig till {PRODUCT} som ägare."
 
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "Pick two different accounts — money cannot move to itself."
+msgstr "Välj två olika konton – pengar kan inte flyttas till samma konto."
+
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "No minus signs — the direction is the two accounts above."
+msgstr "Inga minustecken – riktningen avgörs av de två kontona ovan."
+
 #: src/components/SignInNotice.tsx
 #, fuzzy
 msgid "Recent sign-in changes"
 msgstr "Senaste ändringar av inloggning"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Deleting…"
+msgstr "Raderar…"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -707,6 +1884,21 @@ msgstr "Återkalla"
 #, fuzzy
 msgid "Don't ask on this browser for 30 days"
 msgstr "Fråga inte i den här webbläsaren på 30 dagar"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Width of the {label} column"
+msgstr "Bredd på kolumnen {label}"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Would link"
+msgstr "Skulle koppla"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Nothing waiting."
+msgstr "Inget väntar."
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
@@ -723,6 +1915,26 @@ msgstr "Återställ din inloggning"
 msgid "Set up {PRODUCT}"
 msgstr "Installera {PRODUCT}"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "The name looks like its number."
+msgstr "Namnet ser ut att vara dess nummer."
+
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
+#: src/screens/Transfer.tsx
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Amount"
+msgstr "Belopp"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Fecha;Concepto;Importe\n"
+"05/01/2026;MERCADONA;-45,20"
+msgstr "Datum;Text;Belopp\n"
+"2026-01-05;ICA NÄRA;-45,20"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Close: {name}"
@@ -733,20 +1945,92 @@ msgstr "Stäng: {name}"
 msgid "Added as an owner"
 msgstr "Tillagd som ägare"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Detaching…"
+msgstr "Kopplar loss…"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "This row is locked, so nothing here can be changed and an import will not match against it. Set it back to cleared to edit it."
+msgstr "Den här raden är låst, så inget här kan ändras och en import matchas inte mot den. Sätt tillbaka den till bokförd för att redigera den."
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "The server reset {user}'s authenticator"
 msgstr "Servern återställde autentiseringsappen för {user}"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "date format"
+msgstr "datumformat"
+
+#: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Rows"
+msgstr "Rader"
+
+#. placeholder {0}: list.length
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Receipts ({0})"
+msgstr "Kvitton ({0})"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Not a transfer"
+msgstr "Ingen överföring"
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Added"
 msgstr "Tillagd"
 
+#. placeholder {0}: format(Math.abs(left), currency)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0} left to account for"
+msgstr "{0} kvar att fördela"
+
+#: src/screens/Categories.tsx
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "this payee"
+msgstr "den här mottagaren"
+
+#. placeholder {0}: purging.row_count
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
+msgstr "<0>{purgingName}</0> och dess {0} rader raderas. Inget i den har nått registret, så det finns inget att ångra efteråt – och filen kan importeras igen från början."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Confirm and replace"
 msgstr "Bekräfta och ersätt"
+
+#. placeholder {0}: format(left, currency)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Add a part for the {0}"
+msgstr "Lägg till en del för {0}"
+
+#: src/screens/Accounts.tsx
+#: src/screens/Categories.tsx
+#, fuzzy
+msgid "Create"
+msgstr "Skapa"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Work items and their repayments"
+msgstr "Jobbutlägg och deras ersättningar"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "A running balance needs one account, newest-first by date, and no filters — it is a sum down the page, so in any other order or with rows hidden it would not mean anything."
+msgstr "Ett löpande saldo kräver ett konto, sortering på datum med nyast först och inga filter – det är en summa nedför sidan, så i annan ordning eller med dolda rader skulle det inte betyda något."
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
@@ -758,15 +2042,79 @@ msgstr "{inviter} har bjudit in dig till {PRODUCT} som ägare, i {households}."
 msgid "Passkeys are not set up on this server."
 msgstr "Lösennycklar är inte inställda på den här servern."
 
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Matched"
+msgstr "Matchad"
+
+#: src/screens/Categories.tsx
+msgid "unused"
+msgstr ""
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "No single category matches that."
+msgstr "Ingen enskild kategori matchar det."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Split"
+msgstr "Dela upp"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Import from a file"
+msgstr "Importera från en fil"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "New codes made. Every earlier code, used or not, has stopped working."
 msgstr "Nya koder skapade. Alla tidigare koder, använda eller inte, har slutat fungera."
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "a statement"
+msgstr "ett kontoutdrag"
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "You've been invited"
 msgstr "Du har blivit inbjuden"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "mixed currencies, not compared"
+msgstr "blandade valutor, inte jämförda"
+
+#. placeholder {0}: txn.import_id
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Came from a statement. Its line key is <0>{0}</0>, which is what stops the same line being imported twice."
+msgstr "Kom från ett kontoutdrag. Dess radnyckel är <0>{0}</0>, och det är den som hindrar att samma rad importeras två gånger."
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Already imported"
+msgstr "Redan importerad"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Checking"
+msgstr "Lönekonton"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Work will not pay this. It counts as your spending."
+msgstr "Jobbet betalar inte detta. Det räknas som din utgift."
+
+#: src/screens/Categories.tsx
+msgid "Do not auto-categorise {name}"
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Add more"
+msgstr "Lägg till fler"
 
 #: src/components/RecoveryCodes.tsx
 #, fuzzy
@@ -778,10 +2126,46 @@ msgstr "Varje kod fungerar en gång, och de visas bara nu. Det är så du kommer
 msgid "Your new authenticator is the only one that works now."
 msgstr "Din nya autentiseringsapp är den enda som fungerar nu."
 
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Connect"
+msgstr "Anslut"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "New"
+msgstr "Ny"
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "Date range"
+msgstr "Datumintervall"
+
+#. placeholder {0}: index + 1
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Part {0} ({currency})"
+msgstr "Del {0} ({currency})"
+
 #: src/App.tsx
 #, fuzzy
 msgid "Create it"
 msgstr "Skapa det"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "amount column"
+msgstr "beloppskolumn"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Category: no category needed, this is one leg of a transfer"
+msgstr "Kategori: behövs inte, det här är ena delen av en överföring"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "File"
+msgstr "Fil"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -798,6 +2182,21 @@ msgstr "Visa en kod att skanna"
 #, fuzzy
 msgid "Passkeys need this app opened at its HTTPS address."
 msgstr "Lösennycklar kräver att appen öppnas på sin HTTPS-adress."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "One part is still empty"
+msgstr "En del är fortfarande tom"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Current account"
+msgstr "Lönekonto"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{text} — edit the memo"
+msgstr "{text} – redigera beskrivningen"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -820,30 +2219,134 @@ msgstr "Senast använd"
 msgid "This browser is signed in as {0}. An invitation makes a new account, so sign out first if the link is meant for somebody else."
 msgstr "Den här webbläsaren är inloggad som {0}. En inbjudan skapar ett nytt konto, så logga ut först om länken är till någon annan."
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "the last four, or the part the bank prints"
+msgstr "de fyra sista, eller den del banken skriver ut"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Untick every row shown"
+msgstr "Avmarkera alla visade rader"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Locked — checked against the bank, and every change to it is refused"
+msgstr "Låst – avstämd mot banken, och alla ändringar nekas"
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "To year"
+msgstr "Till år"
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "Finish"
 msgstr "Slutför"
+
+#: src/screens/Accounts.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Country"
+msgstr "Land"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "filters are set"
+msgstr "filter är satta"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "The rest of this payee?"
+msgstr "Resten av den här mottagaren?"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Each account keeps its own currency. Nothing is ever converted in the ledger."
+msgstr "Varje konto behåller sin egen valuta. Inget räknas någonsin om i boken."
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Not available here"
 msgstr "Inte tillgängligt här"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "One line per currency, and no total across them."
+msgstr "En rad per valuta, och ingen summa över dem."
+
+#. placeholder {0}: one.value
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Ignore {0}"
+msgstr "Ignorera {0}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Link as transfer"
+msgstr "Koppla som överföring"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Gather the accounts by country"
+msgstr "Samla kontona per land"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Drag to resize · double-click to reset every column"
+msgstr "Dra för att ändra storlek · dubbelklicka för att återställa alla kolumner"
+
+#: src/screens/Categories.tsx
+msgid "Delete group"
+msgstr ""
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Recovery code"
 msgstr "Återställningskod"
+
+#: src/screens/Categories.tsx
+msgid "New group"
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Detach this receipt?"
+msgstr "Koppla loss det här kvittot?"
+
+#: src/screens/Categories.tsx
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Category"
+msgstr "Kategori"
 
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr "Du har fortfarande 1 lösennyckel, och en återställningskod låter dem fortsätta fungera. Om en fanns på enheten du tappade bort, ta bort den under Inloggningsmetoder i din profil – ditt namn i menyn."
 
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "Memo"
+msgstr "Beskrivning"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "One-time Import"
+msgstr "Engångsimport"
+
 #: src/App.tsx
 #, fuzzy
 msgid "{waiting} waiting"
 msgstr "{waiting} väntar"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "New account"
+msgstr "Nytt konto"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -855,20 +2358,67 @@ msgstr "Servern återställde lösenordet för {user}"
 msgid "Try again"
 msgstr "Försök igen"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "M — Entered by hand"
+msgstr "M – Inskriven för hand"
+
+#. placeholder {0}: tagOffer.value
+#. placeholder {1}: account.name
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
+msgstr "Filens namn innehåller <0>{0}</0>. Spara det som filmärkning för <1>{1}</1>, så att nästa kontoutdrag väljer kontot själv?"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "product column"
+msgstr "produktkolumn"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Set work expense on the selected rows"
+msgstr "Ange jobbutlägg för de markerade raderna"
+
 #: src/App.tsx
 #, fuzzy
 msgid "Invitation"
 msgstr "Inbjudan"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Leave it blank for an account that starts empty."
+msgstr "Lämna tomt för ett konto som börjar tomt."
 
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "{user} set up this instance as its owner"
 msgstr "{user} installerade den här instansen som ägare"
 
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "This writes both rows as one act, so undoing it from History takes both back together."
+msgstr "Detta sparar båda raderna som en enda handling, så att ångra den i Historik tar bort båda tillsammans."
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Note"
+msgstr "Anteckning"
+
 #: src/App.tsx
 #, fuzzy
 msgid "How import works"
 msgstr "Så fungerar importen"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Transfer between your own accounts"
+msgstr "Överföring mellan dina egna konton"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Bank"
+msgstr "Bank"
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -880,20 +2430,109 @@ msgstr "Tills dess kommer varje inloggning att kräva en ny återställningskod.
 msgid "Setting it up takes one of your recovery codes."
 msgstr "Att ställa in den kostar en av dina återställningskoder."
 
+#. placeholder {0}: preview.lines.length
+#. placeholder {1}: preview.lines.length
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0, plural, other {{1} lines}}"
+msgstr "{0, plural, one {{1} rad} other {{1} rader}}"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Every link has a name or a person behind it."
+msgstr "Varje koppling har ett namn eller en person bakom sig."
+
+#. placeholder {0}: one.value
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Account for {0}"
+msgstr "Konto för {0}"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Opening balance"
+msgstr "Ingående saldo"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Written off — work will not pay"
+msgstr "Avskriven – jobbet betalar inte"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Kind"
+msgstr "Slag"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Waiting for the other statement"
+msgstr "Väntar på det andra kontoutdraget"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Brought in by the <0>One-time Import</0> from {how}, reading {what}, on {when}."
+msgstr "Inhämtad av <0>Engångsimport</0> från {how}, genom att läsa {what}, den {when}."
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Continue to the passkey"
 msgstr "Fortsätt till lösennyckeln"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Select every row shown"
+msgstr "Markera alla visade rader"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "The server made {user} an owner"
 msgstr "Servern gjorde {user} till ägare"
 
+#: src/lib/labels.ts
+#, fuzzy
+msgid "owner"
+msgstr "ägare"
+
+#: src/screens/Categories.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Undo in History brings it back."
+msgstr "Ångra i Historik tar tillbaka den."
+
 #: src/App.tsx
+#: src/screens/Register.tsx
 #, fuzzy
 msgid "Import"
 msgstr "Importera"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Reimbursed by"
+msgstr "Ersatt av"
+
+#: src/screens/Categories.tsx
+msgid "Group"
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Import is in the menu on the left — this screen was given no way to navigate"
+msgstr "Importera finns i menyn till vänster – den här skärmen har inget sätt att navigera"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "How banks write our names"
+msgstr "Hur bankerna skriver våra namn"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Where the account is held. Optional, and separate from the currency — a euro account can sit in any number of countries."
+msgstr "Var kontot finns. Valfritt, och skilt från valutan – ett eurokonto kan finnas i vilket land som helst."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "The line exactly as it arrived"
+msgstr "Raden exakt som den kom"
 
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -911,6 +2550,11 @@ msgstr "Jag har sparat dem någon annanstans än i den här webbläsaren"
 msgid "Each one works once, and they are shown only now. Your old ones no longer work. They are how you get back in if you lose your phone but still know your password."
 msgstr "Varje kod fungerar en gång, och de visas bara nu. Dina gamla fungerar inte längre. Det är så du kommer in igen om du tappar bort telefonen men fortfarande kan ditt lösenord."
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Not reimbursed yet"
+msgstr "Inte ersatt än"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "You sign in with a passkey, or with your password and authenticator code."
@@ -923,6 +2567,43 @@ msgstr "Du loggar in med en lösennyckel, eller med ditt lösenord och en kod fr
 msgid "Signed in as <0>{0}</0> ({1})."
 msgstr "Inloggad som <0>{0}</0> ({1})."
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Repaid by the payment above"
+msgstr "Ersatt av betalningen ovan"
+
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
+msgstr "Båda, eftersom kontona har olika valutor och vi inte hittar på en växelkurs – ta beloppet som banken faktiskt satte in."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Amount ({currency})"
+msgstr "Belopp ({currency})"
+
+#. placeholder {0}: listText(sums.map((one) => one.currency))
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so a figure adding {0} would be a number with nothing behind it."
+msgstr "Den här boken räknar aldrig om. Valutan hör till kontot och ingen växelkurs sparas någonstans, så en siffra som lägger ihop {0} vore ett tal utan något bakom sig."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Larger text"
+msgstr "Större text"
+
+#. placeholder {0}: listText(available)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so one Out column holding {0} would be a column nobody could add up."
+msgstr "Den här boken räknar aldrig om. Valutan hör till kontot och ingen växelkurs sparas någonstans, så en Ut-kolumn med {0} vore en kolumn som ingen kunde summera."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Uncleared — the bank has not seen this yet"
+msgstr "Ej bokförd – banken har inte sett den än"
+
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -934,10 +2615,25 @@ msgstr "En ny autentiseringsapp"
 msgid "1. You"
 msgstr "1. Du"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "It is recorded as a real transaction on that date, not a hidden number, so it shows in the register and can be corrected like anything else. For a card or a loan, type what you owe as a negative."
+msgstr "Det registreras som en riktig transaktion det datumet, inte som en dold siffra, så det syns i registret och kan rättas som allt annat. För ett kort eller ett lån skriver du det du är skyldig som ett negativt tal."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
 msgstr "Ha en av dina återställningskoder redo: den bevisar att det är du i stället för den gamla autentiseringsappen. (Återställningskoden du loggade in med täcker det bara i fliken där du använde den, så länge du är inloggad och i ett dygn.)"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "What was in the account on the day you started tracking it — usually a date in the past, the one your first statement opens with."
+msgstr "Det som fanns på kontot den dag du började följa det – oftast ett datum bakåt i tiden, det som ditt första kontoutdrag börjar med."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Any"
+msgstr "Alla"
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -949,10 +2645,37 @@ msgstr "Du kan fortfarande logga in med ditt lösenord och en kod."
 msgid "read"
 msgstr "läsa"
 
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Not for this account"
+msgstr "Inte för det här kontot"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Each currency is totalled on its own instead. Nothing on this screen ever adds two together."
+msgstr "I stället summeras varje valuta för sig. Inget på den här skärmen lägger ihop två."
+
+#: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Add"
+msgstr "Lägg till"
+
 #: src/App.tsx
 #, fuzzy
 msgid "Only you right now"
 msgstr "Bara du just nu"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Other debt"
+msgstr "Övrig skuld"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
+msgstr "I stället får varje valuta egna Ut och In, och en rad fyller bara i sina egna. Att stänga av en döljer både dess rader och kolumner – tabellen säger hur många."
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -979,6 +2702,11 @@ msgstr "Servern återställde lösenordet och autentiseringsappen för {user}"
 msgid "The six digits from the new one"
 msgstr "De sex siffrorna från den nya"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "double click to edit"
+msgstr "dubbelklicka för att redigera"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "New authenticator"
@@ -988,6 +2716,45 @@ msgstr "Ny autentiseringsapp"
 #, fuzzy
 msgid "Your account is under your name in the menu."
 msgstr "Ditt konto finns under ditt namn i menyn."
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "no country set"
+msgstr "inget land angivet"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "All accounts"
+msgstr "Alla konton"
+
+#. placeholder {0}: recognised.account_name
+#. placeholder {1}: recognised.how
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "This file looks like it is for <0>{0}</0> ({1}), not the account chosen above."
+msgstr "Den här filen ser ut att höra till <0>{0}</0> ({1}), inte kontot som valts ovan."
+
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
+#: src/screens/Transfer.tsx
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Date"
+msgstr "Datum"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "memo column"
+msgstr "beskrivningskolumn"
+
+#: src/screens/Categories.tsx
+msgid "How to categorise {name}"
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Download"
+msgstr "Ladda ner"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -1004,30 +2771,103 @@ msgstr "Någon återställde lösenordet för {user}"
 msgid "Synced"
 msgstr "Synkad"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "a pocket's or a card product's name"
+msgstr "namnet på en sparficka eller en kortprodukt"
+
+#. placeholder {0}: rule.data?.history_window ?? 3
+#: src/screens/Categories.tsx
+msgid "The category is chosen from how the last {0} transactions for {name} were categorised — the most common of them, most recent winning a tie. It updates as you add and edit transactions."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Set"
 msgstr "Inställt"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "uncategorised (chosen)"
+msgstr "okategoriserad (valt)"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "kind"
+msgstr "typ"
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
 msgstr "Återställningskoden du loggade in med täcker detta, så ingen annan kod behövs."
 
+#: src/screens/Categories.tsx
+msgid "New transactions arrive blank and you choose each time. Right for a payee that is genuinely different every time."
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."
+msgstr "Delarna du har ställt in har inte sparats. Att kasta dem lämnar transaktionen som den var."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Currencies shown"
+msgstr "Visade valutor"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled — <0>show it in the register</0>. Zero removes it."
+msgstr "Båda är en riktig transaktion i registret, avstämd och daterad den dag uppföljningen började. Ändrar du dem här ändras den raden och den förblir avstämd – <0>visa den i registret</0>. Noll tar bort den."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "C — Cleared"
+msgstr "C – Bokförd"
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "If you did not expect this, tell an owner of this instance before you go on."
 msgstr "Om du inte väntade dig detta, säg till en ägare av instansen innan du fortsätter."
 
+#. placeholder {0}: from.currency
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "Amount leaving ({0})"
+msgstr "Belopp som går ut ({0})"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Description"
+msgstr "Beskrivning"
+
 #: src/App.tsx
+#: src/lib/labels.ts
+#: src/screens/Categories.tsx
+#: src/screens/Register.tsx
 #, fuzzy
 msgid "Categories"
 msgstr "Kategorier"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "The one on screen goes to the inbox, and the new file takes its place. One undo puts both back."
+msgstr "Det som visas hamnar i inkorgen, och den nya filen tar dess plats. En ångring återställer båda."
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "type to search — leave empty for none"
+msgstr "skriv för att söka – lämna tomt för inget"
 
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked 1 agent key. A program that was using it will be refused from now on; issue a new key on your profile if it should keep working."
 msgstr "När du använde en återställningskod loggades du ut överallt, alla betrodda webbläsare glömdes och 1 agentnyckel återkallades. Ett program som använde den nekas från och med nu; skapa en ny nyckel i din profil om det ska fortsätta fungera."
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "member"
+msgstr "medlem"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1039,12 +2879,27 @@ msgstr "om utseende"
 msgid "The server re-enabled {user}"
 msgstr "Servern återaktiverade {user}"
 
+#: src/screens/Categories.tsx
+msgid "archived"
+msgstr ""
+
+#: src/screens/Categories.tsx
+msgid "No categories yet. Categories say what a transaction was <0>for</0> — they group the register and let a payee fill itself in."
+msgstr ""
+
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "In Docker:"
 msgstr "I Docker:"
 
+#. placeholder {0}: offer.count
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "<0>{0} other line has the same payee</0> and no category of their own."
+msgstr "<0>{0} annan rad har samma mottagare</0> och ingen egen kategori."
+
 #: src/screens/Profile.tsx
+#: src/screens/Register.tsx
 #, fuzzy
 msgid "Change"
 msgstr "Ändra"
@@ -1060,6 +2915,11 @@ msgstr "Du har fortfarande {0} lösennycklar, och en återställningskod låter 
 msgid "Reset: authenticator"
 msgstr "Återställning: autentiseringsapp"
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "This lands as one entry in History, so the whole import can be undone in one go."
+msgstr "Detta hamnar som en enda post i Historik, så hela importen kan ångras på en gång."
+
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
@@ -1072,25 +2932,60 @@ msgstr "E-post"
 msgid "somebody"
 msgstr "någon"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Work expense…"
+msgstr "Jobbutlägg…"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Reconcile"
+msgstr "Stäm av"
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "It could not be used here anyway."
 msgstr "Den kunde ändå inte användas här."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Show the {code} columns"
+msgstr "Visa kolumnerna för {code}"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Numbers and names your statements already use for your accounts, read off the register. An identifier lets transfers link without asking, so a wrong one makes wrong links: nothing here is added until you say so. <0>Would link</0> is how many transfer pairs adding it would link now."
+msgstr "Nummer och namn som dina kontoutdrag redan använder för dina konton, hämtade ur registret. En identifierare låter överföringar kopplas utan att fråga, så en felaktig ger felaktiga kopplingar: inget här läggs till förrän du säger det. <0>Skulle koppla</0> är hur många överföringspar den skulle koppla nu om den lades till."
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Make new codes"
 msgstr "Skapa nya koder"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "This is one act: the original goes, the parts arrive, and History undoes the whole thing in one click. The parts stay marked as belonging together."
+msgstr "Det är en enda handling: originalet försvinner, delarna kommer till, och Historik ångrar alltihop med ett klick. Delarna förblir markerade som hörande ihop."
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Add a passkey"
 msgstr "Lägg till en lösennyckel"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Between two of your own accounts — two rows, one act"
+msgstr "Mellan två av dina egna konton – två rader, en handling"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "One household per key. Two households means two keys."
 msgstr "Ett hushåll per nyckel. Två hushåll betyder två nycklar."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "why each currency has its own columns"
+msgstr "varför varje valuta har egna kolumner"
 
 #: src/App.tsx
 #, fuzzy
@@ -1102,15 +2997,48 @@ msgstr "Återställning"
 msgid "Following this device, which is dark right now."
 msgstr "Följer enheten, som är mörk just nu."
 
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Other assets"
+msgstr "Övriga tillgångar"
+
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "4. Recovery codes"
 msgstr "4. Återställningskoder"
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Discard this staged import?"
+msgstr "Kasta den här förberedda importen?"
+
+#: src/lib/labels.ts
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Uncategorised"
+msgstr "Okategoriserad"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "password"
 msgstr "lösenord"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Cleared — the bank has it"
+msgstr "Bokförd – banken har den"
+
+#. placeholder {0}: suggested.value
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Add <0>{0}</0>"
+msgstr "Lägg till <0>{0}</0>"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Imported from a statement or a one-time import"
+msgstr "Importerad från ett kontoutdrag eller en engångsimport"
 
 #: src/App.tsx
 #, fuzzy
@@ -1128,10 +3056,65 @@ msgstr "Går ut {0}"
 msgid "A recovery code cannot be used here. If somebody else has seen your codes, one of them must not be enough to make the next set."
 msgstr "En återställningskod kan inte användas här. Om någon annan har sett dina koder får en av dem inte räcka för att skapa nästa omgång."
 
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Credit card"
+msgstr "Kreditkort"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Receipt"
+msgstr "Kvitto"
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "Ditt lösenord för {email} återställdes från servern den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in det igen nedan."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Staged by"
+msgstr "Förberedd av"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Split this transaction"
+msgstr "Dela upp den här transaktionen"
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "This month"
+msgstr "Den här månaden"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "No, just this one"
+msgstr "Nej, bara den här"
+
+#: src/screens/Profile.tsx
+#, fuzzy
+msgctxt "authenticator state"
+msgid "Cleared"
+msgstr "Rensad"
+
+#. placeholder {0}: formatCount(hiddenByCurrency)
+#. placeholder {1}: listText(columns)
+#. placeholder {2}: formatCount(hiddenByCurrency)
+#. placeholder {3}: listText(columns)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{hiddenByCurrency, plural, one {{0} row is not shown: the currency toggle is showing {1}, and that row is in another.} other {{2} rows are not shown: the currency toggle is showing {3}, and those rows are in another.}}"
+msgstr "{hiddenByCurrency, plural, one {{0} rad visas inte: valutaväljaren visar {1}, och den raden är i en annan.} other {{2} rader visas inte: valutaväljaren visar {3}, och de raderna är i en annan.}}"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
+msgstr "Kopplade som överföringar fast ingen människa valde dem – för att de två kontona har kopplats ihop förut och ingen av raderna nämner den andra, eller för att ett program kopplade dem med en agentnyckel. Ett köp och återbetalningen av exakt samma belopp kan se ut så. Koppla isär dem som inte är överföringar; de föreslås inte igen. Behåll dem som är det."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "This import"
+msgstr "Den här importen"
 
 #. placeholder {0}: passkey.rp_id
 #: src/screens/Passkeys.tsx
@@ -1139,10 +3122,46 @@ msgstr "Ditt lösenord för {email} återställdes från servern den {when}. All
 msgid "Made for {0}, cannot be used here."
 msgstr "Skapad för {0}, kan inte användas här."
 
+#: src/screens/Register.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Not now"
 msgstr "Inte nu"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "outflow column"
+msgstr "utflödeskolumn"
+
+#: src/screens/Categories.tsx
+msgid "Payees"
+msgstr ""
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Tag in the download's file name"
+msgstr "Märkning i den nedladdade filens namn"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{text} — edit the payee"
+msgstr "{text} – redigera mottagaren"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Mark uncleared"
+msgstr "Markera som ej bokförd"
+
+#. placeholder {0}: line.line_no
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Include line {0}"
+msgstr "Ta med rad {0}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Where did this come from?"
+msgstr "Var kom det här ifrån?"
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -1159,10 +3178,24 @@ msgstr "Se dem under Administration"
 msgid "Hide help: {label}"
 msgstr "Dölj hjälp: {label}"
 
+#: src/screens/Categories.tsx
+msgid "how this works"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Current password"
 msgstr "Nuvarande lösenord"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Nothing to suggest."
+msgstr "Inget att föreslå."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Table text size"
+msgstr "Textstorlek i tabellen"
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
@@ -1174,10 +3207,24 @@ msgstr "Ställ in lösenordet"
 msgid "Sign out and accept the invitation"
 msgstr "Logga ut och tacka ja till inbjudan"
 
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "Later: the same length of time, just after"
+msgstr "Senare: lika lång period, strax efter"
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "You signed in with a recovery code, and your passkeys still work. If one of them was on the device you lost, remove it here."
 msgstr "Du loggade in med en återställningskod, och dina lösennycklar fungerar fortfarande. Om en av dem fanns på enheten du tappade bort, ta bort den här."
+
+#: src/screens/Categories.tsx
+msgid "Rename or delete this group"
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Out {code}"
+msgstr "Ut {code}"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1206,11 +3253,37 @@ msgstr "Ställ in en ny autentiseringsapp"
 msgid "the server answered {0}"
 msgstr "servern svarade {0}"
 
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Keep"
+msgstr "Behåll"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Five parts is the most"
+msgstr "Fem delar är max"
+
 #: src/components/StepUp.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "The six digits from your authenticator"
 msgstr "De sex siffrorna från din autentiseringsapp"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "fee column"
+msgstr "avgiftskolumn"
+
+#: src/screens/Accounts.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Currency"
+msgstr "Valuta"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "decimal separator"
+msgstr "decimaltecken"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
@@ -1223,50 +3296,123 @@ msgstr "Ditt namn"
 msgid "{by} reset {user}'s authenticator"
 msgstr "{by} återställde autentiseringsappen för {user}"
 
+#. placeholder {0}: purging.row_count
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "<0>{purgingName}</0> and its {0} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
+msgstr "<0>{purgingName}</0> och dess {0} rad raderas. Inget i den har nått registret, så det finns inget att ångra efteråt – och filen kan importeras igen från början."
+
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "type any part"
+msgstr "skriv vilken del som helst"
+
+#: src/screens/Categories.tsx
+msgid "Categorisation"
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Reimbursed, with the payment"
+msgstr "Ersatta, med betalningen"
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Your password and your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
 msgstr "Ditt lösenord och din autentiseringsapp för {email} återställdes från servern den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in båda igen nedan."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Where this line will land"
+msgstr "Var den här raden hamnar"
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "{others, plural, one {You will still be able to sign in with your other passkey, or with your password and code.} other {You will still be able to sign in with your other {others} passkeys, or with your password and code.}}"
 msgstr "{others, plural, one {Du kan fortfarande logga in med din andra lösennyckel, eller med ditt lösenord och en kod.} other {Du kan fortfarande logga in med dina {others} andra lösennycklar, eller med ditt lösenord och en kod.}}"
 
+#: src/screens/Categories.tsx
+msgid "Archived — hide it from the pickers"
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "3. Recovery codes"
 msgstr "3. Återställningskoder"
+
+#. placeholder {0}: "Savings"
+#. placeholder {0}: one.sample
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "e.g. {0}"
+msgstr "t.ex. {0}"
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "One of your recovery codes"
 msgstr "En av dina återställningskoder"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "opening balance"
+msgstr "ingående saldo"
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Never"
 msgstr "Aldrig"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Not the same thing — add it separately"
+msgstr "Inte samma sak – lägg till den separat"
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "{usable, plural, one {{usable} passkey} other {{usable} passkeys}}"
 msgstr "{usable, plural, one {{usable} lösennyckel} other {{usable} lösennycklar}}"
 
+#: src/screens/Categories.tsx
+msgid "A group can only be deleted when there are no categories under it, archived ones included. Deleting it is an entry in History, and Undo there brings it back."
+msgstr ""
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "{by} gave {user} a new authenticator"
 msgstr "{by} gav {user} en ny autentiseringsapp"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "A transfer moves money between your own accounts, so it is not spending and has no category"
+msgstr "En överföring flyttar pengar mellan dina egna konton, så den är ingen utgift och har ingen kategori"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "{count, plural, other {{shown} rows}}"
+msgstr "{count, plural, one {{shown} rad} other {{shown} rader}}"
 
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "A recovery code"
 msgstr "En återställningskod"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Hide filters"
+msgstr "Dölj filter"
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "{by} reset your password for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "{by} återställde ditt lösenord för {email} den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in det igen nedan."
+
+#. placeholder {0}: format(txn.amount, currency)
+#. placeholder {1}: formatDate(txn.date)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
+msgstr "{0} den {1}. Delarna ersätter den, så de måste bli samma belopp. Inga minustecken – varje del går åt samma håll som originalet."
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
@@ -1283,6 +3429,11 @@ msgstr "Namnregler för mottagare"
 msgid "{by} made {user} an owner"
 msgstr "{by} gjorde {user} till ägare"
 
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Preview"
+msgstr "Förhandsvisning"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "<0>Copy this now.</0> It is the only time it is shown — only a fingerprint of it is stored, so there is nothing to show again."
@@ -1298,6 +3449,38 @@ msgstr "Gjord till ägare"
 msgid "Show a new code to scan"
 msgstr "Visa en ny kod att skanna"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Out ({currency})"
+msgstr "Ut ({currency})"
+
+#. placeholder {0}: tagOffer.value
+#. placeholder {1}: account.name
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so its next statement picks the account itself?"
+msgstr "Filens namn innehåller <0>{0}</0>. Spara det som IBAN för <1>{1}</1>, så att nästa kontoutdrag väljer kontot själv?"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Line"
+msgstr "Rad"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "This file is not text — a spreadsheet export keeps its rows in a binary format. What it was read as is in the table above."
+msgstr "Den här filen är inte text – en kalkylbladsexport lagrar sina rader i ett binärt format. Det som lästes ur den finns i tabellen ovan."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Brought in by the <0>One-time Import</0> from {how}, on {when}."
+msgstr "Inhämtad av <0>Engångsimport</0> från {how}, den {when}."
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "From year"
+msgstr "Från år"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Replacing it also un-trusts every browser, including this one, and signs out every other browser — they were let in on the strength of the old authenticator, and that is exactly what you are replacing."
@@ -1309,25 +3492,73 @@ msgstr "Att ersätta den gör också att alla webbläsare, även den här, sluta
 msgid "Your authenticator"
 msgstr "Din autentiseringsapp"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Nothing here yet. Add a row above, or import a statement from the Import screen."
+msgstr "Inget här än. Lägg till en rad ovan, eller importera ett kontoutdrag från skärmen Importera."
+
 #: src/components/SignInNotice.tsx
 #, fuzzy
 msgid "Sign-in changes in the last 14 days, by somebody other than you:"
 msgstr "Ändringar av inloggning de senaste 14 dagarna, gjorda av någon annan än du:"
 
+#: src/screens/Categories.tsx
+#: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/Register.tsx
 #, fuzzy
 msgid "Keep it"
 msgstr "Behåll den"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "No money in between those dates. Widen them above — a repayment can take weeks."
+msgstr "Inga pengar in mellan de datumen. Vidga dem ovan – en ersättning kan ta veckor."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Work expenses"
+msgstr "Jobbutlägg"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Read the file"
+msgstr "Läs filen"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "That isn't an amount in {currency}"
+msgstr "Det är inte ett belopp i {currency}"
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "You have not given a key to anything."
 msgstr "Du har inte gett någon nyckel till något."
 
+#. placeholder {0}: formatDate(current.date)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Money in within {PAYMENT_PICKER_DAYS} days either side of {0}. Either side, because an advance arrives before the spending it covers."
+msgstr "Pengar in inom {PAYMENT_PICKER_DAYS} dagar före eller efter {0}. Före eller efter, eftersom ett förskott kommer före utgiften det täcker."
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Out of"
+msgstr "Från"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "write"
 msgstr "skriva"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Money you owe the card issuer. Spending makes the balance more negative; paying the bill is a transfer from the account that pays it."
+msgstr "Pengar du är skyldig kortutgivaren. Köp gör saldot mer negativt; att betala fakturan är en överföring från kontot som betalar den."
+
+#: src/screens/Categories.tsx
+msgid "Nothing to go on yet, so new transactions stay uncategorised."
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1350,6 +3581,61 @@ msgstr "{by} återställde lösenordet för {user}"
 msgid "Using a recovery code signed you out everywhere, forgot every trusted browser and revoked {0} agent keys. A program that was using one will be refused from now on; issue a new key on your profile if it should keep working."
 msgstr "När du använde en återställningskod loggades du ut överallt, alla betrodda webbläsare glömdes och {0} agentnycklar återkallades. Ett program som använde en av dem nekas från och med nu; skapa en ny nyckel i din profil om det ska fortsätta fungera."
 
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "All dates"
+msgstr "Alla datum"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "What banks call it"
+msgstr "Vad bankerna kallar det"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Empty it to go back to the suggestion."
+msgstr "Töm fältet för att gå tillbaka till förslaget."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Importing…"
+msgstr "Importerar…"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Add transaction"
+msgstr "Lägg till transaktion"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "S — Split parts"
+msgstr "S – Delar av uppdelning"
+
+#: src/screens/Categories.tsx
+msgid "Nothing in this group yet."
+msgstr ""
+
+#. placeholder {0}: offer.count + 1
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Yes, all {0} of them"
+msgstr "Ja, alla {0}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{app}, via its CSV export"
+msgstr "{app}, via dess CSV-export"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Unlink transfer"
+msgstr "Koppla isär överföring"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Staged"
+msgstr "Förberedd"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Needs setting up again"
@@ -1365,18 +3651,42 @@ msgstr "Den här webbläsaren har inte använts här nyligen, så vi behöver de
 msgid "why this is asked"
 msgstr "varför detta efterfrågas"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "The money out, repaid by the one payment in"
+msgstr "Pengarna ut, ersatta av den enda betalningen in"
+
 #. placeholder {0}: names.length
 #: src/App.tsx
 #, fuzzy
 msgid "{0, plural, one {{who} is here too} other {{who} are here too}}"
 msgstr "{0, plural, one {{who} är också här} other {{who} är också här}}"
 
+#: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/Register.tsx
 #, fuzzy
 msgid "Remove"
 msgstr "Ta bort"
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Leave them <0>uncategorised</0> too?"
+msgstr "Lämna dem <0>okategoriserade</0> också?"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "inflow column"
+msgstr "inflödeskolumn"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Difference"
+msgstr "Skillnad"
+
 #: src/App.tsx
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
 #, fuzzy
 msgid "Payee"
 msgstr "Mottagare"
@@ -1385,6 +3695,16 @@ msgstr "Mottagare"
 #, fuzzy
 msgid "No other browsers were signed in."
 msgstr "Inga andra webbläsare var inloggade."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Not numbered: in an OFX file the Line column above counts transactions, not lines of the file."
+msgstr "Inte numrerad: i en OFX-fil räknar kolumnen Rad ovan transaktioner, inte rader i filen."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Hide the {code} columns"
+msgstr "Dölj kolumnerna för {code}"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1401,20 +3721,83 @@ msgstr "Inget har ändrats än – din nuvarande autentiseringsapp fortsätter f
 msgid "Reports"
 msgstr "Rapporter"
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "a note for this row"
+msgstr "en anteckning för den här raden"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "in or out, any currency"
+msgstr "in eller ut, vilken valuta som helst"
+
+#: src/screens/Categories.tsx
+msgid "Archived"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Let it add and change transactions, not only read them"
 msgstr "Låt den lägga till och ändra transaktioner, inte bara läsa dem"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Transfer — the other side is in {otherAccount}"
+msgstr "Överföring – andra sidan finns på {otherAccount}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Larger text in the table"
+msgstr "Större text i tabellen"
+
+#: src/screens/Accounts.tsx
+#: src/screens/Categories.tsx
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Save"
 msgstr "Spara"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "One row from each account's statement, made the two sides of one transfer"
+msgstr "En rad från varje kontos kontoutdrag, gjorda till de två sidorna av en överföring"
+
 #: src/App.tsx
 #, fuzzy
 msgid "Couldn't load your households"
 msgstr "Det gick inte att läsa in dina hushåll"
+
+#: src/lib/reimbursement.ts
+#, fuzzy
+msgid "Work expense — written off"
+msgstr "Jobbutlägg – avskrivet"
+
+#. placeholder {0}: format(openingMinor, currency)
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Recorded as {0} on the date below."
+msgstr "Registreras som {0} på datumet nedan."
+
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "uncategorised"
+msgstr "okategoriserad"
+
+#: src/lib/reimbursement.ts
+#, fuzzy
+msgid "Written off — work will not pay it"
+msgstr "Avskriven – jobbet betalar inte"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "What this would do"
+msgstr "Vad detta skulle göra"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Fixed"
+msgstr "Rättad"
 
 #: src/components/bits.tsx
 #, fuzzy
@@ -1426,6 +3809,22 @@ msgstr "Vad är det här? {label}"
 msgid "Payee Categorisation"
 msgstr "Kategorisering av mottagare"
 
+#: src/screens/Categories.tsx
+msgid "Choose a category…"
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "At most {LINK_MAX_EXPENSES} expenses at a time"
+msgstr "Högst {LINK_MAX_EXPENSES} utgifter åt gången"
+
+#. placeholder {0}: waiting.length
+#. placeholder {1}: waiting.length
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0, plural, one {An import was staged and never finished. Nothing in it has reached the register — open one to carry on where it was left, or discard it.} other {{1} imports were staged and never finished. Nothing in them has reached the register — open one to carry on where it was left, or discard it.}}"
+msgstr "{0, plural, one {En import förbereddes men slutfördes aldrig. Inget i den har nått registret – öppna den för att fortsätta där den lämnades, eller kasta den.} other {{1} importer förbereddes men slutfördes aldrig. Inget i dem har nått registret – öppna en för att fortsätta där den lämnades, eller kasta den.}}"
+
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/Setup.tsx
@@ -1433,10 +3832,31 @@ msgstr "Kategorisering av mottagare"
 msgid "At least 12 characters. Length is what matters."
 msgstr "Minst 12 tecken. Det är längden som räknas."
 
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "Latest 6 months"
+msgstr "Senaste 6 månaderna"
+
 #: src/components/bits.tsx
+#: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Settings"
 msgstr "Inställningar"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Link as reimbursement"
+msgstr "Koppla som ersättning"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Set the category on {done} rows and skipped {skipped} transfer legs — a transfer has no category."
+msgstr "Kategorin angavs på {done} rader och {skipped} överföringsdelar hoppades över – en överföring har ingen kategori."
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Show closed"
+msgstr "Visa avslutade"
 
 #: src/App.tsx
 #, fuzzy
@@ -1453,15 +3873,70 @@ msgstr "Nytt lösenord igen"
 msgid "why not a recovery code"
 msgstr "varför inte en återställningskod"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Clear filters"
+msgstr "Rensa filter"
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "this device"
 msgstr "den här enheten"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "No accounts yet. Add the one you use most and import a statement into it."
+msgstr "Inga konton än. Lägg till det du använder mest och importera ett kontoutdrag till det."
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Already have it"
+msgstr "Finns redan"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Holder's name"
+msgstr "Kontohavarens namn"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Keys for programs"
 msgstr "Nycklar för program"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Written off"
+msgstr "Avskrivna"
+
+#: src/screens/Register.tsx
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "12,34"
+msgstr "12,34"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "a negative balance here is money you owe"
+msgstr "ett negativt saldo här är pengar du är skyldig"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "What has happened to this"
+msgstr "Vad som har hänt med den här"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
+msgstr "Båda är en riktig transaktion i registret, avstämd och daterad den dag uppföljningen började. Ändrar du dem här ändras den raden och den förblir avstämd. Noll tar bort den."
+
+#: src/screens/Categories.tsx
+msgid "A heading the categories sit under — Bills, Everyday, whatever divides your spending in a way you recognise."
+msgstr ""
+
+#. placeholder {0}: group.name
+#: src/screens/Categories.tsx
+msgid "New category in {0}"
+msgstr ""
 
 #. placeholder {0}: recovery.data.unused
 #: src/screens/Profile.tsx
@@ -1474,10 +3949,45 @@ msgstr "{0} av 10 kvar"
 msgid "Somebody re-enabled {user}"
 msgstr "Någon återaktiverade {user}"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "I — Imported"
+msgstr "I – Importerade"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Matches nothing in the register yet."
+msgstr "Matchar inget i registret än."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Passkeys"
 msgstr "Lösennycklar"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Import it anyway"
+msgstr "Importera ändå"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "U — Uncleared"
+msgstr "U – Ej bokförda"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Yes, delete it"
+msgstr "Ja, radera den"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Every part of the original is accounted for."
+msgstr "Varje del av originalet är fördelad."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Change a part, or add another."
+msgstr "Ändra en del, eller lägg till en till."
 
 #. placeholder {0}: owed.length - SHOWN
 #: src/components/SignInNotice.tsx
@@ -1495,11 +4005,70 @@ msgstr "Vad som ska använda den (valfritt)"
 msgid "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
 msgstr "Alla koder du har nu, använda eller inte, slutar fungera och tio nya ersätter dem. Ingen loggas ut."
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
+msgstr "{count, plural, one {{shown} transaktion} other {{shown} transaktioner}}"
+
+#. placeholder {0}: category.name
+#: src/screens/Categories.tsx
+msgid "Delete the category {0}?"
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Send it to the inbox. It stays there until you delete it."
+msgstr "Skicka den till inkorgen. Den stannar där tills du raderar den."
+
+#. placeholder {0}: to!.currency
+#. placeholder {1}: from!.currency
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "That works out at <0>{impliedRate}</0> {0} per {1}."
+msgstr "Det blir <0>{impliedRate}</0> {0} per {1}."
+
+#: src/screens/Categories.tsx
+msgid "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Discard this split?"
+msgstr "Kasta den här uppdelningen?"
+
+#: src/lib/reimbursement.ts
+#, fuzzy
+msgid "Work should pay this back"
+msgstr "Jobbet ska betala tillbaka detta"
+
 #. placeholder {0}: tokenPath ?? t`the data directory`
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "It was printed to the server log when this instance started, and written to <0>{0}</0>. It changes every time the server restarts until setup is finished."
 msgstr "Den skrevs ut i serverns logg när instansen startade och sparades i <0>{0}</0>. Den ändras varje gång servern startas om tills installationen är klar."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Set the category on {done} rows and skipped 1 transfer leg — a transfer has no category."
+msgstr "Kategorin angavs på {done} rader och 1 överföringsdel hoppades över – en överföring har ingen kategori."
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "From month"
+msgstr "Från månad"
+
+#. placeholder {0}: rule.data.current_default_name
+#: src/screens/Categories.tsx
+msgid "Right now that is <0>{0}</0>."
+msgstr ""
+
+#. placeholder {0}: formatCount(page.shown)
+#. placeholder {1}: formatCount(page.total)
+#: src/screens/Import.tsx
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Showing {0} of {1} — show more"
+msgstr "Visar {0} av {1} – visa fler"
 
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -1521,6 +4090,28 @@ msgstr "Språk"
 msgid "{inviter} invited you to {PRODUCT} as a member."
 msgstr "{inviter} har bjudit in dig till {PRODUCT} som medlem."
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Add an account before entering transactions."
+msgstr "Lägg till ett konto innan du skriver in transaktioner."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "In {code}"
+msgstr "In {code}"
+
+#. placeholder {0}: selected.size - counted
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0} of the selected rows are outside the current filter and are not in the figures above — they are still selected, and a change made here still reaches them."
+msgstr "{0} av de markerade raderna ligger utanför det aktuella filtret och ingår inte i siffrorna ovan – de är fortfarande markerade, och en ändring här når dem också."
+
+#. placeholder {0}: entry.filename
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0} was discarded — nothing was written"
+msgstr "{0} kastades – inget skrevs"
+
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "the data directory"
@@ -1528,6 +4119,8 @@ msgstr "datakatalogen"
 
 #. placeholder {0}: passkey.label
 #. placeholder {0}: removing.label
+#. placeholder {0}: row.value
+#: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Remove {0}"
@@ -1548,20 +4141,94 @@ msgstr "Logga in med en lösennyckel"
 msgid "authenticator"
 msgstr "autentiseringsapp"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Set the category on {done} row and skipped {skipped} transfer legs — a transfer has no category."
+msgstr "Kategorin angavs på {done} rad och {skipped} överföringsdelar hoppades över – en överföring har ingen kategori."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from your bank's website. CSV and spreadsheets are worked out from the file itself — the delimiter, the date format, the decimal separator, which column is which, and which row the table actually starts on. OFX needs none of that: it names its own fields, and its transaction ids are used so re-importing an overlapping statement cannot double anything up. A PDF is read by where the words sit on the page, so a running-balance column is not mistaken for the amount — and a designed bill, which is summary boxes rather than a table, is refused rather than half-read. You will see all of it before anything is written."
+msgstr "En CSV, en OFX/QFX-nedladdning, en .xls-export från banken, ett kontoutdrag som PDF eller något inklistrat från bankens webbplats. CSV och kalkylblad tolkas utifrån själva filen – avgränsaren, datumformatet, decimaltecknet, vilken kolumn som är vilken och på vilken rad tabellen faktiskt börjar. OFX behöver inget av det: den namnger sina egna fält, och dess transaktions-id:n används så att en ny import av ett överlappande kontoutdrag inte dubblerar något. En PDF läses utifrån var orden står på sidan, så att en kolumn med löpande saldo inte tas för beloppet – och en designad faktura, som består av sammanfattningsrutor snarare än en tabell, nekas i stället för att läsas till hälften. Du ser allt innan något skrivs."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Applying…"
+msgstr "Tillämpar…"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Source"
+msgstr "Källa"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "may apply imports"
 msgstr "får genomföra importer"
+
+#: src/screens/Categories.tsx
+msgid "Build my own"
+msgstr ""
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Edit the memo"
+msgstr "Redigera beskrivningen"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "In"
+msgstr "In"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Enter again to edit"
+msgstr "Enter igen för att redigera"
 
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
 msgid "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
 msgstr "<0>SPENDTRACKER_SECRET_KEY</0> öppnar inte {locked, plural, one {autentiseringsappen för 1 medlem} other {autentiseringsapparna för {locked} medlemmar}}; de får ange en återställningskod och sedan ställa in en ny autentiseringsapp. Att sätta tillbaka den ursprungliga nyckeln avslutar detta för alla som inte har registrerat sig igen än."
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "An account cannot have been opened in the future."
+msgstr "Ett konto kan inte ha öppnats i framtiden."
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Value"
+msgstr "Värde"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Statement product"
+msgstr "Produkt i kontoutdraget"
+
+#. placeholder {0}: offer.count
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "<0>{0} other lines have the same payee</0> and no category of their own."
+msgstr "<0>{0} andra rader har samma mottagare</0> och ingen egen kategori."
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody added {user} as an owner"
 msgstr "Någon lade till {user} som ägare"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
+msgstr "Ändrade {done} rader och lämnade {skipped} orörda – bara pengar ut som inte är en överföring kan vara ett jobbutlägg."
+
+#: src/screens/Categories.tsx
+msgid "Show archived"
+msgstr ""
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "The memo this row will carry"
+msgstr "Beskrivningen som den här raden får"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1577,6 +4244,22 @@ msgstr "Återställningskoder"
 #, fuzzy
 msgid "Set up again"
 msgstr "Ställ in igen"
+
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
+msgstr "En överföring behöver två öppna konton. Lägg till ett till på skärmen Konton först."
+
+#. placeholder {0}: household.name
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "<0>Coming from another budgeting app?</0> Statements go in one at a time here. To bring your whole history across at once — YNAB so far — use the {link} on the {0} page. The household’s owner runs it, once."
+msgstr "<0>Kommer du från en annan budgetapp?</0> Här kommer kontoutdragen in ett i taget. För att föra över hela din historik på en gång – än så länge från YNAB – använd {link} på sidan {0}. Hushållets ägare gör det, en gång."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Double click, or press Enter twice, to edit"
+msgstr "Dubbelklicka, eller tryck Enter två gånger, för att redigera"
 
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
@@ -1595,20 +4278,64 @@ msgstr "Du loggar in med ditt lösenord och en kod från autentiseringsappen."
 msgid "Continue"
 msgstr "Fortsätt"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "The bar comes back once the parts add up."
+msgstr "Stapeln kommer tillbaka när delarna går jämnt ut."
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Card number"
+msgstr "Kortnummer"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{hiddenByCurrency, plural, one {Every row here is in a currency the toggle is hiding. Turn one back on to see them — {hiddenByCurrency} row is waiting.} other {Every row here is in a currency the toggle is hiding. Turn one back on to see them — {hiddenByCurrency} rows are waiting.}}"
+msgstr "{hiddenByCurrency, plural, one {Alla rader här har en valuta som väljaren döljer. Slå på en igen för att se dem – {hiddenByCurrency} rad väntar.} other {Alla rader här har en valuta som väljaren döljer. Slå på en igen för att se dem – {hiddenByCurrency} rader väntar.}}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "All categories"
+msgstr "Alla kategorier"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Bank or institution"
+msgstr "Bank eller institut"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "L — Locked"
+msgstr "L – Låsta"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "from the server"
 msgstr "från servern"
+
+#: src/screens/Categories.tsx
+msgid "Every new transaction for this payee gets a category without you choosing one. Which one depends on the setting below."
+msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "An owner can administer this instance: people, households and invitations."
 msgstr "En ägare kan administrera instansen: personer, hushåll och inbjudningar."
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "No categories are ticked, not even Needs a category, so there is nothing to show. Tick one in the categories filter, or Select all."
+msgstr "Inga kategorier är markerade, inte ens Behöver kategori, så det finns inget att visa. Markera en i kategorifiltret, eller Välj alla."
+
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
 msgstr "Inget sparas förrän i sista steget. Om du stänger sidan är instansen fortfarande orörd och du kan börja om."
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "the number other statements quote"
+msgstr "numret som andra kontoutdrag anger"
 
 #. placeholder {0}: formatInstant(key.last_used_at)
 #: src/screens/Profile.tsx
@@ -1621,6 +4348,16 @@ msgstr "senast använd {0}"
 msgid "Setup token"
 msgstr "Installationstoken"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "<0>▾</0> marks the two whose balance is normally negative — you owe it. Nothing else changes: every account holds transactions the same way, and no arithmetic depends on the type. Pick the one that describes it, because it can't be changed afterwards."
+msgstr "<0>▾</0> markerar de två vars saldo normalt är negativt – du är skyldig det. Inget annat ändras: alla konton håller transaktioner på samma sätt, och ingen beräkning beror på typen. Välj den som beskriver kontot, för den kan inte ändras efteråt."
+
+#: src/components/DateRange.tsx
+#, fuzzy
+msgid "This year"
+msgstr "I år"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Give a program a key"
@@ -1631,20 +4368,76 @@ msgstr "Ge ett program en nyckel"
 msgid "A code from your current authenticator"
 msgstr "En kod från din nuvarande autentiseringsapp"
 
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Setting the rule…"
+msgstr "Ställer in regeln…"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "from the copy in this browser, not from the server — the file itself is not kept"
+msgstr "från kopian i den här webbläsaren, inte från servern – själva filen sparas inte"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Yes, discard it"
+msgstr "Ja, kasta den"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Following this device, which is light right now."
 msgstr "Följer enheten, som är ljus just nu."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Which payment repaid this?"
+msgstr "Vilken betalning ersatte detta?"
+
+#. placeholder {0}: done.payee_name
+#. placeholder {1}: done.category_name
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0} will always be {1}"
+msgstr "{0} blir alltid {1}"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Reading…"
+msgstr "Läser…"
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "New codes"
 msgstr "Nya koder"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "For"
+msgstr "För"
+
+#. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "showing the first {0}"
+msgstr "visar de första {0}"
+
+#. placeholder {0}: rest.length
+#. placeholder {1}: rest.join(", ")
+#. placeholder {2}: restOn.length
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0} more currencies: {1}. {2} shown."
+msgstr "{0} valutor till: {1}. {2} visas."
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody made {user} an owner"
 msgstr "Någon gjorde {user} till ägare"
+
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "Add transfer between accounts"
+msgstr "Lägg till överföring mellan konton"
 
 #. placeholder {0}: formatInstant(key.revoked_at)
 #: src/screens/Profile.tsx
@@ -1652,10 +4445,25 @@ msgstr "Någon gjorde {user} till ägare"
 msgid "Revoked {0}"
 msgstr "Återkallad {0}"
 
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
+msgstr "Typen säger vad för slags konto det är. Den sorterar listan och markerar vilka saldon som är pengar du <0>är skyldig</0> snarare än pengar du har."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
 msgstr "En nyckel fortsätter fungera någon annanstans långt efter att webbläsaren har stängts, så vi frågar efter ditt lösenord och en kod – samma som när du loggar in."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Smaller text, more rows on screen"
+msgstr "Mindre text, fler rader på skärmen"
+
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Notes and coins in a wallet or a tin. Nothing imports into it — you enter what you spend."
+msgstr "Sedlar och mynt i en plånbok eller en burk. Inget importeras hit – du för in det du spenderar."
 
 #: src/components/bits.tsx
 #: src/screens/Profile.tsx
@@ -1668,25 +4476,108 @@ msgstr "Stäng"
 msgid "Receipts"
 msgstr "Kvitton"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Link"
+msgstr "Koppla"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Choose the replacement"
+msgstr "Välj ersättaren"
+
+#. placeholder {0}: found.payee_original
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "The bank called it <0>{0}</0>."
+msgstr "Banken kallade den <0>{0}</0>."
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{count, plural, one {Linked {count} expense to the payment of {paid} on {on}.} other {Linked {count} expenses to the payment of {paid} on {on}.}}"
+msgstr "{count, plural, one {Kopplade {count} utgift till betalningen på {paid} den {on}.} other {Kopplade {count} utgifter till betalningen på {paid} den {on}.}}"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "This is one leg of a transfer. Changing the amount changes the other side too, so the two can never disagree."
+msgstr "Det här är ena delen av en överföring. Att ändra beloppet ändrar också den andra sidan, så de två kan aldrig skilja sig åt."
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as a member, in {households}."
 msgstr "{inviter} har bjudit in dig till {PRODUCT} som medlem, i {households}."
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "that import was discarded — nothing was written"
+msgstr "den importen kastades – inget skrevs"
+
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Gather the accounts by type: checking, savings, cards…"
+msgstr "Samla kontona per typ: lönekonto, sparkonto, kort…"
+
+#. placeholder {0}: account?.name ?? ""
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "into {0}"
+msgstr "till {0}"
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "I have saved it"
 msgstr "Jag har sparat den"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "OK"
+msgstr "OK"
+
+#: src/screens/TransferSections.tsx
+#, fuzzy
+msgid "Linked by history only"
+msgstr "Kopplade bara genom historiken"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "{by} re-enabled {user}"
 msgstr "{by} återaktiverade {user}"
 
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "The whole import is one entry in History, and undoing it there takes every row it brought in back out."
+msgstr "Hela importen är en enda post i Historik, och att ångra den där tar bort alla rader den förde in."
+
+#: src/screens/Transfer.tsx
+#, fuzzy
+msgid "Transfer"
+msgstr "För över"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "This account started empty, so there is no opening balance row. Type a figure to add one; without a date it is dated at the account's oldest transaction."
+msgstr "Det här kontot började tomt, så det finns ingen rad för ingående saldo. Skriv ett belopp för att lägga till en; utan datum får den kontots äldsta transaktions datum."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "{unused, plural, one {{unused} unused recovery code left.} other {{unused} unused recovery codes left.}}"
 msgstr "{unused, plural, one {{unused} oanvänd återställningskod kvar.} other {{unused} oanvända återställningskoder kvar.}}"
+
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "Oldest"
+msgstr "Äldsta"
+
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "Open that import"
+msgstr "Öppna den importen"
+
+#. placeholder {0}: parts.length
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "Split into {0}"
+msgstr "Dela i {0}"
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy

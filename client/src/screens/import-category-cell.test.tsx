@@ -27,7 +27,9 @@ vi.mock("../lib/api", () => ({
 }));
 
 import { api } from "../lib/api";
-import { Import, UNCATEGORISED, categoryOf } from "./Import";
+import { Import, categoryOf, uncategorisedWord } from "./Import";
+
+const UNCATEGORISED = uncategorisedWord();
 import type { StagedImport } from "./Import";
 import type { Household, ImportLine, ImportPreview } from "../lib/types";
 
