@@ -32,6 +32,10 @@ msgstr ""
 msgid "{0} now tells a file it is for that account"
 msgstr ""
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "No payees yet. They appear as you enter or import transactions."
+msgstr ""
+
 #: src/App.tsx
 msgid "Application management"
 msgstr ""
@@ -165,6 +169,10 @@ msgstr ""
 msgid "Light"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "Review…"
+msgstr ""
+
 #: src/lib/api.ts
 msgid "the server's answer could not be read"
 msgstr ""
@@ -225,6 +233,10 @@ msgstr ""
 msgid "Each payment from work is followed by the expenses it repaid, marked ↳. The rest are in the order the headings say."
 msgstr ""
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "What each payee has been filed under, and what a new transaction for it will be. Which payee a statement line becomes is decided first, by the payee naming rules."
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 msgid "This browser does not support passkeys yet."
 msgstr ""
@@ -280,6 +292,10 @@ msgstr ""
 
 #: src/components/ReenrolmentDue.tsx
 msgid "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
+msgstr ""
+
+#: src/screens/PayeeCategorisation.tsx
+msgid "What each payee is categorised as"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -356,6 +372,13 @@ msgstr ""
 msgid "{0} now tells a file it is for {1}"
 msgstr ""
 
+#. placeholder {0}: payee.name
+#. placeholder {1}: target.name
+#. placeholder {2}: payee.name
+#: src/screens/Payees.tsx
+msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and {2} will be gone. It is one act in History, so it can be undone there."
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Set the category on {done} row and skipped 1 transfer leg — a transfer has no category."
 msgstr ""
@@ -407,6 +430,8 @@ msgstr ""
 
 #: src/App.tsx
 #: src/screens/Categories.tsx
+#: src/screens/PayeeCategorisation.tsx
+#: src/screens/Payees.tsx
 #: src/screens/Register.tsx
 msgid "Transactions"
 msgstr ""
@@ -529,6 +554,10 @@ msgstr ""
 msgid "Remove this part"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "Spellings"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 msgid "Somebody reset {user}'s password and authenticator"
 msgstr ""
@@ -549,6 +578,7 @@ msgstr ""
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/Payees.tsx
 msgid "Name"
 msgstr ""
 
@@ -581,12 +611,18 @@ msgstr ""
 msgid "Cut off at {0} characters. Every line of it was still read — the table above is the whole file."
 msgstr ""
 
+#. placeholder {0}: household.name
+#: src/screens/Payees.tsx
+msgid "Everyone {0} has paid or been paid by. Most arrive on their own, from a transaction or an import; two spellings of the same shop are merged here."
+msgstr ""
+
 #: src/lib/labels.ts
 msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
 msgstr ""
 
 #: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 msgid "Actions"
 msgstr ""
@@ -691,6 +727,10 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "Name as the bank writes it"
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "Spellings of one name"
 msgstr ""
 
 #: src/lib/signInChanges.ts
@@ -799,6 +839,10 @@ msgstr ""
 msgid "Reimbursement"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "Merge…"
+msgstr ""
+
 #. placeholder {0}: selected.size
 #: src/screens/Register.tsx
 msgid "<0>{0} selected.</0> Changing them is one act, so undo puts all of them back together."
@@ -847,6 +891,7 @@ msgid "{by} reset {user}'s password and authenticator"
 msgstr ""
 
 #: src/screens/Import.tsx
+#: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 msgid "Into"
 msgstr ""
@@ -920,6 +965,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Needs a category"
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "Folded into {kept}"
 msgstr ""
 
 #. placeholder {0}: offer.name
@@ -1090,6 +1139,10 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "The one you keep is the one you choose here."
+msgstr ""
+
 #: src/screens/Import.tsx
 msgid "Yes, all of them and set the rule"
 msgstr ""
@@ -1126,6 +1179,12 @@ msgstr ""
 msgid "Newest"
 msgstr ""
 
+#. placeholder {0}: others.map((one) => one.name).join(", ")
+#. placeholder {1}: kept.name
+#: src/screens/Payees.tsx
+msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and that payee will be gone. Each merge is one act in History, so it can be undone there."
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "another app"
 msgstr ""
@@ -1137,6 +1196,10 @@ msgstr ""
 #. placeholder {0}: to!.currency
 #: src/screens/Transfer.tsx
 msgid "Amount arriving ({0})"
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "Choose a payee…"
 msgstr ""
 
 #. placeholder {0}: format(-difference, currency)
@@ -1218,6 +1281,11 @@ msgstr ""
 msgid "No single category matches that. Keep typing, or empty it."
 msgstr ""
 
+#. placeholder {0}: payee.name
+#: src/screens/Payees.tsx
+msgid "Merge {0}"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.currency.not_iso_4217"
@@ -1278,6 +1346,10 @@ msgstr ""
 msgid "error.transfer.same_account"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "No payees yet. One appears the first time you name somebody on a transaction."
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "a household"
 msgstr ""
@@ -1304,6 +1376,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "Add payee"
 msgstr ""
 
 #. placeholder {0}: found.via
@@ -1347,6 +1423,10 @@ msgstr ""
 
 #: src/App.tsx
 msgid "Register"
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -1466,6 +1546,10 @@ msgstr ""
 msgid "Your account"
 msgstr ""
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "Payee categorisation"
+msgstr ""
+
 #. placeholder {0}: mine.rows
 #. placeholder {1}: mine.rows
 #. placeholder {2}: mine.rows
@@ -1547,6 +1631,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Width of the {label} column"
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "part of a name"
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -1649,6 +1737,10 @@ msgstr ""
 #. placeholder {0}: format(left, currency)
 #: src/screens/Register.tsx
 msgid "Add a part for the {0}"
+msgstr ""
+
+#: src/screens/PayeeCategorisation.tsx
+msgid "Search payees"
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -1793,6 +1885,12 @@ msgstr ""
 
 #: src/lib/labels.ts
 msgid "Current account"
+msgstr ""
+
+#. placeholder {0}: others.map((one) => one.name).join(", ")
+#. placeholder {1}: kept.name
+#: src/screens/Payees.tsx
+msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and those payees will be gone. Each merge is one act in History, so it can be undone there."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -1952,6 +2050,10 @@ msgstr ""
 msgid "Invitation"
 msgstr ""
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "Categorised as"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Leave it blank for an account that starts empty."
 msgstr ""
@@ -2012,6 +2114,7 @@ msgid "Written off — work will not pay"
 msgstr ""
 
 #: src/screens/Accounts.tsx
+#: src/screens/Payees.tsx
 msgid "Kind"
 msgstr ""
 
@@ -2047,6 +2150,11 @@ msgstr ""
 #: src/App.tsx
 #: src/screens/Register.tsx
 msgid "Import"
+msgstr ""
+
+#. placeholder {0}: kept.name
+#: src/screens/Payees.tsx
+msgid "Folded into {0}"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -2173,6 +2281,7 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
+#: src/screens/Payees.tsx
 #: src/screens/Register.tsx
 msgid "Add"
 msgstr ""
@@ -2297,6 +2406,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "Find a payee"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -2564,6 +2677,7 @@ msgid "outflow column"
 msgstr ""
 
 #: src/screens/Categories.tsx
+#: src/screens/Payees.tsx
 msgid "Payees"
 msgstr ""
 
@@ -2636,6 +2750,10 @@ msgstr ""
 msgid "Rename or delete this group"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "another account"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Out {code}"
 msgstr ""
@@ -2649,6 +2767,7 @@ msgid "Ignore it and carry on"
 msgstr ""
 
 #: src/App.tsx
+#: src/screens/Payees.tsx
 msgid "Loading…"
 msgstr ""
 
@@ -2662,6 +2781,7 @@ msgstr ""
 msgid "the server answered {0}"
 msgstr ""
 
+#: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 msgid "Keep"
 msgstr ""
@@ -2708,6 +2828,7 @@ msgid "type any part"
 msgstr ""
 
 #: src/screens/Categories.tsx
+#: src/screens/PayeeCategorisation.tsx
 msgid "Categorisation"
 msgstr ""
 
@@ -2789,6 +2910,13 @@ msgstr ""
 msgid "{by} reset your password for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr ""
 
+#. placeholder {0}: one.rule_count
+#. placeholder {1}: one.rule_count
+#. placeholder {2}: one.rule_count
+#: src/screens/Payees.tsx
+msgid "{0, plural, one {{1} rule} other {{2} rules}}"
+msgstr ""
+
 #. placeholder {0}: format(txn.amount, currency)
 #. placeholder {1}: formatDate(txn.date)
 #: src/screens/Register.tsx
@@ -2866,6 +2994,10 @@ msgstr ""
 msgid "Sign-in changes in the last 14 days, by somebody other than you:"
 msgstr ""
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "Every category this payee has been filed under, biggest first. The transactions with no category are listed too, because they are what this payee still costs you to classify."
+msgstr ""
+
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
@@ -2881,8 +3013,18 @@ msgstr ""
 msgid "Work expenses"
 msgstr ""
 
+#. placeholder {0}: formatCount(rest)
+#: src/screens/PayeeCategorisation.tsx
+msgid "+{0} more"
+msgstr ""
+
 #: src/screens/Import.tsx
 msgid "Read the file"
+msgstr ""
+
+#. placeholder {0}: accountName(one.transfer_account_id)
+#: src/screens/Payees.tsx
+msgid "Transfer to {0}"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -2964,6 +3106,10 @@ msgstr ""
 msgid "Yes, all {0} of them"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "Add a payee"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "{app}, via its CSV export"
 msgstr ""
@@ -2978,6 +3124,11 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "Needs setting up again"
+msgstr ""
+
+#. placeholder {0}: kept?.name ?? "…"
+#: src/screens/Payees.tsx
+msgid "Merge into {0}"
 msgstr ""
 
 #: src/screens/SignIn.tsx
@@ -3017,6 +3168,8 @@ msgstr ""
 
 #: src/App.tsx
 #: src/screens/Import.tsx
+#: src/screens/PayeeCategorisation.tsx
+#: src/screens/Payees.tsx
 #: src/screens/Register.tsx
 msgid "Payee"
 msgstr ""
@@ -3207,12 +3360,24 @@ msgstr ""
 msgid "a negative balance here is money you owe"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "Merge spellings of one name"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "What has happened to this"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "Merge"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
+msgstr ""
+
+#: src/screens/PayeeCategorisation.tsx
+msgid "type any part of a payee"
 msgstr ""
 
 #: src/screens/Categories.tsx
@@ -3330,6 +3495,7 @@ msgstr ""
 #. placeholder {0}: formatCount(page.shown)
 #. placeholder {1}: formatCount(page.total)
 #: src/screens/Import.tsx
+#: src/screens/PayeeCategorisation.tsx
 #: src/screens/Register.tsx
 msgid "Showing {0} of {1} — show more"
 msgstr ""
@@ -3469,6 +3635,11 @@ msgstr ""
 msgid "Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the server, and clearing this browser's site data forgets it -- which returns you to following the system."
 msgstr ""
 
+#. placeholder {0}: search.trim()
+#: src/screens/PayeeCategorisation.tsx
+msgid "No payee matches “{0}”."
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Recovery codes"
 msgstr ""
@@ -3502,6 +3673,10 @@ msgstr ""
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 msgid "Continue"
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "These payees differ only in accents, dashes or spaces you cannot see, which no longer tell two names apart. Nothing has been merged: review each and choose the spelling to keep."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -3644,6 +3819,16 @@ msgstr ""
 msgid "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
 msgstr ""
 
+#. placeholder {0}: rows.length
+#. placeholder {1}: payees.data?.length ?? 0
+#: src/screens/Payees.tsx
+msgid "{0} of {1} shown."
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "No payee matches that."
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
 msgstr ""
@@ -3692,6 +3877,13 @@ msgstr ""
 
 #: src/screens/Import.tsx
 msgid "that import was discarded — nothing was written"
+msgstr ""
+
+#. placeholder {0}: one.transaction_count
+#. placeholder {1}: one.transaction_count
+#. placeholder {2}: one.transaction_count
+#: src/screens/Payees.tsx
+msgid "{0, plural, one {{1} transaction} other {{2} transactions}}"
 msgstr ""
 
 #: src/screens/Register.tsx

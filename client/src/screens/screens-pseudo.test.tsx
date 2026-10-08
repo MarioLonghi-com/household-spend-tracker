@@ -196,7 +196,7 @@ describe("in en-XA, the register's screens show no English", () => {
     render(withQueries(<Import household={HOUSEHOLD} onGo={vi.fn()} />));
     await screen.findByText("casa.csv");
     // whenStaged writes the month as a word, the browser's way; it is not ours.
-    const left = untranslated(document.body).filter((word) => !/^(March|AM|PM)$/.test(word));
+    const left = untranslated(document.body).filter((word) => !/^(March|AM|PM|at)$/.test(word));
     expect(left).toEqual([]);
   });
 });

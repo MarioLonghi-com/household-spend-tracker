@@ -21,6 +21,8 @@ import { activate } from "../lib/i18n";
 import type { Household } from "../lib/types";
 import { untranslated } from "../test-pseudo";
 import { Categories } from "./Categories";
+import { PayeeCategorisation } from "./PayeeCategorisation";
+import { Payees } from "./Payees";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -103,6 +105,56 @@ describe("in en-XA, the remaining screens show no English", () => {
     expect(left()).toEqual([]);
     const addTo = document.querySelector(".card .row > button.link") as HTMLElement;
     fireEvent.click(addTo);
+    expect(left()).toEqual([]);
+  });
+
+  it("Payees, with spellings to merge, and the merge dialogs", async () => {
+    const bakery = { id: "p1", name: "Bakery", transfer_account_id: null, transaction_count: 3, rule_count: 1 };
+    const cinema = { id: "p2", name: "Cinema", transfer_account_id: null, transaction_count: 1, rule_count: 0 };
+    const leg = { id: "p3", name: "Sam", transfer_account_id: "a1", transaction_count: 2, rule_count: 0 };
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path.endsWith("/payee-collisions")) return [{ key: "bakery", payees: [bakery, cinema] }];
+      if (path.includes("/accounts")) return [{ id: "a1", name: "Doe", currency: "EUR" }];
+      return [bakery, cinema, leg];
+    });
+    render(withQueries(<Payees household={HOUSEHOLD} />));
+    await screen.findByText("Sam");
+    expect(left()).toEqual([]);
+
+    // Review the spellings, then merge one payee into another.
+    fireEvent.click(document.querySelector("section.card td button")!);
+    expect(left()).toEqual([]);
+    cleanup();
+    render(withQueries(<Payees household={HOUSEHOLD} />));
+    await screen.findByText("Sam");
+    const merge = Array.from(document.querySelectorAll(".card")).pop()!.querySelector("tbody td button")!;
+    fireEvent.click(merge);
+    expect(left()).toEqual([]);
+  });
+
+  it("Payee categorisation, with a breakdown", async () => {
+    vi.mocked(api.get).mockImplementation(async (path: string) => {
+      if (path.includes("/stats/payees"))
+        return {
+          payees: [
+            {
+              payee_id: "p1",
+              transaction_count: 1234,
+              category_count: 5,
+              categories: ["Groceries", "Rent", "Water", "Bills", "Everyday"].map((name, at) => ({
+                key: `c${at}`,
+                name,
+                transaction_count: 10 - at,
+              })),
+            },
+          ],
+        };
+      return [{ id: "p1", name: "Bakery", transfer_account_id: null, transaction_count: 1234, rule_count: 0 }];
+    });
+    render(withQueries(<PayeeCategorisation household={HOUSEHOLD} />));
+    await screen.findByText("Bakery");
+    expect(left()).toEqual([]);
+    fireEvent.click(document.querySelector("button.tally-more")!);
     expect(left()).toEqual([]);
   });
 });

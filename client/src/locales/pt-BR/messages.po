@@ -37,6 +37,10 @@ msgstr "Criando…"
 msgid "{0} now tells a file it is for that account"
 msgstr "{0} agora indica que um arquivo é dessa conta"
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "No payees yet. They appear as you enter or import transactions."
+msgstr ""
+
 #: src/App.tsx
 #, fuzzy
 msgid "Application management"
@@ -200,6 +204,10 @@ msgstr "Termine primeiro a categoria que está editando"
 msgid "Light"
 msgstr "Claro"
 
+#: src/screens/Payees.tsx
+msgid "Review…"
+msgstr ""
+
 #: src/lib/api.ts
 #, fuzzy
 msgid "the server's answer could not be read"
@@ -273,6 +281,10 @@ msgstr "O trabalho deve reembolsar estas"
 msgid "Each payment from work is followed by the expenses it repaid, marked ↳. The rest are in the order the headings say."
 msgstr "Cada pagamento do trabalho vem seguido das despesas que ele reembolsou, marcadas com ↳. O resto segue a ordem dos títulos."
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "What each payee has been filed under, and what a new transaction for it will be. Which payee a statement line becomes is decided first, by the payee naming rules."
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "This browser does not support passkeys yet."
@@ -342,6 +354,10 @@ msgstr "Antes: o mesmo período, logo antes"
 #, fuzzy
 msgid "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
 msgstr "O código de recuperação com que você entrou nesta aba cobre isso, enquanto você continuar conectado e por até um dia."
+
+#: src/screens/PayeeCategorisation.tsx
+msgid "What each payee is categorised as"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -433,6 +449,13 @@ msgstr "As chaves de acesso exigem que este app seja aberto no endereço HTTPS d
 msgid "{0} now tells a file it is for {1}"
 msgstr "{0} agora indica que um arquivo é de {1}"
 
+#. placeholder {0}: payee.name
+#. placeholder {1}: target.name
+#. placeholder {2}: payee.name
+#: src/screens/Payees.tsx
+msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and {2} will be gone. It is one act in History, so it can be undone there."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Set the category on {done} row and skipped 1 transfer leg — a transfer has no category."
@@ -494,6 +517,8 @@ msgstr "Pular para as transações"
 
 #: src/App.tsx
 #: src/screens/Categories.tsx
+#: src/screens/PayeeCategorisation.tsx
+#: src/screens/Payees.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Transactions"
@@ -645,6 +670,10 @@ msgstr "Desvincular"
 msgid "Remove this part"
 msgstr "Remover esta parte"
 
+#: src/screens/Payees.tsx
+msgid "Spellings"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody reset {user}'s password and authenticator"
@@ -669,6 +698,7 @@ msgstr "Só este arquivo. A regra do favorecido continua como está para os pró
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/Payees.tsx
 #, fuzzy
 msgid "Name"
 msgstr "Nome"
@@ -709,6 +739,11 @@ msgstr "Depois de confirmado, mantenha só esta entrada da conta no aplicativo: 
 msgid "Cut off at {0} characters. Every line of it was still read — the table above is the whole file."
 msgstr "Cortado em {0} caracteres. Mesmo assim, todas as linhas foram lidas — a tabela acima é o arquivo inteiro."
 
+#. placeholder {0}: household.name
+#: src/screens/Payees.tsx
+msgid "Everyone {0} has paid or been paid by. Most arrive on their own, from a transaction or an import; two spellings of the same shop are merged here."
+msgstr ""
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
@@ -716,6 +751,7 @@ msgstr "Dinheiro que você deve e que não é cartão — um financiamento imobi
 
 #: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Actions"
@@ -845,6 +881,10 @@ msgstr "Aguardando a chave de acesso…"
 #, fuzzy
 msgid "Name as the bank writes it"
 msgstr "Nome como o banco escreve"
+
+#: src/screens/Payees.tsx
+msgid "Spellings of one name"
+msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -977,6 +1017,10 @@ msgstr "usar a do banco: {0}"
 msgid "Reimbursement"
 msgstr "Reembolso"
 
+#: src/screens/Payees.tsx
+msgid "Merge…"
+msgstr ""
+
 #. placeholder {0}: selected.size
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1036,6 +1080,7 @@ msgid "{by} reset {user}'s password and authenticator"
 msgstr "{by} redefiniu a senha e o autenticador de {user}"
 
 #: src/screens/Import.tsx
+#: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Into"
@@ -1125,6 +1170,10 @@ msgstr "Contas"
 #, fuzzy
 msgid "Needs a category"
 msgstr "Precisa de categoria"
+
+#: src/screens/Payees.tsx
+msgid "Folded into {kept}"
+msgstr ""
 
 #. placeholder {0}: offer.name
 #: src/screens/Import.tsx
@@ -1331,6 +1380,10 @@ msgstr "Se você não tem mais o autenticador antigo, use aqui um dos seus códi
 msgid "Cancel"
 msgstr "Cancelar"
 
+#: src/screens/Payees.tsx
+msgid "The one you keep is the one you choose here."
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Yes, all of them and set the rule"
@@ -1373,6 +1426,12 @@ msgstr "Adicionar uma transação"
 msgid "Newest"
 msgstr "Mais recente"
 
+#. placeholder {0}: others.map((one) => one.name).join(", ")
+#. placeholder {1}: kept.name
+#: src/screens/Payees.tsx
+msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and that payee will be gone. Each merge is one act in History, so it can be undone there."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "another app"
@@ -1388,6 +1447,10 @@ msgstr "As duas não coincidem."
 #, fuzzy
 msgid "Amount arriving ({0})"
 msgstr "Valor que chega ({0})"
+
+#: src/screens/Payees.tsx
+msgid "Choose a payee…"
+msgstr ""
 
 #. placeholder {0}: format(-difference, currency)
 #: src/screens/Register.tsx
@@ -1485,6 +1548,11 @@ msgstr ""
 msgid "No single category matches that. Keep typing, or empty it."
 msgstr "Nenhuma categoria corresponde exatamente a isso. Continue digitando ou apague."
 
+#. placeholder {0}: payee.name
+#: src/screens/Payees.tsx
+msgid "Merge {0}"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
@@ -1557,6 +1625,10 @@ msgstr "Uma transferência de {from_currency} para {to_currency} precisa do valo
 msgid "error.transfer.same_account"
 msgstr "Uma conta não pode transferir para si mesma"
 
+#: src/screens/Payees.tsx
+msgid "No payees yet. One appears the first time you name somebody on a transaction."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "a household"
@@ -1591,6 +1663,10 @@ msgstr "coluna de estado"
 #, fuzzy
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "{done} linha alterada e {skipped} deixadas como estavam — só uma saída de dinheiro que não seja transferência pode ser despesa de trabalho."
+
+#: src/screens/Payees.tsx
+msgid "Add payee"
+msgstr ""
 
 #. placeholder {0}: found.via
 #: src/screens/Register.tsx
@@ -1643,6 +1719,10 @@ msgstr "{0} · {1} em {2}. As partes a substituem, então precisam somar o mesmo
 #, fuzzy
 msgid "Register"
 msgstr "Registro"
+
+#: src/screens/Payees.tsx
+msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1787,6 +1867,10 @@ msgstr "Plano"
 msgid "Your account"
 msgstr "Sua conta"
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "Payee categorisation"
+msgstr ""
+
 #. placeholder {0}: mine.rows
 #. placeholder {1}: mine.rows
 #. placeholder {2}: mine.rows
@@ -1889,6 +1973,10 @@ msgstr "Não perguntar neste navegador por 30 dias"
 #, fuzzy
 msgid "Width of the {label} column"
 msgstr "Largura da coluna {label}"
+
+#: src/screens/Payees.tsx
+msgid "part of a name"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -2015,6 +2103,10 @@ msgstr "Confirmar e substituir"
 #, fuzzy
 msgid "Add a part for the {0}"
 msgstr "Adicionar uma parte para os {0}"
+
+#: src/screens/PayeeCategorisation.tsx
+msgid "Search payees"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
@@ -2192,6 +2284,12 @@ msgstr "Uma parte ainda está vazia"
 #, fuzzy
 msgid "Current account"
 msgstr "Conta corrente"
+
+#. placeholder {0}: others.map((one) => one.name).join(", ")
+#. placeholder {1}: kept.name
+#: src/screens/Payees.tsx
+msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and those payees will be gone. Each merge is one act in History, so it can be undone there."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2385,6 +2483,10 @@ msgstr "Definir despesa de trabalho nas linhas selecionadas"
 msgid "Invitation"
 msgstr "Convite"
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "Categorised as"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Leave it blank for an account that starts empty."
@@ -2459,6 +2561,7 @@ msgid "Written off — work will not pay"
 msgstr "Dada como perdida — o trabalho não vai pagar"
 
 #: src/screens/Accounts.tsx
+#: src/screens/Payees.tsx
 #, fuzzy
 msgid "Kind"
 msgstr "Tipo"
@@ -2504,6 +2607,11 @@ msgstr "Desfazer no Histórico a traz de volta."
 #, fuzzy
 msgid "Import"
 msgstr "Importar"
+
+#. placeholder {0}: kept.name
+#: src/screens/Payees.tsx
+msgid "Folded into {0}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2657,6 +2765,7 @@ msgstr "Em vez disso, cada moeda é totalizada separadamente. Nada nesta tela so
 
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
+#: src/screens/Payees.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Add"
@@ -2809,6 +2918,10 @@ msgstr ""
 #, fuzzy
 msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."
 msgstr "As partes que você montou não foram salvas. Descartar deixa a transação como estava."
+
+#: src/screens/Payees.tsx
+msgid "Find a payee"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3134,6 +3247,7 @@ msgid "outflow column"
 msgstr "coluna de saída"
 
 #: src/screens/Categories.tsx
+#: src/screens/Payees.tsx
 msgid "Payees"
 msgstr ""
 
@@ -3221,6 +3335,10 @@ msgstr "Você entrou com um código de recuperação, e suas chaves de acesso co
 msgid "Rename or delete this group"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "another account"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Out {code}"
@@ -3237,6 +3355,7 @@ msgid "Ignore it and carry on"
 msgstr "Ignorar e continuar"
 
 #: src/App.tsx
+#: src/screens/Payees.tsx
 #, fuzzy
 msgid "Loading…"
 msgstr "Carregando…"
@@ -3253,6 +3372,7 @@ msgstr "Configurar um novo autenticador"
 msgid "the server answered {0}"
 msgstr "o servidor respondeu {0}"
 
+#: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Keep"
@@ -3309,6 +3429,7 @@ msgid "type any part"
 msgstr "digite qualquer parte"
 
 #: src/screens/Categories.tsx
+#: src/screens/PayeeCategorisation.tsx
 msgid "Categorisation"
 msgstr ""
 
@@ -3407,6 +3528,13 @@ msgstr "Ocultar filtros"
 msgid "{by} reset your password for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "{by} redefiniu sua senha para {email} em {when}. Todos os navegadores em que você estava conectado foram desconectados. Defina-a de novo abaixo."
 
+#. placeholder {0}: one.rule_count
+#. placeholder {1}: one.rule_count
+#. placeholder {2}: one.rule_count
+#: src/screens/Payees.tsx
+msgid "{0, plural, one {{1} rule} other {{2} rules}}"
+msgstr ""
+
 #. placeholder {0}: format(txn.amount, currency)
 #. placeholder {1}: formatDate(txn.date)
 #: src/screens/Register.tsx
@@ -3502,6 +3630,10 @@ msgstr "Nada aqui ainda. Adicione uma linha acima ou importe um extrato na tela 
 msgid "Sign-in changes in the last 14 days, by somebody other than you:"
 msgstr "Mudanças nas formas de entrar nos últimos 14 dias, feitas por outra pessoa:"
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "Every category this payee has been filed under, biggest first. The transactions with no category are listed too, because they are what this payee still costs you to classify."
+msgstr ""
+
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
@@ -3520,10 +3652,20 @@ msgstr "Nenhuma entrada de dinheiro entre essas datas. Amplie-as acima — um re
 msgid "Work expenses"
 msgstr "Despesas de trabalho"
 
+#. placeholder {0}: formatCount(rest)
+#: src/screens/PayeeCategorisation.tsx
+msgid "+{0} more"
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Read the file"
 msgstr "Ler o arquivo"
+
+#. placeholder {0}: accountName(one.transfer_account_id)
+#: src/screens/Payees.tsx
+msgid "Transfer to {0}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3621,6 +3763,10 @@ msgstr ""
 msgid "Yes, all {0} of them"
 msgstr "Sim, todas as {0}"
 
+#: src/screens/Payees.tsx
+msgid "Add a payee"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "{app}, via its CSV export"
@@ -3640,6 +3786,11 @@ msgstr "Preparada em"
 #, fuzzy
 msgid "Needs setting up again"
 msgstr "Precisa ser configurado de novo"
+
+#. placeholder {0}: kept?.name ?? "…"
+#: src/screens/Payees.tsx
+msgid "Merge into {0}"
+msgstr ""
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -3686,6 +3837,8 @@ msgstr "Diferença"
 
 #: src/App.tsx
 #: src/screens/Import.tsx
+#: src/screens/PayeeCategorisation.tsx
+#: src/screens/Payees.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Payee"
@@ -3919,15 +4072,27 @@ msgstr "12,34"
 msgid "a negative balance here is money you owe"
 msgstr "um saldo negativo aqui é dinheiro que você deve"
 
+#: src/screens/Payees.tsx
+msgid "Merge spellings of one name"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "What has happened to this"
 msgstr "O que aconteceu com isto"
 
+#: src/screens/Payees.tsx
+msgid "Merge"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
 msgstr "Os dois são uma transação de verdade no registro, conciliada, com a data em que o acompanhamento começou. Mudá-los aqui edita essa linha e a mantém conciliada. Zero a remove."
+
+#: src/screens/PayeeCategorisation.tsx
+msgid "type any part of a payee"
+msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "A heading the categories sit under — Bills, Everyday, whatever divides your spending in a way you recognise."
@@ -4065,6 +4230,7 @@ msgstr ""
 #. placeholder {0}: formatCount(page.shown)
 #. placeholder {1}: formatCount(page.total)
 #: src/screens/Import.tsx
+#: src/screens/PayeeCategorisation.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Showing {0} of {1} — show more"
@@ -4235,6 +4401,11 @@ msgstr "A descrição que esta linha vai ter"
 msgid "Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the server, and clearing this browser's site data forgets it -- which returns you to following the system."
 msgstr "Fica guardado só neste dispositivo, então um celular e um notebook podem ser diferentes. Nada é enviado ao servidor, e limpar os dados do site neste navegador apaga a escolha — o que faz voltar a seguir o sistema."
 
+#. placeholder {0}: search.trim()
+#: src/screens/PayeeCategorisation.tsx
+msgid "No payee matches “{0}”."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Recovery codes"
@@ -4277,6 +4448,10 @@ msgstr "Você entra com sua senha e o código do autenticador."
 #, fuzzy
 msgid "Continue"
 msgstr "Continuar"
+
+#: src/screens/Payees.tsx
+msgid "These payees differ only in accents, dashes or spaces you cannot see, which no longer tell two names apart. Nothing has been merged: review each and choose the spelling to keep."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -4450,6 +4625,16 @@ msgstr "Revogada em {0}"
 msgid "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
 msgstr "O tipo diz que tipo de coisa a conta é. Ele ordena a lista e marca quais saldos são dinheiro que você <0>deve</0>, e não dinheiro que você tem."
 
+#. placeholder {0}: rows.length
+#. placeholder {1}: payees.data?.length ?? 0
+#: src/screens/Payees.tsx
+msgid "{0} of {1} shown."
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "No payee matches that."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
@@ -4511,6 +4696,13 @@ msgstr "{inviter} convidou você para o {PRODUCT} como membro, em {households}."
 #, fuzzy
 msgid "that import was discarded — nothing was written"
 msgstr "essa importação foi descartada — nada foi gravado"
+
+#. placeholder {0}: one.transaction_count
+#. placeholder {1}: one.transaction_count
+#. placeholder {2}: one.transaction_count
+#: src/screens/Payees.tsx
+msgid "{0, plural, one {{1} transaction} other {{2} transactions}}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy

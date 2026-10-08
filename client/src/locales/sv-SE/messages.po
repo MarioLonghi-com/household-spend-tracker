@@ -37,6 +37,10 @@ msgstr "Skapar…"
 msgid "{0} now tells a file it is for that account"
 msgstr "{0} visar nu att en fil hör till det kontot"
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "No payees yet. They appear as you enter or import transactions."
+msgstr ""
+
 #: src/App.tsx
 #, fuzzy
 msgid "Application management"
@@ -200,6 +204,10 @@ msgstr "Gör klart kategorin du redigerar först"
 msgid "Light"
 msgstr "Ljust"
 
+#: src/screens/Payees.tsx
+msgid "Review…"
+msgstr ""
+
 #: src/lib/api.ts
 #, fuzzy
 msgid "the server's answer could not be read"
@@ -273,6 +281,10 @@ msgstr "Jobbet ska betala tillbaka dessa"
 msgid "Each payment from work is followed by the expenses it repaid, marked ↳. The rest are in the order the headings say."
 msgstr "Varje betalning från jobbet följs av utgifterna den ersatte, markerade med ↳. Resten står i den ordning rubrikerna anger."
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "What each payee has been filed under, and what a new transaction for it will be. Which payee a statement line becomes is decided first, by the payee naming rules."
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "This browser does not support passkeys yet."
@@ -342,6 +354,10 @@ msgstr "Tidigare: lika lång period, strax före"
 #, fuzzy
 msgid "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
 msgstr "Återställningskoden du loggade in med i den här fliken täcker det, så länge du är inloggad och i högst ett dygn."
+
+#: src/screens/PayeeCategorisation.tsx
+msgid "What each payee is categorised as"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -433,6 +449,13 @@ msgstr "Lösennycklar kräver att appen öppnas på sin HTTPS-adress, {address}.
 msgid "{0} now tells a file it is for {1}"
 msgstr "{0} visar nu att en fil hör till {1}"
 
+#. placeholder {0}: payee.name
+#. placeholder {1}: target.name
+#. placeholder {2}: payee.name
+#: src/screens/Payees.tsx
+msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and {2} will be gone. It is one act in History, so it can be undone there."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Set the category on {done} row and skipped 1 transfer leg — a transfer has no category."
@@ -494,6 +517,8 @@ msgstr "Hoppa till transaktionerna"
 
 #: src/App.tsx
 #: src/screens/Categories.tsx
+#: src/screens/PayeeCategorisation.tsx
+#: src/screens/Payees.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Transactions"
@@ -645,6 +670,10 @@ msgstr "Koppla isär"
 msgid "Remove this part"
 msgstr "Ta bort den här delen"
 
+#: src/screens/Payees.tsx
+msgid "Spellings"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody reset {user}'s password and authenticator"
@@ -669,6 +698,7 @@ msgstr "Bara den här filen. Mottagarens regel lämnas som den är för framtida
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/Payees.tsx
 #, fuzzy
 msgid "Name"
 msgstr "Namn"
@@ -709,6 +739,11 @@ msgstr "När den är bekräftad, behåll bara den här posten för kontot i appe
 msgid "Cut off at {0} characters. Every line of it was still read — the table above is the whole file."
 msgstr "Avkortat vid {0} tecken. Alla rader lästes ändå – tabellen ovan är hela filen."
 
+#. placeholder {0}: household.name
+#: src/screens/Payees.tsx
+msgid "Everyone {0} has paid or been paid by. Most arrive on their own, from a transaction or an import; two spellings of the same shop are merged here."
+msgstr ""
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
@@ -716,6 +751,7 @@ msgstr "Pengar du är skyldig som inte är ett kort – ett bolån, ett billån,
 
 #: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Actions"
@@ -845,6 +881,10 @@ msgstr "Väntar på lösennyckeln…"
 #, fuzzy
 msgid "Name as the bank writes it"
 msgstr "Namnet som banken skriver det"
+
+#: src/screens/Payees.tsx
+msgid "Spellings of one name"
+msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -977,6 +1017,10 @@ msgstr "använd bankens: {0}"
 msgid "Reimbursement"
 msgstr "Ersättning"
 
+#: src/screens/Payees.tsx
+msgid "Merge…"
+msgstr ""
+
 #. placeholder {0}: selected.size
 #: src/screens/Register.tsx
 #, fuzzy
@@ -1036,6 +1080,7 @@ msgid "{by} reset {user}'s password and authenticator"
 msgstr "{by} återställde lösenordet och autentiseringsappen för {user}"
 
 #: src/screens/Import.tsx
+#: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Into"
@@ -1125,6 +1170,10 @@ msgstr "Konton"
 #, fuzzy
 msgid "Needs a category"
 msgstr "Behöver kategori"
+
+#: src/screens/Payees.tsx
+msgid "Folded into {kept}"
+msgstr ""
 
 #. placeholder {0}: offer.name
 #: src/screens/Import.tsx
@@ -1331,6 +1380,10 @@ msgstr "Om du inte längre har den gamla autentiseringsappen kan du använda en 
 msgid "Cancel"
 msgstr "Avbryt"
 
+#: src/screens/Payees.tsx
+msgid "The one you keep is the one you choose here."
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Yes, all of them and set the rule"
@@ -1373,6 +1426,12 @@ msgstr "Lägg till en transaktion"
 msgid "Newest"
 msgstr "Senaste"
 
+#. placeholder {0}: others.map((one) => one.name).join(", ")
+#. placeholder {1}: kept.name
+#: src/screens/Payees.tsx
+msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and that payee will be gone. Each merge is one act in History, so it can be undone there."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "another app"
@@ -1388,6 +1447,10 @@ msgstr "De två stämmer inte överens."
 #, fuzzy
 msgid "Amount arriving ({0})"
 msgstr "Belopp som kommer in ({0})"
+
+#: src/screens/Payees.tsx
+msgid "Choose a payee…"
+msgstr ""
 
 #. placeholder {0}: format(-difference, currency)
 #: src/screens/Register.tsx
@@ -1485,6 +1548,11 @@ msgstr ""
 msgid "No single category matches that. Keep typing, or empty it."
 msgstr "Ingen enskild kategori matchar det. Fortsätt skriva eller töm fältet."
 
+#. placeholder {0}: payee.name
+#: src/screens/Payees.tsx
+msgid "Merge {0}"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
@@ -1557,6 +1625,10 @@ msgstr "En överföring från {from_currency} till {to_currency} behöver belopp
 msgid "error.transfer.same_account"
 msgstr "Ett konto kan inte föra över till sig självt"
 
+#: src/screens/Payees.tsx
+msgid "No payees yet. One appears the first time you name somebody on a transaction."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "a household"
@@ -1591,6 +1663,10 @@ msgstr "statuskolumn"
 #, fuzzy
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "Ändrade {done} rad och lämnade {skipped} orörda – bara pengar ut som inte är en överföring kan vara ett jobbutlägg."
+
+#: src/screens/Payees.tsx
+msgid "Add payee"
+msgstr ""
 
 #. placeholder {0}: found.via
 #: src/screens/Register.tsx
@@ -1643,6 +1719,10 @@ msgstr "{0} · {1} den {2}. Delarna ersätter den, så de måste bli samma belop
 #, fuzzy
 msgid "Register"
 msgstr "Register"
+
+#: src/screens/Payees.tsx
+msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1787,6 +1867,10 @@ msgstr "Plan"
 msgid "Your account"
 msgstr "Ditt konto"
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "Payee categorisation"
+msgstr ""
+
 #. placeholder {0}: mine.rows
 #. placeholder {1}: mine.rows
 #. placeholder {2}: mine.rows
@@ -1889,6 +1973,10 @@ msgstr "Fråga inte i den här webbläsaren på 30 dagar"
 #, fuzzy
 msgid "Width of the {label} column"
 msgstr "Bredd på kolumnen {label}"
+
+#: src/screens/Payees.tsx
+msgid "part of a name"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -2015,6 +2103,10 @@ msgstr "Bekräfta och ersätt"
 #, fuzzy
 msgid "Add a part for the {0}"
 msgstr "Lägg till en del för {0}"
+
+#: src/screens/PayeeCategorisation.tsx
+msgid "Search payees"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #: src/screens/Categories.tsx
@@ -2192,6 +2284,12 @@ msgstr "En del är fortfarande tom"
 #, fuzzy
 msgid "Current account"
 msgstr "Lönekonto"
+
+#. placeholder {0}: others.map((one) => one.name).join(", ")
+#. placeholder {1}: kept.name
+#: src/screens/Payees.tsx
+msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and those payees will be gone. Each merge is one act in History, so it can be undone there."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2385,6 +2483,10 @@ msgstr "Ange jobbutlägg för de markerade raderna"
 msgid "Invitation"
 msgstr "Inbjudan"
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "Categorised as"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Leave it blank for an account that starts empty."
@@ -2459,6 +2561,7 @@ msgid "Written off — work will not pay"
 msgstr "Avskriven – jobbet betalar inte"
 
 #: src/screens/Accounts.tsx
+#: src/screens/Payees.tsx
 #, fuzzy
 msgid "Kind"
 msgstr "Slag"
@@ -2504,6 +2607,11 @@ msgstr "Ångra i Historik tar tillbaka den."
 #, fuzzy
 msgid "Import"
 msgstr "Importera"
+
+#. placeholder {0}: kept.name
+#: src/screens/Payees.tsx
+msgid "Folded into {0}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2657,6 +2765,7 @@ msgstr "I stället summeras varje valuta för sig. Inget på den här skärmen l
 
 #: src/screens/Accounts.tsx
 #: src/screens/Import.tsx
+#: src/screens/Payees.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Add"
@@ -2809,6 +2918,10 @@ msgstr ""
 #, fuzzy
 msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."
 msgstr "Delarna du har ställt in har inte sparats. Att kasta dem lämnar transaktionen som den var."
+
+#: src/screens/Payees.tsx
+msgid "Find a payee"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3134,6 +3247,7 @@ msgid "outflow column"
 msgstr "utflödeskolumn"
 
 #: src/screens/Categories.tsx
+#: src/screens/Payees.tsx
 msgid "Payees"
 msgstr ""
 
@@ -3221,6 +3335,10 @@ msgstr "Du loggade in med en återställningskod, och dina lösennycklar fungera
 msgid "Rename or delete this group"
 msgstr ""
 
+#: src/screens/Payees.tsx
+msgid "another account"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Out {code}"
@@ -3237,6 +3355,7 @@ msgid "Ignore it and carry on"
 msgstr "Ignorera och fortsätt"
 
 #: src/App.tsx
+#: src/screens/Payees.tsx
 #, fuzzy
 msgid "Loading…"
 msgstr "Läser in…"
@@ -3253,6 +3372,7 @@ msgstr "Ställ in en ny autentiseringsapp"
 msgid "the server answered {0}"
 msgstr "servern svarade {0}"
 
+#: src/screens/Payees.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Keep"
@@ -3309,6 +3429,7 @@ msgid "type any part"
 msgstr "skriv vilken del som helst"
 
 #: src/screens/Categories.tsx
+#: src/screens/PayeeCategorisation.tsx
 msgid "Categorisation"
 msgstr ""
 
@@ -3407,6 +3528,13 @@ msgstr "Dölj filter"
 msgid "{by} reset your password for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "{by} återställde ditt lösenord för {email} den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in det igen nedan."
 
+#. placeholder {0}: one.rule_count
+#. placeholder {1}: one.rule_count
+#. placeholder {2}: one.rule_count
+#: src/screens/Payees.tsx
+msgid "{0, plural, one {{1} rule} other {{2} rules}}"
+msgstr ""
+
 #. placeholder {0}: format(txn.amount, currency)
 #. placeholder {1}: formatDate(txn.date)
 #: src/screens/Register.tsx
@@ -3502,6 +3630,10 @@ msgstr "Inget här än. Lägg till en rad ovan, eller importera ett kontoutdrag 
 msgid "Sign-in changes in the last 14 days, by somebody other than you:"
 msgstr "Ändringar av inloggning de senaste 14 dagarna, gjorda av någon annan än du:"
 
+#: src/screens/PayeeCategorisation.tsx
+msgid "Every category this payee has been filed under, biggest first. The transactions with no category are listed too, because they are what this payee still costs you to classify."
+msgstr ""
+
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
@@ -3520,10 +3652,20 @@ msgstr "Inga pengar in mellan de datumen. Vidga dem ovan – en ersättning kan 
 msgid "Work expenses"
 msgstr "Jobbutlägg"
 
+#. placeholder {0}: formatCount(rest)
+#: src/screens/PayeeCategorisation.tsx
+msgid "+{0} more"
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Read the file"
 msgstr "Läs filen"
+
+#. placeholder {0}: accountName(one.transfer_account_id)
+#: src/screens/Payees.tsx
+msgid "Transfer to {0}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3621,6 +3763,10 @@ msgstr ""
 msgid "Yes, all {0} of them"
 msgstr "Ja, alla {0}"
 
+#: src/screens/Payees.tsx
+msgid "Add a payee"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "{app}, via its CSV export"
@@ -3640,6 +3786,11 @@ msgstr "Förberedd"
 #, fuzzy
 msgid "Needs setting up again"
 msgstr "Behöver ställas in igen"
+
+#. placeholder {0}: kept?.name ?? "…"
+#: src/screens/Payees.tsx
+msgid "Merge into {0}"
+msgstr ""
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -3686,6 +3837,8 @@ msgstr "Skillnad"
 
 #: src/App.tsx
 #: src/screens/Import.tsx
+#: src/screens/PayeeCategorisation.tsx
+#: src/screens/Payees.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Payee"
@@ -3919,15 +4072,27 @@ msgstr "12,34"
 msgid "a negative balance here is money you owe"
 msgstr "ett negativt saldo här är pengar du är skyldig"
 
+#: src/screens/Payees.tsx
+msgid "Merge spellings of one name"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "What has happened to this"
 msgstr "Vad som har hänt med den här"
 
+#: src/screens/Payees.tsx
+msgid "Merge"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
 msgstr "Båda är en riktig transaktion i registret, avstämd och daterad den dag uppföljningen började. Ändrar du dem här ändras den raden och den förblir avstämd. Noll tar bort den."
+
+#: src/screens/PayeeCategorisation.tsx
+msgid "type any part of a payee"
+msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "A heading the categories sit under — Bills, Everyday, whatever divides your spending in a way you recognise."
@@ -4065,6 +4230,7 @@ msgstr ""
 #. placeholder {0}: formatCount(page.shown)
 #. placeholder {1}: formatCount(page.total)
 #: src/screens/Import.tsx
+#: src/screens/PayeeCategorisation.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Showing {0} of {1} — show more"
@@ -4235,6 +4401,11 @@ msgstr "Beskrivningen som den här raden får"
 msgid "Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the server, and clearing this browser's site data forgets it -- which returns you to following the system."
 msgstr "Sparas bara på den här enheten, så en telefon och en dator kan skilja sig åt. Inget skickas till servern, och om du rensar webbläsarens webbplatsdata glöms valet – och du följer systemet igen."
 
+#. placeholder {0}: search.trim()
+#: src/screens/PayeeCategorisation.tsx
+msgid "No payee matches “{0}”."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Recovery codes"
@@ -4277,6 +4448,10 @@ msgstr "Du loggar in med ditt lösenord och en kod från autentiseringsappen."
 #, fuzzy
 msgid "Continue"
 msgstr "Fortsätt"
+
+#: src/screens/Payees.tsx
+msgid "These payees differ only in accents, dashes or spaces you cannot see, which no longer tell two names apart. Nothing has been merged: review each and choose the spelling to keep."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -4450,6 +4625,16 @@ msgstr "Återkallad {0}"
 msgid "The type says what kind of thing the account is. It sorts the list and marks which balances are money you <0>owe</0> rather than money you have."
 msgstr "Typen säger vad för slags konto det är. Den sorterar listan och markerar vilka saldon som är pengar du <0>är skyldig</0> snarare än pengar du har."
 
+#. placeholder {0}: rows.length
+#. placeholder {1}: payees.data?.length ?? 0
+#: src/screens/Payees.tsx
+msgid "{0} of {1} shown."
+msgstr ""
+
+#: src/screens/Payees.tsx
+msgid "No payee matches that."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
@@ -4511,6 +4696,13 @@ msgstr "{inviter} har bjudit in dig till {PRODUCT} som medlem, i {households}."
 #, fuzzy
 msgid "that import was discarded — nothing was written"
 msgstr "den importen kastades – inget skrevs"
+
+#. placeholder {0}: one.transaction_count
+#. placeholder {1}: one.transaction_count
+#. placeholder {2}: one.transaction_count
+#: src/screens/Payees.tsx
+msgid "{0, plural, one {{1} transaction} other {{2} transactions}}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
