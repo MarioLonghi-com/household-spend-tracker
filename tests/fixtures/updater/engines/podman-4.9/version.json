@@ -1,0 +1,12 @@
+{
+  "Platform": {"Name": "linux/amd64/debian-12"},
+  "Components": [
+    {"Name": "Podman Engine", "Version": "4.9.4",
+     "Details": {"APIVersion": "4.9.4", "MinAPIVersion": "4.0.0", "Os": "linux", "Arch": "amd64"}}
+  ],
+  "Version": "4.9.4",
+  "ApiVersion": "1.41",
+  "MinAPIVersion": "1.24",
+  "Os": "linux",
+  "Arch": "amd64"
+}
