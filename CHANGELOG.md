@@ -47,6 +47,15 @@ history this repository does not have.
 
 ### Changed
 
+- **Short messages carry a note for the translator.** Every message of one
+  or two words, and any whose English alone is ambiguous, says in one line
+  what it is -- a button, a column heading, a state, which sense of
+  "Balance" -- through Lingui's own `comment`, so it reaches every
+  language's catalog. "New" and the authenticator's "Set up" now have a
+  context of their own, because they need different words in other
+  languages. The rule is in `client/src/locales/README.md`, and the catalog
+  tests refuse a bare short message. English is unchanged. (#228)
+
 - **"Check the repository" reads published releases, not tags,** and returns
   every release newer than the running one, newest first, each with its
   notes: the release's CHANGELOG section where the release body leads with
