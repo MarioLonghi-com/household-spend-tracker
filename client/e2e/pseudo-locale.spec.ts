@@ -35,7 +35,8 @@ test("the shell speaks the pseudo-locale, and the screen still works", async ({ 
   expect(title).not.toContain("Transactions");
   expect(title.replace(/^Spend Tracker - /, "").split(" - ")[0]).not.toMatch(ascii);
 
-  const menu = page.getByRole("button", { name: /Open the menu/ });
+  // By what it controls, not by its name: in en-XA its name is pseudo-localised.
+  const menu = page.locator('.topbar button[aria-controls="main-nav"]');
   if (await menu.isVisible()) await menu.click();
   const nav = page.locator("nav.side");
   await expect(nav.locator(".nav-head")).toHaveCount(4);
