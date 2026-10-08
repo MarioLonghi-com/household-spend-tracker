@@ -31,6 +31,7 @@
     "@lingui/cli": "6.8.0",
     "@lingui/conf": "6.8.0",
     "@lingui/format-po": "6.8.0",
+    "@lingui/message-utils": "6.8.0",
     "@lingui/vite-plugin": "6.8.0",
     "@playwright/test": "^1.63.0",
     "@rolldown/plugin-babel": "0.2.4",

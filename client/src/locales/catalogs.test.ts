@@ -14,6 +14,7 @@
  * locale cannot be activated.
  */
 import { describe, expect, it } from "vitest";
+import { compileMessageOrThrow } from "@lingui/message-utils/compileMessage";
 import config from "../../lingui.config";
 import { PSEUDO_LOCALE, SERVED_LOCALES, SOURCE_LOCALE } from "../lib/i18n";
 
@@ -83,6 +84,21 @@ describe("the catalogs", () => {
     if (!SERVED_LOCALES.includes(locale)) return;
     const unready = catalog(locale).filter((one) => one.fuzzy || !one.translation);
     expect(unready.map((one) => one.id)).toEqual([]);
+  });
+
+  it.each(config.locales)("%s: every message it holds is valid ICU and keeps the source's placeholders", (locale) => {
+    const source = new Map(catalog(SOURCE_LOCALE).map((one) => [one.id, one.translation]));
+    const names = (text: string) => [...new Set(text.match(/\{(\w+)[,}]/g) ?? [])].sort();
+    const tags = (text: string) => (text.match(/<\/?\d+>/g) ?? []).sort();
+    for (const one of catalog(locale)) {
+      if (!one.translation) continue;
+      expect(() => compileMessageOrThrow(one.translation), `${locale}: ${one.id}`).not.toThrow();
+      const english = source.get(one.id) ?? one.id;
+      expect([names(one.translation), tags(one.translation)], `${locale}: ${one.id}`).toEqual([
+        names(english),
+        tags(english),
+      ]);
+    }
   });
 
   it("serves no draft language yet", () => {
