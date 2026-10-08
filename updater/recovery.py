@@ -343,9 +343,10 @@ class Recovery:
         try:
             j = self.check(request)
         except Refusal as e:
-            self.answer(request, "refused", e.sentence, e.code)
+            # Recorded before answering: the page reads the history once it has its answer.
             if e.code not in ("refused_for_now", "unknown"):
                 self.record(request.id, {"kind": request.kind, "result": "refused", "sentence": e.sentence})
+            self.answer(request, "refused", e.sentence, e.code)
             return "refused"
         return self.act(request, j)
 
@@ -448,21 +449,21 @@ class Recovery:
     def act(self, request: RecoveryRequest, j: journal.Journal) -> str:
         kind = request.kind
         if kind == "open":
-            self.answer(request, "done", "The recovery code is right.")
             self.record(j.id, {"kind": "open", "result": "done", "sentence": "Recovery was opened."})
+            self.answer(request, "done", "The recovery code is right.")
             return "done"
         if kind == "download_backup":
             if request.backup not in backup_sources(self.vol):
                 return self._refuse_after_code(request, "That is not one of the newest update backups.")
             with_key = " with secret.key" if request.include_key else " without secret.key"
             sentence = f"The backup {request.backup} was downloaded{with_key}."
-            self.answer(request, "done", sentence)
             self.record(j.id, {"kind": kind, "result": "done", "sentence": sentence})
+            self.answer(request, "done", sentence)
             return "done"
         if kind == "download_diagnostics":
             sentence = "The diagnostics were downloaded."
-            self.answer(request, "done", sentence)
             self.record(j.id, {"kind": kind, "result": "done", "sentence": sentence})
+            self.answer(request, "done", sentence)
             return "done"
         if kind == "leave_for_operator":
             return self.leave(request, j)
@@ -470,8 +471,8 @@ class Recovery:
         # The engine actions.
         if kind == "restore_backup" and request.backup not in backup_sources(self.vol):
             return self._refuse_after_code(request, "That is not one of the newest update backups.")
-        self.answer(request, "accepted", "Accepted. The updater is working on it; this page stops meanwhile.")
         self.record(j.id, {"kind": kind, "result": "running", "sentence": "Started."})
+        self.answer(request, "accepted", "Accepted. The updater is working on it; this page stops meanwhile.")
         a = Apply(self.kit, j)
         a.remember(recovery_action={"kind": kind, "at": contract.iso(self.now())})
         self.kit.sleep(ACCEPT_GRACE_SECONDS)
@@ -491,13 +492,13 @@ class Recovery:
             self.busy = False
             a.remember(recovery_action=None)
         result = "done" if state in ("rolled_back", "recovered") else "failed"
-        self.answer(request, result, sentence)
         self.record(j.id, {"kind": kind, "result": result, "sentence": sentence}, replace_last=True)
+        self.answer(request, result, sentence)
         return result
 
     def _refuse_after_code(self, request: RecoveryRequest, sentence: str) -> str:
-        self.answer(request, "refused", sentence, "backup")
         self.record(request.id, {"kind": request.kind, "result": "refused", "sentence": sentence})
+        self.answer(request, "refused", sentence, "backup")
         return "refused"
 
     def leave(self, request: RecoveryRequest, j: journal.Journal) -> str:
@@ -514,8 +515,8 @@ class Recovery:
             doc["sentence"] = sentence
             volume.write_json(path, doc)
         Records(self.vol, j.id, "apply", self.kit.clock).say(sentence, state="left_for_operator")
-        self.answer(request, "done", sentence)
         self.record(j.id, {"kind": "leave_for_operator", "result": "done", "sentence": sentence})
+        self.answer(request, "done", sentence)
         return "done"
 
     def _fail_back(self, a: Apply, why: str) -> tuple[str, str]:

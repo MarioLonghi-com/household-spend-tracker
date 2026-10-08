@@ -240,6 +240,7 @@ class Place:
     answer_seconds: float = ANSWER_SECONDS
     sessions: dict[str, Session] = field(default_factory=dict)
     lock: threading.Lock = field(default_factory=threading.Lock)
+    _last_sent: float = 0.0
 
     @property
     def recovery_dir(self) -> Path:
@@ -279,11 +280,15 @@ class Place:
         not answer. Serialised: one request in the volume at a time.
         """
         with self.lock:
+            # Each request's time is its own, to the microsecond: it is how
+            # its answer is told from the last one's.
+            stamp = max(self.clock(), self._last_sent + 0.000001)
+            self._last_sent = stamp
             request = {
                 "protocol": 1,
                 "id": update_id,
                 "kind": kind,
-                "created_at": now_iso(self.clock()),
+                "created_at": now_iso(stamp),
                 "code": code,
                 **fields,
             }
