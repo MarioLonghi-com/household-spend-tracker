@@ -168,6 +168,11 @@ history this repository does not have.
 
 ### Changed
 
+- **`/snap` keeps its words in a small dictionary of its own**, keyed by
+  language: the one chosen in the app on this device, then the browser's.
+  Only English is written, so every phone still reads the page in English,
+  word for word as before; the `en-XA` pseudo-locale accents all of it. (#56)
+
 - **The remaining screens' words go into the catalogs one screen at a time**,
   starting with Categories, Payees, Payee categorisation and the payee
   naming rules, the household page, Admin, reconciling and importing
