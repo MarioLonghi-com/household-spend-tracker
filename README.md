@@ -47,13 +47,13 @@ documentation:
 | [`docs/DATA-MODEL.md`](docs/DATA-MODEL.md) | How the data is stored: the groups of tables and the rules every table follows. |
 | [`deploy/DOCKER.md`](deploy/DOCKER.md) | Running it in a container, including seeding a demo. |
 | [`deploy/TROUBLESHOOTING.md`](deploy/TROUBLESHOOTING.md) | Where the ledger is, which one is open, starting again, and getting back into an account. |
-| [`deploy/UPGRADING.md`](deploy/UPGRADING.md) | The upgrade drill: backup, migrate, verify, and how to roll back. |
+| [`deploy/UPGRADING.md`](deploy/UPGRADING.md) | Updating from the browser, the upgrade drill (backup, migrate, verify), and how to roll back. |
 | [`agent/README.md`](agent/README.md) | Letting a program use the ledger over HTTP with an agent key. |
 | [`statements/README.md`](statements/README.md) | The statement-reading library and its command-line tool. |
 | [`CHANGELOG.md`](CHANGELOG.md) | What changed in each release, and whether each change can be reversed. |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How work is named, branched and handed over. |
 | [`CLAUDE.md`](CLAUDE.md) | The standing rules for changing the code. |
-| [`SECURITY.md`](SECURITY.md) | How to report a vulnerability. |
+| [`SECURITY.md`](SECURITY.md) | How to report a vulnerability, and what the self-updater may and may not do. |
 | [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | How people taking part are expected to behave, and how to report it when they do not. |
 
 ## What you need
@@ -315,6 +315,21 @@ docker compose up -d
 To build this checkout instead, `SPENDTRACKER_VERSION=local docker compose build`;
 Compose also builds it when the image cannot be pulled.
 
+**Updates happen in the browser.** Beside the app runs a small second
+container, the updater, which is the only thing holding Docker's or Podman's
+socket. An owner presses *Check the repository* under *Application
+management → Updates*, then *Prepare*; the updater downloads the release and
+proves it was built by this repository's release workflow, and the owner
+confirms with password, code and a one-time recovery code. The updater then
+backs up, migrates, starts the new version and checks it, and puts the old
+one back by itself if anything fails. On a server it needs one setting and
+a writable directory first ([`deploy/DOCKER.md`](deploy/DOCKER.md#the-updater));
+the flow is in [`deploy/UPGRADING.md`](deploy/UPGRADING.md#from-the-browser-container-installs),
+what to do when it goes wrong in
+[`deploy/TROUBLESHOOTING.md`](deploy/TROUBLESHOOTING.md#updates-from-the-browser),
+and what it may and may not do in [`SECURITY.md`](SECURITY.md#self-update-and-the-engine-socket).
+A locally built image is not updated this way: it keeps the drill below.
+
 **[`deploy/DOCKER.md`](deploy/DOCKER.md) is the full guide** — seeding a demo
 database, attaching a ledger you already have, backing up, upgrading, and what
 to do when it will not start. Every command on it has been run against a real
@@ -456,6 +471,10 @@ every week — 2.5 MB of new receipts costing 666 MB of transfer, measured.
 and says whether rolling each one back would lose anything. Read it before you
 upgrade, not after.
 
+A container started from a published release updates from the browser
+instead (above); the commands here are the checkout's, and that container's
+fallback.
+
 **[`deploy/UPGRADING.md`](deploy/UPGRADING.md) is the full drill**, including
 the three rollback cases and the one thing that surprises people: the audit
 log, which makes every other mistake in this app undoable, does not see
@@ -518,6 +537,18 @@ one, and CI's `release-ready` job refuses it until it looks like one
    ```bash
    git tag -a vX.Y.Z -m "X.Y.Z" origin/main && git push origin vX.Y.Z
    ```
+
+   The same run builds, attests and publishes the self-updater's image,
+   `ghcr.io/mariolonghi-com/household-spend-tracker-updater`, and attaches
+   `spend-tracker-X.Y.Z-compose.zip`, the personal-computer bundle.
+
+**The first release that carries the updater image** creates a new package
+on ghcr.io, and ghcr.io may create it **private**. The release job pulls both
+images back with no credentials before the release goes public, so a private
+package stops it there, while the release is still a draft, with an error
+naming the package's settings page. Open that page, *Danger Zone → Change
+visibility → Public*, then **re-run the failed jobs** of the same run; no
+second approval is asked. Expect it once.
 
 Run the same check locally before opening the pull request:
 
