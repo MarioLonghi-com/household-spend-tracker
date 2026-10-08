@@ -488,3 +488,25 @@ def test_fields_and_params_never_collide(client):
 
 def test_the_classes_still_answer_their_own_status():
     assert (Conflict("x", code="a.b").status_code, DomainError("x").status_code) == (409, 400)
+
+
+# --------------------------------------------------------------------------- #
+# The client's half (#53)
+# --------------------------------------------------------------------------- #
+
+
+def _client_messages() -> dict[str, str]:
+    """`client/src/lib/errorMessages.ts`, as code -> English template."""
+    import re
+
+    text = (ROOT / "client/src/lib/errorMessages.ts").read_text(encoding="utf-8")
+    found = {}
+    for block in re.finditer(r'id: "error\.([\w.]+)",\s*message:\s*((?:"[^"]*"\s*)+)', text):
+        found[block.group(1)] = "".join(re.findall(r'"([^"]*)"', block.group(2)))
+    return found
+
+
+@pytest.mark.repo_wide
+def test_the_client_has_every_code_with_the_same_template():
+    """The catalogs are seeded from the client file; it must say what the registry says."""
+    assert _client_messages() == {code: entry.template for code, entry in REGISTRY.items()}

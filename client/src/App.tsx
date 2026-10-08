@@ -40,6 +40,8 @@ import { Setup } from "./screens/Setup";
 import { SignIn } from "./screens/SignIn";
 import { Transfers } from "./screens/Transfers";
 import type { Household, User } from "./lib/types";
+import { t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 
 type Screen =
   | "register"
@@ -135,19 +137,19 @@ export function menu(householdName: string): NavSection[] {
   return [
     {
       id: "register",
-      label: "Register",
+      label: t`Register`,
       children: [
-        { key: "register", label: "Transactions" },
-        { key: "import", label: "Import" },
-        { key: "receipts", label: "Receipts" },
+        { key: "register", label: t`Transactions` },
+        { key: "import", label: t`Import` },
+        { key: "receipts", label: t`Receipts` },
         // Reachable since receipts landed, and for a while linked from
         // nowhere: the only way to open it was to know the URL.
-        { href: "/snap", label: "Snap a Receipt" },
+        { href: "/snap", label: t`Snap a Receipt` },
       ],
     },
     {
       id: "reports",
-      label: "Reports",
+      label: t`Reports`,
       screen: "reports",
       children: REPORTS.map((one) => ({ key: reportScreen(one.key), label: one.label })),
     },
@@ -160,27 +162,27 @@ export function menu(householdName: string): NavSection[] {
       // The order is #185's: the three things a ledger is made of, then the
       // three payee screens gathered under a heading of their own.
       children: [
-        { key: "accounts", label: "Accounts" },
-        { key: "transfers", label: "Transfers" },
-        { key: "categories", label: "Categories" },
+        { key: "accounts", label: t`Accounts` },
+        { key: "transfers", label: t`Transfers` },
+        { key: "categories", label: t`Categories` },
         {
-          heading: "Payee",
+          heading: t`Payee`,
           children: [
             // The list of payees, whose job in practice is folding two
             // spellings of one shop together.
-            { key: "payees", label: "Payee Merge" },
+            { key: "payees", label: t`Payee Merge` },
             // Two screens where there was one "Payee Rules" (#65): the naming
             // rules are a dozen rows and the categorisation table is one row
             // per payee, and on one page the second buried the first.
-            { key: "payee-categorisation", label: "Payee Categorisation" },
-            { key: "rules", label: "Payee Naming Rules" },
+            { key: "payee-categorisation", label: t`Payee Categorisation` },
+            { key: "rules", label: t`Payee Naming Rules` },
           ],
         },
       ],
     },
     {
       id: "admin",
-      label: "Admin",
+      label: t`Admin`,
       screen: "admin",
       // The Admin *screen* is the owner's. History is not -- it is a
       // household's own record of what everyone in it did, and it has been
@@ -188,15 +190,15 @@ export function menu(householdName: string): NavSection[] {
       // everybody and only the header stops being a link.
       ownerOnly: true,
       children: [
-        { key: "history", label: "History" },
+        { key: "history", label: t`History` },
         // Every member's, like History: it explains what the Import screen
         // does, and nothing behind it is private (#73).
-        { key: "import-guide", label: "How import works" },
+        { key: "import-guide", label: t`How import works` },
         // Owner-only in its own right, and separately from the header: History
         // above it is every member's, and this one is about the installation
         // rather than about a ledger. Hiding it is a courtesy -- every route
         // behind it answers 403 to a member.
-        { key: "application", label: "Application management", ownerOnly: true },
+        { key: "application", label: t`Application management`, ownerOnly: true },
       ],
     },
   ];
@@ -466,6 +468,9 @@ function AlreadySignedIn({
 const NAV_COLLAPSED_KEY = "spendtracker.shell.navCollapsed";
 
 function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }) {
+  // The menu and the tab title are built from the active catalog, so the
+  // shell re-renders when another one arrives (`lib/i18n.ts`).
+  useLingui();
   const client = useQueryClient();
   const [opened] = useState(openedAt);
   useEffect(() => putTheAddressBack(opened), [opened]);

@@ -1,0 +1,148 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-10-08 00:14+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+
+#: src/App.tsx
+msgid "Application management"
+msgstr "Application management"
+
+#: src/App.tsx
+msgid "History"
+msgstr "History"
+
+#: src/App.tsx
+msgid "Transactions"
+msgstr "Transactions"
+
+#: src/components/bits.tsx
+msgid "Sort by {label}"
+msgstr "Sort by {label}"
+
+#: src/App.tsx
+msgid "Accounts"
+msgstr "Accounts"
+
+#: src/App.tsx
+msgid "Payee Merge"
+msgstr "Payee Merge"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.currency.not_iso_4217"
+msgstr "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.decimals_in_whole_currency"
+msgstr "{value} has decimals, and {currency} has none"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.not_an_amount"
+msgstr "{value} is not an amount this can read. Write it with a point before the decimals and no thousands separators, like 1234.56 or -80"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.too_large"
+msgstr "{value} is too large to record as money"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.too_many_decimals"
+msgstr "{value} has more decimals than {currency} has ({places})"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.too_many_digits"
+msgstr "An amount {digits} digits long is too large to record as money"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.receipt.no_such_copy"
+msgstr "That receipt has no copy of that kind"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reconcile.does_not_balance"
+msgstr "That does not balance: {difference} out. Tick or untick rows until the difference is zero, or add the transaction the statement has and the register does not."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reconcile.row_after_statement"
+msgstr "A row dated {row_date} is after the statement closes on {statement_date}, so it cannot be on it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.does_not_add_up"
+msgstr "The parts come to {total} and the transaction is {amount}. A split has to add up, or it moves the balance."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.needs_amount_arriving"
+msgstr "A {from_currency} to {to_currency} transfer needs the amount that arrives; we never invent a rate"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.same_account"
+msgstr "An account cannot transfer to itself"
+
+#: src/App.tsx
+msgid "Register"
+msgstr "Register"
+
+#: src/App.tsx
+msgid "Transfers"
+msgstr "Transfers"
+
+#: src/App.tsx
+msgid "How import works"
+msgstr "How import works"
+
+#: src/App.tsx
+msgid "Import"
+msgstr "Import"
+
+#: src/App.tsx
+msgid "Categories"
+msgstr "Categories"
+
+#: src/App.tsx
+msgid "Snap a Receipt"
+msgstr "Snap a Receipt"
+
+#: src/components/bits.tsx
+msgid "{wait, plural, other {Try again in # seconds.}}"
+msgstr "{wait, plural, other {Try again in # seconds.}}"
+
+#: src/App.tsx
+msgid "Payee Naming Rules"
+msgstr "Payee Naming Rules"
+
+#: src/App.tsx
+msgid "Payee"
+msgstr "Payee"
+
+#: src/App.tsx
+msgid "Reports"
+msgstr "Reports"
+
+#: src/App.tsx
+msgid "Payee Categorisation"
+msgstr "Payee Categorisation"
+
+#: src/App.tsx
+msgid "Admin"
+msgstr "Admin"
+
+#: src/components/LanguagePicker.tsx
+msgid "Language"
+msgstr "Language"
+
+#: src/App.tsx
+msgid "Receipts"
+msgstr "Receipts"

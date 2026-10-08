@@ -6,6 +6,9 @@ import { ApiError } from "../lib/api";
 import { fixed, moneyKey, sortRows } from "../lib/sorting";
 import type { FixedGroup, SortDirection, SortKeyPart, SortValue } from "../lib/sorting";
 import { format } from "../lib/money";
+import { problemText } from "../lib/errorMessages";
+import { plural, t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 
 export function Field({
   label,
@@ -41,14 +44,24 @@ export function Field({
   );
 }
 
+/**
+ * A refusal, in words.
+ *
+ * The server's sentence in English; in another language, the catalog's
+ * message for the refusal's `code`, falling back to the sentence when there is
+ * none (`lib/errorMessages.ts`). The wait is a plural for the languages that
+ * need one. English keeps its single form, "1 seconds" included, because this
+ * lane changes nothing an English reader sees; #58 can give English its "one".
+ */
 export function Problem({ error }: { error: unknown }) {
+  useLingui();
   if (!error) return null;
-  const message = error instanceof Error ? error.message : String(error);
+  const message = problemText(error);
   const wait = error instanceof ApiError ? error.retryAfter : undefined;
   return (
     <div className="banner" role="alert">
       {message}
-      {wait ? ` Try again in ${wait} seconds.` : null}
+      {wait ? ` ${plural(wait, { other: "Try again in # seconds." })}` : null}
     </div>
   );
 }
@@ -341,6 +354,8 @@ export function SortHeading<K extends string>({
    */
   children?: ReactNode;
 }) {
+  // Re-renders the heading when the language changes; `t` reads the active one.
+  useLingui();
   const active = sort === column;
   // Generic over the key so the register and the import preview share one
   // heading: the register's sort is a server round trip, the preview's is a
@@ -355,7 +370,7 @@ export function SortHeading<K extends string>({
         .join(" ")}
       aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : "none"}
     >
-      <button type="button" onClick={() => onSort(column, next)} title={`Sort by ${label}`}>
+      <button type="button" onClick={() => onSort(column, next)} title={t`Sort by ${label}`}>
         {short ? (
           <>
             <span aria-hidden="true">{short}</span>

@@ -32,6 +32,17 @@ history this repository does not have.
 
 ## Unreleased
 
+### Changed
+
+- **The client's words can come from translation catalogs** (Lingui 6,
+  `client/src/locales/`). The menu, the sort headings' tooltip and the
+  "try again in" wait are the first messages extracted; a refusal that
+  carries a code shows the catalog's message in another language and the
+  server's sentence in English, as before. English is the only language
+  served and the language picker in Profile → Appearance stays hidden; the
+  `en-XA` pseudo-locale is reachable for CI and development, and one
+  Playwright pass runs in it at phone width. CI fails when the catalogs are
+  behind the source. Nothing an English reader sees changes. (#53)
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
