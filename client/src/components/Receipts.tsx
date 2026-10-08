@@ -58,7 +58,7 @@ function whereText(receipt: Receipt): { text: string; query: string } | null {
   // The text in the reader's decimal mark; the link below keeps the point,
   // which is what a map service reads.
   const shown = `${formatFixed(receipt.gps_lat, places)}, ${formatFixed(receipt.gps_lon, places)}`;
-  let text = vague ? t`approximate — ${shown}` : shown;
+  let text = vague ? t({ message: `approximate — ${shown}`, comment: "Label on the receipts" }) : shown;
   if (receipt.gps_accuracy_m !== null) {
     const metres = receipt.gps_accuracy_m;
     text += metres >= 1000 ? ` ±${formatFixed(metres / 1000, 1)} km` : ` ±${Math.round(metres)} m`;
@@ -66,7 +66,7 @@ function whereText(receipt: Receipt): { text: string; query: string } | null {
   if (receipt.gps_bearing !== null) {
     const bearing = Math.round(receipt.gps_bearing);
     const point = compass(receipt.gps_bearing);
-    text += ` ${t`facing ${bearing}° ${point}`}`;
+    text += ` ${t({ message: `facing ${bearing}° ${point}`, comment: "Label on the receipts" })}`;
   }
   // Five decimals is about a metre, and more than any fix here is worth. The
   // full float stays in the database; the link does not advertise a precision
@@ -147,7 +147,7 @@ export function MoreInfo({ receipt }: { receipt: Receipt }) {
 
   if (receipt.captured_at) {
     rows.push([
-      t`Taken`,
+      t({ message: "Taken", comment: "Label on the receipts" }),
       <>
         {receipt.captured_at_is_local
           ? receipt.captured_at.replace("T", ", ")
@@ -158,10 +158,10 @@ export function MoreInfo({ receipt }: { receipt: Receipt }) {
       </>,
     ]);
   }
-  if (receipt.camera) rows.push([t`Camera`, receipt.camera]);
+  if (receipt.camera) rows.push([t({ message: "Camera", comment: "Label on the receipts" }), receipt.camera]);
   if (where)
     rows.push([
-      t`Where`,
+      t({ message: "Where", comment: "Label on the receipts: noun, where it is" }),
       <>
         {where.text}
         <div style={{ marginTop: 4 }}>
@@ -198,10 +198,10 @@ export function MoreInfo({ receipt }: { receipt: Receipt }) {
       </>,
     ]);
   rows.push([
-    t`Uploaded`,
+    t({ message: "Uploaded", comment: "Label on the receipts" }),
     <>
       {receipt.uploaded_by_name
-        ? t`${formatInstant(receipt.created_at)} by ${receipt.uploaded_by_name}`
+        ? t({ message: `${formatInstant(receipt.created_at)} by ${receipt.uploaded_by_name}`, comment: "Label on the receipts" })
         : formatInstant(receipt.created_at)}
       {receipt.client_encoded ? (
         <span className="muted"> · {t`compressed on the device before sending`}</span>
@@ -209,7 +209,7 @@ export function MoreInfo({ receipt }: { receipt: Receipt }) {
     </>,
   ]);
   rows.push([
-    t`File`,
+    t({ message: "File", comment: "Label on the receipts" }),
     [
       receipt.original_filename,
       sizeText(receipt.byte_size),
@@ -220,9 +220,9 @@ export function MoreInfo({ receipt }: { receipt: Receipt }) {
       .filter(Boolean)
       .join(" · "),
   ]);
-  rows.push([t`Stored as`, <span className="mono">{receipt.download_name}</span>]);
+  rows.push([t({ message: "Stored as", comment: "Label on the receipts" }), <span className="mono">{receipt.download_name}</span>]);
   rows.push([
-    t`Checksum`,
+    t({ message: "Checksum", comment: "Label on the receipts" }),
     <span className="mono" title={receipt.content_sha256}>
       {receipt.content_sha256.slice(0, 12)}…{" "}
       <span className="muted">{t`(SHA-256 of the original)`}</span>
@@ -231,7 +231,7 @@ export function MoreInfo({ receipt }: { receipt: Receipt }) {
 
   return (
     <details className="more-info">
-      <summary><Trans>More info</Trans></summary>
+      <summary><Trans comment="Heading of a section that opens on the receipts">More info</Trans></summary>
       <dl>
         {rows.map(([label, value]) => (
           <div key={label}>
@@ -273,7 +273,7 @@ export function ReceiptFrame({
         <>
           <img
             src={source}
-            alt={receipt ? t`Receipt, ${receipt.download_name}` : t`Uploading`}
+            alt={receipt ? t({ message: `Receipt, ${receipt.download_name}`, comment: "Text on the receipts" }) : t({ message: "Uploading", comment: "Text on the receipts" })}
             loading="lazy"
             width={320}
             height={427}
@@ -287,7 +287,7 @@ export function ReceiptFrame({
           ) : null}
           {preview ? (
             <span className="frame-working">
-              <Trans>Encoding…</Trans>
+              <Trans comment="Text on the receipts">Encoding…</Trans>
             </span>
           ) : null}
         </>
@@ -312,9 +312,9 @@ export function Lightbox({ receipt, onClose }: { receipt: Receipt; onClose: () =
   }, [onClose]);
 
   return (
-    <div className="lightbox" onClick={onClose} role="dialog" aria-label={t`Receipt`}>
+    <div className="lightbox" onClick={onClose} role="dialog" aria-label={t({ message: "Receipt", comment: "Screen-reader name on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md" })}>
       <img src={`/api/receipts/${receipt.id}/display`} alt={receipt.download_name} />
-      <button className="lightbox-close" onClick={onClose} aria-label={t`Close`}>
+      <button className="lightbox-close" onClick={onClose} aria-label={t({ message: "Close", comment: "Screen-reader name of a button on the receipts" })}>
         ×
       </button>
     </div>
@@ -495,7 +495,7 @@ export function ReceiptDrop({
         onClick={() => input.current?.click()}
       >
         {busy.length > 0 ? (
-          t`Uploading ${busy.length}…`
+          t({ message: `Uploading ${busy.length}…`, comment: "Button on the receipts" })
         ) : (
           <>
             {icon ? (
@@ -531,12 +531,12 @@ export function ReceiptDrop({
                     ? t`Encoding and sending…`
                     : job.state === "failed"
                       ? job.why
-                      : t`Waiting`}
+                      : t({ message: "Waiting", comment: "Note on the receipts: how long it has waited, or a queue state" })}
                 </span>
               </span>
               {job.state === "failed" ? (
                 <button onClick={() => update(job.id, { state: "waiting", why: undefined })}>
-                  <Trans>
+                  <Trans comment="Button on the receipts: verb, try again">
                     Retry
                   </Trans>
                 </button>

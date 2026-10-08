@@ -31,6 +31,7 @@ msgstr "Mentions"
 msgid "Creating…"
 msgstr "Creating…"
 
+#. Text on the receipts
 #: src/components/Receipts.tsx
 msgid "Uploading"
 msgstr "Uploading"
@@ -106,6 +107,7 @@ msgstr "Send back to the inbox"
 msgid "One act, so History has one entry and undo puts every row back together."
 msgstr "One act, so History has one entry and undo puts every row back together."
 
+#. Text on the receipts
 #. placeholder {0}: receipt.download_name
 #: src/components/Receipts.tsx
 msgid "Receipt, {0}"
@@ -418,6 +420,7 @@ msgstr "Each payment from work is followed by the expenses it repaid, marked ↳
 msgid "What each payee has been filed under, and what a new transaction for it will be. Which payee a statement line becomes is decided first, by the payee naming rules."
 msgstr "What each payee has been filed under, and what a new transaction for it will be. Which payee a statement line becomes is decided first, by the payee naming rules."
 
+#. Button on the receipts
 #: src/screens/Receipts.tsx
 msgid "List"
 msgstr "List"
@@ -575,6 +578,7 @@ msgstr "2. You"
 msgid "Keep them active"
 msgstr "Keep them active"
 
+#. Label on the receipts
 #: src/components/Receipts.tsx
 msgid "Uploaded"
 msgstr "Uploaded"
@@ -915,6 +919,7 @@ msgstr "Unlink"
 msgid "Remove this part"
 msgstr "Remove this part"
 
+#. Button on the receipts: verb, try again
 #: src/components/Receipts.tsx
 msgid "Retry"
 msgstr "Retry"
@@ -1444,6 +1449,7 @@ msgstr "Check the code"
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 
+#. Label on the receipts
 #: src/components/Receipts.tsx
 msgid "facing {bearing}° {point}"
 msgstr "facing {bearing}° {point}"
@@ -1540,6 +1546,7 @@ msgstr "No receipt yet"
 
 #. Table cell on the Register screen
 #. Text on the Register screen
+#. Text on the receipts
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 msgid "saving…"
@@ -1807,6 +1814,7 @@ msgstr "Changing your own role would close this screen; ask the other owner"
 #. Column heading on the Application management screen: noun, size of a file
 #. Column heading on the Application management screen: noun, size of a file
 #. Column heading on the Backups screen: noun, size of a file
+#. Column heading on the receipts: noun, size of a file
 #. Column name shown beside a value on phones on the Application management screen: noun, size of a file
 #. Column name shown beside a value on phones on the Application management screen: noun, size of a file
 #. Column name shown beside a value on phones on the Backups screen: noun, size of a file
@@ -1841,6 +1849,7 @@ msgstr "Yes, revoke it"
 #. Button on the Categories screen: verb
 #. Button on the Register screen: verb
 #. Button on the Rules screen: verb
+#. Button on the receipts: verb
 #: src/screens/Backups.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Receipts.tsx
@@ -1953,6 +1962,7 @@ msgstr "Check the repository"
 msgid "Closed"
 msgstr "Closed"
 
+#. Sentence on the receipts
 #. placeholder {0}: receipt.uploaded_by_name
 #: src/screens/Receipts.tsx
 msgid "added by {0}"
@@ -2002,6 +2012,7 @@ msgstr "Cancel"
 msgid "The one you keep is the one you choose here."
 msgstr "The one you keep is the one you choose here."
 
+#. Button on the receipts
 #. placeholder {0}: busy.length
 #: src/components/Receipts.tsx
 msgid "Uploading {0}…"
@@ -2496,6 +2507,7 @@ msgid "Households"
 msgstr "Households"
 
 #. Button on the Register screen
+#. Button on the receipts
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 msgid "Clear selection"
@@ -2587,6 +2599,7 @@ msgstr "Detach"
 msgid "Other liabilities"
 msgstr "Other liabilities"
 
+#. Label on the receipts
 #. placeholder {0}: formatInstant(receipt.created_at)
 #. placeholder {1}: receipt.uploaded_by_name
 #: src/components/Receipts.tsx
@@ -2814,6 +2827,8 @@ msgstr "I've lost my authenticator — use a recovery code"
 msgid "Could not read"
 msgstr "Could not read"
 
+#. Filter button on the Receipts screen: show the receipts not on a transaction yet
+#. Filter button on the Receipts screen: show the receipts not on a transaction yet
 #: src/screens/Receipts.tsx
 msgid "Inbox"
 msgstr "Inbox"
@@ -2879,6 +2894,7 @@ msgstr "This installation, rather than any of the ledgers in it. Only an owner c
 
 #. Button on the Backups screen
 #. Button on the Register screen
+#. Button on the receipts
 #: src/screens/Backups.tsx
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
@@ -3104,6 +3120,7 @@ msgstr "Search payees"
 msgid "Create"
 msgstr "Create"
 
+#. Heading of a section that opens on the receipts
 #: src/components/Receipts.tsx
 msgid "More info"
 msgstr "More info"
@@ -3138,6 +3155,7 @@ msgstr "Passkeys are not set up on this server."
 msgid "anyone with the link"
 msgstr "anyone with the link"
 
+#. Filter button on the Receipts screen: show the receipts already on a transaction
 #. Row state in the one-time import's mapping: goes to an existing one
 #. Row state in the one-time import's mapping: goes to an existing one
 #: src/lib/labels.ts
@@ -3193,6 +3211,7 @@ msgstr "a statement"
 msgid "You've been invited"
 msgstr "You've been invited"
 
+#. Button on the receipts: verb, attach a receipt to a transaction
 #: src/screens/Receipts.tsx
 msgid "Attach"
 msgstr "Attach"
@@ -3332,6 +3351,7 @@ msgstr "no git history and no build stamp to ask"
 #. Column heading on the Application management screen
 #. Label of a form field on the Import screen
 #. Label on the Import screen
+#. Label on the receipts
 #: src/components/Receipts.tsx
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
@@ -3436,6 +3456,7 @@ msgstr "Locked — checked against the bank, and every change to it is refused"
 msgid "To year"
 msgstr "To year"
 
+#. Button on the receipts
 #: src/screens/Receipts.tsx
 msgid "Add receipts"
 msgstr "Add receipts"
@@ -3756,6 +3777,10 @@ msgstr "Written off — work will not pay"
 msgid "Kind"
 msgstr "Kind"
 
+#. Column heading on the receipts
+#. Column name shown beside a value on phones on the receipts
+#. Label of a form field on the receipts
+#. Screen-reader name on the receipts
 #: src/screens/Receipts.tsx
 msgid "Receipt notes"
 msgstr "Receipt notes"
@@ -3805,10 +3830,12 @@ msgstr "Readable copies only <0>Recommended</0>"
 msgid "Applied as a statement is read, so <0>CARREFOUR MADRID 4432</0> arrives as Carrefour. The bank's own words are kept on the transaction either way."
 msgstr "Applied as a statement is read, so <0>CARREFOUR MADRID 4432</0> arrives as Carrefour. The bank's own words are kept on the transaction either way."
 
+#. Text on the receipts
 #: src/components/Receipts.tsx
 msgid "Encoding…"
 msgstr "Encoding…"
 
+#. Title of a panel on the receipts
 #: src/screens/Receipts.tsx
 msgid "Which transaction?"
 msgstr "Which transaction?"
@@ -4018,6 +4045,7 @@ msgstr "read"
 msgid "Not for this account"
 msgstr "Not for this account"
 
+#. Table cell on the receipts
 #: src/screens/Receipts.tsx
 msgid "(uploaded)"
 msgstr "(uploaded)"
@@ -4165,6 +4193,7 @@ msgstr "Open in Google Maps ↗"
 
 #. Link on the Backups screen
 #. Link on the Register screen
+#. Link on the receipts
 #: src/screens/Backups.tsx
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
@@ -4194,6 +4223,7 @@ msgstr "Synced"
 msgid "These are counts, not amounts: this ledger never converts one currency into another, so there is no such thing as a household total. Balances live on the Accounts screen, one per account."
 msgstr "These are counts, not amounts: this ledger never converts one currency into another, so there is no such thing as a household total. Balances live on the Accounts screen, one per account."
 
+#. Button on the receipts
 #: src/screens/Receipts.tsx
 msgid "All"
 msgstr "All"
@@ -4585,7 +4615,11 @@ msgstr "A recovery code cannot be used here. If somebody else has seen your code
 msgid "Credit card"
 msgstr "Credit card"
 
+#. Column name shown beside a value on phones on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md
 #. Heading on the Register screen: noun, a photo or PDF of a receipt. See GLOSSARY.md
+#. Screen-reader name on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md
+#. Screen-reader text on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md
+#. Text in a panel on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md
 #: src/components/Receipts.tsx
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
@@ -4873,6 +4907,7 @@ msgstr "When the statement line"
 msgid "Keep"
 msgstr "Keep"
 
+#. Label on the receipts
 #: src/components/Receipts.tsx
 msgid "Checksum"
 msgstr "Checksum"
@@ -5226,6 +5261,9 @@ msgstr "Reset link for {name}"
 msgid "Your authenticator"
 msgstr "Your authenticator"
 
+#. Column heading on the receipts
+#. Column name shown beside a value on phones on the receipts
+#. Label on the receipts
 #: src/components/Receipts.tsx
 #: src/screens/Receipts.tsx
 msgid "Taken"
@@ -5275,6 +5313,7 @@ msgstr "State"
 msgid "Batch"
 msgstr "Batch"
 
+#. Label on the receipts
 #: src/components/Receipts.tsx
 msgid "Camera"
 msgstr "Camera"
@@ -5931,6 +5970,7 @@ msgstr "type any part of a payee"
 msgid "{0}, then strip"
 msgstr "{0}, then strip"
 
+#. Note on the receipts: how long it has waited, or a queue state
 #: src/components/Receipts.tsx
 msgid "Waiting"
 msgstr "Waiting"
@@ -6217,6 +6257,7 @@ msgstr "{0} journal"
 msgid "{0} was discarded — nothing was written"
 msgstr "{0} was discarded — nothing was written"
 
+#. Button on the receipts
 #: src/screens/Receipts.tsx
 msgid "Thumbnails"
 msgstr "Thumbnails"
@@ -6305,6 +6346,7 @@ msgstr "Build my own"
 msgid "Edit the memo"
 msgstr "Edit the memo"
 
+#. Label on the receipts
 #: src/components/Receipts.tsx
 msgid "approximate — {shown}"
 msgstr "approximate — {shown}"
@@ -6724,6 +6766,9 @@ msgstr "Its author, and their other projects"
 msgid "{0} of {1} shown."
 msgstr "{0} of {1} shown."
 
+#. Column heading on the receipts: noun, where it is
+#. Column name shown beside a value on phones on the receipts: noun, where it is
+#. Label on the receipts: noun, where it is
 #: src/components/Receipts.tsx
 #: src/screens/Receipts.tsx
 msgid "Where"
@@ -6747,6 +6792,7 @@ msgstr "Notes and coins in a wallet or a tin. Nothing imports into it — you en
 
 #. Button on the Application management screen: verb, close this panel
 #. Button on the Your account panel: verb, close this panel
+#. Screen-reader name of a button on the receipts
 #. Screen-reader name of a button on the shared controls
 #. Screen-reader name of a button on the shared controls
 #: src/components/bits.tsx
@@ -6761,6 +6807,7 @@ msgstr "Close"
 #. Heading on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md
 #. Label on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md
 #. Menu item and the name of its screen: noun, photos or PDFs of receipts. See GLOSSARY.md
+#. Screen title on the receipts: noun, photos or PDFs of receipts. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Household.tsx
@@ -6795,6 +6842,7 @@ msgstr "{step}. Or download it and upload it"
 msgid "{count, plural, one {Linked {count} expense to the payment of {paid} on {on}.} other {Linked {count} expenses to the payment of {paid} on {on}.}}"
 msgstr "{count, plural, one {Linked {count} expense to the payment of {paid} on {on}.} other {Linked {count} expenses to the payment of {paid} on {on}.}}"
 
+#. Button on the receipts
 #: src/screens/Receipts.tsx
 msgid "Keep them"
 msgstr "Keep them"
@@ -6946,6 +6994,7 @@ msgstr "Open that import"
 msgid "never"
 msgstr "never"
 
+#. Label on the receipts
 #: src/components/Receipts.tsx
 msgid "Stored as"
 msgstr "Stored as"
