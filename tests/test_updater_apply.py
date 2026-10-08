@@ -24,7 +24,8 @@ ledger and to the containers, not only the state word:
 
 Rows 1, 2, 9, 10 and 24 belong to the app or to intake (U1, A1-A11); 21 is U5
 (`tests/test_updater_resume.py`); 26-28 and 31 are the handover's (#162);
-29 and 30 are the app's.
+29 and 30 are the app's; 12, the pre-update hook, is
+`tests/test_updater_hook.py`'s.
 """
 
 from __future__ import annotations
@@ -335,43 +336,6 @@ def test_row_11_the_sidecar_not_running_is_not_started_and_nothing_moved(tmp_pat
 
 def world_journal_steps(w: World, req: dict) -> list[str]:
     return [s["step"] for s in w.journal(req["id"]).started]
-
-
-@pytest.mark.parametrize("answer", [{"exit": 3}, None])
-def test_row_12_a_failing_or_silent_hook_is_not_started(world, tmp_path, answer):
-    hook = tmp_path / "hook"
-    hook.mkdir()
-    volume.write_json(hook / "hook.json", {"timeout_seconds": 30})
-    service = world.service(hook_dir=hook)
-    service.startup()
-    report = world.prepared(service)
-    req = world.apply_request(report)
-    if answer is not None:
-        volume.write_json(hook / f"{req['id']}.result", answer)
-    world.write_request(req)
-    service.tick()
-    record = world.history(req["id"])
-    assert record["state"] == "not_started"
-    assert record["sentence"] in (
-        "Not started: the pre-update hook failed.",
-        "Not started: the pre-update hook did not answer in time.",
-    )
-    assert volume.read_own_json(hook / f"{req['id']}.request") == {"id": req["id"], "from": A, "to": B}
-    assert touched(world, world.app_id) == [] and world.ledger.drills == 0
-
-
-def test_a_hook_that_succeeds_lets_the_update_run(world, tmp_path):
-    hook = tmp_path / "hook"
-    hook.mkdir()
-    volume.write_json(hook / "hook.json", {})
-    service = world.service(hook_dir=hook)
-    service.startup()
-    report = world.prepared(service)
-    req = world.apply_request(report)
-    volume.write_json(hook / f"{req['id']}.result", {"exit": 0})
-    world.write_request(req)
-    service.tick()
-    assert world.history(req["id"])["state"] == "succeeded" and "2" in world_journal_steps(world, req)
 
 
 def test_row_6_at_preflight_short_memory_is_not_started(world):

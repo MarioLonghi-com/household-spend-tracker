@@ -3126,8 +3126,75 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.backup.protected"
-msgstr ""
+msgstr "{name} é um dos cinco backups de atualização mais recentes. Eles são mantidos para que uma atualização possa ser desfeita, e o atualizador remove os mais antigos sozinho"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.archived_default"
+msgstr "{name} está arquivada, então não pode ser padrão"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.choose_default"
+msgstr "Escolha a categoria a usar sempre"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.group_name_taken"
+msgstr "Já existe um grupo chamado {name}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.group_needs_name"
+msgstr "Um grupo precisa de um nome"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.group_not_empty"
+msgstr "Um grupo só pode ser excluído quando não há categorias nele. {name} ainda contém {held, plural, one {# categoria} other {# categorias}}{archived, plural, =0 {} one {, # delas arquivada} other {, # delas arquivadas}}. Mova ou exclua essas categorias primeiro."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.group_not_found"
+msgstr "Esse grupo de categorias não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.in_use"
+msgstr "{count, plural, one {# transação está categorizada} other {# transações estão categorizadas}} como {name}. Arquive a categoria em vez disso, e as transações mantêm a categoria."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.name_taken"
+msgstr "Já existe uma categoria chamada {name}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.needs_name"
+msgstr "Uma categoria precisa de um nome"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.not_found"
+msgstr "Essa categoria não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.other_household"
+msgstr "Essa categoria pertence a outra casa"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3138,14 +3205,32 @@ msgstr "{code} não é um código de moeda ISO 4217. Confira a grafia, como GBP 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.money.amount_too_large"
+msgstr "Esse valor é grande demais para registrar como dinheiro"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.decimals_in_whole_currency"
 msgstr "{value} tem casas decimais, e {currency} não tem nenhuma"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.money.not_a_value"
+msgstr "{value} não é um valor monetário"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.not_an_amount"
 msgstr "{value} não é um valor que possamos ler. Escreva com ponto antes das casas decimais e sem separador de milhar, como 1234.56 ou -80"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.money.not_whole_minor_units"
+msgstr "{milliunits} milésimos não formam um número inteiro de subunidades de {currency}"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3168,6 +3253,144 @@ msgstr "Um valor com {digits} dígitos é grande demais para registrar como dinh
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.payee.merge_different_households"
+msgstr "Esses favorecidos estão em casas diferentes"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.merge_into_itself"
+msgstr "Um favorecido não pode ser unido a si mesmo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.needs_name"
+msgstr "Um favorecido precisa de um nome"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.other_household"
+msgstr "Esse favorecido pertence a outra casa"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.rule_needs_pattern"
+msgstr "Uma regra precisa de algo para corresponder"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.rule_needs_payee"
+msgstr "Uma regra que indica um favorecido precisa apontar para um favorecido"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.rule_not_a_regex"
+msgstr "Essa não é uma expressão regular válida: {reason}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.rule_pattern_too_long"
+msgstr "Esse padrão é longo demais (máximo de {max} caracteres)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.rule_replacement_on_map"
+msgstr "Uma substituição só faz sentido numa regra que reescreve; esta indica um favorecido"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.rule_replacement_too_long"
+msgstr "Essa substituição é longa demais (máximo de {max} caracteres)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.rule_template_no_groups"
+msgstr "Essa substituição usa {reference}, e o padrão não tem grupos entre parênteses. Coloque parênteses em volta da parte que você quer manter."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.rule_template_no_such_group"
+msgstr "Essa substituição usa {reference}, e o padrão não tem nenhum grupo chamado {name}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.payee.rule_template_too_few_groups"
+msgstr "Essa substituição usa {reference}, e o padrão tem só {groups} grupos entre parênteses"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.profile.current_factor_refused"
+msgstr "Esse não é um código válido do seu aplicativo autenticador atual, nem um código de recuperação não usado"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.profile.needs_authenticator"
+msgstr "Configure um aplicativo autenticador antes de gerar novos códigos de recuperação"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.profile.new_code_wrong"
+msgstr "Esse código não está certo. Confira a hora do seu celular e tente de novo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.profile.recovery_grant_not_needed"
+msgstr "Seu aplicativo autenticador atual ainda pode ser verificado, então comprove com um código dele (ou um código de recuperação não usado) em vez da permissão obtida ao entrar."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.profile.recovery_grant_refused"
+msgstr "Essa permissão para configurar um novo aplicativo autenticador expirou ou não é desta sessão. Use um código de recuperação não usado no lugar dela."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.profile.reenrolment_expired"
+msgstr "Essa nova configuração expirou; comece de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.profile.reenrolment_not_yours"
+msgstr "Essa nova configuração pertence a outra pessoa"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.profile.regenerate_refused"
+msgstr "Essa senha e esse código do autenticador não comprovam que é você"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.profile.same_password"
+msgstr "Essa já é a sua senha"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.profile.wrong_password"
+msgstr "Essa não é a sua senha atual"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.receipt.no_such_copy"
 msgstr "Esse comprovante não tem uma cópia desse tipo"
 
@@ -3186,8 +3409,200 @@ msgstr "Uma linha com data {row_date} é posterior ao fechamento do extrato em {
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.reimbursement.not_a_work_expense_cannot_be_paid"
+msgstr "Uma linha que não é despesa de trabalho não pode ter sido reembolsada por nada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.not_money_in"
+msgstr "Um reembolso é dinheiro que entra, então escolha uma entrada de dinheiro"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.not_money_out"
+msgstr "Só dinheiro saindo de uma conta pode ser despesa de trabalho; esta linha é dinheiro entrando"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.paid_cannot_be_written_off"
+msgstr "Isto já foi reembolsado. Tire o pagamento dele antes de dar como perdido."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.payment_cannot_be_expense"
+msgstr "Esta linha reembolsou despesas de trabalho, então não pode ser uma delas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.reimburses_itself"
+msgstr "Uma transação não pode reembolsar a si mesma"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.settlement_is_work_expense"
+msgstr "Essa linha já é uma despesa de trabalho, então não pode ser também o que reembolsou uma"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.sign_change_on_payment"
+msgstr "Esta linha reembolsou despesas de trabalho, então precisa continuar sendo dinheiro que entra. Tire as despesas dela primeiro se o valor realmente mudou de sentido."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.sign_change_on_work_expense"
+msgstr "Isto é uma despesa de trabalho, então precisa continuar sendo dinheiro que sai. Mude para “Não é despesa de trabalho” primeiro se o valor realmente mudou de sentido."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.transfer_is_not_a_reimbursement"
+msgstr "Uma transferência entre as suas próprias contas não é um reembolso"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.transfer_is_not_a_work_expense"
+msgstr "Isto é um lado de uma transferência, dinheiro passando entre as suas próprias contas. Marque a compra que ela pagou em vez disso."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reimbursement.written_off_cannot_be_paid"
+msgstr "Isto foi dado como perdido. Volte para “O trabalho deve reembolsar” antes de registrar um pagamento."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.split.does_not_add_up"
 msgstr "As partes somam {total} e a transação é de {amount}. Uma divisão precisa fechar, senão altera o saldo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.split.part_count"
+msgstr "Uma divisão tem entre {min} e {max} partes"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.split.repaid_work_expenses"
+msgstr "Este pagamento reembolsou despesas de trabalho. Tire-as dele antes de dividi-lo e depois vincule cada uma à parte que a pagou."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.split.transfer_leg"
+msgstr "Isto é um lado de uma transferência, que é um único movimento de dinheiro registrado duas vezes. Divida o outro lado da transferência também, ou desfaça-a primeiro."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.split.work_expense_money_in"
+msgstr "Cada parte de uma despesa de trabalho precisa ser dinheiro que sai, porque cada parte continua sendo despesa de trabalho"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.split.zero_part"
+msgstr "Uma parte de uma divisão não pode ser zero"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transaction.import_line_exists"
+msgstr "Essa linha do extrato já está nesta conta"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transaction.locked"
+msgstr "Essa transação está bloqueada; volte-a para Compensada antes de editá-la"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transaction.not_found"
+msgstr "Essa transação não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.amount_not_positive"
+msgstr "O valor de uma transferência precisa ser positivo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.arriving_not_positive"
+msgstr "O valor que chega precisa ser positivo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.different_households"
+msgstr "Essas contas estão em casas diferentes"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.duplicate_leg"
+msgstr "Crie uma nova transferência pelo registro, não uma cópia de um lado desta"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.edit_cross_currency_leg"
+msgstr "Edite cada lado de uma transferência entre moedas separadamente; não recalculamos uma taxa de câmbio"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.has_no_category"
+msgstr "Uma transferência não tem categoria"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.link_already_a_transfer"
+msgstr "Uma delas já é uma transferência; desvincule-a primeiro"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.link_no_money"
+msgstr "Uma linha sem dinheiro não pode ser um lado de transferência"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.link_repayment"
+msgstr "Uma delas é o pagamento que reembolsou uma despesa de trabalho, não uma transferência. Tire-a primeiro das despesas que ela reembolsou se for mesmo uma transferência."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.link_same_account"
+msgstr "As duas estão na mesma conta; uma transferência passa entre duas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.link_split_part"
+msgstr "Uma parte de uma divisão não pode ser um lado de transferência"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.link_work_expense"
+msgstr "Uma delas é uma despesa de trabalho, que é dinheiro gasto, não movido. Tire primeiro a marcação de despesa de trabalho se for mesmo uma transferência."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3198,73 +3613,116 @@ msgstr "Uma transferência de {from_currency} para {to_currency} precisa do valo
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.transfer.not_a_transfer"
+msgstr "Essa transação não é uma transferência"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.pair_in_two_households"
+msgstr "Essas transações estão em casas diferentes"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.pair_same_direction"
+msgstr "Uma transferência tira dinheiro de uma conta e o coloca na outra"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.pair_with_itself"
+msgstr "Uma transação não pode ser uma transferência consigo mesma"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.transfer.same_account"
 msgstr "Uma conta não pode transferir para si mesma"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.transfer.sides_differ"
+msgstr "Os dois lados de uma transferência na mesma moeda precisam ter o mesmo valor"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.digest_mismatch"
-msgstr ""
+msgstr "Os digests das imagens não são os que o relatório de preparação verificou. Prepare a atualização de novo"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.engine_refused"
-msgstr ""
+msgstr "O atualizador não consegue usar o motor de contêineres ({socket}), então não pode atualizar nada"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.in_flight"
-msgstr ""
+msgstr "Outro pedido de atualização está aguardando ou em andamento. Espere terminar e tente de novo"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.lossy_mismatch"
-msgstr ""
+msgstr "Marque todas as migrações que não podem ser desfeitas, e só elas: a atualização precisa exatamente das que o relatório lista"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.no_report"
-msgstr ""
+msgstr "Não há atualização preparada com esse id para esta versão. Procure atualizações e prepare-a de novo"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.no_updater"
-msgstr ""
+msgstr "Atualizar por esta tela precisa do atualizador, e nenhum respondeu nos últimos dois minutos"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.not_a_version"
-msgstr ""
+msgstr "{version} não é uma versão de lançamento como 1.2.3"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.not_newer"
-msgstr ""
+msgstr "{to_version} não é mais nova que {running}, que esta instância executa. Uma atualização nunca volta atrás"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.outcome_not_found"
-msgstr ""
+msgstr "Não há resultado de atualização com esse id"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.recovery_code_unknown"
-msgstr ""
+msgstr "Esse código de recuperação expirou ou pertence a outra confirmação. Gere a confirmação de novo para obter um novo"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.updater_not_newer"
-msgstr ""
+msgstr "O atualizador já executa {updater_version}, que não é mais antiga que {to_version}"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.updater_older_than_app"
-msgstr ""
+msgstr "O atualizador de {to_version} é mais antigo que esta instância, que executa {running}, então não aceitaria os pedidos dela"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.updater_outdated"
-msgstr ""
+msgstr "O atualizador é antigo demais para este motor de contêineres. Atualize o atualizador primeiro e tente de novo"
 
 #. Column heading on the Application management screen
 #. Column name shown beside a value on phones on the Application management screen

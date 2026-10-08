@@ -2862,8 +2862,68 @@ msgstr "{name} is one of the newest five update backups. They are kept so an upd
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.category.archived_default"
+msgstr "{name} is archived, so it cannot be a default"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.choose_default"
+msgstr "Choose the category to always use"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_name_taken"
+msgstr "There is already a group called {name}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_needs_name"
+msgstr "A group needs a name"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_not_empty"
+msgstr "A group can only be deleted when there are no categories under it. {name} still holds {held, plural, one {# category} other {# categories}}{archived, plural, =0 {} other {, # of them archived}}. Move or delete them first."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_not_found"
+msgstr "No such category group"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.in_use"
+msgstr "{count, plural, one {# transaction is} other {# transactions are}} categorised as {name}. Archive it instead, and they keep their category."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.name_taken"
+msgstr "There is already a category called {name}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.needs_name"
+msgstr "A category needs a name"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.not_found"
+msgstr "No such category"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.other_household"
+msgstr "That category belongs to a different household"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.currency.not_iso_4217"
 msgstr "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.amount_too_large"
+msgstr "That amount is too large to record as money"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -2872,8 +2932,18 @@ msgstr "{value} has decimals, and {currency} has none"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.money.not_a_value"
+msgstr "{value} is not a monetary value"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.money.not_an_amount"
 msgstr "{value} is not an amount this can read. Write it with a point before the decimals and no thousands separators, like 1234.56 or -80"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.money.not_whole_minor_units"
+msgstr "{milliunits} thousandths is not a whole number of {currency} minor units"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -2892,6 +2962,121 @@ msgstr "An amount {digits} digits long is too large to record as money"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.payee.merge_different_households"
+msgstr "Those payees are in different households"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.merge_into_itself"
+msgstr "A payee cannot be merged into itself"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.needs_name"
+msgstr "A payee needs a name"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.other_household"
+msgstr "That payee belongs to a different household"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_needs_pattern"
+msgstr "A rule needs something to match on"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_needs_payee"
+msgstr "A rule that names a payee needs a payee to point at"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_not_a_regex"
+msgstr "That is not a valid regular expression: {reason}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_pattern_too_long"
+msgstr "That pattern is too long (max {max} characters)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_replacement_on_map"
+msgstr "A replacement only means something on a rule that rewrites; this one names a payee"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_replacement_too_long"
+msgstr "That replacement is too long (max {max} characters)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_template_no_groups"
+msgstr "That replacement uses {reference}, and the pattern has no bracketed groups. Put brackets round the part you want to keep."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_template_no_such_group"
+msgstr "That replacement uses {reference}, and the pattern has no group called {name}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.payee.rule_template_too_few_groups"
+msgstr "That replacement uses {reference}, and the pattern has only {groups} bracketed groups"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.current_factor_refused"
+msgstr "That is not a working code from your current authenticator, or an unused recovery code"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.needs_authenticator"
+msgstr "Set up an authenticator before making new recovery codes"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.new_code_wrong"
+msgstr "That code is not right. Check the time on your phone and try again."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.recovery_grant_not_needed"
+msgstr "Your current authenticator can be checked again, so prove it with a code from it (or an unused recovery code) rather than the permission from signing in."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.recovery_grant_refused"
+msgstr "That permission to set up a new authenticator has expired, or is not for this session. Use an unused recovery code in its place."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.reenrolment_expired"
+msgstr "That re-enrolment has expired; start again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.reenrolment_not_yours"
+msgstr "That re-enrolment belongs to somebody else"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.regenerate_refused"
+msgstr "That password and authenticator code do not prove it is you"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.same_password"
+msgstr "That is already your password"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.wrong_password"
+msgstr "That is not your current password"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.receipt.no_such_copy"
 msgstr "That receipt has no copy of that kind"
 
@@ -2907,8 +3092,168 @@ msgstr "A row dated {row_date} is after the statement closes on {statement_date}
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.reimbursement.not_a_work_expense_cannot_be_paid"
+msgstr "A row that is not a work expense cannot have been paid back by anything"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.not_money_in"
+msgstr "A reimbursement is money arriving, so pick money coming in"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.not_money_out"
+msgstr "Only money leaving an account can be a work expense; this row is money coming in"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.paid_cannot_be_written_off"
+msgstr "This has been paid back. Take the payment off it before writing it off."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.payment_cannot_be_expense"
+msgstr "This row paid work expenses back, so it cannot be one itself"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.reimburses_itself"
+msgstr "A transaction cannot reimburse itself"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.settlement_is_work_expense"
+msgstr "That row is itself a work expense, so it cannot also be what paid one back"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.sign_change_on_payment"
+msgstr "This row paid work expenses back, so it has to stay money coming in. Take the expenses off it first if the amount really changed direction."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.sign_change_on_work_expense"
+msgstr "This is a work expense, so it has to stay money going out. Set it to not a work expense first if the amount really changed direction."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.transfer_is_not_a_reimbursement"
+msgstr "A transfer between your own accounts is not a reimbursement"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.transfer_is_not_a_work_expense"
+msgstr "This is one leg of a transfer, money moving between your own accounts. Flag the purchase it paid for instead."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reimbursement.written_off_cannot_be_paid"
+msgstr "This was written off. Set it back to expected before recording a payment for it."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.split.does_not_add_up"
 msgstr "The parts come to {total} and the transaction is {amount}. A split has to add up, or it moves the balance."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.part_count"
+msgstr "A split is between {min} and {max} parts"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.repaid_work_expenses"
+msgstr "This payment repaid work expenses. Take them off it before splitting it, then link each one to the part that paid it."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.transfer_leg"
+msgstr "This is one leg of a transfer, which is a single movement of money recorded twice. Split the other side of the transfer too, or undo it first."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.work_expense_money_in"
+msgstr "Every part of a work expense has to be money going out, because each part stays a work expense"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.split.zero_part"
+msgstr "A part of a split cannot be zero"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transaction.import_line_exists"
+msgstr "That statement line is already in this account"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transaction.locked"
+msgstr "That transaction is locked; set it back to cleared before editing it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transaction.not_found"
+msgstr "No such transaction"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.amount_not_positive"
+msgstr "A transfer amount must be positive"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.arriving_not_positive"
+msgstr "The amount arriving must be positive"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.different_households"
+msgstr "Those accounts are in different households"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.duplicate_leg"
+msgstr "Make a new transfer from the register, not a copy of one leg of this one"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.edit_cross_currency_leg"
+msgstr "Edit each leg of a cross-currency transfer on its own; we will not re-derive a rate"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.has_no_category"
+msgstr "A transfer has no category"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_already_a_transfer"
+msgstr "One of those is already a transfer; unlink it first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_no_money"
+msgstr "A row with no money in it cannot be a transfer leg"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_repayment"
+msgstr "One of those is the payment that repaid a work expense, not a transfer. Take it off the expenses it repaid first if it really is a transfer."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_same_account"
+msgstr "Both of those are in the same account; a transfer moves between two"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_split_part"
+msgstr "A part of a split cannot be a transfer leg"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.link_work_expense"
+msgstr "One of those is a work expense, which is money spent, not moved. Take the work-expense flag off it first if it really is a transfer."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -2917,8 +3262,33 @@ msgstr "A {from_currency} to {to_currency} transfer needs the amount that arrive
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.transfer.not_a_transfer"
+msgstr "That transaction is not a transfer"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.pair_in_two_households"
+msgstr "Those transactions are in different households"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.pair_same_direction"
+msgstr "A transfer takes money out of one account and into the other"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.pair_with_itself"
+msgstr "A transaction cannot be a transfer with itself"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.transfer.same_account"
 msgstr "An account cannot transfer to itself"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.transfer.sides_differ"
+msgstr "Both sides of a same-currency transfer must be the same amount"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts

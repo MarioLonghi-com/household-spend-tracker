@@ -29,7 +29,7 @@ import time
 from dataclasses import replace
 from pathlib import Path
 
-from updater import detect, heartbeat, shapes, survey
+from updater import detect, heartbeat, hook, shapes, survey
 from updater import engine as eng
 from updater.handover import Successions, own_bind_sources
 from updater.journal import Owner
@@ -121,7 +121,7 @@ def serve(args: argparse.Namespace, trust: Trust) -> None:
         kit.site.volume,
         identity,
         # Configured, not merely mounted: what the confirmation shows as "On".
-        hook=kit.site.hook_dir is not None and (kit.site.hook_dir / "hook.json").is_file(),
+        hook=hook.configured(kit.site.hook_dir) is not None,
         busy=lambda: service.busy or handover.mode != "current",
         role=lambda: service.heartbeat_role,
     )

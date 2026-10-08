@@ -47,6 +47,13 @@ history this repository does not have.
 
 ### Changed
 
+- **A hundred more refusals carry a code for translation.** Transactions,
+  transfers, splits and work expenses, payees and their naming rules,
+  categories, money and the profile panel now answer with a stable `code`
+  and raw `params` beside the same English `detail`, and the client has a
+  catalog message for each. The English a person or an agent reads is
+  unchanged, byte for byte, and agents still get no codes. (#57)
+
 - **A fresh install starts without `SPENDTRACKER_AUTO_MIGRATE=1`.** A first
   `docker compose up -d` against a new volume used to be refused until you
   passed the flag once from a terminal. A database with no tables at all --
@@ -262,6 +269,20 @@ history this repository does not have.
   line in the pin, and still works when the engine has moved past the
   updater's tested API versions. The updater is never replaced by an older
   one. No image or compose service runs the updater yet (#164).
+
+- **An optional pre-update hook for servers** (#168). An operator can have a
+  command of their own run **on the host** before every update -- a Proxmox
+  snapshot of the VM, say -- by installing the systemd path unit, service and
+  runner in `deploy/updater/host-hook/` and mounting their directory into the
+  updater from a server-only `compose.override.yaml` (the README has both,
+  and the snapshot as an example). The updater writes a request naming only
+  the two versions; the runner runs the one root-owned command configured on
+  the host, never anything from the request, and never twice for one update.
+  **A failing hook stops the update before anything changes**: a non-zero
+  exit, a timeout, or no runner answering is *Not started: the pre-update
+  hook failed.*, with the reason and the end of the command's output in the
+  update's history. Without a `hook.json` in that directory the step is
+  skipped and says so; nothing changes for an installation without a hook.
 
 ## 0.8.0 — 2026-10-08
 
@@ -680,7 +701,6 @@ published image as what `compose.yaml` runs.
   holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
   each language uses, and how each writes money and dates. Nothing in the app
   changes. (#174)
-
 ## 0.7.1 — 2026-10-05
 
 **Reversible: none** — no migration in this release. To go back, check out

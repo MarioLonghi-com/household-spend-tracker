@@ -38,8 +38,9 @@ from tests.test_api import _household_with_accounts
 ROOT = Path(__file__).resolve().parent.parent
 
 #: `DomainError` constructions in `app/` and `statements/` that carry no code,
-#: as of #65. **Lower it** when you convert sites; the test fails if it rises.
-CODELESS = 418
+#: as of #57's first wave. **Lower it** when you convert sites; the test fails
+#: if it rises.
+CODELESS = 318
 
 
 @dataclass
@@ -170,7 +171,8 @@ def test_every_template_names_its_params_and_only_those():
             if name == "currency" and "{currency}" not in entry.template:
                 # How a money param is read; the template shows the amount.
                 continue
-            assert "{" + name + "}" in entry.template, (code, name)
+            # `{count}`, or `{count, plural, ...}` where the words follow the number.
+            assert "{" + name + "}" in entry.template or "{" + name + "," in entry.template, (code, name)
         assert code.count(".") >= 1 and code == code.lower(), code
 
 
@@ -428,18 +430,12 @@ def test_a_split_that_does_not_add_up_sends_both_figures_and_the_currency(client
 def test_an_unconverted_refusal_still_answers_with_detail_alone(client):
     world = _two_currencies(client)
     answer = client.post(
-        f"/api/households/{world['household']['id']}/transfers",
-        json={
-            "from_account_id": world["checking"]["id"],
-            "to_account_id": world["card"]["id"],
-            "date": "2026-01-15",
-            "amount": 30_000,
-            "to_amount": 20_000,
-        },
+        f"/api/households/{world['household']['id']}/accounts",
+        json={"name": "Spare", "type": "savings", "opening_date": "2999-01-01"},
         headers=HEADERS,
     )
     assert answer.status_code == 422
-    assert answer.json() == {"detail": "both sides of a same-currency transfer must match"}
+    assert answer.json() == {"detail": "an account cannot have been opened in the future"}
 
 
 # --------------------------------------------------------------------------- #

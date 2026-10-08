@@ -102,16 +102,20 @@ def get_for_household(session: Session, category_id: str, household_id: str) -> 
         )
     ).scalar_one_or_none()
     if category is None:
-        raise NotFound("no such category")
+        raise NotFound("no such category", code="category.not_found")
     return category
 
 
 def create_group(session: Session, household_id: str, name: str) -> CategoryGroup:
     clean = name.strip()
     if not clean:
-        raise ValidationError("a group needs a name")
+        raise ValidationError("a group needs a name", code="category.group_needs_name")
     if _group_named(session, household_id, clean) is not None:
-        raise Conflict(f"there is already a group called {clean!r}")
+        raise Conflict(
+            f"there is already a group called {clean!r}",
+            code="category.group_name_taken",
+            params={"name": clean},
+        )
 
     highest = session.execute(
         select(func.coalesce(func.max(CategoryGroup.sort_order), -1)).where(
@@ -129,7 +133,7 @@ def create_category(
 ) -> Category:
     clean = name.strip()
     if not clean:
-        raise ValidationError("a category needs a name")
+        raise ValidationError("a category needs a name", code="category.needs_name")
 
     group = session.execute(
         select(CategoryGroup).where(
@@ -137,9 +141,13 @@ def create_category(
         )
     ).scalar_one_or_none()
     if group is None:
-        raise NotFound("no such category group")
+        raise NotFound("no such category group", code="category.group_not_found")
     if _category_named(session, household_id, clean) is not None:
-        raise Conflict(f"there is already a category called {clean!r}")
+        raise Conflict(
+            f"there is already a category called {clean!r}",
+            code="category.name_taken",
+            params={"name": clean},
+        )
 
     highest = session.execute(
         select(func.coalesce(func.max(Category.sort_order), -1)).where(
@@ -166,10 +174,14 @@ def update_category(
     if name is not None:
         clean = name.strip()
         if not clean:
-            raise ValidationError("a category needs a name")
+            raise ValidationError("a category needs a name", code="category.needs_name")
         clash = _category_named(session, category.household_id, clean)
         if clash is not None and clash.id != category.id:
-            raise Conflict(f"there is already a category called {clean!r}")
+            raise Conflict(
+                f"there is already a category called {clean!r}",
+                code="category.name_taken",
+                params={"name": clean},
+            )
         category.name = clean
 
     if group_id is not None:
@@ -180,7 +192,7 @@ def update_category(
             )
         ).scalar_one_or_none()
         if group is None:
-            raise NotFound("no such category group")
+            raise NotFound("no such category group", code="category.group_not_found")
         category.group_id = group.id
 
     if archived is not None:
@@ -193,10 +205,14 @@ def update_category(
 def rename_group(session: Session, group: CategoryGroup, name: str) -> CategoryGroup:
     clean = name.strip()
     if not clean:
-        raise ValidationError("a group needs a name")
+        raise ValidationError("a group needs a name", code="category.group_needs_name")
     clash = _group_named(session, group.household_id, clean)
     if clash is not None and clash.id != group.id:
-        raise Conflict(f"there is already a group called {clean!r}")
+        raise Conflict(
+            f"there is already a group called {clean!r}",
+            code="category.group_name_taken",
+            params={"name": clean},
+        )
     group.name = clean
     return group
 
@@ -223,7 +239,9 @@ def delete_category(session: Session, category: Category) -> None:
         raise Conflict(
             f"{count} transaction{'s' if count != 1 else ''} "
             f"{'are' if count != 1 else 'is'} categorised as {category.name!r}. "
-            "Archive it instead, and they keep their category."
+            "Archive it instead, and they keep their category.",
+            code="category.in_use",
+            params={"count": count, "name": category.name},
         )
     # `payees.default_category_id` is ON DELETE SET NULL, and nothing on
     # Category points back at payees, so the audit hook never saw the database
@@ -259,7 +277,9 @@ def delete_group(session: Session, group: CategoryGroup) -> None:
         raise Conflict(
             "A group can only be deleted when there are no categories under it. "
             f"{group.name!r} still holds {held} categor{'ies' if held != 1 else 'y'}{hidden}. "
-            "Move or delete them first."
+            "Move or delete them first.",
+            code="category.group_not_empty",
+            params={"name": group.name, "held": held, "archived": archived},
         )
     session.delete(group)
 
@@ -374,10 +394,16 @@ def set_rule(
         if category_id:
             category = get_for_household(session, category_id, payee.household_id)
             if category.archived:
-                raise ValidationError(f"{category.name!r} is archived, so it cannot be a default")
+                raise ValidationError(
+                    f"{category.name!r} is archived, so it cannot be a default",
+                    code="category.archived_default",
+                    params={"name": category.name},
+                )
             payee.default_category_id = category.id
         elif payee.default_category_id is None:
-            raise ValidationError("choose the category to always use")
+            raise ValidationError(
+                "choose the category to always use", code="category.choose_default"
+            )
         # No category given but one already stored: switching back to "always
         # this one" means the one you picked before. Demanding it again would
         # make trying history for a week cost you the choice.

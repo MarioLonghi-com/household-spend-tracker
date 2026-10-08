@@ -1,0 +1,16 @@
+# Spend Tracker's pre-update hook: run the operator's command for each request.
+# Started by spend-tracker-hook.path; not enabled on its own. See README.md.
+
+[Unit]
+Description=Spend Tracker pre-update hook: run the configured command
+
+[Service]
+Type=oneshot
+# -I: the runner imports nothing from the working directory or the environment.
+ExecStart=/usr/bin/python3 -I /usr/local/lib/spend-tracker/hook-runner \
+    --dir /var/lib/spend-tracker/hook \
+    --command /etc/spend-tracker/pre-update-hook
+# The runner stops the command at timeout_seconds from hook.json (at most an
+# hour); this is the backstop above that.
+TimeoutStartSec=65min
+UMask=0022
