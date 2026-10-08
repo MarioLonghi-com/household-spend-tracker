@@ -430,6 +430,11 @@ msgstr "The passkey prompt was closed, so nothing was added."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.currency.not_iso_4217"
+msgstr "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or EUR"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.money.decimals_in_whole_currency"
 msgstr "{value} has decimals, and {currency} has none"
 

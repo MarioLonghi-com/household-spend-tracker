@@ -187,6 +187,14 @@ history this repository does not have.
   Playwright pass runs in it at phone width. CI fails when the catalogs are
   behind the source. Nothing an English reader sees changes. (#53)
 
+- **An invariant suite over randomised ledgers.** Twelve seeds each build a
+  ledger in two households: rows, transfers within and across currencies,
+  edits, splits and deletes. The suite then holds four things true of any
+  ledger: every balance is the sum of its rows, by every route that reports
+  one; transfer pairs point at each other and net to zero within a currency;
+  undoing a run of acts gives back every column of every row; and no total
+  crosses currencies. A failing seed is reproduced by its number. (#107)
+
 - **The database file is looked after, not only its rows.** Every
   housekeeping sweep now ends with a `wal_checkpoint(TRUNCATE)`, so the
   `-wal` file goes back to zero instead of staying at the size the biggest
@@ -389,6 +397,13 @@ history this repository does not have.
   stops new refusals arriving without one. (#65)
 
 ### Documentation
+
+- **The README shows the register**, from the demo household `make seed`
+  creates, so every name and figure in it is invented. There is also a
+  `CITATION.cff`. The data-hygiene test now lets screenshots live under
+  `docs/screenshots/` if they are PNGs with no metadata chunks. It skips
+  `CITATION.cff`'s two author lines, as it already skipped the copyright
+  line. (#111)
 
 - **Passkeys for operators:** the README section *Passkeys, and choosing the
   host name first* says how an instance can be reached for passkeys to work,
