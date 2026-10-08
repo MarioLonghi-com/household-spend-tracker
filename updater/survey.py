@@ -161,8 +161,12 @@ def published_ref(image: Mapping | None, config_image: str | None) -> str | None
     return None
 
 
-def app(client: eng.EngineClient, name: str | None = None) -> App:
-    """Find and inspect the app. Raises `NotStarted` with the sentence when it cannot go on."""
+def app(client: eng.EngineClient, name: str | None = None, *, pod_ok: bool = False) -> App:
+    """Find and inspect the app. Raises `NotStarted` with the sentence when it cannot go on.
+
+    `pod_ok` is for detection, which needs only what the app runs: a request
+    is then refused for the pod itself, not mistaken for a local build.
+    """
     if name is None:
         listed = app_listing(client.containers())
         if listed is None:
@@ -171,7 +175,7 @@ def app(client: eng.EngineClient, name: str | None = None) -> App:
     elif find(client, name) is None:
         raise NotStarted(f"The updater cannot find the app container {name}.")
     seen = client.inspect(name)
-    if shapes.in_pod(seen):
+    if shapes.in_pod(seen) and not pod_ok:
         raise NotStarted(shapes.POD_SENTENCE)
     ledger = shapes.volume_at(seen, shapes.LEDGER_PATH)
     if not ledger:

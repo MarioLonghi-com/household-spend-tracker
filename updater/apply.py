@@ -709,6 +709,7 @@ class Apply:
         result = self.runner.run(self.name("restore"), body, RESTORE_SECONDS)
         if result.exit_code != 0:
             raise StepFailed(f"the backup could not be restored (exit {result.exit_code})")
+        self.remember(restored=True)
 
     def r3(self) -> None:
         self.start("R3", "Starting the previous version.")
@@ -742,14 +743,15 @@ class Apply:
 
     def finish_rolled_back(self) -> str:
         reason = self.ctx.get("rollback_reason") or INTERRUPTED
-        restored = (
-            "the ledger was restored"
-            if self.ctx.get("backup") and reason != SENTENCE_BY_EXIT[1]
-            else NOT_MIGRATED
-        )
+        if self.ctx.get("restored"):
+            tail = "; the ledger was restored"
+        elif NOT_MIGRATED in reason:
+            tail = ""
+        else:
+            tail = f"; {NOT_MIGRATED}"
         return self._finish(
             "rolled_back",
-            f"Rolled back to {self.ctx.get('old_version')}: {reason}; {restored}.",
+            f"Rolled back to {self.ctx.get('old_version')}: {reason}{tail}.",
             failed_step=self.ctx.get("failed_step"),
         )
 

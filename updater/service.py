@@ -51,7 +51,7 @@ class Service:
             with contextlib.suppress(
                 survey.NotStarted, eng.EngineError, eng.NotAllowed, eng.EngineUnavailable
             ):
-                app = survey.app(self.kit.client).running_app  # type: ignore[assignment]
+                app = survey.app(self.kit.client, pod_ok=True).running_app  # type: ignore[assignment]
         return contract.Context(
             app=app,
             updater_version=self.kit.site.me.version,

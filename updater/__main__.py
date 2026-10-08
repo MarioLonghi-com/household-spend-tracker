@@ -32,9 +32,15 @@ DEFAULT_PROJECT = "spend-tracker"
 UPDATE_MOUNT = "/update"
 
 
-def identify(client: eng.EngineClient) -> tuple[Owner, str | None]:
-    """This updater as the journal names it, and the engine name of its `update` volume."""
-    own = detect.find_own_container(client.containers())
+def identify(
+    client: eng.EngineClient, mountinfo: str | None = None, hostname: str | None = None
+) -> tuple[Owner, str | None]:
+    """This updater as the journal names it, and the engine name of its `update` volume.
+
+    Its digest comes from its own image's `RepoDigests`, read by image id (R27).
+    Outside a container -- the CI job runs it as a process -- it is unnamed.
+    """
+    own = detect.find_own_container(client.containers(), mountinfo, hostname)
     if own is None:
         return Owner(image_digest="", version="0.0.0", container=""), None
     name = detect.container_name(own)

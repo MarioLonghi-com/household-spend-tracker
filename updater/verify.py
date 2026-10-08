@@ -358,7 +358,12 @@ def resolve(
     _check_version(version)
     registry = registry or Registry()
     token = registry.token(path)
-    body = registry.manifest(path, version, token, RESOLVE_TYPES)
+    try:
+        body = registry.manifest(path, version, token, RESOLVE_TYPES)
+    except Refused as e:
+        if e.detail == "the registry has no attestation for this image":  # its 404, on a tag
+            raise Refused("release", f"the registry has no {version} of this image") from None
+        raise
     digest = "sha256:" + hashlib.sha256(body).hexdigest()
     doc = _json(body, "the release's manifest")
     if not isinstance(doc, dict):

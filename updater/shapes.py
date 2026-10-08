@@ -283,8 +283,12 @@ def copy_app(
         if not sidecar_id:
             raise ValueError("the sidecar layout needs the sidecar's id as it is now")
         host["NetworkMode"] = f"container:{sidecar_id}"
-        host.pop("PortBindings", None)
-        host.pop("PublishAllPorts", None)
+        # An engine refuses a port binding beside a container network mode;
+        # the sidecar layout has none to lose (S16), and empty ones are kept.
+        if host.get("PortBindings"):
+            host.pop("PortBindings")
+        if host.get("PublishAllPorts"):
+            host.pop("PublishAllPorts")
         body.pop("Domainname", None)
     else:
         host["NetworkMode"] = mode
