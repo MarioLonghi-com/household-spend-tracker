@@ -178,7 +178,7 @@ e2e:  ## end to end in a real browser, desktop and phone
 	cd client && npm run e2e
 
 lint:  ## ruff, the bulk-statement grep, and the client's typecheck
-	./.venv/bin/ruff check app/ statements/ tests/ scripts/
+	./.venv/bin/ruff check app/ statements/ updater/ tests/ scripts/
 	@./scripts/no-bulk-statements.sh
 	cd client && npx tsc -b --noEmit
 

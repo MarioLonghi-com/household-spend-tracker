@@ -18,8 +18,9 @@ msgid "Application management"
 msgstr "Gerenciamento do aplicativo"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "To"
-msgstr ""
+msgstr "Para"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -178,12 +179,6 @@ msgstr "As chaves de acesso exigem que este app seja aberto no endereço HTTPS d
 msgid "New household"
 msgstr "Nova casa"
 
-#. placeholder {0}: leg.account_name
-#. placeholder {1}: formatDate(leg.date)
-#: src/screens/TransferSections.tsx
-msgid "Select {0} {1}"
-msgstr ""
-
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "What it may do"
@@ -238,10 +233,6 @@ msgstr "Você já entrou"
 msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
 msgstr "A chave secreta deste servidor foi substituída, então seu autenticador não funciona mais aqui e, até você configurar um novo, cada entrada vai pedir outro código de recuperação."
 
-#: src/screens/TransferSections.tsx
-msgid "Unlink"
-msgstr ""
-
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody reset {user}'s password and authenticator"
@@ -274,7 +265,6 @@ msgid "Once it is confirmed, keep only this entry for the account in your app: t
 msgstr "Depois de confirmado, mantenha só esta entrada da conta no aplicativo: a antiga não funciona aqui, nem uma que você escaneou antes e nunca confirmou."
 
 #: src/screens/Passkeys.tsx
-#: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Actions"
 msgstr "Ações"
@@ -362,10 +352,6 @@ msgstr "Aparência"
 msgid "None yet"
 msgstr "Nenhuma ainda"
 
-#: src/screens/TransferSections.tsx
-msgid "Account"
-msgstr ""
-
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "never used"
@@ -398,10 +384,6 @@ msgstr "Alterá-la desconecta todos os outros navegadores e esquece todos os con
 msgid "{by} reset {user}'s password and authenticator"
 msgstr "{by} redefiniu a senha e o autenticador de {user}"
 
-#: src/screens/TransferSections.tsx
-msgid "Into"
-msgstr ""
-
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Add a second on another device. If you lose this one, you will need your password and code."
@@ -411,10 +393,6 @@ msgstr "Adicione uma segunda em outro dispositivo. Se perder esta, você vai pre
 #, fuzzy
 msgid "Your new recovery codes"
 msgstr "Seus novos códigos de recuperação"
-
-#: src/screens/TransferSections.tsx
-msgid "Not a transfer — categorise as…"
-msgstr ""
 
 #. placeholder {0}: offer.secret
 #. placeholder {0}: owed.offer.secret
@@ -448,26 +426,19 @@ msgid "or"
 msgstr "ou"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Add transfer"
-msgstr ""
+msgstr "Adicionar transferência"
 
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "receipt filer"
 msgstr "arquivador de comprovantes"
 
-#: src/screens/TransferSections.tsx
-msgid "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
-msgstr ""
-
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
 msgstr "{revoked, plural, one {{revoked} navegador confiável vai pedir um código de novo.} other {{revoked} navegadores confiáveis vão pedir um código de novo.}}"
-
-#: src/screens/TransferSections.tsx
-msgid "Select every waiting row"
-msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -533,10 +504,6 @@ msgstr "Se você não tem mais o autenticador antigo, use aqui um dos seus códi
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: src/screens/TransferSections.tsx
-msgid "Why"
-msgstr ""
-
 #: src/screens/Profile.tsx
 #: src/screens/ResetAccount.tsx
 #, fuzzy
@@ -550,8 +517,9 @@ msgstr "As duas não coincidem."
 
 #. placeholder {0}: to!.currency
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Amount arriving ({0})"
-msgstr ""
+msgstr "Valor que chega ({0})"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
@@ -570,8 +538,9 @@ msgid "Reset: password and authenticator"
 msgstr "Redefinição: senha e autenticador"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "From"
-msgstr ""
+msgstr "De"
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -664,8 +633,9 @@ msgstr "Código"
 #. placeholder {1}: from.name
 #. placeholder {2}: to?.name
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "<0>{0}</0> leaves {1} and the same arrives in {2}."
-msgstr ""
+msgstr "<0>{0}</0> sai de {1} e o mesmo valor chega em {2}."
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -702,15 +672,10 @@ msgstr "Uma casa reúne as contas e o registro. A moeda aqui só é usada nos to
 msgid "Transfers"
 msgstr "Transferências"
 
-#. placeholder {0}: ticked.size
-#: src/screens/TransferSections.tsx
-msgid "Categorise {0} selected as…"
-msgstr ""
-
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Cleared"
-msgstr "Apagado"
+msgstr "Compensado"
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
@@ -758,12 +723,14 @@ msgid "{inviter} invited you to {PRODUCT} as an owner."
 msgstr "{inviter} convidou você para o {PRODUCT} como proprietário."
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Pick two different accounts — money cannot move to itself."
-msgstr ""
+msgstr "Escolha duas contas diferentes — o dinheiro não pode ir para a mesma conta."
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "No minus signs — the direction is the two accounts above."
-msgstr ""
+msgstr "Sem sinal de menos — o sentido vem das duas contas acima."
 
 #: src/components/SignInNotice.tsx
 #, fuzzy
@@ -779,10 +746,6 @@ msgstr "Revogar"
 #, fuzzy
 msgid "Don't ask on this browser for 30 days"
 msgstr "Não perguntar neste navegador por 30 dias"
-
-#: src/screens/TransferSections.tsx
-msgid "Nothing waiting."
-msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
@@ -800,9 +763,9 @@ msgid "Set up {PRODUCT}"
 msgstr "Configurar o {PRODUCT}"
 
 #: src/screens/Transfer.tsx
-#: src/screens/TransferSections.tsx
+#, fuzzy
 msgid "Amount"
-msgstr ""
+msgstr "Valor"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -818,10 +781,6 @@ msgstr "Adicionado como proprietário"
 #, fuzzy
 msgid "The server reset {user}'s authenticator"
 msgstr "O servidor redefiniu o autenticador de {user}"
-
-#: src/screens/TransferSections.tsx
-msgid "Not a transfer"
-msgstr ""
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -926,8 +885,9 @@ msgid "You still have 1 passkey, and a recovery code leaves them working. If one
 msgstr "Você ainda tem 1 chave de acesso, e um código de recuperação não as desativa. Se uma estava no dispositivo que você perdeu, remova-a em Formas de entrar no seu perfil — seu nome no menu."
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Memo"
-msgstr ""
+msgstr "Descrição"
 
 #: src/App.tsx
 #, fuzzy
@@ -955,8 +915,9 @@ msgid "{user} set up this instance as its owner"
 msgstr "{user} configurou esta instância como proprietário"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "This writes both rows as one act, so undoing it from History takes both back together."
-msgstr ""
+msgstr "Isto grava as duas linhas como um único ato, então desfazer pelo Histórico remove as duas juntas."
 
 #: src/App.tsx
 #, fuzzy
@@ -972,14 +933,6 @@ msgstr "Até lá, cada entrada vai pedir outro código de recuperação. Para fa
 #, fuzzy
 msgid "Setting it up takes one of your recovery codes."
 msgstr "Configurá-lo gasta um dos seus códigos de recuperação."
-
-#: src/screens/TransferSections.tsx
-msgid "Every link has a name or a person behind it."
-msgstr ""
-
-#: src/screens/TransferSections.tsx
-msgid "Waiting for the other statement"
-msgstr ""
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -1025,8 +978,9 @@ msgid "Signed in as <0>{0}</0> ({1})."
 msgstr "Conectado como <0>{0}</0> ({1})."
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
-msgstr ""
+msgstr "Os dois, porque as contas estão em moedas diferentes e não vamos inventar uma taxa de câmbio — use o valor que seu banco de fato creditou."
 
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
@@ -1095,9 +1049,9 @@ msgid "Your account is under your name in the menu."
 msgstr "Sua conta fica no seu nome, no menu."
 
 #: src/screens/Transfer.tsx
-#: src/screens/TransferSections.tsx
+#, fuzzy
 msgid "Date"
-msgstr ""
+msgstr "Data"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -1131,12 +1085,9 @@ msgstr "Se você não esperava por isso, avise um proprietário desta instância
 
 #. placeholder {0}: from.currency
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Amount leaving ({0})"
-msgstr ""
-
-#: src/screens/TransferSections.tsx
-msgid "Description"
-msgstr ""
+msgstr "Valor que sai ({0})"
 
 #: src/App.tsx
 #, fuzzy
@@ -1252,10 +1203,6 @@ msgstr "Um código de recuperação não pode ser usado aqui. Se alguém viu seu
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "Sua senha para {email} foi redefinida pelo servidor em {when}. Todos os navegadores em que você estava conectado foram desconectados. Defina-a de novo abaixo."
 
-#: src/screens/TransferSections.tsx
-msgid "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
-msgstr ""
-
 #. placeholder {0}: passkey.rp_id
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -1328,10 +1275,6 @@ msgstr "Configurar um novo autenticador"
 #, fuzzy
 msgid "the server answered {0}"
 msgstr "o servidor respondeu {0}"
-
-#: src/screens/TransferSections.tsx
-msgid "Keep"
-msgstr ""
 
 #: src/components/StepUp.tsx
 #: src/screens/Profile.tsx
@@ -1450,10 +1393,6 @@ msgstr "Manter"
 #, fuzzy
 msgid "You have not given a key to anything."
 msgstr "Você não deu uma chave para nada."
-
-#: src/screens/TransferSections.tsx
-msgid "Out of"
-msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1595,8 +1534,9 @@ msgid "Keys for programs"
 msgstr "Chaves para programas"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "12,34"
-msgstr ""
+msgstr "12,34"
 
 #. placeholder {0}: recovery.data.unused
 #: src/screens/Profile.tsx
@@ -1633,8 +1573,9 @@ msgstr "Todos os códigos que você tem agora, usados ou não, deixam de funcion
 #. placeholder {0}: to!.currency
 #. placeholder {1}: from!.currency
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "That works out at <0>{impliedRate}</0> {0} per {1}."
-msgstr ""
+msgstr "Isso dá <0>{impliedRate}</0> {0} por {1}."
 
 #. placeholder {0}: tokenPath ?? t`the data directory`
 #: src/screens/Setup.tsx
@@ -1720,8 +1661,9 @@ msgid "Set up again"
 msgstr "Configurar de novo"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
-msgstr ""
+msgstr "Uma transferência precisa de duas contas abertas. Adicione outra na tela Contas primeiro."
 
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
@@ -1792,8 +1734,9 @@ msgid "Somebody made {user} an owner"
 msgstr "Alguém tornou {user} proprietário"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Add transfer between accounts"
-msgstr ""
+msgstr "Adicionar transferência entre contas"
 
 #. placeholder {0}: formatInstant(key.revoked_at)
 #: src/screens/Profile.tsx
@@ -1827,18 +1770,15 @@ msgstr "{inviter} convidou você para o {PRODUCT} como membro, em {households}."
 msgid "I have saved it"
 msgstr "Já guardei"
 
-#: src/screens/TransferSections.tsx
-msgid "Linked by history only"
-msgstr ""
-
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "{by} re-enabled {user}"
 msgstr "{by} reativou {user}"
 
 #: src/screens/Transfer.tsx
+#, fuzzy
 msgid "Transfer"
-msgstr ""
+msgstr "Transferir"
 
 #: src/screens/Profile.tsx
 #, fuzzy
