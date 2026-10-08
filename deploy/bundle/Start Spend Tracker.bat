@@ -86,13 +86,14 @@ set "ANSWER=%TEMP%\spend-tracker-launch-%RANDOM%.txt"
 %ENGINE% run --rm --network none --user 0:0 --security-opt label=disable !MOUNTS! --entrypoint python "%UPDATER_IMAGE%" -m updater.launch --bundle-app "%APP_IMAGE%" --bundle-updater "%UPDATER_IMAGE%" --host-dir "%HERE%" --engine-socket "%SOCK%" !EXTRA! > "%ANSWER%"
 set "STATUS=%ERRORLEVEL%"
 
-set "KIND=" & set "PODMAN_RESTART=" & set "APP=" & set "UPDATER=" & set "PLACARD="
+set "KIND=" & set "PODMAN_RESTART=" & set "APP=" & set "UPDATER=" & set "PLACARD=" & set "MADE_BY="
 for /f "usebackq tokens=1,* delims==" %%a in ("%ANSWER%") do (
   if "%%a"=="ENGINE" set "KIND=%%b"
   if "%%a"=="PODMAN_RESTART" set "PODMAN_RESTART=%%b"
   if "%%a"=="APP" set "APP=%%b"
   if "%%a"=="UPDATER" set "UPDATER=%%b"
   if "%%a"=="PLACARD" set "PLACARD=%%b"
+  if "%%a"=="COMPOSE" set "MADE_BY=%%b"
   if "%%a"=="SAY" echo %%b
 )
 del "%ANSWER%" >nul 2>&1
@@ -107,6 +108,29 @@ if not defined KIND (
   goto :stop
 )
 echo Engine: %KIND%.
+
+rem ---------------------------------------------------------------------------
+rem Which compose (#247): the one that created the project, from its labels.
+rem `podman compose` hands the work to docker-compose whenever that is
+rem installed, and docker-compose refuses a stack podman-compose made; Podman
+rem takes the provider from PODMAN_COMPOSE_PROVIDER.
+rem ---------------------------------------------------------------------------
+
+set "PROVIDER="
+if "%MADE_BY%"=="podman-compose" (
+  for /f "delims=" %%p in ('where podman-compose 2^>nul') do if not defined PROVIDER set "PROVIDER=%%p"
+  if not defined PROVIDER (
+    set "WHY=This Spend Tracker was created with podman-compose, which was not found. Install it, then open this launcher again."
+    goto :stop
+  )
+)
+if "%MADE_BY%"=="docker-compose" if "%ENGINE%"=="podman" (
+  for /f "delims=" %%p in ('where docker-compose 2^>nul') do if not defined PROVIDER set "PROVIDER=%%p"
+)
+if defined PROVIDER (
+  set "PODMAN_COMPOSE_PROVIDER=!PROVIDER!"
+  echo Using %MADE_BY%, which created this Spend Tracker.
+)
 
 rem ---------------------------------------------------------------------------
 rem Coming back after a restart (S2, S21): podman-restart inside the machine

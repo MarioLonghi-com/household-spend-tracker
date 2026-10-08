@@ -21,7 +21,9 @@ and this module
    were started from (`/previous`, when the zip was unzipped into a new
    folder), else this folder's; in each, `.env` first and `pin/release.env`,
    the updater's record, second;
-3. applies **the launcher's rule (C5, 9.2)** in `choose()`;
+3. applies **the launcher's rule (C5, 9.2)** in `choose()`, and reads which
+   compose created the project from its containers' labels (`compose_of`,
+   #247);
 4. writes the result into this folder's `.env` -- the pin, when there is one,
    and the per-engine settings compose reads (`SPENDTRACKER_ENGINE_SOCKET`,
    `SPENDTRACKER_SOCKET_GID`, `SPENDTRACKER_UPDATER_USER`) -- every other line
@@ -48,7 +50,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-from updater import detect, pin
+from updater import detect, pin, survey
 from updater import engine as eng
 from updater.contract import label_version, parse_version
 
@@ -60,7 +62,14 @@ GID_KEY = "SPENDTRACKER_SOCKET_GID"
 USER_KEY = "SPENDTRACKER_UPDATER_USER"
 
 #: The lines a launcher reads, in the order they are printed. `SAY` repeats.
-ANSWER_KEYS = ("ENGINE", "PODMAN_RESTART", "LINGER", "CHGRP", "APP", "UPDATER", "PLACARD", "SAY")
+ANSWER_KEYS = ("ENGINE", "PODMAN_RESTART", "LINGER", "CHGRP", "APP", "UPDATER", "PLACARD", "COMPOSE", "SAY")
+
+#: The two compose implementations a project can have been created by (#247).
+PODMAN_COMPOSE = "podman-compose"
+DOCKER_COMPOSE = "docker-compose"
+#: Labels podman-compose writes and docker-compose never does. podman-compose
+#: writes compose's own `com.docker.compose.*` as well, so those say nothing.
+PODMAN_COMPOSE_LABELS = "io.podman.compose."
 
 #: Detections the launcher stops on: nothing about the engine can be decided.
 #: `too_old` and `outdated` are said and passed: the app runs, and the
@@ -141,6 +150,45 @@ def choose(found: Mapping[str, str], bundle_app: str, bundle_updater: str) -> Ch
             updater = bundle_updater
             said.append(f"The updater is replaced: {_text(mine)} by {_text(theirs)} from this download.")
     return Choice(app, updater, tuple(said))
+
+
+# --------------------------------------------------------------------------- #
+# Which compose (#247)
+# --------------------------------------------------------------------------- #
+
+
+def compose_of(listing: list[dict]) -> str | None:
+    """The compose implementation that created the project, from its containers' labels.
+
+    `podman compose` hands the work to docker-compose whenever that is
+    installed, and docker-compose refuses a stack podman-compose created (its
+    network lacks compose's labels). So the launcher must run the one that made
+    the project: podman-compose when the project's containers carry
+    `io.podman.compose.*` labels, docker-compose otherwise. None when the
+    project has no container yet -- a first install -- and the engine's own
+    choice stands.
+
+    The app's container decides, then the updater's, then any other the
+    updater did not create; the updater's copies keep the labels they copy.
+    """
+    def rank(c: dict) -> int:
+        return {"app": 0, "updater": 1}.get(survey.service_of(c.get("Labels")) or "", 2)
+
+    made = sorted((c for c in listing if not survey.is_oneoff(c)), key=rank)
+    if not made:
+        return None
+    labels = made[0].get("Labels") if isinstance(made[0].get("Labels"), dict) else {}
+    return PODMAN_COMPOSE if any(str(k).startswith(PODMAN_COMPOSE_LABELS) for k in labels) else DOCKER_COMPOSE
+
+
+def project_compose(client: eng.EngineClient) -> str | None:
+    """`compose_of` the project's containers, or None when the engine will not list them."""
+    try:
+        if client.negotiated is None:
+            client.negotiate()
+        return compose_of(client.containers())
+    except (eng.EngineError, eng.EngineUnavailable, eng.NotAllowed, OSError):
+        return None
 
 
 # --------------------------------------------------------------------------- #
@@ -266,11 +314,10 @@ def answer(lines: list[tuple[str, str]]) -> str:
 
 def run(args: argparse.Namespace, detection: detect.Detection | None = None) -> tuple[int, str]:
     """Steps 1-5 of the module docstring. Returns the exit status and what to print."""
+    client = eng.EngineClient(args.socket, eng.Scope(project=PROJECT))
     if detection is None:
         refused = detect.check_socket_target(args.engine_socket)
-        detection = refused or detect.detect(
-            eng.EngineClient(args.socket, eng.Scope(project=PROJECT)), args.host_dir
-        )
+        detection = refused or detect.detect(client, args.host_dir)
     if detection.engine is None or detection.socket in STOPS:
         return 2, answer([("SAY", detection.sentence or "The container engine could not be identified.")])
 
@@ -300,6 +347,7 @@ def run(args: argparse.Namespace, detection: detect.Detection | None = None) -> 
         # The label filter that finds the updater's maintenance page (R30),
         # spelt where the updater spells it rather than in three launchers.
         ("PLACARD", f"{eng.ROLE_LABEL}=placard"),
+        ("COMPOSE", project_compose(client) or ""),
     ]
     if detection.sentence:
         lines.append(("SAY", detection.sentence))

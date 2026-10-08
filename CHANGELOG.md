@@ -48,6 +48,12 @@ history this repository does not have.
   update caught by it failed instead of waiting for the engine and resuming
   from its journal. (#247)
 
+- **The release zip's launcher runs the compose that created your Spend
+  Tracker.** With both docker-compose and podman-compose installed, `podman
+  compose` hands the work to docker-compose, which refuses a stack
+  podman-compose made. The launcher now reads which one made it from the
+  containers' labels and tells Podman to use that one. (#247)
+
 - **Starting the previous app by hand no longer spoils an update.** While an
   update runs, the stopped app is kept as `…-previous`; started from Docker
   Desktop's list, its `unless-stopped` policy kept it coming back and it

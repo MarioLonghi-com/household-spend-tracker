@@ -952,15 +952,13 @@ class Run:
             (shim / "docker").write_text("#!/bin/sh\nexit 127\n")
             (shim / "docker").chmod(0o755)
             env["PATH"] = f"{shim}:{env.get('PATH', '')}"
-            # And `podman compose` takes Docker's compose plugin over
-            # podman-compose when both are installed, as on the runner; the
-            # stack was made by podman-compose, whose network docker-compose
-            # refuses ("incorrect label com.docker.compose.network").
-            import shutil
-
-            provider = shutil.which("podman-compose")
-            if provider:
-                env["PODMAN_COMPOSE_PROVIDER"] = provider
+            # `podman compose` takes Docker's compose plugin over
+            # podman-compose when both are installed, as on the runner, and
+            # docker-compose refuses the stack podman-compose made ("incorrect
+            # label com.docker.compose.network"). The launcher now runs the
+            # compose that made the project (#247), so nothing is set here:
+            # this leg is that machine with both installed.
+            env.pop("PODMAN_COMPOSE_PROVIDER", None)
         else:
             env["DOCKER_HOST"] = f"unix://{self.leg.socket}"
         env["SPENDTRACKER_HEALTH_TIMEOUT"] = "240"
@@ -970,6 +968,11 @@ class Run:
         )  # fmt: skip
         print("   " + (done.stdout + done.stderr).strip().replace("\n", "\n   ")[-4000:])
         r.check(done.returncode == 0, f"the launcher, run headless, exits 0 ({done.returncode})")
+        if self.leg.compose[0].startswith("podman"):
+            r.check(
+                "Using podman-compose, which created this Spend Tracker." in done.stdout,
+                "the launcher chose podman-compose, which made the stack (#247)",
+            )
         apps = s.running("app")
         upds = s.running("updater")
         r.check(
