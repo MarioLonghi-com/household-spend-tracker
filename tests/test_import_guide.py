@@ -18,9 +18,12 @@ from statements import sniffing
 # Reads files outside the backend; runs on every pull request. See tests.yml.
 pytestmark = pytest.mark.repo_wide
 
-PAGE = pathlib.Path(__file__).resolve().parent.parent / "client/src/screens/ImportGuide.tsx"
+CLIENT = pathlib.Path(__file__).resolve().parent.parent / "client/src"
+#: The English document. Since #56 each language has its own, written whole,
+#: and `screens/ImportGuide.tsx` picks one; the others follow this one.
+PAGE = CLIENT / "screens/importGuide/en.tsx"
 #: Where the Import screen's outcome words live since #52.
-LABELS = PAGE.parent.parent / "lib/labels.ts"
+LABELS = CLIENT / "lib/labels.ts"
 
 
 @pytest.fixture(scope="module")
@@ -76,7 +79,7 @@ def test_it_is_information_only(page):
 
 
 def test_it_is_every_members_page():
-    app = (PAGE.parent.parent / "App.tsx").read_text(encoding="utf-8")
+    app = (CLIENT / "App.tsx").read_text(encoding="utf-8")
     line = next(line for line in app.splitlines() if '"import-guide", label' in line)
     assert "ownerOnly" not in line
 
@@ -117,7 +120,7 @@ def test_the_files_it_reads_and_writes_are_named(one_time):
 
     assert "<code>Register.csv</code>" in one_time and "<code>Plan.csv</code>" in one_time
     assert "Register.csv" in ynab_source.PLAN_NOT_REGISTER
-    results = (PAGE.parent / "ynab" / "results.tsx").read_text(encoding="utf-8")
+    results = (CLIENT / "screens/ynab/results.tsx").read_text(encoding="utf-8")
     assert ".txt`" in results, "the report is no longer a .txt download"
     assert "<code>.txt</code>" in one_time
 

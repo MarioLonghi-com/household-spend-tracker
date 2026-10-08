@@ -247,3 +247,30 @@ nav.side .nav-subhead {
   overflow-wrap: anywhere;
 }
 nav.side .nav-grandchild { padding-left: 30px; }
+
+/* ---- the nav in a language other than English (#56) ---- */
+/*
+ * 190px was measured against English. Other languages run longer, and some
+ * build one long word where English uses three -- a Swedish compound for
+ * "payee categorisation" is wider than the whole nav -- so outside English
+ * the desktop nav grows to its widest item, up to 240px, and a word too long
+ * even for that breaks where the language allows a hyphen instead of
+ * spilling past the edge. `lang` on <html> is the active catalog's (#53).
+ *
+ * English keeps exactly the 190px it had: `:lang(en)` would also match the
+ * pseudo-locale, which stands for a longer language, so it is named apart.
+ * Desktop only: below 768px the nav is a drawer with a width of its own.
+ */
+@media (min-width: 769px) {
+  html:not(:lang(en)) nav.side,
+  html[lang="en-XA"] nav.side {
+    width: auto;
+    min-width: 190px;
+    max-width: 240px;
+  }
+}
+html:not(:lang(en)) nav.side :is(button, a, .nav-subhead),
+html[lang="en-XA"] nav.side :is(button, a, .nav-subhead) {
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}

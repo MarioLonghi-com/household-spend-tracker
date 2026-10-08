@@ -123,6 +123,10 @@ msgstr ""
 msgid "Cash"
 msgstr "Dinheiro"
 
+#: src/screens/Updates.tsx
+msgid "Updating from this screen needs the updater, which comes with the standard compose file from the release that introduced self-update onwards."
+msgstr ""
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Your new password is set. Sign in with it and your authenticator as usual."
@@ -275,6 +279,10 @@ msgstr ""
 msgid "Or paste the rows, if your bank only lets you copy them from a page:"
 msgstr "Ou cole as linhas, se o seu banco só deixa copiá-las de uma página:"
 
+#: src/screens/Updates.tsx
+msgid "Migrations that cannot be undone"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own."
@@ -347,6 +355,10 @@ msgstr ""
 msgid "A three-letter code. Leave it blank for {0}."
 msgstr ""
 
+#: src/screens/Backups.tsx
+msgid "One of the newest five update backups: kept so an update can be undone"
+msgstr ""
+
 #: src/screens/Rules.tsx
 msgid "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot mean “whatever comes after it” — choose <2>take this bit off</2> for that."
 msgstr ""
@@ -396,6 +408,11 @@ msgstr "Isso não é um valor em {0}."
 msgid "what a key can never do"
 msgstr "o que uma chave nunca pode fazer"
 
+#. How long an update took: seconds
+#: src/screens/Updates.tsx
+msgid "{rest} s"
+msgstr ""
+
 #. Column name shown beside a value on phones on the Rules screen: noun, which rule is tried first
 #: src/screens/Rules.tsx
 msgid "Priority"
@@ -438,8 +455,10 @@ msgstr ""
 
 #. Button on the passkeys panel: verb, hide this notice
 #. Button, SignInNotice (shared): verb, hide this notice
+#. Button: hide this update outcome
 #: src/components/SignInNotice.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/Updates.tsx
 #, fuzzy
 msgid "Dismiss"
 msgstr "Dispensar"
@@ -523,6 +542,10 @@ msgstr "{unloaded, plural, one {Mostrando {0} — falta carregar {1} linha — m
 #: src/screens/Admin.tsx
 #: src/screens/History.tsx
 msgid "When"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "The app stays up throughout. Nothing in the ledger changes."
 msgstr ""
 
 #: src/screens/SignIn.tsx
@@ -621,6 +644,12 @@ msgstr ""
 msgid "<0>{0}</0> goes to the receipts inbox and stays there until it is attached again or deleted."
 msgstr "<0>{0}</0> vai para a caixa de entrada de comprovantes e fica lá até ser anexado de novo ou excluído."
 
+#. Headline of the check: a newer release exists
+#. placeholder {0}: target.version
+#: src/screens/Updates.tsx
+msgid "{0} is available."
+msgstr ""
+
 #: src/screens/ApplicationManagement.tsx
 msgid "Reading this instance…"
 msgstr ""
@@ -659,6 +688,11 @@ msgstr "Agrupar contas por"
 #. placeholder {0}: monthLabel(period)
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Net — {0}"
+msgstr ""
+
+#. Row heading in the update confirmation
+#: src/screens/Updates.tsx
+msgid "On a laptop"
 msgstr ""
 
 #. placeholder {0}: changes.length
@@ -764,6 +798,10 @@ msgstr "Uma parte de uma divisão"
 msgid "Each currency keeps its own figures and nothing here adds two together — the ledger stores no exchange rates. A claim repaid in another currency is listed once, with every amount in its own currency and no difference worked out between them."
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "This instance now runs {running}."
+msgstr ""
+
 #. Heading on the first-run setup
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -839,6 +877,7 @@ msgstr ""
 msgid "{0} now tells a file it is for {1}"
 msgstr "{0} agora indica que um arquivo é de {1}"
 
+#. Screen-reader name on the one-time import's mapping step
 #. Text on the one-time import's mapping step
 #. placeholder {0}: account.name
 #. placeholder {0}: category.name || t({ message: "no category", comment: "Text on the one-time import's mapping step" })
@@ -991,6 +1030,10 @@ msgstr "Pular para as transações"
 msgid "Transactions"
 msgstr "Transações"
 
+#: src/screens/Updates.tsx
+msgid "I understand that <0>{revision}</0> cannot be undone except from the backup."
+msgstr ""
+
 #. Label on the Register screen
 #. placeholder {0}: found.filename
 #: src/screens/Register.tsx
@@ -1115,6 +1158,10 @@ msgstr "Adicionar uma conta"
 msgid "Couldn't reach the clipboard. Select the link above and copy it by hand."
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "Preparing downloads the image and checks where it came from. It does not stop anything or change your data."
+msgstr ""
+
 #. Column name shown beside a value on phones on the one-time import's results: adjective, already in the ledger
 #: src/screens/ynab/results.tsx
 msgid "Existing"
@@ -1176,6 +1223,10 @@ msgstr ""
 
 #: src/screens/ynab/results.tsx
 msgid "(the {RULES_LISTED} largest are listed)"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "Stays as it is."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -1244,6 +1295,12 @@ msgstr ""
 msgid "I understand YNAB's Reconciled, Cleared and Uncleared states will be reset — everything arrives uncleared."
 msgstr ""
 
+#. Column heading: the database migration the backup is at
+#. Column heading: the database migration the backup is at
+#: src/screens/Backups.tsx
+msgid "Revision"
+msgstr ""
+
 #. Column heading on the Payees screen
 #. Column heading on the Rules screen
 #. Column name shown beside a value on phones on the Rules screen
@@ -1267,6 +1324,11 @@ msgstr "Alguém redefiniu a senha e o autenticador de {user}"
 #, fuzzy
 msgid "password and authenticator"
 msgstr "senha e autenticador"
+
+#. placeholder {0}: beat?.socket ?? "?"
+#: src/screens/Updates.tsx
+msgid "The updater cannot use the container engine ({0}), so this screen cannot update the app."
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1335,6 +1397,11 @@ msgstr ""
 msgid "Discard the staged one"
 msgstr "Descartar a que está preparada"
 
+#. Button: replace the recovery code shown
+#: src/screens/Updates.tsx
+msgid "Get a new code"
+msgstr ""
+
 #. Column heading on the Income vs Expense report: noun, the sum
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Total"
@@ -1349,6 +1416,11 @@ msgstr ""
 #, fuzzy
 msgid "Flags & options"
 msgstr "Marcadores e opções"
+
+#. Before a menu of other newer releases to prepare instead
+#: src/screens/Updates.tsx
+msgid "or choose:"
+msgstr ""
 
 #. What the import detected: the file's text encoding. Lower case, inside a list
 #: src/lib/labels.ts
@@ -1424,6 +1496,7 @@ msgctxt "new category"
 msgid "New"
 msgstr "Nova"
 
+#. Hidden column heading over row buttons
 #. Screen-reader name on the Accounts screen
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Payees screen
@@ -1763,6 +1836,10 @@ msgstr "ex.: o código depois de _en_"
 msgid "Sharing and saving straight into a folder need this page on https or on localhost. Over plain http on a network address the browser switches both off, which is why only the download is offered here."
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "Updating the updater"
+msgstr ""
+
 #. Tooltip on the shared controls
 #: src/components/bits.tsx
 #, fuzzy
@@ -1780,8 +1857,17 @@ msgstr "Buscar"
 msgid "Show the menu"
 msgstr "Mostrar o menu"
 
+#. Button: save the recovery code as a text file
+#: src/screens/Updates.tsx
+msgid "Download as a file"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "their password stops working"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "In Docker Desktop or Podman Desktop, open Containers, find the <0>updater</0> service of the <1>spend-tracker</1> project and press Start."
 msgstr ""
 
 #: src/lib/reimbursement.ts
@@ -1798,6 +1884,11 @@ msgstr ""
 msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password and authenticator."
 msgstr ""
 
+#. Button after an expired recovery code was refused
+#: src/screens/Updates.tsx
+msgid "Get a new recovery code"
+msgstr ""
+
 #. Heading on the Your account panel. See GLOSSARY.md
 #. Screen-reader name on the Your account panel. See GLOSSARY.md
 #: src/screens/Profile.tsx
@@ -1810,12 +1901,6 @@ msgstr "Aparência"
 #, fuzzy
 msgid "None yet"
 msgstr "Nenhuma ainda"
-
-#. placeholder {0}: upstream.data.latest
-#. placeholder {1}: upstream.data.running
-#: src/screens/ApplicationManagement.tsx
-msgid "<0>{0}</0> is available. This instance is running {1}."
-msgstr ""
 
 #: src/screens/OneTimeImport.tsx
 msgid "Currency of the plan"
@@ -1910,6 +1995,10 @@ msgstr ""
 msgid "with uncommitted changes"
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "Asking for a recovery code…"
+msgstr ""
+
 #. Text on the household page
 #: src/screens/Household.tsx
 msgid "Counting…"
@@ -1996,11 +2085,20 @@ msgstr "Novo nome para {0}"
 msgid "Sum"
 msgstr "Soma"
 
+#: src/screens/Updates.tsx
+msgid "The update was left to be finished from a terminal."
+msgstr ""
+
 #. Label on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "Last year"
 msgstr "Ano passado"
+
+#. Button: replace the updater container only
+#: src/screens/Updates.tsx
+msgid "Update the updater"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2029,11 +2127,6 @@ msgstr ""
 #, fuzzy
 msgid "saving…"
 msgstr "salvando…"
-
-#. Heading on the Application management screen
-#: src/screens/ApplicationManagement.tsx
-msgid "Operations"
-msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -2113,6 +2206,11 @@ msgstr ""
 #, fuzzy
 msgid "The bank called it <0>{0}</0>, as {app} kept it."
 msgstr "O banco chamou de <0>{0}</0>, como o {app} guardou."
+
+#. Heading while the updater prepares a release
+#: src/screens/Updates.tsx
+msgid "Preparing {toVersion}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2275,8 +2373,10 @@ msgstr "ou"
 
 #. Button on the Import screen: verb, throw away what was not saved
 #. Button on the Register screen: verb, throw away what was not saved
+#. Button: throw the prepared update away; deletes the downloaded images
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
+#: src/screens/Updates.tsx
 #, fuzzy
 msgid "Discard"
 msgstr "Descartar"
@@ -2299,6 +2399,10 @@ msgstr "Adicionar transferência"
 #. placeholder {0}: one.display_name
 #: src/screens/Admin.tsx
 msgid "Reset sign-in for {0}"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "The update failed at {step}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -2346,6 +2450,11 @@ msgstr "Anexar comprovantes"
 msgid "(archived)"
 msgstr ""
 
+#. How long an update took: minutes and seconds
+#: src/screens/Updates.tsx
+msgid "{minutes} min {rest} s"
+msgstr ""
+
 #: src/screens/OneTimeImport.tsx
 msgid "Which plan to import"
 msgstr ""
@@ -2370,6 +2479,10 @@ msgstr "SILVA MARIA"
 msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
 msgstr "{revoked, plural, one {{revoked} navegador confiável vai pedir um código de novo.} other {{revoked} navegadores confiáveis vão pedir um código de novo.}}"
 
+#: src/screens/Updates.tsx
+msgid "Waiting for the updater to take the request…"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Changing your own role would close this screen; ask the other owner"
 msgstr ""
@@ -2378,6 +2491,8 @@ msgstr ""
 #. Column heading on the Application management screen: noun, size of a file
 #. Column heading on the Backups screen: noun, size of a file
 #. Column heading on the receipts: noun, size of a file
+#. Column heading: the backup's size on disk
+#. Column heading: the backup's size on disk
 #. Column name shown beside a value on phones on the Application management screen: noun, size of a file
 #. Column name shown beside a value on phones on the Application management screen: noun, size of a file
 #. Column name shown beside a value on phones on the Backups screen: noun, size of a file
@@ -2424,6 +2539,7 @@ msgstr ""
 #. Button on the Register screen: verb
 #. Button on the Rules screen: verb
 #. Button on the receipts: verb
+#. Button: delete this backup
 #: src/screens/Backups.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Receipts.tsx
@@ -2441,6 +2557,10 @@ msgstr "Fixo no escuro, seja qual for a configuração deste dispositivo."
 #. Button on the Admin screen: verb, stop an account signing in
 #: src/screens/Admin.tsx
 msgid "Disable"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "If that fails, download the newest Spend Tracker zip and run its launcher; your data and version are kept."
 msgstr ""
 
 #. Button on the Application management screen: verb, show the file's contents
@@ -2500,6 +2620,11 @@ msgstr "{0, plural, one {Também em {1} outra transação — o mesmo arquivo, g
 msgid "Payee Merge"
 msgstr "Unir favorecidos"
 
+#. placeholder {0}: state.running
+#: src/screens/Updates.tsx
+msgid "Asks {repository} for its published releases and compares them with the {0} this is running. Nothing leaves this instance unless an owner presses a button like this one, nothing is asked on a timer, and no request says anything about this instance."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Click to edit"
@@ -2554,7 +2679,8 @@ msgstr "Remover <0>{0}</0>? Ela deixa de funcionar na hora."
 msgid "System"
 msgstr "Sistema"
 
-#: src/screens/ApplicationManagement.tsx
+#. Button: look for a newer release
+#: src/screens/Updates.tsx
 msgid "Check the repository"
 msgstr ""
 
@@ -2653,6 +2779,10 @@ msgstr ""
 #, fuzzy
 msgid "Yes, all of them and set the rule"
 msgstr "Sim, todas e definir a regra"
+
+#: src/screens/ApplicationManagement.tsx
+msgid "A download is a zip with a README for whoever opens it next: what the file is, how to read it, and how to put it back with <0>make restore</0>. Delete removes one file when you say so and confirm. Nothing here deletes one of these on its own — no pruning and no timer."
+msgstr ""
 
 #. Column heading on the Accounts screen: noun, the reason
 #. Column heading on the Transfers screen: noun, the reason
@@ -2835,13 +2965,22 @@ msgstr ""
 msgid "Net"
 msgstr ""
 
+#. Button: install the prepared release
+#. Heading on the Updates screen
+#: src/screens/Updates.tsx
+msgid "Update to {to}"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Who was paid"
 msgstr "Quem recebeu"
 
+#. Column heading: the app version that took the backup
+#. Column heading: the app version that took the backup
 #. Name of a fact on the Application management screen: noun, the software version
 #: src/screens/ApplicationManagement.tsx
+#: src/screens/Backups.tsx
 msgid "Version"
 msgstr ""
 
@@ -3212,6 +3351,11 @@ msgstr ""
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "{done} linha alterada e {skipped} deixadas como estavam — só uma saída de dinheiro que não seja transferência pode ser despesa de trabalho."
 
+#. The container engine, by product name; the version may be empty
+#: src/screens/Updates.tsx
+msgid "Podman {version} (podman machine)"
+msgstr ""
+
 #. Label on the History screen: noun or step name: what would happen, not yet done
 #: src/screens/History.tsx
 msgid "preview"
@@ -3220,6 +3364,10 @@ msgstr ""
 #. Button on the Payees screen
 #: src/screens/Payees.tsx
 msgid "Add payee"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "Updated to {running} at {at}."
 msgstr ""
 
 #. placeholder {0}: section.rows.length
@@ -3357,6 +3505,18 @@ msgstr "Outro ativo"
 msgid "Transfers"
 msgstr "Transferências"
 
+#: src/screens/Updates.tsx
+msgid "the container engine"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "A few minutes. The app is stopped while the backup is taken and the migrations run."
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "The update did not start: {said} Nothing was changed."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Click to change"
@@ -3383,6 +3543,11 @@ msgstr ""
 
 #: src/screens/reports/IncomeExpense.tsx
 msgid "{count, plural, one {{count} opening balance} other {{count} opening balances}}"
+msgstr ""
+
+#. Row heading in the update confirmation: where the image was built
+#: src/screens/Updates.tsx
+msgid "Origin"
 msgstr ""
 
 #. Button on the Register screen: verb
@@ -3597,6 +3762,11 @@ msgstr "{0, plural, one {Corresponde a {1} linha, como:} other {Corresponde a {2
 msgid "Single transaction"
 msgstr "Transação única"
 
+#. Row heading in the update confirmation
+#: src/screens/Updates.tsx
+msgid "Will run"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Numbers and names that statements use for this account. A file carrying one is matched to this account on the Import screen, and a transfer naming one is matched to it."
@@ -3695,6 +3865,11 @@ msgstr ""
 msgid "The password alone cannot replace your second factor — otherwise it would not be a second factor."
 msgstr "A senha sozinha não pode substituir seu segundo fator — senão ele não seria um segundo fator."
 
+#. Heading of the panel shown while an update runs
+#: src/screens/Updates.tsx
+msgid "Updating to {toVersion}"
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as an owner."
@@ -3737,6 +3912,7 @@ msgstr ""
 #. Button on the Backups screen
 #. Button on the Register screen
 #. Button on the receipts
+#. Button while a backup is deleted
 #: src/screens/Backups.tsx
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
@@ -3834,6 +4010,10 @@ msgstr ""
 #, fuzzy
 msgid "The name looks like its number."
 msgstr "O nome parece ser o número da conta."
+
+#: src/screens/Updates.tsx
+msgid "The app has stopped. Waiting for it to come back…"
+msgstr ""
 
 #: src/screens/ynab/mapping.tsx
 msgid "a new category"
@@ -3996,12 +4176,6 @@ msgstr ""
 #, fuzzy
 msgid "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
 msgstr "<0>{purgingName}</0> e suas {0} linhas serão excluídos. Nada dele chegou ao registro, então não há nada a desfazer depois — e o arquivo pode ser importado de novo do zero."
-
-#. placeholder {0}: me.repository
-#. placeholder {1}: me.version
-#: src/screens/ApplicationManagement.tsx
-msgid "Asks {0} for its published releases and compares them with the {1} this is running. Nothing leaves this instance unless an owner presses a button like this one, nothing is asked on a timer, and no request says anything about this instance."
-msgstr ""
 
 #. Label of a choice on the one-time import (starting balance rows)
 #: src/screens/OneTimeImport.tsx
@@ -4288,6 +4462,10 @@ msgstr ""
 msgid "Connect"
 msgstr "Conectar"
 
+#: src/screens/Updates.tsx
+msgid "{engine} is newer than this updater ({updaterVersion}) can work with. It will try to replace itself with a newer one:"
+msgstr ""
+
 #. Heading on the one-time import
 #. Screen-reader name on the date range picker
 #: src/components/DateRange.tsx
@@ -4298,6 +4476,11 @@ msgstr "Período"
 
 #: src/screens/History.tsx
 msgid "Everything that has changed this household, grouped by the act that changed it. An import of two hundred rows is one entry here, and undoing it puts all two hundred back."
+msgstr ""
+
+#. Where an update failed, when the updater did not say
+#: src/screens/Updates.tsx
+msgid "an unknown step"
 msgstr ""
 
 #. Text on the Register screen
@@ -4399,6 +4582,11 @@ msgstr ""
 msgid "Questions about {0}'s ledger. Nothing here changes anything: a report reads the register and is gone, which is why none of them appear in History."
 msgstr ""
 
+#. Button while the update request is sent
+#: src/screens/Updates.tsx
+msgid "Starting…"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "{text} — edit the memo"
@@ -4448,6 +4636,11 @@ msgstr ""
 
 #: src/screens/ApplicationManagement.tsx
 msgid "The source, on GitHub"
+msgstr ""
+
+#. Heading of the panel shown while an update runs
+#: src/screens/Updates.tsx
+msgid "Updating"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -4655,6 +4848,11 @@ msgstr "Desanexar este comprovante?"
 msgid "Category"
 msgstr "Categoria"
 
+#. placeholder {0}: lossy.length
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {One of these cannot be undone by a downgrade} other {# of these cannot be undone by a downgrade}}"
+msgstr ""
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
@@ -4714,7 +4912,9 @@ msgid "The server reset {user}'s password"
 msgstr "O servidor redefiniu a senha de {user}"
 
 #. Button on the app's menu and frame
+#. Button: prepare the same release again
 #: src/App.tsx
+#: src/screens/Updates.tsx
 #, fuzzy
 msgid "Try again"
 msgstr "Tentar de novo"
@@ -4890,8 +5090,16 @@ msgstr "Tipo"
 msgid "Receipt notes"
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "If the update fails and cannot undo itself, this page is replaced by a recovery page, and this code is what opens it. It works only for this update and stops working once the update has finished. It is shown once: the server keeps only a hash of it."
+msgstr ""
+
 #: src/screens/Backups.tsx
 msgid "<0>This is the only backup.</0> After this there is none: nothing on this instance could put the ledger back if it were damaged."
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "Preparing the update failed: {said} Nothing was changed."
 msgstr ""
 
 #. Label on the History screen
@@ -5071,6 +5279,11 @@ msgstr "Guardei isto em um lugar que não é este navegador"
 #, fuzzy
 msgid "Each one works once, and they are shown only now. Your old ones no longer work. They are how you get back in if you lose your phone but still know your password."
 msgstr "Cada um funciona uma vez, e eles só aparecem agora. Os antigos não funcionam mais. São a forma de voltar a entrar se você perder o celular mas ainda souber sua senha."
+
+#. Row heading in the update confirmation
+#: src/screens/Updates.tsx
+msgid "Running now"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -5268,6 +5481,10 @@ msgstr "Outra dívida"
 msgid "{0, plural, one {Imported {1} transaction in one batch.} other {Imported {2} transactions in one batch.}}"
 msgstr ""
 
+#: src/screens/Backups.tsx
+msgid "Backups taken by updates"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
@@ -5305,6 +5522,11 @@ msgstr ""
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "An advance not spent yet, or an overpayment"
+msgstr ""
+
+#. Row heading in the update confirmation
+#: src/screens/Updates.tsx
+msgid "Downtime"
 msgstr ""
 
 #: src/components/bits.tsx
@@ -5363,8 +5585,9 @@ msgstr ""
 msgid "Your account is under your name in the menu."
 msgstr "Sua conta fica no seu nome, no menu."
 
-#. Button on the Application management screen
-#: src/screens/ApplicationManagement.tsx
+#. Button while a request is sent
+#. Button while a request is sent
+#: src/screens/Updates.tsx
 msgid "Asking…"
 msgstr ""
 
@@ -5442,6 +5665,7 @@ msgstr ""
 #. Link on the Backups screen
 #. Link on the Register screen
 #. Link on the receipts
+#. Link: download this backup as a zip
 #: src/screens/Backups.tsx
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
@@ -5485,6 +5709,10 @@ msgstr ""
 msgid "a pocket's or a card product's name"
 msgstr "o nome de um cofrinho ou de um produto de cartão"
 
+#: src/screens/Updates.tsx
+msgid "Preparing the update"
+msgstr ""
+
 #. Button on the one-time import: verb, run the import
 #: src/screens/OneTimeImport.tsx
 msgctxt "starting balance rows"
@@ -5500,6 +5728,10 @@ msgstr ""
 msgid "No reset links pending."
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "The end of the update's log"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Yes, withdraw it"
 msgstr ""
@@ -5507,6 +5739,16 @@ msgstr ""
 #. Name of a fact on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Last backup"
+msgstr ""
+
+#. placeholder {0}: code.data!.code
+#: src/screens/Updates.tsx
+msgid "Spend Tracker: recovery code for the update from {from} to {to}\n"
+"\n"
+"{0}\n"
+"\n"
+"If the update fails and cannot undo itself, the app is replaced by a recovery page, and this code is what opens it. It works only for this update and stops working once the update has finished.\n"
+""
 msgstr ""
 
 #: src/screens/reports/Reimbursements.tsx
@@ -5528,6 +5770,10 @@ msgstr ""
 #, fuzzy
 msgid "uncategorised (chosen)"
 msgstr "sem categoria (escolhido)"
+
+#: src/screens/Updates.tsx
+msgid "The recovery page was used for the last update."
+msgstr ""
 
 #. What the import detected: the kind of file. Lower case, inside a list
 #: src/lib/labels.ts
@@ -5597,6 +5843,10 @@ msgstr ""
 #, fuzzy
 msgid "If you did not expect this, tell an owner of this instance before you go on."
 msgstr "Se você não esperava por isso, avise um proprietário desta instância antes de continuar."
+
+#: src/screens/ImportGuide.tsx
+msgid "This guide has not been written in your language yet, so here it is in English."
+msgstr ""
 
 #. Text on the Transfers screen
 #. placeholder {0}: from.currency
@@ -5671,6 +5921,11 @@ msgstr "membro"
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "Open it in Transactions"
+msgstr ""
+
+#. Button: try replacing the updater again
+#: src/screens/Updates.tsx
+msgid "Retry updater update"
 msgstr ""
 
 #. Screen-reader name of a help button on the Your account panel
@@ -6051,6 +6306,11 @@ msgstr ""
 msgid "Problems"
 msgstr ""
 
+#. placeholder {0}: check.running
+#: src/screens/Updates.tsx
+msgid "This instance is running {0}."
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "No, just this one"
@@ -6104,6 +6364,11 @@ msgstr ""
 msgid "Made for {0}, cannot be used here."
 msgstr "Criada para {0}, não pode ser usada aqui."
 
+#. Button: replace the updater container, leave the app and its data as they are
+#: src/screens/Updates.tsx
+msgid "Update the updater only"
+msgstr ""
+
 #. Button on the Reconcile screen
 #. Button on the Register screen
 #. Button on the sign-in page
@@ -6122,6 +6387,10 @@ msgstr "coluna de saída"
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "Each one with the expenses linked to it."
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "This instance runs from a checkout. Update it from the terminal: <0>make upgrade-check</0>, then <1>make upgrade</1>."
 msgstr ""
 
 #. Column heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
@@ -6167,6 +6436,11 @@ msgstr "Incluir a linha {0}"
 #, fuzzy
 msgid "Where did this come from?"
 msgstr "De onde veio isto?"
+
+#. When a release was published
+#: src/screens/Updates.tsx
+msgid "Released {released}."
+msgstr ""
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -6233,6 +6507,10 @@ msgstr "Senha atual"
 msgid "Nothing to suggest."
 msgstr "Nada a sugerir."
 
+#: src/screens/Updates.tsx
+msgid "A newer updater ({version}) is available:"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Table text size"
@@ -6277,6 +6555,10 @@ msgstr "Saída {code}"
 
 #: src/screens/AccountImport.tsx
 msgid "Required, one of"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "On: runs before the backup."
 msgstr ""
 
 #. Label on the Your account panel: colour scheme
@@ -6432,6 +6714,10 @@ msgstr ""
 msgid "Email (optional)"
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "Taken after the app stops, verified, kept in the data volume."
+msgstr ""
+
 #. placeholder {0}: purging.row_count
 #: src/screens/Import.tsx
 #, fuzzy
@@ -6473,6 +6759,16 @@ msgstr "{others, plural, one {Você ainda vai poder entrar com sua outra chave d
 
 #: src/screens/Rules.tsx
 msgid "Every rule of this kind gets a turn, in this order, each one working on what the last one left."
+msgstr ""
+
+#. Heading on the Application management screen: new versions and installing them
+#: src/screens/ApplicationManagement.tsx
+msgid "Updates"
+msgstr ""
+
+#. State of the pre-update hook
+#: src/screens/Updates.tsx
+msgid "Off."
 msgstr ""
 
 #. Name of a fact on the Application management screen: noun, the database's migration revision
@@ -6567,6 +6863,10 @@ msgstr "Uma transferência move dinheiro entre suas próprias contas, então nã
 msgid "{count, plural, other {{shown} rows}}"
 msgstr "{count, plural, one {{shown} linha} other {{shown} linhas}}"
 
+#: src/screens/Updates.tsx
+msgid "Keep it plugged in and awake until this finishes. If it sleeps, the update resumes or rolls back when it wakes."
+msgstr ""
+
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Leave it"
@@ -6641,6 +6941,10 @@ msgstr ""
 #, fuzzy
 msgid "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} em {1}. As partes a substituem, então precisam somar o mesmo valor. Sem sinal de menos — cada parte vai no mesmo sentido da original."
+
+#: src/screens/Updates.tsx
+msgid "Reading what the updater last said…"
+msgstr ""
 
 #: src/screens/ApplicationManagement.tsx
 msgid "The ledger this process is serving."
@@ -6754,7 +7058,10 @@ msgid "Type the closing balance"
 msgstr ""
 
 #. Column heading on the Backups screen. See GLOSSARY.md
+#. Column heading: the backup folder's name
+#. Row heading in the update confirmation
 #: src/screens/Backups.tsx
+#: src/screens/Updates.tsx
 msgid "Backup"
 msgstr ""
 
@@ -6809,6 +7116,7 @@ msgstr ""
 msgid "hand this to kill or lsof"
 msgstr ""
 
+#. Button cancelling a backup's deletion
 #. Button on the Admin screen
 #. Button on the Admin screen
 #. Button on the Backups screen
@@ -6826,6 +7134,10 @@ msgstr ""
 #, fuzzy
 msgid "Keep it"
 msgstr "Manter"
+
+#: src/screens/Updates.tsx
+msgid "In Docker Desktop or Podman Desktop, open Containers, find <0>{name}</0> and press Start."
+msgstr ""
 
 #. Column heading on the History screen: noun, a row's status
 #. Name of a fact on the History screen: noun, a row's status
@@ -6987,6 +7299,10 @@ msgstr "Fixo no claro, seja qual for a configuração deste dispositivo."
 msgid "{by} reset {user}'s password"
 msgstr "{by} redefiniu a senha de {user}"
 
+#: src/screens/Updates.tsx
+msgid "Updated to {running} at {at} in {took}."
+msgstr ""
+
 #. placeholder {0}: count(it.category_groups)
 #. placeholder {1}: count(it.categories_archived)
 #: src/screens/Household.tsx
@@ -7029,6 +7345,15 @@ msgstr "Todas as datas"
 msgid "Transfers linked"
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "Your recovery code for this update"
+msgstr ""
+
+#. The container image of a release, by its digest
+#: src/screens/Updates.tsx
+msgid "image <0>{digest}</0>"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Yes, make them an owner"
 msgstr ""
@@ -7056,6 +7381,11 @@ msgstr "Importando…"
 #, fuzzy
 msgid "Add transaction"
 msgstr "Adicionar transação"
+
+#. Row heading in the update confirmation
+#: src/screens/Updates.tsx
+msgid "Pre-update hook"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -7164,6 +7494,11 @@ msgstr ""
 msgid "The money out, repaid by the one payment in"
 msgstr "A saída de dinheiro, reembolsada pelo único pagamento de entrada"
 
+#. A migration a downgrade can undo
+#: src/screens/Updates.tsx
+msgid "rolling back: clean"
+msgstr ""
+
 #. Label of a form field on the Rules screen
 #: src/screens/Rules.tsx
 msgid "This text"
@@ -7201,6 +7536,14 @@ msgstr ""
 #, fuzzy
 msgid "Leave them <0>uncategorised</0> too?"
 msgstr "Deixá-las <0>sem categoria</0> também?"
+
+#: src/screens/Updates.tsx
+msgid "I have saved the recovery code."
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "The app is about to stop. This page keeps checking and reloads when it is back. Keep this computer awake and Docker running until it says it has finished."
+msgstr ""
 
 #. What the import detected: the column of money coming in. Lower case, inside a list
 #: src/lib/labels.ts
@@ -7330,6 +7673,11 @@ msgstr "Texto maior na tabela"
 msgid "Save"
 msgstr "Salvar"
 
+#. placeholder {0}: skipped.length
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {Installing it also installs {skippedText}, which it skips over: notes for both below.} other {Installing it also installs {skippedText}, which it skips over: notes for all of them below.}}"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "One row from each account's statement, made the two sides of one transfer"
@@ -7391,6 +7739,11 @@ msgstr "sem categoria"
 msgid "Written off — work will not pay it"
 msgstr "Dada como perdida — o trabalho não vai pagar"
 
+#. Tag on an update backup that cannot be deleted
+#: src/screens/Backups.tsx
+msgid "kept"
+msgstr ""
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "What this would do"
@@ -7402,6 +7755,11 @@ msgstr ""
 
 #: src/screens/AccountImport.tsx
 msgid "Every column but name and type can be left blank. Institution, iban and note are kept as written."
+msgstr ""
+
+#. A release published without release notes
+#: src/screens/Updates.tsx
+msgid "No notes."
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -7563,6 +7921,8 @@ msgid "Clear filters"
 msgstr "Limpar filtros"
 
 #. Column heading on the Backups screen
+#. Column heading: when the backup was taken
+#. Column heading: when the backup was taken
 #. Column name shown beside a value on phones on the Backups screen
 #: src/screens/Backups.tsx
 msgid "Made"
@@ -7656,6 +8016,11 @@ msgstr "um saldo negativo aqui é dinheiro que você deve"
 msgid "Still owed"
 msgstr ""
 
+#. placeholder {0}: report.pending.length
+#: src/screens/Updates.tsx
+msgid "{0, plural, =0 {No migrations will run.} one {# migration will run} other {# migrations will run}}"
+msgstr ""
+
 #: src/screens/Payees.tsx
 msgid "Merge spellings of one name"
 msgstr ""
@@ -7717,9 +8082,9 @@ msgstr ""
 msgid "{0} of 10 left"
 msgstr "{0} de 10 restantes"
 
-#. placeholder {0}: upstream.data.running
-#. placeholder {1}: upstream.data.latest
-#: src/screens/ApplicationManagement.tsx
+#. placeholder {0}: check.running
+#. placeholder {1}: check.latest
+#: src/screens/Updates.tsx
 msgid "This is the newest there is: {0}, and the repository's latest release is {1}."
 msgstr ""
 
@@ -7789,6 +8154,7 @@ msgstr ""
 msgid "Its two-letter code, like <0>ES</0>."
 msgstr ""
 
+#. Button confirming a backup's deletion
 #: src/screens/Backups.tsx
 #: src/screens/Register.tsx
 #, fuzzy
@@ -7799,10 +8165,6 @@ msgstr "Sim, excluir"
 #, fuzzy
 msgid "Every part of the original is accounted for."
 msgstr "Cada parte da original está distribuída."
-
-#: src/screens/ApplicationManagement.tsx
-msgid "Is there a newer version?"
-msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -7894,6 +8256,10 @@ msgstr "O trabalho deve reembolsar isto"
 
 #: src/screens/Household.tsx
 msgid "The exact file your camera or scanner produced, as well. About <0>2 MB</0> per receipt, roughly 70× the space."
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "If something goes wrong <0>during</0> this update, it rolls back by restoring the backup, and nothing is lost. If you decide <1>afterwards</1> that you want {from} back, the only way is that same backup, and everything written after the update goes with it."
 msgstr ""
 
 #. placeholder {0}: tokenPath ?? t`the data directory`
@@ -8002,6 +8368,10 @@ msgstr "{inviter} convidou você para o {PRODUCT} como membro."
 #, fuzzy
 msgid "Add an account before entering transactions."
 msgstr "Adicione uma conta antes de inserir transações."
+
+#: src/screens/Updates.tsx
+msgid "Open the recovery page"
+msgstr ""
 
 #. placeholder {0}: either(codes)
 #: src/screens/reports/Reimbursements.tsx
@@ -8131,6 +8501,10 @@ msgstr ""
 msgid "A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from your bank's website. CSV and spreadsheets are worked out from the file itself — the delimiter, the date format, the decimal separator, which column is which, and which row the table actually starts on. OFX needs none of that: it names its own fields, and its transaction ids are used so re-importing an overlapping statement cannot double anything up. A PDF is read by where the words sit on the page, so a running-balance column is not mistaken for the amount — and a designed bill, which is summary boxes rather than a table, is refused rather than half-read. You will see all of it before anything is written."
 msgstr "Um CSV, um download OFX/QFX, uma exportação .xls do banco, um extrato em PDF ou algo colado do site do banco. CSV e planilhas são entendidos a partir do próprio arquivo — o delimitador, o formato de data, o separador decimal, qual coluna é qual e em que linha a tabela começa de fato. OFX não precisa de nada disso: ele nomeia os próprios campos, e os ids das transações são usados para que reimportar um extrato sobreposto não duplique nada. Um PDF é lido pela posição das palavras na página, então uma coluna de saldo acumulado não é confundida com o valor — e uma fatura diagramada, que tem caixas de resumo em vez de uma tabela, é recusada em vez de lida pela metade. Você vê tudo antes de qualquer coisa ser gravada."
 
+#: src/screens/Updates.tsx
+msgid "The updater is now {updaterVersion} too."
+msgstr ""
+
 #. Button on the Import screen
 #. Button on the Rules screen
 #: src/screens/Import.tsx
@@ -8223,6 +8597,10 @@ msgstr "Valor"
 msgid "Expires {0}. Hand it over yourself; it is not sent anywhere."
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "Updating stops the app and changes the ledger's schema."
+msgstr ""
+
 #: src/screens/Rules.tsx
 msgid "Case does not matter. <0>Matches the pattern</0> is a full regular expression, capped at 300 characters and given a tenth of a second per row — one that runs longer is set aside for the rest of that import. Try it below before you save it."
 msgstr ""
@@ -8236,6 +8614,10 @@ msgstr ""
 #, fuzzy
 msgid "Statement product"
 msgstr "Produto do extrato"
+
+#: src/screens/Updates.tsx
+msgid "The updater stayed on {updaterVersion} and will try again:"
+msgstr ""
 
 #. placeholder {0}: offer.count
 #: src/screens/Import.tsx
@@ -8293,8 +8675,16 @@ msgstr ""
 msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "The updater that ships with {to} was checked too, and takes over the update before anything is stopped."
+msgstr ""
+
 #: src/screens/OneTimeImport.tsx
 msgid "If you mean to replace an earlier run, undo it from History first."
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "A prepared update goes stale after 24 hours, or as soon as the running version changes. Discard removes it and asks the updater to delete the images it downloaded."
 msgstr ""
 
 #: src/screens/Import.tsx
@@ -8317,6 +8707,12 @@ msgstr "Fica guardado só neste dispositivo, então um celular e um notebook pod
 msgid "No payee matches “{0}”."
 msgstr ""
 
+#. Which backup folder the recovery page restored
+#. placeholder {0}: outcome.backup
+#: src/screens/Updates.tsx
+msgid "Restored from <0>{0}</0>."
+msgstr ""
+
 #. Column heading on the Admin screen. See GLOSSARY.md
 #. Heading on the Your account panel. See GLOSSARY.md
 #. Heading on the Your account panel. See GLOSSARY.md
@@ -8337,15 +8733,15 @@ msgstr "Configurar de novo"
 msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
 msgstr "Uma transferência precisa de duas contas abertas. Adicione outra na tela Contas primeiro."
 
-#: src/screens/ApplicationManagement.tsx
-msgid "A download is a zip with a README for whoever opens it next: what the file is, how to read it, and how to put it back with <0>make restore</0>. Delete removes one file when you say so and confirm. Nothing here deletes a backup on its own — no pruning and no timer."
-msgstr ""
-
 #. placeholder {0}: household.name
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "<0>Coming from another budgeting app?</0> Statements go in one at a time here. To bring your whole history across at once — YNAB so far — use the {link} on the {0} page. The household’s owner runs it, once."
 msgstr "<0>Vindo de outro app de orçamento?</0> Aqui os extratos entram um de cada vez. Para trazer todo o seu histórico de uma vez — por enquanto, do YNAB — use a {link} na página {0}. O proprietário da casa faz isso uma vez."
+
+#: src/screens/Updates.tsx
+msgid "Discarding the prepared update"
+msgstr ""
 
 #. Text on the Reimbursements report
 #. placeholder {0}: days(oldest)
@@ -8449,6 +8845,15 @@ msgstr "pelo servidor"
 
 #: src/screens/Categories.tsx
 msgid "Every new transaction for this payee gets a category without you choosing one. Which one depends on the setting below."
+msgstr ""
+
+#. Row heading in the update confirmation
+#: src/screens/Updates.tsx
+msgid "Updater"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "The image is kept so you can try again."
 msgstr ""
 
 #. Button on the Admin screen
@@ -8590,6 +8995,12 @@ msgstr "Seguindo este dispositivo, que está no claro agora."
 msgid "Which payment repaid this?"
 msgstr "Qual pagamento reembolsou isto?"
 
+#. A migration's verdict: lossy or undeclared, a word from the server
+#. placeholder {0}: one.reversible
+#: src/screens/Updates.tsx
+msgid "rolling back: <0>{0}</0>"
+msgstr ""
+
 #. placeholder {0}: done.payee_name
 #. placeholder {1}: done.category_name
 #: src/screens/Import.tsx
@@ -8601,8 +9012,16 @@ msgstr "{0} sempre será {1}"
 msgid "why one currency at a time"
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "Another newer release"
+msgstr ""
+
 #: src/components/Receipts.tsx
 msgid "From the photograph's own metadata."
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "Update by replacing the compose bundle with the newest release's: your data and version are kept."
 msgstr ""
 
 #. Button on the Import screen
@@ -8684,6 +9103,10 @@ msgstr ""
 msgid "Add transfer between accounts"
 msgstr "Adicionar transferência entre contas"
 
+#: src/screens/Updates.tsx
+msgid "Updates run in the updater (<0>{container}</0>, version {updaterVersion}, on {engine}). Nothing installs until you confirm it."
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "their authenticator and recovery codes are cleared"
 msgstr ""
@@ -8693,6 +9116,13 @@ msgstr ""
 #. placeholder {1}: one.last_month ?? "…"
 #: src/screens/OneTimeImport.tsx
 msgid "{0} to {1}"
+msgstr ""
+
+#. placeholder {0}: deleting.name
+#. placeholder {1}: deleting.version ?? "?"
+#. placeholder {2}: bytes(deleting.bytes)
+#: src/screens/Backups.tsx
+msgid "<0>{0}</0>, taken by the update from {1}, {2}. The folder is removed and <1>cannot be brought back</1>. The five newest update backups are kept whatever happens to this one."
 msgstr ""
 
 #. Text on the Your account panel
@@ -8719,6 +9149,10 @@ msgstr ""
 
 #: src/screens/ApplicationManagement.tsx
 msgid "Its author, and their other projects"
+msgstr ""
+
+#: src/screens/Backups.tsx
+msgid "Delete this update backup?"
 msgstr ""
 
 #. Sentence on the Payees screen
@@ -8826,6 +9260,10 @@ msgstr ""
 msgid "an existing category"
 msgstr ""
 
+#: src/screens/Backups.tsx
+msgid "{kept, plural, one {Each update backs the ledger up after the app stops and before it migrates. The newest one is kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.} other {Each update backs the ledger up after the app stops and before it migrates. The newest # are kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.}}"
+msgstr ""
+
 #. Column heading on the Rules screen: switched on
 #: src/screens/Rules.tsx
 msgid "On"
@@ -8840,6 +9278,10 @@ msgstr "Este é um lado de uma transferência. Alterar o valor muda o outro lado
 #, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as a member, in {households}."
 msgstr "{inviter} convidou você para o {PRODUCT} como membro, em {households}."
+
+#: src/screens/Updates.tsx
+msgid "The app has not come back yet. If your computer slept or Docker restarted, the update carries on when they are back. If this page says the same in an hour, open the recovery page with your recovery code."
+msgstr ""
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -8898,6 +9340,12 @@ msgstr ""
 msgid "Gather the accounts by type: checking, savings, cards…"
 msgstr "Reunir as contas por tipo: corrente, poupança, cartões…"
 
+#. Button: download and check this release without installing it
+#. placeholder {0}: target.version
+#: src/screens/Updates.tsx
+msgid "Prepare {0}"
+msgstr ""
+
 #: src/screens/AccountImport.tsx
 msgid "A plain figure like <0>1234.56</0> or <1>-80.00</1> — a point for the decimals and no thousands separator. Blank for an account that starts empty."
 msgstr ""
@@ -8933,6 +9381,11 @@ msgstr ""
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "At least one currency stays ticked"
+msgstr ""
+
+#. placeholder {0}: app.repository ?? repository
+#: src/screens/Updates.tsx
+msgid "Built by <0>.github/workflows/release.yml</0> at <1>v{to}</1> in {0}. Checked by the updater when it was prepared."
 msgstr ""
 
 #. A sign-in change, as a sentence: who re-enabled whom; both are people's names
@@ -9023,6 +9476,10 @@ msgstr ""
 #. Label on the receipts
 #: src/components/Receipts.tsx
 msgid "Stored as"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "The backup taken before it is listed under Database; keep it for at least a day of use."
 msgstr ""
 
 #. placeholder {0}: (one.captured_at ?? one.created_at).slice(0, 10)

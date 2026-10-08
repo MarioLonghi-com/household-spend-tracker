@@ -167,7 +167,7 @@ def _grant(client, secret: str, *, steps_ahead: int = 1) -> str:
 
 
 def _code(client) -> dict:
-    answer = client.get(f"{BASE}/recovery-code", headers=HEADERS)
+    answer = client.post(f"{BASE}/recovery-code", headers=HEADERS)
     assert answer.status_code == 200, answer.text
     assert answer.headers["cache-control"] == "no-store"
     return answer.json()
@@ -194,7 +194,7 @@ def _routes(rid: str, record: str) -> list[tuple[str, str, dict | None]]:
     return [
         ("get", BASE, None),
         ("post", f"{BASE}/prepare", {"to_version": NEXT}),
-        ("get", f"{BASE}/recovery-code", None),
+        ("post", f"{BASE}/recovery-code", None),
         ("post", f"{BASE}/apply", _apply_body(rid, "x", "y")),
         ("post", f"{BASE}/discard", {"prepared_id": rid}),
         ("post", f"{BASE}/updater", {"to_version": NEXT}),
@@ -305,6 +305,17 @@ def test_the_state_says_which_case_of_three_one_this_is(world, monkeypatch, over
     monkeypatch.setenv("SPENDTRACKER_IN_CONTAINER", "1")
     _heartbeat(world["vol"], **over)
     assert world["client"].get(BASE, headers=HEADERS).json()["case"] == case
+
+
+def test_a_refused_heartbeat_carries_the_updaters_sentence_for_the_screen(world, monkeypatch):
+    """R24: the `refused` case says why in the updater's own sentence."""
+    monkeypatch.setenv("SPENDTRACKER_IN_CONTAINER", "1")
+    said = "Docker Desktop's Enhanced Container Isolation does not let containers use the Docker socket."
+    _heartbeat(world["vol"], socket="eci_blocked", socket_sentence=said)
+    got = world["client"].get(BASE, headers=HEADERS).json()
+    assert (got["case"], got["heartbeat"]["socket_sentence"]) == ("refused", said)
+    _heartbeat(world["vol"])
+    assert world["client"].get(BASE, headers=HEADERS).json()["heartbeat"]["socket_sentence"] is None
 
 
 def test_a_report_for_another_version_or_past_its_time_is_not_current(world):
@@ -443,10 +454,32 @@ def test_the_recovery_code_is_128_bits_or_more_of_crockford_and_only_its_hash_is
 
 
 def test_no_recovery_code_without_a_current_report(world):
-    answer = world["client"].get(f"{BASE}/recovery-code", headers=HEADERS)
+    answer = world["client"].post(f"{BASE}/recovery-code", headers=HEADERS)
     assert answer.status_code == 404
     assert answer.json()["code"] == "update.no_report"
     assert updates._held == {}
+
+
+def test_a_cross_site_request_cannot_rotate_the_held_recovery_code(world):
+    """R21: issuing a code replaces the held one, so it is a `POST` behind the
+    Origin check. A `GET` is no route at all, and a `POST` from another site is
+    refused before the held hash is touched."""
+    client, vol = world["client"], world["vol"]
+    _report(vol)
+    issued = _code(client)
+    held = dict(updates._held)
+    assert set(held) == {issued["id"]}
+
+    # 405 from the router, or 404 where the API's catch-all answers first:
+    # either way no code, and the held one stays.
+    got = client.get(f"{BASE}/recovery-code", headers=HEADERS)
+    assert got.status_code in (404, 405)
+    assert "code" not in got.json() or got.json()["code"] != issued["code"]
+    assert updates._held == held
+    foreign = client.post(f"{BASE}/recovery-code", headers={"Origin": "https://elsewhere.example"})
+    assert foreign.status_code == 403
+    assert "code" not in foreign.json()
+    assert updates._held == held, "a refused request rotated the code"
 
 
 # --------------------------------------------------------------------------- #
