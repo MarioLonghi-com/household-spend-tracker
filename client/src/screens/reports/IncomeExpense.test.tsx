@@ -15,9 +15,10 @@
  */
 
 import { useState } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { HeadSlot, ReportTable, groupRows, toggleFold } from "./IncomeExpense";
+import { CurrencyToggle, HeadSlot, ReportTable, groupRows, toggleFold } from "./IncomeExpense";
 import type { Household, IncomeExpense as Report, ReportRow } from "../../lib/types";
 
 // `globals` is off in vite.config.ts, so Testing Library never finds an
@@ -25,6 +26,12 @@ import type { Household, IncomeExpense as Report, ReportRow } from "../../lib/ty
 // same document -- which shows up as "found two Transport buttons" three tests
 // later rather than as anything to do with the test that leaked.
 afterEach(cleanup);
+
+// Only the en-XA test opens a figure, which asks the server what went into it.
+vi.mock("../../lib/api", () => ({
+  api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), del: vi.fn(), upload: vi.fn() },
+  ApiError: class ApiError extends Error {},
+}));
 
 const MONTHS = ["2026-08", "2026-09"];
 
@@ -312,3 +319,55 @@ describe("the heading slot", () => {
     expect(screen.getByTestId("toggle").closest(".report-head")).toBe(fallback);
   });
 });
+
+describe("in en-XA, the report shows no English", () => {
+  it("the table, its notes, a folded band and group, a figure's rows and the currency hint", async () => {
+    const { activate } = await import("../../lib/i18n");
+    const { untranslated } = await import("../../test-pseudo");
+    const { api } = await import("../../lib/api");
+    await activate("en-XA");
+    try {
+      const report = aReport({
+        excluded: { transfers: 3, opening_balances: 1, reimbursements: 2 },
+        coverage: { months_in_range: 2, months_with_activity: 1 },
+      });
+      vi.mocked(api.get).mockResolvedValue({
+        entries: [{ id: "t1", account_name: "Visa", date: "2026-08-02", payee_name: "Landlord", memo: null, amount_minor: -120000 }],
+        count: 40,
+        total_minor: -240000,
+        capped: true,
+      });
+      // The fixture's own names are data.
+      const data = new Set(
+        [...report.income.rows, ...report.expense.rows].flatMap((one) => [one.name, one.group_name ?? ""]),
+      );
+      const left = () => untranslated(document.body).filter((word) => !data.has(word) && !/^(Visa|Landlord)$/.test(word));
+      const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      render(
+        <QueryClientProvider client={client}>
+          <Harness report={report} />
+          <CurrencyToggle value="EUR" options={["EUR", "GBP"]} onChange={() => undefined} />
+        </QueryClientProvider>,
+      );
+      expect(left()).toEqual([]);
+
+      // Fold the expense band and a group in the income band.
+      const folds = Array.from(document.querySelectorAll<HTMLButtonElement>("button.fold"));
+      fireEvent.click(folds[1]);
+      fireEvent.click(folds.find((one) => one.textContent?.includes("Earnings"))!);
+      expect(left()).toEqual([]);
+
+      // What went into a figure.
+      fireEvent.click(document.querySelector<HTMLButtonElement>("button.figure-open")!);
+      await screen.findByText("Landlord");
+      expect(left()).toEqual([]);
+
+      // The hint beside the currency toggle.
+      fireEvent.click(document.querySelector<HTMLButtonElement>(".currency-toggle .hint-open")!);
+      expect(left()).toEqual([]);
+    } finally {
+      await activate("en");
+    }
+  });
+});
+

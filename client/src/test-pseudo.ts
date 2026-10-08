@@ -26,8 +26,14 @@ export const DATA = new Set([
   "Current",
   "Savings",
   // Lists are joined by `listText` (Intl's own conjunction outside English),
-  // not by the catalog, so the pseudo-locale cannot accent it.
+  // not by the catalog, so the pseudo-locale cannot accent it. `orText` is the
+  // same for alternatives.
   "and",
+  "or",
+  // Month names come from Intl in the format locale, which the tests pin to
+  // en-US; the pseudo-locale has no calendar of its own to give them.
+  ..."January February March April May June July August September October November December".split(" "),
+  ..."Jan Feb Mar Apr Jun Jul Aug Sep Oct Nov Dec".split(" "),
 ]);
 
 /** Words of plain ASCII letters, from the text and the labels people are given. */

@@ -21,6 +21,8 @@ import { IncomeExpense } from "./reports/IncomeExpense";
 import { Reimbursements } from "./reports/Reimbursements";
 import type { Household } from "../lib/types";
 import type { RegisterPreset } from "./Register";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export type ReportKey = "income-expense" | "reimbursements";
 
@@ -51,14 +53,22 @@ export const REPORTS: {
 }[] = [
   {
     key: "income-expense",
-    label: "Income vs Expense",
-    blurb: "What came in, what went out, and what it was for — month by month.",
+    get label() {
+      return t`Income vs Expense`;
+    },
+    get blurb() {
+      return t`What came in, what went out, and what it was for — month by month.`;
+    },
     render: (household) => <IncomeExpense household={household} />,
   },
   {
     key: "reimbursements",
-    label: "Reimbursements",
-    blurb: "What work owes you, what came back, and what was written off.",
+    get label() {
+      return t({ message: "Reimbursements", comment: "Label on the Reports screen. See GLOSSARY.md" });
+    },
+    get blurb() {
+      return t`What work owes you, what came back, and what was written off.`;
+    },
     render: (household, nav) => (
       <Reimbursements household={household} onOpenRegister={nav.openRegister} />
     ),
@@ -80,11 +90,13 @@ export function Reports({
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1>Reports</h1>
+        <h1><Trans comment="Screen title on the Reports screen. See GLOSSARY.md">Reports</Trans></h1>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
-        Questions about {household.name}'s ledger. Nothing here changes anything: a report reads
-        the register and is gone, which is why none of them appear in History.
+        <Trans>
+          Questions about {household.name}'s ledger. Nothing here changes anything: a report
+          reads the register and is gone, which is why none of them appear in History.
+        </Trans>
       </p>
 
       <ul className="report-index">
@@ -125,18 +137,20 @@ export function Report({
     // still not a blank screen if one of them ever stops.
     return (
       <>
-        <h1>Reports</h1>
-        <p className="muted small">That report does not exist.</p>
-        <button onClick={onBack}>Back to the reports</button>
+        <h1><Trans comment="Screen title on the Reports screen. See GLOSSARY.md">Reports</Trans></h1>
+        <p className="muted small"><Trans>That report does not exist.</Trans></p>
+        <button onClick={onBack}><Trans>Back to the reports</Trans></button>
       </>
     );
   }
 
   return (
     <>
-      <nav className="crumbs" aria-label="Where you are">
+      <nav className="crumbs" aria-label={t`Where you are`}>
         <button type="button" className="link" onClick={onBack}>
-          Reports
+          <Trans comment="Button on the Reports screen. See GLOSSARY.md">
+            Reports
+          </Trans>
         </button>
         <span aria-hidden="true">›</span>
         <span>{report.label}</span>
