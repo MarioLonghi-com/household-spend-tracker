@@ -1003,25 +1003,44 @@ jobs:
         run: docker logs "st-updater-$NAME" || true
 
   # --------------------------------------------------------------------------- #
-  # The end-to-end self-update (design notes 15.5, #169), E1 alone for now
+  # The end-to-end self-update (design notes 15.5, #169), as a matrix
   # --------------------------------------------------------------------------- #
   #
-  # A -> B through the updater's own code, against the runner's Docker
-  # Engine, loopback layout. Release A is built from the merge base and B from
-  # this change, both with release labels (a bare X.Y.Z version and the
-  # revision), and pushed to a registry that answers as ghcr.io on this
-  # runner -- the engine client pulls only ghcr.io references by digest, and
-  # only a pushed image has one. B ships the real updater image (#164), which
-  # prepare pulls; the updater under test still runs as a Python process on
-  # the runner, as root because it reads the `update` volume at its
-  # mountpoint, because the test-only trust policy below must never be built
-  # into an image. The one thing replaced is
-  # verification: nothing built here has an attestation, so the test-only
-  # trust policy in tests/self_update/ci_trust.py "verifies" exactly the
-  # digests this job pushed. The first step proves updater/ cannot reach it.
+  # E1-E15 (tests/self_update/scenarios.py) on the engines the updater has to
+  # work on, each asserting what an update did to what an owner has: row
+  # counts and the ledger's stamp, which digest each container runs, a
+  # container's id and StartedAt, the pin's text.
   #
-  # **Advisory for now: not in `ci-ok`'s needs.** It joins them once it has
-  # run green on enough pull requests to be trusted not to flake.
+  # Release A is built from the merge base and B from this change, both with
+  # release labels, plus small variants of B built FROM it (a migration that
+  # fails after a sentinel row, health 500, an updater that fails its
+  # self-check, a skip): tests/self_update/stage.py. They are pushed to a
+  # registry that answers as ghcr.io on this runner -- the engine client pulls
+  # only ghcr.io references by digest, and only a pushed image has one.
+  #
+  # **The updater runs in its container**, as compose starts it: the CI
+  # updater image, which is each release's real updater image (`--target
+  # updater`) with one thing added on top -- the test-only trust policy and
+  # an entry point that selects it (tests/self_update/ci-updater.Dockerfile).
+  # Nothing built here has an attestation, so verification is the one thing
+  # replaced: the policy "verifies" exactly the digests this job pushed. The
+  # first step proves updater/ cannot reach it, and
+  # tests/test_self_update_ci.py that release.yml never builds or names it.
+  #
+  # The legs (design notes 15.5):
+  #   - docker, loopback and sidecar: the runner's rootful Docker Engine. The
+  #     sidecar layout is deploy/tailnet/compose.yaml with the Tailscale
+  #     container replaced by a stand-in carrying the same healthcheck.
+  #   - podman-rootless: Podman as the runner's user, its socket from
+  #     `systemctl --user` with lingering on, podman-restart enabled,
+  #     podman-compose (x-podman: in_pod: false is in compose.yaml), the
+  #     updater as 0:0 (S18) and label=disable (S4).
+  #   - docker-rootless: rootless Docker from dockerd-rootless-setuptool.sh,
+  #     the updater as 0:0 (S17).
+  #   - docker-arm: E1 on ubuntu-24.04-arm (C6).
+  #
+  # **Advisory: not in `ci-ok`'s needs** until the matrix has run green
+  # three times in a row on one pull request -- see the PR that added it.
   self-update:
     needs: changes
     if: >-
@@ -1030,12 +1049,43 @@ jobs:
       || (github.event_name == 'pull_request'
           && needs.changes.outputs.selfupdate == 'true'
           && needs.changes.outputs.green == '')
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    env:
-      APP_REPO: ghcr.io/mariolonghi-com/household-spend-tracker
-      VERSION_A: "98.0.0"
-      VERSION_B: "99.0.0"
+    name: self-update (${{ matrix.leg }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - leg: docker
+            engine: docker
+            layout: loopback
+            runner: ubuntu-latest
+            only: ""
+            variants: ""
+          - leg: docker-sidecar
+            engine: docker
+            layout: sidecar
+            runner: ubuntu-latest
+            only: ""
+            variants: ""
+          - leg: podman-rootless
+            engine: podman
+            layout: loopback
+            runner: ubuntu-latest
+            only: ""
+            variants: ""
+          - leg: docker-rootless
+            engine: docker-rootless
+            layout: loopback
+            runner: ubuntu-latest
+            only: ""
+            variants: ""
+          - leg: docker-arm
+            engine: docker
+            layout: loopback
+            runner: ubuntu-24.04-arm
+            only: E1
+            variants: none
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -1046,112 +1096,158 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
       - run: pip install --require-hashes -r requirements-dev.txt
+      # Outside the checkout: the releases' build context is the checkout.
+      - run: |
+          echo "STAGED=$RUNNER_TEMP/self-update" >> "$GITHUB_ENV"
+          echo "PROJECT_DIR=$RUNNER_TEMP/self-update-project" >> "$GITHUB_ENV"
 
       - name: the test-only trust policy is out of the updater's reach
         run: |
-          if grep -rnE 'self_update|ci_trust|CiTrust' updater/; then
+          if grep -rnE 'self_update|ci_trust|CiTrust|ci_updater' updater/; then
             echo "updater/ names the CI-only trust policy; it must never ship"
             exit 1
           fi
 
-      # dockerd resolves ghcr.io through /etc/hosts and trusts the CA in
-      # certs.d, so a push and a pull by digest go to this registry.
       - name: a registry that answers as ghcr.io
-        run: |
-          set -eu
-          docker pull -q registry:2@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373
-          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=ghcr.io" \
-            -addext "subjectAltName=DNS:ghcr.io" \
-            -keyout "$RUNNER_TEMP/ghcr.key" -out "$RUNNER_TEMP/ghcr.crt" 2>/dev/null
-          chmod 644 "$RUNNER_TEMP/ghcr.key"
-          sudo mkdir -p /etc/docker/certs.d/ghcr.io
-          sudo cp "$RUNNER_TEMP/ghcr.crt" /etc/docker/certs.d/ghcr.io/ca.crt
-          echo "127.0.0.1 ghcr.io" | sudo tee -a /etc/hosts > /dev/null
-          docker run -d --name ci-registry -p 127.0.0.1:443:443 -v "$RUNNER_TEMP:/certs:ro" \
-            -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
-            -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/ghcr.crt \
-            -e REGISTRY_HTTP_TLS_KEY=/certs/ghcr.key \
-            registry:2@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373 > /dev/null
-          for _ in $(seq 1 30); do
-            curl -fsS --cacert "$RUNNER_TEMP/ghcr.crt" https://ghcr.io/v2/ > /dev/null && exit 0
-            sleep 1
-          done
-          docker logs ci-registry; exit 1
+        run: python -m tests.self_update.stage registry --out "$STAGED" --publish 0.0.0.0:443
 
-      - name: build and push release A (the merge base) and B (this change)
+      - name: build and push the releases (A from the merge base, B from this change, B's variants)
         env:
           BASE_REF: ${{ github.base_ref }}
+          VARIANTS: ${{ matrix.variants }}
         run: |
           set -eu
           if [ -n "$BASE_REF" ]; then base="$(git merge-base HEAD "origin/${BASE_REF}")"
           else base="$(git rev-parse -q --verify 'HEAD^' || git rev-parse HEAD)"; fi
           echo "A is $base, B is $(git rev-parse HEAD)"
-          git worktree add --detach "$RUNNER_TEMP/a" "$base"
-          build() {  # dir version
-            ( cd "$1" && python3 -m scripts.build_stamp \
-              && sed -i "s/^__version__ = .*/__version__ = \"$2\"/" app/__init__.py )
-            docker build -q -t "$APP_REPO:$2" \
-              --label "org.opencontainers.image.version=$2" \
-              --label "org.opencontainers.image.revision=$(git -C "$1" rev-parse HEAD)" "$1"
-            docker push -q "$APP_REPO:$2"
-          }
-          build "$RUNNER_TEMP/a" "$VERSION_A"
-          build "$GITHUB_WORKSPACE" "$VERSION_B"
-          git checkout -- app/__init__.py
-          # B's updater image, the Dockerfile's `updater` target with B's
-          # release labels, so prepare resolves, verifies and pulls the image a
-          # release really ships. The updater under test still runs as a
-          # process: the CI trust policy must never be inside an image.
-          docker build -q --target updater -t "$APP_REPO-updater:$VERSION_B" \
-            --label "org.opencontainers.image.version=$VERSION_B" \
-            --label "org.opencontainers.image.revision=$(git rev-parse HEAD)" .
-          docker push -q "$APP_REPO-updater:$VERSION_B"
-          python3 - <<'PY'
-          import json, os, subprocess
-          def entry(repo, version):
-              ref = f"{repo}:{version}"
-              digests = subprocess.run(["docker", "inspect", "-f", "{{json .RepoDigests}}", ref],
-                                       check=True, capture_output=True, text=True).stdout
-              digest = next(d.split("@", 1)[1] for d in json.loads(digests) if d.startswith(repo + "@"))
-              labels = json.loads(subprocess.run(["docker", "inspect", "-f", "{{json .Config.Labels}}", ref],
-                                                 check=True, capture_output=True, text=True).stdout)
-              return {"digest": digest, "revision": labels["org.opencontainers.image.revision"], "size": 0}
-          app, upd = os.environ["APP_REPO"], os.environ["APP_REPO"] + "-updater"
-          a, b = os.environ["VERSION_A"], os.environ["VERSION_B"]
-          table = {app: {a: entry(app, a), b: entry(app, b)}, upd: {b: entry(upd, b)}}
-          path = os.path.join(os.environ["RUNNER_TEMP"], "digests.json")
-          json.dump(table, open(path, "w"), indent=2)
-          print(json.dumps(table, indent=2))
-          PY
+          started=$(date +%s)
+          python -m tests.self_update.stage build --out "$STAGED" --base "$base" --only "$VARIANTS"
+          echo "BUILD_SECONDS=$(( $(date +%s) - started ))" >> "$GITHUB_ENV"
 
-      - name: release A runs, with a ledger
+      # The engine under test resolves ghcr.io to the registry and trusts its
+      # certificate. Loopback for engines that pull from the runner's own
+      # namespace; the runner's address for rootless Docker, whose daemon
+      # pulls from inside RootlessKit's.
+      - name: "engine: Docker Engine, rootful"
+        if: matrix.engine == 'docker'
         run: |
           set -eu
-          printf 'SPENDTRACKER_VERSION=%s\nSPENDTRACKER_AUTO_MIGRATE=1\n' "$VERSION_A" > .env
-          docker compose up -d --no-build app
-          for _ in $(seq 1 60); do
-            sleep 2
-            curl -fsS http://127.0.0.1:8848/api/health && echo && break
-          done
-          docker compose exec -T app python -m scripts.seed_demo --months 1 > /dev/null \
-            || echo "the demo seed did not run; E1 goes on with the empty ledger"
-          docker volume create spend-tracker_update > /dev/null
+          echo "127.0.0.1 ghcr.io" | sudo tee -a /etc/hosts > /dev/null
+          sudo mkdir -p /etc/docker/certs.d/ghcr.io
+          sudo cp "$STAGED/ghcr.crt" /etc/docker/certs.d/ghcr.io/ca.crt
+          {
+            echo "SOCKET=/var/run/docker.sock"
+            echo "COMPOSE=docker compose"
+            echo "RESTART=sudo systemctl restart docker"
+            echo "UPDATER_USER=65532:65532"
+            echo "SOCKET_GID=$(stat -c %g /var/run/docker.sock)"
+          } >> "$GITHUB_ENV"
+          docker version --format 'Docker Engine {{.Server.Version}}, API {{.Server.MinAPIVersion}}-{{.Server.APIVersion}}'
 
-      - name: E1, A to B through the updater
+      - name: "engine: Podman, rootless"
+        if: matrix.engine == 'podman'
         run: |
-          root="$(docker volume inspect -f '{{.Mountpoint}}' spend-tracker_update)"
-          sudo "$(command -v python)" -m tests.self_update.e1 \
-            --table "$RUNNER_TEMP/digests.json" --update-root "$root" \
-            --project-dir "$GITHUB_WORKSPACE" --from "$VERSION_A" --to "$VERSION_B"
+          set -eu
+          echo "127.0.0.1 ghcr.io" | sudo tee -a /etc/hosts > /dev/null
+          sudo mkdir -p /etc/containers/certs.d/ghcr.io
+          sudo cp "$STAGED/ghcr.crt" /etc/containers/certs.d/ghcr.io/ca.crt
+          pip install --require-hashes --no-deps -r tests/self_update/podman-compose.txt
+          # S20: a rootless engine's services start at boot only with
+          # lingering, and podman-restart is what restores `unless-stopped`.
+          sudo loginctl enable-linger "$(id -un)"
+          systemctl --user enable --now podman.socket
+          systemctl --user enable podman-restart.service
+          sock="$XDG_RUNTIME_DIR/podman/podman.sock"
+          for _ in $(seq 1 30); do [ -S "$sock" ] && break; sleep 1; done
+          {
+            echo "SOCKET=$sock"
+            echo "COMPOSE=podman-compose"
+            # The API service, not the containers: conmon keeps them running.
+            echo "RESTART=systemctl --user restart podman.service"
+            echo "UPDATER_USER=0:0"
+            echo "SOCKET_GID=0"
+          } >> "$GITHUB_ENV"
+          podman version
+          podman-compose version
 
-      - name: what the containers said
-        if: failure()
+      - name: "engine: Docker, rootless"
+        if: matrix.engine == 'docker-rootless'
         run: |
-          docker ps -a
-          for c in $(docker ps -aq); do
-            echo "--- $(docker inspect -f '{{.Name}}' "$c")"
-            docker logs --tail 60 "$c" 2>&1 || true
-          done
+          set -eu
+          started=$(date +%s)
+          addr="$(hostname -I | awk '{print $1}')"
+          echo "$addr ghcr.io" | sudo tee -a /etc/hosts > /dev/null
+          mkdir -p "$HOME/.config/docker/certs.d/ghcr.io"
+          cp "$STAGED/ghcr.crt" "$HOME/.config/docker/certs.d/ghcr.io/ca.crt"
+          # The runner's Docker comes without the rootless extras, and Docker's
+          # apt repository would replace the runner's engine to add them. The
+          # static archive holds only the setup tool, its script and
+          # RootlessKit; pinned by hash, like every download here.
+          sudo apt-get install -y -qq uidmap slirp4netns > /dev/null
+          curl -fsSLo "$RUNNER_TEMP/extras.tgz" \
+            https://download.docker.com/linux/static/stable/x86_64/docker-rootless-extras-29.8.1.tgz
+          want="sha256:8f1ed16fc6913241e599af6234a7f30502bde6e73bebbbc7176b17802d967d49"
+          echo "${want#sha256:}  $RUNNER_TEMP/extras.tgz" | sha256sum -c -
+          sudo tar -xzf "$RUNNER_TEMP/extras.tgz" -C /usr/local/bin --strip-components=1
+          # Ubuntu 24.04 confines unprivileged user namespaces to programs
+          # AppArmor names; RootlessKit is not one of them on this runner.
+          sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
+          sudo loginctl enable-linger "$(id -un)"
+          # --skip-iptables: the rootful daemon beside it keeps the host's.
+          dockerd-rootless-setuptool.sh install --force --skip-iptables
+          sock="$XDG_RUNTIME_DIR/docker.sock"
+          for _ in $(seq 1 60); do DOCKER_HOST="unix://$sock" docker version > /dev/null 2>&1 && break; sleep 1; done
+          {
+            echo "SOCKET=$sock"
+            echo "COMPOSE=docker --host unix://$sock compose"
+            echo "RESTART=systemctl --user restart docker"
+            echo "UPDATER_USER=0:0"
+            echo "SOCKET_GID=0"
+          } >> "$GITHUB_ENV"
+          DOCKER_HOST="unix://$sock" docker version --format 'rootless Docker {{.Server.Version}}, API {{.Server.MinAPIVersion}}-{{.Server.APIVersion}}'
+          echo "rootless Docker set up in $(( $(date +%s) - started )) s"
+
+      - name: the scenarios
+        env:
+          LEG: ${{ matrix.leg }}
+          LAYOUT: ${{ matrix.layout }}
+          ONLY: ${{ matrix.only }}
+        run: |
+          python -m tests.self_update.scenarios --staged "$STAGED" --project-dir "$PROJECT_DIR" \
+            --leg "$LEG" --layout "$LAYOUT" --only "$ONLY" \
+            --socket "$SOCKET" --compose "$COMPOSE" --restart "$RESTART" \
+            --updater-user "$UPDATER_USER" --socket-gid "$SOCKET_GID" \
+            --report "$STAGED/report.json" --version-out "$STAGED/version.json"
+
+      - name: summary
+        if: always()
+        env:
+          LEG: ${{ matrix.leg }}
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY" || true
+          import json, os
+          staged = os.environ["STAGED"]
+          version = json.load(open(f"{staged}/version.json"))
+          print(f"### self-update: {os.environ['LEG']}")
+          print(f"{version.get('Version')}, API {version.get('MinAPIVersion')}-{version.get('ApiVersion')}; "
+                f"releases built in {os.environ.get('BUILD_SECONDS', '?')} s\n")
+          print("| scenario | result | s | |")
+          print("|---|---|---:|---|")
+          for r in json.load(open(f"{staged}/report.json")):
+              note = r["skipped"] or r["error"] or "; ".join(r["failed"])[:300]
+              print(f"| {r['scenario']} {r['title']} | {r['result']} | {r['seconds']} | {note or ''} |")
+          PY
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: self-update-${{ matrix.leg }}
+          path: |
+            ${{ env.STAGED }}/report.json
+            ${{ env.STAGED }}/version.json
+            ${{ env.STAGED }}/releases.json
+          if-no-files-found: ignore
+          retention-days: 14
 
   # --------------------------------------------------------------------------- #
   # The one check a ruleset requires
