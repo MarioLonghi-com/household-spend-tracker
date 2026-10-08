@@ -202,6 +202,21 @@ export function monthLabel(period: string): string {
 }
 
 /**
+ * Names joined into one phrase: "Casa and Flat 2". In English, joined with
+ * " and " as the screens always did -- `Intl.ListFormat` would put a comma
+ * before the last of three, which is a visible change. In another language,
+ * `Intl.ListFormat`, which knows its own conjunction.
+ */
+export function listText(items: readonly string[]): string {
+  if (speaksEnglish()) return items.join(" and ");
+  try {
+    return new Intl.ListFormat(uiLanguage(), { type: "conjunction" }).format(items);
+  } catch {
+    return items.join(", ");
+  }
+}
+
+/**
  * A country's name. In English, the name the server sent, which is the list
  * the account form searches; in another language, `Intl.DisplayNames`.
  */

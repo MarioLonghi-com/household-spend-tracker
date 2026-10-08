@@ -29,6 +29,8 @@ import {
 } from "../lib/passkeys";
 import { formatInstant } from "../lib/time";
 import type { Passkey } from "../lib/types";
+import { plural, t } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 type Column = "label" | "kind" | "created" | "used";
 
@@ -36,15 +38,17 @@ type Column = "label" | "kind" | "created" | "used";
 export function whyNotHere(state: PasskeyState): string {
   switch (state.reason) {
     case "browser":
-      return "This browser does not support passkeys yet.";
+      return t`This browser does not support passkeys yet.`;
     case "wrong_host":
     case "insecure":
-    case "ip_address":
-      return state.address
-        ? `Passkeys need this app opened at its HTTPS address, ${state.address}.`
-        : "Passkeys need this app opened at its HTTPS address.";
+    case "ip_address": {
+      const address = state.address;
+      return address
+        ? t`Passkeys need this app opened at its HTTPS address, ${address}.`
+        : t`Passkeys need this app opened at its HTTPS address.`;
+    }
     default:
-      return "Passkeys are not set up on this server.";
+      return t`Passkeys are not set up on this server.`;
   }
 }
 
@@ -60,11 +64,15 @@ export function usePasskeyState() {
 function whatIsLeft(passkeys: Passkey[], removing: Passkey): string {
   const others = passkeys.filter((one) => one.id !== removing.id && one.usable_here).length;
   return others > 0
-    ? `You will still be able to sign in with your other ${others === 1 ? "passkey" : `${others} passkeys`}, or with your password and code.`
-    : "You will still be able to sign in with your password and code.";
+    ? plural(others, {
+        one: "You will still be able to sign in with your other passkey, or with your password and code.",
+        other: `You will still be able to sign in with your other ${others} passkeys, or with your password and code.`,
+      })
+    : t`You will still be able to sign in with your password and code.`;
 }
 
 export function PasskeysSection() {
+  const { t } = useLingui();
   const queries = useQueryClient();
   const listed = usePasskeys();
   const state = usePasskeyState();
@@ -151,8 +159,10 @@ export function PasskeysSection() {
 
       {reminder > 0 && usable > 0 && (
         <div className="banner warn" role="status">
-          You signed in with a recovery code, and your passkeys still work. If one of them was on
-          the device you lost, remove it here.{" "}
+          <Trans>
+            You signed in with a recovery code, and your passkeys still work. If one of them was on
+            the device you lost, remove it here.
+          </Trans>{" "}
           <button
             type="button"
             className="link"
@@ -161,7 +171,7 @@ export function PasskeysSection() {
               setReminder(0);
             }}
           >
-            Dismiss
+            <Trans>Dismiss</Trans>
           </button>
         </div>
       )}
@@ -171,12 +181,14 @@ export function PasskeysSection() {
           <table className="passkeys">
             <thead>
               <tr>
-                <SortHeading label="Name" column="label" sort={sort} direction={direction} onSort={onSort} />
-                <SortHeading label="Kept" column="kind" sort={sort} direction={direction} onSort={onSort} />
-                <SortHeading label="Added" column="created" sort={sort} direction={direction} onSort={onSort} />
-                <SortHeading label="Last used" column="used" sort={sort} direction={direction} onSort={onSort} />
+                <SortHeading label={t`Name`} column="label" sort={sort} direction={direction} onSort={onSort} />
+                <SortHeading label={t`Kept`} column="kind" sort={sort} direction={direction} onSort={onSort} />
+                <SortHeading label={t`Added`} column="created" sort={sort} direction={direction} onSort={onSort} />
+                <SortHeading label={t`Last used`} column="used" sort={sort} direction={direction} onSort={onSort} />
                 <th>
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">
+                    <Trans>Actions</Trans>
+                  </span>
                 </th>
               </tr>
             </thead>
@@ -202,24 +214,30 @@ export function PasskeysSection() {
       )}
 
       {removing && (
-        <div className="card" role="alertdialog" aria-label={`Remove ${removing.label}`} style={{ marginTop: 12 }}>
+        <div className="card" role="alertdialog" aria-label={t`Remove ${removing.label}`} style={{ marginTop: 12 }}>
           <p style={{ marginTop: 0 }}>
-            Remove <strong>{removing.label}</strong>? It stops working at once.{" "}
-            {removing.usable_here ? whatIsLeft(passkeys, removing) : "It could not be used here anyway."}
+            <Trans>
+              Remove <strong>{removing.label}</strong>? It stops working at once.
+            </Trans>{" "}
+            {removing.usable_here ? whatIsLeft(passkeys, removing) : t`It could not be used here anyway.`}
           </p>
           <div className="row">
             <button className="danger" disabled={remove.isPending} onClick={() => remove.mutate(removing.id)}>
-              Remove
+              <Trans>Remove</Trans>
             </button>
-            <button onClick={() => setRemoving(null)}>Keep it</button>
+            <button onClick={() => setRemoving(null)}>
+              <Trans>Keep it</Trans>
+            </button>
           </div>
         </div>
       )}
 
       {available && usable === 1 && !adding && (
         <p className="small muted">
-          Add a second on another device. If you lose this one, you will need your password and
-          code.
+          <Trans>
+            Add a second on another device. If you lose this one, you will need your password and
+            code.
+          </Trans>
         </p>
       )}
 
@@ -229,16 +247,18 @@ export function PasskeysSection() {
         <div className="card" style={{ marginTop: 12 }}>
           <Problem error={add.error && !wasDismissed(add.error) ? add.error : null} />
           {add.error && wasDismissed(add.error) ? (
-            <p className="small muted">The passkey prompt was closed, so nothing was added.</p>
+            <p className="small muted">
+              <Trans>The passkey prompt was closed, so nothing was added.</Trans>
+            </p>
           ) : null}
           <StepUpFields
             proof={proof}
             onChange={setProof}
-            why="A passkey is a way in that keeps working after this browser is closed."
+            why={t`A passkey is a way in that keeps working after this browser is closed.`}
           />
           <div className="row" style={{ marginTop: 12 }}>
             <button className="primary" disabled={!stepUpReady(proof) || add.isPending} onClick={() => add.mutate()}>
-              {add.isPending ? "Waiting for the passkey…" : "Continue to the passkey"}
+              {add.isPending ? t`Waiting for the passkey…` : t`Continue to the passkey`}
             </button>
             <button
               onClick={() => {
@@ -247,13 +267,13 @@ export function PasskeysSection() {
                 add.reset();
               }}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
           </div>
         </div>
       ) : available ? (
         <button style={{ marginTop: 12 }} onClick={() => setAdding(true)}>
-          Add a passkey
+          <Trans>Add a passkey</Trans>
         </button>
       ) : null}
     </div>
@@ -283,6 +303,7 @@ function PasskeyRow({
   onRemove: () => void;
   busy: boolean;
 }) {
+  const { t } = useLingui();
   const name = useRef<HTMLInputElement>(null);
   const editing = renaming !== null;
   useEffect(() => {
@@ -300,7 +321,7 @@ function PasskeyRow({
               onRenameSave();
             }}
           >
-            <Field label={`New name for ${passkey.label}`}>
+            <Field label={t`New name for ${passkey.label}`}>
               <input
                 ref={name}
                 value={renaming}
@@ -310,35 +331,41 @@ function PasskeyRow({
               />
             </Field>
             <button type="submit" className="primary" disabled={busy || renaming.trim() === ""}>
-              Save
+              <Trans>Save</Trans>
             </button>
             <button type="button" onClick={onRenameCancel}>
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
           </form>
         ) : (
           <>
             <strong>{passkey.label}</strong>
-            {thisDevice && <span className="tag">this device</span>}
+            {thisDevice && (
+              <span className="tag">
+                <Trans>this device</Trans>
+              </span>
+            )}
             {!passkey.usable_here && (
-              <div className="small neg">Made for {passkey.rp_id}, cannot be used here.</div>
+              <div className="small neg">
+                <Trans>Made for {passkey.rp_id}, cannot be used here.</Trans>
+              </div>
             )}
           </>
         )}
       </td>
-      <td className="small">{passkey.synced ? "Synced" : "This device only"}</td>
+      <td className="small">{passkey.synced ? t`Synced` : t`This device only`}</td>
       <td className="small">{formatInstant(passkey.created_at)}</td>
-      <td className="small">{passkey.last_used_at ? formatInstant(passkey.last_used_at) : "Never"}</td>
+      <td className="small">{passkey.last_used_at ? formatInstant(passkey.last_used_at) : t`Never`}</td>
       <td className="actions">
         {renaming === null && (
           <div className="row">
             {passkey.usable_here && (
-              <button disabled={busy} onClick={onRenameStart} aria-label={`Rename ${passkey.label}`}>
-                Rename
+              <button disabled={busy} onClick={onRenameStart} aria-label={t`Rename ${passkey.label}`}>
+                <Trans>Rename</Trans>
               </button>
             )}
-            <button className="danger" disabled={busy} onClick={onRemove} aria-label={`Remove ${passkey.label}`}>
-              Remove
+            <button className="danger" disabled={busy} onClick={onRemove} aria-label={t`Remove ${passkey.label}`}>
+              <Trans>Remove</Trans>
             </button>
           </div>
         )}

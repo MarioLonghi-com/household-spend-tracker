@@ -34,6 +34,15 @@ history this repository does not have.
 
 ### Changed
 
+- **The first screens' words are in the catalogs:** the shell and its menu,
+  signing in, step-up, recovery codes, resetting a sign-in, the profile and
+  passkeys, setting up the instance and accepting an invitation, plus the
+  shared panel, hint and dialog furniture and the sign-in-changes notice.
+  Sentences built from fragments are whole sentences now, one per case, so
+  each can be translated as it is read. English is unchanged, and a test
+  renders each of these screens in the `en-XA` pseudo-locale and finds no
+  English left. (#54)
+
 - **The client's words can come from translation catalogs** (Lingui 6,
   `client/src/locales/`). The menu, the sort headings' tooltip and the
   "try again in" wait are the first messages extracted; a refusal that
@@ -43,6 +52,7 @@ history this repository does not have.
   `en-XA` pseudo-locale is reachable for CI and development, and one
   Playwright pass runs in it at phone width. CI fails when the catalogs are
   behind the source. Nothing an English reader sees changes. (#53)
+
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.

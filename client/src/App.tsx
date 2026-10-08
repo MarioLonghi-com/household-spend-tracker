@@ -40,8 +40,9 @@ import { Setup } from "./screens/Setup";
 import { SignIn } from "./screens/SignIn";
 import { Transfers } from "./screens/Transfers";
 import type { Household, User } from "./lib/types";
-import { t } from "@lingui/core/macro";
+import { plural, t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 
 type Screen =
   | "register"
@@ -124,6 +125,12 @@ export function pageLabel(sections: NavSection[], screen: Screen): string | null
     }
   }
   return null;
+}
+
+/** Who else is here: "Robin is here too", "Robin, Sam are here too". */
+function presenceText(names: string[]): string {
+  const who = names.join(", ");
+  return plural(names.length, { one: `${who} is here too`, other: `${who} are here too` });
 }
 
 /** Sets the tab's title for the screen on show. */
@@ -280,6 +287,7 @@ function tokenAt(prefix: "invite" | "reset"): string | null {
 }
 
 export function App() {
+  useLingui();
   const client = useQueryClient();
   const [user, setUserState] = useState<User | null>(null);
   // Who the cache was last filled for. Not state: it is read and written inside
@@ -355,19 +363,24 @@ export function App() {
   const before = !ready
     ? null
     : setupNeeded
-      ? "Set up"
+      ? t`Set up`
       : reset
-        ? "Reset"
+        ? t`Reset`
         : token
-        ? "Invitation"
+        ? t`Invitation`
         : !user
-          ? "Sign in"
+          ? t`Sign in`
           : undefined;
   useEffect(() => {
     if (before !== undefined) document.title = tabTitle(before);
   }, [before]);
 
-  if (!ready) return <div className="centred muted">Loading…</div>;
+  if (!ready)
+    return (
+      <div className="centred muted">
+        <Trans>Loading…</Trans>
+      </div>
+    );
   if (setupNeeded)
     return (
       <Setup
@@ -448,18 +461,24 @@ function AlreadySignedIn({
 
   return (
     <div className="centred">
-      <h1>You're already signed in</h1>
+      <h1>
+        <Trans>You're already signed in</Trans>
+      </h1>
       <p className="muted small">
-        This browser is signed in as {user.display_name}. An invitation makes a new account, so
-        sign out first if the link is meant for somebody else.
+        <Trans>
+          This browser is signed in as {user.display_name}. An invitation makes a new account, so
+          sign out first if the link is meant for somebody else.
+        </Trans>
       </p>
       <div className="card">
         <Problem error={signOut.error} />
         <button className="primary" onClick={() => signOut.mutate()}>
-          Sign out and accept the invitation
+          <Trans>Sign out and accept the invitation</Trans>
         </button>
         <p />
-        <button onClick={onIgnore}>Ignore it and carry on</button>
+        <button onClick={onIgnore}>
+          <Trans>Ignore it and carry on</Trans>
+        </button>
       </div>
     </div>
   );
@@ -546,28 +565,40 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
     household
       ? pageLabel(menu(household.name), screen)
       : households.isSuccess && list.length === 0
-        ? "New household"
+        ? t`New household`
         : null,
     // Its own page is already its name. Decided by the screen, not by
     // comparing names: a household called "Transfers" keeps its name there.
     screen === "household" ? null : household?.name,
   );
 
-  if (households.isLoading) return <div className="centred muted">Loading…</div>;
+  if (households.isLoading)
+    return (
+      <div className="centred muted">
+        <Trans>Loading…</Trans>
+      </div>
+    );
   // An error is not an empty instance. Without this branch a failed read shows
   // "your household", as if the ledger had never existed.
   if (households.isError)
     return (
       <div className="centred">
-        <h1>Couldn't load your households</h1>
+        <h1>
+          <Trans>Couldn't load your households</Trans>
+        </h1>
         <Problem error={households.error} />
         <button className="primary" onClick={() => households.refetch()}>
-          Try again
+          <Trans>Try again</Trans>
         </button>
       </div>
     );
   if (list.length === 0) return <FirstHousehold onCreated={() => households.refetch()} />;
-  if (!household) return <div className="centred muted">Loading…</div>;
+  if (!household)
+    return (
+      <div className="centred muted">
+        <Trans>Loading…</Trans>
+      </div>
+    );
 
   const others = (presence.data?.online ?? []).filter((one) => one.id !== user.id);
   const waiting = inbox.data?.length ?? 0;
@@ -613,7 +644,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
             furniture nobody sees -- so it disappears at zero, which is also
             the only moment it is worth noticing. */}
         {child.key === "receipts" && waiting > 0 ? (
-          <span className="nav-badge" aria-label={`${waiting} waiting`}>
+          <span className="nav-badge" aria-label={t`${waiting} waiting`}>
             {waiting}
           </span>
         ) : null}
@@ -636,7 +667,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
       <header className="topbar">
         <button
           className="menu-button"
-          aria-label={navOpen ? "Close the menu" : "Open the menu"}
+          aria-label={navOpen ? t`Close the menu` : t`Open the menu`}
           aria-expanded={navOpen}
           aria-controls="main-nav"
           onClick={() => setNavOpen(!navOpen)}
@@ -716,11 +747,12 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
           {others.length > 0 ? (
             <>
               <span className="dot" />
-              {others.map((one) => one.display_name).join(", ")}{" "}
-              {others.length === 1 ? "is" : "are"} here too
+              {presenceText(others.map((one) => one.display_name))}
             </>
           ) : (
-            <span className="muted">Only you right now</span>
+            <span className="muted">
+              <Trans>Only you right now</Trans>
+            </span>
           )}
           <div style={{ marginTop: 8 }}>
             {/* Your name is the way into your own settings -- the same place
@@ -737,7 +769,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
               {user.display_name}
             </button>
             <button className="link" onClick={() => signOut.mutate()}>
-              Sign out
+              <Trans>Sign out</Trans>
             </button>
           </div>
         </div>
@@ -751,8 +783,8 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
         className="nav-rail"
         aria-controls="main-nav"
         aria-expanded={!navCollapsed}
-        aria-label={navCollapsed ? "Show the menu" : "Hide the menu"}
-        title={navCollapsed ? "Show the menu" : "Hide the menu"}
+        aria-label={navCollapsed ? t`Show the menu` : t`Hide the menu`}
+        title={navCollapsed ? t`Show the menu` : t`Hide the menu`}
         onClick={() => setNavCollapsed(!navCollapsed)}
       >
         <span aria-hidden="true">{navCollapsed ? "\u203A" : "\u2039"}</span>
@@ -827,6 +859,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
 }
 
 function FirstHousehold({ onCreated }: { onCreated: () => void }) {
+  useLingui();
   const [name, setName] = useState("");
   const [currency, setCurrency] = useState("EUR");
 
@@ -837,18 +870,22 @@ function FirstHousehold({ onCreated }: { onCreated: () => void }) {
 
   return (
     <div className="centred">
-      <h1>Your household</h1>
+      <h1>
+        <Trans>Your household</Trans>
+      </h1>
       <p className="muted small">
-        A household holds the accounts and the register. The currency here is only used for
-        totals; each account keeps its own.
+        <Trans>
+          A household holds the accounts and the register. The currency here is only used for
+          totals; each account keeps its own.
+        </Trans>
       </p>
       <div className="card">
         <Problem error={create.error} />
-        <Field label="Name">
+        <Field label={t`Name`}>
           <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
         </Field>
         <p />
-        <Field label="Main currency">
+        <Field label={t`Main currency`}>
           <input
             value={currency}
             onChange={(e) => setCurrency(e.target.value.toUpperCase())}
@@ -857,7 +894,7 @@ function FirstHousehold({ onCreated }: { onCreated: () => void }) {
         </Field>
         <p />
         <button className="primary" disabled={!name.trim() || create.isPending} onClick={() => create.mutate()}>
-          Create it
+          <Trans>Create it</Trans>
         </button>
       </div>
     </div>
