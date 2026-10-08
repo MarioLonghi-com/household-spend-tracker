@@ -8,6 +8,10 @@
 **Spend Tracker** is a self-hosted spend tracker for one household.
 Multi-currency, fully audited, and meant to be reachable only over a tailnet.
 
+![The register of the demo household: two currencies, each with its own Out and In columns, work expenses flagged, and a transfer between two accounts](docs/screenshots/register.png)
+
+*The demo household that `make seed` creates. Every name and figure in it is invented.*
+
 ## What it is, and what it is not
 
 It is a ledger for one household's accounts and transactions, and the
@@ -489,9 +493,11 @@ one, and CI's `release-ready` job refuses it until it looks like one
    green, merge it.
 4. Tag the merge on `main` and push the tag. `release.yml` checks that
    `tests.yml` already passed on exactly this tree, checks the tag against the
-   version and the CHANGELOG, builds the tarball and the container image,
-   attests both, and publishes them -- the tarball to the release, the image
-   to `ghcr.io/mariolonghi-com/household-spend-tracker`.
+   version and the CHANGELOG, builds the tarball and the container image for
+   `linux/amd64` and `linux/arm64`, attests both, and publishes them -- the
+   tarball to a draft release, the image to
+   `ghcr.io/mariolonghi-com/household-spend-tracker`, and the release itself
+   last, with the CHANGELOG section as its body.
 
    ```bash
    git tag -a vX.Y.Z -m "X.Y.Z" origin/main && git push origin vX.Y.Z

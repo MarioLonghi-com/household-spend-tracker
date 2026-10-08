@@ -340,6 +340,9 @@ export interface RegisterPage {
   /** True when the household is past the register's ceiling and `total` is
    *  larger than what came back. Never silent: the screen says so. */
   capped: boolean;
+  /** Rows with no category under every other filter of the request, the
+   *  category picker set aside: the count beside "Needs a category". */
+  needs_category: number;
 }
 
 export interface Payee {
@@ -598,6 +601,21 @@ export interface RecoveryMode {
 }
 
 /** Your own second factor, as the profile needs it (#287). Never anybody else's. */
+/** A passkey as its owner sees it (`GET /me/passkeys`, #120). */
+export interface Passkey {
+  id: string;
+  label: string;
+  created_at: string;
+  last_used_at: string | null;
+  /** May live on more than one device; false is "this device only". */
+  synced: boolean;
+  /** The host name it was made for ... */
+  rp_id: string;
+  /** ... and whether that is this instance's. False: it can only be removed. */
+  usable_here: boolean;
+  aaguid: string | null;
+}
+
 export interface AuthenticatorStatus {
   /** An authenticator is set up. False after a reset cleared it. */
   enrolled: boolean;

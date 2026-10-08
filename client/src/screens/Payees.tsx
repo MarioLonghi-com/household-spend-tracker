@@ -28,6 +28,9 @@ import {
   Toasts,
 } from "../components/bits";
 import type { Account, Household, Payee, PayeeCollision } from "../lib/types";
+import { compareNames } from "../lib/locale";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 type PayeeSort = "name" | "kind";
 type CollisionSort = "spellings" | "transactions";
@@ -71,13 +74,13 @@ export function Payees({ household }: { household: Household }) {
       setMerging(null);
       // The register and the rules both name payees, and a merge moved both.
       client.invalidateQueries();
-      toasts.say(`Folded into ${kept.name}`);
+      toasts.say(t({ message: `Folded into ${kept.name}`, comment: "Label on the Payees screen" }));
     },
   });
 
   const order = useSort<PayeeSort>("name");
   const accountName = (id: string | null) =>
-    (accounts.data ?? []).find((one) => one.id === id)?.name ?? "another account";
+    (accounts.data ?? []).find((one) => one.id === id)?.name ?? t({ message: "another account", comment: "Label on the Payees screen" });
 
   const rows = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -94,36 +97,40 @@ export function Payees({ household }: { household: Household }) {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1>Payees</h1>
+        <h1><Trans comment="Screen title on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md">Payees</Trans></h1>
         <button className="primary" onClick={() => setAdding(true)}>
-          Add payee
+          <Trans comment="Button on the Payees screen">
+            Add payee
+          </Trans>
         </button>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
-        Everyone {household.name} has paid or been paid by. Most arrive on their own, from a
-        transaction or an import; two spellings of the same shop are merged here.
+        <Trans>
+          Everyone {household.name} has paid or been paid by. Most arrive on their own, from a
+          transaction or an import; two spellings of the same shop are merged here.
+        </Trans>
       </p>
 
-      <SameName household={household} onMerged={(kept) => toasts.say(`Folded into ${kept}`)} />
+      <SameName household={household} onMerged={(kept) => toasts.say(t({ message: `Folded into ${kept}`, comment: "Text on the Payees screen" }))} />
 
       <div className="card">
         <Problem error={payees.error ?? create.error ?? merge.error} />
 
-        <Field label="Find a payee">
+        <Field label={t`Find a payee`}>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="part of a name"
+            placeholder={t`part of a name`}
           />
         </Field>
 
         {payees.isLoading ? (
-          <p className="muted">Loading…</p>
+          <p className="muted"><Trans comment="Sentence on the Payees screen">Loading…</Trans></p>
         ) : rows.length === 0 ? (
           <Empty>
             {payees.data?.length
-              ? "No payee matches that."
-              : "No payees yet. One appears the first time you name somebody on a transaction."}
+              ? t`No payee matches that.`
+              : t`No payees yet. One appears the first time you name somebody on a transaction.`}
           </Empty>
         ) : (
           <div className="table-scroll">
@@ -131,38 +138,40 @@ export function Payees({ household }: { household: Household }) {
               <thead>
                 <tr>
                   <SortHeading
-                    label="Name"
+                    label={t({ message: "Name", comment: "Column heading on the Payees screen: noun" })}
                     column="name"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label="Kind"
+                    label={t({ message: "Kind", comment: "Column heading on the Payees screen: noun, what sort of thing" })}
                     column="kind"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   {/* Buttons, not a fact about the row: no sort. */}
-                  <th aria-label="Actions" />
+                  <th aria-label={t({ message: "Actions", comment: "Screen-reader name on the Payees screen" })} />
                 </tr>
               </thead>
               <tbody>
                 {rows.map((one) => (
                   <tr key={one.id}>
                     <td data-primary="true">{one.name}</td>
-                    <td className="small muted" data-label="Kind" data-detail-first="true">
+                    <td className="small muted" data-label={t({ message: "Kind", comment: "Column name shown beside a value on phones on the Payees screen: noun, what sort of thing" })} data-detail-first="true">
                       {one.transfer_account_id
-                        ? `Transfer to ${accountName(one.transfer_account_id)}`
-                        : "Payee"}
+                        ? t({ message: `Transfer to ${accountName(one.transfer_account_id)}`, comment: "Table cell on the Payees screen" })
+                        : t({ message: "Payee", comment: "Table cell on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md" })}
                     </td>
                     <td>
                       {/* A transfer payee is the other side of a transfer, kept
                           in step with an account. Merging one into a shop would
                           quietly re-point every transfer that used it. */}
                       {one.transfer_account_id ? null : (
-                        <button onClick={() => setMerging(one)}>Merge…</button>
+                        <button onClick={() => setMerging(one)}>
+                          <Trans comment="Button on the Payees screen: verb, combine two into one">Merge…</Trans>
+                        </button>
                       )}
                     </td>
                   </tr>
@@ -172,7 +181,7 @@ export function Payees({ household }: { household: Household }) {
           </div>
         )}
         <p className="muted small" style={{ marginBottom: 0 }}>
-          {rows.length} of {payees.data?.length ?? 0} shown.
+          {t({ message: `${rows.length} of ${payees.data?.length ?? 0} shown.`, comment: "Sentence on the Payees screen" })}
         </p>
       </div>
 
@@ -272,11 +281,13 @@ function SameName({
   if (!rows.length && !merge.error) return null;
 
   return (
-    <section className="card" aria-label="Spellings of one name">
-      <h2 style={{ marginTop: 0 }}>Spellings of one name</h2>
+    <section className="card" aria-label={t`Spellings of one name`}>
+      <h2 style={{ marginTop: 0 }}><Trans>Spellings of one name</Trans></h2>
       <p className="muted small" style={{ marginTop: 0 }}>
-        These payees differ only in accents, dashes or spaces you cannot see, which no longer tell
-        two names apart. Nothing has been merged: review each and choose the spelling to keep.
+        <Trans>
+          These payees differ only in accents, dashes or spaces you cannot see, which no longer tell
+          two names apart. Nothing has been merged: review each and choose the spelling to keep.
+        </Trans>
       </p>
       <Problem error={groups.error ?? (reviewing ? null : merge.error)} />
       <div className="table-scroll">
@@ -284,14 +295,14 @@ function SameName({
           <thead>
             <tr>
               <SortHeading
-                label="Spellings"
+                label={t({ message: "Spellings", comment: "Column heading on the Payees screen" })}
                 column="spellings"
                 sort={order.sort}
                 direction={order.direction}
                 onSort={order.onSort}
               />
               <SortHeading
-                label="Transactions"
+                label={t({ message: "Transactions", comment: "Column heading on the Payees screen. See GLOSSARY.md" })}
                 column="transactions"
                 sort={order.sort}
                 direction={order.direction}
@@ -299,14 +310,14 @@ function SameName({
                 align="right"
               />
               {/* Buttons, not a fact about the row: no sort. */}
-              <th aria-label="Actions" />
+              <th aria-label={t({ message: "Actions", comment: "Screen-reader name on the Payees screen" })} />
             </tr>
           </thead>
           <tbody>
             {rows.map((group) => (
               <tr key={group.key}>
                 <td data-primary="true">{group.payees.map((one) => one.name).join(" · ")}</td>
-                <td className="amount" data-label="Transactions">
+                <td className="amount" data-label={t({ message: "Transactions", comment: "Column name shown beside a value on phones on the Payees screen. See GLOSSARY.md" })}>
                   {total(group)}
                 </td>
                 <td>
@@ -316,7 +327,9 @@ function SameName({
                       setReviewingKey(group.key);
                     }}
                   >
-                    Review…
+                    <Trans comment="Button on the Payees screen: verb, look over before going on">
+                      Review…
+                    </Trans>
                   </button>
                 </td>
               </tr>
@@ -363,17 +376,17 @@ function MergeSpellings({
   error: unknown;
 }) {
   const busiest = [...group.payees].sort(
-    (a, b) => b.transaction_count - a.transaction_count || a.name.localeCompare(b.name),
+    (a, b) => b.transaction_count - a.transaction_count || compareNames(a.name, b.name),
   )[0];
   const [keep, setKeep] = useState(busiest?.id ?? "");
   const kept = group.payees.find((one) => one.id === keep);
   const others = group.payees.filter((one) => one.id !== keep);
 
   return (
-    <Dialog title="Merge spellings of one name" onClose={onClose}>
+    <Dialog title={t`Merge spellings of one name`} onClose={onClose}>
       <Problem error={error} />
       <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
-        <legend className="small">Keep</legend>
+        <legend className="small"><Trans comment="Heading of a group of choices on the Payees screen: verb">Keep</Trans></legend>
         {group.payees.map((one) => (
           <label key={one.id} className="row" style={{ gap: 8 }}>
             <input
@@ -386,8 +399,13 @@ function MergeSpellings({
             <span>
               {one.name}{" "}
               <span className="muted small">
-                {one.transaction_count} transaction{one.transaction_count === 1 ? "" : "s"}
-                {one.rule_count ? `, ${one.rule_count} rule${one.rule_count === 1 ? "" : "s"}` : ""}
+                {plural(one.transaction_count, {
+                  one: `${one.transaction_count} transaction`,
+                  other: `${one.transaction_count} transactions`,
+                })}
+                {one.rule_count
+                  ? `, ${plural(one.rule_count, { one: `${one.rule_count} rule`, other: `${one.rule_count} rules` })}`
+                  : ""}
               </span>
             </span>
           </label>
@@ -395,19 +413,27 @@ function MergeSpellings({
       </fieldset>
       <p className="muted small">
         {kept ? (
-          <>
-            Every transaction and every rule that names{" "}
-            <strong>{others.map((one) => one.name).join(", ")}</strong> will name{" "}
-            <strong>{kept.name}</strong> instead, and{" "}
-            {others.length === 1 ? "that payee" : "those payees"} will be gone. Each merge is one
-            act in History, so it can be undone there.
-          </>
+          others.length === 1 ? (
+            <Trans>
+              Every transaction and every rule that names{" "}
+              <strong>{others.map((one) => one.name).join(", ")}</strong> will name{" "}
+              <strong>{kept.name}</strong> instead, and that payee will be gone. Each merge is one
+              act in History, so it can be undone there.
+            </Trans>
+          ) : (
+            <Trans>
+              Every transaction and every rule that names{" "}
+              <strong>{others.map((one) => one.name).join(", ")}</strong> will name{" "}
+              <strong>{kept.name}</strong> instead, and those payees will be gone. Each merge is one
+              act in History, so it can be undone there.
+            </Trans>
+          )
         ) : (
-          <>The one you keep is the one you choose here.</>
+          <Trans>The one you keep is the one you choose here.</Trans>
         )}
       </p>
       <button className="primary" disabled={!kept || pending} onClick={() => onMerge(keep)}>
-        Merge into {kept?.name ?? "…"}
+        {t({ message: `Merge into ${kept?.name ?? "…"}`, comment: "Button on the Payees screen" })}
       </button>
     </Dialog>
   );
@@ -426,18 +452,22 @@ function AddPayee({
 }) {
   const [name, setName] = useState("");
   return (
-    <Dialog title="Add a payee" onClose={onClose}>
+    <Dialog title={t`Add a payee`} onClose={onClose}>
       <Problem error={error} />
       <p className="muted small">
-        Only worth doing ahead of time for one you are about to write a rule for. Naming somebody
-        on a transaction creates them anyway.
+        <Trans>
+          Only worth doing ahead of time for one you are about to write a rule for. Naming somebody
+          on a transaction creates them anyway.
+        </Trans>
       </p>
-      <Field label="Name">
+      <Field label={t({ message: "Name", comment: "Label of a form field on the Payees screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus maxLength={200} />
       </Field>
       <p />
       <button className="primary" disabled={!name.trim() || pending} onClick={() => onAdd(name.trim())}>
-        Add
+        <Trans comment="Button on the Payees screen: verb">
+          Add
+        </Trans>
       </button>
     </Dialog>
   );
@@ -469,11 +499,11 @@ function MergePayee({
   const target = others.find((one) => one.id === into);
 
   return (
-    <Dialog title={`Merge ${payee.name}`} onClose={onClose}>
+    <Dialog title={t({ message: `Merge ${payee.name}`, comment: "Title of a panel on the Payees screen" })} onClose={onClose}>
       <Problem error={error} />
-      <Field label="Into">
+      <Field label={t({ message: "Into", comment: "Label of a form field on the Payees screen: where it goes, or what it is merged into" })}>
         <select value={into} onChange={(e) => setInto(e.target.value)} autoFocus>
-          <option value="">Choose a payee…</option>
+          <option value=""><Trans>Choose a payee…</Trans></option>
           {others.map((one) => (
             <option key={one.id} value={one.id}>
               {one.name}
@@ -483,17 +513,19 @@ function MergePayee({
       </Field>
       <p className="muted small">
         {target ? (
-          <>
+          <Trans>
             Every transaction and every rule that names <strong>{payee.name}</strong> will name{" "}
             <strong>{target.name}</strong> instead, and {payee.name} will be gone. It is one act in
             History, so it can be undone there.
-          </>
+          </Trans>
         ) : (
-          <>The one you keep is the one you choose here.</>
+          <Trans>The one you keep is the one you choose here.</Trans>
         )}
       </p>
       <button className="primary" disabled={!into || pending} onClick={() => onMerge(into)}>
-        Merge
+        <Trans comment="Button on the Payees screen: verb, combine two into one">
+          Merge
+        </Trans>
       </button>
     </Dialog>
   );

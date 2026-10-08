@@ -211,7 +211,7 @@ jobs:
           \.py$
           ^requirements[^/]*\.txt$
           ^(pyproject\.toml|alembic\.ini|Makefile)$
-          ^(app|statements|tests|migrations|scripts)/
+          ^(app|statements|updater|tests|migrations|scripts)/
           ^client/src/lib/appearance\.ts$
           PATHS
 
@@ -312,7 +312,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install "$(grep -oE '^ruff==[^ ]+' requirements-dev.txt)"
       - name: ruff
-        run: ruff check app/ statements/ tests/ scripts/
+        run: ruff check app/ statements/ updater/ tests/ scripts/
       - name: no bulk statements against audited tables
         run: ./scripts/no-bulk-statements.sh
 
@@ -337,7 +337,7 @@ jobs:
       - run: make lock UV=uv
       - name: the committed locks are what the .in files compile to
         run: |
-          if ! git diff --exit-code -- requirements.txt requirements-dev.txt; then
+          if ! git diff --exit-code -- requirements.txt requirements-updater.txt requirements-dev.txt; then
             echo "::error::requirements*.txt do not match requirements*.in. Run \`make lock\` and commit the result."
             exit 1
           fi
@@ -458,6 +458,12 @@ jobs:
       - run: npx tsc -b --noEmit
         working-directory: client
       - run: npm test
+        working-directory: client
+      # The catalogs are never behind the code (#53): extracting again from
+      # the source must change nothing. A new message, an edited one or a
+      # removed one shows up here, and `npm run extract` is the fix.
+      - name: catalogs match the source
+        run: npx lingui extract --clean && git diff --exit-code -- src/locales
         working-directory: client
       - run: npm run build
         working-directory: client
@@ -703,7 +709,7 @@ jobs:
       # set an install gets (#46).
       - name: python dependencies
         continue-on-error: true
-        run: pip-audit --require-hashes --disable-pip -r requirements.txt -r requirements-dev.txt
+        run: pip-audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
         with:
@@ -731,6 +737,12 @@ jobs:
       - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294  # v5.0.0
         with:
           fail-on-severity: high
+          # braces <= 3.0.3 (stack exhaustion on deeply nested patterns) has no
+          # fixed release. It arrives through micromatch in @lingui/cli, which
+          # runs at build time on this repository's own globs and is not in
+          # the bundle a browser receives (#53). Named one advisory at a time,
+          # so anything else still fails this check.
+          allow-ghsas: GHSA-vfj7-8cjw-p6xm
 
   # --------------------------------------------------------------------------- #
   # The container, on both bases

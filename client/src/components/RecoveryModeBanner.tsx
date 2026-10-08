@@ -23,6 +23,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import type { RecoveryMode } from "../lib/types";
+import { Plural, Trans } from "@lingui/react/macro";
 
 /** How often the banner asks the server again while it is on screen. */
 export const RECOVERY_MODE_POLL_MS = 60_000;
@@ -39,11 +40,21 @@ export function RecoveryModeBanner() {
   const fromEnv = mode.data?.key_from_environment === true;
   return (
     <div className="banner warn" role="status">
-      <span className="mono">{fromEnv ? "SPENDTRACKER_SECRET_KEY" : "secret.key"}</span> does not
-      open {locked === 1 ? "1 member's authenticator" : `${locked} members' authenticators`}; they
-      will be asked for a recovery code, then to set up a new authenticator.{" "}
-      {fromEnv ? "Setting it back to the original key" : "Putting the original key back"} ends this
-      for everyone who has not re-enrolled yet.
+      {fromEnv ? (
+        <Trans>
+          <span className="mono">SPENDTRACKER_SECRET_KEY</span> does not open{" "}
+          <Plural value={locked} one="1 member's authenticator" other={`${locked} members' authenticators`} />
+          ; they will be asked for a recovery code, then to set up a new authenticator. Setting it
+          back to the original key ends this for everyone who has not re-enrolled yet.
+        </Trans>
+      ) : (
+        <Trans>
+          <span className="mono">secret.key</span> does not open{" "}
+          <Plural value={locked} one="1 member's authenticator" other={`${locked} members' authenticators`} />
+          ; they will be asked for a recovery code, then to set up a new authenticator. Putting the
+          original key back ends this for everyone who has not re-enrolled yet.
+        </Trans>
+      )}
     </div>
   );
 }

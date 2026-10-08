@@ -1,3 +1,5 @@
+import { formatLocale } from "./locale";
+
 /**
  * One place that turns a server timestamp into local text.
  *
@@ -17,7 +19,7 @@ export function asInstant(serverTimestamp: string): Date {
 /** Date and time, in the reader's own zone and format. */
 export function formatInstant(serverTimestamp: string): string {
   const when = asInstant(serverTimestamp);
-  return Number.isNaN(when.getTime()) ? serverTimestamp : when.toLocaleString();
+  return Number.isNaN(when.getTime()) ? serverTimestamp : when.toLocaleString(formatLocale());
 }
 
 /**

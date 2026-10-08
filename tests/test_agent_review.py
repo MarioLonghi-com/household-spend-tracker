@@ -233,6 +233,18 @@ def test_the_same_filter_selects_the_same_rows_as_the_persons_register(client, w
     assert agent["total"] == len(expected)
 
 
+def test_the_amount_filter_matches_the_figure_without_its_sign(client, world):
+    """#41: documented in agent/README.md. Both legs of a 50.00 transfer --
+    one out, one in -- for `50.00`; nothing for `-50.00`."""
+    ids = world["ids"]
+    unsigned = _get(client, world, "/register", amount="50.00", limit=1000).json()
+    assert {row["id"] for row in unsigned["rows"]} >= {ids["same_out"], ids["same_in"]}
+    assert {row["amount_minor"] for row in unsigned["rows"]} == {-5000, 5000}
+
+    signed = _get(client, world, "/register", amount="-50.00", limit=1000).json()
+    assert (signed["total"], signed["rows"]) == (0, [])
+
+
 def test_the_same_account_filter_repeats_the_way_the_register_does(client, world):
     ids = world["ids"]
     params = [("account_id", ids["gbp"]), ("account_id", ids["jpy"])]

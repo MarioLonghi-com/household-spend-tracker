@@ -32,7 +32,158 @@ history this repository does not have.
 
 ## Unreleased
 
+### Fixed
+
+- **Safari can sign in at `http://localhost`.** The cookies carried the
+  `__Host-` prefix, which Safari refuses on plain-HTTP `localhost` while
+  keeping an unprefixed `Secure` cookie, so the container on your own
+  computer answered the sign-in, lost the cookie and showed the sign-in
+  screen again, with nothing in any log. At `localhost`, `127.0.0.1` and
+  `[::1]` the cookies are now named without the prefix and are still
+  `Secure`; every other address, the tailnet included, keeps it. HSTS is no
+  longer sent over plain HTTP to those three, where browsers ignore it.
+  After upgrading, expect to sign in at `localhost` once more, code
+  included, in any browser: the old names are no longer read there. (#196)
+
+### Changed
+
+- **Short messages carry a note for the translator.** Every message of one
+  or two words, and any whose English alone is ambiguous, says in one line
+  what it is -- a button, a column heading, a state, which sense of
+  "Balance" -- through Lingui's own `comment`, so it reaches every
+  language's catalog. "New" and the authenticator's "Set up" now have a
+  context of their own, because they need different words in other
+  languages. The rule is in `client/src/locales/README.md`, and the catalog
+  tests refuse a bare short message. English is unchanged. (#228)
+
+- **"Check the repository" reads published releases, not tags,** and returns
+  every release newer than the running one, newest first, each with its
+  notes: the release's CHANGELOG section where the release body leads with
+  it, and an older release's body as it is. Drafts, prereleases and any tag
+  that is not `vX.Y.Z` are never offered -- a tag can exist with no image
+  behind it, as 0.3.1's did. Still one request, only when the button is
+  pressed, saying nothing about the instance. (#165)
+
+- **The remaining screens' words go into the catalogs one screen at a time**,
+  starting with Categories. English is unchanged; each screen has a test
+  that renders it in the `en-XA` pseudo-locale and finds no English left.
+  (#56)
+
+- **The transfer panel's words are in the catalogs.** English is unchanged;
+  a test renders it in the `en-XA` pseudo-locale and finds no English left.
+  (#55)
+
+- **Draft translations of the first screens** in pt-BR, es-ES and sv-SE:
+  every message extracted so far, each marked `#, fuzzy` until a native
+  speaker reviews it (#58). None is served or selectable; a test checks every
+  catalog entry is valid ICU and keeps the English placeholders. (#175, #176,
+  #177)
+
+- **The first screens' words are in the catalogs:** the shell and its menu,
+  signing in, step-up, recovery codes, resetting a sign-in, the profile and
+  passkeys, setting up the instance and accepting an invitation, plus the
+  shared panel, hint and dialog furniture and the sign-in-changes notice.
+  Sentences built from fragments are whole sentences now, one per case, so
+  each can be translated as it is read. English is unchanged, and a test
+  renders each of these screens in the `en-XA` pseudo-locale and finds no
+  English left. (#54)
+
+- **The client's words can come from translation catalogs** (Lingui 6,
+  `client/src/locales/`). The menu, the sort headings' tooltip and the
+  "try again in" wait are the first messages extracted; a refusal that
+  carries a code shows the catalog's message in another language and the
+  server's sentence in English, as before. English is the only language
+  served and the language picker in Profile → Appearance stays hidden; the
+  `en-XA` pseudo-locale is reachable for CI and development, and one
+  Playwright pass runs in it at phone width. CI fails when the catalogs are
+  behind the source. Nothing an English reader sees changes. (#53)
+
+### Added
+
+- **The app's side of self-update, API only** (#165). Owner-only endpoints
+  under `/admin/application/update` -- a member gets 403 and nothing is
+  written: the updater's heartbeat, status, current prepare report, newest
+  outcome and update backups (`GET`, no outbound request); `prepare`; a
+  one-time recovery code for the confirmation; `apply`, which spends a
+  step-up grant first and must accept exactly the report's lossy migrations;
+  `discard`; `updater`, to replace the updater only, with an optional newer
+  release; and dismissing an outcome. Each writes one request into the
+  shared `update` volume (`SPENDTRACKER_UPDATE_DIR`, default
+  `/var/lib/spend-tracker-update` in the container), atomically, group-shared,
+  never over a request not yet taken; the app checks what it can first, so a
+  refusal is a sentence at once. The recovery code is 140 random bits shown
+  once; only its scrypt hash travels, and the code is never written or
+  logged. Prepared, confirmed (with the lossy migrations accepted),
+  discarded and deleted-backup events are logged at WARNING with the owner's
+  email. The backups listing includes update backups (folders) with their
+  size, version and revision, and the newest five cannot be deleted (409).
+  The Updates section of the screen follows in #166.
+
+- **The self-updater's core, not yet wired to anything** (#158). A new
+  top-level package, `updater/`, standard library only: the file contract
+  between the app and the updater in the shared `update` volume (requests,
+  heartbeat, status, prepare reports, history), strict request validation that
+  refuses anything but a published release newer than the running one and
+  makes no engine call when it refuses, a journal that records which step of
+  an apply has started and which updater owns it, deadlines that do not count
+  time the machine slept, and an engine client that can make only a listed set
+  of calls, negotiates the engine's API version, and refuses privileged
+  containers, host mounts and host networking whoever asks. Tested against a
+  recording fake engine on a real unix socket and `/version` answers recorded
+  from Docker Desktop and Podman. No image, compose service or screen uses it
+  yet.
+- **The self-updater knows which engine it is on** (#160). `updater/detect.py`
+  tells Docker Engine, Docker Desktop, Podman and `podman machine` apart from
+  the engine's `/version` and `/info` and the project's own directory, with
+  rootless and SELinux, and refuses with one sentence each: permission denied
+  on the socket, Enhanced Container Isolation, Windows containers, a TCP
+  socket, Podman older than 4.4, an API older than the tested window, and an
+  engine it does not know; an engine newer than that window is `outdated`. It
+  also reads a local build from the app container's labels and digest, holds
+  the not-root rule for each engine as data for the compose file and the
+  launchers, and infers whether `podman-restart` is on. `updater/heartbeat.py`
+  writes `updater.json` every 30 seconds with the negotiated API version, the
+  engine's window and the updater's real container name, under Docker
+  Compose's and podman-compose's naming alike. Nothing runs it yet.
+
+- **The updater can prove where an image came from before pulling it**
+  (#159). `updater/verify.py` reads the build attestation `release.yml` pushed
+  beside the app or updater image -- anonymously, from the registry, every
+  digest recomputed -- and checks with sigstore that this repository's release
+  workflow built exactly that digest for tag `vX.Y.Z` on a GitHub-hosted
+  runner, by repository and owner id rather than name, with no prerelease
+  suffix. Signature, certificate chain and transparency-log proof are checked
+  from the bundle alone; when Sigstore's trust repository cannot be reached it
+  falls back to the trust root committed beside it and records which one
+  verified. Any doubt is a refusal and nothing skips it. sigstore lives in a
+  lock of its own, `requirements-updater.txt`, never in the app's runtime
+  lock. Tested offline against the real 0.7.0, 0.7.1 and 0.8.0 bundles and
+  tampered copies of them. Nothing calls it yet.
+
+## 0.8.0 — 2026-10-08
+
+**Reversible: lossy** — one migration.
+
+- `2de003489b79` — lossy: adds the `passkeys` and `webauthn_challenges` tables
+  and `users.webauthn_user_handle` (#120). Rolling it back drops every
+  registered passkey. Members then sign in with password + code, as before
+  passkeys existed, and register their passkeys again after upgrading back.
+  The sign-in challenges it drops expire within minutes anyway.
+
+Passkeys: registering them, signing in with one, and one "Sign-in methods"
+section in your account to manage them. Alongside them, security and
+data-integrity fixes, a locked and hashed Python dependency set, and the
+published image as what `compose.yaml` runs.
+
 ### Security
+
+- **The `sql` logging style no longer prints the ledger to the console.**
+  Turning it on set SQLAlchemy's `echo`, which attaches SQLAlchemy's own
+  handler writing every statement and its values to standard output -- that
+  is, to `docker logs` -- below the guard meant to keep them in `sql.log`
+  alone. The style now works by log level, never `echo`, and takes off any
+  such handler it finds. Found through a test that only failed when run on its
+  own. (#108)
 
 - **The container's Chainguard bases are pinned by digest.** The free tier
   has only a moving `:latest`, so the image named an input that changed under
@@ -63,6 +214,50 @@ history this repository does not have.
   theme does. Defence in depth. (#92)
 
 ### Fixed
+
+- **A currency code has to be a real one.** Only the shape was checked, so a
+  typo like `GPB` opened an account in a currency that does not exist. A new
+  account or a household's currency must now be an ISO 4217 code: a current
+  one, or one withdrawn since 1999 such as `HRK` or `DEM`, for accounts with
+  history. A code the household already holds from before this check is still
+  accepted, so no existing ledger stops working. Nothing stored changes. (#110)
+
+- **An agent's oversized receipt batch is answered `413`, not a dropped
+  connection.** The app refused a body over its limit from the declared
+  length and closed the socket at once. Most clients write the whole body
+  before reading the answer, so they saw a broken pipe, which looks like a
+  network fault and does not say whether anything was stored. A body up to
+  five times over its limit is now read and discarded first, so the client
+  reads the sentence. Nothing in it is kept. `agent/README.md` and the route's
+  OpenAPI description give the batch's whole-request limit of 32 MB, and
+  `deploy/DOCKER.md` says a reverse proxy needs a body limit at least as
+  high. (#40)
+
+- **A burst of requests can no longer use more memory than a small host
+  has.** Each SQLite connection had a 32 MiB page cache whatever the machine,
+  and the connection pool is unbounded on purpose. On a 95 MiB ledger, ten
+  connections reading at once held 456 MiB. SQLite now has a process-wide soft
+  heap limit of an eighth of the memory the process may use (the container's
+  limit, or the machine's), and each connection's cache is a sixty-fourth of
+  it, between 2 and 32 MiB. The same ten connections measured 178 MiB. (#102)
+
+- **A Spanish statement whose date column is headed `F. Valor` imports.**
+  Spanish banks abbreviate *fecha* to "F.". "F. Valor" matched no date name
+  and did match the amount name "valor", so the file had no date column and
+  its dates were taken as the amount. A header of "F." followed by a word is
+  now a date. Three synthetic statements are kept as regression fixtures:
+  this header; `1,234` beside `1,234.56`; and a blank debit cell next to a
+  balance column. A new test checks that undoing an import gives a
+  hand-entered row it absorbed back exactly as it was. (#90)
+
+- **A register load is one request for its rows, not two.** The count beside
+  "Needs a category" was a second `GET …/transactions` fired in the same tick
+  as the register's own, and `access.log` drops the query string, so every
+  load and every refresh showed up as two identical requests a few
+  milliseconds apart -- each one running the filter, the count and the
+  lookups again. The register's answer now carries the count
+  (`needs_category`); the badge asks on its own only when nothing is ticked
+  and the register is not asked at all. (#101)
 
 - **The test that every household-scoped route checks membership was
   checking nine routes.** Its walk of the route table predated how this
@@ -116,6 +311,52 @@ history this repository does not have.
 
 ### Changed
 
+- **An invariant suite over randomised ledgers.** Twelve seeds each build a
+  ledger in two households: rows, transfers within and across currencies,
+  edits, splits and deletes. The suite then holds four things true of any
+  ledger: every balance is the sum of its rows, by every route that reports
+  one; transfer pairs point at each other and net to zero within a currency;
+  undoing a run of acts gives back every column of every row; and no total
+  crosses currencies. A failing seed is reproduced by its number. (#107)
+
+- **The database file is looked after, not only its rows.** Every
+  housekeeping sweep now ends with a `wal_checkpoint(TRUNCATE)`, so the
+  `-wal` file goes back to zero instead of staying at the size the biggest
+  import ever left it, and it runs `VACUUM` when more than half the file is
+  free pages, such as after a household is deleted or a large import is
+  undone. Planner statistics are refreshed straight after any commit that
+  writes 1,000 rows or more, and after `make restore`, rather than waiting up
+  to six hours for the next sweep. (#103)
+
+- **The container image is built for linux/amd64 and linux/arm64, and the
+  release is published last.** The image was amd64 only, so Docker Desktop on
+  an Apple-silicon Mac ran it emulated; each platform is now built and
+  smoke-tested natively and the two are joined into one index, whose digest
+  the provenance attestation names. The GitHub release is created as a draft,
+  the image pushed, attested and pulled back with no credentials to prove the
+  package is public, and only then does the release go public and `X.Y` and
+  `latest` move -- a run that fails halfway leaves a draft, not a release
+  with no image behind it. The `org.opencontainers.image.version` label is
+  the bare `X.Y.Z`, the number `/api/health` reports, and the release body
+  leads with the version's CHANGELOG section. (#181)
+
+- **The register loads five hundred rows at a time.** It used to ask for
+  everything the filter matched, up to 25,000 rows, and refetch all of it
+  after every edit. It now asks for the first 500, says how many the filter
+  matched and how many are loaded, and asks for the next 500 when you reach
+  the end of what is there. Sorting at a column heading is still done by the
+  server, from the first page. The heading's tick box selects the rows that
+  are loaded. (#100)
+
+- **The client asks one module which locale it is in** (`lib/locale.ts`):
+  the words stay English, and numbers, money and dates follow the browser's
+  own formatting locale as they always did. Money is formatted from its
+  digits rather than a divided float, sorting by name goes through one
+  collator, and the labels for account types, import outcomes, roles and the
+  YNAB import's steps live in `lib/labels.ts`. Typed amounts now also read
+  the minus sign, spaces and apostrophes other locales write. Nothing an
+  English reader sees changes; tests compare the old and new output. (#52)
+
 - **Small fixes left from reviews** (#110): History headlines a bulk delete
   of receipts as *Bulk delete*, not *Bulk edit*; an account update that sends
   a country or statement product together with its clear flag is refused, as
@@ -138,6 +379,12 @@ history this repository does not have.
   than the admin screen; `scripts/db_view.py` says receipts are carried whole,
   GPS and EXIF included, as are payee rule patterns; and old-tracker issue
   numbers in the `Makefile` and `tests.yml` are marked as such.
+
+- **`agent/README.md` fills three gaps an agent found by trial:** the range
+  and default of `window_days` on `/transactions/match` (0 to 14, default 4),
+  that the register's `amount` filter matches the figure without its sign,
+  and the `receipts/binary` door with its query parameters, its 4 MB ceiling
+  and that it takes no `extracted`. Tests hold each to the code. (#41)
 
 - **The README says CI tests Python 3.12**, and no longer claims 3.14 works:
   every CI job runs 3.12, and nothing tests 3.14. (#105)
@@ -165,11 +412,14 @@ history this repository does not have.
   the route, with a test: it only adds accounts, each in the audit log, and
   History undoes the whole file. Nothing about who may run it changed. (#115)
 
-- **`release.yml`'s publishing jobs run in a `release` environment.** Once
-  the repository gives that environment a required reviewer, a pushed `v*` tag
-  builds and smoke-tests as before and then waits for an approval before
-  anything is published to Releases or ghcr.io. Until then it behaves as it
-  did. (#96)
+- **A release waits for one approval before anything is published.**
+  `release.yml`'s `publish` job runs in a `release` environment, and the other
+  two publishing jobs depend on it, so once the repository gives that
+  environment a required reviewer, a pushed `v*` tag builds and smoke-tests as
+  before and then waits for a single click before anything reaches Releases
+  or ghcr.io. `tests/test_release_workflow.py` fails if a publishing job stops
+  depending on the gated one. Until the reviewer is set, it behaves as it did.
+  (#96)
 
 - **OpenSSF Scorecard runs on pushes to `dev` and weekly, not on `main`.**
   The action only scores the default branch, which is `dev`, so on `main` it
@@ -196,7 +446,59 @@ history this repository does not have.
   dependency. **For an operator:** nothing to do beyond the usual
   `make install-prod`. (#46)
 
+- **One "Sign-in methods" section in your account.** Password,
+  authenticator, passkeys and recovery codes are now rows of one section
+  instead of four separate blocks. Each row says its state in words, such as
+  "Set", "Needs setting up again" or "7 of 10 left", and offers its own
+  action. A line at the top says what currently gets you in. Keys for
+  programs stay a separate section.
+  - **Your passkeys** are listed with their name, whether each is synced or on
+    this device only, when it was added and last used, and "this device" on
+    the one you signed in with. The list sorts at its headers.
+  - **Renaming** is done in place, and **removing** asks once and says what
+    you can still sign in with.
+  - **A passkey made for another host name** is marked as such and can only
+    be removed.
+  - **Adding a passkey** asks for your password and code in the same panel,
+    then hands over to the browser's prompt. The new passkey appears
+    highlighted, with its name ready to edit.
+  - **Where passkeys cannot work** there is no Add button, only one line
+    saying why.
+  (#122)
+
 ### Added
+
+- **An agent key can read a stored receipt back.** Receipts in the agent API
+  now carry their `note`, and there are new read-scope routes for one
+  receipt, its stored file and its thumbnail:
+  `GET /api/agent/v1/receipts/{id}`, `…/file` and `…/thumbnail`. The listing
+  also takes `transaction_id=` to go from a row to its receipts. A note sent
+  at upload used to be write-only, and an agent summarising receipts filed
+  the day before had nothing to read but its own claim. Another household's
+  receipt is a `404`, and every read is in the request log. (#44)
+
+- **A weekly upgrade rehearsal on a bench-sized ledger** (`bench.yml`,
+  Mondays and by hand). It is not a pull-request check. It builds the demo
+  seed with the last release's code, grows it to about 100 MiB with
+  `scripts/bench_ledger.py`, and times `alembic upgrade head`, a backup and
+  the `/db` snapshot. It still fails if a row is lost. On a 93 MiB,
+  129,024-row ledger, the slowest migration in the project's history (one
+  that rebuilds `transactions`) took 5.8 s, and the whole chain about 25 s.
+  The upgrade from 0.7.1 took under 2 s. (#104)
+
+- **The upgrade drill can be driven by a program.** `python -m scripts.upgrade
+  --check --json` prints what an upgrade would do as one JSON document: the
+  deployed version and commit, the database's stamp, the code's head, and each
+  pending migration with its `Reversible:` verdict. `--yes --report PATH`
+  writes the outcome of a real run -- the backup folder and whether it
+  verified, the stamp and every counted table before and after, the
+  `secret.key` check, the exit status and the log -- whatever the exit. And
+  the exit status now says what happened: a `secret.key` that does not open
+  the migrated ledger exits 5 and a table with fewer rows than the backup
+  counted exits 6, where both used to print a warning and exit 0, which a
+  person reading the output catches and an updater would not. The codes are
+  listed in the script's docstring. A test proves `--check` against a live WAL
+  ledger leaves the database and its `-wal` byte for byte as they were. (#155)
 
 - **The groundwork for passkeys: `SPENDTRACKER_RP_ID`, and whether an instance
   can offer them.** Nothing on the sign-in screen changes yet. The new
@@ -242,7 +544,25 @@ history this repository does not have.
   - **A password change leaves passkeys in place**, as it leaves agent keys.
   (#121)
 
+- **Refusals can carry a stable code and raw values beside the sentence.**
+  A converted refusal answers `{"detail", "code", "params"}`: `detail` is the
+  same English sentence as before, `code` a name from `app/error_codes.py`,
+  and `params` the raw values -- money as minor units with its currency, dates
+  as ISO -- so a translated screen can say it in its own words and format.
+  Ten refusals are converted (the exact money parser, transfers to the same
+  account or across currencies, a reconciliation that does not balance or
+  holds a later row, a split that does not add up); the rest follow with the
+  translations. Agent answers are unchanged: they carry no code yet. A test
+  stops new refusals arriving without one. (#65)
+
 ### Documentation
+
+- **The README shows the register**, from the demo household `make seed`
+  creates, so every name and figure in it is invented. There is also a
+  `CITATION.cff`. The data-hygiene test now lets screenshots live under
+  `docs/screenshots/` if they are PNGs with no metadata chunks. It skips
+  `CITATION.cff`'s two author lines, as it already skipped the copyright
+  line. (#111)
 
 - **Passkeys for operators:** the README section *Passkeys, and choosing the
   host name first* says how an instance can be reached for passkeys to work,
@@ -252,6 +572,11 @@ history this repository does not have.
   needs Bluetooth and internet on both. `deploy/DOCKER.md` and
   `deploy/UPGRADING.md` each add a paragraph on what changes the name and
   what to do afterwards. (#123)
+
+- **A glossary for the first translations:** `client/src/locales/GLOSSARY.md`
+  holds one draft rendering per term in pt-BR, es-ES and sv-SE, the register
+  each language uses, and how each writes money and dates. Nothing in the app
+  changes. (#174)
 
 ## 0.7.1 — 2026-10-05
 

@@ -9,3 +9,9 @@
 // module with no declaration is TS2882, so `import "./styles.css"` failed the
 // typecheck while building perfectly well. The stylesheet was never untyped by
 // intent; the file that says so was just missing.
+
+// A Lingui catalog, compiled by `@lingui/vite-plugin` when it is imported (#53).
+declare module "*.po" {
+  import type { Messages } from "@lingui/core";
+  export const messages: Messages;
+}

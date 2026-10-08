@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { SortHeading, sortRows, useSort } from "../../components/bits";
 import { money } from "./mapping";
 import type { Duplicate, ImportReport, NotImported } from "./types";
+import { formatDate } from "../../lib/locale";
 
 export function Counts({ report }: { report: ImportReport }) {
   const it = report.counts;
@@ -115,14 +116,14 @@ export function Duplicates({
                 <td data-select="true">
                   <input
                     type="checkbox"
-                    aria-label={`Import anyway: ${row.date} ${row.payee ?? ""} ${money(row.amount_minor, currency)}`}
+                    aria-label={`Import anyway: ${formatDate(row.date)} ${row.payee ?? ""} ${money(row.amount_minor, currency)}`}
                     checked={importAll || chosen.has(row.row_ref)}
                     disabled={importAll}
                     onChange={(event) => onToggle(row.row_ref, event.target.checked)}
                   />
                 </td>
                 <td className="small mono" data-label="Date" data-detail-first="true">
-                  {row.date}
+                  {formatDate(row.date)}
                 </td>
                 <td className="small" data-label="Account">
                   {row.account}
@@ -137,7 +138,7 @@ export function Duplicates({
                   </span>
                 </td>
                 <td className="small muted" data-label="Existing">
-                  {row.existing.date} · {row.existing.payee ?? "—"} ·{" "}
+                  {formatDate(row.existing.date)} · {row.existing.payee ?? "—"} ·{" "}
                   {money(row.existing.amount_minor, currency)}
                 </td>
               </tr>
@@ -375,7 +376,7 @@ export function Report({
                 <a href={hrefFor("accounts")} target="_blank" rel="noopener">
                   {one.name}
                 </a>{" "}
-                <span className="small muted">opened {one.opening_date}</span>
+                <span className="small muted">opened {formatDate(one.opening_date)}</span>
               </li>
             ))}
           </ul>

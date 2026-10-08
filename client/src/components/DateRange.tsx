@@ -11,15 +11,16 @@
 
 import { useMemo, useRef } from "react";
 import type { KeyboardEvent } from "react";
+import { t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
+import { monthName } from "../lib/locale";
 
 export type Range = { since: string | null; until: string | null };
 
 export const ALL_DATES: Range = { since: null, until: null };
 
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+/** January to December, in the language the words are in (`lib/locale.ts`). */
+const MONTH_INDEXES = Array.from({ length: 12 }, (_, index) => index);
 
 /**
  * The month as a number, for the exact range.
@@ -93,13 +94,13 @@ export function presetRanges(
   const y = today.getFullYear();
   const m = today.getMonth();
   return [
-    { key: "month", label: "This month", range: { since: startOfMonth(y, m), until: endOfMonth(y, m) } },
-    { key: "3-months", label: "Latest 3 months", range: monthsBack(3, today) },
-    { key: "6-months", label: "Latest 6 months", range: monthsBack(6, today) },
-    { key: "12-months", label: "Latest 12 months", range: monthsBack(12, today) },
-    { key: "year", label: "This year", range: { since: iso(y, 0, 1), until: iso(y, 11, 31) } },
-    { key: "last-year", label: "Last year", range: { since: iso(y - 1, 0, 1), until: iso(y - 1, 11, 31) } },
-    { key: "all", label: "All dates", range: ALL_DATES },
+    { key: "month", label: t({ message: "This month", comment: "Label on the date range picker" }), range: { since: startOfMonth(y, m), until: endOfMonth(y, m) } },
+    { key: "3-months", label: t({ message: "Latest 3 months", comment: "Label on the date range picker" }), range: monthsBack(3, today) },
+    { key: "6-months", label: t({ message: "Latest 6 months", comment: "Label on the date range picker" }), range: monthsBack(6, today) },
+    { key: "12-months", label: t({ message: "Latest 12 months", comment: "Label on the date range picker" }), range: monthsBack(12, today) },
+    { key: "year", label: t({ message: "This year", comment: "Label on the date range picker" }), range: { since: iso(y, 0, 1), until: iso(y, 11, 31) } },
+    { key: "last-year", label: t({ message: "Last year", comment: "Label on the date range picker" }), range: { since: iso(y - 1, 0, 1), until: iso(y - 1, 11, 31) } },
+    { key: "all", label: t({ message: "All dates", comment: "Label on the date range picker" }), range: ALL_DATES },
   ];
 }
 
@@ -170,10 +171,12 @@ export function DateRange({
   /** Presets this screen does without. The register drops "Latest 3 months" (#123). */
   omit?: PresetKey[];
 }) {
+  // The preset labels are words: rebuilt when the language changes.
+  const { i18n } = useLingui();
   const omitted = omit.join(",");
   const presets = useMemo(
     () => presetRanges().filter((preset) => !omitted.split(",").includes(preset.key)),
-    [omitted],
+    [omitted, i18n.locale],
   );
   const holder = useRef<HTMLDivElement>(null);
   const earlier = stepRange(value, -1);
@@ -200,7 +203,7 @@ export function DateRange({
       ref={holder}
       onKeyDown={(event) => moveAlong(event, holder.current)}
     >
-      <div className="daterange-presets" role="group" aria-label="Date range">
+      <div className="daterange-presets" role="group" aria-label={t({ message: "Date range", comment: "Screen-reader name on the date range picker" })}>
         {presets.map((preset) => {
           const active = same(value, preset.range);
           return (
@@ -223,16 +226,16 @@ export function DateRange({
         <button
           type="button"
           className="chip daterange-step"
-          aria-label="Earlier: the same length of time, just before"
-          title="Earlier"
+          aria-label={t`Earlier: the same length of time, just before`}
+          title={t({ message: "Earlier", comment: "Tooltip on the date range picker" })}
           disabled={!earlier}
           onClick={() => earlier && onChange(earlier)}
         >
           ‹
         </button>
-        <span className="daterange-label">From</span>
+        <span className="daterange-label">{t({ message: "From", comment: "Text on the date range picker: the start of a range, or where money comes from" })}</span>
         <select
-          aria-label="From month"
+          aria-label={t({ message: "From month", comment: "Screen-reader name on the date range picker" })}
           value={from ? from.getMonth() : ""}
           onChange={(e) =>
             setFrom(from ? from.getFullYear() : thisYear, Number(e.target.value))
@@ -241,14 +244,14 @@ export function DateRange({
           <option value="" disabled>
             —
           </option>
-          {MONTHS.map((name, index) => (
-            <option key={name} value={index} title={name}>
+          {MONTH_INDEXES.map((index) => (
+            <option key={index} value={index} title={monthName(index)}>
               {monthNumber(index)}
             </option>
           ))}
         </select>
         <select
-          aria-label="From year"
+          aria-label={t({ message: "From year", comment: "Screen-reader name on the date range picker" })}
           value={from ? from.getFullYear() : ""}
           onChange={(e) => setFrom(Number(e.target.value), from ? from.getMonth() : 0)}
         >
@@ -262,9 +265,9 @@ export function DateRange({
           ))}
         </select>
 
-        <span className="daterange-label">To</span>
+        <span className="daterange-label">{t({ message: "To", comment: "Text on the date range picker: the end of a range, or where money goes" })}</span>
         <select
-          aria-label="To month"
+          aria-label={t({ message: "To month", comment: "Screen-reader name on the date range picker" })}
           value={until ? until.getMonth() : ""}
           onChange={(e) =>
             setUntil(until ? until.getFullYear() : thisYear, Number(e.target.value))
@@ -273,14 +276,14 @@ export function DateRange({
           <option value="" disabled>
             —
           </option>
-          {MONTHS.map((name, index) => (
-            <option key={name} value={index} title={name}>
+          {MONTH_INDEXES.map((index) => (
+            <option key={index} value={index} title={monthName(index)}>
               {monthNumber(index)}
             </option>
           ))}
         </select>
         <select
-          aria-label="To year"
+          aria-label={t({ message: "To year", comment: "Screen-reader name on the date range picker" })}
           value={until ? until.getFullYear() : ""}
           onChange={(e) => setUntil(Number(e.target.value), until ? until.getMonth() : 11)}
         >
@@ -297,8 +300,8 @@ export function DateRange({
         <button
           type="button"
           className="chip daterange-step"
-          aria-label="Later: the same length of time, just after"
-          title="Later"
+          aria-label={t`Later: the same length of time, just after`}
+          title={t({ message: "Later", comment: "Tooltip on the date range picker" })}
           disabled={!later}
           onClick={() => later && onChange(later)}
         >

@@ -54,15 +54,16 @@ from .api.routers import (
     stats,
     transactions,
     transfers,
+    updates,
 )
-from .auth import housekeeping, keycheck
+from .auth import cookies, housekeeping, keycheck
 from .auth import setup as setup_service
 from .body_limit import BodyLimit
 from .config import SECRET_KEY_ENV, settings
 from .db import SessionLocal, session_scope
 from .db import engine as db_engine
 from .errors import DomainError, TooManyAttempts
-from .hosts import AllowedHosts
+from .hosts import AllowedHosts, request_host
 from .services import agent_keys as agent_key_service
 from .services import agent_requests, backup_bundle
 
@@ -638,20 +639,48 @@ async def add_security_headers(request: Request, call_next):
     # HTTPS **for that host and port, for a year**, and the app becomes
     # unreachable at the address it just told them to use. The user-facing cure
     # is a trip into chrome://net-internals, per device.
-    if not _DEV and settings.cookie_secure:
+    #
+    # Nor over plain HTTP to loopback (#196): the container on somebody's own
+    # computer is production, at `http://localhost:8848`. A browser ignores
+    # HSTS that arrives over HTTP anyway, so this only stops sending noise.
+    # The host is the one the cookie names are chosen by; this middleware runs
+    # outside the host check, but a request the check refuses gets no cookie.
+    plain_loopback = request.url.scheme == "http" and cookies.is_loopback(
+        request_host(request)
+    )
+    if not _DEV and settings.cookie_secure and not plain_loopback:
         response.headers.setdefault(
             "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
         )
     return response
 
 
+def _speaks_to_agent(request: Request) -> bool:
+    """Whether this answer goes to a program holding an agent key.
+
+    The codes exist for the client's translations. An agent reads ``detail``,
+    and the localisation work promised it byte-identical answers (#48), so it
+    gets none of them yet. Offering them is this one condition plus the
+    descriptor and `/llms.txt` saying what they are.
+    """
+    return request.url.path.startswith(f"{API_PREFIX}/agent/") or _carries_a_key(request)
+
+
 @app.exception_handler(DomainError)
 def handle_domain_error(request: Request, exc: DomainError) -> JSONResponse:
-    """Domain rules answer with their own status code and their own words."""
+    """Domain rules answer with their own status code and their own words.
+
+    A raise that carries a ``code`` also sends it, with its ``params`` nested
+    beside ``detail`` so they can never collide with ``fields`` (#65). Not to
+    an agent: its answers stay byte-identical until the codes are documented
+    for agents in `/llms.txt` -- see `_speaks_to_agent`.
+    """
     headers = dict(getattr(exc, "headers", {}) or {})
     if isinstance(exc, TooManyAttempts):
         headers["Retry-After"] = str(exc.retry_after)
     content = {"detail": str(exc), **(getattr(exc, "fields", None) or {})}
+    if not _speaks_to_agent(request):
+        content.update(exc.wire())
     return JSONResponse(status_code=exc.status_code, content=content, headers=headers)
 
 
@@ -778,6 +807,7 @@ for router in (
     imports.router,
     identifiers.router,
     admin.router,
+    updates.router,
     invites.router,
     account_resets.router,
     profile.router,
@@ -822,7 +852,6 @@ def snap(request: Request):
     person is standing at a till holding a piece of paper, so they come back
     *here* once they are signed in.
     """
-    from .auth import cookies
     from .auth import sessions as session_service
 
     # Its own short session rather than the request dependency: this route
@@ -830,7 +859,7 @@ def snap(request: Request):
     # is a write on a page load that changes nothing.
     with session_scope() as db_session:
         row = session_service.lookup(
-            db_session, cookies.session_value(request.cookies)
+            db_session, cookies.session_value(request)
         )
     if row is None:
         return RedirectResponse("/?next=%2Fsnap", status_code=303)

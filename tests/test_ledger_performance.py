@@ -1495,7 +1495,8 @@ def test_the_app_connection_syncs_at_checkpoints_and_keeps_a_real_cache(tmp_path
         with engine.connect() as conn:
             assert conn.exec_driver_sql("PRAGMA journal_mode").scalar() == "wal"
             assert conn.exec_driver_sql("PRAGMA synchronous").scalar() == 1  # NORMAL
-            assert conn.exec_driver_sql("PRAGMA cache_size").scalar() == -32768
+            assert conn.exec_driver_sql("PRAGMA cache_size").scalar() == -(db.CACHE_BYTES // 1024)
+            assert db.CACHE_FLOOR <= db.CACHE_BYTES <= db.CACHE_CEILING
             assert conn.exec_driver_sql("PRAGMA temp_store").scalar() == 2  # MEMORY
             assert conn.exec_driver_sql("PRAGMA foreign_keys").scalar() == 1
     finally:

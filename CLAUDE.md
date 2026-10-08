@@ -15,6 +15,12 @@ sharing a checkout with a session you cannot see.
 
 - **Money is integer minor units.** Never a float, anywhere, ever. `app/money.py`
   owns every conversion.
+- **A `DomainError` carries a `code`; `params` are raw values, never formatted
+  text.** `detail` stays the English sentence; the code, registered in
+  `app/error_codes.py`, is what a translated screen reads. Money goes as minor
+  units beside its currency code, a date as ISO, an enum as its value.
+  `tests/test_error_codes.py` fails if the number of raises without a code
+  goes up -- convert a site, lower the number.
 - **Store deliberate acts. Compute consequences.** One stored number per concept.
 - **A test that does not assert a changed value is not a test.** Asserting a 200,
   or that a mechanism fired, is not asserting what it did to the data. Four of
@@ -63,6 +69,15 @@ sharing a checkout with a session you cannot see.
   exempt. Sort on the meaning, not the glyph: the country column sorts by
   country name, not by the flag. Money across mixed currencies sorts by
   currency first, then figure.
+- **The client's words come from Lingui catalogs** (`client/src/locales/`,
+  `lib/i18n.ts`). A message written with the `t`, `msg` or `plural` macros or
+  `<Trans>` is extracted by `npm run extract`, and CI fails when the catalogs
+  are behind the source. Only English is served: a translated catalog holds
+  `#, fuzzy` drafts and has no loader until #58 ships it, and the picker stays
+  hidden until then. A new error code needs its message in
+  `client/src/lib/errorMessages.ts` as well as `app/error_codes.py`. A
+  message of one or two words, or one whose English alone is ambiguous,
+  carries a translator `comment` (`client/src/locales/README.md`, #228).
 - **An enum value with no designed behaviour is a bug with a menu item.** The
   previous build shipped twelve account types with three behaviours and five
   loan types it never modelled.
@@ -78,6 +93,8 @@ sharing a checkout with a session you cannot see.
     app/api/       deps.py holds current_user / current_household / require_owner
     client/        Vite + React + TS, built into app/static/dist
     migrations/    Alembic, from the first commit
+    updater/       the self-updater's own container: file contract, journal,
+                   restricted engine client -- standard library, no import of app/
 
 ## Security posture, in one place
 

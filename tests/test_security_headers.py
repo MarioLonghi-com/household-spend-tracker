@@ -165,6 +165,55 @@ def test_hsts_is_sent_in_production_and_not_in_development(monkeypatch, tmp_path
         assert "Strict-Transport-Security" not in dev.get("/api/health").headers
 
 
+#: Two loopback hosts, as the browser writes them, and two that are not: the
+#: tailnet name the deployment is reached at, and a LAN address. Every test of
+#: the cookie names runs all four, so a rule that only ever looked at one side
+#: cannot pass.
+LOOPBACK = ("localhost:8848", "[::1]:8848")
+ELSEWHERE = ("spend.example.ts.net", "192.168.1.50:8848")
+
+
+def _request_to(host: str):
+    """A bare request naming `host`, for the functions that read the name
+    off a request rather than being handed one."""
+    from starlette.requests import Request
+
+    return Request({"type": "http", "method": "GET", "path": "/", "headers": [(b"host", host.encode())]})
+
+
+def _issued(monkeypatch, host: str, *, cookie_secure: bool = True) -> tuple[list[str], list[str]]:
+    """Every `Set-Cookie` the module writes for a request to `host`: the
+    three it sets, then the two it clears."""
+    import dataclasses
+
+    from fastapi import Response
+
+    from app.auth import cookies as cookie_module
+
+    monkeypatch.setattr(
+        cookie_module,
+        "settings",
+        dataclasses.replace(cookie_module.settings, cookie_secure=cookie_secure),
+    )
+    request = _request_to(host)
+    made = Response()
+    # All three, deliberately. `st_pending` used to set its own flags inline
+    # in the router, so it kept `Secure` after the other two stopped -- and a
+    # sign-in that holds no pending cookie fails on the *code* step, which
+    # reads as a broken authenticator rather than a dropped cookie.
+    cookie_module.set_session(made, request, "a-session-value")
+    cookie_module.set_device(made, request, "a-device-value")
+    cookie_module.set_pending(made, request, "a-pending-value")
+    cleared = Response()
+    cookie_module.clear_session(cleared, request)
+    cookie_module.clear_pending(cleared, request)
+    return made.headers.getlist("set-cookie"), cleared.headers.getlist("set-cookie")
+
+
+def _names(headers: list[str]) -> list[str]:
+    return [header.split("=", 1)[0] for header in headers]
+
+
 def test_the_cookies_carry_secure_unless_the_lan_flag_turns_it_off(monkeypatch):
     """`Secure` is the flag that makes a LAN instance fail silently.
 
@@ -172,106 +221,184 @@ def test_the_cookies_carry_secure_unless_the_lan_flag_turns_it_off(monkeypatch):
     -- localhost is trustworthy, a LAN address is not. So the sign-in answers
     200, the cookie is dropped without a word, and the app bounces back to the
     sign-in screen with nothing in either log. The flag exists so that instance
-    can work; this test is what says it is still on for everybody else.
+    can work; this test is what says it is still on for everybody else --
+    loopback included, where only the *name* changes (#196).
     """
-    import dataclasses
+    for host in LOOPBACK + ELSEWHERE:
+        on, _ = _issued(monkeypatch, host, cookie_secure=True)
+        assert len(on) == 3, host
+        for header in on:
+            assert "Secure" in header, (host, header)
+            # The two that are not negotiable whatever the transport is.
+            # HttpOnly keeps a script off the session; SameSite=Lax is the
+            # second half of the CSRF story the middleware tells.
+            assert "HttpOnly" in header
+            assert "SameSite=lax" in header
 
-    from fastapi import Response
-
-    from app.auth import cookies as cookie_module
-
-    def cookies_set_with(*, cookie_secure: bool) -> list[str]:
-        monkeypatch.setattr(
-            cookie_module,
-            "settings",
-            dataclasses.replace(cookie_module.settings, cookie_secure=cookie_secure),
-        )
-        response = Response()
-        # All three, deliberately. `st_pending` used to set its own flags inline
-        # in the router, so it kept `Secure` after the other two stopped -- and
-        # a sign-in that holds no pending cookie fails on the *code* step,
-        # which reads as a broken authenticator rather than a dropped cookie.
-        cookie_module.set_session(response, "a-session-value")
-        cookie_module.set_device(response, "a-device-value")
-        cookie_module.set_pending(response, "a-pending-value")
-        return response.headers.getlist("set-cookie")
-
-    on = cookies_set_with(cookie_secure=True)
-    assert len(on) == 3
-    for header in on:
-        assert "Secure" in header
-        # The two that are not negotiable whatever the transport is. HttpOnly
-        # keeps a script off the session; SameSite=Lax is the second half of
-        # the CSRF story the middleware tells.
-        assert "HttpOnly" in header
-        assert "SameSite=lax" in header
-
-    off = cookies_set_with(cookie_secure=False)
-    assert len(off) == 3
-    for header in off:
-        assert "Secure" not in header
-        assert "HttpOnly" in header
-        assert "SameSite=lax" in header
+        off, _ = _issued(monkeypatch, host, cookie_secure=False)
+        assert len(off) == 3, host
+        for header in off:
+            assert "Secure" not in header, (host, header)
+            assert "HttpOnly" in header
+            assert "SameSite=lax" in header
 
 
-def test_the_cookie_names_carry_host_exactly_when_the_cookies_are_secure(monkeypatch):
-    """#209. `__Host-` is what stops another service on this host -- cookies
-    are not isolated by port -- planting its own session for the victim to land
-    in. The browser only honours the prefix on a `Secure` cookie with `Path=/`
-    and no `Domain`, so the name and the flag are one decision."""
-    import dataclasses
+def test_the_names_carry_host_except_on_loopback(monkeypatch):
+    """#209 and #196. `__Host-` is what stops another service on this host --
+    cookies are not isolated by port -- planting its own session for the
+    victim to land in. The browser only honours the prefix on a `Secure`
+    cookie with `Path=/` and no `Domain`, so the name and the flag are one
+    decision. Safari drops a prefixed cookie from `http://localhost` (WebKit
+    218980) and loops at the sign-in, so on loopback the names go bare and
+    `Secure` stays; everywhere else, the tailnet first, keeps the prefix."""
+    prefixed = ["__Host-st_session", "__Host-st_device", "__Host-st_pending"]
+    bare = ["st_session", "st_device", "st_pending"]
 
-    from fastapi import Response
+    for host in ELSEWHERE:
+        made, cleared = _issued(monkeypatch, host)
+        assert _names(made) == prefixed, host
+        for header in made + cleared:
+            # The prefix's own conditions, or the browser drops the cookie.
+            assert "Secure" in header and "Path=/" in header and "Domain" not in header
+        # A clear is an overwrite, which a browser refuses for __Host- unless
+        # Secure -- and it has to be the name that was set, or it clears nothing.
+        assert _names(cleared) == ["__Host-st_session", "__Host-st_pending"], host
 
-    from app.auth import cookies as cookie_module
+    for host in LOOPBACK:
+        made, cleared = _issued(monkeypatch, host)
+        assert _names(made) == bare, host
+        assert all("Secure" in header for header in made + cleared), host
+        assert _names(cleared) == ["st_session", "st_pending"], host
 
-    def issued_with(*, cookie_secure: bool) -> tuple[list[str], list[str]]:
-        monkeypatch.setattr(
-            cookie_module,
-            "settings",
-            dataclasses.replace(cookie_module.settings, cookie_secure=cookie_secure),
-        )
-        made = Response()
-        cookie_module.set_session(made, "a-session-value")
-        cookie_module.set_device(made, "a-device-value")
-        cookie_module.set_pending(made, "a-pending-value")
-        cleared = Response()
-        cookie_module.clear_session(cleared)
-        cookie_module.clear_pending(cleared)
-        return made.headers.getlist("set-cookie"), cleared.headers.getlist("set-cookie")
-
-    made, cleared = issued_with(cookie_secure=True)
-    assert [h.split("=", 1)[0] for h in made] == [
-        "__Host-st_session",
-        "__Host-st_device",
-        "__Host-st_pending",
-    ]
-    for header in made + cleared:
-        assert header.startswith("__Host-")
-        # The prefix's own conditions, or the browser drops the cookie.
-        assert "Secure" in header and "Path=/" in header and "Domain" not in header
-    # A clear is an overwrite, which a browser refuses for __Host- unless Secure.
-    assert [h.split("=", 1)[0] for h in cleared] == ["__Host-st_session", "__Host-st_pending"]
-
-    made, cleared = issued_with(cookie_secure=False)
-    assert [h.split("=", 1)[0] for h in made] == ["st_session", "st_device", "st_pending"]
-    assert [h.split("=", 1)[0] for h in cleared] == ["st_session", "st_pending"]
+    # With `Secure` off the prefix cannot be had anywhere, loopback or not.
+    for host in LOOPBACK + ELSEWHERE:
+        made, cleared = _issued(monkeypatch, host, cookie_secure=False)
+        assert _names(made) == bare, host
+        assert _names(cleared) == ["st_session", "st_pending"], host
 
 
-def test_a_session_planted_under_the_bare_name_is_not_honoured(client):
-    """The server's half of #209: with `Secure` on it reads only the prefixed
-    name, so a cookie some other port set as plain `st_session` is ignored."""
+def test_the_loopback_rule_reads_the_host_not_the_port():
+    """`127.0.0.1` on any port is loopback; `127.0.0.1.example` and a
+    `localhost` subdomain are names somebody else can own."""
     from app.auth import cookies
-    from tests.conftest import _setup_owner
+    from app.hosts import request_host
 
-    _setup_owner(client)
-    value = client.cookies.get(cookies.session_name())
-    assert cookies.session_name() == "__Host-st_session"
-    assert value and client.get("/api/me").status_code == 200
+    hosts = {
+        "localhost": True,
+        "LOCALHOST:8851": True,
+        "127.0.0.1:8848": True,
+        "[::1]": True,
+        "spend.example.ts.net": False,
+        "localhost.example.ts.net": False,
+        "127.0.0.1.example": False,
+        "100.101.102.103:8848": False,
+    }
+    seen = {host: cookies.is_loopback(request_host(_request_to(host))) for host in hosts}
+    assert seen == hosts
+
+
+def _cookies_from(answer) -> dict[str, str]:
+    """`name -> value` out of an answer's `Set-Cookie`s, a clear as `""`."""
+    found = {}
+    for header in answer.headers.get_list("set-cookie"):
+        name, _, rest = header.partition("=")
+        found[name] = rest.split(";", 1)[0].strip('"')
+    return found
+
+
+def _sign_in_at(client, base: str, secret: str, clock) -> dict[str, str]:
+    """Password, then code, at `base` -- carrying the cookies by hand.
+
+    By hand because the test client's jar will not send a `Secure` cookie
+    over `http://`, and plain-HTTP `localhost` is the whole point; the jar is
+    emptied first so nothing it held from another host rides along.
+    """
+    import pyotp
+
+    from tests.conftest import HEADERS, PASSWORD
 
     client.cookies.clear()
-    client.cookies.set("st_session", value, domain="testserver.local")
-    assert client.get("/api/me").status_code == 401
+    first = client.post(
+        f"{base}/api/session",
+        json={"email": "Jane.Doe@gmail.com", "password": PASSWORD},
+        headers=HEADERS,
+    )
+    assert first.status_code == 200, first.text
+    pending = _cookies_from(first)
+    [(pending_name, pending_value)] = pending.items()
+
+    client.cookies.clear()
+    second = client.post(
+        f"{base}/api/session/code",
+        json={"code": pyotp.TOTP(secret).at(clock()), "trust_device": True},
+        headers={**HEADERS, "cookie": f"{pending_name}={pending_value}"},
+    )
+    assert second.status_code == 200, second.text
+    assert second.json()["authenticated"] is True
+    return {"pending": pending_name, **_cookies_from(second)}
+
+
+def test_sign_in_sets_the_name_its_host_reads_and_no_other(client, clock):
+    """The server's half of #209 and #196, through the real routes.
+
+    At `http://localhost` the sign-in issues `st_session` and reads only that;
+    at the tailnet name it issues `__Host-st_session` and reads only that. A
+    session carried under the other host's name is somebody else's cookie --
+    on the tailnet that is the one another port planted -- and is not signed
+    in. Sign-out clears the name it was signed in under.
+    """
+    from tests.conftest import HEADERS, _setup_owner
+
+    owner = _setup_owner(client)
+    at = {"http://localhost:8848": "", "https://spend.example.ts.net": "__Host-"}
+
+    for base, prefix in at.items():
+        issued = _sign_in_at(client, base, owner["secret"], clock)
+        session_name, device_name = f"{prefix}st_session", f"{prefix}st_device"
+        assert issued["pending"] == f"{prefix}st_pending", base
+        # Exactly these: the session, the device, and the pending one cleared.
+        assert set(issued) - {"pending"} == {session_name, device_name, issued["pending"]}
+        assert issued[issued["pending"]] == "", base
+        value = issued[session_name]
+        assert value, base
+
+        client.cookies.clear()
+        mine = {"cookie": f"{session_name}={value}"}
+        assert client.get(f"{base}/api/me", headers=mine).status_code == 200, base
+
+        other = "st_session" if prefix else "__Host-st_session"
+        client.cookies.clear()
+        theirs = {"cookie": f"{other}={value}"}
+        assert client.get(f"{base}/api/me", headers=theirs).status_code == 401, base
+
+        client.cookies.clear()
+        out = client.delete(f"{base}/api/session", headers={**HEADERS, **mine})
+        assert out.status_code == 204, base
+        assert _cookies_from(out) == {session_name: ""}, base
+        # And the session is gone server-side, not only from the browser.
+        client.cookies.clear()
+        assert client.get(f"{base}/api/me", headers=mine).status_code == 401, base
+
+
+def test_hsts_is_held_back_on_plain_http_loopback_only(client):
+    """#196. A browser ignores HSTS over plain HTTP, so sending it to
+    `http://localhost` -- the container on somebody's own computer, which is
+    production -- is noise. Every other address keeps it, the tailnet first."""
+    sent = {
+        base: "Strict-Transport-Security" in client.get(f"{base}/api/health").headers
+        for base in (
+            "http://localhost:8848",
+            "http://[::1]:8848",
+            "https://spend.example.ts.net",
+            "https://localhost:8848",
+        )
+    }
+    assert sent == {
+        "http://localhost:8848": False,
+        "http://[::1]:8848": False,
+        "https://spend.example.ts.net": True,
+        "https://localhost:8848": True,
+    }
 
 
 # Reads the client's sources too, so it runs on every pull request.

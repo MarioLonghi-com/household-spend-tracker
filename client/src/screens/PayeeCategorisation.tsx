@@ -17,6 +17,9 @@ import { PayeeCategorisationPanel } from "./Categories";
 import type { Tally } from "./Categories";
 import { useWindowed } from "../lib/useWindowed";
 import type { Household, Payee } from "../lib/types";
+import { compareNames, formatCount } from "../lib/locale";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** `GET /households/{id}/stats/payees`, one entry per payee with transactions. */
 export interface PayeeStat {
@@ -94,7 +97,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
           if (column === "categories") return byPayee.get(payee.id)?.category_count ?? 0;
           return payee.name;
         },
-        (a, b) => a.name.localeCompare(b.name),
+        (a, b) => compareNames(a.name, b.name),
       ),
     [payees.data, byPayee, query, payeeOrder.sort, payeeOrder.direction],
   );
@@ -112,26 +115,30 @@ export function PayeeCategorisation({ household }: { household: Household }) {
       )}
       {breakdown && (
         <Panel title={breakdown.name} onClose={() => setBreakdown(null)}>
-          <h3 className="section-title">Categorised as</h3>
+          <h3 className="section-title"><Trans comment="Heading on the Payee Categorisation screen">Categorised as</Trans></h3>
           <ul className="breakdown">
             {(byPayee.get(breakdown.id)?.categories ?? []).map((one) => (
               <li key={one.key ?? "none"}>
                 <span className={one.key ? "" : "muted"}>{one.name}</span>
-                <span className="small muted">{one.transaction_count.toLocaleString()}</span>
+                <span className="small muted">{formatCount(one.transaction_count)}</span>
               </li>
             ))}
           </ul>
           <p className="muted small">
-            Every category this payee has been filed under, biggest first. The transactions with
-            no category are listed too, because they are what this payee still costs you to
-            classify.
+            <Trans>
+              Every category this payee has been filed under, biggest first. The transactions with
+              no category are listed too, because they are what this payee still costs you to
+              classify.
+            </Trans>
           </p>
         </Panel>
       )}
-      <h1>Payee categorisation</h1>
+      <h1><Trans comment="Screen title on the Payee Categorisation screen. See GLOSSARY.md">Payee categorisation</Trans></h1>
       <p className="muted small">
-        What each payee has been filed under, and what a new transaction for it will be. Which
-        payee a statement line becomes is decided first, by the payee naming rules.
+        <Trans>
+          What each payee has been filed under, and what a new transaction for it will be. Which
+          payee a statement line becomes is decided first, by the payee naming rules.
+        </Trans>
       </p>
 
       <Problem error={payees.error ?? stats.error} />
@@ -139,30 +146,34 @@ export function PayeeCategorisation({ household }: { household: Household }) {
       <div className="card">
         <div className="row payee-search-row">
           <h2 className="card-title" style={{ margin: 0 }}>
-            What each payee is categorised as
+            <Trans>
+              What each payee is categorised as
+            </Trans>
           </h2>
           {/* `type="search"` rather than a text box: it gets the browser's own
               clear button and the phone keyboard's search key, and neither is
               worth rebuilding. `role="searchbox"` is what it already is. */}
           <label className="payee-search">
-            <span className="sr-only">Search payees</span>
+            <span className="sr-only"><Trans comment="Screen-reader text on the Payee Categorisation screen">Search payees</Trans></span>
             <input
               type="search"
               value={search}
-              placeholder="type any part of a payee"
+              placeholder={t`type any part of a payee`}
               onChange={(e) => setSearch(e.target.value)}
             />
           </label>
         </div>
         {payees.data?.length === 0 ? (
           <p className="muted small" style={{ margin: 0 }}>
-            No payees yet. They appear as you enter or import transactions.
+            <Trans>
+              No payees yet. They appear as you enter or import transactions.
+            </Trans>
           </p>
         ) : realPayees.length === 0 ? (
           /* A filter that matches nothing says so, rather than looking like a
              household with no payees in it. */
           <p className="muted small" style={{ margin: 0 }}>
-            No payee matches “{search.trim()}”.
+            {t`No payee matches “${search.trim()}”.`}
           </p>
         ) : (
           <div className="table-scroll">
@@ -170,14 +181,14 @@ export function PayeeCategorisation({ household }: { household: Household }) {
               <thead>
                 <tr>
                   <SortHeading
-                    label="Payee"
+                    label={t({ message: "Payee", comment: "Column heading on the Payee Categorisation screen: noun, who was paid or who paid. See GLOSSARY.md" })}
                     column="name"
                     sort={payeeOrder.sort}
                     direction={payeeOrder.direction}
                     onSort={payeeOrder.onSort}
                   />
                   <SortHeading
-                    label="Transactions"
+                    label={t({ message: "Transactions", comment: "Column heading on the Payee Categorisation screen. See GLOSSARY.md" })}
                     column="transactions"
                     sort={payeeOrder.sort}
                     direction={payeeOrder.direction}
@@ -185,7 +196,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
                     align="right"
                   />
                   <SortHeading
-                    label="Categorised as"
+                    label={t({ message: "Categorised as", comment: "Column heading on the Payee Categorisation screen" })}
                     column="categories"
                     sort={payeeOrder.sort}
                     direction={payeeOrder.direction}
@@ -203,9 +214,9 @@ export function PayeeCategorisation({ household }: { household: Household }) {
                     <td className="small muted amount" data-figure="true">
                       {stats.isPending
                         ? "…"
-                        : (byPayee.get(payee.id)?.transaction_count ?? 0).toLocaleString()}
+                        : formatCount(byPayee.get(payee.id)?.transaction_count ?? 0)}
                     </td>
-                    <td className="small" data-label="Categorised as" data-detail-first="true">
+                    <td className="small" data-label={t({ message: "Categorised as", comment: "Column name shown beside a value on phones on the Payee Categorisation screen" })} data-detail-first="true">
                       <CategorySummary
                         stat={byPayee.get(payee.id)}
                         onMore={() => setBreakdown(payee)}
@@ -213,7 +224,9 @@ export function PayeeCategorisation({ household }: { household: Household }) {
                     </td>
                     <td className="amount">
                       <button className="link" onClick={() => setCategorising(payee.id)}>
-                        Categorisation
+                        <Trans comment="Button on the Payee Categorisation screen">
+                          Categorisation
+                        </Trans>
                       </button>
                     </td>
                   </tr>
@@ -227,7 +240,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
                 ref={page.sentinelRef}
                 onClick={page.extend}
               >
-                Showing {page.shown.toLocaleString()} of {page.total.toLocaleString()} — show more
+                {t`Showing ${formatCount(page.shown)} of ${formatCount(page.total)} — show more`}
               </button>
             )}
           </div>
@@ -263,12 +276,12 @@ function CategorySummary({
       {shown.map((one, at) => (
         <span key={one.key ?? "none"} className={one.key ? "tally" : "tally unset"}>
           {at > 0 ? <span className="tally-gap" aria-hidden="true"> · </span> : null}
-          {one.name} <span className="muted">{one.transaction_count.toLocaleString()}</span>
+          {one.name} <span className="muted">{formatCount(one.transaction_count)}</span>
         </span>
       ))}
       {rest > 0 && (
         <button type="button" className="link tally-more" onClick={onMore}>
-          +{rest.toLocaleString()} more
+          {t({ message: `+${formatCount(rest)} more`, comment: "Button on the Payee Categorisation screen" })}
         </button>
       )}
     </span>

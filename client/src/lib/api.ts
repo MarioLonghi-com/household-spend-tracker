@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 /**
  * The one place that talks to the server.
  *
@@ -89,7 +90,7 @@ async function read<T>(response: Response): Promise<T> {
     const detail =
       payload && typeof (payload as { detail?: unknown }).detail === "string"
         ? (payload as { detail: string }).detail
-        : response.statusText || `the server answered ${response.status}`;
+        : response.statusText || t`the server answered ${response.status}`;
     const retryAfter = Number(response.headers.get("retry-after")) || undefined;
     const body =
       payload && typeof payload === "object" && !Array.isArray(payload)
@@ -98,7 +99,7 @@ async function read<T>(response: Response): Promise<T> {
     throw new ApiError(detail, response.status, retryAfter, body);
   }
   if (!parsed) {
-    throw new ApiError("the server's answer could not be read", response.status);
+    throw new ApiError(t`the server's answer could not be read`, response.status);
   }
   return payload as T;
 }

@@ -25,14 +25,18 @@ import type {
   YnabAccount,
   YnabCategory,
 } from "./types";
+import { compareNames } from "../../lib/locale";
+import { YNAB_ACCOUNT_WORDS, YNAB_CATEGORY_WORDS } from "../../lib/labels";
 
-/** An amount, or the bare figure when the code is not one `Intl` knows. */
+/**
+ * An amount, or the bare figure when the code is not one `Intl` knows.
+ *
+ * `format` is that fallback now, with the currency's own decimals: the
+ * `(minor / 100).toFixed(2)` that stood here wrote 1,234 JPY as "12.34" and
+ * could not be reached, because `format` does not throw.
+ */
 export function money(minor: number, currency: string): string {
-  try {
-    return format(minor, currency);
-  } catch {
-    return `${(minor / 100).toFixed(2)} ${currency}`;
-  }
+  return format(minor, currency);
 }
 
 export function range(first: string | null, last: string | null): string {
@@ -92,19 +96,8 @@ function StateLegend({ items }: { items: [MatchState, string, string][] }) {
   );
 }
 
-const ACCOUNT_WORD: Record<MatchState, string> = {
-  matched: "Matched",
-  create: "New",
-  unmatched: "Skipped",
-  fixed: "Fixed",
-};
-
-const CATEGORY_WORD: Record<MatchState, string> = {
-  matched: "Matched",
-  create: "New",
-  unmatched: "Uncategorised",
-  fixed: "Fixed",
-};
+const ACCOUNT_WORD = YNAB_ACCOUNT_WORDS;
+const CATEGORY_WORD = YNAB_CATEGORY_WORDS;
 
 // --------------------------------------------------------------------------- //
 // Accounts
@@ -406,10 +399,10 @@ export function MapCategories({
       grouped.set(target.group_name, list);
     }
     return [...grouped.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => compareNames(a, b))
       .map(([name, list]) => ({
         name,
-        list: [...list].sort((a, b) => a.name.localeCompare(b.name)),
+        list: [...list].sort((a, b) => compareNames(a.name, b.name)),
       }));
   }, [targets, choices]);
 

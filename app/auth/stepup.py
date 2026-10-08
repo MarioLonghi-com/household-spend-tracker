@@ -28,6 +28,10 @@ one. Each calls `require` before it writes or reads anything:
   `POST /admin/users/{id}/role` making somebody an owner -- an owner account
   survives every reset the inviting owner can make to their own password,
   authenticator or recovery codes (#205).
+* `POST /admin/application/update/apply` -- installing an update stops the
+  service and changes the schema, and a lossy migration cannot be undone except
+  from the backup; the confirmation is the moment to prove it is the owner at
+  the keyboard (#165).
 
 Two properties are load-bearing and each has a test:
 

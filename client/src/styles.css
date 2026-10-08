@@ -1352,7 +1352,7 @@ tr.row-pick :where(button, a, input, select, textarea, label) { cursor: revert; 
      so, and the import marker is a badge nobody opens a register to read --
      both are one tap away in the panel. */
   .table-scroll td[data-empty="true"],
-  .table-scroll td[data-label="Source"] {
+  .table-scroll td[data-col="source"] {
     display: none;
   }
   .table-scroll td::before {
@@ -1639,4 +1639,19 @@ table.behind tfoot td {
   border-bottom: 0;
   font-weight: 600;
   background: var(--surface);
+}
+
+/* ---- sign-in methods (#122) ---- */
+/* One row per way in: name and state on the left, its action on the right,
+   and its form or list underneath when it is open. */
+.methods .method-row { padding: 10px 0; border-top: 1px solid var(--line); }
+.methods .method-row:first-child { border-top: 0; }
+.method-head { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.method-body { margin-top: 10px; }
+table.passkeys td.actions { white-space: nowrap; text-align: right; }
+/* A passkey just added: the row stands out until the panel is closed. */
+table.passkeys tr.fresh td { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+@media (max-width: 767px) {
+  .method-head { flex-direction: column; align-items: stretch; }
+  table.passkeys td.actions { white-space: normal; }
 }

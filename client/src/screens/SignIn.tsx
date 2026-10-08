@@ -30,12 +30,14 @@ import { Field, Problem } from "../components/bits";
 import {
   conditionalMediationAvailable,
   getPasskey,
+  noteRecoveryReminder,
   passkeyState,
   rememberThisDevice,
   wasDismissed,
 } from "../lib/passkeys";
 import { dropGrant, keepGrant } from "../lib/recoveryGrant";
 import type { User } from "../lib/types";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 interface SignInState {
   authenticated: boolean;
@@ -79,6 +81,7 @@ function keyReplaced(problem: unknown): problem is Error {
 }
 
 export function SignIn({ onDone }: { onDone: (user: User) => void }) {
+  const { t } = useLingui();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -109,6 +112,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
    */
   function finish(user: User, keys: number, passkeys = 0) {
     waiting.current?.abort();
+    if (passkeys > 0) noteRecoveryReminder(passkeys);
     if (keys > 0 || passkeys > 0) setRecovered({ user, keys, passkeys });
     else onDone(user);
   }
@@ -230,7 +234,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
         if (state.key_replaced) {
           toRecoveryCode(
             state.detail ??
-              "This server's secret key has been replaced. Use one of your recovery codes.",
+              t`This server's secret key has been replaced. Use one of your recovery codes.`,
           );
         }
       }
@@ -258,12 +262,16 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
         <h1>Spend Tracker</h1>
         <Problem error={error} />
         <div className="card">
-          <h2>A new authenticator</h2>
+          <h2>
+            <Trans>A new authenticator</Trans>
+          </h2>
           <p className="muted small">
-            You're signed in. This server's secret key was replaced, so the authenticator you had
-            no longer works here. Scan this with your authenticator app and type the six digits it
-            shows — the recovery code you just used covers this, so it costs no other. Then delete
-            the old entry for this account from your app.
+            <Trans>
+              You're signed in. This server's secret key was replaced, so the authenticator you had
+              no longer works here. Scan this with your authenticator app and type the six digits
+              it shows — the recovery code you just used covers this, so it costs no other. Then
+              delete the old entry for this account from your app.
+            </Trans>
           </p>
           {owed.offer ? (
             <>
@@ -273,10 +281,12 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
                 <QRCodeSVG value={owed.offer.uri} size={168} />
               </div>
               <p className="small muted">
-                Can't scan? Enter this key by hand:{" "}
-                <span className="mono">{owed.offer.secret}</span>
+                <Trans>
+                  Can't scan? Enter this key by hand:{" "}
+                  <span className="mono">{owed.offer.secret}</span>
+                </Trans>
               </p>
-              <Field label="The six digits">
+              <Field label={t`The six digits`}>
                 <input
                   name="one-time-code"
                   value={newCode}
@@ -289,7 +299,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
               </Field>
               <p />
               <button className="primary" type="submit" disabled={busy || newCode.length < 6}>
-                Check the code and finish
+                <Trans>Check the code and finish</Trans>
               </button>
             </>
           ) : (
@@ -300,7 +310,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
                 run(() => offer({ user: owed.user, keys: owed.keys, grant: owed.grant }))
               }
             >
-              Show a code to scan
+              <Trans>Show a code to scan</Trans>
             </button>
           )}
           <p />
@@ -313,13 +323,15 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
               finish(owed.user, owed.keys);
             }}
           >
-            Not now
+            <Trans comment="Button on the sign-in page">Not now</Trans>
           </button>
           <p className="muted small">
-            Until you do, every sign-in will ask for another recovery code. To do it later, open
-            your account — your name in the menu — and set up a new authenticator there. In this
-            tab, while you stay signed in and for up to a day, the code you just used still covers
-            it; after that, or anywhere else, it takes one more recovery code.
+            <Trans>
+              Until you do, every sign-in will ask for another recovery code. To do it later, open
+              your account — your name in the menu — and set up a new authenticator there. In this
+              tab, while you stay signed in and for up to a day, the code you just used still
+              covers it; after that, or anywhere else, it takes one more recovery code.
+            </Trans>
           </p>
         </div>
       </form>
@@ -331,25 +343,45 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
       <div className="centred">
         <h1>Spend Tracker</h1>
         <div className="card" role="status">
-          <h2>You're back in</h2>
+          <h2>
+            <Trans>You're back in</Trans>
+          </h2>
           {recovered.keys > 0 && (
             <p>
-              Using a recovery code signed you out everywhere, forgot every trusted browser and
-              revoked {recovered.keys === 1 ? "1 agent key" : `${recovered.keys} agent keys`}. A
-              program that was using {recovered.keys === 1 ? "it" : "one"} will be refused from
-              now on; issue a new key on your profile if it should keep working.
+              {recovered.keys === 1 ? (
+                <Trans>
+                  Using a recovery code signed you out everywhere, forgot every trusted browser and
+                  revoked 1 agent key. A program that was using it will be refused from now on;
+                  issue a new key on your profile if it should keep working.
+                </Trans>
+              ) : (
+                <Trans>
+                  Using a recovery code signed you out everywhere, forgot every trusted browser and
+                  revoked {recovered.keys} agent keys. A program that was using one will be refused
+                  from now on; issue a new key on your profile if it should keep working.
+                </Trans>
+              )}
             </p>
           )}
           {recovered.passkeys > 0 && (
             <p>
-              You still have{" "}
-              {recovered.passkeys === 1 ? "1 passkey" : `${recovered.passkeys} passkeys`}, and a
-              recovery code leaves them working. If one was on the device you lost, remove it in
-              Sign-in methods on your profile — your name in the menu.
+              {recovered.passkeys === 1 ? (
+                <Trans>
+                  You still have 1 passkey, and a recovery code leaves them working. If one was on
+                  the device you lost, remove it in Sign-in methods on your profile — your name in
+                  the menu.
+                </Trans>
+              ) : (
+                <Trans>
+                  You still have {recovered.passkeys} passkeys, and a recovery code leaves them
+                  working. If one was on the device you lost, remove it in Sign-in methods on your
+                  profile — your name in the menu.
+                </Trans>
+              )}
             </p>
           )}
           <button className="primary" autoFocus onClick={() => onDone(recovered.user)}>
-            Continue
+            <Trans comment="Button on the sign-in page: go on to the next step">Continue</Trans>
           </button>
         </div>
       </div>
@@ -364,7 +396,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
       <div className="card">
         {!needsCode ? (
           <>
-            <Field label="Email">
+            <Field label={t({ message: "Email", comment: "Label of a form field on the sign-in page: noun, an email address" })}>
               <input
                 type="email"
                 value={email}
@@ -376,7 +408,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
               />
             </Field>
             <p />
-            <Field label="Password">
+            <Field label={t({ message: "Password", comment: "Label of a form field on the sign-in page: noun. See GLOSSARY.md" })}>
               <input
                 type="password"
                 value={password}
@@ -386,20 +418,22 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
             </Field>
             <p />
             <button className="primary" type="submit" disabled={busy || !email || !password}>
-              Sign in
+              <Trans comment="Button on the sign-in page. See GLOSSARY.md">Sign in</Trans>
             </button>
             {passkeysHere && (
               <>
-                <p className="muted small">or</p>
+                <p className="muted small">
+                  <Trans comment="Sentence on the sign-in page: conjunction between two choices">or</Trans>
+                </p>
                 <button type="button" disabled={busy} onClick={passkeyNow}>
-                  Sign in with a passkey
+                  <Trans>Sign in with a passkey</Trans>
                 </button>
               </>
             )}
           </>
         ) : (
           <>
-            <h2>{useRecovery ? "A recovery code" : "Your authenticator"}</h2>
+            <h2>{useRecovery ? t`A recovery code` : t({ message: "Your authenticator", comment: "Heading on the sign-in page" })}</h2>
             {replaced && (
               <div className="banner warn" role="alert">
                 {replaced}
@@ -407,10 +441,10 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
             )}
             <p className="muted small">
               {useRecovery
-                ? "One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key."
-                : "This browser hasn't been used here recently, so we need the six digits."}
+                ? t`One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key.`
+                : t`This browser hasn't been used here recently, so we need the six digits.`}
             </p>
-            <Field label={useRecovery ? "Recovery code" : "Code"}>
+            <Field label={useRecovery ? t({ message: "Recovery code", comment: "Text on the sign-in page. See GLOSSARY.md" }) : t({ message: "Code", comment: "Text on the sign-in page: noun, a code typed in" })}>
               <input
                 name={useRecovery ? "recovery-code" : "one-time-code"}
                 value={code}
@@ -432,13 +466,13 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
                     onChange={(e) => setTrust(e.target.checked)}
                     style={{ width: "auto", marginRight: 8 }}
                   />
-                  Don't ask on this browser for 30 days
+                  <Trans>Don't ask on this browser for 30 days</Trans>
                 </label>
                 <p />
               </>
             )}
             <button className="primary" type="submit" disabled={busy || code.length < 6}>
-              Continue
+              <Trans comment="Button on the sign-in page: go on to the next step">Continue</Trans>
             </button>
             {/* Not after the key was replaced: no code from it can work here. */}
             {!replaced && (
@@ -454,8 +488,8 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
                   }}
                 >
                   {useRecovery
-                    ? "I have my authenticator after all"
-                    : "I've lost my authenticator — use a recovery code"}
+                    ? t`I have my authenticator after all`
+                    : t`I've lost my authenticator — use a recovery code`}
                 </button>
               </>
             )}

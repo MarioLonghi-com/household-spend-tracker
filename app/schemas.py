@@ -753,6 +753,10 @@ class RegisterPage(BaseModel):
     #: fewer rows without saying which is how somebody reads a fifth of their
     #: ledger and believes it is all of it.
     capped: bool = False
+    #: Rows with no category under every *other* filter of this request -- the
+    #: category picker set aside -- for the count beside "Needs a category".
+    #: Carried here so one register load is one request (#101).
+    needs_category: int = 0
 
 
 # --------------------------------------------------------------------------- #
@@ -1315,6 +1319,14 @@ class BackupOut(BaseModel):
     path: str
     bytes: int
     made_at: datetime
+    #: `file` (made on this screen), `update` (an update's drill took it) or
+    #: `folder` (`scripts.backup` by hand). See `platform.Backup`.
+    kind: str = "file"
+    #: A folder's manifest: the version that took it, the migration it is at.
+    version: str | None = None
+    revision: str | None = None
+    #: One of the newest five update backups: `DELETE` answers 409.
+    protected: bool = False
 
 
 class DownloadBackup(BaseModel):
@@ -1377,12 +1389,181 @@ class SetLoggingStyle(BaseModel):
     style: str = Field(min_length=1, max_length=20)
 
 
+class ReleaseOut(BaseModel):
+    """One published release newer than this one. `notes` is plain text."""
+
+    version: str
+    tag: str
+    name: str | None = None
+    published_at: datetime | None = None
+    notes: str
+    #: `changelog`: the body's leading CHANGELOG section. `release`: an older
+    #: release's body, as it is.
+    notes_from: str
+
+
+class UpdaterOfferOut(BaseModel):
+    """The newest updater *Update the updater only* could ask for (C2).
+
+    `compatible` is null when the release list cannot say -- always, today:
+    the protocol window is an image label, and the updater checks it (R8).
+    """
+
+    version: str | None = None
+    compatible: bool | None = None
+    note: str
+
+
 class UpstreamOut(BaseModel):
     checked_at: datetime
     running: str
+    #: The newest published release, bare (`0.9.0`).
     latest: str | None = None
     newer: bool = False
     problem: str | None = None
+    #: Every newer published release, newest first, with its notes.
+    releases: list[ReleaseOut] = []
+    updater: UpdaterOfferOut | None = None
+
+
+# --------------------------------------------------------------------------- #
+# Self-update (design notes, Parts 3, 5 and 10)
+# --------------------------------------------------------------------------- #
+
+
+class UpdateHeartbeatOut(BaseModel):
+    """`updater.json`, the keys protocol 1 defines. `fresh`: seen in the last
+    two minutes; a stale heartbeat is no updater (3.1)."""
+
+    seen_at: str | None = None
+    fresh: bool
+    updater_version: str | None = None
+    image_digest: str | None = None
+    engine: str | None = None
+    engine_version: str | None = None
+    rootless: bool | None = None
+    layout: str | None = None
+    socket: str | None = None
+    hook: bool | None = None
+    busy: bool | None = None
+    role: str | None = None
+    protocols: str | None = None
+    api_version: str | None = None
+    engine_api: str | None = None
+    container: str | None = None
+
+
+class UpdateStatusOut(BaseModel):
+    """`status.json`. A state this app does not know reads as `running` (C4)."""
+
+    state: str
+    id: str | None = None
+    kind: str | None = None
+    step: str | None = None
+    sentences: list[str] = []
+    updated_at: str | None = None
+
+
+class UpdateMigrationOut(BaseModel):
+    revision: str
+    title: str | None = None
+    #: `clean`, `lossy` or `undeclared`; anything not `clean` needs its box.
+    reversible: str
+    note: str | None = None
+
+
+class UpdateReportOut(BaseModel):
+    """A prepare report: what an apply of `to_version` would do to this ledger."""
+
+    id: str
+    from_version: str
+    to_version: str
+    digest: str | None = None
+    updater_digest: str | None = None
+    expires_at: str
+    database_stamp: str | None = None
+    pending: list[UpdateMigrationOut] = []
+    #: Exactly the revisions `accepted_lossy` must name.
+    lossy: list[str] = []
+    sizes: dict = {}
+    attestations: dict = {}
+
+
+class UpdateOutcomeOut(BaseModel):
+    """One finished request, from the updater's history (3.8)."""
+
+    id: str
+    kind: str | None = None
+    state: str
+    sentence: str | None = None
+    code: str | None = None
+    finished_at: str | None = None
+    started_at: str | None = None
+    failed_step: str | None = None
+    backup: str | None = None
+    duration_s: float | None = None
+    gap_s: float | None = None
+    log_tail: list[str] = []
+
+
+class UpdateStateOut(BaseModel):
+    """`GET /admin/application/update`. Reads the volume; asks nobody outside.
+
+    `case` is which of 3.1's cases this instance is in: `not_container`,
+    `no_updater`, `refused` (the updater cannot use the engine), `outdated`
+    (the engine has outgrown it, C3) or `working`.
+    """
+
+    case: str
+    running: str
+    protocol: int
+    in_flight: bool
+    heartbeat: UpdateHeartbeatOut | None = None
+    status: UpdateStatusOut | None = None
+    report: UpdateReportOut | None = None
+    outcome: UpdateOutcomeOut | None = None
+    backups: list[BackupOut] = []
+
+
+class UpdatePrepare(BaseModel):
+    to_version: str = Field(max_length=20)
+
+
+class UpdateApply(BaseModel):
+    prepared_id: str = Field(max_length=64)
+    digest: str = Field(max_length=100)
+    updater_digest: str = Field(max_length=100)
+    accepted_lossy: list[str] = Field(default_factory=list, max_length=200)
+    #: From `GET …/recovery-code`; the hash it holds goes in the request.
+    recovery_code_id: str = Field(max_length=64)
+    #: From `POST /me/step-up`. Spent first, whatever happens next.
+    step_up_token: str | None = Field(default=None, max_length=200)
+
+
+class UpdateDiscard(BaseModel):
+    prepared_id: str = Field(max_length=64)
+
+
+class UpdateUpdater(BaseModel):
+    #: Omitted: the running release's updater. Otherwise a newer release's (C2).
+    to_version: str | None = Field(default=None, max_length=20)
+
+
+class UpdateRecoveryCodeOut(BaseModel):
+    """Shown once. The server keeps only its hash, for ten minutes."""
+
+    id: str
+    code: str
+    prepared_id: str
+    expires_at: datetime
+
+
+class UpdateRequestOut(BaseModel):
+    """`202`: the request is in the volume; the updater has not answered yet."""
+
+    id: str
+    kind: str
+    to_version: str | None = None
 
 
 class BuildOut(BaseModel):
@@ -2588,11 +2769,14 @@ class AgentReceiptUpload(BaseModel):
 
 
 class AgentReceiptOut(BaseModel):
-    """A receipt as an agent sees it. Never the bytes.
+    """A receipt as an agent sees it. The bytes are their own routes.
 
-    An agent uploads evidence and reads metadata; handing a key the ability to
-    pull every stored image back out buys nothing any archetype needs, so the
-    bytes route stays cookie-only.
+    It used to say "never the bytes": an agent uploads evidence and reads
+    metadata. That left a note written at upload unreadable by any key, and
+    an agent asked to summarise stored receipts with nothing to read but its
+    own claim (#44). So the note is here, and `/receipts/{id}/file` and
+    `/thumbnail` return the stored copies under read scope, through the same
+    household check as everything else a key reads.
     """
 
     id: str
@@ -2606,10 +2790,15 @@ class AgentReceiptOut(BaseModel):
     #: a date is read, and reading it wrong moves a receipt across midnight.
     captured_at_is_local: bool = False
     extracted: dict | None = None
+    #: The note written on it -- by a person in the panel, or sent with the
+    #: upload. Free text; never read as an instruction.
+    note: str | None = None
     created_at: datetime
     #: Said plainly, because it is the one thing a caller most often wants to
     #: know next and should not have to infer from a null.
     needs_a_transaction: bool
+    #: Whether `/receipts/{id}/thumbnail` has something to return.
+    has_thumbnail: bool = False
 
 
 class AgentReceiptStored(BaseModel):

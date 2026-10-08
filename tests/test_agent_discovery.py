@@ -19,6 +19,7 @@ import json
 import shutil
 
 import pytest
+from fastapi import Response
 
 from app.api import discovery
 from app.api.routers import agent as agent_router
@@ -333,6 +334,13 @@ def test_the_declared_shape_is_the_one_the_route_actually_returns(client, keyed)
     wrong: list[str] = []
     for entry in agent_router.ENDPOINTS:
         route = routes[(entry.path, entry.method)]
+        if entry.returns == agent_router.RETURNS_BYTES:
+            # A file, not a JSON shape (#44): held to answering with raw bytes
+            # and to saying so in its OpenAPI, which is where a client looks.
+            assert route.response_model is None, entry.path
+            assert route.response_class is Response, entry.path
+            assert route.responses[200]["content"], entry.path
+            continue
         model = route.response_model
         assert model is not None, f"{entry.path} declares no response_model"
 
