@@ -440,10 +440,37 @@ class Apply:
         if "previous_restart_policy" not in self.ctx:
             # Recorded before anything changes, so a rollback after a crash
             # anywhere from here on knows what to put back.
-            self.remember(previous_restart_policy=restart_policy(self.previous()))
+            self.remember(previous_restart_policy=self.own_restart_policy(self.previous()))
         self.client.stop(self.ctx["previous_id"], grace=STOP_GRACE_SECONDS)
         self.client.rename(self.ctx["previous_id"], parked)
         self.park_restart_policy()
+
+    def own_restart_policy(self, inspect: dict) -> dict:
+        """The app's restart policy -- or, if it is `no` because an earlier apply parked it and a
+        rollback by an older updater (6.6's take-back) left it so, the one that apply recorded.
+
+        Without this the next update would copy `no` onto the new app, and it
+        would not come back after a reboot.
+        """
+        policy = restart_policy(inspect)
+        if policy["Name"] != "no":
+            return policy
+        journals = sorted(
+            (self.vol.root / "journal").glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
+        )
+        for path in journals:
+            if path.stem == self.id:
+                continue
+            ctx = (volume.read_own_json(path) or {}).get("context") or {}
+            own = ctx.get("previous_restart_policy")
+            if (
+                ctx.get("previous_id") == inspect.get("Id")
+                and ctx.get("restart_policy_parked")
+                and isinstance(own, dict)
+                and own.get("Name") not in (None, "", "no")
+            ):
+                return restart_policy({"HostConfig": {"RestartPolicy": own}})
+        return policy
 
     def park_restart_policy(self) -> None:
         """`-previous` with restart policy `no`: a hand start does not keep it coming back."""

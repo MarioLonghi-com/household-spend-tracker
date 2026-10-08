@@ -788,3 +788,23 @@ def test_e7_an_engine_that_cannot_change_a_restart_policy_is_noted_and_the_updat
     assert any("could not be set to `no`" in n for n in record["notes"])
     assert "restart_policy_parked" not in world.journal(req["id"]).context
     assert world.fake.containers[world.app_id]["State"] == "exited"
+
+
+def test_e7_a_policy_an_older_updater_left_parked_is_not_copied_onto_the_next_app(world):
+    """6.6's take-back: an older updater rolled back and did not unpark. The
+    next apply finds `no` on the app, and the earlier journal's own policy."""
+    world.broken.add(B)
+    service = world.service()
+    first, record = apply(world, service)
+    assert record["state"] == "rolled_back"
+    # As an updater from before the parking would leave it: home, still `no`.
+    path = world.volume.journal(first["id"])
+    doc = volume.read_own_json(path)
+    doc["context"]["restart_policy_parked"] = True
+    volume.write_json(path, doc)
+    world.fake.inspect_of(world.fake.containers[world.app_id])["HostConfig"]["RestartPolicy"] = {"Name": "no"}
+    world.broken.discard(B)
+    req, record = apply(world, service)
+    assert record["state"] == "succeeded", record
+    assert world.journal(req["id"]).context["previous_restart_policy"]["Name"] == "unless-stopped"
+    assert policy_of(world, the_app(world)["Id"])["Name"] == "unless-stopped"
