@@ -630,16 +630,6 @@ msgstr "Chose <0>{0}</0> for you: {1}."
 msgid "Closed — hide it from the accounts list"
 msgstr "Closed — hide it from the accounts list"
 
-#. placeholder {0}: offer.count
-#. placeholder {0}: purging.row_count
-#. placeholder {1}: <> <strong>{offer.count} other line has the same payee</strong> and no category of their own. </>
-#. placeholder {1}: <> <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch. </>
-#. placeholder {2}: <> <strong>{offer.count} other lines have the same payee</strong> and no category of their own. </>
-#. placeholder {2}: <> <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch. </>
-#: src/screens/Import.tsx
-msgid "{0, plural, one {{1}} other {{2}}}"
-msgstr "{0, plural, one {{1}} other {{2}}}"
-
 #: src/screens/Accounts.tsx
 msgid "That isn't an amount in {currency}."
 msgstr "That isn't an amount in {currency}."
@@ -1595,6 +1585,11 @@ msgstr "{0} left to account for"
 msgid "this payee"
 msgstr "this payee"
 
+#. placeholder {0}: purging.row_count
+#: src/screens/Import.tsx
+msgid "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
+msgstr "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
+
 #: src/screens/Profile.tsx
 msgid "Confirm and replace"
 msgstr "Confirm and replace"
@@ -2275,6 +2270,11 @@ msgstr "The server re-enabled {user}"
 msgid "In Docker:"
 msgstr "In Docker:"
 
+#. placeholder {0}: offer.count
+#: src/screens/Import.tsx
+msgid "<0>{0} other line has the same payee</0> and no category of their own."
+msgstr "<0>{0} other line has the same payee</0> and no category of their own."
+
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
 msgid "Change"
@@ -2587,6 +2587,11 @@ msgstr "Your name"
 #: src/lib/signInChanges.ts
 msgid "{by} reset {user}'s authenticator"
 msgstr "{by} reset {user}'s authenticator"
+
+#. placeholder {0}: purging.row_count
+#: src/screens/Import.tsx
+msgid "<0>{purgingName}</0> and its {0} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
+msgstr "<0>{purgingName}</0> and its {0} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
 
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
@@ -3276,6 +3281,11 @@ msgstr "Value"
 #: src/screens/Accounts.tsx
 msgid "Statement product"
 msgstr "Statement product"
+
+#. placeholder {0}: offer.count
+#: src/screens/Import.tsx
+msgid "<0>{0} other lines have the same payee</0> and no category of their own."
+msgstr "<0>{0} other lines have the same payee</0> and no category of their own."
 
 #: src/lib/signInChanges.ts
 msgid "Somebody added {user} as an owner"

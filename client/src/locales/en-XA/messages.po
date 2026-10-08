@@ -630,16 +630,6 @@ msgstr ""
 msgid "Closed — hide it from the accounts list"
 msgstr ""
 
-#. placeholder {0}: offer.count
-#. placeholder {0}: purging.row_count
-#. placeholder {1}: <> <strong>{offer.count} other line has the same payee</strong> and no category of their own. </>
-#. placeholder {1}: <> <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch. </>
-#. placeholder {2}: <> <strong>{offer.count} other lines have the same payee</strong> and no category of their own. </>
-#. placeholder {2}: <> <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch. </>
-#: src/screens/Import.tsx
-msgid "{0, plural, one {{1}} other {{2}}}"
-msgstr ""
-
 #: src/screens/Accounts.tsx
 msgid "That isn't an amount in {currency}."
 msgstr ""
@@ -1594,6 +1584,11 @@ msgstr ""
 msgid "this payee"
 msgstr ""
 
+#. placeholder {0}: purging.row_count
+#: src/screens/Import.tsx
+msgid "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Confirm and replace"
 msgstr ""
@@ -2274,6 +2269,11 @@ msgstr ""
 msgid "In Docker:"
 msgstr ""
 
+#. placeholder {0}: offer.count
+#: src/screens/Import.tsx
+msgid "<0>{0} other line has the same payee</0> and no category of their own."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
 msgid "Change"
@@ -2585,6 +2585,11 @@ msgstr ""
 
 #: src/lib/signInChanges.ts
 msgid "{by} reset {user}'s authenticator"
+msgstr ""
+
+#. placeholder {0}: purging.row_count
+#: src/screens/Import.tsx
+msgid "<0>{purgingName}</0> and its {0} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
 msgstr ""
 
 #: src/screens/Import.tsx
@@ -3274,6 +3279,11 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "Statement product"
+msgstr ""
+
+#. placeholder {0}: offer.count
+#: src/screens/Import.tsx
+msgid "<0>{0} other lines have the same payee</0> and no category of their own."
 msgstr ""
 
 #: src/lib/signInChanges.ts

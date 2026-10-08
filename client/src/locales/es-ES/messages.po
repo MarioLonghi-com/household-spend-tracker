@@ -711,16 +711,6 @@ msgstr ""
 msgid "Closed — hide it from the accounts list"
 msgstr "Cerrada: ocultarla de la lista de cuentas"
 
-#. placeholder {0}: offer.count
-#. placeholder {0}: purging.row_count
-#. placeholder {1}: <> <strong>{offer.count} other line has the same payee</strong> and no category of their own. </>
-#. placeholder {1}: <> <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch. </>
-#. placeholder {2}: <> <strong>{offer.count} other lines have the same payee</strong> and no category of their own. </>
-#. placeholder {2}: <> <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch. </>
-#: src/screens/Import.tsx
-msgid "{0, plural, one {{1}} other {{2}}}"
-msgstr ""
-
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "That isn't an amount in {currency}."
@@ -1802,6 +1792,11 @@ msgstr ""
 msgid "this payee"
 msgstr ""
 
+#. placeholder {0}: purging.row_count
+#: src/screens/Import.tsx
+msgid "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Confirm and replace"
@@ -2581,6 +2576,11 @@ msgstr "El servidor reactivó a {user}"
 msgid "In Docker:"
 msgstr "En Docker:"
 
+#. placeholder {0}: offer.count
+#: src/screens/Import.tsx
+msgid "<0>{0} other line has the same payee</0> and no category of their own."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2939,6 +2939,11 @@ msgstr "Tu nombre"
 #, fuzzy
 msgid "{by} reset {user}'s authenticator"
 msgstr "{by} restableció la aplicación de autenticación de {user}"
+
+#. placeholder {0}: purging.row_count
+#: src/screens/Import.tsx
+msgid "<0>{purgingName}</0> and its {0} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch."
+msgstr ""
 
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
@@ -3714,6 +3719,11 @@ msgstr "Valor"
 #, fuzzy
 msgid "Statement product"
 msgstr "Producto del extracto"
+
+#. placeholder {0}: offer.count
+#: src/screens/Import.tsx
+msgid "<0>{0} other lines have the same payee</0> and no category of their own."
+msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
