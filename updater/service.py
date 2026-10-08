@@ -95,7 +95,10 @@ class Service:
                 found.append(j)
         return found
 
-    def resume_journals(self) -> list[str]:
+    def resume_journals(self, restarted: bool = True) -> list[str]:
+        """Resume every unfinished apply. `restarted`: this updater has just started, so
+        the time since each journal's last step is a gap (8.6) -- not so for one that
+        has just taken over or taken back an apply another updater was running."""
         outcomes = []
         handover = self.kit.handover
         try:
@@ -107,7 +110,7 @@ class Service:
                 return outcomes
             for j in self.unfinished():
                 started = [e.get("at") for e in j.started if isinstance(e, dict)]
-                if started and isinstance(started[-1], str):
+                if restarted and started and isinstance(started[-1], str):
                     try:
                         away = self.kit.clock.now() - contract.parse_iso(started[-1])
                         self.kit.clock.record_gap(max(0.0, away), "updater restarted")
@@ -132,7 +135,8 @@ class Service:
             if handover.mode != "current":
                 return None
             # Taken back over, or taken over: resume what the other one left.
-            self.resume_pending = True
+            self.resume_journals(restarted=False)
+            return None
         if self.resume_pending:
             self.resume_journals()
             if self.resume_pending:

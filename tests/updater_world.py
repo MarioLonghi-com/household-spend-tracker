@@ -17,6 +17,18 @@ this gives them behaviour. A `World` holds:
 
 Two of everything: two releases (A and B), two images per release (app and
 updater), and -- where a test needs it -- two backups and two projects.
+
+**Two updaters (6.6).** With `fleet=True` every updater container that is
+started gets a process of its own: an `Updater` with its own engine client,
+`handover.Successions`, `Service` and heartbeat `Beat`, built from what the
+container runs (its image's digest and version, its `--successor` argument).
+The world's clock drives them: every sleep of any updater ticks every other
+one that is not already in the middle of a tick, and every beat -- the beat
+is a thread of its own in the container. `kill_at = (step, "U1" | "U2")`
+kills one of them right after the handover's journal write for that step
+(`Killed` unwinds the victim's stack, as a process dying would leave it);
+the restart policy then starts its container again with a fresh process,
+unless the test says it stays down.
 """
 
 from __future__ import annotations
@@ -32,11 +44,26 @@ from updater import contract, journal, verify, volume
 from updater import engine as eng
 from updater.clock import GapClock
 from updater.detect import PROTOCOL_LABEL, REVISION_LABEL, VERSION_LABEL
-from updater.handover import PROTOCOLS_LABEL
+from updater.handover import PROTOCOLS_LABEL, Successions, own_bind_sources
+from updater.heartbeat import Beat, Identity
 from updater.journal import Owner
 from updater.service import Service
 from updater.site import Kit, Site
 from updater.volume import Volume
+
+SOCKET_HOST = "/var/run/docker.sock"
+SOCKET_MOUNT = "/run/engine.sock"
+PROJECT_MOUNT = "/project"
+
+
+class Killed(BaseException):
+    """An updater died: nothing after this point of its run happened."""
+
+
+#: Whose journal write each handover step is (15.1 U9): the successor's
+#: `ready` (H3) and its H5; U1's for the rest. U1 also notes H3 as it starts
+#: waiting, which is not the step's write.
+WRITER = {"H3": "U2", "H5": "U2"}
 
 PROJECT = "spend-tracker"
 APP = eng.REPOSITORIES[0]
@@ -226,7 +253,190 @@ class FakeTrust:
         return verify.Verified(repository, d, version, commit, "embedded")
 
 
-class World:
+# --------------------------------------------------------------------------- #
+# Two updaters (6.6)
+# --------------------------------------------------------------------------- #
+
+
+@dataclass
+class Updater:
+    """One updater container's process: what `python -m updater` builds."""
+
+    cid: str
+    kit: Kit
+    handover: Successions
+    service: Service
+    beat: Beat
+    started: bool = False
+    in_tick: bool = False
+    dead: bool = False
+
+    @property
+    def me(self) -> Owner:
+        return self.handover.me
+
+    @property
+    def mode(self) -> str:
+        return str(self.handover.mode)
+
+
+def _updaters(w: World) -> list[dict]:
+    return [
+        c
+        for c in w.fake.containers.values()
+        if c["Labels"].get("com.docker.compose.service") == "updater" and eng.ROLE_LABEL not in c["Labels"]
+    ]
+
+
+class _Fleet:
+    """The world's two updaters (6.6): their processes, ticks, deaths and restarts."""
+
+    def who(self, cid: str) -> str:
+        return "U1" if cid == self.updater_id else "U2"
+
+    def successor_id(self) -> str | None:
+        return next((c["Id"] for c in _updaters(self) if c["Id"] != self.updater_id), None)
+
+    def is_running(self, cid: str) -> bool:
+        c = self.fake.containers.get(cid)
+        return c is not None and c["State"] == "running"
+
+    def spawn(self, cid: str) -> Updater:
+        c = self.fake.containers[cid]
+        seen = self.fake.inspect_of(c)
+        image = self.fake.image_by_id(seen.get("Image", "")) or {}
+        repo_digest = next(r for r in image.get("RepoDigests") or [] if r.startswith(UPD + "@"))
+        own_digest = repo_digest.split("@", 1)[1]
+        if cid != self.updater_id and self.lying_digest:
+            own_digest = self.lying_digest
+        version = ((image.get("Config") or {}).get("Labels") or {}).get(VERSION_LABEL, "0.0.0")
+        cmd = list(seen["Config"].get("Cmd") or [])
+        successor_of = cmd[cmd.index("--successor") + 1] if "--successor" in cmd else None
+        me = Owner(image_digest=own_digest, version=version, container=c["Names"][0].lstrip("/"))
+        holder: dict = {}
+
+        def sleep(seconds: float) -> None:
+            self.time.sleep(seconds)
+            if holder["u"].dead:
+                raise Killed("died while it slept")
+
+        kit = self.kit(me=me)
+        kit.sleep = sleep
+        # A process of its own, with clocks of its own: one updater's gaps are not the other's.
+        kit.clock = GapClock(self.time, self.time.monotonic)
+        handover = Successions(
+            kit, successor_of=successor_of, own_id=cid, after_write=lambda step: self._wrote(step, cid)
+        )
+        kit.handover = handover
+        service = Service(kit, owner_uid=os.getuid())
+        beat = Beat(
+            kit.client,
+            self.volume,
+            Identity(updater_version=version, image_digest=own_digest),
+            busy=lambda: service.busy or handover.mode != "current",
+            mountinfo="",
+            hostname=cid[:12],
+            role=lambda: service.heartbeat_role,
+        )
+        handover.on_beat = lambda: beat.tick(self.clock.now())
+        u = Updater(cid, kit, handover, service, beat)
+        holder["u"] = u
+        self.fleet[cid] = u
+        return u
+
+    def _wrote(self, step: str, cid: str) -> None:
+        writer = self.who(cid)
+        self.writes.append((step, writer))
+        if self.kill_at is None or self.kill_at[0] != step or WRITER.get(step, "U1") != writer:
+            return
+        victim_role = self.kill_at[1]
+        self.kill_at = None
+        victim = self.updater_id if victim_role == "U1" else self.successor_id()
+        self.killed.append((step, victim_role))
+        if victim is None:
+            return
+        self.crash(victim)
+        if victim == cid:
+            raise Killed(step)
+
+    def crash(self, cid: str, restart: bool = True) -> None:
+        """The process dies; the container exits with it. The restart policy brings it back."""
+        u = self.fleet.pop(cid, None)
+        if u is not None:
+            u.dead = True
+        c = self.fake.containers.get(cid)
+        if c is not None and c["State"] == "running":
+            self.fake.set_state(c, "exited", 137)
+        if restart and cid not in self.stay_down and c is not None:
+            self.restarts.append(cid)
+            if u is not None:
+                self.dying.append(u)
+
+    def start_container(self, cid: str) -> None:
+        """Started by hand -- `docker start`, or the Desktop GUI's button."""
+        c = self.fake.containers[cid]
+        self.fake.set_state(c, "running")
+        self._on_start(self.fake, c)
+
+    def engine_restart(self) -> None:
+        """Every updater process dies; the engine starts each container that was running or crashed."""
+        for u in list(self.fleet.values()):
+            u.dead = True
+        back = [c["Id"] for c in _updaters(self) if c["State"] == "running" or c["Id"] in self.restarts]
+        self.fleet.clear()
+        self.restarts.clear()
+        for cid in back:
+            self.fake.set_state(self.fake.containers[cid], "running")
+            if cid not in self.pending:
+                self.pending.append(cid)
+
+    def fleet_tick(self) -> None:
+        self.dying = [u for u in self.dying if u.in_tick]
+        if not self.dying:
+            # A crashed process is restarted once its frames have unwound.
+            while self.restarts:
+                cid = self.restarts.pop(0)
+                if cid in self.fake.containers and cid not in self.stay_down:
+                    self.fake.set_state(self.fake.containers[cid], "running")
+                    self.pending.append(cid)
+        while self.pending:
+            cid = self.pending.pop(0)
+            if self.is_running(cid):
+                self.spawn(cid)
+        now = self.clock.now()
+        for u in list(self.fleet.values()):
+            if u.dead or not self.is_running(u.cid):
+                continue
+            if u.started:
+                u.beat.tick(now)
+            if u.in_tick:
+                continue
+            u.in_tick = True
+            try:
+                if not u.started:
+                    u.started = True
+                    u.service.startup()
+                else:
+                    u.service.tick()
+            except Killed:
+                if not u.dead:
+                    self.crash(u.cid)
+            finally:
+                u.in_tick = False
+
+    def run_for(self, seconds: float, step: float = 2.0) -> None:
+        end = self.time.t + seconds
+        while self.time.t < end:
+            self.time.sleep(step)
+
+    def current(self) -> list[Updater]:
+        return [u for u in self.fleet.values() if not u.dead and self.is_running(u.cid) and u.mode == "current"]
+
+    def updater_containers(self) -> list[dict]:
+        return _updaters(self)
+
+
+class World(_Fleet):
     def __init__(
         self,
         tmp_path: Path,
@@ -236,6 +446,7 @@ class World:
         fixture: str = "docker-engine-rootful",
         updater_version: str = A,
         updater_protocols: str = "1-1",
+        fleet: bool = False,
     ) -> None:
         self.tmp = tmp_path
         tmp_path.mkdir(parents=True, exist_ok=True)
@@ -314,16 +525,61 @@ class World:
                 "Image": upd_image["Id"],
                 "Config": {
                     "Image": f"{UPD}:{A}",
+                    "User": "65532:65532",
+                    "Env": list(IMAGE_ENV),
+                    "Entrypoint": ["python", "-m", "updater"],
                     "Labels": {
+                        **upd_image["Config"]["Labels"],
                         "com.docker.compose.project": PROJECT,
                         "com.docker.compose.service": "updater",
+                        "com.docker.compose.oneoff": "False",
                     },
                 },
-                "HostConfig": {"NetworkMode": f"{PROJECT}_default"},
-                "Mounts": [{"Type": "volume", "Name": f"{PROJECT}_update", "Destination": "/update"}],
+                "HostConfig": {
+                    "NetworkMode": f"{PROJECT}_default",
+                    "Binds": [
+                        f"{PROJECT}_update:/update:rw",
+                        f"{SOCKET_HOST}:{SOCKET_MOUNT}:rw",
+                        f"{self.project_dir}:{PROJECT_MOUNT}:rw",
+                    ],
+                    "GroupAdd": ["0", "65532"],
+                    "RestartPolicy": {"Name": "unless-stopped", "MaximumRetryCount": 0},
+                    "Memory": 134217728,
+                    "ReadonlyRootfs": True,
+                    "CapDrop": ["ALL"],
+                    "SecurityOpt": ["label=disable", "no-new-privileges:true"],
+                },
+                "NetworkSettings": {
+                    "Networks": {f"{PROJECT}_default": {"Aliases": [f"{PROJECT}-updater-1", "updater"]}}
+                },
+                "Mounts": [
+                    {"Type": "volume", "Name": f"{PROJECT}_update", "Destination": "/update"},
+                    {"Type": "bind", "Source": SOCKET_HOST, "Destination": SOCKET_MOUNT},
+                    {"Type": "bind", "Source": str(self.project_dir), "Destination": PROJECT_MOUNT},
+                ],
                 "State": {"Status": "running", "Running": True},
             }
         )
+        #: The two updaters' processes, by container id (`fleet=True`).
+        self.fleet: dict[str, Updater] = {}
+        self.fleet_on = fleet
+        #: Updater containers started, waiting for their process.
+        self.pending: list[str] = []
+        #: Crashed updater processes whose container the restart policy brings back.
+        self.restarts: list[str] = []
+        #: Containers whose process dies and is not brought back.
+        self.stay_down: set[str] = set()
+        #: `(step, victim)`: kill "U1" or "U2" after that step's journal write (`WRITER`).
+        self.kill_at: tuple[str, str] | None = None
+        self.killed: list[tuple[str, str]] = []
+        #: Every handover journal write, `(step, "U1" | "U2")`, in order.
+        self.writes: list[tuple[str, str]] = []
+        #: What a successor reports as its own digest, when it lies (U9).
+        self.lying_digest: str | None = None
+        #: Dead processes still unwinding: their container restarts after.
+        self.dying: list[Updater] = []
+        if fleet:
+            self.time.on_sleep = self.fleet_tick
         self.me = Owner(
             image_digest=digest(UPD, updater_version),
             version=updater_version,
@@ -344,7 +600,9 @@ class World:
 
     def kit(self, **kw) -> Kit:
         assert self.running is not None
-        client = eng.EngineClient(self.running.socket_path, eng.Scope(project=PROJECT))
+        own = self.fake.inspect_of(self.fake.containers[self.updater_id])
+        scope = eng.Scope(project=PROJECT, bind_sources=own_bind_sources(own, (SOCKET_MOUNT, PROJECT_MOUNT)))
+        client = eng.EngineClient(self.running.socket_path, scope)
         client.negotiate()
         self.client = client
         site = Site(
@@ -469,6 +727,11 @@ class World:
 
     def _on_start(self, fake: FakeEngine, c: dict) -> None:
         role = c["Labels"].get(eng.ROLE_LABEL)
+        if role is None and c["Labels"].get("com.docker.compose.service") == "updater":
+            # Its process starts at the next tick: not here, inside the engine.
+            if self.fleet_on and c["Id"] not in self.pending:
+                self.pending.append(c["Id"])
+            return
         if role is None:
             c["_epoch"] = self.epoch
             if self.on_app_start is not None:
@@ -626,3 +889,4 @@ class World:
     def no_running_app_at_a_mismatched_stamp(self) -> None:
         for c in self.running_apps():
             assert self.version_of(c) == self.ledger.stamp, (self.version_of(c), self.ledger.stamp)
+

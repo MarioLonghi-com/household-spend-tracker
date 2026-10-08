@@ -69,8 +69,10 @@ def build(args: argparse.Namespace, trust: Trust) -> tuple[Kit, heartbeat.Identi
     client = eng.EngineClient(args.socket, eng.Scope(project=args.project))
     client.negotiate()
     me, update_volume = identify(client)
+    own_id = None
     if me.container:
         own = client.inspect(me.container)
+        own_id = own.get("Id")
         client.scope = replace(
             client.scope, bind_sources=own_bind_sources(own, (args.socket, args.project_dir))
         )
@@ -87,7 +89,7 @@ def build(args: argparse.Namespace, trust: Trust) -> tuple[Kit, heartbeat.Identi
         hook_dir=Path(args.hook) if args.hook and os.path.isdir(args.hook) else None,
     )
     kit = Kit(client=client, site=site, trust=trust)
-    kit.handover = Successions(kit, successor_of=args.successor)
+    kit.handover = Successions(kit, successor_of=args.successor, own_id=own_id)
     return kit, heartbeat.Identity(updater_version=me.version, image_digest=me.image_digest)
 
 

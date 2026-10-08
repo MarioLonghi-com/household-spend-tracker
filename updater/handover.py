@@ -156,8 +156,10 @@ class Handover(Protocol):
         me: Owner,
         successor: Owner,
         before_go: Callable[[], object] | None = None,
+        handover_id: str | None = None,
     ) -> Outcome:
-        """Step 10: hand over after the app update settled. `before_go` records the apply."""
+        """Step 10: hand over after the app update settled. `before_go` records the apply;
+        `handover_id` is this attempt's own, apart from 2a's under the request's id."""
         ...
 
     def update_updater(self, *, request_id: str, successor: Owner) -> Outcome:
@@ -187,7 +189,7 @@ class NotAvailable:
     def first(self, *, request_id: str, me: Owner, successor: Owner) -> Outcome:
         return Outcome(False, self.SENTENCE)
 
-    def after(self, *, request_id: str, me: Owner, successor: Owner, before_go=None) -> Outcome:
+    def after(self, *, request_id: str, me: Owner, successor: Owner, before_go=None, handover_id=None) -> Outcome:
         return Outcome(False, self.SENTENCE)
 
     def update_updater(self, *, request_id: str, successor: Owner) -> Outcome:
@@ -272,6 +274,12 @@ def current_side(doc: Mapping, go_written: bool, beat: Mapping | None) -> str:
         return "predecessor"
     owner = journal.handover_owner(pred, succ, go_written, successor_is_current(doc, beat))
     return "successor" if owner.is_(succ) else "predecessor"
+
+
+def request_of(doc: Mapping) -> str:
+    """The request a handover serves: its own id, except a step-10 attempt's."""
+    value = doc.get("request")
+    return value if isinstance(value, str) and contract.is_uuid4(value) else str(doc.get("id"))
 
 
 def own_bind_sources(inspect: Mapping, destinations: tuple[str, ...]) -> tuple[str, ...]:
@@ -376,6 +384,7 @@ class Successions:
         kit: Kit,
         *,
         successor_of: str | None = None,
+        own_id: str | None = None,
         after_write: Callable[[str], None] | None = None,
     ) -> None:
         self.kit = kit
@@ -383,7 +392,9 @@ class Successions:
         self.successor_of = successor_of
         self.after_write = after_write or (lambda step: None)
         self.mode: str = Mode.SUCCESSOR if successor_of else Mode.CURRENT
-        self.own_id: str | None = None
+        #: This updater's container, by id: its name changes under it (H5),
+        #: and a name looked up a moment late may already be the other one's.
+        self.own_id: str | None = own_id
         #: The handover this updater is standby for (H6).
         self.watching: str | None = None
         self.started_at = kit.clock.now()
@@ -572,26 +583,32 @@ class Successions:
         me: Owner,
         successor: Owner,
         before_go: Callable[[], object] | None = None,
+        handover_id: str | None = None,
     ) -> Outcome:
-        return self.hand_over(request_id, "after", successor, before_go=before_go)
+        return self.hand_over(
+            handover_id or request_id, "after", successor, before_go=before_go, request_id=request_id
+        )
 
     def update_updater(self, *, request_id: str, successor: Owner) -> Outcome:
         return self.hand_over(request_id, "update_updater", successor)
 
     def hand_over(
         self,
-        request_id: str,
+        handover_id: str,
         kind: str,
         successor: Owner,
         *,
         before_go: Callable[[], object] | None = None,
+        request_id: str | None = None,
     ) -> Outcome:
+        """H1-H4 as U1, under `handover/<handover_id>`, for the request `request_id`
+        (the same id, but at step 10, which is a second attempt after 2a's)."""
         if kind not in KINDS:
             raise ValueError(kind)
-        existing = load(self.vol, request_id)
+        existing = load(self.vol, handover_id)
         if existing is not None:
             # 5.6 row 10: the handover's own journal answers.
-            go = journal.read_handover(self.vol, request_id, "go")
+            go = journal.read_handover(self.vol, handover_id, "go")
             if current_side(existing, go is not None, self._beat()) == "successor":
                 return Outcome(True, str(existing.get("sentence") or ""), owner=successor)
             return Outcome(False, str(existing.get("sentence") or "the handover was interrupted"))
@@ -606,7 +623,8 @@ class Successions:
         canon = canonical(name)
         self.me = replace(self.me, container=name)
         doc: dict = {
-            "id": request_id,
+            "id": handover_id,
+            "request": request_id or handover_id,
             "kind": kind,
             "step": "H1",
             "predecessor": replace(self.me, container=canon).to_dict(),
@@ -627,7 +645,7 @@ class Successions:
             self._save(doc)
             self.mode = Mode.HANDING
             self.after_write("H3")
-            ready = self._await(READY_SECONDS, lambda: journal.read_handover(self.vol, request_id, "ready"))
+            ready = self._await(READY_SECONDS, lambda: journal.read_handover(self.vol, handover_id, "ready"))
             if ready is None:
                 return self._fail(
                     doc, f"the updater of {successor.version} did not say it was ready within a minute"
@@ -857,29 +875,31 @@ class Successions:
         if succ is not None and succ.image_digest in pinned:
             self._pin(self.me)
         if doc.get("kind") == "first" and succ is not None:
-            j = journal.load(self.vol, doc["id"])
+            j = journal.load(self.vol, request_of(doc))
             if j is not None and j.step == "2a" and j.owner is not None and j.owner.is_(succ):
                 # Taken at 2a and nothing started since: the request is U1's
-                # again, and it carries on from step 3 (4.2, 2a).
+                # again, it carries on from step 3, and the handover is tried
+                # again at step 10 (4.2, 2a).
                 journal.hand_over(self.vol, j, self.me, self.now())
+                journal.remember(self.vol, j, first_handover="taken_back")
         sentence = str(doc.get("sentence") or "")
         if doc.get("kind") == "update_updater":
             self._record_back(doc, sentence)
         elif not live and sentence:
-            self.notes.append((doc["id"], sentence))
+            self.notes.append((request_of(doc), sentence))
         self.mode, self.watching, self._standby = Mode.CURRENT, None, None
         doc["settled"] = True
         self._save(doc)
 
     def _record_back(self, doc: dict, sentence: str) -> None:
         """An `update_updater` request's record, when the handover ended without U2."""
-        path = self.vol.history(doc["id"])
+        path = self.vol.history(request_of(doc))
         record = volume.read_own_json(path)
         state = "rolled_back" if doc.get("outcome") == TAKEN_BACK else "not_started"
         if record is not None and record.get("state") == state:
             return
         record = contract.History(
-            id=doc["id"],
+            id=request_of(doc),
             kind="update_updater",
             state=state,
             sentence=sentence,
@@ -891,18 +911,19 @@ class Successions:
 
     def _record_success(self, doc: dict) -> None:
         """An `update_updater` request whose record U1 did not live to write."""
-        if doc.get("kind") != "update_updater" or volume.read_own_json(self.vol.history(doc["id"])):
+        rid = request_of(doc)
+        if doc.get("kind") != "update_updater" or volume.read_own_json(self.vol.history(rid)):
             return
         succ = Owner.from_dict(doc.get("successor"))
         record = contract.History(
-            id=doc["id"],
+            id=rid,
             kind="update_updater",
             state="succeeded",
             sentence=f"The updater now runs {succ.version if succ else 'the new release'}.",
             finished_at=contract.iso(self.now()),
         ).to_dict()
         record["handover"] = "done"
-        volume.write_json(self.vol.history(doc["id"]), record)
+        volume.write_json(self.vol.history(rid), record)
 
     # ------------------------------------------------------------------ #
     # U2: the self-check, then H5
@@ -980,7 +1001,7 @@ class Successions:
         write_lock(self.vol, self.me, now)
         self._pin(self.me)
         if doc.get("kind") == "first":
-            j = journal.load(self.vol, doc["id"])
+            j = journal.load(self.vol, request_of(doc))
             if j is not None and not (j.owner is not None and j.owner.is_(self.me)):
                 journal.hand_over(self.vol, j, self.me, now)
                 journal.remember(self.vol, j, first_handover="done")

@@ -53,6 +53,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import uuid
 from dataclasses import replace
 from pathlib import Path
 
@@ -668,6 +669,9 @@ class Apply:
             self.notes.append(f"The updater stays on {me.version}, which is newer.")
             return record()
         if self.j.step != "10":
+            # Its own handover journal: 2a's, if there was one, is under the
+            # request's id and has its own outcome.
+            self.remember(handover_id=str(uuid.uuid4()))
             self.start("10", "Handing over to the new updater.")
         successor = Owner(image_digest=str(self.ctx["updater_digest"]), version=self.to, container="")
         written: list[str] = []
@@ -682,7 +686,11 @@ class Apply:
             written.append(record())
 
         outcome = self.kit.handover.after(
-            request_id=self.id, me=me, successor=successor, before_go=before_go
+            request_id=self.id,
+            me=me,
+            successor=successor,
+            before_go=before_go,
+            handover_id=self.ctx.get("handover_id"),
         )
         if written:
             return written[0]
