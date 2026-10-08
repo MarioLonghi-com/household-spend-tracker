@@ -201,6 +201,20 @@ export function monthLabel(period: string): string {
   );
 }
 
+const ENGLISH_MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/**
+ * A month's full name, from 0 for January. The English table in English, as
+ * the date range's pickers had it; `Intl` in another language.
+ */
+export function monthName(index: number): string {
+  if (speaksEnglish()) return ENGLISH_MONTH_NAMES[index] ?? String(index + 1);
+  return dateTimeFormat({ month: "long", timeZone: "UTC" }, uiLanguage()).format(Date.UTC(2026, index, 1));
+}
+
 /**
  * Names joined into one phrase: "Casa and Flat 2". In English, joined with
  * " and " as the screens always did -- `Intl.ListFormat` would put a comma

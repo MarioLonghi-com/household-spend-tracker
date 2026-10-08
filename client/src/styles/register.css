@@ -328,7 +328,7 @@
      in it, so `2026-07-27` wrapped and every row in the register was 61px
      where 35px would do. Uniformly two lines is still uniform; it just costs a
      third of the rows on screen. An ISO date has nowhere useful to break. */
-  .register-card td[data-label="Date"] > .link { white-space: nowrap; }
+  .register-card td[data-col="date"] > .link { white-space: nowrap; }
 }
 
 /* ---------------------------------------------------------------------------
@@ -627,7 +627,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .register-card table.sized td[data-label="Date"] > .link {
+  .register-card table.sized td[data-col="date"] > .link {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;

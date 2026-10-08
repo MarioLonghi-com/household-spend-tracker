@@ -1352,7 +1352,7 @@ tr.row-pick :where(button, a, input, select, textarea, label) { cursor: revert; 
      so, and the import marker is a badge nobody opens a register to read --
      both are one tap away in the panel. */
   .table-scroll td[data-empty="true"],
-  .table-scroll td[data-label="Source"] {
+  .table-scroll td[data-col="source"] {
     display: none;
   }
   .table-scroll td::before {
