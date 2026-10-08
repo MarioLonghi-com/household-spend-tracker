@@ -24,7 +24,10 @@ import type {
   Recognised,
 } from "../lib/types";
 import { IMPORT_OUTCOME_WORDS } from "../lib/labels";
-import { formatLocale } from "../lib/locale";
+import { formatCount, formatLocale } from "../lib/locale";
+import { plural, t } from "@lingui/core/macro";
+import { Plural, Trans } from "@lingui/react/macro";
+import { detectedLabel } from "../lib/labels";
 
 /**
  * One import staged and never committed, as the queue lists it.
@@ -352,11 +355,23 @@ export function OneTimeImportNote({
   const imports = done.data?.imports;
   if (!Array.isArray(imports)) return null;
   if (imports.some((one) => one.status === "applied")) return null;
+  const link = <OneTimeImportLink onGo={onGo} />;
   return (
-    <div className="card" role="note" aria-label="One-time Import">
+    <div className="card" role="note" aria-label={t`One-time Import`}>
       <p className="small" style={{ margin: 0 }}>
-        <strong>Coming from another budgeting app?</strong> Statements go in one at a time here.
-        To bring your whole history across at once — YNAB so far — use the{" "}
+        <Trans>
+          <strong>Coming from another budgeting app?</strong> Statements go in one at a time here.
+          To bring your whole history across at once — YNAB so far — use the {link} on the{" "}
+          {household.name} page. The household&rsquo;s owner runs it, once.
+        </Trans>
+      </p>
+    </div>
+  );
+}
+
+function OneTimeImportLink({ onGo }: { onGo?: (screen: string) => void }) {
+  return (
+    <>
         {onGo ? (
           <button
             type="button"
@@ -369,14 +384,12 @@ export function OneTimeImportNote({
               }, 0);
             }}
           >
-            One-time Import
+            {t`One-time Import`}
           </button>
         ) : (
-          "One-time Import"
-        )}{" "}
-        on the {household.name} page. The household&rsquo;s owner runs it, once.
-      </p>
-    </div>
+          t`One-time Import`
+        )}
+    </>
   );
 }
 
@@ -508,7 +521,11 @@ export function Import({
           }),
     onSuccess: (_answer, { add }) => {
       if (add && tagOffer) {
-        toasts.say(`${tagOffer.value} now tells a file it is for ${account?.name ?? "that account"}`);
+        toasts.say(
+          account
+            ? t`${tagOffer.value} now tells a file it is for ${account.name}`
+            : t`${tagOffer.value} now tells a file it is for that account`,
+        );
       }
       setTagOffer(null);
       client.invalidateQueries({ queryKey: ["identifiers", household.id] });
@@ -584,7 +601,11 @@ export function Import({
         setRawText(null);
       }
       setDuplicateProblem(null);
-      toasts.say(`${entry.filename ?? "that import"} was discarded — nothing was written`);
+      toasts.say(
+        entry.filename
+          ? t`${entry.filename} was discarded — nothing was written`
+          : t`that import was discarded — nothing was written`,
+      );
       client.invalidateQueries({ queryKey: ["staged-imports", household.id] });
     },
     onError: (error) => {
@@ -630,8 +651,9 @@ export function Import({
       ),
     onSuccess: (done) => {
       toasts.say(
-        `${done.payee_name} will always be ${done.category_name}` +
-          (done.payee_created ? " — and the payee was added" : ""),
+        done.payee_created
+          ? t`${done.payee_name} will always be ${done.category_name} — and the payee was added`
+          : t`${done.payee_name} will always be ${done.category_name}`,
       );
     },
     onError: (error) => toasts.say((error as Error).message),
@@ -683,25 +705,32 @@ export function Import({
 
   return (
     <>
-      <h1>Import a statement</h1>
+      <h1>
+        <Trans>Import a statement</Trans>
+      </h1>
       {onGo ? (
         <p className="small muted" style={{ marginTop: 0 }}>
-          Every path a statement can take, and every way a line can go, is explained in{" "}
-          <button type="button" className="link" onClick={() => onGo("import-guide")}>
-            How import works
-          </button>
-          .
+          <Trans>
+            Every path a statement can take, and every way a line can go, is explained in{" "}
+            <button type="button" className="link" onClick={() => onGo("import-guide")}>
+              How import works
+            </button>
+            .
+          </Trans>
         </p>
       ) : null}
       {!preview ? <OneTimeImportNote household={household} onGo={onGo} /> : null}
 
       {!preview && waiting.length > 0 && (
         <div className="card import-queue">
-          <h2>Waiting to be reviewed</h2>
+          <h2>
+            <Trans>Waiting to be reviewed</Trans>
+          </h2>
           <p className="muted small">
-            {waiting.length === 1 ? "An import was" : `${waiting.length} imports were`} staged and
-            never finished. Nothing in {waiting.length === 1 ? "it" : "them"} has reached the
-            register — open one to carry on where it was left, or discard it.
+            {plural(waiting.length, {
+              one: "An import was staged and never finished. Nothing in it has reached the register — open one to carry on where it was left, or discard it.",
+              other: `${waiting.length} imports were staged and never finished. Nothing in them has reached the register — open one to carry on where it was left, or discard it.`,
+            })}
           </p>
 
           <div className="table-scroll">
@@ -710,10 +739,10 @@ export function Import({
                 <tr>
                   {(
                     [
-                      { label: "File", column: "filename" },
-                      { label: "Into", column: "account" },
-                      { label: "Staged by", column: "actor" },
-                      { label: "Staged", column: "staged_at" },
+                      { label: t`File`, column: "filename" },
+                      { label: t`Into`, column: "account" },
+                      { label: t`Staged by`, column: "actor" },
+                      { label: t`Staged`, column: "staged_at" },
                     ] as { label: string; column: QueueSort }[]
                   ).map((one) => (
                     <SortHeading
@@ -729,7 +758,7 @@ export function Import({
                     />
                   ))}
                   <SortHeading
-                    label="Rows"
+                    label={t`Rows`}
                     column="rows"
                     sort={queueSort}
                     direction={queueDirection}
@@ -758,15 +787,15 @@ export function Import({
                         onClick={() => open.mutate(one)}
                       >
                         {open.isPending && open.variables?.batch_id === one.batch_id
-                          ? "Opening…"
-                          : "Open"}
+                          ? t`Opening…`
+                          : t`Open`}
                       </button>
                       <button
                         className="link"
                         disabled={open.isPending || purge.isPending}
                         onClick={() => setPurging(one)}
                       >
-                        Discard
+                        <Trans>Discard</Trans>
                       </button>
                     </td>
                   </tr>
@@ -778,12 +807,25 @@ export function Import({
       )}
 
       {purging && (
-        <Dialog title="Discard this staged import?" onClose={() => setPurging(null)}>
+        <Dialog title={t`Discard this staged import?`} onClose={() => setPurging(null)}>
           <p style={{ marginTop: 0 }}>
-            <strong>{purging.filename ?? "This import"}</strong> and its {purging.row_count}{" "}
-            {purging.row_count === 1 ? "line" : "lines"} will be deleted. Nothing in it has
-            reached the register, so there is nothing to undo afterwards — and the file can be
-            imported again from scratch.
+            <Plural
+              value={purging.row_count}
+              one={
+                <>
+                  <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} line
+                  will be deleted. Nothing in it has reached the register, so there is nothing to undo
+                  afterwards — and the file can be imported again from scratch.
+                </>
+              }
+              other={
+                <>
+                  <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} lines
+                  will be deleted. Nothing in it has reached the register, so there is nothing to undo
+                  afterwards — and the file can be imported again from scratch.
+                </>
+              }
+            />
           </p>
           <div className="dialog-choices">
             <button
@@ -791,10 +833,10 @@ export function Import({
               disabled={purge.isPending}
               onClick={() => purge.mutate(purging)}
             >
-              {purge.isPending ? "Discarding…" : "Yes, discard it"}
+              {purge.isPending ? t`Discarding…` : t`Yes, discard it`}
             </button>
             <button disabled={purge.isPending} onClick={() => setPurging(null)}>
-              Keep it
+              <Trans>Keep it</Trans>
             </button>
           </div>
         </Dialog>
@@ -803,15 +845,17 @@ export function Import({
       {!preview && (
         <div className="card">
           <p className="muted small">
-            A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from
-            your bank's website. CSV and spreadsheets are worked out from the file itself — the delimiter,
-            the date format, the decimal separator, which column is which, and which row the
-            table actually starts on. OFX needs none of that: it names its own fields, and its
-            transaction ids are used so re-importing an overlapping statement cannot double
-            anything up. A PDF is read by where the words sit on the page, so a running-balance
-            column is not mistaken for the amount — and a designed bill, which is summary boxes
-            rather than a table, is refused rather than half-read. You will see all of it before
-            anything is written.
+            <Trans>
+              A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from
+              your bank's website. CSV and spreadsheets are worked out from the file itself — the
+              delimiter, the date format, the decimal separator, which column is which, and which
+              row the table actually starts on. OFX needs none of that: it names its own fields,
+              and its transaction ids are used so re-importing an overlapping statement cannot
+              double anything up. A PDF is read by where the words sit on the page, so a
+              running-balance column is not mistaken for the amount — and a designed bill, which
+              is summary boxes rather than a table, is refused rather than half-read. You will see
+              all of it before anything is written.
+            </Trans>
           </p>
 
           <Problem error={send.error && !duplicateProblem ? send.error : null} />
@@ -828,13 +872,15 @@ export function Import({
                     disabled={open.isPending}
                     onClick={() => open.mutate(alreadyStaged)}
                   >
-                    {open.isPending ? "Opening…" : "Open that import"}
+                    {open.isPending ? t`Opening…` : t`Open that import`}
                   </button>
                 )}
-                <button onClick={() => send.mutate(true)}>Import it anyway</button>
+                <button onClick={() => send.mutate(true)}>
+                  <Trans>Import it anyway</Trans>
+                </button>
                 {alreadyStaged && (
                   <button className="link" onClick={() => setPurging(alreadyStaged)}>
-                    Discard the staged one
+                    <Trans>Discard the staged one</Trans>
                   </button>
                 )}
               </div>
@@ -842,9 +888,9 @@ export function Import({
           )}
 
           <div className="row">
-            <Field label="Into which account">
+            <Field label={t`Into which account`}>
               <select value={accountId} onChange={(e) => setAccountId(e.target.value)}>
-                <option value="">Choose…</option>
+                <option value="">{t`Choose…`}</option>
                 {(accounts.data ?? []).map((one) => (
                   <option key={one.id} value={one.id}>
                     {one.name} ({one.currency})
@@ -852,7 +898,7 @@ export function Import({
                 ))}
               </select>
             </Field>
-            <Field label="File">
+            <Field label={t`File`}>
               <input
                 type="file"
                 accept=".csv,.txt,.ofx,.qfx,.xls,.pdf,text/csv,application/x-ofx,application/pdf"
@@ -863,13 +909,15 @@ export function Import({
           {recognised && (
             <p className="small muted" style={{ margin: "6px 0 0" }}>
               {recognised.account_id === accountId ? (
-                <>
+                <Trans>
                   Chose <strong>{recognised.account_name}</strong> for you: {recognised.how}.
-                </>
+                </Trans>
               ) : (
                 <span style={{ color: "var(--warn)" }}>
-                  This file looks like it is for <strong>{recognised.account_name}</strong> (
-                  {recognised.how}), not the account chosen above.
+                  <Trans>
+                    This file looks like it is for <strong>{recognised.account_name}</strong> (
+                    {recognised.how}), not the account chosen above.
+                  </Trans>
                 </span>
               )}
             </p>
@@ -877,34 +925,46 @@ export function Import({
 
           {tagOffer && account && (
             <p className="small" style={{ margin: "6px 0 0" }} data-testid="tag-offer">
-              This file's name carries <span className="mono">{tagOffer.value}</span>. Keep it as{" "}
-              <strong>{account.name}</strong>'s {tagOffer.kind === "iban" ? "IBAN" : "file tag"}, so
-              its next statement picks the account itself?{" "}
+              {tagOffer.kind === "iban" ? (
+                <Trans>
+                  This file's name carries <span className="mono">{tagOffer.value}</span>. Keep it as{" "}
+                  <strong>{account.name}</strong>'s IBAN, so its next statement picks the account
+                  itself?
+                </Trans>
+              ) : (
+                <Trans>
+                  This file's name carries <span className="mono">{tagOffer.value}</span>. Keep it as{" "}
+                  <strong>{account.name}</strong>'s file tag, so its next statement picks the account
+                  itself?
+                </Trans>
+              )}{" "}
               <button
                 className="link"
                 disabled={answerTag.isPending}
                 onClick={() => answerTag.mutate({ add: true })}
               >
-                Add
+                <Trans>Add</Trans>
               </button>{" "}
               <button
                 className="link"
                 disabled={answerTag.isPending}
                 onClick={() => answerTag.mutate({ add: false })}
               >
-                Ignore
+                <Trans>Ignore</Trans>
               </button>
             </p>
           )}
 
           <p className="small muted" style={{ margin: "14px 0 6px" }}>
-            Or paste the rows, if your bank only lets you copy them from a page:
+            <Trans>Or paste the rows, if your bank only lets you copy them from a page:</Trans>
           </p>
           <textarea
             rows={5}
             value={pasted}
             onChange={(e) => setPasted(e.target.value)}
-            placeholder="Fecha;Concepto;Importe&#10;05/01/2026;MERCADONA;-45,20"
+            // An example of what a bank's page copies, which a translation may
+            // swap for a bank its readers know.
+            placeholder={t`Fecha;Concepto;Importe\n05/01/2026;MERCADONA;-45,20`}
           />
           <p />
           <button
@@ -912,7 +972,7 @@ export function Import({
             disabled={!accountId || (!file && !pasted.trim()) || send.isPending}
             onClick={() => send.mutate(false)}
           >
-            {send.isPending ? "Reading…" : "Read the file"}
+            {send.isPending ? t`Reading…` : t`Read the file`}
           </button>
         </div>
       )}
@@ -920,20 +980,31 @@ export function Import({
       <Toasts items={toasts.items} onDone={toasts.dismiss} />
 
       {offer && (
-        <Dialog title="The rest of this payee?" onClose={() => setOffer(null)}>
+        <Dialog title={t`The rest of this payee?`} onClose={() => setOffer(null)}>
           <p style={{ marginTop: 0 }}>
-            <strong>
-              {offer.count} other {offer.count === 1 ? "line has" : "lines have"} the same payee
-            </strong>{" "}
-            and no category of their own.{" "}
+            <Plural
+              value={offer.count}
+              one={
+                <>
+                  <strong>{offer.count} other line has the same payee</strong> and no category of
+                  their own.
+                </>
+              }
+              other={
+                <>
+                  <strong>{offer.count} other lines have the same payee</strong> and no category of
+                  their own.
+                </>
+              }
+            />{" "}
             {offer.uncategorised ? (
-              <>
+              <Trans>
                 Leave them <strong>uncategorised</strong> too?
-              </>
+              </Trans>
             ) : (
-              <>
+              <Trans>
                 Put them in <strong>{offer.name}</strong> too?
-              </>
+              </Trans>
             )}
           </p>
           {/* Three answers, and the middle one is the one people actually want
@@ -947,8 +1018,8 @@ export function Import({
               onClick={() => void onlyThisFile(offer.lineId)}
             >
               {spread.isPending && !rule.isPending
-                ? "Applying…"
-                : `Yes, all ${offer.count + 1} of them`}
+                ? t`Applying…`
+                : t`Yes, all ${offer.count + 1} of them`}
             </button>
             {offer.uncategorised ? null : (
               <button
@@ -956,23 +1027,25 @@ export function Import({
                 disabled={busy}
                 onClick={() => void alsoTheRule(offer.lineId)}
               >
-                {rule.isPending ? "Setting the rule…" : `Yes, all of them and set the rule`}
+                {rule.isPending ? t`Setting the rule…` : t`Yes, all of them and set the rule`}
               </button>
             )}
             <button disabled={busy} onClick={() => setOffer(null)}>
-              No, just this one
+              <Trans>No, just this one</Trans>
             </button>
           </div>
 
           {offer.uncategorised ? (
             <p className="small muted" style={{ margin: "12px 0 0" }}>
-              This file only. The payee&rsquo;s rule is left as it is for future statements.
+              <Trans>This file only. The payee&rsquo;s rule is left as it is for future statements.</Trans>
             </p>
           ) : (
             <p className="small muted" style={{ margin: "12px 0 0" }}>
-              The first is this file only. The second also makes{" "}
-              <strong>{offer.name}</strong> the rule for <strong>{offer.payee}</strong>, so every
-              future statement follows without asking.
+              <Trans>
+                The first is this file only. The second also makes <strong>{offer.name}</strong>{" "}
+                the rule for <strong>{offer.payee}</strong>, so every future statement follows
+                without asking.
+              </Trans>
             </p>
           )}
         </Dialog>
@@ -981,9 +1054,11 @@ export function Import({
       {preview && (
         <>
           <div className="card">
-            <h2>What this would do</h2>
+            <h2>
+              <Trans>What this would do</Trans>
+            </h2>
             <p className="muted small">
-              {preview.filename} · {preview.lines.length} lines · into {account?.name}
+              {preview.filename} · {plural(preview.lines.length, { other: `${preview.lines.length} lines` })} · {t`into ${account?.name ?? ""}`}
             </p>
 
             {preview.warnings.map((warning) => (
@@ -995,7 +1070,7 @@ export function Import({
             <dl className="small muted" style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
               {Object.entries(preview.detected).map(([key, value]) => (
                 <div key={key}>
-                  <dt style={{ fontWeight: 600 }}>{key.replace(/_/g, " ")}</dt>
+                  <dt style={{ fontWeight: 600 }}>{detectedLabel(key)}</dt>
                   <dd style={{ margin: 0 }} className="mono">
                     {value === null ? "—" : String(value)}
                   </dd>
@@ -1021,13 +1096,15 @@ export function Import({
               <table>
                 <thead>
                   <tr>
-                    <th style={{ width: 28 }}>Add</th>
+                    <th style={{ width: 28 }}>
+                      <Trans>Add</Trans>
+                    </th>
                     {(
                       [
-                        { label: "Line", column: "line" },
-                        { label: "Date", column: "date" },
-                        { label: "Payee", column: "payee" },
-                        { label: "Memo", column: "memo" },
+                        { label: t`Line`, column: "line" },
+                        { label: t`Date`, column: "date" },
+                        { label: t`Payee`, column: "payee" },
+                        { label: t`Memo`, column: "memo" },
                       ] as { label: string; column: PreviewSort }[]
                     ).map((one) => (
                       <SortHeading
@@ -1043,7 +1120,7 @@ export function Import({
                       />
                     ))}
                     <SortHeading
-                      label="Amount"
+                      label={t`Amount`}
                       column="amount"
                       sort={sort}
                       direction={direction}
@@ -1054,7 +1131,7 @@ export function Import({
                       align="right"
                     />
                     <SortHeading
-                      label="Category"
+                      label={t`Category`}
                       column="category"
                       sort={sort}
                       direction={direction}
@@ -1064,7 +1141,7 @@ export function Import({
                       }}
                     />
                     <SortHeading
-                      label="What happens"
+                      label={t`What happens`}
                       column="outcome"
                       sort={sort}
                       direction={direction}
@@ -1105,10 +1182,10 @@ export function Import({
                             ? {
                                 lineId: updated.id,
                                 count: updated.similar_lines,
-                                name: updated.category_name ?? "uncategorised",
+                                name: updated.category_name ?? t`uncategorised`,
                                 payee:
                                   ((updated.parsed ?? {}) as Record<string, string>).payee ??
-                                  "this payee",
+                                  t`this payee`,
                                 uncategorised: updated.category_uncategorised,
                               }
                             : null,
@@ -1131,8 +1208,7 @@ export function Import({
                   ref={page.sentinelRef}
                   onClick={page.extend}
                 >
-                  Showing {page.shown.toLocaleString()} of {page.total.toLocaleString()} — show
-                  more
+                  {t`Showing ${formatCount(page.shown)} of ${formatCount(page.total)} — show more`}
                 </button>
               )}
             </div>
@@ -1141,15 +1217,17 @@ export function Import({
               <button
                 className="primary"
                 disabled={commit.isPending || busyLines.size > 0}
-                title={busyLines.size > 0 ? "Finish the category you are editing first" : ""}
+                title={busyLines.size > 0 ? t`Finish the category you are editing first` : ""}
                 onClick={() => commit.mutate()}
               >
-                {commit.isPending ? "Importing…" : "Import these"}
+                {commit.isPending ? t`Importing…` : t`Import these`}
               </button>
-              <button onClick={() => setPreview(null)}>Cancel</button>
+              <button onClick={() => setPreview(null)}>
+                <Trans>Cancel</Trans>
+              </button>
             </div>
             <p className="small muted" style={{ marginTop: 10 }}>
-              This lands as one entry in History, so the whole import can be undone in one go.
+              <Trans>This lands as one entry in History, so the whole import can be undone in one go.</Trans>
             </p>
           </div>
 
@@ -1206,16 +1284,20 @@ export function RawFile({
 
   return (
     <div className="card">
-      <h2>The file itself</h2>
+      <h2>
+        <Trans>The file itself</Trans>
+      </h2>
       <p className="muted small">
-        {raw.name} · {raw.total.toLocaleString()} characters
-        {truncated ? ` · showing the first ${RAW_TEXT_LIMIT.toLocaleString()}` : ""}
-        {" · from the copy in this browser, not from the server — the file itself is not kept"}
+        {raw.name} · {t`${formatCount(raw.total)} characters`}
+        {truncated ? ` · ${t`showing the first ${formatCount(RAW_TEXT_LIMIT)}`}` : ""}
+        {` · ${t`from the copy in this browser, not from the server — the file itself is not kept`}`}
       </p>
       {binary ? (
         <p className="small muted">
-          This file is not text — a spreadsheet export keeps its rows in a binary format. What it
-          was read as is in the table above.
+          <Trans>
+            This file is not text — a spreadsheet export keeps its rows in a binary format. What it
+            was read as is in the table above.
+          </Trans>
         </p>
       ) : (
         <>
@@ -1235,15 +1317,16 @@ export function RawFile({
             <>
               <pre className="raw-file mono small">{raw.text.slice(0, RAW_TEXT_LIMIT)}</pre>
               <p className="small muted">
-                Not numbered: in an OFX file the Line column above counts transactions, not lines
-                of the file.
+                <Trans>
+                  Not numbered: in an OFX file the Line column above counts transactions, not lines
+                  of the file.
+                </Trans>
               </p>
             </>
           )}
           {truncated && (
             <p className="small muted">
-              Cut off at {RAW_TEXT_LIMIT.toLocaleString()} characters. Every line of it was still
-              read — the table above is the whole file.
+              {t`Cut off at ${formatCount(RAW_TEXT_LIMIT)} characters. Every line of it was still read — the table above is the whole file.`}
             </p>
           )}
         </>
@@ -1289,7 +1372,7 @@ function PreviewRow({
       <td>
         <input
           type="checkbox"
-          aria-label={`Include line ${line.line_no}`}
+          aria-label={t`Include line ${line.line_no}`}
           checked={willWrite && !skipped}
           disabled={!willWrite}
           onChange={onToggleSkip}
@@ -1336,7 +1419,7 @@ function PreviewRow({
         {line.reason ? <div className="muted">{line.reason}</div> : null}
         {line.outcome === "matched_existing" ? (
           <button className="link" onClick={onToggleMatch}>
-            {rejectedMatch ? "Undo — add as new instead" : "Not the same thing — add it separately"}
+            {rejectedMatch ? t`Undo — add as new instead` : t`Not the same thing — add it separately`}
           </button>
         ) : null}
       </td>
@@ -1414,7 +1497,7 @@ function MemoCell({
           <button
             type="button"
             className="cell-edit"
-            title="The memo this row will carry"
+            title={t`The memo this row will carry`}
             onClick={() => {
               setTyped(shown.text);
               setEditing(true);
@@ -1423,7 +1506,7 @@ function MemoCell({
             {shown.text ? (
               <span className={shown.chosen ? undefined : "muted"}>{shown.text}</span>
             ) : (
-              <span className="muted">{shown.chosen ? "no memo" : "—"}</span>
+              <span className="muted">{shown.chosen ? t`no memo` : "—"}</span>
             )}
             {shown.chosen && bank ? (
               <span className="memo-was mono">{String(bank)}</span>
@@ -1445,8 +1528,8 @@ function MemoCell({
         value={typed}
         autoFocus
         maxLength={500}
-        aria-label="Memo"
-        placeholder={bank ? String(bank) : "a note for this row"}
+        aria-label={t`Memo`}
+        placeholder={bank ? String(bank) : t`a note for this row`}
         onChange={(e) => setTyped(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter") commit();
@@ -1464,7 +1547,7 @@ function MemoCell({
             save.mutate({ clear_memo: true });
           }}
         >
-          use the bank's: {String(bank)}
+          {t`use the bank's: ${String(bank)}`}
         </button>
       ) : null}
       {save.error ? <div className="small neg">{(save.error as Error).message}</div> : null}
@@ -1523,7 +1606,7 @@ function CategoryCell({
   // "Uncategorised" first, as an option like any other, so it is reached the
   // same way a category is -- by typing or with the arrows -- rather than by a
   // link the keyboard cannot get to before the field's blur has saved.
-  const labels = useMemo(() => [UNCATEGORISED, ...all.map((one) => one.full_name)], [all]);
+  const labels = useMemo(() => [uncategorisedWord(), ...all.map((one) => one.full_name)], [all]);
   const shown = categoryOf(line);
 
   const save = useMutation({
@@ -1565,7 +1648,7 @@ function CategoryCell({
     // swallow it, so the option could not be chosen at all. That category is
     // still reached by its full name, or by picking it from the list, which
     // commits the option itself rather than its words.
-    const none = fold(UNCATEGORISED);
+    const none = fold(uncategorisedWord());
     if (needle === none) return { choice: "uncategorised" };
     for (const one of all) {
       if (fold(one.full_name) === needle || fold(one.name) === needle) return { choice: one.id };
@@ -1612,10 +1695,10 @@ function CategoryCell({
           <button
             type="button"
             className="cell-edit"
-            title="Where this line will land"
+            title={t`Where this line will land`}
             onClick={() => {
               const start = line.category_uncategorised
-                ? UNCATEGORISED
+                ? uncategorisedWord()
                 : (line.category_name ?? "");
               setTyped(start);
               setOpened(start);
@@ -1645,8 +1728,8 @@ function CategoryCell({
         options={labels}
         browse
         limit={Infinity}
-        placeholder="type any part"
-        aria-label="Category"
+        placeholder={t`type any part`}
+        aria-label={t`Category`}
         autoFocus
         onCommit={commit}
         onCancel={() => {
@@ -1655,12 +1738,16 @@ function CategoryCell({
         }}
       />
       {unmatched ? (
-        <div className="small neg">No single category matches that.</div>
+        <div className="small neg">
+          <Trans>No single category matches that.</Trans>
+        </div>
       ) : line.category_chosen ? (
         // Said once somebody has chosen, because only then is there a
         // suggestion to go back to -- and it is not "Uncategorised", which is
         // the other thing an empty-looking cell can mean.
-        <div className="small muted">Empty it to go back to the suggestion.</div>
+        <div className="small muted">
+          <Trans>Empty it to go back to the suggestion.</Trans>
+        </div>
       ) : null}
       {save.error ? <div className="small neg">{(save.error as Error).message}</div> : null}
     </td>
@@ -1674,7 +1761,10 @@ function CategoryCell({
  * suggestion", which for a payee with a usual category or a line the bank
  * labelled as interest or a fee is a category again.
  */
-export const UNCATEGORISED = "Uncategorised";
+/** The choice that means "no category", as the category box lists and accepts it. */
+export function uncategorisedWord(): string {
+  return t`Uncategorised`;
+}
 
 /** What the category cell sends: a category id, null for "back to the rule", or none at all. */
 type CategoryChoice = string | null | "uncategorised";
@@ -1688,9 +1778,9 @@ type CategoryChoice = string | null | "uncategorised";
  * are different promises here: one is a decision, the other a gap.
  */
 export function categoryOf(line: ImportLine): { text: string; muted: boolean } {
-  if (line.category_uncategorised) return { text: "uncategorised (chosen)", muted: false };
+  if (line.category_uncategorised) return { text: t`uncategorised (chosen)`, muted: false };
   if (line.category_name) return { text: line.category_name, muted: !line.category_chosen };
-  return { text: "uncategorised", muted: true };
+  return { text: t`uncategorised`, muted: true };
 }
 
 /** Same folding the Combobox ranks with, so what matches is what was offered. */

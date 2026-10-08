@@ -12,6 +12,10 @@ msgstr ""
 msgid "The name looks like its IBAN."
 msgstr "O nome parece ser o IBAN."
 
+#: src/lib/labels.ts
+msgid "balance column"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Mentions"
@@ -21,6 +25,11 @@ msgstr "Menções"
 #, fuzzy
 msgid "Creating…"
 msgstr "Criando…"
+
+#. placeholder {0}: tagOffer.value
+#: src/screens/Import.tsx
+msgid "{0} now tells a file it is for that account"
+msgstr ""
 
 #: src/App.tsx
 #, fuzzy
@@ -33,6 +42,7 @@ msgid "To"
 msgstr "Para"
 
 #: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
 #, fuzzy
 msgid "Choose…"
 msgstr "Escolher…"
@@ -82,6 +92,10 @@ msgstr "Nenhum navegador estava sendo considerado confiável."
 msgid "History"
 msgstr "Histórico"
 
+#: src/screens/Import.tsx
+msgid "Or paste the rows, if your bank only lets you copy them from a page:"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own."
@@ -103,6 +117,20 @@ msgstr "Renomear {0}"
 msgid "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "{by} redefiniu seu aplicativo autenticador para {email} em {when}. Todos os navegadores em que você estava conectado foram desconectados. Configure-o de novo abaixo."
 
+#. placeholder {0}: offer.name
+#. placeholder {1}: offer.payee
+#: src/screens/Import.tsx
+msgid "The first is this file only. The second also makes <0>{0}</0> the rule for <1>{1}</1>, so every future statement follows without asking."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "no memo"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "date column"
+msgstr ""
+
 #. placeholder {0}: account.currency
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -118,6 +146,10 @@ msgstr "o que uma chave nunca pode fazer"
 #, fuzzy
 msgid "Name the bank uses"
 msgstr "Nome que o banco usa"
+
+#: src/screens/Import.tsx
+msgid "Finish the category you are editing first"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -148,10 +180,22 @@ msgstr "{why} Por isso, pedimos sua senha e um código — o mesmo que para entr
 msgid "{0, plural, one {{1} pair} other {{2} pairs}}"
 msgstr "{0, plural, one {{1} par} other {{2} pares}}"
 
+#: src/screens/Import.tsx
+msgid "Open"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "What happens"
+msgstr ""
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "You're signed in. This server's secret key was replaced, so the authenticator you had no longer works here. Scan this with your authenticator app and type the six digits it shows — the recovery code you just used covers this, so it costs no other. Then delete the old entry for this account from your app."
 msgstr "Você entrou. A chave secreta deste servidor foi substituída, então o autenticador que você tinha não funciona mais aqui. Escaneie isto com seu aplicativo autenticador e digite os seis dígitos que ele mostrar — o código de recuperação que você acabou de usar cobre isso, então nenhum outro é gasto. Depois, apague do aplicativo a entrada antiga desta conta."
+
+#: src/screens/Import.tsx
+msgid "Import a statement"
+msgstr ""
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -208,6 +252,10 @@ msgstr "Cartões de crédito"
 msgid "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
 msgstr "O código de recuperação com que você entrou nesta aba cobre isso, enquanto você continuar conectado e por até um dia."
 
+#: src/lib/labels.ts
+msgid "currency column"
+msgstr ""
+
 #. placeholder {0}: one.value
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -239,6 +287,12 @@ msgstr "Sua casa"
 msgid "Passkeys need this app opened at its HTTPS address, {address}."
 msgstr "As chaves de acesso exigem que este app seja aberto no endereço HTTPS dele, {address}."
 
+#. placeholder {0}: tagOffer.value
+#. placeholder {1}: account.name
+#: src/screens/Import.tsx
+msgid "{0} now tells a file it is for {1}"
+msgstr ""
+
 #: src/App.tsx
 #, fuzzy
 msgid "New household"
@@ -250,6 +304,10 @@ msgstr "Nova casa"
 #, fuzzy
 msgid "Select {0} {1}"
 msgstr "Selecionar {0} {1}"
+
+#: src/lib/labels.ts
+msgid "delimiter"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -282,6 +340,10 @@ msgstr "Expirou em {0}"
 #, fuzzy
 msgid "Check the code and finish"
 msgstr "Verificar o código e concluir"
+
+#: src/screens/Import.tsx
+msgid "Opening…"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -365,6 +427,10 @@ msgstr "senha e autenticador"
 msgid "{keys, plural, one {{keys} agent key still works — revoke it below if it should stop.} other {{keys} agent keys still work — revoke them below if they should stop.}}"
 msgstr "{keys, plural, one {{keys} chave de agente ainda funciona — revogue-a abaixo se ela deve parar.} other {{keys} chaves de agente ainda funcionam — revogue-as abaixo se elas devem parar.}}"
 
+#: src/screens/Import.tsx
+msgid "This file only. The payee’s rule is left as it is for future statements."
+msgstr ""
+
 #: src/App.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
@@ -372,10 +438,18 @@ msgstr "{keys, plural, one {{keys} chave de agente ainda funciona — revogue-a 
 msgid "Name"
 msgstr "Nome"
 
+#: src/screens/Import.tsx
+msgid "Discard the staged one"
+msgstr ""
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Flags & options"
 msgstr "Marcadores e opções"
+
+#: src/lib/labels.ts
+msgid "encoding"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -386,6 +460,11 @@ msgstr "Autenticador"
 #, fuzzy
 msgid "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
 msgstr "Depois de confirmado, mantenha só esta entrada da conta no aplicativo: a antiga não funciona aqui, nem uma que você escaneou antes e nunca confirmou."
+
+#. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
+#: src/screens/Import.tsx
+msgid "Cut off at {0} characters. Every line of it was still read — the table above is the whole file."
+msgstr ""
 
 #: src/lib/labels.ts
 #, fuzzy
@@ -424,10 +503,30 @@ msgstr "Cada grafia que um banco usa para alguém desta casa. Um pagamento que c
 msgid "Day-to-day money at a bank. Salary in, card and direct debits out."
 msgstr "Dinheiro do dia a dia no banco. Entra o salário, saem o cartão e os débitos automáticos."
 
+#: src/screens/Import.tsx
+msgid "Undo — add as new instead"
+msgstr ""
+
+#. placeholder {0}: recognised.account_name
+#. placeholder {1}: recognised.how
+#: src/screens/Import.tsx
+msgid "Chose <0>{0}</0> for you: {1}."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Closed — hide it from the accounts list"
 msgstr "Encerrada — ocultar da lista de contas"
+
+#. placeholder {0}: offer.count
+#. placeholder {0}: purging.row_count
+#. placeholder {1}: <> <strong>{offer.count} other line has the same payee</strong> and no category of their own. </>
+#. placeholder {1}: <> <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch. </>
+#. placeholder {2}: <> <strong>{offer.count} other lines have the same payee</strong> and no category of their own. </>
+#. placeholder {2}: <> <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch. </>
+#: src/screens/Import.tsx
+msgid "{0, plural, one {{1}} other {{2}}}"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -475,6 +574,10 @@ msgstr "Alguém redefiniu o autenticador de {user}"
 #, fuzzy
 msgid "Invitations are single-use and they expire. Ask whoever sent it for a fresh one."
 msgstr "Convites só podem ser usados uma vez e expiram. Peça um novo a quem enviou."
+
+#: src/lib/labels.ts
+msgid "payee column"
+msgstr ""
 
 #: src/lib/labels.ts
 #, fuzzy
@@ -539,6 +642,15 @@ msgstr "Verificar o código"
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Dinheiro guardado no banco. Igual a uma conta corrente, mantido à parte para o registro ficar claro."
 
+#: src/screens/Import.tsx
+msgid "Into which account"
+msgstr ""
+
+#. placeholder {0}: String(bank)
+#: src/screens/Import.tsx
+msgid "use the bank's: {0}"
+msgstr ""
+
 #: src/App.tsx
 #, fuzzy
 msgid "Hide the menu"
@@ -560,10 +672,15 @@ msgstr "Alterá-la desconecta todos os outros navegadores e esquece todos os con
 msgid "{by} reset {user}'s password and authenticator"
 msgstr "{by} redefiniu a senha e o autenticador de {user}"
 
+#: src/screens/Import.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Into"
 msgstr "Para"
+
+#: src/screens/Import.tsx
+msgid "Discarding…"
+msgstr ""
 
 #: src/lib/labels.ts
 #, fuzzy
@@ -608,10 +725,24 @@ msgstr "O servidor adicionou {user} como proprietário"
 msgid "Accounts"
 msgstr "Contas"
 
+#. placeholder {0}: offer.name
+#: src/screens/Import.tsx
+msgid "Put them in <0>{0}</0> too?"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
 msgstr "Tudo o que um programa fizer errado precisa poder ser desfeito por uma pessoa, e por isso só uma pessoa pode desfazer."
+
+#: src/screens/Import.tsx
+msgid "Waiting to be reviewed"
+msgstr ""
+
+#. placeholder {0}: formatCount(raw.total)
+#: src/screens/Import.tsx
+msgid "{0} characters"
+msgstr ""
 
 #: src/lib/labels.ts
 #, fuzzy
@@ -622,6 +753,10 @@ msgstr "App de origem"
 #, fuzzy
 msgid "or"
 msgstr "ou"
+
+#: src/screens/Import.tsx
+msgid "Discard"
+msgstr ""
 
 #: src/screens/Transfer.tsx
 #, fuzzy
@@ -679,6 +814,10 @@ msgstr "Moeda principal"
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
 msgstr "Escaneie isto com seu aplicativo autenticador e digite os seis dígitos que ele mostrar. Verificamos o código agora, para você saber que funciona aqui e não descobrir só na próxima vez que entrar. A entrada que o aplicativo tinha para esta conta não funciona mais; apague-a."
 
+#: src/screens/Import.tsx
+msgid "Import these"
+msgstr ""
+
 #: src/App.tsx
 #, fuzzy
 msgid "Close the menu"
@@ -716,11 +855,16 @@ msgstr "Você voltou"
 msgid "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
 msgstr "Se você não tem mais o autenticador antigo, use aqui um dos seus códigos de recuperação; ele será gasto."
 
+#: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Cancel"
 msgstr "Cancelar"
+
+#: src/screens/Import.tsx
+msgid "Yes, all of them and set the rule"
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #: src/screens/TransferSections.tsx
@@ -771,6 +915,10 @@ msgstr "Abrir o menu"
 msgid "Reset: password and authenticator"
 msgstr "Redefinição: senha e autenticador"
 
+#: src/screens/Import.tsx
+msgid "Every path a statement can take, and every way a line can go, is explained in <0>How import works</0>."
+msgstr ""
+
 #: src/screens/Transfer.tsx
 #, fuzzy
 msgid "From"
@@ -790,6 +938,10 @@ msgstr "A janela da chave de acesso foi fechada, então nada foi adicionado."
 #, fuzzy
 msgid "Suggested identifiers"
 msgstr "Identificadores sugeridos"
+
+#: src/lib/labels.ts
+msgid "skip rows"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -873,6 +1025,10 @@ msgstr "uma casa"
 msgid "Code"
 msgstr "Código"
 
+#: src/lib/labels.ts
+msgid "state column"
+msgstr ""
+
 #. placeholder {0}: format(out, from.currency)
 #. placeholder {1}: from.name
 #. placeholder {2}: to?.name
@@ -937,10 +1093,20 @@ msgstr "Saldo"
 msgid "Categorise {0} selected as…"
 msgstr "Categorizar {0} selecionadas como…"
 
+#: src/screens/Import.tsx
+msgid "The file itself"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Cleared"
 msgstr "Compensado"
+
+#. placeholder {0}: done.payee_name
+#. placeholder {1}: done.category_name
+#: src/screens/Import.tsx
+msgid "{0} will always be {1} — and the payee was added"
+msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
@@ -958,6 +1124,7 @@ msgid "Which household"
 msgstr "Qual casa"
 
 #: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
 #, fuzzy
 msgid "Ignore"
 msgstr "Ignorar"
@@ -1075,11 +1242,17 @@ msgstr "Configurar o {PRODUCT}"
 msgid "The name looks like its number."
 msgstr "O nome parece ser o número da conta."
 
+#: src/screens/Import.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Amount"
 msgstr "Valor"
+
+#: src/screens/Import.tsx
+msgid "Fecha;Concepto;Importe\n"
+"05/01/2026;MERCADONA;-45,20"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1096,7 +1269,12 @@ msgstr "Adicionado como proprietário"
 msgid "The server reset {user}'s authenticator"
 msgstr "O servidor redefiniu o autenticador de {user}"
 
+#: src/lib/labels.ts
+msgid "date format"
+msgstr ""
+
 #: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
 #, fuzzy
 msgid "Rows"
 msgstr "Linhas"
@@ -1110,6 +1288,10 @@ msgstr "Não é transferência"
 #, fuzzy
 msgid "Added"
 msgstr "Adicionada"
+
+#: src/screens/Import.tsx
+msgid "this payee"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1135,6 +1317,10 @@ msgstr "As chaves de acesso não estão configuradas neste servidor."
 #, fuzzy
 msgid "Matched"
 msgstr "Correspondida"
+
+#: src/screens/Import.tsx
+msgid "No single category matches that."
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -1185,6 +1371,14 @@ msgstr "Nova"
 #, fuzzy
 msgid "Create it"
 msgstr "Criar"
+
+#: src/lib/labels.ts
+msgid "amount column"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "File"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1243,6 +1437,10 @@ msgstr "Concluir"
 msgid "Country"
 msgstr "País"
 
+#: src/screens/Import.tsx
+msgid "The rest of this payee?"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Each account keeps its own currency. Nothing is ever converted in the ledger."
@@ -1264,15 +1462,24 @@ msgstr "Ignorar {0}"
 msgid "Recovery code"
 msgstr "Código de recuperação"
 
+#: src/screens/Import.tsx
+msgid "Category"
+msgstr ""
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr "Você ainda tem 1 chave de acesso, e um código de recuperação não as desativa. Se uma estava no dispositivo que você perdeu, remova-a em Formas de entrar no seu perfil — seu nome no menu."
 
+#: src/screens/Import.tsx
 #: src/screens/Transfer.tsx
 #, fuzzy
 msgid "Memo"
 msgstr "Descrição"
+
+#: src/screens/Import.tsx
+msgid "One-time Import"
+msgstr ""
 
 #: src/App.tsx
 #, fuzzy
@@ -1293,6 +1500,16 @@ msgstr "O servidor redefiniu a senha de {user}"
 #, fuzzy
 msgid "Try again"
 msgstr "Tentar de novo"
+
+#. placeholder {0}: tagOffer.value
+#. placeholder {1}: account.name
+#: src/screens/Import.tsx
+msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "product column"
+msgstr ""
 
 #: src/App.tsx
 #, fuzzy
@@ -1338,6 +1555,12 @@ msgstr "Até lá, cada entrada vai pedir outro código de recuperação. Para fa
 #, fuzzy
 msgid "Setting it up takes one of your recovery codes."
 msgstr "Configurá-lo gasta um dos seus códigos de recuperação."
+
+#. placeholder {0}: preview.lines.length
+#. placeholder {1}: preview.lines.length
+#: src/screens/Import.tsx
+msgid "{0, plural, other {{1} lines}}"
+msgstr ""
 
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -1470,6 +1693,7 @@ msgid "Not for this account"
 msgstr "Não é desta conta"
 
 #: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
 #, fuzzy
 msgid "Add"
 msgstr "Adicionar"
@@ -1524,11 +1748,22 @@ msgstr "Sua conta fica no seu nome, no menu."
 msgid "no country set"
 msgstr "nenhum país definido"
 
+#. placeholder {0}: recognised.account_name
+#. placeholder {1}: recognised.how
+#: src/screens/Import.tsx
+msgid "This file looks like it is for <0>{0}</0> ({1}), not the account chosen above."
+msgstr ""
+
+#: src/screens/Import.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Date"
 msgstr "Data"
+
+#: src/lib/labels.ts
+msgid "memo column"
+msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -1554,6 +1789,14 @@ msgstr "o nome de um cofrinho ou de um produto de cartão"
 #, fuzzy
 msgid "Set"
 msgstr "Definida"
+
+#: src/screens/Import.tsx
+msgid "uncategorised (chosen)"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "kind"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1633,6 +1876,10 @@ msgstr "Você ainda tem {0} chaves de acesso, e um código de recuperação não
 msgid "Reset: authenticator"
 msgstr "Redefinição: autenticador"
 
+#: src/screens/Import.tsx
+msgid "This lands as one entry in History, so the whole import can be undone in one go."
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
@@ -1695,7 +1942,12 @@ msgstr "Outros ativos"
 msgid "4. Recovery codes"
 msgstr "4. Códigos de recuperação"
 
+#: src/screens/Import.tsx
+msgid "Discard this staged import?"
+msgstr ""
+
 #: src/lib/labels.ts
+#: src/screens/Import.tsx
 #, fuzzy
 msgid "Uncategorised"
 msgstr "Sem categoria"
@@ -1737,6 +1989,14 @@ msgstr "Cartão de crédito"
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "Sua senha para {email} foi redefinida pelo servidor em {when}. Todos os navegadores em que você estava conectado foram desconectados. Defina-a de novo abaixo."
 
+#: src/screens/Import.tsx
+msgid "Staged by"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "No, just this one"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgctxt "authenticator state"
@@ -1747,6 +2007,10 @@ msgstr "Apagado"
 #, fuzzy
 msgid "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
 msgstr "Vinculadas como transferências embora ninguém as tenha escolhido — porque as duas contas já tinham sido vinculadas antes e nenhuma linha cita a outra, ou porque um programa as vinculou com uma chave de agente. Uma compra e o reembolso exatamente do mesmo valor podem parecer isso. Desvincule as que não são transferências; elas não serão oferecidas de novo. Mantenha as que são."
+
+#: src/screens/Import.tsx
+msgid "This import"
+msgstr ""
 
 #. placeholder {0}: passkey.rp_id
 #: src/screens/Passkeys.tsx
@@ -1759,10 +2023,19 @@ msgstr "Criada para {0}, não pode ser usada aqui."
 msgid "Not now"
 msgstr "Agora não"
 
+#: src/lib/labels.ts
+msgid "outflow column"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Tag in the download's file name"
 msgstr "Marcador no nome do arquivo baixado"
+
+#. placeholder {0}: line.line_no
+#: src/screens/Import.tsx
+msgid "Include line {0}"
+msgstr ""
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -1842,10 +2115,18 @@ msgstr "Manter"
 msgid "The six digits from your authenticator"
 msgstr "Os seis dígitos do seu autenticador"
 
+#: src/lib/labels.ts
+msgid "fee column"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Currency"
 msgstr "Moeda"
+
+#: src/lib/labels.ts
+msgid "decimal separator"
+msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
@@ -1858,10 +2139,18 @@ msgstr "Seu nome"
 msgid "{by} reset {user}'s authenticator"
 msgstr "{by} redefiniu o autenticador de {user}"
 
+#: src/screens/Import.tsx
+msgid "type any part"
+msgstr ""
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Your password and your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
 msgstr "Sua senha e seu autenticador para {email} foram redefinidos pelo servidor em {when}. Todos os navegadores em que você estava conectado foram desconectados. Configure os dois de novo abaixo."
+
+#: src/screens/Import.tsx
+msgid "Where this line will land"
+msgstr ""
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -1894,6 +2183,10 @@ msgstr "saldo inicial"
 #, fuzzy
 msgid "Never"
 msgstr "Nunca"
+
+#: src/screens/Import.tsx
+msgid "Not the same thing — add it separately"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1955,6 +2248,20 @@ msgstr "Tornado proprietário"
 msgid "Show a new code to scan"
 msgstr "Mostrar um novo código para escanear"
 
+#. placeholder {0}: tagOffer.value
+#. placeholder {1}: account.name
+#: src/screens/Import.tsx
+msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so its next statement picks the account itself?"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Line"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "This file is not text — a spreadsheet export keeps its rows in a binary format. What it was read as is in the table above."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Replacing it also un-trusts every browser, including this one, and signs out every other browser — they were let in on the strength of the old authenticator, and that is exactly what you are replacing."
@@ -1971,10 +2278,15 @@ msgstr "Seu autenticador"
 msgid "Sign-in changes in the last 14 days, by somebody other than you:"
 msgstr "Mudanças nas formas de entrar nos últimos 14 dias, feitas por outra pessoa:"
 
+#: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Keep it"
 msgstr "Manter"
+
+#: src/screens/Import.tsx
+msgid "Read the file"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -2022,6 +2334,23 @@ msgstr "Usar um código de recuperação desconectou você em todos os lugares, 
 msgid "What banks call it"
 msgstr "Como os bancos a chamam"
 
+#: src/screens/Import.tsx
+msgid "Empty it to go back to the suggestion."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Importing…"
+msgstr ""
+
+#. placeholder {0}: offer.count + 1
+#: src/screens/Import.tsx
+msgid "Yes, all {0} of them"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Staged"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Needs setting up again"
@@ -2049,7 +2378,16 @@ msgstr "{0, plural, one {{who} também está aqui} other {{who} também estão a
 msgid "Remove"
 msgstr "Remover"
 
+#: src/screens/Import.tsx
+msgid "Leave them <0>uncategorised</0> too?"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "inflow column"
+msgstr ""
+
 #: src/App.tsx
+#: src/screens/Import.tsx
 #, fuzzy
 msgid "Payee"
 msgstr "Favorecido"
@@ -2058,6 +2396,10 @@ msgstr "Favorecido"
 #, fuzzy
 msgid "No other browsers were signed in."
 msgstr "Nenhum outro navegador estava conectado."
+
+#: src/screens/Import.tsx
+msgid "Not numbered: in an OFX file the Line column above counts transactions, not lines of the file."
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -2073,6 +2415,10 @@ msgstr "Nada mudou ainda — seu autenticador atual continua funcionando até um
 #, fuzzy
 msgid "Reports"
 msgstr "Relatórios"
+
+#: src/screens/Import.tsx
+msgid "a note for this row"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -2096,6 +2442,14 @@ msgstr "Não foi possível carregar suas casas"
 msgid "Recorded as {0} on the date below."
 msgstr "Registrado como {0} na data abaixo."
 
+#: src/screens/Import.tsx
+msgid "uncategorised"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "What this would do"
+msgstr ""
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Fixed"
@@ -2110,6 +2464,12 @@ msgstr "O que é isto? {label}"
 #, fuzzy
 msgid "Payee Categorisation"
 msgstr "Categorização de favorecidos"
+
+#. placeholder {0}: waiting.length
+#. placeholder {1}: waiting.length
+#: src/screens/Import.tsx
+msgid "{0, plural, one {An import was staged and never finished. Nothing in it has reached the register — open one to carry on where it was left, or discard it.} other {{1} imports were staged and never finished. Nothing in them has reached the register — open one to carry on where it was left, or discard it.}}"
+msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
@@ -2205,6 +2565,10 @@ msgstr "Ainda não corresponde a nada no registro."
 msgid "Passkeys"
 msgstr "Chaves de acesso"
 
+#: src/screens/Import.tsx
+msgid "Import it anyway"
+msgstr ""
+
 #. placeholder {0}: owed.length - SHOWN
 #: src/components/SignInNotice.tsx
 #, fuzzy
@@ -2234,6 +2598,12 @@ msgstr "Isso dá <0>{impliedRate}</0> {0} por {1}."
 msgid "It was printed to the server log when this instance started, and written to <0>{0}</0>. It changes every time the server restarts until setup is finished."
 msgstr "Ele foi impresso no log do servidor quando esta instância iniciou e gravado em <0>{0}</0>. Ele muda toda vez que o servidor reinicia, até a configuração terminar."
 
+#. placeholder {0}: formatCount(page.shown)
+#. placeholder {1}: formatCount(page.total)
+#: src/screens/Import.tsx
+msgid "Showing {0} of {1} — show more"
+msgstr ""
+
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "3. Your authenticator"
@@ -2253,6 +2623,11 @@ msgstr "Idioma"
 #, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as a member."
 msgstr "{inviter} convidou você para o {PRODUCT} como membro."
+
+#. placeholder {0}: entry.filename
+#: src/screens/Import.tsx
+msgid "{0} was discarded — nothing was written"
+msgstr ""
 
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -2282,6 +2657,14 @@ msgstr "Entrar com uma chave de acesso"
 #, fuzzy
 msgid "authenticator"
 msgstr "autenticador"
+
+#: src/screens/Import.tsx
+msgid "A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from your bank's website. CSV and spreadsheets are worked out from the file itself — the delimiter, the date format, the decimal separator, which column is which, and which row the table actually starts on. OFX needs none of that: it names its own fields, and its transaction ids are used so re-importing an overlapping statement cannot double anything up. A PDF is read by where the words sit on the page, so a running-balance column is not mistaken for the amount — and a designed bill, which is summary boxes rather than a table, is refused rather than half-read. You will see all of it before anything is written."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Applying…"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -2313,6 +2696,10 @@ msgstr "Produto do extrato"
 msgid "Somebody added {user} as an owner"
 msgstr "Alguém adicionou {user} como proprietário"
 
+#: src/screens/Import.tsx
+msgid "The memo this row will carry"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the server, and clearing this browser's site data forgets it -- which returns you to following the system."
@@ -2332,6 +2719,11 @@ msgstr "Configurar de novo"
 #, fuzzy
 msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
 msgstr "Uma transferência precisa de duas contas abertas. Adicione outra na tela Contas primeiro."
+
+#. placeholder {0}: household.name
+#: src/screens/Import.tsx
+msgid "<0>Coming from another budgeting app?</0> Statements go in one at a time here. To bring your whole history across at once — YNAB so far — use the {link} on the {0} page. The household’s owner runs it, once."
+msgstr ""
 
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
@@ -2406,10 +2798,32 @@ msgstr "Dar uma chave a um programa"
 msgid "A code from your current authenticator"
 msgstr "Um código do seu autenticador atual"
 
+#: src/screens/Import.tsx
+msgid "Setting the rule…"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "from the copy in this browser, not from the server — the file itself is not kept"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Yes, discard it"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Following this device, which is light right now."
 msgstr "Seguindo este dispositivo, que está no claro agora."
+
+#. placeholder {0}: done.payee_name
+#. placeholder {1}: done.category_name
+#: src/screens/Import.tsx
+msgid "{0} will always be {1}"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Reading…"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -2420,6 +2834,11 @@ msgstr "Novos códigos"
 #, fuzzy
 msgid "For"
 msgstr "Para"
+
+#. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
+#: src/screens/Import.tsx
+msgid "showing the first {0}"
+msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -2468,6 +2887,15 @@ msgstr "Comprovantes"
 msgid "{inviter} invited you to {PRODUCT} as a member, in {households}."
 msgstr "{inviter} convidou você para o {PRODUCT} como membro, em {households}."
 
+#: src/screens/Import.tsx
+msgid "that import was discarded — nothing was written"
+msgstr ""
+
+#. placeholder {0}: account?.name ?? ""
+#: src/screens/Import.tsx
+msgid "into {0}"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "I have saved it"
@@ -2502,6 +2930,10 @@ msgstr "{unused, plural, one {Resta {unused} código de recuperação não usado
 #, fuzzy
 msgid "Oldest"
 msgstr "Mais antiga"
+
+#: src/screens/Import.tsx
+msgid "Open that import"
+msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy

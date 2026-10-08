@@ -11,12 +11,21 @@ msgstr ""
 msgid "The name looks like its IBAN."
 msgstr ""
 
+#: src/lib/labels.ts
+msgid "balance column"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Mentions"
 msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "Creating…"
+msgstr ""
+
+#. placeholder {0}: tagOffer.value
+#: src/screens/Import.tsx
+msgid "{0} now tells a file it is for that account"
 msgstr ""
 
 #: src/App.tsx
@@ -28,6 +37,7 @@ msgid "To"
 msgstr ""
 
 #: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
 msgid "Choose…"
 msgstr ""
 
@@ -67,6 +77,10 @@ msgstr ""
 msgid "History"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Or paste the rows, if your bank only lets you copy them from a page:"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own."
 msgstr ""
@@ -84,6 +98,20 @@ msgstr ""
 msgid "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr ""
 
+#. placeholder {0}: offer.name
+#. placeholder {1}: offer.payee
+#: src/screens/Import.tsx
+msgid "The first is this file only. The second also makes <0>{0}</0> the rule for <1>{1}</1>, so every future statement follows without asking."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "no memo"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "date column"
+msgstr ""
+
 #. placeholder {0}: account.currency
 #: src/screens/Accounts.tsx
 msgid "That isn't an amount in {0}."
@@ -95,6 +123,10 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "Name the bank uses"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Finish the category you are editing first"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -121,8 +153,20 @@ msgstr ""
 msgid "{0, plural, one {{1} pair} other {{2} pairs}}"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Open"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "What happens"
+msgstr ""
+
 #: src/screens/SignIn.tsx
 msgid "You're signed in. This server's secret key was replaced, so the authenticator you had no longer works here. Scan this with your authenticator app and type the six digits it shows — the recovery code you just used covers this, so it costs no other. Then delete the old entry for this account from your app."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Import a statement"
 msgstr ""
 
 #: src/screens/SignIn.tsx
@@ -169,6 +213,10 @@ msgstr ""
 msgid "The recovery code you signed in with in this tab covers it, while you stay signed in and for up to a day."
 msgstr ""
 
+#: src/lib/labels.ts
+msgid "currency column"
+msgstr ""
+
 #. placeholder {0}: one.value
 #: src/screens/Accounts.tsx
 msgid "Add {0}"
@@ -194,6 +242,12 @@ msgstr ""
 msgid "Passkeys need this app opened at its HTTPS address, {address}."
 msgstr ""
 
+#. placeholder {0}: tagOffer.value
+#. placeholder {1}: account.name
+#: src/screens/Import.tsx
+msgid "{0} now tells a file it is for {1}"
+msgstr ""
+
 #: src/App.tsx
 msgid "New household"
 msgstr ""
@@ -202,6 +256,10 @@ msgstr ""
 #. placeholder {1}: formatDate(leg.date)
 #: src/screens/TransferSections.tsx
 msgid "Select {0} {1}"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "delimiter"
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -228,6 +286,10 @@ msgstr ""
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
 msgid "Check the code and finish"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Opening…"
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -296,14 +358,26 @@ msgstr ""
 msgid "{keys, plural, one {{keys} agent key still works — revoke it below if it should stop.} other {{keys} agent keys still work — revoke them below if they should stop.}}"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "This file only. The payee’s rule is left as it is for future statements."
+msgstr ""
+
 #: src/App.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Passkeys.tsx
 msgid "Name"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Discard the staged one"
+msgstr ""
+
 #: src/lib/labels.ts
 msgid "Flags & options"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "encoding"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -312,6 +386,11 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
+msgstr ""
+
+#. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
+#: src/screens/Import.tsx
+msgid "Cut off at {0} characters. Every line of it was still read — the table above is the whole file."
 msgstr ""
 
 #: src/lib/labels.ts
@@ -344,8 +423,28 @@ msgstr ""
 msgid "Day-to-day money at a bank. Salary in, card and direct debits out."
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Undo — add as new instead"
+msgstr ""
+
+#. placeholder {0}: recognised.account_name
+#. placeholder {1}: recognised.how
+#: src/screens/Import.tsx
+msgid "Chose <0>{0}</0> for you: {1}."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Closed — hide it from the accounts list"
+msgstr ""
+
+#. placeholder {0}: offer.count
+#. placeholder {0}: purging.row_count
+#. placeholder {1}: <> <strong>{offer.count} other line has the same payee</strong> and no category of their own. </>
+#. placeholder {1}: <> <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} line will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch. </>
+#. placeholder {2}: <> <strong>{offer.count} other lines have the same payee</strong> and no category of their own. </>
+#. placeholder {2}: <> <strong>{purging.filename ?? t`This import`}</strong> and its {purging.row_count} lines will be deleted. Nothing in it has reached the register, so there is nothing to undo afterwards — and the file can be imported again from scratch. </>
+#: src/screens/Import.tsx
+msgid "{0, plural, one {{1}} other {{2}}}"
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -385,6 +484,10 @@ msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 msgid "Invitations are single-use and they expire. Ask whoever sent it for a fresh one."
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "payee column"
 msgstr ""
 
 #: src/lib/labels.ts
@@ -438,6 +541,15 @@ msgstr ""
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Into which account"
+msgstr ""
+
+#. placeholder {0}: String(bank)
+#: src/screens/Import.tsx
+msgid "use the bank's: {0}"
+msgstr ""
+
 #: src/App.tsx
 msgid "Hide the menu"
 msgstr ""
@@ -455,8 +567,13 @@ msgstr ""
 msgid "{by} reset {user}'s password and authenticator"
 msgstr ""
 
+#: src/screens/Import.tsx
 #: src/screens/TransferSections.tsx
 msgid "Into"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Discarding…"
 msgstr ""
 
 #: src/lib/labels.ts
@@ -495,8 +612,22 @@ msgstr ""
 msgid "Accounts"
 msgstr ""
 
+#. placeholder {0}: offer.name
+#: src/screens/Import.tsx
+msgid "Put them in <0>{0}</0> too?"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Waiting to be reviewed"
+msgstr ""
+
+#. placeholder {0}: formatCount(raw.total)
+#: src/screens/Import.tsx
+msgid "{0} characters"
 msgstr ""
 
 #: src/lib/labels.ts
@@ -505,6 +636,10 @@ msgstr ""
 
 #: src/screens/SignIn.tsx
 msgid "or"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Discard"
 msgstr ""
 
 #: src/screens/Transfer.tsx
@@ -552,6 +687,10 @@ msgstr ""
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Import these"
+msgstr ""
+
 #: src/App.tsx
 msgid "Close the menu"
 msgstr ""
@@ -582,9 +721,14 @@ msgstr ""
 msgid "If you no longer have the old authenticator, use one of your recovery codes here instead; it is spent."
 msgstr ""
 
+#: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Profile.tsx
 msgid "Cancel"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Yes, all of them and set the rule"
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -627,6 +771,10 @@ msgstr ""
 msgid "Reset: password and authenticator"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Every path a statement can take, and every way a line can go, is explained in <0>How import works</0>."
+msgstr ""
+
 #: src/screens/Transfer.tsx
 msgid "From"
 msgstr ""
@@ -641,6 +789,10 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "Suggested identifiers"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "skip rows"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -711,6 +863,10 @@ msgstr ""
 msgid "Code"
 msgstr ""
 
+#: src/lib/labels.ts
+msgid "state column"
+msgstr ""
+
 #. placeholder {0}: format(out, from.currency)
 #. placeholder {1}: from.name
 #. placeholder {2}: to?.name
@@ -763,8 +919,18 @@ msgstr ""
 msgid "Categorise {0} selected as…"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "The file itself"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Cleared"
+msgstr ""
+
+#. placeholder {0}: done.payee_name
+#. placeholder {1}: done.category_name
+#: src/screens/Import.tsx
+msgid "{0} will always be {1} — and the payee was added"
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -780,6 +946,7 @@ msgid "Which household"
 msgstr ""
 
 #: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
 msgid "Ignore"
 msgstr ""
 
@@ -874,9 +1041,15 @@ msgstr ""
 msgid "The name looks like its number."
 msgstr ""
 
+#: src/screens/Import.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
 msgid "Amount"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Fecha;Concepto;Importe\n"
+"05/01/2026;MERCADONA;-45,20"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -891,7 +1064,12 @@ msgstr ""
 msgid "The server reset {user}'s authenticator"
 msgstr ""
 
+#: src/lib/labels.ts
+msgid "date format"
+msgstr ""
+
 #: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
 msgid "Rows"
 msgstr ""
 
@@ -901,6 +1079,10 @@ msgstr ""
 
 #: src/screens/Passkeys.tsx
 msgid "Added"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "this payee"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -921,6 +1103,10 @@ msgstr ""
 
 #: src/lib/labels.ts
 msgid "Matched"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "No single category matches that."
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -961,6 +1147,14 @@ msgstr ""
 
 #: src/App.tsx
 msgid "Create it"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "amount column"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "File"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -1009,6 +1203,10 @@ msgstr ""
 msgid "Country"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "The rest of this payee?"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Each account keeps its own currency. Nothing is ever converted in the ledger."
 msgstr ""
@@ -1026,12 +1224,21 @@ msgstr ""
 msgid "Recovery code"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Category"
+msgstr ""
+
 #: src/screens/SignIn.tsx
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr ""
 
+#: src/screens/Import.tsx
 #: src/screens/Transfer.tsx
 msgid "Memo"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "One-time Import"
 msgstr ""
 
 #: src/App.tsx
@@ -1048,6 +1255,16 @@ msgstr ""
 
 #: src/App.tsx
 msgid "Try again"
+msgstr ""
+
+#. placeholder {0}: tagOffer.value
+#. placeholder {1}: account.name
+#: src/screens/Import.tsx
+msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "product column"
 msgstr ""
 
 #: src/App.tsx
@@ -1084,6 +1301,12 @@ msgstr ""
 
 #: src/components/ReenrolmentDue.tsx
 msgid "Setting it up takes one of your recovery codes."
+msgstr ""
+
+#. placeholder {0}: preview.lines.length
+#. placeholder {1}: preview.lines.length
+#: src/screens/Import.tsx
+msgid "{0, plural, other {{1} lines}}"
 msgstr ""
 
 #: src/screens/TransferSections.tsx
@@ -1192,6 +1415,7 @@ msgid "Not for this account"
 msgstr ""
 
 #: src/screens/Accounts.tsx
+#: src/screens/Import.tsx
 msgid "Add"
 msgstr ""
 
@@ -1235,9 +1459,20 @@ msgstr ""
 msgid "no country set"
 msgstr ""
 
+#. placeholder {0}: recognised.account_name
+#. placeholder {1}: recognised.how
+#: src/screens/Import.tsx
+msgid "This file looks like it is for <0>{0}</0> ({1}), not the account chosen above."
+msgstr ""
+
+#: src/screens/Import.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
 msgid "Date"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "memo column"
 msgstr ""
 
 #: src/lib/signInChanges.ts
@@ -1258,6 +1493,14 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "Set"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "uncategorised (chosen)"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "kind"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -1323,6 +1566,10 @@ msgstr ""
 msgid "Reset: authenticator"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "This lands as one entry in History, so the whole import can be undone in one go."
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
@@ -1373,7 +1620,12 @@ msgstr ""
 msgid "4. Recovery codes"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Discard this staged import?"
+msgstr ""
+
 #: src/lib/labels.ts
+#: src/screens/Import.tsx
 msgid "Uncategorised"
 msgstr ""
 
@@ -1407,6 +1659,14 @@ msgstr ""
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Staged by"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "No, just this one"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgctxt "authenticator state"
 msgid "Cleared"
@@ -1414,6 +1674,10 @@ msgstr ""
 
 #: src/screens/TransferSections.tsx
 msgid "Linked as transfers although no person chose them — because the two accounts had been linked before and neither row names the other, or because a program linked them through an agent key. A purchase and the refund of exactly its amount can look like that. Unlink the ones that are not transfers; they are not offered again. Keep the ones that are."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "This import"
 msgstr ""
 
 #. placeholder {0}: passkey.rp_id
@@ -1425,8 +1689,17 @@ msgstr ""
 msgid "Not now"
 msgstr ""
 
+#: src/lib/labels.ts
+msgid "outflow column"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Tag in the download's file name"
+msgstr ""
+
+#. placeholder {0}: line.line_no
+#: src/screens/Import.tsx
+msgid "Include line {0}"
 msgstr ""
 
 #: src/screens/Passkeys.tsx
@@ -1492,8 +1765,16 @@ msgstr ""
 msgid "The six digits from your authenticator"
 msgstr ""
 
+#: src/lib/labels.ts
+msgid "fee column"
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "Currency"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "decimal separator"
 msgstr ""
 
 #: src/screens/AcceptInvite.tsx
@@ -1505,8 +1786,16 @@ msgstr ""
 msgid "{by} reset {user}'s authenticator"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "type any part"
+msgstr ""
+
 #: src/screens/ResetAccount.tsx
 msgid "Your password and your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Where this line will land"
 msgstr ""
 
 #: src/screens/Passkeys.tsx
@@ -1533,6 +1822,10 @@ msgstr ""
 
 #: src/screens/Passkeys.tsx
 msgid "Never"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Not the same thing — add it separately"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -1583,6 +1876,20 @@ msgstr ""
 msgid "Show a new code to scan"
 msgstr ""
 
+#. placeholder {0}: tagOffer.value
+#. placeholder {1}: account.name
+#: src/screens/Import.tsx
+msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so its next statement picks the account itself?"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Line"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "This file is not text — a spreadsheet export keeps its rows in a binary format. What it was read as is in the table above."
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Replacing it also un-trusts every browser, including this one, and signs out every other browser — they were let in on the strength of the old authenticator, and that is exactly what you are replacing."
 msgstr ""
@@ -1596,8 +1903,13 @@ msgstr ""
 msgid "Sign-in changes in the last 14 days, by somebody other than you:"
 msgstr ""
 
+#: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
 msgid "Keep it"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Read the file"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -1637,6 +1949,23 @@ msgstr ""
 msgid "What banks call it"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Empty it to go back to the suggestion."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Importing…"
+msgstr ""
+
+#. placeholder {0}: offer.count + 1
+#: src/screens/Import.tsx
+msgid "Yes, all {0} of them"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Staged"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Needs setting up again"
 msgstr ""
@@ -1659,12 +1988,25 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Leave them <0>uncategorised</0> too?"
+msgstr ""
+
+#: src/lib/labels.ts
+msgid "inflow column"
+msgstr ""
+
 #: src/App.tsx
+#: src/screens/Import.tsx
 msgid "Payee"
 msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "No other browsers were signed in."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Not numbered: in an OFX file the Line column above counts transactions, not lines of the file."
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -1677,6 +2019,10 @@ msgstr ""
 
 #: src/App.tsx
 msgid "Reports"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "a note for this row"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -1697,6 +2043,14 @@ msgstr ""
 msgid "Recorded as {0} on the date below."
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "uncategorised"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "What this would do"
+msgstr ""
+
 #: src/lib/labels.ts
 msgid "Fixed"
 msgstr ""
@@ -1707,6 +2061,12 @@ msgstr ""
 
 #: src/App.tsx
 msgid "Payee Categorisation"
+msgstr ""
+
+#. placeholder {0}: waiting.length
+#. placeholder {1}: waiting.length
+#: src/screens/Import.tsx
+msgid "{0, plural, one {An import was staged and never finished. Nothing in it has reached the register — open one to carry on where it was left, or discard it.} other {{1} imports were staged and never finished. Nothing in them has reached the register — open one to carry on where it was left, or discard it.}}"
 msgstr ""
 
 #: src/screens/AcceptInvite.tsx
@@ -1785,6 +2145,10 @@ msgstr ""
 msgid "Passkeys"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Import it anyway"
+msgstr ""
+
 #. placeholder {0}: owed.length - SHOWN
 #: src/components/SignInNotice.tsx
 msgid "and {0} more."
@@ -1809,6 +2173,12 @@ msgstr ""
 msgid "It was printed to the server log when this instance started, and written to <0>{0}</0>. It changes every time the server restarts until setup is finished."
 msgstr ""
 
+#. placeholder {0}: formatCount(page.shown)
+#. placeholder {1}: formatCount(page.total)
+#: src/screens/Import.tsx
+msgid "Showing {0} of {1} — show more"
+msgstr ""
+
 #: src/screens/Setup.tsx
 msgid "3. Your authenticator"
 msgstr ""
@@ -1823,6 +2193,11 @@ msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as a member."
+msgstr ""
+
+#. placeholder {0}: entry.filename
+#: src/screens/Import.tsx
+msgid "{0} was discarded — nothing was written"
 msgstr ""
 
 #: src/screens/Setup.tsx
@@ -1849,6 +2224,14 @@ msgstr ""
 msgid "authenticator"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from your bank's website. CSV and spreadsheets are worked out from the file itself — the delimiter, the date format, the decimal separator, which column is which, and which row the table actually starts on. OFX needs none of that: it names its own fields, and its transaction ids are used so re-importing an overlapping statement cannot double anything up. A PDF is read by where the words sit on the page, so a running-balance column is not mistaken for the amount — and a designed bill, which is summary boxes rather than a table, is refused rather than half-read. You will see all of it before anything is written."
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Applying…"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "may apply imports"
 msgstr ""
@@ -1873,6 +2256,10 @@ msgstr ""
 msgid "Somebody added {user} as an owner"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "The memo this row will carry"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Kept on this device only, so a phone and a laptop can differ. Nothing is sent to the server, and clearing this browser's site data forgets it -- which returns you to following the system."
 msgstr ""
@@ -1887,6 +2274,11 @@ msgstr ""
 
 #: src/screens/Transfer.tsx
 msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
+msgstr ""
+
+#. placeholder {0}: household.name
+#: src/screens/Import.tsx
+msgid "<0>Coming from another budgeting app?</0> Statements go in one at a time here. To bring your whole history across at once — YNAB so far — use the {link} on the {0} page. The household’s owner runs it, once."
 msgstr ""
 
 #: src/components/RecoveryModeBanner.tsx
@@ -1948,8 +2340,30 @@ msgstr ""
 msgid "A code from your current authenticator"
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "Setting the rule…"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "from the copy in this browser, not from the server — the file itself is not kept"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Yes, discard it"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Following this device, which is light right now."
+msgstr ""
+
+#. placeholder {0}: done.payee_name
+#. placeholder {1}: done.category_name
+#: src/screens/Import.tsx
+msgid "{0} will always be {1}"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Reading…"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -1958,6 +2372,11 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "For"
+msgstr ""
+
+#. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
+#: src/screens/Import.tsx
+msgid "showing the first {0}"
 msgstr ""
 
 #: src/lib/signInChanges.ts
@@ -1998,6 +2417,15 @@ msgstr ""
 msgid "{inviter} invited you to {PRODUCT} as a member, in {households}."
 msgstr ""
 
+#: src/screens/Import.tsx
+msgid "that import was discarded — nothing was written"
+msgstr ""
+
+#. placeholder {0}: account?.name ?? ""
+#: src/screens/Import.tsx
+msgid "into {0}"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "I have saved it"
 msgstr ""
@@ -2024,6 +2452,10 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "Oldest"
+msgstr ""
+
+#: src/screens/Import.tsx
+msgid "Open that import"
 msgstr ""
 
 #: src/screens/ResetAccount.tsx

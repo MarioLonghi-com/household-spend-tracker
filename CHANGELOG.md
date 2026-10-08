@@ -168,8 +168,8 @@ history this repository does not have.
 
 ### Changed
 
-- **The transfer panel's, the Transfers screen's and the Accounts screen's
-  words are in the catalogs**, with the labels in `lib/labels.ts`. English is unchanged;
+- **The transfer panel's, the Transfers screen's, the Accounts screen's and
+  the Import screen's words are in the catalogs**, with the labels in `lib/labels.ts`. English is unchanged;
   a test renders it in the `en-XA` pseudo-locale and finds no English left.
   (#55)
 
