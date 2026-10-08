@@ -31,6 +31,10 @@ msgstr "Menciones"
 msgid "Creating…"
 msgstr "Creando…"
 
+#: src/components/Receipts.tsx
+msgid "Uploading"
+msgstr ""
+
 #. placeholder {0}: tagOffer.value
 #: src/screens/Import.tsx
 #, fuzzy
@@ -68,6 +72,10 @@ msgstr "Elegir…"
 msgid "New password"
 msgstr "Nueva contraseña"
 
+#: src/components/Receipts.tsx
+msgid "{count, plural, one {has {count} receipts} other {has {count} receipts}}"
+msgstr ""
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Cash"
@@ -87,8 +95,17 @@ msgstr "beneficiario, concepto o las palabras del propio banco"
 msgid "Open Dropbox"
 msgstr ""
 
+#: src/screens/Receipts.tsx
+msgid "Send back to the inbox"
+msgstr ""
+
 #: src/screens/Rules.tsx
 msgid "One act, so History has one entry and undo puts every row back together."
+msgstr ""
+
+#. placeholder {0}: receipt.download_name
+#: src/components/Receipts.tsx
+msgid "Receipt, {0}"
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -398,6 +415,10 @@ msgstr "Cada pago del trabajo va seguido de los gastos que devolvió, marcados c
 msgid "What each payee has been filed under, and what a new transaction for it will be. Which payee a statement line becomes is decided first, by the payee naming rules."
 msgstr ""
 
+#: src/screens/Receipts.tsx
+msgid "List"
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "This browser does not support passkeys yet."
@@ -566,6 +587,10 @@ msgstr "2. Tú"
 msgid "Keep them active"
 msgstr ""
 
+#: src/components/Receipts.tsx
+msgid "Uploaded"
+msgstr ""
+
 #: src/screens/Backups.tsx
 msgid "Handed to the share sheet."
 msgstr ""
@@ -619,6 +644,10 @@ msgstr ""
 msgid "Set the category on {done} row and skipped 1 transfer leg — a transfer has no category."
 msgstr "Se puso la categoría a {done} fila y se omitió 1 parte de transferencia: una transferencia no tiene categoría."
 
+#: src/screens/Receipts.tsx
+msgid "What was it for?"
+msgstr ""
+
 #: src/App.tsx
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -629,6 +658,10 @@ msgstr "Nuevo hogar"
 #, fuzzy
 msgid "Mark cleared"
 msgstr "Marcar como contabilizado"
+
+#: src/components/Receipts.tsx
+msgid "Recorded by the phone that sent it, not by the camera — so this is where the phone was when it went up."
+msgstr ""
 
 #. placeholder {0}: leg.account_name
 #. placeholder {1}: formatDate(leg.date)
@@ -885,6 +918,10 @@ msgstr "Desvincular"
 msgid "Remove this part"
 msgstr "Quitar esta parte"
 
+#: src/components/Receipts.tsx
+msgid "Retry"
+msgstr ""
+
 #: src/screens/Reconcile.tsx
 msgid "the closing balance"
 msgstr ""
@@ -980,6 +1017,10 @@ msgstr "codificación"
 msgid "One part of a split. The others are in the register on the same date, and the transaction they replaced is in History."
 msgstr "Una parte de una división. Las demás están en el registro en la misma fecha, y el movimiento al que sustituyeron está en el Historial."
 
+#: src/screens/Receipts.tsx
+msgid "Anything without a transaction waits here. Photograph a receipt at the till and match it when the statement arrives — that is the ordinary way round, not a mistake to be cleared."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Authenticator"
@@ -1009,6 +1050,10 @@ msgstr ""
 #, fuzzy
 msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
 msgstr "Dinero que debes y que no es una tarjeta: una hipoteca, un préstamo del coche, dinero que le debes a alguien. Los pagos son transferencias hacia ella."
+
+#: src/components/Receipts.tsx
+msgid "has a receipt"
+msgstr ""
 
 #: src/screens/Backups.tsx
 msgid "Drag the zip from your downloads onto that page, into the folder you keep it in."
@@ -1172,6 +1217,10 @@ msgstr "Los seis dígitos"
 #, fuzzy
 msgid "Find the payment…"
 msgstr "Buscar el pago…"
+
+#: src/screens/Receipts.tsx
+msgid "On a transaction"
+msgstr ""
 
 #. placeholder {0}: restOn.join(", ")
 #: src/screens/Register.tsx
@@ -1380,6 +1429,10 @@ msgstr "Comprobar el código"
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Dinero apartado en un banco. Igual que una cuenta corriente, pero separado para que el registro se lea con claridad."
 
+#: src/components/Receipts.tsx
+msgid "facing {bearing}° {point}"
+msgstr ""
+
 #: src/screens/History.tsx
 msgid "Nothing recorded against this one."
 msgstr ""
@@ -1470,6 +1523,11 @@ msgstr "un pago fuera de lo que el registro puede mostrar"
 msgid "Changing it signs out every other browser and forgets every trusted one, so if you are changing it because somebody else knows it, they are out too. Agent keys are separate credentials and keep working until you revoke them."
 msgstr "Cambiarla cierra la sesión en todos los demás navegadores y olvida los de confianza, así que, si la cambias porque alguien más la conoce, también queda fuera. Las claves de agente son credenciales aparte y siguen funcionando hasta que las revoques."
 
+#: src/components/Receipts.tsx
+msgid "No receipt yet"
+msgstr ""
+
+#: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "saving…"
@@ -1621,6 +1679,11 @@ msgstr "Necesita categoría"
 msgid "Folded into {kept}"
 msgstr ""
 
+#. placeholder {0}: formatInstant(receipt.captured_at)
+#: src/screens/Receipts.tsx
+msgid "Taken {0}, so this opens on the ten days either side."
+msgstr ""
+
 #. placeholder {0}: offer.name
 #: src/screens/Import.tsx
 #, fuzzy
@@ -1730,6 +1793,7 @@ msgstr ""
 
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Backups.tsx
+#: src/screens/Receipts.tsx
 msgid "Size"
 msgstr ""
 
@@ -1737,6 +1801,10 @@ msgstr ""
 #, fuzzy
 msgid "Select every waiting row"
 msgstr "Seleccionar todas las filas pendientes"
+
+#: src/screens/Receipts.tsx
+msgid "not saved — leave the field to try again"
+msgstr ""
 
 #: src/screens/Reconcile.tsx
 msgid "The bank says there is more than you have ticked — a payment in you have not entered?"
@@ -1753,6 +1821,7 @@ msgstr ""
 
 #: src/screens/Backups.tsx
 #: src/screens/Categories.tsx
+#: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -1865,6 +1934,11 @@ msgstr ""
 msgid "Closed"
 msgstr "Cerrada"
 
+#. placeholder {0}: receipt.uploaded_by_name
+#: src/screens/Receipts.tsx
+msgid "added by {0}"
+msgstr ""
+
 #: src/App.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1901,6 +1975,11 @@ msgstr "Cancelar"
 
 #: src/screens/Payees.tsx
 msgid "The one you keep is the one you choose here."
+msgstr ""
+
+#. placeholder {0}: busy.length
+#: src/components/Receipts.tsx
+msgid "Uploading {0}…"
 msgstr ""
 
 #: src/screens/Import.tsx
@@ -1977,6 +2056,12 @@ msgstr ""
 msgid "Through the agent key {via}"
 msgstr ""
 
+#. placeholder {0}: gone.length
+#. placeholder {1}: gone.length
+#: src/screens/Receipts.tsx
+msgid "{0, plural, one {1 receipt deleted. The History screen can put it back.} other {{1} receipts deleted, as one act. The History screen can put them all back.}}"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "another app"
@@ -1999,6 +2084,10 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Reset and make the link"
+msgstr ""
+
+#: src/screens/Receipts.tsx
+msgid "Deleting is recorded and can be put back from the History screen. The picture itself is kept for a day after nothing points at it, which is what makes that undo work."
 msgstr ""
 
 #: src/screens/Payees.tsx
@@ -2024,6 +2113,10 @@ msgstr ""
 #, fuzzy
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in."
 msgstr "Escanea esto con tu aplicación de autenticación y escribe los seis dígitos que muestre. Comprobamos el código ahora, para que sepas que funciona aquí y no lo descubras la próxima vez que inicies sesión."
+
+#: src/screens/Receipts.tsx
+msgid "Nothing waiting. Every receipt is on a transaction."
+msgstr ""
 
 #: src/App.tsx
 #, fuzzy
@@ -2063,6 +2156,10 @@ msgstr "Restablecimiento: contraseña y aplicación de autenticación"
 #, fuzzy
 msgid "Every path a statement can take, and every way a line can go, is explained in <0>How import works</0>."
 msgstr "Cada camino que puede seguir un extracto, y cada destino posible de una línea, se explica en <0>Cómo funciona la importación</0>."
+
+#: src/screens/Receipts.tsx
+msgid "Delete these receipts?"
+msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
@@ -2309,6 +2406,7 @@ msgstr ""
 msgid "Households"
 msgstr ""
 
+#: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Clear selection"
@@ -2399,6 +2497,12 @@ msgstr "Desvincular"
 #, fuzzy
 msgid "Other liabilities"
 msgstr "Otras deudas"
+
+#. placeholder {0}: formatInstant(receipt.created_at)
+#. placeholder {1}: receipt.uploaded_by_name
+#: src/components/Receipts.tsx
+msgid "{0} by {1}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2515,6 +2619,10 @@ msgstr "Dejarlo aquí"
 msgid "Ignore"
 msgstr "Ignorar"
 
+#: src/screens/Receipts.tsx
+msgid "Receipt notes saved."
+msgstr ""
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Plan"
@@ -2603,6 +2711,16 @@ msgstr "He perdido mi aplicación de autenticación: usar un código de recupera
 msgid "Could not read"
 msgstr "No se pudo leer"
 
+#: src/screens/Receipts.tsx
+msgid "Inbox"
+msgstr ""
+
+#. placeholder {0}: picked.size
+#. placeholder {1}: picked.size
+#: src/screens/Receipts.tsx
+msgid "{0, plural, one {Delete it} other {Delete all {1}}}"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Change password"
@@ -2642,6 +2760,10 @@ msgstr "Elige dos cuentas distintas: el dinero no puede moverse a la misma cuent
 msgid "No minus signs — the direction is the two accounts above."
 msgstr "Sin signo menos: el sentido lo dan las dos cuentas de arriba."
 
+#: src/components/Receipts.tsx
+msgid "Encoding and sending…"
+msgstr ""
+
 #: src/screens/ApplicationManagement.tsx
 msgid "Show them"
 msgstr ""
@@ -2657,6 +2779,7 @@ msgid "This installation, rather than any of the ledgers in it. Only an owner ca
 msgstr ""
 
 #: src/screens/Backups.tsx
+#: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Deleting…"
@@ -2690,6 +2813,10 @@ msgstr ""
 #, fuzzy
 msgid "Would link"
 msgstr "Vincularía"
+
+#: src/screens/Receipts.tsx
+msgid "No receipts here yet."
+msgstr ""
 
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -2862,6 +2989,10 @@ msgstr ""
 msgid "Create"
 msgstr "Crear"
 
+#: src/components/Receipts.tsx
+msgid "More info"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Work items and their repayments"
@@ -2871,6 +3002,11 @@ msgstr "Gastos de trabajo y sus devoluciones"
 #, fuzzy
 msgid "A running balance needs one account, newest-first by date, and no filters — it is a sum down the page, so in any other order or with rows hidden it would not mean anything."
 msgstr "Un saldo acumulado necesita una sola cuenta, orden por fecha con lo más reciente primero y ningún filtro: es una suma que baja por la página, así que en otro orden o con filas ocultas no significaría nada."
+
+#. placeholder {0}: picked.size
+#: src/screens/Receipts.tsx
+msgid "{0, plural, one {It goes as one act, so the History screen puts it back in one undo.} other {They go as one act, so the History screen puts them all back in one undo.}}"
+msgstr ""
 
 #: src/screens/History.tsx
 msgid "Undo this"
@@ -2891,6 +3027,7 @@ msgid "anyone with the link"
 msgstr ""
 
 #: src/lib/labels.ts
+#: src/screens/Receipts.tsx
 #, fuzzy
 msgid "Matched"
 msgstr "Emparejada"
@@ -2941,6 +3078,10 @@ msgstr "un extracto"
 #, fuzzy
 msgid "You've been invited"
 msgstr "Te han invitado"
+
+#: src/screens/Receipts.tsx
+msgid "Attach"
+msgstr ""
 
 #. placeholder {0}: count(it.payee_rules - it.payee_rules_enabled)
 #: src/screens/Household.tsx
@@ -3079,6 +3220,7 @@ msgstr "Categoría: no hace falta, es una parte de una transferencia"
 msgid "no git history and no build stamp to ask"
 msgstr ""
 
+#: src/components/Receipts.tsx
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
 #, fuzzy
@@ -3191,6 +3333,10 @@ msgstr "Bloqueado: comprobado con el banco, y se rechaza cualquier cambio"
 msgid "To year"
 msgstr "Año final"
 
+#: src/screens/Receipts.tsx
+msgid "Add receipts"
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "Finish"
@@ -3281,6 +3427,11 @@ msgstr "Código de recuperación"
 
 #: src/screens/Categories.tsx
 msgid "New group"
+msgstr ""
+
+#: src/components/Receipts.tsx
+#: src/screens/Receipts.tsx
+msgid "Open the receipt from {when}"
 msgstr ""
 
 #: src/screens/Backups.tsx
@@ -3402,6 +3553,10 @@ msgstr "Nota"
 msgid "How import works"
 msgstr "Cómo funciona la importación"
 
+#: src/screens/Receipts.tsx
+msgid "Attach to a transaction"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Transfer between your own accounts"
@@ -3473,6 +3628,10 @@ msgstr "Dado por perdido: el trabajo no pagará"
 msgid "Kind"
 msgstr "Clase"
 
+#: src/screens/Receipts.tsx
+msgid "Receipt notes"
+msgstr ""
+
 #: src/screens/Backups.tsx
 msgid "<0>This is the only backup.</0> After this there is none: nothing on this instance could put the ledger back if it were damaged."
 msgstr ""
@@ -3522,6 +3681,14 @@ msgstr ""
 msgid "Applied as a statement is read, so <0>CARREFOUR MADRID 4432</0> arrives as Carrefour. The bank's own words are kept on the transaction either way."
 msgstr ""
 
+#: src/components/Receipts.tsx
+msgid "Encoding…"
+msgstr ""
+
+#: src/screens/Receipts.tsx
+msgid "Which transaction?"
+msgstr ""
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "owner"
@@ -3552,6 +3719,10 @@ msgstr ""
 #, fuzzy
 msgid "Reimbursed by"
 msgstr "Reembolsado por"
+
+#: src/screens/Receipts.tsx
+msgid "The picture itself is kept for a day after nothing points at it, which is what makes that undo work."
+msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Group"
@@ -3632,6 +3803,12 @@ msgstr "Los dos, porque las cuentas están en divisas distintas y no nos vamos a
 #, fuzzy
 msgid "Amount ({currency})"
 msgstr "Importe ({currency})"
+
+#. placeholder {0}: picked.size
+#. placeholder {1}: picked.size
+#: src/screens/Receipts.tsx
+msgid "{0, plural, one {Delete 1 receipt} other {Delete {1} receipts}}"
+msgstr ""
 
 #. placeholder {0}: listText(sums.map((one) => one.currency))
 #: src/screens/Register.tsx
@@ -3729,6 +3906,10 @@ msgstr "leer"
 #, fuzzy
 msgid "Not for this account"
 msgstr "No es de esta cuenta"
+
+#: src/screens/Receipts.tsx
+msgid "(uploaded)"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3863,7 +4044,12 @@ msgstr ""
 msgid "Required. No two accounts can share one."
 msgstr ""
 
+#: src/components/Receipts.tsx
+msgid "Open in Google Maps ↗"
+msgstr ""
+
 #: src/screens/Backups.tsx
+#: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Download"
@@ -3891,6 +4077,10 @@ msgstr "Sincronizada"
 
 #: src/screens/Household.tsx
 msgid "These are counts, not amounts: this ledger never converts one currency into another, so there is no such thing as a household total. Balances live on the Accounts screen, one per account."
+msgstr ""
+
+#: src/screens/Receipts.tsx
+msgid "All"
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -3948,6 +4138,12 @@ msgstr ""
 msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."
 msgstr "Las partes que has preparado no se han guardado. Descartar deja el movimiento como estaba."
 
+#. placeholder {0}: picked.size
+#. placeholder {1}: picked.size
+#: src/screens/Receipts.tsx
+msgid "{0, plural, one {One receipt will be deleted.} other {{1} receipts will be deleted.}}"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "To create a new user, use the <0>Invitation link</0>."
 msgstr ""
@@ -3989,6 +4185,11 @@ msgstr "Si no lo esperabas, avisa a un propietario de esta instancia antes de se
 #, fuzzy
 msgid "Amount leaving ({0})"
 msgstr "Importe que sale ({0})"
+
+#. placeholder {0}: picked.size
+#: src/screens/Receipts.tsx
+msgid "<0>{0} selected.</0> Deleting them is one act, so one undo brings the whole selection back."
+msgstr ""
 
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -4279,10 +4480,16 @@ msgstr "Aquí no se puede usar un código de recuperación. Si otra persona ha v
 msgid "Credit card"
 msgstr "Tarjeta de crédito"
 
+#: src/components/Receipts.tsx
+#: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Receipt"
 msgstr "Ticket"
+
+#: src/screens/Receipts.tsx
+msgid "Select every receipt shown"
+msgstr ""
 
 #. placeholder {0}: withdrawing.display_name
 #. placeholder {1}: withdrawing.email
@@ -4558,6 +4765,10 @@ msgstr ""
 #, fuzzy
 msgid "Keep"
 msgstr "Conservar"
+
+#: src/components/Receipts.tsx
+msgid "Checksum"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -4911,6 +5122,11 @@ msgstr ""
 msgid "Your authenticator"
 msgstr "Tu aplicación de autenticación"
 
+#: src/components/Receipts.tsx
+#: src/screens/Receipts.tsx
+msgid "Taken"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Nothing here yet. Add a row above, or import a statement from the Import screen."
@@ -4945,6 +5161,10 @@ msgstr ""
 
 #: src/screens/History.tsx
 msgid "Batch"
+msgstr ""
+
+#: src/components/Receipts.tsx
+msgid "Camera"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -5373,6 +5593,10 @@ msgstr "Dado por perdido: el trabajo no lo pagará"
 msgid "What this would do"
 msgstr "Lo que haría esto"
 
+#: src/components/Receipts.tsx
+msgid "(SHA-256 of the original)"
+msgstr ""
+
 #: src/screens/AccountImport.tsx
 msgid "Every column but name and type can be left blank. Institution, iban and note are kept as written."
 msgstr ""
@@ -5493,6 +5717,10 @@ msgstr "Administración"
 msgid "New password again"
 msgstr "Repite la contraseña nueva"
 
+#: src/components/Receipts.tsx
+msgid "(local time, no zone recorded)"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "why not a recovery code"
@@ -5590,6 +5818,10 @@ msgstr ""
 #. placeholder {0}: matchWord(rule.match_type)
 #: src/screens/Rules.tsx
 msgid "{0}, then strip"
+msgstr ""
+
+#: src/components/Receipts.tsx
+msgid "Waiting"
 msgstr ""
 
 #: src/screens/Categories.tsx
@@ -5771,6 +6003,10 @@ msgstr "Se imprimió en el registro del servidor cuando arrancó esta instancia 
 msgid "Reading the file…"
 msgstr ""
 
+#: src/screens/Receipts.tsx
+msgid "Select the receipt from {when}"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Set the category on {done} rows and skipped 1 transfer leg — a transfer has no category."
@@ -5808,6 +6044,10 @@ msgstr "1. El token de configuración"
 
 #: src/screens/History.tsx
 msgid "Every row it changed"
+msgstr ""
+
+#: src/screens/Receipts.tsx
+msgid "This receipt carries no date of its own, so the window is around when it was uploaded."
 msgstr ""
 
 #: src/screens/Reconcile.tsx
@@ -5868,6 +6108,10 @@ msgstr ""
 msgid "{0} was discarded — nothing was written"
 msgstr "{0} se ha descartado: no se ha escrito nada"
 
+#: src/screens/Receipts.tsx
+msgid "Thumbnails"
+msgstr ""
+
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "the data directory"
@@ -5890,6 +6134,10 @@ msgstr "Quitar {0}"
 #, fuzzy
 msgid "Create the key"
 msgstr "Crear la clave"
+
+#: src/components/Receipts.tsx
+msgid "{count, plural, one {{count} pages} other {{count} pages}}"
+msgstr ""
 
 #: src/screens/Household.tsx
 msgid "Currencies"
@@ -5947,6 +6195,10 @@ msgstr ""
 #, fuzzy
 msgid "Edit the memo"
 msgstr "Editar el concepto"
+
+#: src/components/Receipts.tsx
+msgid "approximate — {shown}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -6032,6 +6284,10 @@ msgstr ""
 #, fuzzy
 msgid "Changed {done} rows and left {skipped} alone — only money out that is not a transfer can be a work expense."
 msgstr "Se cambiaron {done} filas y se dejaron {skipped} como estaban: solo una salida de dinero que no sea una transferencia puede ser un gasto de trabajo."
+
+#: src/components/Receipts.tsx
+msgid "compressed on the device before sending"
+msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Show archived"
@@ -6283,6 +6539,10 @@ msgstr "¿Qué pago devolvió esto?"
 msgid "{0} will always be {1}"
 msgstr "{0} será siempre {1}"
 
+#: src/components/Receipts.tsx
+msgid "From the photograph's own metadata."
+msgstr ""
+
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
 #, fuzzy
@@ -6366,6 +6626,11 @@ msgstr ""
 msgid "{0} of {1} shown."
 msgstr ""
 
+#: src/components/Receipts.tsx
+#: src/screens/Receipts.tsx
+msgid "Where"
+msgstr ""
+
 #: src/screens/Payees.tsx
 msgid "No payee matches that."
 msgstr ""
@@ -6386,6 +6651,7 @@ msgid "Notes and coins in a wallet or a tin. Nothing imports into it — you ent
 msgstr "Billetes y monedas en una cartera o una lata. No se importa nada en ella: anotas lo que gastas."
 
 #: src/components/bits.tsx
+#: src/components/Receipts.tsx
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -6395,6 +6661,7 @@ msgstr "Cerrar"
 #: src/App.tsx
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Household.tsx
+#: src/screens/Receipts.tsx
 #, fuzzy
 msgid "Receipts"
 msgstr "Tickets"
@@ -6427,6 +6694,10 @@ msgstr ""
 #, fuzzy
 msgid "{count, plural, one {Linked {count} expense to the payment of {paid} on {on}.} other {Linked {count} expenses to the payment of {paid} on {on}.}}"
 msgstr "{count, plural, one {Se vinculó {count} gasto al pago de {paid} del {on}.} other {Se vincularon {count} gastos al pago de {paid} del {on}.}}"
+
+#: src/screens/Receipts.tsx
+msgid "Keep them"
+msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "On"
@@ -6479,6 +6750,10 @@ msgstr ""
 #. placeholder {2}: one.transaction_count
 #: src/screens/Payees.tsx
 msgid "{0, plural, one {{1} transaction} other {{2} transactions}}"
+msgstr ""
+
+#: src/screens/Receipts.tsx
+msgid "Save receipt notes"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -6574,6 +6849,15 @@ msgstr "Abrir esa importación"
 
 #: src/screens/ApplicationManagement.tsx
 msgid "never"
+msgstr ""
+
+#: src/components/Receipts.tsx
+msgid "Stored as"
+msgstr ""
+
+#. placeholder {0}: (one.captured_at ?? one.created_at).slice(0, 10)
+#: src/screens/Receipts.tsx
+msgid "Select the receipt from {0}"
 msgstr ""
 
 #: src/screens/Admin.tsx
