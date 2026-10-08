@@ -94,6 +94,9 @@ class FakeEngine:
     gone: bool = False
     #: An engine whose compat API has no `POST /containers/{id}/update` (#169).
     no_update: bool = False
+    #: Seconds a stop takes to answer: a container that ignores SIGTERM is
+    #: killed only after its grace period.
+    stop_delay: float = 0.0
     lock: threading.RLock = field(default_factory=threading.RLock)
 
     def add_container(self, name: str, project: str, label: str = "com.docker.compose.project", **extra) -> str:
@@ -335,6 +338,10 @@ class FakeEngine:
                     self.on_start(self, c)
                 return 204, b""
             if method == "POST" and action == "/stop":
+                if self.stop_delay:
+                    import time
+
+                    time.sleep(self.stop_delay)
                 self.set_state(c, "exited", 143 if c["State"] == "running" else 0)
                 return 204, b""
             if method == "POST" and action == "/update" and self.no_update:

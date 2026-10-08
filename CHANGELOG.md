@@ -43,6 +43,12 @@ history this repository does not have.
   if the update rolls back. The updater's engine client gains one call for
   this, which changes the app's restart policy and nothing else. (#169)
 
+- **Stopping a container that ignores SIGTERM no longer crashes the
+  updater.** The engine answers a stop only after the grace period and the
+  kill, and the updater's socket gave up at the same 30 seconds, so it
+  crashed and the update rolled back as interrupted. It now waits the grace
+  period on top of its usual timeout. (#169)
+
 - **The updater starts under rootless Podman.** Running as in-container root
   without capabilities, it tried to change the mode of the `update`
   volume's directory, which it does not own, and exited before its first

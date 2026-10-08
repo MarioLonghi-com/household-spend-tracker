@@ -363,6 +363,7 @@ class EngineClient:
         path: str,
         query: Mapping | None = None,
         body: object = None,
+        timeout: float | None = None,
     ) -> tuple[int, bytes]:
         """Make one request -- if, and only if, the table lists it."""
         endpoint = allowed(method, path)
@@ -379,7 +380,7 @@ class EngineClient:
         if body is not None:
             payload = json.dumps(body).encode()
             headers["Content-Type"] = "application/json"
-        conn = UnixHTTPConnection(self.socket_path, self.timeout)
+        conn = UnixHTTPConnection(self.socket_path, timeout or self.timeout)
         try:
             try:
                 conn.request(method, target, body=payload, headers=headers)
@@ -402,6 +403,7 @@ class EngineClient:
         name: str,
         query: Mapping | None = None,
         body: object = None,
+        timeout: float | None = None,
         **params: str,
     ) -> object:
         endpoint = _BY_NAME[name]
@@ -412,7 +414,7 @@ class EngineClient:
             if self.negotiated is None:
                 raise NotAllowed("No API version negotiated yet: call negotiate() first.")
             path = f"/v{api_text(self.negotiated.version)}{path}"
-        status, data = self._send(endpoint.method, path, query, body)
+        status, data = self._send(endpoint.method, path, query, body, timeout)
         if status >= 400:
             try:
                 message = json.loads(data).get("message", "")
@@ -500,7 +502,12 @@ class EngineClient:
     def stop(self, ref: str, grace: int = 30) -> None:
         c = self._resolve(ref)
         self._not_sidecar(c, "stops")
-        self._call("stop", query={"t": str(int(grace))}, id=c["Id"])
+        # The engine answers a stop only once the container has stopped, which
+        # is up to `grace` seconds and then the kill: the socket must wait that
+        # long and more. With the same 30 s for both, stopping a container that
+        # ignores SIGTERM -- a process 1 with no handler, as the app is while
+        # it starts -- timed out in the client and crashed the updater (#169, E7).
+        self._call("stop", query={"t": str(int(grace))}, timeout=self.timeout + grace, id=c["Id"])
 
     def rename(self, ref: str, new_name: str) -> None:
         if not CONTAINER_NAME.fullmatch(new_name):

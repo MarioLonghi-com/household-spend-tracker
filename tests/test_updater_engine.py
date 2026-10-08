@@ -525,3 +525,16 @@ def test_a_one_off_of_the_app_service_is_not_updated(world):
     with pytest.raises(NotAllowed):
         client.set_restart_policy("spend-tracker-app-run-1", {"Name": "no"})
     assert not any(c.bare.endswith("/update") for c in fake.calls)
+
+
+def test_a_stop_waits_for_the_grace_period_beyond_the_clients_own_timeout():
+    """The engine answers a stop after the container stopped: up to the grace,
+    then the kill. A client timeout equal to the grace crashed the updater (#169)."""
+    fake = FakeEngine(engine_fixture("docker-desktop"), engine_fixture("docker-desktop", "info"))
+    fake.add_container("spend-tracker-app-1", PROJECT, labels={"com.docker.compose.service": "app"})
+    fake.stop_delay = 0.6
+    with Running(fake) as running:
+        client = EngineClient(running.socket_path, scope(), timeout=0.3)
+        client.negotiate()
+        client.stop("spend-tracker-app-1", grace=1)
+        assert fake.by_name("spend-tracker-app-1")["State"] == "exited"
