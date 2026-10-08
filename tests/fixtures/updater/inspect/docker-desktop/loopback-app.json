@@ -1,0 +1,283 @@
+[
+  {
+    "Id": "e45459fbcfcbe03cfedc30b311ca05bd3253d84634be21fe0278b1dfe2920137",
+    "Created": "2026-10-07T22:18:13.231735129Z",
+    "Path": "python",
+    "Args": [
+      "deploy/entrypoint.py"
+    ],
+    "State": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 1555,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-07T22:18:13.292324296Z",
+      "FinishedAt": "0001-01-01T00:00:00Z",
+      "Health": {
+        "Status": "starting",
+        "FailingStreak": 0,
+        "Log": []
+      }
+    },
+    "Image": "sha256:0be22c13d7c126e17091d2a180ffb42638f02526d835a3c2d5fe727ed3c485db",
+    "ResolvConfPath": "/var/lib/docker/containers/e45459fbcfcbe03cfedc30b311ca05bd3253d84634be21fe0278b1dfe2920137/resolv.conf",
+    "HostnamePath": "/var/lib/docker/containers/e45459fbcfcbe03cfedc30b311ca05bd3253d84634be21fe0278b1dfe2920137/hostname",
+    "HostsPath": "/var/lib/docker/containers/e45459fbcfcbe03cfedc30b311ca05bd3253d84634be21fe0278b1dfe2920137/hosts",
+    "LogPath": "/var/lib/docker/containers/e45459fbcfcbe03cfedc30b311ca05bd3253d84634be21fe0278b1dfe2920137/e45459fbcfcbe03cfedc30b311ca05bd3253d84634be21fe0278b1dfe2920137-json.log",
+    "Name": "/spike157-app-app-1",
+    "RestartCount": 0,
+    "Driver": "overlay2",
+    "Platform": "linux",
+    "MountLabel": "",
+    "ProcessLabel": "",
+    "AppArmorProfile": "",
+    "ExecIDs": null,
+    "HostConfig": {
+      "Binds": [
+        "spike157-app_ledger:/var/lib/spend-tracker:rw",
+        "/host_mnt/Volumes/work/spike157/q5/pin:/pin:rw"
+      ],
+      "ContainerIDFile": "",
+      "LogConfig": {
+        "Type": "json-file",
+        "Config": {}
+      },
+      "NetworkMode": "spike157-app_default",
+      "PortBindings": {
+        "8848/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "8848"
+          }
+        ]
+      },
+      "RestartPolicy": {
+        "Name": "unless-stopped",
+        "MaximumRetryCount": 0
+      },
+      "AutoRemove": false,
+      "VolumeDriver": "",
+      "VolumesFrom": null,
+      "ConsoleSize": [
+        0,
+        0
+      ],
+      "CapAdd": null,
+      "CapDrop": [
+        "ALL"
+      ],
+      "CgroupnsMode": "private",
+      "Dns": null,
+      "DnsOptions": null,
+      "DnsSearch": null,
+      "ExtraHosts": [],
+      "GroupAdd": null,
+      "IpcMode": "private",
+      "Cgroup": "",
+      "Links": null,
+      "OomScoreAdj": 0,
+      "PidMode": "",
+      "Privileged": false,
+      "PublishAllPorts": false,
+      "ReadonlyRootfs": true,
+      "SecurityOpt": [
+        "no-new-privileges:true"
+      ],
+      "Tmpfs": {
+        "/tmp": ""
+      },
+      "UTSMode": "",
+      "UsernsMode": "",
+      "ShmSize": 67108864,
+      "Runtime": "runc",
+      "Isolation": "",
+      "CpuShares": 0,
+      "Memory": 0,
+      "NanoCpus": 0,
+      "CgroupParent": "",
+      "BlkioWeight": 0,
+      "BlkioWeightDevice": null,
+      "BlkioDeviceReadBps": null,
+      "BlkioDeviceWriteBps": null,
+      "BlkioDeviceReadIOps": null,
+      "BlkioDeviceWriteIOps": null,
+      "CpuPeriod": 0,
+      "CpuQuota": 0,
+      "CpuRealtimePeriod": 0,
+      "CpuRealtimeRuntime": 0,
+      "CpusetCpus": "",
+      "CpusetMems": "",
+      "Devices": null,
+      "DeviceCgroupRules": null,
+      "DeviceRequests": null,
+      "MemoryReservation": 0,
+      "MemorySwap": 0,
+      "MemorySwappiness": null,
+      "OomKillDisable": null,
+      "PidsLimit": null,
+      "Ulimits": null,
+      "CpuCount": 0,
+      "CpuPercent": 0,
+      "IOMaximumIOps": 0,
+      "IOMaximumBandwidth": 0,
+      "MaskedPaths": [
+        "/proc/acpi",
+        "/proc/asound",
+        "/proc/interrupts",
+        "/proc/kcore",
+        "/proc/keys",
+        "/proc/latency_stats",
+        "/proc/sched_debug",
+        "/proc/scsi",
+        "/proc/timer_list",
+        "/proc/timer_stats",
+        "/sys/devices/virtual/powercap",
+        "/sys/firmware"
+      ],
+      "ReadonlyPaths": [
+        "/proc/bus",
+        "/proc/fs",
+        "/proc/irq",
+        "/proc/sys",
+        "/proc/sysrq-trigger"
+      ]
+    },
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/host_mnt/Volumes/work/spike157/q5/pin",
+        "Destination": "/pin",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "volume",
+        "Name": "spike157-app_ledger",
+        "Source": "/var/lib/docker/volumes/spike157-app_ledger/_data",
+        "Destination": "/var/lib/spend-tracker",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "Config": {
+      "Hostname": "e45459fbcfcb",
+      "Domainname": "",
+      "User": "65532:65532",
+      "AttachStdin": false,
+      "AttachStdout": true,
+      "AttachStderr": true,
+      "ExposedPorts": {
+        "8848/tcp": {}
+      },
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": [
+        "SPENDTRACKER_PUBLIC_URL=http://localhost:8848",
+        "SPENDTRACKER_AUTO_MIGRATE=1",
+        "SPENDTRACKER_COOKIE_SECURE=on",
+        "SPENDTRACKER_ENV=production",
+        "FORWARDED_ALLOW_IPS=192.0.2.10/12",
+        "PATH=/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin",
+        "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYTHONUNBUFFERED=1",
+        "SPENDTRACKER_DATA_DIR=/var/lib/spend-tracker"
+      ],
+      "Cmd": null,
+      "Healthcheck": {
+        "Test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8848/api/health', timeout=4).status==200 else 1)"
+        ],
+        "Interval": 30000000000,
+        "Timeout": 5000000000,
+        "StartPeriod": 20000000000,
+        "Retries": 3
+      },
+      "Image": "ghcr.io/mariolonghi-com/household-spend-tracker:0.7.1",
+      "Volumes": {
+        "/var/lib/spend-tracker": {}
+      },
+      "WorkingDir": "/app",
+      "Entrypoint": [
+        "python",
+        "deploy/entrypoint.py"
+      ],
+      "Labels": {
+        "com.docker.compose.config-hash": "005d1a7a00cfd32ee03639a231beff7305427525f51720171e69e7a4e84066f4",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:0be22c13d7c126e17091d2a180ffb42638f02526d835a3c2d5fe727ed3c485db",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "spike157-app",
+        "com.docker.compose.project.config_files": "/Volumes/work/spike157/q5/compose.yaml",
+        "com.docker.compose.project.working_dir": "/Volumes/work/spike157/q5",
+        "com.docker.compose.service": "app",
+        "com.docker.compose.version": "5.5.1",
+        "dev.chainguard.image.title": "python",
+        "dev.chainguard.package.main": "",
+        "org.opencontainers.image.authors": "Chainguard Team https://www.chainguard.dev/",
+        "org.opencontainers.image.created": "2026-10-05T12:58:02Z",
+        "org.opencontainers.image.description": "A self-hosted, multi-currency spend tracker for one household",
+        "org.opencontainers.image.documentation": "https://github.com/MarioLonghi-com/household-spend-tracker/blob/main/deploy/DOCKER.md",
+        "org.opencontainers.image.licenses": "AGPL-3.0-or-later",
+        "org.opencontainers.image.revision": "987afefca1d1d372df676e338a3d1c43e9a62552",
+        "org.opencontainers.image.source": "https://github.com/MarioLonghi-com/household-spend-tracker",
+        "org.opencontainers.image.title": "Spend Tracker",
+        "org.opencontainers.image.url": "https://github.com/MarioLonghi-com/household-spend-tracker",
+        "org.opencontainers.image.vendor": "Chainguard",
+        "org.opencontainers.image.version": "v0.7.1",
+        "spendtracker.spike": "157"
+      }
+    },
+    "NetworkSettings": {
+      "SandboxID": "fd2caa3302957bb73b50757325f5bdd70487888e08eeb997c35b804dce9617a9",
+      "SandboxKey": "/var/run/docker/netns/fd2caa330295",
+      "Ports": {
+        "8848/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "8848"
+          }
+        ]
+      },
+      "Networks": {
+        "spike157-app_default": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "spike157-app-app-1",
+            "app"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "8278582afa9afd5ee1cf0c404fcfe9bb9ee5c8f607820a2048b252e9ce3cdbcf",
+          "EndpointID": "1b8af9b1a4afcb5ac4001aa453e56c8404698794c6ec77f21c6858654c28d34d",
+          "Gateway": "192.0.2.11",
+          "IPAddress": "192.0.2.12",
+          "MacAddress": "02:42:c0:00:02:0a",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "spike157-app-app-1",
+            "app",
+            "e45459fbcfcb"
+          ]
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,295 @@
+[
+  {
+    "Id": "e80c49eb404e1848c30773d5e4eee2d17cc3a74bf496c82dde044921f36d3708",
+    "Created": "2026-10-08T07:31:24.274160997Z",
+    "Path": "python",
+    "Args": [
+      "deploy/entrypoint.py"
+    ],
+    "State": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 319438,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-08T07:31:24.477231Z",
+      "FinishedAt": "0001-01-01T00:00:00Z",
+      "Health": {
+        "Status": "starting",
+        "FailingStreak": 0,
+        "Log": [
+          {
+            "Start": "2026-10-08T09:31:29.709394084+02:00",
+            "End": "2026-10-08T09:31:29.986870154+02:00",
+            "ExitCode": 1,
+            "Output": "Traceback (most recent call last):\n  File \"/usr/lib/python3.14/urllib/request.py\", line 1333, in do_open\n    h.request(req.get_method(), req.selector, req.data, headers,\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n              encode_chunked=req.has_header('Transfer-encoding'))\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/http/client.py\", line 1386, in request\n    self._send_request(method, url, body, headers, encode_chunked)\n    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/http/client.py\", line 1432, in _send_request\n    self.endheaders(body, encode_chunked=encode_chunked)\n    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/http/client.py\", line 1381, in endheaders\n    self._send_output(message_body, encode_chunked=encode_chunked)\n    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/http/client.py\", line 1141, in _send_output\n    self.send(msg)\n    ~~~~~~~~~^^^^^\n  File \"/usr/lib/python3.14/http/client.py\", line 1085, in send\n    self.connect()\n    ~~~~~~~~~~~~^^\n  File \"/usr/lib/python3.14/http/client.py\", line 1051, in connect\n    self.sock = self._create_connection(\n                ~~~~~~~~~~~~~~~~~~~~~~~^\n        (self.host,self.port), self.timeout, self.source_address)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/socket.py\", line 874, in create_connection\n    raise exceptions[0]\n  File \"/usr/lib/python3.14/socket.py\", line 859, in create_connection\n    sock.connect(sa)\n    ~~~~~~~~~~~~^^^^\nConnectionRefusedError: [Errno 111] Connection refused\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8848/api/health', timeout=4).status==200 else 1)\n                                             ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/urllib/request.py\", line 187, in urlopen\n    return opener.open(url, data, timeout)\n           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/urllib/request.py\", line 487, in open\n    response = self._open(req, data)\n  File \"/usr/lib/python3.14/urllib/request.py\", line 504, in _open\n    result = self._call_chain(self.handle_open, protocol, protocol +\n                              '_open', req)\n  File \"/usr/lib/python3.14/urllib/request.py\", line 464, in _call_chain\n    result = func(*args)\n  File \"/usr/lib/python3.14/urllib/request.py\", line 1362, in http_open\n    return self.do_open(http.client.HTTPConnection, req)\n           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/urllib/request.py\", line 1336, in do_open\n    raise URLError(err)\nurllib.error.URLError: <urlopen error [Errno 111] Connection refused>\n"
+          }
+        ]
+      }
+    },
+    "Image": "sha256:0dc478cbb3274b36aac15845f84bc7c1e0e97dc9654f5b491dc233613d8c62cf",
+    "ResolvConfPath": "/var/lib/docker/containers/e80c49eb404e1848c30773d5e4eee2d17cc3a74bf496c82dde044921f36d3708/resolv.conf",
+    "HostnamePath": "/var/lib/docker/containers/e80c49eb404e1848c30773d5e4eee2d17cc3a74bf496c82dde044921f36d3708/hostname",
+    "HostsPath": "/var/lib/docker/containers/e80c49eb404e1848c30773d5e4eee2d17cc3a74bf496c82dde044921f36d3708/hosts",
+    "LogPath": "",
+    "Name": "/spike157-app-1",
+    "RestartCount": 0,
+    "Driver": "overlayfs",
+    "Platform": "linux",
+    "MountLabel": "",
+    "ProcessLabel": "",
+    "AppArmorProfile": "docker-default",
+    "ExecIDs": null,
+    "HostConfig": {
+      "Binds": [
+        "spike157_ledger:/var/lib/spend-tracker:rw"
+      ],
+      "ContainerIDFile": "",
+      "LogConfig": {
+        "Type": "journald",
+        "Config": {
+          "tag": "{{.Name}}"
+        }
+      },
+      "NetworkMode": "spike157_default",
+      "PortBindings": {
+        "8848/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "18848"
+          }
+        ]
+      },
+      "RestartPolicy": {
+        "Name": "unless-stopped",
+        "MaximumRetryCount": 0
+      },
+      "AutoRemove": false,
+      "VolumeDriver": "",
+      "VolumesFrom": null,
+      "ConsoleSize": [
+        0,
+        0
+      ],
+      "CapAdd": null,
+      "CapDrop": [
+        "ALL"
+      ],
+      "CgroupnsMode": "private",
+      "Dns": null,
+      "DnsOptions": null,
+      "DnsSearch": null,
+      "ExtraHosts": [],
+      "GroupAdd": null,
+      "IpcMode": "private",
+      "Cgroup": "",
+      "Links": null,
+      "OomScoreAdj": 0,
+      "PidMode": "",
+      "Privileged": false,
+      "PublishAllPorts": false,
+      "ReadonlyRootfs": true,
+      "SecurityOpt": [
+        "no-new-privileges:true"
+      ],
+      "Tmpfs": {
+        "/tmp": ""
+      },
+      "UTSMode": "",
+      "UsernsMode": "",
+      "ShmSize": 67108864,
+      "Runtime": "runc",
+      "Isolation": "",
+      "CpuShares": 0,
+      "Memory": 805306368,
+      "NanoCpus": 0,
+      "CgroupParent": "",
+      "BlkioWeight": 0,
+      "BlkioWeightDevice": null,
+      "BlkioDeviceReadBps": null,
+      "BlkioDeviceWriteBps": null,
+      "BlkioDeviceReadIOps": null,
+      "BlkioDeviceWriteIOps": null,
+      "CpuPeriod": 0,
+      "CpuQuota": 0,
+      "CpuRealtimePeriod": 0,
+      "CpuRealtimeRuntime": 0,
+      "CpusetCpus": "",
+      "CpusetMems": "",
+      "Devices": null,
+      "DeviceCgroupRules": null,
+      "DeviceRequests": null,
+      "MemoryReservation": 0,
+      "MemorySwap": 1610612736,
+      "MemorySwappiness": null,
+      "OomKillDisable": null,
+      "PidsLimit": null,
+      "Ulimits": null,
+      "CpuCount": 0,
+      "CpuPercent": 0,
+      "IOMaximumIOps": 0,
+      "IOMaximumBandwidth": 0,
+      "MaskedPaths": [
+        "/proc/acpi",
+        "/proc/asound",
+        "/proc/interrupts",
+        "/proc/kcore",
+        "/proc/keys",
+        "/proc/latency_stats",
+        "/proc/sched_debug",
+        "/proc/scsi",
+        "/proc/timer_list",
+        "/proc/timer_stats",
+        "/sys/devices/virtual/powercap",
+        "/sys/firmware"
+      ],
+      "ReadonlyPaths": [
+        "/proc/bus",
+        "/proc/fs",
+        "/proc/irq",
+        "/proc/sys",
+        "/proc/sysrq-trigger"
+      ]
+    },
+    "Storage": {
+      "RootFS": {
+        "Snapshot": {
+          "Name": "overlayfs"
+        }
+      }
+    },
+    "Mounts": [
+      {
+        "Type": "volume",
+        "Name": "spike157_ledger",
+        "Source": "/var/lib/docker/volumes/spike157_ledger/_data",
+        "Destination": "/var/lib/spend-tracker",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "Config": {
+      "Hostname": "e80c49eb404e",
+      "Domainname": "",
+      "User": "65532:65532",
+      "AttachStdin": false,
+      "AttachStdout": true,
+      "AttachStderr": true,
+      "ExposedPorts": {
+        "8848/tcp": {}
+      },
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": [
+        "SPENDTRACKER_AUTO_MIGRATE=1",
+        "SPENDTRACKER_COOKIE_SECURE=on",
+        "PATH=/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin",
+        "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYTHONUNBUFFERED=1",
+        "SPENDTRACKER_DATA_DIR=/var/lib/spend-tracker"
+      ],
+      "Cmd": null,
+      "Healthcheck": {
+        "Test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8848/api/health', timeout=4).status==200 else 1)"
+        ],
+        "Interval": 30000000000,
+        "Timeout": 5000000000,
+        "StartPeriod": 20000000000,
+        "Retries": 3
+      },
+      "Image": "ghcr.io/mariolonghi-com/household-spend-tracker:0.8.0",
+      "Volumes": {
+        "/var/lib/spend-tracker": {}
+      },
+      "WorkingDir": "/app",
+      "Entrypoint": [
+        "python",
+        "deploy/entrypoint.py"
+      ],
+      "Labels": {
+        "com.docker.compose.config-hash": "29adce89f345651950750b525f59dd8769229c3aa4cca5a48ff317d4b175270d",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:0dc478cbb3274b36aac15845f84bc7c1e0e97dc9654f5b491dc233613d8c62cf",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "spike157",
+        "com.docker.compose.project.config_files": "/home/user/spike157-out/docker-rootful-debian13/project/compose.yaml",
+        "com.docker.compose.project.working_dir": "/home/user/spike157-out/docker-rootful-debian13/project",
+        "com.docker.compose.service": "app",
+        "com.docker.compose.version": "5.6.0",
+        "dev.chainguard.image.title": "python",
+        "dev.chainguard.package.main": "",
+        "org.opencontainers.image.authors": "Chainguard Team https://www.chainguard.dev/",
+        "org.opencontainers.image.created": "2026-10-06T19:04:03Z",
+        "org.opencontainers.image.description": "A self-hosted, multi-currency spend tracker for one household",
+        "org.opencontainers.image.documentation": "https://github.com/MarioLonghi-com/household-spend-tracker/blob/main/deploy/DOCKER.md",
+        "org.opencontainers.image.licenses": "AGPL-3.0-or-later",
+        "org.opencontainers.image.revision": "e4f252002fd6bd2d3c6c3265cbc883a1e660151e",
+        "org.opencontainers.image.source": "https://github.com/MarioLonghi-com/household-spend-tracker",
+        "org.opencontainers.image.title": "Spend Tracker",
+        "org.opencontainers.image.url": "https://github.com/MarioLonghi-com/household-spend-tracker",
+        "org.opencontainers.image.vendor": "Chainguard",
+        "org.opencontainers.image.version": "v0.8.0"
+      }
+    },
+    "NetworkSettings": {
+      "SandboxID": "883d361fdf893799251610d01d02c7f7f627cff34bc454b889ce99247758312f",
+      "SandboxKey": "/var/run/docker/netns/883d361fdf89",
+      "Ports": {
+        "8848/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "18848"
+          }
+        ]
+      },
+      "Networks": {
+        "spike157_default": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": [
+            "spike157-app-1",
+            "app"
+          ],
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "4618bc97b928d55429bb6683ef262179ebda1a1b8576dee428401116fd64f9e5",
+          "EndpointID": "73131331b1588ba4621fcc6ca1eec5827e968a705c2412b07c9c4c401e9ad8b6",
+          "Gateway": "192.0.2.10",
+          "IPAddress": "192.0.2.11",
+          "MacAddress": "02:42:c0:00:02:0a",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "spike157-app-1",
+            "app",
+            "e80c49eb404e"
+          ]
+        }
+      }
+    },
+    "ImageManifestDescriptor": {
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "digest": "sha256:0dc478cbb3274b36aac15845f84bc7c1e0e97dc9654f5b491dc233613d8c62cf",
+      "size": 4721,
+      "platform": {
+        "architecture": "amd64",
+        "os": "linux"
+      }
+    }
+  }
+]
