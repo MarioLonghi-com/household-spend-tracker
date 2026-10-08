@@ -158,8 +158,7 @@ history this repository does not have.
   verified. Any doubt is a refusal and nothing skips it. sigstore lives in a
   lock of its own, `requirements-updater.txt`, never in the app's runtime
   lock. Tested offline against the real 0.7.0, 0.7.1 and 0.8.0 bundles and
-  tampered copies of them. Nothing calls it yet.
-## 0.8.0 — 2026-10-08
+  tampered copies of them. Nothing calls it yet.## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.
 
