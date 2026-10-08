@@ -195,6 +195,27 @@ history this repository does not have.
   the updater against a real Docker Engine. No image or compose service runs
   the updater yet (#164).
 
+- **The self-updater hands over to its successor** (#162). When an update
+  brings a newer updater, the running one verifies it, starts it beside
+  itself as a copy of its own container, and lets it prove it can work --
+  the engine socket, the project's containers, a file written and read back
+  in the `update` volume, and its own image digest -- before stepping aside.
+  The newer updater **goes first**, before the app is stopped, and runs the
+  rest of the update; if it cannot, nothing has been stopped, the old one
+  runs the update and tries again afterwards. The old updater stays on
+  standby for ten minutes and takes back over if the new one stops or falls
+  silent -- rolling back, rather than finishing, an update the newer one had
+  started -- then stops itself and stays as `<name>-previous`. Started by
+  hand from Docker Desktop or Podman Desktop, a `-previous` updater takes over
+  from a canonical one that has been silent for two minutes, and otherwise
+  leaves it alone. After an engine restart, or either updater dying at any
+  point, exactly one of them carries on. *Update the updater only* now works:
+  it verifies and pulls the updater image of a newer release alone, refuses
+  one that does not speak the app's protocol, changes only the updater's
+  line in the pin, and still works when the engine has moved past the
+  updater's tested API versions. The updater is never replaced by an older
+  one. No image or compose service runs the updater yet (#164).
+
 ## 0.8.0 — 2026-10-08
 
 **Reversible: lossy** — one migration.

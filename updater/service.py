@@ -12,6 +12,17 @@ The engine going away mid-apply (`EngineUnavailable`) leaves the journal as
 it was; the next tick that reaches the engine resumes it. A fresh start of
 the updater is an engine restart too (8.6): `startup` records the time since
 the journal's last step as a gap, so no deadline counts it.
+
+**Only the current updater answers (6.6).** The handover (`kit.handover`)
+says which side of a handover this updater is on. While it is a successor
+proving itself, a standby watching its successor, or a `-previous` watching
+the canonical updater, a tick is the handover's and no request is taken.
+When it becomes current -- taking over at H5, taking back over, or taking
+over from a broken updater -- it resumes the applies the other one left, by
+their journals.
+
+`update_updater` (C2) runs `prepare.updater_only` and then the handover; only
+the pin's updater line changes.
 """
 
 from __future__ import annotations
