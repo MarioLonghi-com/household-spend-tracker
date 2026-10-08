@@ -235,10 +235,11 @@ From your compose directory (`deploy/tailnet` for section 3):
    `spend-tracker_ledger`. Keeping `ts-state` keeps the node's name and
    address, so nothing changes on the tailnet.
 
-6. **Start it, creating a new schema, and check it is empty:**
+6. **Start it, and check it is empty.** The new volume has no tables, so the
+   start creates the schema by itself:
 
    ```bash
-   SPENDTRACKER_AUTO_MIGRATE=1 docker compose up -d
+   docker compose up -d
    docker compose logs app | grep -A2 "one-time token"
    ```
 
