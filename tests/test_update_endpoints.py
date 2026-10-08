@@ -838,8 +838,12 @@ def test_the_check_asks_github_for_releases_and_not_tags():
 
 @pytest.mark.repo_wide
 def test_the_app_never_imports_the_updater_which_its_image_does_not_contain():
+    # The app's stage only: the same Dockerfile builds the updater's own
+    # image as its `updater` target (#164), which copies updater/ by design.
     dockerfile = (ROOT / "Dockerfile").read_text()
-    assert not re.search(r"^COPY\s+updater", dockerfile, re.M), (
+    app_stage = dockerfile[dockerfile.index("AS runtime\n") :]
+    assert re.search(r"^COPY\s+updater", dockerfile, re.M), "the updater target is gone; re-read this test"
+    assert not re.search(r"^COPY\s+updater", app_stage, re.M), (
         "the app image now carries updater/; this test's reason has changed"
     )
     importing = [
