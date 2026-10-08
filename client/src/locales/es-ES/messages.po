@@ -17,6 +17,10 @@ msgstr "Creando…"
 msgid "Application management"
 msgstr "Gestión de la aplicación"
 
+#: src/screens/Transfer.tsx
+msgid "To"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "New password"
@@ -420,6 +424,10 @@ msgstr "Todo lo que un programa haga mal tiene que poder deshacerlo una persona,
 msgid "or"
 msgstr "o"
 
+#: src/screens/Transfer.tsx
+msgid "Add transfer"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "receipt filer"
@@ -505,6 +513,11 @@ msgstr "Listo"
 msgid "Those two don't match."
 msgstr "No coinciden."
 
+#. placeholder {0}: to!.currency
+#: src/screens/Transfer.tsx
+msgid "Amount arriving ({0})"
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -520,6 +533,10 @@ msgstr "Abrir el menú"
 #, fuzzy
 msgid "Reset: password and authenticator"
 msgstr "Restablecimiento: contraseña y aplicación de autenticación"
+
+#: src/screens/Transfer.tsx
+msgid "From"
+msgstr ""
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -608,6 +625,13 @@ msgstr "un hogar"
 msgid "Code"
 msgstr "Código"
 
+#. placeholder {0}: format(out, from.currency)
+#. placeholder {1}: from.name
+#. placeholder {2}: to?.name
+#: src/screens/Transfer.tsx
+msgid "<0>{0}</0> leaves {1} and the same arrives in {2}."
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "what makes a good one"
@@ -693,6 +717,14 @@ msgstr "La contraseña sola no puede sustituir tu segundo factor; si pudiera, no
 msgid "{inviter} invited you to {PRODUCT} as an owner."
 msgstr "{inviter} te ha invitado a {PRODUCT} como propietario."
 
+#: src/screens/Transfer.tsx
+msgid "Pick two different accounts — money cannot move to itself."
+msgstr ""
+
+#: src/screens/Transfer.tsx
+msgid "No minus signs — the direction is the two accounts above."
+msgstr ""
+
 #: src/components/SignInNotice.tsx
 #, fuzzy
 msgid "Recent sign-in changes"
@@ -722,6 +754,10 @@ msgstr "Restablecer tu inicio de sesión"
 #, fuzzy
 msgid "Set up {PRODUCT}"
 msgstr "Configurar {PRODUCT}"
+
+#: src/screens/Transfer.tsx
+msgid "Amount"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -840,6 +876,10 @@ msgstr "Código de recuperación"
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr "Todavía tienes 1 llave de acceso, y un código de recuperación no las desactiva. Si una estaba en el dispositivo que perdiste, quítala en Métodos de inicio de sesión de tu perfil: tu nombre en el menú."
 
+#: src/screens/Transfer.tsx
+msgid "Memo"
+msgstr ""
+
 #: src/App.tsx
 #, fuzzy
 msgid "{waiting} waiting"
@@ -864,6 +904,10 @@ msgstr "Invitación"
 #, fuzzy
 msgid "{user} set up this instance as its owner"
 msgstr "{user} configuró esta instancia como propietario"
+
+#: src/screens/Transfer.tsx
+msgid "This writes both rows as one act, so undoing it from History takes both back together."
+msgstr ""
 
 #: src/App.tsx
 #, fuzzy
@@ -922,6 +966,10 @@ msgstr "Inicias sesión con una llave de acceso, o con tu contraseña y el códi
 #, fuzzy
 msgid "Signed in as <0>{0}</0> ({1})."
 msgstr "Sesión iniciada como <0>{0}</0> ({1})."
+
+#: src/screens/Transfer.tsx
+msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
+msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
@@ -989,6 +1037,10 @@ msgstr "Nueva aplicación de autenticación"
 msgid "Your account is under your name in the menu."
 msgstr "Tu cuenta está en tu nombre, en el menú."
 
+#: src/screens/Transfer.tsx
+msgid "Date"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "The server gave {user} a new authenticator"
@@ -1018,6 +1070,11 @@ msgstr "El código de recuperación con el que iniciaste sesión lo cubre, así 
 #, fuzzy
 msgid "If you did not expect this, tell an owner of this instance before you go on."
 msgstr "Si no lo esperabas, avisa a un propietario de esta instancia antes de seguir."
+
+#. placeholder {0}: from.currency
+#: src/screens/Transfer.tsx
+msgid "Amount leaving ({0})"
+msgstr ""
 
 #: src/App.tsx
 #, fuzzy
@@ -1463,6 +1520,10 @@ msgstr "este dispositivo"
 msgid "Keys for programs"
 msgstr "Claves para programas"
 
+#: src/screens/Transfer.tsx
+msgid "12,34"
+msgstr ""
+
 #. placeholder {0}: recovery.data.unused
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1494,6 +1555,12 @@ msgstr "Quién la va a usar (opcional)"
 #, fuzzy
 msgid "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
 msgstr "Todos los códigos que tienes ahora, usados o no, dejan de funcionar y diez nuevos los sustituyen. No se cierra la sesión de nadie."
+
+#. placeholder {0}: to!.currency
+#. placeholder {1}: from!.currency
+#: src/screens/Transfer.tsx
+msgid "That works out at <0>{impliedRate}</0> {0} per {1}."
+msgstr ""
 
 #. placeholder {0}: tokenPath ?? t`the data directory`
 #: src/screens/Setup.tsx
@@ -1578,6 +1645,10 @@ msgstr "Códigos de recuperación"
 msgid "Set up again"
 msgstr "Volver a configurar"
 
+#: src/screens/Transfer.tsx
+msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
+msgstr ""
+
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
 msgid "<0>secret.key</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Putting the original key back ends this for everyone who has not re-enrolled yet."
@@ -1646,6 +1717,10 @@ msgstr "Códigos nuevos"
 msgid "Somebody made {user} an owner"
 msgstr "Alguien hizo propietario a {user}"
 
+#: src/screens/Transfer.tsx
+msgid "Add transfer between accounts"
+msgstr ""
+
 #. placeholder {0}: formatInstant(key.revoked_at)
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1682,6 +1757,10 @@ msgstr "Ya la he guardado"
 #, fuzzy
 msgid "{by} re-enabled {user}"
 msgstr "{by} reactivó a {user}"
+
+#: src/screens/Transfer.tsx
+msgid "Transfer"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy

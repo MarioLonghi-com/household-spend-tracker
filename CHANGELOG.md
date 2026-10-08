@@ -168,6 +168,10 @@ history this repository does not have.
 
 ### Changed
 
+- **The transfer panel's words are in the catalogs.** English is unchanged;
+  a test renders it in the `en-XA` pseudo-locale and finds no English left.
+  (#55)
+
 - **Draft translations of the first screens** in pt-BR, es-ES and sv-SE:
   every message extracted so far, each marked `#, fuzzy` until a native
   speaker reviews it (#58). None is served or selectable; a test checks every

@@ -29,6 +29,7 @@ vi.mock("../lib/passkeys", async (importOriginal) => ({
 
 import { api } from "../lib/api";
 import { activate } from "../lib/i18n";
+import { untranslated } from "../test-pseudo";
 import { RecoveryCodeSheet } from "../components/RecoveryCodes";
 import { RecoveryModeBanner } from "../components/RecoveryModeBanner";
 import { ReenrolmentDue } from "../components/ReenrolmentDue";
@@ -48,48 +49,6 @@ const ROBIN: User = {
   role: "owner",
   disabled_at: null,
 };
-
-/** Shown as typed or as sent, in every language. */
-const DATA = new Set([
-  "Spend",
-  "Tracker",
-  "Robin",
-  "Sam",
-  "robin@example.com",
-  "Casa",
-  "Doe",
-  "Laptop",
-  "SPENDTRACKER_SECRET_KEY",
-  "secret.key",
-  "ABCDEFGH",
-  "Claude",
-  "Desktop",
-  "HTTPS",
-  // Lists are joined by `listText` (Intl's own conjunction outside English),
-  // not by the catalog, so the pseudo-locale cannot accent it.
-  "and",
-]);
-
-/** Words of plain ASCII letters, from the text and the labels people are given. */
-function untranslated(root: HTMLElement): string[] {
-  const shown: string[] = [];
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    // Code to type, not words to read.
-    if ((node.parentElement?.closest(".mono, .codes, svg") ?? null) !== null) continue;
-    shown.push(node.textContent ?? "");
-  }
-  for (const element of Array.from(root.querySelectorAll("[aria-label], [title], [placeholder]"))) {
-    for (const name of ["aria-label", "title", "placeholder"]) {
-      const value = element.getAttribute(name);
-      if (value) shown.push(value);
-    }
-  }
-  return shown
-    .map((text) => text.replace(/\S+@\S+/g, " "))
-    .flatMap((text) => text.split(/[\s.,;:!?()"'…·—–/-]+/))
-    .filter((word) => /^[A-Za-z]{3,}$/.test(word) && !DATA.has(word));
-}
 
 function withQueries(children: ReactNode) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });

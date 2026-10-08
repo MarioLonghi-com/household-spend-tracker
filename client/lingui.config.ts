@@ -26,7 +26,7 @@ export default defineConfig({
     {
       path: "<rootDir>/src/locales/{locale}/messages",
       include: ["<rootDir>/src"],
-      exclude: ["**/*.test.ts", "**/*.test.tsx", "**/test-setup.ts"],
+      exclude: ["**/*.test.ts", "**/*.test.tsx", "**/test-setup.ts", "**/test-pseudo.ts"],
     },
   ],
   // Without line numbers, so moving code does not churn every catalog, and

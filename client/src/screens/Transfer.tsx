@@ -20,6 +20,7 @@ import { exponent, format, parse } from "../lib/money";
 import { localToday } from "../lib/time";
 import type { Account, Household } from "../lib/types";
 import { formatFixed } from "../lib/locale";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export function Transfer({
   household,
@@ -32,6 +33,7 @@ export function Transfer({
   onClose: () => void;
   onDone: () => void;
 }) {
+  const { t } = useLingui();
   const open = useMemo(() => accounts.filter((one) => !one.closed), [accounts]);
 
   const [fromId, setFromId] = useState(open[0]?.id ?? "");
@@ -80,19 +82,19 @@ export function Transfer({
 
   if (open.length < 2) {
     return (
-      <Panel title="Add transfer" onClose={onClose}>
+      <Panel title={t`Add transfer`} onClose={onClose}>
         <p className="muted small">
-          A transfer needs two open accounts. Add another on the Accounts screen first.
+          <Trans>A transfer needs two open accounts. Add another on the Accounts screen first.</Trans>
         </p>
       </Panel>
     );
   }
 
   return (
-    <Panel title="Add transfer between accounts" onClose={onClose}>
+    <Panel title={t`Add transfer between accounts`} onClose={onClose}>
       <Problem error={send.error} />
 
-      <Field label="From">
+      <Field label={t`From`}>
         <select value={fromId} onChange={(e) => setFromId(e.target.value)} autoFocus>
           {open.map((one) => (
             <option key={one.id} value={one.id}>
@@ -102,7 +104,7 @@ export function Transfer({
         </select>
       </Field>
       <p />
-      <Field label="To">
+      <Field label={t`To`}>
         <select value={toId} onChange={(e) => setToId(e.target.value)}>
           {open.map((one) => (
             <option key={one.id} value={one.id}>
@@ -112,72 +114,82 @@ export function Transfer({
         </select>
       </Field>
       {sameAccount ? (
-        <p className="small neg">Pick two different accounts — money cannot move to itself.</p>
+        <p className="small neg">
+          <Trans>Pick two different accounts — money cannot move to itself.</Trans>
+        </p>
       ) : (
         <p />
       )}
 
-      <Field label="Date">
+      <Field label={t`Date`}>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       </Field>
       <p />
 
-      <Field label={from ? `Amount leaving (${from.currency})` : "Amount"}>
+      <Field label={from ? t`Amount leaving (${from.currency})` : t`Amount`}>
         <input
           value={leaving}
           onChange={(e) => setLeaving(e.target.value)}
           inputMode="decimal"
-          placeholder="12,34"
+          placeholder={t`12,34`}
         />
       </Field>
       {crossCurrency ? (
         <>
           <p className="muted small">
-            No minus signs — the direction is the two accounts above.
+            <Trans>No minus signs — the direction is the two accounts above.</Trans>
           </p>
-          <Field label={`Amount arriving (${to!.currency})`}>
+          <Field label={t`Amount arriving (${to!.currency})`}>
             <input
               value={arriving}
               onChange={(e) => setArriving(e.target.value)}
               inputMode="decimal"
-              placeholder="12,34"
+              placeholder={t`12,34`}
             />
           </Field>
           <p className="muted small">
-            Both, because the two accounts are in different currencies and we will not invent a
-            rate — take the figure your bank actually credited.
+            <Trans>
+              Both, because the two accounts are in different currencies and we will not invent a
+              rate — take the figure your bank actually credited.
+            </Trans>
             {impliedRate ? (
               <>
                 {" "}
-                That works out at <span className="mono">{impliedRate}</span> {to!.currency} per{" "}
-                {from!.currency}.
+                <Trans>
+                  That works out at <span className="mono">{impliedRate}</span> {to!.currency} per{" "}
+                  {from!.currency}.
+                </Trans>
               </>
             ) : null}
           </p>
         </>
       ) : (
         <p className="muted small">
-          No minus signs — the direction is the two accounts above.
+          <Trans>No minus signs — the direction is the two accounts above.</Trans>
           {out !== null && from ? (
             <>
               {" "}
-              <span className="mono">{format(out, from.currency)}</span> leaves {from.name} and the
-              same arrives in {to?.name}.
+              <Trans>
+                <span className="mono">{format(out, from.currency)}</span> leaves {from.name} and
+                the same arrives in {to?.name}.
+              </Trans>
             </>
           ) : null}
         </p>
       )}
 
-      <Field label="Memo">
+      <Field label={t`Memo`}>
         <input value={memo} onChange={(e) => setMemo(e.target.value)} />
       </Field>
       <p />
 
       <button className="primary" disabled={!ready || send.isPending} onClick={() => send.mutate()}>
-        Transfer
+        <Trans>Transfer</Trans>
       </button>
       <p className="muted small" style={{ marginTop: 10 }}>
-        This writes both rows as one act, so undoing it from History takes both back together.
+        <Trans>
+          This writes both rows as one act, so undoing it from History takes both back together.
+        </Trans>
       </p>
     </Panel>
   );
