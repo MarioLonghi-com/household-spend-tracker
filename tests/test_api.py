@@ -95,7 +95,7 @@ def test_a_trusted_browser_is_not_asked_for_a_code(client):
 def test_an_untrusted_browser_is_asked_for_a_code(client):
     result = _setup_owner(client)
     client.delete("/api/session", headers=HEADERS)
-    client.cookies.delete(cookie_names.device_name())
+    client.cookies.delete(cookie_names.device_name("testserver"))
 
     first = client.post(
         "/api/session",
@@ -896,7 +896,7 @@ def test_five_wrong_passwords_do_lock_that_one_account(client):
     """
     _setup_owner(client)
     client.delete("/api/session", headers=HEADERS)
-    client.cookies.delete(cookie_names.device_name())
+    client.cookies.delete(cookie_names.device_name("testserver"))
 
     for _ in range(5):
         assert (
@@ -1043,7 +1043,7 @@ def test_a_recovery_code_gets_you_back_in_without_the_authenticator(client):
     assert len(codes) == 10
 
     client.delete("/api/session", headers=HEADERS)
-    client.cookies.delete(cookie_names.device_name())
+    client.cookies.delete(cookie_names.device_name("testserver"))
 
     first = client.post(
         "/api/session",
@@ -1063,7 +1063,7 @@ def test_a_recovery_code_works_once(client):
     codes = result["recovery_codes"]
 
     def spend(code: str):
-        client.cookies.delete(cookie_names.device_name())
+        client.cookies.delete(cookie_names.device_name("testserver"))
         client.post(
             "/api/session",
             json={"email": "janedoe@gmail.com", "password": PASSWORD},
@@ -1101,7 +1101,7 @@ def test_redeeming_a_recovery_code_forgets_every_trusted_browser(client):
     ), "precondition: this browser is trusted"
 
     client.delete("/api/session", headers=HEADERS)
-    client.cookies.delete(cookie_names.device_name())
+    client.cookies.delete(cookie_names.device_name("testserver"))
     client.post(
         "/api/session",
         json={"email": "janedoe@gmail.com", "password": PASSWORD},
@@ -1252,7 +1252,7 @@ def test_a_half_finished_sign_in_cannot_be_replayed(client):
     """
     result = _setup_owner(client)
     client.delete("/api/session", headers=HEADERS)
-    client.cookies.delete(cookie_names.device_name())
+    client.cookies.delete(cookie_names.device_name("testserver"))
 
     first = client.post(
         "/api/session",
@@ -1260,7 +1260,7 @@ def test_a_half_finished_sign_in_cannot_be_replayed(client):
         headers=HEADERS,
     )
     assert first.json()["needs_code"] is True
-    stolen = client.cookies.get(cookie_names.pending_name())
+    stolen = client.cookies.get(cookie_names.pending_name("testserver"))
     assert stolen, "the half-finished sign-in should set a cookie"
 
     code = pyotp.TOTP(result["secret"]).at(int(time.time()) + 30)
@@ -1273,7 +1273,7 @@ def test_a_half_finished_sign_in_cannot_be_replayed(client):
 
     # Somebody else's browser, holding a copy of the cookie.
     client.cookies.clear()
-    client.cookies.set(cookie_names.pending_name(), stolen, domain="testserver")
+    client.cookies.set(cookie_names.pending_name("testserver"), stolen, domain="testserver")
     replayed = client.post(
         "/api/session/code",
         json={"code": pyotp.TOTP(result["secret"]).at(int(time.time()) + 60)},
@@ -1287,7 +1287,7 @@ def test_a_wrong_code_spends_the_pending_sign_in_too(client):
     """One attempt per half-finished sign-in, not five minutes of them."""
     result = _setup_owner(client)
     client.delete("/api/session", headers=HEADERS)
-    client.cookies.delete(cookie_names.device_name())
+    client.cookies.delete(cookie_names.device_name("testserver"))
 
     client.post(
         "/api/session",
@@ -1666,7 +1666,7 @@ def test_the_snapshot_redacts_a_database_with_several_of_everything(client, tmp_
     _setup_owner(client)
     # Three sessions, three devices, three invitations, ten recovery codes.
     for _ in range(2):
-        client.cookies.delete(cookie_names.session_name())
+        client.cookies.delete(cookie_names.session_name("testserver"))
         client.post(
             "/api/session",
             json={"email": "janedoe@gmail.com", "password": PASSWORD},
