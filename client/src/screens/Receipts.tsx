@@ -39,6 +39,8 @@ import {
 } from "../components/Receipts";
 import { RowPicker } from "../components/RowPicker";
 import type { Household, Receipt } from "../lib/types";
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 type Filter = "unattached" | "attached" | "all";
 
@@ -146,9 +148,10 @@ export function Receipts({ household }: { household: Household }) {
       setConfirming(false);
       setPicked(new Set());
       toasts.say(
-        gone.length === 1
-          ? "1 receipt deleted. The History screen can put it back."
-          : `${gone.length} receipts deleted, as one act. The History screen can put them all back.`,
+        plural(gone.length, {
+          one: "1 receipt deleted. The History screen can put it back.",
+          other: `${gone.length} receipts deleted, as one act. The History screen can put them all back.`,
+        }),
       );
       refresh();
     },
@@ -156,11 +159,13 @@ export function Receipts({ household }: { household: Household }) {
 
   return (
     <div>
-      <h1>Receipts</h1>
+      <h1><Trans comment="Screen title on the receipts: noun, photos or PDFs of receipts. See GLOSSARY.md">Receipts</Trans></h1>
       <p className="muted small">
-        Anything without a transaction waits here. Photograph a receipt at the till and
-        match it when the statement arrives — that is the ordinary way round, not a
-        mistake to be cleared.
+        <Trans>
+          Anything without a transaction waits here. Photograph a receipt at the till and
+          match it when the statement arrives — that is the ordinary way round, not a
+          mistake to be cleared.
+        </Trans>
       </p>
 
       <div className="card">
@@ -183,7 +188,7 @@ export function Receipts({ household }: { household: Household }) {
                   setPicked(new Set());
                 }}
               >
-                {one === "unattached" ? "Inbox" : one === "attached" ? "Matched" : "All"}
+                {one === "unattached" ? t({ message: "Inbox", comment: "Filter button on the Receipts screen: show the receipts not on a transaction yet" }) : one === "attached" ? t({ message: "Matched", comment: "Filter button on the Receipts screen: show the receipts already on a transaction" }) : t({ message: "All", comment: "Button on the receipts" })}
               </button>
             ))}
           </div>
@@ -195,13 +200,13 @@ export function Receipts({ household }: { household: Household }) {
                 aria-pressed={view === one}
                 onClick={() => setView(one)}
               >
-                {one === "grid" ? "Thumbnails" : "List"}
+                {one === "grid" ? t({ message: "Thumbnails", comment: "Button on the receipts" }) : t({ message: "List", comment: "Button on the receipts" })}
               </button>
             ))}
           </div>
           <ReceiptDrop
             target={{ householdId: household.id }}
-            label="Add receipts"
+            label={t({ message: "Add receipts", comment: "Button on the receipts" })}
             icon="＋"
             primary
             onDone={refresh}
@@ -211,10 +216,10 @@ export function Receipts({ household }: { household: Household }) {
         {picked.size > 0 && (
           <div className="banner info">
             <div>
-              <strong>
-                {picked.size} selected.
-              </strong>{" "}
-              Deleting them is one act, so one undo brings the whole selection back.
+              <Trans>
+                <strong>{picked.size} selected.</strong> Deleting them is one act, so one undo
+                brings the whole selection back.
+              </Trans>
             </div>
             <div className="row" style={{ marginTop: 8, gap: 8 }}>
               <button
@@ -222,10 +227,15 @@ export function Receipts({ household }: { household: Household }) {
                 disabled={removeMany.isPending}
                 onClick={() => setConfirming(true)}
               >
-                Delete {picked.size === 1 ? "1 receipt" : `${picked.size} receipts`}
+                {plural(picked.size, {
+                  one: "Delete 1 receipt",
+                  other: `Delete ${picked.size} receipts`,
+                })}
               </button>
               <button className="link" onClick={() => setPicked(new Set())}>
-                Clear selection
+                <Trans comment="Button on the receipts">
+                  Clear selection
+                </Trans>
               </button>
             </div>
           </div>
@@ -236,8 +246,8 @@ export function Receipts({ household }: { household: Household }) {
         {rows.length === 0 ? (
           <Empty>
             {filter === "unattached"
-              ? "Nothing waiting. Every receipt is on a transaction."
-              : "No receipts here yet."}
+              ? t`Nothing waiting. Every receipt is on a transaction.`
+              : t`No receipts here yet.`}
           </Empty>
         ) : view === "grid" ? (
           <div className="receipt-grid">
@@ -256,13 +266,15 @@ export function Receipts({ household }: { household: Household }) {
                       checked={picked.has(one.id)}
                       onChange={() => toggle(one.id)}
                     />
-                    <span className="sr-only">Select the receipt from {when}</span>
+                    <span className="sr-only">
+                      <Trans>Select the receipt from {when}</Trans>
+                    </span>
                   </label>
                   <button
                     type="button"
                     className="card-open"
                     onClick={() => setOpened(one)}
-                    aria-label={`Open the receipt from ${when}`}
+                    aria-label={t`Open the receipt from ${when}`}
                   >
                     <img src={`/api/receipts/${one.id}/thumb`} alt="" loading="lazy" />
                   </button>
@@ -282,31 +294,33 @@ export function Receipts({ household }: { household: Household }) {
                       type="checkbox"
                       checked={allShown}
                       onChange={toggleAll}
-                      aria-label="Select every receipt shown"
+                      aria-label={t`Select every receipt shown`}
                     />
                   </th>
                   {/* The picture is the row, not a fact about it, so it has
                       nothing to sort by -- the facts it carries are the three
                       headings after it. */}
                   <th className="thumb-column">
-                    <span className="sr-only">Receipt</span>
+                    <span className="sr-only">
+                      <Trans comment="Screen-reader text on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md">Receipt</Trans>
+                    </span>
                   </th>
                   <SortHeading
-                    label="Taken"
+                    label={t({ message: "Taken", comment: "Column heading on the receipts" })}
                     column="taken"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label="Receipt notes"
+                    label={t({ message: "Receipt notes", comment: "Column heading on the receipts" })}
                     column="note"
                     sort={order.sort}
                     direction={order.direction}
                     onSort={order.onSort}
                   />
                   <SortHeading
-                    label="Size"
+                    label={t({ message: "Size", comment: "Column heading on the receipts: noun, size of a file" })}
                     column="size"
                     sort={order.sort}
                     direction={order.direction}
@@ -314,7 +328,7 @@ export function Receipts({ household }: { household: Household }) {
                     align="right"
                   />
                   <SortHeading
-                    label="Where"
+                    label={t({ message: "Where", comment: "Column heading on the receipts: noun, where it is" })}
                     column="where"
                     sort={order.sort}
                     direction={order.direction}
@@ -333,24 +347,24 @@ export function Receipts({ household }: { household: Household }) {
                         type="checkbox"
                         checked={picked.has(one.id)}
                         onChange={() => toggle(one.id)}
-                        aria-label={`Select the receipt from ${(one.captured_at ?? one.created_at).slice(0, 10)}`}
+                        aria-label={t`Select the receipt from ${(one.captured_at ?? one.created_at).slice(0, 10)}`}
                         style={{ width: "auto" }}
                       />
                     </td>
-                    <td className="thumb-column" data-label="Receipt">
+                    <td className="thumb-column" data-label={t({ message: "Receipt", comment: "Column name shown beside a value on phones on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md" })}>
                       <ReceiptPeek receipt={one} onOpen={() => setOpened(one)} />
                     </td>
-                    <td data-label="Taken" data-detail-first="true">
+                    <td data-label={t({ message: "Taken", comment: "Column name shown beside a value on phones on the receipts" })} data-detail-first="true">
                       {(one.captured_at ?? one.created_at).slice(0, 10)}
                       {one.captured_at ? null : (
-                        <span className="muted small"> (uploaded)</span>
+                        <span className="muted small"> {t({ message: "(uploaded)", comment: "Table cell on the receipts" })}</span>
                       )}
                     </td>
-                    <td data-label="Receipt notes" data-primary="true">
+                    <td data-label={t({ message: "Receipt notes", comment: "Column name shown beside a value on phones on the receipts" })} data-primary="true">
                       <NoteCell
                         receipt={one}
                         onSaved={() => {
-                          toasts.say("Receipt notes saved.");
+                          toasts.say(t`Receipt notes saved.`);
                           void client.invalidateQueries({ queryKey: ["receipts"] });
                         }}
                       />
@@ -358,8 +372,8 @@ export function Receipts({ household }: { household: Household }) {
                     <td className="amount" data-figure="true">
                       {sizeText(one.download_bytes)}
                     </td>
-                    <td data-label="Where" className="small muted">
-                      {one.transaction_id ? "On a transaction" : "Inbox"}
+                    <td data-label={t({ message: "Where", comment: "Column name shown beside a value on phones on the receipts: noun, where it is" })} className="small muted">
+                      {one.transaction_id ? t`On a transaction` : t({ message: "Inbox", comment: "Filter button on the Receipts screen: show the receipts not on a transaction yet" })}
                     </td>
                   </tr>
                 ))}
@@ -370,18 +384,19 @@ export function Receipts({ household }: { household: Household }) {
       </div>
 
       {confirming && (
-        <Dialog title="Delete these receipts?" onClose={() => setConfirming(false)}>
+        <Dialog title={t`Delete these receipts?`} onClose={() => setConfirming(false)}>
           <p>
             <strong>
-              {picked.size === 1
-                ? "One receipt"
-                : `${picked.size} receipts`}{" "}
-              will be deleted.
+              {plural(picked.size, {
+                one: "One receipt will be deleted.",
+                other: `${picked.size} receipts will be deleted.`,
+              })}
             </strong>{" "}
-            {picked.size === 1 ? "It goes" : "They go"} as one act, so the History
-            screen puts {picked.size === 1 ? "it" : "them all"} back in one undo. The
-            picture itself is kept for a day after nothing points at it, which is what
-            makes that undo work.
+            {plural(picked.size, {
+              one: "It goes as one act, so the History screen puts it back in one undo.",
+              other: "They go as one act, so the History screen puts them all back in one undo.",
+            })}{" "}
+            {t`The picture itself is kept for a day after nothing points at it, which is what makes that undo work.`}
           </p>
           <div className="dialog-choices">
             <button
@@ -390,10 +405,12 @@ export function Receipts({ household }: { household: Household }) {
               onClick={() => removeMany.mutate([...picked])}
             >
               {removeMany.isPending
-                ? "Deleting…"
-                : `Delete ${picked.size === 1 ? "it" : `all ${picked.size}`}`}
+                ? t({ message: "Deleting…", comment: "Button on the receipts" })
+                : plural(picked.size, { one: "Delete it", other: `Delete all ${picked.size}` })}
             </button>
-            <button onClick={() => setConfirming(false)}>Keep them</button>
+            <button onClick={() => setConfirming(false)}>
+              <Trans comment="Button on the receipts">Keep them</Trans>
+            </button>
           </div>
           <Problem error={removeMany.error} />
         </Dialog>
@@ -465,13 +482,17 @@ function NoteCell({
         onKeyDown={(event) => {
           if (event.key === "Enter") event.currentTarget.blur();
         }}
-        placeholder="What was it for?"
-        aria-label="Receipt notes"
+        placeholder={t`What was it for?`}
+        aria-label={t({ message: "Receipt notes", comment: "Screen-reader name on the receipts" })}
       />
       {save.isPending ? (
-        <span className="small muted">saving…</span>
+        <span className="small muted">
+          <Trans comment="Text on the receipts">saving…</Trans>
+        </span>
       ) : save.isError ? (
-        <span className="small danger-text">not saved — leave the field to try again</span>
+        <span className="small danger-text">
+          <Trans>not saved — leave the field to try again</Trans>
+        </span>
       ) : null}
     </span>
   );
@@ -512,7 +533,7 @@ function ReceiptPanel({
   });
 
   return (
-    <Panel title={receipt.download_name.split("/").pop() ?? "Receipt"} onClose={onClose}>
+    <Panel title={receipt.download_name.split("/").pop() ?? t({ message: "Receipt", comment: "Text in a panel on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md" })} onClose={onClose}>
       <Problem error={save.error ?? remove.error ?? detach.error} />
 
       <ReceiptFrame receipt={receipt} onEnlarge={() => setEnlarged(true)} />
@@ -520,9 +541,11 @@ function ReceiptPanel({
       <p className="small muted" style={{ marginTop: 8 }}>
         {sizeText(receipt.download_bytes)} ·{" "}
         <a href={`/api/receipts/${receipt.id}/${receipt.has_original ? "original" : "display"}`}>
-          Download
+          <Trans comment="Link on the receipts">
+            Download
+          </Trans>
         </a>
-        {receipt.uploaded_by_name ? ` · added by ${receipt.uploaded_by_name}` : null}
+        {receipt.uploaded_by_name ? ` · ${t({ message: `added by ${receipt.uploaded_by_name}`, comment: "Sentence on the receipts" })}` : null}
       </p>
 
       {/* It matters more here than in the register: an inbox receipt has no
@@ -530,30 +553,40 @@ function ReceiptPanel({
           very often the only thing that identifies it. */}
       <MoreInfo receipt={receipt} />
 
-      <Field label="Receipt notes">
+      <Field label={t({ message: "Receipt notes", comment: "Label of a form field on the receipts" })}>
         <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       </Field>
 
       <div className="row" style={{ marginTop: 14 }}>
         <button className="primary" disabled={save.isPending} onClick={() => save.mutate()}>
-          Save receipt notes
+          <Trans>
+            Save receipt notes
+          </Trans>
         </button>
         {receipt.transaction_id ? (
           <button disabled={detach.isPending} onClick={() => detach.mutate()}>
-            Send back to the inbox
+            <Trans>
+              Send back to the inbox
+            </Trans>
           </button>
         ) : (
-          <button onClick={() => setMatching(true)}>Attach to a transaction</button>
+          <button onClick={() => setMatching(true)}>
+            <Trans>Attach to a transaction</Trans>
+          </button>
         )}
         <button className="danger" disabled={remove.isPending} onClick={() => remove.mutate()}>
-          Delete
+          <Trans comment="Button on the receipts: verb">
+            Delete
+          </Trans>
         </button>
       </div>
 
       <p className="small muted" style={{ marginTop: 10 }}>
-        Deleting is recorded and can be put back from the History screen. The picture
-        itself is kept for a day after nothing points at it, which is what makes that
-        undo work.
+        <Trans>
+          Deleting is recorded and can be put back from the History screen. The picture
+          itself is kept for a day after nothing points at it, which is what makes that
+          undo work.
+        </Trans>
       </p>
 
       {matching && (
@@ -600,15 +633,15 @@ export function Matcher({
   return (
     <RowPicker
       household={household}
-      title="Which transaction?"
+      title={t({ message: "Which transaction?", comment: "Title of a panel on the receipts" })}
       anchor={receipt.captured_at ?? receipt.created_at}
       days={PICKER_DAYS}
       intro={
         receipt.captured_at
-          ? `Taken ${formatInstant(receipt.captured_at)}, so this opens on the ten days either side.`
-          : "This receipt carries no date of its own, so the window is around when it was uploaded."
+          ? t`Taken ${formatInstant(receipt.captured_at)}, so this opens on the ten days either side.`
+          : t`This receipt carries no date of its own, so the window is around when it was uploaded.`
       }
-      action="Attach"
+      action={t({ message: "Attach", comment: "Button on the receipts: verb, attach a receipt to a transaction" })}
       busy={attach.isPending}
       error={attach.error}
       onPick={(txn) => attach.mutate(txn.id)}
