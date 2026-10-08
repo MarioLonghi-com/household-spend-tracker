@@ -199,7 +199,7 @@ export function ApplicationManagement() {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1><Trans>Application management</Trans></h1>
+        <h1><Trans comment="Screen title on the Application management screen. See GLOSSARY.md">Application management</Trans></h1>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
@@ -234,31 +234,31 @@ export function ApplicationManagement() {
 function Runtime({ me }: { me: Instance }) {
   return (
     <section className="card">
-      <h2 className="section-title"><Trans>Runtime</Trans></h2>
+      <h2 className="section-title"><Trans comment="Heading on the Application management screen: noun, the running program">Runtime</Trans></h2>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
           The process answering this request.
         </Trans>
       </p>
       <dl className="stat-grid application-facts">
-        <Fact label={t`Version`} value={me.version} note={me.app_name} />
+        <Fact label={t({ message: "Version", comment: "Name of a fact on the Application management screen: noun, the software version" })} value={me.version} note={me.app_name} />
         {/* The version only moves at a release, so main and a dev far ahead of
             it both say the same thing. The commit is what tells them apart. */}
         <Fact
-          label={t`Commit`}
-          value={me.build.commit ? me.build.commit.slice(0, 7) : t`unknown`}
+          label={t({ message: "Commit", comment: "Name of a fact on the Application management screen: noun, the git commit the software was built from" })}
+          value={me.build.commit ? me.build.commit.slice(0, 7) : t({ message: "unknown", comment: "Text on the Application management screen: not known" })}
           note={<BuildNote build={me.build} repository={me.repository} />}
         />
-        <Fact label={t`Environment`} value={me.environment} note={t`Python ${me.python}`} />
-        <Fact label={t`Machine`} value={me.platform} />
+        <Fact label={t({ message: "Environment", comment: "Name of a fact on the Application management screen: noun, development or production" })} value={me.environment} note={t({ message: `Python ${me.python}`, comment: "Note on the Application management screen" })} />
+        <Fact label={t({ message: "Machine", comment: "Name of a fact on the Application management screen: noun, the computer it runs on" })} value={me.platform} />
         {/* The one number that tells two instances on one machine apart. A dev
             run and the real one look identical on every other fact here, and
             this is what you hand to `kill` or `lsof`. */}
-        <Fact label={t`Process`} value={String(me.process_id)} note={t`hand this to kill or lsof`} />
+        <Fact label={t({ message: "Process", comment: "Name of a fact on the Application management screen: noun, the operating-system process id" })} value={String(me.process_id)} note={t`hand this to kill or lsof`} />
         <Fact
-          label={t`Started`}
+          label={t({ message: "Started", comment: "Name of a fact on the Application management screen" })}
           value={me.started_at ? formatInstant(me.started_at) : "—"}
-          note={t`this process`}
+          note={t({ message: "this process", comment: "Note on the Application management screen" })}
         />
       </dl>
 
@@ -290,15 +290,15 @@ function BuildNote({ build, repository }: { build: Build; repository: string }) 
     return <Trans>no git history and no build stamp to ask</Trans>;
   }
   const said = [
-    build.branch ?? t`no branch`,
-    build.committed_at ? t`committed ${formatInstant(build.committed_at)}` : null,
+    build.branch ?? t({ message: "no branch", comment: "Label on the Application management screen" }),
+    build.committed_at ? t({ message: `committed ${formatInstant(build.committed_at)}`, comment: "Label on the Application management screen" }) : null,
     build.dirty ? t`with uncommitted changes` : null,
   ].filter(Boolean);
   return (
     <>
       {said.join(" · ")} ·{" "}
       <a href={`${repository}/commit/${build.commit}`} target="_blank" rel="noreferrer noopener">
-        <Trans>
+        <Trans comment="Link on the Application management screen">
           see it
         </Trans>
       </a>
@@ -342,19 +342,19 @@ function HouseholdTable({ households }: { households: HouseholdData[] }) {
           <table>
             <thead>
               <tr>
-                <SortHeading label={t`Household`} column="name" {...order} />
-                <SortHeading label={t`Transactions`} column="transactions" align="right" {...order} />
-                <SortHeading label={t`Receipts`} column="receipts" align="right" {...order} />
+                <SortHeading label={t({ message: "Household", comment: "Column heading on the Application management screen: noun, the people who share one ledger. See GLOSSARY.md" })} column="name" {...order} />
+                <SortHeading label={t({ message: "Transactions", comment: "Column heading on the Application management screen. See GLOSSARY.md" })} column="transactions" align="right" {...order} />
+                <SortHeading label={t({ message: "Receipts", comment: "Column heading on the Application management screen: noun, photos or PDFs of receipts. See GLOSSARY.md" })} column="receipts" align="right" {...order} />
               </tr>
             </thead>
             <tbody>
               {rows.map((house) => (
                 <tr key={house.id}>
                   <td data-primary="true">{house.name}</td>
-                  <td className="amount" data-label={t`Transactions`}>
+                  <td className="amount" data-label={t({ message: "Transactions", comment: "Column name shown beside a value on phones on the Application management screen. See GLOSSARY.md" })}>
                     {count(house.transactions)}
                   </td>
-                  <td className="amount" data-label={t`Receipts`}>
+                  <td className="amount" data-label={t({ message: "Receipts", comment: "Column name shown beside a value on phones on the Application management screen: noun, photos or PDFs of receipts. Se…" })}>
                     {count(house.receipts)}
                   </td>
                 </tr>
@@ -390,9 +390,9 @@ function PlacesTable({ places }: { places: Place[] }) {
         <table>
           <thead>
             <tr>
-              <th><Trans>What</Trans></th>
-              <th><Trans>Path</Trans></th>
-              <th className="amount"><Trans>Size</Trans></th>
+              <th><Trans comment="Column heading on the Application management screen: noun, which thing">What</Trans></th>
+              <th><Trans comment="Column heading on the Application management screen: noun, a place in the file system">Path</Trans></th>
+              <th className="amount"><Trans comment="Column heading on the Application management screen: noun, size of a file">Size</Trans></th>
             </tr>
           </thead>
           <tbody>
@@ -408,17 +408,17 @@ function PlacesTable({ places }: { places: Place[] }) {
                       working instance is one nobody reads the third time. */}
                   {one.exists || one.optional ? null : (
                     <span className="tag" title={t`this path does not exist`}>
-                      <Trans>
+                      <Trans comment="Tag beside a name on the Application management screen">
                         missing
                       </Trans>
                     </span>
                   )}
                   <div className="small muted">{one.note}</div>
                 </td>
-                <td className="mono small" data-label={t`Path`}>
+                <td className="mono small" data-label={t({ message: "Path", comment: "Column name shown beside a value on phones on the Application management screen: noun, a place in the file system" })}>
                   {one.path}
                 </td>
-                <td className="amount muted" data-label={t`Size`}>
+                <td className="amount muted" data-label={t({ message: "Size", comment: "Column name shown beside a value on phones on the Application management screen: noun, size of a file" })}>
                   {bytes(one.bytes)}
                 </td>
               </tr>
@@ -452,7 +452,7 @@ function PackagesTable({ packages }: { packages: Package[] }) {
           other: `${count(packages.length)} packages.`,
         })}{" "}
         <button className="link" onClick={() => setOpen(!open)}>
-          {open ? t`Hide them` : t`Show them`}
+          {open ? t({ message: "Hide them", comment: "Button on the Application management screen" }) : t({ message: "Show them", comment: "Button on the Application management screen" })}
         </button>
       </p>
       {open && (
@@ -514,7 +514,7 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
 
   return (
     <section className="card">
-      <h2 className="section-title"><Trans>Log files</Trans></h2>
+      <h2 className="section-title"><Trans comment="Heading on the Application management screen">Log files</Trans></h2>
       <Problem error={state.error ?? choose.error} />
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
@@ -533,7 +533,7 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
               {stream.filename}
               {stream.holds_ledger_values ? (
                 <span className="pill danger" style={{ marginLeft: 6 }}>
-                  <Trans>
+                  <Trans comment="Tag beside a name on the Application management screen">
                     your data
                   </Trans>
                 </span>
@@ -558,9 +558,9 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
           <table>
             <thead>
               <tr>
-                <th><Trans>File</Trans></th>
-                <th><Trans>Last written</Trans></th>
-                <th className="amount"><Trans>Size</Trans></th>
+                <th><Trans comment="Column heading on the Application management screen">File</Trans></th>
+                <th><Trans comment="Column heading on the Application management screen">Last written</Trans></th>
+                <th className="amount"><Trans comment="Column heading on the Application management screen: noun, size of a file">Size</Trans></th>
                 <th className="amount row-actions" />
               </tr>
             </thead>
@@ -570,10 +570,10 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
                   <td data-primary="true" className="mono small">
                     {one.name}
                   </td>
-                  <td className="small muted" data-label={t`Last written`}>
+                  <td className="small muted" data-label={t({ message: "Last written", comment: "Column name shown beside a value on phones on the Application management screen" })}>
                     {formatInstant(one.modified)}
                   </td>
-                  <td className="amount muted" data-label={t`Size`}>
+                  <td className="amount muted" data-label={t({ message: "Size", comment: "Column name shown beside a value on phones on the Application management screen: noun, size of a file" })}>
                     {bytes(one.bytes)}
                   </td>
                   <td className="amount row-actions">
@@ -581,7 +581,7 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
                       className="link"
                       onClick={() => setOpen(open === one.name ? null : one.name)}
                     >
-                      {open === one.name ? t`Close` : t`Read`}
+                      {open === one.name ? t({ message: "Close", comment: "Button on the Application management screen: verb, close this panel" }) : t({ message: "Read", comment: "Button on the Application management screen: verb, show the file's contents" })}
                     </button>
                   </td>
                 </tr>
@@ -611,7 +611,7 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
             aria-live="polite"
             aria-label={t`The end of ${open}`}
           >
-            {body.isLoading ? t`Reading…` : (body.data?.text ?? "")}
+            {body.isLoading ? t({ message: "Reading…", comment: "Text on the Application management screen" }) : (body.data?.text ?? "")}
           </pre>
         </>
       )}
@@ -670,7 +670,7 @@ function Operations({ me }: { me: Instance }) {
 
   return (
     <section className="card">
-      <h2 className="section-title"><Trans>Operations</Trans></h2>
+      <h2 className="section-title"><Trans comment="Heading on the Application management screen">Operations</Trans></h2>
       <Problem error={upstream.error} />
 
       <h3 className="section-title"><Trans>Is there a newer version?</Trans></h3>
@@ -683,7 +683,7 @@ function Operations({ me }: { me: Instance }) {
         </Trans>
       </p>
       <button onClick={() => upstream.mutate()} disabled={upstream.isPending}>
-        {upstream.isPending ? t`Asking…` : t`Check the repository`}
+        {upstream.isPending ? t({ message: "Asking…", comment: "Button on the Application management screen" }) : t`Check the repository`}
       </button>
       {upstream.data ? (
         <div className={upstream.data.newer ? "banner warn" : "banner"} style={{ marginTop: 10 }}>
@@ -726,7 +726,7 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
 
   return (
     <section className="card">
-      <h2 className="section-title"><Trans>Database</Trans></h2>
+      <h2 className="section-title"><Trans comment="Heading on the Application management screen">Database</Trans></h2>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
           The ledger this process is serving.
@@ -739,17 +739,17 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
             mode, although the WAL and SHM entries in Places already assumed
             it was. */}
         <Fact
-          label={t`Engine`}
+          label={t({ message: "Engine", comment: "Name of a fact on the Application management screen: noun, the database software" })}
           value={me.engine.version ? `${me.engine.name} ${me.engine.version}` : me.engine.name}
-          note={me.engine.journal_mode ? t`${me.engine.journal_mode} journal` : undefined}
+          note={me.engine.journal_mode ? t({ message: `${me.engine.journal_mode} journal`, comment: "Text on the Application management screen" }) : undefined}
         />
         <Fact
-          label={t`Schema`}
+          label={t({ message: "Schema", comment: "Name of a fact on the Application management screen: noun, the database's migration revision" })}
           value={me.schema_revision ?? "—"}
-          note={me.schema_revision ? t`the migration this database is at` : t`not migrated`}
+          note={me.schema_revision ? t`the migration this database is at` : t({ message: "not migrated", comment: "Text on the Application management screen" })}
         />
         <Fact
-          label={t`Size`}
+          label={t({ message: "Size", comment: "Name of a fact on the Application management screen: noun, size of a file" })}
           value={bytes(me.size.total_bytes)}
           note={
             me.size.wal_bytes > 0
@@ -758,17 +758,17 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
           }
         />
         <Fact
-          label={t`Pages`}
+          label={t({ message: "Pages", comment: "Name of a fact on the Application management screen: noun, database pages" })}
           value={me.size.page_count === null ? "—" : count(me.size.page_count)}
           note={
             me.size.page_size === null
               ? undefined
-              : t`${bytes(me.size.page_size)} each, ${count(me.size.free_pages ?? 0)} free`
+              : t({ message: `${bytes(me.size.page_size)} each, ${count(me.size.free_pages ?? 0)} free`, comment: "Text on the Application management screen" })
           }
         />
         <Fact
-          label={t`Last backup`}
-          value={me.latest_backup ? formatInstant(me.latest_backup.made_at) : t`never`}
+          label={t({ message: "Last backup", comment: "Name of a fact on the Application management screen" })}
+          value={me.latest_backup ? formatInstant(me.latest_backup.made_at) : t({ message: "never", comment: "Text on the Application management screen: has never happened" })}
           note={me.latest_backup ? bytes(me.latest_backup.bytes) : t`use the button below`}
         />
       </dl>
@@ -800,7 +800,7 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
         </Trans>
       </p>
       <button className="primary" onClick={() => backup.mutate()} disabled={backup.isPending}>
-        {backup.isPending ? t`Writing…` : t`Back up now`}
+        {backup.isPending ? t({ message: "Writing…", comment: "Button on the Application management screen" }) : t`Back up now`}
       </button>
       <BackupList backups={backups.data ?? []} onChanged={onChanged} />
       <p className="muted small" style={{ marginBottom: 0 }}>
@@ -822,7 +822,7 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
 function About({ me }: { me: Instance }) {
   return (
     <section className="card">
-      <h2 className="section-title"><Trans>About</Trans></h2>
+      <h2 className="section-title"><Trans comment="Heading on the Application management screen">About</Trans></h2>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
           {me.app_name} {me.version} — a self-hosted, multi-currency spend tracker for one

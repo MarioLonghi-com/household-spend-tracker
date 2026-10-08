@@ -41,6 +41,7 @@ msgid "No payees yet. They appear as you enter or import transactions."
 msgstr ""
 
 #. Menu item and the name of its screen. See GLOSSARY.md
+#. Screen title on the Application management screen. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/ApplicationManagement.tsx
 msgid "Application management"
@@ -130,6 +131,7 @@ msgid "To month"
 msgstr ""
 
 #. Column heading on the Admin screen: noun, which thing
+#. Column heading on the Application management screen: noun, which thing
 #: src/screens/Admin.tsx
 #: src/screens/ApplicationManagement.tsx
 msgid "What"
@@ -255,6 +257,7 @@ msgstr ""
 msgid "no memo"
 msgstr ""
 
+#. Name of a fact on the Application management screen: noun, the operating-system process id
 #: src/screens/ApplicationManagement.tsx
 msgid "Process"
 msgstr ""
@@ -327,6 +330,7 @@ msgstr ""
 msgid "Open"
 msgstr ""
 
+#. Name of a fact on the Application management screen: noun, the database software
 #: src/screens/ApplicationManagement.tsx
 msgid "Engine"
 msgstr ""
@@ -676,11 +680,13 @@ msgstr ""
 msgid "Skip to transactions"
 msgstr ""
 
+#. Column heading on the Application management screen. See GLOSSARY.md
 #. Column heading on the Categories screen. See GLOSSARY.md
 #. Column heading on the Payee Categorisation screen. See GLOSSARY.md
 #. Column heading on the Payees screen. See GLOSSARY.md
 #. Column heading on the household page. See GLOSSARY.md
 #. Column heading on the household page. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Application management screen. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Payees screen. See GLOSSARY.md
 #. Column name shown beside a value on phones on the household page. See GLOSSARY.md
 #. Column name shown beside a value on phones on the household page. See GLOSSARY.md
@@ -1093,6 +1099,7 @@ msgstr ""
 msgid "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
 msgstr ""
 
+#. Tag beside a name on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "missing"
 msgstr ""
@@ -1352,6 +1359,7 @@ msgstr ""
 msgid "Account"
 msgstr ""
 
+#. Button on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Writing…"
 msgstr ""
@@ -1445,6 +1453,7 @@ msgstr ""
 msgid "No categories yet — add some on the Categories screen."
 msgstr ""
 
+#. Name of a fact on the Application management screen: noun, development or production
 #: src/screens/ApplicationManagement.tsx
 msgid "Environment"
 msgstr ""
@@ -1478,6 +1487,7 @@ msgstr ""
 msgid "saving…"
 msgstr ""
 
+#. Heading on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Operations"
 msgstr ""
@@ -1585,6 +1595,7 @@ msgstr ""
 msgid "Role for {0}"
 msgstr ""
 
+#. Label on the Application management screen
 #. placeholder {0}: formatInstant(build.committed_at)
 #: src/screens/ApplicationManagement.tsx
 msgid "committed {0}"
@@ -1730,8 +1741,13 @@ msgstr ""
 msgid "Changing your own role would close this screen; ask the other owner"
 msgstr ""
 
+#. Column heading on the Application management screen: noun, size of a file
+#. Column heading on the Application management screen: noun, size of a file
 #. Column heading on the Backups screen: noun, size of a file
+#. Column name shown beside a value on phones on the Application management screen: noun, size of a file
+#. Column name shown beside a value on phones on the Application management screen: noun, size of a file
 #. Column name shown beside a value on phones on the Backups screen: noun, size of a file
+#. Name of a fact on the Application management screen: noun, size of a file
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Backups.tsx
 msgid "Size"
@@ -1773,6 +1789,7 @@ msgstr ""
 msgid "Disable"
 msgstr ""
 
+#. Button on the Application management screen: verb, show the file's contents
 #: src/screens/ApplicationManagement.tsx
 msgid "Read"
 msgstr ""
@@ -2055,6 +2072,7 @@ msgstr ""
 msgid "Who was paid"
 msgstr ""
 
+#. Name of a fact on the Application management screen: noun, the software version
 #: src/screens/ApplicationManagement.tsx
 msgid "Version"
 msgstr ""
@@ -2109,6 +2127,7 @@ msgstr ""
 msgid "Smaller text in the table"
 msgstr ""
 
+#. Heading on the Application management screen: noun, the running program
 #: src/screens/ApplicationManagement.tsx
 msgid "Runtime"
 msgstr ""
@@ -2142,6 +2161,7 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
+#. Column heading on the Application management screen: noun, the people who share one ledger. See GLOSSARY.md
 #: src/screens/ApplicationManagement.tsx
 msgid "Household"
 msgstr ""
@@ -2286,6 +2306,8 @@ msgstr ""
 msgid "error.update.updater_outdated"
 msgstr ""
 
+#. Column heading on the Application management screen
+#. Column name shown beside a value on phones on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Last written"
 msgstr ""
@@ -2719,6 +2741,7 @@ msgstr ""
 msgid "No minus signs — the direction is the two accounts above."
 msgstr ""
 
+#. Button on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Show them"
 msgstr ""
@@ -2803,6 +2826,7 @@ msgstr ""
 msgid "The name looks like its number."
 msgstr ""
 
+#. Name of a fact on the Application management screen: noun, the computer it runs on
 #: src/screens/ApplicationManagement.tsx
 msgid "Machine"
 msgstr ""
@@ -2992,6 +3016,8 @@ msgstr ""
 msgid "No single category matches that."
 msgstr ""
 
+#. Column heading on the Application management screen: noun, a place in the file system
+#. Column name shown beside a value on phones on the Application management screen: noun, a place in the file system
 #: src/screens/ApplicationManagement.tsx
 msgid "Path"
 msgstr ""
@@ -3098,6 +3124,7 @@ msgstr ""
 msgid "New payee rule"
 msgstr ""
 
+#. Note on the Application management screen
 #. placeholder {0}: me.python
 #: src/screens/ApplicationManagement.tsx
 msgid "Python {0}"
@@ -3160,6 +3187,7 @@ msgstr ""
 msgid "no git history and no build stamp to ask"
 msgstr ""
 
+#. Column heading on the Application management screen
 #. Label of a form field on the Import screen
 #. Label on the Import screen
 #: src/screens/ApplicationManagement.tsx
@@ -3216,6 +3244,7 @@ msgstr ""
 msgid "Changing…"
 msgstr ""
 
+#. Name of a fact on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Started"
 msgstr ""
@@ -3326,6 +3355,7 @@ msgstr ""
 msgid "Gather the accounts by country"
 msgstr ""
 
+#. Heading on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Database"
 msgstr ""
@@ -3764,6 +3794,7 @@ msgstr ""
 msgid "Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)"
 msgstr ""
 
+#. Tag beside a name on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "your data"
 msgstr ""
@@ -3896,6 +3927,7 @@ msgstr ""
 msgid "Your account is under your name in the menu."
 msgstr ""
 
+#. Button on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Asking…"
 msgstr ""
@@ -3992,6 +4024,7 @@ msgstr ""
 msgid "Yes, withdraw it"
 msgstr ""
 
+#. Name of a fact on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Last backup"
 msgstr ""
@@ -4727,6 +4760,7 @@ msgstr ""
 msgid "Every rule of this kind gets a turn, in this order, each one working on what the last one left."
 msgstr ""
 
+#. Name of a fact on the Application management screen: noun, the database's migration revision
 #: src/screens/ApplicationManagement.tsx
 msgid "Schema"
 msgstr ""
@@ -4947,6 +4981,7 @@ msgstr ""
 msgid "From year"
 msgstr ""
 
+#. Name of a fact on the Application management screen: noun, the git commit the software was built from
 #: src/screens/ApplicationManagement.tsx
 msgid "Commit"
 msgstr ""
@@ -5032,6 +5067,7 @@ msgstr ""
 msgid "Work expenses"
 msgstr ""
 
+#. Text on the Application management screen: not known
 #: src/screens/ApplicationManagement.tsx
 msgid "unknown"
 msgstr ""
@@ -5404,6 +5440,7 @@ msgstr ""
 msgid "One row from each account's statement, made the two sides of one transfer"
 msgstr ""
 
+#. Heading on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Log files"
 msgstr ""
@@ -5699,6 +5736,7 @@ msgstr ""
 msgid "Somebody re-enabled {user}"
 msgstr ""
 
+#. Heading on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "About"
 msgstr ""
@@ -5815,6 +5853,7 @@ msgstr ""
 msgid "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
 msgstr ""
 
+#. Link on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "see it"
 msgstr ""
@@ -5926,6 +5965,7 @@ msgstr ""
 msgid "Re-enable {0}"
 msgstr ""
 
+#. Text on the Application management screen
 #. placeholder {0}: me.engine.journal_mode
 #: src/screens/ApplicationManagement.tsx
 msgid "{0} journal"
@@ -6032,6 +6072,7 @@ msgstr ""
 msgid "Enter again to edit"
 msgstr ""
 
+#. Label on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "no branch"
 msgstr ""
@@ -6087,6 +6128,7 @@ msgstr ""
 msgid "Trying…"
 msgstr ""
 
+#. Name of a fact on the Application management screen: noun, database pages
 #: src/screens/ApplicationManagement.tsx
 msgid "Pages"
 msgstr ""
@@ -6250,6 +6292,7 @@ msgstr ""
 msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
 msgstr ""
 
+#. Note on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "this process"
 msgstr ""
@@ -6297,6 +6340,7 @@ msgstr ""
 msgid "Disable {0}"
 msgstr ""
 
+#. Text on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "not migrated"
 msgstr ""
@@ -6336,6 +6380,7 @@ msgid "{0} will always be {1}"
 msgstr ""
 
 #. Button on the Import screen
+#. Text on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
 msgid "Reading…"
@@ -6434,6 +6479,7 @@ msgstr ""
 msgid "Notes and coins in a wallet or a tin. Nothing imports into it — you enter what you spend."
 msgstr ""
 
+#. Button on the Application management screen: verb, close this panel
 #. Button on the Your account panel: verb, close this panel
 #. Screen-reader name of a button on the shared controls
 #. Screen-reader name of a button on the shared controls
@@ -6443,6 +6489,8 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
+#. Column heading on the Application management screen: noun, photos or PDFs of receipts. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Application management screen: noun, photos or PDFs of receipts. Se…
 #. Heading on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md
 #. Label on the household page: noun, photos or PDFs of receipts. See GLOSSARY.md
 #. Menu item and the name of its screen: noun, photos or PDFs of receipts. See GLOSSARY.md
@@ -6461,6 +6509,7 @@ msgstr ""
 msgid "Choose the replacement"
 msgstr ""
 
+#. Button on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Hide them"
 msgstr ""
@@ -6499,6 +6548,7 @@ msgstr ""
 msgid "Putting it back…"
 msgstr ""
 
+#. Text on the Application management screen
 #. placeholder {0}: bytes(me.size.page_size)
 #. placeholder {1}: count(me.size.free_pages ?? 0)
 #: src/screens/ApplicationManagement.tsx
@@ -6615,6 +6665,7 @@ msgstr ""
 msgid "Open that import"
 msgstr ""
 
+#. Text on the Application management screen: has never happened
 #: src/screens/ApplicationManagement.tsx
 msgid "never"
 msgstr ""
