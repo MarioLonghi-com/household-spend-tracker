@@ -407,7 +407,8 @@ history this repository does not have.
   launcher repairing an install whose updater is older than the zip's. A
   weekly canary runs an update and the handover on the newest Docker Engine
   (stable and test channel) and Podman, and opens an issue when one breaks.
-  The three bugs it found are under *Fixed*.
+  The bugs it found are under *Fixed*. The job is required by `ci-ok` for
+  any change it covers.
 
 ## 0.8.0 — 2026-10-08
 

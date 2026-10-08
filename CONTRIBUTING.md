@@ -251,7 +251,7 @@ old; security updates arrive on their own whenever they are published.
 
 ### The self-update job
 
-`self-update` in `tests.yml` runs when a change touches the updater, `deploy/`,
+`self-update` in `tests.yml` -- one of the jobs `ci-ok` requires -- runs when a change touches the updater, `deploy/`,
 the drill and restore scripts, the maintenance page, the migrations, the
 Dockerfile or a compose file. It builds release A from the merge base and B
 from the change -- plus a few variants of B built `FROM` it, such as one whose
