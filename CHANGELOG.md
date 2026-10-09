@@ -34,6 +34,13 @@ history this repository does not have.
 
 ### Fixed
 
+- **After an update, the page opens where the outcome is.** Once the app was
+  back, the Updating panel reloaded the page, and the reload landed on
+  Transactions, so whether the update worked, or was rolled back, was only
+  seen by going back to Application management by hand. The page now opens
+  on Application management, scrolled to its Updates section, where the
+  outcome is. (#255)
+
 - **The previous updater exits cleanly when its ten minutes of standby are
   up.** It asked the engine to stop its own container and then waited for the
   answer, which the engine gives only once the container has exited, so the
