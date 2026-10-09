@@ -11,7 +11,8 @@ rem Spend Tracker is started after reinstalling Docker or Podman, and how an
 rem install whose updater no longer works is repaired -- a newer zip's
 rem launcher keeps your release and replaces only the updater (C5).
 rem
-rem What it does: finds `docker compose` or `podman compose`; asks the
+rem What it does: picks Docker or Podman -- the one Spend Tracker is already
+rem in, else the one that is running; asks the
 rem bundle's own updater image what to start (updater/launch.py writes the
 rem pin and the engine's settings into .env); enables podman-restart in a
 rem Podman machine; removes a leftover maintenance page; starts the project;
@@ -37,20 +38,42 @@ rem ---------------------------------------------------------------------------
 rem The engine
 rem ---------------------------------------------------------------------------
 
+rem The rule is updater/launch.py's `pick_engine` (#264), and
+rem tests/test_launcher_engine.py holds this block to its sentences: an
+rem engine that already holds the project, else one that answers, Docker
+rem first in a tie. `docker compose version` reads only the client, so a
+rem Docker CLI alone says nothing about whether Docker runs.
+call :seen docker DOCKER_SEEN
+call :seen podman PODMAN_SEEN
+
 set "ENGINE="
-docker compose version >nul 2>&1 && set "ENGINE=docker" && set "PRODUCT=Docker"
-if not defined ENGINE (
-  podman compose version >nul 2>&1 && set "ENGINE=podman" && set "PRODUCT=Podman"
+if "%DOCKER_SEEN%"=="project" (
+  set "ENGINE=docker"
+  if "%PODMAN_SEEN%"=="project" echo Spend Tracker is installed in both Docker and Podman; this starts the one in Docker.
+  goto :picked
 )
-if not defined ENGINE (
-  set "WHY=Spend Tracker runs in Docker Desktop or Podman Desktop, and neither was found. Install one, start it, then open this launcher again."
-  goto :stop
+if "%PODMAN_SEEN%"=="project" (
+  set "ENGINE=podman"
+  goto :picked
 )
-%ENGINE% info >nul 2>&1
-if errorlevel 1 (
-  set "WHY=%PRODUCT% is installed but not running. Start it, wait until it says it is running, then open this launcher again."
-  goto :stop
+if "%DOCKER_SEEN%"=="answers" (
+  set "ENGINE=docker"
+  if "%PODMAN_SEEN%"=="installed" echo Podman is installed but not running, so whether Spend Tracker is already installed there was not checked; this starts it in Docker.
+  goto :picked
 )
+if "%PODMAN_SEEN%"=="answers" (
+  set "ENGINE=podman"
+  if "%DOCKER_SEEN%"=="installed" echo Docker is installed but not running, so whether Spend Tracker is already installed there was not checked; this starts it in Podman.
+  goto :picked
+)
+set "WHY=Spend Tracker runs in Docker Desktop or Podman Desktop, and neither was found. Install one, start it, then open this launcher again."
+if not "%DOCKER_SEEN%"=="none" set "WHY=Docker is installed but not running. Start it, wait until it says it is running, then open this launcher again."
+if not "%PODMAN_SEEN%"=="none" set "WHY=Podman is installed but not running. Start it, wait until it says it is running, then open this launcher again."
+if not "%DOCKER_SEEN%"=="none" if not "%PODMAN_SEEN%"=="none" set "WHY=Docker and Podman are both installed, and neither is running. Start the one Spend Tracker uses, wait until it says it is running, then open this launcher again."
+goto :stop
+
+:picked
+if "%ENGINE%"=="docker" (set "PRODUCT=Docker") else (set "PRODUCT=Podman")
 
 rem Docker Desktop and a Podman machine both run the engine in a VM, where
 rem /var/run/docker.sock is the right socket (S21).
@@ -192,6 +215,17 @@ goto :wait
 echo Spend Tracker is running at %URL%
 start "" "%URL%"
 endlocal
+exit /b 0
+
+:seen
+rem What %1's CLI answers, into the variable %2: none, installed, answers
+rem or project (updater/launch.py ENGINE_STATES; "denied" is Linux's).
+set "%2=none"
+%1 compose version >nul 2>&1 || exit /b 0
+set "%2=installed"
+%1 info >nul 2>&1 || exit /b 0
+set "%2=answers"
+for /f "delims=" %%i in ('%1 ps -aq --filter "label=com.docker.compose.project=%PROJECT%" 2^>nul') do set "%2=project"
 exit /b 0
 
 :stop

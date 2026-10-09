@@ -151,6 +151,11 @@ label.field > span { font-weight: 600; }
 .row > button,
 .row > .pill,
 .row > h1 { flex: 0 0 auto; }
+/* A heading longer than the phone is wide wraps rather than pushing the page
+   sideways: "Regras de nome de favorecidos" is wider than 390px in some
+   typefaces (#271). It only ever shrinks when it would not fit, so a heading
+   that fits is laid out exactly as before. */
+.row > h1 { flex-shrink: 1; min-width: 0; overflow-wrap: anywhere; }
 
 .card {
   background: var(--surface);

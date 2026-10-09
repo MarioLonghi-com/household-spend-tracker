@@ -110,12 +110,12 @@ describe("nothing an English reader sees changes", () => {
       "Money you owe the card issuer. Spending makes the balance more negative; paying the bill is a transfer from the account that pays it.",
     );
     expect(ACCOUNT_TYPE_HEADINGS).toEqual({
-      checking: "Checking",
+      checking: "Current accounts",
       savings: "Savings",
       cash: "Cash",
       credit_card: "Credit cards",
       other_asset: "Other assets",
-      other_liability: "Other liabilities",
+      other_liability: "Other debts",
     });
     expect(IMPORT_OUTCOME_WORDS).toEqual({
       created: "New",

@@ -6,6 +6,7 @@ import { ApiError } from "../lib/api";
 import { fixed, moneyKey, sortRows } from "../lib/sorting";
 import type { FixedGroup, SortDirection, SortKeyPart, SortValue } from "../lib/sorting";
 import { format } from "../lib/money";
+import { amountLang } from "../lib/locale";
 import { problemText } from "../lib/errorMessages";
 import { plural, t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
@@ -61,7 +62,7 @@ export function Problem({ error }: { error: unknown }) {
   return (
     <div className="banner" role="alert">
       {message}
-      {wait ? ` ${plural(wait, { other: `Try again in ${wait} seconds.` })}` : null}
+      {wait ? ` ${t({ message: plural(wait, { one: `Try again in ${wait} second.`, other: `Try again in ${wait} seconds.` }), comment: "Sentence after a refusal: how long to wait before trying again" })}` : null}
     </div>
   );
 }
@@ -196,7 +197,9 @@ export function Panel({
 
 export function Money({ minor, currency }: { minor: number; currency: string }) {
   return (
-    <span className={minor < 0 ? "amount neg" : "amount pos"}>{format(minor, currency)}</span>
+    <span className={minor < 0 ? "amount neg" : "amount pos"} lang={amountLang()}>
+      {format(minor, currency)}
+    </span>
   );
 }
 
