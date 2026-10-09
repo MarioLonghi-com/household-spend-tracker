@@ -4,8 +4,10 @@ The launchers -- `Start Spend Tracker.command`, `Start Spend Tracker.bat` and
 `start-spend-tracker.sh`, in `deploy/bundle/` -- stay thin. They keep only what
 has to happen on the host: finding `docker compose` or `podman compose`, the
 socket's path, `podman-restart`, lingering and `chgrp`. Everything that is a
-decision is here, in one dialect, with tests: they run **the bundle's own
-updater image** once,
+decision is here, in one dialect, with tests. Which engine to use is the one
+decision taken before any container can run, so the launchers carry it
+themselves, and `pick_engine` is the rule they are tested against (#264).
+Then they run **the bundle's own updater image** once,
 
     <engine> run --rm --network none --user 0:0 --security-opt label=disable \\
         -v <socket>:/run/engine.sock -v "$PWD:/project" [-v <previous>:/previous:ro] \\
@@ -88,6 +90,97 @@ STOPS = frozenset(
 _REF = re.compile(
     r"(?P<repo>[^@:]+(?::[0-9]+)?(?:/[^@:]+)*)(?::(?P<tag>[^@]+))?(?:@(?P<digest>sha256:[0-9a-f]{64}))?"
 )
+
+
+# --------------------------------------------------------------------------- #
+# Which engine (#264)
+# --------------------------------------------------------------------------- #
+
+#: What a launcher finds of one engine on the host, worst to best:
+#: `none` -- no CLI with `compose`; `installed` -- `<engine> info` fails;
+#: `denied` -- it fails with "permission denied"; `answers` -- `info`
+#: works; `project` -- and `ps -aq --filter
+#: label=com.docker.compose.project=spend-tracker` lists something.
+ENGINE_STATES = ("none", "installed", "denied", "answers", "project")
+#: The order a tie is settled in.
+ENGINES = (("docker", "Docker"), ("podman", "Podman"))
+
+NOT_FOUND = (
+    "Spend Tracker runs in Docker Desktop or Podman Desktop, and neither was found. "
+    "Install one, start it, then open this launcher again."
+)
+NOT_RUNNING = (
+    "{product} is installed but not running. Start it, wait until it says it is running, "
+    "then open this launcher again."
+)
+NEITHER_RUNNING = (
+    "Docker and Podman are both installed, and neither is running. Start the one Spend Tracker "
+    "uses, wait until it says it is running, then open this launcher again."
+)
+DENIED = (
+    "Your user cannot reach Docker's socket. Add it to the docker group "
+    "(sudo usermod -aG docker {user}), log out and back in, then run this again."
+)
+IN_BOTH = "Spend Tracker is installed in both Docker and Podman; this starts the one in Docker."
+UNCHECKED = (
+    "{other} is installed but not running, so whether Spend Tracker is already installed there "
+    "was not checked; this starts it in {chosen}."
+)
+
+
+@dataclass(frozen=True)
+class EnginePick:
+    """The engine a launcher uses, or the sentence it stops with; and what it says on the way."""
+
+    engine: str | None
+    product: str | None
+    says: tuple[str, ...] = ()
+    stop: str | None = None
+
+
+def pick_engine(docker: str, podman: str, user: str = "$(id -un)") -> EnginePick:
+    """The launchers' engine rule (#264), on what each engine's CLI answered.
+
+    1. An engine that already holds the project -- its containers carry
+       `com.docker.compose.project=spend-tracker` -- is the one; Docker if
+       both do.
+    2. Otherwise an engine that answers `info`, Docker first.
+    3. Neither answers: say which are installed, and that one must be started.
+
+    `docker compose version` reads only the client, so a Docker CLI on the
+    PATH -- Docker Desktop installed but stopped, or Homebrew's `docker` --
+    used to win over a Podman machine that was running.
+
+    `start-spend-tracker.sh` and `Start Spend Tracker.bat` carry this rule
+    in their own dialects; `tests/test_launcher_engine.py` runs the first
+    against it, state by state, and holds the second to its sentences.
+    """
+    states = {"docker": docker, "podman": podman}
+    for name, state in states.items():
+        if state not in ENGINE_STATES:
+            raise ValueError(f"{name}: {state!r}")
+    product = dict(ENGINES)
+    other = {"docker": "podman", "podman": "docker"}
+
+    for wanted in ("project", "answers"):
+        for name, _ in ENGINES:
+            if states[name] != wanted:
+                continue
+            says: list[str] = []
+            if wanted == "project" and states[other[name]] == "project":
+                says.append(IN_BOTH)
+            if wanted == "answers" and states[other[name]] in ("installed", "denied"):
+                says.append(UNCHECKED.format(other=product[other[name]], chosen=product[name]))
+            return EnginePick(name, product[name], tuple(says))
+
+    if docker == "denied":
+        return EnginePick(None, None, stop=DENIED.format(user=user))
+    present = [name for name, _ in ENGINES if states[name] != "none"]
+    if len(present) == 2:
+        return EnginePick(None, None, stop=NEITHER_RUNNING)
+    if present:
+        return EnginePick(None, None, stop=NOT_RUNNING.format(product=product[present[0]]))
+    return EnginePick(None, None, stop=NOT_FOUND)
 
 
 # --------------------------------------------------------------------------- #

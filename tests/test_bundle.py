@@ -229,6 +229,20 @@ def test_the_launcher_never_runs_sudo_on_the_host():
 ENGINE_STUB = """#!/bin/sh
 # A stand-in for `docker` or `podman`: logs what it was asked, answers enough.
 printf '%s|%s\\n' "$(basename "$0") $*" "${PODMAN_COMPOSE_PROVIDER-}" >> "$STUB_LOG"
+# What this engine is (#264, `launch.ENGINE_STATES`): it answers, unless told otherwise.
+case "$(basename "$0")" in
+  docker) state="${DOCKER_STATE-answers}" ;;
+  podman) state="${PODMAN_STATE-answers}" ;;
+  *) state=answers ;;
+esac
+[ "$state" = none ] && exit 1
+if [ "$1" = info ]; then
+  case "$state" in
+    installed) echo "Cannot connect to the engine. Is it running?" >&2; exit 1 ;;
+    denied) echo "permission denied while trying to connect to the socket" >&2; exit 1 ;;
+  esac
+fi
+[ "$state $*" = "project ps -aq --filter label=com.docker.compose.project=spend-tracker" ] && echo 0123456789ab
 case "$1 $2" in
   "compose version") exit 0 ;;
   "info --format") echo "Docker Desktop" ;;
@@ -241,14 +255,20 @@ exit 0
 OK_STUB = "#!/bin/sh\nexit 0\n"
 
 
-def _launch_headless(tmp_path: Path, installed: tuple[str, ...], made_by: str, kind: str = "podman-machine"):
+def _launch_headless(
+    tmp_path: Path,
+    installed: tuple[str, ...],
+    made_by: str,
+    kind: str = "podman-machine",
+    states: dict[str, str] | None = None,
+):
     """The shell launcher, run as a person runs it, against stubs of what is `installed`.
 
     Returns (exit status, output, the engine calls `compose ... up` made, each
     with the PODMAN_COMPOSE_PROVIDER it ran under)."""
     stubs = tmp_path / "bin"
     stubs.mkdir()
-    for tool in ("dirname", "date", "basename", "cat"):
+    for tool in ("dirname", "date", "basename", "cat", "id"):
         found = shutil.which(tool)
         assert found, tool
         (stubs / tool).symlink_to(found)
@@ -272,39 +292,40 @@ def _launch_headless(tmp_path: Path, installed: tuple[str, ...], made_by: str, k
     log = tmp_path / "calls.log"
     log.touch()
     env = {"PATH": str(stubs), "HOME": str(tmp_path), "STUB_LOG": str(log), "STUB_ANSWER": str(answer)}
+    env.update({f"{name.upper()}_STATE": state for name, state in (states or {}).items()})
     bash = shutil.which("bash") or "/bin/bash"
     done = subprocess.run(
         [bash, str(folder / "start-spend-tracker.sh")],
         cwd=folder, env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60,
     )  # fmt: skip
     ups = [line for line in log.read_text().splitlines() if " compose " in line and "up -d" in line]
-    return done.returncode, done.stdout + done.stderr, ups, stubs
+    return done.returncode, done.stdout + done.stderr, ups, stubs, log.read_text()
 
 
 @pytest.mark.parametrize("made_by", ["podman-compose", "docker-compose"])
 def test_with_both_composes_installed_the_launcher_runs_the_one_that_made_the_project(tmp_path, made_by):
     """`podman compose` would hand a podman-compose stack to docker-compose,
     which refuses it: the launcher names the provider (#247)."""
-    status, out, ups, stubs = _launch_headless(tmp_path, ("podman", "podman-compose", "docker-compose"), made_by)
+    status, out, ups, stubs, _ = _launch_headless(tmp_path, ("podman", "podman-compose", "docker-compose"), made_by)
     assert status == 0, out
     assert ups == [f"podman compose --env-file .env up -d|{stubs / made_by}"], ups
     assert f"Using {made_by}, which created this Spend Tracker." in out
 
 
 def test_a_first_install_leaves_podman_s_own_choice(tmp_path):
-    status, out, ups, _ = _launch_headless(tmp_path, ("podman", "podman-compose", "docker-compose"), "")
+    status, out, ups, _, _ = _launch_headless(tmp_path, ("podman", "podman-compose", "docker-compose"), "")
     assert status == 0, out
     assert ups == ["podman compose --env-file .env up -d|"], ups
 
 
 def test_a_project_podman_compose_made_without_podman_compose_stops_before_up(tmp_path):
-    status, out, ups, _ = _launch_headless(tmp_path, ("podman", "docker-compose"), "podman-compose")
+    status, out, ups, _, _ = _launch_headless(tmp_path, ("podman", "docker-compose"), "podman-compose")
     assert status == 1 and ups == [], (out, ups)
     assert "created with podman-compose, which was not found" in out
 
 
 def test_under_docker_its_own_compose_runs_the_project_docker_compose_made(tmp_path):
-    status, out, ups, _ = _launch_headless(
+    status, out, ups, _, _ = _launch_headless(
         tmp_path, ("docker", "podman", "podman-compose", "docker-compose"), "docker-compose", kind="docker-desktop"
     )
     assert status == 0, out

@@ -40,6 +40,13 @@ history this repository does not have.
   seen by going back to Application management by hand. The page now opens
   on Application management, scrolled to its Updates section, where the
   outcome is. (#255)
+- **The launcher uses Podman when that is where Spend Tracker runs.** With
+  both Docker and Podman on a computer, the launcher picked Docker whenever
+  its command was installed, even with Docker Desktop stopped and a Podman
+  machine running, and then asked for Docker to be started. It now uses the
+  engine Spend Tracker is already installed in, or else the one that is
+  running, and only when neither is running says which are installed and
+  that one of them must be started. (#264)
 
 ## 0.9.1 — 2026-10-09
 
