@@ -181,3 +181,107 @@ const DETECTED: Record<string, () => string> = {
 export function detectedLabel(key: string): string {
   return DETECTED[key]?.() ?? key.replace(/_/g, " ");
 }
+
+/**
+ * Application management's places, log files and logging styles (#271). The
+ * server sends each with its English name and note; the client says them in
+ * the reader's language, keyed by the place's English name or the stream's
+ * and style's key. English is the server's own words, letter for letter --
+ * `tests/test_client_agrees.py` holds every one of them to the English
+ * catalog -- and anything the server adds later reads as the server sent it.
+ */
+const PLACES: Record<string, { what: () => string; note: () => string }> = {
+  Installation: {
+    what: () => t({ message: "Installation", comment: "Application management, Where the files are: the app's own code" }),
+    note: () => t({ message: "the code this process is running", comment: "Application management, Where the files are: note on the Installation row" }),
+  },
+  "Data directory": {
+    what: () => t({ message: "Data directory", comment: "Application management, Where the files are: the folder holding everything but the code" }),
+    note: () => t({ message: "everything that is not the code", comment: "Application management, Where the files are: note on the Data directory row" }),
+  },
+  Database: {
+    what: () => t({ message: "Database", comment: "Application management, Where the files are: the database file" }),
+    note: () => t({ message: "the ledger itself", comment: "Application management, Where the files are: note on the Database row. See GLOSSARY.md" }),
+  },
+  "Write-ahead log": {
+    what: () => t({ message: "Write-ahead log", comment: "Application management, Where the files are: SQLite's file of recent writes" }),
+    note: () => t({ message: "uncheckpointed writes", comment: "Application management, Where the files are: recent writes not yet copied into the database file" }),
+  },
+  "Secret key": {
+    what: () => t({ message: "Secret key", comment: "Application management, Where the files are: the file secret.key" }),
+    note: () => t({ message: "back this up with the database — without it every session and every authenticator is void", comment: "Application management, Where the files are: note on the Secret key row" }),
+  },
+  Backups: {
+    what: () => t({ message: "Backups", comment: "Application management, Where the files are: the backups folder. See GLOSSARY.md" }),
+    note: () => t({ message: "where the backup operation below writes", comment: "Application management, Where the files are: note on the Backups row" }),
+  },
+  "Log files": {
+    what: () => t({ message: "Log files", comment: "Application management, Where the files are: the folder of log files" }),
+    note: () => t({ message: "what this instance has been saying", comment: "Application management, Where the files are: note on the Log files row" }),
+  },
+  "Client build": {
+    what: () => t({ message: "Client build", comment: "Application management, Where the files are: the built web pages" }),
+    note: () => t({ message: "the built SPA; `/` 404s without it", comment: "Application management, Where the files are: note on the Client build row; `/` is the site's address and stays" }),
+  },
+  "Browsable snapshot": {
+    what: () => t({ message: "Browsable snapshot", comment: "Application management, Where the files are: a redacted copy of the database to browse" }),
+    note: () => t({ message: "the redacted copy `/db` serves, if one was built", comment: "Application management, Where the files are: note on the Browsable snapshot row; `/db` is an address and stays" }),
+  },
+  "Setup token": {
+    what: () => t({ message: "Setup token", comment: "Application management, Where the files are: the setup token file. See GLOSSARY.md" }),
+    note: () => t({ message: "present only while setup is unfinished", comment: "Application management, Where the files are: note on the Setup token row" }),
+  },
+};
+
+/** A place's name and note, in the reader's language when this build knows it. */
+export function placeWords(place: { what: string; note: string }): { what: string; note: string } {
+  const known = PLACES[place.what];
+  return known ? { what: known.what(), note: known.note() } : { what: place.what, note: place.note };
+}
+
+const LOG_STREAMS: Record<string, () => string> = {
+  app: () => t({ message: "What the instance did: startups, the schema revision, housekeeping, errors.", comment: "Application management: what app.log holds" }),
+  access: () => t({ message: "One line per HTTP request. Mechanical, and it drowns everything else.", comment: "Application management: what access.log holds" }),
+  sql: () => t({ message: "Only written at the “Verbose, with SQL” style, and it holds the ledger in plain text. Its own file so the other two stay safe to share.", comment: "Application management: what sql.log holds; “Verbose, with SQL” is a logging style's name" }),
+};
+
+/** What a log file holds, in the reader's language when this build knows it. */
+export function logStreamBlurb(stream: { key: string; blurb: string }): string {
+  return LOG_STREAMS[stream.key]?.() ?? stream.blurb;
+}
+
+const LOG_STYLES: Record<string, { label: () => string; blurb: () => string }> = {
+  quiet: {
+    label: () => t({ message: "Quiet", comment: "Logging style on Application management: write only what went wrong" }),
+    blurb: () => t({ message: "Only what went wrong. A healthy instance writes almost nothing.", comment: "Application management: what the Quiet logging style writes" }),
+  },
+  normal: {
+    label: () => t({ message: "Normal", comment: "Logging style on Application management: the default amount of logging" }),
+    blurb: () => t({ message: "What the instance did: startups, the schema revision, housekeeping sweeps.", comment: "Application management: what the Normal logging style writes" }),
+  },
+  verbose: {
+    label: () => t({ message: "Verbose", comment: "Logging style on Application management: write everything" }),
+    blurb: () => t({ message: "Everything the app and its libraries have to say. For chasing something specific.", comment: "Application management: what the Verbose logging style writes" }),
+  },
+  sql: {
+    label: () => t({ message: "Verbose, with SQL", comment: "Logging style on Application management: everything, plus every database statement" }),
+    blurb: () => t({ message: "Verbose, plus every statement and every row it returned — which means transactions, payees and amounts written into a file in plain text. Turn it on to diagnose something and turn it off afterwards.", comment: "Application management: what the Verbose, with SQL logging style writes" }),
+  },
+};
+
+/** A logging style's name and what it writes, in the reader's language when this build knows it. */
+export function logStyleWords(style: { key: string; label: string; blurb: string }): { label: string; blurb: string } {
+  const known = LOG_STYLES[style.key];
+  return known ? { label: known.label(), blurb: known.blurb() } : { label: style.label, blurb: style.blurb };
+}
+
+/**
+ * A category's name as the server sent it, or "Uncategorised" in the
+ * reader's language for the row that has none (`key` null). The server names
+ * that row in English (`reporting.UNCATEGORISED`, #271).
+ */
+export function categoryName(key: string | null | undefined, name: string): string {
+  return key == null
+    ? t({ message: "Uncategorised", comment: "Label on the Income vs Expense report: having no category. See GLOSSARY.md" })
+    : name;
+}

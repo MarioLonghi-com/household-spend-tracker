@@ -450,7 +450,9 @@ export function Accounts({
           />
           <Trans comment="Label of a choice on the Accounts screen">Show closed</Trans>
         </label>
-        <div className="row" style={{ flex: "0 0 auto" }}>
+        {/* Shrinks, so its two buttons wrap onto two lines on a phone rather
+            than pushing the page sideways in a longer language (#271). */}
+        <div className="row" style={{ flex: "0 1 auto" }}>
           <button onClick={() => setImporting(true)}>
             <Trans>Import from a file</Trans>
           </button>

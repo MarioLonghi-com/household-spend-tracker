@@ -499,7 +499,9 @@ jobs:
     needs: changes
     if: needs.changes.outputs.code == 'true' && needs.changes.outputs.green == ''
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Thirty since #271 added a walk of every screen in each draft language,
+    # at both widths -- about four minutes on top of the English suite.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -539,7 +541,10 @@ jobs:
         run: npx playwright install-deps chromium
         working-directory: client
 
-      - name: end to end, desktop and phone
+      # `npm run e2e` builds in QA mode, the one build that can show the draft
+      # languages (#271), and runs the English suite, en-XA, then every screen
+      # in pt-BR, es-ES and sv-SE at both widths.
+      - name: end to end, desktop and phone, and each draft language
         run: npm run e2e
         working-directory: client
         env:
