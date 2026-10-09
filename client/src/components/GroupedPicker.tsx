@@ -18,6 +18,9 @@
  */
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 
 export type PickerItem = { id: string; label: string; hint?: string };
 export type PickerGroup = { key: string; label: string; items: PickerItem[] };
@@ -57,6 +60,8 @@ export function GroupedPicker({
     onChange: (next: boolean) => void;
   };
 }) {
+  // Re-renders its words when the language changes.
+  useLingui();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const holder = useRef<HTMLDivElement>(null);
@@ -189,7 +194,7 @@ export function GroupedPicker({
         >
           <input
             className="picker-search"
-            placeholder={`Search ${label.toLowerCase()}`}
+            placeholder={t({ message: `Search ${label.toLowerCase()}`, comment: "Placeholder of a search box in a dropdown; the placeholder is what it lists, e.g. accounts" })}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             autoFocus
@@ -247,7 +252,11 @@ export function GroupedPicker({
                 </div>
               );
             })}
-            {shown.length === 0 && <p className="muted small">Nothing matches that.</p>}
+            {shown.length === 0 && (
+              <p className="muted small">
+                <Trans comment="Shown in a dropdown when the search finds nothing">Nothing matches that.</Trans>
+              </p>
+            )}
           </div>
 
           <div className="picker-foot">

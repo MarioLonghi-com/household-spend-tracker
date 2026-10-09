@@ -11,6 +11,7 @@
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 import { Problem } from "./bits";
+import { Trans } from "@lingui/react/macro";
 
 type Props = {
   /** Whatever names what is on screen. A new value clears a caught error. */
@@ -40,9 +41,13 @@ export class ScreenBoundary extends Component<Props, State> {
     if (this.state.error) {
       return (
         <div className="card">
-          <h2>This screen could not be shown</h2>
+          <h2>
+            <Trans comment="Heading shown when a screen fails to draw; the menu still works">This screen could not be shown</Trans>
+          </h2>
           <Problem error={this.state.error} />
-          <p className="muted small">The rest of the app still works. Pick another page from the menu.</p>
+          <p className="muted small">
+            <Trans>The rest of the app still works. Pick another page from the menu.</Trans>
+          </p>
         </div>
       );
     }

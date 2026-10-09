@@ -65,7 +65,7 @@ export const NOTICE_MESSAGES: Record<string, ErrorMessage> = {
     dates: ["date"],
   },
   "import.line.transfer": {
-    message: msg({ id: "notice.import.line.transfer", message: "A transfer with {account} ({date}): {why}. It is linked when you commit, and stays out of Income v Expense." }),
+    message: msg({ id: "notice.import.line.transfer", message: "A transfer with {account} ({date}): {why}. It is linked when you commit, and stays out of Income vs Expense." }),
     dates: ["date"],
   },
   "import.line.maybe_transfer": {

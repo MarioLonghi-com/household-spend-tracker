@@ -110,8 +110,8 @@ NOTICES: dict[str, Notice] = {
     ),
     "import.line.transfer": Notice(
         "a transfer with {account} ({date}): {why}. It is linked when you commit, and stays out "
-        "of Income v Expense.",
-        "A transfer with {account} ({date}): {why}. It is linked when you commit, and stays out of Income v Expense.",
+        "of Income vs Expense.",
+        "A transfer with {account} ({date}): {why}. It is linked when you commit, and stays out of Income vs Expense.",
         {"date": "date", "why": "nested"},
     ),
     "import.line.maybe_transfer": Notice(

@@ -237,7 +237,7 @@ function engineName(beat: Heartbeat | null): string {
         comment: "The container engine, by product name; the version may be empty",
       });
     default:
-      return t`the container engine`;
+      return t({ message: `the container engine`, comment: "Fallback name when the engine's own name (Docker, Podman) is not known. See GLOSSARY.md" });
   }
 }
 
@@ -677,7 +677,7 @@ function CheckResult({
           <strong>
             <Trans comment="Headline of the check: a newer release exists">{target.version} is available.</Trans>
           </strong>{" "}
-          <Trans>This instance is running {check.running}.</Trans>{" "}
+          <Trans comment="Updates section: the version running now">This instance is running {check.running}.</Trans>{" "}
           {released ? <Trans comment="When a release was published">Released {released}.</Trans> : null}
         </p>
         {skipped.length > 0 && (
@@ -707,7 +707,7 @@ function CheckResult({
               <label className="small">
                 <Trans comment="Before a menu of other newer releases to prepare instead">or choose:</Trans>{" "}
                 <select
-                  aria-label={t`Another newer release`}
+                  aria-label={t({ message: `Another newer release`, comment: "Screen-reader name of one more release listed on the Updates section. See GLOSSARY.md" })}
                   value={target.version}
                   onChange={(event) => setChosen(event.target.value)}
                 >
@@ -758,7 +758,7 @@ function UpdaterOnlyOffer({
 }) {
   return (
     <div className="small" data-offer="updater" style={{ marginTop: 10 }}>
-      <Trans>A newer updater ({version}) is available:</Trans>{" "}
+      <Trans comment="Updates section, followed by a button to update the updater. See GLOSSARY.md">A newer updater ({version}) is available:</Trans>{" "}
       <button onClick={() => onAsk(version)} disabled={pending}>
         {t({
           message: "Update the updater only",
@@ -804,11 +804,11 @@ function InFlight({ status, toVersion }: { status: UpdateStatus | null; toVersio
     status?.kind === "prepare"
       ? toVersion
         ? t({ message: `Preparing ${toVersion}`, comment: "Heading while the updater prepares a release" })
-        : t`Preparing the update`
+        : t({ message: `Preparing the update`, comment: "Heading of the progress panel while an update is downloaded and checked" })
       : status?.kind === "discard"
-        ? t`Discarding the prepared update`
+        ? t({ message: `Discarding the prepared update`, comment: "Heading of the progress panel while a downloaded update is thrown away" })
         : status?.kind === "update_updater"
-          ? t`Updating the updater`
+          ? t({ message: `Updating the updater`, comment: "Heading of the progress panel while the updater replaces itself. See GLOSSARY.md" })
           : t`Waiting for the updater to take the request…`;
   return (
     <div className="update-progress" aria-live="polite">
@@ -970,7 +970,7 @@ export function Confirm({
                     before anything is stopped.
                   </Trans>
                 ) : (
-                  <Trans>Stays as it is.</Trans>
+                  <Trans comment="Updates section: what happens to a setting during this update">Stays as it is.</Trans>
                 )}
               </td>
             </tr>
@@ -1004,7 +1004,7 @@ export function Confirm({
               <th scope="row">{t({ message: "Pre-update hook", comment: "Row heading in the update confirmation" })}</th>
               <td>
                 {heartbeat?.hook
-                  ? t`On: runs before the backup.`
+                  ? t({ message: `On: runs before the backup.`, comment: "Updates section: a setting is on, and when it takes effect during the update" })
                   : t({ message: "Off.", comment: "State of the pre-update hook" })}
               </td>
             </tr>
@@ -1040,7 +1040,7 @@ export function Confirm({
       )}
 
       {lossy.length > 0 && (
-        <div className="banner warn update-lossy" role="group" aria-label={t`Migrations that cannot be undone`}>
+        <div className="banner warn update-lossy" role="group" aria-label={t({ message: `Migrations that cannot be undone`, comment: "Screen-reader name of a warning on the Updates section. See GLOSSARY.md" })}>
           <p style={{ marginTop: 0 }}>
             <strong>
               {plural(lossy.length, {
@@ -1101,7 +1101,7 @@ export function Confirm({
           </p>
         ) : (
           <p className="muted small">
-            <Trans>Asking for a recovery code…</Trans>
+            <Trans comment="Updates section: waiting while the step-up asks for a recovery code">Asking for a recovery code…</Trans>
           </p>
         )}
         <p className="muted small">
@@ -1284,7 +1284,7 @@ export function Updating({
               recovery page with your recovery code.
             </Trans>{" "}
             <a href="/recovery">
-              <Trans>Open the recovery page</Trans>
+              <Trans comment="Button on the Updates section. See GLOSSARY.md">Open the recovery page</Trans>
             </a>
           </div>
         )}
@@ -1338,11 +1338,11 @@ export function OutcomeBlock({
           <>
             <p style={{ marginTop: 0 }} data-outcome="updated">
               {took ? (
-                <Trans>
+                <Trans comment="Updates section: outcome of an update, with the time it finished and how long it took">
                   Updated to {running} at {at} in {took}.
                 </Trans>
               ) : (
-                <Trans>
+                <Trans comment="Updates section: outcome of an update, with the time it finished">
                   Updated to {running} at {at}.
                 </Trans>
               )}{" "}
@@ -1354,7 +1354,7 @@ export function OutcomeBlock({
                   </button>
                 </>
               ) : updaterVersion ? (
-                <Trans>The updater is now {updaterVersion} too.</Trans>
+                <Trans comment="Updates section, after an update: the updater was updated as well">The updater is now {updaterVersion} too.</Trans>
               ) : null}
             </p>
             <p style={{ marginBottom: 0 }}>
@@ -1402,7 +1402,7 @@ export function OutcomeBlock({
                 Restored from <span className="mono">{outcome.backup}</span>.
               </Trans>
             ) : null}{" "}
-            <Trans>This instance now runs {running}.</Trans>
+            <Trans comment="Updates section, after an update: the version now running">This instance now runs {running}.</Trans>
           </p>
         );
         break;

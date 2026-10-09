@@ -304,7 +304,7 @@ export function ImportGuideDocument() {
       <Section title="5. Transfers between your own accounts">
         <p className="small">
           Money moving between two of your accounts appears in both banks' statements, often
-          imported days apart. Linked as one transfer, the two rows stay out of Income v Expense.
+          imported days apart. Linked as one transfer, the two rows stay out of Income vs Expense.
         </p>
         <ul className="small">
           <li>

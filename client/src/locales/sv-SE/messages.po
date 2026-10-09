@@ -18,6 +18,11 @@ msgstr "Namnet ser ut att vara dess IBAN."
 msgid "YNAB Starting Balance rows ({0})"
 msgstr "YNAB-rader med ingående saldo ({0})"
 
+#: src/components/ScreenBoundary.tsx
+#, fuzzy
+msgid "The rest of the app still works. Pick another page from the menu."
+msgstr "Resten av appen fungerar fortfarande. Välj en annan sida i menyn."
+
 #. What the import detected: the running balance column. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
@@ -126,11 +131,6 @@ msgstr "Nytt lösenord"
 #, fuzzy
 msgid "Expense"
 msgstr "Utgift"
-
-#: src/components/Receipts.tsx
-#, fuzzy
-msgid "{count, plural, one {has {count} receipts} other {has {count} receipts}}"
-msgstr "{count, plural, one {har {count} kvitto} other {har {count} kvitton}}"
 
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
@@ -320,6 +320,7 @@ msgstr "Matchning"
 msgid "Or paste the rows, if your bank only lets you copy them from a page:"
 msgstr "Eller klistra in raderna, om banken bara låter dig kopiera dem från en sida:"
 
+#. Screen-reader name of a warning on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Migrations that cannot be undone"
@@ -363,13 +364,6 @@ msgstr "{0} av {1} kommer att importeras."
 msgid "Net — whole period"
 msgstr "Netto – hela perioden"
 
-#. Text on the household page
-#. placeholder {0}: count(it.category_groups)
-#: src/screens/Household.tsx
-#, fuzzy
-msgid "in {0} groups"
-msgstr "i {0} grupper"
-
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Locked — checked against the bank, refuse every change"
@@ -405,6 +399,12 @@ msgstr "Inget de senaste 14 dagarna."
 msgid "A three-letter code. Leave it blank for {0}."
 msgstr "En kod med tre bokstäver. Lämna tomt för {0}."
 
+#. Column value on the Accounts screen: how many statement files name a suggested identifier
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "{count, plural, one {{shown} file} other {{shown} files}}"
+msgstr "{count, plural, one {{shown} fil} other {{shown} filer}}"
+
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "One of the newest five update backups: kept so an update can be undone"
@@ -415,6 +415,7 @@ msgstr "En av de fem senaste uppdateringssäkerhetskopiorna: sparas så att en u
 msgid "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot mean “whatever comes after it” — choose <2>take this bit off</2> for that."
 msgstr "En regel av det här slaget pekar på <0>en</0> mottagare, så <1>SQ *</1> kan inte betyda ”vad som än kommer efter” – välj <2>ta bort den här biten</2> för det."
 
+#. Screen-reader name of a help button on Application management
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "what this list is"
@@ -444,6 +445,15 @@ msgstr "Process"
 #, fuzzy
 msgid "date column"
 msgstr "datumkolumn"
+
+#. Tooltip on the Register's select-all checkbox
+#. placeholder {0}: ordered.length
+#. placeholder {1}: formatCount(ordered.length)
+#. placeholder {2}: formatCount(ordered.length)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0, plural, one {Tick the {1} row the filter shows} other {Tick all {2} rows the filter shows}}"
+msgstr "{0, plural, one {Markera den {1} rad som filtret visar} other {Markera alla {2} rader som filtret visar}}"
 
 #. placeholder {0}: rows.data.entries.length
 #. placeholder {1}: rows.data.count
@@ -496,6 +506,15 @@ msgstr "Gör klart kategorin du redigerar först"
 #, fuzzy
 msgid "Light"
 msgstr "Ljust"
+
+#. Transfers screen, after how many suggested identifiers: how many transfer pairs they would link
+#. placeholder {0}: suggested.would_link ?? 0
+#. placeholder {1}: suggested.would_link
+#. placeholder {2}: suggested.would_link
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} pair.} other {{2} pairs.}}"
+msgstr "{0, plural, one {{1} par.} other {{2} par.}}"
 
 #. Button on the Payees screen: verb, look over before going on
 #: src/screens/Payees.tsx
@@ -579,6 +598,7 @@ msgstr "Kopiera länken nu – den visas bara en gång."
 msgid "What happens"
 msgstr "Vad som händer"
 
+#. Screen-reader name of a log file's last lines; the placeholder is the file's name
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "The end of {open}"
@@ -616,6 +636,14 @@ msgstr "{unloaded, plural, one {Visar {0} – {1} rad till att läsa in – visa
 #, fuzzy
 msgid "When"
 msgstr "När"
+
+#. Screen-reader name of the handle between two parts of a split transaction. See GLOSSARY.md
+#. placeholder {0}: seam + 1
+#. placeholder {1}: seam + 2
+#: src/components/SplitBar.tsx
+#, fuzzy
+msgid "Between part {0} and part {1}"
+msgstr "Mellan del {0} och del {1}"
 
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -657,6 +685,16 @@ msgstr "Vad varje mottagare har förts under och vad en ny transaktion för den 
 #, fuzzy
 msgid "List"
 msgstr "Lista"
+
+#. Rules screen: how many of the imported rows the rules would move to another payee
+#. placeholder {0}: formatCount(proposed.changing)
+#. placeholder {1}: proposed.considered
+#. placeholder {2}: formatCount(proposed.considered)
+#. placeholder {3}: formatCount(proposed.considered)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "<0>{0}</0> of {1, plural, one {{2} row would move.} other {{3} rows would move.}}"
+msgstr "<0>{0}</0> av {1, plural, one {{2} rad skulle flyttas.} other {{3} rader skulle flyttas.}}"
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -734,6 +772,7 @@ msgstr "<0>{0}</0> hamnar i kvittoinkorgen och stannar där tills det bifogas ig
 msgid "{0} is available."
 msgstr "{0} finns tillgänglig."
 
+#. Application management: loading
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Reading this instance…"
@@ -760,6 +799,7 @@ msgstr "Jag har min autentiseringsapp ändå"
 msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 msgstr "Ingen nyckel kan radera något, ångra något, ändra vilka som ingår i ett hushåll, röra lösenord eller autentiseringsappar eller skapa en ny nyckel – vad du än väljer här."
 
+#. Tooltip on a folder path on Application management
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "this path does not exist"
@@ -900,6 +940,7 @@ msgstr "En del av en uppdelning"
 msgid "Each currency keeps its own figures and nothing here adds two together — the ledger stores no exchange rates. A claim repaid in another currency is listed once, with every amount in its own currency and no difference worked out between them."
 msgstr "Varje valuta behåller sina egna siffror och inget här lägger ihop två – boken lagrar inga växelkurser. Ett utlägg som betalats tillbaka i en annan valuta visas en gång, med varje belopp i sin egen valuta och utan någon uträknad skillnad mellan dem."
 
+#. Updates section, after an update: the version now running
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "This instance now runs {running}."
@@ -939,6 +980,7 @@ msgstr "Uppladdat"
 msgid "Nothing went into this one."
 msgstr "Inget hamnade i den här."
 
+#. Backups screen: the backup was passed to the phone's share menu
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Handed to the share sheet."
@@ -1236,6 +1278,12 @@ msgstr "är lika med"
 msgid "Account number"
 msgstr "Kontonummer"
 
+#. Application management: what the Verbose logging style writes
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Everything the app and its libraries have to say. For chasing something specific."
+msgstr "Allt som appen och dess bibliotek har att säga. För att felsöka något specifikt."
+
 #: src/lib/reimbursement.ts
 #, fuzzy
 msgid "Work expense — not reimbursed yet"
@@ -1268,6 +1316,7 @@ msgstr "Återkalla den här inbjudan?"
 msgid "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
 msgstr "Bara för en bank vars kontoutdrag har flera konton i en fil, åtskilda av en Product-kolumn (Revoluts kontoutdrag). Det här kontot tar raderna med det här värdet; de andra hoppas över. Ett lönekonto tar Current-raderna om du inte anger något annat."
 
+#. Database size: the main file plus recent writes not yet copied into it
 #. placeholder {0}: bytes(me.size.main_bytes)
 #. placeholder {1}: bytes(me.size.wal_bytes)
 #: src/screens/ApplicationManagement.tsx
@@ -1334,6 +1383,12 @@ msgstr "Tidigare"
 msgid "Something you own that holds value and that you want in the totals — a deposit held by a landlord, an investment you track by hand."
 msgstr "Något du äger som har ett värde och som du vill ha med i summorna – en deposition hos hyresvärden, en investering du följer för hand."
 
+#. Application management, Where the files are: note on the Backups row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "where the backup operation below writes"
+msgstr "där säkerhetskopieringen nedan skriver"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Or open <0>the enrolment link</0> on the device with the app."
@@ -1369,6 +1424,7 @@ msgstr "Allt som registrerats om detta"
 msgid "(the {RULES_LISTED} largest are listed)"
 msgstr "(de {RULES_LISTED} största visas)"
 
+#. Updates section: what happens to a setting during this update
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Stays as it is."
@@ -1378,11 +1434,6 @@ msgstr "Förblir som den är."
 #, fuzzy
 msgid "Yes, detach it"
 msgstr "Ja, koppla loss det"
-
-#: src/screens/Accounts.tsx
-#, fuzzy
-msgid "{count, plural, other {{shown} files}}"
-msgstr "{count, plural, one {{shown} fil} other {{shown} filer}}"
 
 #. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
@@ -1406,6 +1457,7 @@ msgstr "Avstämda kontoutdrag"
 msgid "You Need A Budget: from its export file or its API."
 msgstr "You Need A Budget: från dess exportfil eller dess API."
 
+#. Checkbox on the Backups screen; secret.key is a file name and stays
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Include <0>secret.key</0> in downloads"
@@ -1470,6 +1522,13 @@ msgstr "Stavningar"
 #, fuzzy
 msgid "{0} left"
 msgstr "{0} kvar"
+
+#. Transfers screen, after linking: how many pairs were linked
+#. placeholder {0}: (link.data ?? linkAll.data)!.linked
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Linked {0}."
+msgstr "Kopplade: {0}."
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -1648,6 +1707,12 @@ msgstr "Alla som {0} har betalat till eller fått betalt av. De flesta kommer av
 msgid "(closed)"
 msgstr "(avslutat)"
 
+#. Application management, Where the files are: note on the Database row. See GLOSSARY.md
+#: src/lib/labels.ts
+#, fuzzy
+msgid "the ledger itself"
+msgstr "själva boken"
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
@@ -1675,12 +1740,14 @@ msgstr "Ny"
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Transfers screen
+#. Screen-reader name on the Transfers screen
 #. Screen-reader text on the Backups screen
 #. Screen-reader text on the passkeys panel
 #: src/screens/Accounts.tsx
 #: src/screens/Backups.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Payees.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Actions"
@@ -1743,6 +1810,12 @@ msgstr "Ut"
 msgid "{0}: YNAB’s balance is {1}, and this import accounts for {2}, {3} more."
 msgstr "{0}: YNAB:s saldo är {1}, och den här importen står för {2}, {3} mer."
 
+#. Application management: what the Normal logging style writes
+#: src/lib/labels.ts
+#, fuzzy
+msgid "What the instance did: startups, the schema revision, housekeeping sweeps."
+msgstr "Vad instansen gjorde: starter, schemarevisionen, städningar."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
@@ -1775,6 +1848,12 @@ msgstr "Inskriven för hand"
 #, fuzzy
 msgid "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
 msgstr "Varje stavning en bank använder för någon i hushållet. En betalning som nämner en av dem är dina egna pengar som flyttas, inte en inkomst eller utgift."
+
+#. Section heading on the Transfers screen: pairs the app is sure are transfers
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Sure of these"
+msgstr "Säkra"
 
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -1871,6 +1950,7 @@ msgstr "Välj vad {name} ska ställa in igen. Personen gör det själv, via en e
 msgid "That isn't an amount in {currency}."
 msgstr "Det är inte ett belopp i {currency}."
 
+#. Application management: the database is not a file on this machine
 #. placeholder {0}: me.database_url_scheme
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
@@ -1934,6 +2014,7 @@ msgstr "Väntar på lösennyckeln…"
 msgid "Name as the bank writes it"
 msgstr "Namnet som banken skriver det"
 
+#. Backups screen: the list is empty
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Nothing backed up yet."
@@ -2010,6 +2091,16 @@ msgstr "Summa utgifter"
 msgid "Setup change"
 msgstr "Ändrade inställningar"
 
+#. Screen-reader value of a split handle: each part's number and amount. See GLOSSARY.md
+#. placeholder {0}: seam + 1
+#. placeholder {1}: format(magnitudes[seam], currency)
+#. placeholder {2}: seam + 2
+#. placeholder {3}: format(magnitudes[seam + 1], currency)
+#: src/components/SplitBar.tsx
+#, fuzzy
+msgid "Part {0} {1}, part {2} {3}"
+msgstr "Del {0} {1}, del {2} {3}"
+
 #. Row state in the one-time import's account mapping: left out
 #: src/lib/labels.ts
 #, fuzzy
@@ -2057,6 +2148,7 @@ msgstr "t.ex. koden efter _en_"
 msgid "Sharing and saving straight into a folder need this page on https or on localhost. Over plain http on a network address the browser switches both off, which is why only the download is offered here."
 msgstr "Att dela och spara direkt i en mapp kräver att sidan körs på https eller localhost. Över vanlig http på en nätverksadress stänger webbläsaren av båda, och därför erbjuds bara nedladdningen här."
 
+#. Heading of the progress panel while the updater replaces itself. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Updating the updater"
@@ -2129,6 +2221,15 @@ msgstr "Utseende"
 #, fuzzy
 msgid "None yet"
 msgstr "Inga än"
+
+#. One-time import: an account set to be skipped, and what happens to its rows
+#. placeholder {0}: account.rows
+#. placeholder {1}: formatCount(account.rows)
+#. placeholder {2}: formatCount(account.rows)
+#: src/screens/ynab/mapping.tsx
+#, fuzzy
+msgid "{0, plural, one {Its {1} row is left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
+msgstr "{0, plural, one {Dess {1} rad utelämnas och listas i rapporten.} other {Dess {2} rader utelämnas och listas i rapporten.}}"
 
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -2234,11 +2335,13 @@ msgstr "riktad mot {bearing}° {point}"
 msgid "Nothing recorded against this one."
 msgstr "Inget registrerat om den här."
 
+#. Application management: the code was built with changes not yet saved in git
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "with uncommitted changes"
 msgstr "med ändringar som inte är incheckade"
 
+#. Updates section: waiting while the step-up asks for a recovery code
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Asking for a recovery code…"
@@ -2254,12 +2357,6 @@ msgstr "Räknar…"
 #, fuzzy
 msgid "Income vs Expense"
 msgstr "Inkomster och utgifter"
-
-#. placeholder {0}: formatCount(ordered.length)
-#: src/screens/Register.tsx
-#, fuzzy
-msgid "Tick all {0} rows the filter shows"
-msgstr "Markera alla {0} rader som filtret visar"
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -2408,12 +2505,15 @@ msgstr "Vad som hände"
 
 #. Column heading on the Reimbursements report: where it goes, or what it is merged into
 #. Column heading on the Transfers screen: preposition, the account money arrives in
+#. Column heading on the Transfers screen: preposition, the account money arrives in
+#. Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in
 #. Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in
 #. Label of a form field on the Payees screen: where it goes, or what it is merged into
 #. Label on the Import screen: preposition, the account money arrives in
 #: src/screens/Import.tsx
 #: src/screens/Payees.tsx
 #: src/screens/reports/Reimbursements.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Into"
@@ -2509,6 +2609,18 @@ msgstr "Dina nya återställningskoder"
 msgid "Not a transfer — categorise as…"
 msgstr "Ingen överföring – kategorisera som…"
 
+#. Application management, Where the files are: note on the Installation row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "the code this process is running"
+msgstr "koden som den här processen kör"
+
+#. Application management, Where the files are: SQLite's file of recent writes
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Write-ahead log"
+msgstr "Write-ahead-logg"
+
 #. placeholder {0}: offer.secret
 #. placeholder {0}: owed.offer.secret
 #. placeholder {0}: started.secret
@@ -2603,6 +2715,12 @@ msgstr "Tagen {0}, så detta öppnar de tio dagarna före och efter."
 msgid "Put them in <0>{0}</0> too?"
 msgstr "Lägga dem i <0>{0}</0> också?"
 
+#. Tooltip on the paperclip in the Register: this transaction has receipts attached
+#: src/components/Receipts.tsx
+#, fuzzy
+msgid "{count, plural, one {has {count} receipt} other {has {count} receipts}}"
+msgstr "{count, plural, one {har {count} kvitto} other {har {count} kvitton}}"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
@@ -2612,13 +2730,6 @@ msgstr "Allt ett program gör fel måste kunna ångras av en människa, och där
 #, fuzzy
 msgid "Waiting to be reviewed"
 msgstr "Väntar på granskning"
-
-#. Sentence on the Import screen
-#. placeholder {0}: formatCount(raw.total)
-#: src/screens/Import.tsx
-#, fuzzy
-msgid "{0} characters"
-msgstr "{0} tecken"
 
 #. Heading of a group of choices on the one-time import
 #. Step name in the one-time import: which app the history comes from
@@ -2658,6 +2769,12 @@ msgstr "Kasta"
 msgid "Download .txt"
 msgstr "Ladda ner .txt"
 
+#. Application management, Where the files are: the built web pages
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Client build"
+msgstr "Klientbygge"
+
 #: src/screens/Reconcile.tsx
 #, fuzzy
 msgid "Locking is one act, so History undoes the whole reconciliation in one click if you got the statement wrong."
@@ -2685,11 +2802,6 @@ msgstr "Uppdateringen misslyckades vid {step}, så den ångrades. Du kör {runni
 msgid "This one was entered by hand."
 msgstr "Den här skrevs in för hand."
 
-#: src/screens/Register.tsx
-#, fuzzy
-msgid "{count, plural, one {{shown} transaction match the filters} other {{shown} transactions match the filters}}"
-msgstr "{count, plural, one {{shown} transaktion matchar filtren} other {{shown} transaktioner matchar filtren}}"
-
 #. Placeholder in an empty field on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -2703,6 +2815,20 @@ msgstr "kvittoarkiverare"
 #, fuzzy
 msgid "{0, plural, one {{1} transaction carries this category, so it cannot be deleted. Archive it instead.} other {{2} transactions carry this category, so it cannot be deleted. Archive it instead.}}"
 msgstr "{0, plural, one {{1} transaktion har den här kategorin, så den kan inte tas bort. Arkivera den i stället.} other {{2} transaktioner har den här kategorin, så den kan inte tas bort. Arkivera den i stället.}}"
+
+#. Count above the Register's list when a filter is on
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{count, plural, one {{shown} transaction matches the filters} other {{shown} transactions match the filters}}"
+msgstr "{count, plural, one {{shown} transaktion matchar filtren} other {{shown} transaktioner matchar filtren}}"
+
+#. Checkbox on the Rules screen: also delete payees no transaction uses any more
+#. placeholder {0}: proposed.orphaned.length
+#. placeholder {1}: formatCount(proposed.orphaned.length)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "{0, plural, one {Also delete the payee left empty} other {Also delete the {1} payees left empty}}"
+msgstr "{0, plural, one {Ta även bort mottagaren som blir tom} other {Ta även bort de {1} mottagare som blir tomma}}"
 
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -2875,6 +3001,12 @@ msgstr "Skrivs till <0>{0}</0>, roteras vid en megabyte och sparas i fem filer. 
 #, fuzzy
 msgid "Step {0} of {1} — <0>{2}</0>"
 msgstr "Steg {0} av {1} – <0>{2}</0>"
+
+#. Logging style on Application management: the default amount of logging
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Normal"
+msgstr "Normal"
 
 #. Button on the Register screen
 #: src/screens/Register.tsx
@@ -3097,12 +3229,15 @@ msgstr "En nedladdning är en zip-fil med en README för den som öppnar den hä
 #. Column heading on the Accounts screen: noun, the reason
 #. Column heading on the Transfers screen: noun, the reason
 #. Column heading on the Transfers screen: noun, the reason
+#. Column heading on the Transfers screen: noun, the reason
 #. Column heading on the one-time import's results: noun, the reason
 #. Column name shown beside a value on phones on the Accounts screen: noun, the reason
 #. Column name shown beside a value on phones on the Transfers screen: noun, the reason
 #. Column name shown beside a value on phones on the Transfers screen: noun, the reason
+#. Column name shown beside a value on phones on the Transfers screen: noun, the reason
 #. Column name shown beside a value on phones on the one-time import's results: noun, the reason
 #: src/screens/Accounts.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -3129,6 +3264,7 @@ msgstr "Att ändra inställningen nedan skriver en rad i <0>alla tre</0>, på b�
 msgid "Writes a complete, compacted copy into the backups directory above, with this instance still serving. It does <0>not</0> copy <1>secret.key</1> there: without that key every authenticator is refused, so a copy that leaves this machine either carries it (tick the box below) or travels with it separately."
 msgstr "Skriver en fullständig, komprimerad kopia till katalogen för säkerhetskopior ovan, medan instansen fortsätter att köra. Den kopierar <0>inte</0> dit <1>secret.key</1>: utan den nyckeln nekas varje autentiseringsapp, så en kopia som lämnar den här datorn har antingen nyckeln med sig (bocka för rutan nedan) eller följs av den separat."
 
+#. Section heading on Application management: the folders the app uses
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Where the files are"
@@ -3295,6 +3431,12 @@ msgstr "Inget jobbutlägg"
 msgid "Leave a payee somebody set by hand alone. Turning this off lets the rules overrule those too, which is occasionally what you want and never what you want by accident."
 msgstr "Låt en mottagare som någon satt för hand vara. Stänger du av det här får reglerna köra över även dem, vilket ibland är vad du vill och aldrig vad du vill av misstag."
 
+#. Section heading on the Transfers screen: pairs that may be transfers, for a person to decide
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Worth a look"
+msgstr "Värda en titt"
+
 #. Column heading on the Income vs Expense report: income minus spending
 #: src/screens/reports/IncomeExpense.tsx
 #, fuzzy
@@ -3327,6 +3469,12 @@ msgstr "Version"
 #, fuzzy
 msgid "T — Transfers"
 msgstr "T – Överföringar"
+
+#. Heading shown when a screen fails to draw; the menu still works
+#: src/components/ScreenBoundary.tsx
+#, fuzzy
+msgid "This screen could not be shown"
+msgstr "Den här skärmen kunde inte visas"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -3363,6 +3511,12 @@ msgstr "{0} kommer inte att importeras, med skälet för var och en"
 #, fuzzy
 msgid "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
 msgstr "Mönstret drog över sin tiondels sekund. En import skulle lägga det åt sidan halvvägs och fortsätta utan det, så det skulle fungera ibland och ibland inte. Förenkla det."
+
+#. Application management: what app.log holds
+#: src/lib/labels.ts
+#, fuzzy
+msgid "What the instance did: startups, the schema revision, housekeeping, errors."
+msgstr "Vad instansen gjorde: starter, schemarevisionen, städning, fel."
 
 #: src/screens/Household.tsx
 #, fuzzy
@@ -3446,13 +3600,6 @@ msgstr "{0, plural, one {Ersätter {1} utgift} other {Ersätter {2} utgifter}}"
 #, fuzzy
 msgid "skip rows"
 msgstr "överhoppade rader"
-
-#. placeholder {0}: formatCount(trial.data.matches)
-#. placeholder {1}: formatCount(trial.data.considered)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "It rewrites <0>{0}</0> of {1} rows already in this ledger."
-msgstr "Den skriver om <0>{0}</0> av {1} rader som redan finns i den här boken."
 
 #. Button on the Categories screen: verb
 #. History headline, the kind of act: one edit made by hand
@@ -5051,6 +5198,7 @@ msgstr "Kod"
 msgid "state column"
 msgstr "statuskolumn"
 
+#. Section heading on Application management. See GLOSSARY.md
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Back the database up"
@@ -5091,6 +5239,7 @@ msgstr "förhandsvisning"
 msgid "Add payee"
 msgstr "Lägg till mottagare"
 
+#. Updates section: outcome of an update, with the time it finished
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Updated to {running} at {at}."
@@ -5177,6 +5326,12 @@ msgstr "kategorisering"
 msgid "A passkey is a way in that keeps working after this browser is closed."
 msgstr "En lösennyckel är ett sätt att komma in som fortsätter fungera efter att webbläsaren har stängts."
 
+#. Application management, Where the files are: note on the Client build row; `/` is the site's address and stays
+#: src/lib/labels.ts
+#, fuzzy
+msgid "the built SPA; `/` 404s without it"
+msgstr "den byggda SPA:n; utan den svarar `/` med 404"
+
 #. State of the authenticator: it is enrolled and working. See GLOSSARY.md
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -5237,14 +5392,17 @@ msgstr "Ett hushåll samlar kontona och registret. Valutan här används bara f�
 msgid "Other asset"
 msgstr "Övrig tillgång"
 
+#. Heading of the Transfers screen: noun, money moved between your own accounts. See GLOSSARY.md
 #. Menu item and the name of its screen: noun, money moved between your own accounts. See GLOSSARY.md
 #. Name of a fact on the one-time import: noun, money moved between your own accounts. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/OneTimeImport.tsx
+#: src/screens/Transfers.tsx
 #, fuzzy
 msgid "Transfers"
 msgstr "Överföringar"
 
+#. Fallback name when the engine's own name (Docker, Podman) is not known. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "the container engine"
@@ -5270,12 +5428,6 @@ msgstr "Klicka för att ändra"
 #, fuzzy
 msgid "Detach"
 msgstr "Koppla loss"
-
-#. Heading over the other-debt accounts on the Accounts screen. See GLOSSARY.md
-#: src/lib/labels.ts
-#, fuzzy
-msgid "Other liabilities"
-msgstr "Övriga skulder"
 
 #. Label on the receipts
 #. placeholder {0}: formatInstant(receipt.created_at)
@@ -5326,6 +5478,12 @@ msgstr "Kategorisera {0} markerade som…"
 #, fuzzy
 msgid "{0} selected"
 msgstr "{0} markerade"
+
+#. Application management, Where the files are: the folder holding everything but the code
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Data directory"
+msgstr "Datakatalog"
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -5429,6 +5587,12 @@ msgstr "Varje nytt kvitto tar ungefär <0>70× mer utrymme</0> i databasen. Bara
 msgid "{0} — all hidden"
 msgstr "{0} – alla dolda"
 
+#. Logging style on Application management: write everything
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Verbose"
+msgstr "Utförlig"
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "Filled in from the invitation. Change it if you would rather use another address."
@@ -5463,6 +5627,12 @@ msgstr "YNAB-grupper"
 msgctxt "history table"
 msgid "pair marked not a transfer"
 msgstr "par markerat som ingen överföring"
+
+#. How many pages a PDF receipt has
+#: src/components/Receipts.tsx
+#, fuzzy
+msgid "{count, plural, one {{count} page} other {{count} pages}}"
+msgstr "{count, plural, one {{count} sida} other {{count} sidor}}"
 
 #. Button on the Accounts screen
 #. Button on the Import screen
@@ -5522,11 +5692,23 @@ msgstr "Kategorisering av mottagare"
 msgid "{0, plural, one {Matches {1} row, such as:} other {Matches {2} rows, such as:}}"
 msgstr "{0, plural, one {Matchar {1} rad, till exempel:} other {Matchar {2} rader, till exempel:}}"
 
+#. Transfers screen, followed by how many pairs: identifiers are names and numbers that tell accounts apart
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "{helping, plural, one {{helping} suggested identifier would link} other {{helping} suggested identifiers would link}}"
+msgstr "{helping, plural, one {{helping} föreslagen identifierare skulle koppla} other {{helping} föreslagna identifierare skulle koppla}}"
+
 #. Label on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Single transaction"
 msgstr "Enskild transaktion"
+
+#. Application management, Where the files are: note on the Secret key row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "back this up with the database — without it every session and every authenticator is void"
+msgstr "säkerhetskopiera den med databasen – utan den blir varje session och varje autentiseringsapp ogiltig"
 
 #. Row heading in the update confirmation
 #: src/screens/Updates.tsx
@@ -5578,6 +5760,15 @@ msgstr "Rapport"
 #, fuzzy
 msgid "Loading the next rows…"
 msgstr "Läser in nästa rader…"
+
+#. Import screen: the size of the statement file, in characters
+#. placeholder {0}: raw.total
+#. placeholder {1}: formatCount(raw.total)
+#. placeholder {2}: formatCount(raw.total)
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} character} other {{2} characters}}"
+msgstr "{0, plural, one {{1} tecken} other {{2} tecken}}"
 
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
@@ -5690,6 +5881,15 @@ msgstr "Senaste ändringar av inloggning"
 msgid "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
 msgstr "Den här installationen, inte någon av huvudböckerna i den. Bara en ägare kan öppna den här skärmen och nå något på den – sökvägarna, loggarna och antalen nedan gäller alla hushåll på den här instansen."
 
+#. Under the count of categories on the household page
+#. placeholder {0}: it.category_groups
+#. placeholder {1}: count(it.category_groups)
+#. placeholder {2}: count(it.category_groups)
+#: src/screens/Household.tsx
+#, fuzzy
+msgid "{0, plural, one {in {1} group} other {in {2} groups}}"
+msgstr "{0, plural, one {i {1} grupp} other {i {2} grupper}}"
+
 #. Button on the Backups screen
 #. Button on the Register screen
 #. Button on the receipts
@@ -5742,6 +5942,8 @@ msgid "No receipts here yet."
 msgstr "Inga kvitton här än."
 
 #. Shown when a list is empty on the Transfers screen
+#. Shown when a list is empty on the Transfers screen
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Nothing waiting."
@@ -5839,8 +6041,10 @@ msgstr "{others, plural, one {med {others} annan utgift} other {med {others} and
 #. Column heading on the Reconcile screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
+#. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the one-time import's results: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the one-time import's results: noun, a sum of money. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Label of a choice on the Register screen: noun, a sum of money. See GLOSSARY.md
@@ -5850,6 +6054,7 @@ msgstr "{others, plural, one {med {others} annan utgift} other {med {others} and
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
 #: src/screens/Transfer.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -5879,6 +6084,11 @@ msgstr "utelämnat"
 #, fuzzy
 msgid "Close: {name}"
 msgstr "Stäng: {name}"
+
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "The amounts match and the dates are close, but nothing names the other account — or a row could pair with more than one. Pairs whose two descriptions say the same thing come first. Link the ones that are a transfer; mark the rest <0>Not a transfer</0> and they are not offered again."
+msgstr "Beloppen stämmer och datumen ligger nära, men inget nämner det andra kontot – eller så kan en rad paras med fler än en. Par vars två beskrivningar säger samma sak kommer först. Koppla de som är en överföring; markera resten som <0>Ingen överföring</0> så erbjuds de inte igen."
 
 #: src/screens/AccountImport.tsx
 #, fuzzy
@@ -5930,6 +6140,15 @@ msgstr "datumformat"
 msgid "Rows"
 msgstr "Rader"
 
+#. Button on the Transfers screen: verb, link the ticked pairs as transfers
+#. placeholder {0}: chosen.length
+#. placeholder {1}: chosen.length
+#. placeholder {2}: chosen.length
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "{0, plural, one {Link {1} selected} other {Link {2} selected}}"
+msgstr "{0, plural, one {Koppla {1} markerat} other {Koppla {2} markerade}}"
+
 #: src/screens/Reconcile.tsx
 #, fuzzy
 msgid "This account has never been reconciled, so you are starting from the beginning of its history."
@@ -5947,6 +6166,8 @@ msgstr "Kvitton ({0})"
 msgid "a new account"
 msgstr "ett nytt konto"
 
+#. Button on the Transfers screen: these two rows are not one transfer, never offer them again
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Not a transfer"
@@ -5957,6 +6178,12 @@ msgstr "Ingen överföring"
 #, fuzzy
 msgid "One-time Import · YNAB (API)"
 msgstr "Engångsimport · YNAB (API)"
+
+#. Shown when a list is empty on the Transfers screen
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Nothing to look at."
+msgstr "Inget att titta på."
 
 #. Column heading on the passkeys panel: the date the passkey was added
 #: src/screens/Passkeys.tsx
@@ -6100,6 +6327,15 @@ msgstr "Matchad"
 msgid "unused"
 msgstr "oanvänd"
 
+#. Application management: how many software packages are installed
+#. placeholder {0}: packages.length
+#. placeholder {1}: count(packages.length)
+#. placeholder {2}: count(packages.length)
+#: src/screens/ApplicationManagement.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} package.} other {{2} packages.}}"
+msgstr "{0, plural, one {{1} paket.} other {{2} paket.}}"
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "No single category matches that."
@@ -6202,12 +6438,6 @@ msgstr "Mottagarregler"
 msgid "Already imported"
 msgstr "Redan importerad"
 
-#. Heading over the everyday bank accounts on the Accounts screen. See GLOSSARY.md
-#: src/lib/labels.ts
-#, fuzzy
-msgid "Checking"
-msgstr "Lönekonton"
-
 #. Name of a fact on the Reconcile screen
 #: src/screens/Reconcile.tsx
 #, fuzzy
@@ -6223,6 +6453,12 @@ msgstr "Du är medlem i allt du skapar, oavsett om du bockar för dig själv ell
 #, fuzzy
 msgid "Work will not pay this. It counts as your spending."
 msgstr "Jobbet betalar inte detta. Det räknas som din utgift."
+
+#. Heading over the other-debt accounts on the Accounts screen. See GLOSSARY.md
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Other debts"
+msgstr "Övriga skulder"
 
 #: src/screens/Backups.tsx
 #, fuzzy
@@ -6338,6 +6574,11 @@ msgstr "ett okänt steg"
 #, fuzzy
 msgid "Part {0} ({currency})"
 msgstr "Del {0} ({currency})"
+
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "One row names the other account, or these two accounts have had transfers linked before, and neither row could be anything else — or, of the rows it could be, only this one says the same thing."
+msgstr "En rad nämner det andra kontot, eller så har de här två kontona haft överföringar kopplade tidigare, och ingen av raderna kan vara något annat – eller, av raderna det kan vara, säger bara den här samma sak."
 
 #. Button on the app's menu and frame: verb
 #: src/App.tsx
@@ -6467,6 +6708,12 @@ msgstr "Startad"
 msgid "Reset: password"
 msgstr "Återställning: lösenord"
 
+#. Sentence after a refusal: how long to wait before trying again
+#: src/components/bits.tsx
+#, fuzzy
+msgid "{wait, plural, one {Try again in {wait} second.} other {Try again in {wait} seconds.}}"
+msgstr "{wait, plural, one {Försök igen om {wait} sekund.} other {Försök igen om {wait} sekunder.}}"
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "{by} reset your password and your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
@@ -6494,6 +6741,7 @@ msgstr "de fyra sista, eller den del banken skriver ut"
 msgid "A suggestion, not a restriction: it fills in the address on the acceptance screen and the person can change it. <0>The link is the credential</0> — whoever opens it gets this role, so treat it like a password."
 msgstr "Ett förslag, inte en begränsning: den fyller i adressen på godkännandeskärmen och personen kan ändra den. <0>Länken är behörigheten</0> – den som öppnar den får den här rollen, så behandla den som ett lösenord."
 
+#. Link on Application management to the app's source code
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "The source, on GitHub"
@@ -6602,16 +6850,11 @@ msgstr "Koppla som överföring"
 msgid "Rules can be suggested after the first statement import: this import brought no bank text to suggest them from."
 msgstr "Regler kan föreslås efter den första importen av ett kontoutdrag: den här importen tog inte med någon banktext att föreslå dem utifrån."
 
+#. Button on the Backups screen; Drive and Dropbox are product names and stay
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Save to Drive/Dropbox…"
 msgstr "Spara till Drive/Dropbox…"
-
-#. placeholder {0}: formatCount(proposed.considered)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "Nothing would change. {0} rows carry the bank’s words and today’s rules already agree with all of them."
-msgstr "Inget skulle ändras. {0} rader har bankens ord och dagens regler stämmer redan med alla."
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -6630,7 +6873,9 @@ msgstr "YNAB-export"
 msgid "YNAB account"
 msgstr "YNAB-konto"
 
+#. Application management, Where the files are: the database file
 #. Heading on the Application management screen
+#: src/lib/labels.ts
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Database"
@@ -6698,6 +6943,7 @@ msgstr "Steg {0}, klart:"
 msgid "Open the receipt from {when}"
 msgstr "Öppna kvittot från {when}"
 
+#. Button on the Backups screen: make the zip file to download
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Prepare the zip"
@@ -6887,6 +7133,7 @@ msgstr "Bifoga till en transaktion"
 msgid "Transfer between your own accounts"
 msgstr "Överföring mellan dina egna konton"
 
+#. Button on the Backups screen: pick where on this device to save
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Choose a folder…"
@@ -6918,6 +7165,12 @@ msgstr "Färg"
 msgid "Expires"
 msgstr "Upphör"
 
+#. Application management, Where the files are: note on the Log files row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "what this instance has been saying"
+msgstr "vad den här instansen har sagt"
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Until you do, every sign-in will ask for another recovery code. To do it later, open your account — your name in the menu — and set up a new authenticator there. In this tab, while you stay signed in and for up to a day, the code you just used still covers it; after that, or anywhere else, it takes one more recovery code."
@@ -6927,13 +7180,6 @@ msgstr "Tills dess kommer varje inloggning att kräva en ny återställningskod.
 #, fuzzy
 msgid "Setting it up takes one of your recovery codes."
 msgstr "Att ställa in den kostar en av dina återställningskoder."
-
-#. placeholder {0}: preview.lines.length
-#. placeholder {1}: preview.lines.length
-#: src/screens/Import.tsx
-#, fuzzy
-msgid "{0, plural, other {{1} lines}}"
-msgstr "{0, plural, one {{1} rad} other {{1} rader}}"
 
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -6986,6 +7232,15 @@ msgstr "Kvittoanteckningar"
 msgid "If the update fails and cannot undo itself, this page is replaced by a recovery page, and this code is what opens it. It works only for this update and stops working once the update has finished. It is shown once: the server keeps only a hash of it."
 msgstr "Om uppdateringen misslyckas och inte kan ångra sig själv ersätts den här sidan av en återställningssida, och det är den här koden som öppnar den. Den fungerar bara för den här uppdateringen och slutar fungera när uppdateringen är klar. Den visas en gång: servern sparar bara en hash av den."
 
+#. Rules screen: the result of trying today's rules on every imported row
+#. placeholder {0}: proposed.considered
+#. placeholder {1}: formatCount(proposed.considered)
+#. placeholder {2}: formatCount(proposed.considered)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "{0, plural, one {Nothing would change. {1} row carries the bank’s words and today’s rules already agree with it.} other {Nothing would change. {2} rows carry the bank’s words and today’s rules already agree with all of them.}}"
+msgstr "{0, plural, one {Inget skulle ändras. {1} rad har bankens ord och dagens regler stämmer redan med den.} other {Inget skulle ändras. {2} rader har bankens ord och dagens regler stämmer redan med alla.}}"
+
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "<0>This is the only backup.</0> After this there is none: nothing on this instance could put the ledger back if it were damaged."
@@ -7002,6 +7257,7 @@ msgstr "Förberedelsen av uppdateringen misslyckades: {said} Ingenting ändrades
 msgid "running"
 msgstr "pågår"
 
+#. Section heading on Application management: the log level
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "How much to write down"
@@ -7162,6 +7418,7 @@ msgstr "Var kontot finns. Valfritt, och skilt från valutan – ett eurokonto ka
 msgid "The line exactly as it arrived"
 msgstr "Raden exakt som den kom"
 
+#. Section heading on Application management: the addresses the app answers on
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Where it can be reached"
@@ -7228,6 +7485,12 @@ msgstr "Ersatt av betalningen ovan"
 msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
 msgstr "Båda, eftersom kontona har olika valutor och vi inte hittar på en växelkurs – ta beloppet som banken faktiskt satte in."
 
+#. Application management, Where the files are: the backups folder. See GLOSSARY.md
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Backups"
+msgstr "Säkerhetskopior"
+
 #. Label on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
@@ -7259,6 +7522,7 @@ msgstr "Större text"
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so one Out column holding {0} would be a column nobody could add up."
 msgstr "Den här boken räknar aldrig om. Valutan hör till kontot och ingen växelkurs sparas någonstans, så en Ut-kolumn med {0} vore en kolumn som ingen kunde summera."
 
+#. Application management: describes the running server process
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "The process answering this request."
@@ -7332,6 +7596,7 @@ msgstr "Alla"
 msgid "What would this match?"
 msgstr "Vad skulle detta matcha?"
 
+#. Backups screen: a numbered step; the placeholder is its number
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "{step}. Download it, then upload it"
@@ -7401,6 +7666,11 @@ msgstr "Bara du just nu"
 msgid "Other debt"
 msgstr "Övrig skuld"
 
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "A transfer between two of your accounts shows up twice — once in each bank's statement — and until it is linked it counts as spending on one side and income on the other. Linked, it stays out of Income vs Expense. Imports link the ones they are sure of; these are the rest. To link a transfer between two currencies, select its two rows in the register and choose <0>Link as transfer</0>."
+msgstr "En överföring mellan två av dina konton syns två gånger – en gång i varje banks kontoutdrag – och tills den är kopplad räknas den som utgift på ena sidan och inkomst på den andra. Kopplad hålls den utanför Inkomster och utgifter. Importer kopplar de som de är säkra på; det här är resten. För att koppla en överföring mellan två valutor markerar du dess två rader i registret och väljer <0>Koppla som överföring</0>."
+
 #. placeholder {0}: report.counts.imported
 #. placeholder {1}: formatCount(report.counts.imported)
 #. placeholder {2}: formatCount(report.counts.imported)
@@ -7409,6 +7679,7 @@ msgstr "Övrig skuld"
 msgid "{0, plural, one {Imported {1} transaction in one batch.} other {Imported {2} transactions in one batch.}}"
 msgstr "{0, plural, one {Importerade {1} transaktion i en omgång.} other {Importerade {2} transaktioner i en omgång.}}"
 
+#. Section heading on the Backups screen. See GLOSSARY.md
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Backups taken by updates"
@@ -7438,6 +7709,15 @@ msgstr "överskott"
 msgid "Re-enabled"
 msgstr "Återaktiverad"
 
+#. Value on the one-time import: how many transfer rows (legs) the file holds. See GLOSSARY.md
+#. placeholder {0}: totals.transfers
+#. placeholder {1}: formatCount(totals.transfers)
+#. placeholder {2}: formatCount(totals.transfers)
+#: src/screens/OneTimeImport.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} leg} other {{2} legs}}"
+msgstr "{0, plural, one {{1} ben} other {{2} ben}}"
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key."
@@ -7463,11 +7743,6 @@ msgstr "Ett förskott som inte använts än, eller en överbetalning"
 #, fuzzy
 msgid "Downtime"
 msgstr "Driftstopp"
-
-#: src/components/bits.tsx
-#, fuzzy
-msgid "{wait, plural, other {Try again in {wait} seconds.}}"
-msgstr "{wait, plural, one {Försök igen om {wait} sekund.} other {Försök igen om {wait} sekunder.}}"
 
 #. placeholder {0}: count(it.transactions_uncleared)
 #: src/screens/Household.tsx
@@ -7502,14 +7777,6 @@ msgstr "mottagare"
 msgid "The six digits from the new one"
 msgstr "De sex siffrorna från den nya"
 
-#. placeholder {0}: totals.transfers
-#. placeholder {1}: formatCount(totals.transfers)
-#. placeholder {2}: formatCount(totals.transfers)
-#: src/screens/OneTimeImport.tsx
-#, fuzzy
-msgid "{0, plural, one {{1} legs} other {{2} legs}}"
-msgstr "{0, plural, one {{1} del} other {{2} delar}}"
-
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "double click to edit"
@@ -7521,6 +7788,7 @@ msgstr "dubbelklicka för att redigera"
 msgid "New authenticator"
 msgstr "Ny autentiseringsapp"
 
+#. Application management: shown where the last backup's size would be, when there is none
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "use the button below"
@@ -7542,6 +7810,15 @@ msgstr "Frågar…"
 #, fuzzy
 msgid "no country set"
 msgstr "inget land angivet"
+
+#. Button on the Rules screen: verb, move these transactions to the payees the rules give
+#. placeholder {0}: proposed.changing
+#. placeholder {1}: formatCount(proposed.changing)
+#. placeholder {2}: formatCount(proposed.changing)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "{0, plural, one {Move {1} row} other {Move {2} rows}}"
+msgstr "{0, plural, one {Flytta {1} rad} other {Flytta {2} rader}}"
 
 #: src/screens/Reports.tsx
 #, fuzzy
@@ -7636,6 +7913,16 @@ msgctxt "rule list"
 msgid "regex"
 msgstr "regex"
 
+#. Rules screen: how many rows already in the ledger a rule being tried would match
+#. placeholder {0}: formatCount(trial.data.matches)
+#. placeholder {1}: trial.data.considered
+#. placeholder {2}: formatCount(trial.data.considered)
+#. placeholder {3}: formatCount(trial.data.considered)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "It claims <0>{0}</0> of {1, plural, one {{2} row already in this ledger.} other {{3} rows already in this ledger.}}"
+msgstr "Den gör anspråk på <0>{0}</0> av {1, plural, one {{2} rad som redan finns i boken.} other {{3} rader som redan finns i boken.}}"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody reset {user}'s password"
@@ -7663,12 +7950,19 @@ msgstr "Alla"
 msgid "a pocket's or a card product's name"
 msgstr "namnet på en sparficka eller en kortprodukt"
 
+#. Column value on the Accounts screen: how many transactions name a suggested identifier
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "{count, plural, one {{shown} row} other {{shown} rows}}"
+msgstr "{count, plural, one {{shown} rad} other {{shown} rader}}"
+
 #. History headline, the kind of act: several rows deleted at once
 #: src/lib/historyWords.ts
 #, fuzzy
 msgid "Bulk delete"
 msgstr "Massborttagning"
 
+#. Heading of the progress panel while an update is downloaded and checked
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Preparing the update"
@@ -7680,6 +7974,19 @@ msgstr "Förbereder uppdateringen"
 msgctxt "starting balance rows"
 msgid "Import"
 msgstr "Importera"
+
+#. Screen-reader name of the Register's button for more currencies
+#. placeholder {0}: rest.length
+#. placeholder {1}: rest.length
+#. placeholder {2}: rest.join(", ")
+#. placeholder {3}: restOn.length
+#. placeholder {4}: rest.length
+#. placeholder {5}: rest.join(", ")
+#. placeholder {6}: restOn.length
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} more currency: {2}. {3} shown.} other {{4} more currencies: {5}. {6} shown.}}"
+msgstr "{0, plural, one {{1} valuta till: {2}. {3} visas.} other {{4} valutor till: {5}. {6} visas.}}"
 
 #. placeholder {0}: rule.data?.history_window ?? 3
 #: src/screens/Categories.tsx
@@ -7752,6 +8059,12 @@ msgstr "Bara rader som ingen har rättat"
 msgid "uncategorised (chosen)"
 msgstr "okategoriserad (valt)"
 
+#. Application management, Where the files are: recent writes not yet copied into the database file
+#: src/lib/labels.ts
+#, fuzzy
+msgid "uncheckpointed writes"
+msgstr "skrivningar som ännu inte har förts in"
+
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "The recovery page was used for the last update."
@@ -7789,6 +8102,12 @@ msgstr "Delarna du har ställt in har inte sparats. Att kasta dem lämnar transa
 #, fuzzy
 msgid "{0, plural, one {One receipt will be deleted.} other {{1} receipts will be deleted.}}"
 msgstr "{0, plural, one {Ett kvitto raderas.} other {{1} kvitton raderas.}}"
+
+#. Heading over the everyday bank accounts on the Accounts screen. See GLOSSARY.md
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Current accounts"
+msgstr "Lönekonton"
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -8629,6 +8948,15 @@ msgstr "C – Bokförd"
 msgid "Yes, disable them"
 msgstr "Ja, inaktivera hen"
 
+#. Screen-reader name of a pair's tick box on the Transfers screen: from one account to another, and the date
+#. placeholder {0}: pair.out_leg.account_name
+#. placeholder {1}: pair.in_leg.account_name
+#. placeholder {2}: formatDate(pair.out_leg.date)
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Select {0} to {1}, {2}"
+msgstr "Markera {0} till {1}, {2}"
+
 #. Table cell on the Admin screen: adjective, no longer works
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -8825,14 +9153,6 @@ msgstr "Detta hamnar som en enda post i Historik, så hela importen kan ångras 
 msgid "Email"
 msgstr "E-post"
 
-#. placeholder {0}: packages.length
-#. placeholder {1}: count(packages.length)
-#. placeholder {2}: count(packages.length)
-#: src/screens/ApplicationManagement.tsx
-#, fuzzy
-msgid "{0, plural, one {{1} packages.} other {{2} packages.}}"
-msgstr "{0, plural, one {{1} paket.} other {{2} paket.}}"
-
 #: src/screens/Reconcile.tsx
 #, fuzzy
 msgid "The difference has to be zero first"
@@ -8908,6 +9228,17 @@ msgstr "varför varje valuta har egna kolumner"
 msgid "Only used for totals across accounts. Each account keeps its own, and nothing in the ledger is ever converted."
 msgstr "Används bara för summor över flera konton. Varje konto behåller sin egen, och inget i boken räknas någonsin om."
 
+#. Under the count of categories on the household page
+#. placeholder {0}: it.category_groups
+#. placeholder {1}: count(it.category_groups)
+#. placeholder {2}: count(it.categories_archived)
+#. placeholder {3}: count(it.category_groups)
+#. placeholder {4}: count(it.categories_archived)
+#: src/screens/Household.tsx
+#, fuzzy
+msgid "{0, plural, one {in {1} group, {2} archived} other {in {3} groups, {4} archived}}"
+msgstr "{0, plural, one {i {1} grupp, {2} arkiverade} other {i {3} grupper, {4} arkiverade}}"
+
 #. Menu item and the name of its screen
 #: src/App.tsx
 #, fuzzy
@@ -8961,6 +9292,7 @@ msgid "Discard this staged import?"
 msgstr "Kasta den här förberedda importen?"
 
 #. Label on the Import screen: having no category. See GLOSSARY.md
+#. Label on the Income vs Expense report: having no category. See GLOSSARY.md
 #. Label on the Income vs Expense report: having no category. See GLOSSARY.md
 #. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
 #. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
@@ -9103,16 +9435,6 @@ msgstr "Tillämpa reglerna på det som redan finns här"
 msgid "Withdraw this reset link?"
 msgstr "Dra tillbaka den här återställningslänken?"
 
-#. placeholder {0}: report.coverage.months_in_range
-#. placeholder {1}: report.coverage.months_with_activity
-#. placeholder {2}: report.coverage.months_in_range
-#. placeholder {3}: report.coverage.months_with_activity
-#. placeholder {4}: report.coverage.months_in_range
-#: src/screens/reports/IncomeExpense.tsx
-#, fuzzy
-msgid "{0, plural, one {{1} of {2} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.} other {{3} of {4} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.}}"
-msgstr "{0, plural, one {{1} av {2} månader har några transaktioner – en tom kolumn är en månad där inget importerats, inte en månad då du inte spenderade något.} other {{3} av {4} månader har några transaktioner – en tom kolumn är en månad där inget importerats, inte en månad då du inte spenderade något.}}"
-
 #: src/screens/AccountImport.tsx
 #, fuzzy
 msgid "{count, plural, one {Import {count} account} other {Import {count} accounts}}"
@@ -9143,6 +9465,7 @@ msgstr "{count, plural, one {{count} dag} other {{count} dagar}}"
 msgid "Problems"
 msgstr "Problem"
 
+#. Updates section: the version running now
 #. placeholder {0}: check.running
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -9243,6 +9566,13 @@ msgstr "Var och en med utgifterna som är kopplade till den."
 #, fuzzy
 msgid "This instance runs from a checkout. Update it from the terminal: <0>make upgrade-check</0>, then <1>make upgrade</1>."
 msgstr "Den här instansen körs från en utcheckning. Uppdatera den från terminalen: <0>make upgrade-check</0> och sedan <1>make upgrade</1>."
+
+#. Button on the Transfers screen: verb, link every pair in this section; the number is how many
+#. placeholder {0}: data.strong.length
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Link all {0}"
+msgstr "Koppla alla {0}"
 
 #. Column heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Column heading on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md
@@ -9387,6 +9717,7 @@ msgstr "grupp"
 msgid "Nothing to suggest."
 msgstr "Inget att föreslå."
 
+#. Updates section, followed by a button to update the updater. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "A newer updater ({version}) is available:"
@@ -9441,6 +9772,7 @@ msgstr "Ut {code}"
 msgid "Required, one of"
 msgstr "Obligatoriskt, ett av"
 
+#. Updates section: a setting is on, and when it takes effect during the update
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "On: runs before the backup."
@@ -9473,6 +9805,7 @@ msgstr "Ignorera och fortsätt"
 msgid "Loading…"
 msgstr "Läser in…"
 
+#. Section heading on Application management
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "How much data, per household"
@@ -9565,6 +9898,12 @@ msgstr "Återfått"
 msgid "Currency"
 msgstr "Valuta"
 
+#. Application management, Where the files are: note on the Setup token row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "present only while setup is unfinished"
+msgstr "finns bara medan installationen inte är klar"
+
 #. placeholder {0}: formatCount(kept)
 #. placeholder {1}: formatCount(kept)
 #: src/screens/ynab/results.tsx
@@ -9607,6 +9946,11 @@ msgstr "Inga än."
 #, fuzzy
 msgid "The figure printed on the statement for the day it closes — what the bank says you had, not what this app thinks."
 msgstr "Beloppet som står på kontoutdraget för dagen det avslutas – det banken säger att du hade, inte vad appen tror."
+
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Add or ignore them under <0>Suggested identifiers</0> on the Accounts screen."
+msgstr "Lägg till eller ignorera dem under <0>Föreslagna identifierare</0> på skärmen Konton."
 
 #. Label of a form field on the Admin screen
 #: src/screens/Admin.tsx
@@ -9719,6 +10063,7 @@ msgstr "3. Återställningskoder"
 msgid "e.g. {0}"
 msgstr "t.ex. {0}"
 
+#. Section heading on Application management: the installed software packages
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "What it depends on"
@@ -9778,11 +10123,6 @@ msgstr "{by} gav {user} en ny autentiseringsapp"
 msgid "A transfer moves money between your own accounts, so it is not spending and has no category"
 msgstr "En överföring flyttar pengar mellan dina egna konton, så den är ingen utgift och har ingen kategori"
 
-#: src/screens/Accounts.tsx
-#, fuzzy
-msgid "{count, plural, other {{shown} rows}}"
-msgstr "{count, plural, one {{shown} rad} other {{shown} rader}}"
-
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Keep it plugged in and awake until this finishes. If it sleeps, the update resumes or rolls back when it wakes."
@@ -9820,6 +10160,15 @@ msgstr "Autentiseringsapp, med dess återställningskoder"
 #, fuzzy
 msgid "by country"
 msgstr "per land"
+
+#. Import preview: how many lines the statement file holds
+#. placeholder {0}: preview.lines.length
+#. placeholder {1}: preview.lines.length
+#. placeholder {2}: preview.lines.length
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} line} other {{2} lines}}"
+msgstr "{0, plural, one {{1} rad} other {{2} rader}}"
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -9861,6 +10210,12 @@ msgstr "Räknar ut vad som skulle ändras…"
 msgid "Download…"
 msgstr "Ladda ned…"
 
+#. Application management, Where the files are: note on the Data directory row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "everything that is not the code"
+msgstr "allt som inte är koden"
+
 #. placeholder {0}: formatCount(totals.splits)
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -9873,6 +10228,12 @@ msgstr "{0}, var och en importerad som en egen transaktion"
 #, fuzzy
 msgid "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} den {1}. Delarna ersätter den, så de måste bli samma belopp. Inga minustecken – varje del går åt samma håll som originalet."
+
+#. Logging style on Application management: write only what went wrong
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Quiet"
+msgstr "Tyst"
 
 #. History headline, the kind of act: history brought over from YNAB's export file
 #: src/lib/historyWords.ts
@@ -9953,6 +10314,12 @@ msgstr "Visa en ny kod att skanna"
 msgid "Out ({currency})"
 msgstr "Ut ({currency})"
 
+#. Application management, Where the files are: note on the Browsable snapshot row; `/db` is an address and stays
+#: src/lib/labels.ts
+#, fuzzy
+msgid "the redacted copy `/db` serves, if one was built"
+msgstr "den maskerade kopian som `/db` visar, om en har byggts"
+
 #. placeholder {0}: tagOffer.value
 #. placeholder {1}: account.name
 #: src/screens/Import.tsx
@@ -9965,13 +10332,6 @@ msgstr "Filens namn innehåller <0>{0}</0>. Spara det som IBAN för <1>{1}</1>, 
 #, fuzzy
 msgid "Disabling…"
 msgstr "Inaktiverar…"
-
-#. Button on the Rules screen
-#. placeholder {0}: formatCount(proposed.changing)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "Move {0} rows"
-msgstr "Flytta {0} rader"
 
 #. Column heading on the accounts import: noun, a line of a file
 #. Column name shown beside a value on phones on the accounts import: noun, a line of a file
@@ -10147,6 +10507,12 @@ msgstr "Jobbutlägg"
 msgid "unknown"
 msgstr "okänt"
 
+#. Application management: what access.log holds
+#: src/lib/labels.ts
+#, fuzzy
+msgid "One line per HTTP request. Mechanical, and it drowns everything else."
+msgstr "En rad per HTTP-förfrågan. Mekaniskt, och dränker allt annat."
+
 #. Label on the household page
 #: src/screens/Household.tsx
 #, fuzzy
@@ -10229,7 +10595,10 @@ msgid "Money in within {PAYMENT_PICKER_DAYS} days either side of {0}. Either sid
 msgstr "Pengar in inom {PAYMENT_PICKER_DAYS} dagar före eller efter {0}. Före eller efter, eftersom ett förskott kommer före utgiften det täcker."
 
 #. Column heading on the Transfers screen: preposition, the account money leaves
+#. Column heading on the Transfers screen: preposition, the account money leaves
 #. Column name shown beside a value on phones on the Transfers screen: preposition, the account money leaves
+#. Column name shown beside a value on phones on the Transfers screen: preposition, the account money leaves
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Out of"
@@ -10290,17 +10659,11 @@ msgstr "Låst i ljust, oavsett vad enheten är inställd på."
 msgid "{by} reset {user}'s password"
 msgstr "{by} återställde lösenordet för {user}"
 
+#. Updates section: outcome of an update, with the time it finished and how long it took
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Updated to {running} at {at} in {took}."
 msgstr "Uppdaterad till {running} {at} på {took}."
-
-#. placeholder {0}: count(it.category_groups)
-#. placeholder {1}: count(it.categories_archived)
-#: src/screens/Household.tsx
-#, fuzzy
-msgid "in {0} groups, {1} archived"
-msgstr "i {0} grupper, {1} arkiverade"
 
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
@@ -10394,6 +10757,12 @@ msgstr "Krok före uppdatering"
 msgid "S — Split parts"
 msgstr "S – Delar av uppdelning"
 
+#. Button on the Transfers screen: verb, link the ticked pairs as transfers
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Link selected"
+msgstr "Koppla markerade"
+
 #: src/screens/Rules.tsx
 #, fuzzy
 msgid "whatever is left"
@@ -10437,6 +10806,12 @@ msgstr "Namnregler för mottagare"
 msgid "{app}, via its CSV export"
 msgstr "{app}, via dess CSV-export"
 
+#. Shown in a dropdown when the search finds nothing
+#: src/components/GroupedPicker.tsx
+#, fuzzy
+msgid "Nothing matches that."
+msgstr "Inget matchar."
+
 #. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
@@ -10459,6 +10834,7 @@ msgstr "Den .zip som YNAB exporterar, eller CSV-filen i den."
 msgid "Staged"
 msgstr "Förberedd"
 
+#. Dialog title on the Backups screen
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Delete this backup?"
@@ -10721,7 +11097,9 @@ msgstr "{0, plural, one {Att installera den installerar också {skippedText}, so
 msgid "One row from each account's statement, made the two sides of one transfer"
 msgstr "En rad från varje kontos kontoutdrag, gjorda till de två sidorna av en överföring"
 
+#. Application management, Where the files are: the folder of log files
 #. Heading on the Application management screen
+#: src/lib/labels.ts
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Log files"
@@ -10742,12 +11120,6 @@ msgstr "Jobbutlägg – avskrivet"
 #, fuzzy
 msgid "{0} will no longer be able to administer this instance."
 msgstr "{0} kommer inte längre att kunna administrera instansen."
-
-#. placeholder {0}: formatCount(proposed.orphaned.length)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "Also delete the {0} payees left empty"
-msgstr "Ta även bort de {0} mottagare som blir tomma"
 
 #. Name of a fact on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
@@ -10853,6 +11225,7 @@ msgstr "migreringen som databasen är på"
 msgid "Payee Categorisation"
 msgstr "Kategorisering av mottagare"
 
+#. Button on Application management. See GLOSSARY.md
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Back up now"
@@ -10875,6 +11248,12 @@ msgctxt "new account"
 msgid "New"
 msgstr "Nytt"
 
+#. Application management: what the Quiet logging style writes
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Only what went wrong. A healthy instance writes almost nothing."
+msgstr "Bara det som gick fel. En frisk instans skriver nästan ingenting."
+
 #. Column heading on the one-time import's mapping step
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
@@ -10893,6 +11272,12 @@ msgstr "återbetalt av"
 #, fuzzy
 msgid "{0, plural, one {An import was staged and never finished. Nothing in it has reached the register — open one to carry on where it was left, or discard it.} other {{1} imports were staged and never finished. Nothing in them has reached the register — open one to carry on where it was left, or discard it.}}"
 msgstr "{0, plural, one {En import förbereddes men slutfördes aldrig. Inget i den har nått registret – öppna den för att fortsätta där den lämnades, eller kasta den.} other {{1} importer förbereddes men slutfördes aldrig. Inget i dem har nått registret – öppna en för att fortsätta där den lämnades, eller kasta den.}}"
+
+#. Application management, Where the files are: a redacted copy of the database to browse
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Browsable snapshot"
+msgstr "Bläddringsbar ögonblicksbild"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
@@ -10970,6 +11355,12 @@ msgstr "Administration"
 #, fuzzy
 msgid "New password again"
 msgstr "Nytt lösenord igen"
+
+#. Logging style on Application management: everything, plus every database statement
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Verbose, with SQL"
+msgstr "Utförlig, med SQL"
 
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -11115,6 +11506,12 @@ msgstr "Fortfarande skyldigt"
 msgid "{0, plural, =0 {No migrations will run.} one {# migration will run} other {# migrations will run}}"
 msgstr "{0, plural, =0 {Inga migreringar kommer att köras.} one {# migrering kommer att köras} other {# migreringar kommer att köras}}"
 
+#. Tooltip on the Transfers screen: why this pair cannot be ticked
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Shares a row with a pair you've ticked"
+msgstr "Delar en rad med ett par du har markerat"
+
 #: src/screens/Payees.tsx
 #, fuzzy
 msgid "Merge spellings of one name"
@@ -11124,6 +11521,11 @@ msgstr "Slå ihop stavningar av samma namn"
 #, fuzzy
 msgid "What has happened to this"
 msgstr "Vad som har hänt med den här"
+
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Select every pair that does not share a row with another"
+msgstr "Markera alla par som inte delar en rad med ett annat"
 
 #. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
@@ -11326,6 +11728,16 @@ msgstr "Vad som ska använda den (valfritt)"
 msgid "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
 msgstr "Alla koder du har nu, använda eller inte, slutar fungera och tio nya ersätter dem. Ingen loggas ut."
 
+#. Rules screen: how many rows already in the ledger a rule being tried would match
+#. placeholder {0}: formatCount(trial.data.matches)
+#. placeholder {1}: trial.data.considered
+#. placeholder {2}: formatCount(trial.data.considered)
+#. placeholder {3}: formatCount(trial.data.considered)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "It rewrites <0>{0}</0> of {1, plural, one {{2} row already in this ledger.} other {{3} rows already in this ledger.}}"
+msgstr "Den skriver om <0>{0}</0> av {1, plural, one {{2} rad som redan finns i boken.} other {{3} rader som redan finns i boken.}}"
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
@@ -11465,6 +11877,13 @@ msgstr "1. Installationstoken"
 msgid "{0, plural, one {{1} expense, counted as your spending} other {{2} expenses, counted as your spending}}"
 msgstr "{0, plural, one {{1} utgift, räknad som din egen} other {{2} utgifter, räknade som dina egna}}"
 
+#. Placeholder of a search box in a dropdown; the placeholder is what it lists, e.g. accounts
+#. placeholder {0}: label.toLowerCase()
+#: src/components/GroupedPicker.tsx
+#, fuzzy
+msgid "Search {0}"
+msgstr "Sök {0}"
+
 #: src/screens/History.tsx
 #, fuzzy
 msgid "Every row it changed"
@@ -11514,6 +11933,7 @@ msgstr "{inviter} har bjudit in dig till {PRODUCT} som medlem."
 msgid "Add an account before entering transactions."
 msgstr "Lägg till ett konto innan du skriver in transaktioner."
 
+#. Button on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Open the recovery page"
@@ -11615,11 +12035,6 @@ msgstr "Ta bort {0}"
 msgid "Create the key"
 msgstr "Skapa nyckeln"
 
-#: src/components/Receipts.tsx
-#, fuzzy
-msgid "{count, plural, one {{count} pages} other {{count} pages}}"
-msgstr "{count, plural, one {{count} sida} other {{count} sidor}}"
-
 #. Label on the household page: noun
 #: src/screens/Household.tsx
 #, fuzzy
@@ -11667,6 +12082,7 @@ msgstr "matchar mönstret"
 msgid "A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from your bank's website. CSV and spreadsheets are worked out from the file itself — the delimiter, the date format, the decimal separator, which column is which, and which row the table actually starts on. OFX needs none of that: it names its own fields, and its transaction ids are used so re-importing an overlapping statement cannot double anything up. A PDF is read by where the words sit on the page, so a running-balance column is not mistaken for the amount — and a designed bill, which is summary boxes rather than a table, is refused rather than half-read. You will see all of it before anything is written."
 msgstr "En CSV, en OFX/QFX-nedladdning, en .xls-export från banken, ett kontoutdrag som PDF eller något inklistrat från bankens webbplats. CSV och kalkylblad tolkas utifrån själva filen – avgränsaren, datumformatet, decimaltecknet, vilken kolumn som är vilken och på vilken rad tabellen faktiskt börjar. OFX behöver inget av det: den namnger sina egna fält, och dess transaktions-id:n används så att en ny import av ett överlappande kontoutdrag inte dubblerar något. En PDF läses utifrån var orden står på sidan, så att en kolumn med löpande saldo inte tas för beloppet – och en designad faktura, som består av sammanfattningsrutor snarare än en tabell, nekas i stället för att läsas till hälften. Du ser allt innan något skrivs."
 
+#. Updates section, after an update: the updater was updated as well
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "The updater is now {updaterVersion} too."
@@ -11724,13 +12140,6 @@ msgstr "ungefärligt – {shown}"
 msgid "In"
 msgstr "In"
 
-#. placeholder {0}: formatCount(trial.data.matches)
-#. placeholder {1}: formatCount(trial.data.considered)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "It claims <0>{0}</0> of {1} rows already in this ledger."
-msgstr "Den gör anspråk på <0>{0}</0> av {1} rader som redan finns i boken."
-
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Enter again to edit"
@@ -11781,6 +12190,17 @@ msgstr "Att uppdatera stoppar appen och ändrar bokens schema."
 msgid "Case does not matter. <0>Matches the pattern</0> is a full regular expression, capped at 300 characters and given a tenth of a second per row — one that runs longer is set aside for the rest of that import. Try it below before you save it."
 msgstr "Skiftläget spelar ingen roll. <0>Matchar mönstret</0> är ett fullständigt reguljärt uttryck, högst 300 tecken och med en tiondels sekund per rad – ett som tar längre tid läggs åt sidan under resten av importen. Prova det nedan innan du sparar det."
 
+#. Income vs Expense report: how many months in the range have any transactions
+#. placeholder {0}: report.coverage.months_with_activity
+#. placeholder {1}: report.coverage.months_with_activity
+#. placeholder {2}: report.coverage.months_in_range
+#. placeholder {3}: report.coverage.months_with_activity
+#. placeholder {4}: report.coverage.months_in_range
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} of {2} months has any transactions — an empty column is a month with nothing imported, not a month you spent nothing.} other {{3} of {4} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.}}"
+msgstr "{0, plural, one {{1} av {2} månader har några transaktioner – en tom kolumn är en månad där inget importerats, inte en månad då du inte spenderade något.} other {{3} av {4} månader har några transaktioner – en tom kolumn är en månad där inget importerats, inte en månad då du inte spenderade något.}}"
+
 #: src/screens/Rules.tsx
 #, fuzzy
 msgid "No rules yet. Add one the next time a statement gives you a name you dislike."
@@ -11802,6 +12222,12 @@ msgstr "Uppdateraren stannade på {updaterVersion} och försöker igen:"
 #, fuzzy
 msgid "<0>{0} other lines have the same payee</0> and no category of their own."
 msgstr "<0>{0} andra rader har samma mottagare</0> och ingen egen kategori."
+
+#. Application management: what sql.log holds; “Verbose, with SQL” is a logging style's name
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Only written at the “Verbose, with SQL” style, and it holds the ledger in plain text. Its own file so the other two stay safe to share."
+msgstr "Skrivs bara med stilen ”Utförlig, med SQL”, och innehåller boken i klartext. En egen fil så att de andra två går att dela utan risk."
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -11938,6 +12364,7 @@ msgstr "En överföring behöver två öppna konton. Lägg till ett till på sk�
 msgid "<0>Coming from another budgeting app?</0> Statements go in one at a time here. To bring your whole history across at once — YNAB so far — use the {link} on the {0} page. The household’s owner runs it, once."
 msgstr "<0>Kommer du från en annan budgetapp?</0> Här kommer kontoutdragen in ett i taget. För att föra över hela din historik på en gång – än så länge från YNAB – använd {link} på sidan {0}. Hushållets ägare gör det, en gång."
 
+#. Heading of the progress panel while a downloaded update is thrown away
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Discarding the prepared update"
@@ -12078,11 +12505,22 @@ msgstr "Uppdaterare"
 msgid "The image is kept so you can try again."
 msgstr "Avbildningen sparas så att du kan försöka igen."
 
+#: src/components/RowPicker.tsx
+#, fuzzy
+msgid "Nothing in that window. Widen the dates above."
+msgstr "Inget i det intervallet. Vidga datumen ovan."
+
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Resetting…"
 msgstr "Återställer…"
+
+#. Application management, Where the files are: the app's own code
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Installation"
+msgstr "Installation"
 
 #. placeholder {0}: formatCount(report.not_imported.length)
 #: src/screens/ynab/results.tsx
@@ -12099,13 +12537,6 @@ msgstr "En ägare kan administrera instansen: personer, hushåll och inbjudninga
 #, fuzzy
 msgid "No categories are ticked, not even Needs a category, so there is nothing to show. Tick one in the categories filter, or Select all."
 msgstr "Inga kategorier är markerade, inte ens Behöver kategori, så det finns inget att visa. Markera en i kategorifiltret, eller Välj alla."
-
-#. placeholder {0}: formatCount(proposed.changing)
-#. placeholder {1}: formatCount(proposed.considered)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "<0>{0}</0> of {1} rows would move."
-msgstr "<0>{0}</0> av {1} rader skulle flyttas."
 
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -12136,11 +12567,19 @@ msgstr "per typ"
 msgid "last used {0}"
 msgstr "senast använd {0}"
 
+#. Application management, Where the files are: the setup token file. See GLOSSARY.md
 #. Label of a form field on the first-run setup. See GLOSSARY.md
+#: src/lib/labels.ts
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "Setup token"
 msgstr "Installationstoken"
+
+#. Application management: what the Verbose, with SQL logging style writes
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Verbose, plus every statement and every row it returned — which means transactions, payees and amounts written into a file in plain text. Turn it on to diagnose something and turn it off afterwards."
+msgstr "Utförlig, plus varje sats och varje rad den returnerade – alltså transaktioner, mottagare och belopp skrivna i en fil i klartext. Slå på det för att felsöka något och stäng av det efteråt."
 
 #. Tooltip on the Income vs Expense report: noun, money that came in
 #: src/screens/reports/IncomeExpense.tsx
@@ -12214,6 +12653,7 @@ msgstr "från kopian i den här webbläsaren, inte från servern – själva fil
 msgid "Yes, discard it"
 msgstr "Ja, kasta den"
 
+#. Section heading on Application management: where the database file is
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Where it is"
@@ -12248,6 +12688,7 @@ msgstr "{0} blir alltid {1}"
 msgid "why one currency at a time"
 msgstr "varför en valuta i taget"
 
+#. Screen-reader name of one more release listed on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Another newer release"
@@ -12308,14 +12749,6 @@ msgstr "Hålls utanför loggen: {0}. Utelämnat snarare än överstjärnat – e
 #, fuzzy
 msgid "showing the first {0}"
 msgstr "visar de första {0}"
-
-#. placeholder {0}: rest.length
-#. placeholder {1}: rest.join(", ")
-#. placeholder {2}: restOn.length
-#: src/screens/Register.tsx
-#, fuzzy
-msgid "{0} more currencies: {1}. {2} shown."
-msgstr "{0} valutor till: {1}. {2} visas."
 
 #. Label on the one-time import's results
 #: src/screens/ynab/results.tsx
@@ -12404,6 +12837,7 @@ msgstr "Inte identifierat"
 msgid "Its author, and their other projects"
 msgstr "Upphovspersonen och deras andra projekt"
 
+#. Dialog title on the Backups screen: a backup an update took
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Delete this update backup?"
@@ -12474,7 +12908,9 @@ msgid "Receipts"
 msgstr "Kvitton"
 
 #. Button on the Register screen: verb, link two rows as one transfer
+#. Button on the Transfers screen: verb, link this pair as one transfer
 #: src/screens/Register.tsx
+#: src/screens/Transfers.tsx
 #, fuzzy
 msgid "Link"
 msgstr "Koppla"
@@ -12713,6 +13149,7 @@ msgstr "{0}. Dela den till Drive- eller Dropbox-appen"
 msgid "<0>{0}</0>, made {1}, {2}. The file is removed from the backups directory and <1>cannot be brought back</1> — a backup is a file, not a ledger row, so there is no undo in History."
 msgstr "<0>{0}</0>, gjord {1}, {2}. Filen tas bort ur katalogen för säkerhetskopior och <1>kan inte tas tillbaka</1> – en säkerhetskopia är en fil, inte en rad i boken, så det finns inget att ångra i Historik."
 
+#. Button on the Backups screen while the zip is being made
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Preparing the zip…"
@@ -12771,14 +13208,6 @@ msgstr "Avstämning"
 msgid "never"
 msgstr "aldrig"
 
-#. placeholder {0}: account.rows
-#. placeholder {1}: formatCount(account.rows)
-#. placeholder {2}: formatCount(account.rows)
-#: src/screens/ynab/mapping.tsx
-#, fuzzy
-msgid "{0, plural, one {Its {1} row are left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
-msgstr "{0, plural, one {Dess {1} rad utelämnas och listas i rapporten.} other {Dess {2} rader utelämnas och listas i rapporten.}}"
-
 #. Label on the receipts
 #: src/components/Receipts.tsx
 #, fuzzy
@@ -12805,6 +13234,12 @@ msgstr "DD/MM/ÅÅÅÅ"
 #, fuzzy
 msgid "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."
 msgstr "Du behöver bara filen *Register.csv, inte *Plan.csv. Hela export-zip-filen fungerar också."
+
+#. Application management, Where the files are: the file secret.key
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Secret key"
+msgstr "Hemlig nyckel"
 
 #. Button on the Register screen
 #. placeholder {0}: parts.length
