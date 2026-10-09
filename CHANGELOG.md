@@ -87,6 +87,14 @@ history this repository does not have.
   down, rather than a take-back that did not happen, and stops itself. A
   take-back the engine refuses ends the same way. (#259)
 
+- **The launcher uses Podman when that is where Spend Tracker runs.** With
+  both Docker and Podman on a computer, the launcher picked Docker whenever
+  its command was installed, even with Docker Desktop stopped and a Podman
+  machine running, and then asked for Docker to be started. It now uses the
+  engine Spend Tracker is already installed in, or else the one that is
+  running, and only when neither is running says which are installed and
+  that one of them must be started. (#264)
+
 ## 0.9.1 — 2026-10-09
 
 **Reversible: none** — no migration in this release. To go back to
