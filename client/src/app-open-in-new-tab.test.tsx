@@ -153,17 +153,17 @@ describe("?open=application", () => {
     window.localStorage.clear();
   });
 
-  it("opens Application management for an owner", { timeout: 15_000 }, async () => {
+  it("opens Application management for an owner", async () => {
     boot("/?open=application", person("owner"));
-    await screen.findByText("Reading this instance…", undefined, { timeout: 5_000 });
+    await screen.findByText("Reading this instance…", undefined);
     expect(paths()).toContain("/admin/application");
     await waitFor(() => expect(document.title).toBe("Spend Tracker - Application management - Alice's house"));
     expect(window.location.search).toBe("");
   });
 
-  it("opens the register for a member, and asks nothing of the instance", { timeout: 15_000 }, async () => {
+  it("opens the register for a member, and asks nothing of the instance", async () => {
     boot("/?open=application", person("member"));
-    await screen.findByRole("group", { name: "Alice's house" }, { timeout: 5_000 });
+    await screen.findByRole("group", { name: "Alice's house" });
     await waitFor(() => expect(document.title).toBe("Spend Tracker - Transactions - Alice's house"));
     expect(screen.queryByText("Reading this instance…")).toBeNull();
     expect(paths().filter((path) => path.startsWith("/admin/"))).toEqual([]);

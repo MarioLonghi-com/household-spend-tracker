@@ -250,15 +250,15 @@ describe("the register's remembered settings", () => {
         name: "Select none",
       }),
     );
-    await waitFor(() => expect(last().get("search")).toBe("taxi"), { timeout: 2000 });
-    await waitFor(() => expect(last().get("amount")).toBe("12"), { timeout: 2000 });
+    await waitFor(() => expect(last().get("search")).toBe("taxi"));
+    await waitFor(() => expect(last().get("amount")).toBe("12"));
     const before = last().toString();
     first.unmount();
 
     // Somewhere else, and back.
     asked = [];
     await mount();
-    await waitFor(() => expect(last().get("search")).toBe("taxi"), { timeout: 2000 });
+    await waitFor(() => expect(last().get("search")).toBe("taxi"));
     expect(last().toString()).toBe(before);
     expect(last().get("cleared")).toBe("cleared");
     expect(last().get("source")).toBe("imported");
@@ -301,7 +301,7 @@ describe("the register's remembered settings", () => {
     fireEvent.change(screen.getByRole("combobox", { name: "Cleared" }), {
       target: { value: "uncleared" },
     });
-    await waitFor(() => expect(last().get("search")).toBe("bakery"), { timeout: 2000 });
+    await waitFor(() => expect(last().get("search")).toBe("bakery"));
     first.unmount();
 
     // The report's "Show in Transactions": its filter, and nothing of ours
@@ -319,7 +319,7 @@ describe("the register's remembered settings", () => {
     // From the menu again: what the person set, not what the report did.
     asked = [];
     await mount();
-    await waitFor(() => expect(last().get("search")).toBe("bakery"), { timeout: 2000 });
+    await waitFor(() => expect(last().get("search")).toBe("bakery"));
     expect(last().get("cleared")).toBe("uncleared");
     expect(last().get("reimbursement")).toBeNull();
   });

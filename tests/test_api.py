@@ -1173,7 +1173,7 @@ def test_the_schema_and_doc_viewers_are_off_by_default(client):
 # --------------------------------------------------------------------------- #
 
 
-def test_the_spa_fallback_cannot_be_walked_out_of(client):
+def test_the_spa_fallback_cannot_be_walked_out_of(spa_built, client):
     """In the previous build this was an unauthenticated path traversal that
     served the database.
 
@@ -1186,16 +1186,14 @@ def test_the_spa_fallback_cannot_be_walked_out_of(client):
     this test passes just as happily with the guard deleted -- which is the
     shape of test CLAUDE.md warns about. This drives the ASGI callable directly,
     the way `curl --path-as-is` would.
+
+    Against `spa_built`'s stand-in, always. It used to skip unless the client
+    had been built in the checkout -- which CI's pytest job never does -- and
+    to fail when another worker's stand-in came and went under it.
     """
     import asyncio
 
-    import app.main as main
-
-    static = main.Path(main.__file__).parent / "static" / "dist"
-    if not static.exists():
-        import pytest
-
-        pytest.skip("the client is not built, so the SPA route is not mounted")
+    main = client.app_module
 
     def raw_get(path: str) -> bytes:
         """One GET, with the path exactly as written."""
@@ -1225,23 +1223,28 @@ def test_the_spa_fallback_cannot_be_walked_out_of(client):
         return b"".join(m.get("body", b"") for m in sent if m["type"] == "http.response.body")
 
     # The depths matter, and getting them wrong is how this test passes while
-    # proving nothing: `app/static/dist` is three levels below the repo root, so
-    # three `..` reaches CLAUDE.md and seven reaches /etc. With the guard
-    # deleted, both of these really are served.
+    # proving nothing. The stand-in is three levels below `tmp_path`, which
+    # holds this test's ledger and key, so three `..` reaches the database;
+    # thirty reach / from anywhere. With the guard deleted, every one of these
+    # really is served (checked by deleting it).
+    ledger = spa_built.parents[2] / "api.sqlite3"
+    assert ledger.read_bytes().startswith(b"SQLite format 3")
     for path, needle in (
-        ("/../../../CLAUDE.md", b"# household-spend-tracker"),
-        ("/../../../../../../../etc/passwd", b"root:x:"),
-        ("/../../../requirements.txt", b"fastapi"),
+        ("/../../../api.sqlite3", b"sqlite format 3"),
+        ("/static/../../../../api.sqlite3", b"sqlite format 3"),
+        ("/" + "../" * 30 + "etc/passwd", b"root:"),
     ):
         body = raw_get(path)
         assert needle not in body.lower(), f"{path} escaped the static root"
-        assert b"<!doctype html>" in body.lower(), f"{path} did not fall through to the app shell"
+        assert body == b"<!doctype html><title>stand-in</title>", (
+            f"{path} did not fall through to the app shell"
+        )
 
     # Under /assets the StaticFiles mount answers instead of the SPA route. It
     # has its own containment check and refuses rather than falling through, so
     # only the first assertion applies.
-    escaped = raw_get("/assets/../../../../CLAUDE.md")
-    assert b"# household-spend-tracker" not in escaped.lower(), "the assets mount escaped its root"
+    escaped = raw_get("/assets/../../../../api.sqlite3")
+    assert b"sqlite format 3" not in escaped.lower(), "the assets mount escaped its root"
 
 
 def test_a_half_finished_sign_in_cannot_be_replayed(client):

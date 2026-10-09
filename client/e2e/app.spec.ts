@@ -84,8 +84,8 @@ test("the split panel offers real categories", async ({ page }) => {
   // broken picker rather than an empty ledger.
   const category = page.locator(".split-part select").first();
   await expect(category).toBeVisible();
-  const groups = await category.locator("optgroup").count();
-  expect(groups).toBeGreaterThan(0);
+  // Polled: the groups arrive with the categories query, after the select.
+  await expect.poll(() => category.locator("optgroup").count()).toBeGreaterThan(0);
   await expect(category.locator("option", { hasText: "Groceries" })).toHaveCount(1);
 });
 
@@ -618,8 +618,7 @@ test("a phone held sideways still has a register", async ({ page }, testInfo) =>
   await page.getByRole("heading", { name: "Transactions", exact: true }).waitFor();
 
   const rows = page.locator("tbody tr");
-  await expect(rows.first()).toBeVisible();
-  expect(await rows.count()).toBeGreaterThan(5);
+  await expect(rows.nth(5)).toBeVisible();
 
   const height = await page
     .locator(".register-card .table-scroll")
@@ -857,14 +856,19 @@ test("payee naming rules and payee categorisation are separate screens", async (
   await expect(search).toBeVisible();
   await expect(main.getByRole("button", { name: "Add a rule" })).toHaveCount(0);
 
-  // The search still narrows the table it sits on.
+  // The search still narrows the table it sits on. Counted once the payees
+  // have arrived: a bare `count()` reads whatever is drawn at that instant,
+  // which before the query answers is nothing (#292).
   const rows = main.locator(".table-scroll tbody tr");
+  await expect(rows.nth(1)).toBeVisible();
   const before = await rows.count();
   expect(before).toBeGreaterThan(1);
   const first = (await rows.first().locator("td").first().innerText()).trim();
   await search.fill(first);
+  // Polled: the first row already held this name before the search, so it
+  // says nothing about whether the filter has run yet.
+  await expect.poll(() => rows.count()).toBeLessThan(before);
   await expect(rows.first().locator("td").first()).toHaveText(first);
-  expect(await rows.count()).toBeLessThan(before);
 });
 
 test("the Reports header opens an index, and the index opens the report", async ({ page }) => {

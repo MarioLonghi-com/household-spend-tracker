@@ -69,10 +69,6 @@ function boot(signedIn: User | null) {
   return client;
 }
 
-// The whole shell mounts behind these; on a slow machine that is past the
-// one-second default.
-const WAIT = { timeout: 5_000 };
-
 beforeEach(() => {
   vi.mocked(api.get).mockReset();
   vi.mocked(api.post).mockReset();
@@ -82,10 +78,10 @@ beforeEach(() => {
 describe("the query cache across a change of user", () => {
   it("is emptied when the session ends underneath the page", async () => {
     const client = boot(ALICE);
-    await waitFor(() => expect(handler.current).not.toBeNull(), WAIT);
+    await waitFor(() => expect(handler.current).not.toBeNull());
     await waitFor(() =>
       expect(client.getQueryCache().find({ queryKey: ["households"] })).toBeDefined(),
-    WAIT);
+    );
     act(() => client.setQueryData(["households"], ALICES_HOUSEHOLDS));
     expect(client.getQueryData(["households"])).toEqual(ALICES_HOUSEHOLDS);
 
@@ -94,13 +90,13 @@ describe("the query cache across a change of user", () => {
     expect(client.getQueryData(["households"])).toBeUndefined();
     expect(client.getQueryCache().getAll()).toHaveLength(0);
     // And the page is back at the door, not showing an empty shell.
-    expect(await screen.findByRole("button", { name: "Sign in" }, WAIT)).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "Sign in" })).toBeTruthy();
   });
 
   it("is emptied when a different person signs in", async () => {
     vi.mocked(api.post).mockResolvedValue({ authenticated: true, user: BOB });
     const client = boot(null);
-    const button = await screen.findByRole("button", { name: "Sign in" }, WAIT);
+    const button = await screen.findByRole("button", { name: "Sign in" });
 
     // Somebody else's ledger, still cached from before.
     act(() => client.setQueryData(["households"], ALICES_HOUSEHOLDS));
@@ -116,7 +112,7 @@ describe("the query cache across a change of user", () => {
 
     await waitFor(() =>
       expect(client.getQueryCache().find({ queryKey: ["households"] })).toBeDefined(),
-    WAIT);
+    );
     // The shell is up and asking for Bob's households; Alice's are not there
     // to be shown while it waits.
     expect(client.getQueryData(["households"])).toBeUndefined();

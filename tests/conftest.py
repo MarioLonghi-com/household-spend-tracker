@@ -265,6 +265,29 @@ def _stamp_head(engine) -> None:
 
 
 @pytest.fixture()
+def spa_built(monkeypatch, tmp_path) -> Path:
+    """A stand-in for the built client, so the SPA catch-all is mounted.
+
+    That route is only registered when the client's build directory exists,
+    so without one a test of it passes against an app that never mounted the
+    thing being tested -- or skips, which is how the traversal test went
+    unrun in CI. List it **before** `client` in a test's signature: `client`
+    is what reloads `app.main`, and the directory has to be there when it does.
+
+    Under this test's own `tmp_path`, never the checkout's `app/static/dist`:
+    a stand-in written there was seen by every pytest-xdist worker that
+    reloaded `app.main` while it existed, and deleted under them when its test
+    finished. Three levels below `tmp_path`, as the real one is three below
+    the repository, so `../../..` from it reaches the ledger `client` makes.
+    """
+    dist = tmp_path / "client" / "static" / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("<!doctype html><title>stand-in</title>")
+    monkeypatch.setenv("SPENDTRACKER_CLIENT_DIST", str(dist))
+    return dist
+
+
+@pytest.fixture()
 def client(monkeypatch, tmp_path):
     """A whole app on its own database, booted through its real lifespan."""
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'api.sqlite3'}")

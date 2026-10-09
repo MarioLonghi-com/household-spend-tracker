@@ -12,7 +12,6 @@ here is what the report makes of rows in each state.
 
 from __future__ import annotations
 
-import json
 from dataclasses import asdict
 from datetime import date
 
@@ -56,6 +55,17 @@ def _payee(session, household, owner, name):
         return payee_service.get_or_create(session, household.id, name)
 
 
+def _figures(value):
+    """Every integer in a report, walked field by field. Bools are not figures."""
+    if isinstance(value, dict):
+        return [n for v in value.values() for n in _figures(v)]
+    if isinstance(value, list):
+        return [n for v in value for n in _figures(v)]
+    if isinstance(value, int) and not isinstance(value, bool):
+        return [value]
+    return []
+
+
 def _report(session, household, currency="EUR", **kw):
     return report_service.reimbursements(session, household.id, currency=currency, **kw)
 
@@ -85,9 +95,12 @@ def test_t22_two_currencies_are_two_answers_and_never_one_sum(
     assert (pounds.outstanding, pounds.outstanding_count) == (900, 1)
     assert [r.amount for r in euros.outstanding_rows] == [2_340]
     assert [r.amount for r in pounds.outstanding_rows] == [900]
+    # Every figure in each answer, field by field. Not a substring of the
+    # serialised payload: the ids are UUIDs, and "3240" is four hex digits a
+    # random one can hold (#296).
     for answer in (euros, pounds):
-        payload = json.dumps(asdict(answer), default=str)
-        assert "3240" not in payload, "EUR and GBP were added together"
+        figures = _figures(asdict(answer))
+        assert 2_340 + 900 not in figures, "EUR and GBP were added together"
 
 
 def test_t23_an_advance_covering_less_than_it_paid_leaves_a_difference(
@@ -543,7 +556,7 @@ def test_the_report_over_http_carries_the_contract_shape(client):
          "written_off": 0, "outstanding": 2_340}
     ]
     # GBP's 9.00 is in the GBP answer, not this one.
-    assert "900" not in json.dumps([body["outstanding"], body["months"]])
+    assert 900 not in _figures([body["outstanding"], body["months"]])
 
     windowed = client.get(
         f"/api/households/{house}/reports/reimbursements"

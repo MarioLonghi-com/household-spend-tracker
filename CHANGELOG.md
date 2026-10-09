@@ -53,6 +53,17 @@ history this repository does not have.
   an hour; after that, or when a repair fails, the Updates screen says so and
   names `docker compose up -d --force-recreate app` (#275).
 
+- **The tests that failed now and then no longer do.** Each one waited on
+  the wrong thing: a report test matched digits a random id can hold, the
+  statement-limit budgets counted wall-clock seconds a busy machine spends
+  waiting, the reset tests moved the ledger with the app still running, the
+  traversal test skipped in CI and raced another worker's stand-in client,
+  four end-to-end specs counted rows before they arrived, and the client
+  suite had a one-second wait deadline that a busy machine ran past. Tests
+  only, apart from `SPENDTRACKER_CLIENT_DIST`, which moves where the app
+  looks for the built client and is set only by the tests. (#108, #292,
+  #296, #297, #304, #305)
+
 ## 0.10.0 — 2026-10-09
 
 **Reversible: lossy** — one migration.

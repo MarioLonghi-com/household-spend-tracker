@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -950,7 +951,14 @@ _NO_SUCH_ENDPOINT = (
     "see /llms.txt for how to use it."
 )
 
-_static = Path(__file__).parent / "static" / "dist"
+#: The built client. `SPENDTRACKER_CLIENT_DIST` moves it, and only the tests
+#: do: they build a stand-in under their own temporary directory. A stand-in
+#: written into the checkout's `app/static/dist` was seen by every other
+#: pytest-xdist worker that imported this module while it existed, and was
+#: deleted under them when its test finished.
+_static = Path(
+    os.environ.get("SPENDTRACKER_CLIENT_DIST") or Path(__file__).parent / "static" / "dist"
+)
 if _static.exists():  # pragma: no cover - only present once the client is built
     app.mount("/assets", StaticFiles(directory=_static / "assets"), name="assets")
     _static_root = _static.resolve()

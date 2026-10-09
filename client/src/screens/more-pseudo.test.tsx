@@ -9,7 +9,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 // The One-time Import's card is its own screen, extracted on its own.
 vi.mock("./OneTimeImport", () => ({ OneTimeImport: () => null, NEW_ISSUE_URL: "https://example.com/new" }));
@@ -200,7 +200,12 @@ describe("in en-XA, the remaining screens show no English", () => {
     render(withQueries(<Rules household={HOUSEHOLD} />));
     await screen.findByText("CINEMA");
     fireEvent.click(document.querySelector(".card .row .small-button")!);
-    await screen.findByText("x", { exact: false }).catch(() => undefined);
+    // The proposal, by the payee it names. This used to be a `findByText("x")`
+    // with its failure swallowed: "x" matches many elements, so it never
+    // succeeded, and the test always sat out the whole wait deadline instead.
+    await waitFor(() =>
+      expect(document.querySelector(".banner.info .plain-list li strong")?.textContent).toBe("Bakery"),
+    );
     await new Promise((done) => setTimeout(done, 0));
     expect(left()).toEqual([]);
   });
