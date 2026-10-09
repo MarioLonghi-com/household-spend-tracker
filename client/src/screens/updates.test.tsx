@@ -37,6 +37,7 @@ import {
   type Report,
   type UpdateState,
   type Upstream,
+  whatTheUpdaterDoes,
 } from "./Updates";
 import { UpdateBackupList } from "./Backups";
 import type { Backup } from "./Backups";
@@ -265,7 +266,10 @@ describe("A5: what the section says in each case", () => {
       "Updates run in the updater (spend-tracker-updater-1, version 0.8.0, on Docker Desktop 4.48.0). Nothing installs until you confirm it.",
     );
     await checkNow();
-    expect(screen.getByText(/Installing it also installs 0\.9\.0, which it skips over/)).toBeTruthy();
+    expect(
+      screen.getByText("It also brings the changes of 0.9.0, released in between: notes for both below."),
+    ).toBeTruthy();
+    expect(screen.queryByText(/skips over/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Prepare 0.10.0" }));
     await vi.waitFor(() =>
       expect(post).toHaveBeenCalledWith("/admin/application/update/prepare", { to_version: "0.10.0" }),
@@ -383,6 +387,44 @@ describe("A8: the Update button needs every box", () => {
     // On Docker Desktop, the laptop row shows; the commit comes from the attestation.
     expect(screen.getByText("On a laptop")).toBeTruthy();
     expect(screen.getByText("(9c41e0b)")).toBeTruthy();
+  });
+
+  it("says the schema changes only when a migration runs (#277)", async () => {
+    mount(state({ report: REPORT }));
+    await screen.findByText("3 migrations will run");
+    expect(screen.getByText(/^Updating stops the app and changes the ledger's schema\. So this asks/)).toBeTruthy();
+    cleanup();
+    mount(state({ report: { ...REPORT, pending: [], lossy: [] } }));
+    await screen.findByText("No migrations will run.");
+    expect(screen.getByText(/^Updating stops the app\. So this asks for your password/)).toBeTruthy();
+    expect(screen.queryByText(/changes the ledger's schema/)).toBeNull();
+  });
+
+  it("the Updater row follows the updater's rule: digest first, then the newer version (#277)", async () => {
+    const OTHER = "sha256:" + "9d9d".repeat(16);
+    const cases: [Partial<Heartbeat>, string, RegExp][] = [
+      [{ updater_version: "0.8.0", image_digest: OTHER }, "first", /takes over the update before anything is stopped/],
+      [{ updater_version: "0.10.0", image_digest: UPDATER_DIGEST }, "same", /^Stays as it is\.$/],
+      [{ updater_version: "0.11.0", image_digest: OTHER }, "newer", /^Stays on 0\.11\.0, which is newer than the updater that ships with 0\.10\.0\.$/],
+      [{ updater_version: "0.10.0", image_digest: OTHER }, "after", /same version as the one running, built again, and takes over once the update has finished/],
+    ];
+    for (const [over, fate, said] of cases) {
+      mount(state({ report: REPORT, heartbeat: beat(over) }));
+      await screen.findByRole("button", { name: "Update to 0.10.0" });
+      const row = document.querySelector("[data-updater]")!;
+      expect(row.getAttribute("data-updater")).toBe(fate);
+      expect(row.textContent).toMatch(said);
+      cleanup();
+    }
+  });
+
+  it("an updater is its image: the same digest stays whatever either version says", () => {
+    const report = { to_version: "0.10.0", updater_digest: UPDATER_DIGEST };
+    expect(whatTheUpdaterDoes(report, { updater_version: "0.8.0", image_digest: UPDATER_DIGEST })).toBe("same");
+    expect(whatTheUpdaterDoes(report, { updater_version: "0.11.0", image_digest: UPDATER_DIGEST })).toBe("same");
+    expect(whatTheUpdaterDoes(report, null)).toBe("same");
+    expect(whatTheUpdaterDoes(report, { updater_version: null, image_digest: DIGEST })).toBe("after");
+    expect(whatTheUpdaterDoes(report, { updater_version: "0.9.10", image_digest: DIGEST })).toBe("first");
   });
 
   it("Discard sends the report's id", async () => {

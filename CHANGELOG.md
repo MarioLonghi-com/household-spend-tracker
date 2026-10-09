@@ -57,6 +57,15 @@ history this repository does not have.
   the previous release by hand it named that one. The outcome now carries
   the release the update went to, from the updater's record, and an older
   record that does not name it shows the updater's own sentence. (#260)
+- **The update confirmation follows the updater's own rules.** It said the
+  update changes the ledger's schema even when it also said no migrations
+  would run; that is now said only when one does. Its Updater row said the
+  release's updater takes over before anything is stopped in every case. It
+  now follows the rule the updater uses: the same image stays as it is, a
+  newer release's updater goes first, a running updater newer than the
+  release's stays, and a rebuild at the same version takes over once the
+  update has finished. A release that brings an earlier one's changes with
+  it no longer says it "also installs" what it "skips over". (#277)
 - **An update, or any act that asks for the password and code again, is no
   longer refused as "ledger busy" after a minute on its form.** The first
   request after a minute's pause records that the browser's session is still

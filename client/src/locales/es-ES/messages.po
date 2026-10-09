@@ -3133,6 +3133,11 @@ msgstr "Restablecer inicio de sesión…"
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
 msgstr "Escanea esto con tu aplicación de autenticación y escribe los seis dígitos que muestre. Comprobamos el código ahora, para que sepas que funciona aquí y no lo descubras la próxima vez que inicies sesión. La entrada que tenía la aplicación para esta cuenta ya no funciona; bórrala."
 
+#. placeholder {0}: skipped.length
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {It also brings the changes of {skippedText}, released in between: notes for both below.} other {It also brings the changes of {skippedText}, released in between: notes for all of them below.}}"
+msgstr ""
+
 #. Button on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
@@ -8360,6 +8365,11 @@ msgstr "{0, plural, one {Se importó {1} movimiento en un solo lote.} other {Se 
 msgid "Backups taken by updates"
 msgstr "Copias de seguridad hechas por actualizaciones"
 
+#. Update confirmation, Updater row: the updater running is newer than the release's
+#: src/screens/Updates.tsx
+msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
@@ -10893,6 +10903,11 @@ msgstr "Ya hay un enlace de restablecimiento pendiente para {name}. Este lo sust
 msgid "No payment linked yet"
 msgstr "Todavía no hay ningún pago vinculado"
 
+#. Update confirmation, Updater row: the release's updater is the same version as the one running, built again
+#: src/screens/Updates.tsx
+msgid "The updater that ships with {to} was checked too. It is the same version as the one running, built again, and takes over once the update has finished."
+msgstr ""
+
 #. Table cell on the Admin screen: nothing; shown in place of a list
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -11983,12 +11998,6 @@ msgstr "Texto más grande en la tabla"
 #, fuzzy
 msgid "Save"
 msgstr "Guardar"
-
-#. placeholder {0}: skipped.length
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "{0, plural, one {Installing it also installs {skippedText}, which it skips over: notes for both below.} other {Installing it also installs {skippedText}, which it skips over: notes for all of them below.}}"
-msgstr "{0, plural, one {Instalarla también instala {skippedText}, que se salta: abajo están las notas de ambas.} other {Instalarla también instala {skippedText}, que se salta: abajo están las notas de todas.}}"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -13213,6 +13222,7 @@ msgstr "Quién"
 msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 msgstr "Vacío es la respuesta habitual: <0>PAGO MOVIL BAR MARISOL</0> pasa a ser <1>Bar Marisol</1>."
 
+#. Update confirmation, Updater row: the release's updater is newer than the one running
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "The updater that ships with {to} was checked too, and takes over the update before anything is stopped."
@@ -13544,6 +13554,11 @@ msgstr "Dar una clave a un programa"
 #, fuzzy
 msgid "New account name for {0}"
 msgstr "Nombre de la nueva cuenta para {0}"
+
+#. Update confirmation, why both factors are asked for: an update with no migration
+#: src/screens/Updates.tsx
+msgid "Updating stops the app."
+msgstr ""
 
 #. Button on the Admin screen: verb, stop an account signing in
 #. placeholder {0}: one.display_name

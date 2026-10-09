@@ -2629,6 +2629,11 @@ msgstr "Reset sign-in…"
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
 msgstr "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
 
+#. placeholder {0}: skipped.length
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {It also brings the changes of {skippedText}, released in between: notes for both below.} other {It also brings the changes of {skippedText}, released in between: notes for all of them below.}}"
+msgstr "{0, plural, one {It also brings the changes of {skippedText}, released in between: notes for both below.} other {It also brings the changes of {skippedText}, released in between: notes for all of them below.}}"
+
 #. Button on the Import screen
 #: src/screens/Import.tsx
 msgid "Import these"
@@ -7022,6 +7027,11 @@ msgstr "{0, plural, one {Imported {1} transaction in one batch.} other {Imported
 msgid "Backups taken by updates"
 msgstr "Backups taken by updates"
 
+#. Update confirmation, Updater row: the updater running is newer than the release's
+#: src/screens/Updates.tsx
+msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
+msgstr "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
+
 #: src/screens/Register.tsx
 msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
 msgstr "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
@@ -9152,6 +9162,11 @@ msgstr "A reset link for {name} is already pending. This one replaces it, and wh
 msgid "No payment linked yet"
 msgstr "No payment linked yet"
 
+#. Update confirmation, Updater row: the release's updater is the same version as the one running, built again
+#: src/screens/Updates.tsx
+msgid "The updater that ships with {to} was checked too. It is the same version as the one running, built again, and takes over once the update has finished."
+msgstr "The updater that ships with {to} was checked too. It is the same version as the one running, built again, and takes over once the update has finished."
+
 #. Table cell on the Admin screen: nothing; shown in place of a list
 #: src/screens/Admin.tsx
 msgid "none"
@@ -10069,11 +10084,6 @@ msgstr "Larger text in the table"
 #: src/screens/Passkeys.tsx
 msgid "Save"
 msgstr "Save"
-
-#. placeholder {0}: skipped.length
-#: src/screens/Updates.tsx
-msgid "{0, plural, one {Installing it also installs {skippedText}, which it skips over: notes for both below.} other {Installing it also installs {skippedText}, which it skips over: notes for all of them below.}}"
-msgstr "{0, plural, one {Installing it also installs {skippedText}, which it skips over: notes for both below.} other {Installing it also installs {skippedText}, which it skips over: notes for all of them below.}}"
 
 #: src/screens/Register.tsx
 msgid "One row from each account's statement, made the two sides of one transfer"
@@ -11092,6 +11102,7 @@ msgstr "Who"
 msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 msgstr "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 
+#. Update confirmation, Updater row: the release's updater is newer than the one running
 #: src/screens/Updates.tsx
 msgid "The updater that ships with {to} was checked too, and takes over the update before anything is stopped."
 msgstr "The updater that ships with {to} was checked too, and takes over the update before anything is stopped."
@@ -11366,6 +11377,11 @@ msgstr "Give a program a key"
 #: src/screens/ynab/mapping.tsx
 msgid "New account name for {0}"
 msgstr "New account name for {0}"
+
+#. Update confirmation, why both factors are asked for: an update with no migration
+#: src/screens/Updates.tsx
+msgid "Updating stops the app."
+msgstr "Updating stops the app."
 
 #. Button on the Admin screen: verb, stop an account signing in
 #. placeholder {0}: one.display_name

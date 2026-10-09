@@ -685,8 +685,8 @@ function CheckResult({
         {skipped.length > 0 && (
           <p style={{ marginBottom: 0 }}>
             {plural(skipped.length, {
-              one: `Installing it also installs ${skippedText}, which it skips over: notes for both below.`,
-              other: `Installing it also installs ${skippedText}, which it skips over: notes for all of them below.`,
+              one: `It also brings the changes of ${skippedText}, released in between: notes for both below.`,
+              other: `It also brings the changes of ${skippedText}, released in between: notes for all of them below.`,
             })}
           </p>
         )}
@@ -845,6 +845,31 @@ function Progress({ sentences, running }: { sentences: string[]; running: boolea
 // 3.4: confirming
 // --------------------------------------------------------------------------- //
 
+/**
+ * What the release's updater does in this update, by the updater's own rule
+ * (`updater/handover.py`: `is_me`, `stays_newer`, `goes_first`; #277). An
+ * updater is its image: the same digest is the same updater and nothing
+ * changes, whatever the version says. Otherwise the newer version wins -- a
+ * newer release's updater goes first, before the app stops (step 2a); a newer
+ * running updater is never replaced by an older one -- and a rebuild at the
+ * same version takes over at the end (step 10).
+ *
+ * `same` when there is no heartbeat to compare with: the confirmation is only
+ * drawn while the updater answers, so that is a fallback, not a case.
+ */
+export function whatTheUpdaterDoes(
+  report: Pick<Report, "to_version" | "updater_digest">,
+  heartbeat: Pick<Heartbeat, "updater_version" | "image_digest"> | null,
+): "same" | "first" | "after" | "newer" {
+  if (!report.updater_digest || !heartbeat || report.updater_digest === heartbeat.image_digest) return "same";
+  const running = heartbeat.updater_version;
+  if (!running || !/^\d+\.\d+\.\d+$/.test(running)) return "after";
+  const order = compareVersions(report.to_version, running);
+  if (order > 0) return "first";
+  if (order < 0) return "newer";
+  return "after";
+}
+
 export function Confirm({
   report,
   heartbeat,
@@ -912,8 +937,7 @@ export function Confirm({
   };
 
   const app = attested(report, "app");
-  const updaterChanges =
-    !!report.updater_digest && report.updater_digest !== heartbeat?.image_digest;
+  const updaterFate = whatTheUpdaterDoes(report, heartbeat);
   const toggle = (revision: string, on: boolean) =>
     setTicked((was) => {
       const next = new Set(was);
@@ -924,6 +948,7 @@ export function Confirm({
 
   const from = report.from_version;
   const to = report.to_version;
+  const runningUpdater = heartbeat?.updater_version ?? "";
   const shortCommit = commit ? commit.slice(0, 7) : null;
   const toCommit = app.commit ? app.commit.slice(0, 7) : null;
   const digest = shortDigest(report.digest);
@@ -965,11 +990,20 @@ export function Confirm({
             </tr>
             <tr>
               <th scope="row">{t({ message: "Updater", comment: "Row heading in the update confirmation" })}</th>
-              <td>
-                {updaterChanges ? (
-                  <Trans>
+              <td data-updater={updaterFate}>
+                {updaterFate === "first" ? (
+                  <Trans comment="Update confirmation, Updater row: the release's updater is newer than the one running">
                     The updater that ships with {to} was checked too, and takes over the update
                     before anything is stopped.
+                  </Trans>
+                ) : updaterFate === "after" ? (
+                  <Trans comment="Update confirmation, Updater row: the release's updater is the same version as the one running, built again">
+                    The updater that ships with {to} was checked too. It is the same version as the
+                    one running, built again, and takes over once the update has finished.
+                  </Trans>
+                ) : updaterFate === "newer" ? (
+                  <Trans comment="Update confirmation, Updater row: the updater running is newer than the release's">
+                    Stays on {runningUpdater}, which is newer than the updater that ships with {to}.
                   </Trans>
                 ) : (
                   <Trans comment="Updates section: what happens to a setting during this update">Stays as it is.</Trans>
@@ -1128,7 +1162,11 @@ export function Confirm({
         <StepUpFields
           proof={proof}
           onChange={setProof}
-          why={t`Updating stops the app and changes the ledger's schema.`}
+          why={
+            report.pending.length > 0
+              ? t`Updating stops the app and changes the ledger's schema.`
+              : t({ message: "Updating stops the app.", comment: "Update confirmation, why both factors are asked for: an update with no migration" })
+          }
         />
       </div>
 
