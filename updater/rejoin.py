@@ -8,7 +8,7 @@ keeps its id and gets a new namespace; the app stays in the old one, which has
 no interfaces any more, and nothing restarts it: `depends_on` does not cover
 restarts, and a restart policy acts only when the app itself exits.
 
-**A narrow duty, decided (Mario, 2026-10-09).** Every `CHECK_EVERY_SECONDS`
+**A narrow duty, decided on #275.** Every `CHECK_EVERY_SECONDS`
 the idle updater inspects the app and the sidecar -- a listing and two
 inspects, nothing else -- and acts only when all of these hold:
 
