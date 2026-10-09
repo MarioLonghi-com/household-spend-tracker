@@ -107,9 +107,12 @@ def issue(
     Conflict and changes nothing.
     """
     if not (password or authenticator):
-        raise ValidationError("choose what to reset: the password, the authenticator, or both")
+        raise ValidationError(
+            "choose what to reset: the password, the authenticator, or both",
+            code="reset.choose_what",
+        )
     if by is not None and by.role is not Role.owner:
-        raise ValidationError("only an owner can reset an account")
+        raise ValidationError("only an owner can reset an account", code="reset.owner_only")
 
     previous = session.execute(
         select(AccountReset).where(AccountReset.user_id == user.id)
@@ -118,7 +121,7 @@ def issue(
         # Before the insert: the unit of work orders inserts ahead of deletes,
         # and `user_id` is unique. Refused if the link was followed meanwhile:
         # the owner replacing it has to see the account as it now is.
-        _delete(session, previous, refusal=Conflict(_OVERTAKEN))
+        _delete(session, previous, refusal=Conflict(_OVERTAKEN, code="reset.overtaken"))
     password = password or user.password_hash is None
     authenticator = authenticator or user.totp_secret is None
 
@@ -173,12 +176,14 @@ def issue_by_owner(
     if user.id == by.id:
         raise Conflict(
             "you cannot reset your own account here: change your password or your "
-            "authenticator from your profile"
+            "authenticator from your profile",
+            code="reset.own_account",
         )
     if user.disabled_at is not None:
         raise Conflict(
             "that account is disabled, so a reset link for it could not be followed. "
-            "Re-enable it first."
+            "Re-enable it first.",
+            code="reset.account_disabled",
         )
     return issue(session, user, password=password, authenticator=authenticator, by=by)
 
@@ -187,7 +192,7 @@ def get(session: Session, reset_id: str) -> AccountReset:
     """A pending link by its id, for the owner's screen to withdraw."""
     reset = session.get(AccountReset, reset_id)
     if reset is None:
-        raise NotFound("no such reset link")
+        raise NotFound("no such reset link", code="reset.not_found")
     return reset
 
 
@@ -197,10 +202,10 @@ def lookup(session: Session, token: str) -> AccountReset:
         select(AccountReset).where(AccountReset.token_hash == tokens.fingerprint(token or ""))
     ).scalar_one_or_none()
     if reset is None or reset.expires_at <= utcnow():
-        raise NotFound(_NOT_VALID)
+        raise NotFound(_NOT_VALID, code="reset.link_invalid")
     user = session.get(User, reset.user_id)
     if user is None or user.disabled_at is not None:
-        raise NotFound(_NOT_VALID)
+        raise NotFound(_NOT_VALID, code="reset.link_invalid")
     return reset
 
 
@@ -229,26 +234,29 @@ def redeem(
     """
     user = session.get(User, reset.user_id)
     if user is None:
-        raise NotFound(_NOT_VALID)
+        raise NotFound(_NOT_VALID, code="reset.link_invalid")
 
     if reset.password:
         if not new_password:
-            raise ValidationError("choose a new password")
-        problems = passwords.complaints(new_password, email=user.email)
-        if problems:
-            raise ValidationError("that password will not do: " + ", and ".join(problems))
+            raise ValidationError("choose a new password", code="reset.choose_password")
+        passwords.refuse_weak(new_password, email=user.email)
     elif new_password:
-        raise ValidationError("this link does not change the password")
+        raise ValidationError("this link does not change the password", code="reset.not_password")
 
     step: int | None = None
     if reset.authenticator:
         if not totp_secret:
-            raise ValidationError("enrol a new authenticator first")
+            raise ValidationError("enrol a new authenticator first", code="reset.enrol_first")
         step = totp.code_matches(totp_secret, totp_code or "")
         if step is None:
-            raise ValidationError("that code is not right. Check the time on your phone and try again.")
+            raise ValidationError(
+                "that code is not right. Check the time on your phone and try again.",
+                code="auth.new_code_wrong",
+            )
     elif totp_secret:
-        raise ValidationError("this link does not change the authenticator")
+        raise ValidationError(
+            "this link does not change the authenticator", code="reset.not_authenticator"
+        )
 
     codes: list[str] = []
     if reset.password:
@@ -263,7 +271,7 @@ def redeem(
     # link up before this one spent it is refused here, and the password,
     # secret and recovery codes it set are rolled back with the batch -- not
     # left beside the first person's as the last word (#284).
-    _delete(session, reset, refusal=NotFound(_NOT_VALID))
+    _delete(session, reset, refusal=NotFound(_NOT_VALID, code="reset.link_invalid"))
     return codes
 
 
@@ -278,8 +286,8 @@ def withdraw(session: Session, reset: AccountReset, *, by: User | None) -> None:
     must not be told it is withdrawn when somebody has just used it.
     """
     if by is not None and by.role is not Role.owner:
-        raise ValidationError("only an owner can withdraw a reset link")
-    _delete(session, reset, refusal=Conflict(_OVERTAKEN))
+        raise ValidationError("only an owner can withdraw a reset link", code="reset.owner_only_withdraw")
+    _delete(session, reset, refusal=Conflict(_OVERTAKEN, code="reset.overtaken"))
 
 
 def pending(session: Session) -> list[AccountReset]:

@@ -27,7 +27,7 @@ def list_users(session: Session) -> list[User]:
 def get_user(session: Session, user_id: str) -> User:
     user = session.get(User, user_id)
     if user is None:
-        raise NotFound("no such person")
+        raise NotFound("no such person", code="user.not_found")
     return user
 
 
@@ -42,9 +42,12 @@ def set_disabled(session: Session, *, user: User, disabled: bool, by: User | Non
     account comes back when no owner who can sign in is left to do it.
     """
     if by is not None and by.role is not Role.owner:
-        raise ValidationError("only the owner can do that")
+        raise ValidationError("only the owner can do that", code="auth.owner_only")
     if by is not None and user.id == by.id and disabled:
-        raise Conflict("you cannot disable yourself; there would be nobody left to undo it")
+        raise Conflict(
+            "you cannot disable yourself; there would be nobody left to undo it",
+            code="user.cannot_disable_self",
+        )
 
     user.disabled_at = utcnow() if disabled else None
     if disabled:
@@ -58,11 +61,11 @@ def set_disabled(session: Session, *, user: User, disabled: bool, by: User | Non
 
 def set_role(session: Session, *, user: User, role: Role, by: User) -> User:
     if by.role is not Role.owner:
-        raise ValidationError("only the owner can do that")
+        raise ValidationError("only the owner can do that", code="auth.owner_only")
     if user.id == by.id and role is not Role.owner:
         owners = [u for u in list_users(session) if u.role is Role.owner and u.id != user.id]
         if not owners:
-            raise Conflict("there would be no owner left")
+            raise Conflict("there would be no owner left", code="user.no_owner_left")
     user.role = Role(role)
     session.flush()
     return user
@@ -95,7 +98,7 @@ def create_household_for(
         if user_id == creator.id:
             continue
         if session.get(User, user_id) is None:
-            raise NotFound("no such person")
+            raise NotFound("no such person", code="user.not_found")
         session.add(
             HouseholdMember(
                 household_id=household.id,

@@ -40,7 +40,7 @@ ROOT = Path(__file__).resolve().parent.parent
 #: `DomainError` constructions in `app/` and `statements/` that carry no code,
 #: as of #57's first wave. **Lower it** when you convert sites; the test fails
 #: if it rises.
-CODELESS = 318
+CODELESS = 219
 
 
 @dataclass

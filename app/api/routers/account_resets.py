@@ -64,7 +64,7 @@ def offer_authenticator(token: str, session: SessionDep) -> ResetAuthenticator:
     """A new secret to scan. Nothing is written until a code from it comes back."""
     reset = reset_service.lookup(session, token)
     if not reset.authenticator:
-        raise ValidationError("this link does not change the authenticator")
+        raise ValidationError("this link does not change the authenticator", code="reset.not_authenticator")
     user = session.get(User, reset.user_id)
     secret = totp.new_secret()
     blob = crypto.seal_blob(json.dumps(asdict(_Offer(reset_id=reset.id, secret=secret))), purpose=PURPOSE)
@@ -85,10 +85,14 @@ def complete_reset(token: str, body: ResetComplete, session: SessionDep) -> Rese
                 **json.loads(crypto.open_blob(body.blob, max_age_seconds=ENROL_SECONDS, purpose=PURPOSE))
             )
         except Exception as exc:  # noqa: BLE001 -- any failure here means "scan again"
-            raise ValidationError("that authenticator offer has expired; scan a new one") from exc
+            raise ValidationError(
+            "that authenticator offer has expired; scan a new one", code="reset.offer_expired"
+        ) from exc
         # Bound to this link: an offer from another one is not this account's.
         if offer.reset_id != reset.id:
-            raise ValidationError("that authenticator offer has expired; scan a new one")
+            raise ValidationError(
+            "that authenticator offer has expired; scan a new one", code="reset.offer_expired"
+        )
         secret = offer.secret
 
     with batch(

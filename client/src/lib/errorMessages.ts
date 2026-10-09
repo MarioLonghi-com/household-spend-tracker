@@ -591,6 +591,219 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
         "The updater is too old for this container engine. Update the updater first, then try again",
     }),
   },
+  "auth.sign_in_first": {
+    message: msg({ id: "error.auth.sign_in_first", message: "Sign in first", comment: "Refusal when the session has ended or never began" }),
+  },
+  "auth.owner_only": {
+    message: msg({ id: "error.auth.owner_only", message: "Only the owner can do that" }),
+  },
+  "auth.start_again": {
+    message: msg({ id: "error.auth.start_again", message: "Start again from the sign-in page" }),
+  },
+  "auth.secret_unreadable": {
+    message: msg({ id: "error.auth.secret_unreadable", message: "That authenticator secret cannot be read with this server key" }),
+  },
+  "auth.too_many_for_account": {
+    message: msg({ id: "error.auth.too_many_for_account", message: "Too many attempts for this account. Try again in {seconds, plural, one {# second} other {# seconds}}." }),
+  },
+  "auth.too_many_attempts": {
+    message: msg({ id: "error.auth.too_many_attempts", message: "Too many attempts. Try again in {seconds, plural, one {# second} other {# seconds}}." }),
+  },
+  "auth.too_many_from_here": {
+    message: msg({ id: "error.auth.too_many_from_here", message: "Too many attempts from here. Try again in {seconds, plural, one {# second} other {# seconds}}." }),
+  },
+  "auth.refused": {
+    message: msg({ id: "error.auth.refused", message: "That email and password do not match" }),
+  },
+  "auth.authenticator_cleared": {
+    message: msg({ id: "error.auth.authenticator_cleared", message: "This account's authenticator was reset, so there is no code to give. Use the reset link you were sent to enrol a new one, or ask an owner for a new link." }),
+  },
+  "auth.code_wrong": {
+    message: msg({ id: "error.auth.code_wrong", message: "That code is not right, or has already been used" }),
+  },
+  "auth.recovery_code_wrong": {
+    message: msg({ id: "error.auth.recovery_code_wrong", message: "That recovery code is not right, or has already been used" }),
+  },
+  "auth.new_code_wrong": {
+    message: msg({ id: "error.auth.new_code_wrong", message: "That code is not right. Check the time on your phone and try again." }),
+  },
+  "email.not_an_address": {
+    message: msg({ id: "error.email.not_an_address", message: "{email} is not an email address" }),
+  },
+  "email.too_long": {
+    message: msg({ id: "error.email.too_long", message: "That email address is too long (max {max} characters)" }),
+  },
+  "email.no_name": {
+    message: msg({ id: "error.email.no_name", message: "{email} has no usable name before the @" }),
+  },
+  "household.not_found": {
+    message: msg({ id: "error.household.not_found", message: "No such household" }),
+  },
+  "agent_key.not_found": {
+    message: msg({ id: "error.agent_key.not_found", message: "No such key", comment: "A key for a program. See GLOSSARY.md (Keys for programs)" }),
+  },
+  "agent_key.needs_label": {
+    message: msg({ id: "error.agent_key.needs_label", message: "Give the key a label, so you know what it is for" }),
+  },
+  "agent_key.lifetime": {
+    message: msg({ id: "error.agent_key.lifetime", message: "A key can last between a day and {max_days} days" }),
+  },
+  "agent_key.read_only_commit": {
+    message: msg({ id: "error.agent_key.read_only_commit", message: "A read-only key has nothing to commit" }),
+  },
+  "agent_key.not_issuer": {
+    message: msg({ id: "error.agent_key.not_issuer", message: "Only the person who issued a key can revoke it" }),
+  },
+  "invite.not_found": {
+    message: msg({ id: "error.invite.not_found", message: "No such invitation" }),
+  },
+  "invite.not_an_invitation": {
+    message: msg({ id: "error.invite.not_an_invitation", message: "That is not an invitation" }),
+  },
+  "invite.address_unusable": {
+    message: msg({ id: "error.invite.address_unusable", message: "That email address cannot be used for a new account here, and this link is now spent. Ask whoever invited you for a new one." }),
+  },
+  "invite.owner_only": {
+    message: msg({ id: "error.invite.owner_only", message: "Only an owner can invite people" }),
+  },
+  "invite.link_invalid": {
+    message: msg({ id: "error.invite.link_invalid", message: "That invitation link is not valid" }),
+  },
+  "invite.owner_only_withdraw": {
+    message: msg({ id: "error.invite.owner_only_withdraw", message: "Only an owner can withdraw an invitation" }),
+  },
+  "invite.already_used": {
+    message: msg({ id: "error.invite.already_used", message: "That invitation has already been used; disable the account instead" }),
+  },
+  "passkey.unavailable": {
+    message: msg({ id: "error.passkey.unavailable", message: "{reason, select, not_configured {Passkeys are not set up on this server} ip_address {Passkeys need a host name, and this server is configured with an IP address} wrong_host {Passkeys work only at this server's own address} insecure {Passkeys need this app opened over HTTPS} no_origins {Passkeys need the server's public address configured} other {Passkeys are not available here}}", comment: "Why passkeys cannot be used here; {reason} picks the sentence. See GLOSSARY.md (passkey)" }),
+  },
+  "passkey.no_user_handle": {
+    message: msg({ id: "error.passkey.no_user_handle", message: "Give the member a user handle first", comment: "A user handle is the WebAuthn id of a person; an internal step" }),
+  },
+  "passkey.not_registered": {
+    message: msg({ id: "error.passkey.not_registered", message: "That passkey could not be registered here. Start again." }),
+  },
+  "passkey.already_registered": {
+    message: msg({ id: "error.passkey.already_registered", message: "That passkey is already registered" }),
+  },
+  "passkey.not_found": {
+    message: msg({ id: "error.passkey.not_found", message: "No such passkey" }),
+  },
+  "passkey.needs_name": {
+    message: msg({ id: "error.passkey.needs_name", message: "A passkey needs a name" }),
+  },
+  "passkey.too_many_at_once": {
+    message: msg({ id: "error.passkey.too_many_at_once", message: "Too many sign-ins at once. Try again in a minute." }),
+  },
+  "passkey.refused": {
+    message: msg({ id: "error.passkey.refused", message: "That passkey cannot sign in here" }),
+  },
+  "passkey.not_an_answer": {
+    message: msg({ id: "error.passkey.not_an_answer", message: "That is not a passkey answer" }),
+  },
+  "password.too_short": {
+    message: msg({ id: "error.password.too_short", message: "That password is too short: it needs at least {min_length} characters" }),
+  },
+  "password.common": {
+    message: msg({ id: "error.password.common", message: "That password is one of the {count, number} most common passwords, which are the first ones anybody guessing tries" }),
+  },
+  "password.is_email": {
+    message: msg({ id: "error.password.is_email", message: "A password cannot be your email address" }),
+  },
+  "password.too_short_and_is_email": {
+    message: msg({ id: "error.password.too_short_and_is_email", message: "That password needs at least {min_length} characters, and it cannot be your email address" }),
+  },
+  "password.common_and_is_email": {
+    message: msg({ id: "error.password.common_and_is_email", message: "That password is one of the {count, number} most common passwords, and it cannot be your email address" }),
+  },
+  "reset.not_authenticator": {
+    message: msg({ id: "error.reset.not_authenticator", message: "This link does not change the authenticator" }),
+  },
+  "reset.offer_expired": {
+    message: msg({ id: "error.reset.offer_expired", message: "That authenticator offer has expired; scan a new one", comment: "The QR code offered for setting up a new authenticator" }),
+  },
+  "reset.choose_what": {
+    message: msg({ id: "error.reset.choose_what", message: "Choose what to reset: the password, the authenticator, or both" }),
+  },
+  "reset.owner_only": {
+    message: msg({ id: "error.reset.owner_only", message: "Only an owner can reset an account" }),
+  },
+  "reset.own_account": {
+    message: msg({ id: "error.reset.own_account", message: "You cannot reset your own account here: change your password or your authenticator from your profile" }),
+  },
+  "reset.account_disabled": {
+    message: msg({ id: "error.reset.account_disabled", message: "That account is disabled, so a reset link for it could not be followed. Re-enable it first." }),
+  },
+  "reset.not_found": {
+    message: msg({ id: "error.reset.not_found", message: "No such reset link" }),
+  },
+  "reset.link_invalid": {
+    message: msg({ id: "error.reset.link_invalid", message: "That reset link is not valid" }),
+  },
+  "reset.overtaken": {
+    message: msg({ id: "error.reset.overtaken", message: "That reset link was used or replaced a moment ago. Look at the account again before doing anything else to it" }),
+  },
+  "reset.owner_only_withdraw": {
+    message: msg({ id: "error.reset.owner_only_withdraw", message: "Only an owner can withdraw a reset link" }),
+  },
+  "reset.choose_password": {
+    message: msg({ id: "error.reset.choose_password", message: "Choose a new password" }),
+  },
+  "reset.not_password": {
+    message: msg({ id: "error.reset.not_password", message: "This link does not change the password" }),
+  },
+  "reset.enrol_first": {
+    message: msg({ id: "error.reset.enrol_first", message: "Enrol a new authenticator first" }),
+  },
+  "setup.already_done": {
+    message: msg({ id: "error.setup.already_done", message: "This instance has already been set up" }),
+  },
+  "setup.is_an_invitation": {
+    message: msg({ id: "error.setup.is_an_invitation", message: "That is an invitation; finish it from the link you were sent" }),
+  },
+  "setup.session_expired": {
+    message: msg({ id: "error.setup.session_expired", message: "That setup session has expired; start again" }),
+  },
+  "setup.store_codes": {
+    message: msg({ id: "error.setup.store_codes", message: "Store your recovery codes somewhere that is not this browser, then tick the box" }),
+  },
+  "setup.not_waiting": {
+    message: msg({ id: "error.setup.not_waiting", message: "This instance is not waiting to be set up" }),
+  },
+  "setup.token_wrong": {
+    message: msg({ id: "error.setup.token_wrong", message: "That setup token is not right" }),
+  },
+  "setup.server_restarted": {
+    message: msg({ id: "error.setup.server_restarted", message: "The server restarted; start again with the new setup token" }),
+  },
+  "setup.needs_display_name": {
+    message: msg({ id: "error.setup.needs_display_name", message: "A display name is required" }),
+  },
+  "setup.enrol_first": {
+    message: msg({ id: "error.setup.enrol_first", message: "Finish enrolling an authenticator first" }),
+  },
+  "setup.address_taken": {
+    message: msg({ id: "error.setup.address_taken", message: "Somebody already uses that email address" }),
+  },
+  "setup.session_invalid": {
+    message: msg({ id: "error.setup.session_invalid", message: "That setup session is not valid; start again" }),
+  },
+  "stepup.refused": {
+    message: msg({ id: "error.stepup.refused", message: "That password and code do not match" }),
+  },
+  "stepup.needed": {
+    message: msg({ id: "error.stepup.needed", message: "Confirm your password and authenticator code first", comment: "See GLOSSARY.md (step-up)" }),
+  },
+  "user.not_found": {
+    message: msg({ id: "error.user.not_found", message: "No such person" }),
+  },
+  "user.cannot_disable_self": {
+    message: msg({ id: "error.user.cannot_disable_self", message: "You cannot disable yourself; there would be nobody left to undo it" }),
+  },
+  "user.no_owner_left": {
+    message: msg({ id: "error.user.no_owner_left", message: "There would be no owner left" }),
+  },
 };
 
 /** The params as the active locale writes them. */

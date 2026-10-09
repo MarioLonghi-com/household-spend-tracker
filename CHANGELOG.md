@@ -51,6 +51,14 @@ history this repository does not have.
   its own catalog; English shows the server's sentences exactly as before,
   and the English is now rendered from the same structure, so the two cannot
   disagree. (#266)
+- **Signing in and its refusals carry codes for translation.** Sign-in,
+  step-up, recovery codes, passkeys, invitations, account resets, the setup
+  wizard, keys for programs and the people screens now answer with a stable
+  `code` and raw `params` beside the same English `detail`, and the
+  password complaints say which complaint it was (too short, too common, the
+  email address) with the length or list size as a number. The rate limit
+  sends its wait in seconds as a number. English and agents' answers are
+  unchanged. (#267)
 
 ## 0.9.3 — 2026-10-09
 

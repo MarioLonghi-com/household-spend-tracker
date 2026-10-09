@@ -437,7 +437,11 @@ def test_a_cleared_authenticator_beside_a_replaced_key_is_its_own_state_everywhe
     assert (state["needs_code"], state["key_replaced"], state["detail"]) == (True, False, None)
     cleared = _code(partner, world["partner_secret"])
     assert cleared.status_code == 401
-    assert cleared.json() == {"detail": service.AUTHENTICATOR_CLEARED}, "no key_replaced"
+    assert cleared.json() == {
+        "detail": service.AUTHENTICATOR_CLEARED,
+        "code": "auth.authenticator_cleared",
+        "params": {},
+    }, "no key_replaced"
     assert partner.get("/api/me").status_code == 401
 
     # The owner re-enrols; the banner empties, and the partner is still not in it.

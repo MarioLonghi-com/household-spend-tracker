@@ -3050,6 +3050,93 @@ msgstr "No payments linked yet."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.agent_key.lifetime"
+msgstr "A key can last between a day and {max_days} days"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.needs_label"
+msgstr "Give the key a label, so you know what it is for"
+
+#. A key for a program. See GLOSSARY.md (Keys for programs)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.not_found"
+msgstr "No such key"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.not_issuer"
+msgstr "Only the person who issued a key can revoke it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.read_only_commit"
+msgstr "A read-only key has nothing to commit"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.authenticator_cleared"
+msgstr "This account's authenticator was reset, so there is no code to give. Use the reset link you were sent to enrol a new one, or ask an owner for a new link."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.code_wrong"
+msgstr "That code is not right, or has already been used"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.new_code_wrong"
+msgstr "That code is not right. Check the time on your phone and try again."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.owner_only"
+msgstr "Only the owner can do that"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.recovery_code_wrong"
+msgstr "That recovery code is not right, or has already been used"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.refused"
+msgstr "That email and password do not match"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.secret_unreadable"
+msgstr "That authenticator secret cannot be read with this server key"
+
+#. Refusal when the session has ended or never began
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.sign_in_first"
+msgstr "Sign in first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.start_again"
+msgstr "Start again from the sign-in page"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.too_many_attempts"
+msgstr "Too many attempts. Try again in {seconds, plural, one {# second} other {# seconds}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.too_many_for_account"
+msgstr "Too many attempts for this account. Try again in {seconds, plural, one {# second} other {# seconds}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.too_many_from_here"
+msgstr "Too many attempts from here. Try again in {seconds, plural, one {# second} other {# seconds}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.backup.protected"
 msgstr "{name} is one of the newest five update backups. They are kept so an update can be undone, and the updater removes older ones itself"
 
@@ -3115,6 +3202,61 @@ msgstr "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.email.no_name"
+msgstr "{email} has no usable name before the @"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.email.not_an_address"
+msgstr "{email} is not an email address"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.email.too_long"
+msgstr "That email address is too long (max {max} characters)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.household.not_found"
+msgstr "No such household"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.address_unusable"
+msgstr "That email address cannot be used for a new account here, and this link is now spent. Ask whoever invited you for a new one."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.already_used"
+msgstr "That invitation has already been used; disable the account instead"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.link_invalid"
+msgstr "That invitation link is not valid"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.not_an_invitation"
+msgstr "That is not an invitation"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.not_found"
+msgstr "No such invitation"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.owner_only"
+msgstr "Only an owner can invite people"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.owner_only_withdraw"
+msgstr "Only an owner can withdraw an invitation"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.money.amount_too_large"
 msgstr "That amount is too large to record as money"
 
@@ -3152,6 +3294,78 @@ msgstr "{value} has more decimals than {currency} has ({places})"
 #: src/lib/errorMessages.ts
 msgid "error.money.too_many_digits"
 msgstr "An amount {digits} digits long is too large to record as money"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.already_registered"
+msgstr "That passkey is already registered"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.needs_name"
+msgstr "A passkey needs a name"
+
+#. A user handle is the WebAuthn id of a person; an internal step
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.no_user_handle"
+msgstr "Give the member a user handle first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.not_an_answer"
+msgstr "That is not a passkey answer"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.not_found"
+msgstr "No such passkey"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.not_registered"
+msgstr "That passkey could not be registered here. Start again."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.refused"
+msgstr "That passkey cannot sign in here"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.too_many_at_once"
+msgstr "Too many sign-ins at once. Try again in a minute."
+
+#. Why passkeys cannot be used here; {reason} picks the sentence. See GLOSSARY.md (passkey)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.unavailable"
+msgstr "{reason, select, not_configured {Passkeys are not set up on this server} ip_address {Passkeys need a host name, and this server is configured with an IP address} wrong_host {Passkeys work only at this server's own address} insecure {Passkeys need this app opened over HTTPS} no_origins {Passkeys need the server's public address configured} other {Passkeys are not available here}}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.password.common"
+msgstr "That password is one of the {count, number} most common passwords, which are the first ones anybody guessing tries"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.password.common_and_is_email"
+msgstr "That password is one of the {count, number} most common passwords, and it cannot be your email address"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.password.is_email"
+msgstr "A password cannot be your email address"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.password.too_short"
+msgstr "That password is too short: it needs at least {min_length} characters"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.password.too_short_and_is_email"
+msgstr "That password needs at least {min_length} characters, and it cannot be your email address"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3345,6 +3559,127 @@ msgstr "This was written off. Set it back to expected before recording a payment
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.reset.account_disabled"
+msgstr "That account is disabled, so a reset link for it could not be followed. Re-enable it first."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.choose_password"
+msgstr "Choose a new password"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.choose_what"
+msgstr "Choose what to reset: the password, the authenticator, or both"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.enrol_first"
+msgstr "Enrol a new authenticator first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.link_invalid"
+msgstr "That reset link is not valid"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.not_authenticator"
+msgstr "This link does not change the authenticator"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.not_found"
+msgstr "No such reset link"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.not_password"
+msgstr "This link does not change the password"
+
+#. The QR code offered for setting up a new authenticator
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.offer_expired"
+msgstr "That authenticator offer has expired; scan a new one"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.overtaken"
+msgstr "That reset link was used or replaced a moment ago. Look at the account again before doing anything else to it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.own_account"
+msgstr "You cannot reset your own account here: change your password or your authenticator from your profile"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.owner_only"
+msgstr "Only an owner can reset an account"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.owner_only_withdraw"
+msgstr "Only an owner can withdraw a reset link"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.address_taken"
+msgstr "Somebody already uses that email address"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.already_done"
+msgstr "This instance has already been set up"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.enrol_first"
+msgstr "Finish enrolling an authenticator first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.is_an_invitation"
+msgstr "That is an invitation; finish it from the link you were sent"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.needs_display_name"
+msgstr "A display name is required"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.not_waiting"
+msgstr "This instance is not waiting to be set up"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.server_restarted"
+msgstr "The server restarted; start again with the new setup token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.session_expired"
+msgstr "That setup session has expired; start again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.session_invalid"
+msgstr "That setup session is not valid; start again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.store_codes"
+msgstr "Store your recovery codes somewhere that is not this browser, then tick the box"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.token_wrong"
+msgstr "That setup token is not right"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.split.does_not_add_up"
 msgstr "The parts come to {total} and the transaction is {amount}. A split has to add up, or it moves the balance."
 
@@ -3372,6 +3707,17 @@ msgstr "Every part of a work expense has to be money going out, because each par
 #: src/lib/errorMessages.ts
 msgid "error.split.zero_part"
 msgstr "A part of a split cannot be zero"
+
+#. See GLOSSARY.md (step-up)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.stepup.needed"
+msgstr "Confirm your password and authenticator code first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.stepup.refused"
+msgstr "That password and code do not match"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3547,6 +3893,21 @@ msgstr "The updater of {to_version} is older than this instance, which runs {run
 #: src/lib/errorMessages.ts
 msgid "error.update.updater_outdated"
 msgstr "The updater is too old for this container engine. Update the updater first, then try again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.user.cannot_disable_self"
+msgstr "You cannot disable yourself; there would be nobody left to undo it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.user.no_owner_left"
+msgstr "There would be no owner left"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.user.not_found"
+msgstr "No such person"
 
 #. Column heading on the Application management screen
 #. Column name shown beside a value on phones on the Application management screen
