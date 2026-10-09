@@ -32,6 +32,19 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.9.3 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.9.2`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.9.2` and restart.
+
+Two fixes to the updater: on Podman, 0.9.2's updater could not hand over
+to a newer one, so the fixes it carried never reached a Podman install from
+the browser; and a shutdown or sleep in the ten minutes after an update made
+the previous updater take back over when the machine woke. Alongside them,
+the screens' English is made consistent ahead of translation, counts read
+"1 row", and the client's build no longer pulls in `braces`.
+
 ### Added
 
 - **Every screen is checked in each draft language before review.** The
