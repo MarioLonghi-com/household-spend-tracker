@@ -321,6 +321,17 @@ def test_a_refused_heartbeat_carries_the_updaters_sentence_for_the_screen(world,
     assert world["client"].get(BASE, headers=HEADERS).json()["heartbeat"]["socket_sentence"] is None
 
 
+def test_an_updater_that_cannot_go_on_carries_its_sentence_for_the_screen(world, monkeypatch):
+    """#262: the heartbeat's `problem` reaches the screen as the updater wrote it, and goes with it."""
+    monkeypatch.setenv("SPENDTRACKER_IN_CONTAINER", "1")
+    said = "The updater cannot go on: the container engine will not list this installation's containers."
+    _heartbeat(world["vol"], problem=said)
+    got = world["client"].get(BASE, headers=HEADERS).json()
+    assert (got["case"], got["heartbeat"]["problem"]) == ("working", said)
+    _heartbeat(world["vol"])
+    assert world["client"].get(BASE, headers=HEADERS).json()["heartbeat"]["problem"] is None
+
+
 def test_a_report_for_another_version_or_past_its_time_is_not_current(world):
     client, vol = world["client"], world["vol"]
     _report(vol, hours=-1)

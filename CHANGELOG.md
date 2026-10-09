@@ -40,6 +40,17 @@ history this repository does not have.
   seen by going back to Application management by hand. The page now opens
   on Application management, scrolled to its Updates section, where the
   outcome is. (#255)
+- **A power cut during an update no longer leaves the updater restarting
+  forever.** Cut off a second after the updater made its maintenance page and
+  its drill, those two containers could come back without their files, and
+  the container engine then refused to list any of the installation's
+  containers. The updater stopped at that on every start -- hundreds of times
+  -- with the app down and nothing to say why. It now finds itself anyway,
+  removes its own two broken containers, and rolls the update back as after
+  any interruption. If something else is broken, it says so on the Updates
+  screen and in the update's progress, and tries again every so often instead
+  of exiting; running the launcher again removes the updater's own broken
+  containers, or names the one to remove. (#262)
 
 - **The previous updater exits cleanly when its ten minutes of standby are
   up.** It asked the engine to stop its own container and then waited for the

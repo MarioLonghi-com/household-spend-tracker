@@ -467,7 +467,9 @@ class World(_Fleet):
         self.broken: set[str] = set()
         #: How the next drill behaves: ok, no-backup, migration-fails,
         #: rows-dropped, crash (no report, the container dies), vanish
-        #: (the container is gone, as after an engine restart), hang.
+        #: (the container is gone, as after an engine restart), hang, and
+        #: stall: started, and nothing done yet -- where a power cut a second
+        #: after the create leaves it (#262).
         self.drill = "ok"
         self.restore_fails = 0
         #: Called when an app container (not a one-off) starts.
@@ -756,6 +758,8 @@ class World(_Fleet):
         self.ledger.drills += 1
         if self.on_drill is not None:
             self.on_drill(c)
+        if self.drill == "stall":
+            return
         report_path = Path(
             str(self.volume.root)
             + cmd[cmd.index("--report") + 1].removeprefix("/var/lib/spend-tracker-update")
