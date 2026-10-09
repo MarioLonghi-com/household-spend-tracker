@@ -141,6 +141,7 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | Payee Categorisation (screen) | [App menu](../App.tsx) | Categorização de favorecidos | Categorización de beneficiarios | Kategorisering av mottagare | The menu says "Payee Categorisation" (title case), the heading "Payee categorisation"; sentence case in all three | draft |
 | Payee Merge (screen) | [App menu](../App.tsx) | Unir favorecidos | Fusionar beneficiarios | Slå ihop mottagare | The heading of the screen is "Payees" | draft |
 | Payee Naming Rules (screen) | [App menu](../App.tsx), [Rules](../screens/Rules.tsx) | Regras de nome de favorecidos | Reglas de nombre de beneficiarios | Namnregler för mottagare | | draft |
+| preview (a draft language, in review mode) | [LanguagePicker](../components/LanguagePicker.tsx) | prévia | vista previa | förhandsvisning | "Preview — machine translated, under review" beside a draft language's name (#272) | draft |
 | Profile | [Profile](../screens/Profile.tsx) | Perfil | Perfil | Profil | | draft |
 | receipt | [Receipts](../screens/Receipts.tsx) | comprovante | ticket | kvitto | es-ES: *recibo* in Spain is a bill paid by direct debit; a shop's slip is a *ticket*. pt-BR: *nota fiscal* is the tax invoice, not every slip | draft |
 | reconcile, reconciliation | [Reconcile](../screens/Reconcile.tsx) | conciliar, conciliação | conciliar, conciliación | stämma av, avstämning | Checking the ledger against a statement and locking what matched | draft |
@@ -153,6 +154,7 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | Reports | [Reports](../screens/Reports.tsx) | Relatórios | Informes | Rapporter | es-ES *informes*; *reportes* is Latin American | draft |
 | reset link | [Admin](../screens/Admin.tsx) | link de redefinição | enlace de restablecimiento | återställningslänk | One-time link for choosing a new password or authenticator | draft |
 | restore (a backup) | [Backups](../screens/Backups.tsx) | restaurar | restaurar | återställa | | draft |
+| review mode; review (verb) | [TranslationReview](../screens/TranslationReview.tsx) | revisão; revisar | revisión; revisar | granskning; granska | An owner reading the drafts in the app on their own device (#272) | draft |
 | revoke | [Profile](../screens/Profile.tsx) | revogar | revocar | återkalla | A key or device stops working at once | draft |
 | role | [Household](../screens/Household.tsx), [Admin](../screens/Admin.tsx) | função | rol | roll | Owner or member | draft |
 | rule | [Rules](../screens/Rules.tsx) | regra | regla | regel | | draft |
@@ -164,6 +166,7 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | split (noun), split (verb) | [SplitBar](../components/SplitBar.tsx) | divisão, dividir | división, dividir | uppdelning, dela upp | One transaction across several categories | draft |
 | statement | [Import](../screens/Import.tsx), [Reconcile](../screens/Reconcile.tsx) | extrato | extracto | kontoutdrag | | draft |
 | step-up (confirm with password and code) | [StepUp](../components/StepUp.tsx) | confirmar sua identidade | confirmar tu identidad | bekräfta din identitet | The English never names it; it says "this asks for your password and a code". Use the phrase, not a noun | draft |
+| suggested wording; suggest | [SuggestWording](../components/SuggestWording.tsx) | sugestão de redação; sugerir | sugerencia de redacción; sugerir | formuleringsförslag; föreslå | A reviewer's better words for one message | draft |
 | transaction | [Register](../screens/Register.tsx) | transação | movimiento | transaktion | es-ES banks list *movimientos*; *transacción* reads as a translation | draft |
 | Transactions (screen) | [App menu](../App.tsx) | Transações | Movimientos | Transaktioner | | draft |
 | transfer | [Transfer](../screens/Transfer.tsx), [Transfers](../screens/Transfers.tsx) | transferência | transferencia | överföring | Between the household's own accounts only; not spending, no category | draft |

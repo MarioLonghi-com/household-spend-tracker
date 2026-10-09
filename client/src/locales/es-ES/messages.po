@@ -41,6 +41,13 @@ msgstr "Usar siempre mi elección"
 msgid "Mentions"
 msgstr "Menciones"
 
+#. Button shown while reviewing a draft language: propose better words for one message
+#. Title of the panel where a reviewer proposes better words for one message
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Suggest a better wording"
+msgstr "Sugerir una redacción mejor"
+
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -627,12 +634,15 @@ msgstr "Más divisas"
 msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 msgstr "{unloaded, plural, one {Mostrando {0}: queda {1} fila por cargar; mostrar más} other {Mostrando {2}: quedan {3} filas por cargar; mostrar más}}"
 
+#. Column heading on Application management's suggestions: when it was suggested
 #. Column heading on the Admin screen: noun, the time
 #. Column heading on the History screen: noun, the time
+#. Column name shown beside a value on phones on Application management's suggestions
 #. Column name shown beside a value on phones on the History screen: noun, the time
 #. Name of a fact on the History screen: noun, the time
 #: src/screens/Admin.tsx
 #: src/screens/History.tsx
+#: src/screens/TranslationReview.tsx
 #, fuzzy
 msgid "When"
 msgstr "Cuándo"
@@ -1213,6 +1223,13 @@ msgstr "Entiendo que <0>{revision}</0> no se puede deshacer salvo desde la copia
 msgid "the file <0>{0}</0>"
 msgstr "el archivo <0>{0}</0>"
 
+#. Application management: how many suggestions are waiting and how many are in the catalogs
+#. placeholder {0}: rows.length - open
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "{open} open, {0} applied."
+msgstr "{open} pendientes, {0} aplicadas."
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "The type and currency are fixed once an account exists, because every transaction on it is recorded in that currency."
@@ -1736,6 +1753,7 @@ msgid "New"
 msgstr "Nueva"
 
 #. Hidden column heading over row buttons
+#. Screen-reader name on Application management's suggestions
 #. Screen-reader name on the Accounts screen
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Payees screen
@@ -1749,6 +1767,7 @@ msgstr "Nueva"
 #: src/screens/Payees.tsx
 #: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
+#: src/screens/TranslationReview.tsx
 #, fuzzy
 msgid "Actions"
 msgstr "Acciones"
@@ -2132,6 +2151,12 @@ msgstr "Todo lo que cambies aquí queda registrado y se puede deshacer desde la 
 msgid "Undo"
 msgstr "Deshacer"
 
+#. Review mode: the suggestion was saved
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Saved. It is in the next download of suggestions, on Application management."
+msgstr "Guardada. Irá en la próxima descarga de sugerencias, en Gestión de la aplicación."
+
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -2230,6 +2255,12 @@ msgstr "Ninguna todavía"
 #, fuzzy
 msgid "{0, plural, one {Its {1} row is left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
 msgstr "{0, plural, one {Su {1} fila queda fuera y aparece en el informe.} other {Sus {2} filas quedan fuera y aparecen en el informe.}}"
+
+#. Review mode: the suggestion lost a placeholder or a tag; the two examples are written as they are
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Keep every placeholder and tag the English has, like <0>{placeholder}</0> or <1>{tag}</1>: they are where names, numbers and links go."
+msgstr "Mantén todos los marcadores y etiquetas que tiene el inglés, como <0>{placeholder}</0> o <1>{tag}</1>: es donde van los nombres, los números y los enlaces."
 
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -2431,6 +2462,12 @@ msgstr "Nuevo nombre para {0}"
 #, fuzzy
 msgid "Sum"
 msgstr "Suma"
+
+#. Label of the search box in review mode: find a message by its words
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Find the message, in English or as it reads now"
+msgstr "Busca el mensaje, en inglés o como se lee ahora"
 
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -2870,6 +2907,12 @@ msgstr "Qué plan importar"
 msgid "This writes the ledger's own values into a file in plain text. Turn it off when you are done."
 msgstr "Esto escribe los propios valores del libro en un archivo de texto plano. Desactívalo cuando termines."
 
+#. Review mode: label of the draft translation as it reads now
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Now"
+msgstr "Ahora"
+
 #. Label on the household page
 #: src/screens/Household.tsx
 #, fuzzy
@@ -2935,6 +2978,12 @@ msgstr "Seleccionar todas las filas pendientes"
 msgid "not saved — leave the field to try again"
 msgstr "no guardado: sal del campo para volver a intentarlo"
 
+#. Review mode: label of an optional note explaining the suggestion
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Why, if it helps (optional)"
+msgstr "Por qué, si ayuda (opcional)"
+
 #: src/screens/Reconcile.tsx
 #, fuzzy
 msgid "The bank says there is more than you have ticked — a payment in you have not entered?"
@@ -2950,6 +2999,7 @@ msgstr "Eso no es un importe"
 msgid "Yes, revoke it"
 msgstr "Sí, revocarla"
 
+#. Button on Application management: delete this suggestion
 #. Button on the Backups screen: verb
 #. Button on the Categories screen: verb
 #. Button on the Register screen: verb
@@ -2961,6 +3011,7 @@ msgstr "Sí, revocarla"
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #: src/screens/Rules.tsx
+#: src/screens/TranslationReview.tsx
 #, fuzzy
 msgid "Delete"
 msgstr "Eliminar"
@@ -3545,6 +3596,12 @@ msgstr "No necesita categoría"
 #, fuzzy
 msgid "not counted"
 msgstr "sin contar"
+
+#. Application management: how to send the suggestions on; the links follow
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Download the open suggestions for <0>scripts/apply_translation_suggestions.py</0>:"
+msgstr "Descarga las sugerencias pendientes para <0>scripts/apply_translation_suggestions.py</0>:"
 
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -4768,6 +4825,12 @@ msgstr "Los dos lados de una transferencia en la misma divisa tienen que tener e
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.translation.suggestion_not_found"
+msgstr "No existe esa sugerencia de redacción"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.digest_mismatch"
 msgstr "Los digests de las imágenes no son los que verificó el informe de preparación. Prepara la actualización de nuevo"
 
@@ -5870,6 +5933,13 @@ msgstr "Codificando y enviando…"
 msgid "Show them"
 msgstr "Mostrarlos"
 
+#. What kind of row changed, lower case, singular, in History beside its id: a better translation an owner suggested
+#: src/lib/historyWords.ts
+#, fuzzy
+msgctxt "history table"
+msgid "suggested wording"
+msgstr "sugerencia de redacción"
+
 #: src/components/SignInNotice.tsx
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -6222,6 +6292,13 @@ msgstr "{count, plural, one {# movimiento} other {# movimientos}}"
 #, fuzzy
 msgid "history.count.transfer_rejections"
 msgstr "{count, plural, one {# par marcado como no transferencia} other {# pares marcados como no transferencia}}"
+
+#. History: better translations an owner suggested in review mode
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.translation_suggestions"
+msgstr "{count, plural, one {# sugerencia de redacción} other {# sugerencias de redacción}}"
 
 #. History: a count of changed rows of one kind: people who sign in
 #. js-lingui-explicit-id
@@ -6739,6 +6816,12 @@ msgstr "No es una transferencia"
 msgid "One-time Import · YNAB (API)"
 msgstr "Importación única · YNAB (API)"
 
+#. Button on Application management: put this suggestion back in the next download
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Mark open"
+msgstr "Marcar como pendiente"
+
 #. Shown when a list is empty on the Transfers screen
 #: src/screens/Transfers.tsx
 #, fuzzy
@@ -6783,6 +6866,12 @@ msgstr "Se eliminarán <0>{purgingName}</0> y sus {0} líneas. Nada de ello ha l
 msgctxt "starting balance rows"
 msgid "Skip"
 msgstr "Omitir"
+
+#. Review mode: label of the note written for translators
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Note for translators"
+msgstr "Nota para traductores"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -6866,6 +6955,12 @@ msgstr "{inviter} te ha invitado a {PRODUCT} como propietario, en {households}."
 #, fuzzy
 msgid "Passkeys are not set up on this server."
 msgstr "Las llaves de acceso no están configuradas en este servidor."
+
+#. Beside a language's name in the language picker: its words are a draft, being reviewed
+#: src/components/LanguagePicker.tsx
+#, fuzzy
+msgid "Preview — machine translated, under review"
+msgstr "Vista previa: traducción automática, en revisión"
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -7204,6 +7299,12 @@ msgstr "Mostrar un código para escanear"
 msgid "Passkeys need this app opened at its HTTPS address."
 msgstr "Las llaves de acceso necesitan que abras esta aplicación en su dirección HTTPS."
 
+#. Button in review mode: back to finding another message
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Find another message"
+msgstr "Buscar otro mensaje"
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "One part is still empty"
@@ -7534,6 +7635,12 @@ msgstr "¿Desvincular este ticket?"
 #, fuzzy
 msgid "Category"
 msgstr "Categoría"
+
+#. Heading on the Application management screen: reviewing the draft languages
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Translations"
+msgstr "Traducciones"
 
 #. placeholder {0}: lossy.length
 #: src/screens/Updates.tsx
@@ -8184,6 +8291,15 @@ msgstr "lectura"
 msgid "Not for this account"
 msgstr "No es de esta cuenta"
 
+#. Column heading on Application management's suggestions: the message's English source
+#. Column name shown beside a value on phones on Application management's suggestions
+#. Review mode: label of the message's English source
+#: src/components/SuggestWording.tsx
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "English"
+msgstr "Inglés"
+
 #. Table cell on the receipts
 #: src/screens/Receipts.tsx
 #, fuzzy
@@ -8612,6 +8728,12 @@ msgstr "Establecida"
 #, fuzzy
 msgid "Only rows nobody has corrected"
 msgstr "Solo filas que nadie ha corregido"
+
+#. Review mode: no message has these words
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "No message has those words."
+msgstr "Ningún mensaje tiene esas palabras."
 
 #. Label on the Import screen
 #: src/screens/Import.tsx
@@ -9647,6 +9769,13 @@ msgstr "Todavía no hay categorías. Las categorías dicen <0>para qué</0> fue 
 msgid "nothing recorded yet"
 msgstr "nada registrado todavía"
 
+#. Column heading on Application management's suggestions: the better wording
+#. Column name shown beside a value on phones on Application management's suggestions
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Suggested"
+msgstr "Sugerida"
+
 #. Sentence on the first-run setup
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -9777,6 +9906,13 @@ msgstr "Entre dos de tus cuentas: dos filas, un solo acto"
 #, fuzzy
 msgid "One household per key. Two households means two keys."
 msgstr "Un hogar por clave. Dos hogares, dos claves."
+
+#. State of a suggestion: not yet in the catalogs, so in the next download
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgctxt "suggestion state"
+msgid "Open"
+msgstr "Pendiente"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -10110,6 +10246,12 @@ msgstr "Actualizar solo el actualizador"
 #, fuzzy
 msgid "Not now"
 msgstr "Ahora no"
+
+#. Link on Application management: download every language's suggestions as one JSON file
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "All languages (JSON)"
+msgstr "Todos los idiomas (JSON)"
 
 #. What the import detected: the column of money going out. Lower case, inside a list
 #: src/lib/labels.ts
@@ -11025,9 +11167,12 @@ msgstr "En Docker Desktop o Podman Desktop, abre Containers, busca <0>{name}</0>
 msgid "First setup"
 msgstr "Configuración inicial"
 
+#. Column heading on Application management's suggestions: open or applied
 #. Column heading on the History screen: noun, a row's status
+#. Column name shown beside a value on phones on Application management's suggestions
 #. Name of a fact on the History screen: noun, a row's status
 #: src/screens/History.tsx
+#: src/screens/TranslationReview.tsx
 #, fuzzy
 msgid "State"
 msgstr "Estado"
@@ -11537,6 +11682,12 @@ msgstr "Sí, las {0}"
 #, fuzzy
 msgid "Add a payee"
 msgstr "Añadir un beneficiario"
+
+#. Button in review mode: keep this suggestion
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Save the suggestion"
+msgstr "Guardar la sugerencia"
 
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -12311,6 +12462,12 @@ msgstr "Un encabezado bajo el que van las categorías: Facturas, Día a día, lo
 msgid "One ledger: its accounts, its register, its receipts and the people who can reach them."
 msgstr "Un libro: sus cuentas, su registro, sus tickets y las personas que pueden acceder a ellos."
 
+#. Review mode: the language's messages are loading
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Reading the messages…"
+msgstr "Leyendo los mensajes…"
+
 #. placeholder {0}: group.name
 #: src/screens/Categories.tsx
 #, fuzzy
@@ -12485,6 +12642,12 @@ msgstr "Reescribe <0>{0}</0> de {1, plural, one {{2} fila que ya está en este l
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 msgstr "{count, plural, one {{shown} movimiento} other {{shown} movimientos}}"
 
+#. Button on Application management: the catalogs now carry this suggestion
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Mark applied"
+msgstr "Marcar como aplicada"
+
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Close without copying? The link cannot be shown again."
@@ -12642,8 +12805,10 @@ msgstr "Este ticket no tiene fecha propia, así que el intervalo se centra en cu
 msgid "Already locked"
 msgstr "Ya bloqueado"
 
+#. Column heading on Application management's suggestions
 #. Label of a choice on the language picker
 #: src/components/LanguagePicker.tsx
+#: src/screens/TranslationReview.tsx
 #, fuzzy
 msgid "Language"
 msgstr "Idioma"
@@ -13025,6 +13190,13 @@ msgstr "Mostrar archivadas"
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 msgstr "Una regla se compara con <0>las palabras del propio banco</0>, no con el beneficiario que ves en el registro. El registro puede decir <1>Amazon</1> mientras el extracto decía <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2>, así que escribe la regla para lo segundo. Abre un movimiento y pulsa <3>¿De dónde ha salido esto?</3> para ver exactamente lo que llegó."
 
+#. State of a suggestion: the catalogs carry it
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgctxt "suggestion state"
+msgid "Applied"
+msgstr "Aplicada"
+
 #. Column heading on the Admin screen: noun, the person
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -13186,6 +13358,12 @@ msgstr "Todas las categorías"
 #, fuzzy
 msgid "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
 msgstr "{work, plural, one {{work} gasto de trabajo o devolución excluido: lo que el trabajo te devuelve nunca fue gasto tuyo, y la devolución no es un ingreso.} other {{work} gastos de trabajo y devoluciones excluidos: lo que el trabajo te devuelve nunca fue gasto tuyo, y la devolución no es un ingreso.}}"
+
+#. Review mode: label of the box for the better translation
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Your wording"
+msgstr "Tu redacción"
 
 #. History headline, the kind of act: a statement was imported
 #: src/lib/historyWords.ts
@@ -13429,6 +13607,12 @@ msgstr "{0} será siempre {1}"
 #, fuzzy
 msgid "why one currency at a time"
 msgstr "por qué una divisa cada vez"
+
+#. Switch on Application management: show the draft languages on this device only
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Review translations on this device"
+msgstr "Revisar traducciones en este dispositivo"
 
 #. Screen-reader name of one more release listed on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
@@ -13736,6 +13920,12 @@ msgstr "esa importación se ha descartado: no se ha escrito nada"
 msgid "Putting it back…"
 msgstr "Restaurando…"
 
+#. Application management: nobody has suggested a wording yet
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "No suggestions yet. Choose a preview language in your profile, then use “Suggest a better wording”."
+msgstr "Todavía no hay sugerencias. Elige un idioma de vista previa en tu perfil y luego usa «Sugerir una redacción mejor»."
+
 #. Text on the Application management screen
 #. placeholder {0}: bytes(me.size.page_size)
 #. placeholder {1}: count(me.size.free_pages ?? 0)
@@ -13932,6 +14122,11 @@ msgstr "Más antigua"
 #, fuzzy
 msgid "{0} {1} — a self-hosted, multi-currency spend tracker for one household, under the AGPL."
 msgstr "{0} {1}: un control de gastos autoalojado y multidivisa para un hogar, bajo la AGPL."
+
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
+msgstr "El selector de idioma de tu perfil ofrece entonces Português, Español y Svenska como vistas previas: traducción automática, en revisión. A nadie más se le ofrecen, y el inglés sigue siendo el predeterminado en todo lo demás."
 
 #: src/screens/Import.tsx
 #, fuzzy

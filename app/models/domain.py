@@ -43,6 +43,7 @@ from .enums import (
     MatchType,
     ReimbursementState,
     RuleAction,
+    SuggestionStatus,
     SystemPayee,
 )
 
@@ -114,6 +115,9 @@ class Household(Base, UUIDPrimaryKey, Timestamped):
     )
     ignored_identifier_suggestions: Mapped[list[IgnoredIdentifierSuggestion]] = relationship(
         "IgnoredIdentifierSuggestion", back_populates="household", cascade="all, delete-orphan"
+    )
+    translation_suggestions: Mapped[list[TranslationSuggestion]] = relationship(
+        "TranslationSuggestion", back_populates="household", cascade="all, delete-orphan"
     )
     #: Deleted with the household, through the ORM. `receipts.household_id` is
     #: RESTRICT at the database level precisely so this is the only path: the
@@ -720,6 +724,44 @@ class IgnoredIdentifierSuggestion(Base, UUIDPrimaryKey, Timestamped):
             "household_id", "kind", "normalised", name="uq_ignored_identifier_suggestions_value"
         ),
     )
+
+
+class TranslationSuggestion(Base, UUIDPrimaryKey, Timestamped):
+    """A better wording for one message of a draft language, from review mode (#272).
+
+    An owner reviewing a draft language in the app picks a message and writes
+    what it should say. The message is named the way the catalogs name it --
+    its English source and, when it has one, its context -- because that is
+    what `scripts/apply_translation_suggestions.py` finds it by in a `.po`
+    file, and what a person reading the export can read.
+
+    Audited, like every deliberate act: a suggestion and its withdrawal are in
+    History and undone there. Swept by nothing -- it is the household's own
+    words, kept until somebody deletes it.
+    """
+
+    __tablename__ = "translation_suggestions"
+    __audit__ = True
+
+    household_id: Mapped[str] = mapped_column(
+        String(32), ForeignKey("households.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    #: One of the draft languages: `pt-BR`, `es-ES`, `sv-SE`.
+    locale: Mapped[str] = mapped_column(String(16), nullable=False)
+    #: The message's `msgctxt`, or "" for the many that have none.
+    context: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    #: The message's English source, its `msgid`.
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    suggested: Mapped[str] = mapped_column(Text, nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+    suggested_by_id: Mapped[str | None] = mapped_column(
+        String(32), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    status: Mapped[SuggestionStatus] = mapped_column(
+        EnumStr(SuggestionStatus, 16), nullable=False, default=SuggestionStatus.open
+    )
+
+    household: Mapped[Household] = relationship("Household", back_populates="translation_suggestions")
 
 
 class Receipt(Base, UUIDPrimaryKey, Timestamped):

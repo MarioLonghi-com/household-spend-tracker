@@ -34,6 +34,7 @@ from .domain import (
     Reconciliation,
     Transaction,
     TransferRejection,
+    TranslationSuggestion,
 )
 from .enums import (
     AccountType,
@@ -56,6 +57,7 @@ from .enums import (
     Role,
     RuleAction,
     SortDirection,
+    SuggestionStatus,
     SystemPayee,
 )
 
@@ -64,6 +66,6 @@ __all__ = [
     "Category", "CategoryGroup", "Change", "ChangeOp",
     "ClearedState", "EnumStr", "IdentifierKind", "Household", "HouseholdMember", "IgnoredIdentifierSuggestion", "ImportLine", "ImportOutcome",
     "Instance", "InstanceState", "Invitation", "LinkSource", "LoginAttempt", "MatchType", "NAMING_CONVENTION", "Payee", "Reconciliation",
-    "Passkey", "PayeeRule", "PendingSignIn", "StepUpGrant", "Receipt", "ReceiptBlob", "RecoveryCode", "RegisterSort", "RegisterSource", "ReimbursementState", "ReimbursementView", "RuleAction", "SortDirection", "Role", "SystemPayee", "Timestamped", "Transaction", "TransferRejection", "TrustedDevice",
+    "Passkey", "PayeeRule", "PendingSignIn", "StepUpGrant", "Receipt", "ReceiptBlob", "RecoveryCode", "RegisterSort", "RegisterSource", "ReimbursementState", "ReimbursementView", "RuleAction", "SortDirection", "Role", "SuggestionStatus", "SystemPayee", "Timestamped", "Transaction", "TransferRejection", "TranslationSuggestion", "TrustedDevice",
     "UUIDPrimaryKey", "User", "WebAuthnChallenge", "WebSession", "new_id", "utcnow",
 ]

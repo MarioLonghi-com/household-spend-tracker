@@ -6,7 +6,7 @@
  * wants to make one.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, setUnauthorizedHandler } from "./lib/api";
 import { seedLocale } from "./lib/seedWords";
@@ -43,6 +43,9 @@ import { Transfers } from "./screens/Transfers";
 import type { Household, User } from "./lib/types";
 import { plural, t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
+import { DRAFT_LOCALES, onReviewingChange, reviewing, setReviewer } from "./lib/i18n";
+import { reviewAllowed } from "./lib/review";
+import { SuggestWording } from "./components/SuggestWording";
 import { Trans } from "@lingui/react/macro";
 
 type Screen =
@@ -521,7 +524,15 @@ const NAV_COLLAPSED_KEY = "spendtracker.shell.navCollapsed";
 function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }) {
   // The menu and the tab title are built from the active catalog, so the
   // shell re-renders when another one arrives (`lib/i18n.ts`).
-  useLingui();
+  const { i18n } = useLingui();
+  // Review mode (#272): an owner whose device has it on is offered the draft
+  // languages, and while one is showing, a way to suggest better words.
+  // Whoever is signed in decides, so leaving turns the previews off again.
+  const review = useSyncExternalStore(onReviewingChange, reviewing);
+  useEffect(() => {
+    void setReviewer(reviewAllowed(user.role));
+    return () => void setReviewer(false);
+  }, [user.role]);
   const client = useQueryClient();
   const [opened] = useState(openedAt);
   useEffect(() => putTheAddressBack(opened), [opened]);
@@ -883,13 +894,20 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
             offered; this decides what renders, and a member who reached the
             name some other way gets nothing rather than a screen of 403s. */}
         {screen === "application" && user.role === "owner" && (
-          <ApplicationManagement section={section} onSectionShown={() => setSection(null)} />
+          <ApplicationManagement
+            section={section}
+            onSectionShown={() => setSection(null)}
+            household={household}
+          />
         )}
         </ScreenBoundary>
       </main>
 
       {profileOpen && (
         <Profile user={user} households={list} onClose={() => setProfileOpen(false)} />
+      )}
+      {review && DRAFT_LOCALES.includes(i18n.locale) && (
+        <SuggestWording household={household} locale={i18n.locale} />
       )}
     </div>
   );

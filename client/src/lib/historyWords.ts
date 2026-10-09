@@ -178,6 +178,9 @@ export const HISTORY_TABLES: Record<string, string> = {
   get ignored_identifier_suggestions() {
     return t({ message: "ignored identifier suggestion", context: "history table", comment: "What kind of row changed, lower case, singular, in History beside its id" });
   },
+  get translation_suggestions() {
+    return t({ message: "suggested wording", context: "history table", comment: "What kind of row changed, lower case, singular, in History beside its id: a better translation an owner suggested" });
+  },
 };
 
 /** The batch's headline: the server's English, or this language's word for its kind. */
@@ -438,6 +441,7 @@ export const HISTORY_COUNTS: Record<string, MessageDescriptor> = {
   agent_keys: msg({ id: "history.count.agent_keys", message: "{count, plural, one {# agent key} other {# agent keys}}", comment: "History: a count of changed rows of one kind: keys for programs" }),
   transfer_rejections: msg({ id: "history.count.transfer_rejections", message: "{count, plural, one {# pair marked not a transfer} other {# pairs marked not a transfer}}", comment: "History: two rows a person said are not one transfer" }),
   ignored_identifier_suggestions: msg({ id: "history.count.ignored_identifier_suggestions", message: "{count, plural, one {# ignored identifier suggestion} other {# ignored identifier suggestions}}", comment: "History: suggested account numbers a person dismissed" }),
+  translation_suggestions: msg({ id: "history.count.translation_suggestions", message: "{count, plural, one {# suggested wording} other {# suggested wordings}}", comment: "History: better translations an owner suggested in review mode" }),
 };
 
 /** The words History supplies itself, by set and key: the server's `WORDS`. */

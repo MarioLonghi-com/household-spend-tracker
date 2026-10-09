@@ -83,3 +83,24 @@ and fails on:
 `catalogs.test.ts` holds each translation to the placeholders and tags of
 its English and to the plural forms its language needs; the en-XA walk in
 `e2e/pseudo-locale.spec.ts` finds whole screens nobody extracted.
+
+## Review in the app (#272)
+
+The household reviews the drafts in the app, not in these files. An owner
+turns on *Review translations on this device* in Application management;
+Profile's language picker then offers each draft as a preview, and *Suggest a
+better wording* keeps a better wording for any message. Application
+management lists them and downloads them as JSON or as one language's `.po`
+patch. To apply a download, on a branch:
+
+```bash
+python -m scripts.apply_translation_suggestions suggestions.json
+cd client && npm run extract
+```
+
+The script writes each suggestion as the translation, takes its `fuzzy` flag
+off -- the entry is now *reviewed* -- skips any whose message has gone or that
+drops a placeholder or tag, and reports the reviewed share of each language,
+the number #58 ships a language on. Run with no file, it reports alone. Then
+mark the suggestions applied in Application management, so the next download
+leaves them out.

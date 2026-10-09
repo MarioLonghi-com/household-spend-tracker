@@ -32,6 +32,23 @@ history this repository does not have.
 
 ## Unreleased
 
+### Added
+
+- **The household reviews the draft translations in the app.** An owner can
+  turn on *Review translations on this device* in Application management;
+  Profile's language picker then offers Português, Español and Svenska as
+  previews, machine translated and under review, and a *Suggest a better
+  wording* button finds any message by its words and keeps the owner's
+  better wording, with the English and the translator's note beside it.
+  Suggestions are listed, downloaded as a `.po` patch or JSON, and applied
+  to the catalogs with `scripts/apply_translation_suggestions.py`, which also
+  reports how much of each language is reviewed (0% today). Off by default
+  and per device: nobody else is offered the languages, English stays the
+  default everywhere, and the routes answer only a household's owners.
+  New table `translation_suggestions` (migration `c4d9e2a7b318`; rolling
+  it back is lossy -- it drops every suggested wording, so export them
+  first; nothing in the ledger changes). (#272)
+
 ### Changed
 
 - **A new household can be seeded in its own language.** Creating a

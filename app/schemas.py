@@ -11,7 +11,15 @@ from datetime import date as Date
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictInt,
+    StrictStr,
+    field_validator,
+    model_validator,
+)
 
 from .auth.email_canonical import MAX_LENGTH as MAX_EMAIL_LENGTH
 from .models.enums import (
@@ -28,6 +36,7 @@ from .models.enums import (
     ReimbursementState,
     Role,
     RuleAction,
+    SuggestionStatus,
 )
 from .money import MAX_MINOR, MIN_MINOR
 
@@ -3378,3 +3387,45 @@ class OneTimeAnalysis(BaseModel):
     categories: list[dict]
     targets: dict
     previous_imports: list[dict]
+
+
+# --------------------------------------------------------------------------- #
+# Translation review (#272)
+# --------------------------------------------------------------------------- #
+
+#: The languages with drafts; English is the source and is never suggested for.
+DraftLocale = Literal["pt-BR", "es-ES", "sv-SE"]
+
+
+class TranslationSuggestionCreate(BaseModel):
+    locale: DraftLocale
+    #: The message's English source, as the catalogs' `msgid` holds it.
+    message: str = Field(min_length=1, max_length=4000)
+    #: Its `msgctxt`, when it has one.
+    context: str = Field(default="", max_length=200)
+    suggested: str = Field(min_length=1, max_length=4000)
+    note: Note | None = None
+
+    @field_validator("suggested")
+    @classmethod
+    def _not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("a suggested wording needs words")
+        return value
+
+
+class TranslationSuggestionOut(ORMModel):
+    id: str
+    locale: str
+    context: str
+    message: str
+    suggested: str
+    note: str | None
+    suggested_by_id: str | None
+    status: SuggestionStatus
+    created_at: datetime
+
+
+class TranslationSuggestionsMark(BaseModel):
+    ids: list[str] = Field(min_length=1, max_length=500)
+    status: SuggestionStatus
