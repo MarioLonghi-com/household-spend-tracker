@@ -10,7 +10,7 @@ of digests each time, and read back the way a person's computer reads it:
 - `.env`: `SPENDTRACKER_PUBLIC_URL=http://localhost:8848` (C13), nothing secret;
 - the launchers: executable in the zip (C16), naming the same two images,
   `cd` first (S1), placards removed before `up` (R30), localhost opened,
-  never `sudo` on the host; the `.bat` in CRLF and saying it is untested (D2);
+  never `sudo` on the host; the `.bat` in CRLF and saying what is untested (D2);
 - `--check` catching each way a zip goes wrong;
 - shellcheck, where it is installed (CI's runners have it).
 """
@@ -150,12 +150,16 @@ def test_every_launcher_names_the_compose_file_s_two_images(tmp_path, version, a
     assert f'set "APP_IMAGE={app}"' in bat and f'set "UPDATER_IMAGE={upd}"' in bat
 
 
-def test_the_windows_launcher_is_crlf_and_says_it_is_untested(tmp_path):
+def test_the_windows_launcher_is_crlf_and_says_what_is_untested(tmp_path):
     with zipfile.ZipFile(_build(tmp_path, *RELEASES[0])) as f:
         raw = f.read("spend-tracker-0.9.0/Start Spend Tracker.bat")
     assert raw.count(b"\r\n") == raw.count(b"\n") > 50
     assert b"UNTESTED" in raw[:400]
-    assert "Windows is untested" in _read(_build(tmp_path / "2", *RELEASES[1]), "README.txt")
+    readme = _read(_build(tmp_path / "2", *RELEASES[1]), "README.txt")
+    assert "With Podman on Windows it has not been tried yet" in readme
+    # The first-run warning is explained where the owner double-clicks (#170).
+    step3 = readme[readme.index("3. Double-click"):readme.index("4. The wizard")]
+    assert "Open Anyway" in step3 and "Run anyway" in step3
 
 
 LAUNCHER = (ROOT / "deploy" / "bundle" / "start-spend-tracker.sh").read_text()

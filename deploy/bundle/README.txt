@@ -11,8 +11,20 @@ Spend Tracker @VERSION@ -- on this computer
 3. Double-click the launcher for your system:
 
      macOS     Start Spend Tracker.command
-     Windows   Start Spend Tracker.bat      (untested -- see below)
+     Windows   Start Spend Tracker.bat
      Linux     start-spend-tracker.sh       (or run ./start-spend-tracker.sh)
+
+   The first time, your system stops it with a warning, because these files
+   are not signed yet. That is expected:
+
+     macOS     Close the warning. Open System Settings -> Privacy & Security,
+               scroll down to the line about "Start Spend Tracker.command",
+               click "Open Anyway" and enter your password. It starts by
+               itself. (Right-click -> Open no longer does this.)
+     Windows   SmartScreen says "Windows protected your PC". Click
+               "More info", then "Run anyway".
+
+   After that first time it opens without asking.
 
    A window opens and shows what it does; you do not type anything into it.
    The first start downloads Spend Tracker, which takes a few minutes. When it
@@ -27,20 +39,6 @@ Spend Tracker @VERSION@ -- on this computer
 
 After that, Spend Tracker starts with Docker or Podman, and updates are made
 in the browser, under Application. Nothing else needs this folder's launcher.
-
-
-The first double-click: your system asks first
-----------------------------------------------
-
-These files are not signed yet, so the first open meets a warning.
-
-macOS 15 and later: double-click the .command once and close the warning.
-Then open System Settings -> Privacy & Security, scroll down to the line
-about "Start Spend Tracker.command", click "Open Anyway" and enter your
-password. Double-click it again. (Right-click -> Open no longer does this.)
-
-Windows: SmartScreen says "Windows protected your PC". Click "More info",
-then "Run anyway".
 
 
 Run the launcher again when
@@ -79,11 +77,12 @@ If in doubt, start it once more and take a backup under Application ->
 Backups first.
 
 
-Windows is untested
--------------------
+Windows
+-------
 
-No Windows machine has run "Start Spend Tracker.bat" yet. If it stops,
-open a terminal in this folder and run:
+"Start Spend Tracker.bat" has been run with Docker Desktop on Windows 11.
+With Podman on Windows it has not been tried yet. If it stops, open a
+terminal in this folder and run:
 
   docker compose --env-file .env up -d
 
