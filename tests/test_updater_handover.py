@@ -17,7 +17,20 @@ import time
 import pytest
 
 from tests.updater_fake_engine import engine_fixture
-from tests.updater_world import APP, PROJECT, UPD, A, B, C, Killed, World, digest, ref
+from tests.updater_world import (
+    APP,
+    MULTIARCH,
+    PROJECT,
+    UPD,
+    A,
+    B,
+    C,
+    Killed,
+    World,
+    digest,
+    platform_digest,
+    ref,
+)
 from updater import contract, journal, pin, shapes, volume
 from updater import engine as eng
 from updater import service as service_module
@@ -39,9 +52,11 @@ PREVIOUS = f"{CANONICAL}-previous"
 NEXT = f"{CANONICAL}-next"
 
 
-@pytest.fixture
-def world(tmp_path):
-    with World(tmp_path, fleet=True) as w:
+@pytest.fixture(params=MULTIARCH, ids=["one-digest", "index-first", "platform-first"])
+def world(tmp_path, request):
+    """Every handover test on an engine that lists one digest per image, and on
+    one that lists the index's and the platform manifest's, in both orders (#287)."""
+    with World(tmp_path, fleet=True, multiarch=request.param) as w:
         boot(w)
         yield w
 
@@ -547,6 +562,7 @@ def test_a_successor_replaced_by_compose_with_another_updater_is_stood_down_from
     seen.pop("Id")
     seen["Name"] = "/" + CANONICAL
     seen["State"] = {"Running": True, "Status": "running"}
+    seen["Config"]["Image"] = f"{UPD}:{A}@{digest(UPD, A)}"  # the pin, put back by hand
     fresh = world.fake.add_inspected(seen, image_id=world.fake.images[ref(UPD, A)]["Id"])
     assert fresh != u2 and digest(UPD, A) != digest(UPD, C)
     # The new one starts before U1 next looks: U1's process is between ticks.
@@ -928,3 +944,302 @@ def test_the_handover_files_stay_protocol_1_and_carry_no_code(world):
         doc = json.loads(world.volume.handover(req["id"], part).read_text())
         assert doc["protocol"] == contract.FROZEN_PROTOCOL and doc["id"] == req["id"]
     assert not list((world.volume.root / "handover").glob("*.check-*"))
+
+
+# --------------------------------------------------------------------------- #
+# An image with two digests: the index's and the platform manifest's (#287)
+# --------------------------------------------------------------------------- #
+
+TWO_ORDERS = pytest.mark.parametrize("order", ["index_first", "platform_first"])
+
+
+def two_digests(version: str, order: str) -> tuple[str, str]:
+    pair = (digest(UPD, version), platform_digest(UPD, version))
+    return pair if order == "index_first" else pair[::-1]
+
+
+@TWO_ORDERS
+def test_an_updater_is_every_digest_its_image_carries_not_the_last_one(order):
+    """0.9.2 took the last `RepoDigests` entry for its own, and on Podman that
+    is the platform manifest's: the successor refused itself, and no updater
+    could hand over. Either digest of the image is the same updater."""
+    digests = two_digests(B, order)
+    me = Owner(digests[0], B, CANONICAL, digests=digests)
+    index, platform = Owner(digest(UPD, B), B, ""), Owner(platform_digest(UPD, B), B, "")
+    rebuilt, newer = Owner(digest(UPD, C), B, ""), Owner(digest(UPD, C), C, "")
+    assert is_me(me, index) and is_me(me, platform)
+    assert not is_me(me, rebuilt) and not is_me(me, newer)
+    # 2a: never first to a copy of itself, whichever digest the target names.
+    assert not goes_first(me, index, (1, 1), 1) and not goes_first(me, platform, (1, 1), 1)
+    assert goes_first(me, newer, (1, 1), 1)
+    # An Owner read back from a file has the one digest it was written with.
+    assert me.is_(Owner.from_dict(platform.to_dict())) and me.is_(Owner.from_dict(index.to_dict()))
+    assert not me.is_(Owner.from_dict(newer.to_dict()))
+    assert me.preferring(digest(UPD, B)).image_digest == digest(UPD, B)
+    assert me.preferring(digest(UPD, C)).image_digest == digests[0]  # not its image: unchanged
+    # The file form is unchanged: one digest, the one it writes.
+    assert me.preferring(digest(UPD, B)).to_dict() == {
+        "image_digest": digest(UPD, B), "version": B, "container": CANONICAL,
+    }  # fmt: skip
+
+
+@TWO_ORDERS
+def test_identity_of_reads_every_updater_digest_and_names_itself_as_its_container_was_created(order):
+    from updater.handover import identity_of, own_digests
+
+    digests = two_digests(B, order)
+    image = {
+        "RepoDigests": [
+            f"{APP}@{digest(APP, B)}",
+            *(f"{UPD}@{d}" for d in digests),
+            f"{UPD}@{digests[0]}",
+            "localhost/other@sha256:" + "9" * 64,
+        ]
+    }
+    assert own_digests(image) == digests
+    # The bundle's compose file names the index digest: that is the one it writes.
+    by_digest = {"Config": {"Image": f"{UPD}:{B}@{digest(UPD, B)}"}}
+    me = identity_of(image, by_digest, B, CANONICAL)
+    assert me.image_digest == digest(UPD, B) and me.ids == {digest(UPD, B), platform_digest(UPD, B)}
+    # Started by tag: the engine's first, and still both are its identity.
+    by_tag = {"Config": {"Image": f"{UPD}:{B}"}}
+    me = identity_of(image, by_tag, B, CANONICAL)
+    assert me.image_digest == digests[0] and me.ids == set(digests)
+    # Created from another updater's digest (compose with an older pin): not taken.
+    other = {"Config": {"Image": f"{UPD}:{A}@{digest(UPD, A)}"}}
+    assert identity_of(image, other, B, CANONICAL).image_digest == digests[0]
+    assert identity_of({}, by_tag, B, CANONICAL).ids == frozenset()
+
+
+@TWO_ORDERS
+def test_known_as_prefers_the_verified_digest_then_the_pin(tmp_path, order):
+    from updater.handover import known_as
+
+    vol = volume.Volume(tmp_path / "update")
+    vol.init()
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / ".env").write_text("SPENDTRACKER_VERSION=0.8.0\n")
+    digests = two_digests(B, order)
+    me = Owner(digests[0], B, NEXT, digests=digests)
+    # No handover, no pin: as it came.
+    assert known_as(me, vol, project, None).image_digest == digests[0]
+    # The pin names the platform digest (written by 0.9.2 on Podman): the pin's.
+    pin.write_updater(project, f"{UPD}:{B}@{platform_digest(UPD, B)}")
+    assert known_as(me, vol, project, None).image_digest == platform_digest(UPD, B)
+    # A pin naming another updater is not this one's name.
+    pin.write_updater(project, f"{UPD}:{A}@{digest(UPD, A)}")
+    assert known_as(me, vol, project, None).image_digest == digests[0]
+    # A successor names itself by the digest its handover verified, above the pin.
+    pin.write_updater(project, f"{UPD}:{B}@{platform_digest(UPD, B)}")
+    rid = "0b7a3c9e-5d2f-4c1a-9e8b-1f2d3c4b5a69"
+    succ = Owner(digest(UPD, B), B, NEXT).to_dict()
+    journal.write_handover(vol, rid, "request", {"successor": succ}, time.time())
+    known = known_as(me, vol, project, rid)
+    assert known.image_digest == digest(UPD, B) and known.ids == set(digests)
+
+
+@pytest.mark.parametrize("multiarch", ["index_first", "platform_first"])
+def test_identify_reads_both_digests_from_the_engine(tmp_path, multiarch):
+    from updater.__main__ import identify
+
+    with World(tmp_path, multiarch=multiarch) as w:
+        w.kit()
+        assert w.client is not None
+        me, update_volume = identify(w.client, mountinfo="", hostname=w.updater_id[:12])
+        assert me.container == CANONICAL and me.version == A and update_volume == f"{PROJECT}_update"
+        assert me.ids == {digest(UPD, A), platform_digest(UPD, A)}
+        # Its container was created by the index digest, as the bundle names it.
+        assert me.image_digest == digest(UPD, A)
+        listed = w.fake.images[ref(UPD, A)]["RepoDigests"]
+        assert listed[-1 if multiarch == "index_first" else 0] == f"{UPD}@{platform_digest(UPD, A)}"
+
+
+@pytest.fixture(params=["index_first", "platform_first"])
+def podman_world(tmp_path, request):
+    with World(tmp_path, fleet=True, multiarch=request.param) as w:
+        boot(w)
+        yield w
+
+
+def test_a_successor_whose_image_also_carries_the_platform_digest_passes_its_own_check(podman_world):
+    w = podman_world
+    req, record = update_updater(w, C)
+    assert record["state"] == "succeeded", record
+    ready = journal.read_handover(w.volume, req["id"], "ready")
+    assert ready["ok"] is True and ready["problem"] is None
+    assert ready["image_digest"] == digest(UPD, C)
+    assert ready["image_digests"] == sorted([digest(UPD, C), platform_digest(UPD, C)])
+    u2 = w.fleet[w.successor_id()]
+    assert u2.me.image_digest == digest(UPD, C) and u2.kit.site.me.image_digest == digest(UPD, C)
+    # The heartbeat, the lock and the pin name the index: what the release published.
+    assert beat(w)["image_digest"] == digest(UPD, C) and beat(w)["role"] == "current"
+    assert lock_holder(w.volume).image_digest == digest(UPD, C)
+    assert pin.read(w.project_dir)[pin.UPDATER_KEY] == f"{UPD}:{C}@{digest(UPD, C)}"
+    w.run_for(STANDBY_SECONDS + 30)
+    assert load(w.volume, req["id"])["outcome"] == "done"
+    assert assert_exactly_one_current(w).image_digest == digest(UPD, C)
+
+
+def test_the_successors_self_check_refuses_an_image_carrying_neither_digest(podman_world):
+    w = podman_world
+    w.lying_digest = platform_digest(UPD, A)
+    req, record = update_updater(w, C)
+    assert record["state"] == "not_started"
+    assert f"it runs {platform_digest(UPD, A)[:19]}, not {digest(UPD, C)[:19]}" in record["sentence"]
+    assert named(w, NEXT) is None and assert_exactly_one_current(w).version == A
+    assert pin.UPDATER_KEY not in pin.read(w.project_dir)
+
+
+def as_092(monkeypatch, version: str = A) -> None:
+    """Updaters of `version` know themselves as 0.9.2 did: by the last entry alone."""
+    import tests.updater_world as world_module
+    from updater.handover import identity_of
+
+    def last_entry(image, seen, v, container):
+        me = identity_of(image, seen, v, container)
+        if v != version:
+            return me
+        listed = [r.split("@", 1)[1] for r in image.get("RepoDigests") or [] if r.startswith(UPD + "@")]
+        return Owner(listed[-1], v, container)
+
+    monkeypatch.setattr(world_module, "identity_of", last_entry)
+
+
+def test_a_092_updater_hands_over_to_a_fixed_successor_first(podman_world, monkeypatch):
+    """The release that fixes #287 goes first from a 0.9.2 updater on Podman.
+
+    U1 knows itself by one digest -- the platform's, where the engine lists it
+    last -- so it is never the target's index digest: 2a goes first. The fixed
+    successor checks membership and answers with the verified index digest,
+    which is exactly what U1 compares, by its word and the engine's.
+    """
+    w = podman_world
+    w.fleet.clear()
+    as_092(monkeypatch)
+    boot(w)
+    u1 = w.fleet[w.updater_id]
+    expected_own = digest(UPD, A) if w.multiarch == "platform_first" else platform_digest(UPD, A)
+    assert u1.me.ids == {expected_own}
+    req, record = apply(w)
+    assert record["state"] == "succeeded" and w.ledger.stamp == B
+    j = w.journal(req["id"])
+    assert [(o["owner"]["version"], o["from_step"]) for o in j.owners] == [(A, "0"), (B, "2a")]
+    assert j.owners[-1]["owner"]["image_digest"] == digest(UPD, B)
+    assert pin.read(w.project_dir)[pin.UPDATER_KEY] == f"{UPD}:{B}@{digest(UPD, B)}"
+    assert beat(w)["image_digest"] == digest(UPD, B)
+    w.run_for(STANDBY_SECONDS + 30)
+    assert load(w.volume, req["id"])["outcome"] == "done"
+    assert assert_exactly_one_current(w).version == B
+
+
+# --------------------------------------------------------------------------- #
+# A gap during the standby (#288)
+# --------------------------------------------------------------------------- #
+
+
+def standby_clock(w: World) -> list[float]:
+    """The monotonic time of U1's H6 write -- the standby's start -- once it happens."""
+    started: list[float] = []
+    real = w._wrote
+
+    def wrote(step, cid):
+        if step == "H6" and w.who(cid) == "U1" and not started:
+            started.append(w.time.t)
+        real(step, cid)
+
+    w._wrote = wrote  # type: ignore[method-assign]
+    return started
+
+
+def until_settled(w: World, rid: str, limit: float) -> float:
+    """Run until U1's handover has an outcome; the monotonic time it took."""
+    t0 = w.time.t
+    while (load(w.volume, rid) or {}).get("outcome") is None and w.time.t - t0 < limit:
+        w.run_for(2)
+    return w.time.t
+
+
+def test_a_shutdown_during_the_standby_does_not_take_back_on_boot(world):
+    """Lab VM 314: shut down four minutes into the standby, booted an hour later.
+    The standby restarted into a successor heartbeat an hour old, took back,
+    stopped the healthy successor and pinned the older updater."""
+    started = standby_clock(world)
+    req, record = update_updater(world, C)
+    assert record["state"] == "succeeded" and started
+    u2 = world.successor_id()
+    pinned = pin.read(world.project_dir)
+    world.run_for(120)
+    # Off: every process dies, for an hour. On boot the engine starts U1 at
+    # once; U2's container starts 5 s later.
+    world.engine_restart()
+    world.pending.remove(u2)
+    world.fake.set_state(world.fake.containers[u2], "exited", 0)
+    world.time.doze(3600)
+    world.run_for(5)
+    assert world.fleet[world.updater_id].mode == "standby"
+    world.start_container(u2)
+    world.run_for(60)
+
+    doc = load(world.volume, req["id"])
+    assert doc["outcome"] is None and doc["step"] == "H6"
+    assert world.fleet[world.updater_id].mode == "standby" and world.is_running(world.updater_id)
+    assert named(world, CANONICAL)["Id"] == u2 and world.is_running(u2)
+    assert pin.read(world.project_dir) == pinned
+    assert lock_holder(world.volume).version == C
+    # H7 after ten minutes of running standby -- the hour off not among them
+    # (what it ran is saved every 30 s, so up to that is run again).
+    done = until_settled(world, req["id"], STANDBY_SECONDS)
+    ran = done - started[0]
+    assert STANDBY_SECONDS <= ran <= STANDBY_SECONDS + 30 + 10, ran
+    doc = load(world.volume, req["id"])
+    assert doc["outcome"] == "done" and not world.is_running(world.updater_id)
+    assert pin.read(world.project_dir) == pinned
+    assert world.history(req["id"])["state"] == "succeeded"
+    assert assert_exactly_one_current(world).version == C
+
+
+def test_a_sleep_during_the_standby_does_not_take_back_on_wake(world):
+    """The laptop case: both processes live through an hour asleep, and the
+    successor's first heartbeat after it comes 5 s after the wake."""
+    started = standby_clock(world)
+    req, record = update_updater(world, C)
+    assert record["state"] == "succeeded" and started
+    u2 = world.fleet[world.successor_id()]
+    pinned = pin.read(world.project_dir)
+    world.run_for(120)
+    real = u2.beat.tick
+    wake = world.time.t + 5
+    u2.beat.tick = lambda now: real(now) if world.time.t >= wake else None  # type: ignore[method-assign]
+    world.time.doze(3600)
+    world.run_for(90)
+
+    assert load(world.volume, req["id"])["outcome"] is None
+    assert world.fleet[world.updater_id].mode == "standby"
+    assert named(world, CANONICAL)["Id"] == u2.cid and world.is_running(u2.cid)
+    assert pin.read(world.project_dir) == pinned
+    done = until_settled(world, req["id"], STANDBY_SECONDS)
+    assert STANDBY_SECONDS <= done - started[0] <= STANDBY_SECONDS + 10
+    assert load(world.volume, req["id"])["outcome"] == "done"
+    assert pin.read(world.project_dir) == pinned
+    assert assert_exactly_one_current(world).version == C
+
+
+def test_after_a_shutdown_a_successor_that_never_comes_back_is_still_taken_back_from(world):
+    """The grace after a return is the stale window, not a pass: U2 down for good is taken back."""
+    req, record = update_updater(world, C)
+    assert record["state"] == "succeeded"
+    u2 = world.successor_id()
+    world.run_for(120)
+    world.engine_restart()
+    world.pending.remove(u2)
+    world.stay_down.add(u2)
+    world.fake.set_state(world.fake.containers[u2], "exited", 0)
+    world.time.doze(3600)
+    world.run_for(60)
+    assert load(world.volume, req["id"])["outcome"] is None
+    world.run_for(60 + GONE_GRACE_SECONDS + 10)
+    assert load(world.volume, req["id"])["outcome"] == "taken_back"
+    assert named(world, CANONICAL)["Id"] == world.updater_id
+    assert pin.read(world.project_dir)[pin.UPDATER_KEY].endswith(digest(UPD, A))
+    assert assert_exactly_one_current(world).version == A
