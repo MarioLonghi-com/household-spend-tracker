@@ -43,6 +43,13 @@ history this repository does not have.
   sends its wait in seconds as a number. English and agents' answers are
   unchanged. (#267)
 
+- **Import refusals carry codes too.** A statement import, an accounts CSV,
+  a One-time Import from YNAB (its file, its plan and YNAB's own answers) and
+  an oversized upload refuse with a stable `code` and raw `params` -- when an
+  earlier import was made as a timestamp, line numbers and limits as numbers,
+  column names and currency codes as the file wrote them -- beside the same
+  English `detail`. (#267)
+
 ### Fixed
 
 - **After an update, the page opens where the outcome is.** Once the app was

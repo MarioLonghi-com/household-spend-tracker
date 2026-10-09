@@ -122,10 +122,10 @@ async def upload(
         raw = pasted.encode()
         filename = "pasted"
     else:
-        raise Conflict("send a file or some pasted text")
+        raise Conflict("send a file or some pasted text", code="import.send_something")
 
     if len(raw) > MAX_UPLOAD_BYTES:
-        raise TooLarge(TOO_BIG)
+        raise TooLarge(TOO_BIG, code="import.file_too_large", params={"max_bytes": MAX_UPLOAD_BYTES})
 
     digest = importing.file_digest(raw)
     if not force:
@@ -140,12 +140,16 @@ async def upload(
                 raise Conflict(
                     f"this exact file is already staged for {account.name}, from {when} "
                     f"(as {name}), and is waiting to be reviewed. Open that import rather "
-                    "than starting a second one, or send this with force set."
+                    "than starting a second one, or send this with force set.",
+                    code="import.already_staged",
+                    params={"account": account.name, "at": already.started_at, "filename": name},
                 )
             raise Conflict(
                 f"this exact file was already imported into {account.name} on {when} "
                 f"(as {name}). Nothing has been changed. If you meant to import it again, "
-                "send it with force set."
+                "send it with force set.",
+                code="import.already_imported",
+                params={"account": account.name, "at": already.started_at, "filename": name},
             )
 
     # Sniffing and parsing are pure CPU over the bytes -- a large spreadsheet
@@ -230,7 +234,7 @@ def set_line_category(
         select(ImportLine).where(ImportLine.id == line_id, ImportLine.batch_id == staged.id)
     ).scalar_one_or_none()
     if line is None:
-        raise NotFound("no such line on this import")
+        raise NotFound("no such line on this import", code="import.line_not_found")
 
     category = None
     if not body.clear_category and body.category_id:
@@ -278,7 +282,7 @@ def set_line_memo(
         select(ImportLine).where(ImportLine.id == line_id, ImportLine.batch_id == staged.id)
     ).scalar_one_or_none()
     if line is None:
-        raise NotFound("no such line on this import")
+        raise NotFound("no such line on this import", code="import.line_not_found")
 
     importing.set_line_memo(session, line, body.memo, clear=body.clear_memo)
     session.flush()
@@ -311,7 +315,7 @@ def apply_category_to_payee(
         select(ImportLine).where(ImportLine.id == line_id, ImportLine.batch_id == staged.id)
     ).scalar_one_or_none()
     if line is None:
-        raise NotFound("no such line on this import")
+        raise NotFound("no such line on this import", code="import.line_not_found")
 
     importing.apply_to_similar(session, staged.id, line)
     lines = list(
@@ -353,9 +357,9 @@ def rule_from_line(
         select(ImportLine).where(ImportLine.id == line_id, ImportLine.batch_id == staged.id)
     ).scalar_one_or_none()
     if line is None:
-        raise NotFound("no such line on this import")
+        raise NotFound("no such line on this import", code="import.line_not_found")
     if not line.category_id:
-        raise ValidationError("give the line a category first")
+        raise ValidationError("give the line a category first", code="import.line_needs_category")
 
     parsed = line.parsed or {}
     name = (parsed.get("payee") or "").strip()
@@ -363,7 +367,9 @@ def rule_from_line(
     if parsed.get("payee_id"):
         payee = session.get(Payee, parsed["payee_id"])
     if payee is None and not name:
-        raise ValidationError("this line has no payee to attach a rule to")
+        raise ValidationError(
+            "this line has no payee to attach a rule to", code="import.line_has_no_payee"
+        )
 
     created = False
     with batch(session, kind=BatchKind.admin, actor_id=user.id, household_id=household.id):
@@ -556,7 +562,7 @@ def row_history(
     if table not in audited_models():
         from ...errors import NotFound
 
-        raise NotFound("no such table in the audit log")
+        raise NotFound("no such table in the audit log", code="history.no_such_table")
 
     rows = session.execute(
         select(Change)
@@ -747,7 +753,7 @@ def batch_detail(
 
     target = session.get(Batch, batch_id)
     if target is None or target.household_id != household.id:
-        raise NotFound("no such batch")
+        raise NotFound("no such batch", code="history.batch_not_found")
 
     count = session.execute(
         select(func.count()).select_from(Change).where(Change.batch_id == target.id)
@@ -800,6 +806,6 @@ def undo(
     if target is None or target.household_id != household.id:
         from ...errors import NotFound
 
-        raise NotFound("no such batch")
+        raise NotFound("no such batch", code="history.batch_not_found")
     undone = undo_batch(session, batch_id, actor_id=user.id)
     return _described(session, undone, 0)

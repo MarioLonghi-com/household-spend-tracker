@@ -2920,6 +2920,42 @@ msgstr "No payments linked yet."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.account_import.column_twice"
+msgstr "This file has the column {column} twice"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.missing_column"
+msgstr "This file has no {columns} column, and every account needs one. The first line should name the columns, as the template does."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.no_accounts"
+msgstr "There are no accounts in this file"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.not_csv"
+msgstr "Line {line} of this file cannot be read as CSV. Save it from the spreadsheet as CSV again, or start from the template."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.rows_refused"
+msgstr "{refused} of {rows, plural, one {# row} other {# rows}} cannot be imported, so none were. Nothing has been changed; correct the file and try again."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.too_many_rows"
+msgstr "This file has more than {max} accounts in it, which is more than a household has -- it may be a statement rather than a list of accounts"
+
+#. {columns} and {known} are column names, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.unknown_column"
+msgstr "This file has a column this does not know: {columns}. The columns are {known} -- download the template to start from them."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.agent_key.lifetime"
 msgstr "A key can last between a day and {max_days} days"
 
@@ -3085,10 +3121,112 @@ msgstr "{email} is not an email address"
 msgid "error.email.too_long"
 msgstr "That email address is too long (max {max} characters)"
 
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.history.batch_not_found"
+msgstr "No such batch"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.history.no_such_table"
+msgstr "No such table in the audit log"
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.household.not_found"
 msgstr "No such household"
+
+#. force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.already_imported"
+msgstr "This exact file was already imported into {account} on {at} (as {filename}). Nothing has been changed. If you meant to import it again, send it with force set."
+
+#. {at} is when the earlier import was made; force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.already_staged"
+msgstr "This exact file is already staged for {account}, from {at} (as {filename}), and is waiting to be reviewed. Open that import rather than starting a second one, or send this with force set."
+
+#. {products} is the bank's own names for the accounts in the file
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.choose_product"
+msgstr "This file holds more than one account ({products}), and {account} has not said which of them it is. Set its statement product on the Accounts screen, then read the file again."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.committed_not_purged"
+msgstr "That import is {status}, not staged. A committed import is put back from History rather than purged."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.file_too_large"
+msgstr "That file is larger than this is meant for (at most {max_bytes, number} bytes)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_already_in_account"
+msgstr "That statement line is already in this account"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_has_no_payee"
+msgstr "This line has no payee to attach a rule to"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_needs_category"
+msgstr "Give the line a category first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_no_own_category"
+msgstr "That line has no category of its own to apply"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_not_found"
+msgstr "No such line on this import"
+
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_an_import"
+msgstr "That batch is not an import"
+
+#. {status} is the import's state as stored: applied, preview, failed, undone
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_awaiting_commit"
+msgstr "That import is {status}, not waiting to be committed"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_found"
+msgstr "No such import"
+
+#. {status} is the import's state as stored
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_staged"
+msgstr "That import is {status}, not staged"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.product_absent"
+msgstr "{account} takes the {product} rows of a statement, and this file has none: it holds {products}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.send_something"
+msgstr "Send a file or some pasted text"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.wrong_currency"
+msgstr "This file is in {currencies}, and {account} holds {currency}: none of its rows are in {currency}. Import it into an account that holds {currencies}, or check that this is the right file."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3766,6 +3904,11 @@ msgstr "The updater is too old for this container engine. Update the updater fir
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.upload.too_large"
+msgstr "That file is too large (at most {max_bytes, number} bytes)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.user.cannot_disable_self"
 msgstr "You cannot disable yourself; there would be nobody left to undo it"
 
@@ -3778,6 +3921,217 @@ msgstr "There would be no owner left"
 #: src/lib/errorMessages.ts
 msgid "error.user.not_found"
 msgstr "No such person"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_currency"
+msgstr "{account} is in {account_currency}, and this plan is in {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_elsewhere"
+msgstr "The account chosen for {account} is not in this household"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_mapping_unknown"
+msgstr "{kind} is not something an account can be mapped to"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_twice"
+msgstr "{first} and {second} both go to {account}; each YNAB account needs an account of its own"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_type_unknown"
+msgstr "{type} is not an account type"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_undecided"
+msgstr "Say what to do with the YNAB account {account}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.amount_too_long"
+msgstr "Line {line} of this file has an amount longer than {max} characters, which YNAB never writes -- it may not be a YNAB export, or it may be damaged"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.answer_too_large"
+msgstr "YNAB's answer was larger than this import will read"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.answer_unreadable"
+msgstr "YNAB's answer could not be read"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.category_elsewhere"
+msgstr "The category chosen for {category} is not in this household"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.category_mapping_unknown"
+msgstr "{kind} is not something a category can be mapped to"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.category_undecided"
+msgstr "Say what to do with the YNAB category {category}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.choose_export"
+msgstr "Choose the YNAB export: the zip, or its Register.csv"
+
+#. A plan is what YNAB calls a budget
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.choose_plan"
+msgstr "Choose which YNAB plan to import"
+
+#. See GLOSSARY.md (Cleared, Uncleared, reconcile)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.confirm_states"
+msgstr "Confirm that YNAB's reconciled and cleared states are reset: everything arrives uncleared"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.currency_not_a_code"
+msgstr "{currency} is not a three-letter currency code"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.date_format_unknown"
+msgstr "{format} is not a date format this import reads"
+
+#. {format} is a date pattern like DD/MM/YYYY
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.date_unreadable"
+msgstr "{date} is not a {format} date"
+
+#. YNAB's coloured flags on a transaction
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.flags_choice"
+msgstr "Flags are either kept in the memo or ignored"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.new_account_needs_name"
+msgstr "The new account for {account} needs a name"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.new_category_needs_name"
+msgstr "The new category for {category} needs a name"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.no_such_plan"
+msgstr "YNAB has no such plan for this token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.no_transactions"
+msgstr "There are no transactions in this file"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.not_csv"
+msgstr "Line {line} of this file cannot be read as CSV. Export the plan from YNAB again and upload the zip or its Register.csv."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.not_register"
+msgstr "This is not a YNAB Register.csv: it has no {columns} column. Export the plan from YNAB and upload the zip or its Register.csv."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.plan_not_register"
+msgstr "Only the YNAB Register.csv is needed, not the Plan.csv"
+
+#. The import plan: the choices made on the One-time Import screen
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.plan_unreadable"
+msgstr "The import plan cannot be read"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.range_backwards"
+msgstr "The date range ends before it starts"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.rate_limited"
+msgstr "YNAB is limiting requests from this token for now; try again in an hour"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.register_too_large"
+msgstr "The Register.csv in that zip is larger than this import reads"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.rows_taken"
+msgstr "Some of these rows were imported by another request a moment ago; open the Import screen and check History before trying again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.say_how"
+msgstr "Say how to reach YNAB: through its export file or its API"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.starting_balance_choice"
+msgstr "The starting balance is either imported or skipped"
+
+#. {status} is an HTTP status number, like 503
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.status"
+msgstr "YNAB answered {status}; try again later"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.timeout"
+msgstr "YNAB took too long to answer; try again later"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.token_malformed"
+msgstr "That is not a YNAB personal access token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.token_needed"
+msgstr "A YNAB personal access token is needed"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.token_rejected"
+msgstr "YNAB rejected the token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.unreachable"
+msgstr "YNAB could not be reached; check the connection and try again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.zip_has_no_register"
+msgstr "Only the YNAB Register.csv is needed, not the Plan.csv, and this zip has no Register.csv in it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.zip_unreadable"
+msgstr "That zip file cannot be opened"
 
 #. Column heading on the Application management screen
 #. Column name shown beside a value on phones on the Application management screen

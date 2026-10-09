@@ -165,7 +165,7 @@ def _register_bytes(raw: bytes, filename: str | None) -> tuple[bytes, str | None
     try:
         archive = zipfile.ZipFile(io.BytesIO(raw))
     except zipfile.BadZipFile:
-        raise ValidationError("that zip file cannot be opened") from None
+        raise ValidationError("that zip file cannot be opened", code="ynab.zip_unreadable") from None
     with archive:
         registers = [
             info for info in archive.infolist()
@@ -173,15 +173,22 @@ def _register_bytes(raw: bytes, filename: str | None) -> tuple[bytes, str | None
         ]
         if not registers:
             raise ValidationError(
-                f"{PLAN_NOT_REGISTER}, and this zip has no Register.csv in it"
+                f"{PLAN_NOT_REGISTER}, and this zip has no Register.csv in it",
+                code="ynab.zip_has_no_register",
             )
         info = registers[0]
         if info.file_size > MAX_REGISTER_BYTES:
-            raise ValidationError("the Register.csv in that zip is larger than this import reads")
+            raise ValidationError(
+                "the Register.csv in that zip is larger than this import reads",
+                code="ynab.register_too_large",
+            )
         with archive.open(info) as handle:
             body = handle.read(MAX_REGISTER_BYTES + 1)
         if len(body) > MAX_REGISTER_BYTES:
-            raise ValidationError("the Register.csv in that zip is larger than this import reads")
+            raise ValidationError(
+                "the Register.csv in that zip is larger than this import reads",
+                code="ynab.register_too_large",
+            )
         return body, filename or info.filename.rsplit("/", 1)[-1]
 
 
@@ -232,7 +239,9 @@ def _read_register(text: str) -> Source:
                 raise ValidationError(
                     f"line {start} of this file has an amount longer than "
                     f"{MAX_AMOUNT_CHARS} characters, which YNAB never writes -- "
-                    "it may not be a YNAB export, or it may be damaged"
+                    "it may not be a YNAB export, or it may be damaged",
+                    code="ynab.amount_too_long",
+                    params={"line": start, "max": MAX_AMOUNT_CHARS},
                 )
             amounts.extend(value for value in (outflow, inflow) if value)
             dates.append(cell("date"))
@@ -265,11 +274,13 @@ def _read_register(text: str) -> Source:
         log.debug("csv could not read the register", exc_info=True)
         raise ValidationError(
             f"line {reader.line_num} of this file cannot be read as CSV. Export the plan "
-            "from YNAB again and upload the zip or its Register.csv."
+            "from YNAB again and upload the zip or its Register.csv.",
+            code="ynab.not_csv",
+            params={"line": reader.line_num},
         ) from None
 
     if header is None or not rows:
-        raise ValidationError("there are no transactions in this file")
+        raise ValidationError("there are no transactions in this file", code="ynab.no_transactions")
 
     currency, symbol = _currency_of(amounts)
     decimal_comma = _decimal_comma(amounts)
@@ -304,13 +315,15 @@ def _read_register(text: str) -> Source:
 def _header(cells: list[str]) -> dict[str, int]:
     keys = [_key(cell).lstrip("﻿") for cell in cells]
     if any(key in _PLAN_COLUMNS for key in keys) and "account" not in keys:
-        raise ValidationError(PLAN_NOT_REGISTER)
+        raise ValidationError(PLAN_NOT_REGISTER, code="ynab.plan_not_register")
     missing = [name for name in _REGISTER_COLUMNS if name not in keys]
     if missing or ("category" not in keys and "category group/category" not in keys):
         raise ValidationError(
             "this is not a YNAB Register.csv: it has no "
             + ", ".join(repr(m) for m in missing or ["category"])
-            + " column. Export the plan from YNAB and upload the zip or its Register.csv."
+            + " column. Export the plan from YNAB and upload the zip or its Register.csv.",
+            code="ynab.not_register",
+            params={"columns": ", ".join(missing or ["category"])},
         )
     return {key: at for at, key in enumerate(keys) if key}
 
@@ -499,7 +512,7 @@ def _checked[T](shape: type[T], answer: list) -> list[T]:
     try:
         return TypeAdapter(list[shape]).validate_python(answer)
     except (SchemaError, RecursionError):
-        raise ynab_api.YnabError("YNAB's answer could not be read") from None
+        raise ynab_api.YnabError("YNAB's answer could not be read", code="ynab.answer_unreadable") from None
 
 
 def _plans(token: str) -> list[YnabPlan]:
@@ -557,7 +570,7 @@ def from_api(token: str, plan_id: str) -> Source:
     """
     plan = next((one for one in _plans(token) if one.id == plan_id), None)
     if plan is None:
-        raise ynab_api.YnabError("YNAB has no such plan for this token")
+        raise ynab_api.YnabError("YNAB has no such plan for this token", code="ynab.no_such_plan")
     currency = (plan.currency_format.iso_code if plan.currency_format else None) or None
     symbol = (plan.currency_format.currency_symbol if plan.currency_format else None) or None
 

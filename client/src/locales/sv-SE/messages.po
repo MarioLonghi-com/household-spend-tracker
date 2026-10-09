@@ -3488,6 +3488,49 @@ msgstr "Inga betalningar kopplade än."
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.account_import.column_twice"
+msgstr "Filen har kolumnen {column} två gånger"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.missing_column"
+msgstr "Filen saknar kolumnen {columns}, och varje konto behöver den. Första raden ska namnge kolumnerna, som mallen gör."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.no_accounts"
+msgstr "Det finns inga konton i filen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.not_csv"
+msgstr "Rad {line} i filen kan inte läsas som CSV. Spara den som CSV från kalkylarket igen, eller utgå från mallen."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.rows_refused"
+msgstr "{refused} av {rows, plural, one {# rad} other {# rader}} kan inte importeras, så ingen importerades. Inget har ändrats; rätta filen och försök igen."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.too_many_rows"
+msgstr "Filen innehåller fler än {max} konton, vilket är fler än ett hushåll har -- det kan vara ett kontoutdrag snarare än en lista över konton"
+
+#. {columns} and {known} are column names, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.unknown_column"
+msgstr "Filen har en kolumn som inte känns igen: {columns}. Kolumnerna är {known} -- ladda ner mallen för att utgå från dem."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.agent_key.lifetime"
 msgstr "En nyckel kan gälla mellan en dag och {max_days} dagar"
 
@@ -3685,11 +3728,132 @@ msgstr "{email} är ingen e-postadress"
 msgid "error.email.too_long"
 msgstr "E-postadressen är för lång (högst {max} tecken)"
 
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.history.batch_not_found"
+msgstr "Omgången finns inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.history.no_such_table"
+msgstr "Tabellen finns inte i granskningsloggen"
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.household.not_found"
 msgstr "Hushållet finns inte"
+
+#. force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.already_imported"
+msgstr "Exakt den här filen har redan importerats till {account} {at} (som {filename}). Inget har ändrats. Om du ville importera den igen, skicka den med force satt."
+
+#. {at} is when the earlier import was made; force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.already_staged"
+msgstr "Exakt den här filen är redan förberedd för {account}, sedan {at} (som {filename}), och väntar på granskning. Öppna den importen i stället för att starta en till, eller skicka den här med force satt."
+
+#. {products} is the bank's own names for the accounts in the file
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.choose_product"
+msgstr "Filen innehåller mer än ett konto ({products}), och {account} har inte angett vilket av dem det är. Ange dess kontoutdragsprodukt på skärmen Konton och läs filen igen."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.committed_not_purged"
+msgstr "Den importen är {status}, inte förberedd. En tillämpad import ångras från Historik i stället för att rensas."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.file_too_large"
+msgstr "Filen är större än vad det här är tänkt för (högst {max_bytes, number} byte)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_already_in_account"
+msgstr "Den raden i kontoutdraget finns redan på det här kontot"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_has_no_payee"
+msgstr "Raden har ingen mottagare att koppla en regel till"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_needs_category"
+msgstr "Ge raden en kategori först"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_no_own_category"
+msgstr "Raden har ingen egen kategori att tillämpa"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_not_found"
+msgstr "Raden finns inte i den här importen"
+
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_an_import"
+msgstr "Den omgången är ingen import"
+
+#. {status} is the import's state as stored: applied, preview, failed, undone
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_awaiting_commit"
+msgstr "Den importen är {status}, inte väntande på att tillämpas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_found"
+msgstr "Importen finns inte"
+
+#. {status} is the import's state as stored
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_staged"
+msgstr "Den importen är {status}, inte förberedd"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.product_absent"
+msgstr "{account} tar {product}-raderna i ett kontoutdrag, och den här filen har inga: den innehåller {products}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.send_something"
+msgstr "Skicka en fil eller klistra in text"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.wrong_currency"
+msgstr "Filen är i {currencies}, och {account} är i {currency}: ingen av raderna är i {currency}. Importera den till ett konto i {currencies}, eller kontrollera att det är rätt fil."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4502,6 +4666,12 @@ msgstr "Uppdateraren är för gammal för den här containermotorn. Uppdatera up
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.upload.too_large"
+msgstr "Filen är för stor (högst {max_bytes, number} byte)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.user.cannot_disable_self"
 msgstr "Du kan inte inaktivera dig själv; då finns ingen kvar som kan ångra det"
 
@@ -4516,6 +4686,258 @@ msgstr "Det skulle inte finnas någon ägare kvar"
 #, fuzzy
 msgid "error.user.not_found"
 msgstr "Personen finns inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_currency"
+msgstr "{account} är i {account_currency}, och den här planen är i {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_elsewhere"
+msgstr "Kontot som valts för {account} finns inte i det här hushållet"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_mapping_unknown"
+msgstr "{kind} är inget som ett konto kan kopplas till"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_twice"
+msgstr "{first} och {second} går båda till {account}; varje YNAB-konto behöver ett eget konto"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_type_unknown"
+msgstr "{type} är ingen kontotyp"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_undecided"
+msgstr "Ange vad som ska göras med YNAB-kontot {account}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.amount_too_long"
+msgstr "Rad {line} i filen har ett belopp längre än {max} tecken, vilket YNAB aldrig skriver -- det kanske inte är en export från YNAB, eller så är den skadad"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.answer_too_large"
+msgstr "YNAB:s svar var större än den här importen läser"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.answer_unreadable"
+msgstr "YNAB:s svar kunde inte läsas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.category_elsewhere"
+msgstr "Kategorin som valts för {category} finns inte i det här hushållet"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.category_mapping_unknown"
+msgstr "{kind} är inget som en kategori kan kopplas till"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.category_undecided"
+msgstr "Ange vad som ska göras med YNAB-kategorin {category}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.choose_export"
+msgstr "Välj exporten från YNAB: zip-filen eller dess Register.csv"
+
+#. A plan is what YNAB calls a budget
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.choose_plan"
+msgstr "Välj vilken YNAB-plan som ska importeras"
+
+#. See GLOSSARY.md (Cleared, Uncleared, reconcile)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.confirm_states"
+msgstr "Bekräfta att YNAB:s avstämda och bokförda status återställs: allt kommer in som ej bokfört"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.currency_not_a_code"
+msgstr "{currency} är ingen valutakod på tre bokstäver"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.date_format_unknown"
+msgstr "{format} är inget datumformat som den här importen läser"
+
+#. {format} is a date pattern like DD/MM/YYYY
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.date_unreadable"
+msgstr "{date} är inget datum i formatet {format}"
+
+#. YNAB's coloured flags on a transaction
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.flags_choice"
+msgstr "Flaggor behålls i beskrivningen eller ignoreras"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.new_account_needs_name"
+msgstr "Det nya kontot för {account} behöver ett namn"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.new_category_needs_name"
+msgstr "Den nya kategorin för {category} behöver ett namn"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.no_such_plan"
+msgstr "YNAB har ingen sådan plan för den här token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.no_transactions"
+msgstr "Det finns inga transaktioner i filen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.not_csv"
+msgstr "Rad {line} i filen kan inte läsas som CSV. Exportera planen från YNAB igen och ladda upp zip-filen eller dess Register.csv."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.not_register"
+msgstr "Det här är ingen Register.csv från YNAB: den saknar kolumnen {columns}. Exportera planen från YNAB och ladda upp zip-filen eller dess Register.csv."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.plan_not_register"
+msgstr "Bara YNAB:s Register.csv behövs, inte Plan.csv"
+
+#. The import plan: the choices made on the One-time Import screen
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.plan_unreadable"
+msgstr "Importplanen kan inte läsas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.range_backwards"
+msgstr "Datumintervallet slutar innan det börjar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.rate_limited"
+msgstr "YNAB begränsar förfrågningar från den här token just nu; försök igen om en timme"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.register_too_large"
+msgstr "Register.csv i zip-filen är större än vad den här importen läser"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.rows_taken"
+msgstr "Några av raderna importerades av en annan begäran för en stund sedan; öppna skärmen Import och kontrollera Historik innan du försöker igen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.say_how"
+msgstr "Ange hur YNAB ska nås: via exportfilen eller via API:t"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.starting_balance_choice"
+msgstr "Startsaldot importeras eller hoppas över"
+
+#. {status} is an HTTP status number, like 503
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.status"
+msgstr "YNAB svarade {status}; försök igen senare"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.timeout"
+msgstr "YNAB tog för lång tid att svara; försök igen senare"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.token_malformed"
+msgstr "Det är ingen personlig åtkomsttoken för YNAB"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.token_needed"
+msgstr "En personlig åtkomsttoken för YNAB behövs"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.token_rejected"
+msgstr "YNAB avvisade token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.unreachable"
+msgstr "YNAB gick inte att nå; kontrollera anslutningen och försök igen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.zip_has_no_register"
+msgstr "Bara YNAB:s Register.csv behövs, inte Plan.csv, och den här zip-filen innehåller ingen Register.csv"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.zip_unreadable"
+msgstr "Zip-filen kan inte öppnas"
 
 #. Column heading on the Application management screen
 #. Column name shown beside a value on phones on the Application management screen

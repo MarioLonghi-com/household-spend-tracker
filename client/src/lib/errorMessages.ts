@@ -804,6 +804,212 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "user.no_owner_left": {
     message: msg({ id: "error.user.no_owner_left", message: "There would be no owner left" }),
   },
+  "import.file_too_large": {
+    message: msg({ id: "error.import.file_too_large", message: "That file is larger than this is meant for (at most {max_bytes, number} bytes)" }),
+  },
+  "import.line_not_found": {
+    message: msg({ id: "error.import.line_not_found", message: "No such line on this import" }),
+  },
+  "import.line_needs_category": {
+    message: msg({ id: "error.import.line_needs_category", message: "Give the line a category first" }),
+  },
+  "import.line_has_no_payee": {
+    message: msg({ id: "error.import.line_has_no_payee", message: "This line has no payee to attach a rule to" }),
+  },
+  "import.send_something": {
+    message: msg({ id: "error.import.send_something", message: "Send a file or some pasted text" }),
+  },
+  "import.already_staged": {
+    message: msg({ id: "error.import.already_staged", message: "This exact file is already staged for {account}, from {at} (as {filename}), and is waiting to be reviewed. Open that import rather than starting a second one, or send this with force set.", comment: "{at} is when the earlier import was made; force is the name of a request field" }),
+    dates: ["at"],
+  },
+  "import.already_imported": {
+    message: msg({ id: "error.import.already_imported", message: "This exact file was already imported into {account} on {at} (as {filename}). Nothing has been changed. If you meant to import it again, send it with force set.", comment: "force is the name of a request field" }),
+    dates: ["at"],
+  },
+  "import.choose_product": {
+    message: msg({ id: "error.import.choose_product", message: "This file holds more than one account ({products}), and {account} has not said which of them it is. Set its statement product on the Accounts screen, then read the file again.", comment: "{products} is the bank's own names for the accounts in the file" }),
+  },
+  "import.product_absent": {
+    message: msg({ id: "error.import.product_absent", message: "{account} takes the {product} rows of a statement, and this file has none: it holds {products}." }),
+  },
+  "import.wrong_currency": {
+    message: msg({ id: "error.import.wrong_currency", message: "This file is in {currencies}, and {account} holds {currency}: none of its rows are in {currency}. Import it into an account that holds {currencies}, or check that this is the right file." }),
+  },
+  "import.not_awaiting_commit": {
+    message: msg({ id: "error.import.not_awaiting_commit", message: "That import is {status}, not waiting to be committed", comment: "{status} is the import's state as stored: applied, preview, failed, undone" }),
+  },
+  "import.not_found": {
+    message: msg({ id: "error.import.not_found", message: "No such import" }),
+  },
+  "import.not_an_import": {
+    message: msg({ id: "error.import.not_an_import", message: "That batch is not an import", comment: "Batch: one act in History. See GLOSSARY.md" }),
+  },
+  "import.not_staged": {
+    message: msg({ id: "error.import.not_staged", message: "That import is {status}, not staged", comment: "{status} is the import's state as stored" }),
+  },
+  "import.committed_not_purged": {
+    message: msg({ id: "error.import.committed_not_purged", message: "That import is {status}, not staged. A committed import is put back from History rather than purged." }),
+  },
+  "import.line_no_own_category": {
+    message: msg({ id: "error.import.line_no_own_category", message: "That line has no category of its own to apply" }),
+  },
+  "import.line_already_in_account": {
+    message: msg({ id: "error.import.line_already_in_account", message: "That statement line is already in this account" }),
+  },
+  "history.no_such_table": {
+    message: msg({ id: "error.history.no_such_table", message: "No such table in the audit log" }),
+  },
+  "history.batch_not_found": {
+    message: msg({ id: "error.history.batch_not_found", message: "No such batch", comment: "Batch: one act in History. See GLOSSARY.md" }),
+  },
+  "upload.too_large": {
+    message: msg({ id: "error.upload.too_large", message: "That file is too large (at most {max_bytes, number} bytes)" }),
+  },
+  "account_import.rows_refused": {
+    message: msg({ id: "error.account_import.rows_refused", message: "{refused} of {rows, plural, one {# row} other {# rows}} cannot be imported, so none were. Nothing has been changed; correct the file and try again." }),
+  },
+  "account_import.no_accounts": {
+    message: msg({ id: "error.account_import.no_accounts", message: "There are no accounts in this file" }),
+  },
+  "account_import.unknown_column": {
+    message: msg({ id: "error.account_import.unknown_column", message: "This file has a column this does not know: {columns}. The columns are {known} -- download the template to start from them.", comment: "{columns} and {known} are column names, which stay in English" }),
+  },
+  "account_import.missing_column": {
+    message: msg({ id: "error.account_import.missing_column", message: "This file has no {columns} column, and every account needs one. The first line should name the columns, as the template does." }),
+  },
+  "account_import.not_csv": {
+    message: msg({ id: "error.account_import.not_csv", message: "Line {line} of this file cannot be read as CSV. Save it from the spreadsheet as CSV again, or start from the template." }),
+  },
+  "account_import.column_twice": {
+    message: msg({ id: "error.account_import.column_twice", message: "This file has the column {column} twice" }),
+  },
+  "account_import.too_many_rows": {
+    message: msg({ id: "error.account_import.too_many_rows", message: "This file has more than {max} accounts in it, which is more than a household has -- it may be a statement rather than a list of accounts" }),
+  },
+  "ynab.say_how": {
+    message: msg({ id: "error.ynab.say_how", message: "Say how to reach YNAB: through its export file or its API" }),
+  },
+  "ynab.token_needed": {
+    message: msg({ id: "error.ynab.token_needed", message: "A YNAB personal access token is needed" }),
+  },
+  "ynab.token_malformed": {
+    message: msg({ id: "error.ynab.token_malformed", message: "That is not a YNAB personal access token" }),
+  },
+  "ynab.choose_export": {
+    message: msg({ id: "error.ynab.choose_export", message: "Choose the YNAB export: the zip, or its Register.csv" }),
+  },
+  "ynab.choose_plan": {
+    message: msg({ id: "error.ynab.choose_plan", message: "Choose which YNAB plan to import", comment: "A plan is what YNAB calls a budget" }),
+  },
+  "ynab.plan_unreadable": {
+    message: msg({ id: "error.ynab.plan_unreadable", message: "The import plan cannot be read", comment: "The import plan: the choices made on the One-time Import screen" }),
+  },
+  "ynab.date_format_unknown": {
+    message: msg({ id: "error.ynab.date_format_unknown", message: "{format} is not a date format this import reads" }),
+  },
+  "ynab.currency_not_a_code": {
+    message: msg({ id: "error.ynab.currency_not_a_code", message: "{currency} is not a three-letter currency code" }),
+  },
+  "ynab.flags_choice": {
+    message: msg({ id: "error.ynab.flags_choice", message: "Flags are either kept in the memo or ignored", comment: "YNAB's coloured flags on a transaction" }),
+  },
+  "ynab.starting_balance_choice": {
+    message: msg({ id: "error.ynab.starting_balance_choice", message: "The starting balance is either imported or skipped" }),
+  },
+  "ynab.range_backwards": {
+    message: msg({ id: "error.ynab.range_backwards", message: "The date range ends before it starts" }),
+  },
+  "ynab.confirm_states": {
+    message: msg({ id: "error.ynab.confirm_states", message: "Confirm that YNAB's reconciled and cleared states are reset: everything arrives uncleared", comment: "See GLOSSARY.md (Cleared, Uncleared, reconcile)" }),
+  },
+  "ynab.date_unreadable": {
+    message: msg({ id: "error.ynab.date_unreadable", message: "{date} is not a {format} date", comment: "{format} is a date pattern like DD/MM/YYYY" }),
+  },
+  "ynab.account_undecided": {
+    message: msg({ id: "error.ynab.account_undecided", message: "Say what to do with the YNAB account {account}" }),
+  },
+  "ynab.category_undecided": {
+    message: msg({ id: "error.ynab.category_undecided", message: "Say what to do with the YNAB category {category}" }),
+  },
+  "ynab.account_elsewhere": {
+    message: msg({ id: "error.ynab.account_elsewhere", message: "The account chosen for {account} is not in this household" }),
+  },
+  "ynab.account_currency": {
+    message: msg({ id: "error.ynab.account_currency", message: "{account} is in {account_currency}, and this plan is in {currency}" }),
+  },
+  "ynab.account_twice": {
+    message: msg({ id: "error.ynab.account_twice", message: "{first} and {second} both go to {account}; each YNAB account needs an account of its own" }),
+  },
+  "ynab.category_elsewhere": {
+    message: msg({ id: "error.ynab.category_elsewhere", message: "The category chosen for {category} is not in this household" }),
+  },
+  "ynab.rows_taken": {
+    message: msg({ id: "error.ynab.rows_taken", message: "Some of these rows were imported by another request a moment ago; open the Import screen and check History before trying again" }),
+  },
+  "ynab.new_account_needs_name": {
+    message: msg({ id: "error.ynab.new_account_needs_name", message: "The new account for {account} needs a name" }),
+  },
+  "ynab.account_mapping_unknown": {
+    message: msg({ id: "error.ynab.account_mapping_unknown", message: "{kind} is not something an account can be mapped to" }),
+  },
+  "ynab.new_category_needs_name": {
+    message: msg({ id: "error.ynab.new_category_needs_name", message: "The new category for {category} needs a name" }),
+  },
+  "ynab.category_mapping_unknown": {
+    message: msg({ id: "error.ynab.category_mapping_unknown", message: "{kind} is not something a category can be mapped to" }),
+  },
+  "ynab.account_type_unknown": {
+    message: msg({ id: "error.ynab.account_type_unknown", message: "{type} is not an account type" }),
+  },
+  "ynab.answer_unreadable": {
+    message: msg({ id: "error.ynab.answer_unreadable", message: "YNAB's answer could not be read" }),
+  },
+  "ynab.answer_too_large": {
+    message: msg({ id: "error.ynab.answer_too_large", message: "YNAB's answer was larger than this import will read" }),
+  },
+  "ynab.timeout": {
+    message: msg({ id: "error.ynab.timeout", message: "YNAB took too long to answer; try again later" }),
+  },
+  "ynab.status": {
+    message: msg({ id: "error.ynab.status", message: "YNAB answered {status}; try again later", comment: "{status} is an HTTP status number, like 503" }),
+  },
+  "ynab.unreachable": {
+    message: msg({ id: "error.ynab.unreachable", message: "YNAB could not be reached; check the connection and try again" }),
+  },
+  "ynab.token_rejected": {
+    message: msg({ id: "error.ynab.token_rejected", message: "YNAB rejected the token" }),
+  },
+  "ynab.no_such_plan": {
+    message: msg({ id: "error.ynab.no_such_plan", message: "YNAB has no such plan for this token" }),
+  },
+  "ynab.rate_limited": {
+    message: msg({ id: "error.ynab.rate_limited", message: "YNAB is limiting requests from this token for now; try again in an hour" }),
+  },
+  "ynab.no_transactions": {
+    message: msg({ id: "error.ynab.no_transactions", message: "There are no transactions in this file" }),
+  },
+  "ynab.plan_not_register": {
+    message: msg({ id: "error.ynab.plan_not_register", message: "Only the YNAB Register.csv is needed, not the Plan.csv" }),
+  },
+  "ynab.not_register": {
+    message: msg({ id: "error.ynab.not_register", message: "This is not a YNAB Register.csv: it has no {columns} column. Export the plan from YNAB and upload the zip or its Register.csv." }),
+  },
+  "ynab.zip_unreadable": {
+    message: msg({ id: "error.ynab.zip_unreadable", message: "That zip file cannot be opened" }),
+  },
+  "ynab.zip_has_no_register": {
+    message: msg({ id: "error.ynab.zip_has_no_register", message: "Only the YNAB Register.csv is needed, not the Plan.csv, and this zip has no Register.csv in it" }),
+  },
+  "ynab.register_too_large": {
+    message: msg({ id: "error.ynab.register_too_large", message: "The Register.csv in that zip is larger than this import reads" }),
+  },
+  "ynab.not_csv": {
+    message: msg({ id: "error.ynab.not_csv", message: "Line {line} of this file cannot be read as CSV. Export the plan from YNAB again and upload the zip or its Register.csv." }),
+  },
+  "ynab.amount_too_long": {
+    message: msg({ id: "error.ynab.amount_too_long", message: "Line {line} of this file has an amount longer than {max} characters, which YNAB never writes -- it may not be a YNAB export, or it may be damaged" }),
+  },
 };
 
 /** The params as the active locale writes them. */

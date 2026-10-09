@@ -402,12 +402,16 @@ def _product_for(account: Account, rows: list[ParsedRow], notes: list[str]) -> s
         raise ValidationError(
             f"this file holds more than one account ({listed}), and {account.name} has not said "
             "which of them it is. Set its statement product on the Accounts screen, then read "
-            "the file again."
+            "the file again.",
+            code="import.choose_product",
+            params={"account": account.name, "products": ", ".join(sorted(products))},
         )
     if chosen not in products:
         raise ValidationError(
             f"{account.name} takes the {chosen} rows of a statement, and this file has none: it "
-            f"holds {listed}."
+            f"holds {listed}.",
+            code="import.product_absent",
+            params={"account": account.name, "product": chosen, "products": ", ".join(sorted(products))},
         )
     return chosen
 
@@ -459,7 +463,9 @@ def _currencies_for(account: Account, rows: list[ParsedRow], notes: list[str]) -
         raise ValidationError(
             f"this file is in {listed}, and {account.name} holds {mine}: none of its rows are in "
             f"{mine}. Import it into an account that holds {', '.join(sorted(stated))}, or check "
-            "that this is the right file."
+            "that this is the right file.",
+            code="import.wrong_currency",
+            params={"account": account.name, "currency": mine, "currencies": ", ".join(sorted(stated))},
         )
     #: Only a table's currency column can hold several accounts' rows.
     in_columns = {row.currency for row in rows if row.currency and row.currency_from == "column"}
@@ -1261,7 +1267,9 @@ def commit(
         # read of its ids and this write is refused by the unique constraint
         # instead. Said the way the clash query said it.
         if "transactions.account_id, transactions.import_id" in str(exc.orig):
-            raise Conflict("that statement line is already in this account") from exc
+            raise Conflict(
+            "that statement line is already in this account", code="import.line_already_in_account"
+        ) from exc
         raise
 
 
@@ -1274,7 +1282,11 @@ def _commit(
     reject_matches: set[str] | None,
 ) -> dict[str, int]:
     if batch_row.status is not BatchStatus.preview:
-        raise Conflict(f"that import is {batch_row.status.value}, not waiting to be committed")
+        raise Conflict(
+            f"that import is {batch_row.status.value}, not waiting to be committed",
+            code="import.not_awaiting_commit",
+            params={"status": batch_row.status.value},
+        )
 
     skip_line_ids = skip_line_ids or set()
     reject_matches = reject_matches or set()
@@ -1562,11 +1574,15 @@ def get_preview(
     """
     batch_row = session.get(Batch, batch_id)
     if batch_row is None or batch_row.household_id != household_id:
-        raise NotFound("no such import")
+        raise NotFound("no such import", code="import.not_found")
     if batch_row.kind is not BatchKind.imported:
-        raise ValidationError("that batch is not an import")
+        raise ValidationError("that batch is not an import", code="import.not_an_import")
     if status is not None and batch_row.status is not status:
-        raise Conflict(f"that import is {batch_row.status.value}, not staged")
+        raise Conflict(
+            f"that import is {batch_row.status.value}, not staged",
+            code="import.not_staged",
+            params={"status": batch_row.status.value},
+        )
     return batch_row
 
 
@@ -1683,7 +1699,9 @@ def discard_preview(session: Session, batch_row: Batch) -> None:
     if batch_row.status is not BatchStatus.preview:
         raise Conflict(
             f"that import is {batch_row.status.value}, not staged. A committed import is "
-            "put back from History rather than purged."
+            "put back from History rather than purged.",
+            code="import.committed_not_purged",
+            params={"status": batch_row.status.value},
         )
 
     for line in session.execute(
@@ -1939,7 +1957,9 @@ def apply_to_similar(
     """
     uncategorised = line_uncategorised(line.parsed)
     if not line.category_id and not uncategorised:
-        raise ValidationError("that line has no category of its own to apply")
+        raise ValidationError(
+            "that line has no category of its own to apply", code="import.line_no_own_category"
+        )
 
     category = session.get(Category, line.category_id) if line.category_id else None
     changed = similar_lines(session, batch_id, line)
