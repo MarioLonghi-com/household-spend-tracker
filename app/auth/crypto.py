@@ -83,7 +83,8 @@ def open_totp_secret(sealed: bytes, *, user_id: str) -> str:
         return _totp_cipher().decrypt(nonce, ciphertext, user_id.encode()).decode()
     except Exception as exc:
         raise ValidationError(
-            "that authenticator secret cannot be read with this server key"
+            "that authenticator secret cannot be read with this server key",
+            code="auth.secret_unreadable",
         ) from exc
 
 
@@ -140,4 +141,6 @@ def open_blob(
     try:
         return _blob_cipher(purpose).decrypt_at_time(token.encode(), max_age_seconds, now).decode()
     except InvalidToken as exc:
-        raise ValidationError("that setup session has expired; start again") from exc
+        raise ValidationError(
+            "that setup session has expired; start again", code="setup.session_expired"
+        ) from exc

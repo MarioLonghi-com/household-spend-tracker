@@ -3488,6 +3488,110 @@ msgstr "Inga betalningar kopplade än."
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.agent_key.lifetime"
+msgstr "En nyckel kan gälla mellan en dag och {max_days} dagar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.needs_label"
+msgstr "Ge nyckeln en etikett, så att du vet vad den är till för"
+
+#. A key for a program. See GLOSSARY.md (Keys for programs)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.not_found"
+msgstr "Nyckeln finns inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.not_issuer"
+msgstr "Bara den som utfärdade en nyckel kan återkalla den"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.read_only_commit"
+msgstr "En nyckel som bara kan läsa har inget att tillämpa"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.authenticator_cleared"
+msgstr "Kontots autentiseringsapp har återställts, så det finns ingen kod att ange. Använd återställningslänken du fick för att registrera en ny, eller be en ägare om en ny länk."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.code_wrong"
+msgstr "Den koden stämmer inte, eller har redan använts"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.new_code_wrong"
+msgstr "Den koden stämmer inte. Kontrollera tiden på telefonen och försök igen."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.owner_only"
+msgstr "Bara ägaren kan göra det"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.recovery_code_wrong"
+msgstr "Den återställningskoden stämmer inte, eller har redan använts"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.refused"
+msgstr "E-postadressen och lösenordet stämmer inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.secret_unreadable"
+msgstr "Den hemligheten för autentiseringsappen kan inte läsas med den här servernyckeln"
+
+#. Refusal when the session has ended or never began
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.sign_in_first"
+msgstr "Logga in först"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.start_again"
+msgstr "Börja om från inloggningssidan"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.too_many_attempts"
+msgstr "För många försök. Försök igen om {seconds, plural, one {# sekund} other {# sekunder}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.too_many_for_account"
+msgstr "För många försök för det här kontot. Försök igen om {seconds, plural, one {# sekund} other {# sekunder}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.too_many_from_here"
+msgstr "För många försök härifrån. Försök igen om {seconds, plural, one {# sekund} other {# sekunder}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.backup.protected"
 msgstr "{name} är en av de fem senaste säkerhetskopiorna från uppdateringar. De sparas så att en uppdatering kan ångras, och uppdateraren tar själv bort äldre"
 
@@ -3566,6 +3670,72 @@ msgstr "{code} är inte en valutakod enligt ISO 4217. Kontrollera stavningen, so
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.email.no_name"
+msgstr "{email} har inget användbart namn före @"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.email.not_an_address"
+msgstr "{email} är ingen e-postadress"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.email.too_long"
+msgstr "E-postadressen är för lång (högst {max} tecken)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.household.not_found"
+msgstr "Hushållet finns inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.address_unusable"
+msgstr "Den e-postadressen kan inte användas för ett nytt konto här, och länken är nu förbrukad. Be den som bjöd in dig om en ny."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.already_used"
+msgstr "Den inbjudan har redan använts; inaktivera kontot i stället"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.link_invalid"
+msgstr "Den inbjudningslänken är inte giltig"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.not_an_invitation"
+msgstr "Det är ingen inbjudan"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.not_found"
+msgstr "Inbjudan finns inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.owner_only"
+msgstr "Bara en ägare kan bjuda in personer"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.owner_only_withdraw"
+msgstr "Bara en ägare kan dra tillbaka en inbjudan"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.amount_too_large"
 msgstr "Det beloppet är för stort för att registreras som pengar"
 
@@ -3610,6 +3780,92 @@ msgstr "{value} har fler decimaler än {currency} har ({places})"
 #, fuzzy
 msgid "error.money.too_many_digits"
 msgstr "Ett belopp med {digits} siffror är för stort för att registreras som pengar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.already_registered"
+msgstr "Lösennyckeln är redan registrerad"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.needs_name"
+msgstr "En lösennyckel behöver ett namn"
+
+#. A user handle is the WebAuthn id of a person; an internal step
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.no_user_handle"
+msgstr "Ge medlemmen ett användarhandtag först"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.not_an_answer"
+msgstr "Det är inget svar från en lösennyckel"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.not_found"
+msgstr "Lösennyckeln finns inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.not_registered"
+msgstr "Lösennyckeln kunde inte registreras här. Börja om."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.refused"
+msgstr "Den lösennyckeln kan inte logga in här"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.too_many_at_once"
+msgstr "För många inloggningar samtidigt. Försök igen om en minut."
+
+#. Why passkeys cannot be used here; {reason} picks the sentence. See GLOSSARY.md (passkey)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.unavailable"
+msgstr "{reason, select, not_configured {Lösennycklar är inte konfigurerade på den här servern} ip_address {Lösennycklar behöver ett värdnamn, och servern är konfigurerad med en IP-adress} wrong_host {Lösennycklar fungerar bara på serverns egen adress} insecure {Lösennycklar kräver att appen öppnas över HTTPS} no_origins {Lösennycklar kräver att serverns offentliga adress är konfigurerad} other {Lösennycklar är inte tillgängliga här}}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.common"
+msgstr "Lösenordet är ett av de {count, number} vanligaste lösenorden, som är de första som någon som gissar provar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.common_and_is_email"
+msgstr "Lösenordet är ett av de {count, number} vanligaste lösenorden, och det får inte vara din e-postadress"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.is_email"
+msgstr "Lösenordet får inte vara din e-postadress"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.too_short"
+msgstr "Lösenordet är för kort: det behöver minst {min_length} tecken"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.too_short_and_is_email"
+msgstr "Lösenordet behöver minst {min_length} tecken, och det får inte vara din e-postadress"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3842,6 +4098,151 @@ msgstr "Det här är avskrivet. Ändra tillbaka till ”Jobbet ska betala tillba
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.reset.account_disabled"
+msgstr "Kontot är inaktiverat, så en återställningslänk för det skulle inte gå att följa. Återaktivera det först."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.choose_password"
+msgstr "Välj ett nytt lösenord"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.choose_what"
+msgstr "Välj vad som ska återställas: lösenordet, autentiseringsappen eller båda"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.enrol_first"
+msgstr "Registrera en ny autentiseringsapp först"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.link_invalid"
+msgstr "Återställningslänken är inte giltig"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.not_authenticator"
+msgstr "Den här länken ändrar inte autentiseringsappen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.not_found"
+msgstr "Återställningslänken finns inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.not_password"
+msgstr "Den här länken ändrar inte lösenordet"
+
+#. The QR code offered for setting up a new authenticator
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.offer_expired"
+msgstr "Erbjudandet för autentiseringsappen har gått ut; skanna ett nytt"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.overtaken"
+msgstr "Återställningslänken användes eller ersattes för en stund sedan. Titta på kontot igen innan du gör något mer med det"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.own_account"
+msgstr "Du kan inte återställa ditt eget konto här: byt lösenord eller autentiseringsapp i din profil"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.owner_only"
+msgstr "Bara en ägare kan återställa ett konto"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.owner_only_withdraw"
+msgstr "Bara en ägare kan dra tillbaka en återställningslänk"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.address_taken"
+msgstr "Någon använder redan den e-postadressen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.already_done"
+msgstr "Den här instansen är redan installerad"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.enrol_first"
+msgstr "Slutför registreringen av en autentiseringsapp först"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.is_an_invitation"
+msgstr "Det är en inbjudan; slutför den från länken du fick"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.needs_display_name"
+msgstr "Ett visningsnamn krävs"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.not_waiting"
+msgstr "Den här instansen väntar inte på att installeras"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.server_restarted"
+msgstr "Servern startades om; börja om med den nya installationstoken"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.session_expired"
+msgstr "Installationssessionen har gått ut; börja om"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.session_invalid"
+msgstr "Installationssessionen är inte giltig; börja om"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.store_codes"
+msgstr "Spara dina återställningskoder någonstans som inte är den här webbläsaren och kryssa sedan i rutan"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.token_wrong"
+msgstr "Installationstoken stämmer inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.split.does_not_add_up"
 msgstr "Delarna blir {total} och transaktionen är {amount}. En uppdelning måste gå jämnt ut, annars ändras saldot."
 
@@ -3874,6 +4275,19 @@ msgstr "Varje del av ett jobbutlägg måste vara pengar som går ut, eftersom va
 #, fuzzy
 msgid "error.split.zero_part"
 msgstr "En del av en uppdelning kan inte vara noll"
+
+#. See GLOSSARY.md (step-up)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.stepup.needed"
+msgstr "Bekräfta först ditt lösenord och koden från autentiseringsappen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.stepup.refused"
+msgstr "Lösenordet och koden stämmer inte"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4084,6 +4498,24 @@ msgstr "Uppdateraren i {to_version} är äldre än den här instansen, som kör 
 #, fuzzy
 msgid "error.update.updater_outdated"
 msgstr "Uppdateraren är för gammal för den här containermotorn. Uppdatera uppdateraren först och försök sedan igen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.user.cannot_disable_self"
+msgstr "Du kan inte inaktivera dig själv; då finns ingen kvar som kan ångra det"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.user.no_owner_left"
+msgstr "Det skulle inte finnas någon ägare kvar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.user.not_found"
+msgstr "Personen finns inte"
 
 #. Column heading on the Application management screen
 #. Column name shown beside a value on phones on the Application management screen

@@ -132,7 +132,7 @@ def submit_code(
     user_id = session_service.claim_pending(db.engine, pending)
     user = session.get(User, user_id) if user_id else None
     if user is None or user.disabled_at is not None:
-        raise Unauthorized("start again from the sign-in page")
+        raise Unauthorized("start again from the sign-in page", code="auth.start_again")
 
     service.check_code(session, db.engine, user, body.code, ip=client_ip(request))
     result = service.complete_sign_in(
@@ -170,7 +170,7 @@ def submit_recovery_code(
     user_id = session_service.claim_pending(db.engine, cookies.pending_value(request))
     user = session.get(User, user_id) if user_id else None
     if user is None or user.disabled_at is not None:
-        raise Unauthorized("start again from the sign-in page")
+        raise Unauthorized("start again from the sign-in page", code="auth.start_again")
 
     with batch(session, kind=BatchKind.admin, actor_id=user.id):
         keys_revoked = service.redeem_recovery_code(

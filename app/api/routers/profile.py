@@ -261,7 +261,7 @@ def issue_key(
         # 404 before the service is reached, so an id that never existed and
         # one in a household this person is not in read identically. The
         # service repeats the check for its own callers.
-        raise NotFound("no such household")
+        raise NotFound("no such household", code="household.not_found")
 
     # A batch, because `agent_keys` is audited and issuing a credential is
     # exactly the kind of act History should carry. `admin`, not a new kind:
@@ -295,7 +295,7 @@ def revoke_key(
     key = session.get(AgentKey, key_id)
     if key is None or key.user_id != user.id:
         # Somebody else's key reads exactly like one that was never real.
-        raise NotFound("no such key")
+        raise NotFound("no such key", code="agent_key.not_found")
 
     with batch(
         session, kind=BatchKind.admin, actor_id=user.id, household_id=key.household_id

@@ -3488,6 +3488,110 @@ msgstr "Nenhum pagamento vinculado ainda."
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.agent_key.lifetime"
+msgstr "Uma chave pode durar entre um dia e {max_days} dias"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.needs_label"
+msgstr "Dê um nome à chave, para saber para que ela serve"
+
+#. A key for a program. See GLOSSARY.md (Keys for programs)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.not_found"
+msgstr "Essa chave não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.not_issuer"
+msgstr "Só quem emitiu uma chave pode revogá-la"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.read_only_commit"
+msgstr "Uma chave somente leitura não tem nada a aplicar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.authenticator_cleared"
+msgstr "O aplicativo autenticador desta conta foi redefinido, então não há código para informar. Use o link de redefinição que você recebeu para cadastrar um novo, ou peça um novo link a um proprietário."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.code_wrong"
+msgstr "Esse código não está certo, ou já foi usado"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.new_code_wrong"
+msgstr "Esse código não está certo. Confira a hora do seu celular e tente de novo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.owner_only"
+msgstr "Só o proprietário pode fazer isso"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.recovery_code_wrong"
+msgstr "Esse código de recuperação não está certo, ou já foi usado"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.refused"
+msgstr "Esse e-mail e essa senha não correspondem"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.secret_unreadable"
+msgstr "Esse segredo do aplicativo autenticador não pode ser lido com a chave deste servidor"
+
+#. Refusal when the session has ended or never began
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.sign_in_first"
+msgstr "Entre primeiro"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.start_again"
+msgstr "Comece de novo pela página de entrada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.too_many_attempts"
+msgstr "Tentativas demais. Tente de novo em {seconds, plural, one {# segundo} other {# segundos}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.too_many_for_account"
+msgstr "Tentativas demais para esta conta. Tente de novo em {seconds, plural, one {# segundo} other {# segundos}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.too_many_from_here"
+msgstr "Tentativas demais a partir daqui. Tente de novo em {seconds, plural, one {# segundo} other {# segundos}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.backup.protected"
 msgstr "{name} é um dos cinco backups de atualização mais recentes. Eles são mantidos para que uma atualização possa ser desfeita, e o atualizador remove os mais antigos sozinho"
 
@@ -3566,6 +3670,72 @@ msgstr "{code} não é um código de moeda ISO 4217. Confira a grafia, como GBP 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.email.no_name"
+msgstr "{email} não tem um nome utilizável antes do @"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.email.not_an_address"
+msgstr "{email} não é um endereço de e-mail"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.email.too_long"
+msgstr "Esse endereço de e-mail é longo demais (máximo de {max} caracteres)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.household.not_found"
+msgstr "Essa casa não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.address_unusable"
+msgstr "Esse endereço de e-mail não pode ser usado para uma nova conta aqui, e este link já foi gasto. Peça um novo a quem convidou você."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.already_used"
+msgstr "Esse convite já foi usado; desative a conta em vez disso"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.link_invalid"
+msgstr "Esse link de convite não é válido"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.not_an_invitation"
+msgstr "Isso não é um convite"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.not_found"
+msgstr "Esse convite não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.owner_only"
+msgstr "Só um proprietário pode convidar pessoas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.owner_only_withdraw"
+msgstr "Só um proprietário pode retirar um convite"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.amount_too_large"
 msgstr "Esse valor é grande demais para registrar como dinheiro"
 
@@ -3610,6 +3780,92 @@ msgstr "{value} tem mais casas decimais do que {currency} tem ({places})"
 #, fuzzy
 msgid "error.money.too_many_digits"
 msgstr "Um valor com {digits} dígitos é grande demais para registrar como dinheiro"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.already_registered"
+msgstr "Essa chave de acesso já está registrada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.needs_name"
+msgstr "Uma chave de acesso precisa de um nome"
+
+#. A user handle is the WebAuthn id of a person; an internal step
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.no_user_handle"
+msgstr "Dê primeiro um identificador de usuário ao membro"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.not_an_answer"
+msgstr "Isso não é uma resposta de chave de acesso"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.not_found"
+msgstr "Essa chave de acesso não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.not_registered"
+msgstr "Essa chave de acesso não pôde ser registrada aqui. Comece de novo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.refused"
+msgstr "Essa chave de acesso não pode entrar aqui"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.too_many_at_once"
+msgstr "Entradas demais ao mesmo tempo. Tente de novo em um minuto."
+
+#. Why passkeys cannot be used here; {reason} picks the sentence. See GLOSSARY.md (passkey)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.unavailable"
+msgstr "{reason, select, not_configured {As chaves de acesso não estão configuradas neste servidor} ip_address {As chaves de acesso precisam de um nome de host, e este servidor está configurado com um endereço IP} wrong_host {As chaves de acesso só funcionam no endereço deste servidor} insecure {As chaves de acesso precisam que o aplicativo seja aberto por HTTPS} no_origins {As chaves de acesso precisam que o endereço público do servidor esteja configurado} other {As chaves de acesso não estão disponíveis aqui}}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.common"
+msgstr "Essa senha é uma das {count, number} senhas mais comuns, que são as primeiras que alguém tentando adivinhar experimenta"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.common_and_is_email"
+msgstr "Essa senha é uma das {count, number} senhas mais comuns, e não pode ser o seu endereço de e-mail"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.is_email"
+msgstr "A senha não pode ser o seu endereço de e-mail"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.too_short"
+msgstr "Essa senha é curta demais: ela precisa de pelo menos {min_length} caracteres"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.too_short_and_is_email"
+msgstr "Essa senha precisa de pelo menos {min_length} caracteres, e não pode ser o seu endereço de e-mail"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3842,6 +4098,151 @@ msgstr "Isto foi dado como perdido. Volte para “O trabalho deve reembolsar” 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.reset.account_disabled"
+msgstr "Essa conta está desativada, então um link de redefinição para ela não poderia ser seguido. Reative-a primeiro."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.choose_password"
+msgstr "Escolha uma nova senha"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.choose_what"
+msgstr "Escolha o que redefinir: a senha, o aplicativo autenticador ou os dois"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.enrol_first"
+msgstr "Cadastre primeiro um novo aplicativo autenticador"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.link_invalid"
+msgstr "Esse link de redefinição não é válido"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.not_authenticator"
+msgstr "Este link não altera o aplicativo autenticador"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.not_found"
+msgstr "Esse link de redefinição não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.not_password"
+msgstr "Este link não altera a senha"
+
+#. The QR code offered for setting up a new authenticator
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.offer_expired"
+msgstr "Essa oferta de aplicativo autenticador expirou; escaneie uma nova"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.overtaken"
+msgstr "Esse link de redefinição foi usado ou substituído há pouco. Olhe a conta de novo antes de fazer qualquer outra coisa com ela"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.own_account"
+msgstr "Você não pode redefinir a sua própria conta aqui: altere a senha ou o aplicativo autenticador no seu perfil"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.owner_only"
+msgstr "Só um proprietário pode redefinir uma conta"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.owner_only_withdraw"
+msgstr "Só um proprietário pode retirar um link de redefinição"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.address_taken"
+msgstr "Alguém já usa esse endereço de e-mail"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.already_done"
+msgstr "Esta instância já foi configurada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.enrol_first"
+msgstr "Termine primeiro de cadastrar um aplicativo autenticador"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.is_an_invitation"
+msgstr "Isso é um convite; conclua-o pelo link que você recebeu"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.needs_display_name"
+msgstr "É preciso um nome de exibição"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.not_waiting"
+msgstr "Esta instância não está aguardando configuração"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.server_restarted"
+msgstr "O servidor reiniciou; comece de novo com o novo token de configuração"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.session_expired"
+msgstr "Essa sessão de configuração expirou; comece de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.session_invalid"
+msgstr "Essa sessão de configuração não é válida; comece de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.store_codes"
+msgstr "Guarde os seus códigos de recuperação em algum lugar que não seja este navegador e depois marque a caixa"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.token_wrong"
+msgstr "Esse token de configuração não está certo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.split.does_not_add_up"
 msgstr "As partes somam {total} e a transação é de {amount}. Uma divisão precisa fechar, senão altera o saldo."
 
@@ -3874,6 +4275,19 @@ msgstr "Cada parte de uma despesa de trabalho precisa ser dinheiro que sai, porq
 #, fuzzy
 msgid "error.split.zero_part"
 msgstr "Uma parte de uma divisão não pode ser zero"
+
+#. See GLOSSARY.md (step-up)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.stepup.needed"
+msgstr "Confirme primeiro a sua senha e o código do autenticador"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.stepup.refused"
+msgstr "Essa senha e esse código não correspondem"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4084,6 +4498,24 @@ msgstr "O atualizador de {to_version} é mais antigo que esta instância, que ex
 #, fuzzy
 msgid "error.update.updater_outdated"
 msgstr "O atualizador é antigo demais para este motor de contêineres. Atualize o atualizador primeiro e tente de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.user.cannot_disable_self"
+msgstr "Você não pode desativar a si mesmo; não sobraria ninguém para desfazer isso"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.user.no_owner_left"
+msgstr "Não sobraria nenhum proprietário"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.user.not_found"
+msgstr "Essa pessoa não existe"
 
 #. Column heading on the Application management screen
 #. Column name shown beside a value on phones on the Application management screen

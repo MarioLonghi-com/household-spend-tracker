@@ -45,7 +45,7 @@ def setup_state(session: SessionDep) -> dict:
 def begin(body: SetupBegin, session: SessionDep) -> SetupStarted:
     """Prove you deployed this, and name the owner. Nothing is written."""
     if setup_service.is_configured(session):
-        raise Conflict("this instance has already been set up")
+        raise Conflict("this instance has already been set up", code="setup.already_done")
 
     blob = setup_service.begin(
         body.token, email=body.email, display_name=body.display_name, password=body.password
@@ -62,7 +62,7 @@ def begin(body: SetupBegin, session: SessionDep) -> SetupStarted:
 def enrol(body: SetupEnrol, session: SessionDep) -> dict:
     """Prove the authenticator actually pairs, before it is load-bearing."""
     if setup_service.is_configured(session):
-        raise Conflict("this instance has already been set up")
+        raise Conflict("this instance has already been set up", code="setup.already_done")
     blob = setup_service.unseal(body.blob)
     confirmed = setup_service.confirm_authenticator(blob, body.code)
     return {"blob": setup_service.seal(confirmed)}
@@ -76,7 +76,10 @@ def complete(
     browser. Or nothing at all."""
     blob = setup_service.unseal(body.blob)
     if blob.invitation_id:
-        raise Conflict("that is an invitation; finish it from the link you were sent")
+        raise Conflict(
+            "that is an invitation; finish it from the link you were sent",
+            code="setup.is_an_invitation",
+        )
     setup_service.require_codes_saved(body.codes_saved)
     user, session_value, device_value = setup_service.complete(
         session,

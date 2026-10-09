@@ -151,9 +151,7 @@ def change_password(
     """
     _check_current_password(session, engine, user, current, ip=ip)
 
-    problems = passwords.complaints(replacement, email=user.email)
-    if problems:
-        raise ValidationError(problems[0])
+    passwords.refuse_weak(replacement, email=user.email, first_only=True)
     if passwords.verify_password(user.password_hash, replacement):
         raise ValidationError("that is already your password", code="profile.same_password")
 

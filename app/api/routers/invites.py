@@ -78,7 +78,7 @@ def revoke_invitation(invitation_id: str, session: SessionDep, owner: OwnerOnly)
 
     invitation = session.get(Invitation, invitation_id)
     if invitation is None:
-        raise NotFound("no such invitation")
+        raise NotFound("no such invitation", code="invite.not_found")
     with batch(session, kind=BatchKind.admin, actor_id=owner.id):
         invite_service.revoke(session, invitation, by=owner)
 
@@ -129,7 +129,7 @@ def enrol(body: SetupEnrol, session: SessionDep) -> dict:
     """The same mandatory authenticator check the first owner passed."""
     blob = setup_service.unseal(body.blob)
     if not blob.invitation_id:
-        raise Conflict("that is not an invitation")
+        raise Conflict("that is not an invitation", code="invite.not_an_invitation")
     invite_service.lookup_by_id(session, blob.invitation_id)
     confirmed = setup_service.confirm_authenticator(blob, body.code)
     return {"blob": setup_service.seal(confirmed)}
@@ -155,7 +155,7 @@ def complete(
     """
     blob = setup_service.unseal(body.blob)
     if not blob.invitation_id:
-        raise Conflict("that is not an invitation")
+        raise Conflict("that is not an invitation", code="invite.not_an_invitation")
     setup_service.require_codes_saved(body.codes_saved)
 
     try:
@@ -171,7 +171,8 @@ def complete(
         session.commit()
         raise Conflict(
             "that email address cannot be used for a new account here, and this link is now "
-            "spent. Ask whoever invited you for a new one."
+            "spent. Ask whoever invited you for a new one.",
+            code="invite.address_unusable",
         ) from None
     cookies.set_session(response, request, session_value)
     cookies.set_device(response, request, device_value)

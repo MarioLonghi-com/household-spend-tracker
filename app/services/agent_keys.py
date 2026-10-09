@@ -76,9 +76,15 @@ def issue(
     """
     name = (label or "").strip()
     if not name:
-        raise ValidationError("give the key a label, so you know what it is for")
+        raise ValidationError(
+            "give the key a label, so you know what it is for", code="agent_key.needs_label"
+        )
     if not 1 <= days <= MAX_DAYS:
-        raise ValidationError(f"a key can last between a day and {MAX_DAYS} days")
+        raise ValidationError(
+            f"a key can last between a day and {MAX_DAYS} days",
+            code="agent_key.lifetime",
+            params={"max_days": MAX_DAYS},
+        )
 
     member = session.execute(
         select(HouseholdMember).where(
@@ -90,14 +96,14 @@ def issue(
         # 404, not 403, like everything else keyed on a household: a key cannot
         # be issued into a household its owner is not in, and refusing in a way
         # that confirms the id is real would be the one place this app leaks it.
-        raise NotFound("no such household")
+        raise NotFound("no such household", code="household.not_found")
 
     chosen = AgentScope(scope)
     if may_commit and not chosen.may_write:
         # A read-only key that may commit an import is a contradiction with a
         # checkbox. Refused here rather than ignored, because ignoring it would
         # store a flag that reads as true and behaves as false.
-        raise ValidationError("a read-only key has nothing to commit")
+        raise ValidationError("a read-only key has nothing to commit", code="agent_key.read_only_commit")
 
     value, digest = tokens.issue()
     # One reading of the clock for both columns, like `sessions.issue`. Letting
@@ -187,7 +193,9 @@ def revoke(session: Session, key: AgentKey, *, by: User, now: datetime | None = 
     not one this screen offers.
     """
     if key.user_id != by.id:
-        raise Forbidden("only the person who issued a key can revoke it")
+        raise Forbidden(
+            "only the person who issued a key can revoke it", code="agent_key.not_issuer"
+        )
     if key.revoked_at is None:
         key.revoked_at = now or utcnow()
     return key
