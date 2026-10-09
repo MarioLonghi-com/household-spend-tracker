@@ -12,6 +12,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { summaryOf } from "../lib/historyWords";
 import { equalParts, retype } from "../lib/splitting";
 import { amountLookup, format, parse, toInput } from "../lib/money";
 import { Actor, Dialog, Empty, Field, Hint, Panel, Problem, SortHeading } from "../components/bits";
@@ -3215,7 +3216,7 @@ function TransactionHistory({
                   </>
                 ) : null}
               </div>
-              <div className="small">{entry.summary}</div>
+              <div className="small">{summaryOf(entry)}</div>
             </li>
           ))}
         </ol>
