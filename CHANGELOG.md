@@ -32,6 +32,30 @@ history this repository does not have.
 
 ## Unreleased
 
+### Changed
+
+- **A new household can be seeded in its own language.** Creating a
+  household, from the first-household form, Admin or *Add the defaults* on
+  Categories, takes the device's language when that language is served, and
+  seeds the category tree and the "Opening balance" payee in it. Only
+  reviewed translations are seeded (`app/seed_catalog.json`, written from the
+  catalogs by `scripts/seed_catalog.py`); a draft never is, so until a
+  language ships every household is seeded in English exactly as before. The
+  names are ordinary names, and no language is stored on the household. (#268)
+
+## 0.9.3 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.9.2`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.9.2` and restart.
+
+Two fixes to the updater: on Podman, 0.9.2's updater could not hand over
+to a newer one, so the fixes it carried never reached a Podman install from
+the browser; and a shutdown or sleep in the ten minutes after an update made
+the previous updater take back over when the machine woke. Alongside them,
+the screens' English is made consistent ahead of translation, counts read
+"1 row", and the client's build no longer pulls in `braces`.
+
 ### Added
 
 - **Every screen is checked in each draft language before review.** The
@@ -49,15 +73,6 @@ history this repository does not have.
   (#271)
 
 ### Changed
-
-- **A new household can be seeded in its own language.** Creating a
-  household, from the first-household form, Admin or *Add the defaults* on
-  Categories, takes the device's language when that language is served, and
-  seeds the category tree and the "Opening balance" payee in it. Only
-  reviewed translations are seeded (`app/seed_catalog.json`, written from the
-  catalogs by `scripts/seed_catalog.py`); a draft never is, so until a
-  language ships every household is seeded in English exactly as before. The
-  names are ordinary names, and no language is stored on the household. (#268)
 
 - **One English word for each thing.** The headings that group accounts by type
   now say "Current accounts" and "Other debts", the plurals of the account
