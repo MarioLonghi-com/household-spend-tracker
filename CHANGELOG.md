@@ -52,6 +52,13 @@ history this repository does not have.
   network again, and records it in the update history. At most three times in
   an hour; after that, or when a repair fails, the Updates screen says so and
   names `docker compose up -d --force-recreate app` (#275).
+- **A fresh install no longer warns about its own `.keep` file.** The first
+  start of every new install logged that `/var/lib/spend-tracker/.keep` could
+  be read by other users and told the owner to `chmod` it, in a container
+  with no shell to do it in. The image now makes the file 0600, and an empty
+  `.keep` is left out of the check, so a volume made by an older image stops
+  warning too. Anything else in the data directory that others can read is
+  still named. (#279)
 
 ## 0.10.0 — 2026-10-09
 

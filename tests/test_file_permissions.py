@@ -175,3 +175,54 @@ def test_a_private_copy_is_never_created_readable(tmp_path, monkeypatch):
     assert opened == [(str(tmp_path / "copy.key"), 0o600)]
     assert stat.S_IMODE((tmp_path / "copy.key").stat().st_mode) == 0o600
     assert (tmp_path / "copy.key").read_text() == "k" * 44
+
+
+def test_an_empty_placeholder_is_not_named_but_one_with_content_is(
+    monkeypatch, tmp_path, permissive_umask, caplog
+):
+    """Every volume made from an image before #279 holds the image's empty
+    `.keep` at 0644, and the owner of a container without a shell cannot
+    chmod it. An empty one is not reported; a `.keep` with something in it,
+    and every other loose file, still is."""
+    data = tmp_path / "data"
+    data.mkdir()
+    placeholder = data / ".keep"
+    placeholder.touch()
+    placeholder.chmod(0o644)
+    logs = data / "logs"
+    logs.mkdir(mode=0o700)
+    logs.chmod(0o700)
+    stuffed = logs / ".keep"
+    stuffed.write_text("not a placeholder any more\n")
+    stuffed.chmod(0o644)
+    old_log = logs / "left-over.log"
+    old_log.write_text("from before\n")
+    old_log.chmod(0o664)
+
+    with caplog.at_level("WARNING", logger="spendtracker"), _boot(monkeypatch, data):
+        pass
+
+    said = "\n".join(record.getMessage() for record in caplog.records)
+    assert "2 path(s) in the data directory can be read by other users" in said
+    named = {line.strip() for line in said.splitlines() if line.startswith("    0")}
+    assert named == {f"0644  {stuffed}", f"0664  {old_log}"}
+    # Not reported is not changed: its mode is the owner's to keep.
+    assert stat.S_IMODE(placeholder.stat().st_mode) == 0o644
+
+
+def test_a_fresh_install_from_the_image_says_nothing_about_its_placeholder(
+    monkeypatch, tmp_path, permissive_umask, caplog
+):
+    """A data directory laid out as the image now ships it -- `.keep` 0600 --
+    boots without the warning at all."""
+    data = tmp_path / "data"
+    data.mkdir()
+    placeholder = data / ".keep"
+    placeholder.touch()
+    placeholder.chmod(0o600)
+
+    with caplog.at_level("WARNING", logger="spendtracker"), _boot(monkeypatch, data):
+        pass
+
+    said = "\n".join(record.getMessage() for record in caplog.records)
+    assert "can be read by other users" not in said
