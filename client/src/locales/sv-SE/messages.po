@@ -3635,6 +3635,49 @@ msgstr "Inga betalningar kopplade än."
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.account_import.column_twice"
+msgstr "Filen har kolumnen {column} två gånger"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.missing_column"
+msgstr "Filen saknar kolumnen {columns}, och varje konto behöver den. Första raden ska namnge kolumnerna, som mallen gör."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.no_accounts"
+msgstr "Det finns inga konton i filen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.not_csv"
+msgstr "Rad {line} i filen kan inte läsas som CSV. Spara den som CSV från kalkylarket igen, eller utgå från mallen."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.rows_refused"
+msgstr "{refused} av {rows, plural, one {# rad} other {# rader}} kan inte importeras, så ingen importerades. Inget har ändrats; rätta filen och försök igen."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.too_many_rows"
+msgstr "Filen innehåller fler än {max} konton, vilket är fler än ett hushåll har -- det kan vara ett kontoutdrag snarare än en lista över konton"
+
+#. {columns} and {known} are column names, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.unknown_column"
+msgstr "Filen har en kolumn som inte känns igen: {columns}. Kolumnerna är {known} -- ladda ner mallen för att utgå från dem."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.agent_key.lifetime"
 msgstr "En nyckel kan gälla mellan en dag och {max_days} dagar"
 
@@ -3832,11 +3875,132 @@ msgstr "{email} är ingen e-postadress"
 msgid "error.email.too_long"
 msgstr "E-postadressen är för lång (högst {max} tecken)"
 
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.history.batch_not_found"
+msgstr "Omgången finns inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.history.no_such_table"
+msgstr "Tabellen finns inte i granskningsloggen"
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.household.not_found"
 msgstr "Hushållet finns inte"
+
+#. force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.already_imported"
+msgstr "Exakt den här filen har redan importerats till {account} {at} (som {filename}). Inget har ändrats. Om du ville importera den igen, skicka den med force satt."
+
+#. {at} is when the earlier import was made; force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.already_staged"
+msgstr "Exakt den här filen är redan förberedd för {account}, sedan {at} (som {filename}), och väntar på granskning. Öppna den importen i stället för att starta en till, eller skicka den här med force satt."
+
+#. {products} is the bank's own names for the accounts in the file
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.choose_product"
+msgstr "Filen innehåller mer än ett konto ({products}), och {account} har inte angett vilket av dem det är. Ange dess kontoutdragsprodukt på skärmen Konton och läs filen igen."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.committed_not_purged"
+msgstr "Den importen är {status}, inte förberedd. En tillämpad import ångras från Historik i stället för att rensas."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.file_too_large"
+msgstr "Filen är större än vad det här är tänkt för (högst {max_bytes, number} byte)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_already_in_account"
+msgstr "Den raden i kontoutdraget finns redan på det här kontot"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_has_no_payee"
+msgstr "Raden har ingen mottagare att koppla en regel till"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_needs_category"
+msgstr "Ge raden en kategori först"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_no_own_category"
+msgstr "Raden har ingen egen kategori att tillämpa"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_not_found"
+msgstr "Raden finns inte i den här importen"
+
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_an_import"
+msgstr "Den omgången är ingen import"
+
+#. {status} is the import's state as stored: applied, preview, failed, undone
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_awaiting_commit"
+msgstr "Den importen är {status}, inte väntande på att tillämpas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_found"
+msgstr "Importen finns inte"
+
+#. {status} is the import's state as stored
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_staged"
+msgstr "Den importen är {status}, inte förberedd"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.product_absent"
+msgstr "{account} tar {product}-raderna i ett kontoutdrag, och den här filen har inga: den innehåller {products}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.send_something"
+msgstr "Skicka en fil eller klistra in text"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.wrong_currency"
+msgstr "Filen är i {currencies}, och {account} är i {currency}: ingen av raderna är i {currency}. Importera den till ett konto i {currencies}, eller kontrollera att det är rätt fil."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4649,6 +4813,12 @@ msgstr "Uppdateraren är för gammal för den här containermotorn. Uppdatera up
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.upload.too_large"
+msgstr "Filen är för stor (högst {max_bytes, number} byte)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.user.cannot_disable_self"
 msgstr "Du kan inte inaktivera dig själv; då finns ingen kvar som kan ångra det"
 
@@ -4663,6 +4833,258 @@ msgstr "Det skulle inte finnas någon ägare kvar"
 #, fuzzy
 msgid "error.user.not_found"
 msgstr "Personen finns inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_currency"
+msgstr "{account} är i {account_currency}, och den här planen är i {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_elsewhere"
+msgstr "Kontot som valts för {account} finns inte i det här hushållet"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_mapping_unknown"
+msgstr "{kind} är inget som ett konto kan kopplas till"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_twice"
+msgstr "{first} och {second} går båda till {account}; varje YNAB-konto behöver ett eget konto"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_type_unknown"
+msgstr "{type} är ingen kontotyp"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_undecided"
+msgstr "Ange vad som ska göras med YNAB-kontot {account}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.amount_too_long"
+msgstr "Rad {line} i filen har ett belopp längre än {max} tecken, vilket YNAB aldrig skriver -- det kanske inte är en export från YNAB, eller så är den skadad"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.answer_too_large"
+msgstr "YNAB:s svar var större än den här importen läser"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.answer_unreadable"
+msgstr "YNAB:s svar kunde inte läsas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.category_elsewhere"
+msgstr "Kategorin som valts för {category} finns inte i det här hushållet"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.category_mapping_unknown"
+msgstr "{kind} är inget som en kategori kan kopplas till"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.category_undecided"
+msgstr "Ange vad som ska göras med YNAB-kategorin {category}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.choose_export"
+msgstr "Välj exporten från YNAB: zip-filen eller dess Register.csv"
+
+#. A plan is what YNAB calls a budget
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.choose_plan"
+msgstr "Välj vilken YNAB-plan som ska importeras"
+
+#. See GLOSSARY.md (Cleared, Uncleared, reconcile)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.confirm_states"
+msgstr "Bekräfta att YNAB:s avstämda och bokförda status återställs: allt kommer in som ej bokfört"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.currency_not_a_code"
+msgstr "{currency} är ingen valutakod på tre bokstäver"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.date_format_unknown"
+msgstr "{format} är inget datumformat som den här importen läser"
+
+#. {format} is a date pattern like DD/MM/YYYY
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.date_unreadable"
+msgstr "{date} är inget datum i formatet {format}"
+
+#. YNAB's coloured flags on a transaction
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.flags_choice"
+msgstr "Flaggor behålls i beskrivningen eller ignoreras"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.new_account_needs_name"
+msgstr "Det nya kontot för {account} behöver ett namn"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.new_category_needs_name"
+msgstr "Den nya kategorin för {category} behöver ett namn"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.no_such_plan"
+msgstr "YNAB har ingen sådan plan för den här token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.no_transactions"
+msgstr "Det finns inga transaktioner i filen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.not_csv"
+msgstr "Rad {line} i filen kan inte läsas som CSV. Exportera planen från YNAB igen och ladda upp zip-filen eller dess Register.csv."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.not_register"
+msgstr "Det här är ingen Register.csv från YNAB: den saknar kolumnen {columns}. Exportera planen från YNAB och ladda upp zip-filen eller dess Register.csv."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.plan_not_register"
+msgstr "Bara YNAB:s Register.csv behövs, inte Plan.csv"
+
+#. The import plan: the choices made on the One-time Import screen
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.plan_unreadable"
+msgstr "Importplanen kan inte läsas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.range_backwards"
+msgstr "Datumintervallet slutar innan det börjar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.rate_limited"
+msgstr "YNAB begränsar förfrågningar från den här token just nu; försök igen om en timme"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.register_too_large"
+msgstr "Register.csv i zip-filen är större än vad den här importen läser"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.rows_taken"
+msgstr "Några av raderna importerades av en annan begäran för en stund sedan; öppna skärmen Import och kontrollera Historik innan du försöker igen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.say_how"
+msgstr "Ange hur YNAB ska nås: via exportfilen eller via API:t"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.starting_balance_choice"
+msgstr "Startsaldot importeras eller hoppas över"
+
+#. {status} is an HTTP status number, like 503
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.status"
+msgstr "YNAB svarade {status}; försök igen senare"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.timeout"
+msgstr "YNAB tog för lång tid att svara; försök igen senare"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.token_malformed"
+msgstr "Det är ingen personlig åtkomsttoken för YNAB"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.token_needed"
+msgstr "En personlig åtkomsttoken för YNAB behövs"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.token_rejected"
+msgstr "YNAB avvisade token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.unreachable"
+msgstr "YNAB gick inte att nå; kontrollera anslutningen och försök igen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.zip_has_no_register"
+msgstr "Bara YNAB:s Register.csv behövs, inte Plan.csv, och den här zip-filen innehåller ingen Register.csv"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.zip_unreadable"
+msgstr "Zip-filen kan inte öppnas"
 
 #. Column heading on the Application management screen
 #. Column name shown beside a value on phones on the Application management screen
@@ -8223,6 +8645,606 @@ msgstr "Använd <0>Inbjudningslänk</0> för att skapa en ny användare."
 #, fuzzy
 msgid "Find a payee"
 msgstr "Hitta en mottagare"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.currency_not_a_code"
+msgstr "{currency} är ingen valutakod på tre bokstäver"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.date_unreadable"
+msgstr "{text} är inget datum som kan läsas -- skriv det som ÅÅÅÅ-MM-DD, till exempel 2026-01-31"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.iban_taken"
+msgstr "Rad {line} i filen har redan IBAN {iban}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.iban_too_long"
+msgstr "IBAN är längre än {max} tecken"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.name_taken"
+msgstr "Rad {line} i filen heter redan {name}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.needs_name"
+msgstr "Ett konto behöver ett namn"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.needs_type"
+msgstr "Ett konto behöver en typ"
+
+#. {column} is a column name of the accounts file, which stays in English
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.too_long"
+msgstr "Fältet {column} är längre än {max} tecken"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.too_many_cells"
+msgstr "Raden har fler celler än filen har kolumner"
+
+#. {types} is the list of account types as the file must write them, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.unknown_type"
+msgstr "{type} är ingen kontotyp -- använd en av {types}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.country.not_a_code"
+msgstr "{code} är ingen landskod"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.added_by_choice"
+msgstr "Du valde att lägga till detta som en ny transaktion"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.already_there"
+msgstr "Raden finns redan på kontot"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.arrived_before_commit"
+msgstr "Raden kom till kontot innan den här importen tillämpades"
+
+#. {match} is the kind of rule: contains, prefix or regex. {why} says why it looks too broad
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.broad_rule"
+msgstr "Regeln {match} ”{pattern}” tog {claimed} av {total} rader — {why}. Redigera eller ta bort den på skärmen Regler om inte alla är samma mottagare."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.fee_already_there"
+msgstr "Avgiften finns redan på kontot"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.fee_of"
+msgstr "Banken tog ut detta utöver rad {line}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.foreign"
+msgstr "Raden är i {foreign}, och {account} är i {currency}, så den kan inte läsas in där -- den skulle bokföras som {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.foreign_ofx"
+msgstr "Transaktionen är i {foreign}, och {account} är i {currency}. Den hör till kontot, men beloppet är inte i {currency} och räknas inte om här -- för in den för hand i {currency}"
+
+#. {rate} is the exchange rate as the bank wrote it
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.foreign_ofx_rate"
+msgstr "Transaktionen är i {foreign} (bankens kurs: {rate}), och {account} är i {currency}. Den hör till kontot, men beloppet är inte i {currency} och räknas inte om här -- för in den för hand i {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match"
+msgstr "Ser ut som posten från {date} som du redan har; den markeras som sedd av banken i stället för att läggas till igen"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match_changed"
+msgstr "Transaktionen den matchade har ändrats sedan förhandsvisningen, så den lämnades orörd och raden importerades inte"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match_deleted"
+msgstr "Transaktionen den matchades mot har tagits bort sedan dess"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match_one_time"
+msgstr "Posten från {date} som din engångsimport tog in är den här bankraden; den markeras som sedd av banken i stället för att läggas till igen"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match_taken"
+msgstr "Den transaktionen har redan matchats mot en rad i ett kontoutdrag"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match_ynab_history"
+msgstr "Matchad på belopp och datum mot posten från {date} i din YNAB-historik (engångsimport), inte på bankens egen nyckel; kontrollera att det är samma köp och inte ett nytt med samma belopp innan du tillämpar"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.maybe_transfer"
+msgstr "Kan vara en överföring med {account} ({date}): {why}. Bekräfta den på skärmen Överföringar efter att du tillämpat."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.no_date_or_amount"
+msgstr "Raden saknar datum eller belopp"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.no_money"
+msgstr "Raden flyttar inga pengar"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.other_currency_rows"
+msgstr "Raden är i {foreign}, och {account} är i {currency}: den hör till raderna i {foreign} i filen"
+
+#. {product} and {taken} are the bank's names for accounts in one file
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.other_product"
+msgstr "Raden är {product}, och {account} tar {taken}-raderna i filen"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.own_money"
+msgstr "Ser ut som dina egna pengar som flyttas -- den {why}. Den kopplas när det kontoutdraget importeras."
+
+#. Part of a sentence about a payee rule that claimed too many rows
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.rule_most_of_file"
+msgstr "det är största delen av filen"
+
+#. Part of a sentence about a payee rule that claimed too many rows. {match} is contains, prefix or regex
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.rule_pattern_short"
+msgstr "{length} tecken är väldigt lite för en {match}-regel"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.transfer"
+msgstr "En överföring med {account} ({date}): {why}. Den kopplas när du tillämpar, och hålls utanför Inkomster och utgifter."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.balance_breaks"
+msgstr "Kontoutdragets löpande saldo slutar stämma på rad {line} ({date}): en rad före den saknas i det som lästes, eller hör till ett annat konto."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.balance_gap"
+msgstr "Kontoutdraget börjar på {opening} den {date}, men boken har {held} dagen före -- {gap} i skillnad. Ett kontoutdrag mellan den senaste importen och den här kan saknas: ladda ner från dagen efter den senast importerade."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.balance_unchecked"
+msgstr "Kontoutdragets löpande saldo kontrollerades inte: ett saldo, belopp eller en avgift i det är för stort för att bokföras som pengar."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.other_currencies"
+msgstr "Filen innehåller mer än en valuta: {currencies}. Bara raderna i {currency} lästes in i {account}; de andra hör till ett konto i sin egen valuta och visas som överhoppade."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.other_products"
+msgstr "Filen innehåller mer än ett konto: {products}. Bara {product}-raderna lästes in i {account}; de andra hör till ett annat konto och visas som överhoppade. För att ändra vilka rader kontot tar, ange dess kontoutdragsprodukt på skärmen Konton."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.rechecked"
+msgstr "{count, plural, one {# av raderna ändrades} other {# av raderna ändrades}} när de kontrollerades mot kontot nyss: registret har ändrats sedan importen förbereddes."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.all_positive"
+msgstr "Alla belopp i filen är positiva, och det finns ingen andra kolumn som säger vilka rader som är pengar ut — kontrollera beloppen i förhandsvisningen, eller välj separata kolumner för pengar ut och pengar in"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.balance_unreadable"
+msgstr "Kolumnen {column} är inget belopp på {count, plural, one {# rad} other {# rader}} (som {text}) -- de raderna importeras utan löpande saldo"
+
+#. Follows “because”: why a decimal separator was expected. {country} is a country's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.because_country"
+msgstr "kontots land är inställt på {country}"
+
+#. Follows “because”: why a decimal separator was expected
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.because_default"
+msgstr "det är standard när inget annat sägs"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.card_signs_reversed"
+msgstr "Beloppen är omvända mot fakturans egna tecken, så ett köp är pengar ut från kortkontot och en återbetalning är pengar in"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.control_codes"
+msgstr "Några tecken i filen är styrkoder och inte bokstäver -- den kan blanda två teckenkodningar, så kontrollera mottagarnas namn i förhandsvisningen"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.currency_columns"
+msgstr "Filen har mer än en valutakolumn ({columns}), och det gick inte att avgöra vilken beloppen är i, så ingen användes: varje rad räknas i kontots valuta"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.date_format_unknown"
+msgstr "Kunde inte avgöra datumformatet från värden som {text}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.dates_either_way"
+msgstr "Varje datum i filen kunde läsas med dagen eller månaden först, så de lästes med dagen först — kontrollera datumen i förhandsvisningen innan du importerar"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.dates_mixed"
+msgstr "Filen har datum som läses med dagen först och andra med månaden först; kontrollera datumen i förhandsvisningen"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.decimal_assumed"
+msgstr "Decimaltecknet gick inte att avgöra från filen — ett belopp som ”{example}” kan läsas på båda sätten — så ”{separator}” antogs, eftersom {because}. Kontrollera beloppen i förhandsvisningen innan du importerar"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.decimal_from_column"
+msgstr "Beloppen i filen kan läsas på båda sätten (som ”{example}”), så decimaltecknet ”{separator}” togs från avgifts- eller saldokolumnen — vilket skiljer sig från det förväntade ”{expected}” eftersom {because}. Kontrollera beloppen i förhandsvisningen innan du importerar"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.no_amount_column"
+msgstr "Ingen beloppskolumn hittades -- kontrollera att filen har en rubrikrad, eller lägg till en"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.no_date_column"
+msgstr "Ingen datumkolumn hittades -- kontrollera att filen har en rubrikrad, eller lägg till en"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.no_rows"
+msgstr "Filen har inga rader"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.ofx_empty"
+msgstr "Det ser ut som en OFX-fil men har inga transaktioner -- vissa banker exporterar ett tomt kontoutdrag när perioden inte har något"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.ofx_no_currency"
+msgstr "Filen anger inte vilken valuta den är i"
+
+#. {fitid} and {earlier} are the bank's own ids for two transactions
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.ofx_replaces"
+msgstr "Transaktion {fitid} ersätter en tidigare ({earlier}); den tidigare finns kvar på kontot och ska tas bort för hand"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.undecodable"
+msgstr "Några tecken i filen kunde inte avkodas; mottagarnas namn kan se fel ut"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.amount_unreadable"
+msgstr "Kunde inte läsa {text} som ett belopp"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.date_unreadable"
+msgstr "Kunde inte läsa {text} som ett datum"
+
+#. {state} is the bank's own word for the row, like declined or reversed
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.did_not_happen"
+msgstr "Banken markerade detta som {state}, så inga pengar flyttades"
+
+#. {problem} is why a cell could not be read; {column} is the file's own column name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.in_column"
+msgstr "{problem}, i kolumnen {column}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.no_amount"
+msgstr "Raden saknar belopp, så det är ingen transaktion"
+
+#. {state} is the bank's own word for the row, like pending
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.not_settled"
+msgstr "Banken markerade detta som {state}: det har inte gått igenom än, och importeras från nästa kontoutdrag när det har det"
+
+#. {fitid} is the bank's own id for the transaction it cancels
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.ofx_cancels"
+msgstr "Banken skickade detta för att makulera en tidigare transaktion ({fitid}), så det finns inget att lägga till här"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.ofx_no_amount"
+msgstr "Inget användbart belopp i {text}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.ofx_no_date"
+msgstr "Inget användbart datum i {text}"
+
+#. {kind} is the OFX transaction type the bank wrote, like HOLD
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.ofx_pending"
+msgstr "Banken markerade detta som {kind}, vilket är en reservation och inte en transaktion som har skett"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.signed_twice"
+msgstr "{text} har tecken två gånger, så om det är pengar in eller ut vore en gissning"
+
+#. Part of a sentence on a transfer: a doubt. {named} is a name the bank wrote
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.payer.names"
+msgstr "den nämner {named}, som har betalat dig förut"
+
+#. Part of a sentence on a transfer: a doubt. {payee} is a payee's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.payer.paid_before"
+msgstr "{payee} har betalat dig förut"
+
+#. Part of a sentence on a transfer: a doubt. {payee} is a payee's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.payer.rule"
+msgstr "{payee} har en kategoriregel"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.amounts_match"
+msgstr "beloppen stämmer och datumen ligger nära"
+
+#. Follows “it”: the row names an account whose statement is not imported yet
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.awaiting"
+msgstr "nämner {named}; dess andra sida finns inte i boken än"
+
+#. Part of a sentence on a transfer. {words} are words the bank wrote on both rows
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.both_say"
+msgstr "{why}; båda raderna säger {words}"
+
+#. Part of a sentence on a transfer. {why} is the reason so far, {payer} a doubt about it
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.but"
+msgstr "{why}, men {payer}"
+
+#. Part of a sentence on a transfer. {why} is the reason so far, this adds a doubt
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.card_purchase"
+msgstr "{why}, men pengar ut från ett kort är ett köp tills du säger något annat"
+
+#. Part of a sentence on a transfer. {count} is how many rows it could be
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.closest"
+msgstr "{why}; den närmaste i datum av {count} möjliga"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.linked_before"
+msgstr "de här två kontona har haft överföringar kopplade mellan sig tidigare"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.member_named"
+msgstr "en hushållsmedlems namn står på den, och beloppen stämmer"
+
+#. Part of a sentence on a transfer. {why} is the reason so far
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.more_than_one"
+msgstr "{why}, men det finns mer än en rad det kan vara"
+
+#. Part of a sentence on a transfer: why two rows look like one. {named} is the account the bank text names
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.names"
+msgstr "raden i {account} nämner {named}"
+
+#. {direction} is more or less: whether the import accounts for more than YNAB's balance
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.balance.differs"
+msgstr "{account}: YNAB:s saldo är {ynab}, och den här importen står för {imported}, {direction, select, more {{gap} mer} other {{gap} mindre}}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.balance.unchecked"
+msgstr "{account}: YNAB:s saldo kunde inte kontrolleras: {problem}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.account_skipped"
+msgstr "Dess konto hoppas över"
+
+#. {constraint} is the database's own name for the rule a row broke
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.database_refused"
+msgstr "Databasen avvisade raden: {constraint}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.imported_before"
+msgstr "Redan importerad av en tidigare engångsimport"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.looks_like_existing"
+msgstr "Ser ut som en rad som redan finns i boken"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.outside_range"
+msgstr "Utanför datumintervallet"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.starting_balance"
+msgstr "Ett startsaldo från YNAB, överhoppat"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.transfer.not_linked"
+msgstr "Inte kopplad som överföring: {problem}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.transfer.other_side_failed"
+msgstr "Den andra sidan av överföringen kunde inte importeras"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.transfer.other_side_missing"
+msgstr "En överföring från YNAB vars andra sida hoppas över, ligger utanför intervallet eller inte finns i exporten, så den importerades som en vanlig transaktion"
 
 #. Screen-reader name on the Register screen
 #: src/screens/Register.tsx

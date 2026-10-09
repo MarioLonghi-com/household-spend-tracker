@@ -3050,6 +3050,42 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.account_import.column_twice"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.missing_column"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.no_accounts"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.not_csv"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.rows_refused"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.too_many_rows"
+msgstr ""
+
+#. {columns} and {known} are column names, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.unknown_column"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.agent_key.lifetime"
 msgstr ""
 
@@ -3215,9 +3251,111 @@ msgstr ""
 msgid "error.email.too_long"
 msgstr ""
 
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.history.batch_not_found"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.history.no_such_table"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.household.not_found"
+msgstr ""
+
+#. force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.already_imported"
+msgstr ""
+
+#. {at} is when the earlier import was made; force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.already_staged"
+msgstr ""
+
+#. {products} is the bank's own names for the accounts in the file
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.choose_product"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.committed_not_purged"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.file_too_large"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_already_in_account"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_has_no_payee"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_needs_category"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_no_own_category"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_not_found"
+msgstr ""
+
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_an_import"
+msgstr ""
+
+#. {status} is the import's state as stored: applied, preview, failed, undone
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_awaiting_commit"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_found"
+msgstr ""
+
+#. {status} is the import's state as stored
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_staged"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.product_absent"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.send_something"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.wrong_currency"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -3896,6 +4034,11 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.upload.too_large"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.user.cannot_disable_self"
 msgstr ""
 
@@ -3907,6 +4050,217 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.user.not_found"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_currency"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_elsewhere"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_mapping_unknown"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_twice"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_type_unknown"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_undecided"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.amount_too_long"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.answer_too_large"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.answer_unreadable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.category_elsewhere"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.category_mapping_unknown"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.category_undecided"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.choose_export"
+msgstr ""
+
+#. A plan is what YNAB calls a budget
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.choose_plan"
+msgstr ""
+
+#. See GLOSSARY.md (Cleared, Uncleared, reconcile)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.confirm_states"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.currency_not_a_code"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.date_format_unknown"
+msgstr ""
+
+#. {format} is a date pattern like DD/MM/YYYY
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.date_unreadable"
+msgstr ""
+
+#. YNAB's coloured flags on a transaction
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.flags_choice"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.new_account_needs_name"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.new_category_needs_name"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.no_such_plan"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.no_transactions"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.not_csv"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.not_register"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.plan_not_register"
+msgstr ""
+
+#. The import plan: the choices made on the One-time Import screen
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.plan_unreadable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.range_backwards"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.rate_limited"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.register_too_large"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.rows_taken"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.say_how"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.starting_balance_choice"
+msgstr ""
+
+#. {status} is an HTTP status number, like 503
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.status"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.timeout"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.token_malformed"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.token_needed"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.token_rejected"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.unreachable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.zip_has_no_register"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.zip_unreadable"
 msgstr ""
 
 #. Column heading on the Application management screen
@@ -6900,6 +7254,511 @@ msgstr ""
 
 #: src/screens/Payees.tsx
 msgid "Find a payee"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.currency_not_a_code"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.date_unreadable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.iban_taken"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.iban_too_long"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.name_taken"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.needs_name"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.needs_type"
+msgstr ""
+
+#. {column} is a column name of the accounts file, which stays in English
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.too_long"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.too_many_cells"
+msgstr ""
+
+#. {types} is the list of account types as the file must write them, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.unknown_type"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.country.not_a_code"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.added_by_choice"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.already_there"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.arrived_before_commit"
+msgstr ""
+
+#. {match} is the kind of rule: contains, prefix or regex. {why} says why it looks too broad
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.broad_rule"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.fee_already_there"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.fee_of"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.foreign"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.foreign_ofx"
+msgstr ""
+
+#. {rate} is the exchange rate as the bank wrote it
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.foreign_ofx_rate"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_changed"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_deleted"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_one_time"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_taken"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_ynab_history"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.maybe_transfer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.no_date_or_amount"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.no_money"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.other_currency_rows"
+msgstr ""
+
+#. {product} and {taken} are the bank's names for accounts in one file
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.other_product"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.own_money"
+msgstr ""
+
+#. Part of a sentence about a payee rule that claimed too many rows
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.rule_most_of_file"
+msgstr ""
+
+#. Part of a sentence about a payee rule that claimed too many rows. {match} is contains, prefix or regex
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.rule_pattern_short"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.transfer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.balance_breaks"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.balance_gap"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.balance_unchecked"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.other_currencies"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.other_products"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.rechecked"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.all_positive"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.balance_unreadable"
+msgstr ""
+
+#. Follows “because”: why a decimal separator was expected. {country} is a country's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.because_country"
+msgstr ""
+
+#. Follows “because”: why a decimal separator was expected
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.because_default"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.card_signs_reversed"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.control_codes"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.currency_columns"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.date_format_unknown"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.dates_either_way"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.dates_mixed"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.decimal_assumed"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.decimal_from_column"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.no_amount_column"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.no_date_column"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.no_rows"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.ofx_empty"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.ofx_no_currency"
+msgstr ""
+
+#. {fitid} and {earlier} are the bank's own ids for two transactions
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.ofx_replaces"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.undecodable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.amount_unreadable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.date_unreadable"
+msgstr ""
+
+#. {state} is the bank's own word for the row, like declined or reversed
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.did_not_happen"
+msgstr ""
+
+#. {problem} is why a cell could not be read; {column} is the file's own column name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.in_column"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.no_amount"
+msgstr ""
+
+#. {state} is the bank's own word for the row, like pending
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.not_settled"
+msgstr ""
+
+#. {fitid} is the bank's own id for the transaction it cancels
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_cancels"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_no_amount"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_no_date"
+msgstr ""
+
+#. {kind} is the OFX transaction type the bank wrote, like HOLD
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_pending"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.signed_twice"
+msgstr ""
+
+#. Part of a sentence on a transfer: a doubt. {named} is a name the bank wrote
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.payer.names"
+msgstr ""
+
+#. Part of a sentence on a transfer: a doubt. {payee} is a payee's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.payer.paid_before"
+msgstr ""
+
+#. Part of a sentence on a transfer: a doubt. {payee} is a payee's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.payer.rule"
+msgstr ""
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.amounts_match"
+msgstr ""
+
+#. Follows “it”: the row names an account whose statement is not imported yet
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.awaiting"
+msgstr ""
+
+#. Part of a sentence on a transfer. {words} are words the bank wrote on both rows
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.both_say"
+msgstr ""
+
+#. Part of a sentence on a transfer. {why} is the reason so far, {payer} a doubt about it
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.but"
+msgstr ""
+
+#. Part of a sentence on a transfer. {why} is the reason so far, this adds a doubt
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.card_purchase"
+msgstr ""
+
+#. Part of a sentence on a transfer. {count} is how many rows it could be
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.closest"
+msgstr ""
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.linked_before"
+msgstr ""
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.member_named"
+msgstr ""
+
+#. Part of a sentence on a transfer. {why} is the reason so far
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.more_than_one"
+msgstr ""
+
+#. Part of a sentence on a transfer: why two rows look like one. {named} is the account the bank text names
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.names"
+msgstr ""
+
+#. {direction} is more or less: whether the import accounts for more than YNAB's balance
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.balance.differs"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.balance.unchecked"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.account_skipped"
+msgstr ""
+
+#. {constraint} is the database's own name for the rule a row broke
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.database_refused"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.imported_before"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.looks_like_existing"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.outside_range"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.starting_balance"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.transfer.not_linked"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.transfer.other_side_failed"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.transfer.other_side_missing"
 msgstr ""
 
 #. Screen-reader name on the Register screen

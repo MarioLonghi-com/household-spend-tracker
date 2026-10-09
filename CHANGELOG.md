@@ -59,6 +59,22 @@ history this repository does not have.
   email address) with the length or list size as a number. The rate limit
   sends its wait in seconds as a number. English and agents' answers are
   unchanged. (#267)
+- **Import refusals carry codes too.** A statement import, an accounts CSV,
+  a One-time Import from YNAB (its file, its plan and YNAB's own answers) and
+  an oversized upload refuse with a stable `code` and raw `params` -- when an
+  earlier import was made as a timestamp, line numbers and limits as numbers,
+  column names and currency codes as the file wrote them -- beside the same
+  English `detail`. (#267)
+- **What an import says about its lines and files carries codes.** Why a
+  statement line was skipped, matched or flagged, what reading the file
+  could not settle, a row of an accounts file that cannot be imported, and a
+  One-time Import row that was not, now come with a code and raw params
+  (`reason_code`/`reason_params`, `warning_codes`, `problem_codes`,
+  `sentence_code`/`sentence_params`), and the Import, accounts-import and
+  One-time Import screens word them in another language. They are read back
+  from the sentences by `app/notices.py`, so nothing new is stored, no
+  migration is needed, and a line staged before this upgrade reads as well
+  as a new one. English and agents' answers are unchanged. (#267)
 
 ## 0.9.3 — 2026-10-09
 

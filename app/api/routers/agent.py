@@ -831,7 +831,21 @@ def _idempotency(request: Request) -> str | None:
     return value[:200] or None
 
 
-@router.post("/households/{household_id}/imports", response_model=ImportPreview, status_code=201)
+#: What the Import screen is sent beside its words and an agent is not: the
+#: codes a translated screen reads (#267). An agent's answer stays the one its
+#: documentation describes, byte for byte, until the codes are documented too.
+_SCREEN_ONLY = {
+    "warning_codes": True,
+    "lines": {"__all__": {"reason_code": True, "reason_params": True}},
+}
+
+
+@router.post(
+    "/households/{household_id}/imports",
+    response_model=ImportPreview,
+    response_model_exclude=_SCREEN_ONLY,
+    status_code=201,
+)
 def stage_rows(
     household_id: str,
     body: AgentImportRequest,
