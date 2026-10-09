@@ -43,7 +43,10 @@ history this repository does not have.
   else. The walk found the Transfers screen and a few shared controls never
   prepared for translation, and Application management's places, log files
   and logging styles arriving in English from the server; all of them now
-  translate, with English unchanged. (#271)
+  translate, with English unchanged. On a phone, the Accounts screen's two
+  buttons and a long screen title could push the page sideways in a longer
+  language; they wrap now, and English, which fits, is laid out as before.
+  (#271)
 
 ### Fixed
 
