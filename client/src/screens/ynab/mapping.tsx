@@ -341,10 +341,10 @@ export function MapAccounts({
                       ) : null}
                       {choice.kind === "skip" ? (
                         <div className="small muted ynab-detail">
-                          {plural(account.rows, {
-                            one: `Its ${formatCount(account.rows)} row are left out and listed in the report.`,
+                          {t({ message: plural(account.rows, {
+                            one: `Its ${formatCount(account.rows)} row is left out and listed in the report.`,
                             other: `Its ${formatCount(account.rows)} rows are left out and listed in the report.`,
-                          })}
+                          }), comment: "One-time import: an account set to be skipped, and what happens to its rows" })}
                         </div>
                       ) : null}
                     </div>

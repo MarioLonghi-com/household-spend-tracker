@@ -43,6 +43,16 @@ history this repository does not have.
   language ships every household is seeded in English exactly as before. The
   names are ordinary names, and no language is stored on the household. (#268)
 
+### Fixed
+
+- **English counts say "1 row", not "1 rows".** While the screens were being
+  prepared for translation, a count kept its English exactly as it was, wrong
+  plural included: "Try again in 1 seconds", "1 legs", "Its 1 row are left
+  out", "1 transaction match the filters", and a few more like them on the
+  Rules, Import, Household, Accounts and Register screens. Every English
+  message with a count now has its singular, and the translations follow.
+  (#269)
+
 ## 0.9.2 — 2026-10-09
 
 **Reversible: none** — no migration in this release. To go back to

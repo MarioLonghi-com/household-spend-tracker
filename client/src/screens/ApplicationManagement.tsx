@@ -472,10 +472,10 @@ function PackagesTable({ packages }: { packages: Package[] }) {
         </Hint>
       </h3>
       <p className="muted small">
-        {plural(packages.length, {
-          one: `${count(packages.length)} packages.`,
+        {t({ message: plural(packages.length, {
+          one: `${count(packages.length)} package.`,
           other: `${count(packages.length)} packages.`,
-        })}{" "}
+        }), comment: "Application management: how many software packages are installed" })}{" "}
         <button className="link" onClick={() => setOpen(!open)}>
           {open ? t({ message: "Hide them", comment: "Button on the Application management screen" }) : t({ message: "Show them", comment: "Button on the Application management screen" })}
         </button>

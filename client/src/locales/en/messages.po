@@ -108,10 +108,6 @@ msgstr "New password"
 msgid "Expense"
 msgstr "Expense"
 
-#: src/components/Receipts.tsx
-msgid "{count, plural, one {has {count} receipts} other {has {count} receipts}}"
-msgstr "{count, plural, one {has {count} receipts} other {has {count} receipts}}"
-
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #: src/lib/labels.ts
@@ -304,12 +300,6 @@ msgstr "{0} of {1} will be imported."
 msgid "Net — whole period"
 msgstr "Net — whole period"
 
-#. Text on the household page
-#. placeholder {0}: count(it.category_groups)
-#: src/screens/Household.tsx
-msgid "in {0} groups"
-msgstr "in {0} groups"
-
 #: src/screens/Register.tsx
 msgid "Locked — checked against the bank, refuse every change"
 msgstr "Locked — checked against the bank, refuse every change"
@@ -338,6 +328,11 @@ msgstr "Nothing in the last 14 days."
 #: src/screens/AccountImport.tsx
 msgid "A three-letter code. Leave it blank for {0}."
 msgstr "A three-letter code. Leave it blank for {0}."
+
+#. Column value on the Accounts screen: how many statement files name a suggested identifier
+#: src/screens/Accounts.tsx
+msgid "{count, plural, one {{shown} file} other {{shown} files}}"
+msgstr "{count, plural, one {{shown} file} other {{shown} files}}"
 
 #: src/screens/Backups.tsx
 msgid "One of the newest five update backups: kept so an update can be undone"
@@ -371,6 +366,14 @@ msgstr "Process"
 #: src/lib/labels.ts
 msgid "date column"
 msgstr "date column"
+
+#. Tooltip on the Register's select-all checkbox
+#. placeholder {0}: ordered.length
+#. placeholder {1}: formatCount(ordered.length)
+#. placeholder {2}: formatCount(ordered.length)
+#: src/screens/Register.tsx
+msgid "{0, plural, one {Tick the {1} row the filter shows} other {Tick all {2} rows the filter shows}}"
+msgstr "{0, plural, one {Tick the {1} row the filter shows} other {Tick all {2} rows the filter shows}}"
 
 #. placeholder {0}: rows.data.entries.length
 #. placeholder {1}: rows.data.count
@@ -549,6 +552,15 @@ msgstr "What each payee has been filed under, and what a new transaction for it 
 #: src/screens/Receipts.tsx
 msgid "List"
 msgstr "List"
+
+#. Rules screen: how many of the imported rows the rules would move to another payee
+#. placeholder {0}: formatCount(proposed.changing)
+#. placeholder {1}: proposed.considered
+#. placeholder {2}: formatCount(proposed.considered)
+#. placeholder {3}: formatCount(proposed.considered)
+#: src/screens/Rules.tsx
+msgid "<0>{0}</0> of {1, plural, one {{2} row would move.} other {{3} rows would move.}}"
+msgstr "<0>{0}</0> of {1, plural, one {{2} row would move.} other {{3} rows would move.}}"
 
 #: src/screens/Passkeys.tsx
 msgid "This browser does not support passkeys yet."
@@ -1149,10 +1161,6 @@ msgstr "Stays as it is."
 #: src/screens/Register.tsx
 msgid "Yes, detach it"
 msgstr "Yes, detach it"
-
-#: src/screens/Accounts.tsx
-msgid "{count, plural, other {{shown} files}}"
-msgstr "{count, plural, other {{shown} files}}"
 
 #. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
@@ -1776,6 +1784,14 @@ msgstr "Appearance"
 msgid "None yet"
 msgstr "None yet"
 
+#. One-time import: an account set to be skipped, and what happens to its rows
+#. placeholder {0}: account.rows
+#. placeholder {1}: formatCount(account.rows)
+#. placeholder {2}: formatCount(account.rows)
+#: src/screens/ynab/mapping.tsx
+msgid "{0, plural, one {Its {1} row is left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
+msgstr "{0, plural, one {Its {1} row is left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
+
 #: src/screens/OneTimeImport.tsx
 msgid "Currency of the plan"
 msgstr "Currency of the plan"
@@ -1881,11 +1897,6 @@ msgstr "Counting…"
 #: src/screens/Reports.tsx
 msgid "Income vs Expense"
 msgstr "Income vs Expense"
-
-#. placeholder {0}: formatCount(ordered.length)
-#: src/screens/Register.tsx
-msgid "Tick all {0} rows the filter shows"
-msgstr "Tick all {0} rows the filter shows"
 
 #: src/screens/Import.tsx
 msgid "Into which account"
@@ -2176,6 +2187,11 @@ msgstr "Taken {0}, so this opens on the ten days either side."
 msgid "Put them in <0>{0}</0> too?"
 msgstr "Put them in <0>{0}</0> too?"
 
+#. Tooltip on the paperclip in the Register: this transaction has receipts attached
+#: src/components/Receipts.tsx
+msgid "{count, plural, one {has {count} receipt} other {has {count} receipts}}"
+msgstr "{count, plural, one {has {count} receipt} other {has {count} receipts}}"
+
 #: src/screens/Profile.tsx
 msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
 msgstr "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
@@ -2183,12 +2199,6 @@ msgstr "Everything a program gets wrong has to be undoable by a person, which me
 #: src/screens/Import.tsx
 msgid "Waiting to be reviewed"
 msgstr "Waiting to be reviewed"
-
-#. Sentence on the Import screen
-#. placeholder {0}: formatCount(raw.total)
-#: src/screens/Import.tsx
-msgid "{0} characters"
-msgstr "{0} characters"
 
 #. Heading of a group of choices on the one-time import
 #. Step name in the one-time import: which app the history comes from
@@ -2245,10 +2255,6 @@ msgstr "The update failed at {step}, so it was undone. You are on {running}, wit
 msgid "This one was entered by hand."
 msgstr "This one was entered by hand."
 
-#: src/screens/Register.tsx
-msgid "{count, plural, one {{shown} transaction match the filters} other {{shown} transactions match the filters}}"
-msgstr "{count, plural, one {{shown} transaction match the filters} other {{shown} transactions match the filters}}"
-
 #. Placeholder in an empty field on the Your account panel
 #: src/screens/Profile.tsx
 msgid "receipt filer"
@@ -2260,6 +2266,18 @@ msgstr "receipt filer"
 #: src/screens/Categories.tsx
 msgid "{0, plural, one {{1} transaction carries this category, so it cannot be deleted. Archive it instead.} other {{2} transactions carry this category, so it cannot be deleted. Archive it instead.}}"
 msgstr "{0, plural, one {{1} transaction carries this category, so it cannot be deleted. Archive it instead.} other {{2} transactions carry this category, so it cannot be deleted. Archive it instead.}}"
+
+#. Count above the Register's list when a filter is on
+#: src/screens/Register.tsx
+msgid "{count, plural, one {{shown} transaction matches the filters} other {{shown} transactions match the filters}}"
+msgstr "{count, plural, one {{shown} transaction matches the filters} other {{shown} transactions match the filters}}"
+
+#. Checkbox on the Rules screen: also delete payees no transaction uses any more
+#. placeholder {0}: proposed.orphaned.length
+#. placeholder {1}: formatCount(proposed.orphaned.length)
+#: src/screens/Rules.tsx
+msgid "{0, plural, one {Also delete the payee left empty} other {Also delete the {1} payees left empty}}"
+msgstr "{0, plural, one {Also delete the payee left empty} other {Also delete the {1} payees left empty}}"
 
 #: src/screens/TransferSections.tsx
 msgid "These name one of your accounts or a member of the household, and their other side is not in the ledger yet. They are linked when that statement is imported. Give a row a category if it isn't a transfer."
@@ -2885,12 +2903,6 @@ msgstr "{0, plural, one {Repays {1} expense} other {Repays {2} expenses}}"
 #: src/lib/labels.ts
 msgid "skip rows"
 msgstr "skip rows"
-
-#. placeholder {0}: formatCount(trial.data.matches)
-#. placeholder {1}: formatCount(trial.data.considered)
-#: src/screens/Rules.tsx
-msgid "It rewrites <0>{0}</0> of {1} rows already in this ledger."
-msgstr "It rewrites <0>{0}</0> of {1} rows already in this ledger."
 
 #. Button on the Categories screen: verb
 #. History headline, the kind of act: one edit made by hand
@@ -3831,6 +3843,11 @@ msgctxt "history table"
 msgid "pair marked not a transfer"
 msgstr "pair marked not a transfer"
 
+#. How many pages a PDF receipt has
+#: src/components/Receipts.tsx
+msgid "{count, plural, one {{count} page} other {{count} pages}}"
+msgstr "{count, plural, one {{count} page} other {{count} pages}}"
+
 #. Button on the Accounts screen
 #. Button on the Import screen
 #. Label of a choice on the one-time import
@@ -3928,6 +3945,14 @@ msgstr "Report"
 msgid "Loading the next rows…"
 msgstr "Loading the next rows…"
 
+#. Import screen: the size of the statement file, in characters
+#. placeholder {0}: raw.total
+#. placeholder {1}: formatCount(raw.total)
+#. placeholder {2}: formatCount(raw.total)
+#: src/screens/Import.tsx
+msgid "{0, plural, one {{1} character} other {{2} characters}}"
+msgstr "{0, plural, one {{1} character} other {{2} characters}}"
+
 #: src/screens/reports/Reimbursements.tsx
 msgid "{count, plural, one {{count} expense} other {{count} expenses}}"
 msgstr "{count, plural, one {{count} expense} other {{count} expenses}}"
@@ -4018,6 +4043,14 @@ msgstr "Recent sign-in changes"
 #: src/screens/ApplicationManagement.tsx
 msgid "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
 msgstr "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
+
+#. Under the count of categories on the household page
+#. placeholder {0}: it.category_groups
+#. placeholder {1}: count(it.category_groups)
+#. placeholder {2}: count(it.category_groups)
+#: src/screens/Household.tsx
+msgid "{0, plural, one {in {1} group} other {in {2} groups}}"
+msgstr "{0, plural, one {in {1} group} other {in {2} groups}}"
 
 #. Button on the Backups screen
 #. Button on the Register screen
@@ -4364,6 +4397,14 @@ msgstr "Matched"
 msgid "unused"
 msgstr "unused"
 
+#. Application management: how many software packages are installed
+#. placeholder {0}: packages.length
+#. placeholder {1}: count(packages.length)
+#. placeholder {2}: count(packages.length)
+#: src/screens/ApplicationManagement.tsx
+msgid "{0, plural, one {{1} package.} other {{2} packages.}}"
+msgstr "{0, plural, one {{1} package.} other {{2} packages.}}"
+
 #: src/screens/Import.tsx
 msgid "No single category matches that."
 msgstr "No single category matches that."
@@ -4669,6 +4710,11 @@ msgstr "Started"
 msgid "Reset: password"
 msgstr "Reset: password"
 
+#. Sentence after a refusal: how long to wait before trying again
+#: src/components/bits.tsx
+msgid "{wait, plural, one {Try again in {wait} second.} other {Try again in {wait} seconds.}}"
+msgstr "{wait, plural, one {Try again in {wait} second.} other {Try again in {wait} seconds.}}"
+
 #: src/screens/ResetAccount.tsx
 msgid "{by} reset your password and your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
 msgstr "{by} reset your password and your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
@@ -4784,11 +4830,6 @@ msgstr "Rules can be suggested after the first statement import: this import bro
 #: src/screens/Backups.tsx
 msgid "Save to Drive/Dropbox…"
 msgstr "Save to Drive/Dropbox…"
-
-#. placeholder {0}: formatCount(proposed.considered)
-#: src/screens/Rules.tsx
-msgid "Nothing would change. {0} rows carry the bank’s words and today’s rules already agree with all of them."
-msgstr "Nothing would change. {0} rows carry the bank’s words and today’s rules already agree with all of them."
 
 #: src/screens/Register.tsx
 msgid "Gather the accounts by country"
@@ -5057,12 +5098,6 @@ msgstr "Until you do, every sign-in will ask for another recovery code. To do it
 msgid "Setting it up takes one of your recovery codes."
 msgstr "Setting it up takes one of your recovery codes."
 
-#. placeholder {0}: preview.lines.length
-#. placeholder {1}: preview.lines.length
-#: src/screens/Import.tsx
-msgid "{0, plural, other {{1} lines}}"
-msgstr "{0, plural, other {{1} lines}}"
-
 #: src/screens/TransferSections.tsx
 msgid "Every link has a name or a person behind it."
 msgstr "Every link has a name or a person behind it."
@@ -5106,6 +5141,14 @@ msgstr "Receipt notes"
 #: src/screens/Updates.tsx
 msgid "If the update fails and cannot undo itself, this page is replaced by a recovery page, and this code is what opens it. It works only for this update and stops working once the update has finished. It is shown once: the server keeps only a hash of it."
 msgstr "If the update fails and cannot undo itself, this page is replaced by a recovery page, and this code is what opens it. It works only for this update and stops working once the update has finished. It is shown once: the server keeps only a hash of it."
+
+#. Rules screen: the result of trying today's rules on every imported row
+#. placeholder {0}: proposed.considered
+#. placeholder {1}: formatCount(proposed.considered)
+#. placeholder {2}: formatCount(proposed.considered)
+#: src/screens/Rules.tsx
+msgid "{0, plural, one {Nothing would change. {1} row carries the bank’s words and today’s rules already agree with it.} other {Nothing would change. {2} rows carry the bank’s words and today’s rules already agree with all of them.}}"
+msgstr "{0, plural, one {Nothing would change. {1} row carries the bank’s words and today’s rules already agree with it.} other {Nothing would change. {2} rows carry the bank’s words and today’s rules already agree with all of them.}}"
 
 #: src/screens/Backups.tsx
 msgid "<0>This is the only backup.</0> After this there is none: nothing on this instance could put the ledger back if it were damaged."
@@ -5481,6 +5524,14 @@ msgstr "surplus"
 msgid "Re-enabled"
 msgstr "Re-enabled"
 
+#. Value on the one-time import: how many transfer rows (legs) the file holds. See GLOSSARY.md
+#. placeholder {0}: totals.transfers
+#. placeholder {1}: formatCount(totals.transfers)
+#. placeholder {2}: formatCount(totals.transfers)
+#: src/screens/OneTimeImport.tsx
+msgid "{0, plural, one {{1} leg} other {{2} legs}}"
+msgstr "{0, plural, one {{1} leg} other {{2} legs}}"
+
 #: src/screens/SignIn.tsx
 msgid "One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key."
 msgstr "One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key."
@@ -5501,10 +5552,6 @@ msgstr "An advance not spent yet, or an overpayment"
 #: src/screens/Updates.tsx
 msgid "Downtime"
 msgstr "Downtime"
-
-#: src/components/bits.tsx
-msgid "{wait, plural, other {Try again in {wait} seconds.}}"
-msgstr "{wait, plural, other {Try again in {wait} seconds.}}"
 
 #. placeholder {0}: count(it.transactions_uncleared)
 #: src/screens/Household.tsx
@@ -5533,13 +5580,6 @@ msgstr "payee"
 msgid "The six digits from the new one"
 msgstr "The six digits from the new one"
 
-#. placeholder {0}: totals.transfers
-#. placeholder {1}: formatCount(totals.transfers)
-#. placeholder {2}: formatCount(totals.transfers)
-#: src/screens/OneTimeImport.tsx
-msgid "{0, plural, one {{1} legs} other {{2} legs}}"
-msgstr "{0, plural, one {{1} legs} other {{2} legs}}"
-
 #: src/screens/Register.tsx
 msgid "double click to edit"
 msgstr "double click to edit"
@@ -5566,6 +5606,14 @@ msgstr "Asking…"
 #: src/screens/Accounts.tsx
 msgid "no country set"
 msgstr "no country set"
+
+#. Button on the Rules screen: verb, move these transactions to the payees the rules give
+#. placeholder {0}: proposed.changing
+#. placeholder {1}: formatCount(proposed.changing)
+#. placeholder {2}: formatCount(proposed.changing)
+#: src/screens/Rules.tsx
+msgid "{0, plural, one {Move {1} row} other {Move {2} rows}}"
+msgstr "{0, plural, one {Move {1} row} other {Move {2} rows}}"
 
 #: src/screens/Reports.tsx
 msgid "That report does not exist."
@@ -5649,6 +5697,15 @@ msgctxt "rule list"
 msgid "regex"
 msgstr "regex"
 
+#. Rules screen: how many rows already in the ledger a rule being tried would match
+#. placeholder {0}: formatCount(trial.data.matches)
+#. placeholder {1}: trial.data.considered
+#. placeholder {2}: formatCount(trial.data.considered)
+#. placeholder {3}: formatCount(trial.data.considered)
+#: src/screens/Rules.tsx
+msgid "It claims <0>{0}</0> of {1, plural, one {{2} row already in this ledger.} other {{3} rows already in this ledger.}}"
+msgstr "It claims <0>{0}</0> of {1, plural, one {{2} row already in this ledger.} other {{3} rows already in this ledger.}}"
+
 #: src/lib/signInChanges.ts
 msgid "Somebody reset {user}'s password"
 msgstr "Somebody reset {user}'s password"
@@ -5671,6 +5728,11 @@ msgstr "All"
 msgid "a pocket's or a card product's name"
 msgstr "a pocket's or a card product's name"
 
+#. Column value on the Accounts screen: how many transactions name a suggested identifier
+#: src/screens/Accounts.tsx
+msgid "{count, plural, one {{shown} row} other {{shown} rows}}"
+msgstr "{count, plural, one {{shown} row} other {{shown} rows}}"
+
 #. History headline, the kind of act: several rows deleted at once
 #: src/lib/historyWords.ts
 msgid "Bulk delete"
@@ -5685,6 +5747,18 @@ msgstr "Preparing the update"
 msgctxt "starting balance rows"
 msgid "Import"
 msgstr "Import"
+
+#. Screen-reader name of the Register's button for more currencies
+#. placeholder {0}: rest.length
+#. placeholder {1}: rest.length
+#. placeholder {2}: rest.join(", ")
+#. placeholder {3}: restOn.length
+#. placeholder {4}: rest.length
+#. placeholder {5}: rest.join(", ")
+#. placeholder {6}: restOn.length
+#: src/screens/Register.tsx
+msgid "{0, plural, one {{1} more currency: {2}. {3} shown.} other {{4} more currencies: {5}. {6} shown.}}"
+msgstr "{0, plural, one {{1} more currency: {2}. {3} shown.} other {{4} more currencies: {5}. {6} shown.}}"
 
 #. placeholder {0}: rule.data?.history_window ?? 3
 #: src/screens/Categories.tsx
@@ -5969,13 +6043,6 @@ msgstr "This lands as one entry in History, so the whole import can be undone in
 msgid "Email"
 msgstr "Email"
 
-#. placeholder {0}: packages.length
-#. placeholder {1}: count(packages.length)
-#. placeholder {2}: count(packages.length)
-#: src/screens/ApplicationManagement.tsx
-msgid "{0, plural, one {{1} packages.} other {{2} packages.}}"
-msgstr "{0, plural, one {{1} packages.} other {{2} packages.}}"
-
 #: src/screens/Reconcile.tsx
 msgid "The difference has to be zero first"
 msgstr "The difference has to be zero first"
@@ -6036,6 +6103,16 @@ msgstr "why each currency has its own columns"
 #: src/screens/Household.tsx
 msgid "Only used for totals across accounts. Each account keeps its own, and nothing in the ledger is ever converted."
 msgstr "Only used for totals across accounts. Each account keeps its own, and nothing in the ledger is ever converted."
+
+#. Under the count of categories on the household page
+#. placeholder {0}: it.category_groups
+#. placeholder {1}: count(it.category_groups)
+#. placeholder {2}: count(it.categories_archived)
+#. placeholder {3}: count(it.category_groups)
+#. placeholder {4}: count(it.categories_archived)
+#: src/screens/Household.tsx
+msgid "{0, plural, one {in {1} group, {2} archived} other {in {3} groups, {4} archived}}"
+msgstr "{0, plural, one {in {1} group, {2} archived} other {in {3} groups, {4} archived}}"
 
 #. Menu item and the name of its screen
 #: src/App.tsx
@@ -6199,15 +6276,6 @@ msgstr "Apply rules to what is already here"
 #: src/screens/Admin.tsx
 msgid "Withdraw this reset link?"
 msgstr "Withdraw this reset link?"
-
-#. placeholder {0}: report.coverage.months_in_range
-#. placeholder {1}: report.coverage.months_with_activity
-#. placeholder {2}: report.coverage.months_in_range
-#. placeholder {3}: report.coverage.months_with_activity
-#. placeholder {4}: report.coverage.months_in_range
-#: src/screens/reports/IncomeExpense.tsx
-msgid "{0, plural, one {{1} of {2} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.} other {{3} of {4} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.}}"
-msgstr "{0, plural, one {{1} of {2} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.} other {{3} of {4} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.}}"
 
 #: src/screens/AccountImport.tsx
 msgid "{count, plural, one {Import {count} account} other {Import {count} accounts}}"
@@ -6767,10 +6835,6 @@ msgstr "{by} gave {user} a new authenticator"
 msgid "A transfer moves money between your own accounts, so it is not spending and has no category"
 msgstr "A transfer moves money between your own accounts, so it is not spending and has no category"
 
-#: src/screens/Accounts.tsx
-msgid "{count, plural, other {{shown} rows}}"
-msgstr "{count, plural, other {{shown} rows}}"
-
 #: src/screens/Updates.tsx
 msgid "Keep it plugged in and awake until this finishes. If it sleeps, the update resumes or rolls back when it wakes."
 msgstr "Keep it plugged in and awake until this finishes. If it sleeps, the update resumes or rolls back when it wakes."
@@ -6801,6 +6865,14 @@ msgstr "Authenticator, with its recovery codes"
 #: src/screens/reports/IncomeExpense.tsx
 msgid "by country"
 msgstr "by country"
+
+#. Import preview: how many lines the statement file holds
+#. placeholder {0}: preview.lines.length
+#. placeholder {1}: preview.lines.length
+#. placeholder {2}: preview.lines.length
+#: src/screens/Import.tsx
+msgid "{0, plural, one {{1} line} other {{2} lines}}"
+msgstr "{0, plural, one {{1} line} other {{2} lines}}"
 
 #: src/screens/Admin.tsx
 msgid "A reset link for {name} is already pending. This one replaces it, and what that one reset stays reset."
@@ -6921,12 +6993,6 @@ msgstr "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so it
 #: src/screens/Admin.tsx
 msgid "Disabling…"
 msgstr "Disabling…"
-
-#. Button on the Rules screen
-#. placeholder {0}: formatCount(proposed.changing)
-#: src/screens/Rules.tsx
-msgid "Move {0} rows"
-msgstr "Move {0} rows"
 
 #. Column heading on the accounts import: noun, a line of a file
 #. Column name shown beside a value on phones on the accounts import: noun, a line of a file
@@ -7196,12 +7262,6 @@ msgstr "{by} reset {user}'s password"
 #: src/screens/Updates.tsx
 msgid "Updated to {running} at {at} in {took}."
 msgstr "Updated to {running} at {at} in {took}."
-
-#. placeholder {0}: count(it.category_groups)
-#. placeholder {1}: count(it.categories_archived)
-#: src/screens/Household.tsx
-msgid "in {0} groups, {1} archived"
-msgstr "in {0} groups, {1} archived"
 
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
 #. js-lingui-explicit-id
@@ -7729,11 +7789,6 @@ msgstr "Work expense — written off"
 msgid "{0} will no longer be able to administer this instance."
 msgstr "{0} will no longer be able to administer this instance."
 
-#. placeholder {0}: formatCount(proposed.orphaned.length)
-#: src/screens/Rules.tsx
-msgid "Also delete the {0} payees left empty"
-msgstr "Also delete the {0} payees left empty"
-
 #. Name of a fact on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
 msgid "Linked to"
@@ -8214,6 +8269,15 @@ msgstr "What is holding it (optional)"
 msgid "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
 msgstr "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
 
+#. Rules screen: how many rows already in the ledger a rule being tried would match
+#. placeholder {0}: formatCount(trial.data.matches)
+#. placeholder {1}: trial.data.considered
+#. placeholder {2}: formatCount(trial.data.considered)
+#. placeholder {3}: formatCount(trial.data.considered)
+#: src/screens/Rules.tsx
+msgid "It rewrites <0>{0}</0> of {1, plural, one {{2} row already in this ledger.} other {{3} rows already in this ledger.}}"
+msgstr "It rewrites <0>{0}</0> of {1, plural, one {{2} row already in this ledger.} other {{3} rows already in this ledger.}}"
+
 #: src/screens/Register.tsx
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 msgstr "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
@@ -8454,10 +8518,6 @@ msgstr "Remove {0}"
 msgid "Create the key"
 msgstr "Create the key"
 
-#: src/components/Receipts.tsx
-msgid "{count, plural, one {{count} pages} other {{count} pages}}"
-msgstr "{count, plural, one {{count} pages} other {{count} pages}}"
-
 #. Label on the household page: noun
 #: src/screens/Household.tsx
 msgid "Currencies"
@@ -8544,12 +8604,6 @@ msgstr "approximate — {shown}"
 msgid "In"
 msgstr "In"
 
-#. placeholder {0}: formatCount(trial.data.matches)
-#. placeholder {1}: formatCount(trial.data.considered)
-#: src/screens/Rules.tsx
-msgid "It claims <0>{0}</0> of {1} rows already in this ledger."
-msgstr "It claims <0>{0}</0> of {1} rows already in this ledger."
-
 #: src/screens/Register.tsx
 msgid "Enter again to edit"
 msgstr "Enter again to edit"
@@ -8590,6 +8644,16 @@ msgstr "Updating stops the app and changes the ledger's schema."
 #: src/screens/Rules.tsx
 msgid "Case does not matter. <0>Matches the pattern</0> is a full regular expression, capped at 300 characters and given a tenth of a second per row — one that runs longer is set aside for the rest of that import. Try it below before you save it."
 msgstr "Case does not matter. <0>Matches the pattern</0> is a full regular expression, capped at 300 characters and given a tenth of a second per row — one that runs longer is set aside for the rest of that import. Try it below before you save it."
+
+#. Income vs Expense report: how many months in the range have any transactions
+#. placeholder {0}: report.coverage.months_with_activity
+#. placeholder {1}: report.coverage.months_with_activity
+#. placeholder {2}: report.coverage.months_in_range
+#. placeholder {3}: report.coverage.months_with_activity
+#. placeholder {4}: report.coverage.months_in_range
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{0, plural, one {{1} of {2} months has any transactions — an empty column is a month with nothing imported, not a month you spent nothing.} other {{3} of {4} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.}}"
+msgstr "{0, plural, one {{1} of {2} months has any transactions — an empty column is a month with nothing imported, not a month you spent nothing.} other {{3} of {4} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.}}"
 
 #: src/screens/Rules.tsx
 msgid "No rules yet. Add one the next time a statement gives you a name you dislike."
@@ -8854,12 +8918,6 @@ msgstr "An owner can administer this instance: people, households and invitation
 msgid "No categories are ticked, not even Needs a category, so there is nothing to show. Tick one in the categories filter, or Select all."
 msgstr "No categories are ticked, not even Needs a category, so there is nothing to show. Tick one in the categories filter, or Select all."
 
-#. placeholder {0}: formatCount(proposed.changing)
-#. placeholder {1}: formatCount(proposed.considered)
-#: src/screens/Rules.tsx
-msgid "<0>{0}</0> of {1} rows would move."
-msgstr "<0>{0}</0> of {1} rows would move."
-
 #: src/screens/Setup.tsx
 msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
 msgstr "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
@@ -9026,13 +9084,6 @@ msgstr "Kept out of the log: {0}. Absent rather than starred over — an undo wr
 #: src/screens/Import.tsx
 msgid "showing the first {0}"
 msgstr "showing the first {0}"
-
-#. placeholder {0}: rest.length
-#. placeholder {1}: rest.join(", ")
-#. placeholder {2}: restOn.length
-#: src/screens/Register.tsx
-msgid "{0} more currencies: {1}. {2} shown."
-msgstr "{0} more currencies: {1}. {2} shown."
 
 #. Label on the one-time import's results
 #: src/screens/ynab/results.tsx
@@ -9412,13 +9463,6 @@ msgstr "Reconciliation"
 #: src/screens/ApplicationManagement.tsx
 msgid "never"
 msgstr "never"
-
-#. placeholder {0}: account.rows
-#. placeholder {1}: formatCount(account.rows)
-#. placeholder {2}: formatCount(account.rows)
-#: src/screens/ynab/mapping.tsx
-msgid "{0, plural, one {Its {1} row are left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
-msgstr "{0, plural, one {Its {1} row are left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
 
 #. Label on the receipts
 #: src/components/Receipts.tsx

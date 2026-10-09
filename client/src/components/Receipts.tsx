@@ -30,9 +30,10 @@ export function sizeText(bytes: number): string {
 /** A fix worse than this is a district, not a doorway. */
 const VAGUE_METRES = 100;
 
-/** "3 pages": a PDF's page count, only ever shown for more than one. */
+/** "3 pages": a PDF's page count, only ever shown for more than one -- the
+ * singular is still right, so a reader never meets "1 pages" (#269). */
 function pages(count: number): string {
-  return plural(count, { one: `${count} pages`, other: `${count} pages` });
+  return t({ message: plural(count, { one: `${count} page`, other: `${count} pages` }), comment: "How many pages a PDF receipt has" });
 }
 
 function compass(degrees: number): string {
@@ -553,7 +554,7 @@ export function ReceiptDrop({
 export function ReceiptMark({ count }: { count?: number }) {
   const word =
     count && count > 1
-      ? plural(count, { one: `has ${count} receipts`, other: `has ${count} receipts` })
+      ? t({ message: plural(count, { one: `has ${count} receipt`, other: `has ${count} receipts` }), comment: "Tooltip on the paperclip in the Register: this transaction has receipts attached" })
       : t`has a receipt`;
   return (
     <span className="receipt-mark" title={word} aria-label={word}>
