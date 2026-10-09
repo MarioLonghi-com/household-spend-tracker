@@ -18,7 +18,8 @@ requests arrive (`health`), the pin (`pin`), the handover interface
 (`handover`, its mechanics are #162's), browser recovery behind the one-time
 code (`recovery`, Part 11: the code checked here, never by the page), the
 app rejoining its sidecar's network after the sidecar restarts (`rejoin`,
-#275), and the request loop (`service`, `python -m updater`).
+#275), the request loop (`service`, `python -m updater`), and the one line
+per step it prints on stdout (`trail`).
 
 Standard library only, except `verify`, which uses sigstore. Nothing here
 imports `app`: the updater image carries this package, not the application,

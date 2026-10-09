@@ -37,6 +37,8 @@ import {
   type Report,
   type UpdateState,
   type Upstream,
+  whatTheUpdaterDoes,
+  whereItFailed,
 } from "./Updates";
 import { UpdateBackupList } from "./Backups";
 import type { Backup } from "./Backups";
@@ -265,7 +267,10 @@ describe("A5: what the section says in each case", () => {
       "Updates run in the updater (spend-tracker-updater-1, version 0.8.0, on Docker Desktop 4.48.0). Nothing installs until you confirm it.",
     );
     await checkNow();
-    expect(screen.getByText(/Installing it also installs 0\.9\.0, which it skips over/)).toBeTruthy();
+    expect(
+      screen.getByText("It also brings the changes of 0.9.0, released in between: notes for both below."),
+    ).toBeTruthy();
+    expect(screen.queryByText(/skips over/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Prepare 0.10.0" }));
     await vi.waitFor(() =>
       expect(post).toHaveBeenCalledWith("/admin/application/update/prepare", { to_version: "0.10.0" }),
@@ -385,6 +390,44 @@ describe("A8: the Update button needs every box", () => {
     expect(screen.getByText("(9c41e0b)")).toBeTruthy();
   });
 
+  it("says the schema changes only when a migration runs (#277)", async () => {
+    mount(state({ report: REPORT }));
+    await screen.findByText("3 migrations will run");
+    expect(screen.getByText(/^Updating stops the app and changes the ledger's schema\. So this asks/)).toBeTruthy();
+    cleanup();
+    mount(state({ report: { ...REPORT, pending: [], lossy: [] } }));
+    await screen.findByText("No migrations will run.");
+    expect(screen.getByText(/^Updating stops the app\. So this asks for your password/)).toBeTruthy();
+    expect(screen.queryByText(/changes the ledger's schema/)).toBeNull();
+  });
+
+  it("the Updater row follows the updater's rule: digest first, then the newer version (#277)", async () => {
+    const OTHER = "sha256:" + "9d9d".repeat(16);
+    const cases: [Partial<Heartbeat>, string, RegExp][] = [
+      [{ updater_version: "0.8.0", image_digest: OTHER }, "first", /takes over the update before anything is stopped/],
+      [{ updater_version: "0.10.0", image_digest: UPDATER_DIGEST }, "same", /^Stays as it is\.$/],
+      [{ updater_version: "0.11.0", image_digest: OTHER }, "newer", /^Stays on 0\.11\.0, which is newer than the updater that ships with 0\.10\.0\.$/],
+      [{ updater_version: "0.10.0", image_digest: OTHER }, "after", /same version as the one running, built again, and takes over once the update has finished/],
+    ];
+    for (const [over, fate, said] of cases) {
+      mount(state({ report: REPORT, heartbeat: beat(over) }));
+      await screen.findByRole("button", { name: "Update to 0.10.0" });
+      const row = document.querySelector("[data-updater]")!;
+      expect(row.getAttribute("data-updater")).toBe(fate);
+      expect(row.textContent).toMatch(said);
+      cleanup();
+    }
+  });
+
+  it("an updater is its image: the same digest stays whatever either version says", () => {
+    const report = { to_version: "0.10.0", updater_digest: UPDATER_DIGEST };
+    expect(whatTheUpdaterDoes(report, { updater_version: "0.8.0", image_digest: UPDATER_DIGEST })).toBe("same");
+    expect(whatTheUpdaterDoes(report, { updater_version: "0.11.0", image_digest: UPDATER_DIGEST })).toBe("same");
+    expect(whatTheUpdaterDoes(report, null)).toBe("same");
+    expect(whatTheUpdaterDoes(report, { updater_version: null, image_digest: DIGEST })).toBe("after");
+    expect(whatTheUpdaterDoes(report, { updater_version: "0.9.10", image_digest: DIGEST })).toBe("first");
+  });
+
   it("Discard sends the report's id", async () => {
     mount(state({ report: REPORT }));
     fireEvent.click(await screen.findByRole("button", { name: "Discard" }));
@@ -438,6 +481,7 @@ describe("A9: each outcome", () => {
     duration_s: 160,
     gap_s: 0,
     log_tail: [],
+    to_version: "0.10.0",
   };
 
   function show(outcome: Outcome, heartbeat: Heartbeat | null = beat({ updater_version: "0.10.0" })) {
@@ -469,6 +513,51 @@ describe("A9: each outcome", () => {
     expect(post).toHaveBeenCalledWith(`/admin/application/update/outcome/${base.id}/seen`);
   });
 
+  it("names the version it updated to, not the one running after a manual downgrade (#260)", () => {
+    for (const [target, running] of [
+      ["0.10.0", "0.9.0"],
+      ["0.9.0", "0.8.0"],
+    ]) {
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <OutcomeBlock
+            outcome={{ ...base, to_version: target }}
+            running={running}
+            heartbeat={beat({ updater_version: running })}
+            lastPrepared={null}
+            onPrepare={vi.fn()}
+            onChanged={vi.fn()}
+          />
+        </QueryClientProvider>,
+      );
+      const said = document.querySelector('[data-outcome="updated"]')!;
+      expect(said.textContent).toMatch(new RegExp(`^Updated to ${target.replace(/\./g, "\\.")} at .+ in 2 min 40 s\\.`));
+      expect(said.textContent).not.toContain(`Updated to ${running}`);
+      cleanup();
+    }
+  });
+
+  it("an older record without its target says the updater's own sentence", () => {
+    for (const sentence of ["Updated to 0.9.1.", "Updated to 0.10.0."]) {
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <OutcomeBlock
+            outcome={{ ...base, sentence, to_version: undefined }}
+            running="0.9.0"
+            heartbeat={beat({ updater_version: "0.9.0" })}
+            lastPrepared={null}
+            onPrepare={vi.fn()}
+            onChanged={vi.fn()}
+          />
+        </QueryClientProvider>,
+      );
+      const said = document.querySelector('[data-outcome="updated"]')!;
+      expect(said.textContent).toMatch(new RegExp(`^${sentence.replace(/\./g, "\\.")} It finished at .+\\.`));
+      expect(said.textContent).not.toContain("Updated to 0.9.0");
+      cleanup();
+    }
+  });
+
   it("updated, but the updater stayed behind: Retry updater update", async () => {
     show(base, beat({ updater_version: "0.8.0" }));
     expect(screen.getByText(/The updater stayed on 0\.8\.0 and will try again/)).toBeTruthy();
@@ -482,15 +571,37 @@ describe("A9: each outcome", () => {
     show({
       ...base,
       state: "rolled_back",
-      failed_step: "migrate",
+      failed_step: "5",
       sentence: "alembic upgrade failed on b2c3d4e5f6a1.",
       log_tail: ["INFO running b2c3d4e5f6a1", "ERROR no such column"],
     });
     const said = document.querySelector('[data-outcome="rolled_back"]')!;
-    expect(said.textContent).toContain("The update failed at migrate, so it was undone. You are on 0.8.0");
+    expect(said.textContent).toContain(
+      "The update failed while backing up and migrating the ledger, so it was undone. You are on 0.8.0",
+    );
+    expect(said.textContent).not.toContain("failed at 5");
     expect(said.textContent).toContain("alembic upgrade failed on b2c3d4e5f6a1.");
     expect(said.querySelector("pre")!.textContent).toBe("INFO running b2c3d4e5f6a1\nERROR no such column");
     expect(said.textContent).toContain("The image is kept so you can try again.");
+  });
+
+  it("names the step it failed at in words, never a bare number", () => {
+    for (const [step, words] of [
+      ["7", "while starting the new version"],
+      ["8", "while checking the new version answers"],
+      ["2a", "while handing over to the new updater before the app stopped"],
+      ["R9", "at step R9"],
+      [null, "at a step the updater did not name"],
+    ] as const) {
+      show({ ...base, state: "rolled_back", failed_step: step, sentence: "It did not answer." });
+      expect(document.querySelector('[data-outcome="rolled_back"]')!.textContent).toContain(
+        `The update failed ${words}, so it was undone.`,
+      );
+      cleanup();
+    }
+    for (let step = 0; step <= 10; step += 1) {
+      expect(whereItFailed(String(step))).toMatch(/^while [a-z]/);
+    }
   });
 
   it("not started, and refused, say nothing was changed", () => {

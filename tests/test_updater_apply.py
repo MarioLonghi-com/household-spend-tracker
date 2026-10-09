@@ -31,7 +31,9 @@ Rows 1, 2, 9, 10 and 24 belong to the app or to intake (U1, A1-A11); 21 is U5
 from __future__ import annotations
 
 import copy
+import logging
 import os
+import re
 import stat
 import uuid
 from dataclasses import replace
@@ -228,6 +230,8 @@ def test_apply_moves_the_ledger_and_the_app_to_b_and_records_it(world):
     req, record = apply(world)
 
     assert record["state"] == "succeeded" and record["sentence"] == "Updated to 0.8.0."
+    # The target as a field, for the screen to name after a manual downgrade (#260).
+    assert (record["from_version"], record["to_version"]) == (A, B)
     # The ledger: migrated once, backed up first, at B's schema.
     assert world.ledger.stamp == B and world.ledger.drills == 1
     assert list(world.ledger.backups.values()) == [A]
@@ -1049,3 +1053,53 @@ def test_246_a_resumed_drill_is_guarded_as_well(tmp_path):
         assert sum(written) == 0 and (w.ledger.stamp, w.ledger.rows) == (B, rows)
         assert w.fake.containers[w.app_id]["State"] == "exited"
         assert [h["id"] for h in holders_stopped(w, req["id"])] == [w.app_id]
+
+
+# --------------------------------------------------------------------------- #
+# #278: what the updater says on stdout
+# --------------------------------------------------------------------------- #
+
+
+def _trail(caplog, request_id: str) -> list[str]:
+    return [
+        r.getMessage()
+        for r in caplog.records
+        if r.name == "spend-tracker-updater" and r.getMessage().startswith(f"request {request_id} ")
+    ]
+
+
+def _steps(lines: list[str], what: str) -> list[str]:
+    return [m.group(1) for line in lines if (m := re.search(rf" step (\S+) {what}", line))]
+
+
+def test_an_apply_says_each_step_it_starts_and_ends_and_how_it_finished(world, caplog):
+    with caplog.at_level(logging.INFO, logger="spend-tracker-updater"):
+        req, record = apply(world)
+
+    lines = _trail(caplog, req["id"])
+    assert lines[0] == f"request {req['id']} apply taken: To {B}."
+    started = _steps(lines, "apply started")
+    assert started == ["0", "1", "2a", "3", "4", "5", "6", "7", "8", "9", "10"]
+    assert _steps(lines, "ended in") == started
+    assert re.fullmatch(
+        rf"request {req['id']} apply finished: succeeded after \d+\.\d s: Updated to {re.escape(B)}\.",
+        lines[-1],
+    )
+    assert f"request {req['id']} step 5 apply started after 0.0 s: Backing up and migrating the ledger." in lines
+    # Never a secret: not the recovery code's hash, not a whole digest.
+    said = "\n".join(caplog.messages)
+    for secret in (req["recovery_hash"], *req["recovery_hash"].split("$")[-2:], digest(APP, B), digest(UPD, B)):
+        assert secret not in said
+
+
+def test_a_rollback_says_each_of_its_steps_and_where_the_update_failed(world, caplog):
+    world.broken.add(B)
+    with caplog.at_level(logging.INFO, logger="spend-tracker-updater"):
+        req, record = apply(world)
+
+    lines = _trail(caplog, req["id"])
+    assert record["state"] == "rolled_back"
+    assert _steps(lines, "apply started")[-6:] == ["8", "R1", "R2", "R3", "R4", "R5"]
+    assert "step 8 ended in 120.0 s" in "\n".join(lines), "the time the health check waited"
+    assert lines[-1].startswith(f"request {req['id']} step 8 apply finished: rolled_back after 120.0 s: ")
+    assert lines[-1].endswith(record["sentence"])

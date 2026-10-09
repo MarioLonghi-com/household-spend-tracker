@@ -105,8 +105,12 @@ RUN python -m venv /venv && /venv/bin/pip install --require-hashes -r requiremen
 # owned by root, the app runs as 65532, and the first boot dies trying to write
 # `secret.key`. The `.keep` file is not decoration: it guarantees the directory
 # survives the COPY as a directory rather than depending on how an empty one is
-# treated.
-RUN mkdir -p /var/lib/spend-tracker && touch /var/lib/spend-tracker/.keep
+# treated. It is made 0600, like everything else in that directory: at 0644
+# the app's own boot check named it as readable by other users on every fresh
+# install, and the advice to chmod it cannot be followed in an image without a
+# shell (#279).
+RUN mkdir -p /var/lib/spend-tracker && touch /var/lib/spend-tracker/.keep \
+ && chmod 0600 /var/lib/spend-tracker/.keep
 
 # The mount point of the `update` volume the app shares with the updater
 # (design notes 5.1, C11): group 65532, mode 2770, setgid so everything made

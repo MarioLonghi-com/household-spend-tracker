@@ -31,7 +31,7 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
-from updater import contract, journal, volume
+from updater import contract, journal, trail, volume
 from updater.contract import Context, History, Refusal, Request, Status
 from updater.volume import REQUEST_OWNER_UID, UnsafeFile, Volume
 
@@ -84,6 +84,11 @@ def resume_intake(
     return outcomes
 
 
+def _taken(request: Request) -> str:
+    target = request.to_version
+    return f"To {target}." if target else "Taken."
+
+
 def _answer(
     vol: Volume, holding: Path, ctx: Context, now: float, owner_uid: int, me: journal.Owner | None
 ) -> Outcome:
@@ -130,6 +135,7 @@ def _answer(
             request_id=claimed if isinstance(claimed, str) and claimed != record_id else None,
         )
         volume.write_json(vol.history(record_id), record.to_dict())
+        trail.line(record_id, None, f"{kind or 'request'} refused ({refusal.code})", refusal.sentence)
         return Outcome(record_id, None, refusal)
 
     assert request is not None
@@ -144,6 +150,9 @@ def _answer(
         volume.write_json(vol.history(request.id), pong.to_dict())
         return Outcome(record_id, request, None)
 
+    # One line per request taken (#278); a ping, every few seconds from the
+    # page, is not one. The version is the request's, never its hash.
+    trail.line(request.id, None, f"{request.kind} taken", _taken(request))
     status = Status(id=request.id, kind=request.kind, state="accepted", updated_at=contract.iso(now))
     volume.write_json(vol.status, status.to_dict())
     if request.kind == "apply":

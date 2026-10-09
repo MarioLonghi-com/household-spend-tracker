@@ -95,7 +95,7 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from typing import TYPE_CHECKING, Protocol
 
-from updater import contract, journal, pin, shapes, survey, verify, volume
+from updater import contract, journal, pin, shapes, survey, trail, verify, volume
 from updater import engine as eng
 from updater.clock import Deadline
 from updater.detect import PROTOCOL_LABEL
@@ -491,6 +491,19 @@ def present(client: eng.EngineClient, ref: str) -> dict | None:
 # --------------------------------------------------------------------------- #
 
 
+#: What each handover step is doing, for its line on stdout (#278). The
+#: outcomes carry their own sentence.
+HANDOVER_STEPS = {
+    "H1": "Checking the new updater's image.",
+    "H2": "Starting the new updater beside this one.",
+    "H3": "Waiting for the new updater to say it is ready.",
+    "H4": "Telling the new updater to take over.",
+    "H5": "Taking over.",
+    "H6": "Standing by while the new updater runs.",
+    "H7": "The handover is finished.",
+}
+
+
 class Successions:
     """One updater's side of every handover: as U1, as U2, or as a `-previous`.
 
@@ -525,6 +538,9 @@ class Successions:
         self.on_beat: Callable[[], object] = lambda: None
         self._standby: Deadline | None = None
         self._saved_at = 0.0
+        #: What `_trail` has already said, and when each handover began here.
+        self._trailed: set[tuple] = set()
+        self._handover_began: dict[str, float] = {}
         #: H6: when U2's container was first seen not running.
         self._gone_since: float | None = None
         #: When this process found itself on standby at its start (#288).
@@ -573,6 +589,24 @@ class Successions:
     def _save(self, doc: dict) -> None:
         body = {k: v for k, v in doc.items() if k not in ("protocol", "id", "at")}
         journal.write_handover(self.vol, doc["id"], "request", body, self.now())
+        self._trail(doc, str(doc.get("step")))
+
+    def _trail(self, doc: dict, step: str, sentence: str | None = None) -> None:
+        """One stdout line per handover step and per outcome (#278), not per
+        save: H6 saves its standby every few seconds."""
+        key = (doc.get("id"), step, doc.get("outcome"))
+        if key in self._trailed:
+            return
+        self._trailed.add(key)
+        began = self._handover_began.setdefault(str(doc.get("id")), self.now())
+        outcome = doc.get("outcome")
+        trail.line(
+            str(doc.get("request") or doc.get("id")),
+            step,
+            f"handover {outcome}" if outcome else "handover",
+            sentence or (doc.get("sentence") if outcome else None) or HANDOVER_STEPS.get(step),
+            elapsed=self.now() - began,
+        )
 
     def _beat(self) -> dict | None:
         return volume.read_own_json(self.vol.heartbeat)
@@ -1216,7 +1250,13 @@ class Successions:
             return
         ready = journal.read_handover(self.vol, rid, "ready")
         if ready is None or ready.get("container") != self.own_id:
-            journal.write_handover(self.vol, rid, "ready", self.self_check(doc), self.now())
+            checked = self.self_check(doc)
+            journal.write_handover(self.vol, rid, "ready", checked, self.now())
+            self._trail(
+                doc,
+                "H3",
+                "Ready to take over." if checked["ok"] else f"Not ready: {checked['problem']}.",
+            )
             self.after_write("H3")
 
     def self_check(self, doc: dict) -> dict:
@@ -1280,6 +1320,7 @@ class Successions:
         self.mode = Mode.CURRENT
         self.successor_of = None
         self.on_beat()
+        self._trail(doc, "H5", f"The updater of {self.me.version} took over.")
         self.after_write("H5")
 
     def _pong(self, ping: object) -> None:

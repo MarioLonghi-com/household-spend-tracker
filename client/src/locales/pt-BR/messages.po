@@ -234,6 +234,11 @@ msgstr "Um proprietário pode administrar esta instância e continua sendo propr
 msgid "Delete the group {0}?"
 msgstr "Excluir o grupo {0}?"
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while starting the new version"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
@@ -261,6 +266,11 @@ msgstr "Agrupados pelo que o banco enviou, sem a referência de cada transação
 #, fuzzy
 msgid "To month"
 msgstr "Mês final"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while stopping the maintenance page"
+msgstr ""
 
 #. Column heading on the Admin screen: noun, which thing
 #. Column heading on the Application management screen: noun, which thing
@@ -2044,6 +2054,11 @@ msgstr "Nenhum backup ainda."
 msgid "Spellings of one name"
 msgstr "Grafias de um nome"
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while starting the maintenance page"
+msgstr ""
+
 #: src/lib/saveBackup.ts
 #, fuzzy
 msgid "the server sent no file"
@@ -2240,6 +2255,11 @@ msgstr "Obter um novo código de recuperação"
 #, fuzzy
 msgid "Appearance"
 msgstr "Aparência"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while backing up and migrating the ledger"
+msgstr ""
 
 #. Label on the Your account panel: nothing so far
 #: src/screens/Profile.tsx
@@ -2636,6 +2656,11 @@ msgstr "O link de {0} ({1}) para de funcionar imediatamente. A senha e o autenti
 msgid "Reading the log…"
 msgstr "Lendo o registro…"
 
+#. Where an update failed: a step this screen has no words for, by its id
+#: src/screens/Updates.tsx
+msgid "at step {step}"
+msgstr ""
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Your new recovery codes"
@@ -2752,6 +2777,11 @@ msgstr "Tirada em {0}, então isto abre nos dez dias antes e depois."
 msgid "Put them in <0>{0}</0> too?"
 msgstr "Colocá-las em <0>{0}</0> também?"
 
+#. Where an update failed: its first step
+#: src/screens/Updates.tsx
+msgid "while starting the update"
+msgstr ""
+
 #. Tooltip on the paperclip in the Register: this transaction has receipts attached
 #: src/components/Receipts.tsx
 #, fuzzy
@@ -2828,11 +2858,6 @@ msgstr "Adicionar transferência"
 #, fuzzy
 msgid "Reset sign-in for {0}"
 msgstr "Redefinir o acesso de {0}"
-
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "The update failed at {step}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
-msgstr "A atualização falhou em {step}, então foi desfeita. Você está em {running}, com o livro-caixa exatamente como estava às {stopped}, quando o aplicativo parou. O que falhou:"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2999,6 +3024,11 @@ msgstr "Isso não é um valor"
 msgid "Yes, revoke it"
 msgstr "Sim, revogar"
 
+#. Where an update failed: before anything was stopped
+#: src/screens/Updates.tsx
+msgid "while checking everything was ready"
+msgstr ""
+
 #. Button on Application management: delete this suggestion
 #. Button on the Backups screen: verb
 #. Button on the Categories screen: verb
@@ -3111,6 +3141,11 @@ msgstr "Pede a {repository} as versões publicadas e as compara com a {0} que es
 msgid "Click to edit"
 msgstr "Clique para editar"
 
+#. Where an update failed. See GLOSSARY.md for the pre-update hook
+#: src/screens/Updates.tsx
+msgid "while running the pre-update hook"
+msgstr ""
+
 #. Column heading on the Admin screen
 #. Label of a form field on the Admin screen
 #. Label of a form field on the app's menu and frame
@@ -3132,6 +3167,11 @@ msgstr "Redefinir acesso…"
 #, fuzzy
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
 msgstr "Escaneie isto com seu aplicativo autenticador e digite os seis dígitos que ele mostrar. Verificamos o código agora, para você saber que funciona aqui e não descobrir só na próxima vez que entrar. A entrada que o aplicativo tinha para esta conta não funciona mais; apague-a."
+
+#. placeholder {0}: skipped.length
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {It also brings the changes of {skippedText}, released in between: notes for both below.} other {It also brings the changes of {skippedText}, released in between: notes for all of them below.}}"
+msgstr ""
 
 #. Button on the Import screen
 #: src/screens/Import.tsx
@@ -3433,6 +3473,11 @@ msgstr "Redefinir e criar o link"
 #, fuzzy
 msgid "Deleting is recorded and can be put back from the History screen. The picture itself is kept for a day after nothing points at it, which is what makes that undo work."
 msgstr "A exclusão é registrada e pode ser desfeita na tela Histórico. A imagem em si é mantida por um dia depois que nada mais aponta para ela, e é isso que faz o desfazer funcionar."
+
+#. Where an update failed: after the new version was running. See GLOSSARY.md for the updater
+#: src/screens/Updates.tsx
+msgid "while handing over to the new updater"
+msgstr ""
 
 #: src/screens/Payees.tsx
 #, fuzzy
@@ -5302,12 +5347,6 @@ msgstr "pré-visualização"
 msgid "Add payee"
 msgstr "Adicionar favorecido"
 
-#. Updates section: outcome of an update, with the time it finished
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "Updated to {running} at {at}."
-msgstr "Atualizado para {running} em {at}."
-
 #. placeholder {0}: section.rows.length
 #. placeholder {1}: section.rows.length
 #. placeholder {2}: section.rows.length
@@ -5409,6 +5448,12 @@ msgstr "Configurado"
 #, fuzzy
 msgid "{0} · {1} on {2}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} · {1} em {2}. As partes a substituem, então precisam somar o mesmo valor. Sem sinal de menos — cada parte vai no mesmo sentido da original."
+
+#. Updates section, a rolled-back update. {where} is a phrase such as 'while migrating the ledger'
+#: src/screens/Updates.tsx
+#, fuzzy
+msgid "The update failed {where}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
+msgstr "A atualização falhou {where}, então foi desfeita. Você está em {running}, com o livro-caixa exatamente como estava às {stopped}, quando o aplicativo parou. O que falhou:"
 
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
@@ -7217,12 +7262,6 @@ msgstr "Período"
 msgid "Everything that has changed this household, grouped by the act that changed it. An import of two hundred rows is one entry here, and undoing it puts all two hundred back."
 msgstr "Tudo o que mudou esta casa, agrupado pelo ato que fez a mudança. Uma importação de duzentas linhas é uma única entrada aqui, e desfazê-la traz as duzentas de volta."
 
-#. Where an update failed, when the updater did not say
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "an unknown step"
-msgstr "uma etapa desconhecida"
-
 #. Text on the Register screen
 #. placeholder {0}: index + 1
 #: src/screens/Register.tsx
@@ -7418,6 +7457,11 @@ msgstr "Atualizando"
 #, fuzzy
 msgid "Untick every row shown"
 msgstr "Desmarcar todas as linhas mostradas"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while checking the new version answers"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -8224,6 +8268,11 @@ msgstr "{0}. Salve na sua pasta sincronizada do Drive ou do Dropbox"
 msgid "1. You"
 msgstr "1. Você"
 
+#. Updates section: outcome of an update, the updater's own sentence (in English) and then the time it finished
+#: src/screens/Updates.tsx
+msgid "{said} It finished at {at}."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "It is recorded as a real transaction on that date, not a hidden number, so it shows in the register and can be corrected like anything else. For a card or a loan, type what you owe as a negative."
@@ -8361,6 +8410,11 @@ msgstr "{0, plural, one {{1} transação importada em um único lote.} other {{2
 msgid "Backups taken by updates"
 msgstr "Backups feitos por atualizações"
 
+#. Update confirmation, Updater row: the updater running is newer than the release's
+#: src/screens/Updates.tsx
+msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
@@ -8452,6 +8506,11 @@ msgstr "favorecido"
 #, fuzzy
 msgid "The six digits from the new one"
 msgstr "Os seis dígitos do novo"
+
+#. Where an update failed. See GLOSSARY.md for the updater
+#: src/screens/Updates.tsx
+msgid "while handing over to the new updater before the app stopped"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -10361,6 +10420,12 @@ msgstr "Ver em Administração"
 msgid "date"
 msgstr "data"
 
+#. Updates section: outcome of an update, with the time it finished
+#: src/screens/Updates.tsx
+#, fuzzy
+msgid "Updated to {target} at {at}."
+msgstr "Atualizado para {target} em {at}."
+
 #. Button on the shared controls
 #: src/components/bits.tsx
 #, fuzzy
@@ -10407,6 +10472,11 @@ msgstr "Senha atual"
 msgctxt "history table"
 msgid "category group"
 msgstr "grupo de categorias"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while recording the update"
+msgstr ""
 
 #. A changed field in History's detail, lower case: the category group it is in
 #: src/lib/historyWords.ts
@@ -10723,6 +10793,11 @@ msgstr "Cada regra deste tipo tem sua vez, nesta ordem, cada uma trabalhando com
 msgid "Updates"
 msgstr "Atualizações"
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while stopping the app"
+msgstr ""
+
 #. State of the pre-update hook
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -10734,6 +10809,12 @@ msgstr "Desativado."
 #, fuzzy
 msgid "Schema"
 msgstr "Esquema"
+
+#. Updates section: outcome of an update, with the time it finished and how long it took
+#: src/screens/Updates.tsx
+#, fuzzy
+msgid "Updated to {target} at {at} in {took}."
+msgstr "Atualizado para {target} em {at}, em {took}."
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -10881,6 +10962,11 @@ msgstr "Já existe um link de redefinição pendente para {name}. Este o substit
 #, fuzzy
 msgid "No payment linked yet"
 msgstr "Nenhum pagamento vinculado ainda"
+
+#. Update confirmation, Updater row: the release's updater is the same version as the one running, built again
+#: src/screens/Updates.tsx
+msgid "The updater that ships with {to} was checked too. It is the same version as the one running, built again, and takes over once the update has finished."
+msgstr ""
 
 #. Table cell on the Admin screen: nothing; shown in place of a list
 #: src/screens/Admin.tsx
@@ -11363,12 +11449,6 @@ msgstr "Fixo no claro, seja qual for a configuração deste dispositivo."
 #, fuzzy
 msgid "{by} reset {user}'s password"
 msgstr "{by} redefiniu a senha de {user}"
-
-#. Updates section: outcome of an update, with the time it finished and how long it took
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "Updated to {running} at {at} in {took}."
-msgstr "Atualizado para {running} em {at}, em {took}."
 
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
 #. js-lingui-explicit-id
@@ -11978,12 +12058,6 @@ msgstr "Texto maior na tabela"
 #, fuzzy
 msgid "Save"
 msgstr "Salvar"
-
-#. placeholder {0}: skipped.length
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "{0, plural, one {Installing it also installs {skippedText}, which it skips over: notes for both below.} other {Installing it also installs {skippedText}, which it skips over: notes for all of them below.}}"
-msgstr "{0, plural, one {Instalá-la também instala {skippedText}, que ela pula: as notas das duas estão abaixo.} other {Instalá-la também instala {skippedText}, que ela pula: as notas de todas estão abaixo.}}"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -13024,6 +13098,11 @@ msgstr "Não contados: {0} e {1}. Mover dinheiro entre suas próprias contas nã
 msgid "may apply imports"
 msgstr "pode aplicar importações"
 
+#. Where an update failed, when the updater did not say
+#: src/screens/Updates.tsx
+msgid "at a step the updater did not name"
+msgstr ""
+
 #: src/screens/Categories.tsx
 #, fuzzy
 msgid "Build my own"
@@ -13208,6 +13287,7 @@ msgstr "Quem"
 msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 msgstr "Vazio é a resposta mais comum: <0>PAGO MOVIL BAR MARISOL</0> vira <1>Bar Marisol</1>."
 
+#. Update confirmation, Updater row: the release's updater is newer than the one running
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "The updater that ships with {to} was checked too, and takes over the update before anything is stopped."
@@ -13539,6 +13619,11 @@ msgstr "Dar uma chave a um programa"
 #, fuzzy
 msgid "New account name for {0}"
 msgstr "Nome da nova conta para {0}"
+
+#. Update confirmation, why both factors are asked for: an update with no migration
+#: src/screens/Updates.tsx
+msgid "Updating stops the app."
+msgstr ""
 
 #. Button on the Admin screen: verb, stop an account signing in
 #. placeholder {0}: one.display_name

@@ -151,6 +151,8 @@ export interface Outcome {
   duration_s: number | null;
   gap_s: number | null;
   log_tail: string[];
+  /** The release an apply went to; null on a record that does not name one (#260). */
+  to_version?: string | null;
 }
 
 export type UpdateCase = "not_container" | "no_updater" | "refused" | "outdated" | "working";
@@ -683,8 +685,8 @@ function CheckResult({
         {skipped.length > 0 && (
           <p style={{ marginBottom: 0 }}>
             {plural(skipped.length, {
-              one: `Installing it also installs ${skippedText}, which it skips over: notes for both below.`,
-              other: `Installing it also installs ${skippedText}, which it skips over: notes for all of them below.`,
+              one: `It also brings the changes of ${skippedText}, released in between: notes for both below.`,
+              other: `It also brings the changes of ${skippedText}, released in between: notes for all of them below.`,
             })}
           </p>
         )}
@@ -843,6 +845,31 @@ function Progress({ sentences, running }: { sentences: string[]; running: boolea
 // 3.4: confirming
 // --------------------------------------------------------------------------- //
 
+/**
+ * What the release's updater does in this update, by the updater's own rule
+ * (`updater/handover.py`: `is_me`, `stays_newer`, `goes_first`; #277). An
+ * updater is its image: the same digest is the same updater and nothing
+ * changes, whatever the version says. Otherwise the newer version wins -- a
+ * newer release's updater goes first, before the app stops (step 2a); a newer
+ * running updater is never replaced by an older one -- and a rebuild at the
+ * same version takes over at the end (step 10).
+ *
+ * `same` when there is no heartbeat to compare with: the confirmation is only
+ * drawn while the updater answers, so that is a fallback, not a case.
+ */
+export function whatTheUpdaterDoes(
+  report: Pick<Report, "to_version" | "updater_digest">,
+  heartbeat: Pick<Heartbeat, "updater_version" | "image_digest"> | null,
+): "same" | "first" | "after" | "newer" {
+  if (!report.updater_digest || !heartbeat || report.updater_digest === heartbeat.image_digest) return "same";
+  const running = heartbeat.updater_version;
+  if (!running || !/^\d+\.\d+\.\d+$/.test(running)) return "after";
+  const order = compareVersions(report.to_version, running);
+  if (order > 0) return "first";
+  if (order < 0) return "newer";
+  return "after";
+}
+
 export function Confirm({
   report,
   heartbeat,
@@ -910,8 +937,7 @@ export function Confirm({
   };
 
   const app = attested(report, "app");
-  const updaterChanges =
-    !!report.updater_digest && report.updater_digest !== heartbeat?.image_digest;
+  const updaterFate = whatTheUpdaterDoes(report, heartbeat);
   const toggle = (revision: string, on: boolean) =>
     setTicked((was) => {
       const next = new Set(was);
@@ -922,6 +948,7 @@ export function Confirm({
 
   const from = report.from_version;
   const to = report.to_version;
+  const runningUpdater = heartbeat?.updater_version ?? "";
   const shortCommit = commit ? commit.slice(0, 7) : null;
   const toCommit = app.commit ? app.commit.slice(0, 7) : null;
   const digest = shortDigest(report.digest);
@@ -963,11 +990,20 @@ export function Confirm({
             </tr>
             <tr>
               <th scope="row">{t({ message: "Updater", comment: "Row heading in the update confirmation" })}</th>
-              <td>
-                {updaterChanges ? (
-                  <Trans>
+              <td data-updater={updaterFate}>
+                {updaterFate === "first" ? (
+                  <Trans comment="Update confirmation, Updater row: the release's updater is newer than the one running">
                     The updater that ships with {to} was checked too, and takes over the update
                     before anything is stopped.
+                  </Trans>
+                ) : updaterFate === "after" ? (
+                  <Trans comment="Update confirmation, Updater row: the release's updater is the same version as the one running, built again">
+                    The updater that ships with {to} was checked too. It is the same version as the
+                    one running, built again, and takes over once the update has finished.
+                  </Trans>
+                ) : updaterFate === "newer" ? (
+                  <Trans comment="Update confirmation, Updater row: the updater running is newer than the release's">
+                    Stays on {runningUpdater}, which is newer than the updater that ships with {to}.
                   </Trans>
                 ) : (
                   <Trans comment="Updates section: what happens to a setting during this update">Stays as it is.</Trans>
@@ -1126,7 +1162,11 @@ export function Confirm({
         <StepUpFields
           proof={proof}
           onChange={setProof}
-          why={t`Updating stops the app and changes the ledger's schema.`}
+          why={
+            report.pending.length > 0
+              ? t`Updating stops the app and changes the ledger's schema.`
+              : t({ message: "Updating stops the app.", comment: "Update confirmation, why both factors are asked for: an update with no migration" })
+          }
         />
       </div>
 
@@ -1297,6 +1337,47 @@ export function Updating({
 // 3.8: the outcome
 // --------------------------------------------------------------------------- //
 
+/**
+ * Where an update failed, in words: the updater records the step's id (`5`),
+ * and its status sentence for that step ("Backing up and migrating the
+ * ledger.") is the one these follow (`updater/apply.py`, `Apply.start`).
+ * An id this screen does not know is named as it is.
+ */
+export function whereItFailed(step: string | null | undefined): string {
+  switch (step) {
+    case "0":
+      return t({ message: "while starting the update", comment: "Where an update failed: its first step" });
+    case "1":
+      return t({ message: "while checking everything was ready", comment: "Where an update failed: before anything was stopped" });
+    case "2":
+      return t({ message: "while running the pre-update hook", comment: "Where an update failed. See GLOSSARY.md for the pre-update hook" });
+    case "2a":
+      return t({ message: "while handing over to the new updater before the app stopped", comment: "Where an update failed. See GLOSSARY.md for the updater" });
+    case "3":
+      return t({ message: "while stopping the app", comment: "Where an update failed" });
+    case "4":
+      return t({ message: "while starting the maintenance page", comment: "Where an update failed" });
+    case "5":
+      return t({ message: "while backing up and migrating the ledger", comment: "Where an update failed" });
+    case "6":
+      return t({ message: "while stopping the maintenance page", comment: "Where an update failed" });
+    case "7":
+      return t({ message: "while starting the new version", comment: "Where an update failed" });
+    case "8":
+      return t({ message: "while checking the new version answers", comment: "Where an update failed" });
+    case "9":
+      return t({ message: "while recording the update", comment: "Where an update failed" });
+    case "10":
+      return t({ message: "while handing over to the new updater", comment: "Where an update failed: after the new version was running. See GLOSSARY.md for the updater" });
+    case null:
+    case undefined:
+    case "":
+      return t({ message: "at a step the updater did not name", comment: "Where an update failed, when the updater did not say" });
+    default:
+      return t({ message: `at step ${step}`, comment: "Where an update failed: a step this screen has no words for, by its id" });
+  }
+}
+
 export function OutcomeBlock({
   outcome,
   running,
@@ -1334,16 +1415,24 @@ export function OutcomeBlock({
       case "succeeded": {
         const updaterVersion = heartbeat?.updater_version ?? null;
         const stayed = !!updaterVersion && compareVersions(updaterVersion, running) < 0;
+        // The version the update went to, from its record -- not the one running
+        // now, which differs once the owner has gone back by hand (#260). A record
+        // that does not name it says it in its own sentence.
+        const target = outcome.to_version ?? null;
         body = (
           <>
             <p style={{ marginTop: 0 }} data-outcome="updated">
-              {took ? (
+              {target === null ? (
+                <Trans comment="Updates section: outcome of an update, the updater's own sentence (in English) and then the time it finished">
+                  {said} It finished at {at}.
+                </Trans>
+              ) : took ? (
                 <Trans comment="Updates section: outcome of an update, with the time it finished and how long it took">
-                  Updated to {running} at {at} in {took}.
+                  Updated to {target} at {at} in {took}.
                 </Trans>
               ) : (
                 <Trans comment="Updates section: outcome of an update, with the time it finished">
-                  Updated to {running} at {at}.
+                  Updated to {target} at {at}.
                 </Trans>
               )}{" "}
               {stayed ? (
@@ -1369,13 +1458,13 @@ export function OutcomeBlock({
       }
       case "rolled_back": {
         tone = "banner warn";
-        const step = outcome.failed_step ?? t({ message: "an unknown step", comment: "Where an update failed, when the updater did not say" });
+        const where = whereItFailed(outcome.failed_step);
         const stopped = timeOf(outcome.started_at);
         body = (
           <div data-outcome="rolled_back">
             <p style={{ marginTop: 0 }}>
-              <Trans>
-                The update failed at {step}, so it was undone. You are on {running}, with the ledger
+              <Trans comment="Updates section, a rolled-back update. {where} is a phrase such as 'while migrating the ledger'">
+                The update failed {where}, so it was undone. You are on {running}, with the ledger
                 exactly as it was at {stopped}, when the app stopped. What failed:
               </Trans>
             </p>

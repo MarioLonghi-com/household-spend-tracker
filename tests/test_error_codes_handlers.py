@@ -78,6 +78,33 @@ def test_a_busy_ledger_is_a_409_with_a_code_but_not_for_an_agent(client, path, a
     assert answer.body == client.app_module.JSONResponse(expected).body
 
 
+@pytest.mark.parametrize(
+    ("method", "path"),
+    [("POST", "/api/admin/application/update/apply"), ("DELETE", "/api/households/h1/transactions/t2")],
+)
+def test_a_busy_ledger_is_logged_with_its_method_and_path_and_nothing_else(client, caplog, method, path):
+    """A refusal that stopped an owner's update left no trace in the log (#273).
+    The line names the request and the wait; not its query string, where a
+    token can ride."""
+    request = Request(
+        {
+            "type": "http",
+            "method": method,
+            "path": path,
+            "headers": [],
+            "query_string": b"step_up_token=never-in-a-log",
+        }
+    )
+    busy = OperationalError("UPDATE x", {}, Exception("database is locked"))
+    with caplog.at_level("WARNING", logger="spendtracker"):
+        answer = client.app_module.handle_operational_error(request, busy)
+    assert answer.status_code == 409
+    said = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+    assert len(said) == 1
+    assert f"ledger busy: {method} {path} was refused with 409 after waiting 5000 ms" in said[0]
+    assert "never-in-a-log" not in said[0]
+
+
 def test_a_statement_refused_whole_says_why_as_a_code(client):
     world = _household_with_accounts(client)
     raw = (ROOT / "tests/statement_files/designed_bill.pdf").read_bytes()

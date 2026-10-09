@@ -116,6 +116,27 @@ def test_the_uid_it_names_is_the_one_the_dockerfile_sets():
     assert f"--chown={entrypoint.RUNS_AS}:{entrypoint.RUNS_AS}" in dockerfile
 
 
+def test_the_image_ships_its_data_directory_placeholder_private():
+    """Every fresh install warned at boot that `/var/lib/spend-tracker/.keep`
+    was 0644 -- a file the image made, in a container with no shell to chmod
+    it in (#279). The same RUN line that makes it makes it 0600, and the stage
+    that copies the directory copies it without a `--chmod` that would undo it.
+    """
+    dockerfile = (pathlib.Path(__file__).resolve().parent.parent / "Dockerfile").read_text()
+    # The RUN instruction, continuation lines included.
+    made = re.search(r"^RUN mkdir -p /var/lib/spend-tracker &&(?:.*\\\n)*.*$", dockerfile, re.M)
+    assert made is not None
+    line = made.group(0)
+    assert "touch /var/lib/spend-tracker/.keep" in line
+    assert "chmod 0600 /var/lib/spend-tracker/.keep" in line
+    copies = [
+        row
+        for row in dockerfile.splitlines()
+        if row.startswith("COPY") and row.rstrip().endswith("/var/lib/spend-tracker")
+    ]
+    assert copies and all("--chmod" not in row for row in copies)
+
+
 # --------------------------------------------------------------------------- #
 # The documentation, which is the part that goes stale silently
 # --------------------------------------------------------------------------- #

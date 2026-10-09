@@ -66,6 +66,48 @@ history this repository does not have.
   network again, and records it in the update history. At most three times in
   an hour; after that, or when a repair fails, the Updates screen says so and
   names `docker compose up -d --force-recreate app` (#275).
+- **An update's outcome names the version it updated to.** The Updates
+  section said "Updated to" the version running now, so after going back to
+  the previous release by hand it named that one. The outcome now carries
+  the release the update went to, from the updater's record, and an older
+  record that does not name it shows the updater's own sentence. A
+  rolled-back update no longer says it "failed at 5", the updater's number
+  for the step, but where in words: "failed while backing up and migrating
+  the ledger". (#260)
+- **The updater says what it is doing in its log.** `docker compose logs
+  updater` was empty in normal operation; the only trace of a failed update
+  was a traceback. It now prints one line per request it takes, per step of
+  a prepare, an update or a rollback it starts and ends, per step of a
+  handover to a new updater and its outcome, and per request finished: the
+  request's id, the step, the sentence the screen shows and the time since
+  the request was taken. No token, recovery-code hash or image digest is
+  printed whole. (#278)
+- **The update confirmation follows the updater's own rules.** It said the
+  update changes the ledger's schema even when it also said no migrations
+  would run; that is now said only when one does. Its Updater row said the
+  release's updater takes over before anything is stopped in every case. It
+  now follows the rule the updater uses: the same image stays as it is, a
+  newer release's updater goes first, a running updater newer than the
+  release's stays, and a rebuild at the same version takes over once the
+  update has finished. A release that brings an earlier one's changes with
+  it no longer says it "also installs" what it "skips over". (#277)
+- **An update, or any act that asks for the password and code again, is no
+  longer refused as "ledger busy" after a minute on its form.** The first
+  request after a minute's pause records that the browser's session is still
+  in use, and it wrote that on the request's own transaction. The step-up
+  check then wrote on a connection of its own and waited for the lock the
+  same request held, until SQLite gave up: the owner was told the ledger was
+  busy with another change when nobody else was there. The session is now
+  recorded on its own short transaction, committed at once. A request
+  refused as "ledger busy" is also logged now, at WARNING, with its method
+  and path. (#273)
+- **A fresh install no longer warns about its own `.keep` file.** The first
+  start of every new install logged that `/var/lib/spend-tracker/.keep` could
+  be read by other users and told the owner to `chmod` it, in a container
+  with no shell to do it in. The image now makes the file 0600, and an empty
+  `.keep` is left out of the check, so a volume made by an older image stops
+  warning too. Anything else in the data directory that others can read is
+  still named. (#279)
 
 - **The tests that failed now and then no longer do.** Each one waited on
   the wrong thing: a report test matched digits a random id can hold, the
