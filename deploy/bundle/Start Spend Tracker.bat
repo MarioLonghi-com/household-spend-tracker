@@ -1,10 +1,10 @@
 @echo off
 rem Start Spend Tracker @VERSION@ on this computer: Windows.
 rem
-rem UNTESTED. No Windows machine has run this launcher yet (design decision
-rem D2): it ships so that one can, and it does what the macOS and Linux
-rem launcher does, step for step. If it fails, the commands it would have run
-rem are in README.txt, and an issue saying where it stopped is welcome.
+rem Run with Docker Desktop on Windows 11 (manual matrix, #170); with Podman
+rem on Windows it is UNTESTED. It does what the macOS and Linux launcher does,
+rem step for step. If it fails, the commands it would have run are in
+rem README.txt, and an issue saying where it stopped is welcome.
 rem
 rem Double-click it. It is safe to run again at any time: it is also how
 rem Spend Tracker is started after reinstalling Docker or Podman, and how an

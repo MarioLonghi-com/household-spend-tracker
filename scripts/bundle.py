@@ -12,7 +12,7 @@ The zip unpacks to one folder, `spend-tracker-<version>/`, holding
     README.txt
     Start Spend Tracker.command    macOS   } the same script, deploy/bundle/
     start-spend-tracker.sh         Linux   } start-spend-tracker.sh
-    Start Spend Tracker.bat        Windows (untested, D2), CRLF
+    Start Spend Tracker.bat        Windows (Docker Desktop tested; Podman untested), CRLF
 
 from the templates in `deploy/bundle/`, with `@VERSION@`, `@APP_IMAGE@` and
 `@UPDATER_IMAGE@` filled in. The images are the index digests the release
