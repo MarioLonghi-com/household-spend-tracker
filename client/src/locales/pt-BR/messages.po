@@ -5224,6 +5224,566 @@ msgstr "Desanexando…"
 msgid "This row is locked, so nothing here can be changed and an import will not match against it. Set it back to cleared to edit it."
 msgstr "Esta linha está bloqueada, então nada aqui pode ser alterado e uma importação não vai corresponder a ela. Volte-a para compensada para editá-la."
 
+#. History: the value of a yes/no field, like archived
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.bool.no"
+msgstr "não"
+
+#. History: the value of a yes/no field, like archived
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.bool.yes"
+msgstr "sim"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.accounts"
+msgstr "{count, plural, one {# conta} other {# contas}}"
+
+#. History: a count of changed rows of one kind: keys for programs
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.agent_keys"
+msgstr "{count, plural, one {# chave de agente} other {# chaves de agente}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.categories"
+msgstr "{count, plural, one {# categoria} other {# categorias}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.category_groups"
+msgstr "{count, plural, one {# grupo de categorias} other {# grupos de categorias}}"
+
+#. History: a count of changed rows of one kind: people in a household
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.household_members"
+msgstr "{count, plural, one {# membro} other {# membros}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.households"
+msgstr "{count, plural, one {# casa} other {# casas}}"
+
+#. History: suggested account numbers a person dismissed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.ignored_identifier_suggestions"
+msgstr "{count, plural, one {# sugestão de identificador ignorada} other {# sugestões de identificador ignoradas}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.invitations"
+msgstr "{count, plural, one {# convite} other {# convites}}"
+
+#. History: a count of changed rows of one kind: rules that name payees
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.payee_rules"
+msgstr "{count, plural, one {# regra de favorecido} other {# regras de favorecido}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.payees"
+msgstr "{count, plural, one {# favorecido} other {# favorecidos}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.receipts"
+msgstr "{count, plural, one {# comprovante} other {# comprovantes}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.reconciliations"
+msgstr "{count, plural, one {# conciliação} other {# conciliações}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.transactions"
+msgstr "{count, plural, one {# transação} other {# transações}}"
+
+#. History: two rows a person said are not one transfer
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.transfer_rejections"
+msgstr "{count, plural, one {# par marcado como não transferência} other {# pares marcados como não transferência}}"
+
+#. History: a count of changed rows of one kind: people who sign in
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.users"
+msgstr "{count, plural, one {# usuário} other {# usuários}}"
+
+#. History: accounts read from a file. {file} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.account_import"
+msgstr "{count, plural, one {# conta} other {# contas}} de {file}."
+
+#. History: an import one person prepared and another applied. {who} is that person's name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.applied_by"
+msgstr "{sentence} Aplicada por {who}."
+
+#. History: an import applied by a person since removed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.applied_by_somebody"
+msgstr "{sentence} Aplicada por outra pessoa."
+
+#. History: a statement import. {made} is like 12 new transactions; {filename} the file's name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.import"
+msgstr "{made} em {account}, de {filename}."
+
+#. History: a statement import with no file name. {made} is like 12 new transactions
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.import_no_file"
+msgstr "{made} em {account}."
+
+#. History: what was done to keys for programs, as a sentence
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.keys"
+msgstr "{acts}."
+
+#. History: a reconciliation locked these rows. See GLOSSARY.md (Locked)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.locked"
+msgstr "{count, plural, one {# transação bloqueada} other {# transações bloqueadas}}."
+
+#. History: an act that changed no rows
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.nothing"
+msgstr "Nada foi alterado."
+
+#. History: a one-time import from YNAB, counted in changed rows
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.changes"
+msgstr "{changes, plural, one {# alteração} other {# alterações}}{linked, plural, =0 {} one {, # transferência vinculada} other {, # transferências vinculadas}}."
+
+#. History: a one-time import from YNAB, counted in changed rows. {where} is the file or budget
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.changes_from"
+msgstr "{changes, plural, one {# alteração} other {# alterações}}{linked, plural, =0 {} one {, # transferência vinculada} other {, # transferências vinculadas}} de {where}."
+
+#. History: a one-time import from YNAB, the rows it brought and the transfers it paired
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.transactions"
+msgstr "{imported, plural, one {# transação} other {# transações}}{linked, plural, =0 {} one {, # transferência vinculada} other {, # transferências vinculadas}}."
+
+#. History: a one-time import from YNAB. {where} is the file or budget it read
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.transactions_from"
+msgstr "{imported, plural, one {# transação} other {# transações}}{linked, plural, =0 {} one {, # transferência vinculada} other {, # transferências vinculadas}} de {where}."
+
+#. History: an undo whose original act is gone. {tally} is like 3 transactions changed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.put_back"
+msgstr "Desfeito — {tally}."
+
+#. History: a reconciliation. {balance} is the statement's closing balance. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.reconciled"
+msgstr "{account} conciliada com um extrato fechado em {date} com saldo de {balance} — {count, plural, one {# transação bloqueada} other {# transações bloqueadas}}."
+
+#. History: an undo. {headline} is the kind of act undone, lower case; {detail} the sentence about it
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.reversed"
+msgstr "Revertido: {headline} — {detail}"
+
+#. History: a transaction divided into {count} parts, listed after the colon. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.split"
+msgstr "{amount} em {date} dividida em {count}: {parts}."
+
+#. History: a split whose parts cannot be read back. Split is the noun. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.split_unknown"
+msgstr "Divisão — {count, plural, one {# transação alterada} other {# transações alteradas}}."
+
+#. History: a transaction divided into {count} parts, listed after the colon. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.split_with_payee"
+msgstr "{payee} {amount} em {date} dividida em {count}: {parts}."
+
+#. History: a count of what an act did, as a sentence, like 12 transactions changed.
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.tally"
+msgstr "{tally}."
+
+#. History: the value of an empty field
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty"
+msgstr "nada"
+
+#. History: a household's accent colour when none is chosen: the palette's own is used
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.accent"
+msgstr "o da paleta"
+
+#. History: the value of a transaction's category when it has none. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.category_id"
+msgstr "sem categoria"
+
+#. History: the value of a payee's default category when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.default_category_id"
+msgstr "sem padrão"
+
+#. History: the value of an account's bank when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.institution"
+msgstr "sem banco"
+
+#. History: the value of a memo when it is empty. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.memo"
+msgstr "sem descrição"
+
+#. History: the value of a note when it is empty. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.note"
+msgstr "sem nota"
+
+#. History: the value of a transaction's payee when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.payee_id"
+msgstr "sem favorecido"
+
+#. History: a work expense with no repayment linked yet
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.reimbursed_by_id"
+msgstr "ainda não reembolsada"
+
+#. History: a transaction work does not pay back. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.reimbursement"
+msgstr "não é despesa de trabalho"
+
+#. History: the state of a transaction the bank has. See GLOSSARY.md (Cleared)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.cleared.cleared"
+msgstr "compensada"
+
+#. History: the state of a transaction locked by a reconciliation. See GLOSSARY.md (Locked)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.cleared.reconciled"
+msgstr "bloqueada"
+
+#. History: the state of a transaction the bank has not seen. See GLOSSARY.md (Uncleared)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.cleared.uncleared"
+msgstr "não compensada"
+
+#. History: a work expense work should pay back. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.reimbursement.expected"
+msgstr "o trabalho deve reembolsar"
+
+#. History: a work expense work will not pay. See GLOSSARY.md (Written off)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.reimbursement.written_off"
+msgstr "dada como perdida"
+
+#. History: an account that cannot be named, in a sentence about an import
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.fallback.account"
+msgstr "uma conta"
+
+#. History: one field's change, from the old value to the new. {field} is lower case, like amount
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.field_change"
+msgstr "{field} {was} → {now}"
+
+#. History: how many rows an act changed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.import.changes"
+msgstr "{count, plural, one {# alteração} other {# alterações}}"
+
+#. History: how many rows a statement import added
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.import.created"
+msgstr "{count, plural, one {# transação nova} other {# transações novas}}"
+
+#. History: how many rows of a statement were already in the ledger
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.import.matched"
+msgstr "{count, plural, one {# correspondeu a uma linha existente} other {# corresponderam a linhas existentes}}"
+
+#. History: a key for a program was changed. {label} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.changed"
+msgstr "Alterou a chave “{label}”"
+
+#. History: a key for a program was made. {label} is the name it was given
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.issued"
+msgstr "Emitiu a chave “{label}”"
+
+#. History: a key for a program was deleted. {label} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.removed"
+msgstr "Removeu a chave “{label}”"
+
+#. History: a key for a program stopped working. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.revoked"
+msgstr "Revogou a chave “{label}”"
+
+#. History: which account a transaction is in, after its amount and payee. {account} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.label.in_account"
+msgstr "em {account}"
+
+#. History, one changed row: a row was added. {table} is the kind of row, {label} what it is
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.added"
+msgstr "Adicionou {table} {label}"
+
+#. History, one changed row: a part made by splitting a transaction. {origin} is the one divided
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.added_by_splitting"
+msgstr "Adicionou {table} {label} ao dividir {origin}"
+
+#. History, one changed row: added by an import. {workflow} is its name, like One-time Import · YNAB (CSV)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.added_by_workflow"
+msgstr "Adicionou {table} {label} via {workflow}"
+
+#. History, one changed row: changed in columns History does not name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.changed"
+msgstr "Alterou {table} {label}"
+
+#. History, one changed row: what it is, then each change to it
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.fields"
+msgstr "{label}: {fields}"
+
+#. History, one changed row: a row was deleted. {table} is the kind of row, {label} what it was
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.removed"
+msgstr "Removeu {table} {label}"
+
+#. History, one changed row: written again with nothing different
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.touched"
+msgstr "Regravou {table} {label} sem alterações"
+
+#. History: the payment that repaid a work expense, by amount, account and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.payment"
+msgstr "{amount} para {account} em {date}"
+
+#. History: a value naming an account that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.account"
+msgstr "uma conta já removida"
+
+#. History: a value naming a category that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.category"
+msgstr "uma categoria já removida"
+
+#. History: a value naming a payee that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.payee"
+msgstr "um favorecido já removido"
+
+#. History: a value naming a transaction that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.transaction"
+msgstr "uma transação já removida"
+
+#. History: the transaction a split divided, by amount and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.split.origin"
+msgstr "{amount} em {date}"
+
+#. History: the transaction a split divided, by payee, amount and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.split.origin_with_payee"
+msgstr "{payee} {amount} em {date}"
+
+#. History: one part of a split, its amount and its category
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.split.part_with_category"
+msgstr "{amount} ({category})"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.tally.added"
+msgstr "Inclusões: {counts}"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.tally.changed"
+msgstr "Alterações: {counts}"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.tally.removed"
+msgstr "Remoções: {counts}"
+
+#. History: a name that cannot be read. Keep it short
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.unknown"
+msgstr "?"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "The server reset {user}'s authenticator"

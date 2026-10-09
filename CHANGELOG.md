@@ -42,6 +42,15 @@ history this repository does not have.
   catalogs by `scripts/seed_catalog.py`); a draft never is, so until a
   language ships every household is seeded in English exactly as before. The
   names are ordinary names, and no language is stored on the household. (#268)
+- **History's sentences go out as structure too.** Beside every sentence it
+  has always sent -- a batch's detail, the undo lines, a changed row's
+  summary, a row's own history -- History now sends a `*_phrase`: a key and
+  its raw values (money in minor units with its currency, ISO dates, enum
+  values, names as stored), and each changed field's `was_value` and
+  `now_value` beside its words. A screen in another language words them from
+  its own catalog; English shows the server's sentences exactly as before,
+  and the English is now rendered from the same structure, so the two cannot
+  disagree. (#266)
 
 ## 0.9.3 — 2026-10-09
 
