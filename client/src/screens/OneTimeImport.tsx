@@ -974,10 +974,10 @@ function Review({
           <Trans comment="Name of a fact on the one-time import: noun, money moved between your own accounts. See GLOSSARY.md">Transfers</Trans>
         </dt>
         <dd>
-          {plural(totals.transfers, {
-            one: `${formatCount(totals.transfers)} legs`,
+          {t({ message: plural(totals.transfers, {
+            one: `${formatCount(totals.transfers)} leg`,
             other: `${formatCount(totals.transfers)} legs`,
-          })}
+          }), comment: "Value on the one-time import: how many transfer rows (legs) the file holds. See GLOSSARY.md" })}
         </dd>
         <dt><Trans comment="Name of a fact on the one-time import: noun, the parts of split transactions">Split parts</Trans></dt>
         <dd>{t`${formatCount(totals.splits)}, each imported as its own transaction`}</dd>

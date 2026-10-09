@@ -132,11 +132,6 @@ msgstr "Nova senha"
 msgid "Expense"
 msgstr "Despesa"
 
-#: src/components/Receipts.tsx
-#, fuzzy
-msgid "{count, plural, one {has {count} receipts} other {has {count} receipts}}"
-msgstr "{count, plural, one {tem {count} comprovante} other {tem {count} comprovantes}}"
-
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #: src/lib/labels.ts
@@ -368,13 +363,6 @@ msgstr "{0} de {1} serão importadas."
 msgid "Net — whole period"
 msgstr "Saldo líquido — período inteiro"
 
-#. Text on the household page
-#. placeholder {0}: count(it.category_groups)
-#: src/screens/Household.tsx
-#, fuzzy
-msgid "in {0} groups"
-msgstr "em {0} grupos"
-
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Locked — checked against the bank, refuse every change"
@@ -409,6 +397,12 @@ msgstr "Nada nos últimos 14 dias."
 #, fuzzy
 msgid "A three-letter code. Leave it blank for {0}."
 msgstr "Um código de três letras. Deixe em branco para {0}."
+
+#. Column value on the Accounts screen: how many statement files name a suggested identifier
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "{count, plural, one {{shown} file} other {{shown} files}}"
+msgstr "{count, plural, one {{shown} arquivo} other {{shown} arquivos}}"
 
 #: src/screens/Backups.tsx
 #, fuzzy
@@ -449,6 +443,15 @@ msgstr "Processo"
 #, fuzzy
 msgid "date column"
 msgstr "coluna de data"
+
+#. Tooltip on the Register's select-all checkbox
+#. placeholder {0}: ordered.length
+#. placeholder {1}: formatCount(ordered.length)
+#. placeholder {2}: formatCount(ordered.length)
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0, plural, one {Tick the {1} row the filter shows} other {Tick all {2} rows the filter shows}}"
+msgstr "{0, plural, one {Marcar a {1} linha que o filtro mostra} other {Marcar as {2} linhas que o filtro mostra}}"
 
 #. placeholder {0}: rows.data.entries.length
 #. placeholder {1}: rows.data.count
@@ -679,6 +682,16 @@ msgstr "Em que cada favorecido foi classificado e o que uma nova transação del
 #, fuzzy
 msgid "List"
 msgstr "Lista"
+
+#. Rules screen: how many of the imported rows the rules would move to another payee
+#. placeholder {0}: formatCount(proposed.changing)
+#. placeholder {1}: proposed.considered
+#. placeholder {2}: formatCount(proposed.considered)
+#. placeholder {3}: formatCount(proposed.considered)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "<0>{0}</0> of {1, plural, one {{2} row would move.} other {{3} rows would move.}}"
+msgstr "<0>{0}</0> de {1, plural, one {{2} linha mudaria.} other {{3} linhas mudariam.}}"
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -1412,11 +1425,6 @@ msgstr "Continua como está."
 #, fuzzy
 msgid "Yes, detach it"
 msgstr "Sim, desanexar"
-
-#: src/screens/Accounts.tsx
-#, fuzzy
-msgid "{count, plural, other {{shown} files}}"
-msgstr "{count, plural, one {{shown} arquivo} other {{shown} arquivos}}"
 
 #. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
@@ -2201,6 +2209,15 @@ msgstr "Aparência"
 msgid "None yet"
 msgstr "Nenhuma ainda"
 
+#. One-time import: an account set to be skipped, and what happens to its rows
+#. placeholder {0}: account.rows
+#. placeholder {1}: formatCount(account.rows)
+#. placeholder {2}: formatCount(account.rows)
+#: src/screens/ynab/mapping.tsx
+#, fuzzy
+msgid "{0, plural, one {Its {1} row is left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
+msgstr "{0, plural, one {A {1} linha dela fica de fora e aparece no relatório.} other {As {2} linhas dela ficam de fora e aparecem no relatório.}}"
+
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
 msgid "Currency of the plan"
@@ -2325,12 +2342,6 @@ msgstr "Contando…"
 #, fuzzy
 msgid "Income vs Expense"
 msgstr "Receitas e despesas"
-
-#. placeholder {0}: formatCount(ordered.length)
-#: src/screens/Register.tsx
-#, fuzzy
-msgid "Tick all {0} rows the filter shows"
-msgstr "Marcar as {0} linhas que o filtro mostra"
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -2689,6 +2700,12 @@ msgstr "Tirada em {0}, então isto abre nos dez dias antes e depois."
 msgid "Put them in <0>{0}</0> too?"
 msgstr "Colocá-las em <0>{0}</0> também?"
 
+#. Tooltip on the paperclip in the Register: this transaction has receipts attached
+#: src/components/Receipts.tsx
+#, fuzzy
+msgid "{count, plural, one {has {count} receipt} other {has {count} receipts}}"
+msgstr "{count, plural, one {tem {count} comprovante} other {tem {count} comprovantes}}"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
@@ -2698,13 +2715,6 @@ msgstr "Tudo o que um programa fizer errado precisa poder ser desfeito por uma p
 #, fuzzy
 msgid "Waiting to be reviewed"
 msgstr "Aguardando revisão"
-
-#. Sentence on the Import screen
-#. placeholder {0}: formatCount(raw.total)
-#: src/screens/Import.tsx
-#, fuzzy
-msgid "{0} characters"
-msgstr "{0} caracteres"
 
 #. Heading of a group of choices on the one-time import
 #. Step name in the one-time import: which app the history comes from
@@ -2777,11 +2787,6 @@ msgstr "A atualização falhou em {step}, então foi desfeita. Você está em {r
 msgid "This one was entered by hand."
 msgstr "Esta foi inserida à mão."
 
-#: src/screens/Register.tsx
-#, fuzzy
-msgid "{count, plural, one {{shown} transaction match the filters} other {{shown} transactions match the filters}}"
-msgstr "{count, plural, one {{shown} transação corresponde aos filtros} other {{shown} transações correspondem aos filtros}}"
-
 #. Placeholder in an empty field on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -2795,6 +2800,20 @@ msgstr "arquivador de comprovantes"
 #, fuzzy
 msgid "{0, plural, one {{1} transaction carries this category, so it cannot be deleted. Archive it instead.} other {{2} transactions carry this category, so it cannot be deleted. Archive it instead.}}"
 msgstr "{0, plural, one {{1} transação usa esta categoria, então ela não pode ser excluída. Arquive-a em vez disso.} other {{2} transações usam esta categoria, então ela não pode ser excluída. Arquive-a em vez disso.}}"
+
+#. Count above the Register's list when a filter is on
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{count, plural, one {{shown} transaction matches the filters} other {{shown} transactions match the filters}}"
+msgstr "{count, plural, one {{shown} transação corresponde aos filtros} other {{shown} transações correspondem aos filtros}}"
+
+#. Checkbox on the Rules screen: also delete payees no transaction uses any more
+#. placeholder {0}: proposed.orphaned.length
+#. placeholder {1}: formatCount(proposed.orphaned.length)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "{0, plural, one {Also delete the payee left empty} other {Also delete the {1} payees left empty}}"
+msgstr "{0, plural, one {Excluir também o favorecido que ficar vazio} other {Excluir também os {1} favorecidos que ficarem vazios}}"
 
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -3565,13 +3584,6 @@ msgstr "{0, plural, one {Reembolsa {1} despesa} other {Reembolsa {2} despesas}}"
 #, fuzzy
 msgid "skip rows"
 msgstr "linhas ignoradas"
-
-#. placeholder {0}: formatCount(trial.data.matches)
-#. placeholder {1}: formatCount(trial.data.considered)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "It rewrites <0>{0}</0> of {1} rows already in this ledger."
-msgstr "Reescreve <0>{0}</0> de {1} linhas que já estão neste livro-caixa."
 
 #. Button on the Categories screen: verb
 #. History headline, the kind of act: one edit made by hand
@@ -4716,6 +4728,12 @@ msgctxt "history table"
 msgid "pair marked not a transfer"
 msgstr "par marcado como não transferência"
 
+#. How many pages a PDF receipt has
+#: src/components/Receipts.tsx
+#, fuzzy
+msgid "{count, plural, one {{count} page} other {{count} pages}}"
+msgstr "{count, plural, one {{count} página} other {{count} páginas}}"
+
 #. Button on the Accounts screen
 #. Button on the Import screen
 #. Label of a choice on the one-time import
@@ -4843,6 +4861,15 @@ msgstr "Relatório"
 msgid "Loading the next rows…"
 msgstr "Carregando as próximas linhas…"
 
+#. Import screen: the size of the statement file, in characters
+#. placeholder {0}: raw.total
+#. placeholder {1}: formatCount(raw.total)
+#. placeholder {2}: formatCount(raw.total)
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} character} other {{2} characters}}"
+msgstr "{0, plural, one {{1} caractere} other {{2} caracteres}}"
+
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
 msgid "{count, plural, one {{count} expense} other {{count} expenses}}"
@@ -4953,6 +4980,15 @@ msgstr "Mudanças recentes nas formas de entrar"
 #, fuzzy
 msgid "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
 msgstr "Esta instalação, e não algum dos livros-caixa nela. Só um proprietário pode abrir esta tela e acessar o que há nela — os caminhos, os logs e as contagens abaixo dizem respeito a todas as casas desta instância."
+
+#. Under the count of categories on the household page
+#. placeholder {0}: it.category_groups
+#. placeholder {1}: count(it.category_groups)
+#. placeholder {2}: count(it.category_groups)
+#: src/screens/Household.tsx
+#, fuzzy
+msgid "{0, plural, one {in {1} group} other {in {2} groups}}"
+msgstr "{0, plural, one {em {1} grupo} other {em {2} grupos}}"
 
 #. Button on the Backups screen
 #. Button on the Register screen
@@ -5391,6 +5427,15 @@ msgstr "Correspondida"
 msgid "unused"
 msgstr "sem uso"
 
+#. Application management: how many software packages are installed
+#. placeholder {0}: packages.length
+#. placeholder {1}: count(packages.length)
+#. placeholder {2}: count(packages.length)
+#: src/screens/ApplicationManagement.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} package.} other {{2} packages.}}"
+msgstr "{0, plural, one {{1} pacote.} other {{2} pacotes.}}"
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "No single category matches that."
@@ -5763,6 +5808,12 @@ msgstr "Iniciado"
 msgid "Reset: password"
 msgstr "Redefinição: senha"
 
+#. Sentence after a refusal: how long to wait before trying again
+#: src/components/bits.tsx
+#, fuzzy
+msgid "{wait, plural, one {Try again in {wait} second.} other {Try again in {wait} seconds.}}"
+msgstr "{wait, plural, one {Tente de novo em {wait} segundo.} other {Tente de novo em {wait} segundos.}}"
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "{by} reset your password and your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
@@ -5902,12 +5953,6 @@ msgstr "Regras podem ser sugeridas depois da primeira importação de extrato: e
 #, fuzzy
 msgid "Save to Drive/Dropbox…"
 msgstr "Salvar no Drive/Dropbox…"
-
-#. placeholder {0}: formatCount(proposed.considered)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "Nothing would change. {0} rows carry the bank’s words and today’s rules already agree with all of them."
-msgstr "Nada mudaria. {0} linhas têm as palavras do banco e as regras atuais já concordam com todas elas."
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -6232,13 +6277,6 @@ msgstr "Até lá, cada entrada vai pedir outro código de recuperação. Para fa
 msgid "Setting it up takes one of your recovery codes."
 msgstr "Configurá-lo gasta um dos seus códigos de recuperação."
 
-#. placeholder {0}: preview.lines.length
-#. placeholder {1}: preview.lines.length
-#: src/screens/Import.tsx
-#, fuzzy
-msgid "{0, plural, other {{1} lines}}"
-msgstr "{0, plural, one {{1} linha} other {{1} linhas}}"
-
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Every link has a name or a person behind it."
@@ -6289,6 +6327,15 @@ msgstr "Notas do comprovante"
 #, fuzzy
 msgid "If the update fails and cannot undo itself, this page is replaced by a recovery page, and this code is what opens it. It works only for this update and stops working once the update has finished. It is shown once: the server keeps only a hash of it."
 msgstr "Se a atualização falhar e não conseguir se desfazer, esta página é substituída por uma página de recuperação, e é este código que a abre. Ele vale só para esta atualização e deixa de funcionar quando ela termina. Ele é mostrado uma única vez: o servidor guarda só um hash dele."
+
+#. Rules screen: the result of trying today's rules on every imported row
+#. placeholder {0}: proposed.considered
+#. placeholder {1}: formatCount(proposed.considered)
+#. placeholder {2}: formatCount(proposed.considered)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "{0, plural, one {Nothing would change. {1} row carries the bank’s words and today’s rules already agree with it.} other {Nothing would change. {2} rows carry the bank’s words and today’s rules already agree with all of them.}}"
+msgstr "{0, plural, one {Nada mudaria. {1} linha tem as palavras do banco e as regras atuais já concordam com ela.} other {Nada mudaria. {2} linhas têm as palavras do banco e as regras atuais já concordam com todas elas.}}"
 
 #: src/screens/Backups.tsx
 #, fuzzy
@@ -6753,6 +6800,15 @@ msgstr "superávit"
 msgid "Re-enabled"
 msgstr "Reativado"
 
+#. Value on the one-time import: how many transfer rows (legs) the file holds. See GLOSSARY.md
+#. placeholder {0}: totals.transfers
+#. placeholder {1}: formatCount(totals.transfers)
+#. placeholder {2}: formatCount(totals.transfers)
+#: src/screens/OneTimeImport.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} leg} other {{2} legs}}"
+msgstr "{0, plural, one {{1} lado} other {{2} lados}}"
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key."
@@ -6778,11 +6834,6 @@ msgstr "Um adiantamento ainda não gasto, ou um pagamento a mais"
 #, fuzzy
 msgid "Downtime"
 msgstr "Tempo fora do ar"
-
-#: src/components/bits.tsx
-#, fuzzy
-msgid "{wait, plural, other {Try again in {wait} seconds.}}"
-msgstr "{wait, plural, one {Tente de novo em {wait} segundo.} other {Tente de novo em {wait} segundos.}}"
 
 #. placeholder {0}: count(it.transactions_uncleared)
 #: src/screens/Household.tsx
@@ -6817,14 +6868,6 @@ msgstr "favorecido"
 msgid "The six digits from the new one"
 msgstr "Os seis dígitos do novo"
 
-#. placeholder {0}: totals.transfers
-#. placeholder {1}: formatCount(totals.transfers)
-#. placeholder {2}: formatCount(totals.transfers)
-#: src/screens/OneTimeImport.tsx
-#, fuzzy
-msgid "{0, plural, one {{1} legs} other {{2} legs}}"
-msgstr "{0, plural, one {{1} parte} other {{2} partes}}"
-
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "double click to edit"
@@ -6857,6 +6900,15 @@ msgstr "Consultando…"
 #, fuzzy
 msgid "no country set"
 msgstr "nenhum país definido"
+
+#. Button on the Rules screen: verb, move these transactions to the payees the rules give
+#. placeholder {0}: proposed.changing
+#. placeholder {1}: formatCount(proposed.changing)
+#. placeholder {2}: formatCount(proposed.changing)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "{0, plural, one {Move {1} row} other {Move {2} rows}}"
+msgstr "{0, plural, one {Mover {1} linha} other {Mover {2} linhas}}"
 
 #: src/screens/Reports.tsx
 #, fuzzy
@@ -6951,6 +7003,16 @@ msgctxt "rule list"
 msgid "regex"
 msgstr "regex"
 
+#. Rules screen: how many rows already in the ledger a rule being tried would match
+#. placeholder {0}: formatCount(trial.data.matches)
+#. placeholder {1}: trial.data.considered
+#. placeholder {2}: formatCount(trial.data.considered)
+#. placeholder {3}: formatCount(trial.data.considered)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "It claims <0>{0}</0> of {1, plural, one {{2} row already in this ledger.} other {{3} rows already in this ledger.}}"
+msgstr "Ela abrange <0>{0}</0> de {1, plural, one {{2} linha que já está neste livro-caixa.} other {{3} linhas que já estão neste livro-caixa.}}"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody reset {user}'s password"
@@ -6978,6 +7040,12 @@ msgstr "Todos"
 msgid "a pocket's or a card product's name"
 msgstr "o nome de um cofrinho ou de um produto de cartão"
 
+#. Column value on the Accounts screen: how many transactions name a suggested identifier
+#: src/screens/Accounts.tsx
+#, fuzzy
+msgid "{count, plural, one {{shown} row} other {{shown} rows}}"
+msgstr "{count, plural, one {{shown} linha} other {{shown} linhas}}"
+
 #. History headline, the kind of act: several rows deleted at once
 #: src/lib/historyWords.ts
 #, fuzzy
@@ -6995,6 +7063,19 @@ msgstr "Preparando a atualização"
 msgctxt "starting balance rows"
 msgid "Import"
 msgstr "Importar"
+
+#. Screen-reader name of the Register's button for more currencies
+#. placeholder {0}: rest.length
+#. placeholder {1}: rest.length
+#. placeholder {2}: rest.join(", ")
+#. placeholder {3}: restOn.length
+#. placeholder {4}: rest.length
+#. placeholder {5}: rest.join(", ")
+#. placeholder {6}: restOn.length
+#: src/screens/Register.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} more currency: {2}. {3} shown.} other {{4} more currencies: {5}. {6} shown.}}"
+msgstr "{0, plural, one {Mais {1} moeda: {2}. {3} mostradas.} other {Mais {4} moedas: {5}. {6} mostradas.}}"
 
 #. placeholder {0}: rule.data?.history_window ?? 3
 #: src/screens/Categories.tsx
@@ -7348,14 +7429,6 @@ msgstr "Isto entra como um único registro no Histórico, então a importação 
 msgid "Email"
 msgstr "E-mail"
 
-#. placeholder {0}: packages.length
-#. placeholder {1}: count(packages.length)
-#. placeholder {2}: count(packages.length)
-#: src/screens/ApplicationManagement.tsx
-#, fuzzy
-msgid "{0, plural, one {{1} packages.} other {{2} packages.}}"
-msgstr "{0, plural, one {{1} pacote.} other {{2} pacotes.}}"
-
 #: src/screens/Reconcile.tsx
 #, fuzzy
 msgid "The difference has to be zero first"
@@ -7430,6 +7503,17 @@ msgstr "por que cada moeda tem suas próprias colunas"
 #, fuzzy
 msgid "Only used for totals across accounts. Each account keeps its own, and nothing in the ledger is ever converted."
 msgstr "Usada só para totais entre contas. Cada conta mantém a sua, e nada no livro-caixa é convertido."
+
+#. Under the count of categories on the household page
+#. placeholder {0}: it.category_groups
+#. placeholder {1}: count(it.category_groups)
+#. placeholder {2}: count(it.categories_archived)
+#. placeholder {3}: count(it.category_groups)
+#. placeholder {4}: count(it.categories_archived)
+#: src/screens/Household.tsx
+#, fuzzy
+msgid "{0, plural, one {in {1} group, {2} archived} other {in {3} groups, {4} archived}}"
+msgstr "{0, plural, one {em {1} grupo, {2} arquivadas} other {em {3} grupos, {4} arquivadas}}"
 
 #. Menu item and the name of its screen
 #: src/App.tsx
@@ -7626,16 +7710,6 @@ msgstr "Aplicar as regras ao que já está aqui"
 #, fuzzy
 msgid "Withdraw this reset link?"
 msgstr "Revogar este link de redefinição?"
-
-#. placeholder {0}: report.coverage.months_in_range
-#. placeholder {1}: report.coverage.months_with_activity
-#. placeholder {2}: report.coverage.months_in_range
-#. placeholder {3}: report.coverage.months_with_activity
-#. placeholder {4}: report.coverage.months_in_range
-#: src/screens/reports/IncomeExpense.tsx
-#, fuzzy
-msgid "{0, plural, one {{1} of {2} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.} other {{3} of {4} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.}}"
-msgstr "{0, plural, one {{1} de {2} meses tem alguma transação — uma coluna vazia é um mês sem nada importado, não um mês em que você não gastou nada.} other {{3} de {4} meses têm alguma transação — uma coluna vazia é um mês sem nada importado, não um mês em que você não gastou nada.}}"
 
 #: src/screens/AccountImport.tsx
 #, fuzzy
@@ -8320,11 +8394,6 @@ msgstr "{by} deu a {user} um novo autenticador"
 msgid "A transfer moves money between your own accounts, so it is not spending and has no category"
 msgstr "Uma transferência move dinheiro entre suas próprias contas, então não é gasto e não tem categoria"
 
-#: src/screens/Accounts.tsx
-#, fuzzy
-msgid "{count, plural, other {{shown} rows}}"
-msgstr "{count, plural, one {{shown} linha} other {{shown} linhas}}"
-
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Keep it plugged in and awake until this finishes. If it sleeps, the update resumes or rolls back when it wakes."
@@ -8362,6 +8431,15 @@ msgstr "Autenticador, com seus códigos de recuperação"
 #, fuzzy
 msgid "by country"
 msgstr "por país"
+
+#. Import preview: how many lines the statement file holds
+#. placeholder {0}: preview.lines.length
+#. placeholder {1}: preview.lines.length
+#. placeholder {2}: preview.lines.length
+#: src/screens/Import.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} line} other {{2} lines}}"
+msgstr "{0, plural, one {{1} linha} other {{2} linhas}}"
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -8525,13 +8603,6 @@ msgstr "O nome deste arquivo traz <0>{0}</0>. Guardar como IBAN de <1>{1}</1>, p
 #, fuzzy
 msgid "Disabling…"
 msgstr "Desativando…"
-
-#. Button on the Rules screen
-#. placeholder {0}: formatCount(proposed.changing)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "Move {0} rows"
-msgstr "Mover {0} linhas"
 
 #. Column heading on the accounts import: noun, a line of a file
 #. Column name shown beside a value on phones on the accounts import: noun, a line of a file
@@ -8863,13 +8934,6 @@ msgstr "{by} redefiniu a senha de {user}"
 #, fuzzy
 msgid "Updated to {running} at {at} in {took}."
 msgstr "Atualizado para {running} em {at}, em {took}."
-
-#. placeholder {0}: count(it.category_groups)
-#. placeholder {1}: count(it.categories_archived)
-#: src/screens/Household.tsx
-#, fuzzy
-msgid "in {0} groups, {1} archived"
-msgstr "em {0} grupos, {1} arquivadas"
 
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
@@ -9325,12 +9389,6 @@ msgstr "Despesa de trabalho — dada como perdida"
 #, fuzzy
 msgid "{0} will no longer be able to administer this instance."
 msgstr "{0} não poderá mais administrar esta instância."
-
-#. placeholder {0}: formatCount(proposed.orphaned.length)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "Also delete the {0} payees left empty"
-msgstr "Excluir também os {0} favorecidos que ficarem vazios"
 
 #. Name of a fact on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
@@ -9938,6 +9996,16 @@ msgstr "Quem vai usá-la (opcional)"
 msgid "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
 msgstr "Todos os códigos que você tem agora, usados ou não, deixam de funcionar e dez novos os substituem. Ninguém é desconectado."
 
+#. Rules screen: how many rows already in the ledger a rule being tried would match
+#. placeholder {0}: formatCount(trial.data.matches)
+#. placeholder {1}: trial.data.considered
+#. placeholder {2}: formatCount(trial.data.considered)
+#. placeholder {3}: formatCount(trial.data.considered)
+#: src/screens/Rules.tsx
+#, fuzzy
+msgid "It rewrites <0>{0}</0> of {1, plural, one {{2} row already in this ledger.} other {{3} rows already in this ledger.}}"
+msgstr "Reescreve <0>{0}</0> de {1, plural, one {{2} linha que já está neste livro-caixa.} other {{3} linhas que já estão neste livro-caixa.}}"
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
@@ -10234,11 +10302,6 @@ msgstr "Remover {0}"
 msgid "Create the key"
 msgstr "Criar a chave"
 
-#: src/components/Receipts.tsx
-#, fuzzy
-msgid "{count, plural, one {{count} pages} other {{count} pages}}"
-msgstr "{count, plural, one {{count} página} other {{count} páginas}}"
-
 #. Label on the household page: noun
 #: src/screens/Household.tsx
 #, fuzzy
@@ -10343,13 +10406,6 @@ msgstr "aproximado — {shown}"
 msgid "In"
 msgstr "Entrada"
 
-#. placeholder {0}: formatCount(trial.data.matches)
-#. placeholder {1}: formatCount(trial.data.considered)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "It claims <0>{0}</0> of {1} rows already in this ledger."
-msgstr "Ela abrange <0>{0}</0> de {1} linhas que já estão neste livro-caixa."
-
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Enter again to edit"
@@ -10399,6 +10455,17 @@ msgstr "Atualizar para o aplicativo e altera o esquema do livro-caixa."
 #, fuzzy
 msgid "Case does not matter. <0>Matches the pattern</0> is a full regular expression, capped at 300 characters and given a tenth of a second per row — one that runs longer is set aside for the rest of that import. Try it below before you save it."
 msgstr "Maiúsculas e minúsculas não importam. <0>Corresponde ao padrão</0> é uma expressão regular completa, limitada a 300 caracteres e com um décimo de segundo por linha — uma que demore mais é deixada de lado pelo resto daquela importação. Teste-a abaixo antes de salvar."
+
+#. Income vs Expense report: how many months in the range have any transactions
+#. placeholder {0}: report.coverage.months_with_activity
+#. placeholder {1}: report.coverage.months_with_activity
+#. placeholder {2}: report.coverage.months_in_range
+#. placeholder {3}: report.coverage.months_with_activity
+#. placeholder {4}: report.coverage.months_in_range
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} of {2} months has any transactions — an empty column is a month with nothing imported, not a month you spent nothing.} other {{3} of {4} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.}}"
+msgstr "{0, plural, one {{1} de {2} meses tem alguma transação — uma coluna vazia é um mês sem nada importado, não um mês em que você não gastou nada.} other {{3} de {4} meses têm alguma transação — uma coluna vazia é um mês sem nada importado, não um mês em que você não gastou nada.}}"
 
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -10736,13 +10803,6 @@ msgstr "Um proprietário pode administrar esta instância: pessoas, casas e conv
 msgid "No categories are ticked, not even Needs a category, so there is nothing to show. Tick one in the categories filter, or Select all."
 msgstr "Nenhuma categoria está marcada, nem Precisa de categoria, então não há nada para mostrar. Marque uma no filtro de categorias, ou Selecionar todas."
 
-#. placeholder {0}: formatCount(proposed.changing)
-#. placeholder {1}: formatCount(proposed.considered)
-#: src/screens/Rules.tsx
-#, fuzzy
-msgid "<0>{0}</0> of {1} rows would move."
-msgstr "<0>{0}</0> de {1} linhas mudariam."
-
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
@@ -10952,14 +11012,6 @@ msgstr "Mantido fora do log: {0}. Ausente em vez de mascarado com asteriscos —
 #, fuzzy
 msgid "showing the first {0}"
 msgstr "mostrando os primeiros {0}"
-
-#. placeholder {0}: rest.length
-#. placeholder {1}: rest.join(", ")
-#. placeholder {2}: restOn.length
-#: src/screens/Register.tsx
-#, fuzzy
-msgid "{0} more currencies: {1}. {2} shown."
-msgstr "Mais {0} moedas: {1}. {2} mostradas."
 
 #. Label on the one-time import's results
 #: src/screens/ynab/results.tsx
@@ -11416,14 +11468,6 @@ msgstr "Conciliação"
 #, fuzzy
 msgid "never"
 msgstr "nunca"
-
-#. placeholder {0}: account.rows
-#. placeholder {1}: formatCount(account.rows)
-#. placeholder {2}: formatCount(account.rows)
-#: src/screens/ynab/mapping.tsx
-#, fuzzy
-msgid "{0, plural, one {Its {1} row are left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
-msgstr "{0, plural, one {A {1} linha dela fica de fora e aparece no relatório.} other {As {2} linhas dela ficam de fora e aparecem no relatório.}}"
 
 #. Label on the receipts
 #: src/components/Receipts.tsx

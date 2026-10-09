@@ -62,7 +62,7 @@ export function Problem({ error }: { error: unknown }) {
   return (
     <div className="banner" role="alert">
       {message}
-      {wait ? ` ${plural(wait, { other: `Try again in ${wait} seconds.` })}` : null}
+      {wait ? ` ${t({ message: plural(wait, { one: `Try again in ${wait} second.`, other: `Try again in ${wait} seconds.` }), comment: "Sentence after a refusal: how long to wait before trying again" })}` : null}
     </div>
   );
 }

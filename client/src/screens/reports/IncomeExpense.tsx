@@ -527,10 +527,10 @@ export function ReportTable({
         ) : null}
         {gaps > 0 ? (
           <>
-            {plural(report.coverage.months_in_range, {
-              one: `${report.coverage.months_with_activity} of ${report.coverage.months_in_range} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.`,
+            {t({ message: plural(report.coverage.months_with_activity, {
+              one: `${report.coverage.months_with_activity} of ${report.coverage.months_in_range} months has any transactions — an empty column is a month with nothing imported, not a month you spent nothing.`,
               other: `${report.coverage.months_with_activity} of ${report.coverage.months_in_range} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.`,
-            })}
+            }), comment: "Income vs Expense report: how many months in the range have any transactions" })}
           </>
         ) : null}
       </p>

@@ -1052,7 +1052,7 @@ export function Import({
               <Trans>What this would do</Trans>
             </h2>
             <p className="muted small">
-              {preview.filename} · {plural(preview.lines.length, { other: `${preview.lines.length} lines` })} · {t({ message: `into ${account?.name ?? ""}`, comment: "Sentence on the Import screen: preposition, the account money arrives in" })}
+              {preview.filename} · {t({ message: plural(preview.lines.length, { one: `${preview.lines.length} line`, other: `${preview.lines.length} lines` }), comment: "Import preview: how many lines the statement file holds" })} · {t({ message: `into ${account?.name ?? ""}`, comment: "Sentence on the Import screen: preposition, the account money arrives in" })}
             </p>
 
             {preview.warnings.map((warning) => (
@@ -1282,7 +1282,7 @@ export function RawFile({
         <Trans>The file itself</Trans>
       </h2>
       <p className="muted small">
-        {raw.name} · {t({ message: `${formatCount(raw.total)} characters`, comment: "Sentence on the Import screen" })}
+        {raw.name} · {t({ message: plural(raw.total, { one: `${formatCount(raw.total)} character`, other: `${formatCount(raw.total)} characters` }), comment: "Import screen: the size of the statement file, in characters" })}
         {truncated ? ` · ${t`showing the first ${formatCount(RAW_TEXT_LIMIT)}`}` : ""}
         {` · ${t`from the copy in this browser, not from the server — the file itself is not kept`}`}
       </p>
