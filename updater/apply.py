@@ -89,7 +89,7 @@ from pathlib import Path
 from updater import contract, health, hook, journal, oneoff, pin, prepare, shapes, survey, verify, volume
 from updater import engine as eng
 from updater.clock import Deadline
-from updater.handover import goes_first, protocol_window, runs, stays_newer
+from updater.handover import goes_first, is_me, protocol_window, runs, stays_newer
 from updater.journal import Action, Journal, Observed, Owner
 from updater.site import APP_REPOSITORY, UPDATER_REPOSITORY, Kit, Records
 
@@ -952,12 +952,18 @@ class Apply:
         if stays_newer(me, self.to):
             self.notes.append(f"The updater stays on {me.version}, which is newer.")
             return record()
+        successor = Owner(image_digest=str(self.ctx["updater_digest"]), version=self.to, container="")
+        if is_me(me, successor):
+            # Already the target's updater -- after an updater-only update, say:
+            # handing over would start a copy of itself and evict the
+            # `-previous` still on standby (#258).
+            self.notes.append(f"The updater stays on {me.version}: it is already the updater of {self.to}.")
+            return record()
         if self.j.step != "10":
             # Its own handover journal: 2a's, if there was one, is under the
             # request's id and has its own outcome.
             self.remember(handover_id=str(uuid.uuid4()))
             self.start("10", "Handing over to the new updater.")
-        successor = Owner(image_digest=str(self.ctx["updater_digest"]), version=self.to, container="")
         written: list[str] = []
 
         def before_go() -> None:

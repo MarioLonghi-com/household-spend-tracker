@@ -580,6 +580,9 @@ class Heartbeat:
     socket_sentence: str | None = None
     podman_restart: str = "not_applicable"
     protocol: int = FROZEN_PROTOCOL
+    #: Gained within protocol 1 (C4, #262): why the updater cannot go on, in
+    #: one sentence the screen shows as it is, or None while it can.
+    problem: str | None = None
 
     def __post_init__(self) -> None:
         if self.podman_restart not in PODMAN_RESTART:

@@ -276,3 +276,50 @@ def test_the_client_asks_for_the_recovery_code_with_a_post():
     source = (SCREENS / "Updates.tsx").read_text()
     calls = re.findall(r"api\.(\w+)<\w+>\(`\$\{BASE\}/recovery-code`", source)
     assert calls == ["post"], calls
+
+
+# --------------------------------------------------------------------------- #
+# Application management's words, said by the client (#271)
+# --------------------------------------------------------------------------- #
+
+ENGLISH_CATALOG = Path(__file__).resolve().parent.parent / "client" / "src" / "locales" / "en" / "messages.po"
+
+
+def _english_messages() -> set[str]:
+    """Every msgid in the English catalog, continuation lines joined."""
+    found: set[str] = set()
+    current: list[str] | None = None
+    for line in ENGLISH_CATALOG.read_text(encoding="utf-8").splitlines():
+        if line.startswith("msgid "):
+            current = [json.loads(line[6:])]
+        elif line.startswith('"') and current is not None:
+            current.append(json.loads(line))
+        else:
+            if current is not None:
+                found.add("".join(current))
+            current = None
+    return found
+
+
+@pytest.mark.skipif(not ENGLISH_CATALOG.exists(), reason="the client is not checked out")
+def test_the_client_says_every_place_log_and_style_in_the_servers_own_english():
+    """The server names its places, log files and logging styles in English;
+    the client says them in the reader's language from `lib/labels.ts`, keyed
+    by name or key. In English the client's words must be the server's, letter
+    for letter, or an English reader sees a changed sentence -- and a server
+    sentence the client does not know is one a translated screen shows in
+    English."""
+    from app import logging_setup
+    from app.services import platform
+
+    english = _english_messages()
+    server = [(place.what, place.note) for place in platform.places()]
+    server += [(stream.key, stream.blurb) for stream in logging_setup.STREAMS]
+    server += [(style.label, style.blurb) for style in logging_setup.STYLES]
+    missing = sorted(
+        text
+        for name, note in server
+        for text in ([name, note] if not name.islower() else [note])
+        if text not in english
+    )
+    assert missing == [], f"not in client/src/locales/en/messages.po: {missing}"

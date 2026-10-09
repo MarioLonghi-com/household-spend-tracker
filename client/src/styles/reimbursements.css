@@ -38,7 +38,7 @@
 .reimb-figure-line.owed strong { color: var(--warn); }
 
 /* The currencies are checkboxes worn as chips: the box stays visible, since
-   "tick several" is the whole difference from Income v Expense's toggle. */
+   "tick several" is the whole difference from Income vs Expense's toggle. */
 .reimb-currencies label.chip {
   display: inline-flex;
   align-items: center;

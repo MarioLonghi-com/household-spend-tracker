@@ -140,7 +140,7 @@ def test_the_seeded_opening_balance_is_marked_as_one(seeded):
     `accounts.create_account`, so it does not pick up the `system` mark that
     service applies -- and an unmarked opening-balance payee is, to every flow
     report, an ordinary payee who paid you the account's whole balance. Caught
-    by opening the Income v Expense report on the demo and drilling into the
+    by opening the Income vs Expense report on the demo and drilling into the
     one figure that looked odd: 2,500 of "Uncategorised" income in month one,
     which turned out to be the Santander starting balance.
 

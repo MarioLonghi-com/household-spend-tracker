@@ -138,8 +138,16 @@ describe("a refusal with a code", () => {
     expect(screen.getByRole("alert").textContent).toBe("something new");
   });
 
-  it("still says how long to wait, in English as it always did", () => {
-    render(<Problem error={new ApiError("too many attempts", 429, 1)} />);
-    expect(screen.getByRole("alert").textContent).toBe("too many attempts Try again in 1 seconds.");
+  it.each([
+    [1, "too many attempts Try again in 1 second."],
+    [2, "too many attempts Try again in 2 seconds."],
+  ])("says how long to wait, %s, with the singular for one (#269)", (wait, said) => {
+    render(<Problem error={new ApiError("too many attempts", 429, wait)} />);
+    expect(screen.getByRole("alert").textContent).toBe(said);
+  });
+
+  it("says nothing about waiting when there is no wait", () => {
+    render(<Problem error={new ApiError("too many attempts", 429, 0)} />);
+    expect(screen.getByRole("alert").textContent).toBe("too many attempts");
   });
 });

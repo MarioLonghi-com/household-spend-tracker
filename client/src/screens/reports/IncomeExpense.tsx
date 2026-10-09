@@ -36,9 +36,10 @@ import type {
   ReportRow,
   ReportSection,
 } from "../../lib/types";
-import { formatDate, listText, monthLabel } from "../../lib/locale";
+import { amountLang, formatDate, listText, monthLabel } from "../../lib/locale";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { categoryName } from "../../lib/labels";
 
 /**
  * Which figure somebody clicked, in the terms the server narrows by.
@@ -526,10 +527,10 @@ export function ReportTable({
         ) : null}
         {gaps > 0 ? (
           <>
-            {plural(report.coverage.months_in_range, {
-              one: `${report.coverage.months_with_activity} of ${report.coverage.months_in_range} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.`,
+            {t({ message: plural(report.coverage.months_with_activity, {
+              one: `${report.coverage.months_with_activity} of ${report.coverage.months_in_range} months has any transactions — an empty column is a month with nothing imported, not a month you spent nothing.`,
               other: `${report.coverage.months_with_activity} of ${report.coverage.months_in_range} months have any transactions — an empty column is a month with nothing imported, not a month you spent nothing.`,
-            })}
+            }), comment: "Income vs Expense report: how many months in the range have any transactions" })}
           </>
         ) : null}
       </p>
@@ -938,13 +939,14 @@ function Line({
   onOpen: (cell: Cell) => void;
 }) {
   const which = { rowCategoryId: row.key, rowUncategorised: row.key === null };
+  const name = categoryName(row.key, row.name);
   return (
     <tr className={row.key === null ? "report-unset" : undefined}>
       {/* The group used to be printed small beside every category name. It is
           the heading above the row now, so repeating it on each line would be
           saying the same thing twice in the narrowest column on screen. */}
       <th scope="row" className="report-label">
-        {row.name}
+        {name}
       </th>
       {months.map((period) => (
         <td key={period} className="amount">
@@ -953,7 +955,7 @@ function Line({
             currency={currency}
             onOpen={onOpen}
             cell={{
-              title: `${row.name} — ${monthLabel(period)}`,
+              title: `${name} — ${monthLabel(period)}`,
               period,
               direction: tone,
               ...which,
@@ -970,7 +972,7 @@ function Line({
           currency={currency}
           strong
           onOpen={onOpen}
-          cell={{ title: row.name, direction: tone, ...which }}
+          cell={{ title: name, direction: tone, ...which }}
         />
       </td>
     </tr>
@@ -1002,19 +1004,20 @@ function Figure({
   cell?: Cell;
 }) {
   const text = format(minor, currency);
+  const lang = amountLang();
 
   // A zero has nothing behind it, so it is not offered as something to open.
   // Making it clickable would promise a list and then show an empty one,
   // which teaches people the feature is broken on the cells where it is
   // simply not applicable.
-  if (minor === 0) return <span className="muted">{text}</span>;
+  if (minor === 0) return <span className="muted" lang={lang}>{text}</span>;
 
   const classes = [strong ? "report-strong" : "", signed ? (minor > 0 ? "net-up" : "net-down") : ""]
     .filter(Boolean)
     .join(" ");
   const body = (
     <span className={classes || undefined}>
-      {text}
+      {lang ? <span lang={lang}>{text}</span> : text}
       {/* The word a screen reader hears, because it hears no colour. The "-"
           in front of the figure is the cue that is there for everybody else. */}
       {signed && <span className="sr-only"> {minor > 0 ? t({ message: "surplus", comment: "Screen-reader text on the Income vs Expense report: the household kept money (for screen readers)" }) : t({ message: "shortfall", comment: "Screen-reader text on the Income vs Expense report: the household spent more than came in (for screen readers)" })}</span>}

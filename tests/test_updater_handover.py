@@ -11,6 +11,8 @@ heartbeat and the records, not only that it said so.
 from __future__ import annotations
 
 import json
+import threading
+import time
 
 import pytest
 
@@ -18,11 +20,14 @@ from tests.updater_fake_engine import engine_fixture
 from tests.updater_world import APP, PROJECT, UPD, A, B, C, Killed, World, digest, ref
 from updater import contract, journal, pin, shapes, volume
 from updater import engine as eng
+from updater import service as service_module
 from updater.handover import (
     GONE_GRACE_SECONDS,
     STANDBY_SECONDS,
     Successions,
     current_side,
+    goes_first,
+    is_me,
     load,
     lock_holder,
     own_bind_sources,
@@ -142,6 +147,55 @@ def test_update_updater_hands_over_and_the_old_one_stops_after_ten_minutes(world
     doc = load(world.volume, req["id"])
     assert doc["outcome"] == "done" and doc["settled"] is True
     assert assert_exactly_one_current(world).version == C
+
+
+def test_h7_exits_on_the_sigterm_while_its_own_stop_is_still_in_flight(world, monkeypatch):
+    """#257: the engine answers a stop only once the container has exited.
+
+    U1's process loop -- `Service.run`, as `serve` runs it -- has to go on
+    while its own stop is in flight, see the `stop` event the SIGTERM sets,
+    and return, so the container exits 0 within the grace instead of being
+    killed (137) when the grace runs out.
+    """
+    req, _ = update_updater(world, C)
+    world.run_for(STANDBY_SECONDS - 60)
+    # From here U1's process runs its own loop, on a thread, as `serve` does.
+    u1 = world.fleet.pop(world.updater_id)
+    assert u1.mode == "standby"
+    world.run_for(90)  # U2 carries on beating; U1's ten minutes are up
+    me = world.fake.containers[world.updater_id]
+    sigterm, exited = threading.Event(), threading.Event()
+    asked: list[str] = []
+
+    def engine_stop(ref: str, grace: int = 30) -> None:
+        # The engine: SIGTERM, then the answer once the process has exited --
+        # or the kill after the grace. Five seconds stand in for the grace.
+        asked.append(ref)
+        sigterm.set()
+        code = 0 if exited.wait(5) else 137
+        world.fake.set_state(me, "exited", code)
+
+    monkeypatch.setattr(u1.kit.client, "stop", engine_stop)
+    monkeypatch.setattr(u1.service, "startup", lambda: None)  # it started long ago
+    monkeypatch.setattr(service_module, "TICK_SECONDS", 0.05)
+
+    def process() -> None:
+        u1.service.run(sigterm)
+        exited.set()  # `serve` returned: `main` returns 0 and the process ends
+
+    loop = threading.Thread(target=process, daemon=True)
+    loop.start()
+    loop.join(4)
+    assert not loop.is_alive(), "the loop was still held by its own stop"
+    assert asked == [world.updater_id] and u1.mode == "retired"
+    for _ in range(100):
+        if me["State"] == "exited":
+            break
+        time.sleep(0.02)
+    assert me["State"] == "exited" and world.fake.inspect_of(me)["State"]["ExitCode"] == 0
+    assert named(world, PREVIOUS)["Id"] == world.updater_id and ("H7", "U1") in world.writes
+    doc = load(world.volume, req["id"])
+    assert doc["step"] == "H7" and doc["outcome"] == "done" and doc["settled"] is True
 
 
 def test_the_next_handover_removes_the_previous_one_and_keeps_one_previous(world):
@@ -471,6 +525,87 @@ def test_a_successor_recreated_by_compose_within_ten_minutes_is_not_taken_back_f
     assert assert_exactly_one_current(world).version == C
 
 
+def test_a_successor_replaced_by_compose_with_another_updater_is_stood_down_from_not_taken_back(world):
+    """#259: a `compose up` during the standby, with `.env` pinned back to A's
+    updater: compose removes U2 (C) and starts a new container of A's image
+    under the canonical name. Two container ids, two digests."""
+    import copy
+
+    req, record = update_updater(world, C)
+    assert record["state"] == "succeeded"
+    world.run_for(60)
+    u2 = world.successor_id()
+    seen = copy.deepcopy(world.fake.inspect_of(world.fake.containers[u2]))
+    world.stay_down.add(u2)
+    world.crash(u2, restart=False)
+    del world.fake.containers[u2]
+    world.run_for(6)
+    cmd = seen["Config"].get("Cmd") or []
+    if "--successor" in cmd:
+        at = cmd.index("--successor")
+        seen["Config"]["Cmd"] = cmd[:at] + cmd[at + 2 :]
+    seen.pop("Id")
+    seen["Name"] = "/" + CANONICAL
+    seen["State"] = {"Running": True, "Status": "running"}
+    fresh = world.fake.add_inspected(seen, image_id=world.fake.images[ref(UPD, A)]["Id"])
+    assert fresh != u2 and digest(UPD, A) != digest(UPD, C)
+    # The new one starts before U1 next looks: U1's process is between ticks.
+    u1 = world.fleet.pop(world.updater_id)
+    world.pending.append(fresh)
+    world.run_for(10)
+
+    # The new container is not U1, though it runs U1's image: it does not
+    # settle U1's handover in its place, and starts as current -- beating.
+    assert world.fleet[fresh].mode == "current"
+    assert load(world.volume, req["id"])["outcome"] is None
+    assert beat(world)["role"] == "current" and beat(world)["image_digest"] == digest(UPD, A)
+    assert beat(world)["container"] == CANONICAL and beat(world)["busy"] is False
+    world.fleet[world.updater_id] = u1
+    world.run_for(20)
+    # U1 recorded what happened, and stopped itself as at H7, still -previous.
+    doc = load(world.volume, req["id"])
+    assert doc["outcome"] == "stood_down" and doc["settled"] is True
+    assert "was replaced by another container under its name" in doc["sentence"]
+    assert "stood down instead of taking back over" in doc["sentence"]
+    assert world.fleet[world.updater_id].mode == "retired"
+    assert not world.is_running(world.updater_id)
+    assert named(world, PREVIOUS)["Id"] == world.updater_id and named(world, CANONICAL)["Id"] == fresh
+    history = world.history(req["id"])
+    assert history["state"] == "succeeded" and doc["sentence"] in history["notes"]
+    assert not any("took back" in n for n in history["notes"])
+    assert assert_exactly_one_current(world).image_digest == digest(UPD, A)
+
+
+def test_a_take_back_the_engine_refuses_stands_down_instead_of_crashing(world, monkeypatch):
+    """#259: the rename back onto the canonical name is refused (Podman: UNIQUE
+    constraint failed). The standby records that it stood down -- not a
+    take-back -- and stops itself; its service loop never sees the error."""
+    req, record = update_updater(world, C)
+    assert record["state"] == "succeeded"
+    world.run_for(60)
+    u2 = world.successor_id()
+    u1 = world.fleet[world.updater_id]
+    real_rename = u1.kit.client.rename
+
+    def rename(ref: str, new_name: str) -> None:
+        if new_name == CANONICAL:
+            raise eng.EngineError(500, "UNIQUE constraint failed: ContainerConfig.Name")
+        real_rename(ref, new_name)
+
+    monkeypatch.setattr(u1.kit.client, "rename", rename)
+    world.stay_down.add(u2)
+    world.crash(u2, restart=False)  # crash-looping: no heartbeat, not running
+    world.run_for(60)
+
+    doc = load(world.volume, req["id"])
+    assert doc["outcome"] == "stood_down" and doc["settled"] is True
+    assert "could not take its name back" in doc["sentence"] and "which did not happen" in doc["sentence"]
+    assert u1.mode == "retired" and not world.is_running(world.updater_id)
+    assert named(world, PREVIOUS)["Id"] == world.updater_id and named(world, NEXT)["Id"] == u2
+    history = world.history(req["id"])
+    assert history["state"] == "succeeded" and doc["sentence"] in history["notes"]
+
+
 def test_a_successor_whose_heartbeat_goes_stale_is_taken_back_from_after_two_minutes(world):
     req, _ = update_updater(world, C)
     u2 = world.fleet[world.successor_id()]
@@ -577,6 +712,52 @@ def test_never_downgrade_no_successor_is_created_when_the_running_updater_is_new
         # And an updater-only refresh to B is refused before anything is pulled.
         refused, answer = update_updater(w, B)
         assert answer["state"] == "refused" and answer["code"] == "updater_not_newer"
+
+
+def test_an_updater_already_on_the_targets_image_does_not_hand_over_to_a_copy_of_itself(world):
+    """#258: an updater-only update to B, then the app A -> B while A's updater is on standby."""
+    update_updater(world, B)
+    b_updater = named(world, CANONICAL)["Id"]
+    assert named(world, PREVIOUS)["Id"] == world.updater_id and world.is_running(world.updater_id)
+    calls_before = len(world.fake.calls)
+
+    req, record = apply(world, B)
+    assert record["state"] == "succeeded" and world.ledger.stamp == B
+    steps = [s["step"] for s in world.journal(req["id"]).started]
+    assert "2a" not in steps and "10" not in steps
+    assert world.journal(req["id"]).context["updater_digest"] == digest(UPD, B) != digest(UPD, A)
+    assert f"The updater stays on {B}: it is already the updater of {B}." in record["notes"]
+    assert not any("takes over" in n for n in record["notes"])
+    # No -next was made; B's updater is still the one, and A's -- still on its
+    # standby, the one a take-back would need -- is still -previous.
+    assert named(world, NEXT) is None
+    assert not any(
+        c.query.get("name") == NEXT
+        for c in world.fake.calls[calls_before:]
+        if c.bare == "/containers/create"
+    )
+    assert named(world, CANONICAL)["Id"] == b_updater
+    assert named(world, PREVIOUS)["Id"] == world.updater_id and world.is_running(world.updater_id)
+    assert world.fleet[world.updater_id].mode == "standby"
+    assert pin.read(world.project_dir)[pin.UPDATER_KEY] == f"{UPD}:{B}@{digest(UPD, B)}"
+    # And a refresh of the updater to the release it already runs is refused.
+    _, answer = update_updater(world, B)
+    assert answer["state"] == "refused" and answer["code"] == "updater_not_newer"
+    world.run_for(STANDBY_SECONDS + 30)
+    assert assert_exactly_one_current(world).image_digest == digest(UPD, B)
+
+
+def test_the_updaters_identity_is_its_digest_not_its_version():
+    """#258: the same image is never handed over to; a rebuild at the same version still is."""
+    me = Owner(digest(UPD, B), B, CANONICAL)
+    same = Owner(digest(UPD, B), B, "")
+    rebuilt = Owner(digest(UPD, C), B, "")
+    newer = Owner(digest(UPD, C), C, "")
+    assert is_me(me, same) and not is_me(me, rebuilt) and not is_me(me, newer)
+    assert not is_me(Owner("", "0.0.0", ""), Owner("", B, ""))
+    assert goes_first(me, newer, (1, 1), 1) and not goes_first(me, same, (1, 1), 1)
+    # Step 10 is what takes a rebuild at the same version: it is not newer, so not first.
+    assert not goes_first(me, rebuilt, (1, 1), 1)
 
 
 # --------------------------------------------------------------------------- #

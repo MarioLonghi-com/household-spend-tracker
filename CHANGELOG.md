@@ -44,6 +44,63 @@ history this repository does not have.
   and the English is now rendered from the same structure, so the two cannot
   disagree. (#266)
 
+### Added
+
+- **Every screen is checked in each draft language before review.** The
+  end-to-end suite walks every screen in Brazilian Portuguese, Spanish and
+  Swedish, on a desktop and on a phone, and fails on a message left in
+  English, a placeholder shown as written, text cut off or pushing the page
+  sideways, an amount not written the language's way, or a wrong `lang`. Only
+  the test build can show the drafts; the languages stay hidden everywhere
+  else. The walk found the Transfers screen and a few shared controls never
+  prepared for translation, and Application management's places, log files
+  and logging styles arriving in English from the server; all of them now
+  translate, with English unchanged. On a phone, the Accounts screen's two
+  buttons and a long screen title could push the page sideways in a longer
+  language; they wrap now, and English, which fits, is laid out as before.
+  (#271)
+
+### Changed
+
+- **One English word for each thing.** The headings that group accounts by type
+  now say "Current accounts" and "Other debts", the plurals of the account
+  types they group, rather than "Checking" and "Other liabilities"; and the
+  report is "Income vs Expense" everywhere, in the import's reasons, the
+  Transfers screen, the import guide and the agent's tool descriptions, where
+  some said "Income v Expense". The glossary gains rows for the words the
+  update screens use (updater, container engine, image, migration,
+  downgrade, launcher, recovery page, release, version), and the update,
+  application-management and backup screens' short messages carry translator
+  notes. (#270)
+- **The client's build tooling no longer installs `braces`**, which carries a
+  high-severity advisory with no fixed release (GHSA-vfj7-8cjw-p6xm). It came
+  in through micromatch under the translation tooling, which runs at build
+  time only and never reached a browser; micromatch is now replaced by the
+  two functions the tooling calls, so the dependency review allows no
+  advisory at all. (#270)
+
+### Fixed
+
+- **English counts say "1 row", not "1 rows".** While the screens were being
+  prepared for translation, a count kept its English exactly as it was, wrong
+  plural included: "Try again in 1 seconds", "1 legs", "Its 1 row are left
+  out", "1 transaction match the filters", and a few more like them on the
+  Rules, Import, Household, Accounts and Register screens. Every English
+  message with a count now has its singular, and the translations follow.
+  (#269)
+
+## 0.9.2 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.9.1`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.9.1` and restart.
+
+Fixes found by testing 0.9.1's updates from the browser on Docker Desktop
+(macOS, Windows), rootless Podman and a Tailscale server: an update cut off
+by a power cut now rolls back by itself, the updaters hand over cleanly, the
+launcher uses the engine Spend Tracker is in, and the page opens on the
+outcome after an update.
+
 ### Fixed
 
 - **After an update, the page opens where the outcome is.** Once the app was
@@ -52,6 +109,49 @@ history this repository does not have.
   seen by going back to Application management by hand. The page now opens
   on Application management, scrolled to its Updates section, where the
   outcome is. (#255)
+- **A power cut during an update no longer leaves the updater restarting
+  forever.** Cut off a second after the updater made its maintenance page and
+  its drill, those two containers could come back without their files, and
+  the container engine then refused to list any of the installation's
+  containers. The updater stopped at that on every start -- hundreds of times
+  -- with the app down and nothing to say why. It now finds itself anyway,
+  removes its own two broken containers, and rolls the update back as after
+  any interruption. If something else is broken, it says so on the Updates
+  screen and in the update's progress, and tries again every so often instead
+  of exiting; running the launcher again removes the updater's own broken
+  containers, or names the one to remove. (#262)
+
+- **The previous updater exits cleanly when its ten minutes of standby are
+  up.** It asked the engine to stop its own container and then waited for the
+  answer, which the engine gives only once the container has exited, so the
+  updater could not see its own stop signal and was killed ten seconds later:
+  every handover ended with the previous updater shown as Exited (137). It now
+  asks without waiting and exits 0. (#257)
+
+- **An update no longer hands the updater over to a copy of itself.** After
+  *Update the updater only*, updating the app to the same release started a
+  second updater from the same image, removed the previous updater that was
+  still standing by, and recorded a takeover the confirmation had said would
+  not happen. An updater is now known by its image digest: the one already
+  running the target's image stays as it is, and says so in the record.
+  (#258)
+
+- **A `compose up` while the previous updater stands by no longer makes it
+  crash.** When compose replaced the new updater with a container of another
+  image, the replacement mistook itself for the previous updater and went
+  quiet for minutes, and the previous updater then tried to take back over
+  under a name that was in use, and died. The replacement now starts as the
+  updater and keeps its heartbeat; the previous one records that it stood
+  down, rather than a take-back that did not happen, and stops itself. A
+  take-back the engine refuses ends the same way. (#259)
+
+- **The launcher uses Podman when that is where Spend Tracker runs.** With
+  both Docker and Podman on a computer, the launcher picked Docker whenever
+  its command was installed, even with Docker Desktop stopped and a Podman
+  machine running, and then asked for Docker to be started. It now uses the
+  engine Spend Tracker is already installed in, or else the one that is
+  running, and only when neither is running says which are installed and
+  that one of them must be started. (#264)
 
 ## 0.9.1 — 2026-10-09
 

@@ -14,6 +14,12 @@
  * (Playwright's en-XA pass does exactly that), and it is what makes an
  * unextracted string visible as plain ASCII among accented text.
  *
+ * **The drafts in a QA build (#271).** `vite build --mode qa`, which is what
+ * `npm run e2e` builds, also has loaders for the drafts, reached the same way
+ * as en-XA: stored on the device. That is how the end-to-end pass walks every
+ * screen in each language before anyone reviews it. The mode is fixed when
+ * the bundle is built, so no other build has those loaders -- or the drafts.
+ *
  * English is loaded with the bundle and activated before the first render, so
  * there is never a frame without words. Another catalog loads lazily.
  */
@@ -32,6 +38,12 @@ export const SERVED_LOCALES: readonly string[] = [SOURCE_LOCALE];
 /** Reachable by storing it, never offered: the pseudo-locale. */
 export const PSEUDO_LOCALE = "en-XA";
 
+/** The languages whose catalogs hold drafts, not yet served (#58). */
+export const DRAFT_LOCALES: readonly string[] = ["pt-BR", "es-ES", "sv-SE"];
+
+/** A build made for the end-to-end QA pass, and nothing else (#271). */
+const QA_BUILD = import.meta.env.MODE === "qa";
+
 /** Where this device's choice of language is kept. Per device, as #48 decided. */
 export const LOCALE_KEY = "spendtracker.locale";
 
@@ -41,6 +53,13 @@ export const LOCALE_KEY = "spendtracker.locale";
  */
 const LOADERS: Record<string, () => Promise<{ messages: Messages }>> = {
   [PSEUDO_LOCALE]: () => import("../locales/en-XA/messages.po"),
+  ...(QA_BUILD
+    ? {
+        "pt-BR": () => import("../locales/pt-BR/messages.po"),
+        "es-ES": () => import("../locales/es-ES/messages.po"),
+        "sv-SE": () => import("../locales/sv-SE/messages.po"),
+      }
+    : {}),
 };
 
 i18n.load(SOURCE_LOCALE, english);
@@ -48,9 +67,13 @@ i18n.activate(SOURCE_LOCALE);
 
 const loaded = new Set<string>([SOURCE_LOCALE]);
 
-/** Whether a locale can be activated at all: served, or the pseudo-locale. */
+/** Whether a locale can be activated at all: served, the pseudo-locale, or a draft in a QA build. */
 export function isReachable(locale: string): boolean {
-  return SERVED_LOCALES.includes(locale) || locale === PSEUDO_LOCALE;
+  return (
+    SERVED_LOCALES.includes(locale) ||
+    locale === PSEUDO_LOCALE ||
+    (QA_BUILD && DRAFT_LOCALES.includes(locale))
+  );
 }
 
 /**
