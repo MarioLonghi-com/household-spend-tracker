@@ -279,7 +279,7 @@ export function Transfers({ household }: { household: Household }) {
         <p className="muted small">
           A transfer between two of your accounts shows up twice — once in each bank's
           statement — and until it is linked it counts as spending on one side and income on the
-          other. Linked, it stays out of Income v Expense. Imports link the ones they are sure of;
+          other. Linked, it stays out of Income vs Expense. Imports link the ones they are sure of;
           these are the rest. To link a transfer between two currencies, select its two rows in
           the register and choose <em>Link as transfer</em>.
         </p>

@@ -320,6 +320,7 @@ msgstr "Correspondência"
 msgid "Or paste the rows, if your bank only lets you copy them from a page:"
 msgstr "Ou cole as linhas, se o seu banco só deixa copiá-las de uma página:"
 
+#. Screen-reader name of a warning on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Migrations that cannot be undone"
@@ -415,6 +416,7 @@ msgstr "Um dos cinco backups de atualização mais recentes: mantido para que um
 msgid "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot mean “whatever comes after it” — choose <2>take this bit off</2> for that."
 msgstr "Uma regra deste tipo aponta para <0>um</0> favorecido, então <1>SQ *</1> não pode significar “o que vier depois” — escolha <2>remover este trecho</2> para isso."
 
+#. Screen-reader name of a help button on Application management
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "what this list is"
@@ -579,6 +581,7 @@ msgstr "Copie este link agora — ele só é mostrado uma vez."
 msgid "What happens"
 msgstr "O que acontece"
 
+#. Screen-reader name of a log file's last lines; the placeholder is the file's name
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "The end of {open}"
@@ -734,6 +737,7 @@ msgstr "<0>{0}</0> vai para a caixa de entrada de comprovantes e fica lá até s
 msgid "{0} is available."
 msgstr "{0} está disponível."
 
+#. Application management: loading
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Reading this instance…"
@@ -760,6 +764,7 @@ msgstr "Estou com meu autenticador, afinal"
 msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 msgstr "Nenhuma chave pode excluir nada, desfazer nada, mudar quem está em uma casa, mexer em senhas ou autenticadores, ou criar outra chave — seja o que for que você escolha aqui."
 
+#. Tooltip on a folder path on Application management
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "this path does not exist"
@@ -900,6 +905,7 @@ msgstr "Uma parte de uma divisão"
 msgid "Each currency keeps its own figures and nothing here adds two together — the ledger stores no exchange rates. A claim repaid in another currency is listed once, with every amount in its own currency and no difference worked out between them."
 msgstr "Cada moeda mantém seus próprios números e nada aqui soma duas delas — o livro-caixa não guarda taxas de câmbio. Um pedido reembolsado em outra moeda aparece uma vez, com cada valor na sua própria moeda e sem calcular a diferença entre eles."
 
+#. Updates section, after an update: the version now running
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "This instance now runs {running}."
@@ -939,6 +945,7 @@ msgstr "Enviado"
 msgid "Nothing went into this one."
 msgstr "Nada entrou nesta."
 
+#. Backups screen: the backup was passed to the phone's share menu
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Handed to the share sheet."
@@ -1268,6 +1275,7 @@ msgstr "Revogar este convite?"
 msgid "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
 msgstr "Só para um banco cujo extrato traz várias contas num arquivo, separadas por uma coluna Product (o extrato de conta do Revolut). Esta conta fica com as linhas que têm este valor; as outras são ignoradas. Uma conta corrente fica com as linhas Current, a menos que você diga outra coisa."
 
+#. Database size: the main file plus recent writes not yet copied into it
 #. placeholder {0}: bytes(me.size.main_bytes)
 #. placeholder {1}: bytes(me.size.wal_bytes)
 #: src/screens/ApplicationManagement.tsx
@@ -1369,6 +1377,7 @@ msgstr "Tudo o que foi registrado sobre isto"
 msgid "(the {RULES_LISTED} largest are listed)"
 msgstr "(as {RULES_LISTED} maiores estão listadas)"
 
+#. Updates section: what happens to a setting during this update
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Stays as it is."
@@ -1406,6 +1415,7 @@ msgstr "Extratos conciliados"
 msgid "You Need A Budget: from its export file or its API."
 msgstr "You Need A Budget: pelo arquivo de exportação ou pela API."
 
+#. Checkbox on the Backups screen; secret.key is a file name and stays
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Include <0>secret.key</0> in downloads"
@@ -1871,6 +1881,7 @@ msgstr "Escolha o que {name} vai configurar de novo. A própria pessoa faz isso,
 msgid "That isn't an amount in {currency}."
 msgstr "Isso não é um valor em {currency}."
 
+#. Application management: the database is not a file on this machine
 #. placeholder {0}: me.database_url_scheme
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
@@ -1934,6 +1945,7 @@ msgstr "Aguardando a chave de acesso…"
 msgid "Name as the bank writes it"
 msgstr "Nome como o banco escreve"
 
+#. Backups screen: the list is empty
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Nothing backed up yet."
@@ -2057,6 +2069,7 @@ msgstr "ex.: o código depois de _en_"
 msgid "Sharing and saving straight into a folder need this page on https or on localhost. Over plain http on a network address the browser switches both off, which is why only the download is offered here."
 msgstr "Compartilhar e salvar direto numa pasta exigem que esta página esteja em https ou em localhost. Em http simples num endereço de rede, o navegador desativa os dois, e é por isso que só o download é oferecido aqui."
 
+#. Heading of the progress panel while the updater replaces itself. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Updating the updater"
@@ -2234,11 +2247,13 @@ msgstr "voltado para {bearing}° {point}"
 msgid "Nothing recorded against this one."
 msgstr "Nada registrado sobre este."
 
+#. Application management: the code was built with changes not yet saved in git
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "with uncommitted changes"
 msgstr "com alterações não confirmadas"
 
+#. Updates section: waiting while the step-up asks for a recovery code
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Asking for a recovery code…"
@@ -3129,6 +3144,7 @@ msgstr "Mudar a configuração abaixo grava uma linha <0>nos três</0>, dos dois
 msgid "Writes a complete, compacted copy into the backups directory above, with this instance still serving. It does <0>not</0> copy <1>secret.key</1> there: without that key every authenticator is refused, so a copy that leaves this machine either carries it (tick the box below) or travels with it separately."
 msgstr "Grava uma cópia completa e compactada no diretório de backups acima, com esta instância ainda em funcionamento. Ela <0>não</0> copia <1>secret.key</1> para lá: sem essa chave todo autenticador é recusado, então uma cópia que sai desta máquina ou a leva junto (marque a caixa abaixo) ou viaja com ela separadamente."
 
+#. Section heading on Application management: the folders the app uses
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Where the files are"
@@ -4164,6 +4180,7 @@ msgstr "Código"
 msgid "state column"
 msgstr "coluna de estado"
 
+#. Section heading on Application management. See GLOSSARY.md
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Back the database up"
@@ -4204,6 +4221,7 @@ msgstr "pré-visualização"
 msgid "Add payee"
 msgstr "Adicionar favorecido"
 
+#. Updates section: outcome of an update, with the time it finished
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Updated to {running} at {at}."
@@ -4358,6 +4376,7 @@ msgstr "Outro ativo"
 msgid "Transfers"
 msgstr "Transferências"
 
+#. Fallback name when the engine's own name (Docker, Podman) is not known. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "the container engine"
@@ -4383,12 +4402,6 @@ msgstr "Clique para alterar"
 #, fuzzy
 msgid "Detach"
 msgstr "Desanexar"
-
-#. Heading over the other-debt accounts on the Accounts screen. See GLOSSARY.md
-#: src/lib/labels.ts
-#, fuzzy
-msgid "Other liabilities"
-msgstr "Outras dívidas"
 
 #. Label on the receipts
 #. placeholder {0}: formatInstant(receipt.created_at)
@@ -5315,12 +5328,6 @@ msgstr "Regras de favorecidos"
 msgid "Already imported"
 msgstr "Já importada"
 
-#. Heading over the everyday bank accounts on the Accounts screen. See GLOSSARY.md
-#: src/lib/labels.ts
-#, fuzzy
-msgid "Checking"
-msgstr "Contas correntes"
-
 #. Name of a fact on the Reconcile screen
 #: src/screens/Reconcile.tsx
 #, fuzzy
@@ -5336,6 +5343,12 @@ msgstr "Você é membro de tudo o que cria, marcando seu nome ou não."
 #, fuzzy
 msgid "Work will not pay this. It counts as your spending."
 msgstr "O trabalho não vai pagar isto. Conta como gasto seu."
+
+#. Heading over the other-debt accounts on the Accounts screen. See GLOSSARY.md
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Other debts"
+msgstr "Outras dívidas"
 
 #: src/screens/Backups.tsx
 #, fuzzy
@@ -5607,6 +5620,7 @@ msgstr "os quatro últimos, ou a parte que o banco imprime"
 msgid "A suggestion, not a restriction: it fills in the address on the acceptance screen and the person can change it. <0>The link is the credential</0> — whoever opens it gets this role, so treat it like a password."
 msgstr "Uma sugestão, não uma restrição: preenche o endereço na tela de aceite e a pessoa pode alterá-lo. <0>O link é a credencial</0> — quem abri-lo recebe esta função, então trate-o como uma senha."
 
+#. Link on Application management to the app's source code
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "The source, on GitHub"
@@ -5715,6 +5729,7 @@ msgstr "Vincular como transferência"
 msgid "Rules can be suggested after the first statement import: this import brought no bank text to suggest them from."
 msgstr "Regras podem ser sugeridas depois da primeira importação de extrato: esta importação não trouxe texto do banco a partir do qual sugeri-las."
 
+#. Button on the Backups screen; Drive and Dropbox are product names and stay
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Save to Drive/Dropbox…"
@@ -5811,6 +5826,7 @@ msgstr "Etapa {0}, concluída:"
 msgid "Open the receipt from {when}"
 msgstr "Abrir o comprovante de {when}"
 
+#. Button on the Backups screen: make the zip file to download
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Prepare the zip"
@@ -6000,6 +6016,7 @@ msgstr "Anexar a uma transação"
 msgid "Transfer between your own accounts"
 msgstr "Transferência entre suas próprias contas"
 
+#. Button on the Backups screen: pick where on this device to save
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Choose a folder…"
@@ -6115,6 +6132,7 @@ msgstr "A preparação da atualização falhou: {said} Nada foi alterado."
 msgid "running"
 msgstr "em execução"
 
+#. Section heading on Application management: the log level
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "How much to write down"
@@ -6275,6 +6293,7 @@ msgstr "Onde a conta fica. Opcional, e separado da moeda — uma conta em euros 
 msgid "The line exactly as it arrived"
 msgstr "A linha exatamente como chegou"
 
+#. Section heading on Application management: the addresses the app answers on
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Where it can be reached"
@@ -6372,6 +6391,7 @@ msgstr "Texto maior"
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so one Out column holding {0} would be a column nobody could add up."
 msgstr "Este livro-caixa nunca converte. A moeda fica na conta e não há taxa de câmbio guardada em lugar nenhum, então uma coluna de Saída com {0} seria uma coluna que ninguém conseguiria somar."
 
+#. Application management: describes the running server process
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "The process answering this request."
@@ -6445,6 +6465,7 @@ msgstr "Qualquer"
 msgid "What would this match?"
 msgstr "Com o que isto corresponderia?"
 
+#. Backups screen: a numbered step; the placeholder is its number
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "{step}. Download it, then upload it"
@@ -6522,6 +6543,7 @@ msgstr "Outra dívida"
 msgid "{0, plural, one {Imported {1} transaction in one batch.} other {Imported {2} transactions in one batch.}}"
 msgstr "{0, plural, one {{1} transação importada em um único lote.} other {{2} transações importadas em um único lote.}}"
 
+#. Section heading on the Backups screen. See GLOSSARY.md
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Backups taken by updates"
@@ -6634,6 +6656,7 @@ msgstr "clique duas vezes para editar"
 msgid "New authenticator"
 msgstr "Novo autenticador"
 
+#. Application management: shown where the last backup's size would be, when there is none
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "use the button below"
@@ -6782,6 +6805,7 @@ msgstr "o nome de um cofrinho ou de um produto de cartão"
 msgid "Bulk delete"
 msgstr "Exclusão em massa"
 
+#. Heading of the progress panel while an update is downloaded and checked
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Preparing the update"
@@ -6902,6 +6926,12 @@ msgstr "As partes que você montou não foram salvas. Descartar deixa a transaç
 #, fuzzy
 msgid "{0, plural, one {One receipt will be deleted.} other {{1} receipts will be deleted.}}"
 msgstr "{0, plural, one {Um comprovante será excluído.} other {{1} comprovantes serão excluídos.}}"
+
+#. Heading over the everyday bank accounts on the Accounts screen. See GLOSSARY.md
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Current accounts"
+msgstr "Contas correntes"
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -7449,6 +7479,7 @@ msgstr "{count, plural, one {{count} dia} other {{count} dias}}"
 msgid "Problems"
 msgstr "Problemas"
 
+#. Updates section: the version running now
 #. placeholder {0}: check.running
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -7693,6 +7724,7 @@ msgstr "grupo"
 msgid "Nothing to suggest."
 msgstr "Nada a sugerir."
 
+#. Updates section, followed by a button to update the updater. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "A newer updater ({version}) is available:"
@@ -7747,6 +7779,7 @@ msgstr "Saída {code}"
 msgid "Required, one of"
 msgstr "Obrigatório, um destes"
 
+#. Updates section: a setting is on, and when it takes effect during the update
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "On: runs before the backup."
@@ -7779,6 +7812,7 @@ msgstr "Ignorar e continuar"
 msgid "Loading…"
 msgstr "Carregando…"
 
+#. Section heading on Application management
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "How much data, per household"
@@ -8025,6 +8059,7 @@ msgstr "3. Códigos de recuperação"
 msgid "e.g. {0}"
 msgstr "ex.: {0}"
 
+#. Section heading on Application management: the installed software packages
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "What it depends on"
@@ -8596,6 +8631,7 @@ msgstr "Fixo no claro, seja qual for a configuração deste dispositivo."
 msgid "{by} reset {user}'s password"
 msgstr "{by} redefiniu a senha de {user}"
 
+#. Updates section: outcome of an update, with the time it finished and how long it took
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Updated to {running} at {at} in {took}."
@@ -8765,6 +8801,7 @@ msgstr "O .zip que o YNAB exporta, ou o CSV dentro dele."
 msgid "Staged"
 msgstr "Preparada em"
 
+#. Dialog title on the Backups screen
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Delete this backup?"
@@ -9159,6 +9196,7 @@ msgstr "a migração em que este banco de dados está"
 msgid "Payee Categorisation"
 msgstr "Categorização de favorecidos"
 
+#. Button on Application management. See GLOSSARY.md
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Back up now"
@@ -9820,6 +9858,7 @@ msgstr "{inviter} convidou você para o {PRODUCT} como membro."
 msgid "Add an account before entering transactions."
 msgstr "Adicione uma conta antes de inserir transações."
 
+#. Button on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Open the recovery page"
@@ -9973,6 +10012,7 @@ msgstr "corresponde ao padrão"
 msgid "A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from your bank's website. CSV and spreadsheets are worked out from the file itself — the delimiter, the date format, the decimal separator, which column is which, and which row the table actually starts on. OFX needs none of that: it names its own fields, and its transaction ids are used so re-importing an overlapping statement cannot double anything up. A PDF is read by where the words sit on the page, so a running-balance column is not mistaken for the amount — and a designed bill, which is summary boxes rather than a table, is refused rather than half-read. You will see all of it before anything is written."
 msgstr "Um CSV, um download OFX/QFX, uma exportação .xls do banco, um extrato em PDF ou algo colado do site do banco. CSV e planilhas são entendidos a partir do próprio arquivo — o delimitador, o formato de data, o separador decimal, qual coluna é qual e em que linha a tabela começa de fato. OFX não precisa de nada disso: ele nomeia os próprios campos, e os ids das transações são usados para que reimportar um extrato sobreposto não duplique nada. Um PDF é lido pela posição das palavras na página, então uma coluna de saldo acumulado não é confundida com o valor — e uma fatura diagramada, que tem caixas de resumo em vez de uma tabela, é recusada em vez de lida pela metade. Você vê tudo antes de qualquer coisa ser gravada."
 
+#. Updates section, after an update: the updater was updated as well
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "The updater is now {updaterVersion} too."
@@ -10244,6 +10284,7 @@ msgstr "Uma transferência precisa de duas contas abertas. Adicione outra na tel
 msgid "<0>Coming from another budgeting app?</0> Statements go in one at a time here. To bring your whole history across at once — YNAB so far — use the {link} on the {0} page. The household’s owner runs it, once."
 msgstr "<0>Vindo de outro app de orçamento?</0> Aqui os extratos entram um de cada vez. Para trazer todo o seu histórico de uma vez — por enquanto, do YNAB — use a {link} na página {0}. O proprietário da casa faz isso uma vez."
 
+#. Heading of the progress panel while a downloaded update is thrown away
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Discarding the prepared update"
@@ -10520,6 +10561,7 @@ msgstr "da cópia neste navegador, não do servidor — o arquivo em si não é 
 msgid "Yes, discard it"
 msgstr "Sim, descartar"
 
+#. Section heading on Application management: where the database file is
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Where it is"
@@ -10554,6 +10596,7 @@ msgstr "{0} sempre será {1}"
 msgid "why one currency at a time"
 msgstr "por que uma moeda por vez"
 
+#. Screen-reader name of one more release listed on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Another newer release"
@@ -10710,6 +10753,7 @@ msgstr "Não detectado"
 msgid "Its author, and their other projects"
 msgstr "O autor e seus outros projetos"
 
+#. Dialog title on the Backups screen: a backup an update took
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Delete this update backup?"
@@ -11019,6 +11063,7 @@ msgstr "{0}. Compartilhe com o aplicativo do Drive ou do Dropbox"
 msgid "<0>{0}</0>, made {1}, {2}. The file is removed from the backups directory and <1>cannot be brought back</1> — a backup is a file, not a ledger row, so there is no undo in History."
 msgstr "<0>{0}</0>, feito {1}, {2}. O arquivo é removido do diretório de backups e <1>não pode ser recuperado</1> — um backup é um arquivo, não uma linha do livro-caixa, então não há como desfazer no Histórico."
 
+#. Button on the Backups screen while the zip is being made
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Preparing the zip…"

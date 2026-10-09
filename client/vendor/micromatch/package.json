@@ -1,0 +1,11 @@
+{
+  "name": "micromatch",
+  "version": "4.0.8",
+  "description": "The two micromatch calls @lingui/cli makes, on picomatch, without braces (GHSA-vfj7-8cjw-p6xm).",
+  "license": "MIT",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "picomatch": "^4.0.3"
+  }
+}

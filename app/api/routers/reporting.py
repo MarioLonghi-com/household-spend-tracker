@@ -230,7 +230,7 @@ def reimbursements(
     `currency` is required and singular for the reason every report here
     gives. `since` and `until` narrow on the **expense** date, so an advance
     paid before the trip and a repayment months after both stay with the
-    expenses they belong to. Either may be omitted; unlike Income v Expense
+    expenses they belong to. Either may be omitted; unlike Income vs Expense
     this report has no calendar columns to close, so an open end stays open.
     """
     answer = report_service.reimbursements(

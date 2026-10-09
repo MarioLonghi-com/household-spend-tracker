@@ -32,6 +32,25 @@ history this repository does not have.
 
 ## Unreleased
 
+### Changed
+
+- **One English word for each thing.** The headings that group accounts by type
+  now say "Current accounts" and "Other debts", the plurals of the account
+  types they group, rather than "Checking" and "Other liabilities"; and the
+  report is "Income vs Expense" everywhere, in the import's reasons, the
+  Transfers screen, the import guide and the agent's tool descriptions, where
+  some said "Income v Expense". The glossary gains rows for the words the
+  update screens use (updater, container engine, image, migration,
+  downgrade, launcher, recovery page, release, version), and the update,
+  application-management and backup screens' short messages carry translator
+  notes. (#270)
+- **The client's build tooling no longer installs `braces`**, which carries a
+  high-severity advisory with no fixed release (GHSA-vfj7-8cjw-p6xm). It came
+  in through micromatch under the translation tooling, which runs at build
+  time only and never reached a browser; micromatch is now replaced by the
+  two functions the tooling calls, so the dependency review allows no
+  advisory at all. (#270)
+
 ### Fixed
 
 - **After an update, the page opens where the outcome is.** Once the app was
