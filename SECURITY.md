@@ -74,6 +74,14 @@ it and run its health check; no build, no volume or network calls, no prune;
 and the one setting of an existing container it changes is the app's restart
 policy (`no` while it is parked as `-previous`, its own again on a rollback),
 in a request that may carry nothing else.
+A container is acted on only once a listing filtered to the project returns
+it, with one exception: one of the updater's own temporary containers whose
+files are gone -- a power cut right after it was made -- cannot be listed or
+inspected at all, so it is force-removed by its name or id when the
+engine's listing filtered to the project, to an updater role and to that
+name or id fails on it, and the running-only listing does not show it. A
+container the engine can still describe is never removed that way, and
+nothing but the updater's own temporary containers ever matches it.
 Every container it creates is refused if it asks for `Privileged`, added
 capabilities, the host's PID, IPC, UTS, user or network namespace, devices,
 or any host path other than the socket and the compose directory the updater

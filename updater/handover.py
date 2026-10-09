@@ -12,9 +12,9 @@ aside, and stays on standby for ten minutes in case it has to take back over.
   completes, the successor owns the apply's journal and carries on from step
   3; if it does not, nothing has been stopped, this updater carries on from
   step 3 itself, and the handover is tried again at step 10;
-- **step 10:** after a successful apply, unless 2a already handed over or this
+- **step 10:** after a successful apply, unless 2a already handed over, this
   updater is already newer than the target release's (never downgrade,
-  `stays_newer`);
+  `stays_newer`), or it already runs the target's updater image (`is_me`);
 - **`update_updater` (C2):** the updater of any newer release whose protocol
   window includes the app's, after its own short prepare
   (`prepare.updater_only`). From `socket: outdated` (C3) it uses only the
@@ -32,12 +32,12 @@ U1 is the running updater, U2 its successor. U1's journal is
 | H3 | Stop taking requests; the heartbeat says `standby`. | Prove it can work: the socket, `_ping`, the project listing, a write read back in `/update`, and its own digest -- from inspecting itself -- equal to the request's. Write `ready`. |
 | H4 | `ready` within 60 s, its digest the verified one by U2's word and the engine's: release the lock, write `go` carrying one `ping`. | Wait for `go`. |
 | H5 | | Rename U1 to `<name>-previous` (removing an older `-previous`), itself to `<name>`, take the lock, pin its image, take the apply's journal over (2a), answer U1's ping, write the heartbeat as `current`. |
-| H6 | Standby for 10 minutes: U2's heartbeat fresh and U2 running, else take back over. | |
+| H6 | Standby for 10 minutes: U2's heartbeat fresh and U2 running, else take back over -- or stand down, if another container now holds the name. | |
 | H7 | After 10 healthy minutes, stop itself. It stays, stopped, as `-previous` until the next handover's H5 removes it. | |
 
 **Who is current is U1's journal's to say** (`current_side`): U1, until `go`
 was written *and* U2's first heartbeat as `current` exists; then U2. A
-recorded outcome (`failed`, `taken_back`, `done`) settles it for good. Each
+recorded outcome (`failed`, `taken_back`, `done`, `stood_down`) settles it for good. Each
 side re-reads this on every start, so after an engine restart mid-handover --
 or either updater dying after any of its writes -- exactly one of them
 carries on, holding the lock, and requests are answered (U9). Every action
@@ -51,6 +51,17 @@ then resumed from its journal by U1 (`Apply.resume`): still at 2a, U1 owns it
 again and carries on from step 3; at step 3 or later, older code never carries
 a newer updater's apply forward (`carry_forward=False`), so it follows 5.6's
 branch for the step reached -- the previous container back, or the rollback.
+
+**Standing down (#259).** A `compose up` during the standby can replace U2:
+compose removes it and starts a new container under the canonical name.
+Started from U2's image, that is U2 still and the standby goes on (#169).
+Started from another image -- `.env` pinned back to an older updater, say
+-- it is the owner's choice of updater, not a failed successor: U1 records
+`stood_down`, leaves the name and the lock to it, and stops itself, as at
+H7. A take-back that finds its name held all the same, or that the engine
+refuses, ends the same way rather than in a crash. And a container started
+from U1's image under the canonical name is not U1 while U1's own container
+still exists: it does not settle U1's handovers, and starts as `current`.
 
 **The `-previous` lifecycle.** An updater started under the `-previous` name
 with no handover of its own to finish watches the canonical one's heartbeat.
@@ -70,6 +81,7 @@ import contextlib
 import os
 import re
 import secrets
+import threading
 import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
@@ -110,6 +122,10 @@ PREVIOUS_PATIENCE_SECONDS = 5 * 60
 #: How often the standby saves what its window has spent.
 SAVE_EVERY_SECONDS = 30.0
 STOP_GRACE_SECONDS = 10
+#: How long stopping itself waits for the engine's answer before the loop goes
+#: on: an answer within it is a refusal, or an engine that has already stopped
+#: it; none means the stop is under way and waits for this process to exit.
+STOP_ANSWER_SECONDS = 2.0
 
 NEXT_SUFFIX = "-next"
 PREVIOUS_SUFFIX = shapes.PREVIOUS_SUFFIX
@@ -117,6 +133,8 @@ PREVIOUS_SUFFIX = shapes.PREVIOUS_SUFFIX
 #: Where the handover runs from: step 2a, step 10, or an `update_updater` request.
 KINDS = ("first", "after", "update_updater")
 FAILED, TAKEN_BACK, DONE = "failed", "taken_back", "done"
+#: H6: U2 was replaced by another updater under its name, and U1 left it be (#259).
+STOOD_DOWN = "stood_down"
 
 
 @dataclass(frozen=True)
@@ -230,9 +248,20 @@ def protocol_window(labels: object) -> tuple[int, int] | None:
 
 def goes_first(me: Owner, successor: Owner, window: tuple[int, int] | None, app_protocol: int) -> bool:
     """C1: the successor is newer than this updater and speaks the running app's protocol."""
-    if window is None:
+    if window is None or is_me(me, successor):
         return False
     return successor.newer_than(me) and window[0] <= app_protocol <= window[1]
+
+
+def is_me(me: Owner, successor: Owner) -> bool:
+    """The successor is this updater: the same image, by digest (#258).
+
+    The digest is an updater's identity, not its version: an image rebuilt at
+    the same version is a different updater and is still handed over to, and
+    one already on the target's image never hands over to a copy of itself --
+    which would evict the `-previous` a take-back needs.
+    """
+    return bool(me.image_digest) and me.image_digest == successor.image_digest
 
 
 def stays_newer(me: Owner, target_version: str) -> bool:
@@ -271,7 +300,7 @@ def current_side(doc: Mapping, go_written: bool, beat: Mapping | None) -> str:
     outcome = doc.get("outcome")
     if outcome in (FAILED, TAKEN_BACK):
         return "predecessor"
-    if outcome == DONE:
+    if outcome in (DONE, STOOD_DOWN):
         return "successor"
     pred = Owner.from_dict(doc.get("predecessor"))
     succ = Owner.from_dict(doc.get("successor"))
@@ -344,6 +373,18 @@ def load(vol: volume.Volume, request_id: str) -> dict | None:
 def _image_id(value: object) -> str | None:
     m = eng.IMAGE_ID.fullmatch(str(value or ""))
     return m.group(1) if m else None
+
+
+def _runs_image(client: eng.EngineClient, container: Mapping, digest: str) -> bool:
+    """Whether `container` was started from the updater image `digest`."""
+    if not contract.DIGEST.fullmatch(digest or ""):
+        return False
+    try:
+        image = client.inspect_image(f"{UPDATER_REPOSITORY}@{digest}")
+    except (eng.EngineError, eng.NotAllowed):
+        return False
+    wanted = _image_id(image.get("Id"))
+    return wanted is not None and _image_id(container.get("ImageID")) == wanted
 
 
 def runs(client: eng.EngineClient, digest: str) -> bool:
@@ -526,9 +567,28 @@ class Successions:
             pred = Owner.from_dict((doc or {}).get("predecessor"))
             if doc is None or doc.get("settled") or pred is None or not pred.is_(self.me):
                 continue
+            if self._another_predecessor(doc):
+                continue
             found.append(doc)
         found.sort(key=lambda d: str(d.get("at")))
         return found
+
+    def _another_predecessor(self, doc: Mapping) -> bool:
+        """The handover's U1 is a container that still exists, and not this one (#259).
+
+        Compose recreating the canonical updater from U1's image makes a new
+        container that `pred.is_(me)` cannot tell from U1. Settling U1's
+        handover in its place, it went on standby -- silent and busy -- and
+        took back from a successor that had done nothing wrong. An engine
+        restart keeps container ids, so U1 restarted is still U1.
+        """
+        pid = doc.get("predecessor_id")
+        if not self.own_id or not isinstance(pid, str) or pid == self.own_id:
+            return False
+        try:
+            return self._by_id(pid) is not None
+        except (eng.EngineError, eng.NotAllowed):
+            return False
 
     def recover(self) -> None:
         """U1 after a restart: settle every handover it started, by its own journal."""
@@ -777,6 +837,10 @@ class Successions:
         if self.kit.clock.settling():
             # Just back from a gap (8.6): the heartbeat's age is the gap's.
             return
+        replacement = self._replacement(doc)
+        if replacement is not None:
+            self._stand_down(doc, f"was replaced by another container under its name ({replacement[:12]})")
+            return
         problem = self._successor_problem(doc)
         if problem:
             self._take_back(doc, problem)
@@ -788,6 +852,21 @@ class Successions:
             doc["standby"] = self._standby.to_dict()
             self._save(doc)
             self._saved_at = self.now()
+
+    def _replacement(self, doc: dict) -> str | None:
+        """H6: the id of a running container that holds the canonical name and is
+        not U2 -- neither the container H2 made nor one of U2's image (#259)."""
+        holder = survey.find(self.client, str(doc.get("canonical") or ""))
+        if holder is None or not survey.running(holder):
+            return None
+        hid = str(holder.get("Id") or "")
+        if hid in (doc.get("successor_id"), self.own_id, doc.get("predecessor_id")):
+            return None
+        succ = Owner.from_dict(doc.get("successor"))
+        if succ is not None and _runs_image(self.client, holder, succ.image_digest):
+            # compose recreated U2 from its own image: that is U2 still (#169).
+            return None
+        return hid
 
     def _successor_problem(self, doc: dict) -> str | None:
         beat = self._beat()
@@ -831,9 +910,31 @@ class Successions:
         self._stop_myself()
 
     def _stop_myself(self) -> None:
-        if self.own_id:
-            with contextlib.suppress(eng.EngineError, eng.NotAllowed):
-                self.client.stop(self.own_id, grace=STOP_GRACE_SECONDS)
+        """Ask the engine to stop this updater's own container, without waiting for it (#257).
+
+        The engine answers a stop only once the container has exited, and it
+        exits when this process does: on the SIGTERM the stop sends, `serve`'s
+        loop sees its `stop` event and returns. Waiting for the answer on that
+        loop held it until the grace ran out and the engine killed it, exit
+        137. So the call goes out on a thread of its own, and the loop goes
+        back to its ticks after a short wait -- long enough for a refusal to
+        come back, short enough to leave the grace for exiting 0.
+
+        The engine's stop is still what ends it, not the process leaving on
+        its own: that is what marks it stopped, and keeps `unless-stopped`
+        from starting it again.
+        """
+        own_id = self.own_id
+        if not own_id:
+            return
+
+        def ask() -> None:
+            with contextlib.suppress(eng.EngineError, eng.NotAllowed, eng.EngineUnavailable):
+                self.client.stop(own_id, grace=STOP_GRACE_SECONDS)
+
+        asking = threading.Thread(target=ask, name="stop-myself", daemon=True)
+        asking.start()
+        asking.join(STOP_ANSWER_SECONDS)
 
     # ------------------------------------------------------------------ #
     # U1: failing, taking back
@@ -849,6 +950,14 @@ class Successions:
 
     def _take_back(self, doc: dict, why: str) -> str:
         """H6: after `go`, U2 failed. The outcome first, then the containers."""
+        with contextlib.suppress(eng.EngineError, eng.NotAllowed):
+            replacement = self._replacement(doc)
+            if replacement is not None:
+                # Its name is another updater's now: taking it back would
+                # rename onto a live container (#259).
+                return self._stand_down(
+                    doc, f"{why}, and another container holds its name ({replacement[:12]})"
+                )
         succ = Owner.from_dict(doc.get("successor"))
         sentence = (
             f"The updater of {succ.version if succ else 'the new release'} {why}; "
@@ -885,7 +994,15 @@ class Successions:
                     self.client.remove(sid, force=True)
         own_id = self.own_id or doc.get("predecessor_id")
         if isinstance(own_id, str):
-            self._rename(own_id, canon)
+            try:
+                self._rename(own_id, canon)
+            except (eng.EngineError, eng.NotAllowed) as e:
+                if doc.get("outcome") != TAKEN_BACK:
+                    raise
+                # The name is not free: another container took it since the
+                # outcome was written. Not a take-back, and not a crash (#259).
+                self._stand_down(doc, f"could not take its name back ({e})", rewrite=True)
+                return
         self.me = replace(self.me, container=canon)
         write_lock(self.vol, self.me, self.now())
         pinned = (
@@ -911,6 +1028,30 @@ class Successions:
         self.mode, self.watching, self._standby = Mode.CURRENT, None, None
         doc["settled"] = True
         self._save(doc)
+
+    def _stand_down(self, doc: dict, why: str, rewrite: bool = False) -> str:
+        """H6: U2 is not there to take back from, and its name is another's (#259).
+
+        Recorded as what happened -- no take-back -- and then as H7: the lock,
+        the pin and the canonical name are left to whoever holds them, and this
+        updater stops itself, staying as it is named.
+        """
+        succ = Owner.from_dict(doc.get("successor"))
+        if rewrite:
+            why = f"{why}; it had recorded taking back over, which did not happen"
+        sentence = (
+            f"The updater of {succ.version if succ else 'the new release'} {why}; "
+            f"the updater of {self.me.version} stood down instead of taking back over."
+        )
+        doc.update(outcome=STOOD_DOWN, sentence=sentence, step="H6", settled=True)
+        self._save(doc)
+        self.after_write("H6")
+        self.notes.append((request_of(doc), sentence))
+        with contextlib.suppress(OSError, volume.UnsafeFile):
+            self.flush()
+        self.mode, self.watching, self._standby = Mode.RETIRED, None, None
+        self._stop_myself()
+        return sentence
 
     def _record_back(self, doc: dict, sentence: str) -> None:
         """An `update_updater` request's record, when the handover ended without U2."""

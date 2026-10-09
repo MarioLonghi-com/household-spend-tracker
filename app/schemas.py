@@ -1475,6 +1475,9 @@ class UpdateHeartbeatOut(BaseModel):
     #: Why the updater cannot use the engine, in one sentence, when `socket`
     #: is a refusal (R24). The screen says it as it is.
     socket_sentence: str | None = None
+    #: Why the updater cannot go on -- a container it cannot list, say -- in
+    #: its own sentence (#262), or None. The screen says it as it is.
+    problem: str | None = None
 
 
 class UpdateStatusOut(BaseModel):

@@ -41,6 +41,16 @@ On top of the list:
 - **Logs are read from the updater's own one-offs only** (`logs`): the check's
   JSON and the floors' measurements arrive on a one-off's standard output,
   and nothing else's output is ever read.
+- **A broken one-off is removed by name or id, unlisted (#262).** A power cut
+  right after a create can leave a container whose storage never reached the
+  disk; the engine then fails every listing that includes it, and every
+  inspect of it, with a 500. `remove_broken_oneoff` force-removes such a
+  container -- and only such a one -- when a listing filtered to the project,
+  to an updater one-off role and to that name or id fails that way while the
+  running-only listing does not show it. A container the engine can still
+  describe goes through the ordinary calls. While the full listing fails,
+  `_resolve` and `inspect_image_id` accept the project's **running-only**
+  listing as proof of membership, so a running container can still be found.
 
 **Which images may be inspected, and how (R27).** Pulls, removals and
 inspections by reference name only this repository's two images, by digest.
@@ -468,14 +478,18 @@ class EngineClient:
     def _in_project(self, labels: object) -> bool:
         return isinstance(labels, dict) and any(labels.get(k) == self.scope.project for k in PROJECT_LABELS)
 
-    def containers(self) -> list[dict]:
-        """The project's containers, running or not. Filtered by the engine and again here."""
+    def containers(self, running_only: bool = False) -> list[dict]:
+        """The project's containers, running or not. Filtered by the engine and again here.
+
+        `running_only` leaves out `all=1`: the listing that still answers while
+        a stopped container's storage is gone (#262).
+        """
         found: dict[str, dict] = {}
         for key in PROJECT_LABELS:
-            listed = self._call(
-                "containers",
-                query={"all": "1", "filters": json.dumps({"label": [f"{key}={self.scope.project}"]})},
-            )
+            query = {"filters": json.dumps({"label": [f"{key}={self.scope.project}"]})}
+            if not running_only:
+                query["all"] = "1"
+            listed = self._call("containers", query=query)
             for c in listed or []:  # type: ignore[union-attr]
                 if isinstance(c, dict) and self._in_project(c.get("Labels")) and isinstance(c.get("Id"), str):
                     found[c["Id"]] = c
@@ -485,10 +499,22 @@ class EngineClient:
         """The project container `ref` names (id or name), or NotAllowed. Sends nothing naming it."""
         if not (CONTAINER_NAME.fullmatch(ref) or CONTAINER_ID.fullmatch(ref)):
             raise NotAllowed(f"{ref!r} is not a container name or id.")
-        for c in self.containers():
+        try:
+            listing = self.containers()
+        except EngineError as e:
+            # #262: one container whose storage is gone fails the whole
+            # listing. A running one is still found in the running listing.
+            if e.status < 500:
+                raise
+            listing, failed = self.containers(running_only=True), e
+        else:
+            failed = None
+        for c in listing:
             names = [n.lstrip("/") for n in c.get("Names") or []]
             if ref == c["Id"] or ref in names:
                 return c
+        if failed is not None:
+            raise failed
         raise NotAllowed(f"Container {ref!r} is not in project {self.scope.project!r}.")
 
     def _not_sidecar(self, c: dict, what: str) -> None:
@@ -538,6 +564,47 @@ class EngineClient:
         c = self._resolve(ref)
         self._not_sidecar(c, "removes")
         self._call("remove", query={"force": "1" if force else "0"}, id=c["Id"])
+
+    def remove_broken_oneoff(self, ref: str) -> bool:
+        """Force-remove one of the updater's one-offs whose storage is gone (#262). True if removed.
+
+        `ref` is the name the updater gave it or the id the engine's own
+        error named. The engine cannot describe such a container, so it is
+        never in a listing to be resolved from; instead the listing filtered
+        to the project's label, to an updater role on a one-off and to `ref`
+        must *fail* with a 500 -- it would answer empty if no such container
+        carried those labels -- while the running-only listing, filtered the
+        same way, answers without it. A container the engine can describe is
+        left alone (False): the ordinary calls handle it. Nothing else is
+        ever removed this way.
+        """
+        if CONTAINER_ID.fullmatch(ref):
+            match = {"id": [ref]}
+        elif CONTAINER_NAME.fullmatch(ref):
+            match = {"name": [f"^/?{re.escape(ref)}$"]}
+        else:
+            raise NotAllowed(f"{ref!r} is not a container name or id.")
+        broken = False
+        for key in PROJECT_LABELS:
+            labels = [f"{key}={self.scope.project}", f"{ONEOFF_LABEL}=True", ROLE_LABEL]
+            filters = json.dumps({"label": labels, **match})
+            try:
+                listed = self._call("containers", query={"all": "1", "filters": filters})
+            except EngineError as e:
+                if e.status < 500:
+                    raise
+                broken = True
+                continue
+            if listed:
+                return False
+        if not broken:
+            return False
+        for key in PROJECT_LABELS:
+            labels = [f"{key}={self.scope.project}", f"{ONEOFF_LABEL}=True", ROLE_LABEL]
+            if self._call("containers", query={"filters": json.dumps({"label": labels, **match})}):
+                return False  # running: whatever failed, it is not this one's storage
+        self._call("remove", query={"force": "1"}, id=ref)
+        return True
 
     def create(self, name: str, body: dict) -> str:
         """Create a container of one of the allowed shapes. Returns its id."""
@@ -627,7 +694,13 @@ class EngineClient:
             raise NotAllowed(f"{image_id!r} is not an image id.")
         wanted = m.group(1)
         used = set()
-        for c in self.containers():
+        try:
+            listing = self.containers()
+        except EngineError as e:
+            if e.status < 500:
+                raise
+            listing = self.containers(running_only=True)  # #262, as in `_resolve`
+        for c in listing:
             found = IMAGE_ID.fullmatch(str(c.get("ImageID") or ""))
             if found:
                 used.add(found.group(1))
