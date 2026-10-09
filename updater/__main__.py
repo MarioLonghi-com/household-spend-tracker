@@ -4,7 +4,7 @@
                       [--project-dir /project] [--project spend-tracker]
                       [--successor <request id>]
 
-It finds its own container, learns its own digest from it (R27), detects the
+It finds its own container, learns its own digests from it (R27), detects the
 engine, and then runs the heartbeat (`updater.heartbeat`) and the request loop
 (`updater.service`) until it is stopped. `--successor` is added by the
 updater it replaces (6.6, H2), never by hand: it starts in successor mode,
@@ -31,7 +31,7 @@ from pathlib import Path
 
 from updater import detect, heartbeat, hook, shapes, survey
 from updater import engine as eng
-from updater.handover import Successions, own_bind_sources
+from updater.handover import Successions, identity_of, known_as, own_bind_sources
 from updater.journal import Owner
 from updater.service import Service
 from updater.site import Kit, Site
@@ -47,7 +47,10 @@ def identify(
 ) -> tuple[Owner, str | None]:
     """This updater as the journal names it, and the engine name of its `update` volume.
 
-    Its digest comes from its own image's `RepoDigests`, read by image id (R27).
+    Its digests come from its own image's `RepoDigests`, read by image id
+    (R27): every one for the updater repository, since an image pulled by a
+    multi-arch index's digest carries the platform manifest's too (#287).
+    Which of them it writes as its own is `known_as`'s to say, in `build`.
     Outside a container -- the CI job runs it as a process -- it is unnamed.
 
     It is running, so the running-only listing finds it when the full one
@@ -67,20 +70,18 @@ def identify(
     name = detect.container_name(own)
     seen = client.inspect(name)
     image = survey.image_of(client, seen) or {}
-    digest = ""
-    for ref in image.get("RepoDigests") or []:
-        m = eng.IMAGE_BY_DIGEST.fullmatch(ref) if isinstance(ref, str) else None
-        if m and m.group(1) == eng.REPOSITORIES[1]:
-            digest = m.group(2)
     labels = (image.get("Config") or {}).get("Labels") or {}
     version = detect.label_version(labels.get(detect.VERSION_LABEL)) or "0.0.0"
-    return Owner(image_digest=digest, version=version, container=name), shapes.volume_at(seen, UPDATE_MOUNT)
+    return identity_of(image, seen, version, name), shapes.volume_at(seen, UPDATE_MOUNT)
 
 
 def build(args: argparse.Namespace, trust: Trust) -> tuple[Kit, heartbeat.Identity]:
     client = eng.EngineClient(args.socket, eng.Scope(project=args.project))
     client.negotiate()
     me, update_volume = identify(client)
+    project_dir = Path(args.project_dir) if args.project_dir and os.path.isdir(args.project_dir) else None
+    vol = Volume(Path(args.update))
+    me = known_as(me, vol, project_dir, args.successor)
     own_id = None
     if me.container:
         own = client.inspect(me.container)
@@ -92,11 +93,9 @@ def build(args: argparse.Namespace, trust: Trust) -> tuple[Kit, heartbeat.Identi
     found = detect.detect(client)
     site = Site(
         project=args.project,
-        volume=Volume(Path(args.update)),
+        volume=vol,
         update_volume=args.update_volume or update_volume or f"{args.project}_update",
-        project_dir=Path(args.project_dir)
-        if args.project_dir and os.path.isdir(args.project_dir)
-        else None,
+        project_dir=project_dir,
         me=me,
         engine=found.engine or "docker-engine",
         hook_dir=Path(args.hook) if args.hook and os.path.isdir(args.hook) else None,

@@ -32,6 +32,19 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.9.3 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.9.2`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.9.2` and restart.
+
+Two fixes to the updater: on Podman, 0.9.2's updater could not hand over
+to a newer one, so the fixes it carried never reached a Podman install from
+the browser; and a shutdown or sleep in the ten minutes after an update made
+the previous updater take back over when the machine woke. Alongside them,
+the screens' English is made consistent ahead of translation, counts read
+"1 row", and the client's build no longer pulls in `braces`.
+
 ### Added
 
 - **Every screen is checked in each draft language before review.** The
@@ -90,6 +103,27 @@ history this repository does not have.
   Rules, Import, Household, Accounts and Register screens. Every English
   message with a count now has its singular, and the translations follow.
   (#269)
+- **On Podman, the updater hands over to a newer one again.** Since 0.9.2 an
+  updater has known itself by its image digest, and it took that digest from
+  the last entry the engine listed. Podman lists two for a release's image:
+  the multi-architecture digest the release publishes, and the digest of
+  this machine's part of it. The new updater picked the second, decided it
+  was not the image it had been started as, and refused to take over, so
+  every handover on Podman failed with "failed its own check" and the
+  updater stayed on the old version. An updater now counts every digest its
+  image carries as its own, writes the published one wherever it can tell
+  which that is, and the check, the "already the updater of" decision and
+  the standby's checks all use the whole set. (#287)
+- **Closing the laptop during the updater's standby no longer brings the
+  old updater back.** For ten minutes after a handover the previous updater
+  stays on standby, ready to take back over if the new one stops answering.
+  A machine shut down or asleep in those minutes came back with the new
+  updater's last heartbeat as old as the time it was off, and the standby
+  read that as silence: within seconds of starting it stopped the healthy
+  new updater, took back over and pinned the old one in `.env`. The standby
+  now counts silence only from its own return, gives a new updater that is
+  still starting up the same two minutes to come back, and does not count
+  time the machine was off towards its ten minutes. (#288)
 
 ## 0.9.2 — 2026-10-09
 
