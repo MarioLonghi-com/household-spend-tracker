@@ -182,3 +182,32 @@ def test_each_launcher_asks_in_the_rule_s_order_and_never_by_the_client_alone(te
     # The old test, `docker compose version` deciding by itself, is gone.
     assert "docker compose version >nul 2>&1 && set" not in text
     assert "command -v docker >/dev/null 2>&1 && docker compose version" not in text
+
+
+# --------------------------------------------------------------------------- #
+# With #262: the engine first, then the broken-container check against it
+# --------------------------------------------------------------------------- #
+
+
+@pytest.mark.parametrize(
+    ("docker", "podman", "engine"), [("installed", "project", "podman"), ("project", "answers", "docker")]
+)
+def test_the_broken_container_check_runs_in_the_engine_the_rule_picked(tmp_path, docker, podman, engine):
+    """`updater.launch` (where `clear_broken` lives) runs only in the engine
+    `pick_engine` chose, and its stop is the launcher's: nothing is started."""
+    said = (
+        "The container engine has lost the files of container c9454cf4abcd, so it will not "
+        "list Spend Tracker's containers. Remove it, then open this launcher again."
+    )
+    status, out, ups, _, calls = _launch_headless(
+        tmp_path,
+        ("docker", "podman"),
+        "",
+        states={"docker": docker, "podman": podman},
+        answer_text=f"SAY={said}\n",
+        answer_status=2,
+    )
+    asked = [line.split(" ", 1)[0] for line in calls.splitlines() if " run --rm " in line]
+    assert asked == [engine], calls
+    assert status == 1 and ups == [], out
+    assert said in out and "Spend Tracker was not started." in out

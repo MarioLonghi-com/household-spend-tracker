@@ -248,7 +248,7 @@ case "$1 $2" in
   "info --format") echo "Docker Desktop" ;;
 esac
 case "$1" in
-  run) cat "$STUB_ANSWER" ;;
+  run) cat "$STUB_ANSWER"; exit "${STUB_STATUS-0}" ;;
 esac
 exit 0
 """
@@ -261,6 +261,8 @@ def _launch_headless(
     made_by: str,
     kind: str = "podman-machine",
     states: dict[str, str] | None = None,
+    answer_text: str | None = None,
+    answer_status: int = 0,
 ):
     """The shell launcher, run as a person runs it, against stubs of what is `installed`.
 
@@ -289,10 +291,13 @@ def _launch_headless(
         f"ENGINE={kind}\nPODMAN_RESTART=\nLINGER=0\nCHGRP=\nAPP=app@sha256:{'a' * 64}\n"
         f"UPDATER=upd@sha256:{'b' * 64}\nPLACARD=role=placard\nCOMPOSE={made_by}\n"
     )
+    if answer_text is not None:
+        answer.write_text(answer_text)
     log = tmp_path / "calls.log"
     log.touch()
     env = {"PATH": str(stubs), "HOME": str(tmp_path), "STUB_LOG": str(log), "STUB_ANSWER": str(answer)}
     env.update({f"{name.upper()}_STATE": state for name, state in (states or {}).items()})
+    env["STUB_STATUS"] = str(answer_status)
     bash = shutil.which("bash") or "/bin/bash"
     done = subprocess.run(
         [bash, str(folder / "start-spend-tracker.sh")],

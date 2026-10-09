@@ -23,6 +23,17 @@ their journals.
 
 `update_updater` (C2) runs `prepare.updater_only` and then the handover; only
 the pin's updater line changes.
+
+**A container whose storage a power cut took (#262)** makes the engine fail
+every full listing it is in. Before anything else at startup, while that is
+so, the updater force-removes the one-offs of each unfinished apply that are
+in that state -- only those, by the names it gave them
+(`oneoff.name_for`), never the `-previous` app or anything else -- and the
+resume goes on as after any interruption. If the listing still fails, the
+startup is not attempted: the sentence (`Service.problem`) goes into the
+heartbeat and into the unfinished apply's status, and the startup is tried
+again after a growing pause, rather than the process exiting into its
+restart policy over and over with nobody told.
 """
 
 from __future__ import annotations
@@ -31,7 +42,7 @@ import contextlib
 import os
 import threading
 
-from updater import contract, detect, intake, journal, prepare, survey, volume
+from updater import contract, detect, intake, journal, oneoff, prepare, survey, volume
 from updater import engine as eng
 from updater.apply import Apply
 from updater.recovery import Recovery
@@ -39,6 +50,25 @@ from updater.site import Kit, Records
 from updater.volume import REQUEST_OWNER_UID
 
 TICK_SECONDS = 2.0
+#: The longest pause between two startups that could not list the project (#262).
+STUCK_MAX_SECONDS = 60.0
+
+
+class Stuck(Exception):
+    """The startup cannot go on, for the reason in the sentence (#262)."""
+
+    def __init__(self, sentence: str) -> None:
+        super().__init__(sentence)
+        self.sentence = sentence
+
+
+def stuck_sentence(message: str) -> str:
+    return (
+        "The updater cannot go on: the container engine will not list this installation's "
+        f"containers ({message}). A container named there may have lost its files, for instance "
+        "in a power cut; removing that container (docker rm -f, or podman rm -f, and its id) "
+        "lets the updater carry on by itself."
+    )
 
 
 class Service:
@@ -48,6 +78,8 @@ class Service:
         self.busy = False
         self.resume_pending = True
         self.lock = threading.Lock()
+        #: Why the startup cannot go on, for the heartbeat; None while it can (#262).
+        self.problem: str | None = None
         #: Part 11: the recovery page's requests, and when recovery mode starts (#163).
         self.recovery = Recovery(kit, owner_uid)
 
@@ -81,6 +113,7 @@ class Service:
 
     def startup(self) -> None:
         self.vol.init()
+        self.clear_broken()
         handover = self.kit.handover
         handover.startup()
         if handover.mode != "current":
@@ -99,6 +132,51 @@ class Service:
         with contextlib.suppress(eng.EngineUnavailable):
             self.recovery.startup()
         self.resume_journals()
+
+    def clear_broken(self) -> list[str]:
+        """#262: this installation's containers can be listed, or `Stuck`. Returns what it removed.
+
+        Only when the full listing fails: then each unfinished apply's own
+        one-offs whose storage is gone are force-removed by name, and the
+        listing is asked again.
+        """
+        client = self.kit.client
+        try:
+            client.containers()
+            return []
+        except eng.EngineError as e:
+            if e.status < 500:
+                raise
+        removed = []
+        for j in self.unfinished():
+            app_name = j.context.get("app_name")
+            if not isinstance(app_name, str):
+                continue
+            for role in eng.ONEOFF_ROLES:
+                name = oneoff.name_for(app_name, role, j.id)
+                if client.remove_broken_oneoff(name):
+                    removed.append(name)
+                    self.note(j, f"Removed {name}: the container engine had lost its files.")
+        try:
+            client.containers()
+        except eng.EngineError as e:
+            if e.status < 500:
+                raise
+            sentence = stuck_sentence(e.message)
+            for j in self.unfinished():
+                self.note(j, sentence)
+            raise Stuck(sentence) from e
+        return removed
+
+    def note(self, j: journal.Journal, sentence: str) -> None:
+        """One sentence added to an unfinished apply's status, after those it has."""
+        records = Records(self.vol, j.id, "apply", self.kit.clock)
+        seen = volume.read_own_json(self.vol.status) or {}
+        if seen.get("id") == j.id and isinstance(seen.get("sentences"), list):
+            if seen["sentences"] and seen["sentences"][-1] == sentence:
+                return
+            records.sentences = [str(x) for x in seen["sentences"]]
+        records.say(sentence, step=j.step)
 
     def unfinished(self) -> list[journal.Journal]:
         found = []
@@ -297,7 +375,18 @@ class Service:
         return "succeeded"
 
     def run(self, stop: threading.Event) -> None:
-        self.startup()
+        pause = TICK_SECONDS
+        while True:
+            try:
+                self.startup()
+                self.problem = None
+                break
+            except Stuck as e:
+                # Said where it can be read, and tried again -- not exited (#262).
+                self.problem = e.sentence
+                if stop.wait(pause):
+                    return
+                pause = min(pause * 2, STUCK_MAX_SECONDS)
         while not stop.is_set():
             try:
                 self.tick()

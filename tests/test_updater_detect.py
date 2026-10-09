@@ -502,8 +502,9 @@ def test_the_heartbeat_file_carries_every_key_and_the_real_name(scheme, tmp_path
     assert set(written) == {
         "protocol", "updater_version", "image_digest", "seen_at", "engine", "engine_version",
         "rootless", "layout", "socket", "hook", "busy", "role", "protocols", "api_version",
-        "engine_api", "container", "socket_sentence", "podman_restart",
+        "engine_api", "container", "socket_sentence", "podman_restart", "problem",
     }  # fmt: skip
+    assert written["problem"] is None
     assert written["container"] == f"{PROJECT}{sep}updater{sep}1"
     assert (written["protocols"], written["protocol"], written["seen_at"]) == ("1-1", 1, contract.iso(NOW))
     if scheme == "docker-compose":

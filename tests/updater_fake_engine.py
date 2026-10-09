@@ -8,7 +8,13 @@ asserts on `calls`, which is what the engine would have seen.
 
 It answers like a real engine where the tests depend on it: a versioned path
 below the engine's `MinAPIVersion` is a 400 naming the floor, as Docker 29
-does, and a container listing honours the `label` filter.
+does, and a container listing honours `all` and the `label` (`key=value` or a
+bare key), `name` (a regular expression) and `id` (a prefix) filters.
+
+A container in `broken` has lost its storage, as after a power cut right
+after its create (#262): like Podman, the engine fails with a 500 naming it
+every listing that would include it -- the filters are applied first -- and
+every inspect or start of it, and removes it only with `force`.
 
 **Since #161 it also keeps containers the way an engine does**, enough for the
 orchestration to run against it: a created container has an inspect view
@@ -105,6 +111,8 @@ class FakeEngine:
     #: Seconds a stop takes to answer: a container that ignores SIGTERM is
     #: killed only after its grace period.
     stop_delay: float = 0.0
+    #: Container ids whose storage is gone (#262).
+    broken: set = field(default_factory=set)
     lock: threading.RLock = field(default_factory=threading.RLock)
 
     def add_container(self, name: str, project: str, label: str = "com.docker.compose.project", **extra) -> str:
@@ -303,16 +311,31 @@ class FakeEngine:
         if route == ("GET", "/info"):
             return 200, self.info_doc
         if route == ("GET", "/containers/json"):
-            wanted = json.loads(query.get("filters", "{}")).get("label", [])
+            filters = json.loads(query.get("filters", "{}"))
+            wanted = filters.get("label", [])
             out = []
             for c in self.containers.values():
                 labels = c["Labels"]
-                if all(labels.get(w.split("=", 1)[0]) == w.split("=", 1)[1] for w in wanted):
-                    listed = {k: v for k, v in c.items() if not k.startswith("_")}
-                    if c.get("_stale_listings"):
-                        c["_stale_listings"] -= 1
-                        listed["State"] = "running"
-                    out.append(listed)
+                if query.get("all") != "1" and c["State"] != "running":
+                    continue
+                if not all(
+                    (w.split("=", 1)[1] == labels.get(w.split("=", 1)[0])) if "=" in w else w in labels
+                    for w in wanted
+                ):
+                    continue
+                if filters.get("name") and not any(
+                    re.search(pat, n) for pat in filters["name"] for n in c["Names"]
+                ):
+                    continue
+                if filters.get("id") and not any(c["Id"].startswith(i) for i in filters["id"]):
+                    continue
+                if c["Id"] in self.broken:
+                    return 500, {"message": _lost(c["Id"])}
+                listed = {k: v for k, v in c.items() if not k.startswith("_")}
+                if c.get("_stale_listings"):
+                    c["_stale_listings"] -= 1
+                    listed["State"] = "running"
+                out.append(listed)
             return 200, out
         if route == ("POST", "/containers/create"):
             name = query.get("name", "")
@@ -335,10 +358,14 @@ class FakeEngine:
 
         cm = re.fullmatch(r"/containers/([^/]+)(/json|/start|/stop|/rename|/exec|/logs|/update)?", bare)
         if cm:
-            c = self.containers.get(cm.group(1))
+            c = self.containers.get(cm.group(1)) or next(
+                (o for o in self.containers.values() if f"/{cm.group(1)}" in o["Names"]), None
+            )
             if c is None:
                 return 404, {"message": f"No such container: {cm.group(1)}"}
             action = cm.group(2)
+            if c["Id"] in self.broken and not (method == "DELETE" and query.get("force") == "1"):
+                return 500, {"message": _lost(c["Id"])}
             if method == "GET" and action == "/json":
                 return 200, self.inspect_of(c)
             if method == "POST" and action == "/start":
@@ -391,6 +418,7 @@ class FakeEngine:
                 if c["State"] == "running" and query.get("force") != "1":
                     return 409, {"message": "cannot remove a running container"}
                 del self.containers[c["Id"]]
+                self.broken.discard(c["Id"])
                 return 204, b""
         em = re.fullmatch(r"/exec/([^/]+)/(start|json)", bare)
         if em and em.group(1) in self.execs:
@@ -411,6 +439,14 @@ class FakeEngine:
                     del self.images[key]
                 return 200, [{"Deleted": ref}]
         return 404, {"message": f"page not found: {method} {bare}"}
+
+
+def _lost(cid: str) -> str:
+    """Podman's message for a container whose overlay layer is gone (#262)."""
+    return (
+        f'getting graph driver info "{cid}": faccessat /home/owner/.local/share/containers/storage/'
+        "overlay/a4d0593d/diff: no such file or directory"
+    )
 
 
 def _image_id(value: object) -> str:

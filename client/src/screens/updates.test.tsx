@@ -225,6 +225,20 @@ describe("A5: what the section says in each case", () => {
     expect(screen.queryByRole("button", { name: /^Prepare/ })).toBeNull();
   });
 
+  it("an updater that cannot go on says why, in its own sentence (#262)", async () => {
+    const why =
+      "The updater cannot go on: the container engine will not list this installation's containers (getting graph driver info).";
+    mount(state({ heartbeat: beat({ problem: why }) }));
+    const said = await screen.findByText(why);
+    expect(said.getAttribute("data-problem")).toBe("updater");
+  });
+
+  it("an updater that can go on says no problem (#262)", async () => {
+    mount(state({ heartbeat: beat({ problem: null }) }));
+    await screen.findByText((_, node) => node?.getAttribute("data-case") === "working");
+    expect(document.querySelector("[data-problem]")).toBeNull();
+  });
+
   it("outdated: names the engine and the updater, and Update the updater asks for the newest one", async () => {
     mount(
       state({
