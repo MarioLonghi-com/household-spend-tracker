@@ -61,8 +61,6 @@ function boot() {
   );
 }
 
-const WAIT = { timeout: 5_000 };
-
 beforeEach(() => {
   vi.mocked(api.get).mockReset();
   window.localStorage.clear();
@@ -74,9 +72,9 @@ afterEach(() => {
 });
 
 describe("the household's section of the menu", () => {
-  it("lists #185's order, with Payee a heading over three pages", { timeout: 15_000 }, async () => {
+  it("lists #185's order, with Payee a heading over three pages", async () => {
     boot();
-    const section = await screen.findByRole("group", { name: "Alice's house" }, WAIT);
+    const section = await screen.findByRole("group", { name: "Alice's house" });
 
     // Everything under the header, in the order it is drawn: pages and the
     // one heading alike.
@@ -108,14 +106,14 @@ describe("the household's section of the menu", () => {
     ]);
   });
 
-  it("opens the payee list from Payee Merge", { timeout: 15_000 }, async () => {
+  it("opens the payee list from Payee Merge", async () => {
     boot();
-    const merge = await screen.findByRole("button", { name: "Payee Merge" }, WAIT);
+    const merge = await screen.findByRole("button", { name: "Payee Merge" });
     expect(merge.getAttribute("aria-current")).toBeNull();
 
     fireEvent.click(merge);
 
     expect(merge.getAttribute("aria-current")).toBe("page");
-    expect(await screen.findByRole("heading", { name: "Payees", level: 1 }, WAIT)).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Payees", level: 1 })).toBeTruthy();
   });
 });

@@ -10,7 +10,7 @@ of digests each time, and read back the way a person's computer reads it:
 - `.env`: `SPENDTRACKER_PUBLIC_URL=http://localhost:8848` (C13), nothing secret;
 - the launchers: executable in the zip (C16), naming the same two images,
   `cd` first (S1), placards removed before `up` (R30), localhost opened,
-  never `sudo` on the host; the `.bat` in CRLF and saying it is untested (D2);
+  never `sudo` on the host; the `.bat` in CRLF and saying what is untested (D2);
 - `--check` catching each way a zip goes wrong;
 - shellcheck, where it is installed (CI's runners have it).
 """
@@ -150,12 +150,16 @@ def test_every_launcher_names_the_compose_file_s_two_images(tmp_path, version, a
     assert f'set "APP_IMAGE={app}"' in bat and f'set "UPDATER_IMAGE={upd}"' in bat
 
 
-def test_the_windows_launcher_is_crlf_and_says_it_is_untested(tmp_path):
+def test_the_windows_launcher_is_crlf_and_says_what_is_untested(tmp_path):
     with zipfile.ZipFile(_build(tmp_path, *RELEASES[0])) as f:
         raw = f.read("spend-tracker-0.9.0/Start Spend Tracker.bat")
     assert raw.count(b"\r\n") == raw.count(b"\n") > 50
     assert b"UNTESTED" in raw[:400]
-    assert "Windows is untested" in _read(_build(tmp_path / "2", *RELEASES[1]), "README.txt")
+    readme = _read(_build(tmp_path / "2", *RELEASES[1]), "README.txt")
+    assert "With Podman on Windows it has not been tried yet" in readme
+    # The first-run warning is explained where the owner double-clicks (#170).
+    step3 = readme[readme.index("3. Double-click"):readme.index("4. The wizard")]
+    assert "Open Anyway" in step3 and "Run anyway" in step3
 
 
 LAUNCHER = (ROOT / "deploy" / "bundle" / "start-spend-tracker.sh").read_text()
@@ -229,11 +233,14 @@ def test_the_launcher_never_runs_sudo_on_the_host():
 ENGINE_STUB = """#!/bin/sh
 # A stand-in for `docker` or `podman`: logs what it was asked, answers enough.
 printf '%s|%s\\n' "$(basename "$0") $*" "${PODMAN_COMPOSE_PROVIDER-}" >> "$STUB_LOG"
-# What this engine is (#264, `launch.ENGINE_STATES`): it answers, unless told otherwise.
-case "$(basename "$0")" in
-  docker) state="${DOCKER_STATE-answers}" ;;
-  podman) state="${PODMAN_STATE-answers}" ;;
-  *) state=answers ;;
+# What this engine is (#264, #300, `launch.ENGINE_STATES`): it answers, unless
+# told otherwise; and, for an install, <ENGINE>_DIR (the folder its containers
+# were started from), _IMAGE, _STARTED and _PORT (it publishes the port).
+me="$(basename "$0")"
+case "$me" in
+  docker) state="${DOCKER_STATE-answers}" dir="${DOCKER_DIR-}" image="${DOCKER_IMAGE-}" started="${DOCKER_STARTED-}" port="${DOCKER_PORT-}" ;;
+  podman) state="${PODMAN_STATE-answers}" dir="${PODMAN_DIR-}" image="${PODMAN_IMAGE-}" started="${PODMAN_STARTED-}" port="${PODMAN_PORT-}" ;;
+  *) state=answers dir="" image="" started="" port="" ;;
 esac
 [ "$state" = none ] && exit 1
 if [ "$1" = info ]; then
@@ -242,15 +249,40 @@ if [ "$1" = info ]; then
     denied) echo "permission denied while trying to connect to the socket" >&2; exit 1 ;;
   esac
 fi
-[ "$state $*" = "project ps -aq --filter label=com.docker.compose.project=spend-tracker" ] && echo 0123456789ab
+P="--filter label=com.docker.compose.project=spend-tracker"
+case "$state" in project|running)
+  case "$*" in
+    "ps -aq $P") echo "${me}-app" ;;
+    "ps -aq $P --filter label=com.docker.compose.service=app") echo "${me}-app" ;;
+    "ps -q $P --filter label=com.docker.compose.service=app") [ "$state" = running ] && echo "${me}-app" ;;
+    "ps $P --format {{.Ports}}") [ -n "$port" ] && echo "127.0.0.1:${port}->8848/tcp" ;;
+    *working_dir*) echo "$dir" ;;
+    "inspect --format {{.Name}} ${me}-app") echo "/spend-tracker-app-1" ;;
+    "inspect --format {{.Config.Image}} ${me}-app") echo "$image" ;;
+    "inspect --format {{.State.StartedAt}} ${me}-app") echo "$started" ;;
+  esac ;;
+esac
 case "$1 $2" in
   "compose version") exit 0 ;;
   "info --format") echo "Docker Desktop" ;;
+  "compose --env-file") exit "${STUB_UP_STATUS-0}" ;;
 esac
 case "$1" in
   run) cat "$STUB_ANSWER"; exit "${STUB_STATUS-0}" ;;
 esac
 exit 0
+"""
+#: curl: the health probe answers; the port check (any other URL) finds the
+#: port free, exit 7, unless PORT_TAKEN is set.
+CURL_STUB = """#!/bin/sh
+printf '%s|\\n' "curl $*" >> "$STUB_LOG"
+case "$*" in *"/api/health"*) exit 0 ;; esac
+[ -n "${PORT_TAKEN-}" ] && exit 0
+# Taken only once `compose up` has been asked: by then the cause is known.
+if [ -n "${PORT_TAKEN_AFTER_UP-}" ]; then
+  case "$(cat "$STUB_LOG")" in *"compose --env-file .env up -d"*) exit 0 ;; esac
+fi
+exit 7
 """
 OK_STUB = "#!/bin/sh\nexit 0\n"
 
@@ -263,6 +295,7 @@ def _launch_headless(
     states: dict[str, str] | None = None,
     answer_text: str | None = None,
     answer_status: int = 0,
+    extra_env: dict[str, str] | None = None,
 ):
     """The shell launcher, run as a person runs it, against stubs of what is `installed`.
 
@@ -277,7 +310,7 @@ def _launch_headless(
     for name in installed:
         (stubs / name).write_text(ENGINE_STUB if name in ("docker", "podman") else OK_STUB)
     # The Linux path, wherever the test runs: Darwin's adds Docker Desktop's CLIs to PATH.
-    for name, text in (("uname", "#!/bin/sh\necho Linux\n"), ("curl", OK_STUB), ("xdg-open", OK_STUB)):
+    for name, text in (("uname", "#!/bin/sh\necho Linux\n"), ("curl", CURL_STUB), ("xdg-open", OK_STUB)):
         (stubs / name).write_text(text)
     for f in stubs.iterdir():
         if not f.is_symlink():
@@ -298,6 +331,7 @@ def _launch_headless(
     env = {"PATH": str(stubs), "HOME": str(tmp_path), "STUB_LOG": str(log), "STUB_ANSWER": str(answer)}
     env.update({f"{name.upper()}_STATE": state for name, state in (states or {}).items()})
     env["STUB_STATUS"] = str(answer_status)
+    env.update(extra_env or {})
     bash = shutil.which("bash") or "/bin/bash"
     done = subprocess.run(
         [bash, str(folder / "start-spend-tracker.sh")],

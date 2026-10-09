@@ -1,4 +1,4 @@
-"""The end-to-end self-update scenarios, E1-E15 (design notes 15.5).
+"""The end-to-end self-update scenarios, E1-E16 (design notes 15.5; E16 is #275).
 
     python -m tests.self_update.scenarios --staged DIR --project-dir DIR --leg docker \\
         --socket /var/run/docker.sock --compose "docker compose" [--layout loopback|sidecar] \\
@@ -193,7 +193,8 @@ def check_updated(
     )
     policy = ((previous.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
     unable = [n for n in record.get("notes") or [] if "could not be set to `no`" in n]
-    if owner == s.releases[A]["updater"] and contains(s.releases[A]["revision"], PARKING) is False:
+    a_ran_it = bool(owner) and owner in updater_digests(s, A)
+    if a_ran_it and contains(s.releases[A]["revision"], PARKING) is False:
         print(f"   (A's updater ran the apply and predates {PARKING[:7]}: restart policy {policy} not checked)")
     else:
         r.check(
@@ -221,7 +222,7 @@ def check_updated(
     extra = {k: v for k, v in diff.items() if k not in ALLOWED}
     if (
         "Config.Healthcheck" in extra
-        and owner == s.releases[A]["updater"]
+        and a_ran_it
         and contains(s.releases[A]["revision"], PODMAN4_HEALTHCHECK) is False
     ):
         # A's updater made this copy, and predates the fix for Podman 4's
@@ -328,6 +329,22 @@ def fresh_beat(s: Stack, after: str | None) -> dict:
     )
 
 
+def updater_digests(s: Stack, version: str) -> set[str]:
+    """Every digest that names `version`'s updater: the release's, and each the engine lists for its image.
+
+    An updater pulled by a multi-arch index's digest carries the platform
+    manifest's beside it (#287), and one started by tag with nothing pinned
+    -- A, at every `up` -- cannot tell which is the index: it writes the one
+    the engine lists first, and Podman lists them in either order (#309).
+    """
+    found = {s.releases[version]["updater"]}
+    with contextlib.suppress(api.Failed):
+        for ref in s.engine.image(s.updater_ref(version)).get("RepoDigests") or []:
+            if str(ref).startswith(UPDATER_REPO + "@"):
+                found.add(str(ref).split("@", 1)[1])
+    return found
+
+
 def updater_now(s: Stack) -> dict:
     """The canonical updater container, inspected."""
     return s.engine.inspect(s.updater_name)
@@ -417,15 +434,27 @@ class Run:
         check_updated(r, s, b, req, record, B3, updater_to=None)
         u = updater_now(s)
         r.check(u["Image"] == s.image_id(s.updater_ref(A)), f"{s.updater_name} still runs A's updater")
+        # A was started by tag with nothing pinned: either of its image's
+        # digests is its name (#309). Which one is A's to choose, once: every
+        # file it writes names the same one.
+        a_digests = updater_digests(s, A)
         beat = fresh_beat(s, after=record.get("finished_at"))
+        chosen = str(beat.get("image_digest"))
         r.check(
-            beat.get("role") == "current" and beat.get("image_digest") == s.releases[A]["updater"],
-            f"the heartbeat says A's updater is current ({beat.get('role')}, {str(beat.get('image_digest'))[:19]})",
+            beat.get("role") == "current" and chosen in a_digests,
+            f"the heartbeat says A's updater is current ({beat.get('role')}, {chosen[:19]} "
+            f"of {', '.join(sorted(d[:19] for d in a_digests))})",
         )
+        lock = (s.vol.read("updater.lock") or {}).get("holder") or {}
+        r.check(lock.get("image_digest") == chosen, "updater.lock names A's updater by the heartbeat's digest")
         pin = pinned(s)
         r.check(
             s.releases[B3]["updater"] not in pin.get("SPENDTRACKER_UPDATER_IMAGE", ""),
             "the pin does not name B3's updater",
+        )
+        r.check(
+            pin.get("SPENDTRACKER_UPDATER_IMAGE") == f"{UPDATER_REPO}:{A}@{chosen}",
+            f".env pins A's updater by the heartbeat's digest ({pin.get('SPENDTRACKER_UPDATER_IMAGE')})",
         )
         hand = s.vol.read(f"handover/{req['id']}.request") or {}
         r.check(
@@ -436,8 +465,8 @@ class Run:
         owners = {str((o.get("owner") or {}).get("image_digest")) for o in j.get("owners") or []}
         owner = (j.get("owner") or {}).get("image_digest")
         r.check(
-            owner == s.releases[A]["updater"] and owners <= {s.releases[A]["updater"]},
-            "the journal names A's updater as the apply's only owner",
+            owner == chosen and owners == {chosen},
+            f"the journal names A's updater, by the heartbeat's digest, as the apply's only owner ({owners})",
         )
         running = [s.name(c) for c in s.running("updater")]
         r.check(running == [s.updater_name], f"only A's updater runs: {running}")
@@ -500,6 +529,50 @@ class Run:
                 f"   {container}: Docker's embedded resolver at 127.0.0.11 ({len(resolver)} sockets), set aside"
             )
         return [x for x in found if x not in resolver]
+
+    def E16(self, r: Result) -> None:
+        """The sidecar restarts on its own: the updater rejoins the app to its new namespace (#275).
+
+        After E1, so the updater is B's, built from the change. Bounded by the
+        updater's check interval, the app's stop and its start."""
+        s = self.s
+        self.ensure_e1(r)
+        s.wait_for(lambda: s.health().get("version") == B, "health before the restart", 120)
+        app = s.engine.inspect(s.app_name)
+        seen = set(s.vol.listdir("/u/history") or [])
+        s.engine.stop(s.standin)
+        s.engine.start(s.standin)
+        side = s.engine.inspect(s.standin)
+        stranded = s.health().get("version")
+        print(f"   right after the sidecar's restart, health says {stranded!r} (stranded unless rejoined)")
+        started = time.monotonic()
+        health = s.wait_for(
+            lambda: (lambda h: h if h.get("version") == B else None)(s.health()), "the app to answer again", 180
+        )
+        took = time.monotonic() - started
+        r.check(health.get("version") == B, f"the app answers inside the sidecar again, after {took:.0f} s")
+        after = s.engine.inspect(s.app_name)
+        r.check(after["Id"] == app["Id"], "the same app container, restarted rather than recreated")
+        r.check(
+            after["State"]["StartedAt"] > side["State"]["StartedAt"] > app["State"]["StartedAt"],
+            f"the app started after the sidecar's restart ({after['State']['StartedAt']} > "
+            f"{side['State']['StartedAt']})",
+        )
+        r.check(
+            after["HostConfig"]["NetworkMode"] == f"container:{side['Id']}",
+            "the app is in the sidecar's namespace as it is now",
+        )
+        records = [
+            d
+            for n in sorted(set(s.vol.listdir("/u/history") or []) - seen)
+            if (d := s.vol.read(f"history/{n}") or {}).get("kind") == "rejoin"
+        ]
+        r.check(
+            len(records) == 1 and records[0].get("state") == "succeeded",
+            f"one rejoin is recorded: {[d.get('sentence') for d in records]}",
+        )
+        beat = s.vol.read("updater.json") or {}
+        r.check(not beat.get("problem"), f"the heartbeat reports no problem ({beat.get('problem')})")
 
     def E12(self, r: Result) -> None:
         """`compose up -d` again, reading the pin, with the parked containers present."""
@@ -1049,6 +1122,7 @@ SCENARIOS = {
     "E11": "the handover",
     "E13": "updater first (C1)",
     "E12": "compose up -d again, with the parked containers present",
+    "E16": "the sidecar restarts: the app rejoins it (#275)",
     "E11b": "E11 and E13 with a successor that fails its self-check",
     "E2": "skip: A -> C over B4",
     "E3": "rollback: a migration fails after a sentinel row",
@@ -1091,6 +1165,8 @@ def main(argv: list[str] | None = None) -> int:
         layout=args.layout,
         skips=skips,
     )
+    if leg.layout != "sidecar":
+        leg.skips.setdefault("E16", "only the sidecar layout has a sidecar to restart")
     if leg.layout == "sidecar":
         leg.skips.setdefault("E15", "the release zip is a personal computer's loopback layout, not a server's sidecar")
     if leg.restart is None:

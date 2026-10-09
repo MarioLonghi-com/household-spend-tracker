@@ -82,6 +82,18 @@ def copy_private(source: Path, destination: Path) -> None:
     os.utime(destination, ns=(seen.st_atime_ns, seen.st_mtime_ns))
 
 
+#: The empty file the image puts in the data directory so that the directory
+#: survives the image build as a directory (the Dockerfile says why). Every
+#: volume initialised from an image before #279 holds it at 0644, it holds
+#: nothing, and an owner of a container without a shell cannot chmod it -- so
+#: an *empty* one is not reported. One with anything in it is.
+PLACEHOLDER = ".keep"
+
+
+def _is_placeholder(path: Path, mode: int, size: int) -> bool:
+    return path.name == PLACEHOLDER and stat.S_ISREG(mode) and size == 0
+
+
 def not_private(root: Path, *, depth: int = 2, limit: int = 20) -> list[tuple[Path, int]]:
     """Paths under `root` that a group or other user can read, list or write,
     each with its permission bits as they were found.
@@ -96,10 +108,13 @@ def not_private(root: Path, *, depth: int = 2, limit: int = 20) -> list[tuple[Pa
         if len(found) >= limit:
             return
         try:
-            mode = path.lstat().st_mode
+            seen = path.lstat()
         except OSError:
             return
+        mode, size = seen.st_mode, seen.st_size
         if stat.S_ISLNK(mode):
+            return
+        if _is_placeholder(path, mode, size):
             return
         if mode & _SHARED_BITS:
             found.append((path, stat.S_IMODE(mode)))

@@ -38,12 +38,22 @@ from tests.test_api import _household_with_accounts
 
 
 class _Clock:
+    """The processor time this thread spent, not the time that passed (#297).
+
+    What these tests bound is the work a hostile file costs, and the defects
+    cost seconds to hours of it. Wall-clock time also counts every moment the
+    thread sat waiting for a core: under `pytest -n auto` on a loaded machine
+    that was 14.6 s against a 10 s budget for work that takes half a second,
+    and the budgets failed while the code did exactly what it should. Nothing
+    measured here runs on another thread, so this thread's time is all of it.
+    """
+
     def __enter__(self):
-        self.started = time.perf_counter()
+        self.started = time.thread_time()
         return self
 
     def __exit__(self, *exc):
-        self.seconds = time.perf_counter() - self.started
+        self.seconds = time.thread_time() - self.started
 
 
 # --------------------------------------------------------------------------- #
@@ -110,18 +120,40 @@ def _workbook(*sheets: dict[tuple[int, int], object]) -> bytes:
     return out.getvalue()
 
 
-def test_one_cell_in_the_far_corner_does_not_expand_the_grid():
+def test_one_cell_in_the_far_corner_does_not_expand_the_grid(monkeypatch):
     """A 5.6 KB file used to become 16.7 million cells per sheet, six sheets over.
 
     Only the first sheet is read, and a row is as long as its own last cell.
     What comes out is the same two rows it always was -- 256 wide, because that
     is how wide the sheet is.
+
+    The budget is counted in work, not seconds (#297): the sheets unpacked and
+    the cells converted. A wall-clock ceiling here failed on a loaded machine
+    while the code did exactly the work it should.
     """
+    from xlrd.book import Book
+
+    loaded, converted = [], []
+    get_sheet, cell = Book.get_sheet, spreadsheet._cell
+
+    def counting_get_sheet(book, number, *args, **kwargs):
+        loaded.append(number)
+        return get_sheet(book, number, *args, **kwargs)
+
+    def counting_cell(*args):
+        converted.append(args)
+        return cell(*args)
+
+    monkeypatch.setattr(Book, "get_sheet", counting_get_sheet)
+    monkeypatch.setattr(spreadsheet, "_cell", counting_cell)
+
     corner = {(0, 0): "Fecha", (65535, 255): "y"}
     raw = _workbook(corner, *[{(0, 0): "other sheet", (65535, 255): "z"}] * 5)
-    with _Clock() as clock:
-        out = spreadsheet.to_csv_bytes(raw).decode()
-    assert clock.seconds < 3.0
+    out = spreadsheet.to_csv_bytes(raw).decode()
+    assert loaded == [0], "only the first sheet is unpacked"
+    # One cell in the first row, 256 in the last: the cells the sheet has, not
+    # the 65,536 x 256 grid between them.
+    assert len(converted) == 1 + 256
     lines = out.splitlines()
     assert len(lines) == 2
     assert lines[0] == "Fecha" + "," * 255

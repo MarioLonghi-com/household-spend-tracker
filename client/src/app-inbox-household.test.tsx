@@ -73,9 +73,9 @@ afterEach(() => {
 });
 
 describe("the household a link names", () => {
-  it("never reaches an API path when it is not an id", { timeout: 15_000 }, async () => {
+  it("never reaches an API path when it is not an id", async () => {
     boot("/?open=accounts&household=..%2Fme%3Fx%3D");
-    await screen.findByRole("group", { name: "Alice's house" }, { timeout: 5_000 });
+    await screen.findByRole("group", { name: "Alice's house" });
     await waitFor(() => expect(inboxPaths().length).toBeGreaterThan(0));
 
     expect(paths().filter((path) => path.includes(".."))).toEqual([]);
@@ -84,9 +84,9 @@ describe("the household a link names", () => {
     );
   });
 
-  it("falls back to one of the member's own when it is not one of theirs", { timeout: 15_000 }, async () => {
+  it("falls back to one of the member's own when it is not one of theirs", async () => {
     boot("/?open=accounts&household=someone-elses");
-    await screen.findByRole("group", { name: "Alice's house" }, { timeout: 5_000 });
+    await screen.findByRole("group", { name: "Alice's house" });
     await waitFor(() => expect(inboxPaths().length).toBeGreaterThan(0));
 
     expect(paths().filter((path) => path.includes("someone-elses"))).toEqual([]);
@@ -95,9 +95,9 @@ describe("the household a link names", () => {
     );
   });
 
-  it("opens the named household when it is the member's", { timeout: 15_000 }, async () => {
+  it("opens the named household when it is the member's", async () => {
     boot("/?open=accounts&household=household-b");
-    await screen.findByRole("group", { name: "The flat" }, { timeout: 5_000 });
+    await screen.findByRole("group", { name: "The flat" });
     await waitFor(() => expect(inboxPaths().length).toBeGreaterThan(0));
 
     expect(new Set(inboxPaths())).toEqual(

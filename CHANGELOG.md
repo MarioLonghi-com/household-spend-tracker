@@ -32,6 +32,114 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.10.1 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.10.0`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.10.0` and restart.
+
+Fixes from the self-update test matrix: the launcher picks the install that
+is running when both Docker and Podman hold one, the updater rejoins the app
+after a Tailscale sidecar restart, an update's outcome names the version it
+went to, the updater logs what it does, and an update is no longer refused as
+"ledger busy". The zip's README explains the first-run warning, and the tests
+that failed now and then no longer do.
+
+### Changed
+
+- **The release zip's README explains the first-run warning where you
+  double-click.** Step 3 now says that macOS or Windows stops the launcher the
+  first time, and what to press. On macOS the launcher starts by itself after
+  *Open Anyway*; the README used to say to double-click it again. It also no
+  longer calls the Windows launcher untested: it has run with Docker Desktop on
+  Windows 11, and only Podman on Windows is still untried. (#170)
+
+### Fixed
+
+- **With Spend Tracker in both Docker and Podman, the launcher uses the one
+  that is running.** It used to take Docker's whenever both held an install,
+  so a stopped, older install in Docker Desktop was started while the one in
+  a Podman machine was running: the launcher replaced the Docker install's
+  updater, then failed on the port the running one held, and left a
+  half-started stack behind. Now the install whose app is running wins. When
+  both hold one and neither runs, the launcher says which release each
+  ledger is at and when each was last started, and starts the newer; at the
+  same release it stops and asks the owner to remove the one they no longer
+  use, which the zip's README.txt now explains. Before it changes anything,
+  it checks that nothing else holds port 8848 and, if something does, says
+  what -- the other engine's Spend Tracker, or another program -- and
+  changes nothing. A failed start names that cause too, rather than "the
+  lines above say why" (#300).
+- **A restart of the Tailscale sidecar no longer leaves the app unreachable.**
+  The sidecar's restart gave it a new network namespace while the app stayed
+  in the old, empty one, and nothing restarted the app. In the sidecar layout
+  only, the idle updater now checks every 45 seconds whether the sidecar has
+  started since the app did; if so it restarts the app (or recreates it, when
+  the sidecar was replaced by a new container) so it joins the sidecar's
+  network again, and records it in the update history. At most three times in
+  an hour; after that, or when a repair fails, the Updates screen says so and
+  names `docker compose up -d --force-recreate app` (#275).
+- **An update's outcome names the version it updated to.** The Updates
+  section said "Updated to" the version running now, so after going back to
+  the previous release by hand it named that one. The outcome now carries
+  the release the update went to, from the updater's record, and an older
+  record that does not name it shows the updater's own sentence. A
+  rolled-back update no longer says it "failed at 5", the updater's number
+  for the step, but where in words: "failed while backing up and migrating
+  the ledger". (#260)
+- **The updater says what it is doing in its log.** `docker compose logs
+  updater` was empty in normal operation; the only trace of a failed update
+  was a traceback. It now prints one line per request it takes, per step of
+  a prepare, an update or a rollback it starts and ends, per step of a
+  handover to a new updater and its outcome, and per request finished: the
+  request's id, the step, the sentence the screen shows and the time since
+  the request was taken. No token, recovery-code hash or image digest is
+  printed whole. (#278)
+- **The update confirmation follows the updater's own rules.** It said the
+  update changes the ledger's schema even when it also said no migrations
+  would run; that is now said only when one does. Its Updater row said the
+  release's updater takes over before anything is stopped in every case. It
+  now follows the rule the updater uses: the same image stays as it is, a
+  newer release's updater goes first, a running updater newer than the
+  release's stays, and a rebuild at the same version takes over once the
+  update has finished. A release that brings an earlier one's changes with
+  it no longer says it "also installs" what it "skips over". (#277)
+- **An update, or any act that asks for the password and code again, is no
+  longer refused as "ledger busy" after a minute on its form.** The first
+  request after a minute's pause records that the browser's session is still
+  in use, and it wrote that on the request's own transaction. The step-up
+  check then wrote on a connection of its own and waited for the lock the
+  same request held, until SQLite gave up: the owner was told the ledger was
+  busy with another change when nobody else was there. The session is now
+  recorded on its own short transaction, committed at once. A request
+  refused as "ledger busy" is also logged now, at WARNING, with its method
+  and path. (#273)
+- **A fresh install no longer warns about its own `.keep` file.** The first
+  start of every new install logged that `/var/lib/spend-tracker/.keep` could
+  be read by other users and told the owner to `chmod` it, in a container
+  with no shell to do it in. The image now makes the file 0600, and an empty
+  `.keep` is left out of the check, so a volume made by an older image stops
+  warning too. Anything else in the data directory that others can read is
+  still named. (#279)
+
+- **The tests that failed now and then no longer do.** Each one waited on
+  the wrong thing: a report test matched digits a random id can hold, the
+  statement-limit budgets counted wall-clock seconds a busy machine spends
+  waiting, the reset tests moved the ledger with the app still running, the
+  traversal test skipped in CI and raced another worker's stand-in client,
+  four end-to-end specs counted rows before they arrived, and the client
+  suite had a one-second wait deadline that a busy machine ran past. Tests
+  only, apart from `SPENDTRACKER_CLIENT_DIST`, which moves where the app
+  looks for the built client and is set only by the tests. (#108, #292,
+  #296, #297, #304, #305)
+- **The self-update check of a handover whose successor fails no longer
+  fails now and then on Podman.** Release A's updater is started by tag with
+  nothing pinned, so it cannot tell which of its image's two digests is the
+  release's index, and writes the one Podman lists first, in either order.
+  The check wanted the index; it now accepts either of A's digests, and
+  asks instead that the heartbeat, the lock, the journal and the pin all
+  name the same one. Tests only. (#309)
+
 ## 0.10.0 — 2026-10-09
 
 **Reversible: lossy** — one migration.

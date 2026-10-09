@@ -446,10 +446,16 @@ class Outcome:
     duration_s: float | None
     gap_s: float | None
     log_tail: list[str]
+    #: The release an apply went to (#260). The screen names it rather than
+    #: the version running now, which differs once the owner has gone back by
+    #: hand. None on a record without one -- not an apply, or refused before
+    #: it began -- and then the screen falls back to the record's sentence.
+    to_version: str | None = None
 
 
 def _outcome(record_id: str, doc: dict) -> Outcome:
     state = doc.get("state")
+    to_version = doc.get("to_version")
     return Outcome(
         id=record_id,
         kind=_str(doc, "kind"),
@@ -463,6 +469,7 @@ def _outcome(record_id: str, doc: dict) -> Outcome:
         duration_s=_number(doc, "duration_s"),
         gap_s=_number(doc, "gap_s"),
         log_tail=_strings(doc, "log_tail")[-40:],
+        to_version=to_version if is_version(to_version) else None,
     )
 
 

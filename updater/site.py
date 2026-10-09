@@ -15,7 +15,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from updater import contract, volume
+from updater import contract, trail, volume
 from updater import engine as eng
 from updater.clock import GapClock
 from updater.handover import Handover, NotAvailable
@@ -61,7 +61,12 @@ class Kit:
 
 
 class Records:
-    """`status.json` while a request runs, `history/<id>.json` when it ends."""
+    """`status.json` while a request runs, `history/<id>.json` when it ends.
+
+    Each sentence is also one line on stdout (`trail`, #278): a step's start,
+    the end of the step before it, and the outcome, with the time since this
+    updater took the request up.
+    """
 
     def __init__(self, vol: Volume, request_id: str, kind: str, clock: GapClock) -> None:
         self.vol = vol
@@ -69,8 +74,36 @@ class Records:
         self.kind = kind
         self.clock = clock
         self.sentences: list[str] = []
+        self.began = clock.now()
+        #: The step running now, and when it started: its end is logged when
+        #: the next one starts or the request finishes.
+        self._step: tuple[str, float] | None = None
+
+    def _elapsed(self) -> float:
+        return self.clock.now() - self.began
+
+    def _end_step(self) -> None:
+        if self._step is not None:
+            step, at = self._step
+            trail.line(self.id, step, f"ended in {self.clock.now() - at:.1f} s", elapsed=self._elapsed())
+            self._step = None
 
     def say(self, sentence: str, step: str | None = None, state: str = "running") -> None:
+        if step is not None and (self._step is None or self._step[0] != step):
+            self._end_step()
+            self._step = (step, self.clock.now())
+            trail.line(self.id, step, f"{self.kind} started", sentence, elapsed=self._elapsed())
+        else:
+            trail.line(
+                self.id,
+                step or (self._step[0] if self._step else None),
+                self.kind if state == "running" else f"{self.kind} {state}",
+                sentence,
+                elapsed=self._elapsed(),
+            )
+        self._status(sentence, step, state)
+
+    def _status(self, sentence: str, step: str | None, state: str) -> None:
         self.sentences.append(sentence)
         status = contract.Status(
             id=self.id,
@@ -114,5 +147,13 @@ class Records:
             for key, value in extra.items():
                 record.setdefault(key, value)
         volume.write_json(self.vol.history(self.id), record)
-        self.say(sentence, state=state)
+        self._end_step()
+        trail.line(
+            self.id,
+            failed_step,
+            f"{self.kind} finished: {state}",
+            sentence,
+            elapsed=self._elapsed(),
+        )
+        self._status(sentence, None, state)
         return record

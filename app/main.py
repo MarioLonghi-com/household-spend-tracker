@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -32,6 +33,7 @@ from statements import UnreadableStatement
 #: definition is in `app/__init__.py`, where a router can read it without
 #: importing this module and creating a cycle.
 from . import __version__, build, logging_setup, notices, permissions, schema_check
+from . import db as db_module
 from .api import dbview, deps, discovery
 from .api.routers import (
     account_resets,
@@ -737,8 +739,21 @@ def handle_operational_error(request: Request, exc: OperationalError) -> JSONRes
     `busy_timeout` runs out -- two people changing the ledger at the same
     moment, not a fault in the server -- and it used to surface as a 500.
     Anything else the database says is still a 500.
+
+    Logged at WARNING with the method and the path (#273): an owner's update
+    was refused this way once and left no trace anywhere. Never the query
+    string or the body -- a step-up token or a password rides in those. SQLite
+    cannot say which connection held the lock; the path, and how long this
+    one waited, are what there is.
     """
     if "database is locked" in str(exc.orig) or "database is busy" in str(exc.orig):
+        log.warning(
+            "ledger busy: %s %s was refused with 409 after waiting %d ms for the "
+            "database's write lock, which another connection held",
+            request.method,
+            request.url.path,
+            db_module.BUSY_TIMEOUT_MS,
+        )
         return _coded_refusal(request, 409, LEDGER_BUSY, code="ledger.busy")
     raise exc
 
@@ -950,7 +965,14 @@ _NO_SUCH_ENDPOINT = (
     "see /llms.txt for how to use it."
 )
 
-_static = Path(__file__).parent / "static" / "dist"
+#: The built client. `SPENDTRACKER_CLIENT_DIST` moves it, and only the tests
+#: do: they build a stand-in under their own temporary directory. A stand-in
+#: written into the checkout's `app/static/dist` was seen by every other
+#: pytest-xdist worker that imported this module while it existed, and was
+#: deleted under them when its test finished.
+_static = Path(
+    os.environ.get("SPENDTRACKER_CLIENT_DIST") or Path(__file__).parent / "static" / "dist"
+)
 if _static.exists():  # pragma: no cover - only present once the client is built
     app.mount("/assets", StaticFiles(directory=_static / "assets"), name="assets")
     _static_root = _static.resolve()

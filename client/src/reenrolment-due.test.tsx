@@ -74,7 +74,7 @@ function boot() {
   return client;
 }
 
-const notice = () => screen.findByRole("status", { name: "Your authenticator" }, { timeout: 5_000 });
+const notice = () => screen.findByRole("status", { name: "Your authenticator" });
 
 beforeEach(() => {
   window.sessionStorage.clear();
@@ -87,7 +87,7 @@ afterEach(() => {
 });
 
 describe("a new authenticator still owed, in the shell", () => {
-  it("tells the member the grant this tab kept covers it, and opens the profile that spends it", { timeout: 15_000 }, async () => {
+  it("tells the member the grant this tab kept covers it, and opens the profile that spends it", async () => {
     keepGrant(SAM.id, "grant-sam"); // what the sign-in kept before the reload
     server(true);
     boot();
@@ -102,7 +102,7 @@ describe("a new authenticator still owed, in the shell", () => {
     expect(await screen.findByText(/covers it — no other code is needed/)).toBeTruthy();
   });
 
-  it("says it takes a recovery code when the grant this tab holds is somebody else's", { timeout: 15_000 }, async () => {
+  it("says it takes a recovery code when the grant this tab holds is somebody else's", async () => {
     keepGrant("user-jane", "grant-jane");
     server(true);
     boot();
@@ -112,12 +112,12 @@ describe("a new authenticator still owed, in the shell", () => {
     expect(said.textContent).not.toContain("covers it");
   });
 
-  it("is not there for a member the key opens", { timeout: 15_000 }, async () => {
+  it("is not there for a member the key opens", async () => {
     keepGrant(SAM.id, "grant-sam");
     server(false);
     const client = boot();
 
-    await screen.findByRole("group", { name: "Sam's house" }, { timeout: 5_000 });
+    await screen.findByRole("group", { name: "Sam's house" });
     // Answered, not merely asked: nothing on screen before the answer says nothing.
     await vi.waitFor(() =>
       expect(client.getQueryState(["authenticator"])?.status).toBe("success"),

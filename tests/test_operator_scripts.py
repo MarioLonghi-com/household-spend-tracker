@@ -418,8 +418,25 @@ def test_the_doctor_warns_about_a_member_with_no_recovery_codes_left(client, cap
 # --------------------------------------------------------------------------- #
 
 
-def test_reset_backs_up_then_moves_the_ledger_and_key_aside(client, monkeypatch, tmp_path):
+def _stop_the_app(client) -> None:
+    """Stop the app before moving its ledger, as `reset` tells an operator to.
+
+    `port_is_busy` is stubbed below, so nothing else stops it. Left running,
+    the app's housekeeping sweep -- started at boot on a worker thread, and
+    running ANALYZE and a WAL checkpoint -- could still hold the ledger while
+    `reset` backed it up and renamed it with its `-wal` and `-shm` -- the
+    likeliest source of the disk I/O error this test hit now and then under
+    load (#108), though no failure was ever caught with its traceback.
+    Leaving the client's context runs the app's shutdown, which waits for
+    that sweep to finish; the fixture's own exit afterwards does nothing.
+    """
     import app.db as db
+
+    client.__exit__(None, None, None)
+    db.engine.dispose()
+
+
+def test_reset_backs_up_then_moves_the_ledger_and_key_aside(client, monkeypatch, tmp_path):
     from scripts import backup, reset, upgrade
 
     _two_members(client)
@@ -427,7 +444,7 @@ def test_reset_backs_up_then_moves_the_ledger_and_key_aside(client, monkeypatch,
     live = _ledger(client)
     key = live.parent / "secret.key"
     key_text = key.read_text()
-    db.engine.dispose()
+    _stop_the_app(client)
 
     assert reset.main(["--into", str(tmp_path / "bk")], ask=lambda _: "reset") == 0
 
@@ -443,12 +460,11 @@ def test_reset_backs_up_then_moves_the_ledger_and_key_aside(client, monkeypatch,
 
 
 def test_reset_without_the_word_moves_nothing(client, monkeypatch, tmp_path):
-    import app.db as db
     from scripts import reset, upgrade
 
     _two_members(client)
     monkeypatch.setattr(upgrade, "port_is_busy", lambda _port: False)
-    db.engine.dispose()
+    _stop_the_app(client)
 
     assert reset.main(["--into", str(tmp_path / "bk")], ask=lambda _: "yes") == 1
     assert _rows(client, "SELECT count(*) FROM users") == [(2,)]

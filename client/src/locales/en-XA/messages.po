@@ -196,6 +196,11 @@ msgstr ""
 msgid "Delete the group {0}?"
 msgstr ""
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while starting the new version"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
 msgstr ""
@@ -217,6 +222,11 @@ msgstr ""
 #. Screen-reader name on the date range picker
 #: src/components/DateRange.tsx
 msgid "To month"
+msgstr ""
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while stopping the maintenance page"
 msgstr ""
 
 #. Column heading on the Admin screen: noun, which thing
@@ -1712,6 +1722,11 @@ msgstr ""
 msgid "Spellings of one name"
 msgstr ""
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while starting the maintenance page"
+msgstr ""
+
 #: src/lib/saveBackup.ts
 msgid "the server sent no file"
 msgstr ""
@@ -1873,6 +1888,11 @@ msgstr ""
 #. Screen-reader name on the Your account panel. See GLOSSARY.md
 #: src/screens/Profile.tsx
 msgid "Appearance"
+msgstr ""
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while backing up and migrating the ledger"
 msgstr ""
 
 #. Label on the Your account panel: nothing so far
@@ -2209,6 +2229,11 @@ msgstr ""
 msgid "Reading the log…"
 msgstr ""
 
+#. Where an update failed: a step this screen has no words for, by its id
+#: src/screens/Updates.tsx
+msgid "at step {step}"
+msgstr ""
+
 #: src/screens/ResetAccount.tsx
 msgid "Your new recovery codes"
 msgstr ""
@@ -2308,6 +2333,11 @@ msgstr ""
 msgid "Put them in <0>{0}</0> too?"
 msgstr ""
 
+#. Where an update failed: its first step
+#: src/screens/Updates.tsx
+msgid "while starting the update"
+msgstr ""
+
 #. Tooltip on the paperclip in the Register: this transaction has receipts attached
 #: src/components/Receipts.tsx
 msgid "{count, plural, one {has {count} receipt} other {has {count} receipts}}"
@@ -2371,10 +2401,6 @@ msgstr ""
 #. placeholder {0}: one.display_name
 #: src/screens/Admin.tsx
 msgid "Reset sign-in for {0}"
-msgstr ""
-
-#: src/screens/Updates.tsx
-msgid "The update failed at {step}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -2515,6 +2541,11 @@ msgstr ""
 msgid "Yes, revoke it"
 msgstr ""
 
+#. Where an update failed: before anything was stopped
+#: src/screens/Updates.tsx
+msgid "while checking everything was ready"
+msgstr ""
+
 #. Button on Application management: delete this suggestion
 #. Button on the Backups screen: verb
 #. Button on the Categories screen: verb
@@ -2610,6 +2641,11 @@ msgstr ""
 msgid "Click to edit"
 msgstr ""
 
+#. Where an update failed. See GLOSSARY.md for the pre-update hook
+#: src/screens/Updates.tsx
+msgid "while running the pre-update hook"
+msgstr ""
+
 #. Column heading on the Admin screen
 #. Label of a form field on the Admin screen
 #. Label of a form field on the app's menu and frame
@@ -2627,6 +2663,11 @@ msgstr ""
 
 #: src/screens/ResetAccount.tsx
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in. The entry your app had for this account no longer works; delete it."
+msgstr ""
+
+#. placeholder {0}: skipped.length
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {It also brings the changes of {skippedText}, released in between: notes for both below.} other {It also brings the changes of {skippedText}, released in between: notes for all of them below.}}"
 msgstr ""
 
 #. Button on the Import screen
@@ -2883,6 +2924,11 @@ msgstr ""
 
 #: src/screens/Receipts.tsx
 msgid "Deleting is recorded and can be put back from the History screen. The picture itself is kept for a day after nothing points at it, which is what makes that undo work."
+msgstr ""
+
+#. Where an update failed: after the new version was running. See GLOSSARY.md for the updater
+#: src/screens/Updates.tsx
+msgid "while handing over to the new updater"
 msgstr ""
 
 #: src/screens/Payees.tsx
@@ -4445,11 +4491,6 @@ msgstr ""
 msgid "Add payee"
 msgstr ""
 
-#. Updates section: outcome of an update, with the time it finished
-#: src/screens/Updates.tsx
-msgid "Updated to {running} at {at}."
-msgstr ""
-
 #. placeholder {0}: section.rows.length
 #. placeholder {1}: section.rows.length
 #. placeholder {2}: section.rows.length
@@ -4534,6 +4575,11 @@ msgstr ""
 #. placeholder {2}: formatDate(txn.date)
 #: src/screens/Register.tsx
 msgid "{0} · {1} on {2}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
+msgstr ""
+
+#. Updates section, a rolled-back update. {where} is a phrase such as 'while migrating the ledger'
+#: src/screens/Updates.tsx
+msgid "The update failed {where}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
 msgstr ""
 
 #. Menu item and the name of its screen. See GLOSSARY.md
@@ -6062,11 +6108,6 @@ msgstr ""
 msgid "Everything that has changed this household, grouped by the act that changed it. An import of two hundred rows is one entry here, and undoing it puts all two hundred back."
 msgstr ""
 
-#. Where an update failed, when the updater did not say
-#: src/screens/Updates.tsx
-msgid "an unknown step"
-msgstr ""
-
 #. Text on the Register screen
 #. placeholder {0}: index + 1
 #: src/screens/Register.tsx
@@ -6228,6 +6269,11 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Untick every row shown"
+msgstr ""
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while checking the new version answers"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -6906,6 +6952,11 @@ msgstr ""
 msgid "1. You"
 msgstr ""
 
+#. Updates section: outcome of an update, the updater's own sentence (in English) and then the time it finished
+#: src/screens/Updates.tsx
+msgid "{said} It finished at {at}."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "It is recorded as a real transaction on that date, not a hidden number, so it shows in the register and can be corrected like anything else. For a card or a loan, type what you owe as a negative."
 msgstr ""
@@ -7021,6 +7072,11 @@ msgstr ""
 msgid "Backups taken by updates"
 msgstr ""
 
+#. Update confirmation, Updater row: the updater running is newer than the release's
+#: src/screens/Updates.tsx
+msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
 msgstr ""
@@ -7095,6 +7151,11 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "The six digits from the new one"
+msgstr ""
+
+#. Where an update failed. See GLOSSARY.md for the updater
+#: src/screens/Updates.tsx
+msgid "while handing over to the new updater before the app stopped"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -8700,6 +8761,11 @@ msgstr ""
 msgid "date"
 msgstr ""
 
+#. Updates section: outcome of an update, with the time it finished
+#: src/screens/Updates.tsx
+msgid "Updated to {target} at {at}."
+msgstr ""
+
 #. Button on the shared controls
 #: src/components/bits.tsx
 msgid "Hide help: {label}"
@@ -8737,6 +8803,11 @@ msgstr ""
 #: src/lib/historyWords.ts
 msgctxt "history table"
 msgid "category group"
+msgstr ""
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while recording the update"
 msgstr ""
 
 #. A changed field in History's detail, lower case: the category group it is in
@@ -9005,6 +9076,11 @@ msgstr ""
 msgid "Updates"
 msgstr ""
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while stopping the app"
+msgstr ""
+
 #. State of the pre-update hook
 #: src/screens/Updates.tsx
 msgid "Off."
@@ -9013,6 +9089,11 @@ msgstr ""
 #. Name of a fact on the Application management screen: noun, the database's migration revision
 #: src/screens/ApplicationManagement.tsx
 msgid "Schema"
+msgstr ""
+
+#. Updates section: outcome of an update, with the time it finished and how long it took
+#: src/screens/Updates.tsx
+msgid "Updated to {target} at {at} in {took}."
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -9134,6 +9215,11 @@ msgstr ""
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "No payment linked yet"
+msgstr ""
+
+#. Update confirmation, Updater row: the release's updater is the same version as the one running, built again
+#: src/screens/Updates.tsx
+msgid "The updater that ships with {to} was checked too. It is the same version as the one running, built again, and takes over once the update has finished."
 msgstr ""
 
 #. Table cell on the Admin screen: nothing; shown in place of a list
@@ -9537,11 +9623,6 @@ msgstr ""
 
 #: src/lib/signInChanges.ts
 msgid "{by} reset {user}'s password"
-msgstr ""
-
-#. Updates section: outcome of an update, with the time it finished and how long it took
-#: src/screens/Updates.tsx
-msgid "Updated to {running} at {at} in {took}."
 msgstr ""
 
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
@@ -10057,11 +10138,6 @@ msgstr ""
 #: src/screens/Household.tsx
 #: src/screens/Passkeys.tsx
 msgid "Save"
-msgstr ""
-
-#. placeholder {0}: skipped.length
-#: src/screens/Updates.tsx
-msgid "{0, plural, one {Installing it also installs {skippedText}, which it skips over: notes for both below.} other {Installing it also installs {skippedText}, which it skips over: notes for all of them below.}}"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -10929,6 +11005,11 @@ msgstr ""
 msgid "may apply imports"
 msgstr ""
 
+#. Where an update failed, when the updater did not say
+#: src/screens/Updates.tsx
+msgid "at a step the updater did not name"
+msgstr ""
+
 #: src/screens/Categories.tsx
 msgid "Build my own"
 msgstr ""
@@ -11081,6 +11162,7 @@ msgstr ""
 msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 msgstr ""
 
+#. Update confirmation, Updater row: the release's updater is newer than the one running
 #: src/screens/Updates.tsx
 msgid "The updater that ships with {to} was checked too, and takes over the update before anything is stopped."
 msgstr ""
@@ -11354,6 +11436,11 @@ msgstr ""
 #. placeholder {0}: account.name
 #: src/screens/ynab/mapping.tsx
 msgid "New account name for {0}"
+msgstr ""
+
+#. Update confirmation, why both factors are asked for: an update with no migration
+#: src/screens/Updates.tsx
+msgid "Updating stops the app."
 msgstr ""
 
 #. Button on the Admin screen: verb, stop an account signing in
