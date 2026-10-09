@@ -18,6 +18,11 @@ msgstr "El nombre parece ser su IBAN."
 msgid "YNAB Starting Balance rows ({0})"
 msgstr "Filas de saldo inicial de YNAB ({0})"
 
+#: src/components/ScreenBoundary.tsx
+#, fuzzy
+msgid "The rest of the app still works. Pick another page from the menu."
+msgstr "El resto de la aplicación sigue funcionando. Elige otra página en el menú."
+
 #. What the import detected: the running balance column. Lower case, inside a list
 #: src/lib/labels.ts
 #, fuzzy
@@ -502,6 +507,15 @@ msgstr "Termina primero la categoría que estás editando"
 msgid "Light"
 msgstr "Claro"
 
+#. Transfers screen, after how many suggested identifiers: how many transfer pairs they would link
+#. placeholder {0}: suggested.would_link ?? 0
+#. placeholder {1}: suggested.would_link
+#. placeholder {2}: suggested.would_link
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "{0, plural, one {{1} pair.} other {{2} pairs.}}"
+msgstr "{0, plural, one {{1} par.} other {{2} pares.}}"
+
 #. Button on the Payees screen: verb, look over before going on
 #: src/screens/Payees.tsx
 #, fuzzy
@@ -622,6 +636,14 @@ msgstr "{unloaded, plural, one {Mostrando {0}: queda {1} fila por cargar; mostra
 #, fuzzy
 msgid "When"
 msgstr "Cuándo"
+
+#. Screen-reader name of the handle between two parts of a split transaction. See GLOSSARY.md
+#. placeholder {0}: seam + 1
+#. placeholder {1}: seam + 2
+#: src/components/SplitBar.tsx
+#, fuzzy
+msgid "Between part {0} and part {1}"
+msgstr "Entre la parte {0} y la parte {1}"
 
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -1256,6 +1278,12 @@ msgstr "es igual a"
 msgid "Account number"
 msgstr "Número de cuenta"
 
+#. Application management: what the Verbose logging style writes
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Everything the app and its libraries have to say. For chasing something specific."
+msgstr "Todo lo que la aplicación y sus bibliotecas tienen que decir. Para investigar algo concreto."
+
 #: src/lib/reimbursement.ts
 #, fuzzy
 msgid "Work expense — not reimbursed yet"
@@ -1354,6 +1382,12 @@ msgstr "Antes"
 #, fuzzy
 msgid "Something you own that holds value and that you want in the totals — a deposit held by a landlord, an investment you track by hand."
 msgstr "Algo tuyo que tiene valor y que quieres en los totales: una fianza en manos del casero, una inversión que sigues a mano."
+
+#. Application management, Where the files are: note on the Backups row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "where the backup operation below writes"
+msgstr "donde escribe la copia de seguridad de abajo"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -1488,6 +1522,13 @@ msgstr "Grafías"
 #, fuzzy
 msgid "{0} left"
 msgstr "Quedan {0}"
+
+#. Transfers screen, after linking: how many pairs were linked
+#. placeholder {0}: (link.data ?? linkAll.data)!.linked
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Linked {0}."
+msgstr "Vinculadas: {0}."
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -1666,6 +1707,12 @@ msgstr "Todos a quienes {0} ha pagado o de quienes ha cobrado. La mayoría llega
 msgid "(closed)"
 msgstr "(cerrada)"
 
+#. Application management, Where the files are: note on the Database row. See GLOSSARY.md
+#: src/lib/labels.ts
+#, fuzzy
+msgid "the ledger itself"
+msgstr "el propio libro"
+
 #: src/lib/labels.ts
 #, fuzzy
 msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
@@ -1693,12 +1740,14 @@ msgstr "Nueva"
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Transfers screen
+#. Screen-reader name on the Transfers screen
 #. Screen-reader text on the Backups screen
 #. Screen-reader text on the passkeys panel
 #: src/screens/Accounts.tsx
 #: src/screens/Backups.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Payees.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Actions"
@@ -1761,6 +1810,12 @@ msgstr "Salida"
 msgid "{0}: YNAB’s balance is {1}, and this import accounts for {2}, {3} more."
 msgstr "{0}: el saldo de YNAB es {1} y esta importación cubre {2}, {3} más."
 
+#. Application management: what the Normal logging style writes
+#: src/lib/labels.ts
+#, fuzzy
+msgid "What the instance did: startups, the schema revision, housekeeping sweeps."
+msgstr "Lo que hizo la instancia: arranques, la revisión del esquema, limpiezas de mantenimiento."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
@@ -1793,6 +1848,12 @@ msgstr "Introducido a mano"
 #, fuzzy
 msgid "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
 msgstr "Cada forma en que un banco escribe el nombre de alguien de este hogar. Un pago que nombra una de ellas es tu propio dinero moviéndose, no un ingreso ni un gasto."
+
+#. Section heading on the Transfers screen: pairs the app is sure are transfers
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Sure of these"
+msgstr "Seguras"
 
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -2029,6 +2090,16 @@ msgstr "Total de gastos"
 #, fuzzy
 msgid "Setup change"
 msgstr "Cambio de configuración"
+
+#. Screen-reader value of a split handle: each part's number and amount. See GLOSSARY.md
+#. placeholder {0}: seam + 1
+#. placeholder {1}: format(magnitudes[seam], currency)
+#. placeholder {2}: seam + 2
+#. placeholder {3}: format(magnitudes[seam + 1], currency)
+#: src/components/SplitBar.tsx
+#, fuzzy
+msgid "Part {0} {1}, part {2} {3}"
+msgstr "Parte {0} {1}, parte {2} {3}"
 
 #. Row state in the one-time import's account mapping: left out
 #: src/lib/labels.ts
@@ -2434,12 +2505,15 @@ msgstr "Qué pasó"
 
 #. Column heading on the Reimbursements report: where it goes, or what it is merged into
 #. Column heading on the Transfers screen: preposition, the account money arrives in
+#. Column heading on the Transfers screen: preposition, the account money arrives in
+#. Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in
 #. Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in
 #. Label of a form field on the Payees screen: where it goes, or what it is merged into
 #. Label on the Import screen: preposition, the account money arrives in
 #: src/screens/Import.tsx
 #: src/screens/Payees.tsx
 #: src/screens/reports/Reimbursements.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Into"
@@ -2534,6 +2608,18 @@ msgstr "Tus nuevos códigos de recuperación"
 #, fuzzy
 msgid "Not a transfer — categorise as…"
 msgstr "No es una transferencia: categorizar como…"
+
+#. Application management, Where the files are: note on the Installation row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "the code this process is running"
+msgstr "el código que ejecuta este proceso"
+
+#. Application management, Where the files are: SQLite's file of recent writes
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Write-ahead log"
+msgstr "Registro de escritura anticipada"
 
 #. placeholder {0}: offer.secret
 #. placeholder {0}: owed.offer.secret
@@ -2682,6 +2768,12 @@ msgstr "Descartar"
 #, fuzzy
 msgid "Download .txt"
 msgstr "Descargar .txt"
+
+#. Application management, Where the files are: the built web pages
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Client build"
+msgstr "Compilación del cliente"
 
 #: src/screens/Reconcile.tsx
 #, fuzzy
@@ -2910,6 +3002,12 @@ msgstr "Se escribe en <0>{0}</0>, se rota al llegar a un megabyte y se guardan h
 msgid "Step {0} of {1} — <0>{2}</0>"
 msgstr "Paso {0} de {1}: <0>{2}</0>"
 
+#. Logging style on Application management: the default amount of logging
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Normal"
+msgstr "Normal"
+
 #. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3131,12 +3229,15 @@ msgstr "Una descarga es un zip con un README para quien lo abra después: qué e
 #. Column heading on the Accounts screen: noun, the reason
 #. Column heading on the Transfers screen: noun, the reason
 #. Column heading on the Transfers screen: noun, the reason
+#. Column heading on the Transfers screen: noun, the reason
 #. Column heading on the one-time import's results: noun, the reason
 #. Column name shown beside a value on phones on the Accounts screen: noun, the reason
 #. Column name shown beside a value on phones on the Transfers screen: noun, the reason
 #. Column name shown beside a value on phones on the Transfers screen: noun, the reason
+#. Column name shown beside a value on phones on the Transfers screen: noun, the reason
 #. Column name shown beside a value on phones on the one-time import's results: noun, the reason
 #: src/screens/Accounts.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -3330,6 +3431,12 @@ msgstr "No es un gasto de trabajo"
 msgid "Leave a payee somebody set by hand alone. Turning this off lets the rules overrule those too, which is occasionally what you want and never what you want by accident."
 msgstr "No tocar un beneficiario que alguien puso a mano. Desactivar esto permite que las reglas también lo sobrescriban, lo que a veces es lo que quieres y nunca lo que quieres por accidente."
 
+#. Section heading on the Transfers screen: pairs that may be transfers, for a person to decide
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Worth a look"
+msgstr "Merece un vistazo"
+
 #. Column heading on the Income vs Expense report: income minus spending
 #: src/screens/reports/IncomeExpense.tsx
 #, fuzzy
@@ -3362,6 +3469,12 @@ msgstr "Versión"
 #, fuzzy
 msgid "T — Transfers"
 msgstr "T — Transferencias"
+
+#. Heading shown when a screen fails to draw; the menu still works
+#: src/components/ScreenBoundary.tsx
+#, fuzzy
+msgid "This screen could not be shown"
+msgstr "No se ha podido mostrar esta pantalla"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -3398,6 +3511,12 @@ msgstr "{0} no se importarán, con el motivo de cada una"
 #, fuzzy
 msgid "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
 msgstr "Ese patrón superó su décima de segundo. Una importación lo dejaría a un lado a mitad de camino y seguiría sin él, así que unas veces funcionaría y otras no. Simplifícalo."
+
+#. Application management: what app.log holds
+#: src/lib/labels.ts
+#, fuzzy
+msgid "What the instance did: startups, the schema revision, housekeeping, errors."
+msgstr "Lo que hizo la instancia: arranques, la revisión del esquema, mantenimiento, errores."
 
 #: src/screens/Household.tsx
 #, fuzzy
@@ -4320,6 +4439,12 @@ msgstr "categorización"
 msgid "A passkey is a way in that keeps working after this browser is closed."
 msgstr "Una llave de acceso es una forma de entrar que sigue funcionando después de cerrar este navegador."
 
+#. Application management, Where the files are: note on the Client build row; `/` is the site's address and stays
+#: src/lib/labels.ts
+#, fuzzy
+msgid "the built SPA; `/` 404s without it"
+msgstr "la SPA compilada; sin ella `/` responde 404"
+
 #. State of the authenticator: it is enrolled and working. See GLOSSARY.md
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -4380,10 +4505,12 @@ msgstr "Un hogar reúne las cuentas y el registro. La divisa de aquí solo se us
 msgid "Other asset"
 msgstr "Otro activo"
 
+#. Heading of the Transfers screen: noun, money moved between your own accounts. See GLOSSARY.md
 #. Menu item and the name of its screen: noun, money moved between your own accounts. See GLOSSARY.md
 #. Name of a fact on the one-time import: noun, money moved between your own accounts. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/OneTimeImport.tsx
+#: src/screens/Transfers.tsx
 #, fuzzy
 msgid "Transfers"
 msgstr "Transferencias"
@@ -4464,6 +4591,12 @@ msgstr "Categorizar {0} seleccionadas como…"
 #, fuzzy
 msgid "{0} selected"
 msgstr "{0} seleccionadas"
+
+#. Application management, Where the files are: the folder holding everything but the code
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Data directory"
+msgstr "Directorio de datos"
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -4567,6 +4700,12 @@ msgstr "Cada ticket nuevo ocupará unas <0>70× más espacio</0> en la base de d
 msgid "{0} — all hidden"
 msgstr "{0}: todas ocultas"
 
+#. Logging style on Application management: write everything
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Verbose"
+msgstr "Detallado"
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "Filled in from the invitation. Change it if you would rather use another address."
@@ -4666,11 +4805,23 @@ msgstr "Categorización de beneficiarios"
 msgid "{0, plural, one {Matches {1} row, such as:} other {Matches {2} rows, such as:}}"
 msgstr "{0, plural, one {Coincide con {1} fila, como:} other {Coincide con {2} filas, como:}}"
 
+#. Transfers screen, followed by how many pairs: identifiers are names and numbers that tell accounts apart
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "{helping, plural, one {{helping} suggested identifier would link} other {{helping} suggested identifiers would link}}"
+msgstr "{helping, plural, one {{helping} identificador sugerido vincularía} other {{helping} identificadores sugeridos vincularían}}"
+
 #. Label on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Single transaction"
 msgstr "Movimiento único"
+
+#. Application management, Where the files are: note on the Secret key row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "back this up with the database — without it every session and every authenticator is void"
+msgstr "haz una copia junto con la base de datos: sin ella, todas las sesiones y todas las aplicaciones de autenticación dejan de valer"
 
 #. Row heading in the update confirmation
 #: src/screens/Updates.tsx
@@ -4904,6 +5055,8 @@ msgid "No receipts here yet."
 msgstr "Todavía no hay tickets aquí."
 
 #. Shown when a list is empty on the Transfers screen
+#. Shown when a list is empty on the Transfers screen
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Nothing waiting."
@@ -5001,8 +5154,10 @@ msgstr "{others, plural, one {con {others} gasto más} other {con {others} gasto
 #. Column heading on the Reconcile screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
+#. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the one-time import's results: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the one-time import's results: noun, a sum of money. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Label of a choice on the Register screen: noun, a sum of money. See GLOSSARY.md
@@ -5012,6 +5167,7 @@ msgstr "{others, plural, one {con {others} gasto más} other {con {others} gasto
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
 #: src/screens/Transfer.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -5041,6 +5197,11 @@ msgstr "excluida"
 #, fuzzy
 msgid "Close: {name}"
 msgstr "Cerrar: {name}"
+
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "The amounts match and the dates are close, but nothing names the other account — or a row could pair with more than one. Pairs whose two descriptions say the same thing come first. Link the ones that are a transfer; mark the rest <0>Not a transfer</0> and they are not offered again."
+msgstr "Los importes coinciden y las fechas son cercanas, pero nada nombra la otra cuenta, o una fila podría emparejarse con más de una. Los pares cuyas dos descripciones dicen lo mismo van primero. Vincula los que sean una transferencia; marca el resto como <0>No es una transferencia</0> y no se volverán a ofrecer."
 
 #: src/screens/AccountImport.tsx
 #, fuzzy
@@ -5092,6 +5253,15 @@ msgstr "formato de fecha"
 msgid "Rows"
 msgstr "Filas"
 
+#. Button on the Transfers screen: verb, link the ticked pairs as transfers
+#. placeholder {0}: chosen.length
+#. placeholder {1}: chosen.length
+#. placeholder {2}: chosen.length
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "{0, plural, one {Link {1} selected} other {Link {2} selected}}"
+msgstr "{0, plural, one {Vincular {1} seleccionado} other {Vincular {2} seleccionados}}"
+
 #: src/screens/Reconcile.tsx
 #, fuzzy
 msgid "This account has never been reconciled, so you are starting from the beginning of its history."
@@ -5109,6 +5279,8 @@ msgstr "Tickets ({0})"
 msgid "a new account"
 msgstr "una cuenta nueva"
 
+#. Button on the Transfers screen: these two rows are not one transfer, never offer them again
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Not a transfer"
@@ -5119,6 +5291,12 @@ msgstr "No es una transferencia"
 #, fuzzy
 msgid "One-time Import · YNAB (API)"
 msgstr "Importación única · YNAB (API)"
+
+#. Shown when a list is empty on the Transfers screen
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Nothing to look at."
+msgstr "No hay nada que revisar."
 
 #. Column heading on the passkeys panel: the date the passkey was added
 #: src/screens/Passkeys.tsx
@@ -5510,6 +5688,11 @@ msgstr "un paso desconocido"
 msgid "Part {0} ({currency})"
 msgstr "Parte {0} ({currency})"
 
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "One row names the other account, or these two accounts have had transfers linked before, and neither row could be anything else — or, of the rows it could be, only this one says the same thing."
+msgstr "Una fila nombra la otra cuenta, o estas dos cuentas ya han tenido transferencias vinculadas antes, y ninguna fila podría ser otra cosa; o, de las filas que podrían ser, solo esta dice lo mismo."
+
 #. Button on the app's menu and frame: verb
 #: src/App.tsx
 #, fuzzy
@@ -5803,7 +5986,9 @@ msgstr "Exportación de YNAB"
 msgid "YNAB account"
 msgstr "Cuenta de YNAB"
 
+#. Application management, Where the files are: the database file
 #. Heading on the Application management screen
+#: src/lib/labels.ts
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Database"
@@ -6092,6 +6277,12 @@ msgstr "Color"
 #, fuzzy
 msgid "Expires"
 msgstr "Caduca"
+
+#. Application management, Where the files are: note on the Log files row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "what this instance has been saying"
+msgstr "lo que esta instancia ha ido diciendo"
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -6407,6 +6598,12 @@ msgstr "Devuelto por el pago de arriba"
 msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
 msgstr "Los dos, porque las cuentas están en divisas distintas y no nos vamos a inventar un tipo de cambio: usa la cifra que tu banco abonó de verdad."
 
+#. Application management, Where the files are: the backups folder. See GLOSSARY.md
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Backups"
+msgstr "Copias de seguridad"
+
 #. Label on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
@@ -6581,6 +6778,11 @@ msgstr "Solo tú ahora mismo"
 #, fuzzy
 msgid "Other debt"
 msgstr "Otra deuda"
+
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "A transfer between two of your accounts shows up twice — once in each bank's statement — and until it is linked it counts as spending on one side and income on the other. Linked, it stays out of Income vs Expense. Imports link the ones they are sure of; these are the rest. To link a transfer between two currencies, select its two rows in the register and choose <0>Link as transfer</0>."
+msgstr "Una transferencia entre dos de tus cuentas aparece dos veces, una en el extracto de cada banco, y hasta que se vincula cuenta como gasto en un lado e ingreso en el otro. Vinculada, queda fuera de Ingresos y gastos. Las importaciones vinculan las que tienen claras; estas son el resto. Para vincular una transferencia entre dos divisas, selecciona sus dos filas en el registro y elige <0>Vincular como transferencia</0>."
 
 #. placeholder {0}: report.counts.imported
 #. placeholder {1}: formatCount(report.counts.imported)
@@ -6970,6 +7172,12 @@ msgstr "Solo filas que nadie ha corregido"
 msgid "uncategorised (chosen)"
 msgstr "sin categoría (elegido)"
 
+#. Application management, Where the files are: recent writes not yet copied into the database file
+#: src/lib/labels.ts
+#, fuzzy
+msgid "uncheckpointed writes"
+msgstr "escrituras aún no consolidadas"
+
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "The recovery page was used for the last update."
@@ -7045,6 +7253,15 @@ msgstr "C — Contabilizado"
 #, fuzzy
 msgid "Yes, disable them"
 msgstr "Sí, desactivarlo"
+
+#. Screen-reader name of a pair's tick box on the Transfers screen: from one account to another, and the date
+#. placeholder {0}: pair.out_leg.account_name
+#. placeholder {1}: pair.in_leg.account_name
+#. placeholder {2}: formatDate(pair.out_leg.date)
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Select {0} to {1}, {2}"
+msgstr "Seleccionar {0} a {1}, {2}"
 
 #. Table cell on the Admin screen: adjective, no longer works
 #: src/screens/Admin.tsx
@@ -7382,6 +7599,7 @@ msgstr "¿Descartar esta importación preparada?"
 
 #. Label on the Import screen: having no category. See GLOSSARY.md
 #. Label on the Income vs Expense report: having no category. See GLOSSARY.md
+#. Label on the Income vs Expense report: having no category. See GLOSSARY.md
 #. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
 #. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
 #. Option in a dropdown on the one-time import's mapping step: having no category. See GLOSSARY.md
@@ -7654,6 +7872,13 @@ msgstr "Cada uno con los gastos vinculados a él."
 #, fuzzy
 msgid "This instance runs from a checkout. Update it from the terminal: <0>make upgrade-check</0>, then <1>make upgrade</1>."
 msgstr "Esta instancia se ejecuta desde un checkout. Actualízala desde el terminal: <0>make upgrade-check</0> y después <1>make upgrade</1>."
+
+#. Button on the Transfers screen: verb, link every pair in this section; the number is how many
+#. placeholder {0}: data.strong.length
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Link all {0}"
+msgstr "Vincular todas ({0})"
 
 #. Column heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Column heading on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md
@@ -7979,6 +8204,12 @@ msgstr "Recuperado"
 msgid "Currency"
 msgstr "Divisa"
 
+#. Application management, Where the files are: note on the Setup token row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "present only while setup is unfinished"
+msgstr "solo existe mientras la configuración no ha terminado"
+
 #. placeholder {0}: formatCount(kept)
 #. placeholder {1}: formatCount(kept)
 #: src/screens/ynab/results.tsx
@@ -8021,6 +8252,11 @@ msgstr "Ninguno todavía."
 #, fuzzy
 msgid "The figure printed on the statement for the day it closes — what the bank says you had, not what this app thinks."
 msgstr "La cifra impresa en el extracto para el día en que cierra: lo que el banco dice que tenías, no lo que cree esta aplicación."
+
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Add or ignore them under <0>Suggested identifiers</0> on the Accounts screen."
+msgstr "Añádelos o ignóralos en <0>Identificadores sugeridos</0>, en la pantalla Cuentas."
 
 #. Label of a form field on the Admin screen
 #: src/screens/Admin.tsx
@@ -8280,6 +8516,12 @@ msgstr "Calculando qué cambiaría…"
 msgid "Download…"
 msgstr "Descargar…"
 
+#. Application management, Where the files are: note on the Data directory row
+#: src/lib/labels.ts
+#, fuzzy
+msgid "everything that is not the code"
+msgstr "todo lo que no es el código"
+
 #. placeholder {0}: formatCount(totals.splits)
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -8292,6 +8534,12 @@ msgstr "{0}, cada uno importado como un movimiento propio"
 #, fuzzy
 msgid "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} el {1}. Las partes lo sustituyen, así que tienen que sumar el mismo importe. Sin signo menos: cada parte va en el mismo sentido que el original."
+
+#. Logging style on Application management: write only what went wrong
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Quiet"
+msgstr "Silencioso"
 
 #. History headline, the kind of act: history brought over from YNAB's export file
 #: src/lib/historyWords.ts
@@ -8371,6 +8619,12 @@ msgstr "Mostrar un código nuevo para escanear"
 #, fuzzy
 msgid "Out ({currency})"
 msgstr "Salida ({currency})"
+
+#. Application management, Where the files are: note on the Browsable snapshot row; `/db` is an address and stays
+#: src/lib/labels.ts
+#, fuzzy
+msgid "the redacted copy `/db` serves, if one was built"
+msgstr "la copia con datos ocultos que sirve `/db`, si se ha generado"
 
 #. placeholder {0}: tagOffer.value
 #. placeholder {1}: account.name
@@ -8559,6 +8813,12 @@ msgstr "Gastos de trabajo"
 msgid "unknown"
 msgstr "desconocido"
 
+#. Application management: what access.log holds
+#: src/lib/labels.ts
+#, fuzzy
+msgid "One line per HTTP request. Mechanical, and it drowns everything else."
+msgstr "Una línea por petición HTTP. Mecánico, y ahoga todo lo demás."
+
 #. Label on the household page
 #: src/screens/Household.tsx
 #, fuzzy
@@ -8641,7 +8901,10 @@ msgid "Money in within {PAYMENT_PICKER_DAYS} days either side of {0}. Either sid
 msgstr "Entradas de dinero hasta {PAYMENT_PICKER_DAYS} días antes o después del {0}. Antes o después, porque un anticipo llega antes del gasto que cubre."
 
 #. Column heading on the Transfers screen: preposition, the account money leaves
+#. Column heading on the Transfers screen: preposition, the account money leaves
 #. Column name shown beside a value on phones on the Transfers screen: preposition, the account money leaves
+#. Column name shown beside a value on phones on the Transfers screen: preposition, the account money leaves
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Out of"
@@ -8800,6 +9063,12 @@ msgstr "Hook previo a la actualización"
 msgid "S — Split parts"
 msgstr "S — Partes de división"
 
+#. Button on the Transfers screen: verb, link the ticked pairs as transfers
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Link selected"
+msgstr "Vincular seleccionados"
+
 #: src/screens/Rules.tsx
 #, fuzzy
 msgid "whatever is left"
@@ -8842,6 +9111,12 @@ msgstr "Reglas de nombre de beneficiarios"
 #, fuzzy
 msgid "{app}, via its CSV export"
 msgstr "{app}, mediante su exportación CSV"
+
+#. Shown in a dropdown when the search finds nothing
+#: src/components/GroupedPicker.tsx
+#, fuzzy
+msgid "Nothing matches that."
+msgstr "No hay coincidencias."
 
 #. Button on the Register screen
 #: src/screens/Register.tsx
@@ -9128,7 +9403,9 @@ msgstr "{0, plural, one {Instalarla también instala {skippedText}, que se salta
 msgid "One row from each account's statement, made the two sides of one transfer"
 msgstr "Una fila del extracto de cada cuenta, convertidas en las dos partes de una transferencia"
 
+#. Application management, Where the files are: the folder of log files
 #. Heading on the Application management screen
+#: src/lib/labels.ts
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Log files"
@@ -9277,6 +9554,12 @@ msgctxt "new account"
 msgid "New"
 msgstr "Nueva"
 
+#. Application management: what the Quiet logging style writes
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Only what went wrong. A healthy instance writes almost nothing."
+msgstr "Solo lo que ha ido mal. Una instancia sana casi no escribe nada."
+
 #. Column heading on the one-time import's mapping step
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
@@ -9295,6 +9578,12 @@ msgstr "reembolsado por"
 #, fuzzy
 msgid "{0, plural, one {An import was staged and never finished. Nothing in it has reached the register — open one to carry on where it was left, or discard it.} other {{1} imports were staged and never finished. Nothing in them has reached the register — open one to carry on where it was left, or discard it.}}"
 msgstr "{0, plural, one {Se preparó una importación y nunca se terminó. Nada de ella ha llegado al registro: ábrela para seguir donde se quedó, o descártala.} other {Se prepararon {1} importaciones y nunca se terminaron. Nada de ellas ha llegado al registro: abre una para seguir donde se quedó, o descártala.}}"
+
+#. Application management, Where the files are: a redacted copy of the database to browse
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Browsable snapshot"
+msgstr "Copia navegable"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
@@ -9372,6 +9661,12 @@ msgstr "Administración"
 #, fuzzy
 msgid "New password again"
 msgstr "Repite la contraseña nueva"
+
+#. Logging style on Application management: everything, plus every database statement
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Verbose, with SQL"
+msgstr "Detallado, con SQL"
 
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -9517,6 +9812,12 @@ msgstr "Aún pendiente"
 msgid "{0, plural, =0 {No migrations will run.} one {# migration will run} other {# migrations will run}}"
 msgstr "{0, plural, =0 {No se ejecutará ninguna migración.} one {Se ejecutará # migración} other {Se ejecutarán # migraciones}}"
 
+#. Tooltip on the Transfers screen: why this pair cannot be ticked
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Shares a row with a pair you've ticked"
+msgstr "Comparte una fila con un par que has marcado"
+
 #: src/screens/Payees.tsx
 #, fuzzy
 msgid "Merge spellings of one name"
@@ -9526,6 +9827,11 @@ msgstr "Fusionar variantes de un mismo nombre"
 #, fuzzy
 msgid "What has happened to this"
 msgstr "Lo que le ha pasado a esto"
+
+#: src/screens/Transfers.tsx
+#, fuzzy
+msgid "Select every pair that does not share a row with another"
+msgstr "Seleccionar todos los pares que no comparten fila con otro"
 
 #. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
@@ -9877,6 +10183,13 @@ msgstr "1. El token de configuración"
 msgid "{0, plural, one {{1} expense, counted as your spending} other {{2} expenses, counted as your spending}}"
 msgstr "{0, plural, one {{1} gasto, contado como gasto tuyo} other {{2} gastos, contados como gasto tuyo}}"
 
+#. Placeholder of a search box in a dropdown; the placeholder is what it lists, e.g. accounts
+#. placeholder {0}: label.toLowerCase()
+#: src/components/GroupedPicker.tsx
+#, fuzzy
+msgid "Search {0}"
+msgstr "Buscar {0}"
+
 #: src/screens/History.tsx
 #, fuzzy
 msgid "Every row it changed"
@@ -10216,6 +10529,12 @@ msgstr "El actualizador se ha quedado en {updaterVersion} y lo volverá a intent
 msgid "<0>{0} other lines have the same payee</0> and no category of their own."
 msgstr "<0>{0} filas más tienen el mismo beneficiario</0> y ninguna categoría propia."
 
+#. Application management: what sql.log holds; “Verbose, with SQL” is a logging style's name
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Only written at the “Verbose, with SQL” style, and it holds the ledger in plain text. Its own file so the other two stay safe to share."
+msgstr "Solo se escribe con el estilo «Detallado, con SQL», y contiene el libro en texto plano. Va en un archivo propio para que los otros dos se puedan compartir sin riesgo."
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody added {user} as an owner"
@@ -10492,11 +10811,22 @@ msgstr "Actualizador"
 msgid "The image is kept so you can try again."
 msgstr "La imagen se conserva para que puedas volver a intentarlo."
 
+#: src/components/RowPicker.tsx
+#, fuzzy
+msgid "Nothing in that window. Widen the dates above."
+msgstr "No hay nada en ese periodo. Amplía las fechas de arriba."
+
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Resetting…"
 msgstr "Restableciendo…"
+
+#. Application management, Where the files are: the app's own code
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Installation"
+msgstr "Instalación"
 
 #. placeholder {0}: formatCount(report.not_imported.length)
 #: src/screens/ynab/results.tsx
@@ -10543,11 +10873,19 @@ msgstr "por tipo"
 msgid "last used {0}"
 msgstr "último uso el {0}"
 
+#. Application management, Where the files are: the setup token file. See GLOSSARY.md
 #. Label of a form field on the first-run setup. See GLOSSARY.md
+#: src/lib/labels.ts
 #: src/screens/Setup.tsx
 #, fuzzy
 msgid "Setup token"
 msgstr "Token de configuración"
+
+#. Application management: what the Verbose, with SQL logging style writes
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Verbose, plus every statement and every row it returned — which means transactions, payees and amounts written into a file in plain text. Turn it on to diagnose something and turn it off afterwards."
+msgstr "Detallado, más cada sentencia y cada fila que devolvió, es decir, movimientos, beneficiarios e importes escritos en un archivo en texto plano. Actívalo para diagnosticar algo y desactívalo después."
 
 #. Tooltip on the Income vs Expense report: noun, money that came in
 #: src/screens/reports/IncomeExpense.tsx
@@ -10876,7 +11214,9 @@ msgid "Receipts"
 msgstr "Tickets"
 
 #. Button on the Register screen: verb, link two rows as one transfer
+#. Button on the Transfers screen: verb, link this pair as one transfer
 #: src/screens/Register.tsx
+#: src/screens/Transfers.tsx
 #, fuzzy
 msgid "Link"
 msgstr "Vincular"
@@ -11200,6 +11540,12 @@ msgstr "DD/MM/AAAA"
 #, fuzzy
 msgid "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."
 msgstr "Solo necesitas el archivo *Register.csv, no el *Plan.csv. También vale el .zip completo de la exportación."
+
+#. Application management, Where the files are: the file secret.key
+#: src/lib/labels.ts
+#, fuzzy
+msgid "Secret key"
+msgstr "Clave secreta"
 
 #. Button on the Register screen
 #. placeholder {0}: parts.length

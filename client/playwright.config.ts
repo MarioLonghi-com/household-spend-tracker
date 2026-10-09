@@ -11,6 +11,12 @@ import { defineConfig, devices } from "@playwright/test";
  * `webServer` seeds a throwaway instance on its own port -- see e2e/serve.sh.
  * The client must be built first, which is why the `e2e` script builds.
  */
+/** 8850, unless E2E_PORT names another (`e2e/serve.sh` reads it too). */
+const PORT = process.env.E2E_PORT ?? "8850";
+
+/** The languages with drafts, each walked at both widths before review (#271). */
+const DRAFTS = ["pt-BR", "es-ES", "sv-SE"];
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -18,7 +24,7 @@ export default defineConfig({
   reporter: process.env.CI ? "list" : [["list"]],
   timeout: 30_000,
   use: {
-    baseURL: "http://127.0.0.1:8850",
+    baseURL: `http://127.0.0.1:${PORT}`,
     trace: "retain-on-failure",
     // Pinned, so what a spec reads -- "€1,234.56", a date, a sort order -- does
     // not depend on the machine that runs it. The en-XA pass in #53 is the one
@@ -39,7 +45,7 @@ export default defineConfig({
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "desktop",
-      testIgnore: /(passkeys|pseudo-locale)\.spec\.ts/,
+      testIgnore: /(passkeys|pseudo-locale|locales)\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 1280, height: 800 },
@@ -49,7 +55,7 @@ export default defineConfig({
     },
     {
       name: "mobile",
-      testIgnore: /(passkeys|pseudo-locale)\.spec\.ts/,
+      testIgnore: /(passkeys|pseudo-locale|locales)\.spec\.ts/,
       use: { ...devices["Pixel 5"], storageState: "./e2e/.auth/state.json" },
       dependencies: ["setup"],
     },
@@ -62,6 +68,38 @@ export default defineConfig({
       use: { ...devices["Pixel 5"], storageState: "./e2e/.auth/state.json" },
       dependencies: ["setup"],
     },
+    // The drafts (#271): accounts with amounts worth formatting, made once
+    // every English spec has run so none of them meets accounts it did not
+    // expect; then every screen in each language, at both widths, with the
+    // browser's own locale set to that language. Only a QA build can show a
+    // draft at all (src/lib/i18n.ts), and `npm run e2e` is one.
+    {
+      name: "l10n-setup",
+      testMatch: /l10n\.setup\.ts/,
+      use: { storageState: "./e2e/.auth/state.json" },
+      dependencies: ["desktop", "mobile", "pseudo-locale"],
+    },
+    ...DRAFTS.flatMap((locale) => [
+      {
+        name: `${locale}-desktop`,
+        testMatch: /locales\.spec\.ts/,
+        metadata: { locale },
+        use: {
+          browserName: "chromium" as const,
+          viewport: { width: 1280, height: 800 },
+          storageState: "./e2e/.auth/state.json",
+          locale,
+        },
+        dependencies: ["l10n-setup"],
+      },
+      {
+        name: `${locale}-mobile`,
+        testMatch: /locales\.spec\.ts/,
+        metadata: { locale },
+        use: { ...devices["Pixel 5"], storageState: "./e2e/.auth/state.json", locale },
+        dependencies: ["l10n-setup"],
+      },
+    ]),
     // Passkeys (#121): registered once, after the sign-in above has spent its
     // code window, then signed in with at both widths -- signed out, so these
     // projects carry no stored session. Their own projects, so a passkey
@@ -82,7 +120,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "./e2e/serve.sh",
-    url: "http://127.0.0.1:8850/api/health",
+    url: `http://127.0.0.1:${PORT}/api/health`,
     reuseExistingServer: false,
     timeout: 120_000,
     stdout: "pipe",

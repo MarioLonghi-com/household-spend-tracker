@@ -2,7 +2,8 @@
 # Seed a throwaway instance and serve it, for Playwright's `webServer`.
 #
 # Its own port and its own data directory, so a dev server on 8848 and a real
-# ledger in ./data are both left alone.
+# ledger in ./data are both left alone. The port is 8850 unless E2E_PORT names
+# another, so a second worktree can run one spec without taking 8850.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
@@ -25,4 +26,4 @@ PY="${PYTHON:-./.venv/bin/python}"
 rm -rf ./e2e-data
 PYTHONPATH=. "$PY" client/e2e/bootstrap.py
 
-exec "$PY" -m uvicorn app.main:app --host 127.0.0.1 --port 8850
+exec "$PY" -m uvicorn app.main:app --host 127.0.0.1 --port "${E2E_PORT:-8850}"

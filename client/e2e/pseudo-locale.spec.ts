@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { inspect } from "./l10n-check";
 
 /**
  * One pass in the en-XA pseudo-locale, at the phone's width (#53).
@@ -72,3 +73,25 @@ test("at a desktop width the nav holds the longer words", async ({ page }) => {
   expect(spilling).toEqual([]);
 });
 
+
+test("every screen the menu opens is extracted (#271)", async ({ page }) => {
+  // An English sentence under en-XA is one nobody extracted: everything the
+  // catalog holds arrives accented. The Transfers screen was one, whole, until
+  // this walk found it.
+  test.setTimeout(120_000);
+  const menu = page.locator('.topbar button[aria-controls="main-nav"]');
+  const targets = page.locator("nav.side .nav-scroll button");
+  const count = await targets.count();
+  const problems: string[] = [];
+  for (let at = 0; at < count; at++) {
+    if (await menu.isVisible()) await menu.click();
+    const target = targets.nth(at);
+    const name = (await target.innerText()).trim();
+    await target.click();
+    await page.waitForLoadState("networkidle");
+    const found = await inspect(page, []);
+    problems.push(...found.sentences.map((one) => `${name}: ${one.slice(0, 90)}`));
+    problems.push(...found.placeholders.map((one) => `${name}: a placeholder left: ${one.slice(0, 90)}`));
+  }
+  expect(problems).toEqual([]);
+});

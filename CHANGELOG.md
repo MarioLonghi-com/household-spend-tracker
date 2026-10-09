@@ -32,6 +32,22 @@ history this repository does not have.
 
 ## Unreleased
 
+### Added
+
+- **Every screen is checked in each draft language before review.** The
+  end-to-end suite walks every screen in Brazilian Portuguese, Spanish and
+  Swedish, on a desktop and on a phone, and fails on a message left in
+  English, a placeholder shown as written, text cut off or pushing the page
+  sideways, an amount not written the language's way, or a wrong `lang`. Only
+  the test build can show the drafts; the languages stay hidden everywhere
+  else. The walk found the Transfers screen and a few shared controls never
+  prepared for translation, and Application management's places, log files
+  and logging styles arriving in English from the server; all of them now
+  translate, with English unchanged. On a phone, the Accounts screen's two
+  buttons and a long screen title could push the page sideways in a longer
+  language; they wrap now, and English, which fits, is laid out as before.
+  (#271)
+
 ### Changed
 
 - **One English word for each thing.** The headings that group accounts by type
