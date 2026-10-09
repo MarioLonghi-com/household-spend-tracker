@@ -57,6 +57,15 @@ history this repository does not have.
   what -- the other engine's Spend Tracker, or another program -- and
   changes nothing. A failed start names that cause too, rather than "the
   lines above say why" (#300).
+- **A restart of the Tailscale sidecar no longer leaves the app unreachable.**
+  The sidecar's restart gave it a new network namespace while the app stayed
+  in the old, empty one, and nothing restarted the app. In the sidecar layout
+  only, the idle updater now checks every 45 seconds whether the sidecar has
+  started since the app did; if so it restarts the app (or recreates it, when
+  the sidecar was replaced by a new container) so it joins the sidecar's
+  network again, and records it in the update history. At most three times in
+  an hour; after that, or when a repair fails, the Updates screen says so and
+  names `docker compose up -d --force-recreate app` (#275).
 
 ## 0.10.0 — 2026-10-09
 

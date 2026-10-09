@@ -74,6 +74,15 @@ it and run its health check; no build, no volume or network calls, no prune;
 and the one setting of an existing container it changes is the app's restart
 policy (`no` while it is parked as `-previous`, its own again on a rollback),
 in a request that may carry nothing else.
+**One thing it does without a request**: in the Tailscale sidecar layout
+only, when the sidecar has restarted since the app started -- which leaves
+the app in a network namespace that no longer exists -- the idle updater
+restarts the project's `app` container, through the same stop and start
+calls, so it joins the sidecar's network again; if the sidecar was replaced
+by a new container, it recreates the app from the same allowlist copy an
+update uses, with the image the app already runs. Never while a request, an
+update, a recovery or a handover is under way, never more than three times
+in an hour, and each one is recorded in the update history (#275).
 A container is acted on only once a listing filtered to the project returns
 it, with one exception: one of the updater's own temporary containers whose
 files are gone -- a power cut right after it was made -- cannot be listed or

@@ -702,8 +702,11 @@ docker exec spend-tracker-tailscale-1 wget -qO- -T 5 http://127.0.0.1:8848/api/h
 
 `Connection refused` settles it.
 
-**The fix is to restart the app**, so that it joins the sidecar's current
-namespace. Run this from `deploy/tailnet`:
+**The updater does this by itself** within a minute of the sidecar's
+restart, and records it under Updates (#275). If it has not -- an updater
+older than the fix, a repair that failed, or three already in the past hour,
+which the Updates screen says -- restart the app by hand, so that it joins
+the sidecar's current namespace. Run this from `deploy/tailnet`:
 
 ```bash
 docker compose restart app
