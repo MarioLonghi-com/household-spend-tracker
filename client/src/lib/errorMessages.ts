@@ -20,6 +20,7 @@ import { ApiError } from "./api";
 import { i18n, SOURCE_LOCALE } from "./i18n";
 import { formatDate } from "./locale";
 import { format } from "./money";
+import { wordNotice } from "./noticeMessages";
 
 export interface ErrorMessage {
   message: MessageDescriptor;
@@ -1010,6 +1011,21 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "ynab.amount_too_long": {
     message: msg({ id: "error.ynab.amount_too_long", message: "Line {line} of this file has an amount longer than {max} characters, which YNAB never writes -- it may not be a YNAB export, or it may be damaged" }),
   },
+  "request.cross_origin": {
+    message: msg({ id: "error.request.cross_origin", message: "That request did not come from this app" }),
+  },
+  "request.invalid": {
+    message: msg({ id: "error.request.invalid", message: "Some of what was sent is not right: {fields}", comment: "A form or request was refused. {fields} are the API's own field names, like body.amount, kept as they are" }),
+  },
+  "ledger.busy": {
+    message: msg({ id: "error.ledger.busy", message: "The ledger is busy with another change at this moment; try again", comment: "Two people changed the ledger at the same moment. See GLOSSARY.md (ledger)" }),
+  },
+  "setup.required": {
+    message: msg({ id: "error.setup.required", message: "This instance has not been set up yet; open /setup", comment: "/setup is a web address and stays as it is" }),
+  },
+  "statement.unreadable": {
+    message: msg({ id: "error.statement.unreadable", message: "This file cannot be read as a statement" }),
+  },
 };
 
 /** The params as the active locale writes them. */
@@ -1038,7 +1054,16 @@ export function problemText(error: unknown): string {
   if (i18n.locale === SOURCE_LOCALE || !(error instanceof ApiError)) return sentence;
   const code = error.body?.code;
   const entry = typeof code === "string" ? ERROR_MESSAGES[code] : undefined;
-  if (!entry) return sentence;
+  if (!entry) {
+    // A refusal whose code is a notice's: a statement the library refused
+    // whole, read back into one of `app/notices.py`'s codes (#267).
+    const params = error.body?.params;
+    const worded =
+      typeof code === "string"
+        ? wordNotice({ code, params: params && typeof params === "object" ? (params as Record<string, unknown>) : {} })
+        : null;
+    return worded ?? sentence;
+  }
   const params = error.body?.params;
   return i18n._(entry.message.id, shown(entry, params && typeof params === "object" ? (params as Record<string, unknown>) : {}), {
     message: entry.message.message,

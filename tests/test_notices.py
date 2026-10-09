@@ -41,6 +41,8 @@ def _sample(code: str) -> tuple[str, dict]:
             said[name], expected[name] = "Café 12", "Café 12"
         elif kind == "int":
             said[name] = expected[name] = 7
+        elif kind == "count":
+            said[name], expected[name] = "100,000", 100_000
         elif kind == "date":
             said[name] = expected[name] = "2026-03-04"
         elif kind == "money":
@@ -220,3 +222,13 @@ def test_the_client_has_every_notice_with_the_same_template_and_kinds():
         if notice.template
     }
     assert _client_notices() == expected
+
+
+def test_a_remembered_reading_is_handed_out_as_a_copy():
+    """Readings are cached per sentence; changing one must not change the next."""
+    first = notices.read("the bank charged this on top of line 7")
+    first["params"]["line"] = 99
+    assert notices.read("the bank charged this on top of line 7") == {
+        "code": "import.line.fee_of",
+        "params": {"line": 7},
+    }

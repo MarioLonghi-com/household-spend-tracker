@@ -4044,6 +4044,13 @@ msgstr "Só um proprietário pode convidar pessoas"
 msgid "error.invite.owner_only_withdraw"
 msgstr "Só um proprietário pode retirar um convite"
 
+#. Two people changed the ledger at the same moment. See GLOSSARY.md (ledger)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ledger.busy"
+msgstr "O livro-caixa está ocupado com outra alteração neste momento; tente de novo"
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
@@ -4409,6 +4416,19 @@ msgstr "Isto foi dado como perdido. Volte para “O trabalho deve reembolsar” 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.request.cross_origin"
+msgstr "Essa solicitação não veio deste aplicativo"
+
+#. A form or request was refused. {fields} are the API's own field names, like body.amount, kept as they are
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.request.invalid"
+msgstr "Parte do que foi enviado não está certa: {fields}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reset.account_disabled"
 msgstr "Essa conta está desativada, então um link de redefinição para ela não poderia ser seguido. Reative-a primeiro."
 
@@ -4521,6 +4541,13 @@ msgstr "É preciso um nome de exibição"
 msgid "error.setup.not_waiting"
 msgstr "Esta instância não está aguardando configuração"
 
+#. /setup is a web address and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.required"
+msgstr "Esta instância ainda não foi configurada; abra /setup"
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
@@ -4586,6 +4613,12 @@ msgstr "Cada parte de uma despesa de trabalho precisa ser dinheiro que sai, porq
 #, fuzzy
 msgid "error.split.zero_part"
 msgstr "Uma parte de uma divisão não pode ser zero"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.statement.unreadable"
+msgstr "Este arquivo não pode ser lido como um extrato"
 
 #. See GLOSSARY.md (step-up)
 #. js-lingui-explicit-id
@@ -8708,6 +8741,58 @@ msgstr "Esta linha tem mais células do que o arquivo tem colunas"
 msgid "notice.account_import.row.unknown_type"
 msgstr "{type} não é um tipo de conta -- use um destes: {types}"
 
+#. Said to a program that staged rows. external_id is a field name and stays as it is; {ids} are row ids
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.already_here"
+msgstr "{count} de {total, plural, one {# linha já estava} other {# linhas já estavam}} nesta conta e não foram preparadas: {ids}. Se alguma delas for de fato uma compra separada, dê a cada uma o seu próprio external_id e envie de novo -- uma linha com external_id é deduplicada só por ele."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.matched"
+msgstr "{count} de {total, plural, one {# linha} other {# linhas}} corresponderam a lançamentos já nesta conta. Aplicar marca esses como vistos pelo banco em vez de adicioná-los de novo."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.period_end"
+msgstr "Você declarou o período terminando em {declared} e a linha preparada mais recente é de {latest}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.period_start"
+msgstr "Você declarou o período começando em {declared} e a linha preparada mais antiga é de {earliest}."
+
+#. Said to a program that staged rows. {reasons} is a list of reasons with counts
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.refused"
+msgstr "{count} de {total, plural, one {# linha foi recusada} other {# linhas foram recusadas}} e não vai entrar: {reasons}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.row_count"
+msgstr "Você declarou {declared, plural, one {# linha} other {# linhas}} e chegaram {arrived}. Uma página perdida ou uma linha mal dividida fica exatamente assim."
+
+#. Said to a program that staged rows. {share} is a percentage like 61%; {type} an account type's value
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.sign_convention"
+msgstr "{share} do valor deste lote é dinheiro entrando numa conta {type} ({count} de {total, plural, one {# linha} other {# linhas}}), e o saldo geral é positivo. Confirme que são receitas e não, por exemplo, pagamentos de cartão lidos de uma fatura de cartão -- num cartão eles são entradas, e numa conta {type} as mesmas linhas são saídas."
+
+#. Said to a program that staged rows. The figures are in minor units, as the program sent them
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.total"
+msgstr "Você declarou um total de {declared} unidades menores e as linhas que entrariam somam {staged}, uma diferença de {difference}. Uma linha fundida, uma linha faltando ou um sinal invertido aparecem aqui. Linhas ignoradas ou recusadas não estão neste valor -- veja os outros avisos, se houver."
+
 #. js-lingui-explicit-id
 #: src/lib/noticeMessages.ts
 #, fuzzy
@@ -9087,6 +9172,147 @@ msgstr "O banco marcou isto como {kind}, que é uma retenção pendente e não u
 msgid "notice.statement.row.signed_twice"
 msgstr "{text} tem sinal duas vezes, então dizer se é entrada ou saída de dinheiro seria um palpite"
 
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.cell_too_long"
+msgstr "Uma célula deste arquivo tem mais de {max, number} caracteres, o que nenhum extrato tem -- pode não ser um extrato, ou pode estar danificado. Baixe-o de novo no seu banco."
+
+#. {found} and {stated} are amounts as the bill wrote them; {label} is the bill's own words for its total
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.layout_changed"
+msgstr "Parece um documento para o qual este aplicativo tem uma regra, mas os lançamentos encontrados somam {found} e o documento diz que “{label}” é {stated}. O layout provavelmente mudou, então nada foi importado -- importar parte de uma fatura seria pior."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_bom"
+msgstr "Este arquivo parece texto UTF-16 ou UTF-32 sem marca de ordem de bytes, então não dá para saber ao certo como lê-lo -- salve-o de novo como UTF-8 (ou CSV UTF-8) e importe esse"
+
+#. pdfplumber is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_pdfplumber"
+msgstr "Ler PDFs requer o pacote pdfplumber, que não está instalado"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_sheets"
+msgstr "Esta pasta de trabalho não tem planilhas"
+
+#. xlrd is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_xlrd"
+msgstr "Ler arquivos .xls requer o pacote xlrd, que não está instalado"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.not_a_spreadsheet"
+msgstr "Este arquivo não pôde ser lido como planilha. Pode estar danificado; baixe-o de novo no seu banco, ou exporte-o como CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.not_a_table"
+msgstr "Este arquivo não pôde ser lido como tabela. Baixe-o de novo no seu banco, ou exporte-o como CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_decoded"
+msgstr "Este PDF se expande para mais de {max, number} MB, muito mais do que um extrato precisa -- pode estar danificado, ou feito para ser lido devagar. Peça ao seu banco CSV ou OFX, ou um extrato com menos meses."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_drawing"
+msgstr "As páginas deste PDF têm mais instruções de desenho do que um extrato de qualquer tamanho teria -- pode estar danificado, ou feito para ser lido devagar. Peça ao seu banco CSV ou OFX, ou um extrato com menos meses."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_no_table"
+msgstr "Nenhuma tabela de extrato foi encontrada neste PDF. Alguns documentos -- uma fatura de cartão diagramada com várias tabelas lado a lado, por exemplo -- não são uma única tabela com cabeçalho, e importar metade de um seria pior do que não importar. Peça ao seu banco CSV ou OFX."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_objects"
+msgstr "Este PDF põe mais de {max, number} caracteres e formas nas páginas, muito mais do que um extrato tem. Peça ao seu banco CSV ou OFX, ou um extrato com menos meses."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_scan"
+msgstr "Não há texto neste PDF -- provavelmente é uma digitalização, e ler isso requer reconhecimento de caracteres que este aplicativo não faz. Peça ao seu banco CSV ou OFX."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_stream"
+msgstr "Este PDF contém um bloco comprimido que se expande para mais de {max, number} MB, o que nenhum extrato precisa -- pode estar danificado, ou feito para ser lido devagar. Peça ao seu banco CSV ou OFX, ou um extrato com menos meses."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_too_long"
+msgstr "Este PDF tem mais de {max, number} páginas, mais longo que qualquer extrato que este aplicativo lê. Peça ao seu banco CSV ou OFX, ou um extrato com menos meses."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_unopenable"
+msgstr "Este arquivo não pôde ser aberto como PDF. Pode estar danificado; baixe-o de novo no seu banco."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_unreadable"
+msgstr "Este PDF não pôde ser lido. Pode estar danificado; baixe-o de novo no seu banco."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.sheet_too_large"
+msgstr "A primeira planilha desta pasta de trabalho chega à linha {rows, number} e à coluna {columns, number}, muito maior que um extrato -- este aplicativo lê no máximo {max_rows, number} linhas e {max_columns, number} colunas. Se o extrato estiver lá, exporte-o do seu banco como CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.sheet_unreadable"
+msgstr "A primeira planilha desta pasta de trabalho não pôde ser lida. Pode estar danificada; baixe-a de novo no seu banco, ou exporte-a como CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.too_many_cells"
+msgstr "A primeira planilha desta pasta de trabalho tem mais de {max, number} células, muito maior que um extrato. Se o extrato estiver lá, exporte-o do seu banco como CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.too_many_rows"
+msgstr "Este arquivo tem mais de {max, number} linhas, o que nenhum extrato tem -- pode não ser um extrato. Baixe um período menor no seu banco."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.undated"
+msgstr "Mais de {max, number} linhas deste arquivo não têm data legível -- não é um extrato, ou a coluna de data não foi encontrada. Confira a linha de cabeçalho."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.xlsx"
+msgstr "Este parece um arquivo .xlsx, que ainda não é aceito -- abra-o e salve como CSV, ou exporte CSV do seu banco"
+
 #. Part of a sentence on a transfer: a doubt. {named} is a name the bank wrote
 #. js-lingui-explicit-id
 #: src/lib/noticeMessages.ts
@@ -9177,6 +9403,20 @@ msgstr "{why}, mas há mais de uma linha que poderia ser"
 #, fuzzy
 msgid "notice.transfer.why.names"
 msgstr "a linha de {account} cita {named}"
+
+#. The name of the rows with no category, in a report or a breakdown. See GLOSSARY.md (Uncategorised)
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.unset.category"
+msgstr "Sem categoria"
+
+#. The name of the rows with no payee, in a breakdown of payees
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.unset.payee"
+msgstr "Sem favorecido"
 
 #. {direction} is more or less: whether the import accounts for more than YNAB's balance
 #. js-lingui-explicit-id

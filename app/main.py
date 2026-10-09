@@ -31,7 +31,7 @@ from statements import UnreadableStatement
 #: Re-exported so `from app.main import __version__` keeps working; the
 #: definition is in `app/__init__.py`, where a router can read it without
 #: importing this module and creating a cycle.
-from . import __version__, build, logging_setup, permissions, schema_check
+from . import __version__, build, logging_setup, notices, permissions, schema_check
 from .api import dbview, deps, discovery
 from .api.routers import (
     account_resets,
@@ -326,8 +326,8 @@ async def refuse_cross_origin_writes(request: Request, call_next):
         same_origin = origin is not None and urlsplit(origin).netloc == request.url.netloc
         declared_same_site = origin is None and site in {"same-origin", "none"}
         if not (same_origin or declared_same_site):
-            return JSONResponse(
-                status_code=403, content={"detail": "that request did not come from this app"}
+            return _coded_refusal(
+                request, 403, "that request did not come from this app", code="request.cross_origin"
             )
     return await call_next(request)
 
@@ -466,9 +466,11 @@ async def gate_until_configured(request: Request, call_next):
         # request wait out a slow disk or a WAL checkpoint.
         _configured = await run_in_threadpool(_is_configured)
         if not _configured:
-            return JSONResponse(
-                status_code=503,
-                content={"detail": "this instance has not been set up yet; open /setup"},
+            return _coded_refusal(
+                request,
+                503,
+                "this instance has not been set up yet; open /setup",
+                code="setup.required",
             )
     return await call_next(request)
 
@@ -655,6 +657,25 @@ async def add_security_headers(request: Request, call_next):
     return response
 
 
+def _coded_refusal(
+    request: Request,
+    status: int,
+    detail: object,
+    *,
+    code: str,
+    params: dict[str, object] | None = None,
+) -> JSONResponse:
+    """A refusal built here rather than raised: ``detail``, and beside it the
+    code and raw params a `DomainError` would carry (#267). Not to an agent,
+    for the reason `_speaks_to_agent` gives. ``code`` is registered in
+    `app/error_codes.py` like any other; `tests/test_error_codes.py` reads
+    these calls as it reads raises."""
+    content: dict[str, object] = {"detail": detail}
+    if not _speaks_to_agent(request):
+        content |= {"code": code, "params": dict(params or {})}
+    return JSONResponse(status_code=status, content=content)
+
+
 def _speaks_to_agent(request: Request) -> bool:
     """Whether this answer goes to a program holding an agent key.
 
@@ -697,7 +718,14 @@ def handle_schema_error(request: Request, exc: RequestValidationError) -> JSONRe
         {key: value for key, value in error.items() if key != "input"}
         for error in exc.errors()
     ]
-    return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
+    # One translated sentence for every schema refusal (#267): pydantic's own
+    # messages are English and many, and what a person can act on is which
+    # fields. Those go out as written -- `body.amount` -- never translated,
+    # because they are the API's names.
+    fields = ", ".join(".".join(str(part) for part in error.get("loc", ())) for error in errors)
+    return _coded_refusal(
+        request, 422, jsonable_encoder(errors), code="request.invalid", params={"fields": fields}
+    )
 
 
 @app.exception_handler(OperationalError)
@@ -710,10 +738,7 @@ def handle_operational_error(request: Request, exc: OperationalError) -> JSONRes
     Anything else the database says is still a 500.
     """
     if "database is locked" in str(exc.orig) or "database is busy" in str(exc.orig):
-        return JSONResponse(
-            status_code=409,
-            content={"detail": LEDGER_BUSY},
-        )
+        return _coded_refusal(request, 409, LEDGER_BUSY, code="ledger.busy")
     raise exc
 
 
@@ -729,7 +754,17 @@ def handle_unreadable_statement(request: Request, exc: UnreadableStatement) -> J
     chosen here: 422, the same answer the domain gives for anything else the
     user uploaded that cannot be used.
     """
-    return JSONResponse(status_code=422, content={"detail": str(exc)})
+    # The library knows nothing of codes. Its sentences are read back into one
+    # by `app/notices.py`, which registers each of them; one it does not know
+    # gets the generic code, so a translated screen still says *something*
+    # true (#267).
+    said = notices.read(str(exc))
+    if said is None:
+        return _coded_refusal(request, 422, str(exc), code="statement.unreadable")
+    content: dict[str, object] = {"detail": str(exc)}
+    if not _speaks_to_agent(request):
+        content |= said
+    return JSONResponse(status_code=422, content=content)
 
 
 #: `no-store`, not `public, max-age=3600`. Both documents are rendered from the

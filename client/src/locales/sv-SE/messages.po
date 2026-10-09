@@ -4044,6 +4044,13 @@ msgstr "Bara en ägare kan bjuda in personer"
 msgid "error.invite.owner_only_withdraw"
 msgstr "Bara en ägare kan dra tillbaka en inbjudan"
 
+#. Two people changed the ledger at the same moment. See GLOSSARY.md (ledger)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ledger.busy"
+msgstr "Boken är upptagen med en annan ändring just nu; försök igen"
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
@@ -4409,6 +4416,19 @@ msgstr "Det här är avskrivet. Ändra tillbaka till ”Jobbet ska betala tillba
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.request.cross_origin"
+msgstr "Den begäran kom inte från den här appen"
+
+#. A form or request was refused. {fields} are the API's own field names, like body.amount, kept as they are
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.request.invalid"
+msgstr "En del av det som skickades stämmer inte: {fields}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.reset.account_disabled"
 msgstr "Kontot är inaktiverat, så en återställningslänk för det skulle inte gå att följa. Återaktivera det först."
 
@@ -4521,6 +4541,13 @@ msgstr "Ett visningsnamn krävs"
 msgid "error.setup.not_waiting"
 msgstr "Den här instansen väntar inte på att installeras"
 
+#. /setup is a web address and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.required"
+msgstr "Den här instansen är inte installerad än; öppna /setup"
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
@@ -4586,6 +4613,12 @@ msgstr "Varje del av ett jobbutlägg måste vara pengar som går ut, eftersom va
 #, fuzzy
 msgid "error.split.zero_part"
 msgstr "En del av en uppdelning kan inte vara noll"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.statement.unreadable"
+msgstr "Filen kan inte läsas som ett kontoutdrag"
 
 #. See GLOSSARY.md (step-up)
 #. js-lingui-explicit-id
@@ -8708,6 +8741,58 @@ msgstr "Raden har fler celler än filen har kolumner"
 msgid "notice.account_import.row.unknown_type"
 msgstr "{type} är ingen kontotyp -- använd en av {types}"
 
+#. Said to a program that staged rows. external_id is a field name and stays as it is; {ids} are row ids
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.already_here"
+msgstr "{count} av {total, plural, one {# rad fanns} other {# rader fanns}} redan på kontot och förbereddes inte: {ids}. Om någon av dem verkligen är ett separat köp, ge var och en ett eget external_id och skicka dem igen -- en rad med external_id dedupliceras bara på det."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.matched"
+msgstr "{count} av {total, plural, one {# rad} other {# rader}} matchade poster som redan finns på kontot. Att tillämpa markerar dem som sedda av banken i stället för att lägga till dem igen."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.period_end"
+msgstr "Du angav perioden som slutar {declared} och den senaste förberedda raden är från {latest}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.period_start"
+msgstr "Du angav perioden som börjar {declared} och den tidigaste förberedda raden är från {earliest}."
+
+#. Said to a program that staged rows. {reasons} is a list of reasons with counts
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.refused"
+msgstr "{count} av {total, plural, one {# rad avvisades} other {# rader avvisades}} och kommer inte in: {reasons}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.row_count"
+msgstr "Du angav {declared, plural, one {# rad} other {# rader}} och {arrived} kom fram. En tappad sida eller en felaktigt delad rad ser ut precis så här."
+
+#. Said to a program that staged rows. {share} is a percentage like 61%; {type} an account type's value
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.sign_convention"
+msgstr "{share} av omgångens värde är pengar in till ett {type}-konto ({count} av {total, plural, one {# rad} other {# rader}}), och nettot är positivt. Bekräfta att det är inkomster och inte till exempel kortbetalningar lästa från ett kortutdrag -- på ett kort är de pengar in, och på ett {type}-konto är samma rader pengar ut."
+
+#. Said to a program that staged rows. The figures are in minor units, as the program sent them
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.total"
+msgstr "Du angav en summa på {declared} minsta enheter och raderna som skulle komma in blir {staged}, en skillnad på {difference}. En sammanslagen rad, en saknad rad eller ett omvänt tecken syns här. Rader som hoppades över eller avvisades ingår inte i siffran -- se de andra varningarna om det finns några."
+
 #. js-lingui-explicit-id
 #: src/lib/noticeMessages.ts
 #, fuzzy
@@ -9087,6 +9172,147 @@ msgstr "Banken markerade detta som {kind}, vilket är en reservation och inte en
 msgid "notice.statement.row.signed_twice"
 msgstr "{text} har tecken två gånger, så om det är pengar in eller ut vore en gissning"
 
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.cell_too_long"
+msgstr "En cell i filen är längre än {max, number} tecken, vilket inget kontoutdrag har -- det kanske inte är ett kontoutdrag, eller så är den skadad. Ladda ner den från banken igen."
+
+#. {found} and {stated} are amounts as the bill wrote them; {label} is the bill's own words for its total
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.layout_changed"
+msgstr "Det ser ut som ett dokument appen har en regel för, men posterna den hittade blir {found} och dokumentet säger att ”{label}” är {stated}. Layouten har troligen ändrats, så inget har importerats -- att importera en del av en faktura vore värre."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_bom"
+msgstr "Filen ser ut som UTF-16- eller UTF-32-text utan byteordningsmarkering, så hur den ska läsas går inte att avgöra säkert -- spara den igen som UTF-8 (eller CSV UTF-8) och importera den"
+
+#. pdfplumber is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_pdfplumber"
+msgstr "Att läsa PDF:er kräver paketet pdfplumber, som inte är installerat"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_sheets"
+msgstr "Arbetsboken har inga blad"
+
+#. xlrd is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_xlrd"
+msgstr "Att läsa .xls-filer kräver paketet xlrd, som inte är installerat"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.not_a_spreadsheet"
+msgstr "Filen kunde inte läsas som ett kalkylark. Den kan vara skadad; ladda ner den från banken igen, eller exportera den som CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.not_a_table"
+msgstr "Filen kunde inte läsas som en tabell. Ladda ner den från banken igen, eller exportera den som CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_decoded"
+msgstr "PDF:en packas upp till mer än {max, number} MB, långt mer än ett kontoutdrag behöver -- den kan vara skadad, eller gjord för att läsas långsamt. Be banken om CSV eller OFX, eller ett kontoutdrag som täcker färre månader."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_drawing"
+msgstr "Sidorna i PDF:en har fler ritinstruktioner än ett kontoutdrag av någon längd skulle ha -- den kan vara skadad, eller gjord för att läsas långsamt. Be banken om CSV eller OFX, eller ett kontoutdrag som täcker färre månader."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_no_table"
+msgstr "Ingen kontoutdragstabell hittades i PDF:en. Vissa dokument -- en formgiven kortfaktura med flera tabeller sida vid sida, till exempel -- är inte en enda tabell med rubrik, och att importera halva vore värre än att inte importera det. Be banken om CSV eller OFX."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_objects"
+msgstr "PDF:en har fler än {max, number} tecken och former på sidorna, långt mer än ett kontoutdrag innehåller. Be banken om CSV eller OFX, eller ett kontoutdrag som täcker färre månader."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_scan"
+msgstr "Det finns ingen text i PDF:en -- den är troligen inskannad, och att läsa sådana kräver teckenigenkänning som appen inte gör. Be banken om CSV eller OFX."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_stream"
+msgstr "PDF:en innehåller ett komprimerat block som packas upp till mer än {max, number} MB, vilket inget kontoutdrag behöver -- den kan vara skadad, eller gjord för att läsas långsamt. Be banken om CSV eller OFX, eller ett kontoutdrag som täcker färre månader."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_too_long"
+msgstr "PDF:en har fler än {max, number} sidor, längre än något kontoutdrag appen läser. Be banken om CSV eller OFX, eller ett kontoutdrag som täcker färre månader."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_unopenable"
+msgstr "Filen kunde inte öppnas som PDF. Den kan vara skadad; ladda ner den från banken igen."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_unreadable"
+msgstr "PDF:en kunde inte läsas. Den kan vara skadad; ladda ner den från banken igen."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.sheet_too_large"
+msgstr "Första bladet i arbetsboken når rad {rows, number} och kolumn {columns, number}, vilket är långt större än ett kontoutdrag -- appen läser högst {max_rows, number} rader och {max_columns, number} kolumner. Om kontoutdraget finns där, exportera det från banken som CSV i stället."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.sheet_unreadable"
+msgstr "Första bladet i arbetsboken kunde inte läsas. Det kan vara skadat; ladda ner den från banken igen, eller exportera den som CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.too_many_cells"
+msgstr "Första bladet i arbetsboken har fler än {max, number} celler, vilket är långt större än ett kontoutdrag. Om kontoutdraget finns där, exportera det från banken som CSV i stället."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.too_many_rows"
+msgstr "Filen har fler än {max, number} rader, vilket inget kontoutdrag har -- det kanske inte är ett kontoutdrag. Ladda ner en kortare period från banken."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.undated"
+msgstr "Fler än {max, number} rader i filen saknar läsbart datum -- det är inget kontoutdrag, eller så hittades inte datumkolumnen. Kontrollera rubrikraden."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.xlsx"
+msgstr "Det här ser ut som en .xlsx-fil, som inte stöds än -- öppna den och spara som CSV, eller exportera CSV från banken i stället"
+
 #. Part of a sentence on a transfer: a doubt. {named} is a name the bank wrote
 #. js-lingui-explicit-id
 #: src/lib/noticeMessages.ts
@@ -9177,6 +9403,20 @@ msgstr "{why}, men det finns mer än en rad det kan vara"
 #, fuzzy
 msgid "notice.transfer.why.names"
 msgstr "raden i {account} nämner {named}"
+
+#. The name of the rows with no category, in a report or a breakdown. See GLOSSARY.md (Uncategorised)
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.unset.category"
+msgstr "Okategoriserad"
+
+#. The name of the rows with no payee, in a breakdown of payees
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.unset.payee"
+msgstr "Ingen mottagare"
 
 #. {direction} is more or less: whether the import accounts for more than YNAB's balance
 #. js-lingui-explicit-id

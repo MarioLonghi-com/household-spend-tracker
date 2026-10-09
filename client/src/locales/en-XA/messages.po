@@ -3393,6 +3393,12 @@ msgstr ""
 msgid "error.invite.owner_only_withdraw"
 msgstr ""
 
+#. Two people changed the ledger at the same moment. See GLOSSARY.md (ledger)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ledger.busy"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.money.amount_too_large"
@@ -3697,6 +3703,17 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.request.cross_origin"
+msgstr ""
+
+#. A form or request was refused. {fields} are the API's own field names, like body.amount, kept as they are
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.request.invalid"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.reset.account_disabled"
 msgstr ""
 
@@ -3791,6 +3808,12 @@ msgstr ""
 msgid "error.setup.not_waiting"
 msgstr ""
 
+#. /setup is a web address and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.required"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.setup.server_restarted"
@@ -3844,6 +3867,11 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.split.zero_part"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.statement.unreadable"
 msgstr ""
 
 #. See GLOSSARY.md (step-up)
@@ -7308,6 +7336,50 @@ msgstr ""
 msgid "notice.account_import.row.unknown_type"
 msgstr ""
 
+#. Said to a program that staged rows. external_id is a field name and stays as it is; {ids} are row ids
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.already_here"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.matched"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.period_end"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.period_start"
+msgstr ""
+
+#. Said to a program that staged rows. {reasons} is a list of reasons with counts
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.refused"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.row_count"
+msgstr ""
+
+#. Said to a program that staged rows. {share} is a percentage like 61%; {type} an account type's value
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.sign_convention"
+msgstr ""
+
+#. Said to a program that staged rows. The figures are in minor units, as the program sent them
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.total"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/noticeMessages.ts
 msgid "notice.country.not_a_code"
@@ -7626,6 +7698,124 @@ msgstr ""
 msgid "notice.statement.row.signed_twice"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.cell_too_long"
+msgstr ""
+
+#. {found} and {stated} are amounts as the bill wrote them; {label} is the bill's own words for its total
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.layout_changed"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_bom"
+msgstr ""
+
+#. pdfplumber is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_pdfplumber"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_sheets"
+msgstr ""
+
+#. xlrd is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_xlrd"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.not_a_spreadsheet"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.not_a_table"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_decoded"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_drawing"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_no_table"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_objects"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_scan"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_stream"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_too_long"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_unopenable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_unreadable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.sheet_too_large"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.sheet_unreadable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.too_many_cells"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.too_many_rows"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.undated"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.xlsx"
+msgstr ""
+
 #. Part of a sentence on a transfer: a doubt. {named} is a name the bank wrote
 #. js-lingui-explicit-id
 #: src/lib/noticeMessages.ts
@@ -7702,6 +7892,18 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/lib/noticeMessages.ts
 msgid "notice.transfer.why.names"
+msgstr ""
+
+#. The name of the rows with no category, in a report or a breakdown. See GLOSSARY.md (Uncategorised)
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.unset.category"
+msgstr ""
+
+#. The name of the rows with no payee, in a breakdown of payees
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.unset.payee"
 msgstr ""
 
 #. {direction} is more or less: whether the import accounts for more than YNAB's balance

@@ -75,6 +75,16 @@ history this repository does not have.
   from the sentences by `app/notices.py`, so nothing new is stored, no
   migration is needed, and a line staged before this upgrade reads as well
   as a new one. English and agents' answers are unchanged. (#267)
+- **The last refusals carry codes, and so does "Uncategorised".** A request
+  the schema refuses keeps pydantic's list in `detail` and adds one code,
+  `request.invalid`, naming the fields as the API spells them; a cross-site
+  write, a fresh instance's setup gate and a busy ledger carry theirs; a
+  statement the library refuses whole is read back into one of
+  `app/notices.py`'s codes, or a generic one. A report's and a breakdown's
+  "Uncategorised" and "No payee" carry `name_code`, and the payee breakdown
+  on Categories words "No payee" from it in another language. An agent's staging warnings have codes too, but
+  an agent is still sent none. English and agents' answers are unchanged.
+  (#267)
 
 ## 0.9.3 — 2026-10-09
 

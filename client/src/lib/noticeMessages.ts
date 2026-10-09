@@ -322,6 +322,107 @@ export const NOTICE_MESSAGES: Record<string, ErrorMessage> = {
   "ynab.balance.unchecked": {
     message: msg({ id: "notice.ynab.balance.unchecked", message: "{account}: YNAB's balance could not be checked: {problem}." }),
   },
+  "unset.category": {
+    message: msg({ id: "notice.unset.category", message: "Uncategorised", comment: "The name of the rows with no category, in a report or a breakdown. See GLOSSARY.md (Uncategorised)" }),
+  },
+  "unset.payee": {
+    message: msg({ id: "notice.unset.payee", message: "No payee", comment: "The name of the rows with no payee, in a breakdown of payees" }),
+  },
+  "statement.unreadable.no_bom": {
+    message: msg({ id: "notice.statement.unreadable.no_bom", message: "This file looks like UTF-16 or UTF-32 text without a byte-order mark, so how to read it cannot be told for certain -- save it again as UTF-8 (or CSV UTF-8) and import that" }),
+  },
+  "statement.unreadable.too_many_rows": {
+    message: msg({ id: "notice.statement.unreadable.too_many_rows", message: "This file has more than {max, number} rows, which no statement has -- it may not be a statement. Download a shorter period from your bank." }),
+  },
+  "statement.unreadable.cell_too_long": {
+    message: msg({ id: "notice.statement.unreadable.cell_too_long", message: "One cell in this file is longer than {max, number} characters, which no statement has -- it may not be a statement, or it may be damaged. Download it from your bank again." }),
+  },
+  "statement.unreadable.not_a_table": {
+    message: msg({ id: "notice.statement.unreadable.not_a_table", message: "This file could not be read as a table. Download it from your bank again, or export it as CSV." }),
+  },
+  "statement.unreadable.undated": {
+    message: msg({ id: "notice.statement.unreadable.undated", message: "More than {max, number} rows of this file have no readable date -- it is not a statement, or its date column was not found. Check the header row." }),
+  },
+  "statement.unreadable.xlsx": {
+    message: msg({ id: "notice.statement.unreadable.xlsx", message: "This looks like an .xlsx file, which is not supported yet -- open it and save as CSV, or export CSV from your bank instead" }),
+  },
+  "statement.unreadable.no_xlrd": {
+    message: msg({ id: "notice.statement.unreadable.no_xlrd", message: "Reading .xls files needs the xlrd package, which is not installed", comment: "xlrd is the name of a software package and stays as it is" }),
+  },
+  "statement.unreadable.not_a_spreadsheet": {
+    message: msg({ id: "notice.statement.unreadable.not_a_spreadsheet", message: "This file could not be read as a spreadsheet. It may be damaged; download it from your bank again, or export it as CSV." }),
+  },
+  "statement.unreadable.no_sheets": {
+    message: msg({ id: "notice.statement.unreadable.no_sheets", message: "This workbook has no sheets in it" }),
+  },
+  "statement.unreadable.sheet_unreadable": {
+    message: msg({ id: "notice.statement.unreadable.sheet_unreadable", message: "The first sheet of this workbook could not be read. It may be damaged; download it from your bank again, or export it as CSV." }),
+  },
+  "statement.unreadable.sheet_too_large": {
+    message: msg({ id: "notice.statement.unreadable.sheet_too_large", message: "The first sheet of this workbook reaches row {rows, number} and column {columns, number}, which is far larger than a statement -- this app reads at most {max_rows, number} rows and {max_columns, number} columns. If the statement is in there, export it from your bank as CSV instead." }),
+  },
+  "statement.unreadable.too_many_cells": {
+    message: msg({ id: "notice.statement.unreadable.too_many_cells", message: "The first sheet of this workbook holds more than {max, number} cells, which is far larger than a statement. If the statement is in there, export it from your bank as CSV instead." }),
+  },
+  "statement.unreadable.pdf_too_long": {
+    message: msg({ id: "notice.statement.unreadable.pdf_too_long", message: "This PDF has more than {max, number} pages, which is longer than any statement this app reads. Ask your bank for CSV or OFX, or a statement covering fewer months." }),
+  },
+  "statement.unreadable.pdf_stream": {
+    message: msg({ id: "notice.statement.unreadable.pdf_stream", message: "This PDF contains a compressed block that unpacks to more than {max, number} MB, which no statement needs -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months." }),
+  },
+  "statement.unreadable.pdf_decoded": {
+    message: msg({ id: "notice.statement.unreadable.pdf_decoded", message: "This PDF unpacks to more than {max, number} MB, which is far more than a statement needs -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months." }),
+  },
+  "statement.unreadable.pdf_drawing": {
+    message: msg({ id: "notice.statement.unreadable.pdf_drawing", message: "The pages of this PDF hold more drawing instructions than a statement of any length would -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months." }),
+  },
+  "statement.unreadable.pdf_objects": {
+    message: msg({ id: "notice.statement.unreadable.pdf_objects", message: "This PDF puts more than {max, number} characters and shapes on its pages, which is far more than a statement holds. Ask your bank for CSV or OFX, or a statement covering fewer months." }),
+  },
+  "statement.unreadable.pdf_unopenable": {
+    message: msg({ id: "notice.statement.unreadable.pdf_unopenable", message: "This file could not be opened as a PDF. It may be damaged; download it from your bank again." }),
+  },
+  "statement.unreadable.pdf_unreadable": {
+    message: msg({ id: "notice.statement.unreadable.pdf_unreadable", message: "This PDF could not be read. It may be damaged; download it from your bank again." }),
+  },
+  "statement.unreadable.no_pdfplumber": {
+    message: msg({ id: "notice.statement.unreadable.no_pdfplumber", message: "Reading PDFs needs the pdfplumber package, which is not installed", comment: "pdfplumber is the name of a software package and stays as it is" }),
+  },
+  "statement.unreadable.pdf_scan": {
+    message: msg({ id: "notice.statement.unreadable.pdf_scan", message: "There is no text in this PDF -- it is probably a scan, and reading those needs character recognition this app does not do. Ask your bank for CSV or OFX." }),
+  },
+  "statement.unreadable.pdf_no_table": {
+    message: msg({ id: "notice.statement.unreadable.pdf_no_table", message: "No statement table was found in this PDF. Some documents -- a designed credit-card bill with several tables side by side, for instance -- are not a single table with a header, and importing half of one would be worse than not importing it. Ask your bank for CSV or OFX." }),
+  },
+  "statement.unreadable.layout_changed": {
+    message: msg({ id: "notice.statement.unreadable.layout_changed", message: "This looks like a document this app has a rule for, but the entries it found add up to {found} and the document says “{label}” is {stated}. The layout has probably changed, so nothing has been imported -- importing part of a bill would be worse.", comment: "{found} and {stated} are amounts as the bill wrote them; {label} is the bill's own words for its total" }),
+  },
+  "agent.warning.already_here": {
+    message: msg({ id: "notice.agent.warning.already_here", message: "{count} of {total, plural, one {# row was} other {# rows were}} already in this account and were not staged: {ids}. If any of those are genuinely separate purchases, give each one its own external_id and send them again -- a row with an external_id is deduped on that alone.", comment: "Said to a program that staged rows. external_id is a field name and stays as it is; {ids} are row ids" }),
+  },
+  "agent.warning.refused": {
+    message: msg({ id: "notice.agent.warning.refused", message: "{count} of {total, plural, one {# row was} other {# rows were}} refused and will not land: {reasons}.", comment: "Said to a program that staged rows. {reasons} is a list of reasons with counts" }),
+  },
+  "agent.warning.matched": {
+    message: msg({ id: "notice.agent.warning.matched", message: "{count} of {total, plural, one {# row} other {# rows}} matched entries already in this account. Committing marks those as seen by the bank rather than adding them again." }),
+  },
+  "agent.warning.sign_convention": {
+    message: msg({ id: "notice.agent.warning.sign_convention", message: "{share} of this batch's value is money coming in to a {type} account ({count} of {total, plural, one {# row} other {# rows}}), and it nets positive overall. Confirm these are income rather than, say, credit-card repayments read from a card statement -- on a card those are money in, and in a {type} account the same rows are money out.", comment: "Said to a program that staged rows. {share} is a percentage like 61%; {type} an account type's value" }),
+  },
+  "agent.warning.row_count": {
+    message: msg({ id: "notice.agent.warning.row_count", message: "You declared {declared, plural, one {# row} other {# rows}} and {arrived} arrived. A dropped page or a mis-split line looks exactly like this." }),
+  },
+  "agent.warning.total": {
+    message: msg({ id: "notice.agent.warning.total", message: "You declared a total of {declared} minor units and the rows that would land come to {staged}, a difference of {difference}. A merged row, a missing row or a flipped sign all show up here. Rows that were skipped or refused are not in this figure -- see the other warnings if there are any.", comment: "Said to a program that staged rows. The figures are in minor units, as the program sent them" }),
+  },
+  "agent.warning.period_start": {
+    message: msg({ id: "notice.agent.warning.period_start", message: "You declared the period starting {declared} and the earliest row staged is {earliest}." }),
+    dates: ["declared", "earliest"],
+  },
+  "agent.warning.period_end": {
+    message: msg({ id: "notice.agent.warning.period_end", message: "You declared the period ending {declared} and the latest row staged is {latest}." }),
+    dates: ["declared", "latest"],
+  },
 };
 
 function isCoded(value: unknown): value is Coded {
