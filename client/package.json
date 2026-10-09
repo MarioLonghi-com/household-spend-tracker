@@ -14,8 +14,8 @@
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "extract": "lingui extract --clean --workers 1",
-    "e2e": "npm run build && playwright test",
-    "e2e:ui": "npm run build && playwright test --ui"
+    "e2e": "tsc -b && vite build --mode qa && playwright test",
+    "e2e:ui": "tsc -b && vite build --mode qa && playwright test --ui"
   },
   "dependencies": {
     "@lingui/core": "6.8.0",

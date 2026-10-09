@@ -59,6 +59,18 @@ export function formatLocale(): string {
 }
 
 /**
+ * The `lang` an amount carries: the formatting locale, when its language is
+ * not the one the words are in (#271). "1 234,56 kr" inside a Portuguese
+ * screen is Swedish, and a screen reader should read it so. `undefined` when
+ * the two agree -- an English screen formatted in English carries nothing,
+ * as before.
+ */
+export function amountLang(): string | undefined {
+  const format = formatLocale();
+  return format.split("-")[0].toLowerCase() === uiLanguage().split("-")[0].toLowerCase() ? undefined : format;
+}
+
+/**
  * Pin the formatting locale, or `undefined` to follow the browser again.
  *
  * For the tests, which must not depend on the machine that runs them, and for

@@ -16,6 +16,10 @@ msgstr "The name looks like its IBAN."
 msgid "YNAB Starting Balance rows ({0})"
 msgstr "YNAB Starting Balance rows ({0})"
 
+#: src/components/ScreenBoundary.tsx
+msgid "The rest of the app still works. Pick another page from the menu."
+msgstr "The rest of the app still works. Pick another page from the menu."
+
 #. What the import detected: the running balance column. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "balance column"
@@ -415,6 +419,14 @@ msgstr "Finish the category you are editing first"
 msgid "Light"
 msgstr "Light"
 
+#. Transfers screen, after how many suggested identifiers: how many transfer pairs they would link
+#. placeholder {0}: suggested.would_link ?? 0
+#. placeholder {1}: suggested.would_link
+#. placeholder {2}: suggested.would_link
+#: src/screens/Transfers.tsx
+msgid "{0, plural, one {{1} pair.} other {{2} pairs.}}"
+msgstr "{0, plural, one {{1} pair.} other {{2} pairs.}}"
+
 #. Button on the Payees screen: verb, look over before going on
 #: src/screens/Payees.tsx
 msgid "Review…"
@@ -516,6 +528,13 @@ msgstr "{unloaded, plural, one {Showing {0} — {1} more row to load — show mo
 #: src/screens/History.tsx
 msgid "When"
 msgstr "When"
+
+#. Screen-reader name of the handle between two parts of a split transaction. See GLOSSARY.md
+#. placeholder {0}: seam + 1
+#. placeholder {1}: seam + 2
+#: src/components/SplitBar.tsx
+msgid "Between part {0} and part {1}"
+msgstr "Between part {0} and part {1}"
 
 #: src/screens/Updates.tsx
 msgid "The app stays up throughout. Nothing in the ledger changes."
@@ -1033,6 +1052,11 @@ msgstr "equals"
 msgid "Account number"
 msgstr "Account number"
 
+#. Application management: what the Verbose logging style writes
+#: src/lib/labels.ts
+msgid "Everything the app and its libraries have to say. For chasing something specific."
+msgstr "Everything the app and its libraries have to say. For chasing something specific."
+
 #: src/lib/reimbursement.ts
 msgid "Work expense — not reimbursed yet"
 msgstr "Work expense — not reimbursed yet"
@@ -1113,6 +1137,11 @@ msgstr "Earlier"
 #: src/lib/labels.ts
 msgid "Something you own that holds value and that you want in the totals — a deposit held by a landlord, an investment you track by hand."
 msgstr "Something you own that holds value and that you want in the totals — a deposit held by a landlord, an investment you track by hand."
+
+#. Application management, Where the files are: note on the Backups row
+#: src/lib/labels.ts
+msgid "where the backup operation below writes"
+msgstr "where the backup operation below writes"
 
 #: src/screens/Profile.tsx
 msgid "Or open <0>the enrolment link</0> on the device with the app."
@@ -1225,6 +1254,12 @@ msgstr "Spellings"
 #: src/screens/Admin.tsx
 msgid "{0} left"
 msgstr "{0} left"
+
+#. Transfers screen, after linking: how many pairs were linked
+#. placeholder {0}: (link.data ?? linkAll.data)!.linked
+#: src/screens/Transfers.tsx
+msgid "Linked {0}."
+msgstr "Linked {0}."
 
 #: src/lib/signInChanges.ts
 msgid "Somebody reset {user}'s password and authenticator"
@@ -1375,6 +1410,11 @@ msgstr "Everyone {0} has paid or been paid by. Most arrive on their own, from a 
 msgid "(closed)"
 msgstr "(closed)"
 
+#. Application management, Where the files are: note on the Database row. See GLOSSARY.md
+#: src/lib/labels.ts
+msgid "the ledger itself"
+msgstr "the ledger itself"
+
 #: src/lib/labels.ts
 msgid "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
 msgstr "Money you owe that isn't a card — a mortgage, a car loan, money owed to a person. Repayments are transfers into it."
@@ -1398,12 +1438,14 @@ msgstr "New"
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Transfers screen
+#. Screen-reader name on the Transfers screen
 #. Screen-reader text on the Backups screen
 #. Screen-reader text on the passkeys panel
 #: src/screens/Accounts.tsx
 #: src/screens/Backups.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Payees.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 msgid "Actions"
 msgstr "Actions"
@@ -1456,6 +1498,11 @@ msgstr "Out"
 msgid "{0}: YNAB’s balance is {1}, and this import accounts for {2}, {3} more."
 msgstr "{0}: YNAB’s balance is {1}, and this import accounts for {2}, {3} more."
 
+#. Application management: what the Normal logging style writes
+#: src/lib/labels.ts
+msgid "What the instance did: startups, the schema revision, housekeeping sweeps."
+msgstr "What the instance did: startups, the schema revision, housekeeping sweeps."
+
 #: src/screens/Profile.tsx
 msgid "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
 msgstr "{ended, plural, one {{ended} other browser was signed out.} other {{ended} other browsers were signed out.}}"
@@ -1482,6 +1529,11 @@ msgstr "Entered by hand"
 #: src/screens/Accounts.tsx
 msgid "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
 msgstr "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
+
+#. Section heading on the Transfers screen: pairs the app is sure are transfers
+#: src/screens/Transfers.tsx
+msgid "Sure of these"
+msgstr "Sure of these"
 
 #: src/screens/ynab/results.tsx
 msgid "Skipped: outside the date range"
@@ -1676,6 +1728,15 @@ msgstr "Total expense"
 #: src/lib/historyWords.ts
 msgid "Setup change"
 msgstr "Setup change"
+
+#. Screen-reader value of a split handle: each part's number and amount. See GLOSSARY.md
+#. placeholder {0}: seam + 1
+#. placeholder {1}: format(magnitudes[seam], currency)
+#. placeholder {2}: seam + 2
+#. placeholder {3}: format(magnitudes[seam + 1], currency)
+#: src/components/SplitBar.tsx
+msgid "Part {0} {1}, part {2} {3}"
+msgstr "Part {0} {1}, part {2} {3}"
 
 #. Row state in the one-time import's account mapping: left out
 #: src/lib/labels.ts
@@ -2010,12 +2071,15 @@ msgstr "What happened"
 
 #. Column heading on the Reimbursements report: where it goes, or what it is merged into
 #. Column heading on the Transfers screen: preposition, the account money arrives in
+#. Column heading on the Transfers screen: preposition, the account money arrives in
+#. Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in
 #. Column name shown beside a value on phones on the Transfers screen: preposition, the account money arrives in
 #. Label of a form field on the Payees screen: where it goes, or what it is merged into
 #. Label on the Import screen: preposition, the account money arrives in
 #: src/screens/Import.tsx
 #: src/screens/Payees.tsx
 #: src/screens/reports/Reimbursements.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 msgid "Into"
 msgstr "Into"
@@ -2094,6 +2158,16 @@ msgstr "Your new recovery codes"
 #: src/screens/TransferSections.tsx
 msgid "Not a transfer — categorise as…"
 msgstr "Not a transfer — categorise as…"
+
+#. Application management, Where the files are: note on the Installation row
+#: src/lib/labels.ts
+msgid "the code this process is running"
+msgstr "the code this process is running"
+
+#. Application management, Where the files are: SQLite's file of recent writes
+#: src/lib/labels.ts
+msgid "Write-ahead log"
+msgstr "Write-ahead log"
 
 #. placeholder {0}: offer.secret
 #. placeholder {0}: owed.offer.secret
@@ -2222,6 +2296,11 @@ msgstr "Discard"
 #: src/screens/ynab/results.tsx
 msgid "Download .txt"
 msgstr "Download .txt"
+
+#. Application management, Where the files are: the built web pages
+#: src/lib/labels.ts
+msgid "Client build"
+msgstr "Client build"
 
 #: src/screens/Reconcile.tsx
 msgid "Locking is one act, so History undoes the whole reconciliation in one click if you got the statement wrong."
@@ -2405,6 +2484,11 @@ msgstr "Written to <0>{0}</0>, rotated at a megabyte and five files deep. A rota
 #: src/screens/OneTimeImport.tsx
 msgid "Step {0} of {1} — <0>{2}</0>"
 msgstr "Step {0} of {1} — <0>{2}</0>"
+
+#. Logging style on Application management: the default amount of logging
+#: src/lib/labels.ts
+msgid "Normal"
+msgstr "Normal"
 
 #. Button on the Register screen
 #: src/screens/Register.tsx
@@ -2593,12 +2677,15 @@ msgstr "A download is a zip with a README for whoever opens it next: what the fi
 #. Column heading on the Accounts screen: noun, the reason
 #. Column heading on the Transfers screen: noun, the reason
 #. Column heading on the Transfers screen: noun, the reason
+#. Column heading on the Transfers screen: noun, the reason
 #. Column heading on the one-time import's results: noun, the reason
 #. Column name shown beside a value on phones on the Accounts screen: noun, the reason
 #. Column name shown beside a value on phones on the Transfers screen: noun, the reason
 #. Column name shown beside a value on phones on the Transfers screen: noun, the reason
+#. Column name shown beside a value on phones on the Transfers screen: noun, the reason
 #. Column name shown beside a value on phones on the one-time import's results: noun, the reason
 #: src/screens/Accounts.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #: src/screens/ynab/results.tsx
 msgid "Why"
@@ -2759,6 +2846,11 @@ msgstr "Not a work expense"
 msgid "Leave a payee somebody set by hand alone. Turning this off lets the rules overrule those too, which is occasionally what you want and never what you want by accident."
 msgstr "Leave a payee somebody set by hand alone. Turning this off lets the rules overrule those too, which is occasionally what you want and never what you want by accident."
 
+#. Section heading on the Transfers screen: pairs that may be transfers, for a person to decide
+#: src/screens/Transfers.tsx
+msgid "Worth a look"
+msgstr "Worth a look"
+
 #. Column heading on the Income vs Expense report: income minus spending
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Net"
@@ -2786,6 +2878,11 @@ msgstr "Version"
 #: src/screens/Register.tsx
 msgid "T — Transfers"
 msgstr "T — Transfers"
+
+#. Heading shown when a screen fails to draw; the menu still works
+#: src/components/ScreenBoundary.tsx
+msgid "This screen could not be shown"
+msgstr "This screen could not be shown"
 
 #: src/lib/signInChanges.ts
 msgid "Reset: password and authenticator"
@@ -2815,6 +2912,11 @@ msgstr "{0} will not be imported, with the reason for each"
 #: src/screens/Rules.tsx
 msgid "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
 msgstr "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
+
+#. Application management: what app.log holds
+#: src/lib/labels.ts
+msgid "What the instance did: startups, the schema revision, housekeeping, errors."
+msgstr "What the instance did: startups, the schema revision, housekeeping, errors."
 
 #: src/screens/Household.tsx
 msgid "Pick an accent colour"
@@ -3589,6 +3691,11 @@ msgstr "categorisation"
 msgid "A passkey is a way in that keeps working after this browser is closed."
 msgstr "A passkey is a way in that keeps working after this browser is closed."
 
+#. Application management, Where the files are: note on the Client build row; `/` is the site's address and stays
+#: src/lib/labels.ts
+msgid "the built SPA; `/` 404s without it"
+msgstr "the built SPA; `/` 404s without it"
+
 #. State of the authenticator: it is enrolled and working. See GLOSSARY.md
 #: src/screens/Profile.tsx
 msgctxt "authenticator state"
@@ -3639,10 +3746,12 @@ msgstr "A household holds the accounts and the register. The currency here is on
 msgid "Other asset"
 msgstr "Other asset"
 
+#. Heading of the Transfers screen: noun, money moved between your own accounts. See GLOSSARY.md
 #. Menu item and the name of its screen: noun, money moved between your own accounts. See GLOSSARY.md
 #. Name of a fact on the one-time import: noun, money moved between your own accounts. See GLOSSARY.md
 #: src/App.tsx
 #: src/screens/OneTimeImport.tsx
+#: src/screens/Transfers.tsx
 msgid "Transfers"
 msgstr "Transfers"
 
@@ -3714,6 +3823,11 @@ msgstr "Categorise {0} selected as…"
 #: src/screens/Register.tsx
 msgid "{0} selected"
 msgstr "{0} selected"
+
+#. Application management, Where the files are: the folder holding everything but the code
+#: src/lib/labels.ts
+msgid "Data directory"
+msgstr "Data directory"
 
 #: src/screens/Import.tsx
 msgid "The file itself"
@@ -3802,6 +3916,11 @@ msgstr "Every new receipt will take about <0>70× more space</0> in the database
 msgid "{0} — all hidden"
 msgstr "{0} — all hidden"
 
+#. Logging style on Application management: write everything
+#: src/lib/labels.ts
+msgid "Verbose"
+msgstr "Verbose"
+
 #: src/screens/AcceptInvite.tsx
 msgid "Filled in from the invitation. Change it if you would rather use another address."
 msgstr "Filled in from the invitation. Change it if you would rather use another address."
@@ -3881,10 +4000,20 @@ msgstr "Payee categorisation"
 msgid "{0, plural, one {Matches {1} row, such as:} other {Matches {2} rows, such as:}}"
 msgstr "{0, plural, one {Matches {1} row, such as:} other {Matches {2} rows, such as:}}"
 
+#. Transfers screen, followed by how many pairs: identifiers are names and numbers that tell accounts apart
+#: src/screens/Transfers.tsx
+msgid "{helping, plural, one {{helping} suggested identifier would link} other {{helping} suggested identifiers would link}}"
+msgstr "{helping, plural, one {{helping} suggested identifier would link} other {{helping} suggested identifiers would link}}"
+
 #. Label on the Register screen
 #: src/screens/Register.tsx
 msgid "Single transaction"
 msgstr "Single transaction"
+
+#. Application management, Where the files are: note on the Secret key row
+#: src/lib/labels.ts
+msgid "back this up with the database — without it every session and every authenticator is void"
+msgstr "back this up with the database — without it every session and every authenticator is void"
 
 #. Row heading in the update confirmation
 #: src/screens/Updates.tsx
@@ -4063,6 +4192,8 @@ msgid "No receipts here yet."
 msgstr "No receipts here yet."
 
 #. Shown when a list is empty on the Transfers screen
+#. Shown when a list is empty on the Transfers screen
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 msgid "Nothing waiting."
 msgstr "Nothing waiting."
@@ -4143,8 +4274,10 @@ msgstr "{others, plural, one {with {others} other expense} other {with {others} 
 #. Column heading on the Reconcile screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
+#. Column heading on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the one-time import's results: noun, a sum of money. See GLOSSARY.md
 #. Column heading on the one-time import's results: noun, a sum of money. See GLOSSARY.md
+#. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun, a sum of money. See GLOSSARY.md
 #. Label of a choice on the Register screen: noun, a sum of money. See GLOSSARY.md
@@ -4154,6 +4287,7 @@ msgstr "{others, plural, one {with {others} other expense} other {with {others} 
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
 #: src/screens/Transfer.tsx
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 #: src/screens/ynab/results.tsx
 msgid "Amount"
@@ -4178,6 +4312,10 @@ msgstr "left out"
 #: src/screens/Profile.tsx
 msgid "Close: {name}"
 msgstr "Close: {name}"
+
+#: src/screens/Transfers.tsx
+msgid "The amounts match and the dates are close, but nothing names the other account — or a row could pair with more than one. Pairs whose two descriptions say the same thing come first. Link the ones that are a transfer; mark the rest <0>Not a transfer</0> and they are not offered again."
+msgstr "The amounts match and the dates are close, but nothing names the other account — or a row could pair with more than one. Pairs whose two descriptions say the same thing come first. Link the ones that are a transfer; mark the rest <0>Not a transfer</0> and they are not offered again."
 
 #: src/screens/AccountImport.tsx
 msgid "<0>YYYY-MM-DD</0>, like <1>2026-01-31</1>. Blank for today."
@@ -4222,6 +4360,14 @@ msgstr "date format"
 msgid "Rows"
 msgstr "Rows"
 
+#. Button on the Transfers screen: verb, link the ticked pairs as transfers
+#. placeholder {0}: chosen.length
+#. placeholder {1}: chosen.length
+#. placeholder {2}: chosen.length
+#: src/screens/Transfers.tsx
+msgid "{0, plural, one {Link {1} selected} other {Link {2} selected}}"
+msgstr "{0, plural, one {Link {1} selected} other {Link {2} selected}}"
+
 #: src/screens/Reconcile.tsx
 msgid "This account has never been reconciled, so you are starting from the beginning of its history."
 msgstr "This account has never been reconciled, so you are starting from the beginning of its history."
@@ -4236,6 +4382,8 @@ msgstr "Receipts ({0})"
 msgid "a new account"
 msgstr "a new account"
 
+#. Button on the Transfers screen: these two rows are not one transfer, never offer them again
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 msgid "Not a transfer"
 msgstr "Not a transfer"
@@ -4244,6 +4392,11 @@ msgstr "Not a transfer"
 #: src/lib/historyWords.ts
 msgid "One-time Import · YNAB (API)"
 msgstr "One-time Import · YNAB (API)"
+
+#. Shown when a list is empty on the Transfers screen
+#: src/screens/Transfers.tsx
+msgid "Nothing to look at."
+msgstr "Nothing to look at."
 
 #. Column heading on the passkeys panel: the date the passkey was added
 #: src/screens/Passkeys.tsx
@@ -4562,6 +4715,10 @@ msgstr "an unknown step"
 msgid "Part {0} ({currency})"
 msgstr "Part {0} ({currency})"
 
+#: src/screens/Transfers.tsx
+msgid "One row names the other account, or these two accounts have had transfers linked before, and neither row could be anything else — or, of the rows it could be, only this one says the same thing."
+msgstr "One row names the other account, or these two accounts have had transfers linked before, and neither row could be anything else — or, of the rows it could be, only this one says the same thing."
+
 #. Button on the app's menu and frame: verb
 #: src/App.tsx
 msgid "Create it"
@@ -4804,7 +4961,9 @@ msgstr "YNAB export"
 msgid "YNAB account"
 msgstr "YNAB account"
 
+#. Application management, Where the files are: the database file
 #. Heading on the Application management screen
+#: src/lib/labels.ts
 #: src/screens/ApplicationManagement.tsx
 msgid "Database"
 msgstr "Database"
@@ -5048,6 +5207,11 @@ msgstr "Colour"
 #: src/screens/Admin.tsx
 msgid "Expires"
 msgstr "Expires"
+
+#. Application management, Where the files are: note on the Log files row
+#: src/lib/labels.ts
+msgid "what this instance has been saying"
+msgstr "what this instance has been saying"
 
 #: src/screens/SignIn.tsx
 msgid "Until you do, every sign-in will ask for another recovery code. To do it later, open your account — your name in the menu — and set up a new authenticator there. In this tab, while you stay signed in and for up to a day, the code you just used still covers it; after that, or anywhere else, it takes one more recovery code."
@@ -5306,6 +5470,11 @@ msgstr "Repaid by the payment above"
 msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
 msgstr "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
 
+#. Application management, Where the files are: the backups folder. See GLOSSARY.md
+#: src/lib/labels.ts
+msgid "Backups"
+msgstr "Backups"
+
 #. Label on the Register screen
 #: src/screens/Register.tsx
 msgid "Amount ({currency})"
@@ -5449,6 +5618,10 @@ msgstr "Only you right now"
 #: src/lib/labels.ts
 msgid "Other debt"
 msgstr "Other debt"
+
+#: src/screens/Transfers.tsx
+msgid "A transfer between two of your accounts shows up twice — once in each bank's statement — and until it is linked it counts as spending on one side and income on the other. Linked, it stays out of Income vs Expense. Imports link the ones they are sure of; these are the rest. To link a transfer between two currencies, select its two rows in the register and choose <0>Link as transfer</0>."
+msgstr "A transfer between two of your accounts shows up twice — once in each bank's statement — and until it is linked it counts as spending on one side and income on the other. Linked, it stays out of Income vs Expense. Imports link the ones they are sure of; these are the rest. To link a transfer between two currencies, select its two rows in the register and choose <0>Link as transfer</0>."
 
 #. placeholder {0}: report.counts.imported
 #. placeholder {1}: formatCount(report.counts.imported)
@@ -5746,6 +5919,11 @@ msgstr "Only rows nobody has corrected"
 msgid "uncategorised (chosen)"
 msgstr "uncategorised (chosen)"
 
+#. Application management, Where the files are: recent writes not yet copied into the database file
+#: src/lib/labels.ts
+msgid "uncheckpointed writes"
+msgstr "uncheckpointed writes"
+
 #: src/screens/Updates.tsx
 msgid "The recovery page was used for the last update."
 msgstr "The recovery page was used for the last update."
@@ -5802,6 +5980,14 @@ msgstr "C — Cleared"
 #: src/screens/Admin.tsx
 msgid "Yes, disable them"
 msgstr "Yes, disable them"
+
+#. Screen-reader name of a pair's tick box on the Transfers screen: from one account to another, and the date
+#. placeholder {0}: pair.out_leg.account_name
+#. placeholder {1}: pair.in_leg.account_name
+#. placeholder {2}: formatDate(pair.out_leg.date)
+#: src/screens/Transfers.tsx
+msgid "Select {0} to {1}, {2}"
+msgstr "Select {0} to {1}, {2}"
 
 #. Table cell on the Admin screen: adjective, no longer works
 #: src/screens/Admin.tsx
@@ -6082,6 +6268,7 @@ msgstr "Discard this staged import?"
 
 #. Label on the Import screen: having no category. See GLOSSARY.md
 #. Label on the Income vs Expense report: having no category. See GLOSSARY.md
+#. Label on the Income vs Expense report: having no category. See GLOSSARY.md
 #. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
 #. Option in a dropdown on the Register screen: having no category. See GLOSSARY.md
 #. Option in a dropdown on the one-time import's mapping step: having no category. See GLOSSARY.md
@@ -6318,6 +6505,12 @@ msgstr "Each one with the expenses linked to it."
 #: src/screens/Updates.tsx
 msgid "This instance runs from a checkout. Update it from the terminal: <0>make upgrade-check</0>, then <1>make upgrade</1>."
 msgstr "This instance runs from a checkout. Update it from the terminal: <0>make upgrade-check</0>, then <1>make upgrade</1>."
+
+#. Button on the Transfers screen: verb, link every pair in this section; the number is how many
+#. placeholder {0}: data.strong.length
+#: src/screens/Transfers.tsx
+msgid "Link all {0}"
+msgstr "Link all {0}"
 
 #. Column heading on the Categories screen: noun, who was paid or who paid. See GLOSSARY.md
 #. Column heading on the Rules screen: noun, who was paid or who paid. See GLOSSARY.md
@@ -6591,6 +6784,11 @@ msgstr "Recovered"
 msgid "Currency"
 msgstr "Currency"
 
+#. Application management, Where the files are: note on the Setup token row
+#: src/lib/labels.ts
+msgid "present only while setup is unfinished"
+msgstr "present only while setup is unfinished"
+
 #. placeholder {0}: formatCount(kept)
 #. placeholder {1}: formatCount(kept)
 #: src/screens/ynab/results.tsx
@@ -6626,6 +6824,10 @@ msgstr "None yet."
 #: src/screens/Reconcile.tsx
 msgid "The figure printed on the statement for the day it closes — what the bank says you had, not what this app thinks."
 msgstr "The figure printed on the statement for the day it closes — what the bank says you had, not what this app thinks."
+
+#: src/screens/Transfers.tsx
+msgid "Add or ignore them under <0>Suggested identifiers</0> on the Accounts screen."
+msgstr "Add or ignore them under <0>Suggested identifiers</0> on the Accounts screen."
 
 #. Label of a form field on the Admin screen
 #: src/screens/Admin.tsx
@@ -6835,6 +7037,11 @@ msgstr "Working out what would change…"
 msgid "Download…"
 msgstr "Download…"
 
+#. Application management, Where the files are: note on the Data directory row
+#: src/lib/labels.ts
+msgid "everything that is not the code"
+msgstr "everything that is not the code"
+
 #. placeholder {0}: formatCount(totals.splits)
 #: src/screens/OneTimeImport.tsx
 msgid "{0}, each imported as its own transaction"
@@ -6845,6 +7052,11 @@ msgstr "{0}, each imported as its own transaction"
 #: src/screens/Register.tsx
 msgid "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} on {1}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
+
+#. Logging style on Application management: write only what went wrong
+#: src/lib/labels.ts
+msgid "Quiet"
+msgstr "Quiet"
 
 #. History headline, the kind of act: history brought over from YNAB's export file
 #: src/lib/historyWords.ts
@@ -6910,6 +7122,11 @@ msgstr "Show a new code to scan"
 #: src/screens/Register.tsx
 msgid "Out ({currency})"
 msgstr "Out ({currency})"
+
+#. Application management, Where the files are: note on the Browsable snapshot row; `/db` is an address and stays
+#: src/lib/labels.ts
+msgid "the redacted copy `/db` serves, if one was built"
+msgstr "the redacted copy `/db` serves, if one was built"
 
 #. placeholder {0}: tagOffer.value
 #. placeholder {1}: account.name
@@ -7075,6 +7292,11 @@ msgstr "Work expenses"
 msgid "unknown"
 msgstr "unknown"
 
+#. Application management: what access.log holds
+#: src/lib/labels.ts
+msgid "One line per HTTP request. Mechanical, and it drowns everything else."
+msgstr "One line per HTTP request. Mechanical, and it drowns everything else."
+
 #. Label on the household page
 #: src/screens/Household.tsx
 msgid "Oldest transaction"
@@ -7143,7 +7365,10 @@ msgid "Money in within {PAYMENT_PICKER_DAYS} days either side of {0}. Either sid
 msgstr "Money in within {PAYMENT_PICKER_DAYS} days either side of {0}. Either side, because an advance arrives before the spending it covers."
 
 #. Column heading on the Transfers screen: preposition, the account money leaves
+#. Column heading on the Transfers screen: preposition, the account money leaves
 #. Column name shown beside a value on phones on the Transfers screen: preposition, the account money leaves
+#. Column name shown beside a value on phones on the Transfers screen: preposition, the account money leaves
+#: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 msgid "Out of"
 msgstr "Out of"
@@ -7279,6 +7504,11 @@ msgstr "Pre-update hook"
 msgid "S — Split parts"
 msgstr "S — Split parts"
 
+#. Button on the Transfers screen: verb, link the ticked pairs as transfers
+#: src/screens/Transfers.tsx
+msgid "Link selected"
+msgstr "Link selected"
+
 #: src/screens/Rules.tsx
 msgid "whatever is left"
 msgstr "whatever is left"
@@ -7313,6 +7543,11 @@ msgstr "Payee naming rules"
 #: src/screens/Register.tsx
 msgid "{app}, via its CSV export"
 msgstr "{app}, via its CSV export"
+
+#. Shown in a dropdown when the search finds nothing
+#: src/components/GroupedPicker.tsx
+msgid "Nothing matches that."
+msgstr "Nothing matches that."
 
 #. Button on the Register screen
 #: src/screens/Register.tsx
@@ -7555,7 +7790,9 @@ msgstr "{0, plural, one {Installing it also installs {skippedText}, which it ski
 msgid "One row from each account's statement, made the two sides of one transfer"
 msgstr "One row from each account's statement, made the two sides of one transfer"
 
+#. Application management, Where the files are: the folder of log files
 #. Heading on the Application management screen
+#: src/lib/labels.ts
 #: src/screens/ApplicationManagement.tsx
 msgid "Log files"
 msgstr "Log files"
@@ -7682,6 +7919,11 @@ msgctxt "new account"
 msgid "New"
 msgstr "New"
 
+#. Application management: what the Quiet logging style writes
+#: src/lib/labels.ts
+msgid "Only what went wrong. A healthy instance writes almost nothing."
+msgstr "Only what went wrong. A healthy instance writes almost nothing."
+
 #. Column heading on the one-time import's mapping step
 #: src/screens/ynab/mapping.tsx
 msgid "YNAB category"
@@ -7697,6 +7939,11 @@ msgstr "reimbursed by"
 #: src/screens/Import.tsx
 msgid "{0, plural, one {An import was staged and never finished. Nothing in it has reached the register — open one to carry on where it was left, or discard it.} other {{1} imports were staged and never finished. Nothing in them has reached the register — open one to carry on where it was left, or discard it.}}"
 msgstr "{0, plural, one {An import was staged and never finished. Nothing in it has reached the register — open one to carry on where it was left, or discard it.} other {{1} imports were staged and never finished. Nothing in them has reached the register — open one to carry on where it was left, or discard it.}}"
+
+#. Application management, Where the files are: a redacted copy of the database to browse
+#: src/lib/labels.ts
+msgid "Browsable snapshot"
+msgstr "Browsable snapshot"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
@@ -7762,6 +8009,11 @@ msgstr "Admin"
 #: src/screens/Profile.tsx
 msgid "New password again"
 msgstr "New password again"
+
+#. Logging style on Application management: everything, plus every database statement
+#: src/lib/labels.ts
+msgid "Verbose, with SQL"
+msgstr "Verbose, with SQL"
 
 #: src/screens/ynab/results.tsx
 msgid "OK for all — import every one of them anyway"
@@ -7884,6 +8136,11 @@ msgstr "Still owed"
 msgid "{0, plural, =0 {No migrations will run.} one {# migration will run} other {# migrations will run}}"
 msgstr "{0, plural, =0 {No migrations will run.} one {# migration will run} other {# migrations will run}}"
 
+#. Tooltip on the Transfers screen: why this pair cannot be ticked
+#: src/screens/Transfers.tsx
+msgid "Shares a row with a pair you've ticked"
+msgstr "Shares a row with a pair you've ticked"
+
 #: src/screens/Payees.tsx
 msgid "Merge spellings of one name"
 msgstr "Merge spellings of one name"
@@ -7891,6 +8148,10 @@ msgstr "Merge spellings of one name"
 #: src/screens/Register.tsx
 msgid "What has happened to this"
 msgstr "What has happened to this"
+
+#: src/screens/Transfers.tsx
+msgid "Select every pair that does not share a row with another"
+msgstr "Select every pair that does not share a row with another"
 
 #. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
@@ -8173,6 +8434,12 @@ msgstr "1. The setup token"
 msgid "{0, plural, one {{1} expense, counted as your spending} other {{2} expenses, counted as your spending}}"
 msgstr "{0, plural, one {{1} expense, counted as your spending} other {{2} expenses, counted as your spending}}"
 
+#. Placeholder of a search box in a dropdown; the placeholder is what it lists, e.g. accounts
+#. placeholder {0}: label.toLowerCase()
+#: src/components/GroupedPicker.tsx
+msgid "Search {0}"
+msgstr "Search {0}"
+
 #: src/screens/History.tsx
 msgid "Every row it changed"
 msgstr "Every row it changed"
@@ -8453,6 +8720,11 @@ msgstr "The updater stayed on {updaterVersion} and will try again:"
 msgid "<0>{0} other lines have the same payee</0> and no category of their own."
 msgstr "<0>{0} other lines have the same payee</0> and no category of their own."
 
+#. Application management: what sql.log holds; “Verbose, with SQL” is a logging style's name
+#: src/lib/labels.ts
+msgid "Only written at the “Verbose, with SQL” style, and it holds the ledger in plain text. Its own file so the other two stay safe to share."
+msgstr "Only written at the “Verbose, with SQL” style, and it holds the ledger in plain text. Its own file so the other two stay safe to share."
+
 #: src/lib/signInChanges.ts
 msgid "Somebody added {user} as an owner"
 msgstr "Somebody added {user} as an owner"
@@ -8680,10 +8952,19 @@ msgstr "Updater"
 msgid "The image is kept so you can try again."
 msgstr "The image is kept so you can try again."
 
+#: src/components/RowPicker.tsx
+msgid "Nothing in that window. Widen the dates above."
+msgstr "Nothing in that window. Widen the dates above."
+
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Resetting…"
 msgstr "Resetting…"
+
+#. Application management, Where the files are: the app's own code
+#: src/lib/labels.ts
+msgid "Installation"
+msgstr "Installation"
 
 #. placeholder {0}: formatCount(report.not_imported.length)
 #: src/screens/ynab/results.tsx
@@ -8728,10 +9009,17 @@ msgstr "by type"
 msgid "last used {0}"
 msgstr "last used {0}"
 
+#. Application management, Where the files are: the setup token file. See GLOSSARY.md
 #. Label of a form field on the first-run setup. See GLOSSARY.md
+#: src/lib/labels.ts
 #: src/screens/Setup.tsx
 msgid "Setup token"
 msgstr "Setup token"
+
+#. Application management: what the Verbose, with SQL logging style writes
+#: src/lib/labels.ts
+msgid "Verbose, plus every statement and every row it returned — which means transactions, payees and amounts written into a file in plain text. Turn it on to diagnose something and turn it off afterwards."
+msgstr "Verbose, plus every statement and every row it returned — which means transactions, payees and amounts written into a file in plain text. Turn it on to diagnose something and turn it off afterwards."
 
 #. Tooltip on the Income vs Expense report: noun, money that came in
 #: src/screens/reports/IncomeExpense.tsx
@@ -9011,7 +9299,9 @@ msgid "Receipts"
 msgstr "Receipts"
 
 #. Button on the Register screen: verb, link two rows as one transfer
+#. Button on the Transfers screen: verb, link this pair as one transfer
 #: src/screens/Register.tsx
+#: src/screens/Transfers.tsx
 msgid "Link"
 msgstr "Link"
 
@@ -9285,6 +9575,11 @@ msgstr "DD/MM/YYYY"
 #: src/screens/OneTimeImport.tsx
 msgid "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."
 msgstr "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."
+
+#. Application management, Where the files are: the file secret.key
+#: src/lib/labels.ts
+msgid "Secret key"
+msgstr "Secret key"
 
 #. Button on the Register screen
 #. placeholder {0}: parts.length

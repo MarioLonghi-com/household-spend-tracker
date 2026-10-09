@@ -36,6 +36,7 @@ import { formatInstant } from "../lib/time";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { formatCount } from "../lib/locale";
+import { logStreamBlurb, logStyleWords, placeWords } from "../lib/labels";
 
 // --------------------------------------------------------------------------- //
 // What the server sends. `InstanceOut` and friends in `app/schemas.py`.
@@ -424,7 +425,7 @@ function PlacesTable({ places }: { places: Place[] }) {
             {places.map((one) => (
               <tr key={one.what}>
                 <td data-primary="true">
-                  {one.what}
+                  {placeWords(one).what}
                   {/* The one that is missing is usually the answer to whatever
                       brought somebody to this screen -- a `dist` directory that
                       is not there is why `/` 404s, which was issue #1 from a
@@ -438,7 +439,7 @@ function PlacesTable({ places }: { places: Place[] }) {
                       </Trans>
                     </span>
                   )}
-                  <div className="small muted">{one.note}</div>
+                  <div className="small muted">{placeWords(one).note}</div>
                 </td>
                 <td className="mono small" data-label={t({ message: "Path", comment: "Column name shown beside a value on phones on the Application management screen: noun, a place in the file system" })}>
                   {one.path}
@@ -564,7 +565,7 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
                 </span>
               ) : null}
             </dt>
-            <dd className="muted small">{stream.blurb}</dd>
+            <dd className="muted small">{logStreamBlurb(stream)}</dd>
           </div>
         ))}
       </dl>
@@ -655,14 +656,14 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
             disabled={choose.isPending}
             onClick={() => choose.mutate(style.key)}
           >
-            {style.label}
+            {logStyleWords(style).label}
           </button>
         ))}
       </div>
       {(it?.styles ?? []).map((style) =>
         style.key === current ? (
           <p className="muted small" key={style.key} style={{ marginBottom: 0 }}>
-            {style.blurb}
+            {logStyleWords(style).blurb}
             {style.echo_sql ? (
               <>
                 {" "}

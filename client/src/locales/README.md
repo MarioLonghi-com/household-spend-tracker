@@ -45,3 +45,26 @@ removed and has to be set up again"*. A domain term points at `GLOSSARY.md`
 ("See GLOSSARY.md") rather than repeating its row.
 
 Not every message needs one: a whole sentence usually says what it is.
+
+## The QA pass (#271)
+
+Before anyone reviews a language, the end-to-end suite walks every screen in
+it. `npm run e2e` builds in QA mode (`vite build --mode qa`), the one build in
+which a device can store a draft language and get it; no other build has the
+drafts' loaders at all (`src/lib/i18n.ts`). `e2e/locales.spec.ts` then runs
+once per language and width, with the browser's locale set to that language,
+and fails on:
+
+- a message shown in English that the catalog translates, or an English
+  sentence nobody extracted;
+- a placeholder or tag shown as written (`{0}`, `<0>`);
+- text wider than its button, heading, label or cell, or a page that scrolls
+  sideways;
+- an amount not written the language's way: `1 234,56 kr` with no-break
+  spaces, `1234,56 €` (Spanish groups only from 10 000), `R$ 1.234,56`;
+- a page whose `lang` is not the language, and an amount whose format is in
+  another language without a `lang` of its own.
+
+`catalogs.test.ts` holds each translation to the placeholders and tags of
+its English and to the plural forms its language needs; the en-XA walk in
+`e2e/pseudo-locale.spec.ts` finds whole screens nobody extracted.

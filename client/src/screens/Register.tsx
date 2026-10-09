@@ -62,7 +62,7 @@ import type {
 } from "../lib/types";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { formatCount, formatDate } from "../lib/locale";
+import { amountLang, formatCount, formatDate } from "../lib/locale";
 import { listText } from "../lib/locale";
 
 /**
@@ -1767,6 +1767,7 @@ export function Register({
                         <Fragment key={code}>
                           <td
                             className="amount neg money-open"
+                            lang={amountLang()}
                             data-label={several ? t({ message: `Out ${code}`, comment: "Table cell on the Register screen: money going out" }) : t({ message: "Out", comment: "Table cell on the Register screen: money going out" })}
                             data-figure="true"
                           >
@@ -1774,6 +1775,7 @@ export function Register({
                           </td>
                           <td
                             className={last ? "amount pos money-close" : "amount pos"}
+                            lang={amountLang()}
                             data-label={several ? t({ message: `In ${code}`, comment: "Table cell on the Register screen: money coming in" }) : t({ message: "In", comment: "Table cell on the Register screen: money coming in" })}
                             data-figure="true"
                           >
