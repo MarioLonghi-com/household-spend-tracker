@@ -32,6 +32,12 @@ and this module
 5. prints what the launcher still has to do on the host, one `KEY=value` per
    line (`ANSWER_KEYS`), and the sentences to show (`SAY=`).
 
+Before writing anything it makes sure the project's containers can be listed
+(`clear_broken`, #262): a container whose storage a power cut took makes the
+engine refuse every listing it is in, and compose with it. One of the
+updater's own one-offs in that state is removed; anything else stops the
+launcher with a sentence naming the container to remove.
+
 It runs as in-container root, which reaches the socket on every engine (S18,
 S21) -- and which on a rootful Linux engine is the host's root. So the `.env`
 it replaces is given back to the owner the old one had.
@@ -192,6 +198,70 @@ def project_compose(client: eng.EngineClient) -> str | None:
 
 
 # --------------------------------------------------------------------------- #
+# Containers the engine cannot list (#262)
+# --------------------------------------------------------------------------- #
+
+#: A container id in the engine's message, e.g. `getting graph driver info "<id>": …`.
+_BROKEN_ID = re.compile(r"\b([0-9a-f]{64})\b")
+#: More broken one-offs than this in one project is not a power cut to tidy up after.
+MAX_BROKEN = 10
+
+
+def clear_broken(client: eng.EngineClient, engine: str | None) -> tuple[bool, list[str]]:
+    """Whether the project's containers can be listed now, and the sentences to say.
+
+    While the full listing fails with a 500 that names a container, that
+    container is force-removed if it is one of the updater's own one-offs
+    (`EngineClient.remove_broken_oneoff` checks, by the engine's own filters);
+    otherwise the launcher stops, saying which container to remove. Any other
+    answer -- the listing works, or the engine is not reachable or not
+    allowed to be asked -- is not this function's to judge.
+    """
+    said: list[str] = []
+    command = "podman" if (engine or "").startswith("podman") else "docker"
+    try:
+        if client.negotiated is None:
+            client.negotiate()
+    except (eng.EngineError, eng.EngineUnavailable, OSError):
+        return True, said
+    for _ in range(MAX_BROKEN + 1):
+        try:
+            client.containers()
+            return True, said
+        except (eng.EngineUnavailable, eng.NotAllowed, OSError):
+            return True, said
+        except eng.EngineError as e:
+            if e.status < 500:
+                return True, said
+            found = _BROKEN_ID.search(e.message)
+            if found is None:
+                said.append(
+                    "The container engine will not list Spend Tracker's containers "
+                    f"({e.message}). Find the container it names with `{command} ps -a`, remove it "
+                    f"with `{command} rm -f` and its name, then open this launcher again."
+                )
+                return False, said
+            cid = found.group(1)
+            try:
+                removed = client.remove_broken_oneoff(cid)
+            except (eng.EngineError, eng.NotAllowed):
+                removed = False
+            if not removed:
+                said.append(
+                    f"The container engine has lost the files of container {cid[:12]}, so it will not "
+                    f"list Spend Tracker's containers ({e.message}). Remove it with "
+                    f"`{command} rm -f {cid}`, then open this launcher again."
+                )
+                return False, said
+            said.append(
+                f"Removed container {cid[:12]}, one of the updater's own temporary containers, "
+                "whose files the container engine had lost."
+            )
+    said.append(f"More than {MAX_BROKEN} of Spend Tracker's containers have lost their files.")
+    return False, said
+
+
+# --------------------------------------------------------------------------- #
 # Reading the pin
 # --------------------------------------------------------------------------- #
 
@@ -326,6 +396,10 @@ def run(args: argparse.Namespace, detection: detect.Detection | None = None) -> 
     except (KeyError, ValueError) as e:
         return 2, answer([("SAY", f"This container engine cannot run Spend Tracker's updater: {e}.")])
 
+    listable, cleared = clear_broken(client, detection.engine)
+    if not listable:
+        return 2, answer([("SAY", s) for s in cleared])
+
     project = Path(args.project)
     previous = Path(args.previous) if args.previous and Path(args.previous).is_dir() else None
     choice = choose(find_pin(project, previous), args.bundle_app, args.bundle_updater)
@@ -351,6 +425,7 @@ def run(args: argparse.Namespace, detection: detect.Detection | None = None) -> 
     ]
     if detection.sentence:
         lines.append(("SAY", detection.sentence))
+    lines += [("SAY", s) for s in cleared]
     lines += [("SAY", s) for s in choice.sentences]
     return 0, answer(lines)
 

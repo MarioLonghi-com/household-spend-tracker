@@ -15,6 +15,8 @@ What a beat carries beyond detection:
 - `layout`, from the app container's network mode (`detect.layout_of`).
 - `podman_restart`, inferred (S2), and `socket_sentence`, the refusal's one
   sentence, so the screen can quote it before any request is sent.
+- `problem`, the service's sentence while its startup cannot go on (#262):
+  the beat runs beside the service, so it is written even then.
 """
 
 from __future__ import annotations
@@ -55,6 +57,7 @@ def assemble(
     busy: bool,
     podman_restart: str,
     now: float,
+    problem: str | None = None,
 ) -> Heartbeat:
     """Pure: one heartbeat from a detection and what the beat learned around it."""
     return Heartbeat(
@@ -74,6 +77,7 @@ def assemble(
         container=container,
         socket_sentence=found.sentence,
         podman_restart=podman_restart,
+        problem=problem,
     )
 
 
@@ -96,6 +100,7 @@ class Beat:
         mountinfo: str | None = None,
         hostname: str | None = None,
         role: Callable[[], str | None] | None = None,
+        problem: Callable[[], str | None] = lambda: None,
     ) -> None:
         self.client = client
         self.volume = volume
@@ -107,6 +112,8 @@ class Beat:
         #: `updater.json` -- the successor before it takes over, the standby
         #: after `go`, a `-previous` watching the canonical one.
         self.role = role
+        #: The service's sentence when it cannot go on (#262), asked at every beat.
+        self.problem = problem
         self._mountinfo = mountinfo
         self._hostname = hostname
         self.detection: det.Detection | None = None
@@ -162,6 +169,7 @@ class Beat:
             busy=self.busy(),
             podman_restart=self.podman_restart,
             now=now,
+            problem=self.problem(),
         )
 
     def tick(self, now: float) -> Heartbeat | None:

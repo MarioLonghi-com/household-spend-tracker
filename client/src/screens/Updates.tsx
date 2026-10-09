@@ -102,6 +102,8 @@ export interface Heartbeat {
   engine_api: string | null;
   container: string | null;
   socket_sentence: string | null;
+  /** Why the updater cannot go on, in its own sentence (#262). Absent from older updaters. */
+  problem?: string | null;
 }
 
 export interface UpdateStatus {
@@ -395,6 +397,11 @@ export function Updates({
         onReplaceUpdater={() => replaceUpdater.mutate()}
         replacing={replaceUpdater.isPending}
       />
+      {beat?.problem ? (
+        <div className="banner warn" data-problem="updater">
+          {beat.problem}
+        </div>
+      ) : null}
       <Problem error={replaceUpdater.error ?? updaterOnly.error ?? prepare.error} />
 
       {applyInFlight ? (

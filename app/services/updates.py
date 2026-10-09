@@ -266,6 +266,8 @@ class Heartbeat:
     #: The refusal's one sentence when `socket` is one (R24): what the
     #: Updates section says in the `refused` case.
     socket_sentence: str | None = None
+    #: Why the updater cannot go on, when it cannot (#262): shown as it is.
+    problem: str | None = None
 
 
 def heartbeat(now: float | None = None) -> Heartbeat | None:
@@ -295,6 +297,7 @@ def heartbeat(now: float | None = None) -> Heartbeat | None:
         engine_api=_str(doc, "engine_api"),
         container=_str(doc, "container"),
         socket_sentence=_str(doc, "socket_sentence"),
+        problem=_str(doc, "problem"),
     )
 
 
