@@ -1081,7 +1081,10 @@ Nothing installs until you confirm it."* In section 3, `deploy/tailnet/check.sh`
 also checks the updater: in its own network and not the sidecar's, the only
 container with the socket mounted, reaching the engine, and whether an update
 is in progress (it then stands back from the checks that would count or start
-containers). Otherwise `docker compose logs updater`.
+containers). Otherwise `docker compose logs updater`: one line per request it
+takes, per step it starts and ends, per handover step and per outcome, each
+with the request's id, the step, what it said on the screen and the time
+since it took the request (#278). No token or hash is ever in it.
 
 **Other engines on a Linux server** need the socket's path and, for rootless
 ones, a different user. `.env` takes all of it:

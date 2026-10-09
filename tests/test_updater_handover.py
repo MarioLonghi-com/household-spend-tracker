@@ -11,6 +11,8 @@ heartbeat and the records, not only that it said so.
 from __future__ import annotations
 
 import json
+import logging
+import re
 import threading
 import time
 
@@ -1243,3 +1245,56 @@ def test_after_a_shutdown_a_successor_that_never_comes_back_is_still_taken_back_
     assert named(world, CANONICAL)["Id"] == world.updater_id
     assert pin.read(world.project_dir)[pin.UPDATER_KEY].endswith(digest(UPD, A))
     assert assert_exactly_one_current(world).version == A
+
+
+# --------------------------------------------------------------------------- #
+# #278: one line on stdout per handover step and per outcome
+# --------------------------------------------------------------------------- #
+
+
+def _handover_lines(caplog, request_id: str) -> list[tuple[str, str]]:
+    """(step, what) for each handover line of one request, in order."""
+    found = []
+    for message in caplog.messages:
+        m = re.match(rf"request {request_id} step (H\d) (handover(?: \w+)?) after ", message)
+        if m:
+            found.append((m.group(1), m.group(2)))
+    return found
+
+
+def test_a_handover_says_each_step_and_its_outcome_once(world, caplog):
+    with caplog.at_level(logging.INFO, logger="spend-tracker-updater"):
+        req, record = update_updater(world, C)
+        world.run_for(STANDBY_SECONDS + 60)
+
+    assert record["state"] == "succeeded"
+    assert _handover_lines(caplog, req["id"]) == [
+        ("H1", "handover"),
+        ("H2", "handover"),
+        ("H3", "handover"),
+        ("H3", "handover"),  # the successor's: ready
+        ("H4", "handover"),
+        ("H5", "handover"),
+        ("H6", "handover"),  # once, though the standby is saved every few seconds
+        ("H7", "handover done"),
+    ]
+    said = "\n".join(caplog.messages)
+    assert "step H3 handover after 0.0 s: Ready to take over." in said
+    assert f"step H5 handover after 1.0 s: The updater of {C} took over." in said
+    assert digest(UPD, C) not in said
+
+
+def test_a_take_back_says_so(world, caplog):
+    with caplog.at_level(logging.INFO, logger="spend-tracker-updater"):
+        req, record = update_updater(world, C)
+        u2 = world.successor_id()
+        world.run_for(180)
+        world.stay_down.add(u2)
+        world.crash(u2, restart=False)
+        world.run_for(10 + GONE_GRACE_SECONDS)
+
+    steps = _handover_lines(caplog, req["id"])
+    assert steps[-1] == ("H6", "handover taken_back")
+    assert ("H7", "handover done") not in steps
+    last = [m for m in caplog.messages if "handover taken_back" in m][0]
+    assert last.endswith("took back over.")

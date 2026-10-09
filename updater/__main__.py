@@ -29,7 +29,7 @@ import time
 from dataclasses import replace
 from pathlib import Path
 
-from updater import detect, heartbeat, hook, shapes, survey
+from updater import detect, heartbeat, hook, shapes, survey, trail
 from updater import engine as eng
 from updater.handover import Successions, identity_of, known_as, own_bind_sources
 from updater.journal import Owner
@@ -118,6 +118,8 @@ def parser() -> argparse.ArgumentParser:
 
 
 def serve(args: argparse.Namespace, trust: Trust) -> None:
+    # First, so the container's log says what it does from the start (#278).
+    trail.configure()
     kit, identity = build(args, trust)
     service = Service(kit)
     stop = threading.Event()

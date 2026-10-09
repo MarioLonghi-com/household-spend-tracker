@@ -57,6 +57,14 @@ history this repository does not have.
   the previous release by hand it named that one. The outcome now carries
   the release the update went to, from the updater's record, and an older
   record that does not name it shows the updater's own sentence. (#260)
+- **The updater says what it is doing in its log.** `docker compose logs
+  updater` was empty in normal operation; the only trace of a failed update
+  was a traceback. It now prints one line per request it takes, per step of
+  a prepare, an update or a rollback it starts and ends, per step of a
+  handover to a new updater and its outcome, and per request finished: the
+  request's id, the step, the sentence the screen shows and the time since
+  the request was taken. No token, recovery-code hash or image digest is
+  printed whole. (#278)
 - **The update confirmation follows the updater's own rules.** It said the
   update changes the ledger's schema even when it also said no migrations
   would run; that is now said only when one does. Its Updater row said the
