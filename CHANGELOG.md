@@ -32,6 +32,15 @@ history this repository does not have.
 
 ## Unreleased
 
+### Changed
+
+- **The release zip's README explains the first-run warning where you
+  double-click.** Step 3 now says that macOS or Windows stops the launcher the
+  first time, and what to press. On macOS the launcher starts by itself after
+  *Open Anyway*; the README used to say to double-click it again. It also no
+  longer calls the Windows launcher untested: it has run with Docker Desktop on
+  Windows 11, and only Podman on Windows is still untried. (#170)
+
 ## 0.10.0 — 2026-10-09
 
 **Reversible: lossy** — one migration.
