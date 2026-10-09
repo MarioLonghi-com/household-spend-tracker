@@ -1,6 +1,6 @@
 [project]
 name = "household-spend-tracker"
-version = "0.9.3"
+version = "0.10.0"
 description = "Self-hosted multi-currency spend tracker for one household"
 requires-python = ">=3.12"
 readme = "README.md"

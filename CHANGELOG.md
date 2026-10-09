@@ -32,6 +32,21 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.10.0 — 2026-10-09
+
+**Reversible: lossy** — one migration.
+
+- `c4d9e2a7b318` — lossy: adds the `translation_suggestions` table (#272).
+  Rolling it back drops every stored suggested wording, so export them first;
+  nothing in the ledger changes.
+
+Localisation is finished in code: History, sign-in, imports and the last
+refusals now carry codes and structure a screen in another language can word
+from its own catalog, and a new household can be seeded in its own language.
+The three languages, Português, Español and Svenska, stay hidden: the
+household reviews the drafts in the app through an owner-only review mode,
+off by default and per device, and English stays the default everywhere.
+
 ### Added
 
 - **The household reviews the draft translations in the app.** An owner can
