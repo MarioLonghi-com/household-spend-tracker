@@ -139,8 +139,14 @@ function Stats({ household }: { household: Household }) {
         <Stat label={t({ message: "Categories", comment: "Label on the household page. See GLOSSARY.md" })} value={count(it.categories)}
           note={
             it.categories_archived > 0
-              ? t`in ${count(it.category_groups)} groups, ${count(it.categories_archived)} archived`
-              : t({ message: `in ${count(it.category_groups)} groups`, comment: "Text on the household page" })
+              ? t({ message: plural(it.category_groups, {
+                  one: `in ${count(it.category_groups)} group, ${count(it.categories_archived)} archived`,
+                  other: `in ${count(it.category_groups)} groups, ${count(it.categories_archived)} archived`,
+                }), comment: "Under the count of categories on the household page" })
+              : t({ message: plural(it.category_groups, {
+                  one: `in ${count(it.category_groups)} group`,
+                  other: `in ${count(it.category_groups)} groups`,
+                }), comment: "Under the count of categories on the household page" })
           } />
         <Stat label={t({ message: "Currencies", comment: "Label on the household page: noun" })} value={count(it.currencies.length)}
           note={it.currencies.map((one) => one.currency).join(" · ") || undefined} />

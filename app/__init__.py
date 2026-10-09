@@ -8,4 +8,4 @@ line in the package root costs neither.
 
 from __future__ import annotations
 
-__version__ = "0.9.1"
+__version__ = "0.9.2"

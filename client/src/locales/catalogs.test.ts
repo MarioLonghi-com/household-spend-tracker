@@ -147,8 +147,66 @@ describe("the catalogs", () => {
     expect(long).toEqual([]);
   });
 
+  // English is held to its singulars by plurals.test.ts (#269), message by
+  // message: "{n, plural, =0 {} other {, # of them archived}}" needs no `one`.
+  it.each(translated)(
+    "%s: every plural has the forms its language needs, and none it does not have (#271)",
+    (locale) => {
+      // Lingui falls back to `other` for a form a message leaves out, so a
+      // missing `one` reads "1 rows" without failing anywhere else. `many`
+      // (Spanish and Portuguese for a million and up) falls back the same
+      // way and reads correctly, so it is allowed, not required.
+      const has = new Set(new Intl.PluralRules(locale).resolvedOptions().pluralCategories as string[]);
+      const wrong: string[] = [];
+      for (const one of catalog(locale)) {
+        for (const forms of pluralForms(one.translation)) {
+          const named = forms.filter((form) => !form.startsWith("="));
+          const missing = ["one", "other"].filter((form) => has.has(form) && !named.includes(form));
+          const foreign = named.filter((form) => !has.has(form));
+          if (missing.length || foreign.length) wrong.push(`${one.id} (missing ${missing}, foreign ${foreign})`);
+        }
+      }
+      expect(wrong).toEqual([]);
+    },
+  );
+
   it("serves no draft language yet", () => {
     expect(SERVED_LOCALES.filter((one) => translated.includes(one))).toEqual([]);
+  });
+});
+
+/** The selectors of every `{x, plural, ...}` in an ICU message, outermost first. */
+export function pluralForms(message: string): string[][] {
+  const found: string[][] = [];
+  const start = /\{\s*\w+\s*,\s*plural\s*,/g;
+  for (let match = start.exec(message); match; match = start.exec(message)) {
+    const forms: string[] = [];
+    let at = match.index + match[0].length;
+    while (at < message.length) {
+      const rest = message.slice(at);
+      const selector = /^\s*(=?\w+)\s*\{/.exec(rest);
+      if (!selector) break;
+      forms.push(selector[1]);
+      // Skip to the brace that closes this form's text.
+      let depth = 0;
+      at += selector[0].length - 1;
+      for (; at < message.length; at++) {
+        if (message[at] === "{") depth++;
+        else if (message[at] === "}" && --depth === 0) break;
+      }
+      at++;
+    }
+    found.push(forms);
+  }
+  return found;
+}
+
+describe("reading a plural's forms", () => {
+  it("finds the selectors, nested ones too", () => {
+    expect(pluralForms("{0, plural, one {{1} row} other {{2} rows}}")).toEqual([["one", "other"]]);
+    expect(pluralForms("<0>{0}</0> of {1, plural, =0 {none} one {# row} other {# rows}}")).toEqual([["=0", "one", "other"]]);
+    expect(pluralForms("{a, plural, one {x {b, plural, other {y}}} other {z}}")).toEqual([["one", "other"], ["other"]]);
+    expect(pluralForms("Rename {0}")).toEqual([]);
   });
 });
 

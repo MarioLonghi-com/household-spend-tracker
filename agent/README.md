@@ -451,7 +451,7 @@ are yours — done visibly.**
   by currency, never totalled across.
 - **Reports:** `GET $H/reports/income-expense?currency=EUR&since=…` and
   `…/reports/reimbursements?currency=GBP`. **One currency per call** — call
-  once per currency the manifest's accounts hold. Income v Expense leaves out
+  once per currency the manifest's accounts hold. Income vs Expense leaves out
   transfers, opening balances and work expenses with their repayments, and
   counts each in `excluded` so you can say so.
 - **Rates the household actually got:** `GET $H/fx/observed?pair=EUR/GBP` —

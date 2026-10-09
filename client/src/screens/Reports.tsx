@@ -162,7 +162,7 @@ export function Report({
         <h1>{report.label}</h1>
         {/* A slot a report can portal its own controls into, so something that
             belongs beside the heading can sit there without this file knowing
-            what any report contains. Income v Expense puts its currency toggle
+            what any report contains. Income vs Expense puts its currency toggle
             here.
 
             It sits after the `<h1>`, at the right end of the heading line: the

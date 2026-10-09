@@ -14,8 +14,8 @@ import type {
   RuleAction,
   RuleTrial,
 } from "../lib/types";
-import { t } from "@lingui/core/macro";
-import { Trans } from "@lingui/react/macro";
+import { plural, t } from "@lingui/core/macro";
+import { Plural, Trans } from "@lingui/react/macro";
 import { formatCount } from "../lib/locale";
 
 type RuleSort = "pattern" | "match" | "payee" | "priority" | "enabled";
@@ -482,14 +482,22 @@ function RuleForm({
             <>
               <p className="small" style={{ marginTop: 0 }}>
                 {rewriting ? (
-                  <Trans>
+                  <Trans comment="Rules screen: how many rows already in the ledger a rule being tried would match">
                     It rewrites <strong>{formatCount(trial.data.matches)}</strong> of{" "}
-                    {formatCount(trial.data.considered)} rows already in this ledger.
+                    <Plural
+                      value={trial.data.considered}
+                      one={`${formatCount(trial.data.considered)} row already in this ledger.`}
+                      other={`${formatCount(trial.data.considered)} rows already in this ledger.`}
+                    />
                   </Trans>
                 ) : (
-                  <Trans>
+                  <Trans comment="Rules screen: how many rows already in the ledger a rule being tried would match">
                     It claims <strong>{formatCount(trial.data.matches)}</strong> of{" "}
-                    {formatCount(trial.data.considered)} rows already in this ledger.
+                    <Plural
+                      value={trial.data.considered}
+                      one={`${formatCount(trial.data.considered)} row already in this ledger.`}
+                      other={`${formatCount(trial.data.considered)} rows already in this ledger.`}
+                    />
                   </Trans>
                 )}
                 {trial.data.matches === 0
@@ -726,16 +734,23 @@ function ReapplyPanel({
       ) : proposed && proposed.changing === 0 ? (
         <div className="banner info" style={{ marginTop: 10 }}>
           <p className="small" style={{ margin: 0 }}>
-            {t`Nothing would change. ${formatCount(proposed.considered)} rows carry the bank’s words and today’s rules already agree with all of them.`}
+            {t({ message: plural(proposed.considered, {
+              one: `Nothing would change. ${formatCount(proposed.considered)} row carries the bank’s words and today’s rules already agree with it.`,
+              other: `Nothing would change. ${formatCount(proposed.considered)} rows carry the bank’s words and today’s rules already agree with all of them.`,
+            }), comment: "Rules screen: the result of trying today's rules on every imported row" })}
           </p>
         </div>
       ) : proposed ? (
         <>
           <div className="banner info" style={{ marginTop: 10 }}>
             <p className="small" style={{ marginTop: 0 }}>
-              <Trans>
+              <Trans comment="Rules screen: how many of the imported rows the rules would move to another payee">
                 <strong>{formatCount(proposed.changing)}</strong> of{" "}
-                {formatCount(proposed.considered)} rows would move.
+                <Plural
+                  value={proposed.considered}
+                  one={`${formatCount(proposed.considered)} row would move.`}
+                  other={`${formatCount(proposed.considered)} rows would move.`}
+                />
               </Trans>
             </p>
             <ul className="plain-list small" style={{ marginBottom: 0 }}>
@@ -756,7 +771,10 @@ function ReapplyPanel({
               />
               <span>
                 <strong>
-                  {t`Also delete the ${formatCount(proposed.orphaned.length)} payees left empty`}
+                  {t({ message: plural(proposed.orphaned.length, {
+                    one: `Also delete the payee left empty`,
+                    other: `Also delete the ${formatCount(proposed.orphaned.length)} payees left empty`,
+                  }), comment: "Checkbox on the Rules screen: also delete payees no transaction uses any more" })}
                 </strong>
                 <span className="small muted" style={{ display: "block" }}>
                   <Trans>
@@ -773,7 +791,7 @@ function ReapplyPanel({
             </Trans>
           </p>
           <button className="primary" disabled={run.isPending} onClick={() => run.mutate()}>
-            {run.isPending ? t({ message: "Applying…", comment: "Button on the Rules screen" }) : t({ message: `Move ${formatCount(proposed.changing)} rows`, comment: "Button on the Rules screen" })}
+            {run.isPending ? t({ message: "Applying…", comment: "Button on the Rules screen" }) : t({ message: plural(proposed.changing, { one: `Move ${formatCount(proposed.changing)} row`, other: `Move ${formatCount(proposed.changing)} rows` }), comment: "Button on the Rules screen: verb, move these transactions to the payees the rules give" })}
           </button>
         </>
       ) : null}
