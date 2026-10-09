@@ -52,6 +52,8 @@ export interface Findings {
   placeholders: string[];
   /** The page scrolls sideways. */
   pageScroll: boolean;
+  /** When it does: the outermost elements that reach past the window's right edge. */
+  pushing: string[];
   /** A label, button, heading or cell whose text is wider than its box. */
   overflowing: string[];
 }
@@ -108,19 +110,35 @@ export async function inspect(page: Page, english: string[]): Promise<Findings> 
       return moved;
     };
     const pageScroll = sideways(document.scrollingElement) || sideways(document.querySelector("main"));
+    const width = document.documentElement.clientWidth;
+    const pushing: string[] = [];
+    if (pageScroll) {
+      for (const element of Array.from(document.querySelectorAll<HTMLElement>("body *"))) {
+        const box = element.getBoundingClientRect();
+        const parent = element.parentElement?.getBoundingClientRect();
+        if (box.width > 0 && box.right > width + 1 && parent && parent.right <= width + 1) {
+          pushing.push(
+            `${element.tagName.toLowerCase()}.${String(element.className).split(" ")[0]} ` +
+              `(${Math.round(box.width)}px to ${Math.round(box.right)}px): ${(element.textContent ?? "").trim().slice(0, 50)}`,
+          );
+        }
+      }
+    }
     const overflowing: string[] = [];
     const boxes = "button, th, h1, h2, h3, h4, label, legend, summary, .chip, .tag, .pill, .nav-head, .nav-child, .banner, .stat, dt, dd";
     for (const element of Array.from(document.querySelectorAll<HTMLElement>(boxes))) {
       if (skip(element) || !visible(element)) continue;
       const style = getComputedStyle(element);
       if (style.overflowX === "auto" || style.overflowX === "scroll") continue;
+      // Cut short on purpose, with an ellipsis: a long payee in a one-line row.
+      if (style.textOverflow === "ellipsis") continue;
       const clippedDown =
         (style.overflowY === "hidden" || style.overflowY === "clip") && element.scrollHeight > element.clientHeight + 1;
       if (element.scrollWidth > element.clientWidth + 1 || clippedDown) {
         overflowing.push(`${element.tagName.toLowerCase()}${element.className ? "." + String(element.className).split(" ")[0] : ""}: ${(element.textContent ?? "").trim().slice(0, 60)}`);
       }
     }
-    return { english, sentences, placeholders, pageScroll, overflowing };
+    return { english, sentences, placeholders, pageScroll, pushing, overflowing };
   }, english);
 }
 

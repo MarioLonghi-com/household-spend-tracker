@@ -52,7 +52,7 @@ test("every screen speaks the language, keeps its placeholders and fits", async 
     for (const one of found.english) problems.push(`${screen}: in English: ${one}`);
     for (const one of found.sentences) problems.push(`${screen}: an English sentence: ${one.slice(0, 90)}`);
     for (const one of found.placeholders) problems.push(`${screen}: a placeholder left: ${one.slice(0, 90)}`);
-    if (found.pageScroll) problems.push(`${screen}: the page scrolls sideways`);
+    if (found.pageScroll) problems.push(`${screen}: the page scrolls sideways, pushed by ${found.pushing.join("; ")}`);
     for (const one of found.overflowing) problems.push(`${screen}: wider than its box: ${one}`);
   };
 
