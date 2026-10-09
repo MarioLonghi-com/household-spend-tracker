@@ -472,7 +472,7 @@ def test_the_heartbeat_carries_every_key_of_5_3():
     assert set(beat) == {
         "protocol", "updater_version", "image_digest", "seen_at", "engine", "engine_version",
         "rootless", "layout", "socket", "hook", "busy", "role", "protocols", "api_version",
-        "engine_api", "container", "socket_sentence", "podman_restart",
+        "engine_api", "container", "socket_sentence", "podman_restart", "problem",
     }  # fmt: skip
     assert (beat["protocol"], beat["protocols"]) == (1, "1-1")
     with pytest.raises(ValueError):
