@@ -45,7 +45,8 @@ import threading
 from updater import contract, detect, intake, journal, oneoff, prepare, survey, volume
 from updater import engine as eng
 from updater.apply import Apply
-from updater.recovery import Recovery
+from updater.recovery import Recovery, apply_journals
+from updater.rejoin import Rejoin
 from updater.site import Kit, Records
 from updater.volume import REQUEST_OWNER_UID
 
@@ -82,6 +83,8 @@ class Service:
         self.problem: str | None = None
         #: Part 11: the recovery page's requests, and when recovery mode starts (#163).
         self.recovery = Recovery(kit, owner_uid)
+        #: #275: the app rejoins its sidecar's network after the sidecar restarts.
+        self.rejoin = Rejoin(kit, self.idle)
 
     @property
     def vol(self) -> volume.Volume:
@@ -105,6 +108,23 @@ class Service:
             busy=self.busy,
             socket_sentence=found.sentence,
         )
+
+    @property
+    def heartbeat_problem(self) -> str | None:
+        """The heartbeat's `problem`: the startup's sentence first, then the rejoin's (#262, #275)."""
+        return self.problem or self.rejoin.problem
+
+    def idle(self) -> bool:
+        """Nothing in flight, by everything kept on the volume: what #275's repair waits for."""
+        if self.busy or self.resume_pending or self.kit.handover.mode != "current":
+            return False
+        if os.path.lexists(self.vol.request) or os.path.lexists(self.vol.recovery_request):
+            return False
+        if any((self.vol.root / "journal").glob(f"{intake.INTAKE_PREFIX}*.taken")):
+            return False
+        if self.unfinished():
+            return False
+        return not any(self.recovery.state_of(j) for j in apply_journals(self.vol))
 
     @property
     def heartbeat_role(self) -> str | None:
@@ -248,6 +268,7 @@ class Service:
             if self.resume_pending:
                 return None
         if not os.path.lexists(self.vol.request):
+            self.rejoin.tick()
             return None
         ctx = self.context()
         outcome = intake.take(self.vol, ctx, self.kit.clock.now(), self.owner_uid, self.kit.site.me)

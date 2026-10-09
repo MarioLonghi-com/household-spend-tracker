@@ -134,7 +134,7 @@ def serve(args: argparse.Namespace, trust: Trust) -> None:
         hook=hook.configured(kit.site.hook_dir) is not None,
         busy=lambda: service.busy or handover.mode != "current",
         role=lambda: service.heartbeat_role,
-        problem=lambda: service.problem,
+        problem=lambda: service.heartbeat_problem,
     )
     if isinstance(handover, Successions):
         handover.on_beat = lambda: beat.tick(time.time())

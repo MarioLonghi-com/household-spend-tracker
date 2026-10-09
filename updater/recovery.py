@@ -215,7 +215,7 @@ class Source:
     update_id: str
 
 
-def _journals(vol: volume.Volume) -> list[journal.Journal]:
+def apply_journals(vol: volume.Volume) -> list[journal.Journal]:
     found = []
     for path in sorted((vol.root / "journal").glob("*.json")):
         rid = path.name[: -len(".json")]
@@ -231,7 +231,7 @@ def _journals(vol: volume.Volume) -> list[journal.Journal]:
 def backup_sources(vol: volume.Volume) -> dict[str, Source]:
     """Every update backup a journal names, newest first, with the image that took it."""
     out: dict[str, Source] = {}
-    for j in _journals(vol):
+    for j in apply_journals(vol):
         folder = j.context.get("backup")
         ref = j.context.get("old_ref")
         version = j.context.get("old_version")
@@ -270,7 +270,7 @@ class Recovery:
         for leftover in (self.vol.root / "recovery").glob(f"{TAKEN_PREFIX}*"):
             with contextlib.suppress(FileNotFoundError):
                 leftover.unlink()
-        for j in _journals(self.vol):
+        for j in apply_journals(self.vol):
             interrupted = j.context.get("recovery_action")
             if not interrupted or j.recovery_hash is None:
                 continue
