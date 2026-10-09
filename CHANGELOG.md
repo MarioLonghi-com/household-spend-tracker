@@ -52,6 +52,16 @@ history this repository does not have.
   network again, and records it in the update history. At most three times in
   an hour; after that, or when a repair fails, the Updates screen says so and
   names `docker compose up -d --force-recreate app` (#275).
+- **An update, or any act that asks for the password and code again, is no
+  longer refused as "ledger busy" after a minute on its form.** The first
+  request after a minute's pause records that the browser's session is still
+  in use, and it wrote that on the request's own transaction. The step-up
+  check then wrote on a connection of its own and waited for the lock the
+  same request held, until SQLite gave up: the owner was told the ledger was
+  busy with another change when nobody else was there. The session is now
+  recorded on its own short transaction, committed at once. A request
+  refused as "ledger busy" is also logged now, at WARNING, with its method
+  and path. (#273)
 - **A fresh install no longer warns about its own `.keep` file.** The first
   start of every new install logged that `/var/lib/spend-tracker/.keep` could
   be read by other users and told the owner to `chmod` it, in a container

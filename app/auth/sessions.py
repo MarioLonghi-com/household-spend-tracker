@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import set_committed_value
 
 from ..config import settings
 from ..models import PendingSignIn, User, WebSession, utcnow
@@ -69,16 +70,33 @@ def touch(session: Session, row: WebSession, *, now: datetime | None = None) -> 
     Writing on every request turns every page load into a WAL write and an
     fsync. A minute's granularity is plenty for a fourteen-day idle window and
     for the "someone else is here" indicator, and removes almost all of them.
+
+    **On its own transaction, committed before the request goes on** (#273).
+    This runs inside `current_user`, before the route. Written on the
+    request's session, the UPDATE held SQLite's write lock until the request
+    ended -- and the routes that then write on a connection of their own
+    (spending a step-up grant, reserving a rate-limit attempt, consuming an
+    authenticator code) waited for that lock, from the same thread that held
+    it, until `busy_timeout` ran out: a 409 "ledger busy" for an owner's
+    update, after a minute spent reading its confirmation. The row in hand is
+    given the new time as already committed, so the request's own session has
+    nothing left to flush for it.
     """
     now = now or utcnow()
     if (now - row.last_seen_at).total_seconds() < settings.session_touch_seconds:
         return
-    row.last_seen_at = now
-    session.execute(  # audit-exempt: sessions are not audited
+    statement = (  # audit-exempt: sessions are not audited
         update(WebSession.__table__)
         .where(WebSession.__table__.c.id_hash == row.id_hash)
         .values(last_seen_at=now)
     )
+    bind = session.get_bind()
+    if isinstance(bind, Engine):
+        with bind.begin() as own:
+            own.execute(statement)
+    else:  # pragma: no cover - a session bound to one connection has no other
+        session.execute(statement)
+    set_committed_value(row, "last_seen_at", now)
 
 
 def revoke(session: Session, value: str) -> None:

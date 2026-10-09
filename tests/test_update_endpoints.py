@@ -666,6 +666,96 @@ def _member_id(client) -> str:
 
 
 # --------------------------------------------------------------------------- #
+# #273: no second writer inside one request
+# --------------------------------------------------------------------------- #
+
+
+@pytest.fixture()
+def short_busy_timeout(monkeypatch):
+    """SQLite waits 200 ms for the write lock instead of five seconds, so a
+    request that blocks on its own write lock fails here rather than slowly."""
+    from app import db
+
+    monkeypatch.setattr(db, "BUSY_TIMEOUT_MS", 200)
+    db.engine.dispose()
+    yield
+    db.engine.dispose()
+
+
+def _idle(seconds: int) -> dict[str, datetime]:
+    """Every browser session last seen `seconds` ago, as after a pause on a form.
+    Returns when each was last seen, by session."""
+    from app import db
+    from app.models import WebSession
+
+    with db.SessionLocal() as session:
+        rows = session.query(WebSession).all()
+        for row in rows:
+            row.last_seen_at = row.last_seen_at - timedelta(seconds=seconds)
+        session.commit()
+        return {row.id_hash: row.last_seen_at for row in rows}
+
+
+def _last_seen() -> dict[str, datetime]:
+    from app import db
+    from app.models import WebSession
+
+    with db.SessionLocal() as session:
+        return {row.id_hash: row.last_seen_at for row in session.query(WebSession).all()}
+
+
+def test_an_apply_after_a_minute_on_the_form_is_not_refused_as_ledger_busy(
+    world, short_busy_timeout, caplog
+):
+    """The confirmation takes longer than a minute to read, so the apply was the
+    first request in a minute: its sign-in check recorded the session as seen
+    -- a write, on the request's own transaction -- and spending the step-up
+    grant then waited, on a connection of its own, for the lock that write held.
+    On a slow disk that was a 409 "ledger busy" (#273)."""
+    client, vol, owner = world["client"], world["vol"], world["owner"]
+    _member_id(client)  # a second browser session, which nobody uses here
+    _heartbeat(vol)
+    rid = _report(vol)
+    code = _code(client)
+    token = _grant(client, owner["secret"])
+    before = _idle(120)
+    assert len(before) == 2
+
+    with caplog.at_level(logging.WARNING, logger="spendtracker"):
+        answer = client.post(f"{BASE}/apply", json=_apply_body(rid, code["id"], token), headers=HEADERS)
+
+    assert answer.status_code == 202, answer.text
+    assert _request(vol)["id"] == answer.json()["id"]
+    after = _last_seen()
+    moved = {key for key in after if after[key] != before[key]}
+    assert len(moved) == 1, "the owner's session is seen again, the member's is not"
+    (mine,) = moved
+    assert after[mine] - before[mine] >= timedelta(seconds=119)
+    assert "ledger busy" not in " ".join(r.getMessage() for r in caplog.records)
+
+
+def test_a_step_up_after_a_minute_on_the_form_is_not_refused_as_ledger_busy(
+    world, short_busy_timeout
+):
+    """The same shape one request earlier: the step-up's rate-limit reservation
+    is committed on its own connection, after the sign-in check has written."""
+    from app import db
+    from app.models import StepUpGrant
+
+    client, owner = world["client"], world["owner"]
+    before = _idle(120)
+
+    token = _grant(client, owner["secret"])
+
+    assert token
+    with db.SessionLocal() as session:
+        assert session.query(StepUpGrant).count() == 1
+    after = _last_seen()
+    (mine,) = after
+    assert after[mine] - before[mine] >= timedelta(seconds=119)
+
+
+# --------------------------------------------------------------------------- #
 # Discard and the updater
 # --------------------------------------------------------------------------- #
 

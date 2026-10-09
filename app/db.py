@@ -121,6 +121,12 @@ def memory_budget(memory: int | None = None) -> tuple[int, int]:
 
 SOFT_HEAP_LIMIT, CACHE_BYTES = memory_budget()
 
+#: How long a connection waits for SQLite's one write lock before it is told
+#: "database is locked" (see `_sqlite_pragmas`). Read when a connection is
+#: opened, so a test can shorten it and dispose of the pool; the 409 a request
+#: gets when it runs out names it in the log (#273).
+BUSY_TIMEOUT_MS = 5000
+
 engine: Engine = create_engine(
     settings.database_url,
     echo=settings.echo_sql,
@@ -144,7 +150,7 @@ def _sqlite_pragmas(dbapi_connection, connection_record) -> None:  # pragma: no 
     # `housekeeping.sweep`. `claim_pending` already carries the scar: its
     # docstring records "database is locked on every wrong code". Five seconds
     # is far longer than any write here takes and far shorter than a user waits.
-    cursor.execute("PRAGMA busy_timeout=5000")
+    cursor.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
     # SQLite's documented setting under WAL. FULL fsyncs the log on every
     # COMMIT, and several paths here commit per row; NORMAL syncs at
     # checkpoints. A crash of the process loses nothing; a power cut can lose
