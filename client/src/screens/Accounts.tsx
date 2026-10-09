@@ -1335,14 +1335,13 @@ function HolderSamples({
 
 /**
  * "12 rows", "1,234 files": the count in the reader's own grouping, as
- * `toLocaleString()` wrote it. English said "rows" even for one, and still
- * does; a translation gets its plural forms.
+ * `toLocaleString()` wrote it, with "1 row" and "1 file" for one (#269).
  */
 function mentionsText(count: number, unit: string): string {
   const shown = formatCount(count);
   return unit === "files"
-    ? plural(count, { other: `${shown} files` })
-    : plural(count, { other: `${shown} rows` });
+    ? t({ message: plural(count, { one: `${shown} file`, other: `${shown} files` }), comment: "Column value on the Accounts screen: how many statement files name a suggested identifier" })
+    : t({ message: plural(count, { one: `${shown} row`, other: `${shown} rows` }), comment: "Column value on the Accounts screen: how many transactions name a suggested identifier" });
 }
 
 type SuggestionSort = "value" | "kind" | "account" | "mentions" | "would_link" | "why";

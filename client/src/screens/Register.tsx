@@ -246,7 +246,7 @@ const SOURCE_CHOICES: { value: string; label: string }[] = [
 function countText(count: number, filtered: boolean): string {
   const shown = formatCount(count);
   return filtered
-    ? plural(count, { one: `${shown} transaction match the filters`, other: `${shown} transactions match the filters` })
+    ? t({ message: plural(count, { one: `${shown} transaction matches the filters`, other: `${shown} transactions match the filters` }), comment: "Count above the Register's list when a filter is on" })
     : plural(count, { one: `${shown} transaction`, other: `${shown} transactions` });
 }
 
@@ -1566,7 +1566,10 @@ export function Register({
                       title={
                         allShownTicked
                           ? t`Untick every row shown`
-                          : t`Tick all ${formatCount(ordered.length)} rows the filter shows`
+                          : t({ message: plural(ordered.length, {
+                              one: `Tick the ${formatCount(ordered.length)} row the filter shows`,
+                              other: `Tick all ${formatCount(ordered.length)} rows the filter shows`,
+                            }), comment: "Tooltip on the Register's select-all checkbox" })
                       }
                       checked={allShownTicked}
                       ref={(box) => {
@@ -2346,7 +2349,10 @@ function CurrencyColumns({
               type="button"
               className={restOn.length > 0 ? "chip active" : "chip"}
               aria-expanded={moreOpen}
-              aria-label={t`${rest.length} more currencies: ${rest.join(", ")}. ${restOn.length} shown.`}
+              aria-label={t({ message: plural(rest.length, {
+                one: `${rest.length} more currency: ${rest.join(", ")}. ${restOn.length} shown.`,
+                other: `${rest.length} more currencies: ${rest.join(", ")}. ${restOn.length} shown.`,
+              }), comment: "Screen-reader name of the Register's button for more currencies" })}
               title={
                 restOn.length > 0
                   ? t({ message: `Also showing ${restOn.join(", ")}`, comment: "Button on the Register screen" })
