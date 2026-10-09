@@ -1135,6 +1135,42 @@ def test_a_092_updater_hands_over_to_a_fixed_successor_first(podman_world, monke
     assert assert_exactly_one_current(w).version == B
 
 
+@TWO_ORDERS
+def test_a_tag_started_updater_whose_successor_fails_writes_one_digest_everywhere(tmp_path, order):
+    """E11b on Podman (#309): U1 started by tag, nothing pinned, its successor failing its own check.
+
+    Nothing names which of its two digests is the index -- not the pin, not
+    the image its container was created from -- so U1 writes the engine's
+    first, and Podman lists them in either order. What the self-update job
+    may assert is membership; what U1 owes is the one it chose, at every
+    write, before the handover and after it: the journal's owner trail, the
+    lock and the heartbeat, with no other digest written in between.
+    """
+    with World(tmp_path, fleet=True, multiarch=order) as w:
+        w.fake.containers[w.updater_id]["_inspect"]["Config"]["Image"] = f"{UPD}:{A}"
+        boot(w)
+        chosen = two_digests(A, order)[0]
+        # The engine's first: the release's index digest only when listed first.
+        assert (chosen == digest(UPD, A)) is (order == "index_first")
+        assert w.fleet[w.updater_id].me.image_digest == chosen
+        w.run_for(4)
+        assert beat(w)["image_digest"] == chosen
+        w.lying_digest = digest(UPD, C)  # B's updater fails its own check
+        req, record = apply(w)
+        assert record["state"] == "succeeded" and w.ledger.stamp == B
+        assert "did not take over first" in " ".join(record.get("notes") or [])
+        j = w.journal(req["id"])
+        assert j.owner is not None and j.owner.image_digest == chosen
+        assert [(o["owner"]["image_digest"], o["from_step"]) for o in j.owners] == [(chosen, "0")]
+        w.run_for(4)
+        me = assert_exactly_one_current(w)
+        assert me.image_digest == chosen and me.ids == {digest(UPD, A), platform_digest(UPD, A)}
+        assert lock_holder(w.volume).image_digest == chosen
+        assert beat(w)["image_digest"] == chosen and beat(w)["role"] == "current"
+        # Step 9 pins the updater that ran the apply, by that same digest.
+        assert pin.read(w.project_dir)[pin.UPDATER_KEY] == f"{UPD}:{A}@{chosen}"
+
+
 # --------------------------------------------------------------------------- #
 # A gap during the standby (#288)
 # --------------------------------------------------------------------------- #

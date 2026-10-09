@@ -193,7 +193,8 @@ def check_updated(
     )
     policy = ((previous.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
     unable = [n for n in record.get("notes") or [] if "could not be set to `no`" in n]
-    if owner == s.releases[A]["updater"] and contains(s.releases[A]["revision"], PARKING) is False:
+    a_ran_it = bool(owner) and owner in updater_digests(s, A)
+    if a_ran_it and contains(s.releases[A]["revision"], PARKING) is False:
         print(f"   (A's updater ran the apply and predates {PARKING[:7]}: restart policy {policy} not checked)")
     else:
         r.check(
@@ -221,7 +222,7 @@ def check_updated(
     extra = {k: v for k, v in diff.items() if k not in ALLOWED}
     if (
         "Config.Healthcheck" in extra
-        and owner == s.releases[A]["updater"]
+        and a_ran_it
         and contains(s.releases[A]["revision"], PODMAN4_HEALTHCHECK) is False
     ):
         # A's updater made this copy, and predates the fix for Podman 4's
@@ -328,6 +329,22 @@ def fresh_beat(s: Stack, after: str | None) -> dict:
     )
 
 
+def updater_digests(s: Stack, version: str) -> set[str]:
+    """Every digest that names `version`'s updater: the release's, and each the engine lists for its image.
+
+    An updater pulled by a multi-arch index's digest carries the platform
+    manifest's beside it (#287), and one started by tag with nothing pinned
+    -- A, at every `up` -- cannot tell which is the index: it writes the one
+    the engine lists first, and Podman lists them in either order (#309).
+    """
+    found = {s.releases[version]["updater"]}
+    with contextlib.suppress(api.Failed):
+        for ref in s.engine.image(s.updater_ref(version)).get("RepoDigests") or []:
+            if str(ref).startswith(UPDATER_REPO + "@"):
+                found.add(str(ref).split("@", 1)[1])
+    return found
+
+
 def updater_now(s: Stack) -> dict:
     """The canonical updater container, inspected."""
     return s.engine.inspect(s.updater_name)
@@ -417,15 +434,27 @@ class Run:
         check_updated(r, s, b, req, record, B3, updater_to=None)
         u = updater_now(s)
         r.check(u["Image"] == s.image_id(s.updater_ref(A)), f"{s.updater_name} still runs A's updater")
+        # A was started by tag with nothing pinned: either of its image's
+        # digests is its name (#309). Which one is A's to choose, once: every
+        # file it writes names the same one.
+        a_digests = updater_digests(s, A)
         beat = fresh_beat(s, after=record.get("finished_at"))
+        chosen = str(beat.get("image_digest"))
         r.check(
-            beat.get("role") == "current" and beat.get("image_digest") == s.releases[A]["updater"],
-            f"the heartbeat says A's updater is current ({beat.get('role')}, {str(beat.get('image_digest'))[:19]})",
+            beat.get("role") == "current" and chosen in a_digests,
+            f"the heartbeat says A's updater is current ({beat.get('role')}, {chosen[:19]} "
+            f"of {', '.join(sorted(d[:19] for d in a_digests))})",
         )
+        lock = (s.vol.read("updater.lock") or {}).get("holder") or {}
+        r.check(lock.get("image_digest") == chosen, "updater.lock names A's updater by the heartbeat's digest")
         pin = pinned(s)
         r.check(
             s.releases[B3]["updater"] not in pin.get("SPENDTRACKER_UPDATER_IMAGE", ""),
             "the pin does not name B3's updater",
+        )
+        r.check(
+            pin.get("SPENDTRACKER_UPDATER_IMAGE") == f"{UPDATER_REPO}:{A}@{chosen}",
+            f".env pins A's updater by the heartbeat's digest ({pin.get('SPENDTRACKER_UPDATER_IMAGE')})",
         )
         hand = s.vol.read(f"handover/{req['id']}.request") or {}
         r.check(
@@ -436,8 +465,8 @@ class Run:
         owners = {str((o.get("owner") or {}).get("image_digest")) for o in j.get("owners") or []}
         owner = (j.get("owner") or {}).get("image_digest")
         r.check(
-            owner == s.releases[A]["updater"] and owners <= {s.releases[A]["updater"]},
-            "the journal names A's updater as the apply's only owner",
+            owner == chosen and owners == {chosen},
+            f"the journal names A's updater, by the heartbeat's digest, as the apply's only owner ({owners})",
         )
         running = [s.name(c) for c in s.running("updater")]
         r.check(running == [s.updater_name], f"only A's updater runs: {running}")
