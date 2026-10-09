@@ -16,7 +16,6 @@ agent acts on it.
 from __future__ import annotations
 
 import json
-import shutil
 
 import pytest
 from fastapi import Response
@@ -30,32 +29,6 @@ from tests.conftest import HEADERS, _setup_owner
 
 BASE = f"/api/agent/v{agent_router.API_VERSION}"
 MANIFEST = f"{BASE}/manifest"
-
-
-@pytest.fixture()
-def spa_built():
-    """A built client, real or stood in for.
-
-    The `/api/` exclusion (#36) lives inside the SPA catch-all, and that route
-    is only registered when `app/static/dist` exists -- so without this the
-    test would pass against an app that never mounted the thing being tested,
-    which is the shape of test CLAUDE.md warns about. Ordered before `client`
-    in every signature below, because `client` is what reloads `app.main` and
-    the directory has to be there when it does.
-    """
-    import app.main as main
-
-    dist = main.Path(main.__file__).parent / "static" / "dist"
-    if dist.exists():
-        yield dist  # the real thing, built by `make client`
-        return
-
-    (dist / "assets").mkdir(parents=True)
-    (dist / "index.html").write_text("<!doctype html><title>stand-in</title>")
-    try:
-        yield dist
-    finally:
-        shutil.rmtree(dist)
 
 
 @pytest.fixture()
