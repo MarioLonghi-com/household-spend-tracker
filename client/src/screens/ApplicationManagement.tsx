@@ -211,7 +211,7 @@ export function ApplicationManagement({
   if (it.isLoading)
     return (
       <div className="card muted">
-        <Trans>Reading this instance…</Trans>
+        <Trans comment="Application management: loading">Reading this instance…</Trans>
       </div>
     );
   if (it.isError)
@@ -262,7 +262,7 @@ function Runtime({ me }: { me: Instance }) {
     <section className="card">
       <h2 className="section-title"><Trans comment="Heading on the Application management screen: noun, the running program">Runtime</Trans></h2>
       <p className="muted small" style={{ marginTop: 0 }}>
-        <Trans>
+        <Trans comment="Application management: describes the running server process">
           The process answering this request.
         </Trans>
       </p>
@@ -289,7 +289,7 @@ function Runtime({ me }: { me: Instance }) {
       </dl>
 
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        <Trans>
+        <Trans comment="Section heading on Application management: the addresses the app answers on">
           Where it can be reached
         </Trans>
       </h3>
@@ -318,7 +318,7 @@ function BuildNote({ build, repository }: { build: Build; repository: string }) 
   const said = [
     build.branch ?? t({ message: "no branch", comment: "Label on the Application management screen" }),
     build.committed_at ? t({ message: `committed ${formatInstant(build.committed_at)}`, comment: "Label on the Application management screen" }) : null,
-    build.dirty ? t`with uncommitted changes` : null,
+    build.dirty ? t({ message: `with uncommitted changes`, comment: "Application management: the code was built with changes not yet saved in git" }) : null,
   ].filter(Boolean);
   return (
     <>
@@ -357,7 +357,7 @@ function HouseholdTable({ households }: { households: HouseholdData[] }) {
   return (
     <>
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        <Trans>
+        <Trans comment="Section heading on Application management">
           How much data, per household
         </Trans>
       </h3>
@@ -408,7 +408,7 @@ function PlacesTable({ places }: { places: Place[] }) {
   return (
     <>
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        <Trans>
+        <Trans comment="Section heading on Application management: the folders the app uses">
           Where the files are
         </Trans>
       </h3>
@@ -433,7 +433,7 @@ function PlacesTable({ places }: { places: Place[] }) {
                       the healthy state: a screen that reports two faults on a
                       working instance is one nobody reads the third time. */}
                   {one.exists || one.optional ? null : (
-                    <span className="tag" title={t`this path does not exist`}>
+                    <span className="tag" title={t({ message: `this path does not exist`, comment: "Tooltip on a folder path on Application management" })}>
                       <Trans comment="Tag beside a name on the Application management screen">
                         missing
                       </Trans>
@@ -461,8 +461,8 @@ function PackagesTable({ packages }: { packages: Package[] }) {
   return (
     <>
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        <Trans>What it depends on</Trans>
-        <Hint label={t`what this list is`}>
+        <Trans comment="Section heading on Application management: the installed software packages">What it depends on</Trans>
+        <Hint label={t({ message: `what this list is`, comment: "Screen-reader name of a help button on Application management" })}>
           <p>
             <Trans>
               Every distribution installed in this environment, with the version that is actually
@@ -635,7 +635,7 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
             className="log-dump"
             tabIndex={0}
             aria-live="polite"
-            aria-label={t`The end of ${open}`}
+            aria-label={t({ message: `The end of ${open}`, comment: "Screen-reader name of a log file's last lines; the placeholder is the file's name" })}
           >
             {body.isLoading ? t({ message: "Reading…", comment: "Text on the Application management screen" }) : (body.data?.text ?? "")}
           </pre>
@@ -643,7 +643,7 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
       )}
 
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        <Trans>
+        <Trans comment="Section heading on Application management: the log level">
           How much to write down
         </Trans>
       </h3>
@@ -748,7 +748,7 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
           value={bytes(me.size.total_bytes)}
           note={
             me.size.wal_bytes > 0
-              ? t`${bytes(me.size.main_bytes)} + ${bytes(me.size.wal_bytes)} not yet checkpointed`
+              ? t({ message: `${bytes(me.size.main_bytes)} + ${bytes(me.size.wal_bytes)} not yet checkpointed`, comment: "Database size: the main file plus recent writes not yet copied into it" })
               : undefined
           }
         />
@@ -764,7 +764,7 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
         <Fact
           label={t({ message: "Last backup", comment: "Name of a fact on the Application management screen" })}
           value={me.latest_backup ? formatInstant(me.latest_backup.made_at) : t({ message: "never", comment: "Text on the Application management screen: has never happened" })}
-          note={me.latest_backup ? bytes(me.latest_backup.bytes) : t`use the button below`}
+          note={me.latest_backup ? bytes(me.latest_backup.bytes) : t({ message: `use the button below`, comment: "Application management: shown where the last backup's size would be, when there is none" })}
         />
       </dl>
 
@@ -773,19 +773,19 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
           look for the database. It comes from `database_path()`, never from
           `settings.database_url`, which can carry a password. */}
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        <Trans>
+        <Trans comment="Section heading on Application management: where the database file is">
           Where it is
         </Trans>
       </h3>
       <p className="mono small" style={{ marginTop: 0 }}>
-        {me.engine.path ?? t`${me.database_url_scheme} — not a local file`}
+        {me.engine.path ?? t({ message: `${me.database_url_scheme} — not a local file`, comment: "Application management: the database is not a file on this machine" })}
       </p>
 
       <HouseholdTable households={me.households} />
 
       <hr className="rule" />
 
-      <h3 className="section-title"><Trans>Back the database up</Trans></h3>
+      <h3 className="section-title"><Trans comment="Section heading on Application management. See GLOSSARY.md">Back the database up</Trans></h3>
       <p className="muted small">
         <Trans>
           Writes a complete, compacted copy into the backups directory above, with this instance
@@ -795,7 +795,7 @@ function Database({ me, onChanged }: { me: Instance; onChanged: () => void }) {
         </Trans>
       </p>
       <button className="primary" onClick={() => backup.mutate()} disabled={backup.isPending}>
-        {backup.isPending ? t({ message: "Writing…", comment: "Button on the Application management screen" }) : t`Back up now`}
+        {backup.isPending ? t({ message: "Writing…", comment: "Button on the Application management screen" }) : t({ message: `Back up now`, comment: "Button on Application management. See GLOSSARY.md" })}
       </button>
       <BackupList
         backups={(backups.data ?? []).filter((one) => one.kind !== "update")}
@@ -834,7 +834,7 @@ function About({ me }: { me: Instance }) {
       <ul className="plain-list">
         <li>
           <a href={me.repository} target="_blank" rel="noreferrer noopener">
-            <Trans>
+            <Trans comment="Link on Application management to the app's source code">
               The source, on GitHub
             </Trans>
           </a>

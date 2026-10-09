@@ -46,6 +46,21 @@ removed and has to be set up again"*. A domain term points at `GLOSSARY.md`
 
 Not every message needs one: a whole sentence usually says what it is.
 
+## The tooling (#270)
+
+- **micromatch is replaced.** `@lingui/cli` depends on micromatch, which
+  depends on `braces`, and no release of braces fixes GHSA-vfj7-8cjw-p6xm.
+  Lingui only calls micromatch's `capture` and `any`, so `client/vendor/micromatch`
+  is those two on picomatch, put in place by `overrides` in
+  `client/package.json`. `src/lib/micromatch-shim.test.ts` holds it to what
+  micromatch answered. Drop both once a Lingui release stops needing braces.
+- **`npm ci` warns `EBADENGINE` for `pseudolocale` on Node 22.** Lingui 6.8
+  requires pseudolocale 3.1, which declares Node 24 or later. Lingui only
+  calls its accenting function, which runs on Node 22: CI extracts on Node 22
+  and fails if the en-XA catalog differs from the committed one. So the
+  warning is harmless, and is left alone rather than pinned away to an older
+  pseudolocale. Node 24 or 26 silences it.
+
 ## The QA pass (#271)
 
 Before anyone reviews a language, the end-to-end suite walks every screen in

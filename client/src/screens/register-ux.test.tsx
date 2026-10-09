@@ -692,7 +692,7 @@ describe("the accounts picker", () => {
     fireEvent.click(type);
     expect(type.getAttribute("aria-pressed")).toBe("true");
     expect(country.getAttribute("aria-pressed")).toBe("false");
-    expect(headings()).toEqual(["Checking", "Savings"]);
+    expect(headings()).toEqual(["Current accounts", "Savings"]);
   });
 });
 

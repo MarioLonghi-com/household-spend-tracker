@@ -105,7 +105,7 @@ export function BackupList({
   if (backups.length === 0) {
     return (
       <p className="muted small" style={{ marginTop: 10, marginBottom: 0 }}>
-        <Trans>
+        <Trans comment="Backups screen: the list is empty">
           Nothing backed up yet.
         </Trans>
       </p>
@@ -120,7 +120,7 @@ export function BackupList({
           checked={withKey}
           onChange={(event) => setWithKey(event.target.checked)}
         />{" "}
-        <Trans>
+        <Trans comment="Checkbox on the Backups screen; secret.key is a file name and stays">
           Include <span className="mono">secret.key</span> in downloads
         </Trans>
       </label>
@@ -173,7 +173,7 @@ export function BackupList({
                     </a>
                   )}
                   <button className="link" onClick={() => setSaving(one)}>
-                    <Trans>
+                    <Trans comment="Button on the Backups screen; Drive and Dropbox are product names and stay">
                       Save to Drive/Dropbox…
                     </Trans>
                   </button>
@@ -194,7 +194,7 @@ export function BackupList({
       )}
 
       {deleting && (
-        <Dialog title={t`Delete this backup?`} onClose={() => setDeleting(null)}>
+        <Dialog title={t({ message: `Delete this backup?`, comment: "Dialog title on the Backups screen" })} onClose={() => setDeleting(null)}>
           <p style={{ marginTop: 0 }}>
             <Trans>
               <span className="mono">{deleting.name}</span>, made {formatInstant(deleting.made_at)},{" "}
@@ -293,7 +293,7 @@ export function SavePanel({
         throw error;
       }
     },
-    onSuccess: (shared) => shared && setDone(t`Handed to the share sheet.`),
+    onSuccess: (shared) => shared && setDone(t({ message: `Handed to the share sheet.`, comment: "Backups screen: the backup was passed to the phone's share menu" })),
   });
   const folder = useMutation({
     mutationFn: () => saveZipToFolder(backup.name, withKey, grant),
@@ -359,7 +359,7 @@ export function SavePanel({
             </button>
           ) : (
             <button disabled={!ready || prepare.isPending} onClick={() => prepare.mutate()}>
-              {prepare.isPending ? t`Preparing the zip…` : t`Prepare the zip`}
+              {prepare.isPending ? t({ message: `Preparing the zip…`, comment: "Button on the Backups screen while the zip is being made" }) : t({ message: `Prepare the zip`, comment: "Button on the Backups screen: make the zip file to download" })}
             </button>
           )}
           <Problem error={prepare.error ?? share.error} />
@@ -380,7 +380,7 @@ export function SavePanel({
             </Trans>
           </p>
           <button disabled={!ready || folder.isPending} onClick={() => folder.mutate()}>
-            {folder.isPending ? t({ message: "Saving…", comment: "Button on the Backups screen" }) : t`Choose a folder…`}
+            {folder.isPending ? t({ message: "Saving…", comment: "Button on the Backups screen" }) : t({ message: `Choose a folder…`, comment: "Button on the Backups screen: pick where on this device to save" })}
           </button>
           <Problem error={folder.error} />
         </section>
@@ -389,7 +389,7 @@ export function SavePanel({
       <section className="save-route">
         <h3 className="section-title">
           {++step === 1
-            ? t`${step}. Download it, then upload it`
+            ? t({ message: `${step}. Download it, then upload it`, comment: "Backups screen: a numbered step; the placeholder is its number" })
             : t`${step}. Or download it and upload it`}
         </h3>
         <ol className="small" style={{ paddingLeft: 18 }}>
@@ -511,7 +511,7 @@ export function UpdateBackupList({
   return (
     <div className="update-backups">
       <h3 className="section-title" style={{ marginTop: 18 }}>
-        <Trans>Backups taken by updates</Trans>
+        <Trans comment="Section heading on the Backups screen. See GLOSSARY.md">Backups taken by updates</Trans>
       </h3>
       <p className="muted small" style={{ marginTop: 0 }}>
         {plural(kept, {
@@ -599,7 +599,7 @@ export function UpdateBackupList({
 
       {deleting && (
         <Dialog
-          title={t`Delete this update backup?`}
+          title={t({ message: `Delete this update backup?`, comment: "Dialog title on the Backups screen: a backup an update took" })}
           onClose={() => setDeleting(null)}
         >
           <p style={{ marginTop: 0 }}>

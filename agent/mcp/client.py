@@ -202,7 +202,7 @@ class SpendTracker:
         return self._get(self._house("categorisation/review"), **params)
 
     def income_expense(self, currency: str, **params: Any) -> dict:
-        """The Income v Expense report for ONE currency."""
+        """The Income vs Expense report for ONE currency."""
         return self._get(self._house("reports/income-expense"), currency=currency, **params)
 
     def reimbursements(self, currency: str, **params: Any) -> dict:

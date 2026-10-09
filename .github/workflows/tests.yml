@@ -761,12 +761,9 @@ jobs:
       - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294  # v5.0.0
         with:
           fail-on-severity: high
-          # braces <= 3.0.3 (stack exhaustion on deeply nested patterns) has no
-          # fixed release. It arrives through micromatch in @lingui/cli, which
-          # runs at build time on this repository's own globs and is not in
-          # the bundle a browser receives (#53). Named one advisory at a time,
-          # so anything else still fails this check.
-          allow-ghsas: GHSA-vfj7-8cjw-p6xm
+          # No advisory is allowed. braces (GHSA-vfj7-8cjw-p6xm) was, until
+          # #270 replaced the micromatch it came through with
+          # client/vendor/micromatch.
 
   # --------------------------------------------------------------------------- #
   # The container, on both bases
