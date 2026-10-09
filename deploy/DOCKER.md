@@ -773,7 +773,11 @@ Never copy the database out of that mountpoint by hand; take a backup (see
   as `(unhealthy)`
   ([TROUBLESHOOTING.md](TROUBLESHOOTING.md#a-502-that-does-not-go-away)).
   A recreate, after changing its image or configuration, needs
-  `docker compose up -d`, which recreates both in order.
+  `docker compose up -d`, which recreates both in order. **The updater
+  rejoins the app by itself after a sidecar restart**, within a minute, and
+  the Updates screen records it (#275); when it cannot, or has already done
+  so three times in an hour, the Updates screen says so, and
+  `docker compose up -d --force-recreate app` rejoins it by hand.
 - **`serve.json`** is the whole proxy configuration. **Never add
   `AllowFunnel`** to it.
 
