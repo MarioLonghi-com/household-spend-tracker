@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { codedText } from "../../lib/noticeMessages";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { Dialog, Empty, Hint, Problem } from "../../components/bits";
@@ -944,7 +945,7 @@ function Line({
           the heading above the row now, so repeating it on each line would be
           saying the same thing twice in the narrowest column on screen. */}
       <th scope="row" className="report-label">
-        {row.name}
+        {codedText(row.name, row.name_code, {})}
       </th>
       {months.map((period) => (
         <td key={period} className="amount">
@@ -953,7 +954,7 @@ function Line({
             currency={currency}
             onOpen={onOpen}
             cell={{
-              title: `${row.name} — ${monthLabel(period)}`,
+              title: `${codedText(row.name, row.name_code, {})} — ${monthLabel(period)}`,
               period,
               direction: tone,
               ...which,
@@ -970,7 +971,7 @@ function Line({
           currency={currency}
           strong
           onOpen={onOpen}
-          cell={{ title: row.name, direction: tone, ...which }}
+          cell={{ title: codedText(row.name, row.name_code, {}), direction: tone, ...which }}
         />
       </td>
     </tr>

@@ -2904,6 +2904,9 @@ class ReportRowOut(BaseModel):
 
     key: str | None = None
     name: str
+    #: `unset.category` when `name` is the server's word for the rows with no
+    #: category (#267), for a client that words it itself. Null otherwise.
+    name_code: str | None = None
     group_name: str | None = None
     by_month: dict[str, int] = {}
     total_minor: int

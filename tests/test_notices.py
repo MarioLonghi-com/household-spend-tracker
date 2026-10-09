@@ -41,6 +41,8 @@ def _sample(code: str) -> tuple[str, dict]:
             said[name], expected[name] = "Café 12", "Café 12"
         elif kind == "int":
             said[name] = expected[name] = 7
+        elif kind == "count":
+            said[name], expected[name] = "100,000", 100_000
         elif kind == "date":
             said[name] = expected[name] = "2026-03-04"
         elif kind == "money":

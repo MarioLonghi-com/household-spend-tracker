@@ -14,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { Panel, Problem, SortHeading, sortRows, useSort } from "../components/bits";
 import { PayeeCategorisationPanel } from "./Categories";
-import type { Tally } from "./Categories";
+import { tallyName, type Tally } from "./Categories";
 import { useWindowed } from "../lib/useWindowed";
 import type { Household, Payee } from "../lib/types";
 import { compareNames, formatCount } from "../lib/locale";
@@ -119,7 +119,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
           <ul className="breakdown">
             {(byPayee.get(breakdown.id)?.categories ?? []).map((one) => (
               <li key={one.key ?? "none"}>
-                <span className={one.key ? "" : "muted"}>{one.name}</span>
+                <span className={one.key ? "" : "muted"}>{tallyName(one)}</span>
                 <span className="small muted">{formatCount(one.transaction_count)}</span>
               </li>
             ))}
@@ -276,7 +276,7 @@ function CategorySummary({
       {shown.map((one, at) => (
         <span key={one.key ?? "none"} className={one.key ? "tally" : "tally unset"}>
           {at > 0 ? <span className="tally-gap" aria-hidden="true"> · </span> : null}
-          {one.name} <span className="muted">{formatCount(one.transaction_count)}</span>
+          {tallyName(one)} <span className="muted">{formatCount(one.transaction_count)}</span>
         </span>
       ))}
       {rest > 0 && (

@@ -40,6 +40,7 @@ def _row_out(row: report_service.Row, currency: str) -> ReportRowOut:
     return ReportRowOut(
         key=row.key,
         name=row.name,
+        name_code="unset.category" if row.key is None else None,
         group_name=row.group_name,
         by_month=row.by_month,
         total_minor=row.total_minor,

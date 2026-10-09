@@ -3263,6 +3263,12 @@ msgstr "Only an owner can invite people"
 msgid "error.invite.owner_only_withdraw"
 msgstr "Only an owner can withdraw an invitation"
 
+#. Two people changed the ledger at the same moment. See GLOSSARY.md (ledger)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ledger.busy"
+msgstr "The ledger is busy with another change at this moment; try again"
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.money.amount_too_large"
@@ -3567,6 +3573,17 @@ msgstr "This was written off. Set it back to expected before recording a payment
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.request.cross_origin"
+msgstr "That request did not come from this app"
+
+#. A form or request was refused. {fields} are the API's own field names, like body.amount, kept as they are
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.request.invalid"
+msgstr "Some of what was sent is not right: {fields}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.reset.account_disabled"
 msgstr "That account is disabled, so a reset link for it could not be followed. Re-enable it first."
 
@@ -3661,6 +3678,12 @@ msgstr "A display name is required"
 msgid "error.setup.not_waiting"
 msgstr "This instance is not waiting to be set up"
 
+#. /setup is a web address and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.required"
+msgstr "This instance has not been set up yet; open /setup"
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.setup.server_restarted"
@@ -3715,6 +3738,11 @@ msgstr "Every part of a work expense has to be money going out, because each par
 #: src/lib/errorMessages.ts
 msgid "error.split.zero_part"
 msgstr "A part of a split cannot be zero"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.statement.unreadable"
+msgstr "This file cannot be read as a statement"
 
 #. See GLOSSARY.md (step-up)
 #. js-lingui-explicit-id
@@ -6552,6 +6580,50 @@ msgstr "This line has more cells than the file has columns"
 msgid "notice.account_import.row.unknown_type"
 msgstr "{type} is not an account type -- use one of {types}"
 
+#. Said to a program that staged rows. external_id is a field name and stays as it is; {ids} are row ids
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.already_here"
+msgstr "{count} of {total, plural, one {# row was} other {# rows were}} already in this account and were not staged: {ids}. If any of those are genuinely separate purchases, give each one its own external_id and send them again -- a row with an external_id is deduped on that alone."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.matched"
+msgstr "{count} of {total, plural, one {# row} other {# rows}} matched entries already in this account. Committing marks those as seen by the bank rather than adding them again."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.period_end"
+msgstr "You declared the period ending {declared} and the latest row staged is {latest}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.period_start"
+msgstr "You declared the period starting {declared} and the earliest row staged is {earliest}."
+
+#. Said to a program that staged rows. {reasons} is a list of reasons with counts
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.refused"
+msgstr "{count} of {total, plural, one {# row was} other {# rows were}} refused and will not land: {reasons}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.row_count"
+msgstr "You declared {declared, plural, one {# row} other {# rows}} and {arrived} arrived. A dropped page or a mis-split line looks exactly like this."
+
+#. Said to a program that staged rows. {share} is a percentage like 61%; {type} an account type's value
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.sign_convention"
+msgstr "{share} of this batch's value is money coming in to a {type} account ({count} of {total, plural, one {# row} other {# rows}}), and it nets positive overall. Confirm these are income rather than, say, credit-card repayments read from a card statement -- on a card those are money in, and in a {type} account the same rows are money out."
+
+#. Said to a program that staged rows. The figures are in minor units, as the program sent them
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.total"
+msgstr "You declared a total of {declared} minor units and the rows that would land come to {staged}, a difference of {difference}. A merged row, a missing row or a flipped sign all show up here. Rows that were skipped or refused are not in this figure -- see the other warnings if there are any."
+
 #. js-lingui-explicit-id
 #: src/lib/noticeMessages.ts
 msgid "notice.country.not_a_code"
@@ -6870,6 +6942,124 @@ msgstr "The bank marked this {kind}, which is a pending hold rather than a trans
 msgid "notice.statement.row.signed_twice"
 msgstr "{text} is signed twice, so whether it is money in or money out would be a guess"
 
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.cell_too_long"
+msgstr "One cell in this file is longer than {max, number} characters, which no statement has -- it may not be a statement, or it may be damaged. Download it from your bank again."
+
+#. {found} and {stated} are amounts as the bill wrote them; {label} is the bill's own words for its total
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.layout_changed"
+msgstr "This looks like a document this app has a rule for, but the entries it found add up to {found} and the document says “{label}” is {stated}. The layout has probably changed, so nothing has been imported -- importing part of a bill would be worse."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_bom"
+msgstr "This file looks like UTF-16 or UTF-32 text without a byte-order mark, so how to read it cannot be told for certain -- save it again as UTF-8 (or CSV UTF-8) and import that"
+
+#. pdfplumber is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_pdfplumber"
+msgstr "Reading PDFs needs the pdfplumber package, which is not installed"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_sheets"
+msgstr "This workbook has no sheets in it"
+
+#. xlrd is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_xlrd"
+msgstr "Reading .xls files needs the xlrd package, which is not installed"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.not_a_spreadsheet"
+msgstr "This file could not be read as a spreadsheet. It may be damaged; download it from your bank again, or export it as CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.not_a_table"
+msgstr "This file could not be read as a table. Download it from your bank again, or export it as CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_decoded"
+msgstr "This PDF unpacks to more than {max, number} MB, which is far more than a statement needs -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_drawing"
+msgstr "The pages of this PDF hold more drawing instructions than a statement of any length would -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_no_table"
+msgstr "No statement table was found in this PDF. Some documents -- a designed credit-card bill with several tables side by side, for instance -- are not a single table with a header, and importing half of one would be worse than not importing it. Ask your bank for CSV or OFX."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_objects"
+msgstr "This PDF puts more than {max, number} characters and shapes on its pages, which is far more than a statement holds. Ask your bank for CSV or OFX, or a statement covering fewer months."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_scan"
+msgstr "There is no text in this PDF -- it is probably a scan, and reading those needs character recognition this app does not do. Ask your bank for CSV or OFX."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_stream"
+msgstr "This PDF contains a compressed block that unpacks to more than {max, number} MB, which no statement needs -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_too_long"
+msgstr "This PDF has more than {max, number} pages, which is longer than any statement this app reads. Ask your bank for CSV or OFX, or a statement covering fewer months."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_unopenable"
+msgstr "This file could not be opened as a PDF. It may be damaged; download it from your bank again."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_unreadable"
+msgstr "This PDF could not be read. It may be damaged; download it from your bank again."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.sheet_too_large"
+msgstr "The first sheet of this workbook reaches row {rows, number} and column {columns, number}, which is far larger than a statement -- this app reads at most {max_rows, number} rows and {max_columns, number} columns. If the statement is in there, export it from your bank as CSV instead."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.sheet_unreadable"
+msgstr "The first sheet of this workbook could not be read. It may be damaged; download it from your bank again, or export it as CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.too_many_cells"
+msgstr "The first sheet of this workbook holds more than {max, number} cells, which is far larger than a statement. If the statement is in there, export it from your bank as CSV instead."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.too_many_rows"
+msgstr "This file has more than {max, number} rows, which no statement has -- it may not be a statement. Download a shorter period from your bank."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.undated"
+msgstr "More than {max, number} rows of this file have no readable date -- it is not a statement, or its date column was not found. Check the header row."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.xlsx"
+msgstr "This looks like an .xlsx file, which is not supported yet -- open it and save as CSV, or export CSV from your bank instead"
+
 #. Part of a sentence on a transfer: a doubt. {named} is a name the bank wrote
 #. js-lingui-explicit-id
 #: src/lib/noticeMessages.ts
@@ -6947,6 +7137,18 @@ msgstr "{why}, but there is more than one row it could be"
 #: src/lib/noticeMessages.ts
 msgid "notice.transfer.why.names"
 msgstr "the {account} row names {named}"
+
+#. The name of the rows with no category, in a report or a breakdown. See GLOSSARY.md (Uncategorised)
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.unset.category"
+msgstr "Uncategorised"
+
+#. The name of the rows with no payee, in a breakdown of payees
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.unset.payee"
+msgstr "No payee"
 
 #. {direction} is more or less: whether the import accounts for more than YNAB's balance
 #. js-lingui-explicit-id

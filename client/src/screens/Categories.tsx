@@ -9,6 +9,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { codedText } from "../lib/noticeMessages";
 import {
   Dialog,
   Empty,
@@ -39,7 +40,14 @@ import { formatCount } from "../lib/locale";
 export interface Tally {
   key: string | null;
   name: string;
+  /** For the unset bucket, the code its name is (#267): `unset.payee`, `unset.category`. */
+  name_code?: string | null;
   transaction_count: number;
+}
+
+/** A tally's name: the server's, or this language's word for the unset bucket. */
+export function tallyName(one: Pick<Tally, "name" | "name_code">): string {
+  return codedText(one.name, one.name_code, {});
 }
 
 /** `GET /households/{id}/stats/categories`, one entry per category in use. */
@@ -541,7 +549,7 @@ function PayeeBreakdown({ stat }: { stat: CategoryStat | undefined }) {
       <ul className="breakdown">
         {stat.payees.map((one) => (
           <li key={one.key ?? "none"}>
-            <span className={one.key ? "" : "muted"}>{one.name}</span>
+            <span className={one.key ? "" : "muted"}>{tallyName(one)}</span>
             <span className="small muted">{formatCount(one.transaction_count)}</span>
           </li>
         ))}
