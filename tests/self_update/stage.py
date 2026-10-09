@@ -25,6 +25,11 @@ release's updater image (`ci-updater.Dockerfile`). It writes:
 - `DIR/releases.json`: per version, its digests, revision, migration chain,
   and what kind of release it is.
 
+With `--index`, each updater is published as a release publishes it: a
+multi-arch OCI index (`multi_arch`), and the digest every file names is the
+index's. An engine that pulls it by that digest -- Podman -- lists the
+platform manifest's digest beside it in `RepoDigests` (#287).
+
 The releases, oldest first:
 
 | Version | What | Used by |
@@ -308,7 +313,76 @@ def push(local: str, repo: str, version: str) -> str:
     return next(d.split("@", 1)[1] for d in digests if d.startswith(prefix))
 
 
-def build(out: Path, base_commit: str, only: set[str] | None) -> None:
+#: Index and manifest media types, OCI then Docker, for `multi_arch` (#287).
+OCI_INDEX = "application/vnd.oci.image.index.v1+json"
+INDEXES = (OCI_INDEX, "application/vnd.docker.distribution.manifest.list.v2+json")
+MANIFESTS = (
+    "application/vnd.oci.image.manifest.v1+json",
+    "application/vnd.docker.distribution.manifest.v2+json",
+)
+
+
+def _registry(method: str, path: str, accept: tuple[str, ...] = (), body: bytes | None = None,
+              content_type: str | None = None) -> tuple[bytes, dict]:  # fmt: skip
+    """One call to the push registry's API (plain HTTP on the loopback)."""
+    import urllib.request
+
+    req = urllib.request.Request(f"http://{PUSH}/v2/{path}", data=body, method=method)
+    if accept:
+        req.add_header("Accept", ", ".join(accept))
+    if content_type:
+        req.add_header("Content-Type", content_type)
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return resp.read(), {k.lower(): v for k, v in resp.headers.items()}
+
+
+def multi_arch(repo: str, version: str, digest: str) -> str:
+    """Re-tag `repo:version` as a two-platform index over the pushed image; the index's digest.
+
+    A release's updater is published as a multi-arch index, and an engine
+    pulling it by the index digest records what it likes in `RepoDigests`:
+    Podman, the index's digest and the platform manifest's (#287). A runner
+    builds one platform, so the second entry names the same manifest under
+    another platform -- nothing pulls that one; it is what makes this an
+    index an engine resolves, as ghcr.io serves a release's.
+    """
+    name = repo.split("/", 1)[1]
+    body, headers = _registry("GET", f"{name}/manifests/{digest}", accept=(*MANIFESTS, *INDEXES))
+    kind = headers.get("content-type", "").split(";")[0]
+    if kind in INDEXES:
+        # A builder that already pushed an index (attestations): its real platforms.
+        entries = [
+            m for m in json.loads(body)["manifests"]
+            if (m.get("platform") or {}).get("architecture") not in (None, "unknown")
+        ]  # fmt: skip
+    else:
+        config = json.loads(body)["config"]["digest"]
+        image, _ = _registry("GET", f"{name}/blobs/{config}")
+        cfg = json.loads(image)
+        platform = {"architecture": cfg["architecture"], "os": cfg["os"]}
+        if cfg.get("variant"):
+            platform["variant"] = cfg["variant"]
+        entries = [{"mediaType": kind, "digest": digest, "size": len(body), "platform": platform}]
+    other = "s390x" if entries[0]["platform"]["architecture"] != "s390x" else "ppc64le"
+    entries.append({**entries[0], "platform": {"architecture": other, "os": "linux"}})
+    # A Docker manifest is listed by a Docker manifest list, an OCI one by an OCI index.
+    kind = INDEXES[1] if entries[0]["mediaType"] == MANIFESTS[1] else OCI_INDEX
+    index = json.dumps({"schemaVersion": 2, "mediaType": kind, "manifests": entries}).encode()
+    _, headers = _registry("PUT", f"{name}/manifests/{version}", body=index, content_type=kind)
+    pushed = headers.get("docker-content-digest", "")
+    if not re.fullmatch(r"sha256:[0-9a-f]{64}", pushed):
+        raise SystemExit(f"the registry did not say the index's digest ({pushed!r})")
+    print(f"{repo}:{version} is an index now: {pushed} over {digest}", flush=True)
+    return pushed
+
+
+def knows_its_digests(tree: Path) -> bool:
+    """Whether the updater in `tree` knows its image by every digest it carries (#287)."""
+    handover = tree / "updater" / "handover.py"
+    return handover.is_file() and "def own_digests" in handover.read_text()
+
+
+def build(out: Path, base_commit: str, only: set[str] | None, index: bool = False) -> None:
     out.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="st-ci-a-"))
     shutil.rmtree(work)
@@ -317,6 +391,7 @@ def build(out: Path, base_commit: str, only: set[str] | None) -> None:
     try:
         a_app, a_upd = build_release(work, A)
         rev_a = revision_of(work)
+        a_indexed = index and knows_its_digests(work)
     finally:
         sh("git", "-C", str(ROOT), "worktree", "remove", "--force", str(work))
     b_app, b_upd = build_release(ROOT, B)
@@ -374,12 +449,19 @@ def build(out: Path, base_commit: str, only: set[str] | None) -> None:
     for version, (app, upd, rev, what) in made.items():
         app_digest = push(app, APP_REPO, version)
         upd_digest = push(upd, UPDATER_REPO, version)
+        # `--index`: every updater as a multi-arch index -- but A's, from a
+        # merge base whose updater takes one `RepoDigests` entry for its
+        # identity: on Podman that is the platform's, and it would refuse
+        # every handover (#287). Such an A is pushed as before.
+        if index and (version != A or a_indexed):
+            upd_digest = multi_arch(UPDATER_REPO, version, upd_digest)
         table[APP_REPO][version] = {"digest": app_digest, "revision": rev, "size": 0}
         table[UPDATER_REPO][version] = {"digest": upd_digest, "revision": rev, "size": 0}
         releases[version] = {
             "what": what,
             "app": app_digest,
             "updater": upd_digest,
+            "updater_index": bool(index and (version != A or a_indexed)),
             "revision": rev,
             "chain": chain_of(app),
         }
@@ -404,13 +486,16 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--out", type=Path, required=True)
     b.add_argument("--base", required=True, help="the commit release A is built from")
     b.add_argument("--only", default="", help="variants to build, e.g. B1,C; none for A and B alone")
+    b.add_argument(
+        "--index", action="store_true", help="publish each updater as a two-platform OCI index (#287)"
+    )
     args = p.parse_args(argv)
     os.environ.setdefault("DOCKER_BUILDKIT", "1")
     if args.what == "registry":
         registry(args.out.resolve(), args.publish, args.network)
     else:
         only = None if args.only == "" else {x for x in args.only.split(",") if x and x != "none"}
-        build(args.out.resolve(), args.base, only)
+        build(args.out.resolve(), args.base, only, index=args.index)
     return 0
 
 

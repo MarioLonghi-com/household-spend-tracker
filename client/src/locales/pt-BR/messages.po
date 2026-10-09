@@ -9531,6 +9531,188 @@ msgstr "{by} redefiniu a senha de {user}"
 msgid "Updated to {running} at {at} in {took}."
 msgstr "Atualizado para {running} em {at}, em {took}."
 
+#. Name of a seeded category: yearly charges such as a card fee. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.annual_fees"
+msgstr "Anuidades"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.car_maintenance"
+msgstr "Manutenção do carro"
+
+#. Name of a seeded category: restaurants, cafés, takeaway. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.eating_out"
+msgstr "Restaurantes"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.electricity"
+msgstr "Luz"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.gifts"
+msgstr "Presentes"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.groceries"
+msgstr "Supermercado"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.health"
+msgstr "Saúde"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.hobbies"
+msgstr "Hobbies"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.home_maintenance"
+msgstr "Manutenção da casa"
+
+#. Name of a seeded category: things for the home. Not the household of the glossary
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.household"
+msgstr "Casa"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.insurance"
+msgstr "Seguros"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.internet"
+msgstr "Internet"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.other_income"
+msgstr "Outras receitas"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.phone"
+msgstr "Telefone"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.rent_mortgage"
+msgstr "Aluguel / Financiamento"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.salary"
+msgstr "Salário"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.subscriptions"
+msgstr "Assinaturas"
+
+#. Name of a seeded category: fares, fuel, taxis. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.transport"
+msgstr "Transporte"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.travel"
+msgstr "Viagens"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.water"
+msgstr "Água"
+
+#. Name of a category group seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.bills"
+msgstr "Contas fixas"
+
+#. Name of a seeded category group: the spending of daily life. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.everyday"
+msgstr "Dia a dia"
+
+#. Name of a category group seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.income"
+msgstr "Receitas"
+
+#. Name of a seeded category group: bills that come less often than monthly
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.non_monthly"
+msgstr "Não mensais"
+
+#. Name of a seeded category group: spending by choice, not need. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.quality_of_life"
+msgstr "Qualidade de vida"
+
+#. Payee and memo of the row holding an account's starting balance. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.opening_balance"
+msgstr "Saldo inicial"
+
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
 msgid "YNAB's own bucket, always uncategorised"

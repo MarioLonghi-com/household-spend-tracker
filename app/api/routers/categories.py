@@ -94,7 +94,7 @@ def seed_defaults(
         raise Conflict("this household already has categories")
 
     with batch(session, kind=BatchKind.admin, actor_id=user.id, household_id=household.id):
-        category_service.seed_defaults(session, household.id)
+        category_service.seed_defaults(session, household.id, locale=body.locale)
     return list_categories(household, session)
 
 
