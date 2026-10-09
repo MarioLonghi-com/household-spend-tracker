@@ -32,6 +32,19 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.10.1 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.10.0`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.10.0` and restart.
+
+Fixes from the self-update test matrix: the launcher picks the install that
+is running when both Docker and Podman hold one, the updater rejoins the app
+after a Tailscale sidecar restart, an update's outcome names the version it
+went to, the updater logs what it does, and an update is no longer refused as
+"ledger busy". The zip's README explains the first-run warning, and the tests
+that failed now and then no longer do.
+
 ### Changed
 
 - **The release zip's README explains the first-run warning where you
