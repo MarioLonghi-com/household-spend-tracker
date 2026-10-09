@@ -265,6 +265,7 @@ msgstr ""
 msgid "Or paste the rows, if your bank only lets you copy them from a page:"
 msgstr ""
 
+#. Screen-reader name of a warning on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
 msgid "Migrations that cannot be undone"
 msgstr ""
@@ -342,6 +343,7 @@ msgstr ""
 msgid "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot mean “whatever comes after it” — choose <2>take this bit off</2> for that."
 msgstr ""
 
+#. Screen-reader name of a help button on Application management
 #: src/screens/ApplicationManagement.tsx
 msgid "what this list is"
 msgstr ""
@@ -487,6 +489,7 @@ msgstr ""
 msgid "What happens"
 msgstr ""
 
+#. Screen-reader name of a log file's last lines; the placeholder is the file's name
 #: src/screens/ApplicationManagement.tsx
 msgid "The end of {open}"
 msgstr ""
@@ -624,6 +627,7 @@ msgstr ""
 msgid "{0} is available."
 msgstr ""
 
+#. Application management: loading
 #: src/screens/ApplicationManagement.tsx
 msgid "Reading this instance…"
 msgstr ""
@@ -645,6 +649,7 @@ msgstr ""
 msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 msgstr ""
 
+#. Tooltip on a folder path on Application management
 #: src/screens/ApplicationManagement.tsx
 msgid "this path does not exist"
 msgstr ""
@@ -760,6 +765,7 @@ msgstr ""
 msgid "Each currency keeps its own figures and nothing here adds two together — the ledger stores no exchange rates. A claim repaid in another currency is listed once, with every amount in its own currency and no difference worked out between them."
 msgstr ""
 
+#. Updates section, after an update: the version now running
 #: src/screens/Updates.tsx
 msgid "This instance now runs {running}."
 msgstr ""
@@ -792,6 +798,7 @@ msgstr ""
 msgid "Nothing went into this one."
 msgstr ""
 
+#. Backups screen: the backup was passed to the phone's share menu
 #: src/screens/Backups.tsx
 msgid "Handed to the share sheet."
 msgstr ""
@@ -1071,6 +1078,7 @@ msgstr ""
 msgid "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
 msgstr ""
 
+#. Database size: the main file plus recent writes not yet copied into it
 #. placeholder {0}: bytes(me.size.main_bytes)
 #. placeholder {1}: bytes(me.size.wal_bytes)
 #: src/screens/ApplicationManagement.tsx
@@ -1154,6 +1162,7 @@ msgstr ""
 msgid "(the {RULES_LISTED} largest are listed)"
 msgstr ""
 
+#. Updates section: what happens to a setting during this update
 #: src/screens/Updates.tsx
 msgid "Stays as it is."
 msgstr ""
@@ -1180,6 +1189,7 @@ msgstr ""
 msgid "You Need A Budget: from its export file or its API."
 msgstr ""
 
+#. Checkbox on the Backups screen; secret.key is a file name and stays
 #: src/screens/Backups.tsx
 msgid "Include <0>secret.key</0> in downloads"
 msgstr ""
@@ -1569,6 +1579,7 @@ msgstr ""
 msgid "That isn't an amount in {currency}."
 msgstr ""
 
+#. Application management: the database is not a file on this machine
 #. placeholder {0}: me.database_url_scheme
 #: src/screens/ApplicationManagement.tsx
 msgid "{0} — not a local file"
@@ -1623,6 +1634,7 @@ msgstr ""
 msgid "Name as the bank writes it"
 msgstr ""
 
+#. Backups screen: the list is empty
 #: src/screens/Backups.tsx
 msgid "Nothing backed up yet."
 msgstr ""
@@ -1724,6 +1736,7 @@ msgstr ""
 msgid "Sharing and saving straight into a folder need this page on https or on localhost. Over plain http on a network address the browser switches both off, which is why only the download is offered here."
 msgstr ""
 
+#. Heading of the progress panel while the updater replaces itself. See GLOSSARY.md
 #: src/screens/Updates.tsx
 msgid "Updating the updater"
 msgstr ""
@@ -1881,10 +1894,12 @@ msgstr ""
 msgid "Nothing recorded against this one."
 msgstr ""
 
+#. Application management: the code was built with changes not yet saved in git
 #: src/screens/ApplicationManagement.tsx
 msgid "with uncommitted changes"
 msgstr ""
 
+#. Updates section: waiting while the step-up asks for a recovery code
 #: src/screens/Updates.tsx
 msgid "Asking for a recovery code…"
 msgstr ""
@@ -2639,6 +2654,7 @@ msgstr ""
 msgid "Writes a complete, compacted copy into the backups directory above, with this instance still serving. It does <0>not</0> copy <1>secret.key</1> there: without that key every authenticator is refused, so a copy that leaves this machine either carries it (tick the box below) or travels with it separately."
 msgstr ""
 
+#. Section heading on Application management: the folders the app uses
 #: src/screens/ApplicationManagement.tsx
 msgid "Where the files are"
 msgstr ""
@@ -3496,6 +3512,7 @@ msgstr ""
 msgid "state column"
 msgstr ""
 
+#. Section heading on Application management. See GLOSSARY.md
 #: src/screens/ApplicationManagement.tsx
 msgid "Back the database up"
 msgstr ""
@@ -3529,6 +3546,7 @@ msgstr ""
 msgid "Add payee"
 msgstr ""
 
+#. Updates section: outcome of an update, with the time it finished
 #: src/screens/Updates.tsx
 msgid "Updated to {running} at {at}."
 msgstr ""
@@ -3658,6 +3676,7 @@ msgstr ""
 msgid "Transfers"
 msgstr ""
 
+#. Fallback name when the engine's own name (Docker, Podman) is not known. See GLOSSARY.md
 #: src/screens/Updates.tsx
 msgid "the container engine"
 msgstr ""
@@ -3677,11 +3696,6 @@ msgstr ""
 #. Button on the Register screen: verb, take the receipt off the transaction
 #: src/screens/Register.tsx
 msgid "Detach"
-msgstr ""
-
-#. Heading over the other-debt accounts on the Accounts screen. See GLOSSARY.md
-#: src/lib/labels.ts
-msgid "Other liabilities"
 msgstr ""
 
 #. Label on the receipts
@@ -4489,11 +4503,6 @@ msgstr ""
 msgid "Already imported"
 msgstr ""
 
-#. Heading over the everyday bank accounts on the Accounts screen. See GLOSSARY.md
-#: src/lib/labels.ts
-msgid "Checking"
-msgstr ""
-
 #. Name of a fact on the Reconcile screen
 #: src/screens/Reconcile.tsx
 msgid "Ticked here"
@@ -4505,6 +4514,11 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Work will not pay this. It counts as your spending."
+msgstr ""
+
+#. Heading over the other-debt accounts on the Accounts screen. See GLOSSARY.md
+#: src/lib/labels.ts
+msgid "Other debts"
 msgstr ""
 
 #: src/screens/Backups.tsx
@@ -4736,6 +4750,7 @@ msgstr ""
 msgid "A suggestion, not a restriction: it fills in the address on the acceptance screen and the person can change it. <0>The link is the credential</0> — whoever opens it gets this role, so treat it like a password."
 msgstr ""
 
+#. Link on Application management to the app's source code
 #: src/screens/ApplicationManagement.tsx
 msgid "The source, on GitHub"
 msgstr ""
@@ -4826,6 +4841,7 @@ msgstr ""
 msgid "Rules can be suggested after the first statement import: this import brought no bank text to suggest them from."
 msgstr ""
 
+#. Button on the Backups screen; Drive and Dropbox are product names and stay
 #: src/screens/Backups.tsx
 msgid "Save to Drive/Dropbox…"
 msgstr ""
@@ -4900,6 +4916,7 @@ msgstr ""
 msgid "Open the receipt from {when}"
 msgstr ""
 
+#. Button on the Backups screen: make the zip file to download
 #: src/screens/Backups.tsx
 msgid "Prepare the zip"
 msgstr ""
@@ -5063,6 +5080,7 @@ msgstr ""
 msgid "Transfer between your own accounts"
 msgstr ""
 
+#. Button on the Backups screen: pick where on this device to save
 #: src/screens/Backups.tsx
 msgid "Choose a folder…"
 msgstr ""
@@ -5162,6 +5180,7 @@ msgstr ""
 msgid "running"
 msgstr ""
 
+#. Section heading on Application management: the log level
 #: src/screens/ApplicationManagement.tsx
 msgid "How much to write down"
 msgstr ""
@@ -5294,6 +5313,7 @@ msgstr ""
 msgid "The line exactly as it arrived"
 msgstr ""
 
+#. Section heading on Application management: the addresses the app answers on
 #: src/screens/ApplicationManagement.tsx
 msgid "Where it can be reached"
 msgstr ""
@@ -5374,6 +5394,7 @@ msgstr ""
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so one Out column holding {0} would be a column nobody could add up."
 msgstr ""
 
+#. Application management: describes the running server process
 #: src/screens/ApplicationManagement.tsx
 msgid "The process answering this request."
 msgstr ""
@@ -5434,6 +5455,7 @@ msgstr ""
 msgid "What would this match?"
 msgstr ""
 
+#. Backups screen: a numbered step; the placeholder is its number
 #: src/screens/Backups.tsx
 msgid "{step}. Download it, then upload it"
 msgstr ""
@@ -5499,6 +5521,7 @@ msgstr ""
 msgid "{0, plural, one {Imported {1} transaction in one batch.} other {Imported {2} transactions in one batch.}}"
 msgstr ""
 
+#. Section heading on the Backups screen. See GLOSSARY.md
 #: src/screens/Backups.tsx
 msgid "Backups taken by updates"
 msgstr ""
@@ -5588,6 +5611,7 @@ msgstr ""
 msgid "New authenticator"
 msgstr ""
 
+#. Application management: shown where the last backup's size would be, when there is none
 #: src/screens/ApplicationManagement.tsx
 msgid "use the button below"
 msgstr ""
@@ -5737,6 +5761,7 @@ msgstr ""
 msgid "Bulk delete"
 msgstr ""
 
+#. Heading of the progress panel while an update is downloaded and checked
 #: src/screens/Updates.tsx
 msgid "Preparing the update"
 msgstr ""
@@ -5843,6 +5868,11 @@ msgstr ""
 #. placeholder {1}: picked.size
 #: src/screens/Receipts.tsx
 msgid "{0, plural, one {One receipt will be deleted.} other {{1} receipts will be deleted.}}"
+msgstr ""
+
+#. Heading over the everyday bank accounts on the Accounts screen. See GLOSSARY.md
+#: src/lib/labels.ts
+msgid "Current accounts"
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -6296,6 +6326,7 @@ msgstr ""
 msgid "Problems"
 msgstr ""
 
+#. Updates section: the version running now
 #. placeholder {0}: check.running
 #: src/screens/Updates.tsx
 msgid "This instance is running {0}."
@@ -6501,6 +6532,7 @@ msgstr ""
 msgid "Nothing to suggest."
 msgstr ""
 
+#. Updates section, followed by a button to update the updater. See GLOSSARY.md
 #: src/screens/Updates.tsx
 msgid "A newer updater ({version}) is available:"
 msgstr ""
@@ -6545,6 +6577,7 @@ msgstr ""
 msgid "Required, one of"
 msgstr ""
 
+#. Updates section: a setting is on, and when it takes effect during the update
 #: src/screens/Updates.tsx
 msgid "On: runs before the backup."
 msgstr ""
@@ -6573,6 +6606,7 @@ msgstr ""
 msgid "Loading…"
 msgstr ""
 
+#. Section heading on Application management
 #: src/screens/ApplicationManagement.tsx
 msgid "How much data, per household"
 msgstr ""
@@ -6781,6 +6815,7 @@ msgstr ""
 msgid "e.g. {0}"
 msgstr ""
 
+#. Section heading on Application management: the installed software packages
 #: src/screens/ApplicationManagement.tsx
 msgid "What it depends on"
 msgstr ""
@@ -7253,6 +7288,7 @@ msgstr ""
 msgid "{by} reset {user}'s password"
 msgstr ""
 
+#. Updates section: outcome of an update, with the time it finished and how long it took
 #: src/screens/Updates.tsx
 msgid "Updated to {running} at {at} in {took}."
 msgstr ""
@@ -7386,6 +7422,7 @@ msgstr ""
 msgid "Staged"
 msgstr ""
 
+#. Dialog title on the Backups screen
 #: src/screens/Backups.tsx
 msgid "Delete this backup?"
 msgstr ""
@@ -7713,6 +7750,7 @@ msgstr ""
 msgid "Payee Categorisation"
 msgstr ""
 
+#. Button on Application management. See GLOSSARY.md
 #: src/screens/ApplicationManagement.tsx
 msgid "Back up now"
 msgstr ""
@@ -8271,6 +8309,7 @@ msgstr ""
 msgid "Add an account before entering transactions."
 msgstr ""
 
+#. Button on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
 msgid "Open the recovery page"
 msgstr ""
@@ -8394,6 +8433,7 @@ msgstr ""
 msgid "A CSV, an OFX/QFX download, a bank's .xls export, a statement PDF, or a paste from your bank's website. CSV and spreadsheets are worked out from the file itself — the delimiter, the date format, the decimal separator, which column is which, and which row the table actually starts on. OFX needs none of that: it names its own fields, and its transaction ids are used so re-importing an overlapping statement cannot double anything up. A PDF is read by where the words sit on the page, so a running-balance column is not mistaken for the amount — and a designed bill, which is summary boxes rather than a table, is refused rather than half-read. You will see all of it before anything is written."
 msgstr ""
 
+#. Updates section, after an update: the updater was updated as well
 #: src/screens/Updates.tsx
 msgid "The updater is now {updaterVersion} too."
 msgstr ""
@@ -8622,6 +8662,7 @@ msgstr ""
 msgid "<0>Coming from another budgeting app?</0> Statements go in one at a time here. To bring your whole history across at once — YNAB so far — use the {link} on the {0} page. The household’s owner runs it, once."
 msgstr ""
 
+#. Heading of the progress panel while a downloaded update is thrown away
 #: src/screens/Updates.tsx
 msgid "Discarding the prepared update"
 msgstr ""
@@ -8844,6 +8885,7 @@ msgstr ""
 msgid "Yes, discard it"
 msgstr ""
 
+#. Section heading on Application management: where the database file is
 #: src/screens/ApplicationManagement.tsx
 msgid "Where it is"
 msgstr ""
@@ -8872,6 +8914,7 @@ msgstr ""
 msgid "why one currency at a time"
 msgstr ""
 
+#. Screen-reader name of one more release listed on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
 msgid "Another newer release"
 msgstr ""
@@ -8995,6 +9038,7 @@ msgstr ""
 msgid "Its author, and their other projects"
 msgstr ""
 
+#. Dialog title on the Backups screen: a backup an update took
 #: src/screens/Backups.tsx
 msgid "Delete this update backup?"
 msgstr ""
@@ -9254,6 +9298,7 @@ msgstr ""
 msgid "<0>{0}</0>, made {1}, {2}. The file is removed from the backups directory and <1>cannot be brought back</1> — a backup is a file, not a ledger row, so there is no undo in History."
 msgstr ""
 
+#. Button on the Backups screen while the zip is being made
 #: src/screens/Backups.tsx
 msgid "Preparing the zip…"
 msgstr ""

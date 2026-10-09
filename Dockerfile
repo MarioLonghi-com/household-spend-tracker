@@ -64,8 +64,10 @@ WORKDIR /src/client
 # The lockfile alone first, so a change to a source file does not re-run the
 # install. `npm ci`, never `npm install`: ci installs exactly the lockfile and
 # fails if package.json disagrees with it, which is the property that makes a
-# build reproducible.
+# build reproducible. `vendor/` is in the lockfile too: micromatch is replaced
+# from there (#270), so the install cannot run without it.
 COPY client/package.json client/package-lock.json ./
+COPY client/vendor/ ./vendor/
 RUN npm ci
 COPY client/ ./
 RUN npm run build && test -f /src/app/static/dist/index.html

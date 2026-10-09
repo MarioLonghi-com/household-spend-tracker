@@ -193,7 +193,7 @@ export function Reimbursements({
 
   // The first request has to name a currency before the report can say which
   // ones have anything in them, so it asks the household's own list -- the
-  // same cached read the register and Income v Expense make.
+  // same cached read the register and Income vs Expense make.
   const currencies = useQuery({
     queryKey: ["report-currencies", household.id],
     queryFn: () =>
@@ -315,7 +315,7 @@ export function Reimbursements({
 /**
  * A checkbox per currency with work money, as many ticked as you like.
  *
- * Its own control rather than Income v Expense's `CurrencyToggle`, which is
+ * Its own control rather than Income vs Expense's `CurrencyToggle`, which is
  * radio buttons on purpose: that report's columns *are* one currency, and a
  * second tick there would be a sum. Here nothing is summed -- each figure
  * grows a line per currency instead -- so the control says "several" in the
@@ -410,7 +410,7 @@ export function mergeClaims(reports: ReimbursementsReport[]): ReimbursementClaim
  * ticked currency, busiest first.
  *
  * Exported so the test can hand it a fixture without a server, the way the
- * Income v Expense test renders `ReportTable` directly.
+ * Income vs Expense test renders `ReportTable` directly.
  */
 export function ReimbursementsBody({
   household,
@@ -584,7 +584,7 @@ function pickable(open: () => void) {
 }
 
 /**
- * One row's details, in the Income v Expense report's dialog (#142).
+ * One row's details, in the Income vs Expense report's dialog (#142).
  *
  * Everything in it came with the report -- memo and category included -- so
  * it opens at once, and what it says is what the table beside it says. What

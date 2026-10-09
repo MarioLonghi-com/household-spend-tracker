@@ -214,7 +214,7 @@ def update(
         txn.cleared = ClearedState(cleared)
     if amount is not None and amount != txn.amount:
         # A work expense is money out and its payment is money in; the report
-        # and Income v Expense both lean on that. An edit that flips the sign
+        # and Income vs Expense both lean on that. An edit that flips the sign
         # of either would leave a link neither rule allows, so it is refused
         # rather than silently producing one.
         flips = (amount > 0) != (txn.amount > 0) or amount == 0

@@ -282,7 +282,7 @@ def reject_transfers(pairs: list[dict]) -> str:
 
 @mcp.tool()
 def income_expense(currency: str, since: str | None = None, until: str | None = None) -> str:
-    """The Income v Expense report for ONE currency. Call once per currency in
+    """The Income vs Expense report for ONE currency. Call once per currency in
     the manifest; never add the answers together without saying the rate."""
     return _answer(lambda: _api.income_expense(currency, since=since, until=until))
 
