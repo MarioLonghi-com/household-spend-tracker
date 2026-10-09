@@ -34,6 +34,28 @@ history this repository does not have.
 
 ### Fixed
 
+- **English counts say "1 row", not "1 rows".** While the screens were being
+  prepared for translation, a count kept its English exactly as it was, wrong
+  plural included: "Try again in 1 seconds", "1 legs", "Its 1 row are left
+  out", "1 transaction match the filters", and a few more like them on the
+  Rules, Import, Household, Accounts and Register screens. Every English
+  message with a count now has its singular, and the translations follow.
+  (#269)
+
+## 0.9.2 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.9.1`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.9.1` and restart.
+
+Fixes found by testing 0.9.1's updates from the browser on Docker Desktop
+(macOS, Windows), rootless Podman and a Tailscale server: an update cut off
+by a power cut now rolls back by itself, the updaters hand over cleanly, the
+launcher uses the engine Spend Tracker is in, and the page opens on the
+outcome after an update.
+
+### Fixed
+
 - **After an update, the page opens where the outcome is.** Once the app was
   back, the Updating panel reloaded the page, and the reload landed on
   Transactions, so whether the update worked, or was rolled back, was only
@@ -76,13 +98,13 @@ history this repository does not have.
   down, rather than a take-back that did not happen, and stops itself. A
   take-back the engine refuses ends the same way. (#259)
 
-- **English counts say "1 row", not "1 rows".** While the screens were being
-  prepared for translation, a count kept its English exactly as it was, wrong
-  plural included: "Try again in 1 seconds", "1 legs", "Its 1 row are left
-  out", "1 transaction match the filters", and a few more like them on the
-  Rules, Import, Household, Accounts and Register screens. Every English
-  message with a count now has its singular, and the translations follow.
-  (#269)
+- **The launcher uses Podman when that is where Spend Tracker runs.** With
+  both Docker and Podman on a computer, the launcher picked Docker whenever
+  its command was installed, even with Docker Desktop stopped and a Podman
+  machine running, and then asked for Docker to be started. It now uses the
+  engine Spend Tracker is already installed in, or else the one that is
+  running, and only when neither is running says which are installed and
+  that one of them must be started. (#264)
 
 ## 0.9.1 — 2026-10-09
 
