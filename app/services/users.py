@@ -79,6 +79,7 @@ def create_household_for(
     base_currency: str = "EUR",
     date_format: str = "YYYY-MM-DD",
     members: list[str] | None = None,
+    locale: str | None = None,
 ) -> Household:
     """Create a household and put people in it, in one act.
 
@@ -91,6 +92,7 @@ def create_household_for(
         creator=creator,
         base_currency=base_currency,
         date_format=date_format,
+        locale=locale,
     )
     for user_id in members or []:
         if user_id == creator.id:

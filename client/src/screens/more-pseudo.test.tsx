@@ -299,13 +299,64 @@ describe("in en-XA, the remaining screens show no English", () => {
     expect(left2).toEqual([]);
   });
 
-  it("History's list and a batch's panel: the kind, the fields and the table in en-XA; its sentences are still the server's", async () => {
-    // The server's English, with the keys beside it (#57). The sentences (the
-    // detail, a row's summary) are still the server's and are data here.
+  it("History's list and a batch's panel: the kind, the fields, the table and the sentences in en-XA", async () => {
+    // The server's English, with the structure beside it (#57, #266). The
+    // English strings here are deliberately not the real ones: en-XA must
+    // word every sentence from its structure, never show the server's text.
+    const money = (amount: number) => ({ type: "money", amount, currency: "EUR" });
     const batch = {
       id: "b1", kind: "import", status: "applied", actor_id: "u1", started_at: "2026-03-01T10:00:00",
       finished_at: null, source: null, summary: null, undone_by_id: null,
-      headline: "Statement import", headline_key: "import", detail: "Doe", actor_name: "Sam", via: "Casa", change_count: 3,
+      headline: "Statement import", headline_key: "import", detail: "English detail", actor_name: "Sam", via: "Casa", change_count: 3,
+      detail_phrase: {
+        key: "history.detail.applied_by",
+        params: {
+          sentence: {
+            key: "history.detail.import",
+            params: {
+              made: {
+                type: "list",
+                sep: ", ",
+                items: [
+                  { key: "history.import.created", params: { count: 2 } },
+                  { key: "history.import.matched", params: { count: 1 } },
+                ],
+              },
+              account: { type: "name", value: "Santander" },
+              filename: { type: "name", value: "Doe" },
+            },
+          },
+          who: { type: "name", value: "Sam" },
+        },
+      },
+    };
+    const line = {
+      key: "history.line.fields",
+      params: {
+        label: { type: "list", sep: " · ", items: [money(-1250), { type: "name", value: "Bakery" }, { key: "history.label.in_account", params: { account: { type: "name", value: "Casa" } } }] },
+        fields: {
+          type: "list",
+          sep: ", ",
+          items: [
+            {
+              key: "history.field_change",
+              params: {
+                field: { type: "word", set: "field", key: "category_id" },
+                was: { type: "word", set: "empty", key: "category_id" },
+                now: { type: "category", group: "Everyday", name: "Cinema" },
+              },
+            },
+            {
+              key: "history.field_change",
+              params: {
+                field: { type: "word", set: "field", key: "cleared" },
+                was: { type: "enum", column: "cleared", value: "uncleared" },
+                now: { type: "enum", column: "cleared", value: "cleared" },
+              },
+            },
+          ],
+        },
+      },
     };
     vi.mocked(api.get).mockImplementation(async (path: string) => {
       if (path.includes("/batches/b1"))
@@ -314,27 +365,56 @@ describe("in en-XA, the remaining screens show no English", () => {
           change_count: 3,
           changed_rows: [
             {
-              seq: 1, op: "update", table: "transaction", table_key: "transactions", row_id: "t1", summary: "Sam",
-              fields: [{ field: "category", column: "category_id", was: "Bakery", now: "Cinema" }],
+              seq: 1, op: "update", table: "transaction", table_key: "transactions", row_id: "t1", summary: "English summary",
+              summary_phrase: line,
+              fields: [
+                {
+                  field: "category", column: "category_id", was: "English was", now: "English now",
+                  was_value: { type: "word", set: "empty", key: "category_id" },
+                  now_value: { type: "category", group: "Everyday", name: "Cinema" },
+                },
+                {
+                  field: "reimbursed by", column: "reimbursed_by_id", was: "English was", now: "English now",
+                  was_value: { type: "word", set: "removed", key: "transaction" },
+                  now_value: { key: "history.payment", params: { amount: money(32450), account: { type: "name", value: "Santander" }, date: { type: "date", value: "2026-09-30", style: "medium" } } },
+                },
+              ],
               snapshot: [], redacted: ["password_hash"],
             },
             {
-              seq: 2, op: "insert", table: "payee", table_key: "payees", row_id: "p1", summary: "Sam",
-              fields: [], snapshot: [{ field: "memo", column: "memo", was: "", now: "Doe" }], redacted: [],
+              seq: 2, op: "insert", table: "payee", table_key: "payees", row_id: "p1", summary: "English summary",
+              summary_phrase: { key: "history.line.added", params: { table: { type: "word", set: "table", key: "payees" }, label: { type: "name", value: "Doe" } } },
+              fields: [], snapshot: [{ field: "memo", column: "memo", was: "", now: "Doe", was_value: null, now_value: { type: "text", value: "Doe" } }], redacted: [],
             },
           ],
         };
       return [batch];
     });
     render(withQueries(<History household={HOUSEHOLD} />));
-    await screen.findByText("Doe");
-    const data = (word: string) => !/^(AM|PM|at|update|insert|password|hash)$/.test(word);
+    await screen.findByText(/Santander/);
+    const data = (word: string) => !/^(AM|PM|at|update|insert|password|hash|Sep)$/.test(word);
     expect(left().filter(data)).toEqual([]);
     expect(document.body.textContent).not.toContain("Statement import");
+    expect(document.body.textContent).not.toContain("English");
     fireEvent.click(document.querySelector("tbody td.editable button, tbody button")!);
     await screen.findByRole("dialog");
-    await screen.findByText("Cinema");
+    await screen.findAllByText(/Cinema/);
     expect(left().filter(data)).toEqual([]);
+    expect(document.body.textContent).not.toContain("English");
+    // The money is formatted here, from minor units, never sent as text.
+    expect(document.body.textContent).toMatch(/12[.,]50/);
+    expect(document.body.textContent).toMatch(/324[.,]50/);
+  });
+
+  it("History's sentences fall back to the server's English when a key is unknown to this build", async () => {
+    const { detailOf } = await import("../lib/historyWords");
+    expect(detailOf({ detail: "As the server said", detail_phrase: { key: "history.not.yet", params: {} } })).toBe(
+      "As the server said",
+    );
+    await activate("en");
+    expect(
+      detailOf({ detail: "As the server said", detail_phrase: { key: "history.detail.nothing", params: {} } }),
+    ).toBe("As the server said");
   });
 
   it("the backups list, with and without the key, and the save panel", () => {

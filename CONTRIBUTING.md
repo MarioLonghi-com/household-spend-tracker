@@ -264,6 +264,10 @@ container's `StartedAt` and the pin in `.env`. It runs on rootful Docker
 (loopback and the Tailscale sidecar layout, with a stand-in for Tailscale),
 rootless Podman, and Docker on arm64. Rootless Docker is in the manual
 matrix instead: its daemon cannot make its bridge network on a hosted runner.
+On the Podman legs each updater is pushed as a two-platform image index and
+pulled by the index's digest, as a release is, so the engine lists two
+digests for it (#287); A's is not, while the merge base's updater still
+takes one digest for its identity.
 
 The only thing replaced is verification: nothing built on a runner has an
 attestation. The CI updater image (`tests/self_update/ci-updater.Dockerfile`)

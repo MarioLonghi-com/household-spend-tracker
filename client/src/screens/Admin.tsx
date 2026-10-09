@@ -20,6 +20,7 @@ import { useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { seedLocale } from "../lib/seedWords";
 import {
   Dialog,
   Empty,
@@ -1144,6 +1145,7 @@ function NewHousehold({
         base_currency: currency.toUpperCase(),
         date_format: dateFormat,
         member_ids: members,
+        ...seedLocale(),
       }),
     onSuccess: onCreated,
   });

@@ -6078,6 +6078,566 @@ msgstr "Kopplar loss…"
 msgid "This row is locked, so nothing here can be changed and an import will not match against it. Set it back to cleared to edit it."
 msgstr "Den här raden är låst, så inget här kan ändras och en import matchas inte mot den. Sätt tillbaka den till bokförd för att redigera den."
 
+#. History: the value of a yes/no field, like archived
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.bool.no"
+msgstr "nej"
+
+#. History: the value of a yes/no field, like archived
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.bool.yes"
+msgstr "ja"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.accounts"
+msgstr "{count, plural, one {# konto} other {# konton}}"
+
+#. History: a count of changed rows of one kind: keys for programs
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.agent_keys"
+msgstr "{count, plural, one {# agentnyckel} other {# agentnycklar}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.categories"
+msgstr "{count, plural, one {# kategori} other {# kategorier}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.category_groups"
+msgstr "{count, plural, one {# kategorigrupp} other {# kategorigrupper}}"
+
+#. History: a count of changed rows of one kind: people in a household
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.household_members"
+msgstr "{count, plural, one {# medlem} other {# medlemmar}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.households"
+msgstr "{count, plural, one {# hushåll} other {# hushåll}}"
+
+#. History: suggested account numbers a person dismissed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.ignored_identifier_suggestions"
+msgstr "{count, plural, one {# ignorerat identifierarförslag} other {# ignorerade identifierarförslag}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.invitations"
+msgstr "{count, plural, one {# inbjudan} other {# inbjudningar}}"
+
+#. History: a count of changed rows of one kind: rules that name payees
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.payee_rules"
+msgstr "{count, plural, one {# mottagarregel} other {# mottagarregler}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.payees"
+msgstr "{count, plural, one {# mottagare} other {# mottagare}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.receipts"
+msgstr "{count, plural, one {# kvitto} other {# kvitton}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.reconciliations"
+msgstr "{count, plural, one {# avstämning} other {# avstämningar}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.transactions"
+msgstr "{count, plural, one {# transaktion} other {# transaktioner}}"
+
+#. History: two rows a person said are not one transfer
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.transfer_rejections"
+msgstr "{count, plural, one {# par markerat som ingen överföring} other {# par markerade som ingen överföring}}"
+
+#. History: a count of changed rows of one kind: people who sign in
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.users"
+msgstr "{count, plural, one {# användare} other {# användare}}"
+
+#. History: accounts read from a file. {file} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.account_import"
+msgstr "{count, plural, one {# konto} other {# konton}} från {file}."
+
+#. History: an import one person prepared and another applied. {who} is that person's name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.applied_by"
+msgstr "{sentence} Tillämpad av {who}."
+
+#. History: an import applied by a person since removed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.applied_by_somebody"
+msgstr "{sentence} Tillämpad av någon annan."
+
+#. History: a statement import. {made} is like 12 new transactions; {filename} the file's name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.import"
+msgstr "{made} till {account} från {filename}."
+
+#. History: a statement import with no file name. {made} is like 12 new transactions
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.import_no_file"
+msgstr "{made} till {account}."
+
+#. History: what was done to keys for programs, as a sentence
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.keys"
+msgstr "{acts}."
+
+#. History: a reconciliation locked these rows. See GLOSSARY.md (Locked)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.locked"
+msgstr "{count, plural, one {# transaktion låst} other {# transaktioner låsta}}."
+
+#. History: an act that changed no rows
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.nothing"
+msgstr "Inget ändrades."
+
+#. History: a one-time import from YNAB, counted in changed rows
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.changes"
+msgstr "{changes, plural, one {# ändring} other {# ändringar}}{linked, plural, =0 {} one {, # överföring kopplad} other {, # överföringar kopplade}}."
+
+#. History: a one-time import from YNAB, counted in changed rows. {where} is the file or budget
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.changes_from"
+msgstr "{changes, plural, one {# ändring} other {# ändringar}}{linked, plural, =0 {} one {, # överföring kopplad} other {, # överföringar kopplade}} från {where}."
+
+#. History: a one-time import from YNAB, the rows it brought and the transfers it paired
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.transactions"
+msgstr "{imported, plural, one {# transaktion} other {# transaktioner}}{linked, plural, =0 {} one {, # överföring kopplad} other {, # överföringar kopplade}}."
+
+#. History: a one-time import from YNAB. {where} is the file or budget it read
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.transactions_from"
+msgstr "{imported, plural, one {# transaktion} other {# transaktioner}}{linked, plural, =0 {} one {, # överföring kopplad} other {, # överföringar kopplade}} från {where}."
+
+#. History: an undo whose original act is gone. {tally} is like 3 transactions changed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.put_back"
+msgstr "Ångrat — {tally}."
+
+#. History: a reconciliation. {balance} is the statement's closing balance. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.reconciled"
+msgstr "{account} avstämt mot ett kontoutdrag som stänger {date} på {balance} — {count, plural, one {# transaktion låst} other {# transaktioner låsta}}."
+
+#. History: an undo. {headline} is the kind of act undone, lower case; {detail} the sentence about it
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.reversed"
+msgstr "Ångrat: {headline} — {detail}"
+
+#. History: a transaction divided into {count} parts, listed after the colon. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.split"
+msgstr "{amount} den {date} uppdelad i {count}: {parts}."
+
+#. History: a split whose parts cannot be read back. Split is the noun. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.split_unknown"
+msgstr "Uppdelning — {count, plural, one {# transaktion ändrad} other {# transaktioner ändrade}}."
+
+#. History: a transaction divided into {count} parts, listed after the colon. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.split_with_payee"
+msgstr "{payee} {amount} den {date} uppdelad i {count}: {parts}."
+
+#. History: a count of what an act did, as a sentence, like 12 transactions changed.
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.tally"
+msgstr "{tally}."
+
+#. History: the value of an empty field
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty"
+msgstr "ingenting"
+
+#. History: a household's accent colour when none is chosen: the palette's own is used
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.accent"
+msgstr "palettens egen"
+
+#. History: the value of a transaction's category when it has none. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.category_id"
+msgstr "okategoriserad"
+
+#. History: the value of a payee's default category when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.default_category_id"
+msgstr "ingen standard"
+
+#. History: the value of an account's bank when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.institution"
+msgstr "ingen bank"
+
+#. History: the value of a memo when it is empty. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.memo"
+msgstr "ingen beskrivning"
+
+#. History: the value of a note when it is empty. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.note"
+msgstr "ingen anteckning"
+
+#. History: the value of a transaction's payee when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.payee_id"
+msgstr "ingen mottagare"
+
+#. History: a work expense with no repayment linked yet
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.reimbursed_by_id"
+msgstr "ännu inte återbetald"
+
+#. History: a transaction work does not pay back. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.reimbursement"
+msgstr "inget jobbutlägg"
+
+#. History: the state of a transaction the bank has. See GLOSSARY.md (Cleared)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.cleared.cleared"
+msgstr "bokförd"
+
+#. History: the state of a transaction locked by a reconciliation. See GLOSSARY.md (Locked)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.cleared.reconciled"
+msgstr "låst"
+
+#. History: the state of a transaction the bank has not seen. See GLOSSARY.md (Uncleared)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.cleared.uncleared"
+msgstr "ej bokförd"
+
+#. History: a work expense work should pay back. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.reimbursement.expected"
+msgstr "jobbet ska betala tillbaka"
+
+#. History: a work expense work will not pay. See GLOSSARY.md (Written off)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.reimbursement.written_off"
+msgstr "avskriven"
+
+#. History: an account that cannot be named, in a sentence about an import
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.fallback.account"
+msgstr "ett konto"
+
+#. History: one field's change, from the old value to the new. {field} is lower case, like amount
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.field_change"
+msgstr "{field} {was} → {now}"
+
+#. History: how many rows an act changed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.import.changes"
+msgstr "{count, plural, one {# ändring} other {# ändringar}}"
+
+#. History: how many rows a statement import added
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.import.created"
+msgstr "{count, plural, one {# ny transaktion} other {# nya transaktioner}}"
+
+#. History: how many rows of a statement were already in the ledger
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.import.matched"
+msgstr "{count, plural, one {# matchad mot en befintlig rad} other {# matchade mot befintliga rader}}"
+
+#. History: a key for a program was changed. {label} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.changed"
+msgstr "Ändrade nyckeln ”{label}”"
+
+#. History: a key for a program was made. {label} is the name it was given
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.issued"
+msgstr "Utfärdade nyckeln ”{label}”"
+
+#. History: a key for a program was deleted. {label} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.removed"
+msgstr "Tog bort nyckeln ”{label}”"
+
+#. History: a key for a program stopped working. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.revoked"
+msgstr "Återkallade nyckeln ”{label}”"
+
+#. History: which account a transaction is in, after its amount and payee. {account} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.label.in_account"
+msgstr "i {account}"
+
+#. History, one changed row: a row was added. {table} is the kind of row, {label} what it is
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.added"
+msgstr "Lade till {table} {label}"
+
+#. History, one changed row: a part made by splitting a transaction. {origin} is the one divided
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.added_by_splitting"
+msgstr "Lade till {table} {label} genom att dela upp {origin}"
+
+#. History, one changed row: added by an import. {workflow} is its name, like One-time Import · YNAB (CSV)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.added_by_workflow"
+msgstr "Lade till {table} {label} via {workflow}"
+
+#. History, one changed row: changed in columns History does not name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.changed"
+msgstr "Ändrade {table} {label}"
+
+#. History, one changed row: what it is, then each change to it
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.fields"
+msgstr "{label}: {fields}"
+
+#. History, one changed row: a row was deleted. {table} is the kind of row, {label} what it was
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.removed"
+msgstr "Tog bort {table} {label}"
+
+#. History, one changed row: written again with nothing different
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.touched"
+msgstr "Sparade om {table} {label} utan ändringar"
+
+#. History: the payment that repaid a work expense, by amount, account and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.payment"
+msgstr "{amount} till {account} den {date}"
+
+#. History: a value naming an account that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.account"
+msgstr "ett konto som har tagits bort"
+
+#. History: a value naming a category that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.category"
+msgstr "en kategori som har tagits bort"
+
+#. History: a value naming a payee that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.payee"
+msgstr "en mottagare som har tagits bort"
+
+#. History: a value naming a transaction that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.transaction"
+msgstr "en transaktion som har tagits bort"
+
+#. History: the transaction a split divided, by amount and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.split.origin"
+msgstr "{amount} den {date}"
+
+#. History: the transaction a split divided, by payee, amount and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.split.origin_with_payee"
+msgstr "{payee} {amount} den {date}"
+
+#. History: one part of a split, its amount and its category
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.split.part_with_category"
+msgstr "{amount} ({category})"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.tally.added"
+msgstr "Tillagt: {counts}"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.tally.changed"
+msgstr "Ändrat: {counts}"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.tally.removed"
+msgstr "Borttaget: {counts}"
+
+#. History: a name that cannot be read. Keep it short
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.unknown"
+msgstr "?"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "The server reset {user}'s authenticator"
@@ -10424,6 +10984,188 @@ msgstr "{by} återställde lösenordet för {user}"
 #, fuzzy
 msgid "Updated to {running} at {at} in {took}."
 msgstr "Uppdaterad till {running} {at} på {took}."
+
+#. Name of a seeded category: yearly charges such as a card fee. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.annual_fees"
+msgstr "Årsavgifter"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.car_maintenance"
+msgstr "Bilunderhåll"
+
+#. Name of a seeded category: restaurants, cafés, takeaway. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.eating_out"
+msgstr "Äta ute"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.electricity"
+msgstr "El"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.gifts"
+msgstr "Presenter"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.groceries"
+msgstr "Matvaror"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.health"
+msgstr "Hälsa"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.hobbies"
+msgstr "Hobbyer"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.home_maintenance"
+msgstr "Underhåll av hemmet"
+
+#. Name of a seeded category: things for the home. Not the household of the glossary
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.household"
+msgstr "Hem"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.insurance"
+msgstr "Försäkringar"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.internet"
+msgstr "Internet"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.other_income"
+msgstr "Övriga inkomster"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.phone"
+msgstr "Telefon"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.rent_mortgage"
+msgstr "Hyra / Bolån"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.salary"
+msgstr "Lön"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.subscriptions"
+msgstr "Prenumerationer"
+
+#. Name of a seeded category: fares, fuel, taxis. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.transport"
+msgstr "Transport"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.travel"
+msgstr "Resor"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.water"
+msgstr "Vatten"
+
+#. Name of a category group seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.bills"
+msgstr "Räkningar"
+
+#. Name of a seeded category group: the spending of daily life. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.everyday"
+msgstr "Vardag"
+
+#. Name of a category group seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.income"
+msgstr "Inkomster"
+
+#. Name of a seeded category group: bills that come less often than monthly
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.non_monthly"
+msgstr "Ej månatliga"
+
+#. Name of a seeded category group: spending by choice, not need. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.quality_of_life"
+msgstr "Livskvalitet"
+
+#. Payee and memo of the row holding an account's starting balance. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.opening_balance"
+msgstr "Ingående saldo"
 
 #: src/screens/ynab/mapping.tsx
 #, fuzzy

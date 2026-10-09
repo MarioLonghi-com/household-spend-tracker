@@ -322,3 +322,251 @@ def test_the_client_words_every_key_in_the_servers_english():
     assert section("HISTORY_HEADLINES") == headlines
     assert section("HISTORY_FIELDS") == describing.FIELD_WORDS
     assert section("HISTORY_TABLES") == {table: one for table, (one, _) in describing.NOUNS.items()}
+
+
+# --------------------------------------------------------------------------- #
+# Sentences and values as structure (#266)
+# --------------------------------------------------------------------------- #
+
+ISO_DATE = r"^\d{4}-\d{2}-\d{2}$"
+
+
+def _nodes(node):
+    """Every phrase and value inside one, depth first."""
+    if isinstance(node, dict):
+        yield node
+        children = node["params"].values() if "params" in node else node.get("items", [])
+        for child in children:
+            yield from _nodes(child)
+
+
+def _assert_raw(node) -> None:
+    """Money as minor units with a currency, dates as ISO, never formatted text."""
+    import re
+
+    for one in _nodes(node):
+        if "params" in one:
+            assert one["key"] in describing.SENTENCES, one
+            continue
+        if one["type"] == "money":
+            assert type(one["amount"]) is int and re.fullmatch(r"[A-Z]{3}", one["currency"]), one
+        if one["type"] == "date":
+            assert re.match(ISO_DATE, one["value"]), one
+        if one["type"] in ("name", "text"):
+            assert not re.search(r"[€£]\s?\d", one["value"]), f"a formatted amount went out as text: {one}"
+
+
+def _edited_in_two_currencies(session, accounts, tree, write):
+    with write():
+        bakery = payee_service.get_or_create(session, accounts["checking"].household_id, "Bakery")
+        euros = txn_service.create(
+            session, account=accounts["checking"], date=JAN, amount=-1_250, payee=bakery
+        )
+        pounds = txn_service.create(session, account=accounts["pounds"], date=JAN, amount=-4_000)
+    with write() as euro_edit:
+        txn_service.update(session, euros, amount=-1_300, category=tree["Groceries"], cleared=ClearedState.cleared)
+    with write() as pound_edit:
+        txn_service.update(session, pounds, amount=-4_500, memo="Train")
+    return euro_edit, pound_edit
+
+
+def test_a_line_goes_out_as_a_phrase_with_raw_values_in_each_accounts_currency(
+    session, accounts, tree, write
+):
+    euro_edit, pound_edit = _edited_in_two_currencies(session, accounts, tree, write)
+
+    euros = describing.describe(session, euro_edit, with_lines=True)
+    pounds = describing.describe(session, pound_edit, with_lines=True)
+
+    # English is the phrase rendered, and is what it always said.
+    assert euros.detail == (
+        "-€13.00 · Bakery · in Checking: amount -€12.50 → -€13.00, "
+        "category uncategorised → Everyday: Groceries, state uncleared → cleared"
+    )
+    assert pounds.detail == "-£45.00 · in UK Savings: amount -£40.00 → -£45.00, memo no memo → Train"
+    assert describing.english(euros.detail_phrase) == euros.detail
+    assert [describing.english(one) for one in pounds.line_phrases] == pounds.lines
+
+    phrase = euros.detail_phrase
+    assert phrase["key"] == "history.line.fields"
+    amount, category, cleared = (one["params"] for one in phrase["params"]["fields"]["items"])
+    assert (amount["was"], amount["now"]) == (
+        {"type": "money", "amount": -1_250, "currency": "EUR"},
+        {"type": "money", "amount": -1_300, "currency": "EUR"},
+    )
+    assert category["was"] == {"type": "word", "set": "empty", "key": "category_id"}
+    assert category["now"] == {"type": "category", "group": "Everyday", "name": "Groceries"}
+    assert cleared["now"] == {"type": "enum", "column": "cleared", "value": "cleared"}
+    pound_amount = pounds.detail_phrase["params"]["fields"]["items"][0]["params"]["now"]
+    assert pound_amount == {"type": "money", "amount": -4_500, "currency": "GBP"}
+    _assert_raw(phrase)
+    _assert_raw(pounds.detail_phrase)
+
+
+def test_each_changed_field_carries_its_values_raw(session, accounts, tree, write):
+    euro_edit, _ = _edited_in_two_currencies(session, accounts, tree, write)
+    changes = describing._Changes(session, euro_edit.id, None).all()
+    [row] = describing.detail_of(session, accounts["checking"].household_id, changes)
+
+    by_column = {one.column: one for one in row.fields}
+    assert (by_column["amount"].was, by_column["amount"].now) == ("-€12.50", "-€13.00")
+    assert by_column["amount"].now_value == {"type": "money", "amount": -1_300, "currency": "EUR"}
+    assert row.summary == describing.english(row.summary_phrase)
+    for one in row.fields:
+        assert describing.english(one.was_value) == one.was
+        assert describing.english(one.now_value) == one.now
+
+
+def test_a_snapshot_dates_as_iso_and_has_no_from(session, accounts, write):
+    with write() as made:
+        txn_service.create(session, account=accounts["pounds"], date=FEB, amount=-990, memo="Tea")
+    changes = describing._Changes(session, made.id, None).all()
+    [row] = describing.detail_of(session, accounts["pounds"].household_id, changes)
+
+    by_column = {one.column: one for one in row.snapshot}
+    assert by_column["date"].now_value == {"type": "date", "value": "2026-02-20"}
+    assert by_column["amount"].now_value == {"type": "money", "amount": -990, "currency": "GBP"}
+    assert all(one.was == "" and one.was_value is None for one in row.snapshot)
+    assert row.summary == "Added transaction -£9.90 · in UK Savings"
+    assert row.summary_phrase["key"] == "history.line.added"
+
+
+def test_counts_reconciliations_and_undos_go_out_as_structure(
+    session, accounts, household, owner, write
+):
+    with write(BatchKind.bulk_update) as bulk:
+        rows = [
+            txn_service.create(session, account=accounts["checking"], date=JAN, amount=amount)
+            for amount in (-1_000, 5_500)
+        ]
+    with write(BatchKind.reconciled) as done:
+        reconciling.reconcile(
+            session,
+            accounts["checking"],
+            statement_date=FEB,
+            statement_balance=4_500,
+            transaction_ids=[one.id for one in rows],
+            batch_id=done.id,
+        )
+    with batch(session, kind=BatchKind.undo, actor_id=owner.id, household_id=household.id) as undone:
+        undo_batch(session, done.id, actor_id=owner.id)
+
+    many = describing.describe(session, bulk)
+    assert many.detail == "2 transactions added."
+    assert many.detail_phrase == {
+        "key": "history.detail.tally",
+        "params": {
+            "tally": {
+                "key": "history.tally.added",
+                "params": {
+                    "counts": {
+                        "type": "list",
+                        "items": [{"type": "count", "table": "transactions", "count": 2}],
+                        "sep": ", ",
+                    }
+                },
+            }
+        },
+    }
+
+    proved = describing.describe(session, done).detail_phrase
+    assert proved["key"] == "history.detail.reconciled"
+    assert proved["params"]["date"] == {"type": "date", "value": "2026-02-20"}
+    assert proved["params"]["balance"] == {"type": "money", "amount": 4_500, "currency": "EUR"}
+    assert proved["params"]["count"] == 2
+
+    reversed_ = describing.describe(session, undone)
+    assert reversed_.detail.startswith("Reversed: reconciliation — Checking proved against")
+    assert reversed_.detail_phrase["params"]["headline"] == {
+        "type": "word", "set": "headline", "key": "reconcile", "lower": True,
+    }
+    assert reversed_.detail_phrase["params"]["detail"] == proved
+    _assert_raw(reversed_.detail_phrase)
+
+
+@pytest.mark.parametrize(
+    ("template", "params", "said"),
+    [
+        ("history.import.created", {"count": 1}, "1 new transaction"),
+        ("history.import.created", {"count": 2}, "2 new transactions"),
+        ("history.detail.one_time.transactions", {"imported": 3, "linked": 0}, "3 transactions."),
+        ("history.detail.one_time.transactions", {"imported": 1, "linked": 1}, "1 transaction, 1 transfer linked."),
+        ("history.detail.one_time.changes_from", {"changes": 4, "linked": 2, "where": {"type": "name", "value": "budget.csv"}}, "4 changes, 2 transfers linked from budget.csv."),
+    ],
+)
+def test_the_english_renderer_reads_the_plurals_as_icu_does(template, params, said):
+    assert describing.english(describing.phrase(template, **params)) == said
+
+
+def test_history_over_http_carries_the_structure_beside_unchanged_english(client):
+    from tests.conftest import HEADERS
+    from tests.test_api import _household_with_accounts
+
+    world = _household_with_accounts(client)
+    house = world["household"]["id"]
+    for account, amount in ((world["checking"], -4_250), (world["card"], -1_999)):
+        made = client.post(
+            f"/api/households/{house}/transactions",
+            json={"account_id": account["id"], "date": "2026-01-15", "amount": amount, "payee_name": "Carrefour"},
+            headers=HEADERS,
+        )
+        assert made.status_code == 201, made.text
+
+    batches = client.get(f"/api/households/{house}/batches?include_single_edits=true").json()
+    assert batches and all(one["detail_phrase"] for one in batches)
+    for one in batches:
+        _assert_raw(one["detail_phrase"])
+    newest = batches[0]
+    assert newest["detail"] == "Added transaction -€19.99 · Carrefour · in Visa"
+
+    detail = client.get(f"/api/households/{house}/batches/{newest['id']}").json()
+    assert len(detail["line_phrases"]) == len(detail["lines"]) == detail["change_count"]
+    assert detail["changed_rows"][0]["summary_phrase"]["key"] == "history.line.added"
+    snapshot = {one["column"]: one for one in detail["changed_rows"][0]["snapshot"]}
+    assert snapshot["amount"]["now_value"] == {"type": "money", "amount": -1_999, "currency": "EUR"}
+
+    txn_id = next(
+        one["row_id"] for one in detail["changed_rows"] if one["table_key"] == "transactions"
+    )
+    history = client.get(f"/api/households/{house}/changes?table=transactions&row_id={txn_id}").json()
+    assert history[0]["summary"] == "Added transaction -€19.99 · Carrefour · in Visa"
+    assert history[0]["summary_phrase"]["key"] == "history.line.added"
+
+
+def _client_section(name: str) -> dict[str, str]:
+    """`historyWords.ts`: a `msg({ id, message })` table, as id -> English."""
+    import json
+    import re
+    from pathlib import Path
+
+    text = (Path(__file__).resolve().parent.parent / "client/src/lib/historyWords.ts").read_text(
+        encoding="utf-8"
+    )
+    body = text.split(f"export const {name}")[1].split("\n};")[0]
+    found = {}
+    for block in re.finditer(r'id: ("[^"]+"),\s*message:\s*((?:"(?:[^"\\]|\\.)*"\s*)+)', body):
+        found[json.loads(block.group(1))] = "".join(
+            json.loads(part) for part in re.findall(r'"(?:[^"\\]|\\.)*"', block.group(2))
+        )
+    return found
+
+
+@pytest.mark.repo_wide
+def test_the_client_has_every_sentence_and_word_in_the_servers_english():
+    """What every translation of History starts from is the server's English."""
+    assert _client_section("HISTORY_SENTENCES") == describing.SENTENCES
+    assert _client_section("HISTORY_COUNTS") == {
+        f"history.count.{table}": f"{{count, plural, one {{# {one}}} other {{# {many}}}}}"
+        for table, (one, many) in describing.NOUNS.items()
+    }
+    words = {
+        (f"history.{word_set}.{key}" if key else f"history.{word_set}"): english
+        for word_set, keyed in describing.WORDS.items()
+        for key, english in keyed.items()
+    }
+    assert _client_section("HISTORY_WORDS") == words
+    assert _client_section("HISTORY_ENUMS") == {
+        f"history.enum.{column}.{value}": english
+        for column, values in describing.ENUM_WORDS.items()
+        for value, english in values.items()
+    }

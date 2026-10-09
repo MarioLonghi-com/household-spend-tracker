@@ -107,6 +107,7 @@ def create_household(body: HouseholdCreate, session: SessionDep, user: CurrentUs
             creator=user,
             base_currency=body.base_currency,
             date_format=body.date_format,
+            locale=body.locale,
         )
     return _seen(household)
 

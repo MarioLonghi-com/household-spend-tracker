@@ -29,7 +29,7 @@ U1 is the running updater, U2 its successor. U1's journal is
 |---|---|---|
 | H1 | U2's image is on the engine at the verified digest, and verifies (the updater subject). | |
 | H2 | Create U2 as a copy of its own container (`shapes.successor`): image changed, named `<name>-next`, `--successor <id>`. Start it. | |
-| H3 | Stop taking requests; the heartbeat says `standby`. | Prove it can work: the socket, `_ping`, the project listing, a write read back in `/update`, and its own digest -- from inspecting itself -- equal to the request's. Write `ready`. |
+| H3 | Stop taking requests; the heartbeat says `standby`. | Prove it can work: the socket, `_ping`, the project listing, a write read back in `/update`, and the request's digest among its own image's digests -- from inspecting itself (#287). Write `ready`. |
 | H4 | `ready` within 60 s, its digest the verified one by U2's word and the engine's: release the lock, write `go` carrying one `ping`. | Wait for `go`. |
 | H5 | | Rename U1 to `<name>-previous` (removing an older `-previous`), itself to `<name>`, take the lock, pin its image, take the apply's journal over (2a), answer U1's ping, write the heartbeat as `current`. |
 | H6 | Standby for 10 minutes: U2's heartbeat fresh and U2 running, else take back over -- or stand down, if another container now holds the name. | |
@@ -51,6 +51,13 @@ then resumed from its journal by U1 (`Apply.resume`): still at 2a, U1 owns it
 again and carries on from step 3; at step 3 or later, older code never carries
 a newer updater's apply forward (`carry_forward=False`), so it follows 5.6's
 branch for the step reached -- the previous container back, or the rollback.
+
+**A gap during the standby (#288).** A laptop closed, or a machine shut down,
+inside the ten minutes stops both updaters. The standby counts a heartbeat's
+silence from the later of the beat and its own return -- a restart into the
+standby, or the end of a gap its clock saw (`resumed_at`) -- and a successor
+not running yet has as long to start again. The ten minutes count only the
+time it ran (8.6).
 
 **Standing down (#259).** A `compose up` during the standby can replace U2:
 compose removes it and starts a new container under the canonical name.
@@ -256,12 +263,79 @@ def goes_first(me: Owner, successor: Owner, window: tuple[int, int] | None, app_
 def is_me(me: Owner, successor: Owner) -> bool:
     """The successor is this updater: the same image, by digest (#258).
 
-    The digest is an updater's identity, not its version: an image rebuilt at
+    The image is an updater's identity, not its version: an image rebuilt at
     the same version is a different updater and is still handed over to, and
     one already on the target's image never hands over to a copy of itself --
-    which would evict the `-previous` a take-back needs.
+    which would evict the `-previous` a take-back needs. Any digest of its
+    image will do (#287): the target names the index, and Podman lists the
+    platform manifest's digest beside it.
     """
-    return bool(me.image_digest) and me.image_digest == successor.image_digest
+    return bool(me.ids & successor.ids)
+
+
+def own_digests(image: Mapping | None) -> tuple[str, ...]:
+    """Every digest an updater image carries for the updater repository, in the engine's order.
+
+    All of them, not one (#287): pulled by the digest of a multi-arch index,
+    Podman records the index digest and the platform manifest's digest, and
+    0.9.2 took the last one for its own -- the platform's, which no release
+    publishes and no pin names.
+    """
+    found: list[str] = []
+    for ref in (image or {}).get("RepoDigests") or []:
+        m = eng.IMAGE_BY_DIGEST.fullmatch(ref) if isinstance(ref, str) else None
+        if m and m.group(1) == UPDATER_REPOSITORY and m.group(2) not in found:
+            found.append(m.group(2))
+    return tuple(found)
+
+
+def digest_named(ref: object) -> str | None:
+    """The digest an updater image reference names -- `<repo>@<digest>` or
+    `<repo>:<version>@<digest>`, as a pin or the bundle's compose file writes it -- or None."""
+    m = re.fullmatch(
+        rf"{re.escape(UPDATER_REPOSITORY)}(?::[A-Za-z0-9_.-]+)?@(sha256:[0-9a-f]{{64}})", str(ref or "")
+    )
+    return m.group(1) if m else None
+
+
+def pinned_digest(project_dir: os.PathLike | None) -> str | None:
+    """The digest the pin in `.env` names for the updater, or None."""
+    if project_dir is None:
+        return None
+    try:
+        return digest_named(pin.read(project_dir).get(pin.UPDATER_KEY))  # type: ignore[arg-type]
+    except (OSError, ValueError):
+        return None
+
+
+def identity_of(image: Mapping | None, seen: Mapping | None, version: str, container: str) -> Owner:
+    """An updater from its own image and container: every digest its image
+    carries (`own_digests`), written as the one its container was created
+    from when that names one -- the bundle's compose file names the index --
+    else the engine's first. `known_as` may prefer another of them."""
+    digests = own_digests(image)
+    first = digests[0] if digests else ""
+    me = Owner(image_digest=first, version=version, container=container, digests=digests)
+    return me.preferring(digest_named(((seen or {}).get("Config") or {}).get("Image")))
+
+
+def known_as(
+    me: Owner, vol: volume.Volume, project_dir: os.PathLike | None, successor_of: str | None
+) -> Owner:
+    """Which of its image's digests this updater writes as its own (#287).
+
+    The engine cannot say which `RepoDigests` entry is the index: so the one
+    it was started for, when it is a successor (the handover's verified
+    digest); else the one the pin names; else the one `identity_of` chose.
+    Whichever it is, its identity stays every digest it carries (`Owner.ids`).
+    """
+    expected = None
+    if successor_of and contract.is_uuid4(successor_of):
+        # Unreadable, it decides nothing here: the self-check reads it again.
+        with contextlib.suppress(OSError, ValueError, volume.UnsafeFile):
+            succ = Owner.from_dict((load(vol, successor_of) or {}).get("successor"))
+            expected = succ.image_digest if succ else None
+    return me.preferring(expected, pinned_digest(project_dir))
 
 
 def stays_newer(me: Owner, target_version: str) -> bool:
@@ -453,6 +527,8 @@ class Successions:
         self._saved_at = 0.0
         #: H6: when U2's container was first seen not running.
         self._gone_since: float | None = None
+        #: When this process found itself on standby at its start (#288).
+        self._resumed: float | None = None
 
     # ------------------------------------------------------------------ #
 
@@ -613,6 +689,8 @@ class Successions:
                 self._record_success(doc)
                 self.mode = Mode.STANDBY
                 self.watching = rid
+                # Restarted into the standby -- by a reboot, say (#288).
+                self._resumed = self.now()
 
     def tick(self) -> None:
         if self.mode == Mode.STANDBY:
@@ -761,6 +839,8 @@ class Successions:
         version = successor.version
         if ready.get("ok") is not True:
             return f"the updater of {version} failed its own check: {ready.get('problem') or 'no reason given'}"
+        # A successor whose image carries the verified digest answers with
+        # it, whatever else its image carries (#287).
         if ready.get("image_digest") != successor.image_digest:
             return (
                 f"the updater of {version} reported a different image of itself "
@@ -868,12 +948,29 @@ class Successions:
             return None
         return hid
 
+    def resumed_at(self) -> float | None:
+        """When the standby last came back: restarted into it, or the end of the last gap its clock saw.
+
+        The standby's watch counts from here (#288). A machine shut down or
+        asleep during the standby stops both updaters; on the way back the
+        successor's last heartbeat is as old as the time the machine was
+        away, which is not silence -- the successor was away too. None when
+        it has watched without a break.
+        """
+        gaps = self.kit.clock.gaps
+        found = [t for t in (self._resumed, gaps[-1].noticed_at if gaps else None) if t is not None]
+        return max(found) if found else None
+
     def _successor_problem(self, doc: dict) -> str | None:
         beat = self._beat()
         if not successor_is_current(doc, beat):
             return "stopped writing its heartbeat"
+        resumed = self.resumed_at()
         try:
-            age = self.now() - contract.parse_iso(str((beat or {}).get("seen_at")))
+            # Silence counts from the later of its last heartbeat and this
+            # updater's own return (#288): a gap is not a failure (8.6).
+            seen = contract.parse_iso(str((beat or {}).get("seen_at")))
+            age = self.now() - (seen if resumed is None else max(seen, resumed))
         except ValueError:
             return "wrote a heartbeat the updater cannot read"
         if age > STALE_SECONDS:
@@ -881,6 +978,12 @@ class Successions:
         found = self._by_id(doc.get("successor_id"))
         if survey.running(found):
             self._gone_since = None
+            return None
+        if resumed is not None and self.now() - resumed < STALE_SECONDS:
+            # Just back from a gap or a restart (#288): the successor may be
+            # restarting by its own restart policy, which on a machine just
+            # booted takes longer than a replacement's grace. It has as long
+            # as a silent heartbeat would.
             return None
         # Not the container H2 made. H6 watches U2's heartbeat, and it is
         # fresh: if another container of the project runs U2's image, compose
@@ -1138,12 +1241,18 @@ class Successions:
             except (OSError, volume.UnsafeFile) as e:
                 problem = f"it cannot write in the update volume ({e})"
         expected = (Owner.from_dict(doc.get("successor")) or Owner("", "", "")).image_digest
-        if problem is None and self.me.image_digest != expected:
-            problem = f"it runs {self.me.image_digest[:19] or 'an unknown image'}, not {expected[:19]}"
+        if self.me.carries(expected):
+            # Its image carries the verified digest -- perhaps beside the
+            # platform manifest's (#287): that is the digest it answers with.
+            self.me = self.me.preferring(expected)
+        elif problem is None:
+            runs = " or ".join(d[:19] for d in sorted(self.me.ids)) or "an unknown image"
+            problem = f"it runs {runs}, not {expected[:19]}"
         return {
             "ok": problem is None,
             "problem": problem,
             "image_digest": self.me.image_digest,
+            "image_digests": sorted(self.me.ids),
             "version": self.me.version,
             "container": self.own_id,
         }

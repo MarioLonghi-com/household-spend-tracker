@@ -239,6 +239,7 @@ def create_household(
             base_currency=body.base_currency,
             date_format=body.date_format,
             members=body.member_ids,
+            locale=body.locale,
         )
     model = AdminHouseholdOut.model_validate(household)
     model.member_ids = [
