@@ -2,7 +2,9 @@ Spend Tracker @VERSION@ -- on this computer
 ==========================================
 
 1. Install Docker Desktop (https://www.docker.com/products/docker-desktop/)
-   or Podman Desktop (https://podman-desktop.io/), and start it.
+   or Podman Desktop (https://podman-desktop.io/), and start it. With both
+   installed, the launcher uses the one Spend Tracker is already in, or else
+   the one that is running.
 2. Unzip this folder somewhere you will keep it, such as your Documents.
    Keep the folder: it holds the settings Spend Tracker is started with.
 3. Double-click the launcher for your system:

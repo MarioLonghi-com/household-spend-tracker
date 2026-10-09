@@ -49,8 +49,19 @@ def identify(
 
     Its digest comes from its own image's `RepoDigests`, read by image id (R27).
     Outside a container -- the CI job runs it as a process -- it is unnamed.
+
+    It is running, so the running-only listing finds it when the full one
+    fails: a container whose storage a power cut took makes the engine refuse
+    every `all=1` listing it is in, and an updater that died on that here was
+    restarted 830 times (#262).
     """
-    own = detect.find_own_container(client.containers(), mountinfo, hostname)
+    try:
+        listing = client.containers()
+    except eng.EngineError as e:
+        if e.status < 500:
+            raise
+        listing = client.containers(running_only=True)
+    own = detect.find_own_container(listing, mountinfo, hostname)
     if own is None:
         return Owner(image_digest="", version="0.0.0", container=""), None
     name = detect.container_name(own)
@@ -124,6 +135,7 @@ def serve(args: argparse.Namespace, trust: Trust) -> None:
         hook=hook.configured(kit.site.hook_dir) is not None,
         busy=lambda: service.busy or handover.mode != "current",
         role=lambda: service.heartbeat_role,
+        problem=lambda: service.problem,
     )
     if isinstance(handover, Successions):
         handover.on_beat = lambda: beat.tick(time.time())

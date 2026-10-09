@@ -21,7 +21,9 @@
  * while the updater prepares, and, once *Update* is pressed, the full-width
  * panel below watches on its own -- the update state every two seconds while
  * the app answers, then `/api/health` every three once it has stopped, keeping
- * the last progress it saw, and reloading when the app is back.
+ * the last progress it saw, and loading `/?open=application#updates` when the
+ * app is back, so the page opens on this section and its outcome rather than
+ * on the register.
  *
  * **The Update button needs every box**: one per migration a downgrade cannot
  * undo (an undeclared one counts), *I have saved the recovery code*, and the
@@ -100,6 +102,8 @@ export interface Heartbeat {
   engine_api: string | null;
   container: string | null;
   socket_sentence: string | null;
+  /** Why the updater cannot go on, in its own sentence (#262). Absent from older updaters. */
+  problem?: string | null;
 }
 
 export interface UpdateStatus {
@@ -297,6 +301,19 @@ function saveText(name: string, text: string): void {
 // The section
 // --------------------------------------------------------------------------- //
 
+/**
+ * Where the page goes once the app is back after an update or a rollback: a
+ * fresh load -- the new version's client, not this one -- opened on
+ * Application management, where the outcome is. A bare reload landed on the
+ * register, because the shell keeps its screen in memory only, and the owner
+ * never saw whether the update worked or was rolled back. `#updates` scrolls
+ * this section into view there. `App.tsx` reads both and puts the address
+ * back to `/`.
+ */
+export function backToThisScreen(): void {
+  window.location.assign("/?open=application#updates");
+}
+
 export function Updates({
   repository,
   commit,
@@ -305,7 +322,7 @@ export function Updates({
   repository: string;
   /** The commit this process runs, for "Running now". */
   commit: string | null;
-  /** What to do when the app is back after an update. A reload, but for tests. */
+  /** What to do when the app is back after an update. `backToThisScreen`, but for tests. */
   onBack?: () => void;
 }) {
   const client = useQueryClient();
@@ -380,13 +397,18 @@ export function Updates({
         onReplaceUpdater={() => replaceUpdater.mutate()}
         replacing={replaceUpdater.isPending}
       />
+      {beat?.problem ? (
+        <div className="banner warn" data-problem="updater">
+          {beat.problem}
+        </div>
+      ) : null}
       <Problem error={replaceUpdater.error ?? updaterOnly.error ?? prepare.error} />
 
       {applyInFlight ? (
         <Updating
           toVersion={applying ?? it.report?.to_version ?? null}
           initial={busy?.sentences ?? []}
-          onBack={onBack ?? (() => window.location.reload())}
+          onBack={onBack ?? backToThisScreen}
         />
       ) : it.in_flight ? (
         <InFlight status={busy} toVersion={lastPrepared} />
@@ -1149,7 +1171,8 @@ type Phase = "up" | "away";
  * and shows the updater's sentences. When the app stops answering, it polls
  * `/api/health` every three seconds, keeping the last sentences it saw. When
  * the app answers again -- or the update ended without stopping it -- the page
- * reloads and the section opens with the outcome. After 30 minutes away it
+ * loads again on Application management (`backToThisScreen`), where the
+ * section opens with the outcome. After 30 minutes away it
  * says so and points at the recovery page, and keeps waiting.
  *
  * Plain `fetch` rather than `api`: a maintenance page answering for the app

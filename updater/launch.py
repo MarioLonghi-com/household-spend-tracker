@@ -4,8 +4,10 @@ The launchers -- `Start Spend Tracker.command`, `Start Spend Tracker.bat` and
 `start-spend-tracker.sh`, in `deploy/bundle/` -- stay thin. They keep only what
 has to happen on the host: finding `docker compose` or `podman compose`, the
 socket's path, `podman-restart`, lingering and `chgrp`. Everything that is a
-decision is here, in one dialect, with tests: they run **the bundle's own
-updater image** once,
+decision is here, in one dialect, with tests. Which engine to use is the one
+decision taken before any container can run, so the launchers carry it
+themselves, and `pick_engine` is the rule they are tested against (#264).
+Then they run **the bundle's own updater image** once,
 
     <engine> run --rm --network none --user 0:0 --security-opt label=disable \\
         -v <socket>:/run/engine.sock -v "$PWD:/project" [-v <previous>:/previous:ro] \\
@@ -31,6 +33,12 @@ and this module
    same thing;
 5. prints what the launcher still has to do on the host, one `KEY=value` per
    line (`ANSWER_KEYS`), and the sentences to show (`SAY=`).
+
+Before writing anything it makes sure the project's containers can be listed
+(`clear_broken`, #262): a container whose storage a power cut took makes the
+engine refuse every listing it is in, and compose with it. One of the
+updater's own one-offs in that state is removed; anything else stops the
+launcher with a sentence naming the container to remove.
 
 It runs as in-container root, which reaches the socket on every engine (S18,
 S21) -- and which on a rootful Linux engine is the host's root. So the `.env`
@@ -88,6 +96,97 @@ STOPS = frozenset(
 _REF = re.compile(
     r"(?P<repo>[^@:]+(?::[0-9]+)?(?:/[^@:]+)*)(?::(?P<tag>[^@]+))?(?:@(?P<digest>sha256:[0-9a-f]{64}))?"
 )
+
+
+# --------------------------------------------------------------------------- #
+# Which engine (#264)
+# --------------------------------------------------------------------------- #
+
+#: What a launcher finds of one engine on the host, worst to best:
+#: `none` -- no CLI with `compose`; `installed` -- `<engine> info` fails;
+#: `denied` -- it fails with "permission denied"; `answers` -- `info`
+#: works; `project` -- and `ps -aq --filter
+#: label=com.docker.compose.project=spend-tracker` lists something.
+ENGINE_STATES = ("none", "installed", "denied", "answers", "project")
+#: The order a tie is settled in.
+ENGINES = (("docker", "Docker"), ("podman", "Podman"))
+
+NOT_FOUND = (
+    "Spend Tracker runs in Docker Desktop or Podman Desktop, and neither was found. "
+    "Install one, start it, then open this launcher again."
+)
+NOT_RUNNING = (
+    "{product} is installed but not running. Start it, wait until it says it is running, "
+    "then open this launcher again."
+)
+NEITHER_RUNNING = (
+    "Docker and Podman are both installed, and neither is running. Start the one Spend Tracker "
+    "uses, wait until it says it is running, then open this launcher again."
+)
+DENIED = (
+    "Your user cannot reach Docker's socket. Add it to the docker group "
+    "(sudo usermod -aG docker {user}), log out and back in, then run this again."
+)
+IN_BOTH = "Spend Tracker is installed in both Docker and Podman; this starts the one in Docker."
+UNCHECKED = (
+    "{other} is installed but not running, so whether Spend Tracker is already installed there "
+    "was not checked; this starts it in {chosen}."
+)
+
+
+@dataclass(frozen=True)
+class EnginePick:
+    """The engine a launcher uses, or the sentence it stops with; and what it says on the way."""
+
+    engine: str | None
+    product: str | None
+    says: tuple[str, ...] = ()
+    stop: str | None = None
+
+
+def pick_engine(docker: str, podman: str, user: str = "$(id -un)") -> EnginePick:
+    """The launchers' engine rule (#264), on what each engine's CLI answered.
+
+    1. An engine that already holds the project -- its containers carry
+       `com.docker.compose.project=spend-tracker` -- is the one; Docker if
+       both do.
+    2. Otherwise an engine that answers `info`, Docker first.
+    3. Neither answers: say which are installed, and that one must be started.
+
+    `docker compose version` reads only the client, so a Docker CLI on the
+    PATH -- Docker Desktop installed but stopped, or Homebrew's `docker` --
+    used to win over a Podman machine that was running.
+
+    `start-spend-tracker.sh` and `Start Spend Tracker.bat` carry this rule
+    in their own dialects; `tests/test_launcher_engine.py` runs the first
+    against it, state by state, and holds the second to its sentences.
+    """
+    states = {"docker": docker, "podman": podman}
+    for name, state in states.items():
+        if state not in ENGINE_STATES:
+            raise ValueError(f"{name}: {state!r}")
+    product = dict(ENGINES)
+    other = {"docker": "podman", "podman": "docker"}
+
+    for wanted in ("project", "answers"):
+        for name, _ in ENGINES:
+            if states[name] != wanted:
+                continue
+            says: list[str] = []
+            if wanted == "project" and states[other[name]] == "project":
+                says.append(IN_BOTH)
+            if wanted == "answers" and states[other[name]] in ("installed", "denied"):
+                says.append(UNCHECKED.format(other=product[other[name]], chosen=product[name]))
+            return EnginePick(name, product[name], tuple(says))
+
+    if docker == "denied":
+        return EnginePick(None, None, stop=DENIED.format(user=user))
+    present = [name for name, _ in ENGINES if states[name] != "none"]
+    if len(present) == 2:
+        return EnginePick(None, None, stop=NEITHER_RUNNING)
+    if present:
+        return EnginePick(None, None, stop=NOT_RUNNING.format(product=product[present[0]]))
+    return EnginePick(None, None, stop=NOT_FOUND)
 
 
 # --------------------------------------------------------------------------- #
@@ -189,6 +288,70 @@ def project_compose(client: eng.EngineClient) -> str | None:
         return compose_of(client.containers())
     except (eng.EngineError, eng.EngineUnavailable, eng.NotAllowed, OSError):
         return None
+
+
+# --------------------------------------------------------------------------- #
+# Containers the engine cannot list (#262)
+# --------------------------------------------------------------------------- #
+
+#: A container id in the engine's message, e.g. `getting graph driver info "<id>": …`.
+_BROKEN_ID = re.compile(r"\b([0-9a-f]{64})\b")
+#: More broken one-offs than this in one project is not a power cut to tidy up after.
+MAX_BROKEN = 10
+
+
+def clear_broken(client: eng.EngineClient, engine: str | None) -> tuple[bool, list[str]]:
+    """Whether the project's containers can be listed now, and the sentences to say.
+
+    While the full listing fails with a 500 that names a container, that
+    container is force-removed if it is one of the updater's own one-offs
+    (`EngineClient.remove_broken_oneoff` checks, by the engine's own filters);
+    otherwise the launcher stops, saying which container to remove. Any other
+    answer -- the listing works, or the engine is not reachable or not
+    allowed to be asked -- is not this function's to judge.
+    """
+    said: list[str] = []
+    command = "podman" if (engine or "").startswith("podman") else "docker"
+    try:
+        if client.negotiated is None:
+            client.negotiate()
+    except (eng.EngineError, eng.EngineUnavailable, OSError):
+        return True, said
+    for _ in range(MAX_BROKEN + 1):
+        try:
+            client.containers()
+            return True, said
+        except (eng.EngineUnavailable, eng.NotAllowed, OSError):
+            return True, said
+        except eng.EngineError as e:
+            if e.status < 500:
+                return True, said
+            found = _BROKEN_ID.search(e.message)
+            if found is None:
+                said.append(
+                    "The container engine will not list Spend Tracker's containers "
+                    f"({e.message}). Find the container it names with `{command} ps -a`, remove it "
+                    f"with `{command} rm -f` and its name, then open this launcher again."
+                )
+                return False, said
+            cid = found.group(1)
+            try:
+                removed = client.remove_broken_oneoff(cid)
+            except (eng.EngineError, eng.NotAllowed):
+                removed = False
+            if not removed:
+                said.append(
+                    f"The container engine has lost the files of container {cid[:12]}, so it will not "
+                    f"list Spend Tracker's containers ({e.message}). Remove it with "
+                    f"`{command} rm -f {cid}`, then open this launcher again."
+                )
+                return False, said
+            said.append(
+                f"Removed container {cid[:12]}, one of the updater's own temporary containers, "
+                "whose files the container engine had lost."
+            )
+    said.append(f"More than {MAX_BROKEN} of Spend Tracker's containers have lost their files.")
+    return False, said
 
 
 # --------------------------------------------------------------------------- #
@@ -326,6 +489,10 @@ def run(args: argparse.Namespace, detection: detect.Detection | None = None) -> 
     except (KeyError, ValueError) as e:
         return 2, answer([("SAY", f"This container engine cannot run Spend Tracker's updater: {e}.")])
 
+    listable, cleared = clear_broken(client, detection.engine)
+    if not listable:
+        return 2, answer([("SAY", s) for s in cleared])
+
     project = Path(args.project)
     previous = Path(args.previous) if args.previous and Path(args.previous).is_dir() else None
     choice = choose(find_pin(project, previous), args.bundle_app, args.bundle_updater)
@@ -351,6 +518,7 @@ def run(args: argparse.Namespace, detection: detect.Detection | None = None) -> 
     ]
     if detection.sentence:
         lines.append(("SAY", detection.sentence))
+    lines += [("SAY", s) for s in cleared]
     lines += [("SAY", s) for s in choice.sentences]
     return 0, answer(lines)
 

@@ -10,7 +10,8 @@
  * lossy set and the code it was shown (A8); every outcome renders (A9); the
  * recovery code is asked for with a POST (R21); and the update panel, once
  * the app has gone, polls `/api/health`, says "not back yet" at 30 minutes
- * with the recovery link, and reloads when the app answers.
+ * with the recovery link, and, when the app answers, loads the page again on
+ * Application management, where the outcome is.
  */
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ vi.mock("../lib/api", () => ({
 
 import { api } from "../lib/api";
 import {
+  APPLY_POLL_MS,
   HEALTH_POLL_MS,
   NOT_BACK_AFTER_MS,
   OutcomeBlock,
@@ -221,6 +223,20 @@ describe("A5: what the section says in each case", () => {
     expect(said.textContent).toContain("replacing the compose bundle");
     await checkNow();
     expect(screen.queryByRole("button", { name: /^Prepare/ })).toBeNull();
+  });
+
+  it("an updater that cannot go on says why, in its own sentence (#262)", async () => {
+    const why =
+      "The updater cannot go on: the container engine will not list this installation's containers (getting graph driver info).";
+    mount(state({ heartbeat: beat({ problem: why }) }));
+    const said = await screen.findByText(why);
+    expect(said.getAttribute("data-problem")).toBe("updater");
+  });
+
+  it("an updater that can go on says no problem (#262)", async () => {
+    mount(state({ heartbeat: beat({ problem: null }) }));
+    await screen.findByText((_, node) => node?.getAttribute("data-case") === "working");
+    expect(document.querySelector("[data-problem]")).toBeNull();
   });
 
   it("outdated: names the engine and the updater, and Update the updater asks for the newest one", async () => {
@@ -577,6 +593,45 @@ describe("updating", () => {
       await vi.advanceTimersByTimeAsync(HEALTH_POLL_MS);
     });
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("once the app is back, opens Application management rather than reloading onto the register", async () => {
+    // A bare reload landed on the register, because the shell holds its
+    // screen in memory only, and the owner never saw the outcome.
+    const assign = vi.fn();
+    const reload = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign, reload });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url === "/api/admin/application/update")
+          return new Response(JSON.stringify(state({ in_flight: false })), { status: 200 });
+        throw new TypeError(`unexpected fetch ${url}`);
+      }),
+    );
+    get.mockImplementation(async () =>
+      state({
+        in_flight: true,
+        status: { state: "running", id: "a", kind: "apply", step: "2", sentences: [], updated_at: null },
+      }),
+    );
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <Updates repository="https://github.com/Example/spend-tracker" commit="987afef00000" />
+      </QueryClientProvider>,
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(screen.getByRole("dialog", { name: "Updating" })).toBeTruthy();
+    expect(assign).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(APPLY_POLL_MS);
+    });
+    expect(assign.mock.calls).toEqual([["/?open=application#updates"]]);
+    expect(reload).not.toHaveBeenCalled();
   });
 
   it("while the app still answers, it shows the updater's sentences", async () => {

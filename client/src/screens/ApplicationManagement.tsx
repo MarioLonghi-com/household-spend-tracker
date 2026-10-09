@@ -26,7 +26,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsFetching, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { Empty, Hint, Problem, SortHeading, sortRows, useSort } from "../components/bits";
 import { bytes } from "../lib/bytes";
@@ -148,12 +148,62 @@ interface Instance {
 
 const count = (n: number) => formatCount(n);
 
-export function ApplicationManagement() {
+/**
+ * Scroll `target` to the top, and for the next few frames scroll it back
+ * whenever it has moved. The rows of every table skip layout while off screen
+ * (`content-visibility: auto` in styles.css) and stand in at a guessed
+ * height; on a phone the backups lists above the Updates section took their
+ * real height a frame after the scroll and pushed it back below the fold.
+ */
+function bringIntoView(target: HTMLElement, frames = 20): void {
+  target.scrollIntoView({ block: "start" });
+  let settled = target.getBoundingClientRect().top;
+  let left = frames;
+  const watch = () => {
+    if (!target.isConnected || --left < 0) return;
+    if (target.getBoundingClientRect().top !== settled) {
+      target.scrollIntoView({ block: "start" });
+      settled = target.getBoundingClientRect().top;
+    }
+    requestAnimationFrame(watch);
+  };
+  requestAnimationFrame(watch);
+}
+
+export function ApplicationManagement({
+  section = null,
+  onSectionShown,
+}: {
+  /**
+   * A section to scroll into view once the screen has drawn: `updates` when
+   * the page was opened by the Updating panel after an update or a rollback,
+   * so its outcome is seen without scrolling. Null on a visit from the menu.
+   */
+  section?: "updates" | null;
+  /** Called once it has scrolled, so it happens once. */
+  onSectionShown?: () => void;
+} = {}) {
   const client = useQueryClient();
   const it = useQuery({
     queryKey: ["application"],
     queryFn: () => api.get<Instance>("/admin/application"),
   });
+  const shown = useRef(onSectionShown);
+  shown.current = onSectionShown;
+  // Not as soon as the instance arrives: the logs, the backups and the
+  // update state load after it, and the backups above the section pushed it
+  // back below the fold. So once nothing on the page is still being fetched
+  // -- asked of the client here rather than from the render's count, because
+  // the sections start their requests in the same commit.
+  const drawn = Boolean(it.data);
+  const fetching = useIsFetching();
+  useEffect(() => {
+    if (section !== "updates" || !drawn) return;
+    if (client.isFetching() > 0) return;
+    const target = document.getElementById("updates");
+    if (target) bringIntoView(target);
+    shown.current?.();
+  }, [section, drawn, fetching, client]);
 
   const refresh = () => client.invalidateQueries({ queryKey: ["application"] });
 
@@ -639,7 +689,7 @@ function Operations({ me }: { me: Instance }) {
   // What used to be *Is there a newer version?*, grown into the owner's side
   // of the self-updater (#166). Everything it says and does is in Updates.tsx.
   return (
-    <section className="card" aria-labelledby="updates-title">
+    <section className="card" id="updates" aria-labelledby="updates-title">
       <h2 className="section-title" id="updates-title">
         <Trans comment="Heading on the Application management screen: new versions and installing them">
           Updates
