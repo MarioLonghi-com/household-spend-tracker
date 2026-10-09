@@ -41,6 +41,13 @@ msgstr "Sempre usar minha escolha"
 msgid "Mentions"
 msgstr "Menções"
 
+#. Button shown while reviewing a draft language: propose better words for one message
+#. Title of the panel where a reviewer proposes better words for one message
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Suggest a better wording"
+msgstr "Sugerir uma redação melhor"
+
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -627,12 +634,15 @@ msgstr "Mais moedas"
 msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 msgstr "{unloaded, plural, one {Mostrando {0} — falta carregar {1} linha — mostrar mais} other {Mostrando {2} — faltam carregar {3} linhas — mostrar mais}}"
 
+#. Column heading on Application management's suggestions: when it was suggested
 #. Column heading on the Admin screen: noun, the time
 #. Column heading on the History screen: noun, the time
+#. Column name shown beside a value on phones on Application management's suggestions
 #. Column name shown beside a value on phones on the History screen: noun, the time
 #. Name of a fact on the History screen: noun, the time
 #: src/screens/Admin.tsx
 #: src/screens/History.tsx
+#: src/screens/TranslationReview.tsx
 #, fuzzy
 msgid "When"
 msgstr "Quando"
@@ -1213,6 +1223,13 @@ msgstr "Entendo que <0>{revision}</0> não pode ser desfeita a não ser pelo bac
 msgid "the file <0>{0}</0>"
 msgstr "o arquivo <0>{0}</0>"
 
+#. Application management: how many suggestions are waiting and how many are in the catalogs
+#. placeholder {0}: rows.length - open
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "{open} open, {0} applied."
+msgstr "{open} em aberto, {0} aplicadas."
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "The type and currency are fixed once an account exists, because every transaction on it is recorded in that currency."
@@ -1736,6 +1753,7 @@ msgid "New"
 msgstr "Nova"
 
 #. Hidden column heading over row buttons
+#. Screen-reader name on Application management's suggestions
 #. Screen-reader name on the Accounts screen
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Payees screen
@@ -1749,6 +1767,7 @@ msgstr "Nova"
 #: src/screens/Payees.tsx
 #: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
+#: src/screens/TranslationReview.tsx
 #, fuzzy
 msgid "Actions"
 msgstr "Ações"
@@ -2132,6 +2151,12 @@ msgstr "Tudo o que você muda aqui fica registrado e pode ser revertido na tela 
 msgid "Undo"
 msgstr "Desfazer"
 
+#. Review mode: the suggestion was saved
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Saved. It is in the next download of suggestions, on Application management."
+msgstr "Salva. Ela entra no próximo download de sugestões, em Gerenciamento do aplicativo."
+
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -2230,6 +2255,12 @@ msgstr "Nenhuma ainda"
 #, fuzzy
 msgid "{0, plural, one {Its {1} row is left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
 msgstr "{0, plural, one {A {1} linha dela fica de fora e aparece no relatório.} other {As {2} linhas dela ficam de fora e aparecem no relatório.}}"
+
+#. Review mode: the suggestion lost a placeholder or a tag; the two examples are written as they are
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Keep every placeholder and tag the English has, like <0>{placeholder}</0> or <1>{tag}</1>: they are where names, numbers and links go."
+msgstr "Mantenha todos os marcadores e tags que o inglês tem, como <0>{placeholder}</0> ou <1>{tag}</1>: é onde entram nomes, números e links."
 
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -2431,6 +2462,12 @@ msgstr "Novo nome para {0}"
 #, fuzzy
 msgid "Sum"
 msgstr "Soma"
+
+#. Label of the search box in review mode: find a message by its words
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Find the message, in English or as it reads now"
+msgstr "Encontre a mensagem, em inglês ou como está agora"
 
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -2870,6 +2907,12 @@ msgstr "Qual plano importar"
 msgid "This writes the ledger's own values into a file in plain text. Turn it off when you are done."
 msgstr "Isto grava os próprios valores do livro-caixa num arquivo em texto simples. Desative quando terminar."
 
+#. Review mode: label of the draft translation as it reads now
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Now"
+msgstr "Agora"
+
 #. Label on the household page
 #: src/screens/Household.tsx
 #, fuzzy
@@ -2935,6 +2978,12 @@ msgstr "Selecionar todas as linhas pendentes"
 msgid "not saved — leave the field to try again"
 msgstr "não salvo — saia do campo para tentar de novo"
 
+#. Review mode: label of an optional note explaining the suggestion
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Why, if it helps (optional)"
+msgstr "Por quê, se ajudar (opcional)"
+
 #: src/screens/Reconcile.tsx
 #, fuzzy
 msgid "The bank says there is more than you have ticked — a payment in you have not entered?"
@@ -2950,6 +2999,7 @@ msgstr "Isso não é um valor"
 msgid "Yes, revoke it"
 msgstr "Sim, revogar"
 
+#. Button on Application management: delete this suggestion
 #. Button on the Backups screen: verb
 #. Button on the Categories screen: verb
 #. Button on the Register screen: verb
@@ -2961,6 +3011,7 @@ msgstr "Sim, revogar"
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #: src/screens/Rules.tsx
+#: src/screens/TranslationReview.tsx
 #, fuzzy
 msgid "Delete"
 msgstr "Excluir"
@@ -3546,6 +3597,12 @@ msgstr "Não precisa de categoria"
 msgid "not counted"
 msgstr "não contado"
 
+#. Application management: how to send the suggestions on; the links follow
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Download the open suggestions for <0>scripts/apply_translation_suggestions.py</0>:"
+msgstr "Baixe as sugestões em aberto para <0>scripts/apply_translation_suggestions.py</0>:"
+
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
 msgid "Close the import? Everything chosen so far will be lost."
@@ -3635,6 +3692,153 @@ msgstr "Nenhum pagamento vinculado ainda."
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.account_import.column_twice"
+msgstr "Este arquivo tem a coluna {column} duas vezes"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.missing_column"
+msgstr "Este arquivo não tem a coluna {columns}, e toda conta precisa dela. A primeira linha deve nomear as colunas, como faz o modelo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.no_accounts"
+msgstr "Não há contas neste arquivo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.not_csv"
+msgstr "A linha {line} deste arquivo não pode ser lida como CSV. Salve-o de novo como CSV na planilha, ou comece pelo modelo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.rows_refused"
+msgstr "{refused} de {rows, plural, one {# linha} other {# linhas}} não podem ser importadas, então nenhuma foi. Nada foi alterado; corrija o arquivo e tente de novo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.too_many_rows"
+msgstr "Este arquivo tem mais de {max} contas, o que é mais do que uma casa tem -- pode ser um extrato em vez de uma lista de contas"
+
+#. {columns} and {known} are column names, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.account_import.unknown_column"
+msgstr "Este arquivo tem uma coluna desconhecida: {columns}. As colunas são {known} -- baixe o modelo para começar por elas."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.lifetime"
+msgstr "Uma chave pode durar entre um dia e {max_days} dias"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.needs_label"
+msgstr "Dê um nome à chave, para saber para que ela serve"
+
+#. A key for a program. See GLOSSARY.md (Keys for programs)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.not_found"
+msgstr "Essa chave não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.not_issuer"
+msgstr "Só quem emitiu uma chave pode revogá-la"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.read_only_commit"
+msgstr "Uma chave somente leitura não tem nada a aplicar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.authenticator_cleared"
+msgstr "O aplicativo autenticador desta conta foi redefinido, então não há código para informar. Use o link de redefinição que você recebeu para cadastrar um novo, ou peça um novo link a um proprietário."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.code_wrong"
+msgstr "Esse código não está certo, ou já foi usado"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.new_code_wrong"
+msgstr "Esse código não está certo. Confira a hora do seu celular e tente de novo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.owner_only"
+msgstr "Só o proprietário pode fazer isso"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.recovery_code_wrong"
+msgstr "Esse código de recuperação não está certo, ou já foi usado"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.refused"
+msgstr "Esse e-mail e essa senha não correspondem"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.secret_unreadable"
+msgstr "Esse segredo do aplicativo autenticador não pode ser lido com a chave deste servidor"
+
+#. Refusal when the session has ended or never began
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.sign_in_first"
+msgstr "Entre primeiro"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.start_again"
+msgstr "Comece de novo pela página de entrada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.too_many_attempts"
+msgstr "Tentativas demais. Tente de novo em {seconds, plural, one {# segundo} other {# segundos}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.too_many_for_account"
+msgstr "Tentativas demais para esta conta. Tente de novo em {seconds, plural, one {# segundo} other {# segundos}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.auth.too_many_from_here"
+msgstr "Tentativas demais a partir daqui. Tente de novo em {seconds, plural, one {# segundo} other {# segundos}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.backup.protected"
 msgstr "{name} é um dos cinco backups de atualização mais recentes. Eles são mantidos para que uma atualização possa ser desfeita, e o atualizador remove os mais antigos sozinho"
 
@@ -3713,6 +3917,200 @@ msgstr "{code} não é um código de moeda ISO 4217. Confira a grafia, como GBP 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.email.no_name"
+msgstr "{email} não tem um nome utilizável antes do @"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.email.not_an_address"
+msgstr "{email} não é um endereço de e-mail"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.email.too_long"
+msgstr "Esse endereço de e-mail é longo demais (máximo de {max} caracteres)"
+
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.history.batch_not_found"
+msgstr "Esse lote não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.history.no_such_table"
+msgstr "Essa tabela não existe no registro de auditoria"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.household.not_found"
+msgstr "Essa casa não existe"
+
+#. force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.already_imported"
+msgstr "Este mesmo arquivo já foi importado em {account} em {at} (como {filename}). Nada foi alterado. Se você quis importá-lo de novo, envie-o com force ativado."
+
+#. {at} is when the earlier import was made; force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.already_staged"
+msgstr "Este mesmo arquivo já está preparado para {account}, desde {at} (como {filename}), e aguarda revisão. Abra essa importação em vez de começar uma segunda, ou envie este com force ativado."
+
+#. {products} is the bank's own names for the accounts in the file
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.choose_product"
+msgstr "Este arquivo contém mais de uma conta ({products}), e {account} não diz qual delas é. Defina o produto do extrato dela na tela Contas e leia o arquivo de novo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.committed_not_purged"
+msgstr "Essa importação está {status}, não preparada. Uma importação aplicada é desfeita pelo Histórico, não descartada."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.file_too_large"
+msgstr "Esse arquivo é maior do que o previsto aqui (no máximo {max_bytes, number} bytes)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_already_in_account"
+msgstr "Essa linha do extrato já está nesta conta"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_has_no_payee"
+msgstr "Esta linha não tem favorecido ao qual vincular uma regra"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_needs_category"
+msgstr "Dê primeiro uma categoria à linha"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_no_own_category"
+msgstr "Essa linha não tem uma categoria própria para aplicar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.line_not_found"
+msgstr "Essa linha não existe nesta importação"
+
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_an_import"
+msgstr "Esse lote não é uma importação"
+
+#. {status} is the import's state as stored: applied, preview, failed, undone
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_awaiting_commit"
+msgstr "Essa importação está {status}, não aguardando ser aplicada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_found"
+msgstr "Essa importação não existe"
+
+#. {status} is the import's state as stored
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.not_staged"
+msgstr "Essa importação está {status}, não preparada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.product_absent"
+msgstr "{account} recebe as linhas {product} de um extrato, e este arquivo não tem nenhuma: ele contém {products}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.send_something"
+msgstr "Envie um arquivo ou cole um texto"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.import.wrong_currency"
+msgstr "Este arquivo está em {currencies}, e {account} é em {currency}: nenhuma das linhas está em {currency}. Importe-o numa conta em {currencies}, ou confira se é o arquivo certo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.address_unusable"
+msgstr "Esse endereço de e-mail não pode ser usado para uma nova conta aqui, e este link já foi gasto. Peça um novo a quem convidou você."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.already_used"
+msgstr "Esse convite já foi usado; desative a conta em vez disso"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.link_invalid"
+msgstr "Esse link de convite não é válido"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.not_an_invitation"
+msgstr "Isso não é um convite"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.not_found"
+msgstr "Esse convite não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.owner_only"
+msgstr "Só um proprietário pode convidar pessoas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.invite.owner_only_withdraw"
+msgstr "Só um proprietário pode retirar um convite"
+
+#. Two people changed the ledger at the same moment. See GLOSSARY.md (ledger)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ledger.busy"
+msgstr "O livro-caixa está ocupado com outra alteração neste momento; tente de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.money.amount_too_large"
 msgstr "Esse valor é grande demais para registrar como dinheiro"
 
@@ -3757,6 +4155,92 @@ msgstr "{value} tem mais casas decimais do que {currency} tem ({places})"
 #, fuzzy
 msgid "error.money.too_many_digits"
 msgstr "Um valor com {digits} dígitos é grande demais para registrar como dinheiro"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.already_registered"
+msgstr "Essa chave de acesso já está registrada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.needs_name"
+msgstr "Uma chave de acesso precisa de um nome"
+
+#. A user handle is the WebAuthn id of a person; an internal step
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.no_user_handle"
+msgstr "Dê primeiro um identificador de usuário ao membro"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.not_an_answer"
+msgstr "Isso não é uma resposta de chave de acesso"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.not_found"
+msgstr "Essa chave de acesso não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.not_registered"
+msgstr "Essa chave de acesso não pôde ser registrada aqui. Comece de novo."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.refused"
+msgstr "Essa chave de acesso não pode entrar aqui"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.too_many_at_once"
+msgstr "Entradas demais ao mesmo tempo. Tente de novo em um minuto."
+
+#. Why passkeys cannot be used here; {reason} picks the sentence. See GLOSSARY.md (passkey)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.passkey.unavailable"
+msgstr "{reason, select, not_configured {As chaves de acesso não estão configuradas neste servidor} ip_address {As chaves de acesso precisam de um nome de host, e este servidor está configurado com um endereço IP} wrong_host {As chaves de acesso só funcionam no endereço deste servidor} insecure {As chaves de acesso precisam que o aplicativo seja aberto por HTTPS} no_origins {As chaves de acesso precisam que o endereço público do servidor esteja configurado} other {As chaves de acesso não estão disponíveis aqui}}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.common"
+msgstr "Essa senha é uma das {count, number} senhas mais comuns, que são as primeiras que alguém tentando adivinhar experimenta"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.common_and_is_email"
+msgstr "Essa senha é uma das {count, number} senhas mais comuns, e não pode ser o seu endereço de e-mail"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.is_email"
+msgstr "A senha não pode ser o seu endereço de e-mail"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.too_short"
+msgstr "Essa senha é curta demais: ela precisa de pelo menos {min_length} caracteres"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.password.too_short_and_is_email"
+msgstr "Essa senha precisa de pelo menos {min_length} caracteres, e não pode ser o seu endereço de e-mail"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3989,6 +4473,171 @@ msgstr "Isto foi dado como perdido. Volte para “O trabalho deve reembolsar” 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.request.cross_origin"
+msgstr "Essa solicitação não veio deste aplicativo"
+
+#. A form or request was refused. {fields} are the API's own field names, like body.amount, kept as they are
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.request.invalid"
+msgstr "Parte do que foi enviado não está certa: {fields}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.account_disabled"
+msgstr "Essa conta está desativada, então um link de redefinição para ela não poderia ser seguido. Reative-a primeiro."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.choose_password"
+msgstr "Escolha uma nova senha"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.choose_what"
+msgstr "Escolha o que redefinir: a senha, o aplicativo autenticador ou os dois"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.enrol_first"
+msgstr "Cadastre primeiro um novo aplicativo autenticador"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.link_invalid"
+msgstr "Esse link de redefinição não é válido"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.not_authenticator"
+msgstr "Este link não altera o aplicativo autenticador"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.not_found"
+msgstr "Esse link de redefinição não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.not_password"
+msgstr "Este link não altera a senha"
+
+#. The QR code offered for setting up a new authenticator
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.offer_expired"
+msgstr "Essa oferta de aplicativo autenticador expirou; escaneie uma nova"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.overtaken"
+msgstr "Esse link de redefinição foi usado ou substituído há pouco. Olhe a conta de novo antes de fazer qualquer outra coisa com ela"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.own_account"
+msgstr "Você não pode redefinir a sua própria conta aqui: altere a senha ou o aplicativo autenticador no seu perfil"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.owner_only"
+msgstr "Só um proprietário pode redefinir uma conta"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.reset.owner_only_withdraw"
+msgstr "Só um proprietário pode retirar um link de redefinição"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.address_taken"
+msgstr "Alguém já usa esse endereço de e-mail"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.already_done"
+msgstr "Esta instância já foi configurada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.enrol_first"
+msgstr "Termine primeiro de cadastrar um aplicativo autenticador"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.is_an_invitation"
+msgstr "Isso é um convite; conclua-o pelo link que você recebeu"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.needs_display_name"
+msgstr "É preciso um nome de exibição"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.not_waiting"
+msgstr "Esta instância não está aguardando configuração"
+
+#. /setup is a web address and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.required"
+msgstr "Esta instância ainda não foi configurada; abra /setup"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.server_restarted"
+msgstr "O servidor reiniciou; comece de novo com o novo token de configuração"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.session_expired"
+msgstr "Essa sessão de configuração expirou; comece de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.session_invalid"
+msgstr "Essa sessão de configuração não é válida; comece de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.store_codes"
+msgstr "Guarde os seus códigos de recuperação em algum lugar que não seja este navegador e depois marque a caixa"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.setup.token_wrong"
+msgstr "Esse token de configuração não está certo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.split.does_not_add_up"
 msgstr "As partes somam {total} e a transação é de {amount}. Uma divisão precisa fechar, senão altera o saldo."
 
@@ -4021,6 +4670,25 @@ msgstr "Cada parte de uma despesa de trabalho precisa ser dinheiro que sai, porq
 #, fuzzy
 msgid "error.split.zero_part"
 msgstr "Uma parte de uma divisão não pode ser zero"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.statement.unreadable"
+msgstr "Este arquivo não pode ser lido como um extrato"
+
+#. See GLOSSARY.md (step-up)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.stepup.needed"
+msgstr "Confirme primeiro a sua senha e o código do autenticador"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.stepup.refused"
+msgstr "Essa senha e esse código não correspondem"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4157,6 +4825,12 @@ msgstr "Os dois lados de uma transferência na mesma moeda precisam ter o mesmo 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.translation.suggestion_not_found"
+msgstr "Essa sugestão de redação não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.update.digest_mismatch"
 msgstr "Os digests das imagens não são os que o relatório de preparação verificou. Prepare a atualização de novo"
 
@@ -4231,6 +4905,282 @@ msgstr "O atualizador de {to_version} é mais antigo que esta instância, que ex
 #, fuzzy
 msgid "error.update.updater_outdated"
 msgstr "O atualizador é antigo demais para este motor de contêineres. Atualize o atualizador primeiro e tente de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.upload.too_large"
+msgstr "Esse arquivo é grande demais (no máximo {max_bytes, number} bytes)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.user.cannot_disable_self"
+msgstr "Você não pode desativar a si mesmo; não sobraria ninguém para desfazer isso"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.user.no_owner_left"
+msgstr "Não sobraria nenhum proprietário"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.user.not_found"
+msgstr "Essa pessoa não existe"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_currency"
+msgstr "{account} é em {account_currency}, e este plano é em {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_elsewhere"
+msgstr "A conta escolhida para {account} não é desta casa"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_mapping_unknown"
+msgstr "{kind} não é algo a que uma conta possa ser associada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_twice"
+msgstr "{first} e {second} vão ambas para {account}; cada conta do YNAB precisa de uma conta própria"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_type_unknown"
+msgstr "{type} não é um tipo de conta"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.account_undecided"
+msgstr "Diga o que fazer com a conta do YNAB {account}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.amount_too_long"
+msgstr "A linha {line} deste arquivo tem um valor com mais de {max} caracteres, o que o YNAB nunca escreve -- pode não ser uma exportação do YNAB, ou pode estar danificado"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.answer_too_large"
+msgstr "A resposta do YNAB foi maior do que esta importação lê"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.answer_unreadable"
+msgstr "A resposta do YNAB não pôde ser lida"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.category_elsewhere"
+msgstr "A categoria escolhida para {category} não é desta casa"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.category_mapping_unknown"
+msgstr "{kind} não é algo a que uma categoria possa ser associada"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.category_undecided"
+msgstr "Diga o que fazer com a categoria do YNAB {category}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.choose_export"
+msgstr "Escolha a exportação do YNAB: o zip, ou o Register.csv dele"
+
+#. A plan is what YNAB calls a budget
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.choose_plan"
+msgstr "Escolha qual plano do YNAB importar"
+
+#. See GLOSSARY.md (Cleared, Uncleared, reconcile)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.confirm_states"
+msgstr "Confirme que os estados conciliado e compensado do YNAB são redefinidos: tudo chega como não compensado"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.currency_not_a_code"
+msgstr "{currency} não é um código de moeda de três letras"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.date_format_unknown"
+msgstr "{format} não é um formato de data que esta importação lê"
+
+#. {format} is a date pattern like DD/MM/YYYY
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.date_unreadable"
+msgstr "{date} não é uma data {format}"
+
+#. YNAB's coloured flags on a transaction
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.flags_choice"
+msgstr "As marcações ficam na descrição ou são ignoradas"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.new_account_needs_name"
+msgstr "A nova conta para {account} precisa de um nome"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.new_category_needs_name"
+msgstr "A nova categoria para {category} precisa de um nome"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.no_such_plan"
+msgstr "O YNAB não tem esse plano para este token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.no_transactions"
+msgstr "Não há transações neste arquivo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.not_csv"
+msgstr "A linha {line} deste arquivo não pode ser lida como CSV. Exporte o plano do YNAB de novo e envie o zip ou o Register.csv dele."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.not_register"
+msgstr "Isto não é um Register.csv do YNAB: não tem a coluna {columns}. Exporte o plano do YNAB e envie o zip ou o Register.csv dele."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.plan_not_register"
+msgstr "Só o Register.csv do YNAB é necessário, não o Plan.csv"
+
+#. The import plan: the choices made on the One-time Import screen
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.plan_unreadable"
+msgstr "O plano de importação não pode ser lido"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.range_backwards"
+msgstr "O intervalo de datas termina antes de começar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.rate_limited"
+msgstr "O YNAB está limitando as solicitações deste token por enquanto; tente de novo em uma hora"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.register_too_large"
+msgstr "O Register.csv desse zip é maior do que esta importação lê"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.rows_taken"
+msgstr "Algumas destas linhas foram importadas por outra solicitação há pouco; abra a tela Importar e confira o Histórico antes de tentar de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.say_how"
+msgstr "Diga como acessar o YNAB: pelo arquivo exportado ou pela API"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.starting_balance_choice"
+msgstr "O saldo inicial é importado ou ignorado"
+
+#. {status} is an HTTP status number, like 503
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.status"
+msgstr "O YNAB respondeu {status}; tente de novo mais tarde"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.timeout"
+msgstr "O YNAB demorou demais para responder; tente de novo mais tarde"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.token_malformed"
+msgstr "Isso não é um token de acesso pessoal do YNAB"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.token_needed"
+msgstr "É preciso um token de acesso pessoal do YNAB"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.token_rejected"
+msgstr "O YNAB recusou o token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.unreachable"
+msgstr "Não foi possível acessar o YNAB; confira a conexão e tente de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.zip_has_no_register"
+msgstr "Só o Register.csv do YNAB é necessário, não o Plan.csv, e este zip não contém um Register.csv"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.ynab.zip_unreadable"
+msgstr "Esse arquivo zip não pode ser aberto"
 
 #. Column heading on the Application management screen
 #. Column name shown beside a value on phones on the Application management screen
@@ -4983,6 +5933,13 @@ msgstr "Codificando e enviando…"
 msgid "Show them"
 msgstr "Mostrar"
 
+#. What kind of row changed, lower case, singular, in History beside its id: a better translation an owner suggested
+#: src/lib/historyWords.ts
+#, fuzzy
+msgctxt "history table"
+msgid "suggested wording"
+msgstr "sugestão de redação"
+
 #: src/components/SignInNotice.tsx
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -5224,6 +6181,573 @@ msgstr "Desanexando…"
 msgid "This row is locked, so nothing here can be changed and an import will not match against it. Set it back to cleared to edit it."
 msgstr "Esta linha está bloqueada, então nada aqui pode ser alterado e uma importação não vai corresponder a ela. Volte-a para compensada para editá-la."
 
+#. History: the value of a yes/no field, like archived
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.bool.no"
+msgstr "não"
+
+#. History: the value of a yes/no field, like archived
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.bool.yes"
+msgstr "sim"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.accounts"
+msgstr "{count, plural, one {# conta} other {# contas}}"
+
+#. History: a count of changed rows of one kind: keys for programs
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.agent_keys"
+msgstr "{count, plural, one {# chave de agente} other {# chaves de agente}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.categories"
+msgstr "{count, plural, one {# categoria} other {# categorias}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.category_groups"
+msgstr "{count, plural, one {# grupo de categorias} other {# grupos de categorias}}"
+
+#. History: a count of changed rows of one kind: people in a household
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.household_members"
+msgstr "{count, plural, one {# membro} other {# membros}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.households"
+msgstr "{count, plural, one {# casa} other {# casas}}"
+
+#. History: suggested account numbers a person dismissed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.ignored_identifier_suggestions"
+msgstr "{count, plural, one {# sugestão de identificador ignorada} other {# sugestões de identificador ignoradas}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.invitations"
+msgstr "{count, plural, one {# convite} other {# convites}}"
+
+#. History: a count of changed rows of one kind: rules that name payees
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.payee_rules"
+msgstr "{count, plural, one {# regra de favorecido} other {# regras de favorecido}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.payees"
+msgstr "{count, plural, one {# favorecido} other {# favorecidos}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.receipts"
+msgstr "{count, plural, one {# comprovante} other {# comprovantes}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.reconciliations"
+msgstr "{count, plural, one {# conciliação} other {# conciliações}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.transactions"
+msgstr "{count, plural, one {# transação} other {# transações}}"
+
+#. History: two rows a person said are not one transfer
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.transfer_rejections"
+msgstr "{count, plural, one {# par marcado como não transferência} other {# pares marcados como não transferência}}"
+
+#. History: better translations an owner suggested in review mode
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.translation_suggestions"
+msgstr "{count, plural, one {# sugestão de redação} other {# sugestões de redação}}"
+
+#. History: a count of changed rows of one kind: people who sign in
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.users"
+msgstr "{count, plural, one {# usuário} other {# usuários}}"
+
+#. History: accounts read from a file. {file} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.account_import"
+msgstr "{count, plural, one {# conta} other {# contas}} de {file}."
+
+#. History: an import one person prepared and another applied. {who} is that person's name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.applied_by"
+msgstr "{sentence} Aplicada por {who}."
+
+#. History: an import applied by a person since removed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.applied_by_somebody"
+msgstr "{sentence} Aplicada por outra pessoa."
+
+#. History: a statement import. {made} is like 12 new transactions; {filename} the file's name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.import"
+msgstr "{made} em {account}, de {filename}."
+
+#. History: a statement import with no file name. {made} is like 12 new transactions
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.import_no_file"
+msgstr "{made} em {account}."
+
+#. History: what was done to keys for programs, as a sentence
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.keys"
+msgstr "{acts}."
+
+#. History: a reconciliation locked these rows. See GLOSSARY.md (Locked)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.locked"
+msgstr "{count, plural, one {# transação bloqueada} other {# transações bloqueadas}}."
+
+#. History: an act that changed no rows
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.nothing"
+msgstr "Nada foi alterado."
+
+#. History: a one-time import from YNAB, counted in changed rows
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.changes"
+msgstr "{changes, plural, one {# alteração} other {# alterações}}{linked, plural, =0 {} one {, # transferência vinculada} other {, # transferências vinculadas}}."
+
+#. History: a one-time import from YNAB, counted in changed rows. {where} is the file or budget
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.changes_from"
+msgstr "{changes, plural, one {# alteração} other {# alterações}}{linked, plural, =0 {} one {, # transferência vinculada} other {, # transferências vinculadas}} de {where}."
+
+#. History: a one-time import from YNAB, the rows it brought and the transfers it paired
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.transactions"
+msgstr "{imported, plural, one {# transação} other {# transações}}{linked, plural, =0 {} one {, # transferência vinculada} other {, # transferências vinculadas}}."
+
+#. History: a one-time import from YNAB. {where} is the file or budget it read
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.one_time.transactions_from"
+msgstr "{imported, plural, one {# transação} other {# transações}}{linked, plural, =0 {} one {, # transferência vinculada} other {, # transferências vinculadas}} de {where}."
+
+#. History: an undo whose original act is gone. {tally} is like 3 transactions changed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.put_back"
+msgstr "Desfeito — {tally}."
+
+#. History: a reconciliation. {balance} is the statement's closing balance. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.reconciled"
+msgstr "{account} conciliada com um extrato fechado em {date} com saldo de {balance} — {count, plural, one {# transação bloqueada} other {# transações bloqueadas}}."
+
+#. History: an undo. {headline} is the kind of act undone, lower case; {detail} the sentence about it
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.reversed"
+msgstr "Revertido: {headline} — {detail}"
+
+#. History: a transaction divided into {count} parts, listed after the colon. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.split"
+msgstr "{amount} em {date} dividida em {count}: {parts}."
+
+#. History: a split whose parts cannot be read back. Split is the noun. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.split_unknown"
+msgstr "Divisão — {count, plural, one {# transação alterada} other {# transações alteradas}}."
+
+#. History: a transaction divided into {count} parts, listed after the colon. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.split_with_payee"
+msgstr "{payee} {amount} em {date} dividida em {count}: {parts}."
+
+#. History: a count of what an act did, as a sentence, like 12 transactions changed.
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.detail.tally"
+msgstr "{tally}."
+
+#. History: the value of an empty field
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty"
+msgstr "nada"
+
+#. History: a household's accent colour when none is chosen: the palette's own is used
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.accent"
+msgstr "o da paleta"
+
+#. History: the value of a transaction's category when it has none. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.category_id"
+msgstr "sem categoria"
+
+#. History: the value of a payee's default category when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.default_category_id"
+msgstr "sem padrão"
+
+#. History: the value of an account's bank when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.institution"
+msgstr "sem banco"
+
+#. History: the value of a memo when it is empty. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.memo"
+msgstr "sem descrição"
+
+#. History: the value of a note when it is empty. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.note"
+msgstr "sem nota"
+
+#. History: the value of a transaction's payee when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.payee_id"
+msgstr "sem favorecido"
+
+#. History: a work expense with no repayment linked yet
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.reimbursed_by_id"
+msgstr "ainda não reembolsada"
+
+#. History: a transaction work does not pay back. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.empty.reimbursement"
+msgstr "não é despesa de trabalho"
+
+#. History: the state of a transaction the bank has. See GLOSSARY.md (Cleared)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.cleared.cleared"
+msgstr "compensada"
+
+#. History: the state of a transaction locked by a reconciliation. See GLOSSARY.md (Locked)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.cleared.reconciled"
+msgstr "bloqueada"
+
+#. History: the state of a transaction the bank has not seen. See GLOSSARY.md (Uncleared)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.cleared.uncleared"
+msgstr "não compensada"
+
+#. History: a work expense work should pay back. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.reimbursement.expected"
+msgstr "o trabalho deve reembolsar"
+
+#. History: a work expense work will not pay. See GLOSSARY.md (Written off)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.enum.reimbursement.written_off"
+msgstr "dada como perdida"
+
+#. History: an account that cannot be named, in a sentence about an import
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.fallback.account"
+msgstr "uma conta"
+
+#. History: one field's change, from the old value to the new. {field} is lower case, like amount
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.field_change"
+msgstr "{field} {was} → {now}"
+
+#. History: how many rows an act changed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.import.changes"
+msgstr "{count, plural, one {# alteração} other {# alterações}}"
+
+#. History: how many rows a statement import added
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.import.created"
+msgstr "{count, plural, one {# transação nova} other {# transações novas}}"
+
+#. History: how many rows of a statement were already in the ledger
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.import.matched"
+msgstr "{count, plural, one {# correspondeu a uma linha existente} other {# corresponderam a linhas existentes}}"
+
+#. History: a key for a program was changed. {label} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.changed"
+msgstr "Alterou a chave “{label}”"
+
+#. History: a key for a program was made. {label} is the name it was given
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.issued"
+msgstr "Emitiu a chave “{label}”"
+
+#. History: a key for a program was deleted. {label} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.removed"
+msgstr "Removeu a chave “{label}”"
+
+#. History: a key for a program stopped working. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.key.revoked"
+msgstr "Revogou a chave “{label}”"
+
+#. History: which account a transaction is in, after its amount and payee. {account} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.label.in_account"
+msgstr "em {account}"
+
+#. History, one changed row: a row was added. {table} is the kind of row, {label} what it is
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.added"
+msgstr "Adicionou {table} {label}"
+
+#. History, one changed row: a part made by splitting a transaction. {origin} is the one divided
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.added_by_splitting"
+msgstr "Adicionou {table} {label} ao dividir {origin}"
+
+#. History, one changed row: added by an import. {workflow} is its name, like One-time Import · YNAB (CSV)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.added_by_workflow"
+msgstr "Adicionou {table} {label} via {workflow}"
+
+#. History, one changed row: changed in columns History does not name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.changed"
+msgstr "Alterou {table} {label}"
+
+#. History, one changed row: what it is, then each change to it
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.fields"
+msgstr "{label}: {fields}"
+
+#. History, one changed row: a row was deleted. {table} is the kind of row, {label} what it was
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.removed"
+msgstr "Removeu {table} {label}"
+
+#. History, one changed row: written again with nothing different
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.line.touched"
+msgstr "Regravou {table} {label} sem alterações"
+
+#. History: the payment that repaid a work expense, by amount, account and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.payment"
+msgstr "{amount} para {account} em {date}"
+
+#. History: a value naming an account that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.account"
+msgstr "uma conta já removida"
+
+#. History: a value naming a category that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.category"
+msgstr "uma categoria já removida"
+
+#. History: a value naming a payee that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.payee"
+msgstr "um favorecido já removido"
+
+#. History: a value naming a transaction that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.removed.transaction"
+msgstr "uma transação já removida"
+
+#. History: the transaction a split divided, by amount and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.split.origin"
+msgstr "{amount} em {date}"
+
+#. History: the transaction a split divided, by payee, amount and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.split.origin_with_payee"
+msgstr "{payee} {amount} em {date}"
+
+#. History: one part of a split, its amount and its category
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.split.part_with_category"
+msgstr "{amount} ({category})"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.tally.added"
+msgstr "Inclusões: {counts}"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.tally.changed"
+msgstr "Alterações: {counts}"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.tally.removed"
+msgstr "Remoções: {counts}"
+
+#. History: a name that cannot be read. Keep it short
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.unknown"
+msgstr "?"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "The server reset {user}'s authenticator"
@@ -5292,6 +6816,12 @@ msgstr "Não é transferência"
 msgid "One-time Import · YNAB (API)"
 msgstr "Importação única · YNAB (API)"
 
+#. Button on Application management: put this suggestion back in the next download
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Mark open"
+msgstr "Marcar como em aberto"
+
 #. Shown when a list is empty on the Transfers screen
 #: src/screens/Transfers.tsx
 #, fuzzy
@@ -5336,6 +6866,12 @@ msgstr "<0>{purgingName}</0> e suas {0} linhas serão excluídos. Nada dele cheg
 msgctxt "starting balance rows"
 msgid "Skip"
 msgstr "Ignorar"
+
+#. Review mode: label of the note written for translators
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Note for translators"
+msgstr "Nota para tradutores"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -5419,6 +6955,12 @@ msgstr "{inviter} convidou você para o {PRODUCT} como proprietário, em {househ
 #, fuzzy
 msgid "Passkeys are not set up on this server."
 msgstr "As chaves de acesso não estão configuradas neste servidor."
+
+#. Beside a language's name in the language picker: its words are a draft, being reviewed
+#: src/components/LanguagePicker.tsx
+#, fuzzy
+msgid "Preview — machine translated, under review"
+msgstr "Prévia — tradução automática, em revisão"
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -5757,6 +7299,12 @@ msgstr "Mostrar um código para escanear"
 msgid "Passkeys need this app opened at its HTTPS address."
 msgstr "As chaves de acesso exigem que este app seja aberto no endereço HTTPS dele."
 
+#. Button in review mode: back to finding another message
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Find another message"
+msgstr "Encontrar outra mensagem"
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "One part is still empty"
@@ -6087,6 +7635,12 @@ msgstr "Desanexar este comprovante?"
 #, fuzzy
 msgid "Category"
 msgstr "Categoria"
+
+#. Heading on the Application management screen: reviewing the draft languages
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Translations"
+msgstr "Traduções"
 
 #. placeholder {0}: lossy.length
 #: src/screens/Updates.tsx
@@ -6737,6 +8291,15 @@ msgstr "leitura"
 msgid "Not for this account"
 msgstr "Não é desta conta"
 
+#. Column heading on Application management's suggestions: the message's English source
+#. Column name shown beside a value on phones on Application management's suggestions
+#. Review mode: label of the message's English source
+#: src/components/SuggestWording.tsx
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "English"
+msgstr "Inglês"
+
 #. Table cell on the receipts
 #: src/screens/Receipts.tsx
 #, fuzzy
@@ -7166,6 +8729,12 @@ msgstr "Definida"
 msgid "Only rows nobody has corrected"
 msgstr "Só linhas que ninguém corrigiu"
 
+#. Review mode: no message has these words
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "No message has those words."
+msgstr "Nenhuma mensagem tem essas palavras."
+
 #. Label on the Import screen
 #: src/screens/Import.tsx
 #, fuzzy
@@ -7231,6 +8800,813 @@ msgstr "Para criar um novo usuário, use o <0>Link de convite</0>."
 #, fuzzy
 msgid "Find a payee"
 msgstr "Encontrar um favorecido"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.currency_not_a_code"
+msgstr "{currency} não é um código de moeda de três letras"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.date_unreadable"
+msgstr "{text} não é uma data que possa ser lida -- escreva como AAAA-MM-DD, por exemplo 2026-01-31"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.iban_taken"
+msgstr "A linha {line} deste arquivo já tem o IBAN {iban}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.iban_too_long"
+msgstr "O IBAN tem mais de {max} caracteres"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.name_taken"
+msgstr "A linha {line} deste arquivo já se chama {name}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.needs_name"
+msgstr "Uma conta precisa de um nome"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.needs_type"
+msgstr "Uma conta precisa de um tipo"
+
+#. {column} is a column name of the accounts file, which stays in English
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.too_long"
+msgstr "O campo {column} tem mais de {max} caracteres"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.too_many_cells"
+msgstr "Esta linha tem mais células do que o arquivo tem colunas"
+
+#. {types} is the list of account types as the file must write them, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.account_import.row.unknown_type"
+msgstr "{type} não é um tipo de conta -- use um destes: {types}"
+
+#. Said to a program that staged rows. external_id is a field name and stays as it is; {ids} are row ids
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.already_here"
+msgstr "{count} de {total, plural, one {# linha já estava} other {# linhas já estavam}} nesta conta e não foram preparadas: {ids}. Se alguma delas for de fato uma compra separada, dê a cada uma o seu próprio external_id e envie de novo -- uma linha com external_id é deduplicada só por ele."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.matched"
+msgstr "{count} de {total, plural, one {# linha} other {# linhas}} corresponderam a lançamentos já nesta conta. Aplicar marca esses como vistos pelo banco em vez de adicioná-los de novo."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.period_end"
+msgstr "Você declarou o período terminando em {declared} e a linha preparada mais recente é de {latest}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.period_start"
+msgstr "Você declarou o período começando em {declared} e a linha preparada mais antiga é de {earliest}."
+
+#. Said to a program that staged rows. {reasons} is a list of reasons with counts
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.refused"
+msgstr "{count} de {total, plural, one {# linha foi recusada} other {# linhas foram recusadas}} e não vai entrar: {reasons}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.row_count"
+msgstr "Você declarou {declared, plural, one {# linha} other {# linhas}} e chegaram {arrived}. Uma página perdida ou uma linha mal dividida fica exatamente assim."
+
+#. Said to a program that staged rows. {share} is a percentage like 61%; {type} an account type's value
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.sign_convention"
+msgstr "{share} do valor deste lote é dinheiro entrando numa conta {type} ({count} de {total, plural, one {# linha} other {# linhas}}), e o saldo geral é positivo. Confirme que são receitas e não, por exemplo, pagamentos de cartão lidos de uma fatura de cartão -- num cartão eles são entradas, e numa conta {type} as mesmas linhas são saídas."
+
+#. Said to a program that staged rows. The figures are in minor units, as the program sent them
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.agent.warning.total"
+msgstr "Você declarou um total de {declared} unidades menores e as linhas que entrariam somam {staged}, uma diferença de {difference}. Uma linha fundida, uma linha faltando ou um sinal invertido aparecem aqui. Linhas ignoradas ou recusadas não estão neste valor -- veja os outros avisos, se houver."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.country.not_a_code"
+msgstr "{code} não é um código de país"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.added_by_choice"
+msgstr "Você escolheu adicionar isto como uma nova transação"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.already_there"
+msgstr "Esta linha já está na conta"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.arrived_before_commit"
+msgstr "Esta linha chegou à conta antes de esta importação ser aplicada"
+
+#. {match} is the kind of rule: contains, prefix or regex. {why} says why it looks too broad
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.broad_rule"
+msgstr "A regra {match} “{pattern}” pegou {claimed} de {total} linhas — {why}. Edite-a ou exclua-a na tela Regras se não forem todas do mesmo favorecido."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.fee_already_there"
+msgstr "Esta tarifa já está na conta"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.fee_of"
+msgstr "O banco cobrou isto além da linha {line}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.foreign"
+msgstr "Esta linha está em {foreign}, e {account} é em {currency}, então não pode ser lida nela -- seria registrada como {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.foreign_ofx"
+msgstr "Esta transação está em {foreign}, e {account} é em {currency}. Ela é desta conta, mas o valor não está em {currency} e não é convertido aqui -- lance-a à mão em {currency}"
+
+#. {rate} is the exchange rate as the bank wrote it
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.foreign_ofx_rate"
+msgstr "Esta transação está em {foreign} (a taxa do banco: {rate}), e {account} é em {currency}. Ela é desta conta, mas o valor não está em {currency} e não é convertido aqui -- lance-a à mão em {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match"
+msgstr "Parece o lançamento de {date} que você já tem; ele será marcado como visto pelo banco em vez de ser adicionado de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match_changed"
+msgstr "A transação correspondida mudou desde a prévia, então foi deixada como estava e esta linha não foi importada"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match_deleted"
+msgstr "A transação correspondida a esta foi excluída desde então"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match_one_time"
+msgstr "O lançamento de {date} que a sua Importação única trouxe é esta linha do banco; ele será marcado como visto pelo banco em vez de ser adicionado de novo"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match_taken"
+msgstr "Essa transação já foi correspondida a uma linha de extrato"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.match_ynab_history"
+msgstr "Correspondido por valor e data ao lançamento de {date} do seu histórico do YNAB (Importação única), não pela chave do próprio banco; confira se é a mesma compra e não uma nova do mesmo valor antes de aplicar"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.maybe_transfer"
+msgstr "Pode ser uma transferência com {account} ({date}): {why}. Confirme-a na tela Transferências depois de aplicar."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.no_date_or_amount"
+msgstr "Esta linha não tem data ou não tem valor"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.no_money"
+msgstr "Esta linha não movimenta dinheiro"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.other_currency_rows"
+msgstr "Esta linha está em {foreign}, e {account} é em {currency}: ela pertence às linhas em {foreign} deste arquivo"
+
+#. {product} and {taken} are the bank's names for accounts in one file
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.other_product"
+msgstr "Esta linha é {product}, e {account} recebe as linhas {taken} deste arquivo"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.own_money"
+msgstr "Parece dinheiro seu se movendo -- ela {why}. É vinculada quando aquele extrato for importado."
+
+#. Part of a sentence about a payee rule that claimed too many rows
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.rule_most_of_file"
+msgstr "isso é a maior parte do arquivo"
+
+#. Part of a sentence about a payee rule that claimed too many rows. {match} is contains, prefix or regex
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.rule_pattern_short"
+msgstr "{length} caracteres é muito pouco para uma regra {match}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.line.transfer"
+msgstr "Uma transferência com {account} ({date}): {why}. Ela é vinculada quando você aplicar, e fica fora de Receitas e despesas."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.balance_breaks"
+msgstr "O saldo corrente do extrato deixa de bater na linha {line} ({date}): uma linha antes dela está faltando no que foi lido, ou pertence a outra conta."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.balance_gap"
+msgstr "Este extrato começa em {opening} em {date}, mas o livro-caixa tem {held} no dia anterior -- {gap} de diferença. Pode estar faltando um extrato entre a última importação e esta: baixe a partir do dia seguinte ao último importado."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.balance_unchecked"
+msgstr "O saldo corrente do extrato não foi conferido: um saldo, valor ou tarifa nele é grande demais para registrar como dinheiro."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.other_currencies"
+msgstr "Este arquivo contém mais de uma moeda: {currencies}. Só as linhas em {currency} foram lidas em {account}; as outras pertencem a uma conta na moeda delas e aparecem como ignoradas."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.other_products"
+msgstr "Este arquivo contém mais de uma conta: {products}. Só as linhas {product} foram lidas em {account}; as outras pertencem a outra conta e aparecem como ignoradas. Para mudar quais linhas esta conta recebe, defina o produto do extrato dela na tela Contas."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.import.note.rechecked"
+msgstr "{count, plural, one {# destas linhas mudou} other {# destas linhas mudaram}} ao serem conferidas de novo com a conta agora: o registro mudou desde que esta importação foi preparada."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.all_positive"
+msgstr "Todos os valores deste arquivo são positivos, e não há uma segunda coluna dizendo quais linhas são saídas de dinheiro — confira os valores na prévia, ou escolha colunas separadas de saída e de entrada"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.balance_unreadable"
+msgstr "A coluna {column} não é um valor em {count, plural, one {# linha} other {# linhas}} (como {text}) -- essas linhas são importadas sem saldo corrente"
+
+#. Follows “because”: why a decimal separator was expected. {country} is a country's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.because_country"
+msgstr "o país desta conta está definido como {country}"
+
+#. Follows “because”: why a decimal separator was expected
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.because_default"
+msgstr "esse é o padrão quando nada diz o contrário"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.card_signs_reversed"
+msgstr "Os valores estão invertidos em relação aos sinais da própria fatura, então uma compra é saída de dinheiro da conta do cartão e um estorno é entrada"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.control_codes"
+msgstr "Alguns caracteres deste arquivo são códigos de controle e não letras -- ele pode misturar duas codificações, então confira os nomes dos favorecidos na prévia"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.currency_columns"
+msgstr "Este arquivo tem mais de uma coluna de moeda ({columns}), e não foi possível saber em qual delas estão os valores, então nenhuma foi usada: todas as linhas são consideradas na moeda da conta"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.date_format_unknown"
+msgstr "Não foi possível descobrir o formato de data a partir de valores como {text}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.dates_either_way"
+msgstr "Todas as datas deste arquivo podiam ser lidas com o dia ou com o mês primeiro, então foram lidas com o dia primeiro — confira as datas na prévia antes de importar"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.dates_mixed"
+msgstr "Este arquivo tem datas que se leem com o dia primeiro e outras com o mês primeiro; confira as datas na prévia"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.decimal_assumed"
+msgstr "Não foi possível descobrir o separador decimal neste arquivo — um valor como “{example}” pode ser lido dos dois jeitos — então “{separator}” foi presumido, porque {because}. Confira os valores na prévia antes de importar"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.decimal_from_column"
+msgstr "Os valores deste arquivo podem ser lidos dos dois jeitos (como “{example}”), então o separador decimal “{separator}” foi tirado da coluna de tarifa ou de saldo — o que difere do “{expected}” esperado porque {because}. Confira os valores na prévia antes de importar"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.no_amount_column"
+msgstr "Nenhuma coluna de valor encontrada -- confira se o arquivo tem uma linha de cabeçalho, ou acrescente uma"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.no_date_column"
+msgstr "Nenhuma coluna de data encontrada -- confira se o arquivo tem uma linha de cabeçalho, ou acrescente uma"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.no_rows"
+msgstr "Este arquivo não tem linhas"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.ofx_empty"
+msgstr "Parece um arquivo OFX, mas não tem transações -- alguns bancos exportam um extrato vazio quando o período não tem nada"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.ofx_no_currency"
+msgstr "Este arquivo não diz em que moeda está"
+
+#. {fitid} and {earlier} are the bank's own ids for two transactions
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.ofx_replaces"
+msgstr "A transação {fitid} substitui uma anterior ({earlier}); a anterior ainda está na conta e deve ser removida à mão"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.read.undecodable"
+msgstr "Alguns caracteres deste arquivo não puderam ser decodificados; os nomes dos favorecidos podem parecer errados"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.amount_unreadable"
+msgstr "Não foi possível ler {text} como valor"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.date_unreadable"
+msgstr "Não foi possível ler {text} como data"
+
+#. {state} is the bank's own word for the row, like declined or reversed
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.did_not_happen"
+msgstr "O banco marcou isto como {state}, então nenhum dinheiro se moveu"
+
+#. {problem} is why a cell could not be read; {column} is the file's own column name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.in_column"
+msgstr "{problem}, na coluna {column}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.no_amount"
+msgstr "Esta linha não tem valor, então não é uma transação"
+
+#. {state} is the bank's own word for the row, like pending
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.not_settled"
+msgstr "O banco marcou isto como {state}: ainda não foi liquidado, e será importado do próximo extrato quando for"
+
+#. {fitid} is the bank's own id for the transaction it cancels
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.ofx_cancels"
+msgstr "O banco enviou isto para cancelar uma transação anterior ({fitid}), então não há nada a adicionar aqui"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.ofx_no_amount"
+msgstr "Nenhum valor utilizável em {text}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.ofx_no_date"
+msgstr "Nenhuma data utilizável em {text}"
+
+#. {kind} is the OFX transaction type the bank wrote, like HOLD
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.ofx_pending"
+msgstr "O banco marcou isto como {kind}, que é uma retenção pendente e não uma transação que aconteceu"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.row.signed_twice"
+msgstr "{text} tem sinal duas vezes, então dizer se é entrada ou saída de dinheiro seria um palpite"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.cell_too_long"
+msgstr "Uma célula deste arquivo tem mais de {max, number} caracteres, o que nenhum extrato tem -- pode não ser um extrato, ou pode estar danificado. Baixe-o de novo no seu banco."
+
+#. {found} and {stated} are amounts as the bill wrote them; {label} is the bill's own words for its total
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.layout_changed"
+msgstr "Parece um documento para o qual este aplicativo tem uma regra, mas os lançamentos encontrados somam {found} e o documento diz que “{label}” é {stated}. O layout provavelmente mudou, então nada foi importado -- importar parte de uma fatura seria pior."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_bom"
+msgstr "Este arquivo parece texto UTF-16 ou UTF-32 sem marca de ordem de bytes, então não dá para saber ao certo como lê-lo -- salve-o de novo como UTF-8 (ou CSV UTF-8) e importe esse"
+
+#. pdfplumber is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_pdfplumber"
+msgstr "Ler PDFs requer o pacote pdfplumber, que não está instalado"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_sheets"
+msgstr "Esta pasta de trabalho não tem planilhas"
+
+#. xlrd is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.no_xlrd"
+msgstr "Ler arquivos .xls requer o pacote xlrd, que não está instalado"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.not_a_spreadsheet"
+msgstr "Este arquivo não pôde ser lido como planilha. Pode estar danificado; baixe-o de novo no seu banco, ou exporte-o como CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.not_a_table"
+msgstr "Este arquivo não pôde ser lido como tabela. Baixe-o de novo no seu banco, ou exporte-o como CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_decoded"
+msgstr "Este PDF se expande para mais de {max, number} MB, muito mais do que um extrato precisa -- pode estar danificado, ou feito para ser lido devagar. Peça ao seu banco CSV ou OFX, ou um extrato com menos meses."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_drawing"
+msgstr "As páginas deste PDF têm mais instruções de desenho do que um extrato de qualquer tamanho teria -- pode estar danificado, ou feito para ser lido devagar. Peça ao seu banco CSV ou OFX, ou um extrato com menos meses."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_no_table"
+msgstr "Nenhuma tabela de extrato foi encontrada neste PDF. Alguns documentos -- uma fatura de cartão diagramada com várias tabelas lado a lado, por exemplo -- não são uma única tabela com cabeçalho, e importar metade de um seria pior do que não importar. Peça ao seu banco CSV ou OFX."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_objects"
+msgstr "Este PDF põe mais de {max, number} caracteres e formas nas páginas, muito mais do que um extrato tem. Peça ao seu banco CSV ou OFX, ou um extrato com menos meses."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_scan"
+msgstr "Não há texto neste PDF -- provavelmente é uma digitalização, e ler isso requer reconhecimento de caracteres que este aplicativo não faz. Peça ao seu banco CSV ou OFX."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_stream"
+msgstr "Este PDF contém um bloco comprimido que se expande para mais de {max, number} MB, o que nenhum extrato precisa -- pode estar danificado, ou feito para ser lido devagar. Peça ao seu banco CSV ou OFX, ou um extrato com menos meses."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_too_long"
+msgstr "Este PDF tem mais de {max, number} páginas, mais longo que qualquer extrato que este aplicativo lê. Peça ao seu banco CSV ou OFX, ou um extrato com menos meses."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_unopenable"
+msgstr "Este arquivo não pôde ser aberto como PDF. Pode estar danificado; baixe-o de novo no seu banco."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.pdf_unreadable"
+msgstr "Este PDF não pôde ser lido. Pode estar danificado; baixe-o de novo no seu banco."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.sheet_too_large"
+msgstr "A primeira planilha desta pasta de trabalho chega à linha {rows, number} e à coluna {columns, number}, muito maior que um extrato -- este aplicativo lê no máximo {max_rows, number} linhas e {max_columns, number} colunas. Se o extrato estiver lá, exporte-o do seu banco como CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.sheet_unreadable"
+msgstr "A primeira planilha desta pasta de trabalho não pôde ser lida. Pode estar danificada; baixe-a de novo no seu banco, ou exporte-a como CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.too_many_cells"
+msgstr "A primeira planilha desta pasta de trabalho tem mais de {max, number} células, muito maior que um extrato. Se o extrato estiver lá, exporte-o do seu banco como CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.too_many_rows"
+msgstr "Este arquivo tem mais de {max, number} linhas, o que nenhum extrato tem -- pode não ser um extrato. Baixe um período menor no seu banco."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.undated"
+msgstr "Mais de {max, number} linhas deste arquivo não têm data legível -- não é um extrato, ou a coluna de data não foi encontrada. Confira a linha de cabeçalho."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.statement.unreadable.xlsx"
+msgstr "Este parece um arquivo .xlsx, que ainda não é aceito -- abra-o e salve como CSV, ou exporte CSV do seu banco"
+
+#. Part of a sentence on a transfer: a doubt. {named} is a name the bank wrote
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.payer.names"
+msgstr "ela cita {named}, que já pagou você antes"
+
+#. Part of a sentence on a transfer: a doubt. {payee} is a payee's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.payer.paid_before"
+msgstr "{payee} já pagou você antes"
+
+#. Part of a sentence on a transfer: a doubt. {payee} is a payee's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.payer.rule"
+msgstr "{payee} tem uma regra de categoria"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.amounts_match"
+msgstr "os valores batem e as datas são próximas"
+
+#. Follows “it”: the row names an account whose statement is not imported yet
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.awaiting"
+msgstr "cita {named}; o outro lado ainda não está no livro-caixa"
+
+#. Part of a sentence on a transfer. {words} are words the bank wrote on both rows
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.both_say"
+msgstr "{why}; as duas linhas dizem {words}"
+
+#. Part of a sentence on a transfer. {why} is the reason so far, {payer} a doubt about it
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.but"
+msgstr "{why}, mas {payer}"
+
+#. Part of a sentence on a transfer. {why} is the reason so far, this adds a doubt
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.card_purchase"
+msgstr "{why}, mas dinheiro saindo de um cartão é uma compra até que você diga o contrário"
+
+#. Part of a sentence on a transfer. {count} is how many rows it could be
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.closest"
+msgstr "{why}; a mais próxima em data de {count} possíveis"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.linked_before"
+msgstr "estas duas contas já tiveram transferências vinculadas entre si"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.member_named"
+msgstr "o nome de um membro da casa está nela, e os valores batem"
+
+#. Part of a sentence on a transfer. {why} is the reason so far
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.more_than_one"
+msgstr "{why}, mas há mais de uma linha que poderia ser"
+
+#. Part of a sentence on a transfer: why two rows look like one. {named} is the account the bank text names
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.transfer.why.names"
+msgstr "a linha de {account} cita {named}"
+
+#. The name of the rows with no category, in a report or a breakdown. See GLOSSARY.md (Uncategorised)
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.unset.category"
+msgstr "Sem categoria"
+
+#. The name of the rows with no payee, in a breakdown of payees
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.unset.payee"
+msgstr "Sem favorecido"
+
+#. {direction} is more or less: whether the import accounts for more than YNAB's balance
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.balance.differs"
+msgstr "{account}: o saldo do YNAB é {ynab}, e esta importação soma {imported}, {direction, select, more {{gap} a mais} other {{gap} a menos}}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.balance.unchecked"
+msgstr "{account}: o saldo do YNAB não pôde ser conferido: {problem}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.account_skipped"
+msgstr "A conta dela foi ignorada"
+
+#. {constraint} is the database's own name for the rule a row broke
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.database_refused"
+msgstr "O banco de dados recusou esta linha: {constraint}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.imported_before"
+msgstr "Já importada por uma importação única anterior"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.looks_like_existing"
+msgstr "Parece uma linha que já está no livro-caixa"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.outside_range"
+msgstr "Fora do intervalo de datas"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.row.starting_balance"
+msgstr "Um saldo inicial do YNAB, ignorado"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.transfer.not_linked"
+msgstr "Não vinculada como transferência: {problem}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.transfer.other_side_failed"
+msgstr "O outro lado desta transferência não pôde ser importado"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+#, fuzzy
+msgid "notice.ynab.transfer.other_side_missing"
+msgstr "Uma transferência do YNAB cujo outro lado foi ignorado, está fora do intervalo ou não está na exportação, então foi importada como uma transação comum"
 
 #. Screen-reader name on the Register screen
 #: src/screens/Register.tsx
@@ -7393,6 +9769,13 @@ msgstr "Nenhuma categoria ainda. As categorias dizem <0>para que</0> foi uma tra
 msgid "nothing recorded yet"
 msgstr "nada registrado ainda"
 
+#. Column heading on Application management's suggestions: the better wording
+#. Column name shown beside a value on phones on Application management's suggestions
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Suggested"
+msgstr "Sugerida"
+
 #. Sentence on the first-run setup
 #: src/screens/Setup.tsx
 #, fuzzy
@@ -7523,6 +9906,13 @@ msgstr "Entre duas das suas contas — duas linhas, um ato"
 #, fuzzy
 msgid "One household per key. Two households means two keys."
 msgstr "Uma casa por chave. Duas casas, duas chaves."
+
+#. State of a suggestion: not yet in the catalogs, so in the next download
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgctxt "suggestion state"
+msgid "Open"
+msgstr "Em aberto"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -7856,6 +10246,12 @@ msgstr "Atualizar só o atualizador"
 #, fuzzy
 msgid "Not now"
 msgstr "Agora não"
+
+#. Link on Application management: download every language's suggestions as one JSON file
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "All languages (JSON)"
+msgstr "Todos os idiomas (JSON)"
 
 #. What the import detected: the column of money going out. Lower case, inside a list
 #: src/lib/labels.ts
@@ -8771,9 +11167,12 @@ msgstr "No Docker Desktop ou no Podman Desktop, abra Containers, encontre <0>{na
 msgid "First setup"
 msgstr "Configuração inicial"
 
+#. Column heading on Application management's suggestions: open or applied
 #. Column heading on the History screen: noun, a row's status
+#. Column name shown beside a value on phones on Application management's suggestions
 #. Name of a fact on the History screen: noun, a row's status
 #: src/screens/History.tsx
+#: src/screens/TranslationReview.tsx
 #, fuzzy
 msgid "State"
 msgstr "Estado"
@@ -8971,6 +11370,188 @@ msgstr "{by} redefiniu a senha de {user}"
 msgid "Updated to {running} at {at} in {took}."
 msgstr "Atualizado para {running} em {at}, em {took}."
 
+#. Name of a seeded category: yearly charges such as a card fee. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.annual_fees"
+msgstr "Anuidades"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.car_maintenance"
+msgstr "Manutenção do carro"
+
+#. Name of a seeded category: restaurants, cafés, takeaway. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.eating_out"
+msgstr "Restaurantes"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.electricity"
+msgstr "Luz"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.gifts"
+msgstr "Presentes"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.groceries"
+msgstr "Supermercado"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.health"
+msgstr "Saúde"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.hobbies"
+msgstr "Hobbies"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.home_maintenance"
+msgstr "Manutenção da casa"
+
+#. Name of a seeded category: things for the home. Not the household of the glossary
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.household"
+msgstr "Casa"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.insurance"
+msgstr "Seguros"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.internet"
+msgstr "Internet"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.other_income"
+msgstr "Outras receitas"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.phone"
+msgstr "Telefone"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.rent_mortgage"
+msgstr "Aluguel / Financiamento"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.salary"
+msgstr "Salário"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.subscriptions"
+msgstr "Assinaturas"
+
+#. Name of a seeded category: fares, fuel, taxis. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.transport"
+msgstr "Transporte"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.travel"
+msgstr "Viagens"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.category.water"
+msgstr "Água"
+
+#. Name of a category group seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.bills"
+msgstr "Contas fixas"
+
+#. Name of a seeded category group: the spending of daily life. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.everyday"
+msgstr "Dia a dia"
+
+#. Name of a category group seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.income"
+msgstr "Receitas"
+
+#. Name of a seeded category group: bills that come less often than monthly
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.non_monthly"
+msgstr "Não mensais"
+
+#. Name of a seeded category group: spending by choice, not need. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.group.quality_of_life"
+msgstr "Qualidade de vida"
+
+#. Payee and memo of the row holding an account's starting balance. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+#, fuzzy
+msgid "seed.opening_balance"
+msgstr "Saldo inicial"
+
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
 msgid "YNAB's own bucket, always uncategorised"
@@ -9101,6 +11682,12 @@ msgstr "Sim, todas as {0}"
 #, fuzzy
 msgid "Add a payee"
 msgstr "Adicionar um favorecido"
+
+#. Button in review mode: keep this suggestion
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Save the suggestion"
+msgstr "Salvar a sugestão"
 
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -9875,6 +12462,12 @@ msgstr "Um título sob o qual as categorias ficam — Contas, Dia a dia, o que d
 msgid "One ledger: its accounts, its register, its receipts and the people who can reach them."
 msgstr "Um livro-caixa: suas contas, seu registro, seus comprovantes e as pessoas que têm acesso a eles."
 
+#. Review mode: the language's messages are loading
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Reading the messages…"
+msgstr "Lendo as mensagens…"
+
 #. placeholder {0}: group.name
 #: src/screens/Categories.tsx
 #, fuzzy
@@ -10049,6 +12642,12 @@ msgstr "Reescreve <0>{0}</0> de {1, plural, one {{2} linha que já está neste l
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 msgstr "{count, plural, one {{shown} transação} other {{shown} transações}}"
 
+#. Button on Application management: the catalogs now carry this suggestion
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Mark applied"
+msgstr "Marcar como aplicada"
+
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Close without copying? The link cannot be shown again."
@@ -10206,8 +12805,10 @@ msgstr "Este comprovante não tem data própria, então o intervalo fica em torn
 msgid "Already locked"
 msgstr "Já bloqueada"
 
+#. Column heading on Application management's suggestions
 #. Label of a choice on the language picker
 #: src/components/LanguagePicker.tsx
+#: src/screens/TranslationReview.tsx
 #, fuzzy
 msgid "Language"
 msgstr "Idioma"
@@ -10589,6 +13190,13 @@ msgstr "Mostrar arquivadas"
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 msgstr "Uma regra é comparada com <0>as palavras do próprio banco</0>, não com o favorecido que você vê no registro. O registro pode dizer <1>Amazon</1> enquanto o extrato dizia <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — então escreva a regra para o segundo. Abra uma transação e toque em <3>De onde veio isto?</3> para ver exatamente o que chegou."
 
+#. State of a suggestion: the catalogs carry it
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgctxt "suggestion state"
+msgid "Applied"
+msgstr "Aplicada"
+
 #. Column heading on the Admin screen: noun, the person
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -10750,6 +13358,12 @@ msgstr "Todas as categorias"
 #, fuzzy
 msgid "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
 msgstr "{work, plural, one {{work} despesa de trabalho ou reembolso deixado de fora: o que o trabalho lhe devolve nunca foi gasto seu, e o reembolso não é receita.} other {{work} despesas de trabalho e reembolsos deixados de fora: o que o trabalho lhe devolve nunca foi gasto seu, e o reembolso não é receita.}}"
+
+#. Review mode: label of the box for the better translation
+#: src/components/SuggestWording.tsx
+#, fuzzy
+msgid "Your wording"
+msgstr "Sua redação"
 
 #. History headline, the kind of act: a statement was imported
 #: src/lib/historyWords.ts
@@ -10993,6 +13607,12 @@ msgstr "{0} sempre será {1}"
 #, fuzzy
 msgid "why one currency at a time"
 msgstr "por que uma moeda por vez"
+
+#. Switch on Application management: show the draft languages on this device only
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Review translations on this device"
+msgstr "Revisar traduções neste dispositivo"
 
 #. Screen-reader name of one more release listed on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
@@ -11300,6 +13920,12 @@ msgstr "essa importação foi descartada — nada foi gravado"
 msgid "Putting it back…"
 msgstr "Restaurando…"
 
+#. Application management: nobody has suggested a wording yet
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "No suggestions yet. Choose a preview language in your profile, then use “Suggest a better wording”."
+msgstr "Ainda não há sugestões. Escolha um idioma de prévia no seu perfil e depois use “Sugerir uma redação melhor”."
+
 #. Text on the Application management screen
 #. placeholder {0}: bytes(me.size.page_size)
 #. placeholder {1}: count(me.size.free_pages ?? 0)
@@ -11496,6 +14122,11 @@ msgstr "Mais antiga"
 #, fuzzy
 msgid "{0} {1} — a self-hosted, multi-currency spend tracker for one household, under the AGPL."
 msgstr "{0} {1} — um controle de gastos auto-hospedado e multimoeda para uma casa, sob a AGPL."
+
+#: src/screens/TranslationReview.tsx
+#, fuzzy
+msgid "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
+msgstr "O seletor de idioma do seu perfil passa a oferecer Português, Español e Svenska como prévias: tradução automática, em revisão. Ninguém mais os vê, e o inglês continua sendo o padrão em todo o resto."
 
 #: src/screens/Import.tsx
 #, fuzzy

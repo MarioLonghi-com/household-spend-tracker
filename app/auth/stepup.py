@@ -113,9 +113,9 @@ def grant(
     # for a caller who does not even have the password is a free way to make
     # somebody's authenticator useless for thirty seconds at a time.
     if not passwords.verify_password(user.password_hash, password):
-        raise ProofRefused(_REFUSAL)
+        raise ProofRefused(_REFUSAL, code="stepup.refused")
     if not totp.verify_and_consume(user, code):
-        raise ProofRefused(_REFUSAL)
+        raise ProofRefused(_REFUSAL, code="stepup.refused")
     ratelimit.release(engine, held)
 
     # An earlier grant for this user is dropped, like `issue_pending` does. Two
@@ -170,7 +170,9 @@ def claim(engine: Engine, value: str | None, *, user_id: str, now: datetime | No
 def require(engine: Engine, value: str | None, *, user_id: str) -> None:
     """Spend a grant or refuse the act. The shape every caller wants."""
     if not claim(engine, value, user_id=user_id):
-        raise ProofRefused("confirm your password and authenticator code first")
+        raise ProofRefused(
+            "confirm your password and authenticator code first", code="stepup.needed"
+        )
 
 
 def drop_for(session: Session, user_id: str) -> int:

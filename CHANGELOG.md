@@ -32,6 +32,92 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.10.0 — 2026-10-09
+
+**Reversible: lossy** — one migration.
+
+- `c4d9e2a7b318` — lossy: adds the `translation_suggestions` table (#272).
+  Rolling it back drops every stored suggested wording, so export them first;
+  nothing in the ledger changes.
+
+Localisation is finished in code: History, sign-in, imports and the last
+refusals now carry codes and structure a screen in another language can word
+from its own catalog, and a new household can be seeded in its own language.
+The three languages, Português, Español and Svenska, stay hidden: the
+household reviews the drafts in the app through an owner-only review mode,
+off by default and per device, and English stays the default everywhere.
+
+### Added
+
+- **The household reviews the draft translations in the app.** An owner can
+  turn on *Review translations on this device* in Application management;
+  Profile's language picker then offers Português, Español and Svenska as
+  previews, machine translated and under review, and a *Suggest a better
+  wording* button finds any message by its words and keeps the owner's
+  better wording, with the English and the translator's note beside it.
+  Suggestions are listed, downloaded as a `.po` patch or JSON, and applied
+  to the catalogs with `scripts/apply_translation_suggestions.py`, which also
+  reports how much of each language is reviewed (0% today). Off by default
+  and per device: nobody else is offered the languages, English stays the
+  default everywhere, and the routes answer only a household's owners.
+  New table `translation_suggestions` (migration `c4d9e2a7b318`; rolling
+  it back is lossy -- it drops every suggested wording, so export them
+  first; nothing in the ledger changes). (#272)
+
+### Changed
+
+- **A new household can be seeded in its own language.** Creating a
+  household, from the first-household form, Admin or *Add the defaults* on
+  Categories, takes the device's language when that language is served, and
+  seeds the category tree and the "Opening balance" payee in it. Only
+  reviewed translations are seeded (`app/seed_catalog.json`, written from the
+  catalogs by `scripts/seed_catalog.py`); a draft never is, so until a
+  language ships every household is seeded in English exactly as before. The
+  names are ordinary names, and no language is stored on the household. (#268)
+- **History's sentences go out as structure too.** Beside every sentence it
+  has always sent -- a batch's detail, the undo lines, a changed row's
+  summary, a row's own history -- History now sends a `*_phrase`: a key and
+  its raw values (money in minor units with its currency, ISO dates, enum
+  values, names as stored), and each changed field's `was_value` and
+  `now_value` beside its words. A screen in another language words them from
+  its own catalog; English shows the server's sentences exactly as before,
+  and the English is now rendered from the same structure, so the two cannot
+  disagree. (#266)
+- **Signing in and its refusals carry codes for translation.** Sign-in,
+  step-up, recovery codes, passkeys, invitations, account resets, the setup
+  wizard, keys for programs and the people screens now answer with a stable
+  `code` and raw `params` beside the same English `detail`, and the
+  password complaints say which complaint it was (too short, too common, the
+  email address) with the length or list size as a number. The rate limit
+  sends its wait in seconds as a number. English and agents' answers are
+  unchanged. (#267)
+- **Import refusals carry codes too.** A statement import, an accounts CSV,
+  a One-time Import from YNAB (its file, its plan and YNAB's own answers) and
+  an oversized upload refuse with a stable `code` and raw `params` -- when an
+  earlier import was made as a timestamp, line numbers and limits as numbers,
+  column names and currency codes as the file wrote them -- beside the same
+  English `detail`. (#267)
+- **What an import says about its lines and files carries codes.** Why a
+  statement line was skipped, matched or flagged, what reading the file
+  could not settle, a row of an accounts file that cannot be imported, and a
+  One-time Import row that was not, now come with a code and raw params
+  (`reason_code`/`reason_params`, `warning_codes`, `problem_codes`,
+  `sentence_code`/`sentence_params`), and the Import, accounts-import and
+  One-time Import screens word them in another language. They are read back
+  from the sentences by `app/notices.py`, so nothing new is stored, no
+  migration is needed, and a line staged before this upgrade reads as well
+  as a new one. English and agents' answers are unchanged. (#267)
+- **The last refusals carry codes, and so does "Uncategorised".** A request
+  the schema refuses keeps pydantic's list in `detail` and adds one code,
+  `request.invalid`, naming the fields as the API spells them; a cross-site
+  write, a fresh instance's setup gate and a busy ledger carry theirs; a
+  statement the library refuses whole is read back into one of
+  `app/notices.py`'s codes, or a generic one. A report's and a breakdown's
+  "Uncategorised" and "No payee" carry `name_code`, and the payee breakdown
+  on Categories words "No payee" from it in another language. An agent's staging warnings have codes too, but
+  an agent is still sent none. English and agents' answers are unchanged.
+  (#267)
+
 ## 0.9.3 — 2026-10-09
 
 **Reversible: none** — no migration in this release. To go back to

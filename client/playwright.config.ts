@@ -45,7 +45,7 @@ export default defineConfig({
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "desktop",
-      testIgnore: /(passkeys|pseudo-locale|locales)\.spec\.ts/,
+      testIgnore: /(passkeys|pseudo-locale|review|locales)\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 1280, height: 800 },
@@ -55,7 +55,7 @@ export default defineConfig({
     },
     {
       name: "mobile",
-      testIgnore: /(passkeys|pseudo-locale|locales)\.spec\.ts/,
+      testIgnore: /(passkeys|pseudo-locale|review|locales)\.spec\.ts/,
       use: { ...devices["Pixel 5"], storageState: "./e2e/.auth/state.json" },
       dependencies: ["setup"],
     },
@@ -100,6 +100,24 @@ export default defineConfig({
         dependencies: ["l10n-setup"],
       },
     ]),
+    // Review mode (#272), at both widths, once the English specs have run:
+    // it leaves a suggested wording behind, which History would show them.
+    {
+      name: "review-desktop",
+      testMatch: /review\.spec\.ts/,
+      use: {
+        browserName: "chromium",
+        viewport: { width: 1280, height: 800 },
+        storageState: "./e2e/.auth/state.json",
+      },
+      dependencies: ["desktop", "mobile", "pseudo-locale"],
+    },
+    {
+      name: "review-mobile",
+      testMatch: /review\.spec\.ts/,
+      use: { ...devices["Pixel 5"], storageState: "./e2e/.auth/state.json" },
+      dependencies: ["review-desktop"],
+    },
     // Passkeys (#121): registered once, after the sign-in above has spent its
     // code window, then signed in with at both widths -- signed out, so these
     // projects carry no stored session. Their own projects, so a passkey

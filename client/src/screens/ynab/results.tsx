@@ -13,6 +13,7 @@ import { formatDate } from "../../lib/locale";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { formatCount } from "../../lib/locale";
+import { codedText } from "../../lib/noticeMessages";
 
 export function Counts({ report }: { report: ImportReport }) {
   const it = report.counts;
@@ -177,7 +178,7 @@ export function NotImportedTable({ rows, currency }: { rows: NotImported[]; curr
           case "amount":
             return row.amount_minor;
           case "reason":
-            return row.reason;
+            return codedText(row.reason, row.reason_code, row.reason_params);
         }
       }),
     [rows, sort, direction],
@@ -218,7 +219,7 @@ export function NotImportedTable({ rows, currency }: { rows: NotImported[]; curr
                 )}
               </td>
               <td className="small" data-label={t({ message: "Why", comment: "Column name shown beside a value on phones on the one-time import's results: noun, the reason" })}>
-                {row.reason}
+                {codedText(row.reason, row.reason_code, row.reason_params)}
               </td>
             </tr>
           ))}
@@ -448,7 +449,7 @@ export function Report({
         <div className="banner warn" role="note" style={{ marginTop: 12 }}>
           <ul className="plain-list ynab-balance-unchecked">
             {report.balance_unchecked!.map((one, at) => (
-              <li key={one.account_key ?? at}>{one.sentence}</li>
+              <li key={one.account_key ?? at}>{codedText(one.sentence, one.sentence_code, one.sentence_params)}</li>
             ))}
           </ul>
         </div>

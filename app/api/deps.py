@@ -59,10 +59,10 @@ def public_origin(request: Request) -> str:
 def current_user(request: Request, session: SessionDep) -> User:
     row = session_service.lookup(session, cookies.session_value(request))
     if row is None:
-        raise Unauthorized("sign in first")
+        raise Unauthorized("sign in first", code="auth.sign_in_first")
     user = session.get(User, row.user_id)
     if user is None or user.disabled_at is not None:
-        raise Unauthorized("sign in first")
+        raise Unauthorized("sign in first", code="auth.sign_in_first")
     session_service.touch(session, row)
     return user
 
@@ -73,7 +73,7 @@ CurrentUser = Annotated[User, Depends(current_user)]
 def require_owner(user: CurrentUser) -> User:
     """403 is right here: they are signed in, so they know the thing exists."""
     if user.role is not Role.owner:
-        raise Forbidden("only the owner can do that")
+        raise Forbidden("only the owner can do that", code="auth.owner_only")
     return user
 
 

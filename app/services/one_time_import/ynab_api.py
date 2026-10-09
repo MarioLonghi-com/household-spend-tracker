@@ -53,7 +53,7 @@ def get(token: str, path: str) -> dict:
     client sent, each quoted; nothing here takes a URL from outside.
     """
     if not token or not token.strip():
-        raise YnabError("a YNAB personal access token is needed")
+        raise YnabError("a YNAB personal access token is needed", code="ynab.token_needed")
     request = urllib.request.Request(
         BASE + path,
         headers={"Authorization": f"Bearer {token.strip()}", "Accept": "application/json"},
@@ -65,33 +65,40 @@ def get(token: str, path: str) -> dict:
                 answer, limit=MAX_RESPONSE_BYTES, seconds=DEADLINE_SECONDS
             )
     except outbound.TooLarge:
-        raise YnabError("YNAB's answer was larger than this import will read") from None
+        raise YnabError(
+            "YNAB's answer was larger than this import will read", code="ynab.answer_too_large"
+        ) from None
     except outbound.TooSlow:
-        raise YnabError("YNAB took too long to answer; try again later") from None
+        raise YnabError("YNAB took too long to answer; try again later", code="ynab.timeout") from None
     except urllib.error.HTTPError as refused:
         status = refused.code
         refused.close()
         if status == 401:
-            raise YnabError(TOKEN_REJECTED) from None
+            raise YnabError(TOKEN_REJECTED, code="ynab.token_rejected") from None
         if status == 404:
-            raise YnabError("YNAB has no such plan for this token") from None
+            raise YnabError("YNAB has no such plan for this token", code="ynab.no_such_plan") from None
         if status == 429:
             raise YnabError(
-                "YNAB is limiting requests from this token for now; try again in an hour"
+                "YNAB is limiting requests from this token for now; try again in an hour",
+                code="ynab.rate_limited",
             ) from None
-        raise YnabError(f"YNAB answered {status}; try again later") from None
+        raise YnabError(
+            f"YNAB answered {status}; try again later", code="ynab.status", params={"status": status}
+        ) from None
     except (urllib.error.URLError, TimeoutError, OSError):
-        raise YnabError("YNAB could not be reached; check the connection and try again") from None
+        raise YnabError(
+            "YNAB could not be reached; check the connection and try again", code="ynab.unreachable"
+        ) from None
 
     try:
         parsed = json.loads(body)
     except (ValueError, RecursionError):
         # RecursionError: `[[[[...` nests deeper than the parser goes, and it
         # is not a ValueError (#223).
-        raise YnabError("YNAB's answer could not be read") from None
+        raise YnabError("YNAB's answer could not be read", code="ynab.answer_unreadable") from None
     data = parsed.get("data") if isinstance(parsed, dict) else None
     if not isinstance(data, dict):
-        raise YnabError("YNAB's answer could not be read")
+        raise YnabError("YNAB's answer could not be read", code="ynab.answer_unreadable")
     return data
 
 
@@ -113,7 +120,7 @@ def _listed(value: object) -> list:
     if value is None:
         return []
     if not isinstance(value, list):
-        raise YnabError("YNAB's answer could not be read")
+        raise YnabError("YNAB's answer could not be read", code="ynab.answer_unreadable")
     return value
 
 

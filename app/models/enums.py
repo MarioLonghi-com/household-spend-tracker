@@ -176,6 +176,18 @@ class BatchKind(enum.StrEnum):
     admin = "admin"
 
 
+class SuggestionStatus(enum.StrEnum):
+    """Where a suggested wording is (#272).
+
+    ``open`` is what the next export carries. ``applied`` is one the owner has
+    marked as taken into the catalogs: kept, so who suggested what stays on
+    record, and left out of the export, so it is not applied twice.
+    """
+
+    open = "open"
+    applied = "applied"
+
+
 class BatchStatus(enum.StrEnum):
     #: Open. A batch that never leaves this state died with its process.
     running = "running"

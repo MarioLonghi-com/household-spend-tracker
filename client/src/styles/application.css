@@ -206,3 +206,22 @@
   .update-facts th { white-space: normal; }
   .update-takeover-body { padding: 20px 16px; }
 }
+
+/* Review mode (#272) ---------------------------------------------------------
+   The one control review mode adds to every screen: bottom right, above the
+   page and below the drawer, the panels and the dialogs (z-index 20 and up),
+   so it never covers what it would be suggesting for. Only drawn while an
+   owner is reviewing a draft language on this device. */
+.suggest-wording {
+  position: fixed;
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 15;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
+}
+.suggest-matches li { padding: 6px 0; border-bottom: 1px solid var(--line); }
+.suggest-matches .link { text-align: left; }
+.suggest-facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0 0 12px; }
+.suggest-facts dt { color: var(--muted); }
+.suggest-facts dd { margin: 0; overflow-wrap: anywhere; }

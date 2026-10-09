@@ -35,6 +35,12 @@ msgstr "Always use my choice"
 msgid "Mentions"
 msgstr "Mentions"
 
+#. Button shown while reviewing a draft language: propose better words for one message
+#. Title of the panel where a reviewer proposes better words for one message
+#: src/components/SuggestWording.tsx
+msgid "Suggest a better wording"
+msgstr "Suggest a better wording"
+
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
 msgid "Creating…"
@@ -526,12 +532,15 @@ msgstr "More currencies"
 msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 msgstr "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 
+#. Column heading on Application management's suggestions: when it was suggested
 #. Column heading on the Admin screen: noun, the time
 #. Column heading on the History screen: noun, the time
+#. Column name shown beside a value on phones on Application management's suggestions
 #. Column name shown beside a value on phones on the History screen: noun, the time
 #. Name of a fact on the History screen: noun, the time
 #: src/screens/Admin.tsx
 #: src/screens/History.tsx
+#: src/screens/TranslationReview.tsx
 msgid "When"
 msgstr "When"
 
@@ -1017,6 +1026,12 @@ msgstr "I understand that <0>{revision}</0> cannot be undone except from the bac
 msgid "the file <0>{0}</0>"
 msgstr "the file <0>{0}</0>"
 
+#. Application management: how many suggestions are waiting and how many are in the catalogs
+#. placeholder {0}: rows.length - open
+#: src/screens/TranslationReview.tsx
+msgid "{open} open, {0} applied."
+msgstr "{open} open, {0} applied."
+
 #: src/screens/Accounts.tsx
 msgid "The type and currency are fixed once an account exists, because every transaction on it is recorded in that currency."
 msgstr "The type and currency are fixed once an account exists, because every transaction on it is recorded in that currency."
@@ -1452,6 +1467,7 @@ msgid "New"
 msgstr "New"
 
 #. Hidden column heading over row buttons
+#. Screen-reader name on Application management's suggestions
 #. Screen-reader name on the Accounts screen
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Payees screen
@@ -1465,6 +1481,7 @@ msgstr "New"
 #: src/screens/Payees.tsx
 #: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
+#: src/screens/TranslationReview.tsx
 msgid "Actions"
 msgstr "Actions"
 
@@ -1784,6 +1801,11 @@ msgstr "Anything you change here is recorded, and can be put back from the Histo
 msgid "Undo"
 msgstr "Undo"
 
+#. Review mode: the suggestion was saved
+#: src/components/SuggestWording.tsx
+msgid "Saved. It is in the next download of suggestions, on Application management."
+msgstr "Saved. It is in the next download of suggestions, on Application management."
+
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
 msgid "Making…"
@@ -1865,6 +1887,11 @@ msgstr "None yet"
 #: src/screens/ynab/mapping.tsx
 msgid "{0, plural, one {Its {1} row is left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
 msgstr "{0, plural, one {Its {1} row is left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
+
+#. Review mode: the suggestion lost a placeholder or a tag; the two examples are written as they are
+#: src/components/SuggestWording.tsx
+msgid "Keep every placeholder and tag the English has, like <0>{placeholder}</0> or <1>{tag}</1>: they are where names, numbers and links go."
+msgstr "Keep every placeholder and tag the English has, like <0>{placeholder}</0> or <1>{tag}</1>: they are where names, numbers and links go."
 
 #: src/screens/OneTimeImport.tsx
 msgid "Currency of the plan"
@@ -2035,6 +2062,11 @@ msgstr "New name for {0}"
 #: src/screens/Register.tsx
 msgid "Sum"
 msgstr "Sum"
+
+#. Label of the search box in review mode: find a message by its words
+#: src/components/SuggestWording.tsx
+msgid "Find the message, in English or as it reads now"
+msgstr "Find the message, in English or as it reads now"
 
 #: src/screens/Updates.tsx
 msgid "The update was left to be finished from a terminal."
@@ -2406,6 +2438,11 @@ msgstr "Which plan to import"
 msgid "This writes the ledger's own values into a file in plain text. Turn it off when you are done."
 msgstr "This writes the ledger's own values into a file in plain text. Turn it off when you are done."
 
+#. Review mode: label of the draft translation as it reads now
+#: src/components/SuggestWording.tsx
+msgid "Now"
+msgstr "Now"
+
 #. Label on the household page
 #: src/screens/Household.tsx
 msgid "Newest transaction"
@@ -2461,6 +2498,11 @@ msgstr "Select every waiting row"
 msgid "not saved — leave the field to try again"
 msgstr "not saved — leave the field to try again"
 
+#. Review mode: label of an optional note explaining the suggestion
+#: src/components/SuggestWording.tsx
+msgid "Why, if it helps (optional)"
+msgstr "Why, if it helps (optional)"
+
 #: src/screens/Reconcile.tsx
 msgid "The bank says there is more than you have ticked — a payment in you have not entered?"
 msgstr "The bank says there is more than you have ticked — a payment in you have not entered?"
@@ -2473,6 +2515,7 @@ msgstr "That isn't an amount"
 msgid "Yes, revoke it"
 msgstr "Yes, revoke it"
 
+#. Button on Application management: delete this suggestion
 #. Button on the Backups screen: verb
 #. Button on the Categories screen: verb
 #. Button on the Register screen: verb
@@ -2484,6 +2527,7 @@ msgstr "Yes, revoke it"
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #: src/screens/Rules.tsx
+#: src/screens/TranslationReview.tsx
 msgid "Delete"
 msgstr "Delete"
 
@@ -2976,6 +3020,11 @@ msgstr "No category needed"
 msgid "not counted"
 msgstr "not counted"
 
+#. Application management: how to send the suggestions on; the links follow
+#: src/screens/TranslationReview.tsx
+msgid "Download the open suggestions for <0>scripts/apply_translation_suggestions.py</0>:"
+msgstr "Download the open suggestions for <0>scripts/apply_translation_suggestions.py</0>:"
+
 #: src/screens/OneTimeImport.tsx
 msgid "Close the import? Everything chosen so far will be lost."
 msgstr "Close the import? Everything chosen so far will be lost."
@@ -3050,6 +3099,129 @@ msgstr "No payments linked yet."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.account_import.column_twice"
+msgstr "This file has the column {column} twice"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.missing_column"
+msgstr "This file has no {columns} column, and every account needs one. The first line should name the columns, as the template does."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.no_accounts"
+msgstr "There are no accounts in this file"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.not_csv"
+msgstr "Line {line} of this file cannot be read as CSV. Save it from the spreadsheet as CSV again, or start from the template."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.rows_refused"
+msgstr "{refused} of {rows, plural, one {# row} other {# rows}} cannot be imported, so none were. Nothing has been changed; correct the file and try again."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.too_many_rows"
+msgstr "This file has more than {max} accounts in it, which is more than a household has -- it may be a statement rather than a list of accounts"
+
+#. {columns} and {known} are column names, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account_import.unknown_column"
+msgstr "This file has a column this does not know: {columns}. The columns are {known} -- download the template to start from them."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.lifetime"
+msgstr "A key can last between a day and {max_days} days"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.needs_label"
+msgstr "Give the key a label, so you know what it is for"
+
+#. A key for a program. See GLOSSARY.md (Keys for programs)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.not_found"
+msgstr "No such key"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.not_issuer"
+msgstr "Only the person who issued a key can revoke it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.read_only_commit"
+msgstr "A read-only key has nothing to commit"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.authenticator_cleared"
+msgstr "This account's authenticator was reset, so there is no code to give. Use the reset link you were sent to enrol a new one, or ask an owner for a new link."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.code_wrong"
+msgstr "That code is not right, or has already been used"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.new_code_wrong"
+msgstr "That code is not right. Check the time on your phone and try again."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.owner_only"
+msgstr "Only the owner can do that"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.recovery_code_wrong"
+msgstr "That recovery code is not right, or has already been used"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.refused"
+msgstr "That email and password do not match"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.secret_unreadable"
+msgstr "That authenticator secret cannot be read with this server key"
+
+#. Refusal when the session has ended or never began
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.sign_in_first"
+msgstr "Sign in first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.start_again"
+msgstr "Start again from the sign-in page"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.too_many_attempts"
+msgstr "Too many attempts. Try again in {seconds, plural, one {# second} other {# seconds}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.too_many_for_account"
+msgstr "Too many attempts for this account. Try again in {seconds, plural, one {# second} other {# seconds}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.too_many_from_here"
+msgstr "Too many attempts from here. Try again in {seconds, plural, one {# second} other {# seconds}}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.backup.protected"
 msgstr "{name} is one of the newest five update backups. They are kept so an update can be undone, and the updater removes older ones itself"
 
@@ -3115,6 +3287,169 @@ msgstr "{code} is not an ISO 4217 currency code. Check the spelling, like GBP or
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.email.no_name"
+msgstr "{email} has no usable name before the @"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.email.not_an_address"
+msgstr "{email} is not an email address"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.email.too_long"
+msgstr "That email address is too long (max {max} characters)"
+
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.history.batch_not_found"
+msgstr "No such batch"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.history.no_such_table"
+msgstr "No such table in the audit log"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.household.not_found"
+msgstr "No such household"
+
+#. force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.already_imported"
+msgstr "This exact file was already imported into {account} on {at} (as {filename}). Nothing has been changed. If you meant to import it again, send it with force set."
+
+#. {at} is when the earlier import was made; force is the name of a request field
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.already_staged"
+msgstr "This exact file is already staged for {account}, from {at} (as {filename}), and is waiting to be reviewed. Open that import rather than starting a second one, or send this with force set."
+
+#. {products} is the bank's own names for the accounts in the file
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.choose_product"
+msgstr "This file holds more than one account ({products}), and {account} has not said which of them it is. Set its statement product on the Accounts screen, then read the file again."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.committed_not_purged"
+msgstr "That import is {status}, not staged. A committed import is put back from History rather than purged."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.file_too_large"
+msgstr "That file is larger than this is meant for (at most {max_bytes, number} bytes)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_already_in_account"
+msgstr "That statement line is already in this account"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_has_no_payee"
+msgstr "This line has no payee to attach a rule to"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_needs_category"
+msgstr "Give the line a category first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_no_own_category"
+msgstr "That line has no category of its own to apply"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.line_not_found"
+msgstr "No such line on this import"
+
+#. Batch: one act in History. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_an_import"
+msgstr "That batch is not an import"
+
+#. {status} is the import's state as stored: applied, preview, failed, undone
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_awaiting_commit"
+msgstr "That import is {status}, not waiting to be committed"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_found"
+msgstr "No such import"
+
+#. {status} is the import's state as stored
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.not_staged"
+msgstr "That import is {status}, not staged"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.product_absent"
+msgstr "{account} takes the {product} rows of a statement, and this file has none: it holds {products}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.send_something"
+msgstr "Send a file or some pasted text"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.import.wrong_currency"
+msgstr "This file is in {currencies}, and {account} holds {currency}: none of its rows are in {currency}. Import it into an account that holds {currencies}, or check that this is the right file."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.address_unusable"
+msgstr "That email address cannot be used for a new account here, and this link is now spent. Ask whoever invited you for a new one."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.already_used"
+msgstr "That invitation has already been used; disable the account instead"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.link_invalid"
+msgstr "That invitation link is not valid"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.not_an_invitation"
+msgstr "That is not an invitation"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.not_found"
+msgstr "No such invitation"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.owner_only"
+msgstr "Only an owner can invite people"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.invite.owner_only_withdraw"
+msgstr "Only an owner can withdraw an invitation"
+
+#. Two people changed the ledger at the same moment. See GLOSSARY.md (ledger)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ledger.busy"
+msgstr "The ledger is busy with another change at this moment; try again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.money.amount_too_large"
 msgstr "That amount is too large to record as money"
 
@@ -3152,6 +3487,78 @@ msgstr "{value} has more decimals than {currency} has ({places})"
 #: src/lib/errorMessages.ts
 msgid "error.money.too_many_digits"
 msgstr "An amount {digits} digits long is too large to record as money"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.already_registered"
+msgstr "That passkey is already registered"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.needs_name"
+msgstr "A passkey needs a name"
+
+#. A user handle is the WebAuthn id of a person; an internal step
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.no_user_handle"
+msgstr "Give the member a user handle first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.not_an_answer"
+msgstr "That is not a passkey answer"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.not_found"
+msgstr "No such passkey"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.not_registered"
+msgstr "That passkey could not be registered here. Start again."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.refused"
+msgstr "That passkey cannot sign in here"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.too_many_at_once"
+msgstr "Too many sign-ins at once. Try again in a minute."
+
+#. Why passkeys cannot be used here; {reason} picks the sentence. See GLOSSARY.md (passkey)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.unavailable"
+msgstr "{reason, select, not_configured {Passkeys are not set up on this server} ip_address {Passkeys need a host name, and this server is configured with an IP address} wrong_host {Passkeys work only at this server's own address} insecure {Passkeys need this app opened over HTTPS} no_origins {Passkeys need the server's public address configured} other {Passkeys are not available here}}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.password.common"
+msgstr "That password is one of the {count, number} most common passwords, which are the first ones anybody guessing tries"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.password.common_and_is_email"
+msgstr "That password is one of the {count, number} most common passwords, and it cannot be your email address"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.password.is_email"
+msgstr "A password cannot be your email address"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.password.too_short"
+msgstr "That password is too short: it needs at least {min_length} characters"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.password.too_short_and_is_email"
+msgstr "That password needs at least {min_length} characters, and it cannot be your email address"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3345,6 +3752,144 @@ msgstr "This was written off. Set it back to expected before recording a payment
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.request.cross_origin"
+msgstr "That request did not come from this app"
+
+#. A form or request was refused. {fields} are the API's own field names, like body.amount, kept as they are
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.request.invalid"
+msgstr "Some of what was sent is not right: {fields}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.account_disabled"
+msgstr "That account is disabled, so a reset link for it could not be followed. Re-enable it first."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.choose_password"
+msgstr "Choose a new password"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.choose_what"
+msgstr "Choose what to reset: the password, the authenticator, or both"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.enrol_first"
+msgstr "Enrol a new authenticator first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.link_invalid"
+msgstr "That reset link is not valid"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.not_authenticator"
+msgstr "This link does not change the authenticator"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.not_found"
+msgstr "No such reset link"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.not_password"
+msgstr "This link does not change the password"
+
+#. The QR code offered for setting up a new authenticator
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.offer_expired"
+msgstr "That authenticator offer has expired; scan a new one"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.overtaken"
+msgstr "That reset link was used or replaced a moment ago. Look at the account again before doing anything else to it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.own_account"
+msgstr "You cannot reset your own account here: change your password or your authenticator from your profile"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.owner_only"
+msgstr "Only an owner can reset an account"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.owner_only_withdraw"
+msgstr "Only an owner can withdraw a reset link"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.address_taken"
+msgstr "Somebody already uses that email address"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.already_done"
+msgstr "This instance has already been set up"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.enrol_first"
+msgstr "Finish enrolling an authenticator first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.is_an_invitation"
+msgstr "That is an invitation; finish it from the link you were sent"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.needs_display_name"
+msgstr "A display name is required"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.not_waiting"
+msgstr "This instance is not waiting to be set up"
+
+#. /setup is a web address and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.required"
+msgstr "This instance has not been set up yet; open /setup"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.server_restarted"
+msgstr "The server restarted; start again with the new setup token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.session_expired"
+msgstr "That setup session has expired; start again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.session_invalid"
+msgstr "That setup session is not valid; start again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.store_codes"
+msgstr "Store your recovery codes somewhere that is not this browser, then tick the box"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.token_wrong"
+msgstr "That setup token is not right"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.split.does_not_add_up"
 msgstr "The parts come to {total} and the transaction is {amount}. A split has to add up, or it moves the balance."
 
@@ -3372,6 +3917,22 @@ msgstr "Every part of a work expense has to be money going out, because each par
 #: src/lib/errorMessages.ts
 msgid "error.split.zero_part"
 msgstr "A part of a split cannot be zero"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.statement.unreadable"
+msgstr "This file cannot be read as a statement"
+
+#. See GLOSSARY.md (step-up)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.stepup.needed"
+msgstr "Confirm your password and authenticator code first"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.stepup.refused"
+msgstr "That password and code do not match"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3485,6 +4046,11 @@ msgstr "Both sides of a same-currency transfer must be the same amount"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.translation.suggestion_not_found"
+msgstr "No such suggested wording"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.update.digest_mismatch"
 msgstr "The image digests are not the ones the prepare report verified. Prepare the update again"
 
@@ -3547,6 +4113,237 @@ msgstr "The updater of {to_version} is older than this instance, which runs {run
 #: src/lib/errorMessages.ts
 msgid "error.update.updater_outdated"
 msgstr "The updater is too old for this container engine. Update the updater first, then try again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.upload.too_large"
+msgstr "That file is too large (at most {max_bytes, number} bytes)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.user.cannot_disable_self"
+msgstr "You cannot disable yourself; there would be nobody left to undo it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.user.no_owner_left"
+msgstr "There would be no owner left"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.user.not_found"
+msgstr "No such person"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_currency"
+msgstr "{account} is in {account_currency}, and this plan is in {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_elsewhere"
+msgstr "The account chosen for {account} is not in this household"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_mapping_unknown"
+msgstr "{kind} is not something an account can be mapped to"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_twice"
+msgstr "{first} and {second} both go to {account}; each YNAB account needs an account of its own"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_type_unknown"
+msgstr "{type} is not an account type"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.account_undecided"
+msgstr "Say what to do with the YNAB account {account}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.amount_too_long"
+msgstr "Line {line} of this file has an amount longer than {max} characters, which YNAB never writes -- it may not be a YNAB export, or it may be damaged"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.answer_too_large"
+msgstr "YNAB's answer was larger than this import will read"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.answer_unreadable"
+msgstr "YNAB's answer could not be read"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.category_elsewhere"
+msgstr "The category chosen for {category} is not in this household"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.category_mapping_unknown"
+msgstr "{kind} is not something a category can be mapped to"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.category_undecided"
+msgstr "Say what to do with the YNAB category {category}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.choose_export"
+msgstr "Choose the YNAB export: the zip, or its Register.csv"
+
+#. A plan is what YNAB calls a budget
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.choose_plan"
+msgstr "Choose which YNAB plan to import"
+
+#. See GLOSSARY.md (Cleared, Uncleared, reconcile)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.confirm_states"
+msgstr "Confirm that YNAB's reconciled and cleared states are reset: everything arrives uncleared"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.currency_not_a_code"
+msgstr "{currency} is not a three-letter currency code"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.date_format_unknown"
+msgstr "{format} is not a date format this import reads"
+
+#. {format} is a date pattern like DD/MM/YYYY
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.date_unreadable"
+msgstr "{date} is not a {format} date"
+
+#. YNAB's coloured flags on a transaction
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.flags_choice"
+msgstr "Flags are either kept in the memo or ignored"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.new_account_needs_name"
+msgstr "The new account for {account} needs a name"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.new_category_needs_name"
+msgstr "The new category for {category} needs a name"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.no_such_plan"
+msgstr "YNAB has no such plan for this token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.no_transactions"
+msgstr "There are no transactions in this file"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.not_csv"
+msgstr "Line {line} of this file cannot be read as CSV. Export the plan from YNAB again and upload the zip or its Register.csv."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.not_register"
+msgstr "This is not a YNAB Register.csv: it has no {columns} column. Export the plan from YNAB and upload the zip or its Register.csv."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.plan_not_register"
+msgstr "Only the YNAB Register.csv is needed, not the Plan.csv"
+
+#. The import plan: the choices made on the One-time Import screen
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.plan_unreadable"
+msgstr "The import plan cannot be read"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.range_backwards"
+msgstr "The date range ends before it starts"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.rate_limited"
+msgstr "YNAB is limiting requests from this token for now; try again in an hour"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.register_too_large"
+msgstr "The Register.csv in that zip is larger than this import reads"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.rows_taken"
+msgstr "Some of these rows were imported by another request a moment ago; open the Import screen and check History before trying again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.say_how"
+msgstr "Say how to reach YNAB: through its export file or its API"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.starting_balance_choice"
+msgstr "The starting balance is either imported or skipped"
+
+#. {status} is an HTTP status number, like 503
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.status"
+msgstr "YNAB answered {status}; try again later"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.timeout"
+msgstr "YNAB took too long to answer; try again later"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.token_malformed"
+msgstr "That is not a YNAB personal access token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.token_needed"
+msgstr "A YNAB personal access token is needed"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.token_rejected"
+msgstr "YNAB rejected the token"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.unreachable"
+msgstr "YNAB could not be reached; check the connection and try again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.zip_has_no_register"
+msgstr "Only the YNAB Register.csv is needed, not the Plan.csv, and this zip has no Register.csv in it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.ynab.zip_unreadable"
+msgstr "That zip file cannot be opened"
 
 #. Column heading on the Application management screen
 #. Column name shown beside a value on phones on the Application management screen
@@ -4178,6 +4975,12 @@ msgstr "Encoding and sending…"
 msgid "Show them"
 msgstr "Show them"
 
+#. What kind of row changed, lower case, singular, in History beside its id: a better translation an owner suggested
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "suggested wording"
+msgstr "suggested wording"
+
 #: src/components/SignInNotice.tsx
 #: src/screens/Admin.tsx
 msgid "Recent sign-in changes"
@@ -4381,6 +5184,492 @@ msgstr "Detaching…"
 msgid "This row is locked, so nothing here can be changed and an import will not match against it. Set it back to cleared to edit it."
 msgstr "This row is locked, so nothing here can be changed and an import will not match against it. Set it back to cleared to edit it."
 
+#. History: the value of a yes/no field, like archived
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.bool.no"
+msgstr "no"
+
+#. History: the value of a yes/no field, like archived
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.bool.yes"
+msgstr "yes"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.accounts"
+msgstr "{count, plural, one {# account} other {# accounts}}"
+
+#. History: a count of changed rows of one kind: keys for programs
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.agent_keys"
+msgstr "{count, plural, one {# agent key} other {# agent keys}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.categories"
+msgstr "{count, plural, one {# category} other {# categories}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.category_groups"
+msgstr "{count, plural, one {# category group} other {# category groups}}"
+
+#. History: a count of changed rows of one kind: people in a household
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.household_members"
+msgstr "{count, plural, one {# member} other {# members}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.households"
+msgstr "{count, plural, one {# household} other {# households}}"
+
+#. History: suggested account numbers a person dismissed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.ignored_identifier_suggestions"
+msgstr "{count, plural, one {# ignored identifier suggestion} other {# ignored identifier suggestions}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.invitations"
+msgstr "{count, plural, one {# invitation} other {# invitations}}"
+
+#. History: a count of changed rows of one kind: rules that name payees
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.payee_rules"
+msgstr "{count, plural, one {# payee rule} other {# payee rules}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.payees"
+msgstr "{count, plural, one {# payee} other {# payees}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.receipts"
+msgstr "{count, plural, one {# receipt} other {# receipts}}"
+
+#. History: a count of changed rows of one kind. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.reconciliations"
+msgstr "{count, plural, one {# reconciliation} other {# reconciliations}}"
+
+#. History: a count of changed rows of one kind
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.transactions"
+msgstr "{count, plural, one {# transaction} other {# transactions}}"
+
+#. History: two rows a person said are not one transfer
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.transfer_rejections"
+msgstr "{count, plural, one {# pair marked not a transfer} other {# pairs marked not a transfer}}"
+
+#. History: better translations an owner suggested in review mode
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.translation_suggestions"
+msgstr "{count, plural, one {# suggested wording} other {# suggested wordings}}"
+
+#. History: a count of changed rows of one kind: people who sign in
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.count.users"
+msgstr "{count, plural, one {# user} other {# users}}"
+
+#. History: accounts read from a file. {file} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.account_import"
+msgstr "{count, plural, one {# account} other {# accounts}} from {file}."
+
+#. History: an import one person prepared and another applied. {who} is that person's name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.applied_by"
+msgstr "{sentence} Applied by {who}."
+
+#. History: an import applied by a person since removed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.applied_by_somebody"
+msgstr "{sentence} Applied by somebody else."
+
+#. History: a statement import. {made} is like 12 new transactions; {filename} the file's name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.import"
+msgstr "{made} into {account} from {filename}."
+
+#. History: a statement import with no file name. {made} is like 12 new transactions
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.import_no_file"
+msgstr "{made} into {account}."
+
+#. History: what was done to keys for programs, as a sentence
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.keys"
+msgstr "{acts}."
+
+#. History: a reconciliation locked these rows. See GLOSSARY.md (Locked)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.locked"
+msgstr "{count, plural, one {# transaction} other {# transactions}} locked."
+
+#. History: an act that changed no rows
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.nothing"
+msgstr "Nothing was changed."
+
+#. History: a one-time import from YNAB, counted in changed rows
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.one_time.changes"
+msgstr "{changes, plural, one {# change} other {# changes}}{linked, plural, =0 {} one {, # transfer linked} other {, # transfers linked}}."
+
+#. History: a one-time import from YNAB, counted in changed rows. {where} is the file or budget
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.one_time.changes_from"
+msgstr "{changes, plural, one {# change} other {# changes}}{linked, plural, =0 {} one {, # transfer linked} other {, # transfers linked}} from {where}."
+
+#. History: a one-time import from YNAB, the rows it brought and the transfers it paired
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.one_time.transactions"
+msgstr "{imported, plural, one {# transaction} other {# transactions}}{linked, plural, =0 {} one {, # transfer linked} other {, # transfers linked}}."
+
+#. History: a one-time import from YNAB. {where} is the file or budget it read
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.one_time.transactions_from"
+msgstr "{imported, plural, one {# transaction} other {# transactions}}{linked, plural, =0 {} one {, # transfer linked} other {, # transfers linked}} from {where}."
+
+#. History: an undo whose original act is gone. {tally} is like 3 transactions changed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.put_back"
+msgstr "Put back {tally}."
+
+#. History: a reconciliation. {balance} is the statement's closing balance. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.reconciled"
+msgstr "{account} proved against a statement closing {date} at {balance} — {count, plural, one {# transaction} other {# transactions}} locked."
+
+#. History: an undo. {headline} is the kind of act undone, lower case; {detail} the sentence about it
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.reversed"
+msgstr "Reversed: {headline} — {detail}"
+
+#. History: a transaction divided into {count} parts, listed after the colon. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.split"
+msgstr "{amount} on {date} split into {count}: {parts}."
+
+#. History: a split whose parts cannot be read back. Split is the noun. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.split_unknown"
+msgstr "Split — {count, plural, one {# transaction} other {# transactions}} changed."
+
+#. History: a transaction divided into {count} parts, listed after the colon. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.split_with_payee"
+msgstr "{payee} {amount} on {date} split into {count}: {parts}."
+
+#. History: a count of what an act did, as a sentence, like 12 transactions changed.
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.detail.tally"
+msgstr "{tally}."
+
+#. History: the value of an empty field
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.empty"
+msgstr "nothing"
+
+#. History: a household's accent colour when none is chosen: the palette's own is used
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.empty.accent"
+msgstr "the palette's own"
+
+#. History: the value of a transaction's category when it has none. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.empty.category_id"
+msgstr "uncategorised"
+
+#. History: the value of a payee's default category when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.empty.default_category_id"
+msgstr "no default"
+
+#. History: the value of an account's bank when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.empty.institution"
+msgstr "no bank"
+
+#. History: the value of a memo when it is empty. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.empty.memo"
+msgstr "no memo"
+
+#. History: the value of a note when it is empty. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.empty.note"
+msgstr "no note"
+
+#. History: the value of a transaction's payee when it has none
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.empty.payee_id"
+msgstr "no payee"
+
+#. History: a work expense with no repayment linked yet
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.empty.reimbursed_by_id"
+msgstr "not yet reimbursed"
+
+#. History: a transaction work does not pay back. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.empty.reimbursement"
+msgstr "not a work expense"
+
+#. History: the state of a transaction the bank has. See GLOSSARY.md (Cleared)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.enum.cleared.cleared"
+msgstr "cleared"
+
+#. History: the state of a transaction locked by a reconciliation. See GLOSSARY.md (Locked)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.enum.cleared.reconciled"
+msgstr "reconciled"
+
+#. History: the state of a transaction the bank has not seen. See GLOSSARY.md (Uncleared)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.enum.cleared.uncleared"
+msgstr "uncleared"
+
+#. History: a work expense work should pay back. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.enum.reimbursement.expected"
+msgstr "expected"
+
+#. History: a work expense work will not pay. See GLOSSARY.md (Written off)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.enum.reimbursement.written_off"
+msgstr "written off"
+
+#. History: an account that cannot be named, in a sentence about an import
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.fallback.account"
+msgstr "an account"
+
+#. History: one field's change, from the old value to the new. {field} is lower case, like amount
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.field_change"
+msgstr "{field} {was} → {now}"
+
+#. History: how many rows an act changed
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.import.changes"
+msgstr "{count, plural, one {# change} other {# changes}}"
+
+#. History: how many rows a statement import added
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.import.created"
+msgstr "{count, plural, one {# new transaction} other {# new transactions}}"
+
+#. History: how many rows of a statement were already in the ledger
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.import.matched"
+msgstr "{count, plural, one {# matched to rows already there} other {# matched to rows already there}}"
+
+#. History: a key for a program was changed. {label} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.key.changed"
+msgstr "Changed the key “{label}”"
+
+#. History: a key for a program was made. {label} is the name it was given
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.key.issued"
+msgstr "Issued the key “{label}”"
+
+#. History: a key for a program was deleted. {label} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.key.removed"
+msgstr "Removed the key “{label}”"
+
+#. History: a key for a program stopped working. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.key.revoked"
+msgstr "Revoked the key “{label}”"
+
+#. History: which account a transaction is in, after its amount and payee. {account} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.label.in_account"
+msgstr "in {account}"
+
+#. History, one changed row: a row was added. {table} is the kind of row, {label} what it is
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.line.added"
+msgstr "Added {table} {label}"
+
+#. History, one changed row: a part made by splitting a transaction. {origin} is the one divided
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.line.added_by_splitting"
+msgstr "Added {table} {label} by splitting {origin}"
+
+#. History, one changed row: added by an import. {workflow} is its name, like One-time Import · YNAB (CSV)
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.line.added_by_workflow"
+msgstr "Added {table} {label} by {workflow}"
+
+#. History, one changed row: changed in columns History does not name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.line.changed"
+msgstr "Changed {table} {label}"
+
+#. History, one changed row: what it is, then each change to it
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.line.fields"
+msgstr "{label}: {fields}"
+
+#. History, one changed row: a row was deleted. {table} is the kind of row, {label} what it was
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.line.removed"
+msgstr "Removed {table} {label}"
+
+#. History, one changed row: written again with nothing different
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.line.touched"
+msgstr "Touched {table} {label}"
+
+#. History: the payment that repaid a work expense, by amount, account and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.payment"
+msgstr "{amount} into {account} on {date}"
+
+#. History: a value naming an account that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.removed.account"
+msgstr "an account since removed"
+
+#. History: a value naming a category that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.removed.category"
+msgstr "a category since removed"
+
+#. History: a value naming a payee that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.removed.payee"
+msgstr "a payee since removed"
+
+#. History: a value naming a transaction that has been deleted
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.removed.transaction"
+msgstr "a transaction since removed"
+
+#. History: the transaction a split divided, by amount and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.split.origin"
+msgstr "{amount} on {date}"
+
+#. History: the transaction a split divided, by payee, amount and date
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.split.origin_with_payee"
+msgstr "{payee} {amount} on {date}"
+
+#. History: one part of a split, its amount and its category
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.split.part_with_category"
+msgstr "{amount} ({category})"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.tally.added"
+msgstr "{counts} added"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.tally.changed"
+msgstr "{counts} changed"
+
+#. History: {counts} is a list like 3 transactions, 1 payee
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.tally.removed"
+msgstr "{counts} removed"
+
+#. History: a name that cannot be read. Keep it short
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.unknown"
+msgstr "?"
+
 #: src/lib/signInChanges.ts
 msgid "The server reset {user}'s authenticator"
 msgstr "The server reset {user}'s authenticator"
@@ -4440,6 +5729,11 @@ msgstr "Not a transfer"
 msgid "One-time Import · YNAB (API)"
 msgstr "One-time Import · YNAB (API)"
 
+#. Button on Application management: put this suggestion back in the next download
+#: src/screens/TranslationReview.tsx
+msgid "Mark open"
+msgstr "Mark open"
+
 #. Shown when a list is empty on the Transfers screen
 #: src/screens/Transfers.tsx
 msgid "Nothing to look at."
@@ -4477,6 +5771,11 @@ msgstr "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it ha
 msgctxt "starting balance rows"
 msgid "Skip"
 msgstr "Skip"
+
+#. Review mode: label of the note written for translators
+#: src/components/SuggestWording.tsx
+msgid "Note for translators"
+msgstr "Note for translators"
 
 #: src/screens/Profile.tsx
 msgid "Confirm and replace"
@@ -4546,6 +5845,11 @@ msgstr "{inviter} invited you to {PRODUCT} as an owner, in {households}."
 #: src/screens/Passkeys.tsx
 msgid "Passkeys are not set up on this server."
 msgstr "Passkeys are not set up on this server."
+
+#. Beside a language's name in the language picker: its words are a draft, being reviewed
+#: src/components/LanguagePicker.tsx
+msgid "Preview — machine translated, under review"
+msgstr "Preview — machine translated, under review"
 
 #: src/screens/Admin.tsx
 msgid "anyone with the link"
@@ -4828,6 +6132,11 @@ msgstr "Show a code to scan"
 msgid "Passkeys need this app opened at its HTTPS address."
 msgstr "Passkeys need this app opened at its HTTPS address."
 
+#. Button in review mode: back to finding another message
+#: src/components/SuggestWording.tsx
+msgid "Find another message"
+msgstr "Find another message"
+
 #: src/screens/Register.tsx
 msgid "One part is still empty"
 msgstr "One part is still empty"
@@ -5104,6 +6413,11 @@ msgstr "Detach this receipt?"
 #: src/screens/reports/Reimbursements.tsx
 msgid "Category"
 msgstr "Category"
+
+#. Heading on the Application management screen: reviewing the draft languages
+#: src/screens/TranslationReview.tsx
+msgid "Translations"
+msgstr "Translations"
 
 #. placeholder {0}: lossy.length
 #: src/screens/Updates.tsx
@@ -5648,6 +6962,14 @@ msgstr "read"
 msgid "Not for this account"
 msgstr "Not for this account"
 
+#. Column heading on Application management's suggestions: the message's English source
+#. Column name shown beside a value on phones on Application management's suggestions
+#. Review mode: label of the message's English source
+#: src/components/SuggestWording.tsx
+#: src/screens/TranslationReview.tsx
+msgid "English"
+msgstr "English"
+
 #. Table cell on the receipts
 #: src/screens/Receipts.tsx
 msgid "(uploaded)"
@@ -6013,6 +7335,11 @@ msgstr "Set"
 msgid "Only rows nobody has corrected"
 msgstr "Only rows nobody has corrected"
 
+#. Review mode: no message has these words
+#: src/components/SuggestWording.tsx
+msgid "No message has those words."
+msgstr "No message has those words."
+
 #. Label on the Import screen
 #: src/screens/Import.tsx
 msgid "uncategorised (chosen)"
@@ -6066,6 +7393,685 @@ msgstr "To create a new user, use the <0>Invitation link</0>."
 #: src/screens/Payees.tsx
 msgid "Find a payee"
 msgstr "Find a payee"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.currency_not_a_code"
+msgstr "{currency} is not a three-letter currency code"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.date_unreadable"
+msgstr "{text} is not a date this can read -- write it as YYYY-MM-DD, like 2026-01-31"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.iban_taken"
+msgstr "Line {line} of this file already has the IBAN {iban}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.iban_too_long"
+msgstr "The IBAN is longer than {max} characters"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.name_taken"
+msgstr "Line {line} of this file is already called {name}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.needs_name"
+msgstr "An account needs a name"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.needs_type"
+msgstr "An account needs a type"
+
+#. {column} is a column name of the accounts file, which stays in English
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.too_long"
+msgstr "The {column} is longer than {max} characters"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.too_many_cells"
+msgstr "This line has more cells than the file has columns"
+
+#. {types} is the list of account types as the file must write them, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.unknown_type"
+msgstr "{type} is not an account type -- use one of {types}"
+
+#. Said to a program that staged rows. external_id is a field name and stays as it is; {ids} are row ids
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.already_here"
+msgstr "{count} of {total, plural, one {# row was} other {# rows were}} already in this account and were not staged: {ids}. If any of those are genuinely separate purchases, give each one its own external_id and send them again -- a row with an external_id is deduped on that alone."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.matched"
+msgstr "{count} of {total, plural, one {# row} other {# rows}} matched entries already in this account. Committing marks those as seen by the bank rather than adding them again."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.period_end"
+msgstr "You declared the period ending {declared} and the latest row staged is {latest}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.period_start"
+msgstr "You declared the period starting {declared} and the earliest row staged is {earliest}."
+
+#. Said to a program that staged rows. {reasons} is a list of reasons with counts
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.refused"
+msgstr "{count} of {total, plural, one {# row was} other {# rows were}} refused and will not land: {reasons}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.row_count"
+msgstr "You declared {declared, plural, one {# row} other {# rows}} and {arrived} arrived. A dropped page or a mis-split line looks exactly like this."
+
+#. Said to a program that staged rows. {share} is a percentage like 61%; {type} an account type's value
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.sign_convention"
+msgstr "{share} of this batch's value is money coming in to a {type} account ({count} of {total, plural, one {# row} other {# rows}}), and it nets positive overall. Confirm these are income rather than, say, credit-card repayments read from a card statement -- on a card those are money in, and in a {type} account the same rows are money out."
+
+#. Said to a program that staged rows. The figures are in minor units, as the program sent them
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.agent.warning.total"
+msgstr "You declared a total of {declared} minor units and the rows that would land come to {staged}, a difference of {difference}. A merged row, a missing row or a flipped sign all show up here. Rows that were skipped or refused are not in this figure -- see the other warnings if there are any."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.country.not_a_code"
+msgstr "{code} is not a country code"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.added_by_choice"
+msgstr "You chose to add this as a new transaction"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.already_there"
+msgstr "This line is already in the account"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.arrived_before_commit"
+msgstr "This line reached the account before this import was committed"
+
+#. {match} is the kind of rule: contains, prefix or regex. {why} says why it looks too broad
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.broad_rule"
+msgstr "The “{pattern}” {match} rule claimed {claimed} of {total} rows — {why}. Edit or delete it on the Rules screen if these are not all the same payee."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.fee_already_there"
+msgstr "This fee is already in the account"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.fee_of"
+msgstr "The bank charged this on top of line {line}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.foreign"
+msgstr "This row is in {foreign}, and {account} holds {currency}, so it cannot be read into it -- it would be recorded as {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.foreign_ofx"
+msgstr "This transaction is in {foreign}, and {account} holds {currency}. It is this account's, but its amount is not in {currency} and is not converted here -- enter it by hand in {currency}"
+
+#. {rate} is the exchange rate as the bank wrote it
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.foreign_ofx_rate"
+msgstr "This transaction is in {foreign} (the bank's rate: {rate}), and {account} holds {currency}. It is this account's, but its amount is not in {currency} and is not converted here -- enter it by hand in {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match"
+msgstr "Looks like the {date} entry you already have; it will be marked as seen by the bank rather than added again"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_changed"
+msgstr "The transaction this matched has changed since the preview, so it was left alone and this line was not imported"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_deleted"
+msgstr "The transaction this was matched to has since been deleted"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_one_time"
+msgstr "The {date} entry your One-time Import brought in is this bank line; it will be marked as seen by the bank rather than added again"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_taken"
+msgstr "That transaction has already been matched to a statement line"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_ynab_history"
+msgstr "Matched by amount and date to the {date} entry from your YNAB history (One-time Import), not by the bank's own key; check it is the same purchase and not a new one of the same amount before committing"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.maybe_transfer"
+msgstr "May be a transfer with {account} ({date}): {why}. Confirm it on the Transfers screen after committing."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.no_date_or_amount"
+msgstr "This line has no date or no amount"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.no_money"
+msgstr "This line moves no money"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.other_currency_rows"
+msgstr "This row is in {foreign}, and {account} holds {currency}: it belongs to the {foreign} rows of this file"
+
+#. {product} and {taken} are the bank's names for accounts in one file
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.other_product"
+msgstr "This row is {product}, and {account} takes the {taken} rows of this file"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.own_money"
+msgstr "Looks like your own money moving -- it {why}. It is linked when that statement is imported."
+
+#. Part of a sentence about a payee rule that claimed too many rows
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.rule_most_of_file"
+msgstr "that is most of the file"
+
+#. Part of a sentence about a payee rule that claimed too many rows. {match} is contains, prefix or regex
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.rule_pattern_short"
+msgstr "{length} characters is very little for a {match} rule"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.transfer"
+msgstr "A transfer with {account} ({date}): {why}. It is linked when you commit, and stays out of Income vs Expense."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.balance_breaks"
+msgstr "The statement's running balance stops adding up at line {line} ({date}): a row before it is missing from what was read, or belongs to another account."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.balance_gap"
+msgstr "This statement starts from {opening} on {date}, but the ledger holds {held} for the day before -- {gap} apart. A statement between the last import and this one may be missing: download from the day after the last one imported."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.balance_unchecked"
+msgstr "The statement's running balance was not checked: a balance, amount or fee in it is too large to record as money."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.other_currencies"
+msgstr "This file holds more than one currency: {currencies}. Only the {currency} rows were read into {account}; the others belong to an account in their own currency and are listed as skipped."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.other_products"
+msgstr "This file holds more than one account: {products}. Only the {product} rows were read into {account}; the others belong to another account and are listed as skipped. To change which rows this account takes, set its statement product on the Accounts screen."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.rechecked"
+msgstr "{count, plural, one {# of these lines} other {# of these lines}} changed when they were re-checked against the account just now: the register has moved since this import was staged."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.all_positive"
+msgstr "Every amount in this file is positive, and there is no second column saying which rows are money out — check the amounts in the preview, or pick separate money-out and money-in columns"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.balance_unreadable"
+msgstr "The {column} column is not an amount on {count, plural, one {# row} other {# rows}} (such as {text}) -- those rows import without a running balance"
+
+#. Follows “because”: why a decimal separator was expected. {country} is a country's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.because_country"
+msgstr "this account's country is set to {country}"
+
+#. Follows “because”: why a decimal separator was expected
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.because_default"
+msgstr "that is the default when nothing says otherwise"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.card_signs_reversed"
+msgstr "Amounts are reversed from the bill's own signs, so a purchase is money out of the card account and a refund is money in"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.control_codes"
+msgstr "Some characters in this file are control codes rather than letters -- it may mix two encodings, so check the payee names in the preview"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.currency_columns"
+msgstr "This file has more than one currency column ({columns}), and which one the amounts are in could not be told, so none was used: every row is taken to be in the account's currency"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.date_format_unknown"
+msgstr "Could not work out the date format from values like {text}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.dates_either_way"
+msgstr "Every date in this file could be read day-first or month-first, so it was read day-first — check the dates in the preview before importing"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.dates_mixed"
+msgstr "This file has dates that read as day-first and others as month-first; check the dates in the preview"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.decimal_assumed"
+msgstr "The decimal separator could not be worked out from this file — an amount like “{example}” reads either way — so “{separator}” was assumed, because {because}. Check the amounts in the preview before importing"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.decimal_from_column"
+msgstr "The amounts in this file read either way (like “{example}”), so the decimal separator “{separator}” was taken from the fee or balance column — which differs from the “{expected}” expected because {because}. Check the amounts in the preview before importing"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.no_amount_column"
+msgstr "No amount column found -- check the file has a header row, or add one"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.no_date_column"
+msgstr "No date column found -- check the file has a header row, or add one"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.no_rows"
+msgstr "This file has no rows"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.ofx_empty"
+msgstr "This looks like an OFX file but has no transactions in it -- some banks export an empty statement when the date range has nothing in it"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.ofx_no_currency"
+msgstr "This file does not say which currency it is in"
+
+#. {fitid} and {earlier} are the bank's own ids for two transactions
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.ofx_replaces"
+msgstr "Transaction {fitid} replaces an earlier one ({earlier}); the earlier one is still in the account and should be removed by hand"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.undecodable"
+msgstr "Some characters in this file could not be decoded; payee names may look wrong"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.amount_unreadable"
+msgstr "Could not read {text} as an amount"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.date_unreadable"
+msgstr "Could not read {text} as a date"
+
+#. {state} is the bank's own word for the row, like declined or reversed
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.did_not_happen"
+msgstr "The bank marked this {state}, so no money moved"
+
+#. {problem} is why a cell could not be read; {column} is the file's own column name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.in_column"
+msgstr "{problem}, in the {column} column"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.no_amount"
+msgstr "This row has no amount, so it is not a transaction"
+
+#. {state} is the bank's own word for the row, like pending
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.not_settled"
+msgstr "The bank marked this {state}: it has not settled, and will import from the next statement once it has"
+
+#. {fitid} is the bank's own id for the transaction it cancels
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_cancels"
+msgstr "The bank sent this to cancel an earlier transaction ({fitid}), so there is nothing here to add"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_no_amount"
+msgstr "No usable amount in {text}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_no_date"
+msgstr "No usable date in {text}"
+
+#. {kind} is the OFX transaction type the bank wrote, like HOLD
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_pending"
+msgstr "The bank marked this {kind}, which is a pending hold rather than a transaction that has happened"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.signed_twice"
+msgstr "{text} is signed twice, so whether it is money in or money out would be a guess"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.cell_too_long"
+msgstr "One cell in this file is longer than {max, number} characters, which no statement has -- it may not be a statement, or it may be damaged. Download it from your bank again."
+
+#. {found} and {stated} are amounts as the bill wrote them; {label} is the bill's own words for its total
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.layout_changed"
+msgstr "This looks like a document this app has a rule for, but the entries it found add up to {found} and the document says “{label}” is {stated}. The layout has probably changed, so nothing has been imported -- importing part of a bill would be worse."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_bom"
+msgstr "This file looks like UTF-16 or UTF-32 text without a byte-order mark, so how to read it cannot be told for certain -- save it again as UTF-8 (or CSV UTF-8) and import that"
+
+#. pdfplumber is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_pdfplumber"
+msgstr "Reading PDFs needs the pdfplumber package, which is not installed"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_sheets"
+msgstr "This workbook has no sheets in it"
+
+#. xlrd is the name of a software package and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.no_xlrd"
+msgstr "Reading .xls files needs the xlrd package, which is not installed"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.not_a_spreadsheet"
+msgstr "This file could not be read as a spreadsheet. It may be damaged; download it from your bank again, or export it as CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.not_a_table"
+msgstr "This file could not be read as a table. Download it from your bank again, or export it as CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_decoded"
+msgstr "This PDF unpacks to more than {max, number} MB, which is far more than a statement needs -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_drawing"
+msgstr "The pages of this PDF hold more drawing instructions than a statement of any length would -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_no_table"
+msgstr "No statement table was found in this PDF. Some documents -- a designed credit-card bill with several tables side by side, for instance -- are not a single table with a header, and importing half of one would be worse than not importing it. Ask your bank for CSV or OFX."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_objects"
+msgstr "This PDF puts more than {max, number} characters and shapes on its pages, which is far more than a statement holds. Ask your bank for CSV or OFX, or a statement covering fewer months."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_scan"
+msgstr "There is no text in this PDF -- it is probably a scan, and reading those needs character recognition this app does not do. Ask your bank for CSV or OFX."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_stream"
+msgstr "This PDF contains a compressed block that unpacks to more than {max, number} MB, which no statement needs -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_too_long"
+msgstr "This PDF has more than {max, number} pages, which is longer than any statement this app reads. Ask your bank for CSV or OFX, or a statement covering fewer months."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_unopenable"
+msgstr "This file could not be opened as a PDF. It may be damaged; download it from your bank again."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.pdf_unreadable"
+msgstr "This PDF could not be read. It may be damaged; download it from your bank again."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.sheet_too_large"
+msgstr "The first sheet of this workbook reaches row {rows, number} and column {columns, number}, which is far larger than a statement -- this app reads at most {max_rows, number} rows and {max_columns, number} columns. If the statement is in there, export it from your bank as CSV instead."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.sheet_unreadable"
+msgstr "The first sheet of this workbook could not be read. It may be damaged; download it from your bank again, or export it as CSV."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.too_many_cells"
+msgstr "The first sheet of this workbook holds more than {max, number} cells, which is far larger than a statement. If the statement is in there, export it from your bank as CSV instead."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.too_many_rows"
+msgstr "This file has more than {max, number} rows, which no statement has -- it may not be a statement. Download a shorter period from your bank."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.undated"
+msgstr "More than {max, number} rows of this file have no readable date -- it is not a statement, or its date column was not found. Check the header row."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.unreadable.xlsx"
+msgstr "This looks like an .xlsx file, which is not supported yet -- open it and save as CSV, or export CSV from your bank instead"
+
+#. Part of a sentence on a transfer: a doubt. {named} is a name the bank wrote
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.payer.names"
+msgstr "it names {named}, who has paid you before"
+
+#. Part of a sentence on a transfer: a doubt. {payee} is a payee's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.payer.paid_before"
+msgstr "{payee} has paid you before"
+
+#. Part of a sentence on a transfer: a doubt. {payee} is a payee's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.payer.rule"
+msgstr "{payee} has a category rule"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.amounts_match"
+msgstr "the amounts match and the dates are close"
+
+#. Follows “it”: the row names an account whose statement is not imported yet
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.awaiting"
+msgstr "names {named}; its other side is not in the ledger yet"
+
+#. Part of a sentence on a transfer. {words} are words the bank wrote on both rows
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.both_say"
+msgstr "{why}; both rows say {words}"
+
+#. Part of a sentence on a transfer. {why} is the reason so far, {payer} a doubt about it
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.but"
+msgstr "{why}, but {payer}"
+
+#. Part of a sentence on a transfer. {why} is the reason so far, this adds a doubt
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.card_purchase"
+msgstr "{why}, but money out of a card is a purchase until you say otherwise"
+
+#. Part of a sentence on a transfer. {count} is how many rows it could be
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.closest"
+msgstr "{why}; the closest in date of {count} it could be"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.linked_before"
+msgstr "these two accounts have had transfers linked between them before"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.member_named"
+msgstr "a household member's name is on it, and the amounts match"
+
+#. Part of a sentence on a transfer. {why} is the reason so far
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.more_than_one"
+msgstr "{why}, but there is more than one row it could be"
+
+#. Part of a sentence on a transfer: why two rows look like one. {named} is the account the bank text names
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.names"
+msgstr "the {account} row names {named}"
+
+#. The name of the rows with no category, in a report or a breakdown. See GLOSSARY.md (Uncategorised)
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.unset.category"
+msgstr "Uncategorised"
+
+#. The name of the rows with no payee, in a breakdown of payees
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.unset.payee"
+msgstr "No payee"
+
+#. {direction} is more or less: whether the import accounts for more than YNAB's balance
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.balance.differs"
+msgstr "{account}: YNAB's balance is {ynab}, and this import accounts for {imported}, {direction, select, more {{gap} more} other {{gap} less}}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.balance.unchecked"
+msgstr "{account}: YNAB's balance could not be checked: {problem}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.account_skipped"
+msgstr "Its account is skipped"
+
+#. {constraint} is the database's own name for the rule a row broke
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.database_refused"
+msgstr "The database refused this row: {constraint}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.imported_before"
+msgstr "Already imported by an earlier one-time import"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.looks_like_existing"
+msgstr "Looks like a row already in the ledger"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.outside_range"
+msgstr "Outside the date range"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.starting_balance"
+msgstr "A YNAB starting balance, skipped"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.transfer.not_linked"
+msgstr "Not linked as a transfer: {problem}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.transfer.other_side_failed"
+msgstr "The other side of this transfer failed to import"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.transfer.other_side_missing"
+msgstr "A YNAB transfer whose other side is skipped, out of range or not in the export, so it was imported as an ordinary transaction"
 
 #. Screen-reader name on the Register screen
 #: src/screens/Register.tsx
@@ -6203,6 +8209,12 @@ msgstr "No categories yet. Categories say what a transaction was <0>for</0> — 
 msgid "nothing recorded yet"
 msgstr "nothing recorded yet"
 
+#. Column heading on Application management's suggestions: the better wording
+#. Column name shown beside a value on phones on Application management's suggestions
+#: src/screens/TranslationReview.tsx
+msgid "Suggested"
+msgstr "Suggested"
+
 #. Sentence on the first-run setup
 #: src/screens/Setup.tsx
 msgid "In Docker:"
@@ -6311,6 +8323,12 @@ msgstr "Between two of your own accounts — two rows, one act"
 #: src/screens/Profile.tsx
 msgid "One household per key. Two households means two keys."
 msgstr "One household per key. Two households means two keys."
+
+#. State of a suggestion: not yet in the catalogs, so in the next download
+#: src/screens/TranslationReview.tsx
+msgctxt "suggestion state"
+msgid "Open"
+msgstr "Open"
 
 #: src/screens/Register.tsx
 msgid "why each currency has its own columns"
@@ -6591,6 +8609,11 @@ msgstr "Update the updater only"
 #: src/screens/SignIn.tsx
 msgid "Not now"
 msgstr "Not now"
+
+#. Link on Application management: download every language's suggestions as one JSON file
+#: src/screens/TranslationReview.tsx
+msgid "All languages (JSON)"
+msgstr "All languages (JSON)"
 
 #. What the import detected: the column of money going out. Lower case, inside a list
 #: src/lib/labels.ts
@@ -7358,9 +9381,12 @@ msgstr "In Docker Desktop or Podman Desktop, open Containers, find <0>{name}</0>
 msgid "First setup"
 msgstr "First setup"
 
+#. Column heading on Application management's suggestions: open or applied
 #. Column heading on the History screen: noun, a row's status
+#. Column name shown beside a value on phones on Application management's suggestions
 #. Name of a fact on the History screen: noun, a row's status
 #: src/screens/History.tsx
+#: src/screens/TranslationReview.tsx
 msgid "State"
 msgstr "State"
 
@@ -7524,6 +9550,162 @@ msgstr "{by} reset {user}'s password"
 msgid "Updated to {running} at {at} in {took}."
 msgstr "Updated to {running} at {at} in {took}."
 
+#. Name of a seeded category: yearly charges such as a card fee. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.annual_fees"
+msgstr "Annual Fees"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.car_maintenance"
+msgstr "Car Maintenance"
+
+#. Name of a seeded category: restaurants, cafés, takeaway. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.eating_out"
+msgstr "Eating Out"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.electricity"
+msgstr "Electricity"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.gifts"
+msgstr "Gifts"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.groceries"
+msgstr "Groceries"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.health"
+msgstr "Health"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.hobbies"
+msgstr "Hobbies"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.home_maintenance"
+msgstr "Home Maintenance"
+
+#. Name of a seeded category: things for the home. Not the household of the glossary
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.household"
+msgstr "Household"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.insurance"
+msgstr "Insurance"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.internet"
+msgstr "Internet"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.other_income"
+msgstr "Other Income"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.phone"
+msgstr "Phone"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.rent_mortgage"
+msgstr "Rent / Mortgage"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.salary"
+msgstr "Salary"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.subscriptions"
+msgstr "Subscriptions"
+
+#. Name of a seeded category: fares, fuel, taxis. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.transport"
+msgstr "Transport"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.travel"
+msgstr "Travel"
+
+#. Name of a category seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.water"
+msgstr "Water"
+
+#. Name of a category group seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.group.bills"
+msgstr "Bills"
+
+#. Name of a seeded category group: the spending of daily life. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.group.everyday"
+msgstr "Everyday"
+
+#. Name of a category group seeded into a new household; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.group.income"
+msgstr "Income"
+
+#. Name of a seeded category group: bills that come less often than monthly
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.group.non_monthly"
+msgstr "Non-Monthly"
+
+#. Name of a seeded category group: spending by choice, not need. The person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.group.quality_of_life"
+msgstr "Quality of Life"
+
+#. Payee and memo of the row holding an account's starting balance. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.opening_balance"
+msgstr "Opening balance"
+
 #: src/screens/ynab/mapping.tsx
 msgid "YNAB's own bucket, always uncategorised"
 msgstr "YNAB's own bucket, always uncategorised"
@@ -7631,6 +9813,11 @@ msgstr "Yes, all {0} of them"
 #: src/screens/Payees.tsx
 msgid "Add a payee"
 msgstr "Add a payee"
+
+#. Button in review mode: keep this suggestion
+#: src/components/SuggestWording.tsx
+msgid "Save the suggestion"
+msgstr "Save the suggestion"
 
 #: src/screens/Rules.tsx
 msgid "Payee naming rules"
@@ -8281,6 +10468,11 @@ msgstr "A heading the categories sit under — Bills, Everyday, whatever divides
 msgid "One ledger: its accounts, its register, its receipts and the people who can reach them."
 msgstr "One ledger: its accounts, its register, its receipts and the people who can reach them."
 
+#. Review mode: the language's messages are loading
+#: src/components/SuggestWording.tsx
+msgid "Reading the messages…"
+msgstr "Reading the messages…"
+
 #. placeholder {0}: group.name
 #: src/screens/Categories.tsx
 msgid "New category in {0}"
@@ -8425,6 +10617,11 @@ msgstr "It rewrites <0>{0}</0> of {1, plural, one {{2} row already in this ledge
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 msgstr "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 
+#. Button on Application management: the catalogs now carry this suggestion
+#: src/screens/TranslationReview.tsx
+msgid "Mark applied"
+msgstr "Mark applied"
+
 #: src/screens/Admin.tsx
 msgid "Close without copying? The link cannot be shown again."
 msgstr "Close without copying? The link cannot be shown again."
@@ -8555,8 +10752,10 @@ msgstr "This receipt carries no date of its own, so the window is around when it
 msgid "Already locked"
 msgstr "Already locked"
 
+#. Column heading on Application management's suggestions
 #. Label of a choice on the language picker
 #: src/components/LanguagePicker.tsx
+#: src/screens/TranslationReview.tsx
 msgid "Language"
 msgstr "Language"
 
@@ -8873,6 +11072,12 @@ msgstr "Show archived"
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 msgstr "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 
+#. State of a suggestion: the catalogs carry it
+#: src/screens/TranslationReview.tsx
+msgctxt "suggestion state"
+msgid "Applied"
+msgstr "Applied"
+
 #. Column heading on the Admin screen: noun, the person
 #: src/screens/Admin.tsx
 msgid "Who"
@@ -9007,6 +11212,11 @@ msgstr "All categories"
 #: src/screens/reports/IncomeExpense.tsx
 msgid "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
 msgstr "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
+
+#. Review mode: label of the box for the better translation
+#: src/components/SuggestWording.tsx
+msgid "Your wording"
+msgstr "Your wording"
 
 #. History headline, the kind of act: a statement was imported
 #: src/lib/historyWords.ts
@@ -9207,6 +11417,11 @@ msgstr "{0} will always be {1}"
 #: src/screens/reports/IncomeExpense.tsx
 msgid "why one currency at a time"
 msgstr "why one currency at a time"
+
+#. Switch on Application management: show the draft languages on this device only
+#: src/screens/TranslationReview.tsx
+msgid "Review translations on this device"
+msgstr "Review translations on this device"
 
 #. Screen-reader name of one more release listed on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
@@ -9464,6 +11679,11 @@ msgstr "that import was discarded — nothing was written"
 msgid "Putting it back…"
 msgstr "Putting it back…"
 
+#. Application management: nobody has suggested a wording yet
+#: src/screens/TranslationReview.tsx
+msgid "No suggestions yet. Choose a preview language in your profile, then use “Suggest a better wording”."
+msgstr "No suggestions yet. Choose a preview language in your profile, then use “Suggest a better wording”."
+
 #. Text on the Application management screen
 #. placeholder {0}: bytes(me.size.page_size)
 #. placeholder {1}: count(me.size.free_pages ?? 0)
@@ -9628,6 +11848,10 @@ msgstr "Oldest"
 #: src/screens/ApplicationManagement.tsx
 msgid "{0} {1} — a self-hosted, multi-currency spend tracker for one household, under the AGPL."
 msgstr "{0} {1} — a self-hosted, multi-currency spend tracker for one household, under the AGPL."
+
+#: src/screens/TranslationReview.tsx
+msgid "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
+msgstr "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
 
 #: src/screens/Import.tsx
 msgid "Open that import"

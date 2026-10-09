@@ -128,7 +128,12 @@ def _write_opening_balance(session: Session, account: Account, amount: int, when
     # Marked, not merely named. The name is what a person sees and is free to
     # change; `system` is what a flow report reads, so that renaming this payee
     # cannot turn an account's starting balance into a month of income.
-    payee = payee_service.get_or_create(
+    #
+    # A household seeded in another language already has its marked payee,
+    # in that language (#268); the row's memo follows the payee's word. An
+    # English household finds or makes "Opening balance" by name, as before.
+    seeded = _seeded_opening_payee(session, account.household_id)
+    payee = seeded or payee_service.get_or_create(
         session,
         account.household_id,
         "Opening balance",
@@ -141,11 +146,40 @@ def _write_opening_balance(session: Session, account: Account, amount: int, when
             date=when,
             amount=amount,
             payee_id=payee.id,
-            memo="Opening balance",
+            memo=seeded.name if seeded is not None else "Opening balance",
             cleared=ClearedState.reconciled,
         )
     )
     session.flush()
+
+
+def _seeded_opening_payee(session: Session, household_id: str) -> Payee | None:
+    """The opening-balance payee a seed in another language made, if there is one.
+
+    Found by its mark *and* by being one of the catalog's reviewed words for
+    "Opening balance" -- the word `categories.seed_defaults` gave it. Nothing
+    else qualifies: an English household, and one whose person renamed the
+    payee to a word of their own, find or make "Opening balance" by name
+    exactly as they did before #268. Until a language is reviewed there are no
+    such words, and this is always None.
+    """
+    from .. import seed_words
+    from ..models import SystemPayee
+
+    words = {payee_service.fold(one) for one in seed_words.translations(seed_words.OPENING_BALANCE)}
+    if not words:
+        return None
+    marked = session.execute(
+        select(Payee)
+        .where(
+            Payee.household_id == household_id,
+            Payee.system == SystemPayee.opening_balance,
+        )
+        .order_by(Payee.name)
+    ).scalars().all()
+    if any(one.name_folded == payee_service.fold("Opening balance") for one in marked):
+        return None
+    return next((one for one in marked if one.name_folded in words), None)
 
 
 #: The panel offers a date and a figure side by side, so a date typed with no

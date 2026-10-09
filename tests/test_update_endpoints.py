@@ -492,7 +492,9 @@ def test_a_cross_site_request_cannot_rotate_the_held_recovery_code(world):
     assert updates._held == held
     foreign = client.post(f"{BASE}/recovery-code", headers={"Origin": "https://elsewhere.example"})
     assert foreign.status_code == 403
-    assert "code" not in foreign.json()
+    # `code` here is the refusal's own (#267), never a recovery code.
+    assert foreign.json().get("code") == "request.cross_origin"
+    assert issued["code"] not in foreign.text
     assert updates._held == held, "a refused request rotated the code"
 
 

@@ -165,7 +165,9 @@ def import_accounts(
     refused = sum(1 for row in rows if row.problems)
     raise ValidationError(
         f"{refused} of {len(rows)} row{'' if len(rows) == 1 else 's'} cannot be imported, "
-        "so none were. Nothing has been changed; correct the file and try again."
+        "so none were. Nothing has been changed; correct the file and try again.",
+        code="account_import.rows_refused",
+        params={"refused": refused, "rows": len(rows)},
     )
 
 
@@ -380,7 +382,7 @@ def _read(raw: bytes) -> list[tuple[int, dict[str, str], bool]]:
     lines = text.splitlines(keepends=True)
     first = next((line for line in lines if line.strip()), None)
     if first is None:
-        raise ValidationError("there are no accounts in this file")
+        raise ValidationError("there are no accounts in this file", code="account_import.no_accounts")
 
     delimiter = max(
         _DELIMITERS,
@@ -409,18 +411,22 @@ def _read(raw: bytes) -> list[tuple[int, dict[str, str], bool]]:
             if len(records) > MAX_ACCOUNT_ROWS:
                 raise ValidationError(
                     f"this file has more than {MAX_ACCOUNT_ROWS} accounts in it, which is more "
-                    "than a household has -- it may be a statement rather than a list of accounts"
+                    "than a household has -- it may be a statement rather than a list of accounts",
+                    code="account_import.too_many_rows",
+                    params={"max": MAX_ACCOUNT_ROWS},
                 )
     except csv.Error as exc:
         # What csv said stays in the log (#224); the sentence names the line.
         log.debug("csv could not read the accounts file", exc_info=True)
         raise ValidationError(
             f"line {reader.line_num} of this file cannot be read as CSV. Save it from "
-            "the spreadsheet as CSV again, or start from the template."
+            "the spreadsheet as CSV again, or start from the template.",
+            code="account_import.not_csv",
+            params={"line": reader.line_num},
         ) from exc
 
     if not records:
-        raise ValidationError("there are no accounts in this file")
+        raise ValidationError("there are no accounts in this file", code="account_import.no_accounts")
     return records
 
 
@@ -430,17 +436,25 @@ def _header(cells: list[str]) -> list[str]:
     if unknown:
         raise ValidationError(
             f"this file has a column this does not know: {', '.join(repr(u) for u in unknown)}. "
-            f"The columns are {', '.join(COLUMNS)} -- download the template to start from them."
+            f"The columns are {', '.join(COLUMNS)} -- download the template to start from them.",
+            code="account_import.unknown_column",
+            params={"columns": ", ".join(unknown), "known": ", ".join(COLUMNS)},
         )
     seen: set[str] = set()
     for key in keys:
         if key and key in seen:
-            raise ValidationError(f"this file has the column {key!r} twice")
+            raise ValidationError(
+                f"this file has the column {key!r} twice",
+                code="account_import.column_twice",
+                params={"column": key},
+            )
         seen.add(key)
     missing = [key for key in REQUIRED if key not in seen]
     if missing:
         raise ValidationError(
             f"this file has no {' or '.join(repr(m) for m in missing)} column, and every account "
-            "needs one. The first line should name the columns, as the template does."
+            "needs one. The first line should name the columns, as the template does.",
+            code="account_import.missing_column",
+            params={"columns": ", ".join(missing)},
         )
     return keys

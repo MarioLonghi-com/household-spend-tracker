@@ -32,6 +32,8 @@ import { Empty, Hint, Problem, SortHeading, sortRows, useSort } from "../compone
 import { bytes } from "../lib/bytes";
 import { BackupList, UpdateBackupList, type Backup } from "./Backups";
 import { Updates } from "./Updates";
+import { TranslationReview } from "./TranslationReview";
+import type { Household } from "../lib/types";
 import { formatInstant } from "../lib/time";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
@@ -174,7 +176,10 @@ function bringIntoView(target: HTMLElement, frames = 20): void {
 export function ApplicationManagement({
   section = null,
   onSectionShown,
+  household,
 }: {
+  /** The household on screen, whose suggested wordings the Translations section lists (#272). */
+  household?: Household;
   /**
    * A section to scroll into view once the screen has drawn: `updates` when
    * the page was opened by the Updating panel after an update or a rollback,
@@ -239,6 +244,7 @@ export function ApplicationManagement({
       <Logs current={me.logging_style} onChanged={refresh} />
       <Database me={me} onChanged={refresh} />
       <Operations me={me} />
+      {household ? <TranslationReview household={household} /> : null}
       <About me={me} />
     </>
   );

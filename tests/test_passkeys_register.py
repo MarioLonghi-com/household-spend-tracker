@@ -275,7 +275,11 @@ def test_member_a_cannot_list_rename_or_remove_member_bs_passkey(client, passkey
     unknown = client.delete("/api/me/passkeys/0123456789abcdef0123456789abcdef", headers=HEADERS)
     # 404, not 403, and the same 404 as an id that was never real.
     assert (renamed.status_code, removed.status_code) == (404, 404)
-    assert renamed.json() == removed.json() == unknown.json() == {"detail": "no such passkey"}
+    assert renamed.json() == removed.json() == unknown.json() == {
+        "detail": "no such passkey",
+        "code": "passkey.not_found",
+        "params": {},
+    }
 
     [after] = _rows(client, Passkey, Passkey.id == theirs)
     assert (after.label, after.user_id) == (before.label, before.user_id) == ("iCloud Keychain", passkey_world["member"]["user"]["id"])

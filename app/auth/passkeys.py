@@ -298,7 +298,11 @@ def refuse_unless_available(request: Request) -> None:
     reason, rather than reached and failing obscurely."""
     found = state(request)
     if not found.available:
-        raise Conflict(found.detail or "passkeys are not available here")
+        raise Conflict(
+            found.detail or "passkeys are not available here",
+            code="passkey.unavailable",
+            params={"reason": found.reason.value if found.reason else None},
+        )
 
 
 def give_user_handle(user: User) -> bool:
@@ -324,7 +328,7 @@ def registration_options(session: Session, user: User, request: Request) -> dict
     """
     refuse_unless_available(request)
     if user.webauthn_user_handle is None:
-        raise Conflict("give the member a user handle first")
+        raise Conflict("give the member a user handle first", code="passkey.no_user_handle")
     settings = config.settings
     existing = [
         PublicKeyCredentialDescriptor(id=base64url_to_bytes(p.credential_id))
@@ -359,7 +363,7 @@ def challenge_of(credential: dict) -> bytes:
         client_data = json.loads(base64url_to_bytes(credential["response"]["clientDataJSON"]))
         return base64url_to_bytes(client_data["challenge"])
     except (KeyError, TypeError, ValueError) as exc:
-        raise ValidationError("that is not a passkey answer") from exc
+        raise ValidationError("that is not a passkey answer", code="passkey.not_an_answer") from exc
 
 
 def register(
@@ -379,7 +383,7 @@ def register(
     refuse_unless_available(request)
     settings = config.settings
     if not claim_challenge(engine, challenge_of(credential), purpose=REGISTER, user_id=user.id):
-        raise ValidationError(_NOT_REGISTERED)
+        raise ValidationError(_NOT_REGISTERED, code="passkey.not_registered")
     try:
         verified = webauthn.verify_registration_response(
             credential=credential,
@@ -389,13 +393,13 @@ def register(
             require_user_verification=True,
         )
     except (WebAuthnException, ValueError, KeyError, TypeError) as exc:
-        raise ValidationError(_NOT_REGISTERED) from exc
+        raise ValidationError(_NOT_REGISTERED, code="passkey.not_registered") from exc
 
     credential_id = bytes_to_base64url(verified.credential_id)
     if session.execute(
         select(Passkey.id).where(Passkey.credential_id == credential_id)
     ).first():
-        raise Conflict("that passkey is already registered")
+        raise Conflict("that passkey is already registered", code="passkey.already_registered")
 
     transports = (credential.get("response") or {}).get("transports")
     passkey = Passkey(
@@ -440,14 +444,14 @@ def owned(session: Session, user: User, passkey_id: str) -> Passkey:
     one that never existed."""
     passkey = session.get(Passkey, passkey_id)
     if passkey is None or passkey.user_id != user.id:
-        raise NotFound("no such passkey")
+        raise NotFound("no such passkey", code="passkey.not_found")
     return passkey
 
 
 def rename(passkey: Passkey, label: str) -> Passkey:
     tidy = _clean_label(label)
     if tidy is None:
-        raise ValidationError("a passkey needs a name")
+        raise ValidationError("a passkey needs a name", code="passkey.needs_name")
     passkey.label = tidy
     return passkey
 
@@ -540,7 +544,11 @@ def sign_in_options(session: Session, request: Request) -> dict:
         .where(WebAuthnChallenge.purpose == SIGN_IN, WebAuthnChallenge.expires_at > utcnow())
     ).scalar_one()
     if live >= MAX_LIVE_SIGN_IN_CHALLENGES:
-        raise TooManyAttempts("too many sign-ins at once. Try again in a minute.", retry_after=60)
+        raise TooManyAttempts(
+            "too many sign-ins at once. Try again in a minute.",
+            retry_after=60,
+            code="passkey.too_many_at_once",
+        )
     options = webauthn.generate_authentication_options(
         rp_id=config.settings.rp_id,
         challenge=issue_challenge(session, purpose=SIGN_IN, user_id=None),
@@ -596,7 +604,7 @@ def verify_sign_in(
     )
     spent = claim_challenge(engine, challenge, purpose=SIGN_IN, user_id=None)
     if not spent or passkey is None or user is None or passkey.rp_id != settings.rp_id:
-        raise Unauthorized(REFUSED)
+        raise Unauthorized(REFUSED, code="passkey.refused")
 
     # The authenticator's own claim about whose credential this is, when it
     # makes one, has to agree with the row: `webauthn` does not compare it.
@@ -605,9 +613,9 @@ def verify_sign_in(
         try:
             said = base64url_to_bytes(handle)
         except (ValueError, TypeError) as exc:
-            raise Unauthorized(REFUSED) from exc
+            raise Unauthorized(REFUSED, code="passkey.refused") from exc
         if said != user.webauthn_user_handle:
-            raise Unauthorized(REFUSED)
+            raise Unauthorized(REFUSED, code="passkey.refused")
 
     try:
         verified = webauthn.verify_authentication_response(
@@ -620,7 +628,7 @@ def verify_sign_in(
             require_user_verification=True,
         )
     except (WebAuthnException, ValueError, KeyError, TypeError) as exc:
-        raise Unauthorized(REFUSED) from exc
+        raise Unauthorized(REFUSED, code="passkey.refused") from exc
     ratelimit.release(engine, held)
 
     passkey.sign_count = verified.new_sign_count

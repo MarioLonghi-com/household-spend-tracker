@@ -392,6 +392,7 @@ SET_NULL_HANDLED_ELSEWHERE = {
     ("receipts", "uploaded_by_id"): "who acted, not money: attribution only",
     ("transfer_rejections", "rejected_by_id"): "who acted, not money: attribution only",
     ("ignored_identifier_suggestions", "ignored_by_id"): "who acted, not money: attribution only",
+    ("translation_suggestions", "suggested_by_id"): "who acted, not money: attribution only",
     ("reconciliations", "batch_id"): "points at the unaudited batches table, which is never deleted",
 }
 

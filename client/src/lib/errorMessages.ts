@@ -20,8 +20,9 @@ import { ApiError } from "./api";
 import { i18n, SOURCE_LOCALE } from "./i18n";
 import { formatDate } from "./locale";
 import { format } from "./money";
+import { wordNotice } from "./noticeMessages";
 
-interface ErrorMessage {
+export interface ErrorMessage {
   message: MessageDescriptor;
   /** Params that are minor units of the `currency` param. */
   money?: readonly string[];
@@ -400,6 +401,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "transaction.not_found": {
     message: msg({ id: "error.transaction.not_found", message: "No such transaction" }),
   },
+  "translation.suggestion_not_found": {
+    message: msg({ id: "error.translation.suggestion_not_found", message: "No such suggested wording" }),
+  },
   "transfer.amount_not_positive": {
     message: msg({ id: "error.transfer.amount_not_positive", message: "A transfer amount must be positive" }),
   },
@@ -591,6 +595,440 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
         "The updater is too old for this container engine. Update the updater first, then try again",
     }),
   },
+  "auth.sign_in_first": {
+    message: msg({ id: "error.auth.sign_in_first", message: "Sign in first", comment: "Refusal when the session has ended or never began" }),
+  },
+  "auth.owner_only": {
+    message: msg({ id: "error.auth.owner_only", message: "Only the owner can do that" }),
+  },
+  "auth.start_again": {
+    message: msg({ id: "error.auth.start_again", message: "Start again from the sign-in page" }),
+  },
+  "auth.secret_unreadable": {
+    message: msg({ id: "error.auth.secret_unreadable", message: "That authenticator secret cannot be read with this server key" }),
+  },
+  "auth.too_many_for_account": {
+    message: msg({ id: "error.auth.too_many_for_account", message: "Too many attempts for this account. Try again in {seconds, plural, one {# second} other {# seconds}}." }),
+  },
+  "auth.too_many_attempts": {
+    message: msg({ id: "error.auth.too_many_attempts", message: "Too many attempts. Try again in {seconds, plural, one {# second} other {# seconds}}." }),
+  },
+  "auth.too_many_from_here": {
+    message: msg({ id: "error.auth.too_many_from_here", message: "Too many attempts from here. Try again in {seconds, plural, one {# second} other {# seconds}}." }),
+  },
+  "auth.refused": {
+    message: msg({ id: "error.auth.refused", message: "That email and password do not match" }),
+  },
+  "auth.authenticator_cleared": {
+    message: msg({ id: "error.auth.authenticator_cleared", message: "This account's authenticator was reset, so there is no code to give. Use the reset link you were sent to enrol a new one, or ask an owner for a new link." }),
+  },
+  "auth.code_wrong": {
+    message: msg({ id: "error.auth.code_wrong", message: "That code is not right, or has already been used" }),
+  },
+  "auth.recovery_code_wrong": {
+    message: msg({ id: "error.auth.recovery_code_wrong", message: "That recovery code is not right, or has already been used" }),
+  },
+  "auth.new_code_wrong": {
+    message: msg({ id: "error.auth.new_code_wrong", message: "That code is not right. Check the time on your phone and try again." }),
+  },
+  "email.not_an_address": {
+    message: msg({ id: "error.email.not_an_address", message: "{email} is not an email address" }),
+  },
+  "email.too_long": {
+    message: msg({ id: "error.email.too_long", message: "That email address is too long (max {max} characters)" }),
+  },
+  "email.no_name": {
+    message: msg({ id: "error.email.no_name", message: "{email} has no usable name before the @" }),
+  },
+  "household.not_found": {
+    message: msg({ id: "error.household.not_found", message: "No such household" }),
+  },
+  "agent_key.not_found": {
+    message: msg({ id: "error.agent_key.not_found", message: "No such key", comment: "A key for a program. See GLOSSARY.md (Keys for programs)" }),
+  },
+  "agent_key.needs_label": {
+    message: msg({ id: "error.agent_key.needs_label", message: "Give the key a label, so you know what it is for" }),
+  },
+  "agent_key.lifetime": {
+    message: msg({ id: "error.agent_key.lifetime", message: "A key can last between a day and {max_days} days" }),
+  },
+  "agent_key.read_only_commit": {
+    message: msg({ id: "error.agent_key.read_only_commit", message: "A read-only key has nothing to commit" }),
+  },
+  "agent_key.not_issuer": {
+    message: msg({ id: "error.agent_key.not_issuer", message: "Only the person who issued a key can revoke it" }),
+  },
+  "invite.not_found": {
+    message: msg({ id: "error.invite.not_found", message: "No such invitation" }),
+  },
+  "invite.not_an_invitation": {
+    message: msg({ id: "error.invite.not_an_invitation", message: "That is not an invitation" }),
+  },
+  "invite.address_unusable": {
+    message: msg({ id: "error.invite.address_unusable", message: "That email address cannot be used for a new account here, and this link is now spent. Ask whoever invited you for a new one." }),
+  },
+  "invite.owner_only": {
+    message: msg({ id: "error.invite.owner_only", message: "Only an owner can invite people" }),
+  },
+  "invite.link_invalid": {
+    message: msg({ id: "error.invite.link_invalid", message: "That invitation link is not valid" }),
+  },
+  "invite.owner_only_withdraw": {
+    message: msg({ id: "error.invite.owner_only_withdraw", message: "Only an owner can withdraw an invitation" }),
+  },
+  "invite.already_used": {
+    message: msg({ id: "error.invite.already_used", message: "That invitation has already been used; disable the account instead" }),
+  },
+  "passkey.unavailable": {
+    message: msg({ id: "error.passkey.unavailable", message: "{reason, select, not_configured {Passkeys are not set up on this server} ip_address {Passkeys need a host name, and this server is configured with an IP address} wrong_host {Passkeys work only at this server's own address} insecure {Passkeys need this app opened over HTTPS} no_origins {Passkeys need the server's public address configured} other {Passkeys are not available here}}", comment: "Why passkeys cannot be used here; {reason} picks the sentence. See GLOSSARY.md (passkey)" }),
+  },
+  "passkey.no_user_handle": {
+    message: msg({ id: "error.passkey.no_user_handle", message: "Give the member a user handle first", comment: "A user handle is the WebAuthn id of a person; an internal step" }),
+  },
+  "passkey.not_registered": {
+    message: msg({ id: "error.passkey.not_registered", message: "That passkey could not be registered here. Start again." }),
+  },
+  "passkey.already_registered": {
+    message: msg({ id: "error.passkey.already_registered", message: "That passkey is already registered" }),
+  },
+  "passkey.not_found": {
+    message: msg({ id: "error.passkey.not_found", message: "No such passkey" }),
+  },
+  "passkey.needs_name": {
+    message: msg({ id: "error.passkey.needs_name", message: "A passkey needs a name" }),
+  },
+  "passkey.too_many_at_once": {
+    message: msg({ id: "error.passkey.too_many_at_once", message: "Too many sign-ins at once. Try again in a minute." }),
+  },
+  "passkey.refused": {
+    message: msg({ id: "error.passkey.refused", message: "That passkey cannot sign in here" }),
+  },
+  "passkey.not_an_answer": {
+    message: msg({ id: "error.passkey.not_an_answer", message: "That is not a passkey answer" }),
+  },
+  "password.too_short": {
+    message: msg({ id: "error.password.too_short", message: "That password is too short: it needs at least {min_length} characters" }),
+  },
+  "password.common": {
+    message: msg({ id: "error.password.common", message: "That password is one of the {count, number} most common passwords, which are the first ones anybody guessing tries" }),
+  },
+  "password.is_email": {
+    message: msg({ id: "error.password.is_email", message: "A password cannot be your email address" }),
+  },
+  "password.too_short_and_is_email": {
+    message: msg({ id: "error.password.too_short_and_is_email", message: "That password needs at least {min_length} characters, and it cannot be your email address" }),
+  },
+  "password.common_and_is_email": {
+    message: msg({ id: "error.password.common_and_is_email", message: "That password is one of the {count, number} most common passwords, and it cannot be your email address" }),
+  },
+  "reset.not_authenticator": {
+    message: msg({ id: "error.reset.not_authenticator", message: "This link does not change the authenticator" }),
+  },
+  "reset.offer_expired": {
+    message: msg({ id: "error.reset.offer_expired", message: "That authenticator offer has expired; scan a new one", comment: "The QR code offered for setting up a new authenticator" }),
+  },
+  "reset.choose_what": {
+    message: msg({ id: "error.reset.choose_what", message: "Choose what to reset: the password, the authenticator, or both" }),
+  },
+  "reset.owner_only": {
+    message: msg({ id: "error.reset.owner_only", message: "Only an owner can reset an account" }),
+  },
+  "reset.own_account": {
+    message: msg({ id: "error.reset.own_account", message: "You cannot reset your own account here: change your password or your authenticator from your profile" }),
+  },
+  "reset.account_disabled": {
+    message: msg({ id: "error.reset.account_disabled", message: "That account is disabled, so a reset link for it could not be followed. Re-enable it first." }),
+  },
+  "reset.not_found": {
+    message: msg({ id: "error.reset.not_found", message: "No such reset link" }),
+  },
+  "reset.link_invalid": {
+    message: msg({ id: "error.reset.link_invalid", message: "That reset link is not valid" }),
+  },
+  "reset.overtaken": {
+    message: msg({ id: "error.reset.overtaken", message: "That reset link was used or replaced a moment ago. Look at the account again before doing anything else to it" }),
+  },
+  "reset.owner_only_withdraw": {
+    message: msg({ id: "error.reset.owner_only_withdraw", message: "Only an owner can withdraw a reset link" }),
+  },
+  "reset.choose_password": {
+    message: msg({ id: "error.reset.choose_password", message: "Choose a new password" }),
+  },
+  "reset.not_password": {
+    message: msg({ id: "error.reset.not_password", message: "This link does not change the password" }),
+  },
+  "reset.enrol_first": {
+    message: msg({ id: "error.reset.enrol_first", message: "Enrol a new authenticator first" }),
+  },
+  "setup.already_done": {
+    message: msg({ id: "error.setup.already_done", message: "This instance has already been set up" }),
+  },
+  "setup.is_an_invitation": {
+    message: msg({ id: "error.setup.is_an_invitation", message: "That is an invitation; finish it from the link you were sent" }),
+  },
+  "setup.session_expired": {
+    message: msg({ id: "error.setup.session_expired", message: "That setup session has expired; start again" }),
+  },
+  "setup.store_codes": {
+    message: msg({ id: "error.setup.store_codes", message: "Store your recovery codes somewhere that is not this browser, then tick the box" }),
+  },
+  "setup.not_waiting": {
+    message: msg({ id: "error.setup.not_waiting", message: "This instance is not waiting to be set up" }),
+  },
+  "setup.token_wrong": {
+    message: msg({ id: "error.setup.token_wrong", message: "That setup token is not right" }),
+  },
+  "setup.server_restarted": {
+    message: msg({ id: "error.setup.server_restarted", message: "The server restarted; start again with the new setup token" }),
+  },
+  "setup.needs_display_name": {
+    message: msg({ id: "error.setup.needs_display_name", message: "A display name is required" }),
+  },
+  "setup.enrol_first": {
+    message: msg({ id: "error.setup.enrol_first", message: "Finish enrolling an authenticator first" }),
+  },
+  "setup.address_taken": {
+    message: msg({ id: "error.setup.address_taken", message: "Somebody already uses that email address" }),
+  },
+  "setup.session_invalid": {
+    message: msg({ id: "error.setup.session_invalid", message: "That setup session is not valid; start again" }),
+  },
+  "stepup.refused": {
+    message: msg({ id: "error.stepup.refused", message: "That password and code do not match" }),
+  },
+  "stepup.needed": {
+    message: msg({ id: "error.stepup.needed", message: "Confirm your password and authenticator code first", comment: "See GLOSSARY.md (step-up)" }),
+  },
+  "user.not_found": {
+    message: msg({ id: "error.user.not_found", message: "No such person" }),
+  },
+  "user.cannot_disable_self": {
+    message: msg({ id: "error.user.cannot_disable_self", message: "You cannot disable yourself; there would be nobody left to undo it" }),
+  },
+  "user.no_owner_left": {
+    message: msg({ id: "error.user.no_owner_left", message: "There would be no owner left" }),
+  },
+  "import.file_too_large": {
+    message: msg({ id: "error.import.file_too_large", message: "That file is larger than this is meant for (at most {max_bytes, number} bytes)" }),
+  },
+  "import.line_not_found": {
+    message: msg({ id: "error.import.line_not_found", message: "No such line on this import" }),
+  },
+  "import.line_needs_category": {
+    message: msg({ id: "error.import.line_needs_category", message: "Give the line a category first" }),
+  },
+  "import.line_has_no_payee": {
+    message: msg({ id: "error.import.line_has_no_payee", message: "This line has no payee to attach a rule to" }),
+  },
+  "import.send_something": {
+    message: msg({ id: "error.import.send_something", message: "Send a file or some pasted text" }),
+  },
+  "import.already_staged": {
+    message: msg({ id: "error.import.already_staged", message: "This exact file is already staged for {account}, from {at} (as {filename}), and is waiting to be reviewed. Open that import rather than starting a second one, or send this with force set.", comment: "{at} is when the earlier import was made; force is the name of a request field" }),
+    dates: ["at"],
+  },
+  "import.already_imported": {
+    message: msg({ id: "error.import.already_imported", message: "This exact file was already imported into {account} on {at} (as {filename}). Nothing has been changed. If you meant to import it again, send it with force set.", comment: "force is the name of a request field" }),
+    dates: ["at"],
+  },
+  "import.choose_product": {
+    message: msg({ id: "error.import.choose_product", message: "This file holds more than one account ({products}), and {account} has not said which of them it is. Set its statement product on the Accounts screen, then read the file again.", comment: "{products} is the bank's own names for the accounts in the file" }),
+  },
+  "import.product_absent": {
+    message: msg({ id: "error.import.product_absent", message: "{account} takes the {product} rows of a statement, and this file has none: it holds {products}." }),
+  },
+  "import.wrong_currency": {
+    message: msg({ id: "error.import.wrong_currency", message: "This file is in {currencies}, and {account} holds {currency}: none of its rows are in {currency}. Import it into an account that holds {currencies}, or check that this is the right file." }),
+  },
+  "import.not_awaiting_commit": {
+    message: msg({ id: "error.import.not_awaiting_commit", message: "That import is {status}, not waiting to be committed", comment: "{status} is the import's state as stored: applied, preview, failed, undone" }),
+  },
+  "import.not_found": {
+    message: msg({ id: "error.import.not_found", message: "No such import" }),
+  },
+  "import.not_an_import": {
+    message: msg({ id: "error.import.not_an_import", message: "That batch is not an import", comment: "Batch: one act in History. See GLOSSARY.md" }),
+  },
+  "import.not_staged": {
+    message: msg({ id: "error.import.not_staged", message: "That import is {status}, not staged", comment: "{status} is the import's state as stored" }),
+  },
+  "import.committed_not_purged": {
+    message: msg({ id: "error.import.committed_not_purged", message: "That import is {status}, not staged. A committed import is put back from History rather than purged." }),
+  },
+  "import.line_no_own_category": {
+    message: msg({ id: "error.import.line_no_own_category", message: "That line has no category of its own to apply" }),
+  },
+  "import.line_already_in_account": {
+    message: msg({ id: "error.import.line_already_in_account", message: "That statement line is already in this account" }),
+  },
+  "history.no_such_table": {
+    message: msg({ id: "error.history.no_such_table", message: "No such table in the audit log" }),
+  },
+  "history.batch_not_found": {
+    message: msg({ id: "error.history.batch_not_found", message: "No such batch", comment: "Batch: one act in History. See GLOSSARY.md" }),
+  },
+  "upload.too_large": {
+    message: msg({ id: "error.upload.too_large", message: "That file is too large (at most {max_bytes, number} bytes)" }),
+  },
+  "account_import.rows_refused": {
+    message: msg({ id: "error.account_import.rows_refused", message: "{refused} of {rows, plural, one {# row} other {# rows}} cannot be imported, so none were. Nothing has been changed; correct the file and try again." }),
+  },
+  "account_import.no_accounts": {
+    message: msg({ id: "error.account_import.no_accounts", message: "There are no accounts in this file" }),
+  },
+  "account_import.unknown_column": {
+    message: msg({ id: "error.account_import.unknown_column", message: "This file has a column this does not know: {columns}. The columns are {known} -- download the template to start from them.", comment: "{columns} and {known} are column names, which stay in English" }),
+  },
+  "account_import.missing_column": {
+    message: msg({ id: "error.account_import.missing_column", message: "This file has no {columns} column, and every account needs one. The first line should name the columns, as the template does." }),
+  },
+  "account_import.not_csv": {
+    message: msg({ id: "error.account_import.not_csv", message: "Line {line} of this file cannot be read as CSV. Save it from the spreadsheet as CSV again, or start from the template." }),
+  },
+  "account_import.column_twice": {
+    message: msg({ id: "error.account_import.column_twice", message: "This file has the column {column} twice" }),
+  },
+  "account_import.too_many_rows": {
+    message: msg({ id: "error.account_import.too_many_rows", message: "This file has more than {max} accounts in it, which is more than a household has -- it may be a statement rather than a list of accounts" }),
+  },
+  "ynab.say_how": {
+    message: msg({ id: "error.ynab.say_how", message: "Say how to reach YNAB: through its export file or its API" }),
+  },
+  "ynab.token_needed": {
+    message: msg({ id: "error.ynab.token_needed", message: "A YNAB personal access token is needed" }),
+  },
+  "ynab.token_malformed": {
+    message: msg({ id: "error.ynab.token_malformed", message: "That is not a YNAB personal access token" }),
+  },
+  "ynab.choose_export": {
+    message: msg({ id: "error.ynab.choose_export", message: "Choose the YNAB export: the zip, or its Register.csv" }),
+  },
+  "ynab.choose_plan": {
+    message: msg({ id: "error.ynab.choose_plan", message: "Choose which YNAB plan to import", comment: "A plan is what YNAB calls a budget" }),
+  },
+  "ynab.plan_unreadable": {
+    message: msg({ id: "error.ynab.plan_unreadable", message: "The import plan cannot be read", comment: "The import plan: the choices made on the One-time Import screen" }),
+  },
+  "ynab.date_format_unknown": {
+    message: msg({ id: "error.ynab.date_format_unknown", message: "{format} is not a date format this import reads" }),
+  },
+  "ynab.currency_not_a_code": {
+    message: msg({ id: "error.ynab.currency_not_a_code", message: "{currency} is not a three-letter currency code" }),
+  },
+  "ynab.flags_choice": {
+    message: msg({ id: "error.ynab.flags_choice", message: "Flags are either kept in the memo or ignored", comment: "YNAB's coloured flags on a transaction" }),
+  },
+  "ynab.starting_balance_choice": {
+    message: msg({ id: "error.ynab.starting_balance_choice", message: "The starting balance is either imported or skipped" }),
+  },
+  "ynab.range_backwards": {
+    message: msg({ id: "error.ynab.range_backwards", message: "The date range ends before it starts" }),
+  },
+  "ynab.confirm_states": {
+    message: msg({ id: "error.ynab.confirm_states", message: "Confirm that YNAB's reconciled and cleared states are reset: everything arrives uncleared", comment: "See GLOSSARY.md (Cleared, Uncleared, reconcile)" }),
+  },
+  "ynab.date_unreadable": {
+    message: msg({ id: "error.ynab.date_unreadable", message: "{date} is not a {format} date", comment: "{format} is a date pattern like DD/MM/YYYY" }),
+  },
+  "ynab.account_undecided": {
+    message: msg({ id: "error.ynab.account_undecided", message: "Say what to do with the YNAB account {account}" }),
+  },
+  "ynab.category_undecided": {
+    message: msg({ id: "error.ynab.category_undecided", message: "Say what to do with the YNAB category {category}" }),
+  },
+  "ynab.account_elsewhere": {
+    message: msg({ id: "error.ynab.account_elsewhere", message: "The account chosen for {account} is not in this household" }),
+  },
+  "ynab.account_currency": {
+    message: msg({ id: "error.ynab.account_currency", message: "{account} is in {account_currency}, and this plan is in {currency}" }),
+  },
+  "ynab.account_twice": {
+    message: msg({ id: "error.ynab.account_twice", message: "{first} and {second} both go to {account}; each YNAB account needs an account of its own" }),
+  },
+  "ynab.category_elsewhere": {
+    message: msg({ id: "error.ynab.category_elsewhere", message: "The category chosen for {category} is not in this household" }),
+  },
+  "ynab.rows_taken": {
+    message: msg({ id: "error.ynab.rows_taken", message: "Some of these rows were imported by another request a moment ago; open the Import screen and check History before trying again" }),
+  },
+  "ynab.new_account_needs_name": {
+    message: msg({ id: "error.ynab.new_account_needs_name", message: "The new account for {account} needs a name" }),
+  },
+  "ynab.account_mapping_unknown": {
+    message: msg({ id: "error.ynab.account_mapping_unknown", message: "{kind} is not something an account can be mapped to" }),
+  },
+  "ynab.new_category_needs_name": {
+    message: msg({ id: "error.ynab.new_category_needs_name", message: "The new category for {category} needs a name" }),
+  },
+  "ynab.category_mapping_unknown": {
+    message: msg({ id: "error.ynab.category_mapping_unknown", message: "{kind} is not something a category can be mapped to" }),
+  },
+  "ynab.account_type_unknown": {
+    message: msg({ id: "error.ynab.account_type_unknown", message: "{type} is not an account type" }),
+  },
+  "ynab.answer_unreadable": {
+    message: msg({ id: "error.ynab.answer_unreadable", message: "YNAB's answer could not be read" }),
+  },
+  "ynab.answer_too_large": {
+    message: msg({ id: "error.ynab.answer_too_large", message: "YNAB's answer was larger than this import will read" }),
+  },
+  "ynab.timeout": {
+    message: msg({ id: "error.ynab.timeout", message: "YNAB took too long to answer; try again later" }),
+  },
+  "ynab.status": {
+    message: msg({ id: "error.ynab.status", message: "YNAB answered {status}; try again later", comment: "{status} is an HTTP status number, like 503" }),
+  },
+  "ynab.unreachable": {
+    message: msg({ id: "error.ynab.unreachable", message: "YNAB could not be reached; check the connection and try again" }),
+  },
+  "ynab.token_rejected": {
+    message: msg({ id: "error.ynab.token_rejected", message: "YNAB rejected the token" }),
+  },
+  "ynab.no_such_plan": {
+    message: msg({ id: "error.ynab.no_such_plan", message: "YNAB has no such plan for this token" }),
+  },
+  "ynab.rate_limited": {
+    message: msg({ id: "error.ynab.rate_limited", message: "YNAB is limiting requests from this token for now; try again in an hour" }),
+  },
+  "ynab.no_transactions": {
+    message: msg({ id: "error.ynab.no_transactions", message: "There are no transactions in this file" }),
+  },
+  "ynab.plan_not_register": {
+    message: msg({ id: "error.ynab.plan_not_register", message: "Only the YNAB Register.csv is needed, not the Plan.csv" }),
+  },
+  "ynab.not_register": {
+    message: msg({ id: "error.ynab.not_register", message: "This is not a YNAB Register.csv: it has no {columns} column. Export the plan from YNAB and upload the zip or its Register.csv." }),
+  },
+  "ynab.zip_unreadable": {
+    message: msg({ id: "error.ynab.zip_unreadable", message: "That zip file cannot be opened" }),
+  },
+  "ynab.zip_has_no_register": {
+    message: msg({ id: "error.ynab.zip_has_no_register", message: "Only the YNAB Register.csv is needed, not the Plan.csv, and this zip has no Register.csv in it" }),
+  },
+  "ynab.register_too_large": {
+    message: msg({ id: "error.ynab.register_too_large", message: "The Register.csv in that zip is larger than this import reads" }),
+  },
+  "ynab.not_csv": {
+    message: msg({ id: "error.ynab.not_csv", message: "Line {line} of this file cannot be read as CSV. Export the plan from YNAB again and upload the zip or its Register.csv." }),
+  },
+  "ynab.amount_too_long": {
+    message: msg({ id: "error.ynab.amount_too_long", message: "Line {line} of this file has an amount longer than {max} characters, which YNAB never writes -- it may not be a YNAB export, or it may be damaged" }),
+  },
+  "request.cross_origin": {
+    message: msg({ id: "error.request.cross_origin", message: "That request did not come from this app" }),
+  },
+  "request.invalid": {
+    message: msg({ id: "error.request.invalid", message: "Some of what was sent is not right: {fields}", comment: "A form or request was refused. {fields} are the API's own field names, like body.amount, kept as they are" }),
+  },
+  "ledger.busy": {
+    message: msg({ id: "error.ledger.busy", message: "The ledger is busy with another change at this moment; try again", comment: "Two people changed the ledger at the same moment. See GLOSSARY.md (ledger)" }),
+  },
+  "setup.required": {
+    message: msg({ id: "error.setup.required", message: "This instance has not been set up yet; open /setup", comment: "/setup is a web address and stays as it is" }),
+  },
+  "statement.unreadable": {
+    message: msg({ id: "error.statement.unreadable", message: "This file cannot be read as a statement" }),
+  },
 };
 
 /** The params as the active locale writes them. */
@@ -619,7 +1057,16 @@ export function problemText(error: unknown): string {
   if (i18n.locale === SOURCE_LOCALE || !(error instanceof ApiError)) return sentence;
   const code = error.body?.code;
   const entry = typeof code === "string" ? ERROR_MESSAGES[code] : undefined;
-  if (!entry) return sentence;
+  if (!entry) {
+    // A refusal whose code is a notice's: a statement the library refused
+    // whole, read back into one of `app/notices.py`'s codes (#267).
+    const params = error.body?.params;
+    const worded =
+      typeof code === "string"
+        ? wordNotice({ code, params: params && typeof params === "object" ? (params as Record<string, unknown>) : {} })
+        : null;
+    return worded ?? sentence;
+  }
   const params = error.body?.params;
   return i18n._(entry.message.id, shown(entry, params && typeof params === "object" ? (params as Record<string, unknown>) : {}), {
     message: entry.message.message,

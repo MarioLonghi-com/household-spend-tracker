@@ -263,6 +263,8 @@ EMPTY_HOUSEHOLD_QUERY = {
     # empty household's every id is.
     "table": "transactions",
     "row_id": "f" * 32,
+    # A draft language: the review's `.po` export is one language's (#272).
+    "locale": "pt-BR",
 }
 
 

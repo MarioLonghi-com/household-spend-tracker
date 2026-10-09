@@ -493,7 +493,14 @@ def test_a_withdrawn_invitation_cannot_still_mint_an_owner(client):
         "/api/invite/complete", json={"blob": enrolled["blob"], "codes_saved": True}, headers=HEADERS
     )
     assert refused.status_code == 404
-    assert client.get("/api/admin/users").json().__len__() == 1, "no second owner exists"
+    # Counted as the owner: signed out, this read only ever answered "sign in
+    # first", a body of one key, and the assertion held whatever happened (#267).
+    client.cookies.clear()
+    for name, value in owners_cookies.items():
+        client.cookies.set(name, value)
+    people = client.get("/api/admin/users")
+    assert people.status_code == 200, people.text
+    assert [one["email"] for one in people.json()] == ["Jane.Doe@gmail.com"], "no second owner exists"
 
 
 def test_an_expired_invitation_cannot_be_spent_at_the_last_step(client, monkeypatch):

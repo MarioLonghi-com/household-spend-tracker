@@ -52,9 +52,9 @@ MAX_TOKEN_LENGTH = 500
 
 def _token(token: str | None) -> str:
     if not token or not token.strip():
-        raise ValidationError("a YNAB personal access token is needed")
+        raise ValidationError("a YNAB personal access token is needed", code="ynab.token_needed")
     if len(token) > MAX_TOKEN_LENGTH:
-        raise ValidationError("that is not a YNAB personal access token")
+        raise ValidationError("that is not a YNAB personal access token", code="ynab.token_malformed")
     return token.strip()
 
 
@@ -66,17 +66,19 @@ async def _source(
 ) -> Source:
     if via == "csv":
         if file is None:
-            raise ValidationError("choose the YNAB export: the zip, or its Register.csv")
+            raise ValidationError(
+            "choose the YNAB export: the zip, or its Register.csv", code="ynab.choose_export"
+        )
         refuse_declared_size(file, ynab_source.MAX_FILE_BYTES, FILE_TOO_BIG)
         raw = await read_capped(file, ynab_source.MAX_FILE_BYTES, FILE_TOO_BIG)
         # Parsing ten thousand rows is CPU, and this is an async route.
         return await run_cpu(ynab_source.from_file, raw, file.filename)
     if via == "api":
         if not plan_id or len(plan_id) > 64:
-            raise ValidationError("choose which YNAB plan to import")
+            raise ValidationError("choose which YNAB plan to import", code="ynab.choose_plan")
         # Network, off the event loop.
         return await run_in_threadpool(ynab_source.from_api, _token(token), plan_id)
-    raise ValidationError("say how to reach YNAB: via is 'csv' or 'api'")
+    raise ValidationError("say how to reach YNAB: via is 'csv' or 'api'", code="ynab.say_how")
 
 
 def _plan(text: str) -> engine.Plan:
@@ -84,7 +86,9 @@ def _plan(text: str) -> engine.Plan:
         body = OneTimeImportPlan.model_validate(json.loads(text))
     except (ValueError, SchemaError) as exc:
         detail = exc.errors(include_input=False) if isinstance(exc, SchemaError) else str(exc)
-        raise ValidationError(f"the import plan cannot be read: {detail}") from None
+        raise ValidationError(
+            f"the import plan cannot be read: {detail}", code="ynab.plan_unreadable"
+        ) from None
     return engine.Plan(
         currency=body.currency.upper(),
         date_format=body.date_format,

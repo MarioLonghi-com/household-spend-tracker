@@ -13,6 +13,7 @@ import secrets
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
 
+from ..errors import ValidationError
 from . import common_passwords
 
 #: argon2-cffi's defaults are argon2id, and current.
@@ -61,3 +62,40 @@ def complaints(password: str, *, email: str = "") -> list[str]:
     if email and password.strip().lower() == email.strip().lower():
         problems.append("it cannot be your email address")
     return problems
+
+
+def refuse_weak(password: str, *, email: str = "", first_only: bool = False) -> None:
+    """Refuse a password `complaints` finds fault with, with a code (#267).
+
+    ``detail`` is what each caller always said: every complaint after "that
+    password will not do: ", or, with ``first_only``, the first complaint
+    alone (the profile's change of password). The code names the complaints
+    that sentence holds, and the params are numbers, never words: a length,
+    the size of the common-password list.
+    """
+    problems = complaints(password, email=email)
+    if not problems:
+        return
+    if first_only:
+        problems = problems[:1]
+    detail = problems[0] if first_only else "that password will not do: " + ", and ".join(problems)
+    short = len(password) < MIN_LENGTH
+    is_email = bool(email) and password.strip().lower() == email.strip().lower()
+    both = len(problems) == 2
+    if short and both:
+        raise ValidationError(
+            detail, code="password.too_short_and_is_email", params={"min_length": MIN_LENGTH}
+        )
+    if short:
+        raise ValidationError(detail, code="password.too_short", params={"min_length": MIN_LENGTH})
+    if both:
+        raise ValidationError(
+            detail,
+            code="password.common_and_is_email",
+            params={"count": common_passwords.ENTRIES},
+        )
+    if is_email and len(problems) == 1 and problems[0].startswith("it cannot"):
+        raise ValidationError(detail, code="password.is_email")
+    raise ValidationError(
+        detail, code="password.common", params={"count": common_passwords.ENTRIES}
+    )

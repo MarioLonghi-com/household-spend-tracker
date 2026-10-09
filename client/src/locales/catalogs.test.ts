@@ -6,7 +6,9 @@
  * -- a fuzzy `msgstr` would be shown like any other -- so the rule is held
  * here, from both sides:
  *
- * - a catalog that is not served may hold translations only as fuzzy drafts;
+ * - a catalog that is not served holds fuzzy drafts and, once the household
+ *   has reviewed some in the app, reviewed entries without the flag (#272) --
+ *   `scripts/apply_translation_suggestions.py` is what takes the flag off;
  * - a catalog that is served may hold no fuzzy entry and no missing one.
  *
  * Which catalogs are served is `SERVED_LOCALES`; the loaders in `lib/i18n.ts`
@@ -17,42 +19,11 @@ import { describe, expect, it } from "vitest";
 import { compileMessageOrThrow } from "@lingui/message-utils/compileMessage";
 import config from "../../lingui.config";
 import { PSEUDO_LOCALE, SERVED_LOCALES, SOURCE_LOCALE } from "../lib/i18n";
+import { readPo, type PoEntry } from "../lib/po";
 
-interface Entry {
-  id: string;
-  translation: string;
-  fuzzy: boolean;
-  /** The translator notes, `#.` lines: a source `comment` (#228). */
-  notes: string[];
-  context: string;
-}
+type Entry = PoEntry;
 
-/** Enough of a PO reader for this: entries, their flags, and their msgstr. */
-export function readPo(text: string): Entry[] {
-  const unquote = (line: string) => JSON.parse(line.slice(line.indexOf('"')));
-  const entries: Entry[] = [];
-  for (const block of text.split(/\n\s*\n/)) {
-    const lines = block.split("\n");
-    let id = "";
-    let translation = "";
-    let field: "id" | "str" | null = null;
-    let fuzzy = false;
-    let context = "";
-    const notes: string[] = [];
-    for (const line of lines) {
-      if (line.startsWith("#,")) fuzzy ||= line.includes("fuzzy");
-      // Lingui's own "placeholder {0}: expr" lines are about the code, not a note.
-      else if (line.startsWith("#. ") && !line.startsWith("#. placeholder ")) notes.push(line.slice(3));
-      else if (line.startsWith("msgctxt ")) context = unquote(line);
-      else if (line.startsWith("msgid ")) [field, id] = ["id", unquote(line)];
-      else if (line.startsWith("msgstr ")) [field, translation] = ["str", unquote(line)];
-      else if (line.startsWith('"') && field === "id") id += unquote(line);
-      else if (line.startsWith('"') && field === "str") translation += unquote(line);
-    }
-    if (field && id) entries.push({ id, translation, fuzzy, notes, context });
-  }
-  return entries;
-}
+export { readPo };
 
 /** Every catalog's text, read as text rather than compiled. */
 const FILES = import.meta.glob<string>("./*/messages.po", {
@@ -94,12 +65,6 @@ describe("the catalogs", () => {
     for (const locale of config.locales) {
       expect(catalog(locale).map((one) => one.id).sort(), locale).toEqual(english);
     }
-  });
-
-  it.each(translated)("%s holds its translations only as fuzzy drafts while it is not served", (locale) => {
-    if (SERVED_LOCALES.includes(locale)) return;
-    const served = catalog(locale).filter((one) => one.translation && !one.fuzzy);
-    expect(served.map((one) => one.id)).toEqual([]);
   });
 
   it.each(translated)("%s, once served, has nothing fuzzy and nothing missing", (locale) => {

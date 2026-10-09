@@ -48,7 +48,13 @@ CURRENCY_CODE = re.compile(r"[A-Z]{3}")
 
 
 def create_household(
-    session: Session, *, name: str, creator: User, base_currency: str = "EUR", date_format: str = "YYYY-MM-DD"
+    session: Session,
+    *,
+    name: str,
+    creator: User,
+    base_currency: str = "EUR",
+    date_format: str = "YYYY-MM-DD",
+    locale: str | None = None,
 ) -> Household:
     """Create a household. The creator is its first member."""
     if not name.strip():
@@ -91,7 +97,7 @@ def create_household(
     # this module's models and the pair would import each other at load time.
     from . import categories as category_service
 
-    category_service.seed_defaults(session, household.id)
+    category_service.seed_defaults(session, household.id, locale=locale)
     session.flush()
     return household
 
@@ -155,19 +161,23 @@ def update_household(
     return household
 
 
-def get_for(session: Session, household_id: str, user: User) -> Household:
+def get_for(
+    session: Session, household_id: str, user: User, *, owner_only: bool = False
+) -> Household:
     """The household, if this user is in it.
 
     Raises ``NotFound`` for a household that does not exist **and** for one the
     user is not a member of -- deliberately the same answer, so a non-member
-    cannot learn that an id is real.
+    cannot learn that an id is real. ``owner_only`` gives a member who is not
+    an owner that same answer too: for routes a member has no business
+    knowing exist, such as the translation review's (#272).
     """
     household = session.execute(
         select(Household)
         .join(HouseholdMember, HouseholdMember.household_id == Household.id)
         .where(Household.id == household_id, HouseholdMember.user_id == user.id)
     ).scalar_one_or_none()
-    if household is None:
+    if household is None or (owner_only and user.role is not Role.owner):
         raise NotFound("no such household")
     return household
 

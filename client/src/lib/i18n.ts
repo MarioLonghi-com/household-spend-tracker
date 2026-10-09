@@ -2,23 +2,25 @@
  * Which catalog the words come from (#53, part of #48).
  *
  * **English is the only language served.** The pt-BR, es-ES and sv-SE
- * catalogs exist and hold drafts, every entry `#, fuzzy`, and none of them is
- * reachable from here: there is no loader for them, so they are not in the
- * bundle at all. #58 ships them, after a native speaker has reviewed each one,
- * by adding it to `SERVED_LOCALES` and `LOADERS` -- and
- * `src/locales/catalogs.test.ts` refuses a served catalog that still holds a
- * fuzzy or missing entry.
+ * catalogs exist and hold drafts, and nobody is offered them -- with one
+ * exception: an owner who turns on **review mode** on their own device
+ * (#272, Application management) gets them in Profile's language picker,
+ * labelled as previews, so the household can review the drafts in the app.
+ * Their loaders are in the bundle for that, as chunks loaded only when chosen.
+ * #58 ships a language, once it is reviewed, by adding it to
+ * `SERVED_LOCALES` -- and `src/locales/catalogs.test.ts` refuses a served
+ * catalog that still holds a fuzzy or missing entry.
  *
  * `en-XA` is the pseudo-locale, for CI and development only. It is never
  * offered in the picker; it is reached by storing it under `LOCALE_KEY`
  * (Playwright's en-XA pass does exactly that), and it is what makes an
  * unextracted string visible as plain ASCII among accented text.
  *
- * **The drafts in a QA build (#271).** `vite build --mode qa`, which is what
- * `npm run e2e` builds, also has loaders for the drafts, reached the same way
- * as en-XA: stored on the device. That is how the end-to-end pass walks every
- * screen in each language before anyone reviews it. The mode is fixed when
- * the bundle is built, so no other build has those loaders -- or the drafts.
+ * **The drafts in a QA build (#271).** In `vite build --mode qa`, which is
+ * what `npm run e2e` builds, a draft stored on the device is reached the way
+ * en-XA is, without review mode. That is how the end-to-end pass walks every
+ * screen in each language. The mode is fixed when the bundle is built, so in
+ * any other build only review mode reaches a draft.
  *
  * English is loaded with the bundle and activated before the first render, so
  * there is never a frame without words. Another catalog loads lazily.
@@ -48,31 +50,63 @@ const QA_BUILD = import.meta.env.MODE === "qa";
 export const LOCALE_KEY = "spendtracker.locale";
 
 /**
- * How each catalog other than English arrives. Only the ones that may be
- * served are listed: a catalog with no loader cannot reach a browser.
+ * How each catalog other than English arrives, each its own chunk, fetched
+ * only when that language is chosen. Whether it may be chosen is
+ * `isReachable`'s question, not this list's.
  */
 const LOADERS: Record<string, () => Promise<{ messages: Messages }>> = {
   [PSEUDO_LOCALE]: () => import("../locales/en-XA/messages.po"),
-  ...(QA_BUILD
-    ? {
-        "pt-BR": () => import("../locales/pt-BR/messages.po"),
-        "es-ES": () => import("../locales/es-ES/messages.po"),
-        "sv-SE": () => import("../locales/sv-SE/messages.po"),
-      }
-    : {}),
+  "pt-BR": () => import("../locales/pt-BR/messages.po"),
+  "es-ES": () => import("../locales/es-ES/messages.po"),
+  "sv-SE": () => import("../locales/sv-SE/messages.po"),
 };
+
+
+/** Whether this device is reviewing the drafts: an owner, review mode on (#272). */
+let reviewer = false;
+const listeners = new Set<() => void>();
+
+/** Whether the drafts are offered here, as previews. */
+export function reviewing(): boolean {
+  return reviewer;
+}
+
+/** For `useSyncExternalStore`: called when `reviewing()` changes. */
+export function onReviewingChange(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+/**
+ * Turn the previews on or off for this device. The shell calls it with
+ * "owner, and review mode on" once it knows who is signed in, and with
+ * `false` when they leave. Turning on brings back a draft this device chose
+ * before; turning off puts a draft that is showing back to English.
+ */
+export async function setReviewer(allowed: boolean): Promise<void> {
+  if (allowed === reviewer) return;
+  reviewer = allowed;
+  for (const listener of listeners) listener();
+  if (allowed) {
+    const chosen = rawStoredLocale();
+    if (chosen && DRAFT_LOCALES.includes(chosen)) await activate(chosen);
+  } else if (DRAFT_LOCALES.includes(i18n.locale)) {
+    // Even in a QA build: turning review off is asking for English back.
+    await activate(SOURCE_LOCALE);
+  }
+}
 
 i18n.load(SOURCE_LOCALE, english);
 i18n.activate(SOURCE_LOCALE);
 
 const loaded = new Set<string>([SOURCE_LOCALE]);
 
-/** Whether a locale can be activated at all: served, the pseudo-locale, or a draft in a QA build. */
+/** Whether a locale can be activated at all: served, the pseudo-locale, or a draft -- under review, or in a QA build. */
 export function isReachable(locale: string): boolean {
   return (
     SERVED_LOCALES.includes(locale) ||
     locale === PSEUDO_LOCALE ||
-    (QA_BUILD && DRAFT_LOCALES.includes(locale))
+    ((reviewer || QA_BUILD) && DRAFT_LOCALES.includes(locale))
   );
 }
 
@@ -100,14 +134,19 @@ export function negotiate(
   return SOURCE_LOCALE;
 }
 
-/** What this device stored, if it is something this build can show. */
-export function storedLocale(): string | null {
+/** What this device stored, whatever it is. */
+function rawStoredLocale(): string | null {
   try {
-    const value = window.localStorage.getItem(LOCALE_KEY);
-    return value && isReachable(value) ? value : null;
+    return window.localStorage.getItem(LOCALE_KEY);
   } catch {
     return null;
   }
+}
+
+/** What this device stored, if it is something this device may show now. */
+export function storedLocale(): string | null {
+  const value = rawStoredLocale();
+  return value && isReachable(value) ? value : null;
 }
 
 /** Remember a choice on this device. A blocked store means it lasts the session. */
@@ -129,6 +168,8 @@ export async function activate(locale: string): Promise<string> {
     const { messages } = await loader();
     i18n.load(target, messages);
     loaded.add(target);
+    // Review mode may have been turned off while the catalog arrived.
+    if (!isReachable(target)) return i18n.locale;
   }
   i18n.activate(target);
   document.documentElement.lang = target;

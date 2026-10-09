@@ -40,7 +40,14 @@ ROOT = Path(__file__).resolve().parent.parent
 #: `DomainError` constructions in `app/` and `statements/` that carry no code,
 #: as of #57's first wave. **Lower it** when you convert sites; the test fails
 #: if it rises.
-CODELESS = 318
+CODELESS = 135
+
+
+#: Functions that build a refusal rather than raise one, and take ``code=`` and
+#: ``params=`` exactly as a raise does: `main._coded_refusal`, for the answers made
+#: in a handler or a middleware (#267). Their codes are held to the registry
+#: like any other.
+BUILDERS = frozenset({"_coded_refusal"})
 
 
 @dataclass
@@ -98,7 +105,7 @@ def scan(sources: dict[str, str]) -> Scan:
                 if isinstance(func, ast.Attribute)
                 else None
             )
-            if name not in classes:
+            if name not in classes and name not in BUILDERS:
                 continue
             at = f"{where}:{node.lineno}"
             keywords = {kw.arg: kw.value for kw in node.keywords if kw.arg}
