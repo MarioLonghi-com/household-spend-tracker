@@ -12,6 +12,7 @@
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { noticeText } from "../lib/noticeMessages";
 import { format, toInput } from "../lib/money";
 import {
   Field,
@@ -132,7 +133,7 @@ export function AccountImport({
             case "iban":
               return row.iban;
             case "problems":
-              return row.problems.join(" ");
+              return row.problems.map((one, at) => noticeText(one, row.problem_codes?.[at])).join(" ");
           }
         },
         (a, b) => a.line - b.line,
@@ -320,7 +321,7 @@ export function AccountImport({
                       ) : (
                         <ul className="plain-list neg" style={{ margin: 0 }}>
                           {row.problems.map((problem, at) => (
-                            <li key={at}>{problem}</li>
+                            <li key={at}>{noticeText(problem, row.problem_codes?.[at])}</li>
                           ))}
                         </ul>
                       )}

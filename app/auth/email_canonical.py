@@ -50,13 +50,23 @@ def canonical(email: str) -> str:
     """
     cleaned = (email or "").strip().lower()
     if not cleaned or cleaned.count("@") < 1:
-        raise ValidationError(f"{email!r} is not an email address")
+        raise ValidationError(
+            f"{email!r} is not an email address",
+            code="email.not_an_address",
+            params={"email": email},
+        )
     if len(cleaned) > MAX_LENGTH:
-        raise ValidationError("that email address is too long")
+        raise ValidationError(
+            "that email address is too long", code="email.too_long", params={"max": MAX_LENGTH}
+        )
 
     local, _, domain = cleaned.rpartition("@")
     if not local or "." not in domain:
-        raise ValidationError(f"{email!r} is not an email address")
+        raise ValidationError(
+            f"{email!r} is not an email address",
+            code="email.not_an_address",
+            params={"email": email},
+        )
 
     # Sub-addressing: everything from the first plus is a label, not an inbox.
     local = local.split("+", 1)[0]
@@ -65,5 +75,9 @@ def canonical(email: str) -> str:
         local = local.replace(character, "")
 
     if not local:
-        raise ValidationError(f"{email!r} has no usable name before the @")
+        raise ValidationError(
+            f"{email!r} has no usable name before the @",
+            code="email.no_name",
+            params={"email": email},
+        )
     return f"{local}@{domain}"

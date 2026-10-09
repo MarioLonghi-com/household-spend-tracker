@@ -109,18 +109,24 @@ def _refuse_if_over(
     )
     if trusted:
         if account_failures >= FREE_ATTEMPTS_TRUSTED + already:
+            wait = _retry_after(account_oldest)
             raise TooManyAttempts(
                 "too many attempts for this account. "
-                f"Try again in {_retry_after(account_oldest)} seconds.",
-                retry_after=_retry_after(account_oldest),
+                f"Try again in {wait} seconds.",
+                retry_after=wait,
+                code="auth.too_many_for_account",
+                params={"seconds": wait},
             )
         return
 
     if account_failures >= FREE_ATTEMPTS + already:
+        wait = _retry_after(account_oldest)
         raise TooManyAttempts(
             "too many attempts for this account. "
-            f"Try again in {_retry_after(account_oldest)} seconds.",
-            retry_after=_retry_after(account_oldest),
+            f"Try again in {wait} seconds.",
+            retry_after=wait,
+            code="auth.too_many_for_account",
+            params={"seconds": wait},
         )
 
     if ip is None:
@@ -133,16 +139,22 @@ def _refuse_if_over(
         kind=kind,
     )
     if pair_failures >= FREE_ATTEMPTS + already:
+        wait = _retry_after(pair_oldest)
         raise TooManyAttempts(
-            f"too many attempts. Try again in {_retry_after(pair_oldest)} seconds.",
-            retry_after=_retry_after(pair_oldest),
+            f"too many attempts. Try again in {wait} seconds.",
+            retry_after=wait,
+            code="auth.too_many_attempts",
+            params={"seconds": wait},
         )
 
     ip_failures, ip_oldest = _failures(session, LoginAttempt.ip == ip, kind=kind)
     if ip_failures >= FREE_ATTEMPTS_PER_IP + already:
+        wait = _retry_after(ip_oldest)
         raise TooManyAttempts(
-            f"too many attempts from here. Try again in {_retry_after(ip_oldest)} seconds.",
-            retry_after=_retry_after(ip_oldest),
+            f"too many attempts from here. Try again in {wait} seconds.",
+            retry_after=wait,
+            code="auth.too_many_from_here",
+            params={"seconds": wait},
         )
 
 

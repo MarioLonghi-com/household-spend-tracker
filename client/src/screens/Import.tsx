@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, api } from "../lib/api";
+import { codedText, noticeText } from "../lib/noticeMessages";
 import { format } from "../lib/money";
 import { STEP, useWindowed } from "../lib/useWindowed";
 import { Dialog, Field, Problem, SortHeading, Toasts, useToasts } from "../components/bits";
@@ -1055,9 +1056,9 @@ export function Import({
               {preview.filename} · {t({ message: plural(preview.lines.length, { one: `${preview.lines.length} line`, other: `${preview.lines.length} lines` }), comment: "Import preview: how many lines the statement file holds" })} · {t({ message: `into ${account?.name ?? ""}`, comment: "Sentence on the Import screen: preposition, the account money arrives in" })}
             </p>
 
-            {preview.warnings.map((warning) => (
+            {preview.warnings.map((warning, at) => (
               <div className="banner warn" key={warning}>
-                {warning}
+                {noticeText(warning, preview.warning_codes?.[at])}
               </div>
             ))}
 
@@ -1410,7 +1411,9 @@ function PreviewRow({
       />
       <td className="small">
         <span className={`pill ${line.outcome}`}>{OUTCOME_WORDS[line.outcome]}</span>
-        {line.reason ? <div className="muted">{line.reason}</div> : null}
+        {line.reason ? (
+          <div className="muted">{codedText(line.reason, line.reason_code, line.reason_params)}</div>
+        ) : null}
         {line.outcome === "matched_existing" ? (
           <button className="link" onClick={onToggleMatch}>
             {rejectedMatch ? t`Undo — add as new instead` : t`Not the same thing — add it separately`}

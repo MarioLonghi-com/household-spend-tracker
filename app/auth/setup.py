@@ -95,18 +95,19 @@ def require_codes_saved(codes_saved: bool) -> None:
     """
     if not codes_saved:
         raise ValidationError(
-            "store your recovery codes somewhere that is not this browser, then tick the box"
+            "store your recovery codes somewhere that is not this browser, then tick the box",
+            code="setup.store_codes",
         )
 
 
 def check_setup_token(presented: str) -> str:
     actual = current_setup_token()
     if not actual:
-        raise Conflict("this instance is not waiting to be set up")
+        raise Conflict("this instance is not waiting to be set up", code="setup.not_waiting")
     # Bytes, for the reason `totp.code_matches` gives: a non-ASCII str makes
     # compare_digest raise, and this answers a stranger before setup (#208).
     if not secrets.compare_digest(presented.strip().encode(), actual.encode()):
-        raise ValidationError("that setup token is not right")
+        raise ValidationError("that setup token is not right", code="setup.token_wrong")
     return actual
 
 
@@ -149,7 +150,9 @@ def unseal(token: str) -> SetupBlob:
         # Something that decrypted but is not a wizard blob. It should no longer
         # be reachable now that each purpose has its own key, but a malformed
         # payload must answer like an expired one rather than escaping as a 500.
-        raise ValidationError("that setup session is not valid; start again") from exc
+        raise ValidationError(
+            "that setup session is not valid; start again", code="setup.session_invalid"
+        ) from exc
 
     if blob.invitation_id:
         # An invited blob is tied to its invitation, not to the setup token --
@@ -158,7 +161,10 @@ def unseal(token: str) -> SetupBlob:
 
     live = current_setup_token()
     if not live or not secrets.compare_digest(blob.token_fp, token_fingerprint(live)):
-        raise ValidationError("the server restarted; start again with the new setup token")
+        raise ValidationError(
+            "the server restarted; start again with the new setup token",
+            code="setup.server_restarted",
+        )
     return blob
 
 
@@ -202,11 +208,9 @@ def _collect(
     role: str = "owner",
 ) -> SetupBlob:
     canonical = email_canonical.canonical(email)
-    problems = passwords.complaints(password, email=email)
-    if problems:
-        raise ValidationError("that password will not do: " + ", and ".join(problems))
+    passwords.refuse_weak(password, email=email)
     if not display_name.strip():
-        raise ValidationError("a display name is required")
+        raise ValidationError("a display name is required", code="setup.needs_display_name")
 
     return SetupBlob(
         token_fp=token_fp,
@@ -231,7 +235,10 @@ def confirm_authenticator(blob: SetupBlob, code: str) -> SetupBlob:
     """
     step = totp.code_matches(blob.totp_secret, code)
     if step is None:
-        raise ValidationError("that code is not right. Check the time on your phone and try again.")
+        raise ValidationError(
+            "that code is not right. Check the time on your phone and try again.",
+            code="auth.new_code_wrong",
+        )
     # Carry the step so `complete()` can burn it: a code that has proved the
     # pairing has been used, and `app/auth/totp.py` promises that a used code is
     # "refused for the rest of its window and forever after".
@@ -261,17 +268,17 @@ def complete(
     the commit.
     """
     if blob.step < 4:
-        raise ValidationError("finish enrolling an authenticator first")
+        raise ValidationError("finish enrolling an authenticator first", code="setup.enrol_first")
 
     invited = blob.invitation_id is not None
     if not invited and is_configured(session):
-        raise Conflict("this instance has already been set up")
+        raise Conflict("this instance has already been set up", code="setup.already_done")
 
     existing = session.execute(
         select(User).where(User.email_canonical == blob.email_canonical)
     ).scalar_one_or_none()
     if existing is not None:
-        raise AddressTaken("somebody already uses that email address")
+        raise AddressTaken("somebody already uses that email address", code="setup.address_taken")
 
     user = User(
         email=blob.email,

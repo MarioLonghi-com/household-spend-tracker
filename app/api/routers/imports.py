@@ -14,6 +14,7 @@ from starlette.concurrency import run_in_threadpool
 
 from statements import parsing
 
+from ... import notices
 from ...audit.batch import batch, resume
 from ...audit.registry import audited_models
 from ...audit.undo import undo_batch
@@ -62,6 +63,8 @@ MAX_UPLOAD_BYTES = 8 * 1024 * 1024
 def _preview(session, batch_row: Batch, lines: list[ImportLine], warnings: list[str]) -> ImportPreview:
     source = batch_row.source or {}
     landing = importing.preview_categories(session, batch_row.household_id or "", lines)
+    said = [*warnings, *source.get("read_warnings", []), *source.get("warnings", [])]
+    account = session.get(Account, source.get("account_id") or "")
     return ImportPreview(
         batch_id=batch_row.id,
         filename=source.get("filename"),
@@ -73,7 +76,8 @@ def _preview(session, batch_row: Batch, lines: list[ImportLine], warnings: list[
         # balance that does not add up (`warnings`) -- are both kept on the
         # batch, so they are said again when the preview is reopened from the
         # queue. `warnings` here is only what this one request has to add.
-        warnings=[*warnings, *source.get("read_warnings", []), *source.get("warnings", [])],
+        warnings=said,
+        warning_codes=[notices.read(one, currency=account.currency if account else None) for one in said],
         counts=importing.summarise(lines),
         lines=[_line_out(line, landing) for line in lines],
     )
@@ -122,10 +126,10 @@ async def upload(
         raw = pasted.encode()
         filename = "pasted"
     else:
-        raise Conflict("send a file or some pasted text")
+        raise Conflict("send a file or some pasted text", code="import.send_something")
 
     if len(raw) > MAX_UPLOAD_BYTES:
-        raise TooLarge(TOO_BIG)
+        raise TooLarge(TOO_BIG, code="import.file_too_large", params={"max_bytes": MAX_UPLOAD_BYTES})
 
     digest = importing.file_digest(raw)
     if not force:
@@ -140,12 +144,16 @@ async def upload(
                 raise Conflict(
                     f"this exact file is already staged for {account.name}, from {when} "
                     f"(as {name}), and is waiting to be reviewed. Open that import rather "
-                    "than starting a second one, or send this with force set."
+                    "than starting a second one, or send this with force set.",
+                    code="import.already_staged",
+                    params={"account": account.name, "at": already.started_at, "filename": name},
                 )
             raise Conflict(
                 f"this exact file was already imported into {account.name} on {when} "
                 f"(as {name}). Nothing has been changed. If you meant to import it again, "
-                "send it with force set."
+                "send it with force set.",
+                code="import.already_imported",
+                params={"account": account.name, "at": already.started_at, "filename": name},
             )
 
     # Sniffing and parsing are pure CPU over the bytes -- a large spreadsheet
@@ -230,7 +238,7 @@ def set_line_category(
         select(ImportLine).where(ImportLine.id == line_id, ImportLine.batch_id == staged.id)
     ).scalar_one_or_none()
     if line is None:
-        raise NotFound("no such line on this import")
+        raise NotFound("no such line on this import", code="import.line_not_found")
 
     category = None
     if not body.clear_category and body.category_id:
@@ -278,7 +286,7 @@ def set_line_memo(
         select(ImportLine).where(ImportLine.id == line_id, ImportLine.batch_id == staged.id)
     ).scalar_one_or_none()
     if line is None:
-        raise NotFound("no such line on this import")
+        raise NotFound("no such line on this import", code="import.line_not_found")
 
     importing.set_line_memo(session, line, body.memo, clear=body.clear_memo)
     session.flush()
@@ -311,7 +319,7 @@ def apply_category_to_payee(
         select(ImportLine).where(ImportLine.id == line_id, ImportLine.batch_id == staged.id)
     ).scalar_one_or_none()
     if line is None:
-        raise NotFound("no such line on this import")
+        raise NotFound("no such line on this import", code="import.line_not_found")
 
     importing.apply_to_similar(session, staged.id, line)
     lines = list(
@@ -353,9 +361,9 @@ def rule_from_line(
         select(ImportLine).where(ImportLine.id == line_id, ImportLine.batch_id == staged.id)
     ).scalar_one_or_none()
     if line is None:
-        raise NotFound("no such line on this import")
+        raise NotFound("no such line on this import", code="import.line_not_found")
     if not line.category_id:
-        raise ValidationError("give the line a category first")
+        raise ValidationError("give the line a category first", code="import.line_needs_category")
 
     parsed = line.parsed or {}
     name = (parsed.get("payee") or "").strip()
@@ -363,7 +371,9 @@ def rule_from_line(
     if parsed.get("payee_id"):
         payee = session.get(Payee, parsed["payee_id"])
     if payee is None and not name:
-        raise ValidationError("this line has no payee to attach a rule to")
+        raise ValidationError(
+            "this line has no payee to attach a rule to", code="import.line_has_no_payee"
+        )
 
     created = False
     with batch(session, kind=BatchKind.admin, actor_id=user.id, household_id=household.id):
@@ -556,7 +566,7 @@ def row_history(
     if table not in audited_models():
         from ...errors import NotFound
 
-        raise NotFound("no such table in the audit log")
+        raise NotFound("no such table in the audit log", code="history.no_such_table")
 
     rows = session.execute(
         select(Change)
@@ -604,7 +614,7 @@ def row_history(
     # One `_Names` for the whole list rather than one per change: a transaction
     # edited fifty times would otherwise be fifty passes over the household's
     # payees and categories to write fifty sentences.
-    sentences = describing.describe_changes(session, household.id, changes)
+    phrases = describing.describe_change_phrases(session, household.id, changes)
 
     # Both maps in one query each. `session.get` would have been one round trip
     # per change for the batch and another for its actor, which is the N+1 this
@@ -626,7 +636,9 @@ def row_history(
         model = ChangeOut.model_validate(change)
         owner = owners.get(change.batch_id)
         model.batch = BatchOut.model_validate(owner) if owner else None
-        model.summary = sentences.get(change.seq, "")
+        said = phrases.get(change.seq)
+        model.summary = describing.english(said) if said is not None else ""
+        model.summary_phrase = said
         model.actor_name = actors.get(owner.actor_id) if owner else None
         # Beside the person, never instead of them. Same source as the History
         # list's, so the two cannot describe one batch differently.
@@ -716,6 +728,7 @@ def _described(
     out.headline = words.headline
     out.headline_key = words.headline_key
     out.detail = words.detail
+    out.detail_phrase = words.detail_phrase
     out.actor_name = words.actor
     out.via = words.via
     out.change_count = change_count
@@ -747,7 +760,7 @@ def batch_detail(
 
     target = session.get(Batch, batch_id)
     if target is None or target.household_id != household.id:
-        raise NotFound("no such batch")
+        raise NotFound("no such batch", code="history.batch_not_found")
 
     count = session.execute(
         select(func.count()).select_from(Change).where(Change.batch_id == target.id)
@@ -768,10 +781,12 @@ def batch_detail(
     out.headline = words.headline
     out.headline_key = words.headline_key
     out.detail = words.detail
+    out.detail_phrase = words.detail_phrase
     out.actor_name = words.actor
     out.via = words.via
     out.change_count = count
-    out.lines = describing.lines_of(changes, names)
+    out.line_phrases = describing.line_phrases_of(changes, names)
+    out.lines = [describing.english(one) for one in out.line_phrases]
     out.changed_rows = [
         ChangeDetailOut(
             seq=one.seq,
@@ -785,6 +800,7 @@ def batch_detail(
             snapshot=[FieldChangeOut(**asdict(f)) for f in one.snapshot],
             redacted=one.redacted,
             table_key=one.table_key,
+            summary_phrase=one.summary_phrase,
         )
         for one in describing.detail_of(session, household.id, changes, names=names)
     ]
@@ -800,6 +816,6 @@ def undo(
     if target is None or target.household_id != household.id:
         from ...errors import NotFound
 
-        raise NotFound("no such batch")
+        raise NotFound("no such batch", code="history.batch_not_found")
     undone = undo_batch(session, batch_id, actor_id=user.id)
     return _described(session, undone, 0)

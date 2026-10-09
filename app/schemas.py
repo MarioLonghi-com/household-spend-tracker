@@ -192,10 +192,20 @@ class PasskeyStateOut(BaseModel):
 # --------------------------------------------------------------------------- #
 
 
+#: A BCP 47 language tag, for seeding a household's words (#268). Bounded and
+#: shaped here; one with no reviewed translations seeds English.
+SeedLocale = Annotated[
+    str | None, Field(max_length=35, pattern=r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}$")
+]
+
+
 class HouseholdCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     base_currency: str = Field(default="EUR", min_length=3, max_length=3)
     date_format: DateFormat = "YYYY-MM-DD"
+    #: The language to seed its categories in (#268), sent only for a language
+    #: that is served. Not stored: the seeded names are ordinary names.
+    locale: SeedLocale = None
 
 
 class HouseholdOut(ORMModel):
@@ -583,6 +593,17 @@ class AccountImportRow(BaseModel):
     opening_date: Date | None = None
     iban: str | None = None
     problems: list[str] = Field(default_factory=list)
+    #: Each problem as a code and raw params, or null for one with no code
+    #: (#267): what a screen in another language words. Read from the
+    #: sentence by `app/notices.py`, so the two cannot disagree.
+    problem_codes: list[dict | None] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _codes(self) -> AccountImportRow:
+        from .notices import read
+
+        self.problem_codes = [read(one) for one in self.problems]
+        return self
 
 
 class AccountImportOut(BaseModel):
@@ -936,6 +957,11 @@ class ImportLineOut(ORMModel):
     outcome: ImportOutcome
     transaction_id: str | None = None
     reason: str | None = None
+    #: `reason` as a code and raw params (#267), read from the sentence by
+    #: `app/notices.py` -- the sentence is what is stored. Null when it has
+    #: no code. Not sent to an agent.
+    reason_code: str | None = None
+    reason_params: dict | None = None
     #: Where this line will land. The payee's rule decides it unless somebody
     #: has said otherwise on the preview screen.
     category_id: str | None = None
@@ -953,6 +979,15 @@ class ImportLineOut(ORMModel):
     #: of their own. Sent after a change so the screen can offer to do the same
     #: to them rather than making somebody type it eleven more times.
     similar_lines: int = 0
+
+    @model_validator(mode="after")
+    def _reason_code(self) -> ImportLineOut:
+        from .notices import read
+
+        found = read(self.reason) if self.reason_code is None else None
+        if found is not None:
+            self.reason_code, self.reason_params = found["code"], found["params"]
+        return self
 
 
 class SetLineCategory(BaseModel):
@@ -1040,6 +1075,9 @@ class ImportPreview(BaseModel):
     #: Anything the sniffer could not settle, in words -- and, on the agent
     #: path, everything `agent_warnings` noticed about the staged rows.
     warnings: list[str] = []
+    #: Each warning as a code and raw params, or null for one with no code
+    #: (#267). Read from the sentence by `app/notices.py`. Not sent to an agent.
+    warning_codes: list[dict | None] = []
     counts: dict[str, int]
     #: The compact answer. Null on the file path, which has the lines already.
     decision: ImportDecision | None = None
@@ -1095,6 +1133,10 @@ class BatchOut(ORMModel):
     #: What it actually did. Computed from the change rows on every read, never
     #: stored -- a stored copy would be free to drift from the log it describes.
     detail: str = ""
+    #: `detail` as structure -- a key and raw values -- for a client that words
+    #: it in its own language (#266). `detail` is this, rendered in English.
+    #: The shapes are `app/services/describing.py`'s.
+    detail_phrase: dict | None = None
     #: Who did it, by name rather than by id. Named `actor_name` and not
     #: `actor`: `Batch.actor` is the ORM relationship to the User, and a
     #: field of that name on a `from_attributes` model picks the object up
@@ -1110,6 +1152,10 @@ class FieldChangeOut(BaseModel):
     now: str
     #: The column `field` names, for a client that words it itself (#57).
     column: str = ""
+    #: `was` and `now` as raw values (#266): money in minor units beside its
+    #: currency, a date as ISO, an enum as its value. Null `was` on a snapshot.
+    was_value: dict | None = None
+    now_value: dict | None = None
 
 
 class ChangeDetailOut(BaseModel):
@@ -1130,6 +1176,8 @@ class ChangeDetailOut(BaseModel):
     redacted: list[str] = []
     #: The table `table` names, for a client that words it itself (#57).
     table_key: str = ""
+    #: `summary` as structure, for the same client (#266).
+    summary_phrase: dict | None = None
 
 
 class BatchDetail(BatchOut):
@@ -1137,6 +1185,8 @@ class BatchDetail(BatchOut):
 
     #: One line per changed row, in the order they happened.
     lines: list[str] = []
+    #: The same lines as structure (#266).
+    line_phrases: list[dict] = []
     #: The same rows with their columns, for the panel that shows everything.
     #:
     #: Named `changed_rows`, not `changes`: `Batch.changes` is the ORM
@@ -1211,6 +1261,8 @@ class ChangeOut(ORMModel):
     #: The same sentence the History screen shows, from the same engine. The
     #: raw images above are the record; this is the record read aloud.
     summary: str = ""
+    #: `summary` as structure, for a client in another language (#266).
+    summary_phrase: dict | None = None
     #: Who did it, by name rather than by id.
     actor_name: str | None = None
     #: The program that did it on their behalf, when one did. Beside
@@ -1255,6 +1307,9 @@ class AdminHouseholdCreate(BaseModel):
     date_format: DateFormat = "YYYY-MM-DD"
     #: Who else goes in it. The creator is always a member.
     member_ids: IdList = []
+    #: The language to seed its categories in (#268), sent only for a language
+    #: that is served. Not stored: the seeded names are ordinary names.
+    locale: SeedLocale = None
 
 
 class SetDisabled(BaseModel):
@@ -1994,6 +2049,9 @@ class SeedCategories(BaseModel):
     """Add the starter tree to a household that has none."""
 
     confirm: bool = True
+    #: The language to seed its categories in (#268), sent only for a language
+    #: that is served. Not stored: the seeded names are ordinary names.
+    locale: SeedLocale = None
 
 
 class PayeeCategorisationOut(BaseModel):
@@ -3205,6 +3263,18 @@ class OneTimeRowNote(BaseModel):
     memo: str
     amount_minor: int | None = None
     reason: str
+    #: `reason` as a code and raw params (#267), or null.
+    reason_code: str | None = None
+    reason_params: dict | None = None
+
+    @model_validator(mode="after")
+    def _reason_code(self) -> OneTimeRowNote:
+        from .notices import read
+
+        found = read(self.reason)
+        if found is not None:
+            self.reason_code, self.reason_params = found["code"], found["params"]
+        return self
 
 
 class OneTimeBalanceDifference(BaseModel):
@@ -3221,6 +3291,18 @@ class OneTimeBalanceDifference(BaseModel):
     #: ``imported_minor - ynab_balance_minor``: negative when rows are missing.
     difference_minor: int
     sentence: str
+    #: `sentence` as a code and raw params (#267): the figures in minor units.
+    sentence_code: str | None = None
+    sentence_params: dict | None = None
+
+    @model_validator(mode="after")
+    def _sentence_code(self) -> OneTimeBalanceDifference:
+        from .notices import read
+
+        found = read(self.sentence, currency=self.currency)
+        if found is not None:
+            self.sentence_code, self.sentence_params = found["code"], found["params"]
+        return self
 
 
 class OneTimeBalanceUnchecked(BaseModel):
@@ -3230,6 +3312,18 @@ class OneTimeBalanceUnchecked(BaseModel):
     account: str
     reason: str
     sentence: str
+    #: `sentence` as a code and raw params (#267), or null.
+    sentence_code: str | None = None
+    sentence_params: dict | None = None
+
+    @model_validator(mode="after")
+    def _sentence_code(self) -> OneTimeBalanceUnchecked:
+        from .notices import read
+
+        found = read(self.sentence)
+        if found is not None:
+            self.sentence_code, self.sentence_params = found["code"], found["params"]
+        return self
 
 
 class OneTimeImportReport(BaseModel):

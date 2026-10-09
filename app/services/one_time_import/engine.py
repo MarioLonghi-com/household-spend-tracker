@@ -151,7 +151,7 @@ def amount_of(row: SourceRow, currency: str, source: Source) -> int:
             plain = normalise_amount(text, decimal_comma=source.decimal_comma)
             value += sign * parse_exact(plain, currency)
     if not MIN_MINOR <= value <= MAX_MINOR:
-        raise MoneyError("that amount is too large to record as money")
+        raise MoneyError("that amount is too large to record as money", code="money.amount_too_large")
     return value
 
 
@@ -159,7 +159,11 @@ def date_of(row: SourceRow, fmt: str) -> date:
     try:
         return parse_date(row.date_text, fmt)
     except (ValueError, KeyError):
-        raise ValidationError(f"{row.date_text!r} is not a {fmt} date") from None
+        raise ValidationError(
+            f"{row.date_text!r} is not a {fmt} date",
+            code="ynab.date_unreadable",
+            params={"date": row.date_text, "format": fmt},
+        ) from None
 
 
 # --------------------------------------------------------------------------- #
@@ -506,22 +510,36 @@ class _Discard(Exception):
 def _check_plan(session: Session, household: Household, source: Source, plan: Plan) -> dict[str, Account]:
     """The plan's refusals, all before anything is written. Returns key -> existing account."""
     if plan.date_format not in DATE_FORMATS:
-        raise ValidationError(f"{plan.date_format!r} is not a date format this import reads")
+        raise ValidationError(
+            f"{plan.date_format!r} is not a date format this import reads",
+            code="ynab.date_format_unknown",
+            params={"format": plan.date_format},
+        )
     if len(plan.currency) != 3 or not plan.currency.isalpha():
-        raise ValidationError(f"{plan.currency!r} is not a three-letter currency code")
+        raise ValidationError(
+            f"{plan.currency!r} is not a three-letter currency code",
+            code="ynab.currency_not_a_code",
+            params={"currency": plan.currency},
+        )
     if plan.flags not in ("memo", "ignore"):
-        raise ValidationError("flags is either 'memo' or 'ignore'")
+        raise ValidationError("flags is either 'memo' or 'ignore'", code="ynab.flags_choice")
     if plan.starting_balance not in ("import", "skip"):
-        raise ValidationError("starting_balance is either 'import' or 'skip'")
+        raise ValidationError(
+            "starting_balance is either 'import' or 'skip'", code="ynab.starting_balance_choice"
+        )
     if plan.date_from and plan.date_to and plan.date_from > plan.date_to:
-        raise ValidationError("the date range ends before it starts")
+        raise ValidationError("the date range ends before it starts", code="ynab.range_backwards")
 
     existing: dict[str, Account] = {}
     used: dict[str, str] = {}
     for key, account in source.accounts.items():
         choice = plan.accounts.get(key)
         if choice is None:
-            raise ValidationError(f"say what to do with the YNAB account {account.name!r}")
+            raise ValidationError(
+                f"say what to do with the YNAB account {account.name!r}",
+                code="ynab.account_undecided",
+                params={"account": account.name},
+            )
         kind = choice.get("kind")
         if kind == "existing":
             target = session.execute(
@@ -531,34 +549,58 @@ def _check_plan(session: Session, household: Household, source: Source, plan: Pl
                 )
             ).scalar_one_or_none()
             if target is None:
-                raise ValidationError(f"the account chosen for {account.name!r} is not in this household")
+                raise ValidationError(
+                    f"the account chosen for {account.name!r} is not in this household",
+                    code="ynab.account_elsewhere",
+                    params={"account": account.name},
+                )
             if target.currency != plan.currency:
                 raise ValidationError(
-                    f"{target.name!r} is in {target.currency}, and this plan is in {plan.currency}"
+                    f"{target.name!r} is in {target.currency}, and this plan is in {plan.currency}",
+                    code="ynab.account_currency",
+                    params={"account": target.name, "account_currency": target.currency, "currency": plan.currency},
                 )
             if target.id in used:
                 raise ValidationError(
                     f"{used[target.id]!r} and {account.name!r} both go to {target.name!r}; "
-                    "each YNAB account needs an account of its own"
+                    "each YNAB account needs an account of its own",
+                    code="ynab.account_twice",
+                    params={"first": used[target.id], "second": account.name, "account": target.name},
                 )
             used[target.id] = account.name
             existing[key] = target
         elif kind == "create":
             if not str(choice.get("name") or "").strip():
-                raise ValidationError(f"the new account for {account.name!r} needs a name")
+                raise ValidationError(
+                    f"the new account for {account.name!r} needs a name",
+                    code="ynab.new_account_needs_name",
+                    params={"account": account.name},
+                )
             try:
                 AccountType(choice.get("type") or "checking")
             except ValueError:
-                raise ValidationError(f"{choice.get('type')!r} is not an account type") from None
+                raise ValidationError(
+                    f"{choice.get('type')!r} is not an account type",
+                    code="ynab.account_type_unknown",
+                    params={"type": str(choice.get("type"))},
+                ) from None
         elif kind != "skip":
-            raise ValidationError(f"{kind!r} is not something an account can be mapped to")
+            raise ValidationError(
+                f"{kind!r} is not something an account can be mapped to",
+                code="ynab.account_mapping_unknown",
+                params={"kind": str(kind)},
+            )
 
     for key in {row.category for row in source.rows if row.category}:
         choice = plan.categories.get(key)
         if choice is None:
             if is_fixed(key):
                 continue
-            raise ValidationError(f"say what to do with the YNAB category {key!r}")
+            raise ValidationError(
+                f"say what to do with the YNAB category {key!r}",
+                code="ynab.category_undecided",
+                params={"category": key},
+            )
         kind = choice.get("kind")
         if kind == "existing":
             found = session.execute(
@@ -568,12 +610,24 @@ def _check_plan(session: Session, household: Household, source: Source, plan: Pl
                 )
             ).scalar_one_or_none()
             if found is None:
-                raise ValidationError(f"the category chosen for {key!r} is not in this household")
+                raise ValidationError(
+                    f"the category chosen for {key!r} is not in this household",
+                    code="ynab.category_elsewhere",
+                    params={"category": key},
+                )
         elif kind == "create":
             if not str(choice.get("name") or "").strip():
-                raise ValidationError(f"the new category for {key!r} needs a name")
+                raise ValidationError(
+                    f"the new category for {key!r} needs a name",
+                    code="ynab.new_category_needs_name",
+                    params={"category": key},
+                )
         elif kind != "uncategorised":
-            raise ValidationError(f"{kind!r} is not something a category can be mapped to")
+            raise ValidationError(
+                f"{kind!r} is not something a category can be mapped to",
+                code="ynab.category_mapping_unknown",
+                params={"kind": str(kind)},
+            )
     return existing
 
 
@@ -596,7 +650,8 @@ def run(
     """Do the whole import in one batch, and keep it or throw it away."""
     if commit and not plan.acknowledge_cleared_reset:
         raise ValidationError(
-            "confirm that YNAB's reconciled and cleared states are reset: everything arrives uncleared"
+            "confirm that YNAB's reconciled and cleared states are reset: everything arrives uncleared",
+            code="ynab.confirm_states",
         )
     existing_targets = _check_plan(session, household, source, plan)
     rows = [_Row(src=one) for one in source.rows]
@@ -659,7 +714,7 @@ def run(
         # commit of the same plan -- a double click, a retry after a proxy
         # timeout -- racing the first. #235.
         if _IMPORT_ID_CLASH in str(exc.orig):
-            raise Conflict(TAKEN) from exc
+            raise Conflict(TAKEN, code="ynab.rows_taken") from exc
         raise
     else:
         session.commit()
@@ -1100,7 +1155,7 @@ def _write(
         except IntegrityError as exc:
             _forget_rolled_back(chunk, cache)
             if _IMPORT_ID_CLASH in str(exc.orig) and _taken_elsewhere(session, chunk, targets, written):
-                raise Conflict(TAKEN) from exc
+                raise Conflict(TAKEN, code="ynab.rows_taken") from exc
             for row in chunk:
                 if row.fate != "import":
                     continue

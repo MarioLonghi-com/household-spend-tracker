@@ -113,7 +113,7 @@ def check_password(
     # No user and a NULL hash -- a password a reset link cleared (#284) -- are
     # both checked against the dummy: the same work and the same sentence.
     if not passwords.verify_password(user.password_hash if user else None, password):
-        raise Unauthorized(_REFUSAL)
+        raise Unauthorized(_REFUSAL, code="auth.refused")
 
     assert user is not None
     ratelimit.release(engine, held)
@@ -159,11 +159,13 @@ def check_code(session: Session, engine, user: User, code: str, *, ip: str | Non
     the second line, for any other caller.
     """
     if user.totp_secret is None:
-        raise Unauthorized(AUTHENTICATOR_CLEARED)
+        raise Unauthorized(AUTHENTICATOR_CLEARED, code="auth.authenticator_cleared")
     refuse_a_replaced_key(user)
     held = ratelimit.reserve(engine, email_canonical=user.email_canonical, ip=ip, kind="totp")
     if not totp.verify_and_consume(user, code):
-        raise Unauthorized("that code is not right, or has already been used")
+        raise Unauthorized(
+            "that code is not right, or has already been used", code="auth.code_wrong"
+        )
     ratelimit.release(engine, held)
 
 
@@ -219,12 +221,15 @@ def redeem_recovery_code(session: Session, engine, user: User, code: str, *, ip:
     if user.totp_secret is None:
         # Reset (#284): its codes were deleted with the secret, so say why
         # rather than "that code is not right" ten times over.
-        raise Unauthorized(AUTHENTICATOR_CLEARED)
+        raise Unauthorized(AUTHENTICATOR_CLEARED, code="auth.authenticator_cleared")
     held = ratelimit.reserve(engine, email_canonical=user.email_canonical, ip=ip, kind="recovery")
     matched = match_recovery_code(session, user, code)
 
     if matched is None:
-        raise Unauthorized("that recovery code is not right, or has already been used")
+        raise Unauthorized(
+            "that recovery code is not right, or has already been used",
+            code="auth.recovery_code_wrong",
+        )
     ratelimit.release(engine, held)
 
     matched.used_at = utcnow()

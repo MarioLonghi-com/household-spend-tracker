@@ -42,11 +42,11 @@ def create(
 ) -> tuple[Invitation, str]:
     """Return the row and the token to put in the link. The token is shown once."""
     if invited_by.role is not Role.owner:
-        raise ValidationError("only an owner can invite people")
+        raise ValidationError("only an owner can invite people", code="invite.owner_only")
 
     for household_id in household_ids or []:
         if session.get(Household, household_id) is None:
-            raise NotFound("no such household")
+            raise NotFound("no such household", code="household.not_found")
 
     value, digest = tokens.issue()
     invitation = Invitation(
@@ -72,13 +72,13 @@ def lookup(session: Session, token: str) -> Invitation:
         select(Invitation).where(Invitation.token_hash == tokens.fingerprint(token or ""))
     ).scalar_one_or_none()
     if invitation is None:
-        raise NotFound("that invitation link is not valid")
+        raise NotFound("that invitation link is not valid", code="invite.link_invalid")
     # One answer for every way a link can be no good. Telling a spent link
     # from an invented one hands out information to somebody holding neither.
     if invitation.accepted_at is not None or invitation.revoked_at is not None:
-        raise NotFound("that invitation link is not valid")
+        raise NotFound("that invitation link is not valid", code="invite.link_invalid")
     if invitation.expires_at <= utcnow():
-        raise NotFound("that invitation link is not valid")
+        raise NotFound("that invitation link is not valid", code="invite.link_invalid")
     return invitation
 
 
@@ -107,9 +107,12 @@ def accept(session: Session, invitation: Invitation, user: User) -> None:
 
 def revoke(session: Session, invitation: Invitation, *, by: User) -> Invitation:
     if by.role is not Role.owner:
-        raise ValidationError("only an owner can withdraw an invitation")
+        raise ValidationError("only an owner can withdraw an invitation", code="invite.owner_only_withdraw")
     if invitation.accepted_at is not None:
-        raise Conflict("that invitation has already been used; disable the account instead")
+        raise Conflict(
+            "that invitation has already been used; disable the account instead",
+            code="invite.already_used",
+        )
     invitation.revoked_at = utcnow()
     session.flush()
     return invitation
@@ -182,11 +185,11 @@ def lookup_by_id(session: Session, invitation_id: str) -> Invitation:
     filling the form cannot still be spent."""
     invitation = session.get(Invitation, invitation_id)
     if invitation is None:
-        raise NotFound("that invitation link is not valid")
+        raise NotFound("that invitation link is not valid", code="invite.link_invalid")
     # One answer for every way a link can be no good. Telling a spent link
     # from an invented one hands out information to somebody holding neither.
     if invitation.accepted_at is not None or invitation.revoked_at is not None:
-        raise NotFound("that invitation link is not valid")
+        raise NotFound("that invitation link is not valid", code="invite.link_invalid")
     if invitation.expires_at <= utcnow():
-        raise NotFound("that invitation link is not valid")
+        raise NotFound("that invitation link is not valid", code="invite.link_invalid")
     return invitation

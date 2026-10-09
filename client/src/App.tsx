@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, setUnauthorizedHandler } from "./lib/api";
+import { seedLocale } from "./lib/seedWords";
 import { Field, Problem } from "./components/bits";
 import { RecoveryModeBanner } from "./components/RecoveryModeBanner";
 import { ReenrolmentDue } from "./components/ReenrolmentDue";
@@ -918,7 +919,7 @@ function FirstHousehold({ onCreated }: { onCreated: () => void }) {
   const [currency, setCurrency] = useState("EUR");
 
   const create = useMutation({
-    mutationFn: () => api.post<Household>("/households", { name, base_currency: currency }),
+    mutationFn: () => api.post<Household>("/households", { name, base_currency: currency, ...seedLocale() }),
     onSuccess: onCreated,
   });
 

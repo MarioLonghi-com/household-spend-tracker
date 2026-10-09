@@ -1,5 +1,7 @@
 /** Shapes the server sends. Kept in one file so a change is one diff. */
 
+import type { Coded } from "./noticeMessages";
+
 export type Role = "owner" | "member";
 export type ClearedState = "uncleared" | "cleared" | "reconciled";
 /**
@@ -180,6 +182,8 @@ export interface AccountImportRow {
   opening_date: string | null;
   iban: string | null;
   problems: string[];
+  /** Each problem as a code and raw params, or null (#267). */
+  problem_codes?: (Coded | null)[];
 }
 
 export interface AccountImportOut {
@@ -445,6 +449,9 @@ export interface ImportLine {
   outcome: ImportOutcome;
   transaction_id: string | null;
   reason: string | null;
+  /** `reason` as a code and raw params, for a screen not in English (#267). */
+  reason_code?: string | null;
+  reason_params?: Record<string, unknown> | null;
   /** Where this line will land — the payee's rule, unless somebody said otherwise. */
   category_id: string | null;
   category_name: string | null;
@@ -467,9 +474,34 @@ export interface ImportPreview {
   sha256: string;
   detected: Record<string, unknown>;
   warnings: string[];
+  /** Each warning as a code and raw params, or null (#267). */
+  warning_codes?: (Coded | null)[];
   counts: Record<string, number>;
   lines: ImportLine[];
 }
+
+/**
+ * One of History's sentences as structure (#266): a key from the server's
+ * `SENTENCES` and its params. `lib/historyWords.ts` words it.
+ */
+export interface HistoryPhrase {
+  key: string;
+  params: Record<string, HistoryNode>;
+}
+
+/** A raw value in a History phrase; the shapes are `app/services/describing.py`'s. */
+export type HistoryValue =
+  | { type: "money"; amount: number; currency: string }
+  | { type: "date"; value: string; style?: "medium" }
+  | { type: "name" | "text"; value: string }
+  | { type: "number"; value: number }
+  | { type: "category"; group: string; name: string }
+  | { type: "enum"; column: string; value: string }
+  | { type: "word"; set: string; key: string; lower?: boolean }
+  | { type: "count"; table: string; count: number }
+  | { type: "list"; items: HistoryNode[]; sep: string };
+
+export type HistoryNode = HistoryPhrase | HistoryValue | number | string;
 
 export interface Batch {
   id: string;
@@ -487,6 +519,8 @@ export interface Batch {
   headline_key?: string;
   /** What it actually did — computed from the change rows, never stored. */
   detail: string;
+  /** The same as structure, for a screen not in English (#266). */
+  detail_phrase?: HistoryPhrase | null;
   /** Who did it, by name. */
   actor_name: string | null;
   /**
@@ -507,6 +541,9 @@ export interface FieldChange {
   now: string;
   /** The column `field` names, for a screen not in English (#57). */
   column?: string;
+  /** `was` and `now` as raw values, for a screen not in English (#266). */
+  was_value?: HistoryValue | HistoryPhrase | null;
+  now_value?: HistoryValue | HistoryPhrase | null;
 }
 
 /** One changed row, as far down as the log goes. */
@@ -524,11 +561,15 @@ export interface ChangeDetail {
   redacted: string[];
   /** The table `table` names, for a screen not in English (#57). */
   table_key?: string;
+  /** `summary` as structure (#266). */
+  summary_phrase?: HistoryPhrase | null;
 }
 
 /** One batch spelled out, which is what the undo confirmation is built from. */
 export interface BatchDetail extends Batch {
   lines: string[];
+  /** The same lines as structure (#266). */
+  line_phrases?: HistoryPhrase[];
   changed_rows: ChangeDetail[];
 }
 
@@ -764,6 +805,8 @@ export interface Change {
   at: string;
   /** The same sentence the History screen shows, from the same engine. */
   summary: string;
+  /** The same as structure, for a screen not in English (#266). */
+  summary_phrase?: HistoryPhrase | null;
   actor_name: string | null;
   /**
    * The program that did it on their behalf, when one did.

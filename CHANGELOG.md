@@ -49,6 +49,50 @@ history this repository does not have.
   it back is lossy -- it drops every suggested wording, so export them
   first; nothing in the ledger changes). (#272)
 
+### Changed
+
+- **A new household can be seeded in its own language.** Creating a
+  household, from the first-household form, Admin or *Add the defaults* on
+  Categories, takes the device's language when that language is served, and
+  seeds the category tree and the "Opening balance" payee in it. Only
+  reviewed translations are seeded (`app/seed_catalog.json`, written from the
+  catalogs by `scripts/seed_catalog.py`); a draft never is, so until a
+  language ships every household is seeded in English exactly as before. The
+  names are ordinary names, and no language is stored on the household. (#268)
+- **History's sentences go out as structure too.** Beside every sentence it
+  has always sent -- a batch's detail, the undo lines, a changed row's
+  summary, a row's own history -- History now sends a `*_phrase`: a key and
+  its raw values (money in minor units with its currency, ISO dates, enum
+  values, names as stored), and each changed field's `was_value` and
+  `now_value` beside its words. A screen in another language words them from
+  its own catalog; English shows the server's sentences exactly as before,
+  and the English is now rendered from the same structure, so the two cannot
+  disagree. (#266)
+- **Signing in and its refusals carry codes for translation.** Sign-in,
+  step-up, recovery codes, passkeys, invitations, account resets, the setup
+  wizard, keys for programs and the people screens now answer with a stable
+  `code` and raw `params` beside the same English `detail`, and the
+  password complaints say which complaint it was (too short, too common, the
+  email address) with the length or list size as a number. The rate limit
+  sends its wait in seconds as a number. English and agents' answers are
+  unchanged. (#267)
+- **Import refusals carry codes too.** A statement import, an accounts CSV,
+  a One-time Import from YNAB (its file, its plan and YNAB's own answers) and
+  an oversized upload refuse with a stable `code` and raw `params` -- when an
+  earlier import was made as a timestamp, line numbers and limits as numbers,
+  column names and currency codes as the file wrote them -- beside the same
+  English `detail`. (#267)
+- **What an import says about its lines and files carries codes.** Why a
+  statement line was skipped, matched or flagged, what reading the file
+  could not settle, a row of an accounts file that cannot be imported, and a
+  One-time Import row that was not, now come with a code and raw params
+  (`reason_code`/`reason_params`, `warning_codes`, `problem_codes`,
+  `sentence_code`/`sentence_params`), and the Import, accounts-import and
+  One-time Import screens word them in another language. They are read back
+  from the sentences by `app/notices.py`, so nothing new is stored, no
+  migration is needed, and a line staged before this upgrade reads as well
+  as a new one. English and agents' answers are unchanged. (#267)
+
 ## 0.9.3 — 2026-10-09
 
 **Reversible: none** — no migration in this release. To go back to

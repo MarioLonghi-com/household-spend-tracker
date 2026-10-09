@@ -449,12 +449,12 @@ def test_over_http_a_preview_then_a_commit(client):
             {
                 "line": 2, "name": "Joint current", "type": "checking", "currency": "EUR",
                 "country": "ES", "flag": "\U0001f1ea\U0001f1f8", "opening_balance": 123456,
-                "opening_date": "2026-01-15", "iban": ES_IBAN, "problems": [],
+                "opening_date": "2026-01-15", "iban": ES_IBAN, "problems": [], "problem_codes": [],
             },
             {
                 "line": 3, "name": "Pounds pot", "type": "savings", "currency": "GBP",
                 "country": "GB", "flag": "\U0001f1ec\U0001f1e7", "opening_balance": 25000,
-                "opening_date": "2026-02-01", "iban": GB_IBAN, "problems": [],
+                "opening_date": "2026-02-01", "iban": GB_IBAN, "problems": [], "problem_codes": [],
             },
         ],
     }

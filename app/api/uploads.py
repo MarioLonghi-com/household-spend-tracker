@@ -26,7 +26,7 @@ def refuse_declared_size(file: UploadFile | None, limit: int, message: str) -> N
     """
     declared = getattr(file, "size", None) if file is not None else None
     if declared is not None and declared > limit:
-        raise TooLarge(message)
+        raise TooLarge(message, code="upload.too_large", params={"max_bytes": limit})
 
 
 async def read_body_capped(request: Request, limit: int, message: str) -> bytes:
@@ -42,7 +42,7 @@ async def read_body_capped(request: Request, limit: int, message: str) -> bytes:
     """
     declared = request.headers.get("content-length")
     if declared is not None and declared.isdigit() and int(declared) > limit:
-        raise TooLarge(message)
+        raise TooLarge(message, code="upload.too_large", params={"max_bytes": limit})
 
     chunks: list[bytes] = []
     total = 0
@@ -51,7 +51,7 @@ async def read_body_capped(request: Request, limit: int, message: str) -> bytes:
             continue
         total += len(chunk)
         if total > limit:
-            raise TooLarge(message)
+            raise TooLarge(message, code="upload.too_large", params={"max_bytes": limit})
         chunks.append(chunk)
     return b"".join(chunks)
 
@@ -70,6 +70,6 @@ async def read_capped(file: UploadFile, limit: int, message: str) -> bytes:
             break
         total += len(chunk)
         if total > limit:
-            raise TooLarge(message)
+            raise TooLarge(message, code="upload.too_large", params={"max_bytes": limit})
         chunks.append(chunk)
     return b"".join(chunks)
