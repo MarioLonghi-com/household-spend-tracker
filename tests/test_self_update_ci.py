@@ -188,3 +188,91 @@ def test_ci_image_problems_name_each_break():
         "entry point" in p
         for p in ci_image_problems(text.replace("tests.self_update.ci_updater", "updater"))
     )
+
+
+# --------------------------------------------------------------------------- #
+# A release's updater is a multi-arch index; so is CI's on Podman (#287)
+# --------------------------------------------------------------------------- #
+
+PLATFORM_MANIFEST = "sha256:" + "e3" * 32
+INDEX_DIGEST = "sha256:" + "30" * 32
+CONFIG = "sha256:" + "c0" * 32
+
+
+class FakeRegistry:
+    """The push registry's API, for `stage.multi_arch`: what it was asked, what it answers."""
+
+    def __init__(self, arch: str, pushed_index: bool = False) -> None:
+        self.arch = arch
+        self.pushed_index = pushed_index
+        self.put: dict | None = None
+
+    def __call__(self, method, path, accept=(), body=None, content_type=None):
+        import json
+
+        if method == "GET" and path.endswith(f"/manifests/{PLATFORM_MANIFEST}"):
+            if self.pushed_index:
+                doc = {
+                    "schemaVersion": 2,
+                    "mediaType": stage.OCI_INDEX,
+                    "manifests": [
+                        {"mediaType": stage.MANIFESTS[0], "digest": "sha256:" + "aa" * 32, "size": 7,
+                         "platform": {"architecture": self.arch, "os": "linux"}},
+                        {"mediaType": stage.MANIFESTS[0], "digest": "sha256:" + "bb" * 32, "size": 5,
+                         "platform": {"architecture": "unknown", "os": "unknown"}},
+                    ],
+                }  # fmt: skip
+                return json.dumps(doc).encode(), {"content-type": stage.OCI_INDEX}
+            doc = {"schemaVersion": 2, "config": {"digest": CONFIG}, "layers": []}
+            return json.dumps(doc).encode(), {"content-type": stage.MANIFESTS[1]}
+        if method == "GET" and path.endswith(f"/blobs/{CONFIG}"):
+            return json.dumps({"architecture": self.arch, "os": "linux"}).encode(), {}
+        if method == "PUT":
+            assert path.endswith("/manifests/99.0.0")
+            self.put = json.loads(body)
+            assert content_type == self.put["mediaType"]
+            return b"", {"docker-content-digest": INDEX_DIGEST}
+        raise AssertionError((method, path))
+
+
+@pytest.mark.parametrize("arch, other", [("amd64", "s390x"), ("s390x", "ppc64le")])
+def test_multi_arch_lists_the_pushed_manifest_under_two_platforms(monkeypatch, arch, other):
+    registry = FakeRegistry(arch)
+    monkeypatch.setattr(stage, "_registry", registry)
+    assert stage.multi_arch(stage.UPDATER_REPO, "99.0.0", PLATFORM_MANIFEST) == INDEX_DIGEST
+    index = registry.put
+    # Docker's push made a Docker manifest: listed by a Docker manifest list.
+    assert index["mediaType"] == stage.INDEXES[1] and index["schemaVersion"] == 2
+    assert [m["digest"] for m in index["manifests"]] == [PLATFORM_MANIFEST, PLATFORM_MANIFEST]
+    assert [m["platform"]["architecture"] for m in index["manifests"]] == [arch, other]
+    assert {m["mediaType"] for m in index["manifests"]} == {stage.MANIFESTS[1]}
+
+
+@pytest.mark.parametrize("arch", ["amd64", "arm64"])
+def test_multi_arch_over_an_index_the_builder_pushed_keeps_its_platforms_and_drops_attestations(monkeypatch, arch):
+    registry = FakeRegistry(arch, pushed_index=True)
+    monkeypatch.setattr(stage, "_registry", registry)
+    assert stage.multi_arch(stage.UPDATER_REPO, "99.0.0", PLATFORM_MANIFEST) == INDEX_DIGEST
+    assert registry.put["mediaType"] == stage.OCI_INDEX
+    entries = registry.put["manifests"]
+    assert [m["digest"] for m in entries] == ["sha256:" + "aa" * 32] * 2
+    assert [m["platform"]["architecture"] for m in entries] == [arch, "s390x"]
+
+
+def test_the_podman_legs_publish_every_updater_as_an_index():
+    doc = yaml.safe_load((ROOT / ".github" / "workflows" / "tests.yml").read_text())
+    legs = doc["jobs"]["self-update"]["strategy"]["matrix"]["include"]
+    assert {leg["leg"]: leg["index"] for leg in legs if leg["engine"] == "podman"} == {
+        "podman-rootless": True,
+        "podman-rootless-2": True,
+    }
+    build = next(s for s in doc["jobs"]["self-update"]["steps"] if "stage build" in str(s.get("run")))
+    assert build["env"]["INDEX"] == "${{ matrix.index }}" and "--index" in build["run"]
+
+
+def test_a_merge_base_whose_updater_takes_one_digest_is_not_indexed(tmp_path):
+    (tmp_path / "updater").mkdir()
+    assert not stage.knows_its_digests(tmp_path)
+    (tmp_path / "updater" / "handover.py").write_text("def is_me(me, successor): ...\n")
+    assert not stage.knows_its_digests(tmp_path)
+    assert stage.knows_its_digests(ROOT)
