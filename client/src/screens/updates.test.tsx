@@ -438,6 +438,7 @@ describe("A9: each outcome", () => {
     duration_s: 160,
     gap_s: 0,
     log_tail: [],
+    to_version: "0.10.0",
   };
 
   function show(outcome: Outcome, heartbeat: Heartbeat | null = beat({ updater_version: "0.10.0" })) {
@@ -467,6 +468,51 @@ describe("A9: each outcome", () => {
     fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
     await vi.waitFor(() => expect(onChanged).toHaveBeenCalled());
     expect(post).toHaveBeenCalledWith(`/admin/application/update/outcome/${base.id}/seen`);
+  });
+
+  it("names the version it updated to, not the one running after a manual downgrade (#260)", () => {
+    for (const [target, running] of [
+      ["0.10.0", "0.9.0"],
+      ["0.9.0", "0.8.0"],
+    ]) {
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <OutcomeBlock
+            outcome={{ ...base, to_version: target }}
+            running={running}
+            heartbeat={beat({ updater_version: running })}
+            lastPrepared={null}
+            onPrepare={vi.fn()}
+            onChanged={vi.fn()}
+          />
+        </QueryClientProvider>,
+      );
+      const said = document.querySelector('[data-outcome="updated"]')!;
+      expect(said.textContent).toMatch(new RegExp(`^Updated to ${target.replace(/\./g, "\\.")} at .+ in 2 min 40 s\\.`));
+      expect(said.textContent).not.toContain(`Updated to ${running}`);
+      cleanup();
+    }
+  });
+
+  it("an older record without its target says the updater's own sentence", () => {
+    for (const sentence of ["Updated to 0.9.1.", "Updated to 0.10.0."]) {
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <OutcomeBlock
+            outcome={{ ...base, sentence, to_version: undefined }}
+            running="0.9.0"
+            heartbeat={beat({ updater_version: "0.9.0" })}
+            lastPrepared={null}
+            onPrepare={vi.fn()}
+            onChanged={vi.fn()}
+          />
+        </QueryClientProvider>,
+      );
+      const said = document.querySelector('[data-outcome="updated"]')!;
+      expect(said.textContent).toMatch(new RegExp(`^${sentence.replace(/\./g, "\\.")} It finished at .+\\.`));
+      expect(said.textContent).not.toContain("Updated to 0.9.0");
+      cleanup();
+    }
   });
 
   it("updated, but the updater stayed behind: Retry updater update", async () => {

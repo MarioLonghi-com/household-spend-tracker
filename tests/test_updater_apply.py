@@ -228,6 +228,8 @@ def test_apply_moves_the_ledger_and_the_app_to_b_and_records_it(world):
     req, record = apply(world)
 
     assert record["state"] == "succeeded" and record["sentence"] == "Updated to 0.8.0."
+    # The target as a field, for the screen to name after a manual downgrade (#260).
+    assert (record["from_version"], record["to_version"]) == (A, B)
     # The ledger: migrated once, backed up first, at B's schema.
     assert world.ledger.stamp == B and world.ledger.drills == 1
     assert list(world.ledger.backups.values()) == [A]

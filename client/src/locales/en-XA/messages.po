@@ -4445,11 +4445,6 @@ msgstr ""
 msgid "Add payee"
 msgstr ""
 
-#. Updates section: outcome of an update, with the time it finished
-#: src/screens/Updates.tsx
-msgid "Updated to {running} at {at}."
-msgstr ""
-
 #. placeholder {0}: section.rows.length
 #. placeholder {1}: section.rows.length
 #. placeholder {2}: section.rows.length
@@ -6906,6 +6901,11 @@ msgstr ""
 msgid "1. You"
 msgstr ""
 
+#. Updates section: outcome of an update, the updater's own sentence (in English) and then the time it finished
+#: src/screens/Updates.tsx
+msgid "{said} It finished at {at}."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 msgid "It is recorded as a real transaction on that date, not a hidden number, so it shows in the register and can be corrected like anything else. For a card or a loan, type what you owe as a negative."
 msgstr ""
@@ -8700,6 +8700,11 @@ msgstr ""
 msgid "date"
 msgstr ""
 
+#. Updates section: outcome of an update, with the time it finished
+#: src/screens/Updates.tsx
+msgid "Updated to {target} at {at}."
+msgstr ""
+
 #. Button on the shared controls
 #: src/components/bits.tsx
 msgid "Hide help: {label}"
@@ -9013,6 +9018,11 @@ msgstr ""
 #. Name of a fact on the Application management screen: noun, the database's migration revision
 #: src/screens/ApplicationManagement.tsx
 msgid "Schema"
+msgstr ""
+
+#. Updates section: outcome of an update, with the time it finished and how long it took
+#: src/screens/Updates.tsx
+msgid "Updated to {target} at {at} in {took}."
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -9537,11 +9547,6 @@ msgstr ""
 
 #: src/lib/signInChanges.ts
 msgid "{by} reset {user}'s password"
-msgstr ""
-
-#. Updates section: outcome of an update, with the time it finished and how long it took
-#: src/screens/Updates.tsx
-msgid "Updated to {running} at {at} in {took}."
 msgstr ""
 
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it

@@ -52,6 +52,11 @@ history this repository does not have.
   network again, and records it in the update history. At most three times in
   an hour; after that, or when a repair fails, the Updates screen says so and
   names `docker compose up -d --force-recreate app` (#275).
+- **An update's outcome names the version it updated to.** The Updates
+  section said "Updated to" the version running now, so after going back to
+  the previous release by hand it named that one. The outcome now carries
+  the release the update went to, from the updater's record, and an older
+  record that does not name it shows the updater's own sentence. (#260)
 - **An update, or any act that asks for the password and code again, is no
   longer refused as "ledger busy" after a minute on its form.** The first
   request after a minute's pause records that the browser's session is still

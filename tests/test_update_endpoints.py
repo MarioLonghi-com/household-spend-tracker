@@ -114,7 +114,9 @@ def _report(vol: Volume, *, to_version: str = NEXT, hours: float = 24, **over) -
     return rid
 
 
-def _history(vol: Volume, *, state: str, finished: float, backup: str | None = None, kind: str = "apply") -> str:
+def _history(
+    vol: Volume, *, state: str, finished: float, backup: str | None = None, kind: str = "apply", **extra
+) -> str:
     rid = str(uuid.uuid4())
     record = contract.History(
         id=rid,
@@ -125,7 +127,8 @@ def _history(vol: Volume, *, state: str, finished: float, backup: str | None = N
         backup=backup,
         log_tail=("one", "two"),
     )
-    volume.write_json(vol.history(rid), record.to_dict())
+    # The keys an apply's record carries beside the dataclass's (`site.Records.finish`).
+    volume.write_json(vol.history(rid), {**record.to_dict(), **extra})
     return rid
 
 
@@ -294,6 +297,30 @@ def test_the_state_reads_what_the_updater_wrote_and_ignores_what_it_does_not_kno
     assert client.get(BASE, headers=HEADERS).json()["outcome"]["id"] == older
     assert vol.history(newer).exists()
     assert client.post(f"{BASE}/outcome/{uuid.uuid4()}/seen", headers=HEADERS).status_code == 404
+
+
+def test_an_outcome_names_the_version_the_update_went_to_not_the_one_running(world):
+    """After a manual downgrade the running version is the old one, and the
+    outcome said "Updated to" it (#260). The record's target is read instead;
+    a record without one, or with something else there, gives none."""
+    client, vol = world["client"], world["vol"]
+    seen = []
+    for at, extra in (
+        (3, {}),
+        (2, {"from_version": __version__, "to_version": "not a version"}),
+        (1, {"from_version": __version__, "to_version": LATER}),
+        (0, {"from_version": __version__, "to_version": NEXT}),
+    ):
+        seen.append(_history(vol, state="succeeded", finished=time.time() - at * 60, **extra))
+
+    targets = []
+    for rid in reversed(seen):
+        got = client.get(BASE, headers=HEADERS).json()["outcome"]
+        assert got["id"] == rid
+        targets.append(got["to_version"])
+        assert client.post(f"{BASE}/outcome/{rid}/seen", headers=HEADERS).status_code == 204
+    assert targets == [NEXT, LATER, None, None]
+    assert __version__ not in targets
 
 
 @pytest.mark.parametrize(

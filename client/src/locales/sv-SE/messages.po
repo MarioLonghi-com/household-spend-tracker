@@ -5302,12 +5302,6 @@ msgstr "förhandsvisning"
 msgid "Add payee"
 msgstr "Lägg till mottagare"
 
-#. Updates section: outcome of an update, with the time it finished
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "Updated to {running} at {at}."
-msgstr "Uppdaterad till {running} {at}."
-
 #. placeholder {0}: section.rows.length
 #. placeholder {1}: section.rows.length
 #. placeholder {2}: section.rows.length
@@ -8224,6 +8218,11 @@ msgstr "{0}. Spara den i din synkade Drive- eller Dropbox-mapp"
 msgid "1. You"
 msgstr "1. Du"
 
+#. Updates section: outcome of an update, the updater's own sentence (in English) and then the time it finished
+#: src/screens/Updates.tsx
+msgid "{said} It finished at {at}."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "It is recorded as a real transaction on that date, not a hidden number, so it shows in the register and can be corrected like anything else. For a card or a loan, type what you owe as a negative."
@@ -10361,6 +10360,12 @@ msgstr "Se dem under Administration"
 msgid "date"
 msgstr "datum"
 
+#. Updates section: outcome of an update, with the time it finished
+#: src/screens/Updates.tsx
+#, fuzzy
+msgid "Updated to {target} at {at}."
+msgstr "Uppdaterad till {target} {at}."
+
 #. Button on the shared controls
 #: src/components/bits.tsx
 #, fuzzy
@@ -10734,6 +10739,12 @@ msgstr "Av."
 #, fuzzy
 msgid "Schema"
 msgstr "Schema"
+
+#. Updates section: outcome of an update, with the time it finished and how long it took
+#: src/screens/Updates.tsx
+#, fuzzy
+msgid "Updated to {target} at {at} in {took}."
+msgstr "Uppdaterad till {target} {at} på {took}."
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -11363,12 +11374,6 @@ msgstr "Låst i ljust, oavsett vad enheten är inställd på."
 #, fuzzy
 msgid "{by} reset {user}'s password"
 msgstr "{by} återställde lösenordet för {user}"
-
-#. Updates section: outcome of an update, with the time it finished and how long it took
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "Updated to {running} at {at} in {took}."
-msgstr "Uppdaterad till {running} {at} på {took}."
 
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
 #. js-lingui-explicit-id

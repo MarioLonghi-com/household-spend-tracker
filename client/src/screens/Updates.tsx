@@ -151,6 +151,8 @@ export interface Outcome {
   duration_s: number | null;
   gap_s: number | null;
   log_tail: string[];
+  /** The release an apply went to; null on a record that does not name one (#260). */
+  to_version?: string | null;
 }
 
 export type UpdateCase = "not_container" | "no_updater" | "refused" | "outdated" | "working";
@@ -1334,16 +1336,24 @@ export function OutcomeBlock({
       case "succeeded": {
         const updaterVersion = heartbeat?.updater_version ?? null;
         const stayed = !!updaterVersion && compareVersions(updaterVersion, running) < 0;
+        // The version the update went to, from its record -- not the one running
+        // now, which differs once the owner has gone back by hand (#260). A record
+        // that does not name it says it in its own sentence.
+        const target = outcome.to_version ?? null;
         body = (
           <>
             <p style={{ marginTop: 0 }} data-outcome="updated">
-              {took ? (
+              {target === null ? (
+                <Trans comment="Updates section: outcome of an update, the updater's own sentence (in English) and then the time it finished">
+                  {said} It finished at {at}.
+                </Trans>
+              ) : took ? (
                 <Trans comment="Updates section: outcome of an update, with the time it finished and how long it took">
-                  Updated to {running} at {at} in {took}.
+                  Updated to {target} at {at} in {took}.
                 </Trans>
               ) : (
                 <Trans comment="Updates section: outcome of an update, with the time it finished">
-                  Updated to {running} at {at}.
+                  Updated to {target} at {at}.
                 </Trans>
               )}{" "}
               {stayed ? (

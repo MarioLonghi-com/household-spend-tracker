@@ -4445,11 +4445,6 @@ msgstr "preview"
 msgid "Add payee"
 msgstr "Add payee"
 
-#. Updates section: outcome of an update, with the time it finished
-#: src/screens/Updates.tsx
-msgid "Updated to {running} at {at}."
-msgstr "Updated to {running} at {at}."
-
 #. placeholder {0}: section.rows.length
 #. placeholder {1}: section.rows.length
 #. placeholder {2}: section.rows.length
@@ -6907,6 +6902,11 @@ msgstr "{0}. Save it into your synced Drive or Dropbox folder"
 msgid "1. You"
 msgstr "1. You"
 
+#. Updates section: outcome of an update, the updater's own sentence (in English) and then the time it finished
+#: src/screens/Updates.tsx
+msgid "{said} It finished at {at}."
+msgstr "{said} It finished at {at}."
+
 #: src/screens/Accounts.tsx
 msgid "It is recorded as a real transaction on that date, not a hidden number, so it shows in the register and can be corrected like anything else. For a card or a loan, type what you owe as a negative."
 msgstr "It is recorded as a real transaction on that date, not a hidden number, so it shows in the register and can be corrected like anything else. For a card or a loan, type what you owe as a negative."
@@ -8706,6 +8706,11 @@ msgstr "See them in Admin"
 msgid "date"
 msgstr "date"
 
+#. Updates section: outcome of an update, with the time it finished
+#: src/screens/Updates.tsx
+msgid "Updated to {target} at {at}."
+msgstr "Updated to {target} at {at}."
+
 #. Button on the shared controls
 #: src/components/bits.tsx
 msgid "Hide help: {label}"
@@ -9020,6 +9025,11 @@ msgstr "Off."
 #: src/screens/ApplicationManagement.tsx
 msgid "Schema"
 msgstr "Schema"
+
+#. Updates section: outcome of an update, with the time it finished and how long it took
+#: src/screens/Updates.tsx
+msgid "Updated to {target} at {at} in {took}."
+msgstr "Updated to {target} at {at} in {took}."
 
 #: src/screens/Admin.tsx
 msgid "Owner — can administer this instance"
@@ -9544,11 +9554,6 @@ msgstr "Held in light, whatever this device is set to."
 #: src/lib/signInChanges.ts
 msgid "{by} reset {user}'s password"
 msgstr "{by} reset {user}'s password"
-
-#. Updates section: outcome of an update, with the time it finished and how long it took
-#: src/screens/Updates.tsx
-msgid "Updated to {running} at {at} in {took}."
-msgstr "Updated to {running} at {at} in {took}."
 
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
 #. js-lingui-explicit-id

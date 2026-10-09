@@ -1582,6 +1582,8 @@ class UpdateOutcomeOut(BaseModel):
     duration_s: float | None = None
     gap_s: float | None = None
     log_tail: list[str] = []
+    #: The release an apply went to, when the record names one (#260).
+    to_version: str | None = None
 
 
 class UpdateStateOut(BaseModel):

@@ -5302,12 +5302,6 @@ msgstr "vista previa"
 msgid "Add payee"
 msgstr "Añadir beneficiario"
 
-#. Updates section: outcome of an update, with the time it finished
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "Updated to {running} at {at}."
-msgstr "Actualizado a {running} el {at}."
-
 #. placeholder {0}: section.rows.length
 #. placeholder {1}: section.rows.length
 #. placeholder {2}: section.rows.length
@@ -8224,6 +8218,11 @@ msgstr "{0}. Guárdalo en tu carpeta sincronizada de Drive o Dropbox"
 msgid "1. You"
 msgstr "1. Tú"
 
+#. Updates section: outcome of an update, the updater's own sentence (in English) and then the time it finished
+#: src/screens/Updates.tsx
+msgid "{said} It finished at {at}."
+msgstr ""
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "It is recorded as a real transaction on that date, not a hidden number, so it shows in the register and can be corrected like anything else. For a card or a loan, type what you owe as a negative."
@@ -10361,6 +10360,12 @@ msgstr "Verlos en Administración"
 msgid "date"
 msgstr "fecha"
 
+#. Updates section: outcome of an update, with the time it finished
+#: src/screens/Updates.tsx
+#, fuzzy
+msgid "Updated to {target} at {at}."
+msgstr "Actualizado a {target} el {at}."
+
 #. Button on the shared controls
 #: src/components/bits.tsx
 #, fuzzy
@@ -10734,6 +10739,12 @@ msgstr "Desactivado."
 #, fuzzy
 msgid "Schema"
 msgstr "Esquema"
+
+#. Updates section: outcome of an update, with the time it finished and how long it took
+#: src/screens/Updates.tsx
+#, fuzzy
+msgid "Updated to {target} at {at} in {took}."
+msgstr "Actualizado a {target} el {at}, en {took}."
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -11363,12 +11374,6 @@ msgstr "Fijado en claro, sea cual sea el ajuste de este dispositivo."
 #, fuzzy
 msgid "{by} reset {user}'s password"
 msgstr "{by} restableció la contraseña de {user}"
-
-#. Updates section: outcome of an update, with the time it finished and how long it took
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "Updated to {running} at {at} in {took}."
-msgstr "Actualizado a {running} el {at}, en {took}."
 
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
 #. js-lingui-explicit-id
