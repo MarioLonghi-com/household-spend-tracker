@@ -9,14 +9,33 @@
  *   the app. A component that reads the language -- `Problem`, `SortHeading`,
  *   anything with a `<Trans>` -- needs the provider, and a test should not have
  *   to remember it. A test's own `wrapper` still applies, inside it.
+ * - One deadline for every `findBy…` and `waitFor`, set here rather than at
+ *   each call. See `WAIT_DEADLINE` below.
  */
 import { createElement, type ComponentType, type ReactNode } from "react";
 import { vi } from "vitest";
+import { configure } from "@testing-library/react";
 import { I18nProvider } from "@lingui/react";
 import { i18n } from "./lib/i18n";
 import { setFormatLocale } from "./lib/locale";
 
 setFormatLocale("en-US");
+
+/**
+ * How long a `findBy…` or `waitFor` waits before it fails with the DOM it saw.
+ *
+ * Nothing in this suite asserts how fast something happens. Every wait is for
+ * a mocked answer and the render it causes, so the deadline only decides how
+ * long a test that has already failed takes to say so. Testing Library's own
+ * default is one second, and a screen that renders in a tenth of that on an
+ * idle machine took three to ten when the pre-commit hook ran beside other
+ * work: thirty of 781 tests failed in one run at a load average of 200, in
+ * fifteen files, each of them passing alone. Generous on purpose, and below
+ * `testTimeout` in `vite.config.ts`, so a wait that does run out fails with
+ * Testing Library's message rather than vitest's bare "timed out".
+ */
+export const WAIT_DEADLINE = 30_000;
+configure({ asyncUtilTimeout: WAIT_DEADLINE });
 
 vi.mock("@testing-library/react", async (importOriginal) => {
   const library = await importOriginal<typeof import("@testing-library/react")>();

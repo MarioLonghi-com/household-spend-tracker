@@ -145,7 +145,7 @@ describe("the register's filters", () => {
     fireEvent.change(screen.getByPlaceholderText("in or out, any currency"), {
       target: { value: "-45,20" },
     });
-    await waitFor(() => expect(last().get("amount")).toBe("45.20"), { timeout: 2000 });
+    await waitFor(() => expect(last().get("amount")).toBe("45.20"));
   });
 
   it("asks for nothing when the amount is not an amount, and says so", async () => {
@@ -376,7 +376,7 @@ describe("the category picker", () => {
     fireEvent.change(screen.getByPlaceholderText("in or out, any currency"), {
       target: { value: "12" },
     });
-    await waitFor(() => expect(last().get("amount")).toBe("12"), { timeout: 2000 });
+    await waitFor(() => expect(last().get("amount")).toBe("12"));
     // One request per view: the count came with the rows (#101).
     expect(counted).toEqual([]);
   });
@@ -387,7 +387,7 @@ describe("the category picker", () => {
     fireEvent.change(screen.getByPlaceholderText("in or out, any currency"), {
       target: { value: "12" },
     });
-    await waitFor(() => expect(last().get("amount")).toBe("12"), { timeout: 2000 });
+    await waitFor(() => expect(last().get("amount")).toBe("12"));
     fireEvent.click(within(pop).getByRole("button", { name: "Select none" }));
     tick(pop, "Needs a category");
     await waitFor(() => expect(counted.length).toBe(1));

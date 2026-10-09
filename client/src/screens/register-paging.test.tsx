@@ -141,8 +141,10 @@ async function drawEverythingInHand() {
   }
 }
 
-// A thousand rows drawn in jsdom take a few seconds.
-vi.setConfig({ testTimeout: 30_000 });
+// A thousand rows drawn in jsdom take a few seconds idle, and fifty on a busy
+// machine: twice the suite's deadline, because a test here waits on several
+// such draws in turn, each of them allowed the suite's longest wait.
+vi.setConfig({ testTimeout: 120_000 });
 
 describe("the register's pages", () => {
   it("asks for the first five hundred rows, not the whole household", async () => {

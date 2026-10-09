@@ -80,21 +80,21 @@ afterEach(() => {
 });
 
 describe("signing out", () => {
-  it("forgets the personal filters and /snap's queue, and keeps the device's settings", { timeout: 15_000 }, async () => {
+  it("forgets the personal filters and /snap's queue, and keeps the device's settings", async () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={client}>
         <App />
       </QueryClientProvider>,
     );
-    await screen.findByRole("group", { name: "Alice's house" }, { timeout: 5_000 });
+    await screen.findByRole("group", { name: "Alice's house" });
     // Written after the shell is up, as the screens would have.
     for (const [key, value] of Object.entries({ ...PERSONAL, ...DEVICE }))
       window.localStorage.setItem(key, value);
     window.localStorage.setItem("snap.household", "household-a");
 
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
-    await screen.findByRole("button", { name: "Sign in" }, { timeout: 5_000 });
+    await screen.findByRole("button", { name: "Sign in" });
 
     for (const key of Object.keys(PERSONAL)) expect(window.localStorage.getItem(key)).toBeNull();
     expect(window.localStorage.getItem("snap.household")).toBeNull();

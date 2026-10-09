@@ -123,17 +123,12 @@ async function openPreview() {
       <Import household={HOUSEHOLD} />
     </QueryClientProvider>,
   );
-  fireEvent.click(await screen.findByRole("button", { name: "Open" }, { timeout: 10_000 }));
-  await waitFor(() => expect(shownLines().length).toBeGreaterThan(0), { timeout: 20_000 });
+  fireEvent.click(await screen.findByRole("button", { name: "Open" }));
+  await waitFor(() => expect(shownLines().length).toBeGreaterThan(0));
 }
 
-// 250 preview rows, each with its category editor, take seconds to mount in
-// jsdom on a slow machine; the default five-second budget is about the DOM,
-// not about the code under test.
-const SLOW = { timeout: 30_000 };
-
 describe("the import preview", () => {
-  it("puts one window of lines on the page, not the whole file", SLOW, async () => {
+  it("puts one window of lines on the page, not the whole file", async () => {
     await openPreview();
 
     expect(shownLines()).toHaveLength(STEP);
@@ -144,7 +139,7 @@ describe("the import preview", () => {
     expect(shownLines()).toHaveLength(2 * STEP);
   });
 
-  it("sorts the whole file at its headings, not only the lines on screen", SLOW, async () => {
+  it("sorts the whole file at its headings, not only the lines on screen", async () => {
     await openPreview();
     expect(shownLines()[0]).toBe(1);
 

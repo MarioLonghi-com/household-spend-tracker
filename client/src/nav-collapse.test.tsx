@@ -68,8 +68,6 @@ function boot() {
   );
 }
 
-const WAIT = { timeout: 5_000 };
-
 beforeEach(() => {
   vi.mocked(api.get).mockReset();
   window.localStorage.clear();
@@ -81,9 +79,9 @@ afterEach(() => {
 });
 
 describe("the desktop menu's rail", () => {
-  it("folds the menu, remembers it, and comes back folded", { timeout: 15_000 }, async () => {
+  it("folds the menu, remembers it, and comes back folded", async () => {
     const first = boot();
-    const rail = await screen.findByRole("button", { name: "Hide the menu" }, WAIT);
+    const rail = await screen.findByRole("button", { name: "Hide the menu" });
     const shell = first.container.querySelector(".shell")!;
 
     // Expanded is the default, and nothing is stored until somebody chooses.
@@ -102,7 +100,7 @@ describe("the desktop menu's rail", () => {
     // A new page load in the same browser: the menu is still folded.
     first.unmount();
     const second = boot();
-    const again = await screen.findByRole("button", { name: "Show the menu" }, WAIT);
+    const again = await screen.findByRole("button", { name: "Show the menu" });
     expect(again.getAttribute("aria-expanded")).toBe("false");
     expect(second.container.querySelector(".shell")!.classList.contains("nav-collapsed")).toBe(true);
 

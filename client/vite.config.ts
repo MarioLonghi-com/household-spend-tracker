@@ -29,6 +29,11 @@ export default defineConfig(({ mode }) => ({
     // Pins the formatting locale to en-US, so a test's expected "€1,234.56"
     // does not depend on the machine running it (#52).
     setupFiles: ["./src/test-setup.ts"],
+    // A deadline for a test that has hung, not a claim about speed: twice the
+    // longest wait (`WAIT_DEADLINE` in `src/test-setup.ts`, which says why it
+    // is generous). vitest's default of five seconds failed tests that take a
+    // fraction of that alone, whenever the machine was busy with other work.
+    testTimeout: 60_000,
   },
   server: {
     port: 5173,
