@@ -1,18 +1,19 @@
 /**
  * The language this device shows the app in (#53).
  *
- * **Hidden until a second language is served.** With English alone in
- * `SERVED_LOCALES` this renders nothing, so Profile → Appearance looks exactly
- * as it did; #58 makes it appear by serving a reviewed catalog. The
- * pseudo-locale is never offered here.
+ * **Hidden until a second language is served** -- or until an owner turns on
+ * review mode on this device (#272), when the draft languages are offered
+ * beside English, each labelled as a machine-translated preview under review.
+ * With English alone and review mode off this renders nothing, so Profile →
+ * Appearance looks exactly as it did. The pseudo-locale is never offered here.
  *
  * Each language is named in itself ("Svenska", not "Swedish"), because the
  * person looking for it may not read the one on screen.
  */
 import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
-import { useState } from "react";
-import { activate, SERVED_LOCALES, storeLocale } from "../lib/i18n";
+import { useState, useSyncExternalStore } from "react";
+import { activate, DRAFT_LOCALES, onReviewingChange, reviewing, SERVED_LOCALES, storeLocale } from "../lib/i18n";
 
 function ownName(locale: string): string {
   try {
@@ -22,10 +23,19 @@ function ownName(locale: string): string {
   }
 }
 
-export function LanguagePicker({ served = SERVED_LOCALES }: { served?: readonly string[] }) {
+export function LanguagePicker({
+  served = SERVED_LOCALES,
+  previews,
+}: {
+  served?: readonly string[];
+  /** The drafts offered as previews; by default, the drafts while this device is reviewing. */
+  previews?: readonly string[];
+}) {
   const { i18n } = useLingui();
   const [busy, setBusy] = useState(false);
-  if (served.length < 2) return null;
+  const review = useSyncExternalStore(onReviewingChange, reviewing);
+  const drafts = previews ?? (review ? DRAFT_LOCALES : []);
+  if (served.length + drafts.length < 2) return null;
 
   const choose = async (locale: string) => {
     setBusy(true);
@@ -34,6 +44,11 @@ export function LanguagePicker({ served = SERVED_LOCALES }: { served?: readonly 
     setBusy(false);
   };
 
+  const preview = t({
+    message: "Preview — machine translated, under review",
+    comment: "Beside a language's name in the language picker: its words are a draft, being reviewed",
+  });
+
   return (
     <label className="field">
       <span>{t({ message: "Language", comment: "Label of a choice on the language picker" })}</span>
@@ -41,6 +56,11 @@ export function LanguagePicker({ served = SERVED_LOCALES }: { served?: readonly 
         {served.map((locale) => (
           <option key={locale} value={locale} lang={locale}>
             {ownName(locale)}
+          </option>
+        ))}
+        {drafts.map((locale) => (
+          <option key={locale} value={locale}>
+            {`${ownName(locale)} — ${preview}`}
           </option>
         ))}
       </select>

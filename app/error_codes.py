@@ -229,6 +229,8 @@ REGISTRY: dict[str, Code] = {
         "That transaction is locked; set it back to cleared before editing it"
     ),
     "transaction.not_found": Code("No such transaction"),
+    # -- translation: app/services/translation_suggestions.py (#272) -------- #
+    "translation.suggestion_not_found": Code("No such suggested wording"),
     # -- transfer: app/services/transactions.py, app/services/transfers.py - #
     "transfer.amount_not_positive": Code("A transfer amount must be positive"),
     "transfer.arriving_not_positive": Code("The amount arriving must be positive"),

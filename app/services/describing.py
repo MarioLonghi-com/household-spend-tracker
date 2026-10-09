@@ -55,6 +55,7 @@ NOUNS: dict[str, tuple[str, str]] = {
     "agent_keys": ("agent key", "agent keys"),
     "transfer_rejections": ("pair marked not a transfer", "pairs marked not a transfer"),
     "ignored_identifier_suggestions": ("ignored identifier suggestion", "ignored identifier suggestions"),
+    "translation_suggestions": ("suggested wording", "suggested wordings"),
 }
 
 #: Fields worth naming when they change, and how to say them.

@@ -173,6 +173,9 @@ export const HISTORY_TABLES: Record<string, string> = {
   get ignored_identifier_suggestions() {
     return t({ message: "ignored identifier suggestion", context: "history table", comment: "What kind of row changed, lower case, singular, in History beside its id" });
   },
+  get translation_suggestions() {
+    return t({ message: "suggested wording", context: "history table", comment: "What kind of row changed, lower case, singular, in History beside its id: a better translation an owner suggested" });
+  },
 };
 
 /** The batch's headline: the server's English, or this language's word for its kind. */

@@ -35,6 +35,12 @@ msgstr "Always use my choice"
 msgid "Mentions"
 msgstr "Mentions"
 
+#. Button shown while reviewing a draft language: propose better words for one message
+#. Title of the panel where a reviewer proposes better words for one message
+#: src/components/SuggestWording.tsx
+msgid "Suggest a better wording"
+msgstr "Suggest a better wording"
+
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
 msgid "Creating…"
@@ -526,12 +532,15 @@ msgstr "More currencies"
 msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 msgstr "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 
+#. Column heading on Application management's suggestions: when it was suggested
 #. Column heading on the Admin screen: noun, the time
 #. Column heading on the History screen: noun, the time
+#. Column name shown beside a value on phones on Application management's suggestions
 #. Column name shown beside a value on phones on the History screen: noun, the time
 #. Name of a fact on the History screen: noun, the time
 #: src/screens/Admin.tsx
 #: src/screens/History.tsx
+#: src/screens/TranslationReview.tsx
 msgid "When"
 msgstr "When"
 
@@ -1017,6 +1026,12 @@ msgstr "I understand that <0>{revision}</0> cannot be undone except from the bac
 msgid "the file <0>{0}</0>"
 msgstr "the file <0>{0}</0>"
 
+#. Application management: how many suggestions are waiting and how many are in the catalogs
+#. placeholder {0}: rows.length - open
+#: src/screens/TranslationReview.tsx
+msgid "{open} open, {0} applied."
+msgstr "{open} open, {0} applied."
+
 #: src/screens/Accounts.tsx
 msgid "The type and currency are fixed once an account exists, because every transaction on it is recorded in that currency."
 msgstr "The type and currency are fixed once an account exists, because every transaction on it is recorded in that currency."
@@ -1452,6 +1467,7 @@ msgid "New"
 msgstr "New"
 
 #. Hidden column heading over row buttons
+#. Screen-reader name on Application management's suggestions
 #. Screen-reader name on the Accounts screen
 #. Screen-reader name on the Payees screen
 #. Screen-reader name on the Payees screen
@@ -1465,6 +1481,7 @@ msgstr "New"
 #: src/screens/Payees.tsx
 #: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
+#: src/screens/TranslationReview.tsx
 msgid "Actions"
 msgstr "Actions"
 
@@ -1784,6 +1801,11 @@ msgstr "Anything you change here is recorded, and can be put back from the Histo
 msgid "Undo"
 msgstr "Undo"
 
+#. Review mode: the suggestion was saved
+#: src/components/SuggestWording.tsx
+msgid "Saved. It is in the next download of suggestions, on Application management."
+msgstr "Saved. It is in the next download of suggestions, on Application management."
+
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
 msgid "Making…"
@@ -1865,6 +1887,11 @@ msgstr "None yet"
 #: src/screens/ynab/mapping.tsx
 msgid "{0, plural, one {Its {1} row is left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
 msgstr "{0, plural, one {Its {1} row is left out and listed in the report.} other {Its {2} rows are left out and listed in the report.}}"
+
+#. Review mode: the suggestion lost a placeholder or a tag; the two examples are written as they are
+#: src/components/SuggestWording.tsx
+msgid "Keep every placeholder and tag the English has, like <0>{placeholder}</0> or <1>{tag}</1>: they are where names, numbers and links go."
+msgstr "Keep every placeholder and tag the English has, like <0>{placeholder}</0> or <1>{tag}</1>: they are where names, numbers and links go."
 
 #: src/screens/OneTimeImport.tsx
 msgid "Currency of the plan"
@@ -2035,6 +2062,11 @@ msgstr "New name for {0}"
 #: src/screens/Register.tsx
 msgid "Sum"
 msgstr "Sum"
+
+#. Label of the search box in review mode: find a message by its words
+#: src/components/SuggestWording.tsx
+msgid "Find the message, in English or as it reads now"
+msgstr "Find the message, in English or as it reads now"
 
 #: src/screens/Updates.tsx
 msgid "The update was left to be finished from a terminal."
@@ -2406,6 +2438,11 @@ msgstr "Which plan to import"
 msgid "This writes the ledger's own values into a file in plain text. Turn it off when you are done."
 msgstr "This writes the ledger's own values into a file in plain text. Turn it off when you are done."
 
+#. Review mode: label of the draft translation as it reads now
+#: src/components/SuggestWording.tsx
+msgid "Now"
+msgstr "Now"
+
 #. Label on the household page
 #: src/screens/Household.tsx
 msgid "Newest transaction"
@@ -2461,6 +2498,11 @@ msgstr "Select every waiting row"
 msgid "not saved — leave the field to try again"
 msgstr "not saved — leave the field to try again"
 
+#. Review mode: label of an optional note explaining the suggestion
+#: src/components/SuggestWording.tsx
+msgid "Why, if it helps (optional)"
+msgstr "Why, if it helps (optional)"
+
 #: src/screens/Reconcile.tsx
 msgid "The bank says there is more than you have ticked — a payment in you have not entered?"
 msgstr "The bank says there is more than you have ticked — a payment in you have not entered?"
@@ -2473,6 +2515,7 @@ msgstr "That isn't an amount"
 msgid "Yes, revoke it"
 msgstr "Yes, revoke it"
 
+#. Button on Application management: delete this suggestion
 #. Button on the Backups screen: verb
 #. Button on the Categories screen: verb
 #. Button on the Register screen: verb
@@ -2484,6 +2527,7 @@ msgstr "Yes, revoke it"
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #: src/screens/Rules.tsx
+#: src/screens/TranslationReview.tsx
 msgid "Delete"
 msgstr "Delete"
 
@@ -2975,6 +3019,11 @@ msgstr "No category needed"
 #: src/screens/Accounts.tsx
 msgid "not counted"
 msgstr "not counted"
+
+#. Application management: how to send the suggestions on; the links follow
+#: src/screens/TranslationReview.tsx
+msgid "Download the open suggestions for <0>scripts/apply_translation_suggestions.py</0>:"
+msgstr "Download the open suggestions for <0>scripts/apply_translation_suggestions.py</0>:"
 
 #: src/screens/OneTimeImport.tsx
 msgid "Close the import? Everything chosen so far will be lost."
@@ -3482,6 +3531,11 @@ msgstr "An account cannot transfer to itself"
 #: src/lib/errorMessages.ts
 msgid "error.transfer.sides_differ"
 msgstr "Both sides of a same-currency transfer must be the same amount"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.translation.suggestion_not_found"
+msgstr "No such suggested wording"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4178,6 +4232,12 @@ msgstr "Encoding and sending…"
 msgid "Show them"
 msgstr "Show them"
 
+#. What kind of row changed, lower case, singular, in History beside its id: a better translation an owner suggested
+#: src/lib/historyWords.ts
+msgctxt "history table"
+msgid "suggested wording"
+msgstr "suggested wording"
+
 #: src/components/SignInNotice.tsx
 #: src/screens/Admin.tsx
 msgid "Recent sign-in changes"
@@ -4440,6 +4500,11 @@ msgstr "Not a transfer"
 msgid "One-time Import · YNAB (API)"
 msgstr "One-time Import · YNAB (API)"
 
+#. Button on Application management: put this suggestion back in the next download
+#: src/screens/TranslationReview.tsx
+msgid "Mark open"
+msgstr "Mark open"
+
 #. Shown when a list is empty on the Transfers screen
 #: src/screens/Transfers.tsx
 msgid "Nothing to look at."
@@ -4477,6 +4542,11 @@ msgstr "<0>{purgingName}</0> and its {0} lines will be deleted. Nothing in it ha
 msgctxt "starting balance rows"
 msgid "Skip"
 msgstr "Skip"
+
+#. Review mode: label of the note written for translators
+#: src/components/SuggestWording.tsx
+msgid "Note for translators"
+msgstr "Note for translators"
 
 #: src/screens/Profile.tsx
 msgid "Confirm and replace"
@@ -4546,6 +4616,11 @@ msgstr "{inviter} invited you to {PRODUCT} as an owner, in {households}."
 #: src/screens/Passkeys.tsx
 msgid "Passkeys are not set up on this server."
 msgstr "Passkeys are not set up on this server."
+
+#. Beside a language's name in the language picker: its words are a draft, being reviewed
+#: src/components/LanguagePicker.tsx
+msgid "Preview — machine translated, under review"
+msgstr "Preview — machine translated, under review"
 
 #: src/screens/Admin.tsx
 msgid "anyone with the link"
@@ -4828,6 +4903,11 @@ msgstr "Show a code to scan"
 msgid "Passkeys need this app opened at its HTTPS address."
 msgstr "Passkeys need this app opened at its HTTPS address."
 
+#. Button in review mode: back to finding another message
+#: src/components/SuggestWording.tsx
+msgid "Find another message"
+msgstr "Find another message"
+
 #: src/screens/Register.tsx
 msgid "One part is still empty"
 msgstr "One part is still empty"
@@ -5104,6 +5184,11 @@ msgstr "Detach this receipt?"
 #: src/screens/reports/Reimbursements.tsx
 msgid "Category"
 msgstr "Category"
+
+#. Heading on the Application management screen: reviewing the draft languages
+#: src/screens/TranslationReview.tsx
+msgid "Translations"
+msgstr "Translations"
 
 #. placeholder {0}: lossy.length
 #: src/screens/Updates.tsx
@@ -5648,6 +5733,14 @@ msgstr "read"
 msgid "Not for this account"
 msgstr "Not for this account"
 
+#. Column heading on Application management's suggestions: the message's English source
+#. Column name shown beside a value on phones on Application management's suggestions
+#. Review mode: label of the message's English source
+#: src/components/SuggestWording.tsx
+#: src/screens/TranslationReview.tsx
+msgid "English"
+msgstr "English"
+
 #. Table cell on the receipts
 #: src/screens/Receipts.tsx
 msgid "(uploaded)"
@@ -6013,6 +6106,11 @@ msgstr "Set"
 msgid "Only rows nobody has corrected"
 msgstr "Only rows nobody has corrected"
 
+#. Review mode: no message has these words
+#: src/components/SuggestWording.tsx
+msgid "No message has those words."
+msgstr "No message has those words."
+
 #. Label on the Import screen
 #: src/screens/Import.tsx
 msgid "uncategorised (chosen)"
@@ -6203,6 +6301,12 @@ msgstr "No categories yet. Categories say what a transaction was <0>for</0> — 
 msgid "nothing recorded yet"
 msgstr "nothing recorded yet"
 
+#. Column heading on Application management's suggestions: the better wording
+#. Column name shown beside a value on phones on Application management's suggestions
+#: src/screens/TranslationReview.tsx
+msgid "Suggested"
+msgstr "Suggested"
+
 #. Sentence on the first-run setup
 #: src/screens/Setup.tsx
 msgid "In Docker:"
@@ -6311,6 +6415,12 @@ msgstr "Between two of your own accounts — two rows, one act"
 #: src/screens/Profile.tsx
 msgid "One household per key. Two households means two keys."
 msgstr "One household per key. Two households means two keys."
+
+#. State of a suggestion: not yet in the catalogs, so in the next download
+#: src/screens/TranslationReview.tsx
+msgctxt "suggestion state"
+msgid "Open"
+msgstr "Open"
 
 #: src/screens/Register.tsx
 msgid "why each currency has its own columns"
@@ -6591,6 +6701,11 @@ msgstr "Update the updater only"
 #: src/screens/SignIn.tsx
 msgid "Not now"
 msgstr "Not now"
+
+#. Link on Application management: download every language's suggestions as one JSON file
+#: src/screens/TranslationReview.tsx
+msgid "All languages (JSON)"
+msgstr "All languages (JSON)"
 
 #. What the import detected: the column of money going out. Lower case, inside a list
 #: src/lib/labels.ts
@@ -7358,9 +7473,12 @@ msgstr "In Docker Desktop or Podman Desktop, open Containers, find <0>{name}</0>
 msgid "First setup"
 msgstr "First setup"
 
+#. Column heading on Application management's suggestions: open or applied
 #. Column heading on the History screen: noun, a row's status
+#. Column name shown beside a value on phones on Application management's suggestions
 #. Name of a fact on the History screen: noun, a row's status
 #: src/screens/History.tsx
+#: src/screens/TranslationReview.tsx
 msgid "State"
 msgstr "State"
 
@@ -7631,6 +7749,11 @@ msgstr "Yes, all {0} of them"
 #: src/screens/Payees.tsx
 msgid "Add a payee"
 msgstr "Add a payee"
+
+#. Button in review mode: keep this suggestion
+#: src/components/SuggestWording.tsx
+msgid "Save the suggestion"
+msgstr "Save the suggestion"
 
 #: src/screens/Rules.tsx
 msgid "Payee naming rules"
@@ -8281,6 +8404,11 @@ msgstr "A heading the categories sit under — Bills, Everyday, whatever divides
 msgid "One ledger: its accounts, its register, its receipts and the people who can reach them."
 msgstr "One ledger: its accounts, its register, its receipts and the people who can reach them."
 
+#. Review mode: the language's messages are loading
+#: src/components/SuggestWording.tsx
+msgid "Reading the messages…"
+msgstr "Reading the messages…"
+
 #. placeholder {0}: group.name
 #: src/screens/Categories.tsx
 msgid "New category in {0}"
@@ -8425,6 +8553,11 @@ msgstr "It rewrites <0>{0}</0> of {1, plural, one {{2} row already in this ledge
 msgid "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 msgstr "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 
+#. Button on Application management: the catalogs now carry this suggestion
+#: src/screens/TranslationReview.tsx
+msgid "Mark applied"
+msgstr "Mark applied"
+
 #: src/screens/Admin.tsx
 msgid "Close without copying? The link cannot be shown again."
 msgstr "Close without copying? The link cannot be shown again."
@@ -8555,8 +8688,10 @@ msgstr "This receipt carries no date of its own, so the window is around when it
 msgid "Already locked"
 msgstr "Already locked"
 
+#. Column heading on Application management's suggestions
 #. Label of a choice on the language picker
 #: src/components/LanguagePicker.tsx
+#: src/screens/TranslationReview.tsx
 msgid "Language"
 msgstr "Language"
 
@@ -8873,6 +9008,12 @@ msgstr "Show archived"
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 msgstr "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 
+#. State of a suggestion: the catalogs carry it
+#: src/screens/TranslationReview.tsx
+msgctxt "suggestion state"
+msgid "Applied"
+msgstr "Applied"
+
 #. Column heading on the Admin screen: noun, the person
 #: src/screens/Admin.tsx
 msgid "Who"
@@ -9007,6 +9148,11 @@ msgstr "All categories"
 #: src/screens/reports/IncomeExpense.tsx
 msgid "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
 msgstr "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
+
+#. Review mode: label of the box for the better translation
+#: src/components/SuggestWording.tsx
+msgid "Your wording"
+msgstr "Your wording"
 
 #. History headline, the kind of act: a statement was imported
 #: src/lib/historyWords.ts
@@ -9207,6 +9353,11 @@ msgstr "{0} will always be {1}"
 #: src/screens/reports/IncomeExpense.tsx
 msgid "why one currency at a time"
 msgstr "why one currency at a time"
+
+#. Switch on Application management: show the draft languages on this device only
+#: src/screens/TranslationReview.tsx
+msgid "Review translations on this device"
+msgstr "Review translations on this device"
 
 #. Screen-reader name of one more release listed on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
@@ -9464,6 +9615,11 @@ msgstr "that import was discarded — nothing was written"
 msgid "Putting it back…"
 msgstr "Putting it back…"
 
+#. Application management: nobody has suggested a wording yet
+#: src/screens/TranslationReview.tsx
+msgid "No suggestions yet. Choose a preview language in your profile, then use “Suggest a better wording”."
+msgstr "No suggestions yet. Choose a preview language in your profile, then use “Suggest a better wording”."
+
 #. Text on the Application management screen
 #. placeholder {0}: bytes(me.size.page_size)
 #. placeholder {1}: count(me.size.free_pages ?? 0)
@@ -9628,6 +9784,10 @@ msgstr "Oldest"
 #: src/screens/ApplicationManagement.tsx
 msgid "{0} {1} — a self-hosted, multi-currency spend tracker for one household, under the AGPL."
 msgstr "{0} {1} — a self-hosted, multi-currency spend tracker for one household, under the AGPL."
+
+#: src/screens/TranslationReview.tsx
+msgid "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
+msgstr "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
 
 #: src/screens/Import.tsx
 msgid "Open that import"

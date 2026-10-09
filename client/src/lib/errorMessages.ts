@@ -400,6 +400,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "transaction.not_found": {
     message: msg({ id: "error.transaction.not_found", message: "No such transaction" }),
   },
+  "translation.suggestion_not_found": {
+    message: msg({ id: "error.translation.suggestion_not_found", message: "No such suggested wording" }),
+  },
   "transfer.amount_not_positive": {
     message: msg({ id: "error.transfer.amount_not_positive", message: "A transfer amount must be positive" }),
   },

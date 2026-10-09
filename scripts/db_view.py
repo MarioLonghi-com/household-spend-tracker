@@ -98,6 +98,10 @@ CARRIED_WHOLE = (
     # Two transaction ids, who and when: pairs a person said are not a
     # transfer (#131). Nothing in it that the ledger does not already show.
     "transfer_rejections",
+    # Wordings an owner suggested for the draft languages (#272): which
+    # message, the words, a note, who and when. The household's own words
+    # about the app's, with nothing secret in them.
+    "translation_suggestions",
 )
 
 #: table -> {column: replacement}, for tables worth reading with the secret

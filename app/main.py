@@ -54,6 +54,7 @@ from .api.routers import (
     stats,
     transactions,
     transfers,
+    translations,
     updates,
 )
 from .auth import cookies, housekeeping, keycheck
@@ -816,6 +817,7 @@ for router in (
     reporting.router,
     stats.router,
     transfers.router,
+    translations.router,
     one_time_import.router,
 ):
     app.include_router(router, prefix=API_PREFIX)
