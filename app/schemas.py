@@ -183,10 +183,20 @@ class PasskeyStateOut(BaseModel):
 # --------------------------------------------------------------------------- #
 
 
+#: A BCP 47 language tag, for seeding a household's words (#268). Bounded and
+#: shaped here; one with no reviewed translations seeds English.
+SeedLocale = Annotated[
+    str | None, Field(max_length=35, pattern=r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}$")
+]
+
+
 class HouseholdCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     base_currency: str = Field(default="EUR", min_length=3, max_length=3)
     date_format: DateFormat = "YYYY-MM-DD"
+    #: The language to seed its categories in (#268), sent only for a language
+    #: that is served. Not stored: the seeded names are ordinary names.
+    locale: SeedLocale = None
 
 
 class HouseholdOut(ORMModel):
@@ -1246,6 +1256,9 @@ class AdminHouseholdCreate(BaseModel):
     date_format: DateFormat = "YYYY-MM-DD"
     #: Who else goes in it. The creator is always a member.
     member_ids: IdList = []
+    #: The language to seed its categories in (#268), sent only for a language
+    #: that is served. Not stored: the seeded names are ordinary names.
+    locale: SeedLocale = None
 
 
 class SetDisabled(BaseModel):
@@ -1982,6 +1995,9 @@ class SeedCategories(BaseModel):
     """Add the starter tree to a household that has none."""
 
     confirm: bool = True
+    #: The language to seed its categories in (#268), sent only for a language
+    #: that is served. Not stored: the seeded names are ordinary names.
+    locale: SeedLocale = None
 
 
 class PayeeCategorisationOut(BaseModel):

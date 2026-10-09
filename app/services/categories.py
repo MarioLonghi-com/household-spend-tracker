@@ -18,12 +18,14 @@ from collections import Counter
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from .. import seed_words
 from ..errors import Conflict, NotFound, ValidationError
 from ..models import (
     Categorisation,
     Category,
     CategoryGroup,
     Payee,
+    SystemPayee,
     Transaction,
 )
 
@@ -38,12 +40,12 @@ HISTORY_DEPTH = 3
 #: "Internal", no "FX Difference", and no inflow group holding the money that
 #: has not been assigned anywhere yet. Those are budget machinery, and a
 #: category list that carries them is a budget with the arithmetic missing.
-DEFAULT_TREE: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("Income", ("Salary", "Other Income")),
-    ("Bills", ("Rent / Mortgage", "Electricity", "Water", "Internet", "Phone", "Insurance")),
-    ("Everyday", ("Groceries", "Eating Out", "Transport", "Household", "Health")),
-    ("Quality of Life", ("Travel", "Subscriptions", "Gifts", "Hobbies")),
-    ("Non-Monthly", ("Car Maintenance", "Home Maintenance", "Annual Fees")),
+#:
+#: In English. The tree itself, by message id, is `seed_words.TREE`, and
+#: `seed_defaults` words it in the language it is asked for (#268).
+DEFAULT_TREE: tuple[tuple[str, tuple[str, ...]], ...] = tuple(
+    (seed_words.ENGLISH[group], tuple(seed_words.ENGLISH[one] for one in names))
+    for group, names in seed_words.TREE
 )
 
 
@@ -52,28 +54,71 @@ DEFAULT_TREE: tuple[tuple[str, tuple[str, ...]], ...] = (
 # --------------------------------------------------------------------------- #
 
 
-def seed_defaults(session: Session, household_id: str) -> list[Category]:
+def seed_defaults(
+    session: Session, household_id: str, *, locale: str | None = None
+) -> list[Category]:
     """Give a new household something to categorise with.
 
     An empty category list makes the feature look broken on the first screen
     somebody opens: every picker is empty and there is nothing to learn from.
     These are a starting point and every one of them can be renamed or archived.
+
+    ``locale`` words them, and the household's "Opening balance" payee, in a
+    language with reviewed translations; anything else is English, word by
+    word (`seed_words.word`). The names are stored as ordinary names and the
+    locale is stored nowhere: after this they are the household's own words.
     """
     made: list[Category] = []
-    for group_order, (group_name, names) in enumerate(DEFAULT_TREE):
+    for group_order, (group_id, ids) in enumerate(seed_words.TREE):
         group = CategoryGroup(
-            household_id=household_id, name=group_name, sort_order=group_order
+            household_id=household_id,
+            name=seed_words.word(group_id, locale),
+            sort_order=group_order,
         )
         session.add(group)
         session.flush()
-        for order, name in enumerate(names):
+        for order, message_id in enumerate(ids):
             category = Category(
-                household_id=household_id, group_id=group.id, name=name, sort_order=order
+                household_id=household_id,
+                group_id=group.id,
+                name=seed_words.word(message_id, locale),
+                sort_order=order,
             )
             session.add(category)
             made.append(category)
     session.flush()
+    _seed_opening_balance_payee(session, household_id, locale)
     return made
+
+
+def _seed_opening_balance_payee(session: Session, household_id: str, locale: str | None) -> None:
+    """The "Opening balance" payee, in the household's language, made ahead of time.
+
+    The payee is otherwise made when the first account is opened with a
+    balance, and by then nothing knows which language the household was set up
+    in -- no locale is stored. So a household seeded in another language gets
+    it now, marked `system` like the one an account would make, and
+    `accounts._write_opening_balance` uses the marked payee it finds.
+
+    In English nothing is made here: the payee arrives with the first opening
+    balance exactly as it always has.
+    """
+    name = seed_words.word(seed_words.OPENING_BALANCE, locale)
+    if name == seed_words.ENGLISH[seed_words.OPENING_BALANCE]:
+        return
+    already = session.execute(
+        select(Payee.id).where(
+            Payee.household_id == household_id,
+            Payee.system == SystemPayee.opening_balance,
+        )
+    ).first()
+    if already is not None:
+        return
+    from . import payees as payee_service
+
+    payee_service.get_or_create(
+        session, household_id, name, system=SystemPayee.opening_balance
+    )
 
 
 def list_groups(session: Session, household_id: str) -> list[CategoryGroup]:

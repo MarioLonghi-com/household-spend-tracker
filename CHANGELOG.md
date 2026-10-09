@@ -32,6 +32,17 @@ history this repository does not have.
 
 ## Unreleased
 
+### Changed
+
+- **A new household can be seeded in its own language.** Creating a
+  household, from the first-household form, Admin or *Add the defaults* on
+  Categories, takes the device's language when that language is served, and
+  seeds the category tree and the "Opening balance" payee in it. Only
+  reviewed translations are seeded (`app/seed_catalog.json`, written from the
+  catalogs by `scripts/seed_catalog.py`); a draft never is, so until a
+  language ships every household is seeded in English exactly as before. The
+  names are ordinary names, and no language is stored on the household. (#268)
+
 ### Fixed
 
 - **After an update, the page opens where the outcome is.** Once the app was
