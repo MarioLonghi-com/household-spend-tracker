@@ -1086,6 +1086,10 @@ class BatchOut(ORMModel):
     #: What it actually did. Computed from the change rows on every read, never
     #: stored -- a stored copy would be free to drift from the log it describes.
     detail: str = ""
+    #: `detail` as structure -- a key and raw values -- for a client that words
+    #: it in its own language (#266). `detail` is this, rendered in English.
+    #: The shapes are `app/services/describing.py`'s.
+    detail_phrase: dict | None = None
     #: Who did it, by name rather than by id. Named `actor_name` and not
     #: `actor`: `Batch.actor` is the ORM relationship to the User, and a
     #: field of that name on a `from_attributes` model picks the object up
@@ -1101,6 +1105,10 @@ class FieldChangeOut(BaseModel):
     now: str
     #: The column `field` names, for a client that words it itself (#57).
     column: str = ""
+    #: `was` and `now` as raw values (#266): money in minor units beside its
+    #: currency, a date as ISO, an enum as its value. Null `was` on a snapshot.
+    was_value: dict | None = None
+    now_value: dict | None = None
 
 
 class ChangeDetailOut(BaseModel):
@@ -1121,6 +1129,8 @@ class ChangeDetailOut(BaseModel):
     redacted: list[str] = []
     #: The table `table` names, for a client that words it itself (#57).
     table_key: str = ""
+    #: `summary` as structure, for the same client (#266).
+    summary_phrase: dict | None = None
 
 
 class BatchDetail(BatchOut):
@@ -1128,6 +1138,8 @@ class BatchDetail(BatchOut):
 
     #: One line per changed row, in the order they happened.
     lines: list[str] = []
+    #: The same lines as structure (#266).
+    line_phrases: list[dict] = []
     #: The same rows with their columns, for the panel that shows everything.
     #:
     #: Named `changed_rows`, not `changes`: `Batch.changes` is the ORM
@@ -1202,6 +1214,8 @@ class ChangeOut(ORMModel):
     #: The same sentence the History screen shows, from the same engine. The
     #: raw images above are the record; this is the record read aloud.
     summary: str = ""
+    #: `summary` as structure, for a client in another language (#266).
+    summary_phrase: dict | None = None
     #: Who did it, by name rather than by id.
     actor_name: str | None = None
     #: The program that did it on their behalf, when one did. Beside

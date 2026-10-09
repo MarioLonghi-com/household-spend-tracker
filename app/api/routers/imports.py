@@ -604,7 +604,7 @@ def row_history(
     # One `_Names` for the whole list rather than one per change: a transaction
     # edited fifty times would otherwise be fifty passes over the household's
     # payees and categories to write fifty sentences.
-    sentences = describing.describe_changes(session, household.id, changes)
+    phrases = describing.describe_change_phrases(session, household.id, changes)
 
     # Both maps in one query each. `session.get` would have been one round trip
     # per change for the batch and another for its actor, which is the N+1 this
@@ -626,7 +626,9 @@ def row_history(
         model = ChangeOut.model_validate(change)
         owner = owners.get(change.batch_id)
         model.batch = BatchOut.model_validate(owner) if owner else None
-        model.summary = sentences.get(change.seq, "")
+        said = phrases.get(change.seq)
+        model.summary = describing.english(said) if said is not None else ""
+        model.summary_phrase = said
         model.actor_name = actors.get(owner.actor_id) if owner else None
         # Beside the person, never instead of them. Same source as the History
         # list's, so the two cannot describe one batch differently.
@@ -716,6 +718,7 @@ def _described(
     out.headline = words.headline
     out.headline_key = words.headline_key
     out.detail = words.detail
+    out.detail_phrase = words.detail_phrase
     out.actor_name = words.actor
     out.via = words.via
     out.change_count = change_count
@@ -768,10 +771,12 @@ def batch_detail(
     out.headline = words.headline
     out.headline_key = words.headline_key
     out.detail = words.detail
+    out.detail_phrase = words.detail_phrase
     out.actor_name = words.actor
     out.via = words.via
     out.change_count = count
-    out.lines = describing.lines_of(changes, names)
+    out.line_phrases = describing.line_phrases_of(changes, names)
+    out.lines = [describing.english(one) for one in out.line_phrases]
     out.changed_rows = [
         ChangeDetailOut(
             seq=one.seq,
@@ -785,6 +790,7 @@ def batch_detail(
             snapshot=[FieldChangeOut(**asdict(f)) for f in one.snapshot],
             redacted=one.redacted,
             table_key=one.table_key,
+            summary_phrase=one.summary_phrase,
         )
         for one in describing.detail_of(session, household.id, changes, names=names)
     ]
