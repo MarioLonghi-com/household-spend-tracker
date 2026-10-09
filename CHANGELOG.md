@@ -45,6 +45,18 @@ history this repository does not have.
   and logging styles arriving in English from the server; all of them now
   translate, with English unchanged. (#271)
 
+## 0.9.2 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.9.1`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.9.1` and restart.
+
+Fixes found by testing 0.9.1's updates from the browser on Docker Desktop
+(macOS, Windows), rootless Podman and a Tailscale server: an update cut off
+by a power cut now rolls back by itself, the updaters hand over cleanly, the
+launcher uses the engine Spend Tracker is in, and the page opens on the
+outcome after an update.
+
 ### Fixed
 
 - **After an update, the page opens where the outcome is.** Once the app was
@@ -88,6 +100,14 @@ history this repository does not have.
   updater and keeps its heartbeat; the previous one records that it stood
   down, rather than a take-back that did not happen, and stops itself. A
   take-back the engine refuses ends the same way. (#259)
+
+- **The launcher uses Podman when that is where Spend Tracker runs.** With
+  both Docker and Podman on a computer, the launcher picked Docker whenever
+  its command was installed, even with Docker Desktop stopped and a Podman
+  machine running, and then asked for Docker to be started. It now uses the
+  engine Spend Tracker is already installed in, or else the one that is
+  running, and only when neither is running says which are installed and
+  that one of them must be started. (#264)
 
 ## 0.9.1 — 2026-10-09
 

@@ -9,8 +9,9 @@
 # updater no longer works is repaired -- a newer zip's launcher keeps your
 # release and replaces only the updater, when its own is newer (C5).
 #
-# What it does, in order: finds `docker compose` or `podman compose`; finds the
-# engine's socket; asks the bundle's own updater image what to start
+# What it does, in order: picks Docker or Podman -- the one Spend Tracker is
+# already in, else the one that is running; finds the engine's socket; asks
+# the bundle's own updater image what to start
 # (updater/launch.py: the engine, the pin, the settings, written into .env,
 # and which compose created the project, so the same one runs it again);
 # makes sure the containers come back after a restart (podman-restart,
@@ -59,25 +60,60 @@ say "Starting Spend Tracker @VERSION@ from $HERE"
 # The engine
 # --------------------------------------------------------------------------- #
 
+# The rule is updater/launch.py's `pick_engine` (#264), and
+# tests/test_launcher_engine.py runs this block against it: an engine that
+# already holds the project, else one that answers, Docker first in a tie.
+# `docker compose version` reads only the client, so a Docker CLI alone
+# says nothing about whether Docker runs.
+seen() {
+  if ! command -v "$1" >/dev/null 2>&1 || ! "$1" compose version >/dev/null 2>&1; then
+    echo none
+    return
+  fi
+  if ! problem="$("$1" info 2>&1 >/dev/null)"; then
+    case "$problem" in
+      *"permission denied"*) echo denied ;;
+      *) echo installed ;;
+    esac
+    return
+  fi
+  if [ -n "$("$1" ps -aq --filter "label=com.docker.compose.project=$PROJECT" 2>/dev/null)" ]; then
+    echo project
+  else
+    echo answers
+  fi
+}
+DOCKER_SEEN="$(seen docker)"
+PODMAN_SEEN="$(seen podman)"
+
 ENGINE=""
-if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+if [ "$DOCKER_SEEN" = project ]; then
   ENGINE=docker
-  PRODUCT="Docker"
-elif command -v podman >/dev/null 2>&1 && podman compose version >/dev/null 2>&1; then
+  [ "$PODMAN_SEEN" = project ] && say "Spend Tracker is installed in both Docker and Podman; this starts the one in Docker."
+elif [ "$PODMAN_SEEN" = project ]; then
   ENGINE=podman
-  PRODUCT="Podman"
+elif [ "$DOCKER_SEEN" = answers ]; then
+  ENGINE=docker
+  case "$PODMAN_SEEN" in installed|denied)
+    say "Podman is installed but not running, so whether Spend Tracker is already installed there was not checked; this starts it in Docker." ;;
+  esac
+elif [ "$PODMAN_SEEN" = answers ]; then
+  ENGINE=podman
+  case "$DOCKER_SEEN" in installed|denied)
+    say "Docker is installed but not running, so whether Spend Tracker is already installed there was not checked; this starts it in Podman." ;;
+  esac
+elif [ "$DOCKER_SEEN" = denied ]; then
+  stop "Your user cannot reach Docker's socket. Add it to the docker group (sudo usermod -aG docker $(id -un)), log out and back in, then run this again."
+elif [ "$DOCKER_SEEN" != none ] && [ "$PODMAN_SEEN" != none ]; then
+  stop "Docker and Podman are both installed, and neither is running. Start the one Spend Tracker uses, wait until it says it is running, then open this launcher again."
+elif [ "$DOCKER_SEEN" != none ]; then
+  stop "Docker is installed but not running. Start it, wait until it says it is running, then open this launcher again."
+elif [ "$PODMAN_SEEN" != none ]; then
+  stop "Podman is installed but not running. Start it, wait until it says it is running, then open this launcher again."
 else
   stop "Spend Tracker runs in Docker Desktop or Podman Desktop, and neither was found. Install one, start it, then open this launcher again."
 fi
-
-if ! problem="$("$ENGINE" info 2>&1 >/dev/null)"; then
-  case "$problem" in
-    *"permission denied"*)
-      stop "Your user cannot reach $PRODUCT's socket. Add it to the docker group (sudo usermod -aG docker $(id -un)), log out and back in, then run this again." ;;
-    *)
-      stop "$PRODUCT is installed but not running. Start it, wait until it says it is running, then open this launcher again." ;;
-  esac
-fi
+if [ "$ENGINE" = docker ]; then PRODUCT="Docker"; else PRODUCT="Podman"; fi
 
 # The socket the updater is given. In Docker Desktop and in a podman machine
 # the path is the VM's, and /var/run/docker.sock is right for both (S21).
