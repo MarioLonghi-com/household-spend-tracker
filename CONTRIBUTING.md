@@ -258,7 +258,7 @@ from the change -- plus a few variants of B built `FROM` it, such as one whose
 migration fails after writing a row -- pushes them to a registry that answers
 as `ghcr.io` on the runner, and updates a running A through **the updater in
 its own container**, as compose starts it. What it proves is what an owner
-would see: after each of E1-E15 (`tests/self_update/scenarios.py`) it reads
+would see: after each of E1-E16 (`tests/self_update/scenarios.py`) it reads
 row counts, the ledger's stamp, which digest each container runs, a
 container's `StartedAt` and the pin in `.env`. It runs on rootful Docker
 (loopback and the Tailscale sidecar layout, with a stand-in for Tailscale),
