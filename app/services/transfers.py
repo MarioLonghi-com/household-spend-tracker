@@ -3,7 +3,7 @@
 Issue #70. A transfer between two household accounts arrives as two rows from
 two statements -- often imported days apart -- and until this module both were
 counted as flow: an expense on one side, income on the other, both in the
-Income v Expense report. The model already had the answer (a mirrored pair,
+Income vs Expense report. The model already had the answer (a mirrored pair,
 excluded from reports once linked); what was missing was any way to link two
 rows that already exist, and anything that looked for them.
 

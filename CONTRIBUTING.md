@@ -264,6 +264,10 @@ container's `StartedAt` and the pin in `.env`. It runs on rootful Docker
 (loopback and the Tailscale sidecar layout, with a stand-in for Tailscale),
 rootless Podman, and Docker on arm64. Rootless Docker is in the manual
 matrix instead: its daemon cannot make its bridge network on a hosted runner.
+On the Podman legs each updater is pushed as a two-platform image index and
+pulled by the index's digest, as a release is, so the engine lists two
+digests for it (#287); A's is not, while the merge base's updater still
+takes one digest for its identity.
 
 The only thing replaced is verification: nothing built on a runner has an
 attestation. The CI updater image (`tests/self_update/ci-updater.Dockerfile`)
@@ -375,6 +379,11 @@ make test
 
 `make e2e` seeds and serves its own throwaway instance on 8850, in
 `e2e-data/` at the top of the checkout, whatever the variable says.
+`E2E_PORT=8862` moves it to another port, so a worktree can run one spec
+(`cd client && E2E_PORT=8862 npx playwright test e2e/locales.spec.ts`) while
+8850 is busy. Its client build is a **QA build** (`vite build --mode qa`), the
+only kind that can show the draft languages (#271): run `make dev` or
+`npm run build` before serving that `app/static/dist` to anyone.
 
 `npm run build` is the client check, not `tsc --noEmit`: the latter has passed a
 file containing an undefined name.

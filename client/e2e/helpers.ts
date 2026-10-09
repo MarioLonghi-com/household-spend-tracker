@@ -133,7 +133,7 @@ export async function go(page: Page, label: string): Promise<void> {
  * host where passkeys work without HTTPS, and `e2e/serve.sh` makes it the
  * RP ID. At `127.0.0.1` -- the suite's `baseURL` -- they are not offered.
  */
-export const BY_NAME = "http://localhost:8850";
+export const BY_NAME = `http://localhost:${process.env.E2E_PORT ?? "8850"}`;
 
 /** Where the passkey the passkey setup registered is kept for the specs. */
 export const PASSKEY = join(HERE, ".auth", "passkey.json");

@@ -958,7 +958,7 @@ def _say_which_are_transfers(session: Session, account: Account, lines: list[Imp
             if pair.strength == "strong":
                 line.reason = (
                     f"a transfer with {where} ({partner.date.isoformat()}): {pair.why}. It is "
-                    "linked when you commit, and stays out of Income v Expense."
+                    "linked when you commit, and stays out of Income vs Expense."
                 )
             else:
                 line.reason = (

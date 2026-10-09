@@ -1,4 +1,6 @@
 import { useRef } from "react";
+import { t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 import { format } from "../lib/money";
 import { moveSeam, SNAP_FRACTIONS } from "../lib/splitting";
 
@@ -23,6 +25,8 @@ export function SplitBar({
   currency: string;
   onChange: (magnitudes: number[]) => void;
 }) {
+  // Re-renders its words when the language changes.
+  useLingui();
   const bar = useRef<HTMLDivElement>(null);
   const total = magnitudes.reduce((sum, one) => sum + one, 0);
   const starts = magnitudes.map((_, index) =>
@@ -58,11 +62,11 @@ export function SplitBar({
             style={{ left: share(position) }}
             tabIndex={0}
             role="slider"
-            aria-label={`Between part ${seam + 1} and part ${seam + 2}`}
+            aria-label={t({ message: `Between part ${seam + 1} and part ${seam + 2}`, comment: "Screen-reader name of the handle between two parts of a split transaction. See GLOSSARY.md" })}
             aria-valuemin={0}
             aria-valuemax={total}
             aria-valuenow={position}
-            aria-valuetext={`Part ${seam + 1} ${format(magnitudes[seam], currency)}, part ${seam + 2} ${format(magnitudes[seam + 1], currency)}`}
+            aria-valuetext={t({ message: `Part ${seam + 1} ${format(magnitudes[seam], currency)}, part ${seam + 2} ${format(magnitudes[seam + 1], currency)}`, comment: "Screen-reader value of a split handle: each part's number and amount. See GLOSSARY.md" })}
             onPointerDown={(event) => {
               event.preventDefault();
               event.currentTarget.focus();

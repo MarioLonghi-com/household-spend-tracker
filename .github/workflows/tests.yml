@@ -499,7 +499,9 @@ jobs:
     needs: changes
     if: needs.changes.outputs.code == 'true' && needs.changes.outputs.green == ''
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Thirty since #271 added a walk of every screen in each draft language,
+    # at both widths -- about four minutes on top of the English suite.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -539,7 +541,10 @@ jobs:
         run: npx playwright install-deps chromium
         working-directory: client
 
-      - name: end to end, desktop and phone
+      # `npm run e2e` builds in QA mode, the one build that can show the draft
+      # languages (#271), and runs the English suite, en-XA, then every screen
+      # in pt-BR, es-ES and sv-SE at both widths.
+      - name: end to end, desktop and phone, and each draft language
         run: npm run e2e
         working-directory: client
         env:
@@ -756,12 +761,9 @@ jobs:
       - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294  # v5.0.0
         with:
           fail-on-severity: high
-          # braces <= 3.0.3 (stack exhaustion on deeply nested patterns) has no
-          # fixed release. It arrives through micromatch in @lingui/cli, which
-          # runs at build time on this repository's own globs and is not in
-          # the bundle a browser receives (#53). Named one advisory at a time,
-          # so anything else still fails this check.
-          allow-ghsas: GHSA-vfj7-8cjw-p6xm
+          # No advisory is allowed. braces (GHSA-vfj7-8cjw-p6xm) was, until
+          # #270 replaced the micromatch it came through with
+          # client/vendor/micromatch.
 
   # --------------------------------------------------------------------------- #
   # The container, on both bases
@@ -1041,6 +1043,12 @@ jobs:
   #     covers it (design notes 15.5), on the test VM.
   #   - docker-arm: E1 on ubuntu-24.04-arm (C6).
   #
+  # `index`: on the Podman legs every updater is pushed as a two-platform OCI
+  # index and pulled by the index's digest, as a release is (#287) -- except
+  # A's, while the merge base's updater takes one RepoDigests entry for its
+  # identity (stage.py, `knows_its_digests`). The Docker legs push one
+  # manifest: Docker's classic image store lists only the digest it pulled.
+  #
   # **Required: in `ci-ok`'s needs**, since the matrix ran green on every leg
   # three times on one tree (#243). Path-filtered like every job here: a
   # change that touches none of the paths above is not owed it, and ci-ok
@@ -1072,6 +1080,7 @@ jobs:
             only: ""
             variants: ""
             a_floor: ""
+            index: false
           - leg: docker-sidecar
             engine: docker
             layout: sidecar
@@ -1080,6 +1089,7 @@ jobs:
             variants: ""
             # The sidecar copy without ExposedPorts (E11b runs A's updater).
             a_floor: 51926060257c831732734c67a6cba6a6e36a8f88
+            index: false
           # Rootless Podman is the slowest engine here: two shards, run side
           # by side, each building its own releases.
           - leg: podman-rootless
@@ -1092,6 +1102,10 @@ jobs:
             # and, as the standby after its handover, not taking back from a
             # successor podman-compose recreates (0ecbf81; E12).
             a_floor: 0ecbf8125f64a55672db60e59720eeb6e1550890
+            # Every updater a two-platform OCI index, pulled by the index's
+            # digest: Podman lists the platform manifest's digest beside it
+            # in RepoDigests, as it does a release's (#287).
+            index: true
           - leg: podman-rootless-2
             engine: podman
             layout: loopback
@@ -1099,6 +1113,7 @@ jobs:
             only: E5,E6,E7,E8,E9,E14,E15
             variants: B1,B2,C
             a_floor: 0ecbf8125f64a55672db60e59720eeb6e1550890
+            index: true
           - leg: docker-arm
             engine: docker
             layout: loopback
@@ -1106,6 +1121,7 @@ jobs:
             only: E1
             variants: none
             a_floor: ""
+            index: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -1182,6 +1198,7 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
           VARIANTS: ${{ matrix.variants }}
           A_FLOOR: ${{ matrix.a_floor }}
+          INDEX: ${{ matrix.index }}
         run: |
           set -eu
           if [ -n "$BASE_REF" ]; then base="$(git merge-base HEAD "origin/${BASE_REF}")"
@@ -1192,7 +1209,9 @@ jobs:
           fi
           echo "A is $base, B is $(git rev-parse HEAD)"
           started=$(date +%s)
-          python -m tests.self_update.stage build --out "$STAGED" --base "$base" --only "$VARIANTS"
+          index=""
+          if [ "$INDEX" = "true" ]; then index="--index"; fi
+          python -m tests.self_update.stage build --out "$STAGED" --base "$base" --only "$VARIANTS" $index
           echo "BUILD_SECONDS=$(( $(date +%s) - started ))" >> "$GITHUB_ENV"
 
       - name: the scenarios

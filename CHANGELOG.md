@@ -32,6 +32,85 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.9.3 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.9.2`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.9.2` and restart.
+
+Two fixes to the updater: on Podman, 0.9.2's updater could not hand over
+to a newer one, so the fixes it carried never reached a Podman install from
+the browser; and a shutdown or sleep in the ten minutes after an update made
+the previous updater take back over when the machine woke. Alongside them,
+the screens' English is made consistent ahead of translation, counts read
+"1 row", and the client's build no longer pulls in `braces`.
+
+### Added
+
+- **Every screen is checked in each draft language before review.** The
+  end-to-end suite walks every screen in Brazilian Portuguese, Spanish and
+  Swedish, on a desktop and on a phone, and fails on a message left in
+  English, a placeholder shown as written, text cut off or pushing the page
+  sideways, an amount not written the language's way, or a wrong `lang`. Only
+  the test build can show the drafts; the languages stay hidden everywhere
+  else. The walk found the Transfers screen and a few shared controls never
+  prepared for translation, and Application management's places, log files
+  and logging styles arriving in English from the server; all of them now
+  translate, with English unchanged. On a phone, the Accounts screen's two
+  buttons and a long screen title could push the page sideways in a longer
+  language; they wrap now, and English, which fits, is laid out as before.
+  (#271)
+
+### Changed
+
+- **One English word for each thing.** The headings that group accounts by type
+  now say "Current accounts" and "Other debts", the plurals of the account
+  types they group, rather than "Checking" and "Other liabilities"; and the
+  report is "Income vs Expense" everywhere, in the import's reasons, the
+  Transfers screen, the import guide and the agent's tool descriptions, where
+  some said "Income v Expense". The glossary gains rows for the words the
+  update screens use (updater, container engine, image, migration,
+  downgrade, launcher, recovery page, release, version), and the update,
+  application-management and backup screens' short messages carry translator
+  notes. (#270)
+- **The client's build tooling no longer installs `braces`**, which carries a
+  high-severity advisory with no fixed release (GHSA-vfj7-8cjw-p6xm). It came
+  in through micromatch under the translation tooling, which runs at build
+  time only and never reached a browser; micromatch is now replaced by the
+  two functions the tooling calls, so the dependency review allows no
+  advisory at all. (#270)
+
+### Fixed
+
+- **English counts say "1 row", not "1 rows".** While the screens were being
+  prepared for translation, a count kept its English exactly as it was, wrong
+  plural included: "Try again in 1 seconds", "1 legs", "Its 1 row are left
+  out", "1 transaction match the filters", and a few more like them on the
+  Rules, Import, Household, Accounts and Register screens. Every English
+  message with a count now has its singular, and the translations follow.
+  (#269)
+- **On Podman, the updater hands over to a newer one again.** Since 0.9.2 an
+  updater has known itself by its image digest, and it took that digest from
+  the last entry the engine listed. Podman lists two for a release's image:
+  the multi-architecture digest the release publishes, and the digest of
+  this machine's part of it. The new updater picked the second, decided it
+  was not the image it had been started as, and refused to take over, so
+  every handover on Podman failed with "failed its own check" and the
+  updater stayed on the old version. An updater now counts every digest its
+  image carries as its own, writes the published one wherever it can tell
+  which that is, and the check, the "already the updater of" decision and
+  the standby's checks all use the whole set. (#287)
+- **Closing the laptop during the updater's standby no longer brings the
+  old updater back.** For ten minutes after a handover the previous updater
+  stays on standby, ready to take back over if the new one stops answering.
+  A machine shut down or asleep in those minutes came back with the new
+  updater's last heartbeat as old as the time it was off, and the standby
+  read that as silence: within seconds of starting it stopped the healthy
+  new updater, took back over and pinned the old one in `.env`. The standby
+  now counts silence only from its own return, gives a new updater that is
+  still starting up the same two minutes to come back, and does not count
+  time the machine was off towards its ten minutes. (#288)
+
 ## 0.9.2 — 2026-10-09
 
 **Reversible: none** — no migration in this release. To go back to

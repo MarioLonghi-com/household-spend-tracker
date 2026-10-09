@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { format } from "../lib/money";
 import { sortRows } from "../lib/sorting";
+import { Trans } from "@lingui/react/macro";
 import { Empty, Field, Panel, Problem, SortHeading, useSort } from "./bits";
 import type { Account, Household, RegisterPage, Transaction } from "../lib/types";
 import { formatDate } from "../lib/locale";
@@ -40,7 +41,7 @@ export function RowPicker({
   action,
   busy = false,
   error,
-  empty = "Nothing in that window. Widen the dates above.",
+  empty,
   onPick,
   onClose,
 }: {
@@ -109,7 +110,7 @@ export function RowPicker({
       </div>
 
       {rows.length === 0 ? (
-        <Empty>{empty}</Empty>
+        <Empty>{empty ?? <Trans>Nothing in that window. Widen the dates above.</Trans>}</Empty>
       ) : (
         <table>
           <thead>
