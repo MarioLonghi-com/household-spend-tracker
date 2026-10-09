@@ -35,10 +35,11 @@ ISO, an amount is minor units beside its currency, a name is as written.
 from __future__ import annotations
 
 import ast
+import copy
 import re
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
-from functools import cache
+from functools import cache, lru_cache
 from string import Formatter
 
 from .error_codes import REGISTRY
@@ -738,8 +739,20 @@ def read(text: str | None, *, currency: str | None = None) -> dict | None:
     Where several notices match, the most specific -- the one naming the most
     of the sentence -- wins.
     """
-    found = _read(text, currency)
-    return found[1] if found else None
+    if not text:
+        return None
+    found = _read_once(text, currency)
+    # A copy: the reading is remembered, and a caller is free to change what
+    # it is handed.
+    return copy.deepcopy(found[1]) if found else None
+
+
+@lru_cache(maxsize=4096)
+def _read_once(text: str, currency: str | None) -> tuple[int, dict] | None:
+    """`_read`, remembered. A statement of two thousand lines says "this line
+    is already in the account" a thousand times, and each reading tries every
+    pattern; once per distinct sentence is enough."""
+    return _read(text, currency)
 
 
 def _read(text: str | None, currency: str | None) -> tuple[int, dict] | None:
