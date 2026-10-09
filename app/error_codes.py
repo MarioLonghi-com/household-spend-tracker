@@ -471,4 +471,10 @@ REGISTRY: dict[str, Code] = {
     "ynab.register_too_large": Code("The Register.csv in that zip is larger than this import reads"),
     "ynab.not_csv": Code("Line {line} of this file cannot be read as CSV. Export the plan from YNAB again and upload the zip or its Register.csv.", ("line",)),
     "ynab.amount_too_long": Code("Line {line} of this file has an amount longer than {max} characters, which YNAB never writes -- it may not be a YNAB export, or it may be damaged", ("line", "max")),
+    # -- request, ledger, setup, statement: app/main.py, refusals built in a handler or a middleware (#267) --- #
+    "request.cross_origin": Code("That request did not come from this app"),
+    "request.invalid": Code("Some of what was sent is not right: {fields}", ("fields",)),
+    "ledger.busy": Code("The ledger is busy with another change at this moment; try again"),
+    "setup.required": Code("This instance has not been set up yet; open /setup"),
+    "statement.unreadable": Code("This file cannot be read as a statement"),
 }

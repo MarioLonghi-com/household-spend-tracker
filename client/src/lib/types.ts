@@ -852,6 +852,8 @@ export interface AgentKey {
 export interface ReportRow {
   key: string | null;
   name: string;
+  /** `unset.category` when `name` is the server's word for no category (#267). */
+  name_code?: string | null;
   group_name: string | null;
   by_month: Record<string, number>;
   total_minor: number;

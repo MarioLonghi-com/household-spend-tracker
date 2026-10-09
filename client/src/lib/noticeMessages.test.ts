@@ -55,3 +55,20 @@ describe("an import's sentences (#267)", () => {
     );
   });
 });
+
+describe("a refusal whose code is a notice's (#267)", () => {
+  it("is worded from the notice outside English, and is the server's sentence in English", async () => {
+    const { ApiError } = await import("./api");
+    const { problemText } = await import("./errorMessages");
+    const refused = new ApiError("the server's sentence", 422, undefined, {
+      detail: "the server's sentence",
+      code: "statement.unreadable.too_many_rows",
+      params: { max: 100000 },
+    });
+    expect(problemText(refused)).toBe("the server's sentence");
+    await activate("en-XA");
+    const said = problemText(refused);
+    expect(said).not.toBe("the server's sentence");
+    expect(said).toMatch(/100[,.  ]?000/);
+  });
+});

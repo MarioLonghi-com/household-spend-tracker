@@ -35,10 +35,11 @@ ISO, an amount is minor units beside its currency, a name is as written.
 from __future__ import annotations
 
 import ast
+import copy
 import re
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
-from functools import cache
+from functools import cache, lru_cache
 from string import Formatter
 
 from .error_codes import REGISTRY
@@ -462,6 +463,192 @@ NOTICES: dict[str, Notice] = {
         None,
         {"milliunits": "int"},
     ),
+    # -- What the server calls an empty bucket, `insights.UNSET_NAME` -------- #
+    # Sent as `name_code` beside a report's or a breakdown's name, not read.
+    "unset.category": Notice("Uncategorised", "Uncategorised"),
+    "unset.payee": Notice("No payee", "No payee"),
+    # -- A file the statements library refused whole, `statements/` --------- #
+    "statement.unreadable.no_bom": Notice(
+        "this file looks like UTF-16 or UTF-32 text without a byte-order mark, so how to read it "
+        "cannot be told for certain -- save it again as UTF-8 (or CSV UTF-8) and import that",
+        "This file looks like UTF-16 or UTF-32 text without a byte-order mark, so how to read it cannot be told for certain -- save it again as UTF-8 (or CSV UTF-8) and import that",
+    ),
+    "statement.unreadable.too_many_rows": Notice(
+        "this file has more than {max} rows, which no statement has -- it may not be a "
+        "statement. Download a shorter period from your bank.",
+        "This file has more than {max, number} rows, which no statement has -- it may not be a statement. Download a shorter period from your bank.",
+        {"max": "count"},
+    ),
+    "statement.unreadable.cell_too_long": Notice(
+        "one cell in this file is longer than {max} characters, which no statement has -- it "
+        "may not be a statement, or it may be damaged. Download it from your bank again.",
+        "One cell in this file is longer than {max, number} characters, which no statement has -- it may not be a statement, or it may be damaged. Download it from your bank again.",
+        {"max": "count"},
+    ),
+    "statement.unreadable.not_a_table": Notice(
+        "this file could not be read as a table. Download it from your bank again, or export "
+        "it as CSV.",
+        "This file could not be read as a table. Download it from your bank again, or export it as CSV.",
+    ),
+    "statement.unreadable.undated": Notice(
+        "more than {max} rows of this file have no readable date -- it is not a statement, or "
+        "its date column was not found. Check the header row.",
+        "More than {max, number} rows of this file have no readable date -- it is not a statement, or its date column was not found. Check the header row.",
+        {"max": "count"},
+    ),
+    "statement.unreadable.xlsx": Notice(
+        "this looks like an .xlsx file, which is not supported yet -- open it and save as CSV, "
+        "or export CSV from your bank instead",
+        "This looks like an .xlsx file, which is not supported yet -- open it and save as CSV, or export CSV from your bank instead",
+    ),
+    "statement.unreadable.no_xlrd": Notice(
+        "reading .xls files needs the xlrd package, which is not installed",
+        "Reading .xls files needs the xlrd package, which is not installed",
+    ),
+    "statement.unreadable.not_a_spreadsheet": Notice(
+        "this file could not be read as a spreadsheet. It may be damaged; download it from "
+        "your bank again, or export it as CSV.",
+        "This file could not be read as a spreadsheet. It may be damaged; download it from your bank again, or export it as CSV.",
+    ),
+    "statement.unreadable.no_sheets": Notice(
+        "this workbook has no sheets in it", "This workbook has no sheets in it"
+    ),
+    "statement.unreadable.sheet_unreadable": Notice(
+        "the first sheet of this workbook could not be read. It may be damaged; download it "
+        "from your bank again, or export it as CSV.",
+        "The first sheet of this workbook could not be read. It may be damaged; download it from your bank again, or export it as CSV.",
+    ),
+    "statement.unreadable.sheet_too_large": Notice(
+        "the first sheet of this workbook reaches row {rows} and column {columns}, which is "
+        "far larger than a statement -- this app reads at most {max_rows} rows and "
+        "{max_columns} columns. If the statement is in there, export it from your bank as CSV "
+        "instead.",
+        "The first sheet of this workbook reaches row {rows, number} and column {columns, number}, which is far larger than a statement -- this app reads at most {max_rows, number} rows and {max_columns, number} columns. If the statement is in there, export it from your bank as CSV instead.",
+        {"rows": "count", "columns": "count", "max_rows": "count", "max_columns": "count"},
+    ),
+    "statement.unreadable.too_many_cells": Notice(
+        "the first sheet of this workbook holds more than {max} cells, which is far larger than "
+        "a statement. If the statement is in there, export it from your bank as CSV instead.",
+        "The first sheet of this workbook holds more than {max, number} cells, which is far larger than a statement. If the statement is in there, export it from your bank as CSV instead.",
+        {"max": "count"},
+    ),
+    "statement.unreadable.pdf_too_long": Notice(
+        "this PDF has more than {max} pages, which is longer than any statement this app reads. "
+        "Ask your bank for CSV or OFX, or a statement covering fewer months.",
+        "This PDF has more than {max, number} pages, which is longer than any statement this app reads. Ask your bank for CSV or OFX, or a statement covering fewer months.",
+        {"max": "count"},
+    ),
+    "statement.unreadable.pdf_stream": Notice(
+        "this PDF contains a compressed block that unpacks to more than {max} MB, which no "
+        "statement needs -- it may be damaged, or built to be read slowly. Ask your bank for "
+        "CSV or OFX, or a statement covering fewer months.",
+        "This PDF contains a compressed block that unpacks to more than {max, number} MB, which no statement needs -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months.",
+        {"max": "count"},
+    ),
+    "statement.unreadable.pdf_decoded": Notice(
+        "this PDF unpacks to more than {max} MB, which is far more than a statement needs -- it "
+        "may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a "
+        "statement covering fewer months.",
+        "This PDF unpacks to more than {max, number} MB, which is far more than a statement needs -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months.",
+        {"max": "count"},
+    ),
+    "statement.unreadable.pdf_drawing": Notice(
+        "the pages of this PDF hold more drawing instructions than a statement of any length "
+        "would -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, "
+        "or a statement covering fewer months.",
+        "The pages of this PDF hold more drawing instructions than a statement of any length would -- it may be damaged, or built to be read slowly. Ask your bank for CSV or OFX, or a statement covering fewer months.",
+    ),
+    "statement.unreadable.pdf_objects": Notice(
+        "this PDF puts more than {max} characters and shapes on its pages, which is far more "
+        "than a statement holds. Ask your bank for CSV or OFX, or a statement covering fewer "
+        "months.",
+        "This PDF puts more than {max, number} characters and shapes on its pages, which is far more than a statement holds. Ask your bank for CSV or OFX, or a statement covering fewer months.",
+        {"max": "count"},
+    ),
+    "statement.unreadable.pdf_unopenable": Notice(
+        "this file could not be opened as a PDF. It may be damaged; download it from your bank "
+        "again.",
+        "This file could not be opened as a PDF. It may be damaged; download it from your bank again.",
+    ),
+    "statement.unreadable.pdf_unreadable": Notice(
+        "this PDF could not be read. It may be damaged; download it from your bank again.",
+        "This PDF could not be read. It may be damaged; download it from your bank again.",
+    ),
+    "statement.unreadable.no_pdfplumber": Notice(
+        "reading PDFs needs the pdfplumber package, which is not installed",
+        "Reading PDFs needs the pdfplumber package, which is not installed",
+    ),
+    "statement.unreadable.pdf_scan": Notice(
+        "there is no text in this PDF -- it is probably a scan, and reading those needs "
+        "character recognition this app does not do. Ask your bank for CSV or OFX.",
+        "There is no text in this PDF -- it is probably a scan, and reading those needs character recognition this app does not do. Ask your bank for CSV or OFX.",
+    ),
+    "statement.unreadable.pdf_no_table": Notice(
+        "no statement table was found in this PDF. Some documents -- a designed credit-card "
+        "bill with several tables side by side, for instance -- are not a single table with a "
+        "header, and importing half of one would be worse than not importing it. Ask your bank "
+        "for CSV or OFX.",
+        "No statement table was found in this PDF. Some documents -- a designed credit-card bill with several tables side by side, for instance -- are not a single table with a header, and importing half of one would be worse than not importing it. Ask your bank for CSV or OFX.",
+    ),
+    "statement.unreadable.layout_changed": Notice(
+        "this looks like a document this app has a rule for, but the entries it found add up to "
+        '{found} and the document says "{label}" is {stated}. The layout has probably changed, '
+        "so nothing has been imported -- importing part of a bill would be worse.",
+        "This looks like a document this app has a rule for, but the entries it found add up to {found} and the document says “{label}” is {stated}. The layout has probably changed, so nothing has been imported -- importing part of a bill would be worse.",
+    ),
+    # -- What an agent's staging noticed, `app/services/agent_warnings.py` --- #
+    # Read for the preview's `warning_codes`, which the agent route leaves out:
+    # an agent is sent no codes until they are documented for it.
+    "agent.warning.already_here": Notice(
+        "{count} of {total} rows were already in this account and were not staged: {ids}. If "
+        "any of those are genuinely separate purchases, give each one its own external_id and "
+        "send them again -- a row with an external_id is deduped on that alone.",
+        "{count} of {total, plural, one {# row was} other {# rows were}} already in this account and were not staged: {ids}. If any of those are genuinely separate purchases, give each one its own external_id and send them again -- a row with an external_id is deduped on that alone.",
+        {"count": "int", "total": "int"},
+    ),
+    "agent.warning.refused": Notice(
+        "{count} of {total} rows were refused and will not land: {reasons}.",
+        "{count} of {total, plural, one {# row was} other {# rows were}} refused and will not land: {reasons}.",
+        {"count": "int", "total": "int"},
+    ),
+    "agent.warning.matched": Notice(
+        "{count} of {total} rows matched entries already in this account. Committing marks "
+        "those as seen by the bank rather than adding them again.",
+        "{count} of {total, plural, one {# row} other {# rows}} matched entries already in this account. Committing marks those as seen by the bank rather than adding them again.",
+        {"count": "int", "total": "int"},
+    ),
+    "agent.warning.sign_convention": Notice(
+        "{share} of this batch's value is money coming IN to a {type} account ({count} of "
+        "{total} rows), and it nets positive overall. Confirm these are income rather than, "
+        "say, credit-card repayments read from a card statement -- on a card those are money "
+        "in, and in a {type} account the same rows are money out.",
+        "{share} of this batch's value is money coming in to a {type} account ({count} of {total, plural, one {# row} other {# rows}}), and it nets positive overall. Confirm these are income rather than, say, credit-card repayments read from a card statement -- on a card those are money in, and in a {type} account the same rows are money out.",
+        {"count": "int", "total": "int"},
+    ),
+    "agent.warning.row_count": Notice(
+        "you declared {declared} rows and {arrived} arrived. A dropped page or a mis-split line "
+        "looks exactly like this.",
+        "You declared {declared, plural, one {# row} other {# rows}} and {arrived} arrived. A dropped page or a mis-split line looks exactly like this.",
+        {"declared": "int", "arrived": "int"},
+    ),
+    "agent.warning.total": Notice(
+        "you declared a total of {declared} minor units and the rows that would land come to "
+        "{staged}, a difference of {difference}. A merged row, a missing row or a flipped sign "
+        "all show up here. Rows that were skipped or refused are not in this figure -- see the "
+        "other warnings if there are any.",
+        "You declared a total of {declared} minor units and the rows that would land come to {staged}, a difference of {difference}. A merged row, a missing row or a flipped sign all show up here. Rows that were skipped or refused are not in this figure -- see the other warnings if there are any.",
+        {"declared": "int", "staged": "int", "difference": "int"},
+    ),
+    "agent.warning.period_start": Notice(
+        "you declared the period starting {declared} and the earliest row staged is {earliest}.",
+        "You declared the period starting {declared} and the earliest row staged is {earliest}.",
+        {"declared": "date", "earliest": "date"},
+    ),
+    "agent.warning.period_end": Notice(
+        "you declared the period ending {declared} and the latest row staged is {latest}.",
+        "You declared the period ending {declared} and the latest row staged is {latest}.",
+        {"declared": "date", "latest": "date"},
+    ),
     # -- Refusals a line or a row repeats, whose codes are the refusal's ----- #
     "money.not_a_value": Notice("not a monetary value: {value!r}", None),
     "money.too_large": Notice("{value!r} is too large to record as money", None),
@@ -491,6 +678,7 @@ _BODIES = {
     "int": r"-?\d+",
     "date": r"\d{4}-\d{2}-\d{2}",
     "money": r"-?\D*?[\d,]+(?:\.\d+)?",
+    "count": r"\d[\d,]*",
 }
 
 
@@ -551,8 +739,20 @@ def read(text: str | None, *, currency: str | None = None) -> dict | None:
     Where several notices match, the most specific -- the one naming the most
     of the sentence -- wins.
     """
-    found = _read(text, currency)
-    return found[1] if found else None
+    if not text:
+        return None
+    found = _read_once(text, currency)
+    # A copy: the reading is remembered, and a caller is free to change what
+    # it is handed.
+    return copy.deepcopy(found[1]) if found else None
+
+
+@lru_cache(maxsize=4096)
+def _read_once(text: str, currency: str | None) -> tuple[int, dict] | None:
+    """`_read`, remembered. A statement of two thousand lines says "this line
+    is already in the account" a thousand times, and each reading tries every
+    pattern; once per distinct sentence is enough."""
+    return _read(text, currency)
 
 
 def _read(text: str | None, currency: str | None) -> tuple[int, dict] | None:
@@ -594,6 +794,8 @@ def _params(
             params[name] = value[9:-2] if value.startswith("Decimal(") else ast.literal_eval(value)
         elif kind == "int":
             params[name] = int(value)
+        elif kind == "count":
+            params[name] = int(value.replace(",", ""))
         elif kind == "money":
             if currency is None:
                 return None

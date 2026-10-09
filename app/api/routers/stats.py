@@ -36,6 +36,10 @@ class TallyOut(BaseModel):
 
     key: str | None
     name: str
+    #: For the unset bucket, the code its `name` is (#267): `unset.payee` or
+    #: `unset.category`, for a client that words it in its own language.
+    #: Null on a real payee or category, whose name is data.
+    name_code: str | None = None
     transaction_count: int
 
 
@@ -79,9 +83,15 @@ class PayeeStatsOut(BaseModel):
     payees: list[PayeeStatOut]
 
 
-def _tallies(rows: list[stats_service.Tally]) -> list[TallyOut]:
+def _tallies(rows: list[stats_service.Tally], unset: str) -> list[TallyOut]:
     return [
-        TallyOut(key=one.key, name=one.name, transaction_count=one.count) for one in rows
+        TallyOut(
+            key=one.key,
+            name=one.name,
+            name_code=unset if one.key is None else None,
+            transaction_count=one.count,
+        )
+        for one in rows
     ]
 
 
@@ -101,7 +111,7 @@ def category_stats(household: CurrentHousehold, session: SessionDep) -> Category
                 category_id=stat.category_id,
                 transaction_count=stat.transaction_count,
                 payee_count=stat.payee_count,
-                payees=_tallies(stat.payees),
+                payees=_tallies(stat.payees, "unset.payee"),
                 more_payees=stat.more_payees,
             )
             for stat in found.values()
@@ -124,7 +134,7 @@ def payee_stats(household: CurrentHousehold, session: SessionDep) -> PayeeStatsO
                 payee_id=stat.payee_id,
                 transaction_count=stat.transaction_count,
                 category_count=stat.category_count,
-                categories=_tallies(stat.categories),
+                categories=_tallies(stat.categories, "unset.category"),
             )
             for stat in found.values()
         ]
