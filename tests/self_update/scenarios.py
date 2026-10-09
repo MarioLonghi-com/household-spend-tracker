@@ -387,6 +387,18 @@ class Run:
         )
         lock = (s.vol.read("updater.lock") or {}).get("holder") or {}
         r.check(lock.get("image_digest") == s.releases[B]["updater"], "updater.lock names B's updater")
+        if s.releases[B].get("updater_index"):
+            # Pulled by a multi-arch index's digest (stage.py --index): what
+            # this leg is for is an engine listing two digests for it (#287).
+            listed = [
+                d.split("@", 1)[1]
+                for d in s.engine.image(s.updater_ref(B)).get("RepoDigests") or []
+                if d.startswith(UPDATER_REPO + "@")
+            ]
+            r.check(
+                s.releases[B]["updater"] in listed and len(set(listed)) >= 2,
+                f"the engine lists B's updater by the index digest and another ({', '.join(d[:19] for d in listed)})",
+            )
         rid = e1["req"]["id"]
         hand = s.vol.read(f"handover/{rid}.request") or {}
         r.check(
