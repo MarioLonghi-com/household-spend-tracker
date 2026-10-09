@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { codedText } from "../lib/noticeMessages";
+import { seedLocale } from "../lib/seedWords";
 import {
   Dialog,
   Empty,
@@ -120,7 +121,7 @@ export function Categories({ household }: { household: Household }) {
 
   const seed = useMutation({
     mutationFn: () =>
-      api.post<CategoryGroup[]>(`/households/${household.id}/categories/defaults`, {}),
+      api.post<CategoryGroup[]>(`/households/${household.id}/categories/defaults`, seedLocale()),
     onSuccess: refresh,
   });
 

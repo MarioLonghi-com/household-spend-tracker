@@ -10,7 +10,7 @@ import type { Batch, BatchDetail, Household } from "../lib/types";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { formatCount } from "../lib/locale";
-import { fieldOf, headlineOf, tableOf } from "../lib/historyWords";
+import { detailOf, fieldOf, headlineOf, summaryOf, tableOf, valueOf } from "../lib/historyWords";
 
 
 type HistorySort = "when" | "what" | "by" | "state" | "rows";
@@ -46,7 +46,7 @@ export function History({ household }: { household: Household }) {
               // The headline is the kind of act; the detail is what it did to
               // this household. Sorting on the pair groups the imports
               // together and then orders inside the group.
-              return [headlineOf(entry), entry.detail];
+              return [headlineOf(entry), detailOf(entry)];
             case "by":
               // The person first, the program second: an agent acting for
               // somebody is still their act, so sorting by who groups it with
@@ -172,7 +172,7 @@ export function History({ household }: { household: Household }) {
                         onClick={() => setOpened(entry)}
                       >
                         <span className="small muted">{headlineOf(entry)}</span>
-                        <span style={{ display: "block" }}>{entry.detail}</span>
+                        <span style={{ display: "block" }}>{detailOf(entry)}</span>
                         {entry.source?.filename ? (
                           <span className="small muted mono" style={{ display: "block" }}>
                             {String(entry.source.filename)}
@@ -316,7 +316,7 @@ function BatchPanel({
         </dd>
       </dl>
 
-      <p style={{ marginTop: 14 }}>{batch.detail}</p>
+      <p style={{ marginTop: 14 }}>{detailOf(batch)}</p>
 
       <hr className="rule" />
       <h3 className="section-title"><Trans>Every row it changed</Trans></h3>
@@ -340,7 +340,7 @@ function BatchPanel({
             <li key={change.seq}>
               <div className="change-head">
                 <span className={`tag op-${change.op}`}>{change.op}</span>
-                <span className="small">{change.summary}</span>
+                <span className="small">{summaryOf(change)}</span>
               </div>
 
               {change.fields.length > 0 && (
@@ -349,9 +349,9 @@ function BatchPanel({
                     {change.fields.map((field) => (
                       <tr key={field.field}>
                         <th scope="row">{fieldOf(field)}</th>
-                        <td className="muted">{field.was}</td>
+                        <td className="muted">{valueOf(field, "was")}</td>
                         <td aria-hidden="true">→</td>
-                        <td>{field.now}</td>
+                        <td>{valueOf(field, "now")}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -370,7 +370,7 @@ function BatchPanel({
                       {change.snapshot.map((field) => (
                         <tr key={field.field}>
                           <th scope="row">{fieldOf(field)}</th>
-                          <td colSpan={3}>{field.now}</td>
+                          <td colSpan={3}>{valueOf(field, "now")}</td>
                         </tr>
                       ))}
                     </tbody>

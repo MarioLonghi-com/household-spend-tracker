@@ -16,6 +16,10 @@ after its create (#262): like Podman, the engine fails with a 500 naming it
 every listing that would include it -- the filters are applied first -- and
 every inspect or start of it, and removes it only with `force`.
 
+An image may carry two repo digests, as Podman records for an image pulled
+by a multi-arch index's digest: the index's and the platform manifest's, in
+either order (#287). It answers to both, as an engine does.
+
 **Since #161 it also keeps containers the way an engine does**, enough for the
 orchestration to run against it: a created container has an inspect view
 built from its create body and its image (environment and labels merged, the
@@ -148,16 +152,37 @@ class FakeEngine:
         self._ports(self.containers[cid])
         return cid
 
-    def add_image(self, ref: str, labels: dict | None = None, env: list | None = None, **config) -> str:
-        """An image present on the engine, known by `ref` (a repo digest) and by its id."""
+    def add_image(
+        self,
+        ref: str,
+        labels: dict | None = None,
+        env: list | None = None,
+        *,
+        platform: str | None = None,
+        platform_first: bool = False,
+        **config,
+    ) -> str:
+        """An image present on the engine, known by `ref` (a repo digest) and by its id.
+
+        With `platform`, `ref` is a multi-arch index's digest and `platform`
+        the digest of this machine's manifest in it: Podman pulled by the
+        index records both in `RepoDigests` (#287), in either order.
+        """
         image_id = "sha256:" + hashlib.sha256(ref.encode()).hexdigest()
+        digests = [ref] if platform is None else [ref, f"{ref.split('@', 1)[0]}@{platform}"]
         doc = {
             "Id": image_id,
-            "RepoDigests": [ref],
+            "RepoDigests": digests[::-1] if platform_first else digests,
             "Config": {"Labels": dict(labels or {}), "Env": list(env or []), **config},
         }
         self.images[ref] = doc
         return image_id
+
+    def image_by_ref(self, ref: str) -> dict | None:
+        """An image by any digest it carries, as an engine resolves `repo@digest`."""
+        return self.images.get(ref) or next(
+            (d for d in self.images.values() if ref in (d.get("RepoDigests") or [])), None
+        )
 
     def by_name(self, name: str) -> dict:
         return next(c for c in self.containers.values() if f"/{name}" in c["Names"])
@@ -226,7 +251,7 @@ class FakeEngine:
     def _created(self, name: str, payload: dict) -> dict:
         cid = secrets.token_hex(32)
         image_ref = payload.get("Image")
-        image = self.images.get(image_ref) or {}
+        image = self.image_by_ref(str(image_ref)) or {}
         image_cfg = image.get("Config") or {}
         env = list(image_cfg.get("Env") or [])
         keys = {e.split("=", 1)[0] for e in payload.get("Env") or []}
@@ -352,7 +377,7 @@ class FakeEngine:
             ref = query.get("fromImage", "")
             if ref in self.registry:
                 self.images[ref] = copy.deepcopy(self.registry[ref])
-            elif ref not in self.images:
+            elif self.image_by_ref(ref) is None:
                 self.images[ref] = {"Id": "sha256:" + "0" * 64, "RepoDigests": [ref], "Config": {"Labels": {}}}
             return 200, b'{"status":"Pulling"}\n{"status":"Digest: ok"}\n'
 
@@ -429,7 +454,9 @@ class FakeEngine:
         im = re.fullmatch(r"/images/(.+?)(/json)?", bare)
         if im:
             ref = im.group(1)
-            doc = self.images.get(ref) or (self.image_by_id(ref) if re.fullmatch(r"(sha256:)?[0-9a-f]{64}", ref) else None)
+            doc = self.image_by_ref(ref) or (
+                self.image_by_id(ref) if re.fullmatch(r"(sha256:)?[0-9a-f]{64}", ref) else None
+            )
             if doc is None:
                 return 404, {"message": f"No such image: {ref}"}
             if method == "GET" and im.group(2):

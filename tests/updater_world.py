@@ -44,7 +44,14 @@ from updater import contract, journal, verify, volume
 from updater import engine as eng
 from updater.clock import GapClock
 from updater.detect import PROTOCOL_LABEL, REVISION_LABEL, VERSION_LABEL
-from updater.handover import PROTOCOLS_LABEL, Successions, own_bind_sources
+from updater.handover import (
+    PROTOCOLS_LABEL,
+    Successions,
+    identity_of,
+    known_as,
+    own_bind_sources,
+    own_digests,
+)
 from updater.heartbeat import Beat, Identity
 from updater.journal import Owner
 from updater.service import Service
@@ -84,6 +91,18 @@ def ref(repo: str, version: str) -> str:
     return f"{repo}@{digest(repo, version)}"
 
 
+def platform_digest(repo: str, version: str) -> str:
+    """The digest of this machine's manifest inside the release's multi-arch index (#287)."""
+    seed = {APP: "p", UPD: "q"}[repo] + version.replace(".", "")
+    return "sha256:" + (seed * 64)[:64].encode().hex()[:64]
+
+
+#: How an engine lists an image pulled by a multi-arch index's digest
+#: (`World(multiarch=...)`): Docker's classic store, the index alone; Podman,
+#: the index and the platform manifest, in either order (#287).
+MULTIARCH = (None, "index_first", "platform_first")
+
+
 IMAGE_ENV = [
     "PATH=/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin",
     "PYTHONUNBUFFERED=1",
@@ -99,7 +118,7 @@ HEALTHCHECK = {
 RECOVERY_HASH = "scrypt$ln=15,r=8,p=1$" + "c2FsdHNhbHRzYWx0c2FsdA" + "$" + "A" * 43
 
 
-def image_doc(repo: str, version: str, *, protocols: str = "1-1") -> dict:
+def image_doc(repo: str, version: str, *, protocols: str = "1-1", multiarch: str | None = None) -> dict:
     labels = {
         VERSION_LABEL: version,
         REVISION_LABEL: REVISION[version],
@@ -110,9 +129,14 @@ def image_doc(repo: str, version: str, *, protocols: str = "1-1") -> dict:
     else:
         labels[PROTOCOLS_LABEL] = protocols
     r = ref(repo, version)
+    digests = [r]
+    if multiarch is not None:
+        digests.append(f"{repo}@{platform_digest(repo, version)}")
+        if multiarch == "platform_first":
+            digests.reverse()
     return {
         "Id": "sha256:" + digest(repo, version).split(":")[1][::-1],
-        "RepoDigests": [r],
+        "RepoDigests": digests,
         "Config": {
             "Labels": labels,
             "Env": list(IMAGE_ENV),
@@ -308,14 +332,16 @@ class _Fleet:
         c = self.fake.containers[cid]
         seen = self.fake.inspect_of(c)
         image = self.fake.image_by_id(seen.get("Image", "")) or {}
-        repo_digest = next(r for r in image.get("RepoDigests") or [] if r.startswith(UPD + "@"))
-        own_digest = repo_digest.split("@", 1)[1]
-        if cid != self.updater_id and self.lying_digest:
-            own_digest = self.lying_digest
+        # What `python -m updater` learns of itself: every digest of its
+        # image (`identify`), then which one it writes (`known_as`, #287).
         version = ((image.get("Config") or {}).get("Labels") or {}).get(VERSION_LABEL, "0.0.0")
+        me = identity_of(image, seen, version, c["Names"][0].lstrip("/"))
+        if cid != self.updater_id and self.lying_digest:
+            me = Owner(self.lying_digest, version, me.container)
         cmd = list(seen["Config"].get("Cmd") or [])
         successor_of = cmd[cmd.index("--successor") + 1] if "--successor" in cmd else None
-        me = Owner(image_digest=own_digest, version=version, container=c["Names"][0].lstrip("/"))
+        me = known_as(me, self.volume, self.project_dir, successor_of)
+        own_digest = me.image_digest
         holder: dict = {}
 
         def sleep(seconds: float) -> None:
@@ -450,6 +476,7 @@ class World(_Fleet):
         updater_version: str = A,
         updater_protocols: str = "1-1",
         fleet: bool = False,
+        multiarch: str | None = None,
     ) -> None:
         self.tmp = tmp_path
         tmp_path.mkdir(parents=True, exist_ok=True)
@@ -492,9 +519,11 @@ class World(_Fleet):
         for version in (A, B, C):
             for repo in (APP, UPD):
                 protocols = updater_protocols if version != A else "1-1"
-                self.fake.registry[ref(repo, version)] = image_doc(repo, version, protocols=protocols)
+                self.fake.registry[ref(repo, version)] = image_doc(
+                    repo, version, protocols=protocols, multiarch=multiarch
+                )
         for repo in (APP, UPD):
-            self.fake.images[ref(repo, A)] = image_doc(repo, A)
+            self.fake.images[ref(repo, A)] = image_doc(repo, A, multiarch=multiarch)
 
         self.sidecar_id = None
         #: Each sidecar restart is a new network namespace; an app that joined
@@ -529,7 +558,8 @@ class World(_Fleet):
                 "Name": f"/{PROJECT}-updater-1",
                 "Image": upd_image["Id"],
                 "Config": {
-                    "Image": f"{UPD}:{A}",
+                    # As the bundle's compose file names it: by the index digest.
+                    "Image": f"{UPD}:{A}@{digest(UPD, A)}",
                     "User": "65532:65532",
                     "Env": list(IMAGE_ENV),
                     "Entrypoint": ["python", "-m", "updater"],
@@ -586,10 +616,12 @@ class World(_Fleet):
         self.dying: list[Updater] = []
         if fleet:
             self.time.on_sleep = self.fleet_tick
+        self.multiarch = multiarch
         self.me = Owner(
             image_digest=digest(UPD, updater_version),
             version=updater_version,
             container=f"{PROJECT}-updater-1",
+            digests=own_digests(image_doc(UPD, updater_version, multiarch=multiarch)),
         )
         self.running: Running | None = None
         self.client: eng.EngineClient | None = None

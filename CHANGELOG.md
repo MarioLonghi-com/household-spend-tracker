@@ -68,6 +68,23 @@ history this repository does not have.
   on Categories words "No payee" from it in another language. An agent's staging warnings have codes too, but
   an agent is still sent none. English and agents' answers are unchanged.
   (#267)
+- **History's sentences go out as structure too.** Beside every sentence it
+  has always sent -- a batch's detail, the undo lines, a changed row's
+  summary, a row's own history -- History now sends a `*_phrase`: a key and
+  its raw values (money in minor units with its currency, ISO dates, enum
+  values, names as stored), and each changed field's `was_value` and
+  `now_value` beside its words. A screen in another language words them from
+  its own catalog; English shows the server's sentences exactly as before,
+  and the English is now rendered from the same structure, so the two cannot
+  disagree. (#266)
+- **A new household can be seeded in its own language.** Creating a
+  household, from the first-household form, Admin or *Add the defaults* on
+  Categories, takes the device's language when that language is served, and
+  seeds the category tree and the "Opening balance" payee in it. Only
+  reviewed translations are seeded (`app/seed_catalog.json`, written from the
+  catalogs by `scripts/seed_catalog.py`); a draft never is, so until a
+  language ships every household is seeded in English exactly as before. The
+  names are ordinary names, and no language is stored on the household. (#268)
 - **One English word for each thing.** The headings that group accounts by type
   now say "Current accounts" and "Other debts", the plurals of the account
   types they group, rather than "Checking" and "Other liabilities"; and the
@@ -110,6 +127,27 @@ history this repository does not have.
   Rules, Import, Household, Accounts and Register screens. Every English
   message with a count now has its singular, and the translations follow.
   (#269)
+- **On Podman, the updater hands over to a newer one again.** Since 0.9.2 an
+  updater has known itself by its image digest, and it took that digest from
+  the last entry the engine listed. Podman lists two for a release's image:
+  the multi-architecture digest the release publishes, and the digest of
+  this machine's part of it. The new updater picked the second, decided it
+  was not the image it had been started as, and refused to take over, so
+  every handover on Podman failed with "failed its own check" and the
+  updater stayed on the old version. An updater now counts every digest its
+  image carries as its own, writes the published one wherever it can tell
+  which that is, and the check, the "already the updater of" decision and
+  the standby's checks all use the whole set. (#287)
+- **Closing the laptop during the updater's standby no longer brings the
+  old updater back.** For ten minutes after a handover the previous updater
+  stays on standby, ready to take back over if the new one stops answering.
+  A machine shut down or asleep in those minutes came back with the new
+  updater's last heartbeat as old as the time it was off, and the standby
+  read that as silence: within seconds of starting it stopped the healthy
+  new updater, took back over and pinned the old one in `.env`. The standby
+  now counts silence only from its own return, gives a new updater that is
+  still starting up the same two minutes to come back, and does not count
+  time the machine was off towards its ten minutes. (#288)
 
 ## 0.9.2 — 2026-10-09
 

@@ -48,7 +48,13 @@ CURRENCY_CODE = re.compile(r"[A-Z]{3}")
 
 
 def create_household(
-    session: Session, *, name: str, creator: User, base_currency: str = "EUR", date_format: str = "YYYY-MM-DD"
+    session: Session,
+    *,
+    name: str,
+    creator: User,
+    base_currency: str = "EUR",
+    date_format: str = "YYYY-MM-DD",
+    locale: str | None = None,
 ) -> Household:
     """Create a household. The creator is its first member."""
     if not name.strip():
@@ -91,7 +97,7 @@ def create_household(
     # this module's models and the pair would import each other at load time.
     from . import categories as category_service
 
-    category_service.seed_defaults(session, household.id)
+    category_service.seed_defaults(session, household.id, locale=locale)
     session.flush()
     return household
 

@@ -22,7 +22,7 @@ the code itself never is.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import StrEnum
 
 from updater import contract, volume
@@ -40,15 +40,48 @@ MAX_ROLLBACK_ATTEMPTS = 3
 
 @dataclass(frozen=True)
 class Owner:
-    """An updater, as the journal names it. Its digest is what identifies it:
-    the container is renamed during a handover (H5), the image is not."""
+    """An updater, as the journal names it. Its image is what identifies it:
+    the container is renamed during a handover (H5), the image is not.
+
+    An image has more than one digest (#287). Pulled by the digest of a
+    multi-arch index, Podman -- and possibly Docker's containerd image store
+    -- records both that index digest and the digest of the platform's own
+    manifest in `RepoDigests`, in no order anybody promises. `image_digest`
+    is the one this updater writes in files: the index digest a release
+    publishes, wherever it can tell which that is (`handover.known_as`).
+    `digests` is every digest its image carries for the updater repository,
+    known only for the updater itself -- an Owner read back from a file has
+    the one it was written with. Identity is membership, never one entry.
+    """
 
     image_digest: str
     version: str
     container: str
+    digests: tuple[str, ...] = field(default=(), compare=False)
+
+    @property
+    def ids(self) -> frozenset[str]:
+        """Every digest known to name this updater's image."""
+        return frozenset(d for d in (self.image_digest, *self.digests) if d)
+
+    def carries(self, digest: str) -> bool:
+        """Whether `digest` names this updater's image."""
+        return bool(digest) and digest in self.ids
+
+    def preferring(self, *wanted: str | None) -> Owner:
+        """This updater named by the first of `wanted` its image carries, else as it is."""
+        for d in wanted:
+            if d and self.carries(d):
+                return replace(self, image_digest=d)
+        return self
 
     def is_(self, other: Owner | None) -> bool:
-        return other is not None and other.image_digest == self.image_digest
+        if other is None:
+            return False
+        if self.ids or other.ids:
+            return bool(self.ids & other.ids)
+        # Neither knows its image (outside a container): as before, the same.
+        return True
 
     def newer_than(self, other: Owner) -> bool:
         return contract.parse_version(self.version) > contract.parse_version(other.version)
