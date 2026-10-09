@@ -234,6 +234,11 @@ msgstr "En ägare kan administrera den här instansen och förblir ägare oavset
 msgid "Delete the group {0}?"
 msgstr "Ta bort gruppen {0}?"
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while starting the new version"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
@@ -261,6 +266,11 @@ msgstr "Grupperade efter vad banken skickade, utan referensen för varje transak
 #, fuzzy
 msgid "To month"
 msgstr "Till månad"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while stopping the maintenance page"
+msgstr ""
 
 #. Column heading on the Admin screen: noun, which thing
 #. Column heading on the Application management screen: noun, which thing
@@ -2044,6 +2054,11 @@ msgstr "Inga säkerhetskopior än."
 msgid "Spellings of one name"
 msgstr "Stavningar av ett namn"
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while starting the maintenance page"
+msgstr ""
+
 #: src/lib/saveBackup.ts
 #, fuzzy
 msgid "the server sent no file"
@@ -2240,6 +2255,11 @@ msgstr "Hämta en ny återställningskod"
 #, fuzzy
 msgid "Appearance"
 msgstr "Utseende"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while backing up and migrating the ledger"
+msgstr ""
 
 #. Label on the Your account panel: nothing so far
 #: src/screens/Profile.tsx
@@ -2636,6 +2656,11 @@ msgstr "Länken för {0} ({1}) slutar fungera direkt. Lösenordet och autentiser
 msgid "Reading the log…"
 msgstr "Läser loggen…"
 
+#. Where an update failed: a step this screen has no words for, by its id
+#: src/screens/Updates.tsx
+msgid "at step {step}"
+msgstr ""
+
 #: src/screens/ResetAccount.tsx
 #, fuzzy
 msgid "Your new recovery codes"
@@ -2752,6 +2777,11 @@ msgstr "Tagen {0}, så detta öppnar de tio dagarna före och efter."
 msgid "Put them in <0>{0}</0> too?"
 msgstr "Lägga dem i <0>{0}</0> också?"
 
+#. Where an update failed: its first step
+#: src/screens/Updates.tsx
+msgid "while starting the update"
+msgstr ""
+
 #. Tooltip on the paperclip in the Register: this transaction has receipts attached
 #: src/components/Receipts.tsx
 #, fuzzy
@@ -2828,11 +2858,6 @@ msgstr "Lägg till överföring"
 #, fuzzy
 msgid "Reset sign-in for {0}"
 msgstr "Återställ inloggningen för {0}"
-
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "The update failed at {step}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
-msgstr "Uppdateringen misslyckades vid {step}, så den ångrades. Du kör {running}, med boken exakt som den var {stopped}, när appen stoppades. Det här misslyckades:"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2999,6 +3024,11 @@ msgstr "Det är inte ett belopp"
 msgid "Yes, revoke it"
 msgstr "Ja, återkalla den"
 
+#. Where an update failed: before anything was stopped
+#: src/screens/Updates.tsx
+msgid "while checking everything was ready"
+msgstr ""
+
 #. Button on Application management: delete this suggestion
 #. Button on the Backups screen: verb
 #. Button on the Categories screen: verb
@@ -3110,6 +3140,11 @@ msgstr "Frågar {repository} efter dess publicerade versioner och jämför dem m
 #, fuzzy
 msgid "Click to edit"
 msgstr "Klicka för att redigera"
+
+#. Where an update failed. See GLOSSARY.md for the pre-update hook
+#: src/screens/Updates.tsx
+msgid "while running the pre-update hook"
+msgstr ""
 
 #. Column heading on the Admin screen
 #. Label of a form field on the Admin screen
@@ -3438,6 +3473,11 @@ msgstr "Återställ och skapa länken"
 #, fuzzy
 msgid "Deleting is recorded and can be put back from the History screen. The picture itself is kept for a day after nothing points at it, which is what makes that undo work."
 msgstr "Borttagningen registreras och kan tas tillbaka från skärmen Historik. Själva bilden sparas en dag efter att inget längre pekar på den, och det är det som gör att ångra fungerar."
+
+#. Where an update failed: after the new version was running. See GLOSSARY.md for the updater
+#: src/screens/Updates.tsx
+msgid "while handing over to the new updater"
+msgstr ""
 
 #: src/screens/Payees.tsx
 #, fuzzy
@@ -5409,6 +5449,12 @@ msgstr "Konfigurerad"
 msgid "{0} · {1} on {2}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} · {1} den {2}. Delarna ersätter den, så de måste bli samma belopp. Inga minustecken – varje del går åt samma håll som originalet."
 
+#. Updates section, a rolled-back update. {where} is a phrase such as 'while migrating the ledger'
+#: src/screens/Updates.tsx
+#, fuzzy
+msgid "The update failed {where}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
+msgstr "Uppdateringen misslyckades {where}, så den ångrades. Du kör {running}, med boken exakt som den var {stopped}, när appen stoppades. Det här misslyckades:"
+
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
@@ -7216,12 +7262,6 @@ msgstr "Datumintervall"
 msgid "Everything that has changed this household, grouped by the act that changed it. An import of two hundred rows is one entry here, and undoing it puts all two hundred back."
 msgstr "Allt som har ändrat det här hushållet, grupperat efter steget som ändrade det. En import på tvåhundra rader är en enda post här, och att ångra den lägger tillbaka alla tvåhundra."
 
-#. Where an update failed, when the updater did not say
-#: src/screens/Updates.tsx
-#, fuzzy
-msgid "an unknown step"
-msgstr "ett okänt steg"
-
 #. Text on the Register screen
 #. placeholder {0}: index + 1
 #: src/screens/Register.tsx
@@ -7417,6 +7457,11 @@ msgstr "Uppdaterar"
 #, fuzzy
 msgid "Untick every row shown"
 msgstr "Avmarkera alla visade rader"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while checking the new version answers"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -8461,6 +8506,11 @@ msgstr "mottagare"
 #, fuzzy
 msgid "The six digits from the new one"
 msgstr "De sex siffrorna från den nya"
+
+#. Where an update failed. See GLOSSARY.md for the updater
+#: src/screens/Updates.tsx
+msgid "while handing over to the new updater before the app stopped"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -10423,6 +10473,11 @@ msgctxt "history table"
 msgid "category group"
 msgstr "kategorigrupp"
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while recording the update"
+msgstr ""
+
 #. A changed field in History's detail, lower case: the category group it is in
 #: src/lib/historyWords.ts
 #, fuzzy
@@ -10737,6 +10792,11 @@ msgstr "Varje regel av den här sorten får sin tur, i den här ordningen, och v
 #, fuzzy
 msgid "Updates"
 msgstr "Uppdateringar"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while stopping the app"
+msgstr ""
 
 #. State of the pre-update hook
 #: src/screens/Updates.tsx
@@ -13037,6 +13097,11 @@ msgstr "Räknas inte: {0} och {1}. Att flytta pengar mellan dina egna konton är
 #, fuzzy
 msgid "may apply imports"
 msgstr "får genomföra importer"
+
+#. Where an update failed, when the updater did not say
+#: src/screens/Updates.tsx
+msgid "at a step the updater did not name"
+msgstr ""
 
 #: src/screens/Categories.tsx
 #, fuzzy

@@ -56,7 +56,10 @@ history this repository does not have.
   section said "Updated to" the version running now, so after going back to
   the previous release by hand it named that one. The outcome now carries
   the release the update went to, from the updater's record, and an older
-  record that does not name it shows the updater's own sentence. (#260)
+  record that does not name it shows the updater's own sentence. A
+  rolled-back update no longer says it "failed at 5", the updater's number
+  for the step, but where in words: "failed while backing up and migrating
+  the ledger". (#260)
 - **The updater says what it is doing in its log.** `docker compose logs
   updater` was empty in normal operation; the only trace of a failed update
   was a traceback. It now prints one line per request it takes, per step of

@@ -38,6 +38,7 @@ import {
   type UpdateState,
   type Upstream,
   whatTheUpdaterDoes,
+  whereItFailed,
 } from "./Updates";
 import { UpdateBackupList } from "./Backups";
 import type { Backup } from "./Backups";
@@ -570,15 +571,37 @@ describe("A9: each outcome", () => {
     show({
       ...base,
       state: "rolled_back",
-      failed_step: "migrate",
+      failed_step: "5",
       sentence: "alembic upgrade failed on b2c3d4e5f6a1.",
       log_tail: ["INFO running b2c3d4e5f6a1", "ERROR no such column"],
     });
     const said = document.querySelector('[data-outcome="rolled_back"]')!;
-    expect(said.textContent).toContain("The update failed at migrate, so it was undone. You are on 0.8.0");
+    expect(said.textContent).toContain(
+      "The update failed while backing up and migrating the ledger, so it was undone. You are on 0.8.0",
+    );
+    expect(said.textContent).not.toContain("failed at 5");
     expect(said.textContent).toContain("alembic upgrade failed on b2c3d4e5f6a1.");
     expect(said.querySelector("pre")!.textContent).toBe("INFO running b2c3d4e5f6a1\nERROR no such column");
     expect(said.textContent).toContain("The image is kept so you can try again.");
+  });
+
+  it("names the step it failed at in words, never a bare number", () => {
+    for (const [step, words] of [
+      ["7", "while starting the new version"],
+      ["8", "while checking the new version answers"],
+      ["2a", "while handing over to the new updater before the app stopped"],
+      ["R9", "at step R9"],
+      [null, "at a step the updater did not name"],
+    ] as const) {
+      show({ ...base, state: "rolled_back", failed_step: step, sentence: "It did not answer." });
+      expect(document.querySelector('[data-outcome="rolled_back"]')!.textContent).toContain(
+        `The update failed ${words}, so it was undone.`,
+      );
+      cleanup();
+    }
+    for (let step = 0; step <= 10; step += 1) {
+      expect(whereItFailed(String(step))).toMatch(/^while [a-z]/);
+    }
   });
 
   it("not started, and refused, say nothing was changed", () => {

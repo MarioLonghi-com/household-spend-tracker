@@ -1337,6 +1337,47 @@ export function Updating({
 // 3.8: the outcome
 // --------------------------------------------------------------------------- //
 
+/**
+ * Where an update failed, in words: the updater records the step's id (`5`),
+ * and its status sentence for that step ("Backing up and migrating the
+ * ledger.") is the one these follow (`updater/apply.py`, `Apply.start`).
+ * An id this screen does not know is named as it is.
+ */
+export function whereItFailed(step: string | null | undefined): string {
+  switch (step) {
+    case "0":
+      return t({ message: "while starting the update", comment: "Where an update failed: its first step" });
+    case "1":
+      return t({ message: "while checking everything was ready", comment: "Where an update failed: before anything was stopped" });
+    case "2":
+      return t({ message: "while running the pre-update hook", comment: "Where an update failed. See GLOSSARY.md for the pre-update hook" });
+    case "2a":
+      return t({ message: "while handing over to the new updater before the app stopped", comment: "Where an update failed. See GLOSSARY.md for the updater" });
+    case "3":
+      return t({ message: "while stopping the app", comment: "Where an update failed" });
+    case "4":
+      return t({ message: "while starting the maintenance page", comment: "Where an update failed" });
+    case "5":
+      return t({ message: "while backing up and migrating the ledger", comment: "Where an update failed" });
+    case "6":
+      return t({ message: "while stopping the maintenance page", comment: "Where an update failed" });
+    case "7":
+      return t({ message: "while starting the new version", comment: "Where an update failed" });
+    case "8":
+      return t({ message: "while checking the new version answers", comment: "Where an update failed" });
+    case "9":
+      return t({ message: "while recording the update", comment: "Where an update failed" });
+    case "10":
+      return t({ message: "while handing over to the new updater", comment: "Where an update failed: after the new version was running. See GLOSSARY.md for the updater" });
+    case null:
+    case undefined:
+    case "":
+      return t({ message: "at a step the updater did not name", comment: "Where an update failed, when the updater did not say" });
+    default:
+      return t({ message: `at step ${step}`, comment: "Where an update failed: a step this screen has no words for, by its id" });
+  }
+}
+
 export function OutcomeBlock({
   outcome,
   running,
@@ -1417,13 +1458,13 @@ export function OutcomeBlock({
       }
       case "rolled_back": {
         tone = "banner warn";
-        const step = outcome.failed_step ?? t({ message: "an unknown step", comment: "Where an update failed, when the updater did not say" });
+        const where = whereItFailed(outcome.failed_step);
         const stopped = timeOf(outcome.started_at);
         body = (
           <div data-outcome="rolled_back">
             <p style={{ marginTop: 0 }}>
-              <Trans>
-                The update failed at {step}, so it was undone. You are on {running}, with the ledger
+              <Trans comment="Updates section, a rolled-back update. {where} is a phrase such as 'while migrating the ledger'">
+                The update failed {where}, so it was undone. You are on {running}, with the ledger
                 exactly as it was at {stopped}, when the app stopped. What failed:
               </Trans>
             </p>

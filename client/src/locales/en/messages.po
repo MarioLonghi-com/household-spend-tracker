@@ -196,6 +196,11 @@ msgstr "An owner can administer this instance, and stays one whatever you later 
 msgid "Delete the group {0}?"
 msgstr "Delete the group {0}?"
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while starting the new version"
+msgstr "while starting the new version"
+
 #: src/screens/Profile.tsx
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
 msgstr "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
@@ -218,6 +223,11 @@ msgstr "Grouped by what the bank sent, with the per-transaction reference taken 
 #: src/components/DateRange.tsx
 msgid "To month"
 msgstr "To month"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while stopping the maintenance page"
+msgstr "while stopping the maintenance page"
 
 #. Column heading on the Admin screen: noun, which thing
 #. Column heading on the Application management screen: noun, which thing
@@ -1712,6 +1722,11 @@ msgstr "Nothing backed up yet."
 msgid "Spellings of one name"
 msgstr "Spellings of one name"
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while starting the maintenance page"
+msgstr "while starting the maintenance page"
+
 #: src/lib/saveBackup.ts
 msgid "the server sent no file"
 msgstr "the server sent no file"
@@ -1874,6 +1889,11 @@ msgstr "Get a new recovery code"
 #: src/screens/Profile.tsx
 msgid "Appearance"
 msgstr "Appearance"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while backing up and migrating the ledger"
+msgstr "while backing up and migrating the ledger"
 
 #. Label on the Your account panel: nothing so far
 #: src/screens/Profile.tsx
@@ -2209,6 +2229,11 @@ msgstr "The link for {0} ({1}) stops working at once. Their password and authent
 msgid "Reading the log…"
 msgstr "Reading the log…"
 
+#. Where an update failed: a step this screen has no words for, by its id
+#: src/screens/Updates.tsx
+msgid "at step {step}"
+msgstr "at step {step}"
+
 #: src/screens/ResetAccount.tsx
 msgid "Your new recovery codes"
 msgstr "Your new recovery codes"
@@ -2308,6 +2333,11 @@ msgstr "Taken {0}, so this opens on the ten days either side."
 msgid "Put them in <0>{0}</0> too?"
 msgstr "Put them in <0>{0}</0> too?"
 
+#. Where an update failed: its first step
+#: src/screens/Updates.tsx
+msgid "while starting the update"
+msgstr "while starting the update"
+
 #. Tooltip on the paperclip in the Register: this transaction has receipts attached
 #: src/components/Receipts.tsx
 msgid "{count, plural, one {has {count} receipt} other {has {count} receipts}}"
@@ -2372,10 +2402,6 @@ msgstr "Add transfer"
 #: src/screens/Admin.tsx
 msgid "Reset sign-in for {0}"
 msgstr "Reset sign-in for {0}"
-
-#: src/screens/Updates.tsx
-msgid "The update failed at {step}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
-msgstr "The update failed at {step}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
 
 #: src/screens/Register.tsx
 msgid "This one was entered by hand."
@@ -2515,6 +2541,11 @@ msgstr "That isn't an amount"
 msgid "Yes, revoke it"
 msgstr "Yes, revoke it"
 
+#. Where an update failed: before anything was stopped
+#: src/screens/Updates.tsx
+msgid "while checking everything was ready"
+msgstr "while checking everything was ready"
+
 #. Button on Application management: delete this suggestion
 #. Button on the Backups screen: verb
 #. Button on the Categories screen: verb
@@ -2609,6 +2640,11 @@ msgstr "Asks {repository} for its published releases and compares them with the 
 #: src/screens/Register.tsx
 msgid "Click to edit"
 msgstr "Click to edit"
+
+#. Where an update failed. See GLOSSARY.md for the pre-update hook
+#: src/screens/Updates.tsx
+msgid "while running the pre-update hook"
+msgstr "while running the pre-update hook"
 
 #. Column heading on the Admin screen
 #. Label of a form field on the Admin screen
@@ -2889,6 +2925,11 @@ msgstr "Reset and make the link"
 #: src/screens/Receipts.tsx
 msgid "Deleting is recorded and can be put back from the History screen. The picture itself is kept for a day after nothing points at it, which is what makes that undo work."
 msgstr "Deleting is recorded and can be put back from the History screen. The picture itself is kept for a day after nothing points at it, which is what makes that undo work."
+
+#. Where an update failed: after the new version was running. See GLOSSARY.md for the updater
+#: src/screens/Updates.tsx
+msgid "while handing over to the new updater"
+msgstr "while handing over to the new updater"
 
 #: src/screens/Payees.tsx
 msgid "Choose a payee…"
@@ -4536,6 +4577,11 @@ msgstr "Set up"
 msgid "{0} · {1} on {2}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 msgstr "{0} · {1} on {2}. The parts replace it, so they have to come to the same amount. No minus signs — every part goes the same way the original did."
 
+#. Updates section, a rolled-back update. {where} is a phrase such as 'while migrating the ledger'
+#: src/screens/Updates.tsx
+msgid "The update failed {where}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
+msgstr "The update failed {where}, so it was undone. You are on {running}, with the ledger exactly as it was at {stopped}, when the app stopped. What failed:"
+
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 msgid "Register"
@@ -6063,11 +6109,6 @@ msgstr "Date range"
 msgid "Everything that has changed this household, grouped by the act that changed it. An import of two hundred rows is one entry here, and undoing it puts all two hundred back."
 msgstr "Everything that has changed this household, grouped by the act that changed it. An import of two hundred rows is one entry here, and undoing it puts all two hundred back."
 
-#. Where an update failed, when the updater did not say
-#: src/screens/Updates.tsx
-msgid "an unknown step"
-msgstr "an unknown step"
-
 #. Text on the Register screen
 #. placeholder {0}: index + 1
 #: src/screens/Register.tsx
@@ -6230,6 +6271,11 @@ msgstr "Updating"
 #: src/screens/Register.tsx
 msgid "Untick every row shown"
 msgstr "Untick every row shown"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while checking the new version answers"
+msgstr "while checking the new version answers"
 
 #: src/screens/Register.tsx
 msgid "Locked — checked against the bank, and every change to it is refused"
@@ -7107,6 +7153,11 @@ msgstr "payee"
 #: src/screens/Profile.tsx
 msgid "The six digits from the new one"
 msgstr "The six digits from the new one"
+
+#. Where an update failed. See GLOSSARY.md for the updater
+#: src/screens/Updates.tsx
+msgid "while handing over to the new updater before the app stopped"
+msgstr "while handing over to the new updater before the app stopped"
 
 #: src/screens/Register.tsx
 msgid "double click to edit"
@@ -8760,6 +8811,11 @@ msgctxt "history table"
 msgid "category group"
 msgstr "category group"
 
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while recording the update"
+msgstr "while recording the update"
+
 #. A changed field in History's detail, lower case: the category group it is in
 #: src/lib/historyWords.ts
 msgid "group"
@@ -9025,6 +9081,11 @@ msgstr "Every rule of this kind gets a turn, in this order, each one working on 
 #: src/screens/ApplicationManagement.tsx
 msgid "Updates"
 msgstr "Updates"
+
+#. Where an update failed
+#: src/screens/Updates.tsx
+msgid "while stopping the app"
+msgstr "while stopping the app"
 
 #. State of the pre-update hook
 #: src/screens/Updates.tsx
@@ -10949,6 +11010,11 @@ msgstr "Not counted: {0} and {1}. Moving money between your own accounts is not 
 #: src/screens/Profile.tsx
 msgid "may apply imports"
 msgstr "may apply imports"
+
+#. Where an update failed, when the updater did not say
+#: src/screens/Updates.tsx
+msgid "at a step the updater did not name"
+msgstr "at a step the updater did not name"
 
 #: src/screens/Categories.tsx
 msgid "Build my own"
