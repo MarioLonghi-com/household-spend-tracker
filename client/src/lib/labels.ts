@@ -71,18 +71,17 @@ export const ACCOUNT_TYPE_LABELS: Record<AccountType, { label: string; blurb: st
 };
 
 /**
- * What a filter heading calls a group of accounts of one type. Plural, and in
- * two cases a different word from the form's: "Checking" for a current
- * account, "Other liabilities" for other debt. The glossary records both, and
- * both translate as one term.
+ * What a filter heading calls a group of accounts of one type: the form's own
+ * word, in the plural. Until #270 two of them said something else ("Checking",
+ * "Other liabilities"), which gave a translator two English words for one term.
  */
 export const ACCOUNT_TYPE_HEADINGS: Record<string, string> = {
-  get checking() { return t({ message: "Checking", comment: "Heading over the everyday bank accounts on the Accounts screen. See GLOSSARY.md" }); },
+  get checking() { return t({ message: "Current accounts", comment: "Heading over the everyday bank accounts on the Accounts screen. See GLOSSARY.md" }); },
   get savings() { return t({ message: "Savings", comment: "Account type `savings`, and the heading of its group. See GLOSSARY.md" }); },
   get cash() { return t({ message: "Cash", comment: "Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md" }); },
   get credit_card() { return t({ message: "Credit cards", comment: "Heading over the credit card accounts on the Accounts screen. See GLOSSARY.md" }); },
   get other_asset() { return t({ message: "Other assets", comment: "Heading over the other-asset accounts on the Accounts screen. See GLOSSARY.md" }); },
-  get other_liability() { return t({ message: "Other liabilities", comment: "Heading over the other-debt accounts on the Accounts screen. See GLOSSARY.md" }); },
+  get other_liability() { return t({ message: "Other debts", comment: "Heading over the other-debt accounts on the Accounts screen. See GLOSSARY.md" }); },
 };
 
 /** A statement line's outcome on the Import screen's preview. */

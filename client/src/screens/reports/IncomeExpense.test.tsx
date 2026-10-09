@@ -284,7 +284,7 @@ describe("the heading slot", () => {
     // The shell, as `Reports.tsx` renders it: the slot first, the heading
     // second, both in one row.
     const shell = document.createElement("div");
-    shell.innerHTML = '<div class="row"><div id="report-head-slot"></div><h1>Income v Expense</h1></div>';
+    shell.innerHTML = '<div class="row"><div id="report-head-slot"></div><h1>Income vs Expense</h1></div>';
     document.body.append(shell);
 
     render(

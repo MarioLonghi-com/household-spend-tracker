@@ -384,7 +384,7 @@ def income_expense(
     category_id: Annotated[list[str] | None, Query()] = None,
     include_uncategorised: bool = True,
 ) -> IncomeExpenseOut:
-    """The Income v Expense report, answered by the person's route itself.
+    """The Income vs Expense report, answered by the person's route itself.
 
     Called rather than re-assembled, so the two cannot disagree about a figure
     or about what `excluded` counts. `currency` is required and singular there
@@ -534,7 +534,7 @@ ENDPOINTS: list[ManifestEndpoint] = [
         method="GET",
         path=f"{_HOUSE}/reports/income-expense",
         says=(
-            "The Income v Expense report for ONE currency (currency is required): income "
+            "The Income vs Expense report for ONE currency (currency is required): income "
             "and expense by category and month, net, in that currency only. Ask once per "
             "currency the manifest's accounts hold and never add the answers together. "
             "Transfers, opening balances and work expenses with their repayments are left "
