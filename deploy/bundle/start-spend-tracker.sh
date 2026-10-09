@@ -10,7 +10,9 @@
 # release and replaces only the updater, when its own is newer (C5).
 #
 # What it does, in order: picks Docker or Podman -- the one Spend Tracker is
-# already in, else the one that is running; finds the engine's socket; asks
+# running in, else the one it is already in (in both: the newer ledger), else
+# the one that is running; makes sure nothing else holds the port, before it
+# changes anything; finds the engine's socket; asks
 # the bundle's own updater image what to start
 # (updater/launch.py: the engine, the pin, the settings, written into .env,
 # and which compose created the project, so the same one runs it again);
@@ -28,6 +30,8 @@ APP_IMAGE='@APP_IMAGE@'
 UPDATER_IMAGE='@UPDATER_IMAGE@'
 PROJECT='spend-tracker'
 URL='http://localhost:8848'
+# The host port compose.yaml publishes the app on (updater/launch.py PORT).
+PORT=8848
 PROBE='http://127.0.0.1:8848/api/health'
 HEALTH_TIMEOUT="${SPENDTRACKER_HEALTH_TIMEOUT:-180}"
 
@@ -60,11 +64,12 @@ say "Starting Spend Tracker @VERSION@ from $HERE"
 # The engine
 # --------------------------------------------------------------------------- #
 
-# The rule is updater/launch.py's `pick_engine` (#264), and
-# tests/test_launcher_engine.py runs this block against it: an engine that
-# already holds the project, else one that answers, Docker first in a tie.
-# `docker compose version` reads only the client, so a Docker CLI alone
-# says nothing about whether Docker runs.
+# The rule is updater/launch.py's `pick_engine` (#264, #300), and
+# tests/test_launcher_engine.py runs this block against it: an engine whose
+# Spend Tracker is running, else one that already holds the project (both
+# holding it: the newer ledger, said out loud), else one that answers, Docker
+# first in a tie. `docker compose version` reads only the client, so a Docker
+# CLI alone says nothing about whether Docker runs.
 seen() {
   if ! command -v "$1" >/dev/null 2>&1 || ! "$1" compose version >/dev/null 2>&1; then
     echo none
@@ -77,7 +82,9 @@ seen() {
     esac
     return
   fi
-  if [ -n "$("$1" ps -aq --filter "label=com.docker.compose.project=$PROJECT" 2>/dev/null)" ]; then
+  if [ -n "$("$1" ps -q --filter "label=com.docker.compose.project=$PROJECT" --filter "label=com.docker.compose.service=app" 2>/dev/null)" ]; then
+    echo running
+  elif [ -n "$("$1" ps -aq --filter "label=com.docker.compose.project=$PROJECT" 2>/dev/null)" ]; then
     echo project
   else
     echo answers
@@ -86,10 +93,126 @@ seen() {
 DOCKER_SEEN="$(seen docker)"
 PODMAN_SEEN="$(seen podman)"
 
+# The pin's app reference in one env file, read as updater/launch.py's
+# `read_keys` reads it: the first non-empty assignment, quotes stripped.
+pin_of() {
+  [ -f "$1" ] || return 0
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    case "$line" in "export "*) line="${line#export }"; line="${line#"${line%%[![:space:]]*}"}" ;; esac
+    case "$line" in
+      SPENDTRACKER_IMAGE=*|"SPENDTRACKER_IMAGE "*)
+        value="${line#SPENDTRACKER_IMAGE}"
+        value="${value#"${value%%[!	 ]*}"}"
+        value="${value#=}"
+        value="${value%"${value##*[![:space:]]}"}"
+        value="${value#"${value%%[![:space:]]*}"}"
+        value="${value#[\"\']}"
+        value="${value%[\"\']}"
+        if [ -n "$value" ]; then
+          printf '%s\n' "$value"
+          return 0
+        fi
+        ;;
+    esac
+  done < "$1"
+}
+
+# The release a `repo:X.Y.Z@sha256:...` reference names, as `version_of` reads it.
+release_of() {
+  ref="${1%%@*}"
+  case "$ref" in *:*) tag="${ref##*:}" ;; *) return 0 ;; esac
+  case "$tag" in */*|"") return 0 ;; esac
+  tag="${tag#v}"
+  case "$tag" in *[!0-9.]*|.*|*.|*..*) return 0 ;; esac
+  IFS=. read -r major minor patch extra <<EOF
+$tag
+EOF
+  [ -n "$patch" ] && [ -z "$extra" ] || return 0
+  printf '%s\n' "$((10#$major)).$((10#$minor)).$((10#$patch))"
+}
+
+# Whether release $1 is newer than release $2.
+newer() {
+  IFS=. read -r a1 b1 c1 <<EOF
+$1
+EOF
+  IFS=. read -r a2 b2 c2 <<EOF
+$2
+EOF
+  [ "$a1" -gt "$a2" ] || { [ "$a1" -eq "$a2" ] && { [ "$b1" -gt "$b2" ] || { [ "$b1" -eq "$b2" ] && [ "$c1" -gt "$c2" ]; }; }; }
+}
+
+# What engine $1's install is, when both hold the project: the ledger's
+# release (the pin, found as updater/launch.py's `find_pin` finds it, else the
+# app container's image) and when its app last started (`started_text`).
+# Sets RELEASE and STARTED, and says the line.
+install_of() {
+  ref="" app="" raw=""
+  apps="$("$1" ps -aq --filter "label=com.docker.compose.project=$PROJECT" --filter "label=com.docker.compose.service=app" 2>/dev/null)"
+  for id in $apps; do
+    case "$("$1" inspect --format '{{.Name}}' "$id" 2>/dev/null)" in *-previous|*-next) continue ;; esac
+    app="$id"
+    break
+  done
+  for id in $("$1" ps -aq --filter "label=com.docker.compose.project=$PROJECT" --filter "label=com.docker.compose.service=updater" 2>/dev/null) $apps; do
+    dir="$("$1" inspect --format '{{index .Config.Labels "com.docker.compose.project.working_dir"}}' "$id" 2>/dev/null)"
+    if [ -n "$dir" ] && [ -d "$dir" ]; then
+      ref="$(pin_of "$dir/.env")"
+      [ -n "$ref" ] || ref="$(pin_of "$dir/pin/release.env")"
+      break
+    fi
+  done
+  if [ -n "$app" ]; then
+    [ -n "$ref" ] || ref="$("$1" inspect --format '{{.Config.Image}}' "$app" 2>/dev/null)"
+    raw="$("$1" inspect --format '{{.State.StartedAt}}' "$app" 2>/dev/null)"
+  fi
+  RELEASE="$(release_of "$ref")"
+  STARTED=""
+  case "$raw" in
+    0001-*) ;;
+    ????-??-?????:??*Z) STARTED="${raw:0:10} ${raw:11:5} UTC" ;;
+    ????-??-?????:??*)
+      STARTED="${raw:0:10} ${raw:11:5}"
+      case "${raw:11}" in *" "*) STARTED="$STARTED ${raw##* }" ;; esac
+      ;;
+  esac
+  when="at an unknown time"
+  [ -n "$STARTED" ] && when="on $STARTED"
+  say "In $2: the ledger is at ${RELEASE:-an unknown release}; it was last started $when."
+}
+
 ENGINE=""
-if [ "$DOCKER_SEEN" = project ]; then
+if [ "$DOCKER_SEEN" = running ] && [ "$PODMAN_SEEN" = running ]; then
+  stop "Spend Tracker is running in both Docker and Podman, which should not happen. Stop the one you no longer use, or remove it (README.txt, under \"Installed in both Docker and Podman\", says how), then open this launcher again."
+elif [ "$DOCKER_SEEN" = running ]; then
   ENGINE=docker
-  [ "$PODMAN_SEEN" = project ] && say "Spend Tracker is installed in both Docker and Podman; this starts the one in Docker."
+  [ "$PODMAN_SEEN" = project ] && say "Spend Tracker is installed in both Docker and Podman; this uses the one running in Docker."
+elif [ "$PODMAN_SEEN" = running ]; then
+  ENGINE=podman
+  [ "$DOCKER_SEEN" = project ] && say "Spend Tracker is installed in both Docker and Podman; this uses the one running in Podman."
+elif [ "$DOCKER_SEEN" = project ] && [ "$PODMAN_SEEN" = project ]; then
+  install_of docker Docker
+  DOCKER_RELEASE="$RELEASE"
+  install_of podman Podman
+  PODMAN_RELEASE="$RELEASE"
+  if [ -z "$DOCKER_RELEASE" ] || [ -z "$PODMAN_RELEASE" ]; then
+    why="the release of a ledger could not be read"
+  elif newer "$DOCKER_RELEASE" "$PODMAN_RELEASE"; then
+    ENGINE=docker
+  elif newer "$PODMAN_RELEASE" "$DOCKER_RELEASE"; then
+    ENGINE=podman
+  else
+    why="both ledgers are at the same release"
+  fi
+  [ -n "$ENGINE" ] || stop "Spend Tracker is installed in both Docker and Podman, neither is running, and $why, so this launcher cannot tell which one you use. Remove the one you no longer use (README.txt, under \"Installed in both Docker and Podman\", says how), then open this launcher again."
+  if [ "$ENGINE" = docker ]; then
+    say "Spend Tracker is installed in both Docker and Podman, and neither is running; this starts the one in Docker, whose ledger is at the newer release."
+  else
+    say "Spend Tracker is installed in both Docker and Podman, and neither is running; this starts the one in Podman, whose ledger is at the newer release."
+  fi
+elif [ "$DOCKER_SEEN" = project ]; then
+  ENGINE=docker
 elif [ "$PODMAN_SEEN" = project ]; then
   ENGINE=podman
 elif [ "$DOCKER_SEEN" = answers ]; then
@@ -113,7 +236,51 @@ elif [ "$PODMAN_SEEN" != none ]; then
 else
   stop "Spend Tracker runs in Docker Desktop or Podman Desktop, and neither was found. Install one, start it, then open this launcher again."
 fi
-if [ "$ENGINE" = docker ]; then PRODUCT="Docker"; else PRODUCT="Podman"; fi
+if [ "$ENGINE" = docker ]; then
+  PRODUCT="Docker" OTHER=podman OTHER_PRODUCT="Podman" OTHER_SEEN="$PODMAN_SEEN"
+else
+  PRODUCT="Podman" OTHER=docker OTHER_PRODUCT="Docker" OTHER_SEEN="$DOCKER_SEEN"
+fi
+
+# --------------------------------------------------------------------------- #
+# The port (#300): asked before anything is changed, so a start that cannot
+# succeed leaves the updater, the containers and .env as they were. The rule
+# is updater/launch.py's `port_refusal`.
+# --------------------------------------------------------------------------- #
+
+# Whether something on this computer accepts connections on the port.
+port_taken() {
+  if command -v curl >/dev/null 2>&1; then
+    curl -s -o /dev/null --max-time 3 "http://127.0.0.1:$PORT/" 2>/dev/null
+    [ $? -ne 7 ]  # 7: nothing listens there
+  else
+    (exec 3<>"/dev/tcp/127.0.0.1/$PORT") 2>/dev/null
+  fi
+}
+# Whether engine $1's Spend Tracker publishes the port.
+publishes() {
+  case "$("$1" ps --filter "label=com.docker.compose.project=$PROJECT" --format '{{.Ports}}' 2>/dev/null)" in
+    *":$PORT->"*) return 0 ;;
+  esac
+  return 1
+}
+# free, self (the chosen engine's own app or maintenance page, which the
+# launcher replaces), the other engine's name, or program.
+port_holder() {
+  if ! port_taken; then
+    echo free
+  elif publishes "$ENGINE"; then
+    echo self
+  elif case "$OTHER_SEEN" in answers|project|running) publishes "$OTHER" ;; *) false ;; esac; then
+    echo "$OTHER"
+  else
+    echo program
+  fi
+}
+case "$(port_holder)" in
+  "$OTHER") stop "Port $PORT on this computer is in use by the Spend Tracker in $OTHER_PRODUCT, so the one in $PRODUCT was not started, and nothing was changed. Stop the one in $OTHER_PRODUCT, or remove it if you no longer use it (README.txt, under \"Installed in both Docker and Podman\", says how), then open this launcher again." ;;
+  program) stop "Port $PORT on this computer is in use by another program, so Spend Tracker was not started in $PRODUCT, and nothing was changed. Close that program, then open this launcher again." ;;
+esac
 
 # The socket the updater is given. In Docker Desktop and in a podman machine
 # the path is the VM's, and /var/run/docker.sock is right for both (S21).
@@ -320,8 +487,14 @@ if [ "$ENGINE" = podman ]; then
   done
 fi
 
-"$ENGINE" compose --env-file .env up -d \
-  || stop "$PRODUCT could not start Spend Tracker; the lines above say why."
+if ! "$ENGINE" compose --env-file .env up -d; then
+  # The cause, when it is one this launcher can name (#300).
+  case "$(port_holder)" in
+    "$OTHER") stop "$PRODUCT could not start Spend Tracker because port $PORT on this computer is in use by the Spend Tracker in $OTHER_PRODUCT. Stop the one in $OTHER_PRODUCT, or remove it if you no longer use it (README.txt, under \"Installed in both Docker and Podman\", says how), then open this launcher again." ;;
+    program) stop "$PRODUCT could not start Spend Tracker because port $PORT on this computer is in use by another program. Close that program, then open this launcher again." ;;
+  esac
+  stop "$PRODUCT could not start Spend Tracker; the lines above say why."
+fi
 
 say "Waiting for Spend Tracker to answer..."
 deadline=$(( $(date +%s) + HEALTH_TIMEOUT ))

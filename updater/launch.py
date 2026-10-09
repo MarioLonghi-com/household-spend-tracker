@@ -106,10 +106,17 @@ _REF = re.compile(
 #: `none` -- no CLI with `compose`; `installed` -- `<engine> info` fails;
 #: `denied` -- it fails with "permission denied"; `answers` -- `info`
 #: works; `project` -- and `ps -aq --filter
-#: label=com.docker.compose.project=spend-tracker` lists something.
-ENGINE_STATES = ("none", "installed", "denied", "answers", "project")
+#: label=com.docker.compose.project=spend-tracker` lists something;
+#: `running` -- and `ps -q` with `label=com.docker.compose.service=app` added
+#: lists something: the project's app is running there (#300).
+ENGINE_STATES = ("none", "installed", "denied", "answers", "project", "running")
 #: The order a tie is settled in.
 ENGINES = (("docker", "Docker"), ("podman", "Podman"))
+#: The host port the bundle's compose.yaml publishes the app on (127.0.0.1 only).
+PORT = 8848
+
+#: The bundle's README.txt section that says how to remove an install.
+REMOVE_HOW = 'README.txt, under "Installed in both Docker and Podman", says how'
 
 NOT_FOUND = (
     "Spend Tracker runs in Docker Desktop or Podman Desktop, and neither was found. "
@@ -127,11 +134,96 @@ DENIED = (
     "Your user cannot reach Docker's socket. Add it to the docker group "
     "(sudo usermod -aG docker {user}), log out and back in, then run this again."
 )
-IN_BOTH = "Spend Tracker is installed in both Docker and Podman; this starts the one in Docker."
 UNCHECKED = (
     "{other} is installed but not running, so whether Spend Tracker is already installed there "
     "was not checked; this starts it in {chosen}."
 )
+#: Both hold the project and one runs it: that one is the install in use (#300).
+IN_BOTH_RUNNING = (
+    "Spend Tracker is installed in both Docker and Podman; this uses the one running in {chosen}."
+)
+BOTH_RUNNING = (
+    "Spend Tracker is running in both Docker and Podman, which should not happen. Stop the one you "
+    f"no longer use, or remove it ({REMOVE_HOW}), then open this launcher again."
+)
+#: Both hold the project and neither runs it: what each is, one line per engine.
+INSTALL_LINE = "In {product}: the ledger is at {release}; it was last started {started}."
+IN_BOTH_NEWER = (
+    "Spend Tracker is installed in both Docker and Podman, and neither is running; this starts "
+    "the one in {chosen}, whose ledger is at the newer release."
+)
+IN_BOTH_UNDECIDED = (
+    "Spend Tracker is installed in both Docker and Podman, neither is running, and {why}, so this "
+    f"launcher cannot tell which one you use. Remove the one you no longer use ({REMOVE_HOW}), "
+    "then open this launcher again."
+)
+SAME_RELEASE = "both ledgers are at the same release"
+UNREAD_RELEASE = "the release of a ledger could not be read"
+#: The published port is taken. Checked before anything is changed; and again
+#: when compose fails, for the sentence (#300).
+PORT_BY_INSTALL = (
+    "Port {port} on this computer is in use by the Spend Tracker in {other}, so the one in "
+    "{chosen} was not started, and nothing was changed. Stop the one in {other}, or remove it "
+    f"if you no longer use it ({REMOVE_HOW}), then open this launcher again."
+)
+PORT_BY_PROGRAM = (
+    "Port {port} on this computer is in use by another program, so Spend Tracker was not started "
+    "in {chosen}, and nothing was changed. Close that program, then open this launcher again."
+)
+UP_PORT_BY_INSTALL = (
+    "{chosen} could not start Spend Tracker because port {port} on this computer is in use by the "
+    "Spend Tracker in {other}. Stop the one in {other}, or remove it if you no longer use it "
+    f"({REMOVE_HOW}), then open this launcher again."
+)
+UP_PORT_BY_PROGRAM = (
+    "{chosen} could not start Spend Tracker because port {port} on this computer is in use by "
+    "another program. Close that program, then open this launcher again."
+)
+UP_FAILED = "{chosen} could not start Spend Tracker; the lines above say why."
+
+
+@dataclass(frozen=True)
+class Install:
+    """What a launcher reads of one engine's install, when both hold the project (#300).
+
+    `app` is the pin's app reference, read as C5 reads it (`find_pin`: the
+    folder the project's containers were started from, `.env` first, then
+    `pin/release.env`), else the app container's own image; `started` is the
+    app container's `.State.StartedAt`, as the engine prints it.
+    """
+
+    app: str | None = None
+    started: str | None = None
+
+
+#: `YYYY-MM-DD?HH:MM`, the start of either engine's `.State.StartedAt`.
+_STARTED = re.compile(r"....-..-.....:..")
+
+
+def started_text(raw: str | None) -> str | None:
+    """`.State.StartedAt` as a person reads it, to the minute; None when never started.
+
+    Docker prints RFC 3339 in UTC (`2026-10-08T21:14:03.1Z`); Podman, Go's
+    own form (`2026-10-08 21:14:03.1 +0200 CEST`), whose last word is the zone.
+    """
+    raw = (raw or "").strip()
+    if not _STARTED.match(raw) or raw.startswith("0001-"):
+        return None
+    head = f"{raw[:10]} {raw[11:16]}"
+    if raw.endswith("Z"):
+        return f"{head} UTC"
+    if " " in raw[11:]:
+        return f"{head} {raw.rsplit(' ', 1)[1]}"
+    return head
+
+
+def install_line(product: str, found: Install) -> str:
+    started = started_text(found.started)
+    return INSTALL_LINE.format(
+        product=product,
+        release=_text(version_of(found.app)),
+        started=f"on {started}" if started else "at an unknown time",
+    )
 
 
 @dataclass(frozen=True)
@@ -144,14 +236,23 @@ class EnginePick:
     stop: str | None = None
 
 
-def pick_engine(docker: str, podman: str, user: str = "$(id -un)") -> EnginePick:
-    """The launchers' engine rule (#264), on what each engine's CLI answered.
+def pick_engine(
+    docker: str, podman: str, user: str = "$(id -un)", installs: Mapping[str, Install] | None = None
+) -> EnginePick:
+    """The launchers' engine rule (#264, #300), on what each engine's CLI answered.
 
-    1. An engine that already holds the project -- its containers carry
-       `com.docker.compose.project=spend-tracker` -- is the one; Docker if
-       both do.
-    2. Otherwise an engine that answers `info`, Docker first.
-    3. Neither answers: say which are installed, and that one must be started.
+    1. An engine whose project app is **running** is the install in use, and
+       wins. Both running should not happen: say so and stop.
+    2. An engine that holds the project -- its containers carry
+       `com.docker.compose.project=spend-tracker` -- is the one. When both
+       do and neither runs it, say what each install is (`installs`: the
+       ledger's release, when it was last started) and take the one whose
+       ledger is at the newer release; equal, or either unreadable, stop and
+       ask the owner to remove the one they no longer use. Never a guess:
+       starting the stale one collided with the running one on the port and
+       replaced its updater on the way (#300).
+    3. Otherwise an engine that answers `info`, Docker first.
+    4. Neither answers: say which are installed, and that one must be started.
 
     `docker compose version` reads only the client, so a Docker CLI on the
     PATH -- Docker Desktop installed but stopped, or Homebrew's `docker` --
@@ -167,14 +268,34 @@ def pick_engine(docker: str, podman: str, user: str = "$(id -un)") -> EnginePick
             raise ValueError(f"{name}: {state!r}")
     product = dict(ENGINES)
     other = {"docker": "podman", "podman": "docker"}
+    found = installs or {}
+
+    if docker == podman == "running":
+        return EnginePick(None, None, stop=BOTH_RUNNING)
+    for name, _ in ENGINES:
+        if states[name] == "running":
+            says = (
+                (IN_BOTH_RUNNING.format(chosen=product[name]),) if states[other[name]] == "project" else ()
+            )
+            return EnginePick(name, product[name], says)
+
+    if docker == podman == "project":
+        lines = tuple(install_line(product[name], found.get(name, Install())) for name, _ in ENGINES)
+        mine, theirs = (
+            version_of(found.get("docker", Install()).app),
+            version_of(found.get("podman", Install()).app),
+        )
+        if mine is not None and theirs is not None and mine != theirs:
+            name = "docker" if mine > theirs else "podman"
+            return EnginePick(name, product[name], (*lines, IN_BOTH_NEWER.format(chosen=product[name])))
+        why = SAME_RELEASE if mine is not None and theirs is not None else UNREAD_RELEASE
+        return EnginePick(None, None, lines, stop=IN_BOTH_UNDECIDED.format(why=why))
 
     for wanted in ("project", "answers"):
         for name, _ in ENGINES:
             if states[name] != wanted:
                 continue
             says: list[str] = []
-            if wanted == "project" and states[other[name]] == "project":
-                says.append(IN_BOTH)
             if wanted == "answers" and states[other[name]] in ("installed", "denied"):
                 says.append(UNCHECKED.format(other=product[other[name]], chosen=product[name]))
             return EnginePick(name, product[name], tuple(says))
@@ -187,6 +308,32 @@ def pick_engine(docker: str, podman: str, user: str = "$(id -un)") -> EnginePick
     if present:
         return EnginePick(None, None, stop=NOT_RUNNING.format(product=product[present[0]]))
     return EnginePick(None, None, stop=NOT_FOUND)
+
+
+#: Who holds the published port, as a launcher finds it: `free`; `self` -- a
+#: container of the chosen engine's own project (its app, its maintenance
+#: page), which the launcher replaces; `docker` or `podman` -- the other
+#: engine's Spend Tracker; `program` -- anything else.
+PORT_HOLDERS = ("free", "self", "docker", "podman", "program")
+
+
+def port_refusal(chosen: str, holder: str, port: int = PORT, *, after_up: bool = False) -> str | None:
+    """The sentence a launcher stops with when the published port is taken (#300), or None.
+
+    Asked before anything is changed -- the updater replaced, a container
+    stopped -- so a refused start leaves everything as it was. `after_up`
+    words it for a `compose up` that failed, where the cause is then known.
+    """
+    if holder not in PORT_HOLDERS:
+        raise ValueError(holder)
+    product = dict(ENGINES)
+    if holder in ("free", "self") or holder == chosen:
+        return None
+    if holder == "program":
+        text = UP_PORT_BY_PROGRAM if after_up else PORT_BY_PROGRAM
+        return text.format(port=port, chosen=product[chosen])
+    text = UP_PORT_BY_INSTALL if after_up else PORT_BY_INSTALL
+    return text.format(port=port, chosen=product[chosen], other=product[holder])
 
 
 # --------------------------------------------------------------------------- #

@@ -43,6 +43,20 @@ history this repository does not have.
 
 ### Fixed
 
+- **With Spend Tracker in both Docker and Podman, the launcher uses the one
+  that is running.** It used to take Docker's whenever both held an install,
+  so a stopped, older install in Docker Desktop was started while the one in
+  a Podman machine was running: the launcher replaced the Docker install's
+  updater, then failed on the port the running one held, and left a
+  half-started stack behind. Now the install whose app is running wins. When
+  both hold one and neither runs, the launcher says which release each
+  ledger is at and when each was last started, and starts the newer; at the
+  same release it stops and asks the owner to remove the one they no longer
+  use, which the zip's README.txt now explains. Before it changes anything,
+  it checks that nothing else holds port 8848 and, if something does, says
+  what -- the other engine's Spend Tracker, or another program -- and
+  changes nothing. A failed start names that cause too, rather than "the
+  lines above say why" (#300).
 - **A restart of the Tailscale sidecar no longer leaves the app unreachable.**
   The sidecar's restart gave it a new network namespace while the app stayed
   in the old, empty one, and nothing restarted the app. In the sidecar layout
