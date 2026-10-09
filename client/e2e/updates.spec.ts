@@ -82,7 +82,7 @@ test("update backups list with their version, the newest five kept, and an older
   await expect(block.getByRole("heading", { name: "Backups taken by updates" })).toBeVisible();
   const rows = block.locator("tbody tr");
   // Seven seeded; the desktop pass deletes one, and the phone pass may run after it.
-  expect(await rows.count()).toBeGreaterThanOrEqual(6);
+  await expect.poll(() => rows.count()).toBeGreaterThanOrEqual(6);
   await expect(block.locator('tbody tr[data-protected="true"]')).toHaveCount(5);
   for (const row of await block.locator('tbody tr[data-protected="true"]').all()) {
     await expect(row.getByRole("button", { name: "Delete" })).toHaveCount(0);
