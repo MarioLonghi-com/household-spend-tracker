@@ -21,7 +21,7 @@ import { i18n, SOURCE_LOCALE } from "./i18n";
 import { formatDate } from "./locale";
 import { format } from "./money";
 
-interface ErrorMessage {
+export interface ErrorMessage {
   message: MessageDescriptor;
   /** Params that are minor units of the `currency` param. */
   money?: readonly string[];

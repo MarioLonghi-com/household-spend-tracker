@@ -574,6 +574,17 @@ class AccountImportRow(BaseModel):
     opening_date: Date | None = None
     iban: str | None = None
     problems: list[str] = Field(default_factory=list)
+    #: Each problem as a code and raw params, or null for one with no code
+    #: (#267): what a screen in another language words. Read from the
+    #: sentence by `app/notices.py`, so the two cannot disagree.
+    problem_codes: list[dict | None] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _codes(self) -> AccountImportRow:
+        from .notices import read
+
+        self.problem_codes = [read(one) for one in self.problems]
+        return self
 
 
 class AccountImportOut(BaseModel):
@@ -927,6 +938,11 @@ class ImportLineOut(ORMModel):
     outcome: ImportOutcome
     transaction_id: str | None = None
     reason: str | None = None
+    #: `reason` as a code and raw params (#267), read from the sentence by
+    #: `app/notices.py` -- the sentence is what is stored. Null when it has
+    #: no code. Not sent to an agent.
+    reason_code: str | None = None
+    reason_params: dict | None = None
     #: Where this line will land. The payee's rule decides it unless somebody
     #: has said otherwise on the preview screen.
     category_id: str | None = None
@@ -944,6 +960,15 @@ class ImportLineOut(ORMModel):
     #: of their own. Sent after a change so the screen can offer to do the same
     #: to them rather than making somebody type it eleven more times.
     similar_lines: int = 0
+
+    @model_validator(mode="after")
+    def _reason_code(self) -> ImportLineOut:
+        from .notices import read
+
+        found = read(self.reason) if self.reason_code is None else None
+        if found is not None:
+            self.reason_code, self.reason_params = found["code"], found["params"]
+        return self
 
 
 class SetLineCategory(BaseModel):
@@ -1031,6 +1056,9 @@ class ImportPreview(BaseModel):
     #: Anything the sniffer could not settle, in words -- and, on the agent
     #: path, everything `agent_warnings` noticed about the staged rows.
     warnings: list[str] = []
+    #: Each warning as a code and raw params, or null for one with no code
+    #: (#267). Read from the sentence by `app/notices.py`. Not sent to an agent.
+    warning_codes: list[dict | None] = []
     counts: dict[str, int]
     #: The compact answer. Null on the file path, which has the lines already.
     decision: ImportDecision | None = None
@@ -3196,6 +3224,18 @@ class OneTimeRowNote(BaseModel):
     memo: str
     amount_minor: int | None = None
     reason: str
+    #: `reason` as a code and raw params (#267), or null.
+    reason_code: str | None = None
+    reason_params: dict | None = None
+
+    @model_validator(mode="after")
+    def _reason_code(self) -> OneTimeRowNote:
+        from .notices import read
+
+        found = read(self.reason)
+        if found is not None:
+            self.reason_code, self.reason_params = found["code"], found["params"]
+        return self
 
 
 class OneTimeBalanceDifference(BaseModel):
@@ -3212,6 +3252,18 @@ class OneTimeBalanceDifference(BaseModel):
     #: ``imported_minor - ynab_balance_minor``: negative when rows are missing.
     difference_minor: int
     sentence: str
+    #: `sentence` as a code and raw params (#267): the figures in minor units.
+    sentence_code: str | None = None
+    sentence_params: dict | None = None
+
+    @model_validator(mode="after")
+    def _sentence_code(self) -> OneTimeBalanceDifference:
+        from .notices import read
+
+        found = read(self.sentence, currency=self.currency)
+        if found is not None:
+            self.sentence_code, self.sentence_params = found["code"], found["params"]
+        return self
 
 
 class OneTimeBalanceUnchecked(BaseModel):
@@ -3221,6 +3273,18 @@ class OneTimeBalanceUnchecked(BaseModel):
     account: str
     reason: str
     sentence: str
+    #: `sentence` as a code and raw params (#267), or null.
+    sentence_code: str | None = None
+    sentence_params: dict | None = None
+
+    @model_validator(mode="after")
+    def _sentence_code(self) -> OneTimeBalanceUnchecked:
+        from .notices import read
+
+        found = read(self.sentence)
+        if found is not None:
+            self.sentence_code, self.sentence_params = found["code"], found["params"]
+        return self
 
 
 class OneTimeImportReport(BaseModel):

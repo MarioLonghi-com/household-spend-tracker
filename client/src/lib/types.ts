@@ -1,5 +1,7 @@
 /** Shapes the server sends. Kept in one file so a change is one diff. */
 
+import type { Coded } from "./noticeMessages";
+
 export type Role = "owner" | "member";
 export type ClearedState = "uncleared" | "cleared" | "reconciled";
 /**
@@ -180,6 +182,8 @@ export interface AccountImportRow {
   opening_date: string | null;
   iban: string | null;
   problems: string[];
+  /** Each problem as a code and raw params, or null (#267). */
+  problem_codes?: (Coded | null)[];
 }
 
 export interface AccountImportOut {
@@ -445,6 +449,9 @@ export interface ImportLine {
   outcome: ImportOutcome;
   transaction_id: string | null;
   reason: string | null;
+  /** `reason` as a code and raw params, for a screen not in English (#267). */
+  reason_code?: string | null;
+  reason_params?: Record<string, unknown> | null;
   /** Where this line will land — the payee's rule, unless somebody said otherwise. */
   category_id: string | null;
   category_name: string | null;
@@ -467,6 +474,8 @@ export interface ImportPreview {
   sha256: string;
   detected: Record<string, unknown>;
   warnings: string[];
+  /** Each warning as a code and raw params, or null (#267). */
+  warning_codes?: (Coded | null)[];
   counts: Record<string, number>;
   lines: ImportLine[];
 }

@@ -150,6 +150,9 @@ export interface NotImported {
   memo: string | null;
   amount_minor: number | null;
   reason: string;
+  /** `reason` as a code and raw params, for a screen not in English (#267). */
+  reason_code?: string | null;
+  reason_params?: Record<string, unknown> | null;
 }
 
 export interface ImportReport {
@@ -195,7 +198,15 @@ export interface ImportReport {
    */
   balance_differences?: BalanceDifference[];
   /** Accounts whose YNAB balance could not be compared at all (#266). */
-  balance_unchecked?: { account_key?: string; account: string; reason: string; sentence: string }[];
+  balance_unchecked?: {
+    account_key?: string;
+    account: string;
+    reason: string;
+    sentence: string;
+    /** `sentence` as a code and raw params (#267). */
+    sentence_code?: string | null;
+    sentence_params?: Record<string, unknown> | null;
+  }[];
   report_text: string;
 }
 

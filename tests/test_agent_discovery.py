@@ -344,7 +344,10 @@ def test_the_declared_shape_is_the_one_the_route_actually_returns(client, keyed)
         model = route.response_model
         assert model is not None, f"{entry.path} declares no response_model"
 
-        actual, declared = _fields(model), _declared(entry.returns)
+        # Less what the route leaves out of the answer: a field the screen is
+        # sent and an agent is not (#267) is not part of the agent's shape.
+        left_out = {name for name, whole in (route.response_model_exclude or {}).items() if whole is True}
+        actual, declared = _fields(model) - left_out, _declared(entry.returns)
         if actual != declared:
             wrong.append(
                 f"{entry.method} {entry.path}: says {sorted(declared)}, "

@@ -14,6 +14,7 @@ from starlette.concurrency import run_in_threadpool
 
 from statements import parsing
 
+from ... import notices
 from ...audit.batch import batch, resume
 from ...audit.registry import audited_models
 from ...audit.undo import undo_batch
@@ -62,6 +63,8 @@ MAX_UPLOAD_BYTES = 8 * 1024 * 1024
 def _preview(session, batch_row: Batch, lines: list[ImportLine], warnings: list[str]) -> ImportPreview:
     source = batch_row.source or {}
     landing = importing.preview_categories(session, batch_row.household_id or "", lines)
+    said = [*warnings, *source.get("read_warnings", []), *source.get("warnings", [])]
+    account = session.get(Account, source.get("account_id") or "")
     return ImportPreview(
         batch_id=batch_row.id,
         filename=source.get("filename"),
@@ -73,7 +76,8 @@ def _preview(session, batch_row: Batch, lines: list[ImportLine], warnings: list[
         # balance that does not add up (`warnings`) -- are both kept on the
         # batch, so they are said again when the preview is reopened from the
         # queue. `warnings` here is only what this one request has to add.
-        warnings=[*warnings, *source.get("read_warnings", []), *source.get("warnings", [])],
+        warnings=said,
+        warning_codes=[notices.read(one, currency=account.currency if account else None) for one in said],
         counts=importing.summarise(lines),
         lines=[_line_out(line, landing) for line in lines],
     )

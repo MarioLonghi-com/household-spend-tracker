@@ -6500,6 +6500,511 @@ msgstr "To create a new user, use the <0>Invitation link</0>."
 msgid "Find a payee"
 msgstr "Find a payee"
 
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.currency_not_a_code"
+msgstr "{currency} is not a three-letter currency code"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.date_unreadable"
+msgstr "{text} is not a date this can read -- write it as YYYY-MM-DD, like 2026-01-31"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.iban_taken"
+msgstr "Line {line} of this file already has the IBAN {iban}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.iban_too_long"
+msgstr "The IBAN is longer than {max} characters"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.name_taken"
+msgstr "Line {line} of this file is already called {name}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.needs_name"
+msgstr "An account needs a name"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.needs_type"
+msgstr "An account needs a type"
+
+#. {column} is a column name of the accounts file, which stays in English
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.too_long"
+msgstr "The {column} is longer than {max} characters"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.too_many_cells"
+msgstr "This line has more cells than the file has columns"
+
+#. {types} is the list of account types as the file must write them, which stay in English
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.account_import.row.unknown_type"
+msgstr "{type} is not an account type -- use one of {types}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.country.not_a_code"
+msgstr "{code} is not a country code"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.added_by_choice"
+msgstr "You chose to add this as a new transaction"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.already_there"
+msgstr "This line is already in the account"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.arrived_before_commit"
+msgstr "This line reached the account before this import was committed"
+
+#. {match} is the kind of rule: contains, prefix or regex. {why} says why it looks too broad
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.broad_rule"
+msgstr "The “{pattern}” {match} rule claimed {claimed} of {total} rows — {why}. Edit or delete it on the Rules screen if these are not all the same payee."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.fee_already_there"
+msgstr "This fee is already in the account"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.fee_of"
+msgstr "The bank charged this on top of line {line}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.foreign"
+msgstr "This row is in {foreign}, and {account} holds {currency}, so it cannot be read into it -- it would be recorded as {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.foreign_ofx"
+msgstr "This transaction is in {foreign}, and {account} holds {currency}. It is this account's, but its amount is not in {currency} and is not converted here -- enter it by hand in {currency}"
+
+#. {rate} is the exchange rate as the bank wrote it
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.foreign_ofx_rate"
+msgstr "This transaction is in {foreign} (the bank's rate: {rate}), and {account} holds {currency}. It is this account's, but its amount is not in {currency} and is not converted here -- enter it by hand in {currency}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match"
+msgstr "Looks like the {date} entry you already have; it will be marked as seen by the bank rather than added again"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_changed"
+msgstr "The transaction this matched has changed since the preview, so it was left alone and this line was not imported"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_deleted"
+msgstr "The transaction this was matched to has since been deleted"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_one_time"
+msgstr "The {date} entry your One-time Import brought in is this bank line; it will be marked as seen by the bank rather than added again"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_taken"
+msgstr "That transaction has already been matched to a statement line"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.match_ynab_history"
+msgstr "Matched by amount and date to the {date} entry from your YNAB history (One-time Import), not by the bank's own key; check it is the same purchase and not a new one of the same amount before committing"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.maybe_transfer"
+msgstr "May be a transfer with {account} ({date}): {why}. Confirm it on the Transfers screen after committing."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.no_date_or_amount"
+msgstr "This line has no date or no amount"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.no_money"
+msgstr "This line moves no money"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.other_currency_rows"
+msgstr "This row is in {foreign}, and {account} holds {currency}: it belongs to the {foreign} rows of this file"
+
+#. {product} and {taken} are the bank's names for accounts in one file
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.other_product"
+msgstr "This row is {product}, and {account} takes the {taken} rows of this file"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.own_money"
+msgstr "Looks like your own money moving -- it {why}. It is linked when that statement is imported."
+
+#. Part of a sentence about a payee rule that claimed too many rows
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.rule_most_of_file"
+msgstr "that is most of the file"
+
+#. Part of a sentence about a payee rule that claimed too many rows. {match} is contains, prefix or regex
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.rule_pattern_short"
+msgstr "{length} characters is very little for a {match} rule"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.line.transfer"
+msgstr "A transfer with {account} ({date}): {why}. It is linked when you commit, and stays out of Income v Expense."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.balance_breaks"
+msgstr "The statement's running balance stops adding up at line {line} ({date}): a row before it is missing from what was read, or belongs to another account."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.balance_gap"
+msgstr "This statement starts from {opening} on {date}, but the ledger holds {held} for the day before -- {gap} apart. A statement between the last import and this one may be missing: download from the day after the last one imported."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.balance_unchecked"
+msgstr "The statement's running balance was not checked: a balance, amount or fee in it is too large to record as money."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.other_currencies"
+msgstr "This file holds more than one currency: {currencies}. Only the {currency} rows were read into {account}; the others belong to an account in their own currency and are listed as skipped."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.other_products"
+msgstr "This file holds more than one account: {products}. Only the {product} rows were read into {account}; the others belong to another account and are listed as skipped. To change which rows this account takes, set its statement product on the Accounts screen."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.import.note.rechecked"
+msgstr "{count, plural, one {# of these lines} other {# of these lines}} changed when they were re-checked against the account just now: the register has moved since this import was staged."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.all_positive"
+msgstr "Every amount in this file is positive, and there is no second column saying which rows are money out — check the amounts in the preview, or pick separate money-out and money-in columns"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.balance_unreadable"
+msgstr "The {column} column is not an amount on {count, plural, one {# row} other {# rows}} (such as {text}) -- those rows import without a running balance"
+
+#. Follows “because”: why a decimal separator was expected. {country} is a country's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.because_country"
+msgstr "this account's country is set to {country}"
+
+#. Follows “because”: why a decimal separator was expected
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.because_default"
+msgstr "that is the default when nothing says otherwise"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.card_signs_reversed"
+msgstr "Amounts are reversed from the bill's own signs, so a purchase is money out of the card account and a refund is money in"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.control_codes"
+msgstr "Some characters in this file are control codes rather than letters -- it may mix two encodings, so check the payee names in the preview"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.currency_columns"
+msgstr "This file has more than one currency column ({columns}), and which one the amounts are in could not be told, so none was used: every row is taken to be in the account's currency"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.date_format_unknown"
+msgstr "Could not work out the date format from values like {text}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.dates_either_way"
+msgstr "Every date in this file could be read day-first or month-first, so it was read day-first — check the dates in the preview before importing"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.dates_mixed"
+msgstr "This file has dates that read as day-first and others as month-first; check the dates in the preview"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.decimal_assumed"
+msgstr "The decimal separator could not be worked out from this file — an amount like “{example}” reads either way — so “{separator}” was assumed, because {because}. Check the amounts in the preview before importing"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.decimal_from_column"
+msgstr "The amounts in this file read either way (like “{example}”), so the decimal separator “{separator}” was taken from the fee or balance column — which differs from the “{expected}” expected because {because}. Check the amounts in the preview before importing"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.no_amount_column"
+msgstr "No amount column found -- check the file has a header row, or add one"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.no_date_column"
+msgstr "No date column found -- check the file has a header row, or add one"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.no_rows"
+msgstr "This file has no rows"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.ofx_empty"
+msgstr "This looks like an OFX file but has no transactions in it -- some banks export an empty statement when the date range has nothing in it"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.ofx_no_currency"
+msgstr "This file does not say which currency it is in"
+
+#. {fitid} and {earlier} are the bank's own ids for two transactions
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.ofx_replaces"
+msgstr "Transaction {fitid} replaces an earlier one ({earlier}); the earlier one is still in the account and should be removed by hand"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.read.undecodable"
+msgstr "Some characters in this file could not be decoded; payee names may look wrong"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.amount_unreadable"
+msgstr "Could not read {text} as an amount"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.date_unreadable"
+msgstr "Could not read {text} as a date"
+
+#. {state} is the bank's own word for the row, like declined or reversed
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.did_not_happen"
+msgstr "The bank marked this {state}, so no money moved"
+
+#. {problem} is why a cell could not be read; {column} is the file's own column name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.in_column"
+msgstr "{problem}, in the {column} column"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.no_amount"
+msgstr "This row has no amount, so it is not a transaction"
+
+#. {state} is the bank's own word for the row, like pending
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.not_settled"
+msgstr "The bank marked this {state}: it has not settled, and will import from the next statement once it has"
+
+#. {fitid} is the bank's own id for the transaction it cancels
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_cancels"
+msgstr "The bank sent this to cancel an earlier transaction ({fitid}), so there is nothing here to add"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_no_amount"
+msgstr "No usable amount in {text}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_no_date"
+msgstr "No usable date in {text}"
+
+#. {kind} is the OFX transaction type the bank wrote, like HOLD
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.ofx_pending"
+msgstr "The bank marked this {kind}, which is a pending hold rather than a transaction that has happened"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.statement.row.signed_twice"
+msgstr "{text} is signed twice, so whether it is money in or money out would be a guess"
+
+#. Part of a sentence on a transfer: a doubt. {named} is a name the bank wrote
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.payer.names"
+msgstr "it names {named}, who has paid you before"
+
+#. Part of a sentence on a transfer: a doubt. {payee} is a payee's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.payer.paid_before"
+msgstr "{payee} has paid you before"
+
+#. Part of a sentence on a transfer: a doubt. {payee} is a payee's name
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.payer.rule"
+msgstr "{payee} has a category rule"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.amounts_match"
+msgstr "the amounts match and the dates are close"
+
+#. Follows “it”: the row names an account whose statement is not imported yet
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.awaiting"
+msgstr "names {named}; its other side is not in the ledger yet"
+
+#. Part of a sentence on a transfer. {words} are words the bank wrote on both rows
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.both_say"
+msgstr "{why}; both rows say {words}"
+
+#. Part of a sentence on a transfer. {why} is the reason so far, {payer} a doubt about it
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.but"
+msgstr "{why}, but {payer}"
+
+#. Part of a sentence on a transfer. {why} is the reason so far, this adds a doubt
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.card_purchase"
+msgstr "{why}, but money out of a card is a purchase until you say otherwise"
+
+#. Part of a sentence on a transfer. {count} is how many rows it could be
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.closest"
+msgstr "{why}; the closest in date of {count} it could be"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.linked_before"
+msgstr "these two accounts have had transfers linked between them before"
+
+#. Part of a sentence on a transfer: why two rows look like one
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.member_named"
+msgstr "a household member's name is on it, and the amounts match"
+
+#. Part of a sentence on a transfer. {why} is the reason so far
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.more_than_one"
+msgstr "{why}, but there is more than one row it could be"
+
+#. Part of a sentence on a transfer: why two rows look like one. {named} is the account the bank text names
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.transfer.why.names"
+msgstr "the {account} row names {named}"
+
+#. {direction} is more or less: whether the import accounts for more than YNAB's balance
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.balance.differs"
+msgstr "{account}: YNAB's balance is {ynab}, and this import accounts for {imported}, {direction, select, more {{gap} more} other {{gap} less}}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.balance.unchecked"
+msgstr "{account}: YNAB's balance could not be checked: {problem}."
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.account_skipped"
+msgstr "Its account is skipped"
+
+#. {constraint} is the database's own name for the rule a row broke
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.database_refused"
+msgstr "The database refused this row: {constraint}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.imported_before"
+msgstr "Already imported by an earlier one-time import"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.looks_like_existing"
+msgstr "Looks like a row already in the ledger"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.outside_range"
+msgstr "Outside the date range"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.row.starting_balance"
+msgstr "A YNAB starting balance, skipped"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.transfer.not_linked"
+msgstr "Not linked as a transfer: {problem}"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.transfer.other_side_failed"
+msgstr "The other side of this transfer failed to import"
+
+#. js-lingui-explicit-id
+#: src/lib/noticeMessages.ts
+msgid "notice.ynab.transfer.other_side_missing"
+msgstr "A YNAB transfer whose other side is skipped, out of range or not in the export, so it was imported as an ordinary transaction"
+
 #. Screen-reader name on the Register screen
 #: src/screens/Register.tsx
 msgid "Currencies shown"
