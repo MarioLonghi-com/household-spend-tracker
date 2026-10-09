@@ -312,7 +312,12 @@ def identity_of(image: Mapping | None, seen: Mapping | None, version: str, conta
     """An updater from its own image and container: every digest its image
     carries (`own_digests`), written as the one its container was created
     from when that names one -- the bundle's compose file names the index --
-    else the engine's first. `known_as` may prefer another of them."""
+    else the engine's first. `known_as` may prefer another of them.
+
+    Started by tag with nothing pinned, it cannot tell the index from the
+    platform manifest's digest, and Podman lists them in either order: it
+    may be named by either (#309). Whichever it is, it is chosen once, at
+    startup, and every file this process writes names that one."""
     digests = own_digests(image)
     first = digests[0] if digests else ""
     me = Owner(image_digest=first, version=version, container=container, digests=digests)

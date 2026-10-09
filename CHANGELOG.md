@@ -119,6 +119,13 @@ history this repository does not have.
   only, apart from `SPENDTRACKER_CLIENT_DIST`, which moves where the app
   looks for the built client and is set only by the tests. (#108, #292,
   #296, #297, #304, #305)
+- **The self-update check of a handover whose successor fails no longer
+  fails now and then on Podman.** Release A's updater is started by tag with
+  nothing pinned, so it cannot tell which of its image's two digests is the
+  release's index, and writes the one Podman lists first, in either order.
+  The check wanted the index; it now accepts either of A's digests, and
+  asks instead that the heartbeat, the lock, the journal and the pin all
+  name the same one. Tests only. (#309)
 
 ## 0.10.0 — 2026-10-09
 
