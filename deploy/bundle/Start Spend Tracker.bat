@@ -11,8 +11,10 @@ rem Spend Tracker is started after reinstalling Docker or Podman, and how an
 rem install whose updater no longer works is repaired -- a newer zip's
 rem launcher keeps your release and replaces only the updater (C5).
 rem
-rem What it does: picks Docker or Podman -- the one Spend Tracker is already
-rem in, else the one that is running; asks the
+rem What it does: picks Docker or Podman -- the one Spend Tracker is running
+rem in, else the one it is already in (in both: the newer ledger), else the
+rem one that is running; makes sure nothing else holds the port, before it
+rem changes anything; asks the
 rem bundle's own updater image what to start (updater/launch.py writes the
 rem pin and the engine's settings into .env); enables podman-restart in a
 rem Podman machine; removes a leftover maintenance page; starts the project;
@@ -26,6 +28,8 @@ set "APP_IMAGE=@APP_IMAGE@"
 set "UPDATER_IMAGE=@UPDATER_IMAGE@"
 set "PROJECT=spend-tracker"
 set "URL=http://localhost:8848"
+rem The host port compose.yaml publishes the app on (updater/launch.py PORT).
+set "PORT=8848"
 set "PROBE=http://127.0.0.1:8848/api/health"
 set "HEALTH_TIMEOUT=180"
 
@@ -38,18 +42,33 @@ rem ---------------------------------------------------------------------------
 rem The engine
 rem ---------------------------------------------------------------------------
 
-rem The rule is updater/launch.py's `pick_engine` (#264), and
+rem The rule is updater/launch.py's `pick_engine` (#264, #300), and
 rem tests/test_launcher_engine.py holds this block to its sentences: an
-rem engine that already holds the project, else one that answers, Docker
-rem first in a tie. `docker compose version` reads only the client, so a
-rem Docker CLI alone says nothing about whether Docker runs.
+rem engine whose Spend Tracker is running, else one that already holds the
+rem project (both holding it: the newer ledger, said out loud), else one that
+rem answers, Docker first in a tie. `docker compose version` reads only the
+rem client, so a Docker CLI alone says nothing about whether Docker runs.
 call :seen docker DOCKER_SEEN
 call :seen podman PODMAN_SEEN
 
 set "ENGINE="
+if "%DOCKER_SEEN%"=="running" if "%PODMAN_SEEN%"=="running" (
+  set "WHY=Spend Tracker is running in both Docker and Podman, which should not happen. Stop the one you no longer use, or remove it (README.txt, under "Installed in both Docker and Podman", says how), then open this launcher again."
+  goto :stop
+)
+if "%DOCKER_SEEN%"=="running" (
+  set "ENGINE=docker"
+  if "%PODMAN_SEEN%"=="project" echo Spend Tracker is installed in both Docker and Podman; this uses the one running in Docker.
+  goto :picked
+)
+if "%PODMAN_SEEN%"=="running" (
+  set "ENGINE=podman"
+  if "%DOCKER_SEEN%"=="project" echo Spend Tracker is installed in both Docker and Podman; this uses the one running in Podman.
+  goto :picked
+)
+if "%DOCKER_SEEN%"=="project" if "%PODMAN_SEEN%"=="project" goto :both
 if "%DOCKER_SEEN%"=="project" (
   set "ENGINE=docker"
-  if "%PODMAN_SEEN%"=="project" echo Spend Tracker is installed in both Docker and Podman; this starts the one in Docker.
   goto :picked
 )
 if "%PODMAN_SEEN%"=="project" (
@@ -72,8 +91,51 @@ if not "%PODMAN_SEEN%"=="none" set "WHY=Podman is installed but not running. Sta
 if not "%DOCKER_SEEN%"=="none" if not "%PODMAN_SEEN%"=="none" set "WHY=Docker and Podman are both installed, and neither is running. Start the one Spend Tracker uses, wait until it says it is running, then open this launcher again."
 goto :stop
 
+:both
+rem Both hold the project and neither runs it: say what each is, and take
+rem the one whose ledger is at the newer release; never a guess.
+call :install docker Docker
+set "DOCKER_RELEASE=!RELEASE!"
+call :install podman Podman
+set "PODMAN_RELEASE=!RELEASE!"
+set "WHICH="
+if not defined DOCKER_RELEASE set "WHICH=unread"
+if not defined PODMAN_RELEASE set "WHICH=unread"
+if not defined WHICH call :newer "%DOCKER_RELEASE%" "%PODMAN_RELEASE%"
+if "%WHICH%"=="unread" set "WHY=Spend Tracker is installed in both Docker and Podman, neither is running, and the release of a ledger could not be read, so this launcher cannot tell which one you use. Remove the one you no longer use (README.txt, under "Installed in both Docker and Podman", says how), then open this launcher again."
+if "%WHICH%"=="same" set "WHY=Spend Tracker is installed in both Docker and Podman, neither is running, and both ledgers are at the same release, so this launcher cannot tell which one you use. Remove the one you no longer use (README.txt, under "Installed in both Docker and Podman", says how), then open this launcher again."
+if "%WHICH%"=="unread" goto :stop
+if "%WHICH%"=="same" goto :stop
+if "%WHICH%"=="first" (
+  set "ENGINE=docker"
+  echo Spend Tracker is installed in both Docker and Podman, and neither is running; this starts the one in Docker, whose ledger is at the newer release.
+) else (
+  set "ENGINE=podman"
+  echo Spend Tracker is installed in both Docker and Podman, and neither is running; this starts the one in Podman, whose ledger is at the newer release.
+)
+
 :picked
-if "%ENGINE%"=="docker" (set "PRODUCT=Docker") else (set "PRODUCT=Podman")
+if "%ENGINE%"=="docker" (
+  set "PRODUCT=Docker" & set "OTHER=podman" & set "OTHER_PRODUCT=Podman" & set "OTHER_SEEN=%PODMAN_SEEN%"
+) else (
+  set "PRODUCT=Podman" & set "OTHER=docker" & set "OTHER_PRODUCT=Docker" & set "OTHER_SEEN=%DOCKER_SEEN%"
+)
+
+rem ---------------------------------------------------------------------------
+rem The port (#300): asked before anything is changed, so a start that cannot
+rem succeed leaves the updater, the containers and .env as they were. The
+rem rule is updater/launch.py's `port_refusal`.
+rem ---------------------------------------------------------------------------
+
+call :holder
+if "%HOLDER%"=="%OTHER%" (
+  set "WHY=Port %PORT% on this computer is in use by the Spend Tracker in %OTHER_PRODUCT%, so the one in %PRODUCT% was not started, and nothing was changed. Stop the one in %OTHER_PRODUCT%, or remove it if you no longer use it (README.txt, under "Installed in both Docker and Podman", says how), then open this launcher again."
+  goto :stop
+)
+if "%HOLDER%"=="program" (
+  set "WHY=Port %PORT% on this computer is in use by another program, so Spend Tracker was not started in %PRODUCT%, and nothing was changed. Close that program, then open this launcher again."
+  goto :stop
+)
 
 rem Docker Desktop and a Podman machine both run the engine in a VM, where
 rem /var/run/docker.sock is the right socket (S21).
@@ -195,7 +257,11 @@ for %%k in (com.docker.compose.project io.podman.compose.project) do (
 
 %ENGINE% compose --env-file .env up -d
 if errorlevel 1 (
+  rem The cause, when it is one this launcher can name (#300).
+  call :holder
   set "WHY=%PRODUCT% could not start Spend Tracker; the lines above say why."
+  if "!HOLDER!"=="%OTHER%" set "WHY=%PRODUCT% could not start Spend Tracker because port %PORT% on this computer is in use by the Spend Tracker in %OTHER_PRODUCT%. Stop the one in %OTHER_PRODUCT%, or remove it if you no longer use it (README.txt, under "Installed in both Docker and Podman", says how), then open this launcher again."
+  if "!HOLDER!"=="program" set "WHY=%PRODUCT% could not start Spend Tracker because port %PORT% on this computer is in use by another program. Close that program, then open this launcher again."
   goto :stop
 )
 
@@ -218,14 +284,117 @@ endlocal
 exit /b 0
 
 :seen
-rem What %1's CLI answers, into the variable %2: none, installed, answers
-rem or project (updater/launch.py ENGINE_STATES; "denied" is Linux's).
+rem What %1's CLI answers, into the variable %2: none, installed, answers,
+rem project or running (updater/launch.py ENGINE_STATES; "denied" is Linux's).
 set "%2=none"
 %1 compose version >nul 2>&1 || exit /b 0
 set "%2=installed"
 %1 info >nul 2>&1 || exit /b 0
 set "%2=answers"
 for /f "delims=" %%i in ('%1 ps -aq --filter "label=com.docker.compose.project=%PROJECT%" 2^>nul') do set "%2=project"
+for /f "delims=" %%i in ('%1 ps -q --filter "label=com.docker.compose.project=%PROJECT%" --filter "label=com.docker.compose.service=app" 2^>nul') do set "%2=running"
+exit /b 0
+
+:install
+rem What %1's install is (%2 names it): the ledger's release, from the pin as
+rem updater/launch.py's `find_pin` finds it, else the app container's image;
+rem and when its app last started. Into RELEASE and STARTED, and said.
+set "REF=" & set "APPID=" & set "RAW=" & set "RELEASE=" & set "STARTED=" & set "PINDIR="
+for /f "delims=" %%i in ('%1 ps -aq --filter "label=com.docker.compose.project=%PROJECT%" --filter "label=com.docker.compose.service=app" 2^>nul') do (
+  if not defined APPID (
+    set "NAME="
+    for /f "delims=" %%n in ('%1 inspect --format "{{.Name}}" %%i 2^>nul') do set "NAME=%%n"
+    if /i not "!NAME:~-9!"=="-previous" if /i not "!NAME:~-5!"=="-next" set "APPID=%%i"
+  )
+)
+for %%s in (updater app) do (
+  for /f "delims=" %%i in ('%1 ps -aq --filter "label=com.docker.compose.project=%PROJECT%" --filter "label=com.docker.compose.service=%%s" 2^>nul') do (
+    if not defined PINDIR (
+      for /f "delims=" %%d in ('%1 inspect --format "{{index .Config.Labels `com.docker.compose.project.working_dir`}}" %%i 2^>nul') do (
+        if exist "%%d\" set "PINDIR=%%d"
+      )
+    )
+  )
+)
+if defined PINDIR (
+  for %%f in ("!PINDIR!\.env" "!PINDIR!\pin\release.env") do (
+    if not defined REF if exist %%f (
+      for /f "usebackq tokens=1,* delims==" %%a in (%%f) do (
+        if not defined REF if "%%a"=="SPENDTRACKER_IMAGE" if not "%%b"=="" set "REF=%%~b"
+      )
+    )
+  )
+)
+if defined APPID (
+  if not defined REF for /f "delims=" %%r in ('%1 inspect --format "{{.Config.Image}}" !APPID! 2^>nul') do set "REF=%%r"
+  for /f "delims=" %%r in ('%1 inspect --format "{{.State.StartedAt}}" !APPID! 2^>nul') do set "RAW=%%r"
+)
+if defined REF (
+  for /f "tokens=1 delims=@" %%r in ("!REF!") do set "REF=%%r"
+  set "TAG=!REF!"
+  call :lasttag
+  if /i "!TAG:~0,1!"=="v" set "TAG=!TAG:~1!"
+  echo !TAG!| findstr /r /x "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*" >nul && (
+    for /f "tokens=1-3 delims=." %%a in ("!TAG!") do (
+      set "RELEASE=%%a.%%b.%%c"
+    )
+  )
+)
+if defined RAW if not "!RAW:~0,5!"=="0001-" if "!RAW:~13,1!"==":" (
+  set "STARTED=!RAW:~0,10! !RAW:~11,5!"
+  if "!RAW:~-1!"=="Z" (
+    set "STARTED=!STARTED! UTC"
+  ) else (
+    set "REST=!RAW:~11!"
+    if not "!REST: =!"=="!REST!" for %%w in (!RAW!) do set "LAST=%%w"
+    if not "!REST: =!"=="!REST!" set "STARTED=!STARTED! !LAST!"
+  )
+)
+set "RTEXT=an unknown release"
+if defined RELEASE set "RTEXT=!RELEASE!"
+set "STEXT=at an unknown time"
+if defined STARTED set "STEXT=on !STARTED!"
+echo In %2: the ledger is at !RTEXT!; it was last started !STEXT!.
+exit /b 0
+
+:lasttag
+rem TAG becomes what follows the reference's last ":", or nothing when a
+rem "/" follows it (a registry's port, not a tag).
+if "!TAG!"=="!TAG:*:=!" (set "TAG=" & exit /b 0)
+:lasttag_more
+set "TAG=!TAG:*:=!"
+if not "!TAG!"=="!TAG:*:=!" goto :lasttag_more
+if not "!TAG!"=="!TAG:/=!" set "TAG="
+exit /b 0
+
+:newer
+rem WHICH: first, second or same, for the releases %1 and %2.
+for /f "tokens=1-3 delims=." %%a in ("%~1") do set /a "A1=%%a, B1=%%b, C1=%%c"
+for /f "tokens=1-3 delims=." %%a in ("%~2") do set /a "A2=%%a, B2=%%b, C2=%%c"
+set "WHICH=same"
+if %A1% GTR %A2% (set "WHICH=first" & exit /b 0)
+if %A1% LSS %A2% (set "WHICH=second" & exit /b 0)
+if %B1% GTR %B2% (set "WHICH=first" & exit /b 0)
+if %B1% LSS %B2% (set "WHICH=second" & exit /b 0)
+if %C1% GTR %C2% (set "WHICH=first" & exit /b 0)
+if %C1% LSS %C2% (set "WHICH=second" & exit /b 0)
+exit /b 0
+
+:holder
+rem HOLDER: free; self (the chosen engine's own app or maintenance page,
+rem which this launcher replaces); the other engine's name; or program.
+set "HOLDER=free"
+curl.exe -s -o NUL --max-time 3 "http://127.0.0.1:%PORT%/" >nul 2>&1
+if errorlevel 7 if not errorlevel 8 exit /b 0
+set "HOLDER=program"
+for /f "delims=" %%p in ('%ENGINE% ps --filter "label=com.docker.compose.project=%PROJECT%" --format "{{.Ports}}" 2^>nul ^| findstr /c:":%PORT%-"') do set "HOLDER=self"
+if "%HOLDER%"=="self" exit /b 0
+if "%OTHER_SEEN%"=="answers" goto :holder_other
+if "%OTHER_SEEN%"=="project" goto :holder_other
+if "%OTHER_SEEN%"=="running" goto :holder_other
+exit /b 0
+:holder_other
+for /f "delims=" %%p in ('%OTHER% ps --filter "label=com.docker.compose.project=%PROJECT%" --format "{{.Ports}}" 2^>nul ^| findstr /c:":%PORT%-"') do set "HOLDER=%OTHER%"
 exit /b 0
 
 :stop

@@ -3,8 +3,9 @@ Spend Tracker @VERSION@ -- on this computer
 
 1. Install Docker Desktop (https://www.docker.com/products/docker-desktop/)
    or Podman Desktop (https://podman-desktop.io/), and start it. With both
-   installed, the launcher uses the one Spend Tracker is already in, or else
-   the one that is running.
+   installed, the launcher uses the one Spend Tracker is running in; else
+   the one it is already in; else the one that is running. See "Installed
+   in both Docker and Podman" below.
 2. Unzip this folder somewhere you will keep it, such as your Documents.
    Keep the folder: it holds the settings Spend Tracker is started with.
 3. Double-click the launcher for your system:
@@ -53,6 +54,29 @@ It is safe to run at any time. It keeps the release your ledger is at; it
 never moves you to an older or newer one. A newer zip's launcher, unzipped
 anywhere, does the same and also replaces the updater when its own is newer:
 that is the repair for an updater that no longer works.
+
+
+Installed in both Docker and Podman
+-----------------------------------
+
+The launcher uses the Spend Tracker that is running. If neither is running,
+it says which release each one's ledger is at and when each was last
+started, and starts the one whose ledger is newer. If both are at the same
+release, or one cannot be read, it stops and asks you to remove the one you
+no longer use. Before it changes anything, it checks that nothing else is
+using port 8848, and stops if something is, saying what.
+
+To remove the one you no longer use, in Docker Desktop or Podman Desktop:
+Containers -> spend-tracker -> Delete. From a terminal, in the folder that
+install was last started from:
+
+  docker compose --env-file .env down     (or: podman compose ...)
+
+Either way removes its containers and keeps its ledger, in the engine's
+volumes, so it can be started again. Delete those volumes (Volumes ->
+spend-tracker_...) only once you are sure you no longer need that ledger.
+If in doubt, start it once more and take a backup under Application ->
+Backups first.
 
 
 Windows is untested
