@@ -32,6 +32,18 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.9.2 — 2026-10-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.9.1`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.9.1` and restart.
+
+Fixes found by testing 0.9.1's updates from the browser on Docker Desktop
+(macOS, Windows), rootless Podman and a Tailscale server: an update cut off
+by a power cut now rolls back by itself, the updaters hand over cleanly, the
+launcher uses the engine Spend Tracker is in, and the page opens on the
+outcome after an update.
+
 ### Fixed
 
 - **After an update, the page opens where the outcome is.** Once the app was
