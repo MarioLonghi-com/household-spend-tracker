@@ -33,7 +33,7 @@ _NONCE_BYTES = 12
 
 
 def _root(secret_key: str | None = None) -> bytes:
-    raw = (settings.secret_key if secret_key is None else secret_key).encode()
+    raw = (settings.key() if secret_key is None else secret_key).encode()
     try:
         key = base64.urlsafe_b64decode(raw)
     except Exception as exc:  # pragma: no cover - defensive
@@ -112,7 +112,7 @@ def opens_totp_secret(sealed: bytes, *, user_id: str) -> bool:
     byte for byte, because putting the original key back is what ends
     recovery mode for every member who has not re-enrolled.
     """
-    return key_opens_totp_secret(settings.secret_key, bytes(sealed), user_id=user_id)
+    return key_opens_totp_secret(settings.key(), bytes(sealed), user_id=user_id)
 
 
 def seal_blob(payload: str, *, purpose: bytes = SETUP_BLOB) -> str:

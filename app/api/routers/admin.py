@@ -438,7 +438,7 @@ def _bundle_response(name: str, owner: User, *, with_key: bool) -> FileResponse:
             version=__version__,
             repository=platform_service.REPOSITORY,
             # Read now, not bound at import: see `platform._settings`.
-            secret_key=config.settings.secret_key if with_key else None,
+            secret_key=config.settings.key() if with_key else None,
         )
     except backup_bundle.BundleRefused as refused:
         raise ValidationError(str(refused)) from refused

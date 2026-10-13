@@ -110,25 +110,22 @@ def _place(what: str, path: Path, note: str, *, optional: bool = False) -> Place
 
 
 def database_path() -> Path | None:
-    """The SQLite file, or None on anything else.
+    """The SQLite file, or None on anything else. See `app.paths.database`."""
+    from .. import paths
 
-    `sqlite:////abs/path` and `sqlite:///relative/path` are the two shapes, and
-    the difference is one slash -- so it is parsed here once rather than in
-    each of the three callers that want the file.
-    """
-    url = _settings().database_url
-    if not url.startswith("sqlite:"):
-        return None
-    _, _, tail = url.partition("sqlite:///")
-    return Path(tail).resolve() if tail else None
+    return paths.database_of(_settings().database_url)
 
 
 def backup_dir() -> Path:
-    return _settings().data_dir / "backups"
+    from .. import paths
+
+    return _settings().data_dir / paths.BACKUPS
 
 
 def places() -> list[Place]:
     """Every path worth knowing, in the order somebody would want them."""
+    from .. import paths
+
     found = [
         _place("Installation", _ROOT, "the code this process is running"),
         _place("Data directory", _settings().data_dir, "everything that is not the code"),
@@ -142,13 +139,13 @@ def places() -> list[Place]:
         found.append(
             _place(
                 "Write-ahead log",
-                db.with_name(db.name + "-wal"),
+                paths.sidecars(db)[0],
                 "uncheckpointed writes",
                 optional=True,
             )
         )
     found += [
-        _place("Secret key", _settings().data_dir / "secret.key", "back this up with the database — without it every session and every authenticator is void"),
+        _place("Secret key", paths.key_in(_settings().data_dir), "back this up with the database — without it every session and every authenticator is void"),
         _place(
             "Backups", backup_dir(), "where the backup operation below writes", optional=True
         ),

@@ -59,6 +59,7 @@ import shutil
 import sqlite3
 import sys
 
+from app import paths
 from app.permissions import PRIVATE_DIR, copy_private, private_dir
 
 # The tables counted on both sides of a copy, and the checks that read one back.
@@ -282,7 +283,7 @@ def take(into: pathlib.Path | None = None, *, method: str = "vacuum") -> pathlib
         with contextlib.closing(sqlite3.connect(live)) as conn:
             conn.execute("VACUUM INTO ?", (str(copy),))
 
-    key = settings.data_dir / "secret.key"
+    key = paths.key_in(settings.data_dir)
     if key.exists():
         # Through a 0600 open, never `shutil.copy2`: that creates the file
         # under the umask and copies the mode across afterwards, so the key

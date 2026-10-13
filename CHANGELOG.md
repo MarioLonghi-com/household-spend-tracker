@@ -55,6 +55,16 @@ history this repository does not have.
 
 ### Changed
 
+- **Importing the app writes nothing to disk.** `secret.key` used to be made
+  when the settings were read, and the data directory when the database
+  module was imported -- so any import, a script's or a test's, could leave
+  an empty data directory or a fresh key behind. The key is now made the
+  first time it is needed (the server's startup asks, so a running instance
+  always has one) and the directory just before the first connection. Every
+  file the app keeps is named in one module, `app/paths.py`. Under the
+  desktop profile the data directory must be named, and is refused inside a
+  folder iCloud, OneDrive, Dropbox or Google Drive syncs, where SQLite's
+  three files cannot be kept together. (#317)
 - **`SPENDTRACKER_ECHO_SQL` writes to standard error, not standard output.**
   It showed the statements run before logging is configured by way of
   SQLAlchemy's `echo`, whose handler writes to standard output -- which the

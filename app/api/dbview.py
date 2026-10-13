@@ -60,7 +60,9 @@ def snapshot_path() -> Path:
     unmounted case could delete the developer's own snapshot. It also means a
     snapshot built while the server is running is found without a restart.
     """
-    return Path(settings.data_dir) / "snapshot.sqlite3"
+    from .. import paths
+
+    return Path(settings.data_dir) / paths.SNAPSHOT
 
 
 def enabled() -> bool:

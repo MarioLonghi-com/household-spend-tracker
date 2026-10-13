@@ -429,7 +429,7 @@ def test_a_cleared_authenticator_beside_a_replaced_key_is_its_own_state_everywhe
     assert _locked(owner_id) and not _locked(partner_id)
     assert _banner(client) == _counts(1, 1)
     ledger = Path(config.settings.database_url.split("///", 1)[-1])
-    booted = keycheck.check(ledger, crypto.settings.secret_key)
+    booted = keycheck.check(ledger, crypto.settings.key())
     assert (booted.enrolled, booted.refused) == (1, (OWNER,))
 
     partner = _browser(client)
@@ -905,7 +905,7 @@ def test_a_disabled_member_is_not_counted_until_they_are_enabled_again(client, m
     _replace_the_key(monkeypatch)
     assert _locked(world["partner_id"]), "still sealed with the original key"
     assert _banner(client) == _counts(1, 1)
-    booted = keycheck.check(ledger, crypto.settings.secret_key)
+    booted = keycheck.check(ledger, crypto.settings.key())
     assert (booted.enrolled, booted.refused) == (1, (OWNER,))
 
     # Every member who can sign in re-enrols; the disabled one cannot try.
@@ -919,7 +919,7 @@ def test_a_disabled_member_is_not_counted_until_they_are_enabled_again(client, m
     assert refused.status_code == 401
 
     assert _banner(owner) == _counts(1, 0)
-    booted = keycheck.check(ledger, crypto.settings.secret_key)
+    booted = keycheck.check(ledger, crypto.settings.key())
     assert (booted.enrolled, booted.refused) == (1, ())
     assert _sealed(world["partner_id"]) == partner_before
 
@@ -929,6 +929,6 @@ def test_a_disabled_member_is_not_counted_until_they_are_enabled_again(client, m
     )
     assert on.status_code == 200, on.text
     assert _banner(owner) == _counts(2, 1)
-    booted = keycheck.check(ledger, crypto.settings.secret_key)
+    booted = keycheck.check(ledger, crypto.settings.key())
     assert (booted.enrolled, booted.refused) == (2, (PARTNER,))
     assert _password(_browser(client), PARTNER, PARTNER_PASSWORD)["key_replaced"] is True

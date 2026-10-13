@@ -238,7 +238,7 @@ def test_the_key_is_in_the_zip_only_when_asked_and_it_is_this_instances_key(clie
 
     archive = _download_with_key(client, made["name"], world)
     assert f"{folder}/secret.key" in archive.namelist()
-    assert archive.read(f"{folder}/secret.key").decode().strip() == config.settings.secret_key
+    assert archive.read(f"{folder}/secret.key").decode().strip() == config.settings.key()
     manifest = json.loads(archive.read(f"{folder}/manifest.json"))
     assert manifest["secret_key"] is True
 

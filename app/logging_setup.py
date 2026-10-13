@@ -341,7 +341,9 @@ log = logging.getLogger("spendtracker")
 
 
 def log_dir() -> Path:
-    return _settings().data_dir / "logs"
+    from . import paths
+
+    return _settings().data_dir / paths.LOGS
 
 
 def log_file(stream: str = "app") -> Path:
