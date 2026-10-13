@@ -52,6 +52,10 @@ from ...services import users as user_service
 from ..deps import CurrentUser, SessionDep, client_ip
 
 router = APIRouter(tags=["profile"])
+#: A person's agent keys: their own router so that a deployment without the
+#: agent API -- the desktop app -- leaves them out whole (`app.capabilities`,
+#: #316).
+keys_router = APIRouter(tags=["profile"])
 
 
 @router.post("/me/password", response_model=PasswordChanged)
@@ -227,7 +231,7 @@ def _out(key: AgentKey) -> AgentKeyOut:
     )
 
 
-@router.get("/me/keys", response_model=list[AgentKeyOut])
+@keys_router.get("/me/keys", response_model=list[AgentKeyOut])
 def my_keys(session: SessionDep, user: CurrentUser) -> list[AgentKeyOut]:
     """Every key you have issued, newest first, dead ones included.
 
@@ -238,7 +242,7 @@ def my_keys(session: SessionDep, user: CurrentUser) -> list[AgentKeyOut]:
     return [_out(key) for key in key_service.for_user(session, user)]
 
 
-@router.post("/me/keys", response_model=AgentKeyIssued, status_code=201)
+@keys_router.post("/me/keys", response_model=AgentKeyIssued, status_code=201)
 def issue_key(
     body: IssueAgentKey, request: Request, session: SessionDep, user: CurrentUser
 ) -> AgentKeyIssued:
@@ -282,7 +286,7 @@ def issue_key(
     return AgentKeyIssued(key=_out(key), token=token)
 
 
-@router.post("/me/keys/{key_id}/revoke", response_model=AgentKeyOut)
+@keys_router.post("/me/keys/{key_id}/revoke", response_model=AgentKeyOut)
 def revoke_key(
     key_id: str, session: SessionDep, user: CurrentUser
 ) -> AgentKeyOut:

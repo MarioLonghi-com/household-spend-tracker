@@ -34,6 +34,18 @@ history this repository does not have.
 
 ### Added
 
+- **One setting says how the app is deployed, and what it offers there.**
+  `SPENDTRACKER_PROFILE` is `server` -- the default, and everything this app
+  has been until now -- or `desktop`, for the desktop app to come (#49). The
+  desktop profile leaves out what needs a network, a second device or a second
+  person: `/snap`, the agent API and agent keys, `/llms.txt`, invitations,
+  account resets, the self-updater and `/db`. Their routes are not mounted, so
+  they answer as paths that do not exist; the client reads the new
+  `GET /api/capabilities` at startup and hides them. The profile also refuses
+  `SPENDTRACKER_PUBLIC_URL`, `SPENDTRACKER_RP_ID` and any allowed host but
+  `localhost` at boot, and sends no HSTS. **Nothing changes on a server.**
+  (#316)
+
 - **The test suite also runs on macOS and Windows** in CI, for changes to the
   backend, the statement readers, the scripts, the migrations or the tests
   (#315). Ruff now refuses a `print` in the app itself (T20), and a test boots
