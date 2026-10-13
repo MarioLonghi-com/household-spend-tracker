@@ -252,8 +252,9 @@ upgrade:  ## the drill: backup, placard, migrate, verify, log
 # when the first one finds something, because "python is clean" is not an
 # answer to "is the client clean".
 audit:  ## known advisories against the pinned dependencies, Python and npm
-	-./.venv/bin/python -m pip_audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt
+	-./.venv/bin/python -m pip_audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt -r requirements-desktop.txt
 	-cd client && npm audit --audit-level=high
+	-cd desktop && npm audit --audit-level=high
 
 # Standalone, for poking at the file without running the app. 127.0.0.1 on
 # purpose: on its own Datasette has no authentication and will happily run

@@ -267,7 +267,7 @@ jobs:
           # thing to say: whether this change pinned something known to be bad.
           decide audit <<'PATHS'
           ^requirements[^/]*\.txt$
-          ^client/package(-lock)?\.json$
+          ^(client|desktop)/package(-lock)?\.json$
           PATHS
 
           # Whether the locks are what their `.in` files compile to. Either
@@ -888,7 +888,7 @@ jobs:
       # set an install gets (#46).
       - name: python dependencies
         continue-on-error: true
-        run: pip-audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt
+        run: pip-audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt -r requirements-desktop.txt
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
         with:
@@ -899,6 +899,10 @@ jobs:
         continue-on-error: true
         run: npm audit --audit-level=high
         working-directory: client
+      - name: desktop dependencies
+        continue-on-error: true
+        run: npm audit --audit-level=high
+        working-directory: desktop
 
   # What this pull request *adds*: a new or bumped dependency (pip, npm or a
   # workflow's action) with a known high-severity advisory fails here, from
