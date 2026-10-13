@@ -32,7 +32,16 @@ from statements import UnreadableStatement
 #: Re-exported so `from app.main import __version__` keeps working; the
 #: definition is in `app/__init__.py`, where a router can read it without
 #: importing this module and creating a cycle.
-from . import __version__, build, capabilities, logging_setup, notices, permissions, schema_check
+from . import (
+    __version__,
+    build,
+    capabilities,
+    instance_lock,
+    logging_setup,
+    notices,
+    permissions,
+    schema_check,
+)
 from . import db as db_module
 from .api import dbview, deps, discovery
 from .api.routers import (
@@ -186,6 +195,11 @@ async def lifespan(_: FastAPI):
     that already had real data in it.
     """
     permissions.private_dir(settings.data_dir)
+    # This process's ledger, for as long as it runs (#318): upgrade, restore
+    # and reset refuse while it is held, and a second desktop app on the same
+    # folder does not start. Released in the `finally` below, and by the
+    # operating system if the process dies first.
+    instance_lock.acquire(settings.data_dir)
     # The key, made now if this is the first start: it is no longer made when
     # the settings are read (#317), and a running instance always has one.
     settings.key()
@@ -270,6 +284,7 @@ async def lifespan(_: FastAPI):
         sweeper.cancel()
         with contextlib.suppress(asyncio.CancelledError):
             await sweeper
+        instance_lock.release(settings.data_dir)
 
 
 # The schema and the two doc viewers are off unless this instance is explicitly

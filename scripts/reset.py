@@ -49,8 +49,6 @@ def main(argv: list[str] | None = None, *, ask=input) -> int:
     args = parser.parse_args(argv)
 
     from app.config import settings
-    from app.services import backup_bundle
-    from scripts import backup as backup_script
     from scripts import in_a_container
     from scripts.upgrade import port_is_busy
 
@@ -67,6 +65,25 @@ def main(argv: list[str] | None = None, *, ask=input) -> int:
             "first; moving a database out from under a running server is how a WAL and "
             "its database start disagreeing."
         )
+
+    from app import instance_lock
+
+    # The ledger, which is what the port stood for (#318).
+    try:
+        instance_lock.acquire(settings.data_dir)
+    except instance_lock.LedgerBusy as busy:
+        raise SystemExit(f"Refusing: {busy}") from None
+    try:
+        return _reset_holding(args, live=live, key=key, ask=ask)
+    finally:
+        instance_lock.release(settings.data_dir)
+
+
+def _reset_holding(args, *, live, key, ask) -> int:
+    from app.config import settings
+    from app.services import backup_bundle
+    from scripts import backup as backup_script
+    from scripts import in_a_container
 
     rows = backup_bundle.counts(live)
     print(f"The ledger at {live}")
