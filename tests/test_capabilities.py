@@ -58,10 +58,14 @@ def restore_server(monkeypatch):
     yield
     monkeypatch.delenv("SPENDTRACKER_PROFILE", raising=False)
     import app.config as config
+    import app.db as db
     import app.main as main
 
     monkeypatch.undo()
+    # All three: `app.db` keeps the engine, and left bound to this test's
+    # temporary ledger it hands the next test in this worker a deleted file.
     importlib.reload(config)
+    importlib.reload(db)
     importlib.reload(main)
 
 
@@ -125,8 +129,15 @@ def test_a_route_left_out_answers_as_one_that_never_existed(monkeypatch, tmp_pat
             answer = client.request(method, concrete, headers=HEADERS)
             # A sibling that was never a route, under the same prefix and method.
             invented = client.request(method, concrete.rsplit("/", 1)[0] + "/no-such-route", headers=HEADERS)
-            assert (answer.status_code, answer.json()) == (404, invented.json()), (need, method, path)
-            assert invented.status_code == 404
+            said = (answer.status_code, answer.headers.get("content-type"), answer.content)
+            assert said == (invented.status_code, invented.headers.get("content-type"), invented.content), (
+                need, method, path,
+            )
+            # Whatever a path nobody claims gets: 404, and once the built
+            # client is served, its shell for a GET outside /api/ and 405 for
+            # any other method -- the same for an invented path as for one
+            # left out, which is the point.
+            assert invented.status_code in (200, 404, 405)
 
 
 def test_what_the_desktop_keeps_works_for_two_households(monkeypatch, tmp_path, restore_server):

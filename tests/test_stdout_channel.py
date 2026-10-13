@@ -43,8 +43,25 @@ def _boot(monkeypatch, data: Path) -> TestClient:
     return TestClient(main.app, base_url="https://testserver")
 
 
+@pytest.fixture()
+def restore_app(monkeypatch):
+    """Rebuild the default app afterwards: the engine `app.db` keeps would
+    otherwise stay bound to this test's temporary ledger for the next test."""
+    yield
+    import app.config as config
+    import app.db as db
+    import app.main as main
+
+    monkeypatch.undo()
+    importlib.reload(config)
+    importlib.reload(db)
+    importlib.reload(main)
+
+
 @pytest.mark.parametrize("echo_sql", ["", "1"], ids=["plain", "echo-sql"])
-def test_import_lifespan_setup_and_requests_print_nothing(monkeypatch, tmp_path, capfd, echo_sql):
+def test_import_lifespan_setup_and_requests_print_nothing(
+    monkeypatch, tmp_path, capfd, echo_sql, restore_app
+):
     monkeypatch.setenv("SPENDTRACKER_ECHO_SQL", echo_sql)
     capfd.readouterr()
 
