@@ -93,6 +93,7 @@ jobs:
       audit: ${{ steps.diff.outputs.audit }}
       lock: ${{ steps.diff.outputs.lock }}
       selfupdate: ${{ steps.diff.outputs.selfupdate }}
+      desktop: ${{ steps.diff.outputs.desktop }}
       tree: ${{ steps.green.outputs.tree }}
       # The id of an earlier successful run of this workflow on the identical
       # tree, or empty. The heavy jobs skip when it is set.
@@ -186,7 +187,7 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
         run: |
-          jobs="python client code image rehearsal audit lock selfupdate"
+          jobs="python client code image rehearsal audit lock selfupdate desktop"
           everything() {
             echo "$1: everything runs"
             for job in $jobs; do echo "$job=true" >> "$GITHUB_OUTPUT"; done
@@ -284,6 +285,16 @@ jobs:
           ^migrations/
           ^(Dockerfile|compose\.yaml|requirements(-updater)?\.txt)$
           ^tests/self_update/
+          PATHS
+
+          # The suite on macOS and Windows (#315): what the desktop app runs
+          # outside a container -- the backend, the statement readers, the
+          # scripts it calls in-process, the migrations -- and the tests and
+          # dependencies that check it there.
+          decide desktop <<'PATHS'
+          ^(app|statements|scripts|migrations|tests)/
+          ^requirements(-dev)?\.txt$
+          ^(pyproject\.toml|alembic\.ini)$
           PATHS
 
   # --------------------------------------------------------------------------- #
@@ -451,6 +462,38 @@ jobs:
         env:
           SPENDTRACKER_DATA_DIR: ./ci-data
           DATABASE_URL: sqlite:///./ci-data/seed.sqlite3
+
+  # The same suite on the two operating systems the desktop app ships for
+  # (#49). Everything above runs on Linux, where the server and the image do;
+  # the desktop runs this code on an Apple Silicon Mac and on Windows 11, where
+  # nothing had ever run it, and the first look found two things that only
+  # broke there (#315). `PYTHONUTF8=1` because that is how the desktop shell
+  # starts the backend, and how Windows reads text the way Linux does. No
+  # coverage here: the threshold is the Linux job's, and a test skipped for
+  # being POSIX-only would only move the number.
+  pytest-desktop-os:
+    needs: changes
+    if: needs.changes.outputs.desktop == 'true' && needs.changes.outputs.green == ''
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, windows-latest]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install --require-hashes -r requirements-dev.txt
+      - name: pytest
+        run: python -m pytest -n auto --dist loadfile --no-cov -ra
+        env:
+          PYTHONUTF8: "1"
+          SPENDTRACKER_DATA_DIR: ./ci-data
 
   # The type check, the client's unit tests (vitest: the pre-commit hook ran
   # them and CI never did) and the build. `npm run build` is the client check,
@@ -1271,6 +1314,7 @@ jobs:
       - lint
       - repo-wide
       - pytest
+      - pytest-desktop-os
       - client
       - e2e
       - rehearsal

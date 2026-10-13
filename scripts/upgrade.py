@@ -474,11 +474,13 @@ def _write_report(path: pathlib.Path, outcome: dict) -> None:
     Podman leg, where every apply stalled at step 5). So 0660 whatever the
     umask, as every other file the app writes there.
     """
+    from app import permissions
+
     scratch = path.with_name(path.name + ".tmp")
     scratch.unlink(missing_ok=True)
-    fd = os.open(scratch, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, REPORT_MODE)
+    fd = os.open(scratch, os.O_WRONLY | os.O_CREAT | os.O_EXCL | permissions.O_NOFOLLOW, REPORT_MODE)
     with os.fdopen(fd, "w") as f:
-        os.fchmod(f.fileno(), REPORT_MODE)  # whatever the umask took away
+        permissions.fchmod(f.fileno(), REPORT_MODE)  # whatever the umask took away
         f.write(json.dumps(outcome, indent=2) + "\n")
     scratch.replace(path)
 
