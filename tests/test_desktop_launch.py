@@ -187,6 +187,48 @@ def test_a_failed_migration_leaves_the_backup_and_says_so(client, ledger_at, mon
     assert "no such column" in (prepared.backup / "upgrade.log").read_text()
 
 
+def test_a_ledger_that_arrived_without_its_key_is_still_upgraded(client, ledger_at):
+    """Found on Windows: a ledger copied in by hand, no `secret.key` beside it,
+    stopped the frozen backend at the backup. The key is made first now."""
+    from app import paths
+    from app.desktop import launch
+    from scripts.upgrade import chain
+
+    older = Path(client.app_module.settings.database_url.split("///", 1)[-1])
+    _older_ledger(client, older, "Ours", "Theirs")
+    key = paths.key_in(older.parent)
+    key.unlink()
+    ledger_at(older.parent, older)
+
+    prepared = launch.prepare(say=lambda _line: None, confirm_lossy=lambda _titles: True)
+
+    assert prepared.outcome == launch.READY, prepared.log
+    assert _stamp(older) == chain()[-1].revision
+    assert _households(older) == ["Ours", "Theirs"]
+    assert key.exists()
+    assert (prepared.backup / "secret.key").read_bytes() == key.read_bytes()
+
+
+def test_a_backup_that_cannot_be_made_stops_the_start_unmigrated(client, ledger_at, monkeypatch):
+    from app.desktop import launch
+    from scripts import backup as backup_script
+
+    older = Path(client.app_module.settings.database_url.split("///", 1)[-1])
+    previous = _older_ledger(client, older, "Ours")
+    ledger_at(older.parent, older)
+
+    def refuse(*_args, **_kwargs):
+        raise SystemExit("the disk is full")
+
+    monkeypatch.setattr(backup_script, "take", refuse)
+    prepared = launch.prepare(say=lambda _line: None, confirm_lossy=lambda _titles: True)
+
+    assert prepared.outcome == launch.BACKUP_FAILED
+    assert "the disk is full" in prepared.log[-1]
+    assert _stamp(older) == previous
+    assert _households(older) == ["Ours"]
+
+
 def test_a_second_process_on_the_same_ledger_is_refused(ledger_at, tmp_path):
     """The lock is the kernel's, so it takes another process to see it."""
     from app import instance_lock

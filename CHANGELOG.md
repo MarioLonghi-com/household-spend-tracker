@@ -57,6 +57,10 @@ history this repository does not have.
   new backend, counting every table before and after. (#61, #62)
 - **The app folds the WAL back into the ledger when it stops,** so a stopped
   ledger is one file. (#62)
+- **A desktop ledger that arrived without its `secret.key` is upgraded
+  anyway.** The key is made before the backup that precedes an upgrade, and a
+  backup that cannot be made stops the start with its reason, unmigrated,
+  instead of ending the backend. (Found on Windows, #61)
 
 - **The backend can be served over stdin and stdout, for the desktop app.**
   `python -m app.desktop.stdio_adapter` runs the desktop start -- the ledger

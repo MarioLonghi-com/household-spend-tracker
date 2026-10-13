@@ -102,10 +102,12 @@ one is signed with a throwaway certificate:
 
 ```powershell
 powershell -File desktop\scripts\test-certificate.ps1 -Out C:\st-test
-$env:CSC_LINK = "C:\st-test\test-signing.pfx"
-$env:CSC_KEY_PASSWORD = Get-Content C:\st-test\test-signing.pass
 python -m scripts.desktop_build win
+powershell -File desktop\scripts\sign-msix.ps1 -Package "desktop\dist\Spend Tracker 0.10.1.appx" -Pfx C:\st-test\test-signing.pfx
 ```
+
+`sign-msix.ps1` uses the Windows SDK's `signtool`: the copy electron-builder
+carries fails on current Windows 11 with "A required function is not present".
 
 Then the machine's owner trusts `test-signing.cer` (the script says how, and
 how to remove it again) and installs `desktop\dist\*.appx`.

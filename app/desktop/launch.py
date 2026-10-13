@@ -13,7 +13,7 @@ the database --
 3. **ask**, when a migration cannot be undone (`Reversible: lossy`): the shell
    shows its own dialog, and declining changes nothing;
 4. **back up** with `VACUUM INTO`, reopened and counted, into the ledger's own
-   `backups/`;
+   `backups/` -- and a backup that cannot be made stops here, unmigrated;
 5. **migrate** in this process (`app.migrate`);
 6. **count again**: a table holding fewer rows than the backup counted means
    the app must not start, and the backup is where the ledger is;
@@ -36,6 +36,7 @@ READY = "ready"
 NEWER = "newer"
 DECLINED = "declined"
 MIGRATION_FAILED = "migration-failed"
+BACKUP_FAILED = "backup-failed"
 ROWS_DROPPED = "rows-dropped"
 
 
@@ -117,7 +118,18 @@ def prepare(
     rows_before: dict[str, int] = {}
     # A ledger that was never stamped is new: there is nothing in it to keep.
     if before is not None and database is not None and database.exists():
-        backup = backup_script.take(paths.backups())
+        # The key first, made if this ledger arrived without one -- moved by
+        # hand, or restored from a server. The backup refuses to be taken
+        # without it, and on the desktop it opens nothing: there are no
+        # authenticators (#320), so a new key loses nothing an old one held.
+        settings.key()
+        try:
+            backup = backup_script.take(paths.backups())
+        except SystemExit as refused:
+            # The drill's sentence, said to the shell rather than ending the
+            # process: nothing has been migrated, so nothing is at risk.
+            tell(f"the backup before the upgrade could not be made: {refused}")
+            return Prepared(BACKUP_FAILED, stamp_before=before, stamp_after=before, log=lines)
         # `take` has reopened the copy and counted it against the live ledger;
         # its manifest holds the "before" of every table, as for the server's
         # drill.

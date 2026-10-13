@@ -7,9 +7,8 @@
 # CN=SpendTrackerTest -- the publisher electron-builder.yml names for test
 # builds -- valid for 30 days, and writes:
 #
-#   test-signing.pfx   the key, for electron-builder: set CSC_LINK to it and
-#                      CSC_KEY_PASSWORD to the contents of test-signing.pass
-#   test-signing.pass  that password, random
+#   test-signing.pfx   the key, for sign-msix.ps1
+#   test-signing.pass  its password, random
 #   test-signing.cer   the public half, to trust
 #
 # It does NOT trust the certificate. Trusting one is a security decision for
