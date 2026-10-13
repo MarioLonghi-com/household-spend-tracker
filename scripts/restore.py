@@ -61,10 +61,12 @@ import pathlib
 import socket
 import sys
 
+from app import paths
+
 #: Moved aside with the database. `-shm` is shared memory and `-wal` is the
 #: write-ahead log; both belong to the file being replaced and neither is
 #: meaningful beside a different one.
-SIDECARS = ("-wal", "-shm")
+SIDECARS = paths.SIDECARS
 
 
 def _port_is_busy(port: int) -> bool:
@@ -183,7 +185,7 @@ def _restore(
         manifest = json.loads((folder / "manifest.json").read_text())
 
     live = pathlib.Path(settings.database_url.split("///", 1)[-1]).resolve()
-    key = settings.data_dir / "secret.key"
+    key = paths.key_in(settings.data_dir)
 
     # Which key goes beside the restored ledger. The backup's own wins; then
     # the one named on the command line; then the one already here, kept in

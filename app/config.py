@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from . import paths
 from .permissions import private_dir, tighten_umask
 
 
@@ -46,7 +47,7 @@ def _load_or_create_secret_key(data_dir: Path) -> str:
         return from_env
 
     private_dir(data_dir)
-    path = data_dir / "secret.key"
+    path = paths.key_in(data_dir)
     if path.exists():
         existing = path.read_text().strip()
         if existing:
@@ -259,6 +260,32 @@ def _desktop_refusals(*, public_url: str, rp_id_raw: str | None, hosts_raw: str 
         )
 
 
+def _desktop_data_dir() -> None:
+    """The desktop profile's data directory: named by the shell, never guessed,
+    and never inside a folder a sync client owns (#317).
+
+    Named, because the shell knows where the operating system keeps an app's
+    data -- the sandbox container's Application Support on a Mac, the
+    unvirtualised `%LOCALAPPDATA%` folder on Windows -- and Python launched
+    from a Finder double-click knows neither, nor even a working directory.
+    Not synced, because SQLite's three files are one database only on one
+    local disk; `paths.sync_root` says why.
+    """
+    named = (os.environ.get("SPENDTRACKER_DATA_DIR") or "").strip()
+    if not named:
+        raise ValueError(
+            "SPENDTRACKER_DATA_DIR must be set under the desktop profile: the app names "
+            "where its ledger lives, and this process does not guess"
+        )
+    service = paths.sync_root(Path(named))
+    if service:
+        raise ValueError(
+            f"the ledger cannot live in a folder {service} syncs ({named}): SQLite keeps it "
+            "as three files that must change together on one disk. Keep it in the app's own "
+            "folder, and put backups in the synced one"
+        )
+
+
 def _hosts(raw: str | None) -> tuple[str, ...]:
     if raw is None or not raw.strip():
         return DEFAULT_ALLOWED_HOSTS
@@ -269,6 +296,10 @@ def _hosts(raw: str | None) -> tuple[str, ...]:
 class Settings:
     database_url: str
     data_dir: Path
+    #: The key from `SPENDTRACKER_SECRET_KEY`, or empty for `secret.key` in
+    #: `data_dir` -- read, or made, on first use rather than when the settings
+    #: are built (#317): importing `app.config` writes nothing. Read it through
+    #: `key()`, which also covers a test that sets one here.
     secret_key: str
     echo_sql: bool
     #: `server` or `desktop`; see `PROFILES`. Read through `app.capabilities`,
@@ -347,6 +378,17 @@ class Settings:
     #: status, reports and history. See `resolve_update_dir`.
     update_dir: Path = Path("/var/lib/spend-tracker-update")
 
+    def key(self) -> str:
+        """The root key this process runs with. `secret.key` is created the
+        first time anything asks -- the server's startup does, so a running
+        instance always has one."""
+        if self.secret_key:
+            return self.secret_key
+        cached = _KEYS.get(self.data_dir)
+        if cached is None:
+            cached = _KEYS[self.data_dir] = _load_or_create_secret_key(self.data_dir)
+        return cached
+
     @property
     def secret_key_source(self) -> str:
         """Where the key this process runs with came from, as an operator
@@ -362,11 +404,13 @@ class Settings:
         # because every entry point reads the settings before it writes, the
         # server and every script alike. See `app/permissions.py`.
         tighten_umask()
+        profile = _profile(os.environ.get("SPENDTRACKER_PROFILE"))
+        if profile == "desktop":
+            _desktop_data_dir()
         data_dir = resolve_data_dir()
-        url = os.environ.get("DATABASE_URL") or f"sqlite:///{data_dir / 'spendtracker.sqlite3'}"
+        url = os.environ.get("DATABASE_URL") or f"sqlite:///{data_dir / paths.DATABASE}"
         environment = os.environ.get("SPENDTRACKER_ENV", "production")
         public_url = _public_url(os.environ.get("SPENDTRACKER_PUBLIC_URL"))
-        profile = _profile(os.environ.get("SPENDTRACKER_PROFILE"))
         hosts_raw = os.environ.get("SPENDTRACKER_ALLOWED_HOSTS")
         if profile == "desktop":
             _desktop_refusals(
@@ -377,7 +421,7 @@ class Settings:
         return cls(
             database_url=url,
             data_dir=data_dir,
-            secret_key=_load_or_create_secret_key(data_dir),
+            secret_key=_key_from_env(),
             secret_key_from_env=bool(_key_from_env()),
             echo_sql=_bool("SPENDTRACKER_ECHO_SQL"),
             profile=profile,
@@ -390,5 +434,9 @@ class Settings:
             update_dir=resolve_update_dir(data_dir),
         )
 
+
+#: The key read from each data directory's `secret.key`, by directory, so it is
+#: read once rather than on every authenticator check.
+_KEYS: dict[Path, str] = {}
 
 settings = Settings.from_env()

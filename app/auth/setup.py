@@ -22,6 +22,7 @@ from pathlib import Path
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
+from .. import paths
 from ..audit.batch import batch
 from ..config import settings
 from ..errors import Conflict, ValidationError
@@ -37,7 +38,7 @@ RECOVERY_CODE_COUNT = 10
 
 
 def setup_token_path() -> Path:
-    return settings.data_dir / "setup-token"
+    return settings.data_dir / paths.SETUP_TOKEN
 
 
 def instance_state(session: Session) -> InstanceState:

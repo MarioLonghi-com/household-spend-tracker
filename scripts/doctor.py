@@ -156,7 +156,7 @@ def run(say: Report, *, backups: list[pathlib.Path]) -> None:
         say.ok("ledger", f"{len(houses)} household(s): {names}; {count} member(s){extra} since {since[:10]}")
 
     key = data / "secret.key"
-    checked = keycheck.check(db, settings.secret_key)
+    checked = keycheck.check(db, settings.key())
     if checked.enrolled == 0:
         say.ok("secret.key", "nobody has enrolled an authenticator yet, so any key will do")
     elif checked.refused:

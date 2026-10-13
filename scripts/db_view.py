@@ -32,6 +32,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
+from app import paths  # noqa: E402
 from app.config import settings  # noqa: E402
 
 #: Tables that are nothing but live authentication state. A snapshot has no use
@@ -447,7 +448,7 @@ def default_destination() -> pathlib.Path:
     Makefile did not -- so the snapshot was built and Datasette was handed a
     path that did not exist (#64).
     """
-    return pathlib.Path(settings.data_dir) / "snapshot.sqlite3"
+    return pathlib.Path(settings.data_dir) / paths.SNAPSHOT
 
 
 def serve(destination: pathlib.Path, port: int) -> None:

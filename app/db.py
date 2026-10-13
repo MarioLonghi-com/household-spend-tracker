@@ -69,7 +69,6 @@ _connect_args: dict = {}
 _pool_args: dict = {}
 if settings.database_url.startswith("sqlite"):
     _connect_args = {"check_same_thread": False}
-    private_dir(settings.data_dir)
     if make_url(settings.database_url).database not in (None, "", ":memory:"):
         # See the module docstring: never make a request wait for a connection
         # that another waiting request is holding.
@@ -145,6 +144,20 @@ if settings.echo_sql:
     _early_sql = logging.getLogger("sqlalchemy.engine.Engine")
     _early_sql.addHandler(logging.StreamHandler(sys.stderr))
     _early_sql.setLevel(logging.INFO)
+
+
+@event.listens_for(engine, "do_connect")
+def _make_the_data_dir(dialect, conn_rec, cargs, cparams) -> None:
+    """The data directory, made private, just before SQLite's first file is.
+
+    Not at import (#317): importing `app.db` writes nothing, so the desktop app
+    can lock, back up and migrate a ledger before anything opens it -- and a
+    stray import cannot leave an empty data directory behind. SQLAlchemy
+    connects lazily, so this runs at the first query, once per new
+    connection; `private_dir` on an existing directory only tightens it.
+    """
+    if settings.database_url.startswith("sqlite"):
+        private_dir(settings.data_dir)
 
 
 @event.listens_for(Engine, "connect")

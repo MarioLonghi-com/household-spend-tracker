@@ -34,7 +34,9 @@ import datetime as dt
 import pathlib
 import sys
 
-SIDECARS = ("-wal", "-shm")
+from app import paths
+
+SIDECARS = paths.SIDECARS
 
 
 def main(argv: list[str] | None = None, *, ask=input) -> int:
@@ -55,7 +57,7 @@ def main(argv: list[str] | None = None, *, ask=input) -> int:
     if not settings.database_url.startswith("sqlite:///"):
         raise SystemExit("DATABASE_URL is not SQLite; reset a Postgres deployment with its own tools.")
     live = pathlib.Path(settings.database_url.split("///", 1)[-1]).resolve()
-    key = settings.data_dir / "secret.key"
+    key = paths.key_in(settings.data_dir)
     if not live.exists():
         print(f"There is no ledger at {live}. Nothing to reset.")
         return 0

@@ -145,7 +145,7 @@ def announce_ledger() -> None:
         rows.get("households", 0),
         rows.get("users", 0),
     )
-    keyed = keycheck.check(path, settings.secret_key)
+    keyed = keycheck.check(path, settings.key())
     if keyed.refused:
         if settings.secret_key_from_env:
             back = f"setting {SECRET_KEY_ENV} back to the original key"
@@ -186,6 +186,9 @@ async def lifespan(_: FastAPI):
     that already had real data in it.
     """
     permissions.private_dir(settings.data_dir)
+    # The key, made now if this is the first start: it is no longer made when
+    # the settings are read (#317), and a running instance always has one.
+    settings.key()
 
     # First, so that everything below this line reaches the file. Until this
     # existed the app configured no handler at all: every `log.warning` here

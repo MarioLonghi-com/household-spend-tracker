@@ -229,7 +229,7 @@ def test_an_authenticator_a_reset_cleared_is_cleared_again_after_a_rollback_and_
     command.upgrade(cfg, "head")
     assert _members(db) == {"owner@example.com": (known, None), "member@example.com": (known, sealed)}
 
-    right = crypto.settings.secret_key
+    right = crypto.settings.key()
     assert keycheck.check(db, right) == keycheck.KeyCheck(enrolled=1, refused=())
     assert backup_bundle.a_sealed_secret(db) == ("user1", sealed)
     assert restore._key_verdict(db, right) == (True, "the key opens a real authenticator secret in it")
