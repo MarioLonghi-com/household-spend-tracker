@@ -57,6 +57,10 @@ router = APIRouter(tags=["profile"])
 #: #316).
 keys_router = APIRouter(tags=["profile"])
 
+#: The authenticator: seeing, replacing and confirming it. Its own router so
+#: that the desktop, where a password is the only factor (#320), leaves it out.
+authenticator_router = APIRouter(tags=["profile"])
+
 
 @router.post("/me/password", response_model=PasswordChanged)
 def change_password(
@@ -87,7 +91,7 @@ def change_password(
     )
 
 
-@router.get("/me/authenticator", response_model=AuthenticatorStatus)
+@authenticator_router.get("/me/authenticator", response_model=AuthenticatorStatus)
 def authenticator_status(user: CurrentUser) -> AuthenticatorStatus:
     """Whether the caller has an authenticator, and whether this server's key
     opens it (#287).
@@ -103,7 +107,7 @@ def authenticator_status(user: CurrentUser) -> AuthenticatorStatus:
     )
 
 
-@router.post("/me/authenticator", response_model=ReenrolmentOffer)
+@authenticator_router.post("/me/authenticator", response_model=ReenrolmentOffer)
 def start_reenrolment(
     body: StartReenrolment, request: Request, session: SessionDep, user: CurrentUser
 ) -> ReenrolmentOffer:
@@ -118,7 +122,7 @@ def start_reenrolment(
     return ReenrolmentOffer(token=token, secret=secret, uri=uri)
 
 
-@router.post("/me/authenticator/confirm", response_model=ReenrolmentDone)
+@authenticator_router.post("/me/authenticator/confirm", response_model=ReenrolmentDone)
 def confirm_reenrolment(
     body: ConfirmReenrolment, request: Request, session: SessionDep, user: CurrentUser
 ) -> ReenrolmentDone:

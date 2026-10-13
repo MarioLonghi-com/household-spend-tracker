@@ -109,7 +109,9 @@ msgid "Choose…"
 msgstr ""
 
 #. Label of a form field on the Your account panel
+#. Label of a form field on the desktop app's sign-in page
 #: src/screens/Profile.tsx
+#: src/screens/SignIn.tsx
 msgid "New password"
 msgstr ""
 
@@ -364,6 +366,11 @@ msgstr ""
 msgid "One of the newest five update backups: kept so an update can be undone"
 msgstr ""
 
+#. Button on the desktop app's sign-in page
+#: src/screens/SignIn.tsx
+msgid "Change password and sign in"
+msgstr ""
+
 #: src/screens/Rules.tsx
 msgid "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot mean “whatever comes after it” — choose <2>take this bit off</2> for that."
 msgstr ""
@@ -570,6 +577,10 @@ msgstr ""
 msgid "The app stays up throughout. Nothing in the ledger changes."
 msgstr ""
 
+#: src/components/RecoveryCodes.tsx
+msgid "It works once, and it is shown only now. It is how you choose a new password if you forget this one."
+msgstr ""
+
 #: src/screens/SignIn.tsx
 msgid "You're signed in. This server's secret key was replaced, so the authenticator you had no longer works here. Scan this with your authenticator app and type the six digits it shows — the recovery code you just used covers this, so it costs no other. Then delete the old entry for this account from your app."
 msgstr ""
@@ -653,6 +664,11 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "Length does more than symbols do. Four unrelated words you can actually remember beats a short one with punctuation in it."
+msgstr ""
+
+#. Link on the desktop app's sign-in page
+#: src/screens/SignIn.tsx
+msgid "Forgot your password? Use your recovery code"
 msgstr ""
 
 #: src/screens/OneTimeImport.tsx
@@ -798,6 +814,10 @@ msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "Add a rule"
+msgstr ""
+
+#: src/components/StepUp.tsx
+msgid "{why} So this asks for your password again."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -1998,9 +2018,18 @@ msgstr ""
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr ""
 
+#. State of the desktop app's recovery code: spent, a new one is needed
+#: src/screens/Profile.tsx
+msgid "Used"
+msgstr ""
+
 #. Label on the receipts
 #: src/components/Receipts.tsx
 msgid "facing {bearing}° {point}"
+msgstr ""
+
+#: src/screens/SignIn.tsx
+msgid "Your password is changed and the code you used has stopped working. This one replaces it: keep it somewhere other than this computer."
 msgstr ""
 
 #: src/screens/History.tsx
@@ -2408,6 +2437,11 @@ msgstr ""
 msgid "Reset sign-in for {0}"
 msgstr ""
 
+#. Heading on the desktop app's sign-in page, after a new password
+#: src/screens/SignIn.tsx
+msgid "Your new recovery code"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "This one was entered by hand."
 msgstr ""
@@ -2514,6 +2548,11 @@ msgstr ""
 
 #: src/screens/reports/IncomeExpense.tsx
 msgid "There are no accounts yet, so there is nothing to report on. Add one on the Accounts screen and the figures will follow."
+msgstr ""
+
+#. State of the desktop app's recovery code: not yet used
+#: src/screens/Profile.tsx
+msgid "Ready"
 msgstr ""
 
 #. placeholder {0}: report.balance_differences!.length
@@ -4467,6 +4506,10 @@ msgstr ""
 msgid "Back the database up"
 msgstr ""
 
+#: src/components/RecoveryCodes.tsx
+msgid "I have stored it somewhere that is not this computer"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "No households yet."
 msgstr ""
@@ -4772,7 +4815,9 @@ msgstr ""
 msgid "By"
 msgstr ""
 
+#. Heading on the desktop app's sign-in page
 #: src/screens/ResetAccount.tsx
+#: src/screens/SignIn.tsx
 msgid "A new password"
 msgstr ""
 
@@ -6350,6 +6395,10 @@ msgstr ""
 msgid "Ignore {0}"
 msgstr ""
 
+#: src/screens/Setup.tsx
+msgid "If you ever forget your password, this code lets you choose a new one. It works once. Keep it somewhere other than this computer: on paper, or in a password manager."
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Link as transfer"
 msgstr ""
@@ -6406,7 +6455,10 @@ msgstr ""
 msgid "Delete group"
 msgstr ""
 
+#. Label on the Your account panel of the desktop app, which has one. See GLOSSARY.md
 #. Text on the sign-in page. See GLOSSARY.md
+#. Text on the sign-in page. See GLOSSARY.md
+#: src/screens/Profile.tsx
 #: src/screens/SignIn.tsx
 msgid "Recovery code"
 msgstr ""
@@ -6918,6 +6970,10 @@ msgstr ""
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so a figure adding {0} would be a number with nothing behind it."
 msgstr ""
 
+#: src/screens/Profile.tsx
+msgid "Your code stops working and a new one replaces it. Nobody is signed out."
+msgstr ""
+
 #. Tooltip on the Register screen
 #: src/screens/Register.tsx
 msgid "Larger text"
@@ -6952,8 +7008,10 @@ msgstr ""
 msgid "{0}. Save it into your synced Drive or Dropbox folder"
 msgstr ""
 
+#. Heading on the desktop app's first-run setup, its first of two steps
 #. Heading on the invitation page
 #: src/screens/AcceptInvite.tsx
+#: src/screens/Setup.tsx
 msgid "1. You"
 msgstr ""
 
@@ -8324,6 +8382,7 @@ msgstr ""
 #. Label of a form field on the first-run setup: noun, an email address
 #. Label of a form field on the invitation page: noun, an email address
 #. Label of a form field on the sign-in page: noun, an email address
+#. Label of a form field on the sign-in page: noun, an email address
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Admin.tsx
 #: src/screens/Setup.tsx
@@ -8480,6 +8539,11 @@ msgstr ""
 msgid "password"
 msgstr ""
 
+#. Link on the desktop app's sign-in page
+#: src/screens/SignIn.tsx
+msgid "Back to signing in"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Cleared — the bank has it"
 msgstr ""
@@ -8595,6 +8659,11 @@ msgstr ""
 #. Column name shown beside a value on phones on the accounts import
 #: src/screens/AccountImport.tsx
 msgid "Problems"
+msgstr ""
+
+#. Button on the Your account panel of the desktop app
+#: src/screens/Profile.tsx
+msgid "New code"
 msgstr ""
 
 #. Updates section: the version running now
@@ -9300,6 +9369,11 @@ msgstr ""
 msgid "work expense"
 msgstr ""
 
+#. Heading on the desktop app's first-run setup, its second of two steps
+#: src/screens/Setup.tsx
+msgid "2. Your recovery code"
+msgstr ""
+
 #: src/App.tsx
 #: src/screens/ynab/results.tsx
 msgid "Payee Naming Rules"
@@ -9628,6 +9702,10 @@ msgstr ""
 
 #: src/lib/signInChanges.ts
 msgid "{by} reset {user}'s password"
+msgstr ""
+
+#: src/screens/Profile.tsx
+msgid "You sign in with your password. If you forget it, your recovery code lets you choose a new one."
 msgstr ""
 
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
@@ -10303,6 +10381,7 @@ msgstr ""
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/Setup.tsx
+#: src/screens/SignIn.tsx
 msgid "At least 12 characters. Length is what matters."
 msgstr ""
 
@@ -10618,6 +10697,10 @@ msgstr ""
 
 #: src/screens/OneTimeImport.tsx
 msgid "No flagged rows were found."
+msgstr ""
+
+#: src/screens/SignIn.tsx
+msgid "Use the recovery code you kept when you set up Spend Tracker. It works once; you will be given a new one."
 msgstr ""
 
 #. A changed field in History's detail, lower case
@@ -11258,6 +11341,7 @@ msgstr ""
 #. Button on the first-run setup: go on to the next step
 #. Button on the first-run setup: go on to the next step
 #. Button on the invitation page: go on to the next step
+#. Button on the sign-in page: go on to the next step
 #. Button on the sign-in page: go on to the next step
 #. Button on the sign-in page: go on to the next step
 #: src/screens/AcceptInvite.tsx

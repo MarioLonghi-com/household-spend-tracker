@@ -34,6 +34,18 @@ history this repository does not have.
 
 ### Added
 
+- **On the desktop profile, a password opens the app and one recovery code
+  replaces a forgotten one.** Setup asks for no token -- only the app itself
+  can reach it -- and enrols no authenticator: you, then a single recovery
+  code to keep. Sign-in is the password; a step-up, and making a new recovery
+  code, take the password alone. *Forgot your password?* takes the recovery
+  code and a new password, spends the code, ends every other session, and
+  shows the code that replaces it (`POST /api/session/recover`, desktop
+  only). The authenticator screens and routes, passkeys, and the Backups
+  option to include `secret.key` -- which protects only authenticators --
+  are not there. Which applies is decided by the profile, never by an empty
+  authenticator, which keeps meaning "cleared by a reset". **Nothing changes
+  on a server.** (#320)
 - **One setting says how the app is deployed, and what it offers there.**
   `SPENDTRACKER_PROFILE` is `server` -- the default, and everything this app
   has been until now -- or `desktop`, for the desktop app to come (#49). The

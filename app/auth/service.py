@@ -244,6 +244,45 @@ def redeem_recovery_code(session: Session, engine, user: User, code: str, *, ip:
     return revoked
 
 
+def check_recovery_code_for_password(
+    session: Session, engine, *, email: str, code: str, new_password: str, ip: str | None
+) -> tuple[User, RecoveryCode]:
+    """The desktop's way back in after a forgotten password (#320): the account
+    and the unused recovery code this is. Writes nothing to the ledger.
+
+    The new password is judged first, so a weak one does not cost an attempt;
+    then the code, against the same budget a recovery code at sign-in uses.
+    An unknown address and a wrong code are refused alike.
+    """
+    passwords.refuse_weak(new_password, email=email)
+    user = find_user(session, email)
+    try:
+        canonical = email_canonical.canonical(email)
+    except Exception:
+        canonical = (email or "").strip().lower()[: email_canonical.MAX_LENGTH]
+    held = ratelimit.reserve(engine, email_canonical=canonical, ip=ip, kind="recovery")
+    matched = match_recovery_code(session, user, code) if user is not None else None
+    if user is None or matched is None:
+        raise Unauthorized(
+            "that recovery code is not right, or has already been used",
+            code="auth.recovery_code_wrong",
+        )
+    ratelimit.release(engine, held)
+    return user, matched
+
+
+def replace_password_with_recovery_code(
+    session: Session, user: User, matched: RecoveryCode, new_password: str
+) -> None:
+    """Spend the code, set the new password, and end every session and trusted
+    browser: whoever had the old password, it is no longer this person alone.
+    Call inside a batch."""
+    matched.used_at = utcnow()
+    user.password_hash = passwords.hash_password(new_password)
+    sessions.revoke_all_for(session, user.id)
+    devices.revoke_all_for(session, user.id)
+
+
 def complete_sign_in(
     session: Session,
     user: User,

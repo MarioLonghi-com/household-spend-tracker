@@ -37,6 +37,8 @@ import {
 } from "../lib/passkeys";
 import { dropGrant, keepGrant } from "../lib/recoveryGrant";
 import type { User } from "../lib/types";
+import { useCapabilities } from "../lib/capabilities";
+import { RecoveryCodeSheet } from "../components/RecoveryCodes";
 import { Trans, useLingui } from "@lingui/react/macro";
 
 interface SignInState {
@@ -105,6 +107,8 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
   const [replaced, setReplaced] = useState<string | null>(null);
   const [owed, setOwed] = useState<Owed | null>(null);
   const [newCode, setNewCode] = useState("");
+  const offered = useCapabilities();
+  const [forgot, setForgot] = useState(false);
 
   /**
    * Signed in: say what the recovery code revoked, and which passkeys it left
@@ -388,6 +392,10 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
     );
   }
 
+  if (forgot) {
+    return <RecoverPassword email={email} onBack={() => setForgot(false)} onDone={onDone} />;
+  }
+
   return (
     <form className="centred" onSubmit={submit}>
       <h1>Spend Tracker</h1>
@@ -420,6 +428,16 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
             <button className="primary" type="submit" disabled={busy || !email || !password}>
               <Trans comment="Button on the sign-in page. See GLOSSARY.md">Sign in</Trans>
             </button>
+            {offered.password_reset_by_code && (
+              <>
+                <p />
+                <button type="button" className="link" onClick={() => setForgot(true)}>
+                  <Trans comment="Link on the desktop app's sign-in page">
+                    Forgot your password? Use your recovery code
+                  </Trans>
+                </button>
+              </>
+            )}
             {passkeysHere && (
               <>
                 <p className="muted small">
@@ -495,6 +513,125 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
             )}
           </>
         )}
+      </div>
+    </form>
+  );
+}
+
+/**
+ * The desktop's way back in (#320): the recovery code from setup, and a new
+ * password. The code is spent, and the one that replaces it is shown once,
+ * before anything else -- it is the only way back the next time.
+ */
+function RecoverPassword({
+  email: given,
+  onBack,
+  onDone,
+}: {
+  email: string;
+  onBack: () => void;
+  onDone: (user: User) => void;
+}) {
+  const { t } = useLingui();
+  const [email, setEmail] = useState(given);
+  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<unknown>(null);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<{ user: User; recovery_code: string } | null>(null);
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      setDone(
+        await api.post<{ user: User; recovery_code: string }>("/session/recover", {
+          email,
+          code,
+          new_password: password,
+        }),
+      );
+      setCode("");
+      setPassword("");
+    } catch (problem) {
+      setError(problem);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (done) {
+    return (
+      <div className="centred">
+        <h1>Spend Tracker</h1>
+        <div className="card" role="status">
+          <h2>
+            <Trans comment="Heading on the desktop app's sign-in page, after a new password">Your new recovery code</Trans>
+          </h2>
+          <p className="muted small">
+            <Trans>
+              Your password is changed and the code you used has stopped working. This one replaces
+              it: keep it somewhere other than this computer.
+            </Trans>
+          </p>
+          <RecoveryCodeSheet
+            codes={[done.recovery_code]}
+            action={t({ message: "Continue", comment: "Button on the sign-in page: go on to the next step" })}
+            onStored={() => onDone(done.user)}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form className="centred" onSubmit={submit}>
+      <h1>Spend Tracker</h1>
+      <Problem error={error} />
+      <div className="card">
+        <h2>
+          <Trans comment="Heading on the desktop app's sign-in page">A new password</Trans>
+        </h2>
+        <p className="muted small">
+          <Trans>
+            Use the recovery code you kept when you set up Spend Tracker. It works once; you will be
+            given a new one.
+          </Trans>
+        </p>
+        <Field label={t({ message: "Email", comment: "Label of a form field on the sign-in page: noun, an email address" })}>
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" />
+        </Field>
+        <p />
+        <Field label={t({ message: "Recovery code", comment: "Text on the sign-in page. See GLOSSARY.md" })}>
+          <input
+            name="recovery-code"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            autoFocus
+            spellCheck={false}
+            autoComplete="off"
+          />
+        </Field>
+        <p />
+        <Field label={t({ message: "New password", comment: "Label of a form field on the desktop app's sign-in page" })}>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+          />
+        </Field>
+        <p className="muted small">
+          <Trans>At least 12 characters. Length is what matters.</Trans>
+        </p>
+        <button className="primary" type="submit" disabled={busy || !email || !code || password.length < 12}>
+          <Trans comment="Button on the desktop app's sign-in page">Change password and sign in</Trans>
+        </button>
+        <p />
+        <button type="button" className="link" onClick={onBack}>
+          <Trans comment="Link on the desktop app's sign-in page">Back to signing in</Trans>
+        </button>
       </div>
     </form>
   );

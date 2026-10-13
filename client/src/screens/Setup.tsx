@@ -4,6 +4,10 @@
  * Four steps, and nothing is written until the last one. Step 3 will not let
  * you past without a code that actually verifies -- so the authenticator is
  * known to pair before it is the only thing between you and the ledger.
+ *
+ * Two on the desktop (#320): no token, because only the app itself can reach
+ * this, and no authenticator, because a password opens the app. You, then the
+ * one recovery code that replaces a forgotten password.
  */
 
 import { useState } from "react";
@@ -13,12 +17,14 @@ import { api } from "../lib/api";
 import { Field, Problem } from "../components/bits";
 import type { User } from "../lib/types";
 import { RecoveryCodeSheet } from "../components/RecoveryCodes";
+import { useCapabilities } from "../lib/capabilities";
 import { Trans, useLingui } from "@lingui/react/macro";
 
 interface Started {
   blob: string;
-  otpauth_uri: string;
-  secret: string;
+  /** Null on the desktop, which enrols no authenticator. */
+  otpauth_uri: string | null;
+  secret: string | null;
   recovery_codes: string[];
 }
 
@@ -28,6 +34,8 @@ interface SetupState {
    *  `data/setup-token`, which is wrong in every container and wrong for any
    *  install since the default data directory moved out of the checkout. */
   token_path?: string | null;
+  /** False on the desktop (#320). */
+  token_needed?: boolean;
 }
 
 /** The product's name, which stays as it is in every language. */
@@ -40,8 +48,10 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
     queryFn: () => api.get<SetupState>("/setup/state"),
   });
   const tokenPath = state.data?.token_path ?? null;
+  // The desktop asks for no token and enrols no authenticator (#320).
+  const desktop = !useCapabilities().second_factor;
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(desktop ? 2 : 1);
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
 
@@ -75,7 +85,8 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
       });
       setStarted(result);
       setBlob(result.blob);
-      setStep(3);
+      // Ready to finish at once on the desktop: there is no authenticator.
+      setStep(result.otpauth_uri ? 3 : 4);
     });
 
   const enrol = () =>
@@ -151,7 +162,11 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
       {step === 2 && (
         <div className="card">
           <h2>
-            <Trans comment="Heading on the first-run setup">2. You</Trans>
+            {desktop ? (
+              <Trans comment="Heading on the desktop app's first-run setup, its first of two steps">1. You</Trans>
+            ) : (
+              <Trans comment="Heading on the first-run setup">2. You</Trans>
+            )}
           </h2>
           <Field label={t({ message: "Email", comment: "Label of a form field on the first-run setup: noun, an email address" })}>
             <input
@@ -202,7 +217,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
             </Trans>
           </p>
           <div style={{ background: "#fff", padding: 12, width: "fit-content", margin: "8px 0" }}>
-            <QRCodeSVG value={started.otpauth_uri} size={168} />
+            <QRCodeSVG value={started.otpauth_uri ?? ""} size={168} />
           </div>
           <p className="small muted">
             <Trans>
@@ -230,8 +245,21 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
       {step === 4 && started && (
         <div className="card">
           <h2>
-            <Trans comment="Heading on the first-run setup">4. Recovery codes</Trans>
+            {desktop ? (
+              <Trans comment="Heading on the desktop app's first-run setup, its second of two steps">2. Your recovery code</Trans>
+            ) : (
+              <Trans comment="Heading on the first-run setup">4. Recovery codes</Trans>
+            )}
           </h2>
+          {desktop && (
+            <p className="muted small">
+              <Trans>
+                If you ever forget your password, this code lets you choose a new one. It works
+                once. Keep it somewhere other than this computer: on paper, or in a password
+                manager.
+              </Trans>
+            </p>
+          )}
           <RecoveryCodeSheet
             codes={started.recovery_codes}
             action={t({ message: "Finish setup", comment: "Button on the first-run setup" })}

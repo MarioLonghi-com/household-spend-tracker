@@ -128,7 +128,9 @@ msgid "Choose…"
 msgstr "Elegir…"
 
 #. Label of a form field on the Your account panel
+#. Label of a form field on the desktop app's sign-in page
 #: src/screens/Profile.tsx
+#: src/screens/SignIn.tsx
 #, fuzzy
 msgid "New password"
 msgstr "Nueva contraseña"
@@ -432,6 +434,11 @@ msgstr "{count, plural, one {{shown} archivo} other {{shown} archivos}}"
 msgid "One of the newest five update backups: kept so an update can be undone"
 msgstr "Una de las cinco copias de seguridad de actualización más recientes: se conserva para poder deshacer una actualización"
 
+#. Button on the desktop app's sign-in page
+#: src/screens/SignIn.tsx
+msgid "Change password and sign in"
+msgstr ""
+
 #: src/screens/Rules.tsx
 #, fuzzy
 msgid "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot mean “whatever comes after it” — choose <2>take this bit off</2> for that."
@@ -675,6 +682,10 @@ msgstr "Entre la parte {0} y la parte {1}"
 msgid "The app stays up throughout. Nothing in the ledger changes."
 msgstr "La aplicación sigue funcionando todo el tiempo. No cambia nada en el libro."
 
+#: src/components/RecoveryCodes.tsx
+msgid "It works once, and it is shown only now. It is how you choose a new password if you forget this one."
+msgstr ""
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "You're signed in. This server's secret key was replaced, so the authenticator you had no longer works here. Scan this with your authenticator app and type the six digits it shows — the recovery code you just used covers this, so it costs no other. Then delete the old entry for this account from your app."
@@ -778,6 +789,11 @@ msgstr "Este servidor no puede comprobar un código de la aplicación de autenti
 #, fuzzy
 msgid "Length does more than symbols do. Four unrelated words you can actually remember beats a short one with punctuation in it."
 msgstr "La longitud importa más que los símbolos. Cuatro palabras sin relación que puedas recordar valen más que una contraseña corta llena de signos."
+
+#. Link on the desktop app's sign-in page
+#: src/screens/SignIn.tsx
+msgid "Forgot your password? Use your recovery code"
+msgstr ""
 
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -954,6 +970,10 @@ msgstr "Permitir que aplique una importación sin que nadie la revise"
 #, fuzzy
 msgid "Add a rule"
 msgstr "Añadir una regla"
+
+#: src/components/StepUp.tsx
+msgid "{why} So this asks for your password again."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2380,11 +2400,20 @@ msgstr "Pendiente"
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Dinero apartado en un banco. Igual que una cuenta corriente, pero separado para que el registro se lea con claridad."
 
+#. State of the desktop app's recovery code: spent, a new one is needed
+#: src/screens/Profile.tsx
+msgid "Used"
+msgstr ""
+
 #. Label on the receipts
 #: src/components/Receipts.tsx
 #, fuzzy
 msgid "facing {bearing}° {point}"
 msgstr "orientado a {bearing}° {point}"
+
+#: src/screens/SignIn.tsx
+msgid "Your password is changed and the code you used has stopped working. This one replaces it: keep it somewhere other than this computer."
+msgstr ""
 
 #: src/screens/History.tsx
 #, fuzzy
@@ -2864,6 +2893,11 @@ msgstr "Añadir transferencia"
 msgid "Reset sign-in for {0}"
 msgstr "Restablecer el inicio de sesión de {0}"
 
+#. Heading on the desktop app's sign-in page, after a new password
+#: src/screens/SignIn.tsx
+msgid "Your new recovery code"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "This one was entered by hand."
@@ -2991,6 +3025,11 @@ msgstr "Tamaño"
 #, fuzzy
 msgid "There are no accounts yet, so there is nothing to report on. Add one on the Accounts screen and the figures will follow."
 msgstr "Todavía no hay cuentas, así que no hay nada sobre lo que informar. Añade una en la pantalla Cuentas y las cifras llegarán después."
+
+#. State of the desktop app's recovery code: not yet used
+#: src/screens/Profile.tsx
+msgid "Ready"
+msgstr ""
 
 #. placeholder {0}: report.balance_differences!.length
 #: src/screens/ynab/results.tsx
@@ -5317,6 +5356,10 @@ msgstr "columna de estado"
 msgid "Back the database up"
 msgstr "Hacer una copia de seguridad de la base de datos"
 
+#: src/components/RecoveryCodes.tsx
+msgid "I have stored it somewhere that is not this computer"
+msgstr ""
+
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "No households yet."
@@ -5678,7 +5721,9 @@ msgstr "Categorizar automáticamente según el historial del beneficiario"
 msgid "By"
 msgstr "Por"
 
+#. Heading on the desktop app's sign-in page
 #: src/screens/ResetAccount.tsx
+#: src/screens/SignIn.tsx
 #, fuzzy
 msgid "A new password"
 msgstr "Una contraseña nueva"
@@ -7550,6 +7595,10 @@ msgstr "Paso {0}:"
 msgid "Ignore {0}"
 msgstr "Ignorar {0}"
 
+#: src/screens/Setup.tsx
+msgid "If you ever forget your password, this code lets you choose a new one. It works once. Keep it somewhere other than this computer: on paper, or in a password manager."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Link as transfer"
@@ -7618,7 +7667,10 @@ msgstr "Guardando…"
 msgid "Delete group"
 msgstr "Eliminar grupo"
 
+#. Label on the Your account panel of the desktop app, which has one. See GLOSSARY.md
 #. Text on the sign-in page. See GLOSSARY.md
+#. Text on the sign-in page. See GLOSSARY.md
+#: src/screens/Profile.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Recovery code"
@@ -8226,6 +8278,10 @@ msgstr "{0, plural, one {Eliminar 1 ticket} other {Eliminar {1} tickets}}"
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so a figure adding {0} would be a number with nothing behind it."
 msgstr "Este libro nunca convierte. La divisa está en la cuenta y no hay ningún tipo de cambio guardado, así que una cifra que sumara {0} sería un número sin nada detrás."
 
+#: src/screens/Profile.tsx
+msgid "Your code stops working and a new one replaces it. Nobody is signed out."
+msgstr ""
+
 #. Tooltip on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
@@ -8267,8 +8323,10 @@ msgstr "Una nueva aplicación de autenticación"
 msgid "{0}. Save it into your synced Drive or Dropbox folder"
 msgstr "{0}. Guárdalo en tu carpeta sincronizada de Drive o Dropbox"
 
+#. Heading on the desktop app's first-run setup, its first of two steps
 #. Heading on the invitation page
 #: src/screens/AcceptInvite.tsx
+#: src/screens/Setup.tsx
 #, fuzzy
 msgid "1. You"
 msgstr "1. Tú"
@@ -9898,6 +9956,7 @@ msgstr "Esto queda como una sola entrada en el Historial, así que toda la impor
 #. Label of a form field on the first-run setup: noun, an email address
 #. Label of a form field on the invitation page: noun, an email address
 #. Label of a form field on the sign-in page: noun, an email address
+#. Label of a form field on the sign-in page: noun, an email address
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Admin.tsx
 #: src/screens/Setup.tsx
@@ -10084,6 +10143,11 @@ msgstr "importe"
 msgid "password"
 msgstr "contraseña"
 
+#. Link on the desktop app's sign-in page
+#: src/screens/SignIn.tsx
+msgid "Back to signing in"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Cleared — the bank has it"
@@ -10224,6 +10288,11 @@ msgstr "{count, plural, one {{count} día} other {{count} días}}"
 #, fuzzy
 msgid "Problems"
 msgstr "Problemas"
+
+#. Button on the Your account panel of the desktop app
+#: src/screens/Profile.tsx
+msgid "New code"
+msgstr ""
 
 #. Updates section: the version running now
 #. placeholder {0}: check.running
@@ -11061,6 +11130,11 @@ msgstr "2. Tu aplicación de autenticación"
 msgid "work expense"
 msgstr "gasto de trabajo"
 
+#. Heading on the desktop app's first-run setup, its second of two steps
+#: src/screens/Setup.tsx
+msgid "2. Your recovery code"
+msgstr ""
+
 #: src/App.tsx
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -11454,6 +11528,10 @@ msgstr "Fijado en claro, sea cual sea el ajuste de este dispositivo."
 #, fuzzy
 msgid "{by} reset {user}'s password"
 msgstr "{by} restableció la contraseña de {user}"
+
+#: src/screens/Profile.tsx
+msgid "You sign in with your password. If you forget it, your recovery code lets you choose a new one."
+msgstr ""
 
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
 #. js-lingui-explicit-id
@@ -12254,6 +12332,7 @@ msgstr "Copia navegable"
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/Setup.tsx
+#: src/screens/SignIn.tsx
 #, fuzzy
 msgid "At least 12 characters. Length is what matters."
 msgstr "Al menos 12 caracteres. Lo que importa es la longitud."
@@ -12633,6 +12712,10 @@ msgstr "contiene"
 #, fuzzy
 msgid "No flagged rows were found."
 msgstr "No se encontró ninguna fila marcada."
+
+#: src/screens/SignIn.tsx
+msgid "Use the recovery code you kept when you set up Spend Tracker. It works once; you will be given a new one."
+msgstr ""
 
 #. A changed field in History's detail, lower case
 #: src/lib/historyWords.ts
@@ -13401,6 +13484,7 @@ msgstr "Marcas"
 #. Button on the first-run setup: go on to the next step
 #. Button on the first-run setup: go on to the next step
 #. Button on the invitation page: go on to the next step
+#. Button on the sign-in page: go on to the next step
 #. Button on the sign-in page: go on to the next step
 #. Button on the sign-in page: go on to the next step
 #: src/screens/AcceptInvite.tsx

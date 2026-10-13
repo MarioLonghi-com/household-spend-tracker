@@ -35,8 +35,12 @@ def setup_state(session: SessionDep) -> dict:
     required = not setup_service.is_configured(session)
     if not required:
         return {"setup_required": False}
+    if not setup_service.token_needed():
+        # The desktop: no token to find (#320).
+        return {"setup_required": True, "token_needed": False, "token_path": None}
     return {
         "setup_required": True,
+        "token_needed": True,
         "token_path": str(setup_service.setup_token_path()),
     }
 
@@ -52,8 +56,8 @@ def begin(body: SetupBegin, session: SessionDep) -> SetupStarted:
     )
     return SetupStarted(
         blob=setup_service.seal(blob),
-        otpauth_uri=totp.provisioning_uri(blob.totp_secret, email=blob.email),
-        secret=blob.totp_secret,
+        otpauth_uri=totp.provisioning_uri(blob.totp_secret, email=blob.email) if blob.totp_secret else None,
+        secret=blob.totp_secret or None,
         recovery_codes=list(blob.recovery_codes),
     )
 

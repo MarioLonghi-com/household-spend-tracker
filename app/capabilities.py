@@ -54,6 +54,10 @@ class Capabilities:
     #: Sign-in asks for an authenticator code after the password. Off on the
     #: desktop, where a password opens the app (#320).
     second_factor: bool
+    #: A forgotten password is replaced with the recovery code from setup. The
+    #: desktop's way back in, where there is no second owner to send a reset
+    #: link and no authenticator for the recovery codes to stand in for (#320).
+    password_reset_by_code: bool
     #: The self-updater beside a container. The stores update the desktop app.
     self_update: bool
     #: The check for a newer release on GitHub, which only reads.
@@ -76,11 +80,28 @@ def for_settings(settings: Settings) -> Capabilities:
         account_resets=server,
         passkeys=server and bool(settings.rp_id),
         second_factor=server,
+        password_reset_by_code=not server,
         self_update=server,
         upstream_check=True,
         db_view=server and str(settings.db_view).lower() not in {"off", "0", "false", "no"},
         ynab_import=True,
     )
+
+
+def current() -> Capabilities:
+    """What this deployment offers, from the settings as they are now. For code
+    that runs per request; `app.main.CAPABILITIES` is the same answer, fixed
+    when the app was built."""
+    from . import config
+
+    return for_settings(config.settings)
+
+
+def second_factor() -> bool:
+    """Whether a password alone is not enough: true on a server, false on the
+    desktop (#320). Asked instead of reading `totp_secret`, whose NULL means
+    "cleared by a reset" (#284) and must keep meaning only that."""
+    return current().second_factor
 
 
 #: Every capability name, for checking a tag against.

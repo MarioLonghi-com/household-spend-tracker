@@ -107,9 +107,25 @@ class SetupComplete(BaseModel):
 
 class SetupStarted(BaseModel):
     blob: str
-    otpauth_uri: str
-    secret: str
+    #: None on the desktop, which enrols no authenticator (#320).
+    otpauth_uri: str | None
+    secret: str | None
     recovery_codes: list[str]
+
+
+class RecoverWithCode(BaseModel):
+    """A forgotten password, replaced with the recovery code (desktop, #320)."""
+
+    email: str = Field(min_length=3, max_length=254)
+    code: str = Field(min_length=1, max_length=40)
+    new_password: str = Field(min_length=1)
+
+
+class Recovered(BaseModel):
+    """Signed in with the new password, and the code that replaces the one spent."""
+
+    user: UserOut
+    recovery_code: str
 
 
 class SignIn(BaseModel):
@@ -1912,10 +1928,11 @@ class ConfirmReenrolment(BaseModel):
 
 
 class StepUpRequest(BaseModel):
-    """Both factors, for an act the session alone does not buy."""
+    """Both factors, for an act the session alone does not buy. The password
+    alone on the desktop, where it is the only one (#320)."""
 
     password: str
-    code: str
+    code: str = ""
 
 
 class StepUpGranted(BaseModel):
@@ -1930,10 +1947,11 @@ class StepUpGranted(BaseModel):
 
 
 class RegenerateRecoveryCodes(BaseModel):
-    """Both factors. A recovery code is not accepted for ``code`` (#289)."""
+    """Both factors. A recovery code is not accepted for ``code`` (#289).
+    Empty on the desktop, where the password is the only factor (#320)."""
 
     password: str = Field(max_length=1024)
-    code: str = Field(max_length=64)
+    code: str = Field(default="", max_length=64)
 
 
 class RecoveryCodesIssued(BaseModel):
