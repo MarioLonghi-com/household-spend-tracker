@@ -44,6 +44,7 @@ way to find one the app already replaced.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as dt
 import pathlib
 import sqlite3
@@ -115,7 +116,7 @@ def run(say: Report, *, backups: list[pathlib.Path]) -> None:
     wal = db.with_name(db.name + "-wal")
     say.ok("database", f"{db.name}, {_size(db)}" + (f", WAL {_size(wal)}" if wal.exists() else ""))
 
-    with sqlite3.connect(f"file:{db}?mode=ro", uri=True) as conn:
+    with contextlib.closing(sqlite3.connect(f"file:{db}?mode=ro", uri=True)) as conn:
         verdict = conn.execute("PRAGMA quick_check").fetchone()[0]
         if verdict == "ok":
             say.ok("integrity", "PRAGMA quick_check: ok")

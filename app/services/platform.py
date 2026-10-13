@@ -20,6 +20,7 @@ stays what every other router here is: thin.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import platform as _platform
@@ -642,7 +643,7 @@ def make_backup() -> Backup:
     # transaction, and every session this app hands out is in one.
     import sqlite3
 
-    with sqlite3.connect(db, isolation_level=None) as connection:
+    with contextlib.closing(sqlite3.connect(db, isolation_level=None)) as connection:
         try:
             connection.execute("VACUUM INTO ?", (str(target),))
         except sqlite3.Error as problem:
