@@ -34,6 +34,15 @@ history this repository does not have.
 
 ### Added
 
+- **A slow step says it is still going.** The YNAB import's four steps show
+  a banner with a spinner, and after a few seconds the time so far and "keep
+  this window open", where they showed a grey line. A large budget takes
+  minutes, and looked stuck. (Found testing the desktop app, #62)
+- **The desktop app has a right-click menu**: Cut, Copy, Paste and Select all
+  in a field, Copy for a selection, Copy link on a link, and spelling
+  suggestions, in the window's language. Electron shows none unless the app
+  builds one. (Found testing the desktop app, #62)
+
 - **The desktop app.** `desktop/` is the Electron shell for the Mac App
   Store (Apple Silicon) and the Microsoft Store (Windows 11 x64): one window on
   `app://localhost`, every request forwarded to the frozen backend, no port

@@ -35,6 +35,8 @@ export const MENU = {
   copy: msg({ message: "Copy", comment: "Desktop app Edit menu item (clipboard)" }),
   paste: msg({ message: "Paste", comment: "Desktop app Edit menu item (clipboard)" }),
   selectAll: msg({ message: "Select all", comment: "Desktop app Edit menu item: select all the text in a field" }),
+  addToDictionary: msg({ message: "Add to dictionary", comment: "Desktop app right-click menu on a misspelt word: stop marking it as misspelt" }),
+  copyLink: msg({ message: "Copy link", comment: "Desktop app right-click menu on a link: copy its address" }),
 
   actualSize: msg({ message: "Actual size", comment: "Desktop app View menu item: reset the zoom" }),
   zoomIn: msg({ message: "Zoom in", comment: "Desktop app View menu item: make everything larger" }),
