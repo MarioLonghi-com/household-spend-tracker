@@ -36,6 +36,7 @@ vi.mock("./lib/api", () => ({
 }));
 
 import { api } from "./lib/api";
+import { EVERYTHING } from "./lib/capabilities";
 import { App } from "./App";
 import type { User } from "./lib/types";
 
@@ -55,6 +56,7 @@ const ALICES_HOUSEHOLDS = [{ id: "household-a", name: "Alice's house" }];
 function boot(signedIn: User | null) {
   vi.mocked(api.get).mockImplementation((path: string) => {
     if (path === "/health") return Promise.resolve({ setup_required: false });
+    if (path === "/capabilities") return Promise.resolve(EVERYTHING);
     if (path === "/me")
       return signedIn ? Promise.resolve(signedIn) : Promise.reject(new Error("401"));
     // Everything the shell asks for stays in flight.

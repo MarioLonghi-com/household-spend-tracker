@@ -40,6 +40,7 @@ import { LanguagePicker } from "../components/LanguagePicker";
 import { plural, t } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { listText } from "../lib/locale";
+import { useCapabilities } from "../lib/capabilities";
 
 type Offer = { token: string; secret: string; uri: string };
 
@@ -53,6 +54,7 @@ export function Profile({
   onClose: () => void;
 }) {
   const { t } = useLingui();
+  const offered = useCapabilities();
   return (
     <Panel title={t({ message: "Your account", comment: "Title of a panel on the Your account panel" })} onClose={onClose} config>
       <p className="muted small" style={{ marginTop: 0 }}>
@@ -63,8 +65,13 @@ export function Profile({
       <AppearanceSection />
       <hr className="rule" />
       <SignInMethods user={user} />
-      <hr className="rule" />
-      <KeysSection households={households} />
+      {/* No agent API on the desktop, so no keys for one (#316). */}
+      {offered.agents ? (
+        <>
+          <hr className="rule" />
+          <KeysSection households={households} />
+        </>
+      ) : null}
     </Panel>
   );
 }

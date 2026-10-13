@@ -9,6 +9,8 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, setUnauthorizedHandler } from "./lib/api";
+import { EVERYTHING, loadCapabilities, useCapabilities } from "./lib/capabilities";
+import type { Capabilities } from "./lib/capabilities";
 import { seedLocale } from "./lib/seedWords";
 import { Field, Problem } from "./components/bits";
 import { RecoveryModeBanner } from "./components/RecoveryModeBanner";
@@ -144,7 +146,12 @@ function useTabTitle(page: string | null, household?: string | null) {
   }, [page, household]);
 }
 
-export function menu(householdName: string): NavSection[] {
+/**
+ * The menu for a household, as this deployment offers it (#316): an entry for
+ * a capability that is off is left out, the way an owner-only one is for a
+ * member. `offered` defaults to everything, which is every server.
+ */
+export function menu(householdName: string, offered: Capabilities = EVERYTHING): NavSection[] {
   return [
     {
       id: "register",
@@ -154,8 +161,9 @@ export function menu(householdName: string): NavSection[] {
         { key: "import", label: t({ message: "Import", comment: "Menu item and the name of its screen: noun, one import of a statement. See GLOSSARY.md" }) },
         { key: "receipts", label: t({ message: "Receipts", comment: "Menu item and the name of its screen: noun, photos or PDFs of receipts. See GLOSSARY.md" }) },
         // Reachable since receipts landed, and for a while linked from
-        // nowhere: the only way to open it was to know the URL.
-        { href: "/snap", label: t`Snap a Receipt` },
+        // nowhere: the only way to open it was to know the URL. Not in the
+        // desktop app, whose computer is not at the till.
+        ...(offered.snap ? [{ href: "/snap", label: t`Snap a Receipt` }] : []),
       ],
     },
     {
@@ -369,7 +377,12 @@ export function App() {
   useEffect(() => {
     (async () => {
       try {
-        const health = await api.get<{ setup_required: boolean }>("/health");
+        // Together: what this deployment offers is needed before the first
+        // screen is drawn, setup and sign-in included (#316).
+        const [health] = await Promise.all([
+          api.get<{ setup_required: boolean }>("/health"),
+          loadCapabilities(),
+        ]);
         setSetupNeeded(health.setup_required);
         if (!health.setup_required) {
           try {
@@ -598,6 +611,8 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
     enabled: Boolean(inboxId),
   });
 
+  const offered = useCapabilities();
+
   // The page takes the colour of whichever household is on screen. Switching is
   // the moment it matters: two ledgers in one browser otherwise look identical,
   // which is how a statement lands in the wrong one.
@@ -648,7 +663,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
 
   const others = (presence.data?.online ?? []).filter((one) => one.id !== user.id);
   const waiting = inbox.data?.length ?? 0;
-  const sections = menu(household.name);
+  const sections = menu(household.name, offered);
   const openReport = reportFor(screen);
 
   /** Go somewhere, and on a phone get out of the way of where you went. */

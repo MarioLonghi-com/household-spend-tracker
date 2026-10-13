@@ -363,6 +363,11 @@ msgstr "Fijo: es el cajón propio de YNAB y no una categoría tuya (Uncategorize
 msgid "You can pick a palette and one accent of your own. You cannot reach the text and background colours, so no household can be made unreadable — and the accent is checked for contrast before it is saved."
 msgstr "Puedes elegir una paleta y un color de acento propio. No puedes cambiar los colores del texto y del fondo, así que ningún hogar puede quedar ilegible, y el contraste del color de acento se comprueba antes de guardarlo."
 
+#. On the Application management screen of the desktop app, in place of the updater
+#: src/screens/ApplicationManagement.tsx
+msgid "This copy of Spend Tracker is kept up to date by the store it was installed from: the App Store on a Mac, the Microsoft Store on Windows."
+msgstr ""
+
 #. Screen-reader name of a help button on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy

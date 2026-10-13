@@ -27,6 +27,7 @@ vi.mock("./lib/api", () => ({
 }));
 
 import { api } from "./lib/api";
+import { EVERYTHING } from "./lib/capabilities";
 import { App } from "./App";
 import type { Household, User } from "./lib/types";
 
@@ -47,6 +48,7 @@ function boot(search: string) {
   window.history.replaceState(null, "", search);
   vi.mocked(api.get).mockImplementation((path: string) => {
     if (path === "/health") return Promise.resolve({ setup_required: false });
+    if (path === "/capabilities") return Promise.resolve(EVERYTHING);
     if (path === "/me") return Promise.resolve(ALICE);
     if (path === "/households") return Promise.resolve(HOUSEHOLDS);
     return new Promise(() => {});

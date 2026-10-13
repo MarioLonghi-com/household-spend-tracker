@@ -53,6 +53,7 @@ import type {
 } from "../lib/types";
 import { roleLabel } from "../lib/labels";
 import { compareNames } from "../lib/locale";
+import { useCapabilities } from "../lib/capabilities";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 
@@ -91,6 +92,9 @@ const SECTIONS: { key: Section; label: string }[] = [
 
 export function Admin({ user }: { user: User }) {
   const [section, setSection] = useState<Section>("people");
+  const offered = useCapabilities();
+  // Invitations need somebody to send a link to; the desktop has nobody (#316).
+  const sections = SECTIONS.filter((one) => one.key !== "invitations" || offered.invitations);
 
   const users = useQuery({
     queryKey: ["admin", "users"],
@@ -114,7 +118,7 @@ export function Admin({ user }: { user: User }) {
       </p>
 
       <div className="row" style={{ gap: 6, marginBottom: 16 }}>
-        {SECTIONS.map((one) => (
+        {sections.map((one) => (
           <button
             key={one.key}
             aria-current={section === one.key ? "page" : undefined}
@@ -134,16 +138,19 @@ export function Admin({ user }: { user: User }) {
             me={user}
             users={users.data ?? []}
             households={households.data ?? []}
-            onInvite={() => setSection("invitations")}
+            onInvite={offered.invitations ? () => setSection("invitations") : null}
+            resets={offered.account_resets}
           />
-          <PendingResets />
+          {offered.account_resets ? <PendingResets /> : null}
           <RecentSignInChanges />
         </>
       )}
       {section === "households" && (
         <Households households={households.data ?? []} users={users.data ?? []} />
       )}
-      {section === "invitations" && <Invitations households={households.data ?? []} />}
+      {section === "invitations" && offered.invitations && (
+        <Invitations households={households.data ?? []} />
+      )}
     </>
   );
 }
@@ -157,12 +164,16 @@ function People({
   users,
   households,
   onInvite,
+  resets,
 }: {
   me: User;
   users: AdminUser[];
   households: AdminHousehold[];
-  /** The Invitations tab, which is the only way a new account is made. */
-  onInvite: () => void;
+  /** The Invitations tab, which is the only way a new account is made; null
+   *  where this deployment has no invitations (#316). */
+  onInvite: (() => void) | null;
+  /** Whether this deployment offers account resets (#316). */
+  resets: boolean;
 }) {
   const client = useQueryClient();
   const refresh = () => client.invalidateQueries({ queryKey: ["admin"] });
@@ -197,7 +208,7 @@ function People({
   const [resetting, setResetting] = useState<AdminUser | null>(null);
   // The list below asks for the same; this copy is for the dialog to say a
   // link is already pending for the person it resets.
-  const pending = useQuery({ queryKey: PENDING_KEY, queryFn: readPending });
+  const pending = useQuery({ queryKey: PENDING_KEY, queryFn: readPending, enabled: resets });
 
   const householdName = (id: string) => households.find((h) => h.id === id)?.name ?? id;
 
@@ -241,15 +252,17 @@ function People({
           is no create-a-user form anywhere, on purpose -- an account is made
           by the person it belongs to, from a link, so they choose their own
           password and nobody else ever knows it. */}
-      <p className="muted small" style={{ marginTop: 0 }}>
-        <Trans>
-          To create a new user, use the{" "}
-          <button className="link" onClick={onInvite}>
-            Invitation link
-          </button>
-          .
-        </Trans>
-      </p>
+      {onInvite ? (
+        <p className="muted small" style={{ marginTop: 0 }}>
+          <Trans>
+            To create a new user, use the{" "}
+            <button className="link" onClick={onInvite}>
+              Invitation link
+            </button>
+            .
+          </Trans>
+        </p>
+      ) : null}
       {users.length === 0 ? (
         <Empty><Trans>Nobody yet, which should be impossible while you are reading this.</Trans></Empty>
       ) : (
@@ -354,26 +367,28 @@ function People({
                     )}
                   </td>
                   <td style={{ whiteSpace: "nowrap" }}>
-                    <button
-                      className="link"
-                      style={{ marginRight: 12 }}
-                      aria-label={t`Reset sign-in for ${one.display_name}`}
-                      // Your own goes through the profile, with proof you hold
-                      // it; a disabled account could not follow a link.
-                      disabled={one.id === me.id || Boolean(one.disabled_at)}
-                      title={
-                        one.id === me.id
-                          ? t`Change your own password or authenticator from your profile`
-                          : one.disabled_at
-                            ? t`Re-enable them first: a disabled account cannot follow a link`
-                            : undefined
-                      }
-                      onClick={() => setResetting(one)}
-                    >
-                      <Trans comment="Button on the Admin screen">
-                        Reset sign-in…
-                      </Trans>
-                    </button>
+                    {resets ? (
+                      <button
+                        className="link"
+                        style={{ marginRight: 12 }}
+                        aria-label={t`Reset sign-in for ${one.display_name}`}
+                        // Your own goes through the profile, with proof you hold
+                        // it; a disabled account could not follow a link.
+                        disabled={one.id === me.id || Boolean(one.disabled_at)}
+                        title={
+                          one.id === me.id
+                            ? t`Change your own password or authenticator from your profile`
+                            : one.disabled_at
+                              ? t`Re-enable them first: a disabled account cannot follow a link`
+                              : undefined
+                        }
+                        onClick={() => setResetting(one)}
+                      >
+                        <Trans comment="Button on the Admin screen">
+                          Reset sign-in…
+                        </Trans>
+                      </button>
+                    ) : null}
                     <button
                       className={one.disabled_at ? "link" : "link danger"}
                       aria-label={

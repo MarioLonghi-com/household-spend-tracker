@@ -32,6 +32,7 @@ import { Empty, Hint, Problem, SortHeading, sortRows, useSort } from "../compone
 import { bytes } from "../lib/bytes";
 import { BackupList, UpdateBackupList, type Backup } from "./Backups";
 import { Updates } from "./Updates";
+import { useCapabilities } from "../lib/capabilities";
 import { TranslationReview } from "./TranslationReview";
 import type { Household } from "../lib/types";
 import { formatInstant } from "../lib/time";
@@ -695,6 +696,9 @@ function Logs({ current, onChanged }: { current: string; onChanged: () => void }
 function Operations({ me }: { me: Instance }) {
   // What used to be *Is there a newer version?*, grown into the owner's side
   // of the self-updater (#166). Everything it says and does is in Updates.tsx.
+  // The desktop app has no updater of its own: the store it came from keeps
+  // it current (#316), so there is nothing here to press.
+  const offered = useCapabilities();
   return (
     <section className="card" id="updates" aria-labelledby="updates-title">
       <h2 className="section-title" id="updates-title">
@@ -702,7 +706,16 @@ function Operations({ me }: { me: Instance }) {
           Updates
         </Trans>
       </h2>
-      <Updates repository={me.repository} commit={me.build.commit} />
+      {offered.self_update ? (
+        <Updates repository={me.repository} commit={me.build.commit} />
+      ) : (
+        <p className="muted" style={{ marginBottom: 0 }}>
+          <Trans comment="On the Application management screen of the desktop app, in place of the updater">
+            This copy of Spend Tracker is kept up to date by the store it was installed from: the App
+            Store on a Mac, the Microsoft Store on Windows.
+          </Trans>
+        </p>
+      )}
     </section>
   );
 }
