@@ -34,6 +34,18 @@ history this repository does not have.
 
 ### Added
 
+- **The ledger is held by the process using it.** The app takes an
+  operating-system lock on `.lock` in the data directory while it runs, and
+  the upgrade drill, restore and reset take it before they touch the ledger,
+  so they now also refuse a running app they could not see by its port -- a
+  second container on the same volume, or the desktop app, which has none.
+  The lock is released by the operating system when a process ends, however
+  it ends. The drill also migrates in its own process now rather than through
+  `python -m alembic`, which a frozen desktop build would have relaunched
+  itself for; its output and `--report` are as before. For the desktop app,
+  `app/desktop/launch.py` brings a ledger up to date before the app opens it:
+  it holds the ledger, refuses one a newer version wrote, asks before a step
+  that cannot be undone, backs up, migrates, and counts the rows again. (#318)
 - **On the desktop profile, a password opens the app and one recovery code
   replaces a forgotten one.** Setup asks for no token -- only the app itself
   can reach it -- and enrols no authenticator: you, then a single recovery

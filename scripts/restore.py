@@ -132,10 +132,8 @@ def restore(
     key_file: pathlib.Path | None = None,
     without_key: bool = False,
 ) -> int:
-    import tempfile
 
     from app.config import settings
-    from app.permissions import private_dir
 
     if not settings.database_url.startswith("sqlite:"):
         raise SystemExit("this restores a SQLite file; a Postgres deployment uses pg_restore")
@@ -149,6 +147,25 @@ def restore(
 
     if key_file is not None and not key_file.is_file():
         raise SystemExit(f"--key {key_file} is not a file")
+
+    from app import instance_lock
+
+    # The ledger, which is what the port stood for (#318).
+    try:
+        instance_lock.acquire(settings.data_dir)
+    except instance_lock.LedgerBusy as busy:
+        raise SystemExit(f"{busy} Nothing was restored.") from None
+    try:
+        return _restore_holding(source, key_file=key_file, yes=yes, port=port, without_key=without_key)
+    finally:
+        instance_lock.release(settings.data_dir)
+
+
+def _restore_holding(source, *, key_file, yes, port, without_key) -> int:
+    import tempfile
+
+    from app.config import settings
+    from app.permissions import private_dir
 
     private_dir(settings.data_dir)
     # In the data directory rather than /tmp: the same filesystem as the ledger,
