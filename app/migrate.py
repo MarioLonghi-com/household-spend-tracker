@@ -36,6 +36,23 @@ class _Collect(logging.Handler):
         self._say(self.format(record))
 
 
+def alembic_config(database_url: str | None = None):
+    """Alembic's configuration, built here rather than read from `alembic.ini`.
+
+    The one place that says where the migrations are: the frozen desktop build
+    carries `migrations/` but not the ini file, and a file-based configuration
+    would also have `env.py` reconfigure the process's logging.
+    """
+    from alembic.config import Config
+
+    config = Config()
+    config.set_main_option("script_location", str(MIGRATIONS))
+    if database_url:
+        # ConfigParser interpolation: a literal % in a path would be read as one.
+        config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
+    return config
+
+
 def upgrade_to_head(*, database_url: str | None = None, say: Callable[[str], None] | None = None) -> None:
     """Migrate the ledger to this code's head. Raises whatever Alembic raises.
 
@@ -44,15 +61,10 @@ def upgrade_to_head(*, database_url: str | None = None, say: Callable[[str], Non
     keeps for its shell.
     """
     from alembic import command
-    from alembic.config import Config
 
     from . import config as app_config
 
-    url = database_url or app_config.settings.database_url
-    alembic_config = Config()
-    alembic_config.set_main_option("script_location", str(MIGRATIONS))
-    # ConfigParser interpolation: a literal % in a path would be read as one.
-    alembic_config.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
+    configured = alembic_config(database_url or app_config.settings.database_url)
 
     logger = logging.getLogger("alembic")
     handler = _Collect(say or (lambda _line: None))
@@ -60,7 +72,7 @@ def upgrade_to_head(*, database_url: str | None = None, say: Callable[[str], Non
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
     try:
-        command.upgrade(alembic_config, "head")
+        command.upgrade(configured, "head")
     finally:
         logger.removeHandler(handler)
         logger.setLevel(was)

@@ -34,6 +34,17 @@ history this repository does not have.
 
 ### Added
 
+- **The backend can be served over stdin and stdout, for the desktop app.**
+  `python -m app.desktop.stdio_adapter` runs the desktop start -- the ledger
+  held, brought up to date, or a reason not to -- tells the shell how it went,
+  and then serves every request the shell forwards, with no network at all.
+  It refuses to start outside the desktop profile or without UTF-8 mode, and
+  stops when stdin closes. `desktop/backend.spec` freezes it with PyInstaller
+  (one folder; the data files, migrations and native libraries the analysis
+  cannot see named in it; UTF-8 mode built in, since a frozen interpreter
+  ignores `PYTHONUTF8`), and `desktop/smoke_backend.py` checks a frozen build.
+  A frozen build reads its commit from its stamp and never starts `git`, and
+  the schema check finds the migrations without `alembic.ini`. (#319)
 - **The ledger is held by the process using it.** The app takes an
   operating-system lock on `.lock` in the data directory while it runs, and
   the upgrade drill, restore and reset take it before they touch the ledger,
