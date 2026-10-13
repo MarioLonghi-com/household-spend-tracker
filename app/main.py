@@ -244,7 +244,7 @@ async def lifespan(_: FastAPI):
     )
 
     with session_scope() as session:
-        if not setup_service.is_configured(session):
+        if not setup_service.is_configured(session) and setup_service.token_needed():
             token = setup_service.rotate_setup_token()
             # To the console as well as the 0600 file, on purpose: in a container
             # `docker compose logs` is the only place the person can read it.
@@ -879,6 +879,7 @@ _ROUTERS = (
     (agent_review.router, "agents"),
     (setup.router, None),
     (auth.router, None),
+    (auth.recovery_router, "password_reset_by_code"),
     (households.router, None),
     (transactions.router, None),
     (imports.router, None),
@@ -890,6 +891,7 @@ _ROUTERS = (
     (account_resets.router, "account_resets"),
     (profile.router, None),
     (profile.keys_router, "agents"),
+    (profile.authenticator_router, "second_factor"),
     (categories.router, None),
     (receipts.router, None),
     (reporting.router, None),

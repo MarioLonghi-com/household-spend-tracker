@@ -16,10 +16,24 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from tests.conftest import HEADERS, _setup_owner, _stamp_head
+from tests.conftest import HEADERS, PASSWORD, _setup_owner, _stamp_head
 
 #: What the desktop app has no use for, and the server keeps.
 NETWORK_ONLY = {"snap", "agents", "invitations", "account_resets", "second_factor", "self_update", "db_view"}
+
+
+def setup_desktop_owner(client) -> dict:
+    """The desktop's wizard (#320): no token, no authenticator, one recovery code."""
+    started = client.post(
+        "/api/setup/begin",
+        json={"token": "", "email": "Jane.Doe@example.test", "display_name": "Jane", "password": PASSWORD},
+        headers=HEADERS,
+    )
+    assert started.status_code == 200, started.text
+    body = started.json()
+    done = client.post("/api/setup/complete", json={"blob": body["blob"], "codes_saved": True}, headers=HEADERS)
+    assert done.status_code == 200, done.text
+    return {"user": done.json(), "recovery_codes": body["recovery_codes"], "started": body}
 
 
 def _boot(monkeypatch, data: Path, *, profile: str | None) -> TestClient:
@@ -97,7 +111,7 @@ def test_the_server_profile_offers_everything_it_did(monkeypatch, tmp_path, rest
         # Passkeys stay off only because no public URL is set here, as before.
         assert offered.json() == {
             "snap": True, "agents": True, "invitations": True, "account_resets": True,
-            "passkeys": False, "second_factor": True, "self_update": True,
+            "passkeys": False, "second_factor": True, "password_reset_by_code": False, "self_update": True,
             "upstream_check": True, "db_view": True, "ynab_import": True,
         }
         import app.main as main
@@ -109,21 +123,28 @@ def test_the_desktop_profile_offers_only_what_needs_nobody_else(monkeypatch, tmp
     with _boot(monkeypatch, tmp_path / "data", profile="desktop") as client:
         offered = client.get("/api/capabilities").json()
     assert {name for name, on in offered.items() if not on} == NETWORK_ONLY | {"passkeys"}
-    assert {name for name, on in offered.items() if on} == {"upstream_check", "ynab_import"}
+    assert {name for name, on in offered.items() if on} == {"upstream_check", "ynab_import", "password_reset_by_code"}
 
 
 def test_a_route_left_out_answers_as_one_that_never_existed(monkeypatch, tmp_path, restore_server):
     import app.main as main
+    from app import capabilities
+    from app.config import Settings
 
-    gated = _gated_routes(main)
+    desktop = Settings(database_url="", data_dir=Path("."), secret_key="", echo_sql=False, profile="desktop")
+    off = {name for name, on in capabilities.for_settings(desktop).as_dict().items() if not on}
+    gated = [one for one in _gated_routes(main) if one[0] in off]
     # The premise: every capability that leaves routes out has some, and the
-    # agent API, the keys, invitations, resets, the updater and /snap are among them.
-    assert {need for need, _, _ in gated} == {"agents", "invitations", "account_resets", "self_update", "snap"}
-    for expected in ("/api/me/keys", "/api/admin/invitations", "/api/admin/resets", "/snap", "/llms.txt"):
+    # agent API, the keys, invitations, resets, the updater, the authenticator
+    # and /snap are among them.
+    assert {need for need, _, _ in gated} == {
+        "agents", "invitations", "account_resets", "self_update", "snap", "second_factor",
+    }
+    for expected in ("/api/me/keys", "/api/admin/invitations", "/api/admin/resets", "/snap", "/llms.txt", "/api/me/authenticator"):
         assert any(path == expected for _, _, path in gated), expected
 
     with _boot(monkeypatch, tmp_path / "data", profile="desktop") as client:
-        _setup_owner(client)
+        setup_desktop_owner(client)
         for need, method, path in gated:
             concrete = re.sub(r"\{[^}]+\}", "x", path)
             answer = client.request(method, concrete, headers=HEADERS)
@@ -142,7 +163,7 @@ def test_a_route_left_out_answers_as_one_that_never_existed(monkeypatch, tmp_pat
 
 def test_what_the_desktop_keeps_works_for_two_households(monkeypatch, tmp_path, restore_server):
     with _boot(monkeypatch, tmp_path / "data", profile="desktop") as client:
-        _setup_owner(client)
+        setup_desktop_owner(client)
         ids = []
         for name in ("Ours", "The flat"):
             made = client.post("/api/households", json={"name": name}, headers=HEADERS)

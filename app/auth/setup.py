@@ -36,6 +36,27 @@ from . import crypto, devices, email_canonical, passwords, sessions, totp
 BLOB_MAX_AGE_SECONDS = 15 * 60
 RECOVERY_CODE_COUNT = 10
 
+#: What a desktop setup blob carries instead of a setup token's fingerprint:
+#: the shell that started this process is the proof of being on the machine
+#: (#320), so there is no token to tie the blob to.
+DESKTOP_PROOF = "desktop"
+
+
+def recovery_code_count() -> int:
+    """Ten where they stand in for an authenticator; one on the desktop, where
+    the one code replaces a forgotten password (#320)."""
+    from .. import capabilities
+
+    return RECOVERY_CODE_COUNT if capabilities.second_factor() else 1
+
+
+def token_needed() -> bool:
+    """Whether setup asks for the setup token. Not on the desktop: nothing but
+    its own shell can reach the process (#320)."""
+    from .. import capabilities
+
+    return capabilities.second_factor()
+
 
 def setup_token_path() -> Path:
     return settings.data_dir / paths.SETUP_TOKEN
@@ -159,6 +180,8 @@ def unseal(token: str) -> SetupBlob:
         # An invited blob is tied to its invitation, not to the setup token --
         # which by then no longer exists.
         return blob
+    if blob.token_fp == DESKTOP_PROOF and not token_needed():
+        return blob
 
     live = current_setup_token()
     if not live or not secrets.compare_digest(blob.token_fp, token_fingerprint(live)):
@@ -170,7 +193,19 @@ def unseal(token: str) -> SetupBlob:
 
 
 def begin(presented_token: str, *, email: str, display_name: str, password: str) -> SetupBlob:
-    """Steps 1 and 2: prove you deployed this, and name the owner."""
+    """Steps 1 and 2: prove you deployed this, and name the owner.
+
+    On the desktop (#320) there is no token and no authenticator: the blob is
+    ready to complete at once, with one recovery code for a forgotten password.
+    """
+    if not token_needed():
+        return _collect(
+            token_fp=DESKTOP_PROOF,
+            email=email,
+            display_name=display_name,
+            password=password,
+            second_factor=False,
+        )
     token = check_setup_token(presented_token)
     return _collect(
         token_fp=token_fingerprint(token),
@@ -207,6 +242,7 @@ def _collect(
     password: str,
     invitation_id: str | None = None,
     role: str = "owner",
+    second_factor: bool = True,
 ) -> SetupBlob:
     canonical = email_canonical.canonical(email)
     passwords.refuse_weak(password, email=email)
@@ -219,9 +255,12 @@ def _collect(
         email_canonical=canonical,
         display_name=display_name.strip(),
         password_hash=passwords.hash_password(password),
-        totp_secret=totp.new_secret(),
-        recovery_codes=tuple(secrets.token_hex(5) for _ in range(RECOVERY_CODE_COUNT)),
-        step=2,
+        # No authenticator on the desktop: the blob skips step 3 and completes.
+        totp_secret=totp.new_secret() if second_factor else "",
+        recovery_codes=tuple(
+            secrets.token_hex(5) for _ in range(RECOVERY_CODE_COUNT if second_factor else 1)
+        ),
+        step=2 if second_factor else 4,
         invitation_id=invitation_id,
         role=role,
     )
@@ -293,7 +332,11 @@ def complete(
         # any screenshot or proxy log of it -- cannot be replayed to sign in.
         totp_last_counter=blob.enrolled_step,
     )
-    user.totp_secret = crypto.seal_totp_secret(blob.totp_secret, user_id=user.id)
+    # None on the desktop, where nobody has one; sign-in there asks the
+    # profile, not this column (`capabilities.second_factor`, #320).
+    user.totp_secret = (
+        crypto.seal_totp_secret(blob.totp_secret, user_id=user.id) if blob.totp_secret else None
+    )
 
     session.execute(text("PRAGMA defer_foreign_keys=ON"))
     # own_transaction=False: this must be one transaction, so the batch cannot

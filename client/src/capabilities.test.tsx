@@ -34,6 +34,7 @@ const DESKTOP: Capabilities = {
   account_resets: false,
   passkeys: false,
   second_factor: false,
+  password_reset_by_code: true,
   self_update: false,
   db_view: false,
 };

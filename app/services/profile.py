@@ -397,9 +397,11 @@ def regenerate_recovery_codes(
 
     Call inside a batch. Returns the new codes, to be shown once.
     """
-    from ..auth.setup import RECOVERY_CODE_COUNT
+    from .. import capabilities
+    from ..auth.setup import recovery_code_count
 
-    if user.totp_secret is None:
+    two_factors = capabilities.second_factor()
+    if two_factors and user.totp_secret is None:
         # Nothing to prove the second factor with. Refused before the budget is
         # touched: it is a fact about the account, not a guess.
         raise ValidationError(
@@ -414,15 +416,16 @@ def regenerate_recovery_codes(
     if not passwords.verify_password(user.password_hash, password):
         raise ProofRefused(_REGENERATE_REFUSAL, code="profile.regenerate_refused")
     candidate = (code or "").strip().replace(" ", "")
-    if not (candidate.isdigit() and len(candidate) == 6):
+    # The password alone on the desktop, where it is the only factor (#320).
+    if two_factors and not (candidate.isdigit() and len(candidate) == 6):
         raise ProofRefused(_REGENERATE_REFUSAL, code="profile.regenerate_refused")
-    if not totp.verify_and_consume(user, candidate):
+    if two_factors and not totp.verify_and_consume(user, candidate):
         raise ProofRefused(_REGENERATE_REFUSAL, code="profile.regenerate_refused")
     ratelimit.release(engine, held)
 
     for old in session.scalars(select(RecoveryCode).where(RecoveryCode.user_id == user.id)):
         session.delete(old)
-    codes = tuple(secrets.token_hex(5) for _ in range(RECOVERY_CODE_COUNT))
+    codes = tuple(secrets.token_hex(5) for _ in range(recovery_code_count()))
     for one in codes:
         session.add(RecoveryCode(user_id=user.id, code_hash=passwords.hash_password(one)))
     session.flush()
@@ -480,10 +483,10 @@ def replace_recovery_codes(session: Session, user: User) -> tuple[str, ...]:
     Returned in plaintext to be shown once; only their hashes are stored.
     Call inside a batch: `recovery_codes` is audited.
     """
-    from ..auth.setup import RECOVERY_CODE_COUNT
+    from ..auth.setup import recovery_code_count
 
     delete_recovery_codes(session, user)
-    codes = tuple(secrets.token_hex(5) for _ in range(RECOVERY_CODE_COUNT))
+    codes = tuple(secrets.token_hex(5) for _ in range(recovery_code_count()))
     for code in codes:
         session.add(RecoveryCode(user_id=user.id, code_hash=passwords.hash_password(code)))
     return codes

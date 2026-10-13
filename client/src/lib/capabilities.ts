@@ -17,6 +17,8 @@ export type Capabilities = {
   account_resets: boolean;
   passkeys: boolean;
   second_factor: boolean;
+  /** A forgotten password is replaced with the recovery code: the desktop's way back in (#320). */
+  password_reset_by_code: boolean;
   self_update: boolean;
   upstream_check: boolean;
   db_view: boolean;
@@ -26,7 +28,7 @@ export type Capabilities = {
 export type Capability = keyof Capabilities;
 
 /**
- * Everything on: what every deployment offered before capabilities existed,
+ * A server's set: what every deployment offered before capabilities existed,
  * and what is assumed if the server cannot say -- one older than the endpoint.
  */
 export const EVERYTHING: Capabilities = {
@@ -36,6 +38,7 @@ export const EVERYTHING: Capabilities = {
   account_resets: true,
   passkeys: true,
   second_factor: true,
+  password_reset_by_code: false,
   self_update: true,
   upstream_check: true,
   db_view: true,
@@ -77,6 +80,11 @@ export function setCapabilities(next: Capabilities | null): void {
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
+}
+
+/** The same, for code that is not a component (a form's "ready" check). */
+export function offeredNow(): Capabilities {
+  return offered ?? EVERYTHING;
 }
 
 /** The deployment's capabilities, or everything until the boot has asked. */

@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Request, Response
 from sqlalchemy import select
 
-from ... import db
+from ... import capabilities, db
 from ...audit.batch import batch
 from ...auth import cookies, keycheck, passkeys, service
 from ...auth import devices as device_service
@@ -20,6 +20,8 @@ from ...models import BatchKind, User
 from ...schemas import (
     PasskeyStateOut,
     PresenceOut,
+    Recovered,
+    RecoverWithCode,
     SignIn,
     SignInState,
     SignInWithPasskey,
@@ -31,6 +33,11 @@ from ...services import profile as profile_service
 from ..deps import CurrentUser, SessionDep, client_ip, device_cookie
 
 router = APIRouter(tags=["auth"])
+
+#: The desktop's way back in after a forgotten password (#320): its own router,
+#: so a deployment where recovery codes stand in for an authenticator instead
+#: leaves it out whole (`app.capabilities`).
+recovery_router = APIRouter(tags=["auth"])
 
 #: The half-finished sign-in. Named and written by `auth/cookies.py`, which
 #: owns the names and the flags of all three of this app's cookies -- there is
@@ -64,7 +71,10 @@ def sign_in(
     # they would stay in recovery mode, unable to pass a step-up, until the
     # thirty days ran out. So the half-finished sign-in it is, and this
     # answer tells them.
-    if trusted is None or user.totp_secret is None or locked:
+    # None of this on the desktop, where the password is the only factor and
+    # this is the whole sign-in (#320). Asked of the profile, never inferred
+    # from a NULL `totp_secret`, which means "cleared by a reset" (#284).
+    if capabilities.second_factor() and (trusted is None or user.totp_secret is None or locked):
         # The browser has not passed a second factor recently. Hold the
         # half-finished sign-in in a sealed cookie and ask for a code.
         # A row, not just a sealed cookie. The sealed value alone was a bearer
@@ -284,3 +294,35 @@ def presence(session: SessionDep, user: CurrentUser) -> PresenceOut:
         )
     ).scalars().all()
     return PresenceOut(online=[UserOut.model_validate(row) for row in rows])
+
+
+@recovery_router.post("/session/recover", response_model=Recovered)
+def recover_with_code(
+    body: RecoverWithCode, request: Request, response: Response, session: SessionDep
+) -> Recovered:
+    """Replace a forgotten password with the recovery code, and sign in.
+
+    The code is spent, every other session and trusted browser ends, and a new
+    code is shown once -- the person has just used the only one they had.
+    """
+    user, matched = service.check_recovery_code_for_password(
+        session,
+        db.engine,
+        email=body.email,
+        code=body.code,
+        new_password=body.new_password,
+        ip=client_ip(request),
+    )
+    with batch(session, kind=BatchKind.manual, actor_id=user.id):
+        service.replace_password_with_recovery_code(session, user, matched, body.new_password)
+        (fresh,) = profile_service.replace_recovery_codes(session, user)
+    result = service.complete_sign_in(
+        session,
+        user,
+        trust_this_browser=False,
+        device_cookie=device_cookie(request),
+        ip=client_ip(request),
+        user_agent=request.headers.get("user-agent"),
+    )
+    cookies.set_session(response, request, result.session_value)
+    return Recovered(user=UserOut.model_validate(user), recovery_code=fresh)
