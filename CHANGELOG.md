@@ -116,6 +116,26 @@ history this repository does not have.
   3.13), are now guarded, and the startup check for files other users can
   read no longer names every file in the data directory on Windows, where
   permission bits do not say who can read a file. (#315)
+- **Found by running the suite on Windows 11** (#315):
+  - **The register's running balance and its pages no longer depend on two
+    rows having different creation times.** After the date, the register
+    broke ties by when each row was created -- which is not unique: rows
+    written within one tick of the clock share it (on Windows a tick is
+    about 15 ms, so most of an import did). The running balance then summed
+    those rows in whatever order they came, so the newest row could show the
+    wrong balance, and a page boundary between them could skip or repeat a
+    row. Every register order now ends with the row's id, and the balance
+    follows the same order.
+  - **A log file is never overwritten when two rotations fall in the same
+    second.** The second used to take the first one's name -- replacing that
+    file on macOS and Linux, and failing on Windows. It now gets a counter
+    after the stamp, and pruning orders by stamp and counter.
+  - **Windows reports its memory**, so SQLite's cache is sized there as
+    elsewhere rather than as for an unknown host.
+  - Tests that restored a ledger under their own running app stop it first,
+    as an operator does: Windows cannot rename a file that is still open.
+    Tests of what runs only in the Linux container are marked so, in one
+    place in `tests/conftest.py`.
 - **Every SQLite connection the app opens on the ledger or a backup is now
   closed when it is done.** Python's `with sqlite3.connect(...)` commits but
   leaves the connection open until the garbage collector reaches it, and

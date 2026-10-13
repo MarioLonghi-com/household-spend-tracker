@@ -365,6 +365,10 @@ def test_a_tab_file_with_a_bom_and_its_columns_in_any_order_and_case(session, ow
         (_file(*[f"A{i},cash" for i in range(MAX_ACCOUNT_ROWS + 1)]), f"more than {MAX_ACCOUNT_ROWS} accounts"),
         (_file(f"A,cash,,,,,,,{'n' * 140_000}"), "line 2 of this file cannot be read as CSV"),
     ],
+    # Named, not drawn from the values: pytest puts the test's id in an
+    # environment variable, and Windows refuses one over 32,767 characters --
+    # which the 140,000-character line made it (#315).
+    ids=["unknown-column", "no-type", "column-twice", "no-rows", "empty", "blank", "too-many", "unreadable-line"],
 )
 def test_a_file_that_is_not_a_list_of_accounts_is_refused_whole(session, owner, household, accounts, raw, said):
     before = _counts(session)

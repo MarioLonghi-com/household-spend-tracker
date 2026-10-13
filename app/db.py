@@ -100,10 +100,37 @@ def host_memory() -> int | None:
             continue
         if text.isdigit() and 0 < int(text) < _NO_LIMIT:
             return int(text)
+    if os.name == "nt":  # pragma: no cover - the Windows leg runs it
+        return _windows_memory()
     try:
         return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
     except (OSError, ValueError, AttributeError):  # pragma: no cover - no sysconf
         return None
+
+
+def _windows_memory() -> int | None:  # pragma: no cover - the Windows leg runs it
+    """The machine's physical memory, where there is no `sysconf` (#315).
+    Without it the desktop app on Windows sized SQLite as for an unknown host."""
+    import ctypes
+
+    class MemoryStatus(ctypes.Structure):
+        _fields_ = [
+            ("dwLength", ctypes.c_ulong),
+            ("dwMemoryLoad", ctypes.c_ulong),
+            ("ullTotalPhys", ctypes.c_ulonglong),
+            ("ullAvailPhys", ctypes.c_ulonglong),
+            ("ullTotalPageFile", ctypes.c_ulonglong),
+            ("ullAvailPageFile", ctypes.c_ulonglong),
+            ("ullTotalVirtual", ctypes.c_ulonglong),
+            ("ullAvailVirtual", ctypes.c_ulonglong),
+            ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+        ]
+
+    status = MemoryStatus()
+    status.dwLength = ctypes.sizeof(MemoryStatus)
+    if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
+        return None
+    return int(status.ullTotalPhys) or None
 
 
 def memory_budget(memory: int | None = None) -> tuple[int, int]:

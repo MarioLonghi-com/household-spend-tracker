@@ -20,6 +20,7 @@ Two of everything: two households with rows in both, two backups.
 from __future__ import annotations
 
 import base64
+import contextlib
 import hashlib
 import io
 import json
@@ -34,6 +35,7 @@ from unittest import mock
 import pyotp
 import pytest
 
+from app import permissions
 from tests.conftest import HEADERS, PASSWORD, _setup_owner
 
 BACKUPS = "/api/admin/application/backups"
@@ -142,7 +144,9 @@ def _download_with_key(client, name: str, world: dict) -> zipfile.ZipFile:
 
 
 def _rows(path: Path, table: str) -> int:
-    with sqlite3.connect(path) as conn:
+    # Closed on the way out, not by the collector: an open one stops Windows
+    # renaming the ledger under it (#315).
+    with contextlib.closing(sqlite3.connect(path)) as conn:
         return conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
 
 
@@ -405,6 +409,17 @@ def _save(archive: zipfile.ZipFile, path: Path) -> Path:
     return path
 
 
+def _stop_the_app(client) -> None:
+    """Stop the app before restoring under it, as the restore tells an operator
+    to and its lock enforces from another process. In this one the lock is
+    shared, so this is the test's to do: on Windows a ledger the app still
+    has open cannot be renamed at all (#315)."""
+    import app.db as db
+
+    client.__exit__(None, None, None)
+    db.engine.dispose()
+
+
 def _change_the_live_ledger(client) -> None:
     client.post("/api/households", json={"name": "After the backup"}, headers=HEADERS)
 
@@ -420,6 +435,7 @@ def test_the_zip_with_its_key_restores_the_ledger_it_was_taken_from(client, tmp_
 
     live = _data_dir(client) / "api.sqlite3"
     assert _rows(live, "households") == 3
+    _stop_the_app(client)
 
     assert restore.restore(zipped, port=1, yes=True) == 0
 
@@ -439,6 +455,7 @@ def test_without_a_key_onto_the_same_instance_the_key_there_is_kept(client, tmp_
 
     key = _data_dir(client) / "secret.key"
     key_before = key.read_bytes()
+    _stop_the_app(client)
 
     assert restore.restore(zipped, port=1, yes=True) == 0
 
@@ -458,6 +475,8 @@ def test_the_wrong_key_is_refused_before_anything_moves(client, tmp_path):
     wrong.write_text(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())
 
     live = _data_dir(client) / "api.sqlite3"
+    # Stopped first: shutting down checkpoints the WAL into the file.
+    _stop_the_app(client)
     live_sha = _sha(live)
 
     with pytest.raises(SystemExit, match="every authenticator would be refused"):
@@ -480,6 +499,7 @@ def test_a_bare_backup_file_restores_with_the_key_named_for_it(client, tmp_path)
     right = tmp_path / "carried.key"
     right.write_bytes((_data_dir(client) / "secret.key").read_bytes())
     _change_the_live_ledger(client)
+    _stop_the_app(client)
 
     assert restore.restore(elsewhere, port=1, yes=True, key_file=right) == 0
     assert _rows(_data_dir(client) / "api.sqlite3", "households") == 0
@@ -504,7 +524,8 @@ def test_unpacking_takes_only_the_four_known_names_and_nothing_by_its_path(tmp_p
 
     assert sorted(p.name for p in into.iterdir()) == ["secret.key", "spendtracker.sqlite3"]
     assert not (tmp_path / "escaped.txt").exists() and not (tmp_path.parent / "escaped.txt").exists()
-    assert (into / "secret.key").stat().st_mode & 0o077 == 0
+    if permissions.MODE_BITS_MEAN_ACCESS:  # Windows: an ACL, not bits
+        assert (into / "secret.key").stat().st_mode & 0o077 == 0
 
     twice = tmp_path / "twice.zip"
     with zipfile.ZipFile(twice, "w") as archive:
