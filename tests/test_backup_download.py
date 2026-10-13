@@ -20,6 +20,7 @@ Two of everything: two households with rows in both, two backups.
 from __future__ import annotations
 
 import base64
+import contextlib
 import hashlib
 import io
 import json
@@ -143,7 +144,9 @@ def _download_with_key(client, name: str, world: dict) -> zipfile.ZipFile:
 
 
 def _rows(path: Path, table: str) -> int:
-    with sqlite3.connect(path) as conn:
+    # Closed on the way out, not by the collector: an open one stops Windows
+    # renaming the ledger under it (#315).
+    with contextlib.closing(sqlite3.connect(path)) as conn:
         return conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
 
 

@@ -382,15 +382,27 @@ LINUX_ONLY = {
     "test_launcher_engine.py": "the shell launchers and the container engines",
     "test_placard.py": "the updater's maintenance page, which speaks over a Unix socket",
     "test_update_endpoints.py": "the self-updater, which answers over a Unix socket",
+    "test_rehearsal_before.py": "the CI rehearsal's bash step",
 }
 LINUX_ONLY_PREFIX = ("test_updater_", "the self-updater, which runs only in its Linux container")
+
+
+def _linux_only(name: str) -> str | None:
+    return LINUX_ONLY.get(name) or (LINUX_ONLY_PREFIX[1] if name.startswith(LINUX_ONLY_PREFIX[0]) else None)
+
+
+def pytest_ignore_collect(collection_path, config):
+    """Not even imported on Windows: the updater's modules build Unix-socket
+    servers at import, which fails before any skip marker could apply."""
+    if os.name == "nt" and collection_path.name.startswith(("test_updater_", "test_placard")):
+        return True
+    return None
 
 
 def pytest_collection_modifyitems(config, items) -> None:
     if os.name != "nt":
         return
     for item in items:
-        name = item.path.name
-        why = LINUX_ONLY.get(name) or (LINUX_ONLY_PREFIX[1] if name.startswith(LINUX_ONLY_PREFIX[0]) else None)
+        why = _linux_only(item.path.name)
         if why:
             item.add_marker(pytest.mark.skip(reason=f"Linux only: {why}"))

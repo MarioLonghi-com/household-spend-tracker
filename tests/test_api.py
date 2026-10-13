@@ -11,6 +11,7 @@ from __future__ import annotations
 import inspect
 import re
 import time
+from contextlib import closing
 from pathlib import Path
 
 import pyotp
@@ -3489,3 +3490,45 @@ def test_a_drill_through_refuses_a_period_that_is_not_one(client):
         ).status_code
         == 422
     )
+
+
+def test_rows_sharing_a_timestamp_page_once_each_and_the_balance_follows_the_page(client):
+    """Windows' clock ticks every 15 ms or so, and rows written within one tick
+    shared `created_at` -- the register's only tiebreaker after the date. The
+    running balance then summed tied rows in whatever order they came, and a
+    page boundary could fall between them and skip or repeat one (#315). The
+    id is the last key now, for the page and the balance alike."""
+    import sqlite3 as _sqlite3
+
+    world = _household_with_accounts(client)
+    house, checking, card = world["household"]["id"], world["checking"]["id"], world["card"]["id"]
+    amounts = [10_000, -1_100, -2_200, -3_300, -4_400, -5_500, -6_600]
+    for amount in amounts:
+        client.post(
+            f"/api/households/{house}/transactions",
+            json={"account_id": checking, "date": "2026-03-01", "amount": amount},
+            headers=HEADERS,
+        )
+    for amount in (-900, -800):  # the other account, which must not move the sum
+        client.post(
+            f"/api/households/{house}/transactions",
+            json={"account_id": card, "date": "2026-03-01", "amount": amount},
+            headers=HEADERS,
+        )
+    import app.db as db
+
+    with closing(_sqlite3.connect(db.engine.url.database)) as raw, raw:
+        raw.execute("UPDATE transactions SET created_at = '2026-03-01 09:00:00.000000'")
+
+    url = f"/api/households/{house}/transactions?account_id={checking}"
+    whole = client.get(url).json()
+    assert whole["has_running_balance"] is True
+    assert whole["transactions"][0]["running_balance"] == sum(amounts), "the top row carries the whole sum"
+    shown = whole["transactions"]
+    for above, below in zip(shown, shown[1:], strict=False):
+        assert above["running_balance"] - above["amount"] == below["running_balance"]
+
+    pages = [client.get(f"{url}&limit=3&offset={start}").json()["transactions"] for start in (0, 3, 6)]
+    paged = [row for page in pages for row in page]
+    assert [row["id"] for row in paged] == [row["id"] for row in shown], "each row once, in one order"
+    assert [row["running_balance"] for row in paged] == [row["running_balance"] for row in shown]

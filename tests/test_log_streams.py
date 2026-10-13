@@ -205,12 +205,9 @@ def test_rotations_are_pruned_to_the_bound_and_only_their_own_stream(client):
     directory = logging_setup.log_dir()
     (directory / "access-20200101-000000.log").write_text("not mine")
 
-    for n in range(logging_setup.KEEP + 3):
-        # Distinct names, since the stamp is per second and this loop is not.
+    for _ in range(logging_setup.KEEP + 3):
+        # Same-second rotations get a counter rather than one name (#315).
         handler.doRollover()
-        for one in sorted(directory.glob("app-*.log")):
-            if one.stat().st_size == 0:
-                one.rename(one.with_name(f"app-2026010{n}-00000{n}.log"))
 
     assert len(list(directory.glob("app-*.log"))) <= logging_setup.KEEP
     assert (directory / "access-20200101-000000.log").exists(), "pruned another stream"
