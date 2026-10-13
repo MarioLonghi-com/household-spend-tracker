@@ -1,0 +1,71 @@
+# How the desktop app is packaged (#61). `npm run dist:mac`, `dist:mas` or
+# `dist:win` after the backend is frozen into ../build/backend (see
+# desktop/README.md); every artefact lands in desktop/dist.
+#
+# Store signing is #63's: these builds are unsigned (macOS) or signed with a
+# test certificate afterwards (MSIX, scripts/sign-msix.ps1).
+
+appId: app.spendtracker.spendtracker
+productName: Spend Tracker
+copyright: Spend Tracker contributors
+
+directories:
+  output: dist
+  buildResources: build-resources
+
+# The bundle is the whole shell (vite.config.ts): no node_modules ships.
+files:
+  - build/main.cjs
+  - build/preload.cjs
+  - package.json
+asar: true
+npmRebuild: false
+
+# The frozen backend, run from the install location, read-only.
+extraResources:
+  - from: ../build/backend/spend-tracker-backend
+    to: backend
+
+mac:
+  category: public.app-category.finance
+  icon: build-resources/icon.icns
+  minimumSystemVersion: "13.0"
+  target:
+    - target: dir
+      arch: arm64
+  hardenedRuntime: true
+  entitlements: entitlements/mac.plist
+  entitlementsInherit: entitlements/mac.inherit.plist
+
+# The Mac App Store build. electron-builder makes it unsigned; the sandbox
+# entitlements, the provisioning profile and the inside-out signing are
+# scripts/sign-mas.sh's, which is what made the spike pass (#59).
+mas:
+  hardenedRuntime: false
+  entitlements: entitlements/mas.plist
+  entitlementsInherit: entitlements/mas.inherit.plist
+masDev:
+  hardenedRuntime: false
+  entitlements: entitlements/mas.plist
+  entitlementsInherit: entitlements/mas.inherit.plist
+
+win:
+  icon: build-resources/icon.ico
+  target:
+    - target: appx
+      arch: x64
+    - target: dir
+      arch: x64
+
+# The identity here is a test one. The Store's comes from the name reserved in
+# Partner Center (#63) and replaces it there.
+appx:
+  identityName: SpendTracker.Test
+  publisher: CN=SpendTrackerTest
+  publisherDisplayName: Spend Tracker (test)
+  applicationId: SpendTracker
+  displayName: Spend Tracker
+  backgroundColor: "#15705C"
+  languages:
+    - en-GB
+  customManifestPath: appxmanifest.xml

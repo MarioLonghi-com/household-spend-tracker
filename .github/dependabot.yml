@@ -92,6 +92,30 @@ updates:
       client:
         patterns: ["*"]
 
+  # The desktop shell (#61). Electron is its own group: each major is a new
+  # Chromium with roughly eight months of support, and the smoke test in
+  # tests.yml's `desktop-app` job is what says a bump still runs. Lingui moves
+  # with the client's, for the same reason as there.
+  - package-ecosystem: npm
+    directory: /desktop
+    target-branch: dev
+    rebase-strategy: disabled
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 2
+    groups:
+      electron:
+        patterns: ["electron", "electron-builder"]
+      lingui:
+        patterns: ["@lingui/*"]
+      desktop:
+        patterns: ["*"]
+
   # The workflows pin every action to a commit SHA, which is the point -- a tag
   # is mutable. Dependabot understands the `# vX.Y.Z` comment beside the pin
   # and moves both together, so pinning does not mean going stale.

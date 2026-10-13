@@ -220,6 +220,27 @@ def _sqlite_pragmas(dbapi_connection, connection_record) -> None:  # pragma: no 
     cursor.close()
 
 
+def checkpoint() -> None:
+    """Fold the WAL back into the ledger and close every pooled connection.
+
+    Called as the app stops. Until the next start the ledger is then one file:
+    a backup tool, a sync client or a person copying the folder sees every
+    write in it, rather than a main file missing what still sits in
+    `-wal` (the 4 KB file beside a 1.7 MB WAL in the CLAUDE.md warning). The
+    desktop app stops every time its window closes, so this is most of its
+    life (#62). A failure is logged and left: SQLite replays the WAL at the
+    next open, so nothing is lost by not checkpointing.
+    """
+    if engine.dialect.name != "sqlite":
+        return
+    try:
+        with engine.connect() as conn:
+            conn.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)")
+    except Exception as problem:  # noqa: BLE001 - see the docstring
+        logging.getLogger(__name__).warning("WAL not checkpointed at shutdown: %s", problem)
+    engine.dispose()
+
+
 from .audit.guard import AuditedSession  # noqa: E402  -- after engine, to avoid a cycle
 
 SessionLocal = sessionmaker(

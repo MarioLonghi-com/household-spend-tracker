@@ -96,6 +96,7 @@ lock:  ## rewrite requirements*.txt from the .in files (UPGRADE=1 to move versio
 	$(LOCK) requirements.in -o requirements.txt
 	$(LOCK) requirements-updater.in -o requirements-updater.txt
 	$(LOCK) requirements-dev.in -o requirements-dev.txt
+	$(LOCK) requirements-desktop.in -o requirements-desktop.txt
 
 install-client: preflight  ## node_modules for the SPA
 	cd client && npm ci
@@ -179,7 +180,7 @@ e2e:  ## end to end in a real browser, desktop and phone
 	cd client && npm run e2e
 
 lint:  ## ruff, the bulk-statement grep, and the client's typecheck
-	./.venv/bin/ruff check app/ statements/ updater/ tests/ scripts/
+	./.venv/bin/ruff check app/ statements/ updater/ tests/ scripts/ desktop/
 	@./scripts/no-bulk-statements.sh
 	cd client && npx tsc -b --noEmit
 
@@ -251,8 +252,9 @@ upgrade:  ## the drill: backup, placard, migrate, verify, log
 # when the first one finds something, because "python is clean" is not an
 # answer to "is the client clean".
 audit:  ## known advisories against the pinned dependencies, Python and npm
-	-./.venv/bin/python -m pip_audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt
+	-./.venv/bin/python -m pip_audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt -r requirements-desktop.txt
 	-cd client && npm audit --audit-level=high
+	-cd desktop && npm audit --audit-level=high
 
 # Standalone, for poking at the file without running the app. 127.0.0.1 on
 # purpose: on its own Datasette has no authentication and will happily run

@@ -25,14 +25,28 @@
 // catalog, and this one has to load anywhere `money.ts` does -- including the
 // server's agreement test, which runs it under plain Node.
 import { i18n } from "@lingui/core";
+import { desktop } from "./desktop";
 
 /** What the words are in until a catalog is served. */
 export const SOURCE_LANGUAGE = "en";
 
 let formatOverride: string | undefined;
 
-/** The browser's own formatting locale, as `Intl` resolves `undefined`. */
+/**
+ * The browser's own formatting locale, as `Intl` resolves `undefined` -- or,
+ * in the desktop app, the operating system's regional format. Chromium there
+ * resolves `undefined` to the UI language, and an English Mac set to Swedish
+ * formats writes "1 234,50 kr", which is what its owner expects to see.
+ */
 function browserLocale(): string {
+  const system = desktop()?.systemLocale;
+  if (system) {
+    try {
+      return new Intl.NumberFormat(system).resolvedOptions().locale;
+    } catch {
+      // Not a tag Intl knows: the browser's, as below.
+    }
+  }
   try {
     return new Intl.NumberFormat().resolvedOptions().locale;
   } catch {

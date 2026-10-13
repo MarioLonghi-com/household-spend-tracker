@@ -279,3 +279,240 @@ def test_the_mime_table_is_pythons_own_and_reads_no_system_file(monkeypatch):
     assert [mimetypes.guess_type(f"a{ext}")[0] for _, ext in stdio_adapter.SERVED_TYPES] == [
         kind for kind, _ in stdio_adapter.SERVED_TYPES
     ]
+
+
+# --------------------------------------------------------------------------- #
+# The shell's own requests, the upgrade event, and the checkpoint at exit (#62)
+# --------------------------------------------------------------------------- #
+
+
+def _ask(child: subprocess.Popen, head: dict, body: bytes = b"") -> tuple[dict, bytes]:
+    from app.desktop.stdio_adapter import encode, read_message
+
+    child.stdin.write(encode(head, body))
+    child.stdin.flush()
+    return read_message(child.stdout)
+
+
+def _post(child: subprocess.Popen, ident: int, path: str, payload: dict, cookie: str = "") -> tuple[dict, dict]:
+    headers = [["content-type", "application/json"], ["sec-fetch-site", "same-origin"]]
+    if cookie:
+        headers.append(["cookie", cookie])
+    head, body = _ask(
+        child,
+        {"id": ident, "method": "POST", "path": path, "query": "", "headers": headers},
+        json.dumps(payload).encode(),
+    )
+    return head, json.loads(body)
+
+
+def _cookies(head: dict) -> str:
+    return "; ".join(value.split(";", 1)[0] for key, value in head["headers"] if key == "set-cookie")
+
+
+def _set_up_over_frames(child: subprocess.Popen, *households: str) -> None:
+    who = {"token": "", "email": "jane@example.test", "display_name": "Jane", "password": PASSWORD}
+    head, begun = _post(child, 101, "/api/setup/begin", who)
+    assert head["status"] == 200, begun
+    head, _ = _post(child, 102, "/api/setup/complete", {"blob": begun["blob"], "codes_saved": True})
+    assert head["status"] == 200
+    cookie = _cookies(head)
+    for offset, name in enumerate(households):
+        head, made = _post(child, 103 + offset, "/api/households", {"name": name}, cookie)
+        assert head["status"] == 201, made
+
+
+def _rows(database: Path, sql: str) -> list:
+    import contextlib
+
+    with contextlib.closing(sqlite3.connect(database)) as conn:
+        return conn.execute(sql).fetchall()
+
+
+def test_a_backup_asked_for_by_the_shell_is_a_checked_copy_with_the_rows(tmp_path):
+    from app.desktop.stdio_adapter import read_message
+
+    data = tmp_path / "ledger"
+    child = _spawn(data)
+    try:
+        assert read_message(child.stdout)[0]["event"] == "ready"
+        head, body = _ask(child, {"id": 1, "control": "state"})
+        assert (head["status"], json.loads(body)) == (200, {"changes_head": 0})
+
+        _set_up_over_frames(child, "Casa Ñandú", "Second home")
+        head, body = _ask(child, {"id": 2, "control": "state"})
+        moved_to = json.loads(body)["changes_head"]
+        assert moved_to > 0
+
+        head, body = _ask(child, {"id": 3, "control": "backup"})
+        first = json.loads(body)
+        assert head["status"] == 200, first
+        copy = Path(first["path"])
+        assert copy.parent == data / ".outgoing"
+        assert sorted(n for (n,) in _rows(copy, "SELECT name FROM households")) == ["Casa Ñandú", "Second home"]
+        assert first["changes_head"] == moved_to
+        assert first["revision"] == _rows(copy, "SELECT version_num FROM alembic_version")[0][0]
+
+        # The next one empties what the shell never collected.
+        head, body = _ask(child, {"id": 4, "control": "backup"})
+        second = Path(json.loads(body)["path"])
+        assert list((data / ".outgoing").iterdir()) == [second]
+
+        head, body = _ask(child, {"id": 5, "control": "format the disk"})
+        assert head["status"] == 404
+    finally:
+        child.stdin.close()
+        child.wait(timeout=60)
+
+
+def test_a_control_is_not_reachable_as_a_request(tmp_path):
+    """The page can only send method + path: a control name in a URL is a 404."""
+    from app.desktop.stdio_adapter import read_message
+
+    child = _spawn(tmp_path / "ledger")
+    try:
+        assert read_message(child.stdout)[0]["event"] == "ready"
+        head, _ = _ask(child, {"id": 1, "method": "POST", "path": "/control/backup", "query": "", "headers": []})
+        assert head["status"] in {403, 404, 405}
+        assert not (tmp_path / "ledger" / ".outgoing").exists()
+    finally:
+        child.stdin.close()
+        child.wait(timeout=60)
+
+
+def test_the_ledger_is_one_file_once_the_app_has_stopped(monkeypatch, tmp_path):
+    """The WAL is folded in when the app stops, while the process lives on.
+
+    In-process on purpose: a process that exits closes its connections and
+    SQLite checkpoints on the last close anyway, so only an app stopped inside
+    a living process -- the pool still holding its connections -- shows
+    whether the shutdown did it.
+    """
+    import shutil
+
+    for name in ("SPENDTRACKER_PUBLIC_URL", "SPENDTRACKER_RP_ID", "SPENDTRACKER_ALLOWED_HOSTS"):
+        monkeypatch.delenv(name, raising=False)
+    data = tmp_path / "ledger"
+    monkeypatch.setenv("SPENDTRACKER_PROFILE", "desktop")
+    monkeypatch.setenv("SPENDTRACKER_DATA_DIR", str(data))
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{data / 'spendtracker.sqlite3'}")
+    import app.config as config
+
+    importlib.reload(config)
+    import app.db as db
+
+    importlib.reload(db)
+    from app.models import Base
+
+    Base.metadata.create_all(db.engine)
+    _stamp_head(db.engine)
+    import app.main as main
+
+    importlib.reload(main)
+    wal = data / "spendtracker.sqlite3-wal"
+    try:
+        with TestClient(main.app, base_url="https://localhost") as client:
+            _set_up(client)
+            made = client.post("/api/households", json={"name": "Ours"}, headers=SAME_ORIGIN)
+            assert made.status_code == 201
+            assert wal.stat().st_size > 0, "the writes are in the WAL while it runs"
+        assert not wal.exists() or wal.stat().st_size == 0
+        alone = tmp_path / "main-file-alone.sqlite3"
+        shutil.copyfile(data / "spendtracker.sqlite3", alone)
+        assert _rows(alone, "SELECT name FROM households") == [("Ours",)]
+    finally:
+        monkeypatch.undo()
+        importlib.reload(config)
+        importlib.reload(db)
+        importlib.reload(main)
+
+
+def test_an_upgrade_is_announced_before_it_runs(tmp_path):
+    from alembic import command
+    from alembic.config import Config
+
+    from app.desktop.stdio_adapter import read_message
+    from app.migrate import MIGRATIONS
+    from scripts.upgrade import chain
+
+    data = tmp_path / "ledger"
+    first = _spawn(data)
+    assert read_message(first.stdout)[0]["event"] == "ready"
+    _set_up_over_frames(first, "Ours", "Theirs")
+    first.stdin.close()
+    assert first.wait(timeout=60) == 0
+
+    database = data / "spendtracker.sqlite3"
+    config = Config()
+    config.set_main_option("script_location", str(MIGRATIONS))
+    config.set_main_option("sqlalchemy.url", f"sqlite:///{database}")
+    command.downgrade(config, chain()[-2].revision)
+
+    # Accepted as the shell does after its dialog: the newest step may be lossy.
+    second = _spawn(data, SPENDTRACKER_ACCEPT_LOSSY="1")
+    try:
+        announced, _ = read_message(second.stdout)
+        assert announced["event"] == "upgrading", announced
+        assert announced["steps"] == 1
+        ready, _ = read_message(second.stdout)
+        assert ready["event"] == "ready"
+        assert ready["launch"]["migrated"] == [chain()[-1].revision]
+        assert Path(ready["launch"]["backup"]).is_dir()
+    finally:
+        second.stdin.close()
+        second.wait(timeout=60)
+    assert _rows(database, "SELECT version_num FROM alembic_version") == [(chain()[-1].revision,)]
+    assert sorted(n for (n,) in _rows(database, "SELECT name FROM households")) == ["Ours", "Theirs"]
+
+
+def test_a_restore_start_puts_the_backup_back_and_serves_nothing(tmp_path):
+    from app.desktop.stdio_adapter import read_message
+
+    data = tmp_path / "ledger"
+    child = _spawn(data)
+    assert read_message(child.stdout)[0]["event"] == "ready"
+    _set_up_over_frames(child, "Before")
+    _, body = _ask(child, {"id": 1, "control": "backup"})
+    kept = tmp_path / "kept.sqlite3"
+    Path(json.loads(body)["path"]).rename(kept)
+    _set_up_over_frames_more(child, "After")
+    child.stdin.close()
+    assert child.wait(timeout=60) == 0
+    database = data / "spendtracker.sqlite3"
+    assert sorted(n for (n,) in _rows(database, "SELECT name FROM households")) == ["After", "Before"]
+
+    restoring = _spawn(data, SPENDTRACKER_RESTORE_FROM=str(kept))
+    head, _ = read_message(restoring.stdout)
+    assert restoring.wait(timeout=60) == 0
+    assert (head["event"], head["restore"]["outcome"]) == ("restored", "restored")
+    assert _rows(database, "SELECT name FROM households") == [("Before",)]
+
+
+def test_a_restore_while_the_app_runs_changes_nothing(tmp_path):
+    from app.desktop.stdio_adapter import read_message
+
+    data = tmp_path / "ledger"
+    running = _spawn(data)
+    try:
+        assert read_message(running.stdout)[0]["event"] == "ready"
+        _set_up_over_frames(running, "Live")
+        _, body = _ask(running, {"id": 1, "control": "backup"})
+        kept = tmp_path / "kept.sqlite3"
+        Path(json.loads(body)["path"]).rename(kept)
+
+        second = _spawn(tmp_path / "ledger", SPENDTRACKER_RESTORE_FROM=str(kept))
+        head, _ = read_message(second.stdout)
+        assert second.wait(timeout=60) == 3
+        assert (head["event"], head["restore"]["outcome"]) == ("stopped", "refused")
+        assert "another Spend Tracker" in head["restore"]["reason"]
+    finally:
+        running.stdin.close()
+        running.wait(timeout=60)
+
+
+def _set_up_over_frames_more(child: subprocess.Popen, name: str) -> None:
+    """Sign in again on a ledger already set up, and add one household."""
+    head, said = _post(child, 201, "/api/session", {"email": "jane@example.test", "password": PASSWORD})
+    assert head["status"] == 200, said
+    head, made = _post(child, 202, "/api/households", {"name": name}, _cookies(head))
+    assert head["status"] == 201, made

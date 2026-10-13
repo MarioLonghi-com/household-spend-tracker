@@ -20,11 +20,28 @@ answer. Heads carry an `id`, so answers may come back in any order.
     here  -> {"id": 0, "event": "ready",   "launch": {...}}    then requests are served
     here  -> {"id": 0, "event": "stopped", "launch": {...}}    and the process exits
 
+When the ledger needs migrating, one more comes first, so the shell can say
+"Upgrading your ledger…" for as long as that takes:
+
+    here  -> {"id": 0, "event": "upgrading", "steps": 2}
+
 `stopped` carries why: `newer` (a newer version wrote this ledger), `declined`
 (a step that cannot be undone needs the person's yes -- the shell asks, and
 starts this again with `SPENDTRACKER_ACCEPT_LOSSY=1`), `migration-failed` and
 `rows-dropped` (the backup it names is where the ledger is), or `busy` (another
 copy of the app holds this ledger).
+
+**The shell's own requests** carry `control` where a request has a method --
+`{"id": 9, "control": "backup"}` -- and are answered like any other, with a
+JSON body (`app.desktop.control`). Only the shell writes frames, so no page
+can send one.
+
+**Restore** is a start of its own: with `SPENDTRACKER_RESTORE_FROM=<file>` the
+process restores that backup (`app.desktop.restore`), says so in one frame,
+and exits without serving anything:
+
+    here  -> {"id": 0, "event": "restored", "restore": {...}}             exit 0
+    here  -> {"id": 0, "event": "stopped",  "restore": {...}}             exit 3
 
 **Standard output is the frames and nothing else.** File descriptor 1 is kept
 for them and then pointed at standard error, so a stray write -- this app's, a
@@ -43,6 +60,7 @@ import struct
 import sys
 import threading
 from dataclasses import asdict
+from pathlib import Path
 from typing import BinaryIO
 from urllib.parse import unquote
 
@@ -52,6 +70,7 @@ _LENGTH = struct.Struct(">I")
 HOST = "localhost"
 
 ACCEPT_LOSSY = "SPENDTRACKER_ACCEPT_LOSSY"
+RESTORE_FROM = "SPENDTRACKER_RESTORE_FROM"
 
 
 # --------------------------------------------------------------------------- #
@@ -162,6 +181,26 @@ async def handle(app, head: dict, body: bytes) -> tuple[dict, bytes]:
     return {"id": head["id"], "status": status, "headers": out_headers}, b"".join(chunks)
 
 
+def serve_control(head: dict) -> tuple[dict, bytes]:
+    """One of the shell's own requests (`app.desktop.control`). Blocking:
+    run it off the event loop."""
+    from app.desktop import control
+
+    command = control.COMMANDS.get(head.get("control"))
+    if command is None:
+        status, said = 404, {"detail": f"no control called {head.get('control')!r}"}
+    else:
+        try:
+            status, said = 200, command()
+        except control.ControlRefused as refused:
+            status, said = 422, {"detail": str(refused)}
+        except Exception as problem:  # noqa: BLE001 - the shell must always get an answer
+            sys.stderr.write(f"stdio_adapter: control {head.get('control')} raised {problem!r}\n")
+            status, said = 500, {"detail": "internal error"}
+    body = json.dumps(said, ensure_ascii=False).encode("utf-8")
+    return {"id": head["id"], "status": status, "headers": [["content-type", "application/json"]]}, body
+
+
 # --------------------------------------------------------------------------- #
 # The app's lifespan
 # --------------------------------------------------------------------------- #
@@ -265,11 +304,18 @@ def main() -> int:
     if config.settings.profile != "desktop":
         return _refuse("this serves the desktop profile only (SPENDTRACKER_PROFILE=desktop)")
 
+    restoring = os.environ.get(RESTORE_FROM, "").strip()
+    if restoring:
+        return _restore(restoring, answer)
+
     from app.desktop import launch
 
     accept = os.environ.get(ACCEPT_LOSSY, "").strip().lower() in {"1", "true", "yes"}
     try:
-        prepared = launch.prepare(confirm_lossy=lambda _titles: accept)
+        prepared = launch.prepare(
+            confirm_lossy=lambda _titles: accept,
+            starting=lambda steps: answer({"id": 0, "event": "upgrading", "steps": steps}),
+        )
     except instance_lock.LedgerBusy as busy:
         answer({"id": 0, "event": "stopped", "launch": {"outcome": "busy", "log": [str(busy)]}})
         return 3
@@ -290,7 +336,10 @@ def main() -> int:
     stdin = sys.stdin.buffer
 
     async def serve(head: dict, body: bytes) -> None:
-        answer(*await handle(app, head, body))
+        if "control" in head:
+            answer(*await loop.run_in_executor(None, serve_control, head))
+        else:
+            answer(*await handle(app, head, body))
 
     def reader() -> None:
         while (message := read_message(stdin)) is not None:
@@ -301,6 +350,18 @@ def main() -> int:
     loop.run_forever()
     loop.run_until_complete(lifespan.shutdown())
     return 0
+
+
+def _restore(source: str, answer) -> int:
+    from app import instance_lock
+    from app.desktop import restore
+
+    try:
+        done = restore.restore(Path(source))
+    except instance_lock.LedgerBusy as busy:
+        done = restore.Restored(restore.REFUSED, str(busy))
+    answer({"id": 0, "event": "restored" if done.ok else "stopped", "restore": asdict(done)})
+    return 0 if done.ok else 3
 
 
 if __name__ == "__main__":
