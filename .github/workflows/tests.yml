@@ -503,6 +503,13 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
       - run: pip install --require-hashes -r requirements-dev.txt
+      # The launcher's shellcheck test fails rather than skips in CI, and only
+      # the Linux runner image carries shellcheck.
+      - name: shellcheck
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then brew install shellcheck; else choco install shellcheck -y --no-progress; fi
+          shellcheck --version | head -2
       - name: pytest
         run: python -m pytest -n auto --dist loadfile --no-cov -ra
         env:
@@ -543,6 +550,7 @@ jobs:
           persist-credentials: false
           # The last release's tag, for the rehearsal.
           fetch-depth: 0
+          fetch-tags: true
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -574,7 +582,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tag="$(git describe --tags --abbrev=0 --match 'v*' HEAD^)"
+          # The newest release by version: the tags are on `main`, so a
+          # describe from a commit on `dev` reaches none of them.
+          tag="$(git tag -l 'v*' --sort=-v:refname | head -1)"
           echo "the last release is $tag"
           git worktree add --detach ../before "$tag"
           python -m venv ../before-venv

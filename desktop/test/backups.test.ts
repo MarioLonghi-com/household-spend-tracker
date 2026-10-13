@@ -60,8 +60,8 @@ describe("backups the person can see (#62)", () => {
   });
 
   it("defaults to Documents, or beside the ledger where the sandbox cannot reach Documents", () => {
-    expect(defaultFolder("/Users/a/Documents", "/sandbox/Backups", false)).toBe(path.join("/Users/a/Documents", "Spend Tracker Backups"));
-    expect(defaultFolder("/Users/a/Documents", "/sandbox/Backups", true)).toBe("/sandbox/Backups");
+    expect(defaultFolder("/home/a/Documents", "/sandbox/Backups", false)).toBe(path.join("/home/a/Documents", "Spend Tracker Backups"));
+    expect(defaultFolder("/home/a/Documents", "/sandbox/Backups", true)).toBe("/sandbox/Backups");
   });
 
   it("brings a chosen backup in, replacing whatever an earlier restore left", () => {

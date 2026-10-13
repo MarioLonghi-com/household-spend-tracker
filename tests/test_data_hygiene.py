@@ -378,7 +378,10 @@ BINARY_SUFFIXES = frozenset({
     ".sqlite", ".sqlite3", ".db", ".zip", ".gz", ".tgz",
 })
 SCREENSHOTS = ROOT / "docs" / "screenshots"
-BINARY_HOMES = (FIXTURES, ROOT / "client" / "public", SCREENSHOTS)
+#: The desktop app's icons and MSIX tiles, drawn by scripts/make_icons.py
+#: like the ones in client/public, and held to the same check below (#61).
+DESKTOP_ICONS = (ROOT / "desktop" / "build-resources", ROOT / "desktop" / "build-resources" / "appx")
+BINARY_HOMES = (FIXTURES, ROOT / "client" / "public", SCREENSHOTS, *DESKTOP_ICONS)
 
 
 def _all_tracked() -> list[pathlib.Path]:
@@ -541,6 +544,16 @@ def test_the_png_reader_sees_a_text_chunk():
         + chunk(b"IEND", b"")
     )
     assert set(png_chunks(raw)) - _IMAGE_ONLY_CHUNKS == {"tEXt"}
+
+
+def test_the_desktop_icons_are_pngs_carrying_nothing_but_the_image():
+    """Drawn by a script, so nothing but pixels -- and kept that way: a PNG's
+    text chunks are where an editor writes an author or a path (#61)."""
+    pngs = [p for home in DESKTOP_ICONS for p in home.glob("*.png")]
+    assert pngs, "the desktop icons are missing; run python -m scripts.make_icons"
+    for png in pngs:
+        extra = set(png_chunks(png.read_bytes())) - _IMAGE_ONLY_CHUNKS
+        assert not extra, f"{png.name} carries {sorted(extra)}; redraw it with scripts.make_icons"
 
 
 def test_the_only_tracked_binaries_are_the_fixtures_and_the_icons():

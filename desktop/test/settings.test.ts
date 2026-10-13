@@ -7,7 +7,7 @@ import { DEFAULTS, load, parse, save } from "../src/settings";
 describe("the shell's settings (#62)", () => {
   it("round-trips through the file", () => {
     const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "st-settings-")), "shell.json");
-    const chosen = { ...DEFAULTS, backupsFolder: "/Users/someone/Dropbox/Spend", lastDailyBackup: "2026-10-13", backedUpTo: 42, language: "en-XA" };
+    const chosen = { ...DEFAULTS, backupsFolder: "/home/someone/Dropbox/Spend", lastDailyBackup: "2026-10-13", backedUpTo: 42, language: "en-XA" };
     save(file, chosen);
     expect(load(file)).toEqual(chosen);
     expect(fs.existsSync(`${file}.writing`)).toBe(false);

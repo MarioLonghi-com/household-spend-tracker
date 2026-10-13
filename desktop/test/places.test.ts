@@ -10,7 +10,7 @@ describe("where the desktop app keeps things (#317)", () => {
   });
 
   it("is Application Support on a Mac, which the sandbox puts in its container", () => {
-    const userData = "/Users/a/Library/Containers/app.spendtracker.spendtracker/Data/Library/Application Support/Spend Tracker";
+    const userData = "/Volumes/Home/a/Library/Containers/app.spendtracker.spendtracker/Data/Library/Application Support/Spend Tracker";
     expect(rootFor({ platform: "darwin", env: {}, userData })).toBe(userData);
   });
 

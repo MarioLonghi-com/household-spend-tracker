@@ -57,8 +57,10 @@ builds on an Apple Silicon Mac, the Windows one on Windows x64.
 python3 -m venv build/freeze-venv
 build/freeze-venv/bin/pip install --require-hashes -r requirements-desktop.txt
 (cd client && npm ci) && (cd desktop && npm ci)
-build/freeze-venv/bin/python -m scripts.desktop_build mac     # or mas, or win
+build/freeze-venv/bin/python -m scripts.desktop_build mac
 ```
+
+`mac` is the plain Mac build; `mas` the Mac App Store one; `win` the MSIX and a folder.
 
 `scripts/desktop_build.py` builds the client, stamps the commit, freezes the
 backend (`desktop/backend.spec`), smoke-tests it (`smoke_backend.py`), builds
@@ -66,9 +68,12 @@ the shell and packages it into `desktop/dist`. `--from N` starts at step N.
 
 ### Checks
 
+The shell's units, the packaged app end to end in `en` and `en-XA`, and the
+upgrade rehearsal:
+
 ```bash
-cd desktop && npm test          # the shell's units
-cd desktop && npm run smoke     # the packaged app, end to end, in en and en-XA
+cd desktop && npm test
+cd desktop && npm run smoke
 python desktop/rehearse_backend.py build/backend/spend-tracker-backend/spend-tracker-backend <ledger dir>
 ```
 
