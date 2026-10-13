@@ -256,3 +256,21 @@ def test_a_frozen_build_reads_its_stamp_and_never_starts_git(monkeypatch, tmp_pa
     finally:
         build.current.cache_clear()
     assert (found.commit, found.source) == ("0123456789abcdef", "stamp")
+
+
+def test_the_mime_table_is_pythons_own_and_reads_no_system_file(monkeypatch):
+    """The sandbox refuses /etc/apache2/mime.types; a registry can say .js is
+    text/plain. Neither may decide what the SPA is served as."""
+    import mimetypes
+
+    from app.desktop import stdio_adapter
+
+    opened: list[str] = []
+    monkeypatch.setattr(mimetypes, "knownfiles", ["/etc/apache2/mime.types"])
+    monkeypatch.setattr(mimetypes.MimeTypes, "read", lambda self, filename, strict=True: opened.append(filename))
+    monkeypatch.setattr(mimetypes, "inited", False)
+    stdio_adapter._own_mime_types()
+    assert opened == []
+    assert [mimetypes.guess_type(f"a{ext}")[0] for _, ext in stdio_adapter.SERVED_TYPES] == [
+        kind for kind, _ in stdio_adapter.SERVED_TYPES
+    ]

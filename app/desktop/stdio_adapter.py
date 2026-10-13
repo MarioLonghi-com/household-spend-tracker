@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import mimetypes
 import os
 import struct
 import sys
@@ -209,6 +210,38 @@ def _take_stdout() -> BinaryIO:
     return frames
 
 
+#: What the app serves, pinned: Python's table already says so, but on Windows
+#: `mimetypes` also reads the registry, where another program can have mapped
+#: `.js` to `text/plain` -- and a module script served as that is refused.
+SERVED_TYPES = (
+    ("text/javascript", ".js"),
+    ("text/javascript", ".mjs"),
+    ("text/css", ".css"),
+    ("text/html", ".html"),
+    ("application/json", ".json"),
+    ("application/manifest+json", ".webmanifest"),
+    ("image/svg+xml", ".svg"),
+    ("image/png", ".png"),
+    ("image/avif", ".avif"),
+    ("font/woff2", ".woff2"),
+)
+
+
+def _own_mime_types() -> None:
+    """Python's own MIME table, never the system's files.
+
+    The first guess otherwise reads `/etc/apache2/mime.types` and its
+    siblings, which the Mac App Store sandbox refuses with EPERM -- so every
+    file response, the SPA itself, failed with a 500 while JSON worked (found
+    in the sandbox, #59). `init(files=[])` is not enough: it *adds* to the
+    system list. The list itself is emptied first.
+    """
+    mimetypes.knownfiles = []
+    mimetypes.init()
+    for kind, extension in SERVED_TYPES:
+        mimetypes.add_type(kind, extension)
+
+
 def _refuse(sentence: str) -> int:
     sys.stderr.write(f"stdio_adapter: {sentence}\n")
     return 2
@@ -245,6 +278,7 @@ def main() -> int:
         answer({"id": 0, "event": "stopped", "launch": said})
         return 3
 
+    _own_mime_types()
     from app.main import app
 
     loop = asyncio.new_event_loop()
