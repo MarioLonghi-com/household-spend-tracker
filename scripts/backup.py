@@ -51,6 +51,7 @@ backup` exists: the online backup API takes an equally consistent copy and
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as dt
 import json
 import pathlib
@@ -275,10 +276,10 @@ def take(into: pathlib.Path | None = None, *, method: str = "vacuum") -> pathlib
     # still up. They differ only in whether the copy's pages land where the
     # original's did -- see the table in this module's docstring.
     if method == "backup":
-        with sqlite3.connect(live) as source, sqlite3.connect(copy) as target:
+        with contextlib.closing(sqlite3.connect(live)) as source, contextlib.closing(sqlite3.connect(copy)) as target:
             source.backup(target)
     else:
-        with sqlite3.connect(live) as conn:
+        with contextlib.closing(sqlite3.connect(live)) as conn:
             conn.execute("VACUUM INTO ?", (str(copy),))
 
     key = settings.data_dir / "secret.key"

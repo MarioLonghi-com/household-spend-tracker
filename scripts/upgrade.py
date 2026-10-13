@@ -65,6 +65,7 @@ wrong assumption here.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as dt
 import html
 import http.server
@@ -172,7 +173,7 @@ def stamped() -> str | None:
     path = pathlib.Path(settings.database_url.split("///", 1)[-1])
     if not path.exists():
         return None
-    with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
+    with contextlib.closing(sqlite3.connect(f"file:{path}?mode=ro", uri=True)) as conn:
         try:
             row = conn.execute("SELECT version_num FROM alembic_version").fetchone()
         except sqlite3.OperationalError:
@@ -642,7 +643,7 @@ def _migrate(port: int, say: Step, folder: pathlib.Path, outcome: dict, finish) 
 
         live = pathlib.Path(settings.database_url.split("///", 1)[-1])
         dropped: list[str] = []
-        with sqlite3.connect(f"file:{live}?mode=ro", uri=True) as conn:
+        with contextlib.closing(sqlite3.connect(f"file:{live}?mode=ro", uri=True)) as conn:
             for table, was in sorted(checked["rows"].items()):
                 now_count = conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
                 outcome["rows"]["after"][table] = now_count

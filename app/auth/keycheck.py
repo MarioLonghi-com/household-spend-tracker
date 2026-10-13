@@ -31,6 +31,7 @@ them one at a time.
 
 from __future__ import annotations
 
+import contextlib
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
@@ -55,7 +56,7 @@ class KeyCheck:
 
 
 def check(database: Path, key_text: str) -> KeyCheck:
-    with sqlite3.connect(f"file:{database}?mode=ro", uri=True) as conn:
+    with contextlib.closing(sqlite3.connect(f"file:{database}?mode=ro", uri=True)) as conn:
         try:
             rows = conn.execute(
                 "SELECT id, email, totp_secret FROM users"
