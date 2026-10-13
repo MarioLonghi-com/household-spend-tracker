@@ -71,6 +71,15 @@ history this repository does not have.
   3.13), are now guarded, and the startup check for files other users can
   read no longer names every file in the data directory on Windows, where
   permission bits do not say who can read a file. (#315)
+- **Every SQLite connection the app opens on the ledger or a backup is now
+  closed when it is done.** Python's `with sqlite3.connect(...)` commits but
+  leaves the connection open until the garbage collector reaches it, and
+  thirteen places used it -- the key check at startup, Back up now, the
+  backup and upgrade scripts among them. On macOS a ledger renamed under one
+  could not be opened again ("disk I/O error"), which is what made the reset
+  test fail now and then (#108) and every time under coverage; on Windows an
+  open handle stops the rename that restore, reset and an upgrade make. A
+  test now refuses the pattern. (#315)
 
 ## 0.10.1 — 2026-10-09
 

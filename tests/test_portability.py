@@ -7,8 +7,10 @@ flag's value, a file's mode, the list a startup check hands to the log.
 
 from __future__ import annotations
 
+import ast
 import os
 import stat
+from pathlib import Path
 
 import pytest
 
@@ -77,3 +79,49 @@ def test_where_the_bits_mean_nothing_no_path_is_named(tmp_path, monkeypatch):
 
 def test_the_bits_are_trusted_exactly_off_windows():
     assert permissions.MODE_BITS_MEAN_ACCESS is (os.name != "nt")
+
+
+# --------------------------------------------------------------------------- #
+# A connection the app opened is closed by the app, not by the collector
+# --------------------------------------------------------------------------- #
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def _unclosed_connections(source: str, where: str) -> list[str]:
+    """`with sqlite3.connect(...) as c:` sites. Python's context manager on a
+    connection commits or rolls back and leaves it **open** until the garbage
+    collector gets to it. On macOS a ledger renamed under such a connection
+    then fails to open with "disk I/O error" (the reset test did, every time,
+    under coverage); on Windows an open handle stops the rename altogether --
+    and restore, reset and the upgrade drill all rename the ledger (#315).
+    `contextlib.closing(sqlite3.connect(...))` closes it on the way out."""
+    found = []
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.With | ast.AsyncWith):
+            for item in node.items:
+                call = item.context_expr
+                if (
+                    isinstance(call, ast.Call)
+                    and isinstance(call.func, ast.Attribute)
+                    and call.func.attr == "connect"
+                    and isinstance(call.func.value, ast.Name)
+                    and call.func.value.id == "sqlite3"
+                ):
+                    found.append(f"{where}:{node.lineno}")
+    return found
+
+
+def test_every_sqlite_connection_the_app_opens_in_a_with_is_closed_by_it():
+    found = []
+    for folder in ("app", "statements", "scripts"):
+        for path in sorted((ROOT / folder).rglob("*.py")):
+            found += _unclosed_connections(path.read_text(), str(path.relative_to(ROOT)))
+    assert found == []
+
+
+def test_the_scan_finds_a_planted_one():
+    planted = "import sqlite3\nwith sqlite3.connect('x') as conn:\n    pass\n"
+    assert _unclosed_connections(planted, "planted.py") == ["planted.py:2"]
+    closed = "import contextlib, sqlite3\nwith contextlib.closing(sqlite3.connect('x')) as conn:\n    pass\n"
+    assert _unclosed_connections(closed, "closed.py") == []
