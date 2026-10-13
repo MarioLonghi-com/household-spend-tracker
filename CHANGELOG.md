@@ -34,6 +34,30 @@ history this repository does not have.
 
 ### Added
 
+- **The desktop app.** `desktop/` is the Electron shell for the Mac App
+  Store (Apple Silicon) and the Microsoft Store (Windows 11 x64): one window on
+  `app://localhost`, every request forwarded to the frozen backend, no port
+  opened. It shows "Opening your ledger…" while the backend starts and
+  "Upgrading your ledger…" while it migrates, and a dialog for a ledger a
+  newer version wrote, an upgrade that cannot be undone (asked first), or one
+  that failed. A second launch focuses the first window; closing it quits.
+  The File menu backs up now, restores from a backup, chooses the backups
+  folder and shows it and the ledger's. A backup is a bare `.sqlite3` in a
+  folder the person can see (`Documents/Spend Tracker Backups` on Windows, a
+  folder chosen once on a Mac), made on demand, on the first launch of each
+  day and on quit after changes; the folder keeps all of the newest day's,
+  the newest of each of 30 days and of 12 months, and never overwrites one.
+  Restore backs the ledger up first and asks for the password again. The
+  shell's menus and dialogs are Lingui messages in the client's catalogs and
+  follow the window's language, and money and dates follow the operating
+  system's regional format. `python -m scripts.desktop_build mac|mas|win`
+  builds it, `requirements-desktop.txt` is the hashed lock it freezes from,
+  and CI's `desktop-app` job builds both, drives the packaged app end to end in
+  English and the pseudo-locale, and opens the last release's ledger with the
+  new backend, counting every table before and after. (#61, #62)
+- **The app folds the WAL back into the ledger when it stops,** so a stopped
+  ledger is one file. (#62)
+
 - **The backend can be served over stdin and stdout, for the desktop app.**
   `python -m app.desktop.stdio_adapter` runs the desktop start -- the ledger
   held, brought up to date, or a reason not to -- tells the shell how it went,

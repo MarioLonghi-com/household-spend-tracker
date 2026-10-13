@@ -94,6 +94,7 @@ jobs:
       lock: ${{ steps.diff.outputs.lock }}
       selfupdate: ${{ steps.diff.outputs.selfupdate }}
       desktop: ${{ steps.diff.outputs.desktop }}
+      desktopapp: ${{ steps.diff.outputs.desktopapp }}
       tree: ${{ steps.green.outputs.tree }}
       # The id of an earlier successful run of this workflow on the identical
       # tree, or empty. The heavy jobs skip when it is set.
@@ -187,7 +188,7 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
         run: |
-          jobs="python client code image rehearsal audit lock selfupdate desktop"
+          jobs="python client code image rehearsal audit lock selfupdate desktop desktopapp"
           everything() {
             echo "$1: everything runs"
             for job in $jobs; do echo "$job=true" >> "$GITHUB_OUTPUT"; done
@@ -217,8 +218,11 @@ jobs:
           ^client/src/lib/appearance\.ts$
           PATHS
 
+          # desktop/src too: the shell's words are extracted into the
+          # client's catalogs (#62), so the catalogs check owes a run for them.
           decide client <<'PATHS'
           ^client/
+          ^desktop/src/
           PATHS
 
           # e2e: anything that changes what a browser sees or what serves it.
@@ -297,6 +301,16 @@ jobs:
           ^(pyproject\.toml|alembic\.ini)$
           PATHS
 
+          # The packaged desktop app (#61): the shell, everything frozen into
+          # its backend, the client it serves, and what builds them.
+          decide desktopapp <<'PATHS'
+          ^desktop/
+          ^(app|statements|migrations|client)/
+          ^scripts/(desktop_build|backup|upgrade|build_stamp)\.py$
+          ^requirements(-desktop)?\.txt$
+          ^alembic\.ini$
+          PATHS
+
   # --------------------------------------------------------------------------- #
   # Tier 0: about a minute each
   # --------------------------------------------------------------------------- #
@@ -342,7 +356,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install "$(grep -oE '^ruff==[^ ]+' requirements-dev.txt)"
       - name: ruff
-        run: ruff check app/ statements/ updater/ tests/ scripts/
+        run: ruff check app/ statements/ updater/ tests/ scripts/ desktop/
       - name: no bulk statements against audited tables
         run: ./scripts/no-bulk-statements.sh
 
@@ -494,6 +508,104 @@ jobs:
         env:
           PYTHONUTF8: "1"
           SPENDTRACKER_DATA_DIR: ./ci-data
+
+  # The desktop app, packaged (#61): the shell's own tests, then a real build
+  # on each OS it ships for -- the client, the backend frozen from the hashed
+  # lock, the shell, electron-builder -- then the packaged app driven end to
+  # end in English and the pseudo-locale, and a ledger made by the last
+  # release opened by this frozen backend, its rows counted before and after.
+  #
+  # Unsigned: an ad-hoc signature on the Mac, none on Windows. Store signing is
+  # #63's, in the protected `release` environment. The Mac App Store build is
+  # made and kept but not run here: a sandboxed app will not start without a
+  # provisioning profile, and that is a secret.
+  desktop-app:
+    needs: changes
+    if: needs.changes.outputs.desktopapp == 'true' && needs.changes.outputs.green == ''
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            target: mac
+          - runner: windows-latest
+            target: win
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    env:
+      PYTHONUTF8: "1"
+      # electron-builder signs with any identity it finds; a runner has none,
+      # and an ad-hoc signature is what an unsigned Apple Silicon app needs.
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          # The last release's tag, for the rehearsal.
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            desktop/package-lock.json
+      - run: pip install --require-hashes -r requirements-desktop.txt
+      - run: npm ci
+        working-directory: client
+      - run: npm ci
+        working-directory: desktop
+      - name: the shell's own tests
+        run: npm run typecheck && npm test
+        working-directory: desktop
+      - name: build
+        run: python -m scripts.desktop_build ${{ matrix.target }}
+      - name: the Mac App Store build, unsigned
+        if: matrix.target == 'mac'
+        run: python -m scripts.desktop_build mas --from 6
+      - name: the packaged app, end to end
+        run: npm run smoke
+        working-directory: desktop
+      - name: a ledger from the last release, opened by this backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="$(git describe --tags --abbrev=0 --match 'v*' HEAD^)"
+          echo "the last release is $tag"
+          git worktree add --detach ../before "$tag"
+          python -m venv ../before-venv
+          py="$(cd ../before-venv && pwd)/bin/python"
+          [ -x "$py" ] || py="$(cd ../before-venv && pwd)/Scripts/python.exe"
+          "$py" -m pip install --quiet --require-hashes -r ../before/requirements.txt
+          export SPENDTRACKER_DATA_DIR="$RUNNER_TEMP/rehearsal/ledger"
+          export DATABASE_URL="sqlite:///$SPENDTRACKER_DATA_DIR/spendtracker.sqlite3"
+          (cd ../before && "$py" -m alembic upgrade head && "$py" -m scripts.seed_demo --reset --months 3 > /dev/null)
+          unset DATABASE_URL
+          exe=build/backend/spend-tracker-backend/spend-tracker-backend
+          [ -f "$exe.exe" ] && exe="$exe.exe"
+          data="$SPENDTRACKER_DATA_DIR"
+          unset SPENDTRACKER_DATA_DIR
+          python desktop/rehearse_backend.py "$exe" "$data"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: desktop-${{ matrix.target }}
+          path: |
+            desktop/dist/*.appx
+            desktop/dist/mac-arm64/
+            desktop/dist/mas-dev-arm64/
+          if-no-files-found: ignore
+          retention-days: 7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: failure()
+        with:
+          name: desktop-${{ matrix.target }}-failure
+          path: desktop/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
 
   # The type check, the client's unit tests (vitest: the pre-commit hook ran
   # them and CI never did) and the build. `npm run build` is the client check,
@@ -1315,6 +1427,7 @@ jobs:
       - repo-wide
       - pytest
       - pytest-desktop-os
+      - desktop-app
       - client
       - e2e
       - rehearsal

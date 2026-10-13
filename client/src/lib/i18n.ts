@@ -28,6 +28,7 @@
 
 import { i18n, type Messages } from "@lingui/core";
 import { messages as english } from "../locales/en/messages.po";
+import { desktop } from "./desktop";
 
 export { i18n };
 
@@ -173,6 +174,8 @@ export async function activate(locale: string): Promise<string> {
   }
   i18n.activate(target);
   document.documentElement.lang = target;
+  // The desktop app's menus and dialogs follow the window (#62).
+  desktop()?.setLanguage(target);
   return target;
 }
 

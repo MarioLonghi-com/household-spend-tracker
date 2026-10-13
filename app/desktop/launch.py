@@ -69,12 +69,16 @@ def prepare(
     *,
     say: Callable[[str], None] = _to_stderr,
     confirm_lossy: Callable[[list[str]], bool] = lambda _titles: False,
+    starting: Callable[[int], None] = lambda _steps: None,
 ) -> Prepared:
     """Bring the ledger to this code's schema, or say why not. Raises
     `instance_lock.LedgerBusy` when another process holds it.
 
     `confirm_lossy` is shown the titles of the migrations that cannot be
-    undone; it declines unless the shell says otherwise.
+    undone; it declines unless the shell says otherwise. `starting` is told
+    how many steps there are just before the backup and the migration begin,
+    so the shell can say "Upgrading your ledger…" rather than show nothing; a
+    ledger being made for the first time is not announced.
     """
     from app import config, instance_lock, migrate, paths
     from scripts import backup as backup_script
@@ -105,6 +109,9 @@ def prepare(
         tell("declined: nothing was changed")
         return Prepared(DECLINED, stamp_before=before, stamp_after=before, lossy=lossy, log=lines)
 
+    if before is not None:
+        # A new ledger is being made, not upgraded: nothing to announce.
+        starting(len(upcoming))
     database = paths.database()
     backup: Path | None = None
     rows_before: dict[str, int] = {}

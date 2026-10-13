@@ -284,6 +284,9 @@ async def lifespan(_: FastAPI):
         sweeper.cancel()
         with contextlib.suppress(asyncio.CancelledError):
             await sweeper
+        # After the sweep, which may have been writing, and before the lock
+        # goes: nothing else can open the ledger in between.
+        db_module.checkpoint()
         instance_lock.release(settings.data_dir)
 
 

@@ -84,6 +84,10 @@ msgstr ""
 msgid "Application management"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Opening your ledger…"
+msgstr ""
+
 #. Label of a form field on the Transfers screen: the end of a range, or where money goes
 #. Label of a form field on the one-time import: the end of a range, or where money goes
 #. Text on the date range picker: the end of a range, or where money goes
@@ -260,6 +264,10 @@ msgstr ""
 msgid "Select {0}"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "The upgrade did not keep every row, so Spend Tracker stopped"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "No browsers were being trusted."
 msgstr ""
@@ -350,6 +358,10 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Nothing in the last 14 days."
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "It was made by a newer version of Spend Tracker. Update this one first. Nothing was changed."
 msgstr ""
 
 #. placeholder {0}: household.base_currency
@@ -504,6 +516,11 @@ msgstr ""
 #. placeholder {2}: one.would_link
 #: src/screens/Accounts.tsx
 msgid "{0, plural, one {{1} pair} other {{2} pairs}}"
+msgstr ""
+
+#. Desktop app View menu item: reset the zoom
+#: ../desktop/src/words.ts
+msgid "Actual size"
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -892,6 +909,11 @@ msgctxt "import outcome"
 msgid "New"
 msgstr ""
 
+#. Desktop app folder picker's confirm button
+#: ../desktop/src/words.ts
+msgid "Use this folder"
+msgstr ""
+
 #. Label of a form field on the accounts import
 #: src/screens/AccountImport.tsx
 msgid "Accounts file"
@@ -901,6 +923,11 @@ msgstr ""
 #. placeholder {1}: account.name
 #: src/screens/Import.tsx
 msgid "{0} now tells a file it is for {1}"
+msgstr ""
+
+#. macOS app menu item: hide every other app's windows
+#: ../desktop/src/words.ts
+msgid "Hide others"
 msgstr ""
 
 #. Screen-reader name on the one-time import's mapping step
@@ -969,6 +996,10 @@ msgstr ""
 #. What the import detected: the character between columns. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "delimiter"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "This update changes your ledger in a way that cannot be undone"
 msgstr ""
 
 #. Button on the Register screen
@@ -1093,6 +1124,10 @@ msgstr ""
 
 #: src/screens/Rules.tsx
 msgid "A rule only runs as a statement is read, so writing one changes nothing already in your register. This runs today’s rules over the rows that are, matching against the bank’s own words exactly as an import would."
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Choose where backups go"
 msgstr ""
 
 #: src/screens/ResetAccount.tsx
@@ -1730,6 +1765,10 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "{name} will replace everything in the ledger now. The ledger as it is now is backed up first, and you will sign in again."
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 msgid "Waiting for the passkey…"
 msgstr ""
@@ -1836,7 +1875,9 @@ msgstr ""
 msgid "Anything you change here is recorded, and can be put back from the History screen."
 msgstr ""
 
+#. Desktop app Edit menu item: undo the last edit in a text field
 #. History headline, the kind of act: an earlier act was taken back
+#: ../desktop/src/words.ts
 #: src/lib/historyWords.ts
 msgid "Undo"
 msgstr ""
@@ -1923,6 +1964,11 @@ msgstr ""
 #. Label on the Your account panel: nothing so far
 #: src/screens/Profile.tsx
 msgid "None yet"
+msgstr ""
+
+#. macOS Window menu item: make the window fill the screen, not full screen
+#: ../desktop/src/words.ts
+msgid "Zoom"
 msgstr ""
 
 #. One-time import: an account set to be skipped, and what happens to its rows
@@ -2107,6 +2153,11 @@ msgstr ""
 msgid "Environment"
 msgstr ""
 
+#. Desktop app View menu item: make everything larger
+#: ../desktop/src/words.ts
+msgid "Zoom in"
+msgstr ""
+
 #. placeholder {0}: passkey.label
 #: src/screens/Passkeys.tsx
 msgid "New name for {0}"
@@ -2215,6 +2266,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "A split needs at least two parts"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "The backup could not be made"
 msgstr ""
 
 #. Screen-reader name on the one-time import's mapping step
@@ -2377,6 +2432,10 @@ msgstr ""
 msgid "{count, plural, one {has {count} receipt} other {has {count} receipts}}"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "The ledger could not be upgraded"
+msgstr ""
+
 #: src/screens/Profile.tsx
 msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
 msgstr ""
@@ -2437,6 +2496,11 @@ msgstr ""
 msgid "Reset sign-in for {0}"
 msgstr ""
 
+#. Desktop app menu bar: the Help menu
+#: ../desktop/src/words.ts
+msgid "Help"
+msgstr ""
+
 #. Heading on the desktop app's sign-in page, after a new password
 #: src/screens/SignIn.tsx
 msgid "Your new recovery code"
@@ -2478,6 +2542,11 @@ msgstr ""
 #. placeholder {1}: report.data.until
 #: src/screens/reports/IncomeExpense.tsx
 msgid "All dates: {0} to {1}."
+msgstr ""
+
+#. Desktop app Edit menu item (clipboard)
+#: ../desktop/src/words.ts
+msgid "Cut"
 msgstr ""
 
 #. Text on the Register screen
@@ -2810,6 +2879,8 @@ msgstr ""
 #. Button on the Your account panel
 #. Button on the passkeys panel
 #. Button on the passkeys panel
+#. Desktop app dialog button: do nothing and close the dialog
+#: ../desktop/src/words.ts
 #: src/screens/Admin.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
@@ -3052,6 +3123,10 @@ msgstr ""
 msgid "This screen could not be shown"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Spend Tracker will close. Everything saved before this is kept."
+msgstr ""
+
 #: src/lib/signInChanges.ts
 msgid "Reset: password and authenticator"
 msgstr ""
@@ -3110,6 +3185,10 @@ msgstr ""
 msgid "not counted"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Hide Spend Tracker"
+msgstr ""
+
 #. Application management: how to send the suggestions on; the links follow
 #: src/screens/TranslationReview.tsx
 msgid "Download the open suggestions for <0>scripts/apply_translation_suggestions.py</0>:"
@@ -3137,6 +3216,10 @@ msgstr ""
 msgid "Runtime"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Show backups folder"
+msgstr ""
+
 #. What kind of row changed, lower case, singular, in History beside its id
 #: src/lib/historyWords.ts
 msgctxt "history table"
@@ -3162,10 +3245,16 @@ msgid "skip rows"
 msgstr ""
 
 #. Button on the Categories screen: verb
+#. Desktop app menu bar: the Edit menu
 #. History headline, the kind of act: one edit made by hand
+#: ../desktop/src/words.ts
 #: src/lib/historyWords.ts
 #: src/screens/Categories.tsx
 msgid "Edit"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "This backup was not restored"
 msgstr ""
 
 #. Column heading on the Application management screen: noun, the people who share one ledger. See GLOSSARY.md
@@ -4534,6 +4623,10 @@ msgstr ""
 msgid "preview"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "The ledger stopped unexpectedly"
+msgstr ""
+
 #. Button on the Payees screen
 #: src/screens/Payees.tsx
 msgid "Add payee"
@@ -4653,13 +4746,20 @@ msgstr ""
 msgid "Use the palette's"
 msgstr ""
 
+#. Desktop app dialog button: not now, ask again another time
 #. Tooltip on the date range picker
+#: ../desktop/src/words.ts
 #: src/components/DateRange.tsx
 msgid "Later"
 msgstr ""
 
 #: src/App.tsx
 msgid "A household holds the accounts and the register. The currency here is only used for totals; each account keeps its own."
+msgstr ""
+
+#. Desktop app View menu item: make everything smaller
+#: ../desktop/src/words.ts
+msgid "Zoom out"
 msgstr ""
 
 #. Account type `other_asset`: something owned that holds value. See GLOSSARY.md
@@ -5152,6 +5252,11 @@ msgstr ""
 msgid "Looking up your invitation…"
 msgstr ""
 
+#. Desktop app Edit menu item: redo the edit just undone in a text field
+#: ../desktop/src/words.ts
+msgid "Redo"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Every household on this instance, including ones you are not in. Joining one is still an explicit act."
 msgstr ""
@@ -5193,6 +5298,10 @@ msgstr ""
 msgid "The name looks like its number."
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Spend Tracker could not open the ledger"
+msgstr ""
+
 #: src/screens/Updates.tsx
 msgid "The app has stopped. Waiting for it to come back…"
 msgstr ""
@@ -5207,6 +5316,8 @@ msgid "Machine"
 msgstr ""
 
 #. Button on the Admin screen: verb, copy to the clipboard
+#. Desktop app Edit menu item (clipboard)
+#: ../desktop/src/words.ts
 #: src/screens/Admin.tsx
 msgid "Copy"
 msgstr ""
@@ -5933,6 +6044,11 @@ msgstr ""
 msgid "Undo this"
 msgstr ""
 
+#. Desktop app Edit menu item (clipboard)
+#: ../desktop/src/words.ts
+msgid "Paste"
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as an owner, in {households}."
 msgstr ""
@@ -6193,9 +6309,11 @@ msgid "no git history and no build stamp to ask"
 msgstr ""
 
 #. Column heading on the Application management screen
+#. Desktop app menu bar: the File menu
 #. Label of a form field on the Import screen
 #. Label on the Import screen
 #. Label on the receipts
+#: ../desktop/src/words.ts
 #: src/components/Receipts.tsx
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
@@ -6263,6 +6381,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "{text} — edit the memo"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "This ledger was last opened by a newer version of Spend Tracker"
 msgstr ""
 
 #. Button on the Admin screen
@@ -6373,6 +6495,11 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "Each account keeps its own currency. Nothing is ever converted in the ledger."
+msgstr ""
+
+#. Desktop app menu bar: the View menu
+#: ../desktop/src/words.ts
+msgid "View"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -6657,6 +6784,8 @@ msgid "Transfer between your own accounts"
 msgstr ""
 
 #. Button on the Backups screen: pick where on this device to save
+#. Desktop app dialog button: open a folder picker
+#: ../desktop/src/words.ts
 #: src/screens/Backups.tsx
 msgid "Choose a folder…"
 msgstr ""
@@ -6670,6 +6799,10 @@ msgstr ""
 #. Table cell on the household page
 #: src/screens/Household.tsx
 msgid "(main)"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "A backup was made first. This can take a minute."
 msgstr ""
 
 #. Heading on the household page
@@ -7083,9 +7216,18 @@ msgstr ""
 msgid "English"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Spend Tracker is already using this ledger"
+msgstr ""
+
 #. Table cell on the receipts
 #: src/screens/Receipts.tsx
 msgid "(uploaded)"
+msgstr ""
+
+#. macOS app menu item: show every app's windows again
+#: ../desktop/src/words.ts
+msgid "Show all"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -7230,6 +7372,11 @@ msgstr ""
 msgid "New authenticator"
 msgstr ""
 
+#. Desktop app dialog button: go ahead with an upgrade that cannot be undone
+#: ../desktop/src/words.ts
+msgid "Update the ledger"
+msgstr ""
+
 #. Application management: shown where the last backup's size would be, when there is none
 #: src/screens/ApplicationManagement.tsx
 msgid "use the button below"
@@ -7243,6 +7390,10 @@ msgstr ""
 #. Button while a request is sent
 #: src/screens/Updates.tsx
 msgid "Asking…"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Choose a folder you can see, in Documents or one that syncs, so you can find your backups and copy them elsewhere."
 msgstr ""
 
 #: src/screens/Accounts.tsx
@@ -7483,6 +7634,10 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Quit Spend Tracker"
 msgstr ""
 
 #: src/screens/Categories.tsx
@@ -8255,6 +8410,11 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
+#. Desktop app dialog button: open the folder holding the new backup
+#: ../desktop/src/words.ts
+msgid "Show in folder"
+msgstr ""
+
 #. Label on the household page. See GLOSSARY.md
 #. Menu item and the name of its screen. See GLOSSARY.md
 #. Name of a fact on the one-time import's results. See GLOSSARY.md
@@ -8317,6 +8477,10 @@ msgstr ""
 #: src/lib/historyWords.ts
 #: src/screens/Categories.tsx
 msgid "archived"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "A backup is made first, so you can go back to it. What changes: {titles}."
 msgstr ""
 
 #: src/screens/Categories.tsx
@@ -8585,6 +8749,10 @@ msgstr ""
 msgid "Credit card"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Another copy of the app has it open. Close that one, then try again."
+msgstr ""
+
 #. Column name shown beside a value on phones on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md
 #. Heading on the Register screen: noun, a photo or PDF of a receipt. See GLOSSARY.md
 #. Screen-reader name on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md
@@ -8651,6 +8819,11 @@ msgstr ""
 msgid "This month"
 msgstr ""
 
+#. Desktop app View menu item: switch full screen on or off
+#: ../desktop/src/words.ts
+msgid "Full screen"
+msgstr ""
+
 #: src/screens/reports/Reimbursements.tsx
 msgid "{count, plural, one {{count} day} other {{count} days}}"
 msgstr ""
@@ -8711,6 +8884,10 @@ msgstr ""
 #. Label on the Import screen
 #: src/screens/Import.tsx
 msgid "This import"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Backups are kept inside the app's own folder for now"
 msgstr ""
 
 #. Value of a fact on the one-time import's results (created)
@@ -9160,6 +9337,10 @@ msgstr ""
 msgid "Off."
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Nothing is lost: the ledger as it was is in the backup made just before, in {backup}. Please report this."
+msgstr ""
+
 #. Name of a fact on the Application management screen: noun, the database's migration revision
 #: src/screens/ApplicationManagement.tsx
 msgid "Schema"
@@ -9172,6 +9353,10 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "Owner — can administer this instance"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Sign in to carry on."
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -9242,6 +9427,15 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "A transfer moves money between your own accounts, so it is not spending and has no category"
+msgstr ""
+
+#. Desktop app dialog: the backup's file name, then the folder it was saved in
+#: ../desktop/src/words.ts
+msgid "{name} in {folder}"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Choose a backup to restore"
 msgstr ""
 
 #: src/screens/Updates.tsx
@@ -9374,6 +9568,11 @@ msgstr ""
 msgid "2. Your recovery code"
 msgstr ""
 
+#. Desktop app dialog title after Back up now succeeded
+#: ../desktop/src/words.ts
+msgid "Backup saved"
+msgstr ""
+
 #: src/App.tsx
 #: src/screens/ynab/results.tsx
 msgid "Payee Naming Rules"
@@ -9396,6 +9595,11 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "<0>Copy this now.</0> It is the only time it is shown — only a fingerprint of it is stored, so there is nothing to show again."
+msgstr ""
+
+#. Desktop app File menu item
+#: ../desktop/src/words.ts
+msgid "Close window"
 msgstr ""
 
 #: src/lib/signInChanges.ts
@@ -9495,6 +9699,10 @@ msgstr ""
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "Nothing is marked as a work expense yet. Open a transaction in the register and set Reimbursement to “Work should pay this back” — or tick several and use Work expense in the bar that appears."
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Restore from backup…"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -9972,6 +10180,11 @@ msgstr ""
 msgid "Add a payee"
 msgstr ""
 
+#. Desktop app dialog button: close Spend Tracker
+#: ../desktop/src/words.ts
+msgid "Quit"
+msgstr ""
+
 #. Button in review mode: keep this suggestion
 #: src/components/SuggestWording.tsx
 msgid "Save the suggestion"
@@ -10101,6 +10314,11 @@ msgstr ""
 #. What the import detected: the column of money coming in. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "inflow column"
+msgstr ""
+
+#. Desktop app menu bar: the Window menu
+#: ../desktop/src/words.ts
+msgid "Window"
 msgstr ""
 
 #. Column heading on the Reimbursements report: noun, what is left after subtracting
@@ -10334,6 +10552,8 @@ msgid "Payee Categorisation"
 msgstr ""
 
 #. Button on Application management. See GLOSSARY.md
+#. Desktop app File menu item: make a backup of the ledger now
+#: ../desktop/src/words.ts
 #: src/screens/ApplicationManagement.tsx
 msgid "Back up now"
 msgstr ""
@@ -10596,8 +10816,21 @@ msgstr ""
 msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Choose backups folder…"
+msgstr ""
+
 #: src/screens/PayeeCategorisation.tsx
 msgid "type any part of a payee"
+msgstr ""
+
+#. Desktop app Window menu item: minimise the window to the Dock or taskbar
+#: ../desktop/src/words.ts
+msgid "Minimise"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Upgrading your ledger…"
 msgstr ""
 
 #. Table cell on the Rules screen
@@ -10723,6 +10956,11 @@ msgstr ""
 msgid "Yes, delete it"
 msgstr ""
 
+#. Desktop app dialog button: open the folder holding the backup
+#: ../desktop/src/words.ts
+msgid "Show the backup"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Every part of the original is accounted for."
 msgstr ""
@@ -10810,6 +11048,10 @@ msgstr ""
 
 #: src/screens/Categories.tsx
 msgid "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Version {version}. Licensed under the GNU AGPL, version 3 or later."
 msgstr ""
 
 #. Link on the Application management screen
@@ -11098,6 +11340,11 @@ msgstr ""
 msgid "at a step the updater did not name"
 msgstr ""
 
+#. Desktop app Edit menu item: select all the text in a field
+#: ../desktop/src/words.ts
+msgid "Select all"
+msgstr ""
+
 #: src/screens/Categories.tsx
 msgid "Build my own"
 msgstr ""
@@ -11124,6 +11371,11 @@ msgstr ""
 #. Label on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "no branch"
+msgstr ""
+
+#. Desktop app dialog button: open the folder holding the log file
+#: ../desktop/src/words.ts
+msgid "Show the log"
 msgstr ""
 
 #: src/components/RecoveryModeBanner.tsx
@@ -11200,6 +11452,10 @@ msgstr ""
 msgid "Trying…"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Update Spend Tracker, then open it again. Nothing was changed."
+msgstr ""
+
 #. Name of a fact on the Application management screen: noun, database pages
 #: src/screens/ApplicationManagement.tsx
 msgid "Pages"
@@ -11224,6 +11480,14 @@ msgstr ""
 
 #: src/components/Receipts.tsx
 msgid "compressed on the device before sending"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "The backup is restored"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Spend Tracker backups"
 msgstr ""
 
 #. Label of a choice on the Categories screen
@@ -11348,6 +11612,10 @@ msgstr ""
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 msgid "Continue"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Show ledger folder"
 msgstr ""
 
 #: src/screens/Payees.tsx
@@ -11645,6 +11913,11 @@ msgstr ""
 msgid "showing the first {0}"
 msgstr ""
 
+#. Desktop app dialog button: replace the ledger with the chosen backup
+#: ../desktop/src/words.ts
+msgid "Restore"
+msgstr ""
+
 #. Label on the one-time import's results
 #: src/screens/ynab/results.tsx
 msgid "Duplicates skipped"
@@ -11715,6 +11988,10 @@ msgstr ""
 
 #: src/screens/ApplicationManagement.tsx
 msgid "Its author, and their other projects"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Replace the ledger with this backup?"
 msgstr ""
 
 #. Dialog title on the Backups screen: a backup an update took
@@ -11822,6 +12099,10 @@ msgstr ""
 
 #: src/screens/Backups.tsx
 msgid "{kept, plural, one {Each update backs the ledger up after the app stops and before it migrates. The newest one is kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.} other {Each update backs the ledger up after the app stops and before it migrates. The newest # are kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.}}"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "About Spend Tracker"
 msgstr ""
 
 #. Column heading on the Rules screen: switched on
@@ -11933,6 +12214,8 @@ msgid "I have saved it"
 msgstr ""
 
 #. Button on the Register screen
+#. Desktop app dialog button: close the dialog
+#: ../desktop/src/words.ts
 #: src/screens/Register.tsx
 msgid "OK"
 msgstr ""

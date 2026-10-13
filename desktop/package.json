@@ -1,0 +1,40 @@
+{
+  "name": "spend-tracker-desktop",
+  "productName": "Spend Tracker",
+  "version": "0.10.1",
+  "description": "Spend Tracker for one household, on this computer",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "author": "Spend Tracker contributors",
+  "main": "build/main.cjs",
+  "engines": {
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+  },
+  "scripts": {
+    "build": "tsc --noEmit -p . && vite build && vite build --mode preload",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run",
+    "start": "npm run build && electron .",
+    "dist:mac": "npm run build && electron-builder --mac dir --arm64",
+    "dist:mas": "npm run build && electron-builder --mac mas-dev --arm64 -c.mac.identity=null",
+    "dist:win": "npm run build && electron-builder --win appx dir --x64",
+    "smoke": "playwright test"
+  },
+  "devDependencies": {
+    "@babel/core": "8.0.6",
+    "@lingui/babel-plugin-lingui-macro": "6.8.0",
+    "@lingui/conf": "6.8.0",
+    "@lingui/core": "6.8.0",
+    "@lingui/format-po": "6.8.0",
+    "@lingui/vite-plugin": "6.8.0",
+    "@playwright/test": "^1.63.0",
+    "@rolldown/plugin-babel": "0.2.4",
+    "@types/node": "^24.0.0",
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  },
+  "type": "module"
+}

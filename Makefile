@@ -96,6 +96,7 @@ lock:  ## rewrite requirements*.txt from the .in files (UPGRADE=1 to move versio
 	$(LOCK) requirements.in -o requirements.txt
 	$(LOCK) requirements-updater.in -o requirements-updater.txt
 	$(LOCK) requirements-dev.in -o requirements-dev.txt
+	$(LOCK) requirements-desktop.in -o requirements-desktop.txt
 
 install-client: preflight  ## node_modules for the SPA
 	cd client && npm ci
@@ -179,7 +180,7 @@ e2e:  ## end to end in a real browser, desktop and phone
 	cd client && npm run e2e
 
 lint:  ## ruff, the bulk-statement grep, and the client's typecheck
-	./.venv/bin/ruff check app/ statements/ updater/ tests/ scripts/
+	./.venv/bin/ruff check app/ statements/ updater/ tests/ scripts/ desktop/
 	@./scripts/no-bulk-statements.sh
 	cd client && npx tsc -b --noEmit
 
