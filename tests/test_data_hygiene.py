@@ -422,7 +422,7 @@ def vendored(path: pathlib.Path) -> bool:
 def stray_binaries(paths: list[pathlib.Path]) -> list[str]:
     """Binaries outside the two folders anybody scans, relative to the root."""
     return sorted(
-        str(p.relative_to(ROOT))
+        p.relative_to(ROOT).as_posix()
         for p in paths
         if p.suffix.lower() in BINARY_SUFFIXES and p.parent not in BINARY_HOMES
     )

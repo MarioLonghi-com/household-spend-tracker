@@ -7,6 +7,7 @@ written until the last step, so an abandoned wizard leaves nothing to clean up.
 
 from __future__ import annotations
 
+import os
 import time
 
 import pyotp
@@ -41,6 +42,7 @@ def _walk_to_step_four(token: str) -> setup.SetupBlob:
 # --------------------------------------------------------------------------- #
 
 
+@pytest.mark.skipif(os.name == "nt", reason="permission bits; Windows access is an ACL")
 def test_the_token_file_is_not_world_readable(token, tmp_path):
     mode = (tmp_path / "setup-token").stat().st_mode & 0o777
     assert mode == 0o600

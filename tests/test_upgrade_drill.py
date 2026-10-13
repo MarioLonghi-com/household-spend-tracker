@@ -13,6 +13,7 @@ producing a quieter upgrade report six months from now.
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import sqlite3
 
@@ -539,6 +540,7 @@ def test_the_flags_belong_to_their_modes(capsys):
     assert refused.value.code == 2
 
 
+@pytest.mark.skipif(os.name == "nt", reason="permission bits; Windows access is an ACL")
 def test_the_report_is_written_0660_for_the_updates_group_whatever_the_umask(tmp_path):
     """The updater reads it through the `update` volume's group; under a rootless
     engine it is root without capabilities and cannot read a 0600 file (#169)."""

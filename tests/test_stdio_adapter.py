@@ -170,13 +170,17 @@ def test_a_backup_downloads_as_a_zip(desktop):
 
 
 def _spawn(data: Path, **env: str) -> subprocess.Popen:
+    """The adapter as the shell starts it. Its log goes to a file beside the
+    ledger: a pipe nobody reads fills -- at 4 KiB on Windows, where the
+    migrations' lines alone are more -- and the child then blocks writing it."""
     clean = {k: v for k, v in os.environ.items() if not k.startswith("SPENDTRACKER_") and k != "DATABASE_URL"}
+    data.mkdir(parents=True, exist_ok=True)
     return subprocess.Popen(
         [sys.executable, "-m", "app.desktop.stdio_adapter"],
         cwd=ROOT,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stderr=(data.parent / f"{data.name}.log").open("ab"),
         env={**clean, "SPENDTRACKER_PROFILE": "desktop", "SPENDTRACKER_DATA_DIR": str(data), "PYTHONUTF8": "1", **env},
     )
 
@@ -214,9 +218,10 @@ def test_it_refuses_to_start_without_utf8_mode_or_outside_the_desktop_profile(tm
         ({"SPENDTRACKER_PROFILE": "server"}, "serves the desktop profile only"),
     ):
         child = _spawn(tmp_path / "ledger", **env)
-        out, err = child.communicate(timeout=60)
-        assert (child.returncode, out) == (2, b""), err
-        assert says in err.decode()
+        out, _ = child.communicate(timeout=60)
+        said = (tmp_path / "ledger.log").read_text(encoding="utf-8")
+        assert (child.returncode, out) == (2, b""), said
+        assert says in said
 
 
 def test_a_ledger_from_a_newer_version_stops_the_start_and_says_why(tmp_path):

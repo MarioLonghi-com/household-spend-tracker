@@ -1552,7 +1552,7 @@ def _build_snapshot(client) -> None:
     import app.db as db
     from scripts.db_view import build
 
-    source = Path(str(db.engine.url).split("///", 1)[1])
+    source = Path(db.engine.url.database)
     dbview.snapshot_path().parent.mkdir(parents=True, exist_ok=True)
     build(source, dbview.snapshot_path())
 
@@ -1684,7 +1684,7 @@ def test_the_snapshot_redacts_a_database_with_several_of_everything(client, tmp_
             headers=HEADERS,
         )
 
-    source = Path(str(db.engine.url).split("///", 1)[1])
+    source = Path(db.engine.url.database)
     destination = tmp_path / "snap.sqlite3"
     wiped = build(source, destination)
 

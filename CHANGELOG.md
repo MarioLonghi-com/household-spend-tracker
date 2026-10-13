@@ -116,6 +116,17 @@ history this repository does not have.
   3.13), are now guarded, and the startup check for files other users can
   read no longer names every file in the data directory on Windows, where
   permission bits do not say who can read a file. (#315)
+- **Found by running the suite on Windows 11** (#315):
+  - **A log file is never overwritten when two rotations fall in the same
+    second.** The second used to take the first one's name -- replacing that
+    file on macOS and Linux, and failing on Windows. It now gets a counter
+    after the stamp, and pruning orders by stamp and counter.
+  - **Windows reports its memory**, so SQLite's cache is sized there as
+    elsewhere rather than as for an unknown host.
+  - Tests that restored a ledger under their own running app stop it first,
+    as an operator does: Windows cannot rename a file that is still open.
+    Tests of what runs only in the Linux container are marked so, in one
+    place in `tests/conftest.py`.
 - **Every SQLite connection the app opens on the ledger or a backup is now
   closed when it is done.** Python's `with sqlite3.connect(...)` commits but
   leaves the connection open until the garbage collector reaches it, and

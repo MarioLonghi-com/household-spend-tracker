@@ -366,3 +366,31 @@ def _setup_owner(client, tmp_path_token: str | None = None) -> dict:
 
 # The passkey tests' two members with two passkeys each (#120, #121).
 from tests.passkey_world import passkey_world, passkeys_on  # noqa: E402, F401
+
+# --------------------------------------------------------------------------- #
+# What only ever runs on Linux
+# --------------------------------------------------------------------------- #
+
+#: Test files for what runs only in the Linux container, its updater and the
+#: shell launchers beside it: Unix sockets, `chown` and setgid directories,
+#: `bash`. Skipped on Windows (#315), where none of it runs -- the desktop app
+#: included, which ships without the updater -- and named here, in one place,
+#: rather than one marker per file a reader has to go and find.
+LINUX_ONLY = {
+    "test_bundle.py": "the release zip's shell launchers",
+    "test_container_entrypoint.py": "the container's entrypoint",
+    "test_launcher_engine.py": "the shell launchers and the container engines",
+    "test_placard.py": "the updater's maintenance page, which speaks over a Unix socket",
+    "test_update_endpoints.py": "the self-updater, which answers over a Unix socket",
+}
+LINUX_ONLY_PREFIX = ("test_updater_", "the self-updater, which runs only in its Linux container")
+
+
+def pytest_collection_modifyitems(config, items) -> None:
+    if os.name != "nt":
+        return
+    for item in items:
+        name = item.path.name
+        why = LINUX_ONLY.get(name) or (LINUX_ONLY_PREFIX[1] if name.startswith(LINUX_ONLY_PREFIX[0]) else None)
+        if why:
+            item.add_marker(pytest.mark.skip(reason=f"Linux only: {why}"))
