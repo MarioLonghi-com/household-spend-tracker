@@ -38,6 +38,27 @@ PRIVATE_FILE = 0o600
 #: Group or other may do anything at all.
 _SHARED_BITS = stat.S_IRWXG | stat.S_IRWXO
 
+#: Whether permission bits say anything about who can read a file. On Windows
+#: they do not: `stat` reports 0o666 for every writable file and 0o777 for
+#: every directory, whoever may open them, because access is an ACL the bits
+#: are not derived from. The desktop app keeps its data under the user's
+#: profile, whose ACL already admits only that user and the system.
+MODE_BITS_MEAN_ACCESS = os.name != "nt"
+
+#: `os.open` flags POSIX has and Windows does not. On Windows they are 0: a
+#: file is opened as it would be without them. What they guard -- the update
+#: volume, the upgrade report -- belongs to the container and server
+#: deployments, and the desktop profile does not serve the routes that use it.
+O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
+O_NONBLOCK = getattr(os, "O_NONBLOCK", 0)
+
+
+def fchmod(fd: int, mode: int) -> None:
+    """`os.fchmod` where there is one: Windows gained it only in Python 3.13,
+    and there it sets nothing but the read-only flag."""
+    if hasattr(os, "fchmod"):
+        os.fchmod(fd, mode)
+
 
 def tighten_umask() -> None:
     """Make every file this process creates from now on private.
@@ -101,8 +122,13 @@ def not_private(root: Path, *, depth: int = 2, limit: int = 20) -> list[tuple[Pa
     Bounded in depth, because the check runs on every boot and the data
     directory is where anything can pile up. Two levels reach every file this
     app writes: the database and its sidecars, the key, `logs/*`, `backups/*`.
+
+    Always empty where the bits mean nothing (`MODE_BITS_MEAN_ACCESS`):
+    reporting every file on every boot would teach the owner to ignore it.
     """
     found: list[tuple[Path, int]] = []
+    if not MODE_BITS_MEAN_ACCESS:
+        return found
 
     def visit(path: Path, level: int) -> None:
         if len(found) >= limit:

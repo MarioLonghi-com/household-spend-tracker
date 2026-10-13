@@ -50,7 +50,9 @@ And one for memory, because the pool above is unbounded (#102):
 
 from __future__ import annotations
 
+import logging
 import os
+import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -129,10 +131,20 @@ BUSY_TIMEOUT_MS = 5000
 
 engine: Engine = create_engine(
     settings.database_url,
-    echo=settings.echo_sql,
     connect_args=_connect_args,
     **_pool_args,
 )
+
+# `SPENDTRACKER_ECHO_SQL` shows the statements run before logging is
+# configured -- boot, migrations, the first queries -- on the console. Not via
+# `echo=`: SQLAlchemy's echo handler writes to *stdout*, and the desktop build
+# speaks to its shell over stdout, so one statement there is a corrupt frame
+# (#315). Standard error instead. `logging_setup.configure` takes this handler
+# off when lifespan starts, and the chosen logging style governs from then on.
+if settings.echo_sql:
+    _early_sql = logging.getLogger("sqlalchemy.engine.Engine")
+    _early_sql.addHandler(logging.StreamHandler(sys.stderr))
+    _early_sql.setLevel(logging.INFO)
 
 
 @event.listens_for(Engine, "connect")

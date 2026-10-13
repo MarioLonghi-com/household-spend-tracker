@@ -59,6 +59,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from .. import __version__, config
+from ..permissions import O_NOFOLLOW, O_NONBLOCK, fchmod
 
 log = logging.getLogger("spendtracker")
 
@@ -183,7 +184,7 @@ def read_json(path: Path) -> dict | None:
     renames into place -- so a parse failure is a file that is not one of
     its, and reads as absent.
     """
-    flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | getattr(os, "O_CLOEXEC", 0)
+    flags = os.O_RDONLY | O_NOFOLLOW | O_NONBLOCK | getattr(os, "O_CLOEXEC", 0)
     try:
         fd = os.open(path, flags)
     except OSError:
@@ -521,7 +522,7 @@ def dismiss(record_id: str) -> bool:
 
 def _write_private(path: Path, data: bytes) -> None:
     tmp = path.with_name(f".{path.name}.{secrets.token_hex(6)}.tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | O_NOFOLLOW, 0o600)
     try:
         os.write(fd, data)
         os.fsync(fd)
@@ -745,11 +746,11 @@ def write_request(doc: dict) -> Path:
 
     with _write_lock:
         tmp = where / f".request.json.{secrets.token_hex(6)}.tmp"
-        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0)
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0)
         fd = os.open(tmp, flags, FILE_MODE)
         try:
             try:
-                os.fchmod(fd, FILE_MODE)  # whatever the umask took away
+                fchmod(fd, FILE_MODE)  # whatever the umask took away
                 with contextlib.suppress(PermissionError):
                     if os.fstat(fd).st_gid != UPDATE_GID:
                         os.fchown(fd, -1, UPDATE_GID)

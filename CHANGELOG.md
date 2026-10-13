@@ -32,6 +32,34 @@ history this repository does not have.
 
 ## Unreleased
 
+### Added
+
+- **The test suite also runs on macOS and Windows** in CI, for changes to the
+  backend, the statement readers, the scripts, the migrations or the tests
+  (#315). Ruff now refuses a `print` in the app itself (T20), and a test boots
+  the whole app -- import, startup, first-boot setup, requests, with and
+  without `SPENDTRACKER_ECHO_SQL` -- and asserts nothing reached standard
+  output.
+
+### Changed
+
+- **`SPENDTRACKER_ECHO_SQL` writes to standard error, not standard output.**
+  It showed the statements run before logging is configured by way of
+  SQLAlchemy's `echo`, whose handler writes to standard output -- which the
+  desktop build will use to talk to its shell, so one statement there is a
+  corrupt message. It now attaches a standard-error handler for the same
+  window. Handing over to the logging style at startup also resets that
+  logger's level, which would otherwise have kept every statement flowing
+  into `sql.log` at a style that never asked for it. (#315)
+
+### Fixed
+
+- **The code the desktop app will run no longer assumes Linux.** Two
+  `os.open` flags and `os.fchmod`, which Windows lacks (`fchmod` until Python
+  3.13), are now guarded, and the startup check for files other users can
+  read no longer names every file in the data directory on Windows, where
+  permission bits do not say who can read a file. (#315)
+
 ## 0.10.1 — 2026-10-09
 
 **Reversible: none** — no migration in this release. To go back to

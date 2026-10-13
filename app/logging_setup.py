@@ -439,13 +439,18 @@ def apply(style: Style) -> None:
     # `docker logs` (#108: the "order-dependent" test that caught it passed
     # only when an earlier test's handler was already there). At INFO the
     # statements reach `sql.log` without it. A handler SQLAlchemy added anyway
-    # -- `SPENDTRACKER_ECHO_SQL` at `create_engine` -- is taken back off.
+    # -- or the stderr one `SPENDTRACKER_ECHO_SQL` puts there at import -- is
+    # taken back off.
     engine.echo = False
     sql_engine = logging.getLogger("sqlalchemy.engine.Engine")
     ours = {id(handler) for handler in our_handlers()}
     for handler in list(sql_engine.handlers):
         if id(handler) not in ours:
             sql_engine.removeHandler(handler)
+    # Its level too, which the boot-time echo set to INFO: left there it would
+    # outrank the parent's below and keep every statement flowing into
+    # `sql.log` at a style that never asked for it.
+    sql_engine.setLevel(logging.NOTSET)
     logging.getLogger("sqlalchemy.engine").setLevel(
         logging.INFO if style.echo_sql else logging.WARNING
     )
