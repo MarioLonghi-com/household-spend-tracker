@@ -17,7 +17,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Field, Panel, Problem } from "../components/bits";
+import { Field, Panel, Problem, Working } from "../components/bits";
 import type { Household } from "../lib/types";
 import * as calls from "./ynab/calls";
 import {
@@ -599,9 +599,9 @@ function YnabWizard({
             </>
           )}
           {plansCall.isPending ? (
-            <p className="small muted">
+            <Working>
               <Trans>Asking YNAB for your plans…</Trans>
-            </p>
+            </Working>
           ) : null}
         </>
       )}
@@ -651,9 +651,9 @@ function YnabWizard({
       {step === "review" && (
         <>
           {analyseCall.isPending ? (
-            <p className="small muted">
+            <Working>
               <Trans>Reading what YNAB holds…</Trans>
-            </p>
+            </Working>
           ) : null}
           {analysis ? (
             <Review
@@ -796,7 +796,7 @@ function YnabWizard({
             </Trans>
           </label>
           {previewCall.isPending ? (
-            <p className="small muted"><Trans>Running the import without keeping it…</Trans></p>
+            <Working><Trans>Running the import without keeping it…</Trans></Working>
           ) : null}
         </>
       )}
@@ -848,9 +848,9 @@ function YnabWizard({
             committed={false}
           />
           {commitCall.isPending ? (
-            <p className="small muted">
+            <Working>
               <Trans comment="Sentence on the one-time import">Importing…</Trans>
-            </p>
+            </Working>
           ) : null}
         </>
       )}

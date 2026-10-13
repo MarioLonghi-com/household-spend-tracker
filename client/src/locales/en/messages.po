@@ -9749,6 +9749,11 @@ msgstr "Keep it"
 msgid "In Docker Desktop or Podman Desktop, open Containers, find <0>{name}</0> and press Start."
 msgstr "In Docker Desktop or Podman Desktop, open Containers, find <0>{name}</0> and press Start."
 
+#. Desktop app right-click menu on a misspelt word: stop marking it as misspelt
+#: ../desktop/src/words.ts
+msgid "Add to dictionary"
+msgstr "Add to dictionary"
+
 #. History headline, the kind of act: the instance was set up
 #: src/lib/historyWords.ts
 msgid "First setup"
@@ -11796,6 +11801,11 @@ msgstr "One row per account, under the template's header row. <0>Download the te
 msgid "Give a program a key"
 msgstr "Give a program a key"
 
+#. Desktop app right-click menu on a link: copy its address
+#: ../desktop/src/words.ts
+msgid "Copy link"
+msgstr "Copy link"
+
 #. placeholder {0}: account.name
 #: src/screens/ynab/mapping.tsx
 msgid "New account name for {0}"
@@ -12325,6 +12335,11 @@ msgstr "Reconciliation"
 #: src/screens/ApplicationManagement.tsx
 msgid "never"
 msgstr "never"
+
+#. Under a message about a slow step, after a few seconds; elapsed is minutes:seconds
+#: src/components/bits.tsx
+msgid "Still working ({elapsed}). This can take a few minutes; keep this window open."
+msgstr "Still working ({elapsed}). This can take a few minutes; keep this window open."
 
 #. Label on the receipts
 #: src/components/Receipts.tsx

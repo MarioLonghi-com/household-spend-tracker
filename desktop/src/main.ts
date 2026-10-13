@@ -25,6 +25,7 @@
 import {
   app,
   BrowserWindow,
+  clipboard,
   dialog,
   ipcMain,
   Menu,
@@ -40,6 +41,7 @@ import path from "node:path";
 import { Backend, type Launch } from "./backend";
 import { bringIn, defaultFolder, deliver, localDay, type Made } from "./backups";
 import { LANGUAGE_CHANNEL, SYSTEM_LOCALE_ARG } from "./bridge";
+import { contextTemplate } from "./context";
 import { CookieJar } from "./cookies";
 import { language, say, useLanguage } from "./i18n";
 import * as menu from "./menu";
@@ -421,6 +423,10 @@ function guard(contents: WebContents): void {
     }
   });
   contents.on("will-attach-webview", (event) => event.preventDefault());
+  contents.on("context-menu", (_event, params) => {
+    const items = contextTemplate(params, contents, (text) => clipboard.writeText(text));
+    if (items.length) Menu.buildFromTemplate(items).popup({ window: BrowserWindow.fromWebContents(contents) ?? undefined });
+  });
   // A same-origin `_blank` (a receipt, a report) opens an app window; anything
   // else opens in the browser.
   contents.setWindowOpenHandler(({ url }) => {

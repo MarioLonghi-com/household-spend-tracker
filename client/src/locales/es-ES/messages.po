@@ -11534,6 +11534,11 @@ msgstr "Conservarla"
 msgid "In Docker Desktop or Podman Desktop, open Containers, find <0>{name}</0> and press Start."
 msgstr "En Docker Desktop o Podman Desktop, abre Containers, busca <0>{name}</0> y pulsa Start."
 
+#. Desktop app right-click menu on a misspelt word: stop marking it as misspelt
+#: ../desktop/src/words.ts
+msgid "Add to dictionary"
+msgstr ""
+
 #. History headline, the kind of act: the instance was set up
 #: src/lib/historyWords.ts
 #, fuzzy
@@ -13971,6 +13976,11 @@ msgstr "Una fila por cuenta, bajo la fila de encabezado de la plantilla. <0>Desc
 msgid "Give a program a key"
 msgstr "Dar una clave a un programa"
 
+#. Desktop app right-click menu on a link: copy its address
+#: ../desktop/src/words.ts
+msgid "Copy link"
+msgstr ""
+
 #. placeholder {0}: account.name
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
@@ -14601,6 +14611,11 @@ msgstr "Conciliación"
 #, fuzzy
 msgid "never"
 msgstr "nunca"
+
+#. Under a message about a slow step, after a few seconds; elapsed is minutes:seconds
+#: src/components/bits.tsx
+msgid "Still working ({elapsed}). This can take a few minutes; keep this window open."
+msgstr ""
 
 #. Label on the receipts
 #: src/components/Receipts.tsx
