@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, setUnauthorizedHandler } from "./lib/api";
-import { EVERYTHING, loadCapabilities, useCapabilities } from "./lib/capabilities";
+import { EVERYTHING, loadCapabilities, productNameNow, useCapabilities, useProductName } from "./lib/capabilities";
 import type { Capabilities } from "./lib/capabilities";
 import { seedLocale } from "./lib/seedWords";
 import { Field, Problem } from "./components/bits";
@@ -114,10 +114,9 @@ type NavSection = {
  * tab too. The household's own page is already named after it, so the caller
  * leaves the household out there rather than say it twice.
  */
-export const APP_NAME = "Spend Tracker";
-
 export function tabTitle(page?: string | null, household?: string | null): string {
-  const parts = [APP_NAME, page, household];
+  // The deployment's name: "Household Spend Tracker" in the desktop app (#346).
+  const parts = [productNameNow(), page, household];
   return parts.filter(Boolean).join(" - ");
 }
 
@@ -612,6 +611,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
   });
 
   const offered = useCapabilities();
+  const productName = useProductName();
 
   // The page takes the colour of whichever household is on screen. Switching is
   // the moment it matters: two ledgers in one browser otherwise look identical,
@@ -735,7 +735,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
         >
           <span aria-hidden="true">{navOpen ? "\u2715" : "\u2630"}</span>
         </button>
-        <span className="brand">Spend Tracker</span>
+        <span className="brand">{productName}</span>
       </header>
 
       {/* Tapping away closes it. Without this the only way out of the drawer
@@ -750,7 +750,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
             them, so the one way out of the app never scrolls out of view, and
             the list scrolls only when the window is shorter than the menu. */}
         <div className="nav-scroll">
-          <div className="brand">Spend Tracker</div>
+          <div className="brand">{productName}</div>
 
           {list.length > 1 && (
             <select

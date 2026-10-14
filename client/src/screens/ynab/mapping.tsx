@@ -29,6 +29,7 @@ import { compareNames, formatCount } from "../../lib/locale";
 import { YNAB_ACCOUNT_WORDS, YNAB_CATEGORY_WORDS } from "../../lib/labels";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { useProductName } from "../../lib/capabilities";
 
 /**
  * An amount, or the bare figure when the code is not one `Intl` knows.
@@ -159,6 +160,7 @@ export function MapAccounts({
   choices: Record<string, AccountChoice>;
   onChoose: (key: string, choice: AccountChoice) => void;
 }) {
+  const productName = useProductName();
   const { sort, direction, onSort } = useSort<AccountSort>("name");
   const eligible = useMemo(() => targets.filter((target) => target.eligible), [targets]);
   const byId = useMemo(() => new Map(targets.map((target) => [target.id, target])), [targets]);
@@ -196,7 +198,7 @@ export function MapAccounts({
     <>
       <p className="small">
         <Trans>
-          Each YNAB account goes to one Spend Tracker account in {currency}, to a new one, or is
+          Each YNAB account goes to one {productName} account in {currency}, to a new one, or is
           skipped. An account can take only one YNAB account, so one chosen on a row is not
           offered on the others.
         </Trans>

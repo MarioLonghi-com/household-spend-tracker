@@ -42,6 +42,7 @@ import { YNAB_STEP_LABELS } from "../lib/labels";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { formatCount } from "../lib/locale";
+import { useProductName } from "../lib/capabilities";
 
 export const NEW_ISSUE_URL = "https://github.com/MarioLonghi-com/household-spend-tracker/issues/new";
 export const YNAB_DEVELOPER_URL = "https://app.ynab.com/settings/developer";
@@ -128,6 +129,7 @@ function YnabWizard({
   onProgress?: (inProgress: boolean) => void;
 }) {
   const client = useQueryClient();
+  const productName = useProductName();
   const hid = household.id;
 
   const [step, setStep] = useState<Step>("source");
@@ -592,7 +594,7 @@ function YnabWizard({
                 <strong>
                   <Trans>
                     Your key is used only for this import. It stays in this browser tab and is never
-                    stored or logged by Spend Tracker.
+                    stored or logged by {productName}.
                   </Trans>
                 </strong>
               </div>

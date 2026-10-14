@@ -202,6 +202,10 @@ msgstr "Um único ato, então o Histórico tem uma só entrada e desfazer recomp
 msgid "Reimbursements"
 msgstr "Reembolsos"
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker will close. Everything saved before this is kept."
+msgstr ""
+
 #. Text on the receipts
 #. placeholder {0}: receipt.download_name
 #: src/components/Receipts.tsx
@@ -311,10 +315,6 @@ msgstr "Tipo"
 msgid "Select {0}"
 msgstr "Selecionar {0}"
 
-#: ../desktop/src/words.ts
-msgid "The upgrade did not keep every row, so Spend Tracker stopped"
-msgstr ""
-
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "No browsers were being trusted."
@@ -373,11 +373,6 @@ msgstr "Fixo: este é o grupo próprio do YNAB, e não uma categoria sua (Uncate
 msgid "You can pick a palette and one accent of your own. You cannot reach the text and background colours, so no household can be made unreadable — and the accent is checked for contrast before it is saved."
 msgstr "Você pode escolher uma paleta e uma cor de destaque própria. Não é possível mudar as cores do texto e do fundo, então nenhuma casa fica ilegível — e o contraste da cor de destaque é verificado antes de ser salva."
 
-#. On the Application management screen of the desktop app, in place of the updater
-#: src/screens/ApplicationManagement.tsx
-msgid "This copy of Spend Tracker is kept up to date by the store it was installed from: the App Store on a Mac, the Microsoft Store on Windows."
-msgstr ""
-
 #. Screen-reader name of a help button on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -425,10 +420,6 @@ msgstr "{0} ({1}) foi desconectado em todos os lugares e seus navegadores confi�
 msgid "Nothing in the last 14 days."
 msgstr "Nada nos últimos 14 dias."
 
-#: ../desktop/src/words.ts
-msgid "It was made by a newer version of Spend Tracker. Update this one first. Nothing was changed."
-msgstr ""
-
 #. placeholder {0}: household.base_currency
 #: src/screens/AccountImport.tsx
 #, fuzzy
@@ -461,6 +452,10 @@ msgstr "Uma regra deste tipo aponta para <0>um</0> favorecido, então <1>SQ *</1
 #, fuzzy
 msgid "what this list is"
 msgstr "o que é esta lista"
+
+#: ../desktop/src/words.ts
+msgid "It was made by a newer version of Household Spend Tracker. Update this one first. Nothing was changed."
+msgstr ""
 
 #. placeholder {0}: offer.name
 #. placeholder {1}: offer.payee
@@ -1048,6 +1043,10 @@ msgstr "Nada entrou nesta."
 msgid "Handed to the share sheet."
 msgstr "Entregue à folha de compartilhamento."
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker is already using this ledger"
+msgstr ""
+
 #: src/screens/Categories.tsx
 #, fuzzy
 msgid "Start with a common set"
@@ -1582,6 +1581,10 @@ msgstr "Não há mais nada a comprovar até essa data. Tudo até aqui já está 
 msgid "Nobody yet, which should be impossible while you are reading this."
 msgstr "Ninguém ainda, o que deveria ser impossível enquanto você está lendo isto."
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker could not open the ledger"
+msgstr ""
+
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
 msgid "I understand YNAB's Reconciled, Cleared and Uncleared states will be reset — everything arrives uncleared."
@@ -1775,6 +1778,10 @@ msgstr "Com falha"
 #, fuzzy
 msgid "With <0>matches the pattern</0> this is a template, so <1>\\1</1> is the first bracketed group: <2>^SQ \\*(.+)$</2> with <3>\\1</3> keeps what follows."
 msgstr "Com <0>corresponde ao padrão</0> isto é um modelo, então <1>\\1</1> é o primeiro grupo entre parênteses: <2>^SQ \\*(.+)$</2> com <3>\\1</3> mantém o que vem depois."
+
+#: ../desktop/src/words.ts
+msgid "The upgrade did not keep every row, so Household Spend Tracker stopped"
+msgstr ""
 
 #. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
 #: src/screens/Import.tsx
@@ -2117,6 +2124,10 @@ msgstr "Nenhum backup ainda."
 #, fuzzy
 msgid "Spellings of one name"
 msgstr "Grafias de um nome"
+
+#: ../desktop/src/words.ts
+msgid "This ledger was last opened by a newer version of Household Spend Tracker"
+msgstr ""
 
 #. Where an update failed
 #: src/screens/Updates.tsx
@@ -3111,6 +3122,10 @@ msgstr "{0, plural, one {Esta conta não bate com o saldo do YNAB.} other {Estas
 msgid "Select every waiting row"
 msgstr "Selecionar todas as linhas pendentes"
 
+#: ../desktop/src/words.ts
+msgid "About Household Spend Tracker"
+msgstr ""
+
 #: src/screens/Receipts.tsx
 #, fuzzy
 msgid "not saved — leave the field to try again"
@@ -3687,10 +3702,6 @@ msgstr "T — Transferências"
 msgid "This screen could not be shown"
 msgstr "Não foi possível mostrar esta tela"
 
-#: ../desktop/src/words.ts
-msgid "Spend Tracker will close. Everything saved before this is kept."
-msgstr ""
-
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Reset: password and authenticator"
@@ -3760,10 +3771,6 @@ msgstr "Não precisa de categoria"
 #, fuzzy
 msgid "not counted"
 msgstr "não contado"
-
-#: ../desktop/src/words.ts
-msgid "Hide Spend Tracker"
-msgstr ""
 
 #. Application management: how to send the suggestions on; the links follow
 #: src/screens/TranslationReview.tsx
@@ -5432,6 +5439,10 @@ msgstr "Pago, sem correspondência"
 msgid "Read a statement file into this register"
 msgstr "Ler um arquivo de extrato para este registro"
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker backups"
+msgstr ""
+
 #. Text on the sign-in page: noun, a code typed in
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -5525,6 +5536,10 @@ msgstr "<0>{0}</0> sai de {1} e o mesmo valor chega em {2}."
 #, fuzzy
 msgid "Active"
 msgstr "Ativo"
+
+#: ../desktop/src/words.ts
+msgid "Quit Household Spend Tracker"
+msgstr ""
 
 #. Column heading on the Admin screen
 #. Column heading on the Admin screen
@@ -5832,11 +5847,6 @@ msgstr "Por"
 #, fuzzy
 msgid "A new password"
 msgstr "Uma nova senha"
-
-#: src/screens/ynab/mapping.tsx
-#, fuzzy
-msgid "Each YNAB account goes to one Spend Tracker account in {currency}, to a new one, or is skipped. An account can take only one YNAB account, so one chosen on a row is not offered on the others."
-msgstr "Cada conta do YNAB vai para uma conta do Spend Tracker em {currency}, para uma nova, ou é ignorada. Uma conta só pode receber uma conta do YNAB, então uma escolhida em uma linha não é oferecida nas outras."
 
 #: src/screens/Household.tsx
 #, fuzzy
@@ -6267,12 +6277,6 @@ msgstr "{imported} A importação inteira — transações, contas, categorias e
 msgid "By currency"
 msgstr "Por moeda"
 
-#. Screen title on the first-run setup
-#: src/screens/Setup.tsx
-#, fuzzy
-msgid "Set up {PRODUCT}"
-msgstr "Configurar o {PRODUCT}"
-
 #. Column heading on the Reimbursements report: noun, a calendar month
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
@@ -6283,10 +6287,6 @@ msgstr "Mês"
 #, fuzzy
 msgid "The name looks like its number."
 msgstr "O nome parece ser o número da conta."
-
-#: ../desktop/src/words.ts
-msgid "Spend Tracker could not open the ledger"
-msgstr ""
 
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -7167,6 +7167,10 @@ msgstr ""
 msgid "{inviter} invited you to {PRODUCT} as an owner, in {households}."
 msgstr "{inviter} convidou você para o {PRODUCT} como proprietário, em {households}."
 
+#: src/screens/SignIn.tsx
+msgid "Use the recovery code you kept when you set up {productName}. It works once; you will be given a new one."
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Passkeys are not set up on this server."
@@ -7388,11 +7392,6 @@ msgstr "Importar mesmo assim"
 msgid "Python {0}"
 msgstr "Python {0}"
 
-#: src/screens/OneTimeImport.tsx
-#, fuzzy
-msgid "Your key is used only for this import. It stays in this browser tab and is never stored or logged by Spend Tracker."
-msgstr "Sua chave é usada só para esta importação. Ela fica nesta aba do navegador e nunca é armazenada nem registrada pelo Spend Tracker."
-
 #: src/components/RecoveryCodes.tsx
 #, fuzzy
 msgid "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
@@ -7563,10 +7562,6 @@ msgstr "Iniciando…"
 msgid "{text} — edit the memo"
 msgstr "{text} — editar a descrição"
 
-#: ../desktop/src/words.ts
-msgid "This ledger was last opened by a newer version of Spend Tracker"
-msgstr ""
-
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -7590,6 +7585,11 @@ msgstr "Redefinição: senha"
 #, fuzzy
 msgid "{wait, plural, one {Try again in {wait} second.} other {Try again in {wait} seconds.}}"
 msgstr "{wait, plural, one {Tente de novo em {wait} segundo.} other {Tente de novo em {wait} segundos.}}"
+
+#. Screen title on the first-run setup
+#: src/screens/Setup.tsx
+msgid "Set up {productName}"
+msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #, fuzzy
@@ -8550,10 +8550,6 @@ msgstr "Não é desta conta"
 msgid "English"
 msgstr "Inglês"
 
-#: ../desktop/src/words.ts
-msgid "Spend Tracker is already using this ledger"
-msgstr ""
-
 #. Table cell on the receipts
 #: src/screens/Receipts.tsx
 #, fuzzy
@@ -9045,10 +9041,6 @@ msgstr "Ignorada: Starting Balance do YNAB"
 #, fuzzy
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
 msgstr "O código de recuperação com que você entrou cobre isso, então nenhum outro código é pedido."
-
-#: ../desktop/src/words.ts
-msgid "Quit Spend Tracker"
-msgstr ""
 
 #: src/screens/Categories.tsx
 #, fuzzy
@@ -11329,6 +11321,10 @@ msgstr "2. Seu autenticador"
 msgid "work expense"
 msgstr "despesa de trabalho"
 
+#: src/screens/OneTimeImport.tsx
+msgid "Your key is used only for this import. It stays in this browser tab and is never stored or logged by {productName}."
+msgstr ""
+
 #. Heading on the desktop app's first-run setup, its second of two steps
 #: src/screens/Setup.tsx
 msgid "2. Your recovery code"
@@ -11751,6 +11747,10 @@ msgstr "{by} redefiniu a senha de {user}"
 msgid "You sign in with your password. If you forget it, your recovery code lets you choose a new one."
 msgstr ""
 
+#: src/screens/ynab/mapping.tsx
+msgid "Each YNAB account goes to one {productName} account in {currency}, to a new one, or is skipped. An account can take only one YNAB account, so one chosen on a row is not offered on the others."
+msgstr ""
+
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
 #. js-lingui-explicit-id
 #: src/lib/seedWords.ts
@@ -12064,7 +12064,7 @@ msgstr "Sim, todas as {0}"
 msgid "Add a payee"
 msgstr "Adicionar um favorecido"
 
-#. Desktop app dialog button: close Spend Tracker
+#. Desktop app dialog button: close Household Spend Tracker
 #: ../desktop/src/words.ts
 msgid "Quit"
 msgstr ""
@@ -12327,6 +12327,11 @@ msgstr "geralmente nada"
 #, fuzzy
 msgid "in or out, any currency"
 msgstr "entrada ou saída, qualquer moeda"
+
+#. On the Application management screen of the desktop app, in place of the updater
+#: src/screens/ApplicationManagement.tsx
+msgid "This copy of {productName} is kept up to date by the store it was installed from: the App Store on a Mac, the Microsoft Store on Windows."
+msgstr ""
 
 #. What kind of row changed, lower case, singular, in History beside its id
 #: src/lib/historyWords.ts
@@ -12823,6 +12828,10 @@ msgstr "Os dois são uma transação de verdade no registro, conciliada, com a d
 msgid "Choose backups folder…"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Update Household Spend Tracker, then open it again. Nothing was changed."
+msgstr ""
+
 #: src/screens/PayeeCategorisation.tsx
 #, fuzzy
 msgid "type any part of a payee"
@@ -12955,10 +12964,6 @@ msgstr "contém"
 #, fuzzy
 msgid "No flagged rows were found."
 msgstr "Nenhuma linha sinalizada foi encontrada."
-
-#: src/screens/SignIn.tsx
-msgid "Use the recovery code you kept when you set up Spend Tracker. It works once; you will be given a new one."
-msgstr ""
 
 #. A changed field in History's detail, lower case
 #: src/lib/historyWords.ts
@@ -13433,6 +13438,10 @@ msgstr "Origem"
 msgid "Not counted: {0} and {1}. Moving money between your own accounts is not income or spending, and what an account held when you started is not money you earned."
 msgstr "Não contados: {0} e {1}. Mover dinheiro entre suas próprias contas não é receita nem despesa, e o que uma conta tinha quando você começou não é dinheiro que você ganhou."
 
+#: ../desktop/src/words.ts
+msgid "Hide Household Spend Tracker"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "may apply imports"
@@ -13576,10 +13585,6 @@ msgstr "Alguém adicionou {user} como proprietário"
 msgid "Trying…"
 msgstr "Testando…"
 
-#: ../desktop/src/words.ts
-msgid "Update Spend Tracker, then open it again. Nothing was changed."
-msgstr ""
-
 #. Name of a fact on the Application management screen: noun, database pages
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
@@ -13614,10 +13619,6 @@ msgstr "compactado no dispositivo antes do envio"
 
 #: ../desktop/src/words.ts
 msgid "The backup is restored"
-msgstr ""
-
-#: ../desktop/src/words.ts
-msgid "Spend Tracker backups"
 msgstr ""
 
 #. Label of a choice on the Categories screen
@@ -14354,10 +14355,6 @@ msgstr "uma categoria existente"
 #, fuzzy
 msgid "{kept, plural, one {Each update backs the ledger up after the app stops and before it migrates. The newest one is kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.} other {Each update backs the ledger up after the app stops and before it migrates. The newest # are kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.}}"
 msgstr "{kept, plural, one {Cada atualização faz backup do livro-caixa depois que o aplicativo para e antes de migrar. O mais recente é mantido para que uma atualização possa ser desfeita; os mais antigos podem ser excluídos aqui, e o atualizador os remove sozinho depois de uma atualização bem-sucedida.} other {Cada atualização faz backup do livro-caixa depois que o aplicativo para e antes de migrar. Os # mais recentes são mantidos para que uma atualização possa ser desfeita; os mais antigos podem ser excluídos aqui, e o atualizador os remove sozinho depois de uma atualização bem-sucedida.}}"
-
-#: ../desktop/src/words.ts
-msgid "About Spend Tracker"
-msgstr ""
 
 #. Column heading on the Rules screen: switched on
 #: src/screens/Rules.tsx

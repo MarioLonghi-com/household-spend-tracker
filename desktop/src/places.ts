@@ -11,12 +11,18 @@
  * `<root>` is the operating system's per-user application data, never a
  * synced folder and never inside the app:
  *
- * - **macOS:** Application Support, which for the Mac App Store build is
- *   inside the app's sandbox container. The container stays when the app is
- *   deleted.
+ * - **macOS:** `Application Support/Spend Tracker`, which for the Mac App
+ *   Store build is inside the app's sandbox container. The container stays
+ *   when the app is deleted.
  * - **Windows:** `%LOCALAPPDATA%\Spend Tracker`, which is not Roaming (a WAL
  *   database must not roam) and is excluded from MSIX virtualisation in the
  *   manifest, so it is the real folder and survives an uninstall (#59).
+ *
+ * **The folder's name is fixed, not the product's** (#346). Electron's
+ * `userData` is Application Support/<productName>, and the app was renamed
+ * "Household Spend Tracker" for the stores: following the product name would
+ * have moved the ledger, and the app would have opened as a fresh install
+ * with the old ledger still on disk. Both platforms use `DATA_FOLDER`.
  *
  * The backups the person keeps go elsewhere, to a folder they can see
  * (`backups.ts`).
@@ -36,17 +42,20 @@ export type Places = {
   incoming: string;
 };
 
+/** The ledger's folder under the platform's application data, whatever the app is called. */
+export const DATA_FOLDER = "Spend Tracker";
+
 export type Environment = {
   platform: NodeJS.Platform;
   env: NodeJS.ProcessEnv;
-  /** Electron's `app.getPath("userData")`. */
-  userData: string;
+  /** Electron's `app.getPath("appData")`: Application Support on a Mac. */
+  appData: string;
 };
 
-export function rootFor({ platform, env, userData }: Environment): string {
+export function rootFor({ platform, env, appData }: Environment): string {
   if (env.SPENDTRACKER_DESKTOP_ROOT) return path.resolve(env.SPENDTRACKER_DESKTOP_ROOT);
-  if (platform === "win32" && env.LOCALAPPDATA) return path.win32.join(env.LOCALAPPDATA, "Spend Tracker");
-  return userData;
+  if (platform === "win32" && env.LOCALAPPDATA) return path.win32.join(env.LOCALAPPDATA, DATA_FOLDER);
+  return path.join(appData, DATA_FOLDER);
 }
 
 export function placesIn(root: string): Places {

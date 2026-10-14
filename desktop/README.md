@@ -5,6 +5,11 @@ client as the server, in an Electron window, for the Mac App Store (Apple
 Silicon) and the Microsoft Store (Windows 11 x64). Epic #49; this folder is
 #61 and #62.
 
+**On the stores it is called Household Spend Tracker** (#346), the name both
+reserved, and the window, menus and the client's headings say so; the client
+reads it from `GET /api/capabilities`. The folders below keep the name
+`Spend Tracker`, so a ledger made before the rename is still the one opened.
+
 ## How it fits together
 
 ```
@@ -92,11 +97,13 @@ Hardware, not the Hardware UUID). With one from the developer account:
 
 ```bash
 build/freeze-venv/bin/python -m scripts.desktop_build mas
-desktop/scripts/sign-mas.sh "desktop/dist/mas-dev-arm64/Spend Tracker.app" ~/path/to/profile.provisionprofile
-open "desktop/dist/mas-dev-arm64/Spend Tracker.app"
+desktop/scripts/sign-mas.sh "desktop/dist/mas-dev-arm64/Household Spend Tracker.app" ~/path/to/profile.provisionprofile
+open "desktop/dist/mas-dev-arm64/Household Spend Tracker.app"
 ```
 
-Profiles stay out of the repository (`.gitignore`). Playwright cannot drive
+Profiles stay out of the repository: keep them with the account's other
+files and pass the path, rather than copying one into `desktop/` (where
+`.gitignore` would at least keep it out of a commit). Playwright cannot drive
 the sandboxed build — it needs a debugging port, and the sandbox allows no
 listener — so that one is checked by hand.
 
@@ -108,7 +115,7 @@ one is signed with a throwaway certificate:
 ```powershell
 powershell -File desktop\scripts\test-certificate.ps1 -Out C:\st-test
 python -m scripts.desktop_build win
-powershell -File desktop\scripts\sign-msix.ps1 -Package "desktop\dist\Spend Tracker <version>.appx" -Pfx C:\st-test\test-signing.pfx
+powershell -File desktop\scripts\sign-msix.ps1 -Package "desktop\dist\Household Spend Tracker <version>.appx" -Pfx C:\st-test\test-signing.pfx
 ```
 
 `sign-msix.ps1` uses the Windows SDK's `signtool`: the copy electron-builder

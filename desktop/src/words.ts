@@ -9,6 +9,13 @@
 
 import { msg } from "@lingui/core/macro";
 
+/**
+ * The app's name, as both stores list it (#346): titles and the macOS app
+ * menu. A name, so never translated. The ledger's folder keeps its own name
+ * (`places.DATA_FOLDER`).
+ */
+export const PRODUCT_NAME = "Household Spend Tracker";
+
 export const MENU = {
   file: msg({ message: "File", comment: "Desktop app menu bar: the File menu" }),
   edit: msg({ message: "Edit", comment: "Desktop app menu bar: the Edit menu" }),
@@ -23,11 +30,11 @@ export const MENU = {
   showLedger: msg`Show ledger folder`,
   closeWindow: msg({ message: "Close window", comment: "Desktop app File menu item" }),
 
-  about: msg`About Spend Tracker`,
-  hide: msg`Hide Spend Tracker`,
+  about: msg`About Household Spend Tracker`,
+  hide: msg`Hide Household Spend Tracker`,
   hideOthers: msg({ message: "Hide others", comment: "macOS app menu item: hide every other app's windows" }),
   showAll: msg({ message: "Show all", comment: "macOS app menu item: show every app's windows again" }),
-  quit: msg`Quit Spend Tracker`,
+  quit: msg`Quit Household Spend Tracker`,
 
   undo: msg({ message: "Undo", comment: "Desktop app Edit menu item: undo the last edit in a text field" }),
   redo: msg({ message: "Redo", comment: "Desktop app Edit menu item: redo the edit just undone in a text field" }),
@@ -54,7 +61,7 @@ export const SPLASH = {
 
 export const BUTTON = {
   ok: msg({ message: "OK", comment: "Desktop app dialog button: close the dialog" }),
-  quit: msg({ message: "Quit", comment: "Desktop app dialog button: close Spend Tracker" }),
+  quit: msg({ message: "Quit", comment: "Desktop app dialog button: close Household Spend Tracker" }),
   cancel: msg({ message: "Cancel", comment: "Desktop app dialog button: do nothing and close the dialog" }),
   later: msg({ message: "Later", comment: "Desktop app dialog button: not now, ask again another time" }),
   showBackup: msg({ message: "Show the backup", comment: "Desktop app dialog button: open the folder holding the backup" }),
@@ -67,24 +74,24 @@ export const BUTTON = {
 };
 
 export const DIALOG = {
-  newerTitle: msg`This ledger was last opened by a newer version of Spend Tracker`,
-  newerDetail: msg`Update Spend Tracker, then open it again. Nothing was changed.`,
+  newerTitle: msg`This ledger was last opened by a newer version of Household Spend Tracker`,
+  newerDetail: msg`Update Household Spend Tracker, then open it again. Nothing was changed.`,
 
   lossyTitle: msg`This update changes your ledger in a way that cannot be undone`,
   lossyDetail: (titles: string) =>
     msg`A backup is made first, so you can go back to it. What changes: ${titles}.`,
 
   failedTitle: msg`The ledger could not be upgraded`,
-  droppedTitle: msg`The upgrade did not keep every row, so Spend Tracker stopped`,
+  droppedTitle: msg`The upgrade did not keep every row, so Household Spend Tracker stopped`,
   failedDetail: (backup: string) =>
     msg`Nothing is lost: the ledger as it was is in the backup made just before, in ${backup}. Please report this.`,
 
-  busyTitle: msg`Spend Tracker is already using this ledger`,
+  busyTitle: msg`Household Spend Tracker is already using this ledger`,
   busyDetail: msg`Another copy of the app has it open. Close that one, then try again.`,
 
-  couldNotStartTitle: msg`Spend Tracker could not open the ledger`,
+  couldNotStartTitle: msg`Household Spend Tracker could not open the ledger`,
   stoppedTitle: msg`The ledger stopped unexpectedly`,
-  stoppedDetail: msg`Spend Tracker will close. Everything saved before this is kept.`,
+  stoppedDetail: msg`Household Spend Tracker will close. Everything saved before this is kept.`,
 
   backedUpTitle: msg({ message: "Backup saved", comment: "Desktop app dialog title after Back up now succeeded" }),
   backedUpDetail: (name: string, folder: string) =>
@@ -92,14 +99,14 @@ export const DIALOG = {
   backupFailedTitle: msg`The backup could not be made`,
 
   restorePick: msg`Choose a backup to restore`,
-  restoreFilter: msg`Spend Tracker backups`,
+  restoreFilter: msg`Household Spend Tracker backups`,
   restoreTitle: msg`Replace the ledger with this backup?`,
   restoreDetail: (name: string) =>
     msg`${name} will replace everything in the ledger now. The ledger as it is now is backed up first, and you will sign in again.`,
   restoredTitle: msg`The backup is restored`,
   restoredDetail: msg`Sign in to carry on.`,
   notRestoredTitle: msg`This backup was not restored`,
-  notRestoredNewer: msg`It was made by a newer version of Spend Tracker. Update this one first. Nothing was changed.`,
+  notRestoredNewer: msg`It was made by a newer version of Household Spend Tracker. Update this one first. Nothing was changed.`,
 
   chooseFolderTitle: msg`Choose where backups go`,
   askFolderTitle: msg`Backups are kept inside the app's own folder for now`,

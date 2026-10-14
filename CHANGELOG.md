@@ -32,6 +32,14 @@ history this repository does not have.
 
 ## Unreleased
 
+### Changed
+
+- **The desktop app is called Household Spend Tracker**, the name it is
+  listed under on the Mac App Store and the Microsoft Store: the window, the
+  menus, the dialogs, and the headings and sentences of the app inside it. The
+  server and the web app are still Spend Tracker. The ledger stays where it
+  was, so an install from before the rename opens the same ledger. (#346)
+
 ## 0.11.1 — 2026-10-14
 
 **Reversible: none** — no migration in this release. To go back to

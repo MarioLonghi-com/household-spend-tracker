@@ -1,5 +1,5 @@
 /**
- * Spend Tracker on a desktop: the Electron shell (#61, #62).
+ * Household Spend Tracker on a desktop: the Electron shell (#61, #62, #346).
  *
  * One window on `app://localhost`, every request forwarded to the frozen
  * backend over stdin/stdout (`scheme.ts`, `backend.ts`). The shell owns what a
@@ -49,7 +49,7 @@ import { placesIn, rootFor } from "./places";
 import { handler, ORIGIN } from "./scheme";
 import * as stored from "./settings";
 import { Splash } from "./splash";
-import { BUTTON, DIALOG, SPLASH } from "./words";
+import { BUTTON, DIALOG, PRODUCT_NAME, SPLASH } from "./words";
 
 protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } },
@@ -60,7 +60,7 @@ protocol.registerSchemesAsPrivileged([
 if (process.env.SPENDTRACKER_DESKTOP_ROOT) {
   app.setPath("userData", path.join(path.resolve(process.env.SPENDTRACKER_DESKTOP_ROOT), "Chromium"));
 }
-const places = placesIn(rootFor({ platform: process.platform, env: process.env, userData: app.getPath("userData") }));
+const places = placesIn(rootFor({ platform: process.platform, env: process.env, appData: app.getPath("appData") }));
 const sandboxed = Boolean(process.mas);
 const jar = new CookieJar();
 let settings = stored.load(places.settings);
@@ -453,7 +453,7 @@ function setMenu(): void {
       about: () =>
         void ask({
           type: "info",
-          message: "Spend Tracker",
+          message: PRODUCT_NAME,
           detail: say(DIALOG.aboutDetail(app.getVersion())),
           buttons: [say(BUTTON.ok)],
         }),
@@ -468,7 +468,7 @@ function createWindow(): BrowserWindow {
     minWidth: 380,
     minHeight: 520,
     show: false,
-    title: "Spend Tracker",
+    title: PRODUCT_NAME,
     webPreferences: webPreferences(),
   });
   made.once("ready-to-show", () => {
