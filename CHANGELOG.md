@@ -32,6 +32,24 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.11.0 — 2026-10-14
+
+**Reversible: none** — no migration in this release. To go back to
+`0.10.1`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.10.1` and restart.
+
+The desktop app, built and tested; not yet in the stores. The same backend and
+client now also run as a desktop app for the Mac App Store and the Microsoft
+Store (#49). This release carries its core, its Electron shell and its builds,
+tested on macOS and Windows 11. Store submission is a later release (#63).
+
+On a server, two things are new:
+- `GET /api/capabilities`, which says what this deployment offers;
+- the ledger is folded back into one file when the app stops.
+
+The YNAB import shows that it is still working, and four tests that failed now
+and then, mostly on Windows, no longer do.
+
 ### Added
 
 - **A slow step says it is still going.** The YNAB import's four steps show
