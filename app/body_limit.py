@@ -34,6 +34,14 @@ gigabyte to be polite to them is doing their bidding. A client that sent
 `Expect: 100-continue` is waiting for leave to send and is refused at once.
 A chunked body has no length to judge, so it is still cut off where it
 crosses the ceiling.
+
+**The large ceilings are for somebody who signed in** (#337). Chosen by path
+alone, they let a stranger make the app read and parse 32 MB of JSON before
+the 401: the default megabyte was the only one that kept the promise above.
+So a path whose ceiling is larger than the default gets it only when the
+request carries a live session cookie or a live agent key -- looked up, not
+merely present, because a made-up cookie costs nothing to send. Anyone else
+gets the default, and a sentence saying what would raise it.
 """
 
 from __future__ import annotations
@@ -42,6 +50,8 @@ import json
 import re
 
 from fastapi import HTTPException
+from starlette.concurrency import run_in_threadpool
+from starlette.requests import HTTPConnection
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from .api.routers import agent as agent_router
@@ -117,6 +127,40 @@ def _sentence(ceiling: int) -> str:
     )
 
 
+def _sentence_unvouched(ceiling: int) -> str:
+    return (
+        f"that request body is larger than this endpoint accepts without a signed-in "
+        f"session or a valid key ({ceiling // MIB} MB). Nothing in it was stored: sign "
+        "in, or check the key, and send it again."
+    )
+
+
+def _vouched_for(scope: Scope) -> bool:
+    """Does this request carry a live session or a live agent key?
+
+    The same lookups `deps.current_user` and `deps.current_agent` make, and
+    nothing more: no touch, no rate-limit line, no membership of the household
+    in the path. Those are the route's to judge once the body is in; this only
+    decides how much of a body is worth reading to get there. Run only for the
+    few paths whose ceiling is above the default.
+    """
+    from .auth import cookies
+    from .auth import sessions as session_service
+    from .db import session_scope
+    from .services import agent_keys
+
+    conn = HTTPConnection(scope)
+    cookie = cookies.session_value(conn)
+    header = conn.headers.get("authorization") or ""
+    token = header[len("Bearer ") :].strip() if header.startswith("Bearer ") else None
+    if not cookie and not token:
+        return False
+    with session_scope() as session:
+        if cookie and session_service.lookup(session, cookie) is not None:
+            return True
+        return bool(token) and agent_keys.lookup(session, token) is not None
+
+
 class BodyTooLarge(HTTPException):
     """Raised from inside `receive` when a streamed body crosses its ceiling.
 
@@ -126,8 +170,8 @@ class BodyTooLarge(HTTPException):
     truth is that it was too long.
     """
 
-    def __init__(self, ceiling: int) -> None:
-        super().__init__(status_code=413, detail=_sentence(ceiling))
+    def __init__(self, sentence: str) -> None:
+        super().__init__(status_code=413, detail=sentence)
 
 
 class BodyLimit:
@@ -144,6 +188,10 @@ class BodyLimit:
             return
 
         ceiling = ceiling_for(scope.get("path", ""))
+        sentence = _sentence(ceiling)
+        if ceiling > DEFAULT_CEILING and not await run_in_threadpool(_vouched_for, scope):
+            ceiling = DEFAULT_CEILING
+            sentence = _sentence_unvouched(ceiling)
 
         declared = None
         waiting = False
@@ -159,7 +207,7 @@ class BodyLimit:
             if int(declared) > ceiling:
                 if not waiting and int(declared) <= drain_limit(ceiling):
                     await self._drain(receive, int(declared))
-                await self._refuse(send, 413, _sentence(ceiling))
+                await self._refuse(send, 413, sentence)
                 return
 
         # Counted even when a length was declared: a client that declares 10
@@ -176,7 +224,7 @@ class BodyLimit:
                 received += len(message.get("body", b""))
                 if received > ceiling:
                     exceeded = True
-                    raise BodyTooLarge(ceiling)
+                    raise BodyTooLarge(sentence)
             return message
 
         async def watched(message: Message) -> None:
@@ -189,7 +237,7 @@ class BodyLimit:
                 # FastAPI calls that "400 There was an error parsing the body".
                 if message["type"] == "http.response.start" and not started:
                     started = True
-                    await self._refuse(send, 413, _sentence(ceiling))
+                    await self._refuse(send, 413, sentence)
                 return
             if message["type"] == "http.response.start":
                 started = True
@@ -203,7 +251,7 @@ class BodyLimit:
             # send.
             if not exceeded or started:
                 raise
-            await self._refuse(send, 413, _sentence(ceiling))
+            await self._refuse(send, 413, sentence)
 
     @staticmethod
     async def _drain(receive: Receive, declared: int) -> None:

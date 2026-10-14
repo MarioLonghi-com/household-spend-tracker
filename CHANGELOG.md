@@ -52,6 +52,11 @@ history this repository does not have.
   nothing else handled was answered outside the middleware that sets them,
   so it went out with no content policy or framing protection. And an
   address with an encoded NUL in it is the app's page, not a 500. (#336)
+- **Large uploads are read only for somebody signed in.** The receipt,
+  statement and agent batch endpoints accepted bodies of up to 32 MB from
+  anyone, and read them in full before saying "sign in first". Without a
+  live session or agent key they now take the ordinary 1 MB, and the
+  refusal says what would raise it. (#337)
 
 ## 0.11.0 — 2026-10-14
 
