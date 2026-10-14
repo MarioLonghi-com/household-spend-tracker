@@ -171,6 +171,10 @@ msgstr "One act, so History has one entry and undo puts every row back together.
 msgid "Reimbursements"
 msgstr "Reimbursements"
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker will close. Everything saved before this is kept."
+msgstr "Household Spend Tracker will close. Everything saved before this is kept."
+
 #. Text on the receipts
 #. placeholder {0}: receipt.download_name
 #: src/components/Receipts.tsx
@@ -264,10 +268,6 @@ msgstr "Type"
 msgid "Select {0}"
 msgstr "Select {0}"
 
-#: ../desktop/src/words.ts
-msgid "The upgrade did not keep every row, so Spend Tracker stopped"
-msgstr "The upgrade did not keep every row, so Spend Tracker stopped"
-
 #: src/screens/Profile.tsx
 msgid "No browsers were being trusted."
 msgstr "No browsers were being trusted."
@@ -316,11 +316,6 @@ msgstr "Fixed: this is YNAB's own bucket rather than a category of yours (Uncate
 msgid "You can pick a palette and one accent of your own. You cannot reach the text and background colours, so no household can be made unreadable — and the accent is checked for contrast before it is saved."
 msgstr "You can pick a palette and one accent of your own. You cannot reach the text and background colours, so no household can be made unreadable — and the accent is checked for contrast before it is saved."
 
-#. On the Application management screen of the desktop app, in place of the updater
-#: src/screens/ApplicationManagement.tsx
-msgid "This copy of Spend Tracker is kept up to date by the store it was installed from: the App Store on a Mac, the Microsoft Store on Windows."
-msgstr "This copy of Spend Tracker is kept up to date by the store it was installed from: the App Store on a Mac, the Microsoft Store on Windows."
-
 #. Screen-reader name of a help button on the Accounts screen
 #: src/screens/Accounts.tsx
 msgid "account types"
@@ -360,10 +355,6 @@ msgstr "{0} ({1}) is signed out everywhere and their trusted browsers are forgot
 msgid "Nothing in the last 14 days."
 msgstr "Nothing in the last 14 days."
 
-#: ../desktop/src/words.ts
-msgid "It was made by a newer version of Spend Tracker. Update this one first. Nothing was changed."
-msgstr "It was made by a newer version of Spend Tracker. Update this one first. Nothing was changed."
-
 #. placeholder {0}: household.base_currency
 #: src/screens/AccountImport.tsx
 msgid "A three-letter code. Leave it blank for {0}."
@@ -391,6 +382,10 @@ msgstr "A rule of this kind points at <0>one</0> payee, so <1>SQ *</1> cannot me
 #: src/screens/ApplicationManagement.tsx
 msgid "what this list is"
 msgstr "what this list is"
+
+#: ../desktop/src/words.ts
+msgid "It was made by a newer version of Household Spend Tracker. Update this one first. Nothing was changed."
+msgstr "It was made by a newer version of Household Spend Tracker. Update this one first. Nothing was changed."
 
 #. placeholder {0}: offer.name
 #. placeholder {1}: offer.payee
@@ -883,6 +878,10 @@ msgstr "Nothing went into this one."
 msgid "Handed to the share sheet."
 msgstr "Handed to the share sheet."
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker is already using this ledger"
+msgstr "Household Spend Tracker is already using this ledger"
+
 #: src/screens/Categories.tsx
 msgid "Start with a common set"
 msgstr "Start with a common set"
@@ -1334,6 +1333,10 @@ msgstr "Nothing left to prove on or before that date. Everything up to here is a
 msgid "Nobody yet, which should be impossible while you are reading this."
 msgstr "Nobody yet, which should be impossible while you are reading this."
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker could not open the ledger"
+msgstr "Household Spend Tracker could not open the ledger"
+
 #: src/screens/OneTimeImport.tsx
 msgid "I understand YNAB's Reconciled, Cleared and Uncleared states will be reset — everything arrives uncleared."
 msgstr "I understand YNAB's Reconciled, Cleared and Uncleared states will be reset — everything arrives uncleared."
@@ -1497,6 +1500,10 @@ msgstr "Failed"
 #: src/screens/Rules.tsx
 msgid "With <0>matches the pattern</0> this is a template, so <1>\\1</1> is the first bracketed group: <2>^SQ \\*(.+)$</2> with <3>\\1</3> keeps what follows."
 msgstr "With <0>matches the pattern</0> this is a template, so <1>\\1</1> is the first bracketed group: <2>^SQ \\*(.+)$</2> with <3>\\1</3> keeps what follows."
+
+#: ../desktop/src/words.ts
+msgid "The upgrade did not keep every row, so Household Spend Tracker stopped"
+msgstr "The upgrade did not keep every row, so Household Spend Tracker stopped"
 
 #. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
 #: src/screens/Import.tsx
@@ -1785,6 +1792,10 @@ msgstr "Nothing backed up yet."
 #: src/screens/Payees.tsx
 msgid "Spellings of one name"
 msgstr "Spellings of one name"
+
+#: ../desktop/src/words.ts
+msgid "This ledger was last opened by a newer version of Household Spend Tracker"
+msgstr "This ledger was last opened by a newer version of Household Spend Tracker"
 
 #. Where an update failed
 #: src/screens/Updates.tsx
@@ -2633,6 +2644,10 @@ msgstr "{0, plural, one {This account does not add up to YNAB’s balance.} othe
 msgid "Select every waiting row"
 msgstr "Select every waiting row"
 
+#: ../desktop/src/words.ts
+msgid "About Household Spend Tracker"
+msgstr "About Household Spend Tracker"
+
 #: src/screens/Receipts.tsx
 msgid "not saved — leave the field to try again"
 msgstr "not saved — leave the field to try again"
@@ -3123,10 +3138,6 @@ msgstr "T — Transfers"
 msgid "This screen could not be shown"
 msgstr "This screen could not be shown"
 
-#: ../desktop/src/words.ts
-msgid "Spend Tracker will close. Everything saved before this is kept."
-msgstr "Spend Tracker will close. Everything saved before this is kept."
-
 #: src/lib/signInChanges.ts
 msgid "Reset: password and authenticator"
 msgstr "Reset: password and authenticator"
@@ -3184,10 +3195,6 @@ msgstr "No category needed"
 #: src/screens/Accounts.tsx
 msgid "not counted"
 msgstr "not counted"
-
-#: ../desktop/src/words.ts
-msgid "Hide Spend Tracker"
-msgstr "Hide Spend Tracker"
 
 #. Application management: how to send the suggestions on; the links follow
 #: src/screens/TranslationReview.tsx
@@ -4585,6 +4592,10 @@ msgstr "Paid, not matched"
 msgid "Read a statement file into this register"
 msgstr "Read a statement file into this register"
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker backups"
+msgstr "Household Spend Tracker backups"
+
 #. Text on the sign-in page: noun, a code typed in
 #: src/screens/SignIn.tsx
 msgid "Code"
@@ -4664,6 +4675,10 @@ msgstr "<0>{0}</0> leaves {1} and the same arrives in {2}."
 #: src/screens/Admin.tsx
 msgid "Active"
 msgstr "Active"
+
+#: ../desktop/src/words.ts
+msgid "Quit Household Spend Tracker"
+msgstr "Quit Household Spend Tracker"
 
 #. Column heading on the Admin screen
 #. Column heading on the Admin screen
@@ -4925,10 +4940,6 @@ msgstr "By"
 #: src/screens/SignIn.tsx
 msgid "A new password"
 msgstr "A new password"
-
-#: src/screens/ynab/mapping.tsx
-msgid "Each YNAB account goes to one Spend Tracker account in {currency}, to a new one, or is skipped. An account can take only one YNAB account, so one chosen on a row is not offered on the others."
-msgstr "Each YNAB account goes to one Spend Tracker account in {currency}, to a new one, or is skipped. An account can take only one YNAB account, so one chosen on a row is not offered on the others."
 
 #: src/screens/Household.tsx
 msgid "Every new receipt will take about <0>70× more space</0> in the database. Only worth it if you need the exact file. Existing receipts are not changed."
@@ -5289,11 +5300,6 @@ msgstr "{imported} The whole import — transactions, accounts, categories and p
 msgid "By currency"
 msgstr "By currency"
 
-#. Screen title on the first-run setup
-#: src/screens/Setup.tsx
-msgid "Set up {PRODUCT}"
-msgstr "Set up {PRODUCT}"
-
 #. Column heading on the Reimbursements report: noun, a calendar month
 #: src/screens/reports/Reimbursements.tsx
 msgid "Month"
@@ -5302,10 +5308,6 @@ msgstr "Month"
 #: src/screens/Accounts.tsx
 msgid "The name looks like its number."
 msgstr "The name looks like its number."
-
-#: ../desktop/src/words.ts
-msgid "Spend Tracker could not open the ledger"
-msgstr "Spend Tracker could not open the ledger"
 
 #: src/screens/Updates.tsx
 msgid "The app has stopped. Waiting for it to come back…"
@@ -6059,6 +6061,10 @@ msgstr "Paste"
 msgid "{inviter} invited you to {PRODUCT} as an owner, in {households}."
 msgstr "{inviter} invited you to {PRODUCT} as an owner, in {households}."
 
+#: src/screens/SignIn.tsx
+msgid "Use the recovery code you kept when you set up {productName}. It works once; you will be given a new one."
+msgstr "Use the recovery code you kept when you set up {productName}. It works once; you will be given a new one."
+
 #: src/screens/Passkeys.tsx
 msgid "Passkeys are not set up on this server."
 msgstr "Passkeys are not set up on this server."
@@ -6243,10 +6249,6 @@ msgstr "Import anyway"
 msgid "Python {0}"
 msgstr "Python {0}"
 
-#: src/screens/OneTimeImport.tsx
-msgid "Your key is used only for this import. It stays in this browser tab and is never stored or logged by Spend Tracker."
-msgstr "Your key is used only for this import. It stays in this browser tab and is never stored or logged by Spend Tracker."
-
 #: src/components/RecoveryCodes.tsx
 msgid "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
 msgstr "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
@@ -6389,10 +6391,6 @@ msgstr "Starting…"
 msgid "{text} — edit the memo"
 msgstr "{text} — edit the memo"
 
-#: ../desktop/src/words.ts
-msgid "This ledger was last opened by a newer version of Spend Tracker"
-msgstr "This ledger was last opened by a newer version of Spend Tracker"
-
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Changing…"
@@ -6412,6 +6410,11 @@ msgstr "Reset: password"
 #: src/components/bits.tsx
 msgid "{wait, plural, one {Try again in {wait} second.} other {Try again in {wait} seconds.}}"
 msgstr "{wait, plural, one {Try again in {wait} second.} other {Try again in {wait} seconds.}}"
+
+#. Screen title on the first-run setup
+#: src/screens/Setup.tsx
+msgid "Set up {productName}"
+msgstr "Set up {productName}"
 
 #: src/screens/ResetAccount.tsx
 msgid "{by} reset your password and your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
@@ -7222,10 +7225,6 @@ msgstr "Not for this account"
 msgid "English"
 msgstr "English"
 
-#: ../desktop/src/words.ts
-msgid "Spend Tracker is already using this ledger"
-msgstr "Spend Tracker is already using this ledger"
-
 #. Table cell on the receipts
 #: src/screens/Receipts.tsx
 msgid "(uploaded)"
@@ -7646,10 +7645,6 @@ msgstr "Skipped: YNAB Starting Balance"
 #: src/screens/Profile.tsx
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
 msgstr "The recovery code you signed in with covers this, so no other code is asked for."
-
-#: ../desktop/src/words.ts
-msgid "Quit Spend Tracker"
-msgstr "Quit Spend Tracker"
 
 #: src/screens/Categories.tsx
 msgid "New transactions arrive blank and you choose each time. Right for a payee that is genuinely different every time."
@@ -9574,6 +9569,10 @@ msgstr "2. Your authenticator"
 msgid "work expense"
 msgstr "work expense"
 
+#: src/screens/OneTimeImport.tsx
+msgid "Your key is used only for this import. It stays in this browser tab and is never stored or logged by {productName}."
+msgstr "Your key is used only for this import. It stays in this browser tab and is never stored or logged by {productName}."
+
 #. Heading on the desktop app's first-run setup, its second of two steps
 #: src/screens/Setup.tsx
 msgid "2. Your recovery code"
@@ -9932,6 +9931,10 @@ msgstr "{by} reset {user}'s password"
 msgid "You sign in with your password. If you forget it, your recovery code lets you choose a new one."
 msgstr "You sign in with your password. If you forget it, your recovery code lets you choose a new one."
 
+#: src/screens/ynab/mapping.tsx
+msgid "Each YNAB account goes to one {productName} account in {currency}, to a new one, or is skipped. An account can take only one YNAB account, so one chosen on a row is not offered on the others."
+msgstr "Each YNAB account goes to one {productName} account in {currency}, to a new one, or is skipped. An account can take only one YNAB account, so one chosen on a row is not offered on the others."
+
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
 #. js-lingui-explicit-id
 #: src/lib/seedWords.ts
@@ -10196,7 +10199,7 @@ msgstr "Yes, all {0} of them"
 msgid "Add a payee"
 msgstr "Add a payee"
 
-#. Desktop app dialog button: close Spend Tracker
+#. Desktop app dialog button: close Household Spend Tracker
 #: ../desktop/src/words.ts
 msgid "Quit"
 msgstr "Quit"
@@ -10420,6 +10423,11 @@ msgstr "usually nothing"
 #: src/screens/Register.tsx
 msgid "in or out, any currency"
 msgstr "in or out, any currency"
+
+#. On the Application management screen of the desktop app, in place of the updater
+#: src/screens/ApplicationManagement.tsx
+msgid "This copy of {productName} is kept up to date by the store it was installed from: the App Store on a Mac, the Microsoft Store on Windows."
+msgstr "This copy of {productName} is kept up to date by the store it was installed from: the App Store on a Mac, the Microsoft Store on Windows."
 
 #. What kind of row changed, lower case, singular, in History beside its id
 #: src/lib/historyWords.ts
@@ -10836,6 +10844,10 @@ msgstr "Both are a real transaction in the register, reconciled, dated the day t
 msgid "Choose backups folder…"
 msgstr "Choose backups folder…"
 
+#: ../desktop/src/words.ts
+msgid "Update Household Spend Tracker, then open it again. Nothing was changed."
+msgstr "Update Household Spend Tracker, then open it again. Nothing was changed."
+
 #: src/screens/PayeeCategorisation.tsx
 msgid "type any part of a payee"
 msgstr "type any part of a payee"
@@ -10947,10 +10959,6 @@ msgstr "contains"
 #: src/screens/OneTimeImport.tsx
 msgid "No flagged rows were found."
 msgstr "No flagged rows were found."
-
-#: src/screens/SignIn.tsx
-msgid "Use the recovery code you kept when you set up Spend Tracker. It works once; you will be given a new one."
-msgstr "Use the recovery code you kept when you set up Spend Tracker. It works once; you will be given a new one."
 
 #. A changed field in History's detail, lower case
 #: src/lib/historyWords.ts
@@ -11347,6 +11355,10 @@ msgstr "Source"
 msgid "Not counted: {0} and {1}. Moving money between your own accounts is not income or spending, and what an account held when you started is not money you earned."
 msgstr "Not counted: {0} and {1}. Moving money between your own accounts is not income or spending, and what an account held when you started is not money you earned."
 
+#: ../desktop/src/words.ts
+msgid "Hide Household Spend Tracker"
+msgstr "Hide Household Spend Tracker"
+
 #: src/screens/Profile.tsx
 msgid "may apply imports"
 msgstr "may apply imports"
@@ -11468,10 +11480,6 @@ msgstr "Somebody added {user} as an owner"
 msgid "Trying…"
 msgstr "Trying…"
 
-#: ../desktop/src/words.ts
-msgid "Update Spend Tracker, then open it again. Nothing was changed."
-msgstr "Update Spend Tracker, then open it again. Nothing was changed."
-
 #. Name of a fact on the Application management screen: noun, database pages
 #: src/screens/ApplicationManagement.tsx
 msgid "Pages"
@@ -11501,10 +11509,6 @@ msgstr "compressed on the device before sending"
 #: ../desktop/src/words.ts
 msgid "The backup is restored"
 msgstr "The backup is restored"
-
-#: ../desktop/src/words.ts
-msgid "Spend Tracker backups"
-msgstr "Spend Tracker backups"
 
 #. Label of a choice on the Categories screen
 #: src/screens/Categories.tsx
@@ -12121,10 +12125,6 @@ msgstr "an existing category"
 #: src/screens/Backups.tsx
 msgid "{kept, plural, one {Each update backs the ledger up after the app stops and before it migrates. The newest one is kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.} other {Each update backs the ledger up after the app stops and before it migrates. The newest # are kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.}}"
 msgstr "{kept, plural, one {Each update backs the ledger up after the app stops and before it migrates. The newest one is kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.} other {Each update backs the ledger up after the app stops and before it migrates. The newest # are kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.}}"
-
-#: ../desktop/src/words.ts
-msgid "About Spend Tracker"
-msgstr "About Spend Tracker"
 
 #. Column heading on the Rules screen: switched on
 #: src/screens/Rules.tsx

@@ -905,15 +905,16 @@ CAPABILITIES = capabilities.for_settings(settings)
 
 
 @app.get("/api/capabilities", tags=["meta"])
-def offered() -> dict[str, bool]:
-    """Which features this deployment offers, for the client to hide the rest.
+def offered() -> dict[str, bool | str]:
+    """Which features this deployment offers, for the client to hide the rest,
+    and what the app is called here (`product_name`, #346).
 
     Unauthenticated like `/api/health`, and for the same reason: the sign-in
     screen is drawn before anyone has a session, and it is one of the screens
     that differ. It says what the software offers here, nothing about who uses
     it.
     """
-    return CAPABILITIES.as_dict()
+    return {**CAPABILITIES.as_dict(), "product_name": capabilities.product_name(settings)}
 
 
 #: Every router, with the capability it needs (None: every deployment). One

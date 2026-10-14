@@ -12,6 +12,7 @@
 
 import { BrowserWindow, nativeTheme } from "electron";
 import { language } from "./i18n";
+import { PRODUCT_NAME } from "./words";
 
 function escape(text: string): string {
   return text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -49,7 +50,7 @@ export class Splash {
       fullscreenable: false,
       show: false,
       center: true,
-      title: "Spend Tracker",
+      title: PRODUCT_NAME,
       webPreferences: { sandbox: true, contextIsolation: true, javascript: false },
     });
     this.window.setMenuBarVisibility(false);

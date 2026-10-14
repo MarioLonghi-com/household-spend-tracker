@@ -9,7 +9,7 @@
 
 import { Menu, type MenuItemConstructorOptions } from "electron";
 import { say } from "./i18n";
-import { MENU } from "./words";
+import { MENU, PRODUCT_NAME } from "./words";
 
 export type Actions = {
   backUpNow: () => void;
@@ -82,7 +82,7 @@ export function build(actions: Actions, platform: NodeJS.Platform = process.plat
   const template: MenuItemConstructorOptions[] = [file, edit, view, window, help];
   if (mac) {
     template.unshift({
-      label: "Spend Tracker",
+      label: PRODUCT_NAME,
       submenu: [
         { label: say(MENU.about), click: actions.about },
         { type: "separator" },

@@ -17,7 +17,7 @@ import { api } from "../lib/api";
 import { Field, Problem } from "../components/bits";
 import type { User } from "../lib/types";
 import { RecoveryCodeSheet } from "../components/RecoveryCodes";
-import { useCapabilities } from "../lib/capabilities";
+import { useCapabilities, useProductName } from "../lib/capabilities";
 import { Trans, useLingui } from "@lingui/react/macro";
 
 interface Started {
@@ -39,10 +39,10 @@ interface SetupState {
 }
 
 /** The product's name, which stays as it is in every language. */
-const PRODUCT = "Spend Tracker";
 
 export function Setup({ onDone }: { onDone: (user: User) => void }) {
   const { t } = useLingui();
+  const productName = useProductName();
   const state = useQuery({
     queryKey: ["setup", "state"],
     queryFn: () => api.get<SetupState>("/setup/state"),
@@ -109,7 +109,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
   return (
     <div className="centred">
       <h1>
-        <Trans comment="Screen title on the first-run setup">Set up {PRODUCT}</Trans>
+        <Trans comment="Screen title on the first-run setup">Set up {productName}</Trans>
       </h1>
       <p className="muted small">
         <Trans>

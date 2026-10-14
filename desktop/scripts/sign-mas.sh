@@ -1,7 +1,7 @@
 #!/bin/sh
 # Sign the Mac App Store app for a sandboxed run on this Mac (#59, #61).
 #
-#   scripts/sign-mas.sh "dist/mas-dev-arm64/Spend Tracker.app" PROFILE.provisionprofile ["Apple Development"]
+#   scripts/sign-mas.sh "dist/mas-dev-arm64/Household Spend Tracker.app" PROFILE.provisionprofile ["Apple Development"]
 #
 # electron-builder makes the app unsigned (`npm run dist:mas`); this does what
 # the spike found a sandboxed Electron app with a frozen Python child needs:

@@ -6,7 +6,9 @@
 # test certificate afterwards (MSIX, scripts/sign-msix.ps1).
 
 appId: app.spendtracker.spendtracker
-productName: Spend Tracker
+# The name both stores list the app under (#346). The ledger's folder keeps
+# its own name, `Spend Tracker` (src/places.ts).
+productName: Household Spend Tracker
 copyright: Spend Tracker contributors
 
 directories:
@@ -64,7 +66,8 @@ appx:
   publisher: CN=SpendTrackerTest
   publisherDisplayName: Spend Tracker (test)
   applicationId: SpendTracker
-  displayName: Spend Tracker
+  # Must match the name reserved in Partner Center (#346).
+  displayName: Household Spend Tracker
   backgroundColor: "#15705C"
   languages:
     - en-GB

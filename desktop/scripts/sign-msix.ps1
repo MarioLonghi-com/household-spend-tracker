@@ -1,6 +1,6 @@
 # Sign a test MSIX with a certificate from test-certificate.ps1 (#61).
 #
-#   powershell -File desktop\scripts\sign-msix.ps1 -Package "desktop\dist\Spend Tracker 0.10.1.appx" -Pfx C:\st-test\test-signing.pfx
+#   powershell -File desktop\scripts\sign-msix.ps1 -Package "desktop\dist\Household Spend Tracker 0.12.0.appx" -Pfx C:\st-test\test-signing.pfx
 #
 # With the Windows SDK's own signtool, not the copy electron-builder carries:
 # that one fails on current Windows 11 builds with "A required function is not
