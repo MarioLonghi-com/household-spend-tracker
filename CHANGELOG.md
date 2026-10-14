@@ -78,6 +78,12 @@ history this repository does not have.
   The Profile screen put whatever link the server sent into the page; it
   now offers it only for an `otpauth://` address and otherwise shows the
   secret alone. Nothing sends anything else today. (#342)
+- **The register no longer skips a row when somebody else deletes one
+  while you scroll.** The next 500 rows were asked for by position, so a
+  row deleted further up between two loads moved the boundary and one row
+  was on neither page. Each page now reaches back over the last rows in
+  hand, and the register starts again from the top if more went than
+  that. (#341)
 
 ### Security
 
