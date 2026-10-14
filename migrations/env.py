@@ -66,7 +66,24 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def _make_the_ledgers_folder() -> None:
+    """The SQLite file's folder, made private, before Alembic opens the file.
+
+    The app makes it on its first connection since #317 -- importing `app.db`
+    writes nothing -- but Alembic connects through an engine of its own, so
+    `alembic upgrade head` on a fresh install failed with "unable to open
+    database file" (found by the CI rehearsal on the 0.11.0 release).
+    """
+    from app import paths
+    from app.permissions import private_dir
+
+    database = paths.database_of(config.get_main_option("sqlalchemy.url") or "")
+    if database is not None:
+        private_dir(database.parent)
+
+
 def run_migrations_online() -> None:
+    _make_the_ledgers_folder()
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
