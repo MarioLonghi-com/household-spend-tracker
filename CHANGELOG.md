@@ -166,6 +166,13 @@ and then, mostly on Windows, no longer do.
 
 ### Fixed
 
+- **An update waits a moment for a ledger that is being let go.** The upgrade
+  drill tries for up to a minute to take the ledger's lock before refusing.
+  A previous version started by hand during an update is stopped by the
+  updater, and its lock goes a moment after the stop; a drill that tried
+  once in that moment rolled the whole update back. (Found by the
+  self-update test on rootless Podman, #318)
+
 - **The code the desktop app will run no longer assumes Linux.** Two
   `os.open` flags and `os.fchmod`, which Windows lacks (`fchmod` until Python
   3.13), are now guarded, and the startup check for files other users can

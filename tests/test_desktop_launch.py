@@ -261,6 +261,62 @@ def test_a_second_process_on_the_same_ledger_is_refused(ledger_at, tmp_path):
     assert launch.prepare(say=lambda _line: None).outcome == launch.READY
 
 
+def _holder(data: Path, *, for_seconds: float | None) -> subprocess.Popen:
+    """Another process holding the ledger: until stdin closes, or for a while."""
+    let_go = "sys.stdin.read()" if for_seconds is None else f"time.sleep({for_seconds})"
+    holder = subprocess.Popen(
+        [sys.executable, "-c", textwrap.dedent(f"""
+            import sys, time
+            from app import instance_lock
+            instance_lock.acquire({str(data)!r})
+            print("held", flush=True)
+            {let_go}
+        """)],
+        cwd=ROOT, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+        env={**os.environ, "SPENDTRACKER_DATA_DIR": str(data)},
+    )
+    assert holder.stdout.readline().strip() == "held"
+    return holder
+
+
+def test_a_ledger_being_let_go_is_waited_for(tmp_path):
+    """The updater stops a previous version somebody started by hand, and its
+    lock goes a moment later; a drill that tried once in that moment refused
+    the whole update (self-update E7, rootless Podman, on the 0.11.0 release)."""
+    import time
+
+    from app import instance_lock
+
+    data = tmp_path / "shared"
+    holder = _holder(data, for_seconds=1.0)
+    try:
+        started = time.monotonic()
+        instance_lock.acquire(data, wait=30)
+        waited = time.monotonic() - started
+        assert 0.3 < waited < 30, waited
+        assert instance_lock.held_elsewhere(data) is False
+    finally:
+        instance_lock.release(data)
+        holder.wait(timeout=30)
+
+
+def test_a_ledger_still_held_after_the_wait_is_refused(tmp_path):
+    import time
+
+    from app import instance_lock
+
+    data = tmp_path / "shared"
+    holder = _holder(data, for_seconds=None)
+    try:
+        started = time.monotonic()
+        with pytest.raises(instance_lock.LedgerBusy):
+            instance_lock.acquire(data, wait=0.6)
+        assert time.monotonic() - started >= 0.6
+    finally:
+        holder.stdin.close()
+        holder.wait(timeout=30)
+
+
 def test_a_ledger_the_server_holds_refuses_restore_and_reset_from_another_process(client, tmp_path):
     """The running app holds its ledger, so the scripts refuse from outside it."""
     data = Path(client.app_module.settings.data_dir)
