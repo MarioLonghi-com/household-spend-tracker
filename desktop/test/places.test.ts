@@ -20,7 +20,8 @@ describe("where the desktop app keeps things (#317)", () => {
     // still the one opened, on both platforms.
     const appData = "/Volumes/Home/a/Library/Application Support";
     expect(DATA_FOLDER).toBe("Spend Tracker");
-    expect(rootFor({ platform: "darwin", env: {}, appData })).toBe("/Volumes/Home/a/Library/Application Support/Spend Tracker");
+    // path.join, not a literal: the suite also runs on Windows, where it joins with "\\".
+    expect(rootFor({ platform: "darwin", env: {}, appData })).toBe(path.join(appData, "Spend Tracker"));
     expect(rootFor({ platform: "win32", env: { LOCALAPPDATA: "C:\\L" }, appData: "C:\\R" })).toBe("C:\\L\\Spend Tracker");
   });
 
