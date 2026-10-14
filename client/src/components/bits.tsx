@@ -78,6 +78,41 @@ export function Empty({ children }: { children: ReactNode }) {
  * a different border and an explicit badge, so it cannot be mistaken for the
  * ledger.
  */
+/**
+ * Something slow is under way: say what, and that it is still going.
+ *
+ * A grey line was all a long step showed -- the YNAB import of a large budget
+ * takes minutes, and on the desktop app, with no browser spinner in the tab,
+ * it looked stuck. So a banner the eye finds, a spinner, and after a few
+ * seconds a second sentence with the time so far, so a wait reads as work.
+ * `role="status"` so a screen reader announces it once, not every second.
+ */
+export function Working({ children }: { children: ReactNode }) {
+  const [seconds, setSeconds] = useState(0);
+  useEffect(() => {
+    const started = Date.now();
+    const timer = window.setInterval(() => setSeconds(Math.floor((Date.now() - started) / 1000)), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const elapsed = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+  return (
+    <div className="banner info working" role="status">
+      <span className="spinner" aria-hidden="true" />
+      <div>
+        <div>{children}</div>
+        {seconds >= 3 ? (
+          <div className="small muted">
+            {t({
+              message: `Still working (${elapsed}). This can take a few minutes; keep this window open.`,
+              comment: "Under a message about a slow step, after a few seconds; elapsed is minutes:seconds",
+            })}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export function Panel({
   title,
   onClose,

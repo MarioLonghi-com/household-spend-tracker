@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import base64
 import dataclasses
+import gc
 import logging
 import secrets
 import sqlite3
@@ -92,7 +93,7 @@ def test_the_key_check_names_exactly_the_members_a_key_cannot_open(client):
     from app.auth import keycheck
 
     _two_members(client)
-    right = keycheck.check(_ledger(client), config.settings.secret_key)
+    right = keycheck.check(_ledger(client), config.settings.key())
     assert (right.enrolled, right.refused) == (2, ())
 
     wrong = keycheck.check(_ledger(client), _another_key())
@@ -152,7 +153,8 @@ def test_a_key_from_the_environment_is_named_as_the_environment(client, monkeypa
 
     monkeypatch.delenv("SPENDTRACKER_SECRET_KEY")
     from_file = config.Settings.from_env()
-    assert (from_file.secret_key, from_file.secret_key_from_env) == (file_key, False)
+    # Read from the file when first asked (#317), not when the settings are built.
+    assert (from_file.secret_key, from_file.key(), from_file.secret_key_from_env) == ("", file_key, False)
     assert from_file.secret_key_source == f"secret.key in {data.resolve()}"
 
     main = client.app_module
@@ -275,7 +277,7 @@ def test_after_the_key_is_replaced_the_reset_is_what_lets_a_member_back_in(clien
     _two_members(client)
     replaced = dataclasses.replace(config.settings, secret_key=_another_key())
     monkeypatch.setattr(crypto, "settings", replaced)
-    assert keycheck.check(_ledger(client), replaced.secret_key).opened == 0
+    assert keycheck.check(_ledger(client), replaced.key()).opened == 0
 
     seen: dict = {}
 
@@ -293,7 +295,7 @@ def test_after_the_key_is_replaced_the_reset_is_what_lets_a_member_back_in(clien
     monkeypatch.setattr(totp, "new_secret", remembered)
     assert reset_authenticator.main([PARTNER], ask=code_for_new_secret) == 0
 
-    after = keycheck.check(_ledger(client), replaced.secret_key)
+    after = keycheck.check(_ledger(client), replaced.key())
     assert (after.enrolled, after.refused) == (2, ("Jane.Doe@gmail.com",))
 
 
@@ -317,7 +319,7 @@ def test_after_the_key_is_replaced_a_recovery_code_lets_a_member_back_in_on_thei
     owner_sealed = _rows(client, "SELECT totp_secret FROM users WHERE id = ?", world["owner_id"])
     replaced = dataclasses.replace(config.settings, secret_key=_another_key())
     monkeypatch.setattr(crypto, "settings", replaced)
-    assert keycheck.check(_ledger(client), replaced.secret_key).opened == 0
+    assert keycheck.check(_ledger(client), replaced.key()).opened == 0
 
     partner = TestClient(client.app_module.app, base_url="https://testserver")
     first = partner.post(
@@ -346,7 +348,7 @@ def test_after_the_key_is_replaced_a_recovery_code_lets_a_member_back_in_on_thei
     )
     assert done.status_code == 200, done.text
 
-    after = keycheck.check(_ledger(client), replaced.secret_key)
+    after = keycheck.check(_ledger(client), replaced.key())
     assert (after.enrolled, after.refused) == (2, ("Jane.Doe@gmail.com",))
     assert _rows(client, "SELECT totp_secret FROM users WHERE id = ?", world["owner_id"]) == owner_sealed
     assert _rows(
@@ -434,6 +436,10 @@ def _stop_the_app(client) -> None:
 
     client.__exit__(None, None, None)
     db.engine.dispose()
+    # A connection the pool no longer holds but nothing has collected yet --
+    # one kept alive by a reference cycle -- still has the file open, and
+    # Windows will not rename an open file (found on the Windows CI leg, #315).
+    gc.collect()
 
 
 def test_reset_backs_up_then_moves_the_ledger_and_key_aside(client, monkeypatch, tmp_path):

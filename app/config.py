@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from . import paths
 from .permissions import private_dir, tighten_umask
 
 
@@ -46,7 +47,7 @@ def _load_or_create_secret_key(data_dir: Path) -> str:
         return from_env
 
     private_dir(data_dir)
-    path = data_dir / "secret.key"
+    path = paths.key_in(data_dir)
     if path.exists():
         existing = path.read_text().strip()
         if existing:
@@ -213,6 +214,78 @@ def _rp_id(raw: str | None, public_url: str, environment: str) -> str:
     return value
 
 
+#: The two ways this code is deployed (#49). `server` is everything before the
+#: desktop app and stays the default: a browser reaches it over HTTP, on a
+#: tailnet, a LAN or loopback. `desktop` is the same code inside the desktop
+#: app, where a shell owns the only window and forwards each request to this
+#: process with no network at all. What differs between them is decided in one
+#: place, `app/capabilities.py`, from this value.
+PROFILES = ("server", "desktop")
+
+#: The one host name the desktop shell sends: its private scheme is
+#: `app://localhost`, and the shell puts `Host: localhost` on every request.
+DESKTOP_HOST = "localhost"
+
+
+def _profile(raw: str | None) -> str:
+    value = (raw or "server").strip().lower()
+    if value not in PROFILES:
+        raise ValueError(f"SPENDTRACKER_PROFILE must be one of {', '.join(PROFILES)}, not {value!r}")
+    return value
+
+
+def _desktop_refusals(*, public_url: str, rp_id_raw: str | None, hosts_raw: str | None) -> None:
+    """What the desktop profile refuses at boot, the way a malformed public URL
+    is refused: settings that only mean something on a network.
+
+    - **A public URL.** Nobody reaches the desktop app by address; a link built
+      from one would point at something that does not answer.
+    - **A relying-party ID.** Passkeys need an origin a browser trusts with
+      WebAuthn, and `app://localhost` is not one.
+    - **Any host but `localhost`.** The shell sends nothing else, so anything
+      more in the allow-list is only surface.
+    """
+    if public_url:
+        raise ValueError("SPENDTRACKER_PUBLIC_URL is not used by the desktop profile; leave it unset")
+    if (rp_id_raw or "").strip():
+        raise ValueError(
+            "SPENDTRACKER_RP_ID is not used by the desktop profile: passkeys need a web origin, "
+            "which the desktop app does not have; leave it unset"
+        )
+    named = _hosts(hosts_raw) if (hosts_raw or "").strip() else (DESKTOP_HOST,)
+    if named != (DESKTOP_HOST,):
+        raise ValueError(
+            f"SPENDTRACKER_ALLOWED_HOSTS can only be {DESKTOP_HOST} under the desktop profile, "
+            f"not {', '.join(named)!r}; leave it unset"
+        )
+
+
+def _desktop_data_dir() -> None:
+    """The desktop profile's data directory: named by the shell, never guessed,
+    and never inside a folder a sync client owns (#317).
+
+    Named, because the shell knows where the operating system keeps an app's
+    data -- the sandbox container's Application Support on a Mac, the
+    unvirtualised `%LOCALAPPDATA%` folder on Windows -- and Python launched
+    from a Finder double-click knows neither, nor even a working directory.
+    Not synced, because SQLite's three files are one database only on one
+    local disk; `paths.sync_root` says why.
+    """
+    named = (os.environ.get("SPENDTRACKER_DATA_DIR") or "").strip()
+    if not named:
+        raise ValueError(
+            "SPENDTRACKER_DATA_DIR must be set under the desktop profile: the app names "
+            "where its ledger lives, and this process does not guess"
+        )
+    service = paths.sync_root(Path(named))
+    if service:
+        raise ValueError(
+            f"the ledger cannot live in a folder {service} syncs ({named}): SQLite keeps it "
+            "as three files that must change together on one disk. Keep it in the app's own "
+            "folder, and put backups in the synced one"
+        )
+
+
 def _hosts(raw: str | None) -> tuple[str, ...]:
     if raw is None or not raw.strip():
         return DEFAULT_ALLOWED_HOSTS
@@ -223,8 +296,15 @@ def _hosts(raw: str | None) -> tuple[str, ...]:
 class Settings:
     database_url: str
     data_dir: Path
+    #: The key from `SPENDTRACKER_SECRET_KEY`, or empty for `secret.key` in
+    #: `data_dir` -- read, or made, on first use rather than when the settings
+    #: are built (#317): importing `app.config` writes nothing. Read it through
+    #: `key()`, which also covers a test that sets one here.
     secret_key: str
     echo_sql: bool
+    #: `server` or `desktop`; see `PROFILES`. Read through `app.capabilities`,
+    #: not compared directly, so that what a profile turns off is listed once.
+    profile: str = "server"
     #: "development" turns on the OpenAPI schema and the two doc viewers. They
     #: hand an unauthenticated visitor the whole route inventory, so a deployed
     #: instance keeps them off unless somebody asks for them by name.
@@ -298,6 +378,17 @@ class Settings:
     #: status, reports and history. See `resolve_update_dir`.
     update_dir: Path = Path("/var/lib/spend-tracker-update")
 
+    def key(self) -> str:
+        """The root key this process runs with. `secret.key` is created the
+        first time anything asks -- the server's startup does, so a running
+        instance always has one."""
+        if self.secret_key:
+            return self.secret_key
+        cached = _KEYS.get(self.data_dir)
+        if cached is None:
+            cached = _KEYS[self.data_dir] = _load_or_create_secret_key(self.data_dir)
+        return cached
+
     @property
     def secret_key_source(self) -> str:
         """Where the key this process runs with came from, as an operator
@@ -313,24 +404,39 @@ class Settings:
         # because every entry point reads the settings before it writes, the
         # server and every script alike. See `app/permissions.py`.
         tighten_umask()
+        profile = _profile(os.environ.get("SPENDTRACKER_PROFILE"))
+        if profile == "desktop":
+            _desktop_data_dir()
         data_dir = resolve_data_dir()
-        url = os.environ.get("DATABASE_URL") or f"sqlite:///{data_dir / 'spendtracker.sqlite3'}"
+        url = os.environ.get("DATABASE_URL") or f"sqlite:///{data_dir / paths.DATABASE}"
         environment = os.environ.get("SPENDTRACKER_ENV", "production")
         public_url = _public_url(os.environ.get("SPENDTRACKER_PUBLIC_URL"))
+        hosts_raw = os.environ.get("SPENDTRACKER_ALLOWED_HOSTS")
+        if profile == "desktop":
+            _desktop_refusals(
+                public_url=public_url,
+                rp_id_raw=os.environ.get("SPENDTRACKER_RP_ID"),
+                hosts_raw=hosts_raw,
+            )
         return cls(
             database_url=url,
             data_dir=data_dir,
-            secret_key=_load_or_create_secret_key(data_dir),
+            secret_key=_key_from_env(),
             secret_key_from_env=bool(_key_from_env()),
             echo_sql=_bool("SPENDTRACKER_ECHO_SQL"),
+            profile=profile,
             environment=environment,
             db_view=os.environ.get("SPENDTRACKER_DB_VIEW", "on"),
             cookie_secure=_bool("SPENDTRACKER_COOKIE_SECURE", True),
-            allowed_hosts=_hosts(os.environ.get("SPENDTRACKER_ALLOWED_HOSTS")),
+            allowed_hosts=(DESKTOP_HOST,) if profile == "desktop" else _hosts(hosts_raw),
             public_url=public_url,
             rp_id=_rp_id(os.environ.get("SPENDTRACKER_RP_ID"), public_url, environment),
             update_dir=resolve_update_dir(data_dir),
         )
 
+
+#: The key read from each data directory's `secret.key`, by directory, so it is
+#: read once rather than on every authenticator check.
+_KEYS: dict[Path, str] = {}
 
 settings = Settings.from_env()

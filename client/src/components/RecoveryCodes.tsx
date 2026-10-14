@@ -25,14 +25,24 @@ export function RecoveryCodeSheet({
   onStored: () => void;
 }) {
   const [saved, setSaved] = useState(false);
+  // One code is the desktop's (#320): it replaces a forgotten password, where
+  // the server's ten stand in for a lost authenticator.
+  const one = codes.length === 1;
 
   return (
     <>
       <p className="muted small">
-        <Trans>
-          Each one works once, and they are shown only now. They are how you get back in if you
-          lose your phone but still know your password.
-        </Trans>
+        {one ? (
+          <Trans>
+            It works once, and it is shown only now. It is how you choose a new password if you
+            forget this one.
+          </Trans>
+        ) : (
+          <Trans>
+            Each one works once, and they are shown only now. They are how you get back in if you
+            lose your phone but still know your password.
+          </Trans>
+        )}
       </p>
       <div className="codes">
         {codes.map((one) => (
@@ -46,7 +56,11 @@ export function RecoveryCodeSheet({
           onChange={(e) => setSaved(e.target.checked)}
           style={{ width: "auto", marginRight: 8 }}
         />
-        <Trans>I have stored these somewhere that is not this browser</Trans>
+        {one ? (
+          <Trans>I have stored it somewhere that is not this computer</Trans>
+        ) : (
+          <Trans>I have stored these somewhere that is not this browser</Trans>
+        )}
       </label>
       <p />
       <button className="primary" disabled={busy || !saved} onClick={onStored}>

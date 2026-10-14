@@ -205,12 +205,9 @@ def test_rotations_are_pruned_to_the_bound_and_only_their_own_stream(client):
     directory = logging_setup.log_dir()
     (directory / "access-20200101-000000.log").write_text("not mine")
 
-    for n in range(logging_setup.KEEP + 3):
-        # Distinct names, since the stamp is per second and this loop is not.
+    for _ in range(logging_setup.KEEP + 3):
+        # Same-second rotations get a counter rather than one name (#315).
         handler.doRollover()
-        for one in sorted(directory.glob("app-*.log")):
-            if one.stat().st_size == 0:
-                one.rename(one.with_name(f"app-2026010{n}-00000{n}.log"))
 
     assert len(list(directory.glob("app-*.log"))) <= logging_setup.KEEP
     assert (directory / "access-20200101-000000.log").exists(), "pruned another stream"
@@ -435,3 +432,29 @@ def test_a_redacted_line_still_formats_on_uvicorns_own_console(client):
     assert '"GET /api/households/h1/receipts HTTP/1.1" 200' in written
     assert '"GET /api/households/h2/receipts HTTP/1.1" 200' in written
     assert "FALAFEL" not in written and "Zq9x" not in written
+
+
+def test_two_rotations_in_one_second_keep_both_files(client, monkeypatch):
+    """The stamp is per second. Two rotations inside one used to share a name:
+    the second rename replaced the first file on macOS and Linux, and failed
+    on Windows (#315). Both are kept, the second with a counter."""
+    _setup_owner(client)
+    handler = next(one for one in logging_setup.our_handlers() if one.name.endswith(":app"))
+    directory = logging_setup.log_dir()
+
+    class Frozen:
+        @staticmethod
+        def now():
+            from datetime import datetime
+
+            return datetime(2026, 10, 13, 13, 15, 45)
+
+    monkeypatch.setattr(logging_setup, "datetime", Frozen)
+    for text in ("first", "second"):
+        logging.getLogger("spendtracker").warning("before the %s rotation", text)
+        handler.doRollover()
+
+    rotated = sorted(p.name for p in directory.glob("app-20261013-131545*.log"))
+    assert rotated == ["app-20261013-131545-2.log", "app-20261013-131545.log"]
+    assert "before the first rotation" in (directory / "app-20261013-131545.log").read_text()
+    assert "before the second rotation" in (directory / "app-20261013-131545-2.log").read_text()

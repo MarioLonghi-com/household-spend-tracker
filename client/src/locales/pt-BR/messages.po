@@ -100,6 +100,10 @@ msgstr "Ainda não há favorecidos. Eles aparecem conforme você lança ou impor
 msgid "Application management"
 msgstr "Gerenciamento do aplicativo"
 
+#: ../desktop/src/words.ts
+msgid "Opening your ledger…"
+msgstr ""
+
 #. Label of a form field on the Transfers screen: the end of a range, or where money goes
 #. Label of a form field on the one-time import: the end of a range, or where money goes
 #. Text on the date range picker: the end of a range, or where money goes
@@ -128,7 +132,9 @@ msgid "Choose…"
 msgstr "Escolher…"
 
 #. Label of a form field on the Your account panel
+#. Label of a form field on the desktop app's sign-in page
 #: src/screens/Profile.tsx
+#: src/screens/SignIn.tsx
 #, fuzzy
 msgid "New password"
 msgstr "Nova senha"
@@ -305,6 +311,10 @@ msgstr "Tipo"
 msgid "Select {0}"
 msgstr "Selecionar {0}"
 
+#: ../desktop/src/words.ts
+msgid "The upgrade did not keep every row, so Spend Tracker stopped"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "No browsers were being trusted."
@@ -363,6 +373,11 @@ msgstr "Fixo: este é o grupo próprio do YNAB, e não uma categoria sua (Uncate
 msgid "You can pick a palette and one accent of your own. You cannot reach the text and background colours, so no household can be made unreadable — and the accent is checked for contrast before it is saved."
 msgstr "Você pode escolher uma paleta e uma cor de destaque própria. Não é possível mudar as cores do texto e do fundo, então nenhuma casa fica ilegível — e o contraste da cor de destaque é verificado antes de ser salva."
 
+#. On the Application management screen of the desktop app, in place of the updater
+#: src/screens/ApplicationManagement.tsx
+msgid "This copy of Spend Tracker is kept up to date by the store it was installed from: the App Store on a Mac, the Microsoft Store on Windows."
+msgstr ""
+
 #. Screen-reader name of a help button on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -410,6 +425,10 @@ msgstr "{0} ({1}) foi desconectado em todos os lugares e seus navegadores confi�
 msgid "Nothing in the last 14 days."
 msgstr "Nada nos últimos 14 dias."
 
+#: ../desktop/src/words.ts
+msgid "It was made by a newer version of Spend Tracker. Update this one first. Nothing was changed."
+msgstr ""
+
 #. placeholder {0}: household.base_currency
 #: src/screens/AccountImport.tsx
 #, fuzzy
@@ -426,6 +445,11 @@ msgstr "{count, plural, one {{shown} arquivo} other {{shown} arquivos}}"
 #, fuzzy
 msgid "One of the newest five update backups: kept so an update can be undone"
 msgstr "Um dos cinco backups de atualização mais recentes: mantido para que uma atualização possa ser desfeita"
+
+#. Button on the desktop app's sign-in page
+#: src/screens/SignIn.tsx
+msgid "Change password and sign in"
+msgstr ""
 
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -587,6 +611,11 @@ msgstr "{why} Por isso, pedimos sua senha e um código — o mesmo que para entr
 msgid "{0, plural, one {{1} pair} other {{2} pairs}}"
 msgstr "{0, plural, one {{1} par} other {{2} pares}}"
 
+#. Desktop app View menu item: reset the zoom
+#: ../desktop/src/words.ts
+msgid "Actual size"
+msgstr ""
+
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Every reset link, every new owner, and anything the server did to an account's way in, in the last 14 days, by anyone. Read from the audit log."
@@ -669,6 +698,10 @@ msgstr "Entre a parte {0} e a parte {1}"
 #, fuzzy
 msgid "The app stays up throughout. Nothing in the ledger changes."
 msgstr "O aplicativo continua no ar o tempo todo. Nada muda no livro-caixa."
+
+#: src/components/RecoveryCodes.tsx
+msgid "It works once, and it is shown only now. It is how you choose a new password if you forget this one."
+msgstr ""
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -773,6 +806,11 @@ msgstr "Este servidor não consegue verificar um código do autenticador que voc
 #, fuzzy
 msgid "Length does more than symbols do. Four unrelated words you can actually remember beats a short one with punctuation in it."
 msgstr "O tamanho conta mais que os símbolos. Quatro palavras sem relação que você consiga lembrar valem mais que uma senha curta cheia de pontuação."
+
+#. Link on the desktop app's sign-in page
+#: src/screens/SignIn.tsx
+msgid "Forgot your password? Use your recovery code"
+msgstr ""
 
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -950,6 +988,10 @@ msgstr "Permitir que aplique uma importação sem que ninguém a revise"
 msgid "Add a rule"
 msgstr "Adicionar uma regra"
 
+#: src/components/StepUp.tsx
+msgid "{why} So this asks for your password again."
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "One part of a split"
@@ -1037,6 +1079,11 @@ msgctxt "import outcome"
 msgid "New"
 msgstr "Nova"
 
+#. Desktop app folder picker's confirm button
+#: ../desktop/src/words.ts
+msgid "Use this folder"
+msgstr ""
+
 #. Label of a form field on the accounts import
 #: src/screens/AccountImport.tsx
 #, fuzzy
@@ -1049,6 +1096,11 @@ msgstr "Arquivo de contas"
 #, fuzzy
 msgid "{0} now tells a file it is for {1}"
 msgstr "{0} agora indica que um arquivo é de {1}"
+
+#. macOS app menu item: hide every other app's windows
+#: ../desktop/src/words.ts
+msgid "Hide others"
+msgstr ""
 
 #. Screen-reader name on the one-time import's mapping step
 #. Text on the one-time import's mapping step
@@ -1129,6 +1181,10 @@ msgstr "Selecionar {0} {1}"
 #, fuzzy
 msgid "delimiter"
 msgstr "delimitador"
+
+#: ../desktop/src/words.ts
+msgid "This update changes your ledger in a way that cannot be undone"
+msgstr ""
 
 #. Button on the Register screen
 #: src/screens/Register.tsx
@@ -1273,6 +1329,10 @@ msgstr "{0} deste pagamento ainda não corresponde a uma despesa. Num adiantamen
 #, fuzzy
 msgid "A rule only runs as a statement is read, so writing one changes nothing already in your register. This runs today’s rules over the rows that are, matching against the bank’s own words exactly as an import would."
 msgstr "Uma regra só é aplicada quando um extrato é lido, então escrever uma não muda nada que já está no seu registro. Isto aplica as regras de hoje às linhas que já estão lá, comparando com as palavras do próprio banco exatamente como uma importação faria."
+
+#: ../desktop/src/words.ts
+msgid "Choose where backups go"
+msgstr ""
 
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
@@ -2033,6 +2093,10 @@ msgstr "O código de recuperação com que você entrou nesta aba cobre isso —
 msgid "Password"
 msgstr "Senha"
 
+#: ../desktop/src/words.ts
+msgid "{name} will replace everything in the ledger now. The ledger as it is now is backed up first, and you will sign in again."
+msgstr ""
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Waiting for the passkey…"
@@ -2160,7 +2224,9 @@ msgstr "Sua senha"
 msgid "Anything you change here is recorded, and can be put back from the History screen."
 msgstr "Tudo o que você muda aqui fica registrado e pode ser revertido na tela Histórico."
 
+#. Desktop app Edit menu item: undo the last edit in a text field
 #. History headline, the kind of act: an earlier act was taken back
+#: ../desktop/src/words.ts
 #: src/lib/historyWords.ts
 #, fuzzy
 msgid "Undo"
@@ -2266,6 +2332,11 @@ msgstr ""
 #, fuzzy
 msgid "None yet"
 msgstr "Nenhuma ainda"
+
+#. macOS Window menu item: make the window fill the screen, not full screen
+#: ../desktop/src/words.ts
+msgid "Zoom"
+msgstr ""
 
 #. One-time import: an account set to be skipped, and what happens to its rows
 #. placeholder {0}: account.rows
@@ -2375,11 +2446,20 @@ msgstr "Em aberto"
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Dinheiro guardado no banco. Igual a uma conta corrente, mantido à parte para o registro ficar claro."
 
+#. State of the desktop app's recovery code: spent, a new one is needed
+#: src/screens/Profile.tsx
+msgid "Used"
+msgstr ""
+
 #. Label on the receipts
 #: src/components/Receipts.tsx
 #, fuzzy
 msgid "facing {bearing}° {point}"
 msgstr "voltado para {bearing}° {point}"
+
+#: src/screens/SignIn.tsx
+msgid "Your password is changed and the code you used has stopped working. This one replaces it: keep it somewhere other than this computer."
+msgstr ""
 
 #: src/screens/History.tsx
 #, fuzzy
@@ -2470,6 +2550,11 @@ msgstr "Nenhuma categoria ainda — adicione algumas na tela Categorias."
 #, fuzzy
 msgid "Environment"
 msgstr "Ambiente"
+
+#. Desktop app View menu item: make everything larger
+#: ../desktop/src/words.ts
+msgid "Zoom in"
+msgstr ""
 
 #. placeholder {0}: passkey.label
 #: src/screens/Passkeys.tsx
@@ -2600,6 +2685,10 @@ msgstr "Poupança"
 #, fuzzy
 msgid "A split needs at least two parts"
 msgstr "Uma divisão precisa de pelo menos duas partes"
+
+#: ../desktop/src/words.ts
+msgid "The backup could not be made"
+msgstr ""
 
 #. Screen-reader name on the one-time import's mapping step
 #: src/screens/ynab/mapping.tsx
@@ -2788,6 +2877,10 @@ msgstr ""
 msgid "{count, plural, one {has {count} receipt} other {has {count} receipts}}"
 msgstr "{count, plural, one {tem {count} comprovante} other {tem {count} comprovantes}}"
 
+#: ../desktop/src/words.ts
+msgid "The ledger could not be upgraded"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Everything a program gets wrong has to be undoable by a person, which means a person stays the only one who can undo."
@@ -2859,6 +2952,16 @@ msgstr "Adicionar transferência"
 msgid "Reset sign-in for {0}"
 msgstr "Redefinir o acesso de {0}"
 
+#. Desktop app menu bar: the Help menu
+#: ../desktop/src/words.ts
+msgid "Help"
+msgstr ""
+
+#. Heading on the desktop app's sign-in page, after a new password
+#: src/screens/SignIn.tsx
+msgid "Your new recovery code"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "This one was entered by hand."
@@ -2903,6 +3006,11 @@ msgstr "Estas linhas citam uma das suas contas ou alguém da casa, e o outro lad
 #, fuzzy
 msgid "All dates: {0} to {1}."
 msgstr "Todas as datas: de {0} a {1}."
+
+#. Desktop app Edit menu item (clipboard)
+#: ../desktop/src/words.ts
+msgid "Cut"
+msgstr ""
 
 #. Text on the Register screen
 #: src/screens/Register.tsx
@@ -2986,6 +3094,11 @@ msgstr "Tamanho"
 #, fuzzy
 msgid "There are no accounts yet, so there is nothing to report on. Add one on the Accounts screen and the figures will follow."
 msgstr "Ainda não há contas, então não há sobre o que gerar relatórios. Adicione uma na tela Contas e os números virão em seguida."
+
+#. State of the desktop app's recovery code: not yet used
+#: src/screens/Profile.tsx
+msgid "Ready"
+msgstr ""
 
 #. placeholder {0}: report.balance_differences!.length
 #: src/screens/ynab/results.tsx
@@ -3286,6 +3399,8 @@ msgstr "{0, plural, one {{1} categoria recolhida} other {{2} categorias recolhid
 #. Button on the Your account panel
 #. Button on the passkeys panel
 #. Button on the passkeys panel
+#. Desktop app dialog button: do nothing and close the dialog
+#: ../desktop/src/words.ts
 #: src/screens/Admin.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
@@ -3572,6 +3687,10 @@ msgstr "T — Transferências"
 msgid "This screen could not be shown"
 msgstr "Não foi possível mostrar esta tela"
 
+#: ../desktop/src/words.ts
+msgid "Spend Tracker will close. Everything saved before this is kept."
+msgstr ""
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Reset: password and authenticator"
@@ -3642,6 +3761,10 @@ msgstr "Não precisa de categoria"
 msgid "not counted"
 msgstr "não contado"
 
+#: ../desktop/src/words.ts
+msgid "Hide Spend Tracker"
+msgstr ""
+
 #. Application management: how to send the suggestions on; the links follow
 #: src/screens/TranslationReview.tsx
 #, fuzzy
@@ -3675,6 +3798,10 @@ msgstr "Texto menor na tabela"
 msgid "Runtime"
 msgstr "Ambiente de execução"
 
+#: ../desktop/src/words.ts
+msgid "Show backups folder"
+msgstr ""
+
 #. What kind of row changed, lower case, singular, in History beside its id
 #: src/lib/historyWords.ts
 #, fuzzy
@@ -3704,12 +3831,18 @@ msgid "skip rows"
 msgstr "linhas ignoradas"
 
 #. Button on the Categories screen: verb
+#. Desktop app menu bar: the Edit menu
 #. History headline, the kind of act: one edit made by hand
+#: ../desktop/src/words.ts
 #: src/lib/historyWords.ts
 #: src/screens/Categories.tsx
 #, fuzzy
 msgid "Edit"
 msgstr "Editar"
+
+#: ../desktop/src/words.ts
+msgid "This backup was not restored"
+msgstr ""
 
 #. Column heading on the Application management screen: noun, the people who share one ledger. See GLOSSARY.md
 #: src/screens/ApplicationManagement.tsx
@@ -5312,6 +5445,10 @@ msgstr "coluna de estado"
 msgid "Back the database up"
 msgstr "Fazer backup do banco de dados"
 
+#: src/components/RecoveryCodes.tsx
+msgid "I have stored it somewhere that is not this computer"
+msgstr ""
+
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "No households yet."
@@ -5340,6 +5477,10 @@ msgstr "Podman {version} (podman machine)"
 #, fuzzy
 msgid "preview"
 msgstr "pré-visualização"
+
+#: ../desktop/src/words.ts
+msgid "The ledger stopped unexpectedly"
+msgstr ""
 
 #. Button on the Payees screen
 #: src/screens/Payees.tsx
@@ -5483,7 +5624,9 @@ msgstr "A chave secreta deste servidor foi substituída, então o autenticador q
 msgid "Use the palette's"
 msgstr "Usar a da paleta"
 
+#. Desktop app dialog button: not now, ask again another time
 #. Tooltip on the date range picker
+#: ../desktop/src/words.ts
 #: src/components/DateRange.tsx
 #, fuzzy
 msgid "Later"
@@ -5493,6 +5636,11 @@ msgstr "Depois"
 #, fuzzy
 msgid "A household holds the accounts and the register. The currency here is only used for totals; each account keeps its own."
 msgstr "Uma casa reúne as contas e o registro. A moeda aqui só é usada nos totais; cada conta mantém a sua."
+
+#. Desktop app View menu item: make everything smaller
+#: ../desktop/src/words.ts
+msgid "Zoom out"
+msgstr ""
 
 #. Account type `other_asset`: something owned that holds value. See GLOSSARY.md
 #: src/lib/labels.ts
@@ -5673,7 +5821,9 @@ msgstr "Categorizar automaticamente pelo histórico do favorecido"
 msgid "By"
 msgstr "Por"
 
+#. Heading on the desktop app's sign-in page
 #: src/screens/ResetAccount.tsx
+#: src/screens/SignIn.tsx
 #, fuzzy
 msgid "A new password"
 msgstr "Uma nova senha"
@@ -6074,6 +6224,11 @@ msgstr "{name} é desconectado em todos os lugares e não pode entrar até abrir
 msgid "Looking up your invitation…"
 msgstr "Procurando seu convite…"
 
+#. Desktop app Edit menu item: redo the edit just undone in a text field
+#: ../desktop/src/words.ts
+msgid "Redo"
+msgstr ""
+
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Every household on this instance, including ones you are not in. Joining one is still an explicit act."
@@ -6124,6 +6279,10 @@ msgstr "Mês"
 msgid "The name looks like its number."
 msgstr "O nome parece ser o número da conta."
 
+#: ../desktop/src/words.ts
+msgid "Spend Tracker could not open the ledger"
+msgstr ""
+
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "The app has stopped. Waiting for it to come back…"
@@ -6141,6 +6300,8 @@ msgid "Machine"
 msgstr "Máquina"
 
 #. Button on the Admin screen: verb, copy to the clipboard
+#. Desktop app Edit menu item (clipboard)
+#: ../desktop/src/words.ts
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Copy"
@@ -6991,6 +7152,11 @@ msgstr "{0, plural, one {Ele sai como um único ato, então a tela Histórico o 
 msgid "Undo this"
 msgstr "Desfazer isto"
 
+#. Desktop app Edit menu item (clipboard)
+#: ../desktop/src/words.ts
+msgid "Paste"
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as an owner, in {households}."
@@ -7304,9 +7470,11 @@ msgid "no git history and no build stamp to ask"
 msgstr "sem histórico do git nem carimbo de build para consultar"
 
 #. Column heading on the Application management screen
+#. Desktop app menu bar: the File menu
 #. Label of a form field on the Import screen
 #. Label on the Import screen
 #. Label on the receipts
+#: ../desktop/src/words.ts
 #: src/components/Receipts.tsx
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
@@ -7389,6 +7557,10 @@ msgstr "Iniciando…"
 #, fuzzy
 msgid "{text} — edit the memo"
 msgstr "{text} — editar a descrição"
+
+#: ../desktop/src/words.ts
+msgid "This ledger was last opened by a newer version of Spend Tracker"
+msgstr ""
 
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
@@ -7521,6 +7693,11 @@ msgstr "O resto deste favorecido?"
 msgid "Each account keeps its own currency. Nothing is ever converted in the ledger."
 msgstr "Cada conta mantém sua própria moeda. Nada é convertido no livro-caixa."
 
+#. Desktop app menu bar: the View menu
+#: ../desktop/src/words.ts
+msgid "View"
+msgstr ""
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Not available here"
@@ -7544,6 +7721,10 @@ msgstr "Etapa {0}:"
 #, fuzzy
 msgid "Ignore {0}"
 msgstr "Ignorar {0}"
+
+#: src/screens/Setup.tsx
+msgid "If you ever forget your password, this code lets you choose a new one. It works once. Keep it somewhere other than this computer: on paper, or in a password manager."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -7613,7 +7794,10 @@ msgstr "Salvando…"
 msgid "Delete group"
 msgstr "Excluir grupo"
 
+#. Label on the Your account panel of the desktop app, which has one. See GLOSSARY.md
 #. Text on the sign-in page. See GLOSSARY.md
+#. Text on the sign-in page. See GLOSSARY.md
+#: src/screens/Profile.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Recovery code"
@@ -7845,6 +8029,8 @@ msgid "Transfer between your own accounts"
 msgstr "Transferência entre suas próprias contas"
 
 #. Button on the Backups screen: pick where on this device to save
+#. Desktop app dialog button: open a folder picker
+#: ../desktop/src/words.ts
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Choose a folder…"
@@ -7862,6 +8048,10 @@ msgstr "Banco"
 #, fuzzy
 msgid "(main)"
 msgstr "(principal)"
+
+#: ../desktop/src/words.ts
+msgid "A backup was made first. This can take a minute."
+msgstr ""
 
 #. Heading on the household page
 #: src/screens/Household.tsx
@@ -8221,6 +8411,10 @@ msgstr "{0, plural, one {Excluir 1 comprovante} other {Excluir {1} comprovantes}
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so a figure adding {0} would be a number with nothing behind it."
 msgstr "Este livro-caixa nunca converte. A moeda fica na conta e não há taxa de câmbio guardada em lugar nenhum, então um número somando {0} não teria nada por trás."
 
+#: src/screens/Profile.tsx
+msgid "Your code stops working and a new one replaces it. Nobody is signed out."
+msgstr ""
+
 #. Tooltip on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
@@ -8262,8 +8456,10 @@ msgstr "Um novo autenticador"
 msgid "{0}. Save it into your synced Drive or Dropbox folder"
 msgstr "{0}. Salve na sua pasta sincronizada do Drive ou do Dropbox"
 
+#. Heading on the desktop app's first-run setup, its first of two steps
 #. Heading on the invitation page
 #: src/screens/AcceptInvite.tsx
+#: src/screens/Setup.tsx
 #, fuzzy
 msgid "1. You"
 msgstr "1. Você"
@@ -8349,11 +8545,20 @@ msgstr "Não é desta conta"
 msgid "English"
 msgstr "Inglês"
 
+#: ../desktop/src/words.ts
+msgid "Spend Tracker is already using this ledger"
+msgstr ""
+
 #. Table cell on the receipts
 #: src/screens/Receipts.tsx
 #, fuzzy
 msgid "(uploaded)"
 msgstr "(enviado)"
+
+#. macOS app menu item: show every app's windows again
+#: ../desktop/src/words.ts
+msgid "Show all"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -8523,6 +8728,11 @@ msgstr "clique duas vezes para editar"
 msgid "New authenticator"
 msgstr "Novo autenticador"
 
+#. Desktop app dialog button: go ahead with an upgrade that cannot be undone
+#: ../desktop/src/words.ts
+msgid "Update the ledger"
+msgstr ""
+
 #. Application management: shown where the last backup's size would be, when there is none
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
@@ -8540,6 +8750,10 @@ msgstr "Sua conta fica no seu nome, no menu."
 #, fuzzy
 msgid "Asking…"
 msgstr "Consultando…"
+
+#: ../desktop/src/words.ts
+msgid "Choose a folder you can see, in Documents or one that syncs, so you can find your backups and copy them elsewhere."
+msgstr ""
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -8826,6 +9040,10 @@ msgstr "Ignorada: Starting Balance do YNAB"
 #, fuzzy
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
 msgstr "O código de recuperação com que você entrou cobre isso, então nenhum outro código é pedido."
+
+#: ../desktop/src/words.ts
+msgid "Quit Spend Tracker"
+msgstr ""
 
 #: src/screens/Categories.tsx
 #, fuzzy
@@ -9743,6 +9961,11 @@ msgstr "<0>{0} selecionados.</0> Excluí-los é um único ato, então um só des
 msgid "Description"
 msgstr "Descrição"
 
+#. Desktop app dialog button: open the folder holding the new backup
+#: ../desktop/src/words.ts
+msgid "Show in folder"
+msgstr ""
+
 #. Label on the household page. See GLOSSARY.md
 #. Menu item and the name of its screen. See GLOSSARY.md
 #. Name of a fact on the one-time import's results. See GLOSSARY.md
@@ -9818,6 +10041,10 @@ msgstr "O servidor reativou {user}"
 msgid "archived"
 msgstr "arquivada"
 
+#: ../desktop/src/words.ts
+msgid "A backup is made first, so you can go back to it. What changes: {titles}."
+msgstr ""
+
 #: src/screens/Categories.tsx
 #, fuzzy
 msgid "No categories yet. Categories say what a transaction was <0>for</0> — they group the register and let a payee fill itself in."
@@ -9892,6 +10119,7 @@ msgstr "Isto entra como um único registro no Histórico, então a importação 
 #. Column heading on the Admin screen: noun, an email address
 #. Label of a form field on the first-run setup: noun, an email address
 #. Label of a form field on the invitation page: noun, an email address
+#. Label of a form field on the sign-in page: noun, an email address
 #. Label of a form field on the sign-in page: noun, an email address
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Admin.tsx
@@ -10079,6 +10307,11 @@ msgstr "valor"
 msgid "password"
 msgstr "senha"
 
+#. Link on the desktop app's sign-in page
+#: src/screens/SignIn.tsx
+msgid "Back to signing in"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Cleared — the bank has it"
@@ -10128,6 +10361,10 @@ msgstr "Um código de recuperação não pode ser usado aqui. Se alguém viu seu
 #, fuzzy
 msgid "Credit card"
 msgstr "Cartão de crédito"
+
+#: ../desktop/src/words.ts
+msgid "Another copy of the app has it open. Close that one, then try again."
+msgstr ""
 
 #. Column name shown beside a value on phones on the receipts: noun, a photo or PDF of a receipt. See GLOSSARY.md
 #. Heading on the Register screen: noun, a photo or PDF of a receipt. See GLOSSARY.md
@@ -10208,6 +10445,11 @@ msgstr "Membro"
 msgid "This month"
 msgstr "Este mês"
 
+#. Desktop app View menu item: switch full screen on or off
+#: ../desktop/src/words.ts
+msgid "Full screen"
+msgstr ""
+
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
 msgid "{count, plural, one {{count} day} other {{count} days}}"
@@ -10219,6 +10461,11 @@ msgstr "{count, plural, one {{count} dia} other {{count} dias}}"
 #, fuzzy
 msgid "Problems"
 msgstr "Problemas"
+
+#. Button on the Your account panel of the desktop app
+#: src/screens/Profile.tsx
+msgid "New code"
+msgstr ""
 
 #. Updates section: the version running now
 #. placeholder {0}: check.running
@@ -10275,6 +10522,10 @@ msgstr "Vinculadas como transferências embora ninguém as tenha escolhido — p
 #, fuzzy
 msgid "This import"
 msgstr "Esta importação"
+
+#: ../desktop/src/words.ts
+msgid "Backups are kept inside the app's own folder for now"
+msgstr ""
 
 #. Value of a fact on the one-time import's results (created)
 #. Value of a fact on the one-time import's results (created)
@@ -10804,6 +11055,10 @@ msgstr ""
 msgid "Off."
 msgstr "Desativado."
 
+#: ../desktop/src/words.ts
+msgid "Nothing is lost: the ledger as it was is in the backup made just before, in {backup}. Please report this."
+msgstr ""
+
 #. Name of a fact on the Application management screen: noun, the database's migration revision
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
@@ -10820,6 +11075,10 @@ msgstr "Atualizado para {target} em {at}, em {took}."
 #, fuzzy
 msgid "Owner — can administer this instance"
 msgstr "Proprietário — pode administrar esta instância"
+
+#: ../desktop/src/words.ts
+msgid "Sign in to carry on."
+msgstr ""
 
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -10905,6 +11164,15 @@ msgstr "{by} deu a {user} um novo autenticador"
 #, fuzzy
 msgid "A transfer moves money between your own accounts, so it is not spending and has no category"
 msgstr "Uma transferência move dinheiro entre suas próprias contas, então não é gasto e não tem categoria"
+
+#. Desktop app dialog: the backup's file name, then the folder it was saved in
+#: ../desktop/src/words.ts
+msgid "{name} in {folder}"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Choose a backup to restore"
+msgstr ""
 
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -11056,6 +11324,16 @@ msgstr "2. Seu autenticador"
 msgid "work expense"
 msgstr "despesa de trabalho"
 
+#. Heading on the desktop app's first-run setup, its second of two steps
+#: src/screens/Setup.tsx
+msgid "2. Your recovery code"
+msgstr ""
+
+#. Desktop app dialog title after Back up now succeeded
+#: ../desktop/src/words.ts
+msgid "Backup saved"
+msgstr ""
+
 #: src/App.tsx
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -11084,6 +11362,11 @@ msgstr "O zip vai conter a chave que descriptografa todos os autenticadores. Com
 #, fuzzy
 msgid "<0>Copy this now.</0> It is the only time it is shown — only a fingerprint of it is stored, so there is nothing to show again."
 msgstr "<0>Copie isto agora.</0> É a única vez que aparece — só uma impressão digital dele fica guardada, então não há como mostrá-lo de novo."
+
+#. Desktop app File menu item
+#: ../desktop/src/words.ts
+msgid "Close window"
+msgstr ""
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -11203,6 +11486,10 @@ msgstr "Tirada em"
 msgid "Nothing is marked as a work expense yet. Open a transaction in the register and set Reimbursement to “Work should pay this back” — or tick several and use Work expense in the bar that appears."
 msgstr "Nada está marcado como despesa de trabalho ainda. Abra uma transação no registro e defina Reembolso como “O trabalho deve reembolsar” — ou marque várias e use Despesa de trabalho na barra que aparece."
 
+#: ../desktop/src/words.ts
+msgid "Restore from backup…"
+msgstr ""
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Nothing here yet. Add a row above, or import a statement from the Import screen."
@@ -11246,6 +11533,11 @@ msgstr "Manter"
 #, fuzzy
 msgid "In Docker Desktop or Podman Desktop, open Containers, find <0>{name}</0> and press Start."
 msgstr "No Docker Desktop ou no Podman Desktop, abra Containers, encontre <0>{name}</0> e clique em Start."
+
+#. Desktop app right-click menu on a misspelt word: stop marking it as misspelt
+#: ../desktop/src/words.ts
+msgid "Add to dictionary"
+msgstr ""
 
 #. History headline, the kind of act: the instance was set up
 #: src/lib/historyWords.ts
@@ -11449,6 +11741,10 @@ msgstr "Fixo no claro, seja qual for a configuração deste dispositivo."
 #, fuzzy
 msgid "{by} reset {user}'s password"
 msgstr "{by} redefiniu a senha de {user}"
+
+#: src/screens/Profile.tsx
+msgid "You sign in with your password. If you forget it, your recovery code lets you choose a new one."
+msgstr ""
 
 #. Name of a seeded category: yearly charges such as a card fee. The person can rename it
 #. js-lingui-explicit-id
@@ -11763,6 +12059,11 @@ msgstr "Sim, todas as {0}"
 msgid "Add a payee"
 msgstr "Adicionar um favorecido"
 
+#. Desktop app dialog button: close Spend Tracker
+#: ../desktop/src/words.ts
+msgid "Quit"
+msgstr ""
+
 #. Button in review mode: keep this suggestion
 #: src/components/SuggestWording.tsx
 #, fuzzy
@@ -11920,6 +12221,11 @@ msgstr "O aplicativo vai parar. Esta página continua verificando e recarrega qu
 #, fuzzy
 msgid "inflow column"
 msgstr "coluna de entrada"
+
+#. Desktop app menu bar: the Window menu
+#: ../desktop/src/words.ts
+msgid "Window"
+msgstr ""
 
 #. Column heading on the Reimbursements report: noun, what is left after subtracting
 #. Name of a fact on the Register screen: noun, what is left after subtracting
@@ -12193,6 +12499,8 @@ msgid "Payee Categorisation"
 msgstr "Categorização de favorecidos"
 
 #. Button on Application management. See GLOSSARY.md
+#. Desktop app File menu item: make a backup of the ledger now
+#: ../desktop/src/words.ts
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
 msgid "Back up now"
@@ -12249,6 +12557,7 @@ msgstr "Cópia navegável"
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
 #: src/screens/Setup.tsx
+#: src/screens/SignIn.tsx
 #, fuzzy
 msgid "At least 12 characters. Length is what matters."
 msgstr "Pelo menos 12 caracteres. O que importa é o tamanho."
@@ -12505,10 +12814,23 @@ msgstr "Unir"
 msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled. Zero removes it."
 msgstr "Os dois são uma transação de verdade no registro, conciliada, com a data em que o acompanhamento começou. Mudá-los aqui edita essa linha e a mantém conciliada. Zero a remove."
 
+#: ../desktop/src/words.ts
+msgid "Choose backups folder…"
+msgstr ""
+
 #: src/screens/PayeeCategorisation.tsx
 #, fuzzy
 msgid "type any part of a payee"
 msgstr "digite qualquer parte de um favorecido"
+
+#. Desktop app Window menu item: minimise the window to the Dock or taskbar
+#: ../desktop/src/words.ts
+msgid "Minimise"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Upgrading your ledger…"
+msgstr ""
 
 #. Table cell on the Rules screen
 #. placeholder {0}: matchWord(rule.match_type)
@@ -12629,6 +12951,10 @@ msgstr "contém"
 msgid "No flagged rows were found."
 msgstr "Nenhuma linha sinalizada foi encontrada."
 
+#: src/screens/SignIn.tsx
+msgid "Use the recovery code you kept when you set up Spend Tracker. It works once; you will be given a new one."
+msgstr ""
+
 #. A changed field in History's detail, lower case
 #: src/lib/historyWords.ts
 #, fuzzy
@@ -12652,6 +12978,11 @@ msgstr "O código de duas letras, como <0>ES</0>."
 #, fuzzy
 msgid "Yes, delete it"
 msgstr "Sim, excluir"
+
+#. Desktop app dialog button: open the folder holding the backup
+#: ../desktop/src/words.ts
+msgid "Show the backup"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -12760,6 +13091,10 @@ msgstr "banco"
 #, fuzzy
 msgid "Archiving takes it out of the lists and leaves it on everything it ever categorised, so the past still reads correctly."
 msgstr "Arquivar a tira das listas e a mantém em tudo o que ela já categorizou, para que o passado continue correto."
+
+#: ../desktop/src/words.ts
+msgid "Version {version}. Licensed under the GNU AGPL, version 3 or later."
+msgstr ""
 
 #. Link on the Application management screen
 #: src/screens/ApplicationManagement.tsx
@@ -13103,6 +13438,11 @@ msgstr "pode aplicar importações"
 msgid "at a step the updater did not name"
 msgstr ""
 
+#. Desktop app Edit menu item: select all the text in a field
+#: ../desktop/src/words.ts
+msgid "Select all"
+msgstr ""
+
 #: src/screens/Categories.tsx
 #, fuzzy
 msgid "Build my own"
@@ -13136,6 +13476,11 @@ msgstr "Enter de novo para editar"
 #, fuzzy
 msgid "no branch"
 msgstr "sem branch"
+
+#. Desktop app dialog button: open the folder holding the log file
+#: ../desktop/src/words.ts
+msgid "Show the log"
+msgstr ""
 
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
@@ -13226,6 +13571,10 @@ msgstr "Alguém adicionou {user} como proprietário"
 msgid "Trying…"
 msgstr "Testando…"
 
+#: ../desktop/src/words.ts
+msgid "Update Spend Tracker, then open it again. Nothing was changed."
+msgstr ""
+
 #. Name of a fact on the Application management screen: noun, database pages
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
@@ -13257,6 +13606,14 @@ msgstr "As datas filtram por quando a despesa aconteceu, não por quando foi ree
 #, fuzzy
 msgid "compressed on the device before sending"
 msgstr "compactado no dispositivo antes do envio"
+
+#: ../desktop/src/words.ts
+msgid "The backup is restored"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Spend Tracker backups"
+msgstr ""
 
 #. Label of a choice on the Categories screen
 #: src/screens/Categories.tsx
@@ -13398,12 +13755,17 @@ msgstr "Sinalizadores"
 #. Button on the invitation page: go on to the next step
 #. Button on the sign-in page: go on to the next step
 #. Button on the sign-in page: go on to the next step
+#. Button on the sign-in page: go on to the next step
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Continue"
 msgstr "Continuar"
+
+#: ../desktop/src/words.ts
+msgid "Show ledger folder"
+msgstr ""
 
 #: src/screens/Payees.tsx
 #, fuzzy
@@ -13614,6 +13976,11 @@ msgstr "Uma linha por conta, abaixo da linha de cabeçalho do modelo. <0>Baixe o
 msgid "Give a program a key"
 msgstr "Dar uma chave a um programa"
 
+#. Desktop app right-click menu on a link: copy its address
+#: ../desktop/src/words.ts
+msgid "Copy link"
+msgstr ""
+
 #. placeholder {0}: account.name
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
@@ -13761,6 +14128,11 @@ msgstr "Mantido fora do log: {0}. Ausente em vez de mascarado com asteriscos —
 msgid "showing the first {0}"
 msgstr "mostrando os primeiros {0}"
 
+#. Desktop app dialog button: replace the ledger with the chosen backup
+#: ../desktop/src/words.ts
+msgid "Restore"
+msgstr ""
+
 #. Label on the one-time import's results
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -13847,6 +14219,10 @@ msgstr "Não detectado"
 #, fuzzy
 msgid "Its author, and their other projects"
 msgstr "O autor e seus outros projetos"
+
+#: ../desktop/src/words.ts
+msgid "Replace the ledger with this backup?"
+msgstr ""
 
 #. Dialog title on the Backups screen: a backup an update took
 #: src/screens/Backups.tsx
@@ -13973,6 +14349,10 @@ msgstr "uma categoria existente"
 #, fuzzy
 msgid "{kept, plural, one {Each update backs the ledger up after the app stops and before it migrates. The newest one is kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.} other {Each update backs the ledger up after the app stops and before it migrates. The newest # are kept so an update can be undone; older ones can be deleted here, and the updater removes them itself after a successful update.}}"
 msgstr "{kept, plural, one {Cada atualização faz backup do livro-caixa depois que o aplicativo para e antes de migrar. O mais recente é mantido para que uma atualização possa ser desfeita; os mais antigos podem ser excluídos aqui, e o atualizador os remove sozinho depois de uma atualização bem-sucedida.} other {Cada atualização faz backup do livro-caixa depois que o aplicativo para e antes de migrar. Os # mais recentes são mantidos para que uma atualização possa ser desfeita; os mais antigos podem ser excluídos aqui, e o atualizador os remove sozinho depois de uma atualização bem-sucedida.}}"
+
+#: ../desktop/src/words.ts
+msgid "About Spend Tracker"
+msgstr ""
 
 #. Column heading on the Rules screen: switched on
 #: src/screens/Rules.tsx
@@ -14105,6 +14485,8 @@ msgid "I have saved it"
 msgstr "Já guardei"
 
 #. Button on the Register screen
+#. Desktop app dialog button: close the dialog
+#: ../desktop/src/words.ts
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "OK"
@@ -14229,6 +14611,11 @@ msgstr "Conciliação"
 #, fuzzy
 msgid "never"
 msgstr "nunca"
+
+#. Under a message about a slow step, after a few seconds; elapsed is minutes:seconds
+#: src/components/bits.tsx
+msgid "Still working ({elapsed}). This can take a few minutes; keep this window open."
+msgstr ""
 
 #. Label on the receipts
 #: src/components/Receipts.tsx

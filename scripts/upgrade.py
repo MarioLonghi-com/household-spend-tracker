@@ -65,6 +65,7 @@ wrong assumption here.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as dt
 import html
 import http.server
@@ -79,6 +80,11 @@ import threading
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 VERSIONS = ROOT / "migrations" / "versions"
+
+#: How long the drill waits for a ledger another process is letting go of
+#: (`instance_lock.acquire`). Long enough for the updater to stop a previous
+#: version started by hand; a person at a terminal is refused after it.
+LEDGER_WAIT_SECONDS = 60.0
 
 #: Two spellings of the same declaration live in `migrations/versions/`: the
 #: four oldest files were generated when Alembic's template still wrote
@@ -172,7 +178,7 @@ def stamped() -> str | None:
     path = pathlib.Path(settings.database_url.split("///", 1)[-1])
     if not path.exists():
         return None
-    with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
+    with contextlib.closing(sqlite3.connect(f"file:{path}?mode=ro", uri=True)) as conn:
         try:
             row = conn.execute("SELECT version_num FROM alembic_version").fetchone()
         except sqlite3.OperationalError:
@@ -458,8 +464,10 @@ KEY_DOES_NOT_OPEN = 5
 ROWS_DROPPED = 6
 
 
-#: The report's mode: the `update` volume's group reads it (C11).
-REPORT_MODE = 0o660
+#: The report's mode: the `update` volume's group reads it (C11), and only
+#: reads it -- nothing but the drill writes it -- so no group write (CodeQL,
+#: on the 0.11.0 release; `app/services/updates.py` was already 0640).
+REPORT_MODE = 0o640
 
 
 def _write_report(path: pathlib.Path, outcome: dict) -> None:
@@ -471,14 +479,16 @@ def _write_report(path: pathlib.Path, outcome: dict) -> None:
     It is the updater's to read, through the `update` volume's group: under a
     rootless engine the updater is in-container root without capabilities,
     which cannot read a 0600 file the drill's user owns (#169's rootless
-    Podman leg, where every apply stalled at step 5). So 0660 whatever the
-    umask, as every other file the app writes there.
+    Podman leg, where every apply stalled at step 5). So 0640 whatever the
+    umask: the group reads, and only the drill writes.
     """
+    from app import permissions
+
     scratch = path.with_name(path.name + ".tmp")
     scratch.unlink(missing_ok=True)
-    fd = os.open(scratch, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, REPORT_MODE)
+    fd = os.open(scratch, os.O_WRONLY | os.O_CREAT | os.O_EXCL | permissions.O_NOFOLLOW, REPORT_MODE)
     with os.fdopen(fd, "w") as f:
-        os.fchmod(f.fileno(), REPORT_MODE)  # whatever the umask took away
+        permissions.fchmod(f.fileno(), REPORT_MODE)  # whatever the umask took away
         f.write(json.dumps(outcome, indent=2) + "\n")
     scratch.replace(path)
 
@@ -512,8 +522,13 @@ def run(port: int, *, yes: bool, report_to: pathlib.Path | None = None) -> int:
         "log": say.lines,
     }
     folder: pathlib.Path | None = None
+    from app import instance_lock
+
+    held: list[pathlib.Path] = []
 
     def finish(code: int, word: str) -> int:
+        while held:
+            instance_lock.release(held.pop())
         outcome["exit"] = code
         outcome["outcome"] = word
         outcome["finished_at"] = dt.datetime.now().astimezone().isoformat(timespec="seconds")
@@ -537,6 +552,15 @@ def run(port: int, *, yes: bool, report_to: pathlib.Path | None = None) -> int:
                 "Then run this again. It will hold the port with a maintenance page so\n"
                 "anyone visiting sees what is happening rather than a refused connection."
             )
+        # The ledger itself, which is what the port stood for (#318), and the
+        # only check the desktop app -- which has no port -- can answer.
+        # Waited for, briefly: a holder being stopped -- the updater stops a
+        # previous version somebody started by hand -- lets go a moment later.
+        try:
+            instance_lock.acquire(settings.data_dir, wait=LEDGER_WAIT_SECONDS)
+        except instance_lock.LedgerBusy as busy:
+            raise SystemExit(f"{busy}\n\nNothing was changed.") from None
+        held.append(settings.data_dir)
 
         if upcoming and not yes:
             wording = (
@@ -603,14 +627,18 @@ def _migrate(port: int, say: Step, folder: pathlib.Path, outcome: dict, finish) 
     try:
         say("")
         say("Migrating.")
-        done = subprocess.run(
-            [sys.executable, "-m", "alembic", "upgrade", "head"],
-            cwd=ROOT, capture_output=True, text=True,
-        )
-        for line in (done.stdout + done.stderr).splitlines():
-            if line.strip():
-                say(f"    {line.rstrip()}")
-        if done.returncode != 0:
+        # In this process (#318): `sys.executable -m alembic` relaunches a
+        # frozen desktop build instead of migrating it.
+        from app import migrate
+
+        try:
+            migrate.upgrade_to_head(say=lambda line: say(f"    {line}"))
+            failed = False
+        except Exception as problem:  # noqa: BLE001 - every failure is reported, then restored from
+            for line in str(problem).splitlines() or [type(problem).__name__]:
+                say(f"    {line}")
+            failed = True
+        if failed:
             say("")
             say("THE MIGRATION FAILED. Nothing has been started back up.")
             say(f"The database as it was before is at {folder}.")
@@ -640,7 +668,7 @@ def _migrate(port: int, say: Step, folder: pathlib.Path, outcome: dict, finish) 
 
         live = pathlib.Path(settings.database_url.split("///", 1)[-1])
         dropped: list[str] = []
-        with sqlite3.connect(f"file:{live}?mode=ro", uri=True) as conn:
+        with contextlib.closing(sqlite3.connect(f"file:{live}?mode=ro", uri=True)) as conn:
             for table, was in sorted(checked["rows"].items()):
                 now_count = conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
                 outcome["rows"]["after"][table] = now_count

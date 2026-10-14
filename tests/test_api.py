@@ -11,6 +11,7 @@ from __future__ import annotations
 import inspect
 import re
 import time
+from contextlib import closing
 from pathlib import Path
 
 import pyotp
@@ -1546,18 +1547,35 @@ def test_the_running_balance_is_withheld_under_any_other_sort(client):
 # --------------------------------------------------------------------------- #
 
 
+@pytest.fixture()
+def own_snapshot(monkeypatch, tmp_path):
+    """A snapshot file for this test alone.
+
+    `snapshot_path()` is under the worker's data directory, shared by every
+    test the worker runs, and the viewer an earlier test built keeps that file
+    open -- which Windows will not let the next test delete or rebuild (found
+    on the Windows CI leg, #315). Each test gets its own; the viewer builds
+    afresh for a path it has not seen.
+    """
+    import app.api.dbview as dbview
+
+    own = tmp_path / "snapshot.sqlite3"
+    monkeypatch.setattr(dbview, "snapshot_path", lambda: own)
+    return own
+
+
 def _build_snapshot(client) -> None:
     """The snapshot the view serves, built the way `make snapshot` builds it."""
     import app.api.dbview as dbview
     import app.db as db
     from scripts.db_view import build
 
-    source = Path(str(db.engine.url).split("///", 1)[1])
+    source = Path(db.engine.url.database)
     dbview.snapshot_path().parent.mkdir(parents=True, exist_ok=True)
     build(source, dbview.snapshot_path())
 
 
-def test_the_database_browser_refuses_a_signed_out_browser(client):
+def test_the_database_browser_refuses_a_signed_out_browser(client, own_snapshot):
     """Datasette has no authentication of its own and will run arbitrary
     read-only SQL for whoever reaches it. Mounted here it gets the app's."""
     _setup_owner(client)
@@ -1570,7 +1588,7 @@ def test_the_database_browser_refuses_a_signed_out_browser(client):
         assert "sign in" in refused.json()["detail"]
 
 
-def test_the_database_browser_refuses_a_member(client):
+def test_the_database_browser_refuses_a_member(client, own_snapshot):
     """Raw tables have no notion of household: `transactions` is every
     household at once, so the 404-not-403 scoping the API relies on does not
     apply here. An owner already sees them all; a member must not."""
@@ -1586,7 +1604,7 @@ def test_the_database_browser_refuses_a_member(client):
     assert "only the owner" in refused.json()["detail"]
 
 
-def test_the_database_browser_serves_the_owner_a_redacted_snapshot(client):
+def test_the_database_browser_serves_the_owner_a_redacted_snapshot(client, own_snapshot):
     """And never the live file: an owner reading their own ledger is expected,
     an owner pulling argon2 hashes out of a web console is not."""
     _setup_owner(client)
@@ -1609,7 +1627,7 @@ def test_the_database_browser_serves_the_owner_a_redacted_snapshot(client):
     assert all(r["password_hash"] == "-- redacted --" for r in console.json())
 
 
-def test_the_database_browser_is_not_mounted_without_a_snapshot(client):
+def test_the_database_browser_is_not_mounted_without_a_snapshot(client, own_snapshot):
     """Nothing is served until somebody deliberately builds one."""
     import app.api.dbview as dbview
 
@@ -1621,7 +1639,7 @@ def test_the_database_browser_is_not_mounted_without_a_snapshot(client):
     assert "snapshot" in missing.json()["detail"]
 
 
-def test_the_database_browser_says_so_when_datasette_is_not_installed(client, monkeypatch):
+def test_the_database_browser_says_so_when_datasette_is_not_installed(client, monkeypatch, own_snapshot):
     """`datasette` is a dev dependency, and the /db viewer is the one thing that
     needs it.
 
@@ -1632,7 +1650,6 @@ def test_the_database_browser_says_so_when_datasette_is_not_installed(client, mo
     """
     import builtins
 
-    import app.api.dbview as dbview
 
     _setup_owner(client)
     _build_snapshot(client)
@@ -1645,9 +1662,8 @@ def test_the_database_browser_says_so_when_datasette_is_not_installed(client, mo
         return real_import(name, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "__import__", without_datasette)
-    # The instance caches the built Datasette, so a viewer already constructed
-    # by an earlier test would never reach the import at all.
-    monkeypatch.setattr(dbview.GuardedDatasette, "_inner", None, raising=False)
+    # The viewer builds afresh for this test's own snapshot (`own_snapshot`),
+    # so the import is reached even if an earlier test built one.
 
     answer = client.get("/db/snapshot")
     assert answer.status_code == 501
@@ -1684,7 +1700,7 @@ def test_the_snapshot_redacts_a_database_with_several_of_everything(client, tmp_
             headers=HEADERS,
         )
 
-    source = Path(str(db.engine.url).split("///", 1)[1])
+    source = Path(db.engine.url.database)
     destination = tmp_path / "snap.sqlite3"
     wiped = build(source, destination)
 
@@ -3489,3 +3505,45 @@ def test_a_drill_through_refuses_a_period_that_is_not_one(client):
         ).status_code
         == 422
     )
+
+
+def test_rows_sharing_a_timestamp_page_once_each_and_the_balance_follows_the_page(client):
+    """Windows' clock ticks every 15 ms or so, and rows written within one tick
+    shared `created_at` -- the register's only tiebreaker after the date. The
+    running balance then summed tied rows in whatever order they came, and a
+    page boundary could fall between them and skip or repeat one (#315). The
+    id is the last key now, for the page and the balance alike."""
+    import sqlite3 as _sqlite3
+
+    world = _household_with_accounts(client)
+    house, checking, card = world["household"]["id"], world["checking"]["id"], world["card"]["id"]
+    amounts = [10_000, -1_100, -2_200, -3_300, -4_400, -5_500, -6_600]
+    for amount in amounts:
+        client.post(
+            f"/api/households/{house}/transactions",
+            json={"account_id": checking, "date": "2026-03-01", "amount": amount},
+            headers=HEADERS,
+        )
+    for amount in (-900, -800):  # the other account, which must not move the sum
+        client.post(
+            f"/api/households/{house}/transactions",
+            json={"account_id": card, "date": "2026-03-01", "amount": amount},
+            headers=HEADERS,
+        )
+    import app.db as db
+
+    with closing(_sqlite3.connect(db.engine.url.database)) as raw, raw:
+        raw.execute("UPDATE transactions SET created_at = '2026-03-01 09:00:00.000000'")
+
+    url = f"/api/households/{house}/transactions?account_id={checking}"
+    whole = client.get(url).json()
+    assert whole["has_running_balance"] is True
+    assert whole["transactions"][0]["running_balance"] == sum(amounts), "the top row carries the whole sum"
+    shown = whole["transactions"]
+    for above, below in zip(shown, shown[1:], strict=False):
+        assert above["running_balance"] - above["amount"] == below["running_balance"]
+
+    pages = [client.get(f"{url}&limit=3&offset={start}").json()["transactions"] for start in (0, 3, 6)]
+    paged = [row for page in pages for row in page]
+    assert [row["id"] for row in paged] == [row["id"] for row in shown], "each row once, in one order"
+    assert [row["running_balance"] for row in paged] == [row["running_balance"] for row in shown]

@@ -21,14 +21,11 @@ to run the migrations, and an escape hatch is just a way to ship the 500.
 
 from __future__ import annotations
 
-from pathlib import Path
-
-from alembic.config import Config
 from alembic.script import ScriptDirectory
 from sqlalchemy import inspect
 from sqlalchemy.engine import Engine
 
-ALEMBIC_INI = Path(__file__).resolve().parent.parent / "alembic.ini"
+from . import migrate
 
 
 class SchemaOutOfDate(RuntimeError):
@@ -37,12 +34,12 @@ class SchemaOutOfDate(RuntimeError):
 
 def expected_head() -> str | None:
     """The revision this code's migrations end at."""
-    script = ScriptDirectory.from_config(Config(str(ALEMBIC_INI)))
+    script = ScriptDirectory.from_config(migrate.alembic_config())
     return script.get_current_head()
 
 
 def known_revisions() -> set[str]:
-    script = ScriptDirectory.from_config(Config(str(ALEMBIC_INI)))
+    script = ScriptDirectory.from_config(migrate.alembic_config())
     return {revision.revision for revision in script.walk_revisions()}
 
 

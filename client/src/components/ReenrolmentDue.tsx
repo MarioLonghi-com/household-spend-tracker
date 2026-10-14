@@ -17,6 +17,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { useCapabilities } from "../lib/capabilities";
 import { api } from "../lib/api";
 import { heldGrant } from "../lib/recoveryGrant";
 import type { AuthenticatorStatus, User } from "../lib/types";
@@ -25,9 +26,12 @@ import { Trans, useLingui } from "@lingui/react/macro";
 
 export function ReenrolmentDue({ user, onOpen }: { user: User; onOpen: () => void }) {
   const { t } = useLingui();
+  // No authenticator on the desktop, so nothing can be owed there (#320).
+  const offered = useCapabilities();
   const status = useQuery({
     queryKey: ["authenticator"],
     queryFn: () => api.get<AuthenticatorStatus>("/me/authenticator"),
+    enabled: offered.second_factor,
     staleTime: RECOVERY_MODE_POLL_MS,
     refetchInterval: RECOVERY_MODE_POLL_MS,
   });

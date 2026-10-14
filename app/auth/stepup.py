@@ -56,6 +56,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
+from .. import capabilities
 from ..errors import ProofRefused
 from ..models import StepUpGrant, User, utcnow
 from . import passwords, ratelimit, service, tokens, totp
@@ -114,7 +115,8 @@ def grant(
     # somebody's authenticator useless for thirty seconds at a time.
     if not passwords.verify_password(user.password_hash, password):
         raise ProofRefused(_REFUSAL, code="stepup.refused")
-    if not totp.verify_and_consume(user, code):
+    # The password alone on the desktop, where it is the only factor (#320).
+    if capabilities.second_factor() and not totp.verify_and_consume(user, code):
         raise ProofRefused(_REFUSAL, code="stepup.refused")
     ratelimit.release(engine, held)
 

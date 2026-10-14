@@ -261,7 +261,10 @@ def _ordering(stmt, sort: RegisterSort, direction: SortDirection) -> tuple[objec
 
     `created_at` is always the tiebreaker: several rows a day share a date, and
     without a stable second key the same query returns them in a different order
-    each time, which makes a paginated register skip and repeat rows.
+    each time, which makes a paginated register skip and repeat rows. And the
+    row's id after it, because `created_at` is not unique either: Windows'
+    clock ticks every 15 ms or so, and rows written within one tick shared it
+    -- found when the suite first ran there (#315).
 
     The joins come back as a set of names rather than a flag per table: it was a
     pair of booleans, and every new sortable column that needed a join made it
@@ -275,14 +278,14 @@ def _ordering(stmt, sort: RegisterSort, direction: SortDirection) -> tuple[objec
     if sort is RegisterSort.account:
         return (
             stmt.order_by(
-                turn(Account.name), Transaction.date.desc(), Transaction.created_at.desc()
+                turn(Account.name), Transaction.date.desc(), Transaction.created_at.desc(), Transaction.id.desc()
             ),
             {"account"},
         )
     if sort is RegisterSort.payee:
         # Nulls last either way: a row with no payee is not "before A".
         return (
-            stmt.order_by(Payee.name.is_(None), turn(Payee.name), Transaction.created_at.desc()),
+            stmt.order_by(Payee.name.is_(None), turn(Payee.name), Transaction.created_at.desc(), Transaction.id.desc()),
             {"payee"},
         )
     if sort is RegisterSort.category:
@@ -295,14 +298,14 @@ def _ordering(stmt, sort: RegisterSort, direction: SortDirection) -> tuple[objec
                 Category.name.is_(None),
                 turn(CategoryGroup.name),
                 turn(Category.name),
-                Transaction.created_at.desc(),
+                Transaction.created_at.desc(), Transaction.id.desc(),
             ),
             {"category"},
         )
     if sort is RegisterSort.memo:
         return (
             stmt.order_by(
-                Transaction.memo.is_(None), turn(Transaction.memo), Transaction.created_at.desc()
+                Transaction.memo.is_(None), turn(Transaction.memo), Transaction.created_at.desc(), Transaction.id.desc()
             ),
             set(),
         )
@@ -318,7 +321,7 @@ def _ordering(stmt, sort: RegisterSort, direction: SortDirection) -> tuple[objec
         # leaving the currencies in place and flipping inside them.
         return (
             stmt.order_by(
-                turn(Account.currency), turn(Transaction.amount), Transaction.created_at.desc()
+                turn(Account.currency), turn(Transaction.amount), Transaction.created_at.desc(), Transaction.id.desc()
             ),
             {"account"},
         )
@@ -332,7 +335,7 @@ def _ordering(stmt, sort: RegisterSort, direction: SortDirection) -> tuple[objec
             else_=2,
         )
         return (
-            stmt.order_by(turn(rank), Transaction.date.desc(), Transaction.created_at.desc()),
+            stmt.order_by(turn(rank), Transaction.date.desc(), Transaction.created_at.desc(), Transaction.id.desc()),
             set(),
         )
     if sort is RegisterSort.cleared:
@@ -340,11 +343,11 @@ def _ordering(stmt, sort: RegisterSort, direction: SortDirection) -> tuple[objec
             stmt.order_by(
                 turn(Transaction.cleared),
                 Transaction.date.desc(),
-                Transaction.created_at.desc(),
+                Transaction.created_at.desc(), Transaction.id.desc(),
             ),
             set(),
         )
-    return stmt.order_by(turn(Transaction.date), turn(Transaction.created_at)), set()
+    return stmt.order_by(turn(Transaction.date), turn(Transaction.created_at), turn(Transaction.id)), set()
 
 
 @router.get("/households/{household_id}/transactions", response_model=RegisterPage)
@@ -511,7 +514,10 @@ def register(
     # Seeded with everything older than this page. Accumulating from zero gave
     # every figure on page two -- and on page one of a long register -- a
     # plausible-looking wrong number.
-    ascending = sorted(keyed, key=lambda row: (row[1], row[3]))
+    # The same total order as the page, id last: by date and created_at alone,
+    # rows sharing a created_at were summed in whatever order they came, and
+    # the newest row on the page did not carry the whole sum (#315).
+    ascending = sorted(keyed, key=lambda row: (row[1], row[3], row[0]))
     opening = 0
     if ascending:
         oldest = ascending[0]
@@ -519,7 +525,12 @@ def register(
             select(func.coalesce(func.sum(Transaction.amount), 0)).where(
                 Transaction.account_id == only_account,
                 (Transaction.date < oldest[1])
-                | ((Transaction.date == oldest[1]) & (Transaction.created_at < oldest[3])),
+                | ((Transaction.date == oldest[1]) & (Transaction.created_at < oldest[3]))
+                | (
+                    (Transaction.date == oldest[1])
+                    & (Transaction.created_at == oldest[3])
+                    & (Transaction.id < oldest[0])
+                ),
             )
         ).scalar_one()
 

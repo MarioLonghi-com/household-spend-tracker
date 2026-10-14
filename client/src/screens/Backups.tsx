@@ -18,6 +18,7 @@
  * the password and a code and fetches the zip itself.
  */
 
+import { useCapabilities } from "../lib/capabilities";
 import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
@@ -74,6 +75,7 @@ export function BackupList({
   backups: Backup[];
   onChanged: () => void;
 }) {
+  const offered = useCapabilities();
   const client = useQueryClient();
   const [withKey, setWithKey] = useState(false);
   const [saving, setSaving] = useState<Backup | null>(null);
@@ -114,6 +116,10 @@ export function BackupList({
 
   return (
     <>
+      {/* The key seals authenticators, and the desktop has none (#320): a
+          backup there is the ledger alone, and complete without it. */}
+      {offered.second_factor ? (
+      <>
       <label className="check" style={{ marginTop: 12 }}>
         <input
           type="checkbox"
@@ -129,6 +135,8 @@ export function BackupList({
           ? t`The zip will hold the key that decrypts every authenticator. With it and a member's password, anyone holding the zip can sign in as that member once it is restored. Keep it somewhere only you can open. Each download asks for your password and a code.`
           : t`Left out, the zip restores onto this instance as it is. Anywhere else, every authenticator is refused unless you supply the key separately, and the zip's README says how.`}
       </p>
+      </>
+      ) : null}
 
       <div className="table-scroll" style={{ marginTop: 10 }}>
         <table>

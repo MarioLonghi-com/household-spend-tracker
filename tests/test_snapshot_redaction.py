@@ -85,7 +85,7 @@ def _build(client, tmp_path) -> tuple[Path, dict]:
     import app.db as db
     from scripts.db_view import build
 
-    source = Path(str(db.engine.url).split("///", 1)[1])
+    source = Path(db.engine.url.database)
     destination = tmp_path / "snap.sqlite3"
     return destination, build(source, destination)
 
@@ -120,7 +120,7 @@ def test_no_text_column_of_the_snapshot_carries_a_full_account_number(client, tm
 
     # The premise, checked on the ledger itself: every number is there to find,
     # so a clean snapshot is the snapshot's doing and not an empty fixture's.
-    live = Path(str(db.engine.url).split("///", 1)[1])
+    live = Path(db.engine.url.database)
     before = "\n".join(value for _, _, value in _every_text_value(live))
     for number in (IBAN, CARD, NUMBER, SECOND_IBAN):
         assert number in before.replace(" ", ""), number

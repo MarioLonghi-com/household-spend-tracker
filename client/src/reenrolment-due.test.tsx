@@ -33,6 +33,7 @@ vi.mock("./lib/api", () => ({
 }));
 
 import { api } from "./lib/api";
+import { EVERYTHING } from "./lib/capabilities";
 import { App } from "./App";
 import { keepGrant } from "./lib/recoveryGrant";
 import type { Household, User } from "./lib/types";
@@ -54,6 +55,7 @@ const HOUSEHOLDS = [
 function server(locked: boolean) {
   vi.mocked(api.get).mockImplementation((path: string) => {
     if (path === "/health") return Promise.resolve({ setup_required: false });
+    if (path === "/capabilities") return Promise.resolve(EVERYTHING);
     if (path === "/me") return Promise.resolve(SAM);
     if (path === "/households") return Promise.resolve(HOUSEHOLDS);
     if (path === "/me/authenticator")

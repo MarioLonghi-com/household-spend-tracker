@@ -25,8 +25,10 @@ export default defineConfig({
   catalogs: [
     {
       path: "<rootDir>/src/locales/{locale}/messages",
-      include: ["<rootDir>/src"],
-      exclude: ["**/*.test.ts", "**/*.test.tsx", "**/test-setup.ts", "**/test-pseudo.ts"],
+      // The desktop shell's menus and dialogs too (#62): one set of catalogs,
+      // so a translator sees the menu item beside the screen it opens.
+      include: ["<rootDir>/src", "<rootDir>/../desktop/src"],
+      exclude: ["**/*.test.ts", "**/*.test.tsx", "**/test-setup.ts", "**/test-pseudo.ts", "**/*.d.ts"],
     },
   ],
   // Without line numbers, so moving code does not churn every catalog, and

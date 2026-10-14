@@ -142,7 +142,16 @@ class TimestampedRotatingFileHandler(logging.handlers.RotatingFileHandler):
         # rename the live file to. The number is meaningless here.
         base = pathlib.Path(self.baseFilename)
         stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        return str(base.with_name(f"{base.stem}-{stamp}{base.suffix}"))
+        # Two rotations in one second used to share a name: the second
+        # rename replaced the first file on macOS and Linux -- a megabyte of
+        # log gone -- and failed outright on Windows. A counter after the
+        # stamp keeps both (#315).
+        candidate = base.with_name(f"{base.stem}-{stamp}{base.suffix}")
+        count = 1
+        while candidate.exists():
+            count += 1
+            candidate = base.with_name(f"{base.stem}-{stamp}-{count}{base.suffix}")
+        return str(candidate)
 
     def doRollover(self) -> None:  # noqa: N802 - the stdlib names it
         if self.stream:
@@ -166,7 +175,16 @@ class TimestampedRotatingFileHandler(logging.handlers.RotatingFileHandler):
         if self.backupCount <= 0:
             return
         base = pathlib.Path(self.baseFilename)
-        rotated = sorted(base.parent.glob(f"{base.stem}-*{base.suffix}"))
+        prefix = len(base.stem) + 1
+
+        def oldest_first(path: pathlib.Path) -> tuple[str, int]:
+            # `-<stamp>` or `-<stamp>-<n>`: by the stamp, then the counter.
+            # By name alone, `...-131545-2` sorts before `...-131545`.
+            stamp, _, count = path.stem[prefix:].partition("-")[2].partition("-")
+            day = path.stem[prefix:].partition("-")[0]
+            return (f"{day}-{stamp}", int(count) if count.isdigit() else 1)
+
+        rotated = sorted(base.parent.glob(f"{base.stem}-*{base.suffix}"), key=oldest_first)
         for old in rotated[: -self.backupCount] if len(rotated) > self.backupCount else []:
             with contextlib.suppress(OSError):
                 old.unlink()
@@ -341,7 +359,9 @@ log = logging.getLogger("spendtracker")
 
 
 def log_dir() -> Path:
-    return _settings().data_dir / "logs"
+    from . import paths
+
+    return _settings().data_dir / paths.LOGS
 
 
 def log_file(stream: str = "app") -> Path:
@@ -439,13 +459,18 @@ def apply(style: Style) -> None:
     # `docker logs` (#108: the "order-dependent" test that caught it passed
     # only when an earlier test's handler was already there). At INFO the
     # statements reach `sql.log` without it. A handler SQLAlchemy added anyway
-    # -- `SPENDTRACKER_ECHO_SQL` at `create_engine` -- is taken back off.
+    # -- or the stderr one `SPENDTRACKER_ECHO_SQL` puts there at import -- is
+    # taken back off.
     engine.echo = False
     sql_engine = logging.getLogger("sqlalchemy.engine.Engine")
     ours = {id(handler) for handler in our_handlers()}
     for handler in list(sql_engine.handlers):
         if id(handler) not in ours:
             sql_engine.removeHandler(handler)
+    # Its level too, which the boot-time echo set to INFO: left there it would
+    # outrank the parent's below and keep every statement flowing into
+    # `sql.log` at a style that never asked for it.
+    sql_engine.setLevel(logging.NOTSET)
     logging.getLogger("sqlalchemy.engine").setLevel(
         logging.INFO if style.echo_sql else logging.WARNING
     )

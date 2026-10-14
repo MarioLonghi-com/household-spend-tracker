@@ -16,6 +16,7 @@ each of the four operations does what it says to something a test can check.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from tests.conftest import HEADERS, _setup_owner
 from tests.test_invitations import _accept, _invite
@@ -187,7 +188,7 @@ def test_the_database_path_never_comes_from_the_url(client):
     it = _instance(client)
 
     path = it["engine"]["path"]
-    assert path and path.startswith("/"), path
+    assert path and Path(path).is_absolute(), path
     assert "://" not in path and "@" not in path, "that looks like a URL, not a file"
     assert path.endswith(".sqlite3"), path
 

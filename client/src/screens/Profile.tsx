@@ -40,6 +40,7 @@ import { LanguagePicker } from "../components/LanguagePicker";
 import { plural, t } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { listText } from "../lib/locale";
+import { useCapabilities } from "../lib/capabilities";
 
 type Offer = { token: string; secret: string; uri: string };
 
@@ -53,6 +54,7 @@ export function Profile({
   onClose: () => void;
 }) {
   const { t } = useLingui();
+  const offered = useCapabilities();
   return (
     <Panel title={t({ message: "Your account", comment: "Title of a panel on the Your account panel" })} onClose={onClose} config>
       <p className="muted small" style={{ marginTop: 0 }}>
@@ -63,8 +65,13 @@ export function Profile({
       <AppearanceSection />
       <hr className="rule" />
       <SignInMethods user={user} />
-      <hr className="rule" />
-      <KeysSection households={households} />
+      {/* No agent API on the desktop, so no keys for one (#316). */}
+      {offered.agents ? (
+        <>
+          <hr className="rule" />
+          <KeysSection households={households} />
+        </>
+      ) : null}
     </Panel>
   );
 }
@@ -153,9 +160,12 @@ type Method = "password" | "authenticator" | "recovery";
 function SignInMethods({ user }: { user: User }) {
   const { t } = useLingui();
   const [open, setOpen] = useState<Method | null>(null);
+  // The desktop has a password and one recovery code, nothing else (#320).
+  const offered = useCapabilities();
   const authenticator = useQuery({
     queryKey: ["authenticator"],
     queryFn: () => api.get<AuthenticatorStatus>("/me/authenticator"),
+    enabled: offered.second_factor,
   });
   const recovery = useQuery({
     queryKey: ["recovery-codes"],
@@ -167,8 +177,9 @@ function SignInMethods({ user }: { user: User }) {
   const usable = (passkeys.data ?? []).filter((one) => one.usable_here).length;
   const locked = authenticator.data?.locked_by_key === true;
   const enrolled = authenticator.data?.enrolled !== false;
-  const summary =
-    usable > 0
+  const summary = !offered.second_factor
+    ? t`You sign in with your password. If you forget it, your recovery code lets you choose a new one.`
+    : usable > 0
       ? t`You sign in with a passkey, or with your password and authenticator code.`
       : t`You sign in with your password and authenticator code.`;
 
@@ -200,6 +211,7 @@ function SignInMethods({ user }: { user: User }) {
         >
           <PasswordSection titled={false} />
         </MethodRow>
+        {offered.second_factor ? (
         <MethodRow
           slug="authenticator"
           name={t({ message: "Authenticator", comment: "Label on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md" })}
@@ -213,15 +225,18 @@ function SignInMethods({ user }: { user: User }) {
         >
           <AuthenticatorSection user={user} titled={false} />
         </MethodRow>
-        <MethodRow slug="passkeys" name={t({ message: "Passkeys", comment: "Label on the Your account panel. See GLOSSARY.md" })} state={passkeyState} open>
-          <PasskeysSection />
-        </MethodRow>
+        ) : null}
+        {offered.second_factor ? (
+          <MethodRow slug="passkeys" name={t({ message: "Passkeys", comment: "Label on the Your account panel. See GLOSSARY.md" })} state={passkeyState} open>
+            <PasskeysSection />
+          </MethodRow>
+        ) : null}
         <MethodRow
           slug="recovery-codes"
-          name={t({ message: "Recovery codes", comment: "Label on the Your account panel. See GLOSSARY.md" })}
-          state={recovery.data ? t({ message: `${recovery.data.unused} of 10 left`, comment: "Text on the Your account panel" }) : ""}
+          name={offered.second_factor ? t({ message: "Recovery codes", comment: "Label on the Your account panel. See GLOSSARY.md" }) : t({ message: "Recovery code", comment: "Label on the Your account panel of the desktop app, which has one. See GLOSSARY.md" })}
+          state={!recovery.data ? "" : offered.second_factor ? t({ message: `${recovery.data.unused} of 10 left`, comment: "Text on the Your account panel" }) : recovery.data.unused > 0 ? t({ message: "Ready", comment: "State of the desktop app's recovery code: not yet used" }) : t({ message: "Used", comment: "State of the desktop app's recovery code: spent, a new one is needed" })}
           warn={recovery.data?.unused === 0}
-          action={t({ message: "New codes", comment: "Button on the Your account panel" })}
+          action={offered.second_factor ? t({ message: "New codes", comment: "Button on the Your account panel" }) : t({ message: "New code", comment: "Button on the Your account panel of the desktop app" })}
           open={open === "recovery"}
           onToggle={() => toggle("recovery")}
         >
@@ -670,6 +685,7 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
     queryFn: () => api.get<{ unused: number }>("/me/recovery-codes"),
   });
 
+  const offered = useCapabilities();
   const [making, setMaking] = useState(false);
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -703,7 +719,9 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
   }
 
   const unused = left.data?.unused;
-  const ready = password.length > 0 && /^\d{6}$/.test(code.replace(/\s/g, ""));
+  // The password alone on the desktop, where it is the only factor (#320).
+  const ready =
+    password.length > 0 && (!offered.second_factor || /^\d{6}$/.test(code.replace(/\s/g, "")));
 
   return (
     <section>
@@ -728,10 +746,14 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
         <div className="card" style={{ marginTop: 12 }}>
           <Problem error={make.error} />
           <p className="small muted" style={{ marginTop: 0 }}>
-            <Trans>
-              Every code you have now, used or not, stops working and ten new ones replace them.
-              Nobody is signed out.
-            </Trans>
+            {offered.second_factor ? (
+              <Trans>
+                Every code you have now, used or not, stops working and ten new ones replace them.
+                Nobody is signed out.
+              </Trans>
+            ) : (
+              <Trans>Your code stops working and a new one replaces it. Nobody is signed out.</Trans>
+            )}
           </p>
           <Field label={t({ message: "Your password", comment: "Label of a form field on the Your account panel" })}>
             <input
@@ -741,6 +763,8 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field>
+          {offered.second_factor ? (
+          <>
           <p />
           <Field
             label={t`The six digits from your authenticator`}
@@ -762,6 +786,8 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
               onChange={(e) => setCode(e.target.value)}
             />
           </Field>
+          </>
+          ) : null}
           <div className="row" style={{ marginTop: 12 }}>
             <button
               className="primary"

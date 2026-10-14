@@ -50,7 +50,9 @@ And one for memory, because the pool above is unbounded (#102):
 
 from __future__ import annotations
 
+import logging
 import os
+import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -67,7 +69,6 @@ _connect_args: dict = {}
 _pool_args: dict = {}
 if settings.database_url.startswith("sqlite"):
     _connect_args = {"check_same_thread": False}
-    private_dir(settings.data_dir)
     if make_url(settings.database_url).database not in (None, "", ":memory:"):
         # See the module docstring: never make a request wait for a connection
         # that another waiting request is holding.
@@ -99,10 +100,37 @@ def host_memory() -> int | None:
             continue
         if text.isdigit() and 0 < int(text) < _NO_LIMIT:
             return int(text)
+    if os.name == "nt":  # pragma: no cover - the Windows leg runs it
+        return _windows_memory()
     try:
         return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
     except (OSError, ValueError, AttributeError):  # pragma: no cover - no sysconf
         return None
+
+
+def _windows_memory() -> int | None:  # pragma: no cover - the Windows leg runs it
+    """The machine's physical memory, where there is no `sysconf` (#315).
+    Without it the desktop app on Windows sized SQLite as for an unknown host."""
+    import ctypes
+
+    class MemoryStatus(ctypes.Structure):
+        _fields_ = [
+            ("dwLength", ctypes.c_ulong),
+            ("dwMemoryLoad", ctypes.c_ulong),
+            ("ullTotalPhys", ctypes.c_ulonglong),
+            ("ullAvailPhys", ctypes.c_ulonglong),
+            ("ullTotalPageFile", ctypes.c_ulonglong),
+            ("ullAvailPageFile", ctypes.c_ulonglong),
+            ("ullTotalVirtual", ctypes.c_ulonglong),
+            ("ullAvailVirtual", ctypes.c_ulonglong),
+            ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+        ]
+
+    status = MemoryStatus()
+    status.dwLength = ctypes.sizeof(MemoryStatus)
+    if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
+        return None
+    return int(status.ullTotalPhys) or None
 
 
 def memory_budget(memory: int | None = None) -> tuple[int, int]:
@@ -129,10 +157,34 @@ BUSY_TIMEOUT_MS = 5000
 
 engine: Engine = create_engine(
     settings.database_url,
-    echo=settings.echo_sql,
     connect_args=_connect_args,
     **_pool_args,
 )
+
+# `SPENDTRACKER_ECHO_SQL` shows the statements run before logging is
+# configured -- boot, migrations, the first queries -- on the console. Not via
+# `echo=`: SQLAlchemy's echo handler writes to *stdout*, and the desktop build
+# speaks to its shell over stdout, so one statement there is a corrupt frame
+# (#315). Standard error instead. `logging_setup.configure` takes this handler
+# off when lifespan starts, and the chosen logging style governs from then on.
+if settings.echo_sql:
+    _early_sql = logging.getLogger("sqlalchemy.engine.Engine")
+    _early_sql.addHandler(logging.StreamHandler(sys.stderr))
+    _early_sql.setLevel(logging.INFO)
+
+
+@event.listens_for(engine, "do_connect")
+def _make_the_data_dir(dialect, conn_rec, cargs, cparams) -> None:
+    """The data directory, made private, just before SQLite's first file is.
+
+    Not at import (#317): importing `app.db` writes nothing, so the desktop app
+    can lock, back up and migrate a ledger before anything opens it -- and a
+    stray import cannot leave an empty data directory behind. SQLAlchemy
+    connects lazily, so this runs at the first query, once per new
+    connection; `private_dir` on an existing directory only tightens it.
+    """
+    if settings.database_url.startswith("sqlite"):
+        private_dir(settings.data_dir)
 
 
 @event.listens_for(Engine, "connect")
@@ -166,6 +218,27 @@ def _sqlite_pragmas(dbapi_connection, connection_record) -> None:  # pragma: no 
     # rather than in a file.
     cursor.execute("PRAGMA temp_store=MEMORY")
     cursor.close()
+
+
+def checkpoint() -> None:
+    """Fold the WAL back into the ledger and close every pooled connection.
+
+    Called as the app stops. Until the next start the ledger is then one file:
+    a backup tool, a sync client or a person copying the folder sees every
+    write in it, rather than a main file missing what still sits in
+    `-wal` (the 4 KB file beside a 1.7 MB WAL in the CLAUDE.md warning). The
+    desktop app stops every time its window closes, so this is most of its
+    life (#62). A failure is logged and left: SQLite replays the WAL at the
+    next open, so nothing is lost by not checkpointing.
+    """
+    if engine.dialect.name != "sqlite":
+        return
+    try:
+        with engine.connect() as conn:
+            conn.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)")
+    except Exception as problem:  # noqa: BLE001 - see the docstring
+        logging.getLogger(__name__).warning("WAL not checkpointed at shutdown: %s", problem)
+    engine.dispose()
 
 
 from .audit.guard import AuditedSession  # noqa: E402  -- after engine, to avoid a cycle

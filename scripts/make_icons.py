@@ -80,7 +80,41 @@ def draw(px: int) -> Image.Image:
     return image.resize((px, px), Image.LANCZOS)
 
 
+#: The desktop app's icons (#61), which electron-builder reads from here.
+DESKTOP = Path(__file__).resolve().parent.parent / "desktop" / "build-resources"
+
+#: The tiles an MSIX package names in its manifest, by electron-builder's
+#: file names, at their 100% sizes. Windows scales the rest from these.
+APPX = {
+    "StoreLogo.png": (50, 50),
+    "Square44x44Logo.png": (44, 44),
+    "Square150x150Logo.png": (150, 150),
+    "Wide310x150Logo.png": (310, 150),
+}
+
+
+def placed(width: int, height: int, mark: int) -> Image.Image:
+    """The mark at `mark` px, centred on a transparent `width` x `height`."""
+    canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    canvas.alpha_composite(draw(mark), ((width - mark) // 2, (height - mark) // 2))
+    return canvas
+
+
+def desktop() -> None:
+    """The Mac icon, the Windows icon and the MSIX tiles."""
+    (DESKTOP / "appx").mkdir(parents=True, exist_ok=True)
+    # Apple's grid leaves a margin round the shape: 824 of 1024.
+    mac = placed(1024, 1024, 824)
+    mac.save(DESKTOP / "icon.png")
+    mac.save(DESKTOP / "icon.icns")
+    draw(256).save(DESKTOP / "icon.ico", sizes=[(n, n) for n in (16, 24, 32, 48, 64, 128, 256)])
+    for name, (width, height) in APPX.items():
+        placed(width, height, min(width, height)).save(DESKTOP / "appx" / name)
+    print(f"wrote the desktop icons into {DESKTOP}")
+
+
 def main() -> None:
+    desktop()
     PUBLIC.mkdir(parents=True, exist_ok=True)
     for name, px in SIZES.items():
         draw(px).save(PUBLIC / name)

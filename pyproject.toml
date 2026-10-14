@@ -1,6 +1,6 @@
 [project]
 name = "household-spend-tracker"
-version = "0.10.1"
+version = "0.11.0"
 description = "Self-hosted multi-currency spend tracker for one household"
 requires-python = ">=3.12"
 readme = "README.md"
@@ -31,5 +31,14 @@ line-length = 108
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
+select = ["E", "F", "I", "UP", "B", "SIM", "T20"]
 ignore = ["E501"]
+
+# T20 (no `print`) is for the app itself: the desktop build talks to its shell
+# over stdout (#315), so one stray print corrupts the channel. Command-line
+# tools and tests print by design.
+[tool.ruff.lint.per-file-ignores]
+"scripts/**" = ["T20"]
+"deploy/**" = ["T20"]
+"tests/**" = ["T20"]
+"statements/cli.py" = ["T20"]
