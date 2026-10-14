@@ -596,3 +596,78 @@ def test_a_cmd_healthcheck_reaches_podman_4_as_one_json_array(fixture, podman4):
         want = ['["python", "-c", "import sys; sys.exit(0 if 1 else 1)"]'] if podman4 else test
         assert sent["Healthcheck"] == {"Test": want, "Retries": 3}
         assert body["Healthcheck"]["Test"] == test  # the caller's body is not changed
+
+
+# --------------------------------------------------------------------------- #
+# #334: what a forged journal could have reached
+# --------------------------------------------------------------------------- #
+
+#: Volumes a created container may not mount: another installation's, one
+#: whose project name only begins like ours, and a host bind in a volume's
+#: clothing. Each in both spellings a create body has.
+NOT_OURS = {
+    "another_projects_ledger": "spend-tracker-test_ledger",
+    "a_project_named_like_ours": "spend-tracker_two_ledger",
+    "a_bare_name": "ledger",
+    "no_key_after_the_prefix": "spend-tracker_",
+}
+
+
+@pytest.mark.parametrize("name", sorted(NOT_OURS))
+def test_another_projects_volume_is_refused_in_either_spelling(world, name):
+    fake, client = world
+    volume = NOT_OURS[name]
+    for host in (
+        {"Binds": [f"{volume}:/var/lib/spend-tracker:rw"]},
+        {"Mounts": [{"Type": "volume", "Source": volume, "Target": "/var/lib/spend-tracker"}]},
+    ):
+        with pytest.raises(NotAllowed, match="not one of project"):
+            client.create("spend-tracker-drill", good_body(**host))
+    assert fake.calls == []
+
+
+def test_a_volume_with_its_own_driver_configuration_is_refused(world):
+    """`local` with `o: bind, device: /` is the host's root under a volume's name."""
+    fake, client = world
+    host_root = {
+        "Type": "volume",
+        "Source": "spend-tracker_ledger",
+        "Target": "/l",
+        "VolumeOptions": {"DriverConfig": {"Name": "local", "Options": {"type": "none", "o": "bind", "device": "/"}}},
+    }
+    with pytest.raises(NotAllowed, match="driver configuration"):
+        client.create("spend-tracker-drill", good_body(Mounts=[host_root]))
+    assert fake.calls == []
+
+
+def test_our_volumes_an_anonymous_one_and_the_updaters_own_are_allowed(world):
+    fake, client = world
+    client.scope = scope(sidecar="spend-tracker-tailscale-1", volumes=("my-own-update",))
+    made = client.create(
+        "spend-tracker-drill",
+        good_body(
+            Binds=["spend-tracker_ledger:/var/lib/spend-tracker:rw", "my-own-update:/u:rw"],
+            Mounts=[
+                {"Type": "volume", "Source": "spend-tracker_ts-state", "Target": "/t"},
+                {"Type": "volume", "Target": "/scratch", "VolumeOptions": {"NoCopy": True}},
+            ],
+        ),
+    )
+    assert made in fake.containers
+
+
+def test_the_updater_never_removes_or_stops_itself_unless_handing_over(world):
+    """A journal naming the updater's own container as the app, or as the
+    previous one, would have had it remove or stop itself."""
+    fake, client = world
+    own = next(c for c in fake.containers.values() if c["Names"] == ["/spend-tracker-updater-1"])
+    client.scope = scope(sidecar="spend-tracker-tailscale-1", own_id=own["Id"])
+    with pytest.raises(NotAllowed, match="its own container"):
+        client.remove("spend-tracker-updater-1", force=True)
+    with pytest.raises(NotAllowed, match="its own container"):
+        client.stop(own["Id"], grace=1)
+    assert own["Id"] in fake.containers
+    assert [c for c in fake.calls if c.method != "GET"] == []
+
+    client.stop(own["Id"], grace=1, itself=True)
+    assert [c.bare for c in fake.calls if c.method != "GET"] == [f"/containers/{own['Id']}/stop"]

@@ -137,3 +137,19 @@ def test_reading_the_updaters_own_file_never_follows_a_link(tmp_path):
         volume.read_own_json(vol.journal("planted"))
     assert volume.read_own_json(vol.journal("real")) == {"step": "3"}
     assert volume.read_own_json(vol.journal("absent")) is None
+
+
+def test_a_file_larger_than_the_updater_writes_is_refused_not_read(tmp_path):
+    """#334. The app shares the volume; a gigabyte "journal" read whole under the
+    updater's memory limit was a restart loop."""
+    huge = tmp_path / "journal.json"
+    with huge.open("wb") as fh:
+        fh.write(b'{"pad": "')
+        fh.seek(volume.MAX_OWN_JSON_BYTES)
+        fh.write(b'"}')
+    with pytest.raises(UnsafeFile, match="larger than anything"):
+        volume.read_own_json(huge)
+
+    fine = tmp_path / "fine.json"
+    fine.write_text('{"step": "3"}')
+    assert volume.read_own_json(fine) == {"step": "3"}

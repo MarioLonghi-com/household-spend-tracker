@@ -417,6 +417,22 @@ def own_bind_sources(inspect: Mapping, destinations: tuple[str, ...]) -> tuple[s
     return tuple(found)
 
 
+def own_volumes(inspect: Mapping) -> tuple[str, ...]:
+    """The named volumes the updater itself mounts (the create guard's `Scope.volumes`).
+
+    So an installation whose update volume was given a name of its own, rather
+    than compose's `<project>_update`, can still hand it to a successor. Read
+    from the engine, never configured.
+    """
+    found: list[str] = []
+    for m in inspect.get("Mounts") or []:
+        if isinstance(m, dict) and m.get("Type") == "volume":
+            name = m.get("Name")
+            if isinstance(name, str) and name and name not in found:
+                found.append(name)
+    return tuple(found)
+
+
 # --------------------------------------------------------------------------- #
 # Files: the lock and the journal
 # --------------------------------------------------------------------------- #
@@ -1072,7 +1088,7 @@ class Successions:
 
         def ask() -> None:
             with contextlib.suppress(eng.EngineError, eng.NotAllowed, eng.EngineUnavailable):
-                self.client.stop(own_id, grace=STOP_GRACE_SECONDS)
+                self.client.stop(own_id, grace=STOP_GRACE_SECONDS, itself=True)
 
         asking = threading.Thread(target=ask, name="stop-myself", daemon=True)
         asking.start()

@@ -68,6 +68,20 @@ history this repository does not have.
   It now sets the old one aside and puts it back if the create fails.
   (#335)
 
+### Security
+
+- **The updater is held to its own installation, whatever its shared files
+  say.** The app and the updater share a volume by design, and a
+  compromised app could have written an update journal that pointed the
+  updater at another installation's ledger on the same machine, or at the
+  updater's own container. A container the updater creates may now mount
+  only this project's own volumes, never a volume with its own driver
+  settings; the updater never removes or stops its own container except
+  when handing over; it reads at most 4 MB of any file it shares with the
+  app; and a resumed update checks the new image's signature again before
+  it runs it. `SECURITY.md` now says what a compromised app can still do.
+  (#334)
+
 ## 0.11.0 — 2026-10-14
 
 **Reversible: none** — no migration in this release. To go back to

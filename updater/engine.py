@@ -338,6 +338,13 @@ class Scope:
     #: The sidecar's container name, if the layout has one. Never stopped,
     #: started, renamed or removed; probed only with `wget`.
     sidecar: str | None = None
+    #: Named volumes a created container may mount besides the project's own
+    #: `<project>_<name>` ones: those the updater itself was started with, read
+    #: from the engine (#334). Never configured.
+    volumes: tuple[str, ...] = ()
+    #: This updater's own container id. Never removed, and stopped only by the
+    #: handover that means to (#334).
+    own_id: str | None = None
 
 
 class EngineClient:
@@ -522,6 +529,13 @@ class EngineClient:
         if self.scope.sidecar and self.scope.sidecar in names:
             raise NotAllowed(f"The updater never {what} the sidecar.")
 
+    def _not_itself(self, c: dict, what: str) -> None:
+        """The journal names containers by id and name, and the app can write
+        the journal (#334): a forged `app_name` or `previous_id` naming this
+        updater would have had it remove or stop itself."""
+        if self.scope.own_id and c.get("Id") == self.scope.own_id:
+            raise NotAllowed(f"The updater never {what} its own container here.")
+
     def inspect(self, ref: str) -> dict:
         c = self._resolve(ref)
         return self._call("inspect", id=c["Id"])  # type: ignore[return-value]
@@ -531,9 +545,11 @@ class EngineClient:
         self._not_sidecar(c, "starts")
         self._call("start", id=c["Id"])
 
-    def stop(self, ref: str, grace: int = 30) -> None:
+    def stop(self, ref: str, grace: int = 30, *, itself: bool = False) -> None:
         c = self._resolve(ref)
         self._not_sidecar(c, "stops")
+        if not itself:
+            self._not_itself(c, "stops")
         # The engine answers a stop only once the container has stopped, which
         # is up to `grace` seconds and then the kill: the socket must wait that
         # long and more. With the same 30 s for both, stopping a container that
@@ -563,6 +579,7 @@ class EngineClient:
     def remove(self, ref: str, force: bool = False) -> None:
         c = self._resolve(ref)
         self._not_sidecar(c, "removes")
+        self._not_itself(c, "removes")
         self._call("remove", query={"force": "1" if force else "0"}, id=c["Id"])
 
     def remove_broken_oneoff(self, ref: str) -> bool:
@@ -798,8 +815,11 @@ def guard_create(body: object, scope: Scope) -> None:
             raise NotAllowed("A bind is a string.")
         source = _bind_source(bind)
         # A source that is not a path is a named volume.
-        if source.startswith(("/", ".", "~")) and source not in allowed_sources:
-            raise NotAllowed(f"A host bind mount of {source} is refused.")
+        if source.startswith(("/", ".", "~")):
+            if source not in allowed_sources:
+                raise NotAllowed(f"A host bind mount of {source} is refused.")
+        else:
+            _guard_volume(source, scope)
     for mount in host.get("Mounts") or []:
         if not isinstance(mount, dict):
             raise NotAllowed("A mount is a JSON object.")
@@ -807,8 +827,37 @@ def guard_create(body: object, scope: Scope) -> None:
         if kind == "bind":
             if mount.get("Source") not in allowed_sources:
                 raise NotAllowed(f"A host bind mount of {mount.get('Source')} is refused.")
-        elif kind not in ("volume", "tmpfs"):
+        elif kind == "volume":
+            # The `local` driver's `o: bind, device: /` is a host bind mount
+            # under another name (#334). Nothing the updater builds sets a
+            # driver; one carried over from somewhere else is refused.
+            options = mount.get("VolumeOptions") or {}
+            if not isinstance(options, dict) or options.get("DriverConfig"):
+                raise NotAllowed("A volume mount with its own driver configuration is refused.")
+            source = mount.get("Source")
+            if source:  # None or "": an anonymous volume, made fresh, reaching nothing.
+                if not isinstance(source, str):
+                    raise NotAllowed("A volume's name is a string.")
+                _guard_volume(source, scope)
+        elif kind != "tmpfs":
             raise NotAllowed(f"A {kind} mount is refused.")
+
+
+def _guard_volume(name: str, scope: Scope) -> None:
+    """A named volume a created container may mount: this project's, and no other's (#334).
+
+    Compose names a project's volumes `<project>_<key>` -- `spend-tracker_ledger`,
+    `spend-tracker_update`, `spend-tracker_ts-state` -- and the keys this
+    project's compose files use have no underscore of their own, which is
+    what keeps `spend-tracker_two_ledger`, a project called `spend-tracker_two`,
+    out. Before this any named volume on the engine passed, so a journal the
+    app had forged could name another installation's ledger, and a restore
+    one-off would have mounted it read-write.
+    """
+    prefix = f"{scope.project}_"
+    own = name.startswith(prefix) and len(name) > len(prefix) and "_" not in name[len(prefix) :]
+    if not own and name not in scope.volumes:
+        raise NotAllowed(f"The volume {name!r} is not one of project {scope.project!r}'s.")
 
 
 def _guard_shape(body: dict, labels: dict, host: dict) -> None:

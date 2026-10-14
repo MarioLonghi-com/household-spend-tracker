@@ -184,7 +184,7 @@ def test_h7_exits_on_the_sigterm_while_its_own_stop_is_still_in_flight(world, mo
     sigterm, exited = threading.Event(), threading.Event()
     asked: list[str] = []
 
-    def engine_stop(ref: str, grace: int = 30) -> None:
+    def engine_stop(ref: str, grace: int = 30, *, itself: bool = False) -> None:
         # The engine: SIGTERM, then the answer once the process has exited --
         # or the kill after the grace. Five seconds stand in for the grace.
         asked.append(ref)
