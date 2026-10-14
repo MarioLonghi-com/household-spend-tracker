@@ -584,15 +584,19 @@ def test_an_unexpected_500_carries_them_too(client):
     _setup_owner(client)
     main = client.app_module
 
-    @main.app.get("/api/test-only-explodes", include_in_schema=False)
     def explodes():
         raise RuntimeError("nobody handles this")
 
+    # First, not last: with a built client present the SPA catch-all is
+    # mounted, and a route appended after it is never reached.
+    main.app.add_api_route("/api/test-only-explodes", explodes, include_in_schema=False)
+    route = main.app.router.routes.pop()
+    main.app.router.routes.insert(0, route)
     try:
         quiet = TestClient(main.app, base_url="https://testserver", raise_server_exceptions=False)
         answer = quiet.get("/api/test-only-explodes")
     finally:
-        main.app.router.routes.pop()
+        main.app.router.routes.remove(route)
 
     assert answer.status_code == 500
     assert answer.text == "Internal Server Error"
