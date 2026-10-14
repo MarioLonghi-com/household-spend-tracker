@@ -464,8 +464,10 @@ KEY_DOES_NOT_OPEN = 5
 ROWS_DROPPED = 6
 
 
-#: The report's mode: the `update` volume's group reads it (C11).
-REPORT_MODE = 0o660
+#: The report's mode: the `update` volume's group reads it (C11), and only
+#: reads it -- nothing but the drill writes it -- so no group write (CodeQL,
+#: on the 0.11.0 release; `app/services/updates.py` was already 0640).
+REPORT_MODE = 0o640
 
 
 def _write_report(path: pathlib.Path, outcome: dict) -> None:
@@ -477,8 +479,8 @@ def _write_report(path: pathlib.Path, outcome: dict) -> None:
     It is the updater's to read, through the `update` volume's group: under a
     rootless engine the updater is in-container root without capabilities,
     which cannot read a 0600 file the drill's user owns (#169's rootless
-    Podman leg, where every apply stalled at step 5). So 0660 whatever the
-    umask, as every other file the app writes there.
+    Podman leg, where every apply stalled at step 5). So 0640 whatever the
+    umask: the group reads, and only the drill writes.
     """
     from app import permissions
 
