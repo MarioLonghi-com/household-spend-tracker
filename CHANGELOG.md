@@ -67,6 +67,9 @@ history this repository does not have.
   replacement, so an engine that refused the create left no app running.
   It now sets the old one aside and puts it back if the create fails.
   (#335)
+- **The import queue shows when a file was staged in your own time
+  zone.** It showed the server's UTC time as if it were local, two hours
+  early in Madrid in summer, and disagreed with History. (#339)
 
 ### Security
 

@@ -26,6 +26,7 @@ import type {
 } from "../lib/types";
 import { IMPORT_OUTCOME_WORDS } from "../lib/labels";
 import { formatCount, formatLocale } from "../lib/locale";
+import { asInstant } from "../lib/time";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { detectedLabel } from "../lib/labels";
@@ -224,9 +225,15 @@ export function sortQueue(
   });
 }
 
-/** A staged-at stamp, in the words the refusal to re-stage a file uses. */
-function whenStaged(value: string): string {
-  const at = new Date(value);
+/**
+ * A staged-at stamp, in the words the refusal to re-stage a file uses.
+ *
+ * Through `asInstant`: the server's stamp is naive UTC, and a bare
+ * `new Date()` read it as local time -- two hours early in Madrid in summer,
+ * and not the time the History screen shows for the same import (#339).
+ */
+export function whenStaged(value: string): string {
+  const at = asInstant(value);
   if (Number.isNaN(at.getTime())) return value;
   return at.toLocaleString(formatLocale(), {
     day: "numeric",
