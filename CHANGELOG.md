@@ -70,6 +70,10 @@ history this repository does not have.
 - **The import queue shows when a file was staged in your own time
   zone.** It showed the server's UTC time as if it were local, two hours
   early in Madrid in summer, and disagreed with History. (#339)
+- **An update that has not come back after half an hour is checked once
+  a minute, not every three seconds.** The panel kept asking every three
+  seconds for as long as the tab stayed open. It still notices the app
+  coming back. (#340)
 
 ### Security
 
