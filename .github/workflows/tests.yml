@@ -789,8 +789,13 @@ jobs:
           BEFORE: ${{ steps.before.outputs.sha }}
           SPENDTRACKER_DATA_DIR: ./ci-data
           DATABASE_URL: sqlite:///./ci-data/rehearsal.sqlite3
+        # The folder first, as an installation that already exists has one:
+        # this asks whether an upgrade keeps the rows. A fresh install's
+        # first migrate is test_migrations.py's, which caught that the code
+        # before 0.11.0 could not make the folder itself.
         run: |
           git checkout --detach "$BEFORE"
+          mkdir -p "$SPENDTRACKER_DATA_DIR"
           python -m alembic upgrade head
           python -m scripts.seed_demo --reset --months 3
 
