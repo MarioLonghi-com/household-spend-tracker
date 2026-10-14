@@ -287,6 +287,7 @@ def unlink(session: Session, txn: Transaction) -> None:
     if not txn.transfer_transaction_id and not txn.transfer_account_id:
         raise Conflict("that transaction is not a transfer", code="transfer.not_a_transfer")
     other = session.get(Transaction, txn.transfer_transaction_id) if txn.transfer_transaction_id else None
+    rules = None
     for leg in (txn, other):
         if leg is None:
             continue
@@ -294,11 +295,20 @@ def unlink(session: Session, txn: Transaction) -> None:
         leg.transfer_transaction_id = None
         leg.transfer_fx_rate = None
         leg.link_source = None
-        leg.payee_id = (
-            payee_service.get_or_create(session, leg.household_id, leg.import_payee_original).id
-            if leg.import_payee_original
-            else None
+        if not leg.import_payee_original:
+            leg.payee_id = None
+            continue
+        # Through the household's rules, as the import did (#333): a rule
+        # that maps `PAGO MOVIL EN MERCADONA` to "Mercadona" says so here too,
+        # and a rewrite rule's candidate is the name made, rather than a new
+        # payee spelled the way the bank spelled it.
+        if rules is None:
+            rules = payee_service.load_rules(session, leg.household_id)
+        found = rules.resolve(leg.import_payee_original)
+        payee = found.payee or payee_service.get_or_create(
+            session, leg.household_id, found.candidate
         )
+        leg.payee_id = payee.id
     if other is not None:
         reject(session, txn, other)
     session.flush()

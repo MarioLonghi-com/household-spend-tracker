@@ -44,6 +44,10 @@ history this repository does not have.
   count as income in the reports, and merging a payee into it hid that
   payee's money as opening balances. Both are refused now; renaming either
   is still allowed. (#332)
+- **Unlinking a transfer names each row's payee through your payee
+  rules.** It made a new payee spelled exactly as the bank wrote it, so a
+  rule mapping a card descriptor to "Mercadona" was ignored and the payee
+  list gained a duplicate. (#333)
 
 ## 0.11.0 — 2026-10-14
 
