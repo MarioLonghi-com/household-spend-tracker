@@ -269,3 +269,33 @@ def test_a_column_the_code_calls_not_null_is_not_null():
     # `batches.actor_id` and `import_lines.raw` are both claimed and both true:
     # if the pattern silently stopped matching, the loop would pass by doing nothing.
     assert checked >= 2
+
+
+def test_upgrade_head_on_a_fresh_install_makes_the_ledgers_folder(tmp_path):
+    """`alembic upgrade head` into a folder that does not exist yet, as a
+    fresh install's first `make migrate` does. Since #317 the app makes its
+    data folder on first connection and Alembic's own engine never did, so
+    this failed with "unable to open database file" (the 0.11.0 rehearsal).
+    A process of its own, because that is how an operator runs it."""
+    import contextlib
+    import os
+    import sqlite3
+    import subprocess
+    import sys
+
+    data = tmp_path / "not" / "there" / "yet"
+    url = f"sqlite:///{data / 'spendtracker.sqlite3'}"
+    env = {k: v for k, v in os.environ.items() if not k.startswith("SPENDTRACKER_") and k != "DATABASE_URL"}
+    env.update(DATABASE_URL=url, SPENDTRACKER_DATA_DIR=str(data))
+    done = subprocess.run(
+        [sys.executable, "-m", "alembic", "upgrade", "head"],
+        cwd=ROOT, env=env, capture_output=True, text=True, timeout=300,
+    )
+    assert done.returncode == 0, done.stderr[-2000:]
+    with contextlib.closing(sqlite3.connect(data / "spendtracker.sqlite3")) as conn:
+        stamped = conn.execute("SELECT version_num FROM alembic_version").fetchone()[0]
+    from scripts.upgrade import chain
+
+    assert stamped == chain()[-1].revision
+    if os.name != "nt":
+        assert data.stat().st_mode & 0o777 == 0o700

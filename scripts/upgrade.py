@@ -81,6 +81,11 @@ import threading
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 VERSIONS = ROOT / "migrations" / "versions"
 
+#: How long the drill waits for a ledger another process is letting go of
+#: (`instance_lock.acquire`). Long enough for the updater to stop a previous
+#: version started by hand; a person at a terminal is refused after it.
+LEDGER_WAIT_SECONDS = 60.0
+
 #: Two spellings of the same declaration live in `migrations/versions/`: the
 #: four oldest files were generated when Alembic's template still wrote
 #: `Union[str, Sequence[str], None]`, and everything since writes
@@ -547,8 +552,10 @@ def run(port: int, *, yes: bool, report_to: pathlib.Path | None = None) -> int:
             )
         # The ledger itself, which is what the port stood for (#318), and the
         # only check the desktop app -- which has no port -- can answer.
+        # Waited for, briefly: a holder being stopped -- the updater stops a
+        # previous version somebody started by hand -- lets go a moment later.
         try:
-            instance_lock.acquire(settings.data_dir)
+            instance_lock.acquire(settings.data_dir, wait=LEDGER_WAIT_SECONDS)
         except instance_lock.LedgerBusy as busy:
             raise SystemExit(f"{busy}\n\nNothing was changed.") from None
         held.append(settings.data_dir)

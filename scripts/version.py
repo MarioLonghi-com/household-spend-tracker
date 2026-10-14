@@ -29,7 +29,7 @@ Run it:
     python -m scripts.version technical       # 0.1.0 -> 0.1.1
     python -m scripts.version --set 1.0.0     # exactly this
 
-It writes the three files and stops. It does not commit, does not tag and does
+It writes the files and stops. It does not commit, does not tag and does
 not touch the CHANGELOG: a release is a decision somebody makes, and a script
 that makes three of them at once is a script whose mistakes are three deep.
 """
@@ -52,6 +52,10 @@ PACKAGE_JSON = ROOT / "client" / "package.json"
 #: fourth copy saying the old number. Read and written as JSON: npm writes it as
 #: `json.dumps(..., indent=2)` plus a newline, so the round trip is byte-exact.
 PACKAGE_LOCK = ROOT / "client" / "package-lock.json"
+#: The desktop shell (#61) is released with the server, so its package and
+#: lockfile carry the same number: the store builds show it in About.
+DESKTOP_PACKAGE_JSON = ROOT / "desktop" / "package.json"
+DESKTOP_PACKAGE_LOCK = ROOT / "desktop" / "package-lock.json"
 
 #: Which SemVer field each of the review's three classes moves.
 CLASSES = {"major": 0, "minor": 1, "technical": 2}
@@ -73,16 +77,19 @@ def current() -> str:
 
 def declared() -> dict[str, str]:
     """What each copy says -- three files and the lockfile's two -- for the test that they agree."""
-    package = _PACKAGE_RE.search(PACKAGE_JSON.read_text())
     project = _PYPROJECT_RE.search(PYPROJECT.read_text())
-    lock = json.loads(PACKAGE_LOCK.read_text())
-    return {
+    found = {
         "app/__init__.py": current(),
         "pyproject.toml": project["version"] if project else "",
-        "client/package.json": package["version"] if package else "",
-        "client/package-lock.json": lock.get("version", ""),
-        'client/package-lock.json packages[""]': lock.get("packages", {}).get("", {}).get("version", ""),
     }
+    for package_json, package_lock in ((PACKAGE_JSON, PACKAGE_LOCK), (DESKTOP_PACKAGE_JSON, DESKTOP_PACKAGE_LOCK)):
+        where = package_json.parent.name
+        package = _PACKAGE_RE.search(package_json.read_text())
+        lock = json.loads(package_lock.read_text())
+        found[f"{where}/package.json"] = package["version"] if package else ""
+        found[f"{where}/package-lock.json"] = lock.get("version", "")
+        found[f'{where}/package-lock.json packages[""]'] = lock.get("packages", {}).get("", {}).get("version", "")
+    return found
 
 
 def bumped(version: str, kind: str) -> str:
@@ -107,13 +114,14 @@ def write(version: str) -> None:
     PYPROJECT.write_text(
         _PYPROJECT_RE.sub(f'version = "{version}"', PYPROJECT.read_text(), count=1)
     )
-    PACKAGE_JSON.write_text(
-        _PACKAGE_RE.sub(rf'\g<lead>{version}\g<tail>', PACKAGE_JSON.read_text(), count=1)
-    )
-    lock = json.loads(PACKAGE_LOCK.read_text())
-    lock["version"] = version
-    lock["packages"][""]["version"] = version
-    PACKAGE_LOCK.write_text(json.dumps(lock, indent=2) + "\n")
+    for package_json, package_lock in ((PACKAGE_JSON, PACKAGE_LOCK), (DESKTOP_PACKAGE_JSON, DESKTOP_PACKAGE_LOCK)):
+        package_json.write_text(
+            _PACKAGE_RE.sub(rf'\g<lead>{version}\g<tail>', package_json.read_text(), count=1)
+        )
+        lock = json.loads(package_lock.read_text())
+        lock["version"] = version
+        lock["packages"][""]["version"] = version
+        package_lock.write_text(json.dumps(lock, indent=2) + "\n")
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -22,6 +22,7 @@ from __future__ import annotations
 import contextlib
 import os
 import threading
+import time
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -60,8 +61,26 @@ def _try_lock(fd: int) -> bool:
     return True
 
 
-def acquire(directory: Path) -> None:
-    """Hold the ledger in `directory` for this process, or raise `LedgerBusy`."""
+def acquire(directory: Path, *, wait: float = 0.0) -> None:
+    """Hold the ledger in `directory` for this process, or raise `LedgerBusy`.
+
+    `wait` is how many seconds to keep trying while another process holds
+    it. For a holder that is on its way out: the updater stops a previous
+    version somebody started by hand, and its lock goes a moment after the
+    stop -- a drill that tried once in that moment refused the whole update
+    (the self-update E7 scenario on rootless Podman).
+    """
+    deadline = time.monotonic() + wait
+    while True:
+        try:
+            return _acquire_once(directory)
+        except LedgerBusy:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(min(0.25, max(0.0, deadline - time.monotonic())))
+
+
+def _acquire_once(directory: Path) -> None:
     directory = Path(directory).resolve()
     with _guard:
         if directory in _held:
