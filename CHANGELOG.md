@@ -32,6 +32,84 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.11.1 — 2026-10-14
+
+**Reversible: none** — no migration in this release. To go back to
+`0.11.0`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.11.0` and restart.
+
+The fixes from a review of 0.11.0. Two change figures a household sees: a
+split statement line could be imported a second time, and merging the
+"Opening balance" payee put opening balances into the income report. The
+rest harden the server and the self-updater, and tidy four things on screen.
+
+### Fixed
+
+- **A split statement line is not imported twice.** Splitting an imported
+  row gave the parts none of the line's identity, so sending an overlapping
+  statement again brought the split amount in a second time and moved the
+  balance. Every part now keeps the line's key, and the import skips it.
+  (#331)
+- **"Opening balance" and the transfer payee cannot be merged.** Merging
+  "Opening balance" into another payee made every account's opening balance
+  count as income in the reports, and merging a payee into it hid that
+  payee's money as opening balances. Both are refused now; renaming either
+  is still allowed. (#332)
+- **Unlinking a transfer names each row's payee through your payee
+  rules.** It made a new payee spelled exactly as the bank wrote it, so a
+  rule mapping a card descriptor to "Mercadona" was ignored and the payee
+  list gained a duplicate. (#333)
+- **An unexpected server error carries the security headers.** A 500
+  nothing else handled was answered outside the middleware that sets them,
+  so it went out with no content policy or framing protection. And an
+  address with an encoded NUL in it is the app's page, not a 500. (#336)
+- **Large uploads are read only for somebody signed in.** The receipt,
+  statement and agent batch endpoints accepted bodies of up to 32 MB from
+  anyone, and read them in full before saying "sign in first". Without a
+  live session or agent key they now take the ordinary 1 MB, and the
+  refusal says what would raise it. (#337)
+- **Resetting a password with a recovery code takes as long for an
+  unknown address as for a real one.** It answered both alike but did no
+  work for an address with no account, so the time taken said which
+  addresses were registered. This route is only offered by the desktop
+  app. (#338)
+- **Rejoining the app to a replaced network sidecar no longer risks
+  losing the app.** The updater removed the app before creating its
+  replacement, so an engine that refused the create left no app running.
+  It now sets the old one aside and puts it back if the create fails.
+  (#335)
+- **The import queue shows when a file was staged in your own time
+  zone.** It showed the server's UTC time as if it were local, two hours
+  early in Madrid in summer, and disagreed with History. (#339)
+- **An update that has not come back after half an hour is checked once
+  a minute, not every three seconds.** The panel kept asking every three
+  seconds for as long as the tab stayed open. It still notices the app
+  coming back. (#340)
+- **The authenticator's enrolment link is shown only when it is one.**
+  The Profile screen put whatever link the server sent into the page; it
+  now offers it only for an `otpauth://` address and otherwise shows the
+  secret alone. Nothing sends anything else today. (#342)
+- **The register no longer skips a row when somebody else deletes one
+  while you scroll.** The next 500 rows were asked for by position, so a
+  row deleted further up between two loads moved the boundary and one row
+  was on neither page. Each page now reaches back over the last rows in
+  hand, and the register starts again from the top if more went than
+  that. (#341)
+
+### Security
+
+- **The updater is held to its own installation, whatever its shared files
+  say.** The app and the updater share a volume by design, and a
+  compromised app could have written an update journal that pointed the
+  updater at another installation's ledger on the same machine, or at the
+  updater's own container. A container the updater creates may now mount
+  only this project's own volumes, never a volume with its own driver
+  settings; the updater never removes or stops its own container except
+  when handing over; it reads at most 4 MB of any file it shares with the
+  app; and a resumed update checks the new image's signature again before
+  it runs it. `SECURITY.md` now says what a compromised app can still do.
+  (#334)
+
 ## 0.11.0 — 2026-10-14
 
 **Reversible: none** — no migration in this release. To go back to

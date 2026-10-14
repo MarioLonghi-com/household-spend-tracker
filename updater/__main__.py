@@ -31,7 +31,7 @@ from pathlib import Path
 
 from updater import detect, heartbeat, hook, shapes, survey, trail
 from updater import engine as eng
-from updater.handover import Successions, identity_of, known_as, own_bind_sources
+from updater.handover import Successions, identity_of, known_as, own_bind_sources, own_volumes
 from updater.journal import Owner
 from updater.service import Service
 from updater.site import Kit, Site
@@ -89,6 +89,8 @@ def build(args: argparse.Namespace, trust: Trust) -> tuple[Kit, heartbeat.Identi
         client.scope = replace(
             client.scope,
             bind_sources=own_bind_sources(own, (args.socket, args.project_dir, args.hook)),
+            volumes=own_volumes(own),
+            own_id=own_id,
         )
     found = detect.detect(client)
     site = Site(

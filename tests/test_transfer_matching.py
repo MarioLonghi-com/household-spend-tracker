@@ -401,3 +401,40 @@ def test_linking_refuses_a_work_expense_and_a_payment(session, owner, household,
     session.refresh(into)
     assert out.transfer_transaction_id is None and into.transfer_transaction_id is None
     assert into.transfer_account_id is None
+
+
+def test_unlinking_resolves_the_bank_payee_through_the_households_rules(
+    session, owner, household, ledger
+):
+    """#333. The bank's words go through the rules on the way back, as they did on
+    the way in -- a mapped descriptor returns to its payee, a rewritten one to the
+    rewritten name -- rather than becoming a payee spelled as the bank spelled it."""
+    from app.models import MatchType, Payee, RuleAction
+    from app.services import payees as payee_service
+
+    with batch(session, kind=BatchKind.admin, actor_id=owner.id, household_id=household.id):
+        mercadona = payee_service.get_or_create(session, household.id, "Mercadona")
+        payee_service.create_rule(
+            session, household_id=household.id, match_type=MatchType.contains,
+            pattern="MERCADONA", payee=mercadona,
+        )
+        payee_service.create_rule(
+            session, household_id=household.id, match_type=MatchType.regex,
+            pattern=r"^BIZUM DE (.+)$", action=RuleAction.rewrite, replacement=r"\1",
+        )
+    out = _row(session, owner, household, ledger["current"], -4000, "PAGO MOVIL EN MERCADONA")
+    into = _row(session, owner, household, ledger["saver"], 4000, "BIZUM DE ANA LOPEZ")
+    _link(session, owner, household, out, into)
+
+    with batch(session, kind=BatchKind.manual, actor_id=owner.id, household_id=household.id):
+        transfers.unlink(session, into)
+
+    fold = payee_service.fold
+    assert out.payee_id == mercadona.id
+    assert fold(session.get(Payee, into.payee_id).name) == fold("ANA LOPEZ")
+    folded = {
+        fold(p.name)
+        for p in session.execute(select(Payee).where(Payee.household_id == household.id)).scalars()
+    }
+    assert fold("PAGO MOVIL EN MERCADONA") not in folded
+    assert fold("BIZUM DE ANA LOPEZ") not in folded

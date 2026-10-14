@@ -229,3 +229,45 @@ def test_u5_a_drill_still_running_after_a_restart_is_waited_for_and_carried_forw
         w.time.on_sleep = None
         record = w.history(req["id"])
         assert record["state"] == "succeeded" and w.ledger.stamp == B and w.ledger.drills == 1
+
+
+def test_a_resume_does_not_run_an_image_that_no_longer_verifies(tmp_path, monkeypatch):
+    """#334. The journal sits in the volume the app shares, so the digest a resume
+    reads back is not one the updater can vouch for. A resume that would carry
+    on from step 3 checks the new image again first; one that no longer
+    verifies is not started, and the app goes on as it was."""
+    from tests.updater_world import APP, ref
+
+    with World(tmp_path) as w:
+        service = w.service()
+        service.startup()
+        report = w.prepared(service)
+        req = w.apply_request(report)
+        w.write_request(req)
+        real = journal.save
+
+        def die_at_2a(vol, j):
+            real(vol, j)
+            if j.step == "2a":
+                raise Killed("2a")
+
+        monkeypatch.setattr(journal, "save", die_at_2a)
+        with pytest.raises(Killed):
+            service.tick()
+        monkeypatch.undo()
+        assert w.journal(req["id"]).step == "2a"
+
+        w.forged.add((APP, B))
+        before = len(w.fake.calls)
+        again = w.service()
+        again.startup()
+
+        record = w.history(req["id"])
+        assert record["state"] == "not_started", record["sentence"]
+        assert "no longer verifies" in record["sentence"]
+        new_image = ref(APP, B)
+        since = w.fake.calls[before:]
+        assert not [c for c in since if c.bare == "/containers/create" and c.body["Image"] == new_image]
+        assert w.ledger.drills == 0 and w.ledger.stamp == A
+        [app] = w.running_apps()
+        assert w.version_of(app) == A

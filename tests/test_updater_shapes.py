@@ -262,17 +262,20 @@ def test_every_ledger_one_off_has_no_network_and_passes_the_guard(role):
 
 
 def test_the_maintenance_page_is_the_old_image_where_the_app_listened_with_the_ledger_read_only():
-    body = shapes.placard(APP, OLD, RID, ledger_volume="l", update_volume="u", sidecar_id=None)
+    body = shapes.placard(APP, OLD, RID, ledger_volume="spike157_ledger", update_volume="spike157_update", sidecar_id=None)
     eng.guard_create(body, scope())
     host = body["HostConfig"]
     assert body["Image"] == OLD and body["Cmd"] == ["-m", "scripts.placard"]
     assert host["PortBindings"] == APP["HostConfig"]["PortBindings"]
     assert host["NetworkMode"] == APP["HostConfig"]["NetworkMode"]
-    assert host["Binds"] == ["u:/var/lib/spend-tracker-update:rw", "l:/var/lib/spend-tracker:ro"]
+    assert host["Binds"] == [
+        "spike157_update:/var/lib/spend-tracker-update:rw",
+        "spike157_ledger:/var/lib/spend-tracker:ro",
+    ]
     assert body["Labels"]["com.docker.compose.oneoff"] == "True"
     sidecar = app_of("docker-engine-rootful/sidecar.json")
     joined = shapes.placard(
-        sidecar, OLD, RID, ledger_volume="l", update_volume="u", sidecar_id="e" * 64, recovery=True
+        sidecar, OLD, RID, ledger_volume="spike157_ledger", update_volume="spike157_update", sidecar_id="e" * 64, recovery=True
     )
     assert joined["HostConfig"]["NetworkMode"] == "container:" + "e" * 64
     assert joined["Cmd"] == ["-m", "scripts.placard", "--recovery"]
@@ -284,7 +287,7 @@ def test_the_port_probe_runs_the_app_image_on_the_bridge_and_mounts_nothing():
     assert body["HostConfig"]["NetworkMode"] == "bridge" and "Binds" not in body["HostConfig"]
     assert body["Cmd"][-2:] == ["http://host.docker.internal:8848/api/health", "localhost:8848"]
     for bad in (
-        {**body, "HostConfig": {**body["HostConfig"], "Binds": ["l:/var/lib/spend-tracker"]}},
+        {**body, "HostConfig": {**body["HostConfig"], "Binds": ["spike157_ledger:/var/lib/spend-tracker"]}},
         {**body, "HostConfig": {**body["HostConfig"], "NetworkMode": "none"}},
         {**body, "Image": eng.REPOSITORIES[1] + "@sha256:" + "b" * 64},
     ):
@@ -293,7 +296,7 @@ def test_the_port_probe_runs_the_app_image_on_the_bridge_and_mounts_nothing():
 
 
 def test_a_one_off_without_a_role_or_a_request_and_a_role_on_a_service_are_refused():
-    body = shapes.oneoff(APP, NEW, "drill", RID, ["python"], ledger_volume="l")
+    body = shapes.oneoff(APP, NEW, "drill", RID, ["python"], ledger_volume="spike157_ledger")
     for labels in (
         {k: v for k, v in body["Labels"].items() if k != eng.ROLE_LABEL},
         {k: v for k, v in body["Labels"].items() if k != eng.REQUEST_LABEL},

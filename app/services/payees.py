@@ -397,6 +397,19 @@ def merge(session: Session, *, source: Payee, target: Payee) -> Payee:
         raise ValidationError(
             "those payees are in different households", code="payee.merge_different_households"
         )
+    # "Opening balance" and the transfer payee are what the reports read to
+    # leave those rows out of income and spending (`reporting.flow_rows`), and
+    # the mark lives on the payee, not on the row. Merged away, an account's
+    # opening balance became a month of income; merged into, a salary hid as
+    # an opening balance (#332). `delete_orphans` refuses them for the same
+    # reason. Renaming one is still fine -- the mark survives a rename.
+    for payee in (source, target):
+        if payee.system is not None:
+            raise ValidationError(
+                f"{payee.name!r} is a payee the app keeps for itself, so it cannot be "
+                "merged. Rename it if the name is the problem.",
+                code="payee.merge_system",
+            )
 
     from ..models import Transaction
 

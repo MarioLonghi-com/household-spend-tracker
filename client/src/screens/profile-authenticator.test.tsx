@@ -22,7 +22,7 @@ vi.mock("../lib/api", () => ({
 import { api } from "../lib/api";
 import { heldGrant, keepGrant } from "../lib/recoveryGrant";
 import type { User } from "../lib/types";
-import { Profile } from "./Profile";
+import { Profile, enrolmentHref } from "./Profile";
 import { SignIn } from "./SignIn";
 
 const JANE: User = {
@@ -254,5 +254,42 @@ describe("the profile in recovery mode", () => {
     // Nothing on the screen sends them to a recovery code: a step-up takes none.
     expect(said.textContent).not.toMatch(/use one of your recovery codes/i);
     expect(vi.mocked(api.post).mock.calls.map(([path]) => path)).toEqual(["/me/step-up"]);
+  });
+});
+
+describe("the enrolment link (#342)", () => {
+  it("is offered only for an otpauth URI; anything else shows the secret alone", () => {
+    expect(enrolmentHref(OFFER.uri)).toBe(OFFER.uri);
+    for (const bad of [
+      "javascript:alert(document.cookie)",
+      " otpauth://totp/x",
+      "OTPAUTH://totp/x",
+      "https://example.com/otpauth://totp/x",
+      "otpauth://hotp/x?secret=JBSWY3DPEHPK3PXP",
+      "",
+      null,
+      undefined,
+    ]) {
+      expect(enrolmentHref(bad)).toBeUndefined();
+    }
+  });
+
+  it("puts no link on the screen when the server sends something else", async () => {
+    server(false);
+    vi.mocked(api.post).mockImplementation(async (path: string) => {
+      if (path === "/me/authenticator") return { ...OFFER, uri: "javascript:alert(1)" };
+      throw new Error(`unexpected POST ${path}`);
+    });
+    profileFor(JANE);
+    await toTheOffer();
+    expect(screen.getByText(OFFER.secret)).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "the enrolment link" })).toBeNull();
+  });
+
+  it("links an otpauth URI as before", async () => {
+    server(false);
+    profileFor(JANE);
+    await toTheOffer();
+    expect(screen.getByRole("link", { name: "the enrolment link" }).getAttribute("href")).toBe(OFFER.uri);
   });
 });

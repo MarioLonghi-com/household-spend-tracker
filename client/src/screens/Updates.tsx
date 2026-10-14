@@ -207,6 +207,12 @@ export const APPLY_POLL_MS = 2_000;
 export const HEALTH_POLL_MS = 3_000;
 /** When the panel stops only waiting and points at the recovery page. */
 export const NOT_BACK_AFTER_MS = 30 * 60 * 1_000;
+/**
+ * And how often it still asks after that (#340): every three seconds for a
+ * tab left open overnight was some 29,000 requests a day at a machine that
+ * may be mid-recovery. A minute still notices the app coming back.
+ */
+export const NOT_BACK_POLL_MS = 60_000;
 
 function numbers(version: string): number[] {
   return version.split(".").map((part) => Number(part) || 0);
@@ -1281,8 +1287,9 @@ export function Updating({
         // Still away.
       }
       if (stopped) return;
-      if (awaySince !== null && Date.now() - awaySince >= NOT_BACK_AFTER_MS) setNotBack(true);
-      later(HEALTH_POLL_MS);
+      const longGone = awaySince !== null && Date.now() - awaySince >= NOT_BACK_AFTER_MS;
+      if (longGone) setNotBack(true);
+      later(longGone ? NOT_BACK_POLL_MS : HEALTH_POLL_MS);
     }
 
     later(APPLY_POLL_MS);

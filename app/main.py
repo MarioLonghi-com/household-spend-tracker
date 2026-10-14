@@ -19,7 +19,12 @@ from urllib.parse import urlsplit
 from fastapi import FastAPI, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import (
+    FileResponse,
+    JSONResponse,
+    PlainTextResponse,
+    RedirectResponse,
+)
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import OperationalError
 from starlette.background import BackgroundTask
@@ -638,7 +643,17 @@ async def add_security_headers(request: Request, call_next):
     rather than sitting inside them. Anything added after this line would run
     outside it, and its refusals would go out bare.
     """
-    response = await call_next(request)
+    return _with_security_headers(request, await call_next(request))
+
+
+def _with_security_headers(request: Request, response: Response) -> Response:
+    """The headers `add_security_headers` sets, for any response it did not see.
+
+    The middleware's own path, and `handle_unexpected`'s: an exception no
+    handler claimed passes *out through* the middleware, and Starlette answers
+    it from `ServerErrorMiddleware`, which sits outside every middleware this
+    file adds -- so before #336 every 500 went out with none of them.
+    """
     headers = SNAP_SECURITY_HEADERS if _is_snap(request.url.path) else BASE_SECURITY_HEADERS
     for name, value in headers.items():
         response.headers.setdefault(name, value)
@@ -782,6 +797,20 @@ def handle_operational_error(request: Request, exc: OperationalError) -> JSONRes
 
 #: What a request refused for a busy database is told.
 LEDGER_BUSY = "the ledger is busy with another change at this moment; try again"
+
+
+@app.exception_handler(Exception)
+def handle_unexpected(request: Request, exc: Exception) -> Response:
+    """Any exception nothing else claimed: the same bare 500 as before, with the
+    security headers on it (#336).
+
+    Starlette runs this from `ServerErrorMiddleware`, outermost, and then
+    re-raises -- so the traceback still reaches the log exactly as it did, and
+    a test client still sees the exception. Only the response changes.
+    """
+    return _with_security_headers(
+        request, PlainTextResponse("Internal Server Error", status_code=500)
+    )
 
 
 @app.exception_handler(UnreadableStatement)
@@ -1059,6 +1088,10 @@ if _static.exists():  # pragma: no cover - only present once the client is built
         """
         if path == "api" or path.startswith("api/"):
             return JSONResponse(status_code=404, content={"detail": _NO_SUCH_ENDPOINT})
+        # A NUL decoded from `%00` makes `resolve()` raise rather than answer
+        # (#336). No file in the build has one, so it is just an unknown path.
+        if "\x00" in path:
+            return FileResponse(_static / "index.html")
         candidate = (_static / path).resolve()
         if candidate.is_file() and candidate.is_relative_to(_static_root):
             return FileResponse(candidate)

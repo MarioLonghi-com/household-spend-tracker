@@ -169,24 +169,34 @@ def check_code(session: Session, engine, user: User, code: str, *, ip: str | Non
     ratelimit.release(engine, held)
 
 
-def match_recovery_code(session: Session, user: User, code: str) -> RecoveryCode | None:
+def match_recovery_code(session: Session, user: User | None, code: str) -> RecoveryCode | None:
     """The unused recovery code this is, if any. Spends nothing.
 
     Every unused code is checked, so the time taken does not say which one
-    matched -- or whether any did.
+    matched -- or whether any did. And never fewer checks than a full set is
+    issued with (#338): the shortfall is made up against the dummy hash, so an
+    address with no account, or one whose codes are spent, costs what one
+    with every code left costs. Before, an unknown address cost nothing and a
+    known one a verify per code, on a route that answers both alike.
     """
+    from .setup import recovery_code_count
+
     candidate = (code or "").strip().replace(" ", "").replace("-", "")
-    unused = list(
-        session.execute(
-            select(RecoveryCode).where(
-                RecoveryCode.user_id == user.id, RecoveryCode.used_at.is_(None)
-            )
-        ).scalars()
-    )
+    unused: list[RecoveryCode] = []
+    if user is not None:
+        unused = list(
+            session.execute(
+                select(RecoveryCode).where(
+                    RecoveryCode.user_id == user.id, RecoveryCode.used_at.is_(None)
+                )
+            ).scalars()
+        )
     matched = None
     for row in unused:
         if passwords.verify_password(row.code_hash, candidate) and matched is None:
             matched = row
+    for _ in range(recovery_code_count() - len(unused)):
+        passwords.verify_password(None, candidate)
     return matched
 
 
@@ -261,7 +271,7 @@ def check_recovery_code_for_password(
     except Exception:
         canonical = (email or "").strip().lower()[: email_canonical.MAX_LENGTH]
     held = ratelimit.reserve(engine, email_canonical=canonical, ip=ip, kind="recovery")
-    matched = match_recovery_code(session, user, code) if user is not None else None
+    matched = match_recovery_code(session, user, code)
     if user is None or matched is None:
         raise Unauthorized(
             "that recovery code is not right, or has already been used",

@@ -30,7 +30,7 @@ vi.mock("../lib/api", () => ({
 }));
 
 import { api } from "../lib/api";
-import { REGISTER_PAGE, Register } from "./Register";
+import { PAGE_OVERLAP, REGISTER_PAGE, Register } from "./Register";
 import type { Household } from "../lib/types";
 
 afterEach(() => {
@@ -70,10 +70,12 @@ function row(index: number) {
 const LEDGER = Array.from({ length: COUNT }, (_, index) => row(index));
 
 let asked: URLSearchParams[] = [];
+//: Rows another member has deleted since the register first asked.
+const gone = new Set<string>();
 
 /** The fake server's order: by date or by amount, largest first under desc. */
 function order(params: URLSearchParams) {
-  const sorted = [...LEDGER];
+  const sorted = LEDGER.filter((one) => !gone.has(one.id));
   if (params.get("sort") === "amount") sorted.sort((a, b) => b.amount - a.amount);
   if (params.get("direction") === "asc") sorted.reverse();
   return sorted;
@@ -95,6 +97,7 @@ beforeEach(() => {
   vi.stubGlobal("IntersectionObserver", Unseen);
   window.localStorage.clear();
   asked = [];
+  gone.clear();
   vi.mocked(api.get).mockReset();
   vi.mocked(api.get).mockImplementation(((path: string) => {
     if (path.includes("/transactions?")) {
@@ -106,10 +109,10 @@ beforeEach(() => {
       const transactions = sorted.slice(offset, offset + limit);
       return Promise.resolve({
         transactions,
-        total: COUNT,
+        total: sorted.length,
         has_running_balance: false,
-        capped: COUNT > offset + transactions.length,
-        needs_category: COUNT,
+        capped: sorted.length > offset + transactions.length,
+        needs_category: sorted.length,
       });
     }
     if (path.endsWith("/reports/currencies"))
@@ -167,16 +170,20 @@ describe("the register's pages", () => {
 
     fireEvent.click(moreButton()!);
     await screen.findByText("row 500");
-    expect(asked.map((one) => one.get("offset"))).toEqual(["0", "500"]);
+    // Each next page reaches back over the last rows in hand (#341).
+    const second = String(REGISTER_PAGE - PAGE_OVERLAP);
+    expect(asked.map((one) => one.get("offset"))).toEqual(["0", second]);
     expect(asked[1].get("sort")).toBe("date");
+    // Five hundred and the 475 new ones the second page brought.
     expect(document.querySelector(".register-count")?.textContent).toContain(
-      "the first 1,000 loaded",
+      "the first 975 loaded",
     );
 
     await drawEverythingInHand();
     fireEvent.click(moreButton()!);
     await screen.findByText("row 1000");
-    expect(asked.map((one) => one.get("offset"))).toEqual(["0", "500", "1000"]);
+    const third = String(2 * (REGISTER_PAGE - PAGE_OVERLAP));
+    expect(asked.map((one) => one.get("offset"))).toEqual(["0", second, third]);
     await drawEverythingInHand();
     // Everything in hand: no more to ask for, and the count is the plain one.
     expect(moreButton()).toBeNull();
@@ -206,5 +213,43 @@ describe("the register's pages", () => {
     expect(document.querySelector(".register-count")?.textContent).toContain(
       "the first 500 loaded",
     );
+  });
+
+  it("loses no row when another member deletes some above the boundary between two pages (#341)", async () => {
+    mount();
+    await screen.findByText("row 0");
+    await drawEverythingInHand();
+    // Ten rows of page one go, elsewhere, before page two is asked for: by
+    // offset alone, rows 500 to 509 would now be on neither page.
+    for (let index = 100; index < 110; index += 1) gone.add(`txn-${index}`);
+
+    fireEvent.click(moreButton()!);
+    await screen.findByText("row 500");
+    await drawEverythingInHand();
+    const shown = new Set(
+      [...document.querySelectorAll(".register-card tbody tr")].map((tr) => tr.textContent ?? ""),
+    );
+    for (let index = 495; index < 520; index += 1) {
+      expect([...shown].some((text) => text.includes(`row ${index}`)), `row ${index}`).toBe(true);
+    }
+    expect(asked).toHaveLength(2);
+  });
+
+  it("starts again from the first page when more went than the overlap covers", async () => {
+    mount();
+    await screen.findByText("row 0");
+    await drawEverythingInHand();
+    for (let index = 100; index < 100 + 2 * PAGE_OVERLAP; index += 1) gone.add(`txn-${index}`);
+
+    fireEvent.click(moreButton()!);
+    // The second page shares no row with the first: the whole register is
+    // asked for again, from the top, and row 500 is not skipped.
+    await waitFor(() => expect(asked.filter((one) => one.get("offset") === "0")).toHaveLength(2));
+    await screen.findByText("row 500");
+    await drawEverythingInHand();
+    expect(screen.queryByText("row 100")).toBeNull();
+    for (const index of [499, 500, 501, 549, 550]) {
+      expect(screen.getByText(`row ${index}`)).toBeTruthy();
+    }
   });
 });

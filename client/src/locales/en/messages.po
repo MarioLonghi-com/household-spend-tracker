@@ -3751,6 +3751,11 @@ msgstr "A payee cannot be merged into itself"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.payee.merge_system"
+msgstr "That is a payee the app keeps for itself, so it cannot be merged. Rename it if the name is the problem"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.payee.needs_name"
 msgstr "A payee needs a name"
 
