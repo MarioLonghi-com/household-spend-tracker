@@ -32,6 +32,17 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.11.1 — 2026-10-14
+
+**Reversible: none** — no migration in this release. To go back to
+`0.11.0`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.11.0` and restart.
+
+The fixes from a review of 0.11.0. Two change figures a household sees: a
+split statement line could be imported a second time, and merging the
+"Opening balance" payee put opening balances into the income report. The
+rest harden the server and the self-updater, and tidy four things on screen.
+
 ### Fixed
 
 - **A split statement line is not imported twice.** Splitting an imported
