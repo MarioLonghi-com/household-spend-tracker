@@ -103,13 +103,17 @@ class GuardedDatasette:
 
     def __init__(self) -> None:
         self._inner: Any = None
+        #: The snapshot the cached viewer was built on. A different path --
+        #: only ever a test's -- builds a new one rather than serving the old
+        #: file, which on Windows stays open for as long as the viewer lives.
+        self._built_on: Path | None = None
         self._lock = asyncio.Lock()
 
     async def _datasette(self) -> Any:
-        if self._inner is not None:
+        if self._inner is not None and self._built_on == snapshot_path():
             return self._inner
         async with self._lock:
-            if self._inner is None:
+            if self._inner is None or self._built_on != snapshot_path():
                 try:
                     from datasette.app import Datasette
                 except ImportError as exc:
@@ -136,6 +140,7 @@ class GuardedDatasette:
                 )
                 await ds.invoke_startup()
                 self._inner = ds.app()
+                self._built_on = snapshot_path()
         return self._inner
 
     async def __call__(self, scope: dict, receive: Any, send: Any) -> None:

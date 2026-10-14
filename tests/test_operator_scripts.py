@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import base64
 import dataclasses
+import gc
 import logging
 import secrets
 import sqlite3
@@ -435,6 +436,10 @@ def _stop_the_app(client) -> None:
 
     client.__exit__(None, None, None)
     db.engine.dispose()
+    # A connection the pool no longer holds but nothing has collected yet --
+    # one kept alive by a reference cycle -- still has the file open, and
+    # Windows will not rename an open file (found on the Windows CI leg, #315).
+    gc.collect()
 
 
 def test_reset_backs_up_then_moves_the_ledger_and_key_aside(client, monkeypatch, tmp_path):

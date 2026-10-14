@@ -1547,6 +1547,23 @@ def test_the_running_balance_is_withheld_under_any_other_sort(client):
 # --------------------------------------------------------------------------- #
 
 
+@pytest.fixture()
+def own_snapshot(monkeypatch, tmp_path):
+    """A snapshot file for this test alone.
+
+    `snapshot_path()` is under the worker's data directory, shared by every
+    test the worker runs, and the viewer an earlier test built keeps that file
+    open -- which Windows will not let the next test delete or rebuild (found
+    on the Windows CI leg, #315). Each test gets its own; the viewer builds
+    afresh for a path it has not seen.
+    """
+    import app.api.dbview as dbview
+
+    own = tmp_path / "snapshot.sqlite3"
+    monkeypatch.setattr(dbview, "snapshot_path", lambda: own)
+    return own
+
+
 def _build_snapshot(client) -> None:
     """The snapshot the view serves, built the way `make snapshot` builds it."""
     import app.api.dbview as dbview
@@ -1558,7 +1575,7 @@ def _build_snapshot(client) -> None:
     build(source, dbview.snapshot_path())
 
 
-def test_the_database_browser_refuses_a_signed_out_browser(client):
+def test_the_database_browser_refuses_a_signed_out_browser(client, own_snapshot):
     """Datasette has no authentication of its own and will run arbitrary
     read-only SQL for whoever reaches it. Mounted here it gets the app's."""
     _setup_owner(client)
@@ -1571,7 +1588,7 @@ def test_the_database_browser_refuses_a_signed_out_browser(client):
         assert "sign in" in refused.json()["detail"]
 
 
-def test_the_database_browser_refuses_a_member(client):
+def test_the_database_browser_refuses_a_member(client, own_snapshot):
     """Raw tables have no notion of household: `transactions` is every
     household at once, so the 404-not-403 scoping the API relies on does not
     apply here. An owner already sees them all; a member must not."""
@@ -1587,7 +1604,7 @@ def test_the_database_browser_refuses_a_member(client):
     assert "only the owner" in refused.json()["detail"]
 
 
-def test_the_database_browser_serves_the_owner_a_redacted_snapshot(client):
+def test_the_database_browser_serves_the_owner_a_redacted_snapshot(client, own_snapshot):
     """And never the live file: an owner reading their own ledger is expected,
     an owner pulling argon2 hashes out of a web console is not."""
     _setup_owner(client)
@@ -1610,7 +1627,7 @@ def test_the_database_browser_serves_the_owner_a_redacted_snapshot(client):
     assert all(r["password_hash"] == "-- redacted --" for r in console.json())
 
 
-def test_the_database_browser_is_not_mounted_without_a_snapshot(client):
+def test_the_database_browser_is_not_mounted_without_a_snapshot(client, own_snapshot):
     """Nothing is served until somebody deliberately builds one."""
     import app.api.dbview as dbview
 
@@ -1622,7 +1639,7 @@ def test_the_database_browser_is_not_mounted_without_a_snapshot(client):
     assert "snapshot" in missing.json()["detail"]
 
 
-def test_the_database_browser_says_so_when_datasette_is_not_installed(client, monkeypatch):
+def test_the_database_browser_says_so_when_datasette_is_not_installed(client, monkeypatch, own_snapshot):
     """`datasette` is a dev dependency, and the /db viewer is the one thing that
     needs it.
 
@@ -1633,7 +1650,6 @@ def test_the_database_browser_says_so_when_datasette_is_not_installed(client, mo
     """
     import builtins
 
-    import app.api.dbview as dbview
 
     _setup_owner(client)
     _build_snapshot(client)
@@ -1646,9 +1662,8 @@ def test_the_database_browser_says_so_when_datasette_is_not_installed(client, mo
         return real_import(name, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "__import__", without_datasette)
-    # The instance caches the built Datasette, so a viewer already constructed
-    # by an earlier test would never reach the import at all.
-    monkeypatch.setattr(dbview.GuardedDatasette, "_inner", None, raising=False)
+    # The viewer builds afresh for this test's own snapshot (`own_snapshot`),
+    # so the import is reached even if an earlier test built one.
 
     answer = client.get("/db/snapshot")
     assert answer.status_code == 501

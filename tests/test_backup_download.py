@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import base64
 import contextlib
+import gc
 import hashlib
 import io
 import json
@@ -418,6 +419,10 @@ def _stop_the_app(client) -> None:
 
     client.__exit__(None, None, None)
     db.engine.dispose()
+    # A connection the pool no longer holds but nothing has collected yet --
+    # one kept alive by a reference cycle -- still has the file open, and
+    # Windows will not rename an open file (found on the Windows CI leg, #315).
+    gc.collect()
 
 
 def _change_the_live_ledger(client) -> None:

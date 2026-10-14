@@ -393,7 +393,11 @@ def test_retry_from_the_page_brings_the_previous_version_back(recovering):
     unlock(page)
     w.restore_fails = 0
     resp, body = page.post("/recovery/act", {"csrf": page.csrf(), "kind": "retry_rollback"})
-    assert resp.status == 202 and "Accepted" in body.decode()
+    # The page shows the updater's newest sentence: "Accepted" when it reads
+    # the answer at once, the outcome when the retry finished first -- which a
+    # fast runner does (found on the macOS leg). Either way it is the 202 page
+    # that stops while the updater works, and the end state is asserted below.
+    assert resp.status == 202 and "This page stops while the updater works" in body.decode()
     deadline = time.time() + 20
     while time.time() < deadline and (w.history(req["id"]) or {}).get("state") != "rolled_back":
         time.sleep(0.05)
