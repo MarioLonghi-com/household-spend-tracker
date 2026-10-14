@@ -24,6 +24,11 @@ from tests.conftest import HEADERS, _setup_owner, _stamp_head
 
 SHARED = stat.S_IRWXG | stat.S_IRWXO
 
+#: Permission bits are what these tests assert, and on Windows they mean
+#: nothing (`app.permissions.MODE_BITS_MEAN_ACCESS`). What the app does there
+#: instead is in `tests/test_portability.py`, which runs everywhere.
+pytestmark = pytest.mark.skipif(os.name == "nt", reason="POSIX permission bits; Windows access is an ACL")
+
 
 @pytest.fixture()
 def permissive_umask():

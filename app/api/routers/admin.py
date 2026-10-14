@@ -53,6 +53,10 @@ from ...services import users as user_service
 from ..deps import OwnerOnly, SessionDep, public_origin
 
 router = APIRouter(tags=["admin"], prefix="/admin")
+#: Issuing and withdrawing account resets (#286): their own router so that a
+#: deployment without them -- the desktop app, where there is nobody to send a
+#: link to -- leaves them out whole (`app.capabilities`, #316).
+resets_router = APIRouter(tags=["admin"], prefix="/admin")
 
 log = logging.getLogger("spendtracker")
 
@@ -144,7 +148,7 @@ def set_role(user_id: str, body: SetRole, session: SessionDep, owner: OwnerOnly)
 # every owner, in `sign-in-changes` below, which reads the audit log.
 
 
-@router.post("/users/{user_id}/reset", response_model=ResetIssued, status_code=201)
+@resets_router.post("/users/{user_id}/reset", response_model=ResetIssued, status_code=201)
 def issue_reset(
     user_id: str, body: ResetIssue, request: Request, session: SessionDep, owner: OwnerOnly
 ) -> ResetIssued:
@@ -184,14 +188,14 @@ def _pending_out(session, reset: AccountReset, now: datetime) -> PendingResetOut
     )
 
 
-@router.get("/resets", response_model=list[PendingResetOut])
+@resets_router.get("/resets", response_model=list[PendingResetOut])
 def list_resets(session: SessionDep, owner: OwnerOnly) -> list[PendingResetOut]:
     """Every link not yet followed or withdrawn, lapsed ones marked."""
     now = utcnow()
     return [_pending_out(session, one, now) for one in reset_service.pending(session)]
 
 
-@router.delete("/resets/{reset_id}", status_code=204)
+@resets_router.delete("/resets/{reset_id}", status_code=204)
 def withdraw_reset(reset_id: str, session: SessionDep, owner: OwnerOnly) -> Response:
     """The link stops working. The account stays shut: the way in is a new link."""
     reset = reset_service.get(session, reset_id)
@@ -434,7 +438,7 @@ def _bundle_response(name: str, owner: User, *, with_key: bool) -> FileResponse:
             version=__version__,
             repository=platform_service.REPOSITORY,
             # Read now, not bound at import: see `platform._settings`.
-            secret_key=config.settings.secret_key if with_key else None,
+            secret_key=config.settings.key() if with_key else None,
         )
     except backup_bundle.BundleRefused as refused:
         raise ValidationError(str(refused)) from refused

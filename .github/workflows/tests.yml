@@ -93,6 +93,8 @@ jobs:
       audit: ${{ steps.diff.outputs.audit }}
       lock: ${{ steps.diff.outputs.lock }}
       selfupdate: ${{ steps.diff.outputs.selfupdate }}
+      desktop: ${{ steps.diff.outputs.desktop }}
+      desktopapp: ${{ steps.diff.outputs.desktopapp }}
       tree: ${{ steps.green.outputs.tree }}
       # The id of an earlier successful run of this workflow on the identical
       # tree, or empty. The heavy jobs skip when it is set.
@@ -186,7 +188,7 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
         run: |
-          jobs="python client code image rehearsal audit lock selfupdate"
+          jobs="python client code image rehearsal audit lock selfupdate desktop desktopapp"
           everything() {
             echo "$1: everything runs"
             for job in $jobs; do echo "$job=true" >> "$GITHUB_OUTPUT"; done
@@ -216,8 +218,11 @@ jobs:
           ^client/src/lib/appearance\.ts$
           PATHS
 
+          # desktop/src too: the shell's words are extracted into the
+          # client's catalogs (#62), so the catalogs check owes a run for them.
           decide client <<'PATHS'
           ^client/
+          ^desktop/src/
           PATHS
 
           # e2e: anything that changes what a browser sees or what serves it.
@@ -262,7 +267,7 @@ jobs:
           # thing to say: whether this change pinned something known to be bad.
           decide audit <<'PATHS'
           ^requirements[^/]*\.txt$
-          ^client/package(-lock)?\.json$
+          ^(client|desktop)/package(-lock)?\.json$
           PATHS
 
           # Whether the locks are what their `.in` files compile to. Either
@@ -284,6 +289,26 @@ jobs:
           ^migrations/
           ^(Dockerfile|compose\.yaml|requirements(-updater)?\.txt)$
           ^tests/self_update/
+          PATHS
+
+          # The suite on macOS and Windows (#315): what the desktop app runs
+          # outside a container -- the backend, the statement readers, the
+          # scripts it calls in-process, the migrations -- and the tests and
+          # dependencies that check it there.
+          decide desktop <<'PATHS'
+          ^(app|statements|scripts|migrations|tests)/
+          ^requirements(-dev)?\.txt$
+          ^(pyproject\.toml|alembic\.ini)$
+          PATHS
+
+          # The packaged desktop app (#61): the shell, everything frozen into
+          # its backend, the client it serves, and what builds them.
+          decide desktopapp <<'PATHS'
+          ^desktop/
+          ^(app|statements|migrations|client)/
+          ^scripts/(desktop_build|backup|upgrade|build_stamp)\.py$
+          ^requirements(-desktop)?\.txt$
+          ^alembic\.ini$
           PATHS
 
   # --------------------------------------------------------------------------- #
@@ -331,7 +356,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install "$(grep -oE '^ruff==[^ ]+' requirements-dev.txt)"
       - name: ruff
-        run: ruff check app/ statements/ updater/ tests/ scripts/
+        run: ruff check app/ statements/ updater/ tests/ scripts/ desktop/
       - name: no bulk statements against audited tables
         run: ./scripts/no-bulk-statements.sh
 
@@ -451,6 +476,146 @@ jobs:
         env:
           SPENDTRACKER_DATA_DIR: ./ci-data
           DATABASE_URL: sqlite:///./ci-data/seed.sqlite3
+
+  # The same suite on the two operating systems the desktop app ships for
+  # (#49). Everything above runs on Linux, where the server and the image do;
+  # the desktop runs this code on an Apple Silicon Mac and on Windows 11, where
+  # nothing had ever run it, and the first look found two things that only
+  # broke there (#315). `PYTHONUTF8=1` because that is how the desktop shell
+  # starts the backend, and how Windows reads text the way Linux does. No
+  # coverage here: the threshold is the Linux job's, and a test skipped for
+  # being POSIX-only would only move the number.
+  pytest-desktop-os:
+    needs: changes
+    if: needs.changes.outputs.desktop == 'true' && needs.changes.outputs.green == ''
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, windows-latest]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install --require-hashes -r requirements-dev.txt
+      # The launcher's shellcheck test fails rather than skips in CI, and only
+      # the Linux runner image carries shellcheck.
+      - name: shellcheck
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then brew install shellcheck; else choco install shellcheck -y --no-progress; fi
+          shellcheck --version | head -2
+      - name: pytest
+        run: python -m pytest -n auto --dist loadfile --no-cov -ra
+        env:
+          PYTHONUTF8: "1"
+          SPENDTRACKER_DATA_DIR: ./ci-data
+
+  # The desktop app, packaged (#61): the shell's own tests, then a real build
+  # on each OS it ships for -- the client, the backend frozen from the hashed
+  # lock, the shell, electron-builder -- then the packaged app driven end to
+  # end in English and the pseudo-locale, and a ledger made by the last
+  # release opened by this frozen backend, its rows counted before and after.
+  #
+  # Unsigned: an ad-hoc signature on the Mac, none on Windows. Store signing is
+  # #63's, in the protected `release` environment. The Mac App Store build is
+  # made and kept but not run here: a sandboxed app will not start without a
+  # provisioning profile, and that is a secret.
+  desktop-app:
+    needs: changes
+    if: needs.changes.outputs.desktopapp == 'true' && needs.changes.outputs.green == ''
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            target: mac
+          - runner: windows-latest
+            target: win
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    env:
+      PYTHONUTF8: "1"
+      # electron-builder signs with any identity it finds; a runner has none,
+      # and an ad-hoc signature is what an unsigned Apple Silicon app needs.
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          # The last release's tag, for the rehearsal.
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            desktop/package-lock.json
+      - run: pip install --require-hashes -r requirements-desktop.txt
+      - run: npm ci
+        working-directory: client
+      - run: npm ci
+        working-directory: desktop
+      - name: the shell's own tests
+        run: npm run typecheck && npm test
+        working-directory: desktop
+      - name: build
+        run: python -m scripts.desktop_build ${{ matrix.target }}
+      - name: the Mac App Store build, unsigned
+        if: matrix.target == 'mac'
+        run: python -m scripts.desktop_build mas --from 6
+      - name: the packaged app, end to end
+        run: npm run smoke
+        working-directory: desktop
+      - name: a ledger from the last release, opened by this backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The newest release by version: the tags are on `main`, so a
+          # describe from a commit on `dev` reaches none of them.
+          tag="$(git tag -l 'v*' --sort=-v:refname | head -1)"
+          echo "the last release is $tag"
+          git worktree add --detach ../before "$tag"
+          python -m venv ../before-venv
+          py="$(cd ../before-venv && pwd)/bin/python"
+          [ -x "$py" ] || py="$(cd ../before-venv && pwd)/Scripts/python.exe"
+          "$py" -m pip install --quiet --require-hashes -r ../before/requirements.txt
+          export SPENDTRACKER_DATA_DIR="$RUNNER_TEMP/rehearsal/ledger"
+          export DATABASE_URL="sqlite:///$SPENDTRACKER_DATA_DIR/spendtracker.sqlite3"
+          (cd ../before && "$py" -m alembic upgrade head && "$py" -m scripts.seed_demo --reset --months 3 > /dev/null)
+          unset DATABASE_URL
+          exe=build/backend/spend-tracker-backend/spend-tracker-backend
+          [ -f "$exe.exe" ] && exe="$exe.exe"
+          data="$SPENDTRACKER_DATA_DIR"
+          unset SPENDTRACKER_DATA_DIR
+          python desktop/rehearse_backend.py "$exe" "$data"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: desktop-${{ matrix.target }}
+          path: |
+            desktop/dist/*.appx
+            desktop/dist/mac-arm64/
+            desktop/dist/mas-dev-arm64/
+          if-no-files-found: ignore
+          retention-days: 7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: failure()
+        with:
+          name: desktop-${{ matrix.target }}-failure
+          path: desktop/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
 
   # The type check, the client's unit tests (vitest: the pre-commit hook ran
   # them and CI never did) and the build. `npm run build` is the client check,
@@ -733,7 +898,7 @@ jobs:
       # set an install gets (#46).
       - name: python dependencies
         continue-on-error: true
-        run: pip-audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt
+        run: pip-audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt -r requirements-desktop.txt
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
         with:
@@ -744,6 +909,10 @@ jobs:
         continue-on-error: true
         run: npm audit --audit-level=high
         working-directory: client
+      - name: desktop dependencies
+        continue-on-error: true
+        run: npm audit --audit-level=high
+        working-directory: desktop
 
   # What this pull request *adds*: a new or bumped dependency (pip, npm or a
   # workflow's action) with a known high-severity advisory fails here, from
@@ -1271,6 +1440,8 @@ jobs:
       - lint
       - repo-wide
       - pytest
+      - pytest-desktop-os
+      - desktop-app
       - client
       - e2e
       - rehearsal

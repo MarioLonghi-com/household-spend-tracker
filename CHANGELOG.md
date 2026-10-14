@@ -32,6 +32,157 @@ history this repository does not have.
 
 ## Unreleased
 
+### Added
+
+- **A slow step says it is still going.** The YNAB import's four steps show
+  a banner with a spinner, and after a few seconds the time so far and "keep
+  this window open", where they showed a grey line. A large budget takes
+  minutes, and looked stuck. (Found testing the desktop app, #62)
+- **The desktop app has a right-click menu**: Cut, Copy, Paste and Select all
+  in a field, Copy for a selection, Copy link on a link, and spelling
+  suggestions, in the window's language. Electron shows none unless the app
+  builds one. (Found testing the desktop app, #62)
+
+- **The desktop app.** `desktop/` is the Electron shell for the Mac App
+  Store (Apple Silicon) and the Microsoft Store (Windows 11 x64): one window on
+  `app://localhost`, every request forwarded to the frozen backend, no port
+  opened. It shows "Opening your ledger…" while the backend starts and
+  "Upgrading your ledger…" while it migrates, and a dialog for a ledger a
+  newer version wrote, an upgrade that cannot be undone (asked first), or one
+  that failed. A second launch focuses the first window; closing it quits.
+  The File menu backs up now, restores from a backup, chooses the backups
+  folder and shows it and the ledger's. A backup is a bare `.sqlite3` in a
+  folder the person can see (`Documents/Spend Tracker Backups` on Windows, a
+  folder chosen once on a Mac), made on demand, on the first launch of each
+  day and on quit after changes; the folder keeps all of the newest day's,
+  the newest of each of 30 days and of 12 months, and never overwrites one.
+  Restore backs the ledger up first and asks for the password again. The
+  shell's menus and dialogs are Lingui messages in the client's catalogs and
+  follow the window's language, and money and dates follow the operating
+  system's regional format. `python -m scripts.desktop_build mac|mas|win`
+  builds it, `requirements-desktop.txt` is the hashed lock it freezes from,
+  and CI's `desktop-app` job builds both, drives the packaged app end to end in
+  English and the pseudo-locale, and opens the last release's ledger with the
+  new backend, counting every table before and after. (#61, #62)
+- **The app folds the WAL back into the ledger when it stops,** so a stopped
+  ledger is one file. (#62)
+- **A desktop ledger that arrived without its `secret.key` is upgraded
+  anyway.** The key is made before the backup that precedes an upgrade, and a
+  backup that cannot be made stops the start with its reason, unmigrated,
+  instead of ending the backend. (Found on Windows, #61)
+
+- **The backend can be served over stdin and stdout, for the desktop app.**
+  `python -m app.desktop.stdio_adapter` runs the desktop start -- the ledger
+  held, brought up to date, or a reason not to -- tells the shell how it went,
+  and then serves every request the shell forwards, with no network at all.
+  It refuses to start outside the desktop profile or without UTF-8 mode, and
+  stops when stdin closes. `desktop/backend.spec` freezes it with PyInstaller
+  (one folder; the data files, migrations and native libraries the analysis
+  cannot see named in it; UTF-8 mode built in, since a frozen interpreter
+  ignores `PYTHONUTF8`), and `desktop/smoke_backend.py` checks a frozen build.
+  A frozen build reads its commit from its stamp and never starts `git`, and
+  the schema check finds the migrations without `alembic.ini`. (#319)
+- **The ledger is held by the process using it.** The app takes an
+  operating-system lock on `.lock` in the data directory while it runs, and
+  the upgrade drill, restore and reset take it before they touch the ledger,
+  so they now also refuse a running app they could not see by its port -- a
+  second container on the same volume, or the desktop app, which has none.
+  The lock is released by the operating system when a process ends, however
+  it ends. The drill also migrates in its own process now rather than through
+  `python -m alembic`, which a frozen desktop build would have relaunched
+  itself for; its output and `--report` are as before. For the desktop app,
+  `app/desktop/launch.py` brings a ledger up to date before the app opens it:
+  it holds the ledger, refuses one a newer version wrote, asks before a step
+  that cannot be undone, backs up, migrates, and counts the rows again. (#318)
+- **On the desktop profile, a password opens the app and one recovery code
+  replaces a forgotten one.** Setup asks for no token -- only the app itself
+  can reach it -- and enrols no authenticator: you, then a single recovery
+  code to keep. Sign-in is the password; a step-up, and making a new recovery
+  code, take the password alone. *Forgot your password?* takes the recovery
+  code and a new password, spends the code, ends every other session, and
+  shows the code that replaces it (`POST /api/session/recover`, desktop
+  only). The authenticator screens and routes, passkeys, and the Backups
+  option to include `secret.key` -- which protects only authenticators --
+  are not there. Which applies is decided by the profile, never by an empty
+  authenticator, which keeps meaning "cleared by a reset". **Nothing changes
+  on a server.** (#320)
+- **One setting says how the app is deployed, and what it offers there.**
+  `SPENDTRACKER_PROFILE` is `server` -- the default, and everything this app
+  has been until now -- or `desktop`, for the desktop app to come (#49). The
+  desktop profile leaves out what needs a network, a second device or a second
+  person: `/snap`, the agent API and agent keys, `/llms.txt`, invitations,
+  account resets, the self-updater and `/db`. Their routes are not mounted, so
+  they answer as paths that do not exist; the client reads the new
+  `GET /api/capabilities` at startup and hides them. The profile also refuses
+  `SPENDTRACKER_PUBLIC_URL`, `SPENDTRACKER_RP_ID` and any allowed host but
+  `localhost` at boot, and sends no HSTS. **Nothing changes on a server.**
+  (#316)
+
+- **The test suite also runs on macOS and Windows** in CI, for changes to the
+  backend, the statement readers, the scripts, the migrations or the tests
+  (#315). Ruff now refuses a `print` in the app itself (T20), and a test boots
+  the whole app -- import, startup, first-boot setup, requests, with and
+  without `SPENDTRACKER_ECHO_SQL` -- and asserts nothing reached standard
+  output.
+
+### Changed
+
+- **Importing the app writes nothing to disk.** `secret.key` used to be made
+  when the settings were read, and the data directory when the database
+  module was imported -- so any import, a script's or a test's, could leave
+  an empty data directory or a fresh key behind. The key is now made the
+  first time it is needed (the server's startup asks, so a running instance
+  always has one) and the directory just before the first connection. Every
+  file the app keeps is named in one module, `app/paths.py`. Under the
+  desktop profile the data directory must be named, and is refused inside a
+  folder iCloud, OneDrive, Dropbox or Google Drive syncs, where SQLite's
+  three files cannot be kept together. (#317)
+- **`SPENDTRACKER_ECHO_SQL` writes to standard error, not standard output.**
+  It showed the statements run before logging is configured by way of
+  SQLAlchemy's `echo`, whose handler writes to standard output -- which the
+  desktop build will use to talk to its shell, so one statement there is a
+  corrupt message. It now attaches a standard-error handler for the same
+  window. Handing over to the logging style at startup also resets that
+  logger's level, which would otherwise have kept every statement flowing
+  into `sql.log` at a style that never asked for it. (#315)
+
+### Fixed
+
+- **The code the desktop app will run no longer assumes Linux.** Two
+  `os.open` flags and `os.fchmod`, which Windows lacks (`fchmod` until Python
+  3.13), are now guarded, and the startup check for files other users can
+  read no longer names every file in the data directory on Windows, where
+  permission bits do not say who can read a file. (#315)
+- **Found by running the suite on Windows 11** (#315):
+  - **The register's running balance and its pages no longer depend on two
+    rows having different creation times.** After the date, the register
+    broke ties by when each row was created -- which is not unique: rows
+    written within one tick of the clock share it (on Windows a tick is
+    about 15 ms, so most of an import did). The running balance then summed
+    those rows in whatever order they came, so the newest row could show the
+    wrong balance, and a page boundary between them could skip or repeat a
+    row. Every register order now ends with the row's id, and the balance
+    follows the same order.
+  - **A log file is never overwritten when two rotations fall in the same
+    second.** The second used to take the first one's name -- replacing that
+    file on macOS and Linux, and failing on Windows. It now gets a counter
+    after the stamp, and pruning orders by stamp and counter.
+  - **Windows reports its memory**, so SQLite's cache is sized there as
+    elsewhere rather than as for an unknown host.
+  - Tests that restored a ledger under their own running app stop it first,
+    as an operator does: Windows cannot rename a file that is still open.
+    Tests of what runs only in the Linux container are marked so, in one
+    place in `tests/conftest.py`.
+- **Every SQLite connection the app opens on the ledger or a backup is now
+  closed when it is done.** Python's `with sqlite3.connect(...)` commits but
+  leaves the connection open until the garbage collector reaches it, and
+  thirteen places used it -- the key check at startup, Back up now, the
+  backup and upgrade scripts among them. On macOS a ledger renamed under one
+  could not be opened again ("disk I/O error"), which is what made the reset
+  test fail now and then (#108) and every time under coverage; on Windows an
+  open handle stops the rename that restore, reset and an upgrade make. A
+  test now refuses the pattern. (#315)
+
 ## 0.10.1 — 2026-10-09
 
 **Reversible: none** — no migration in this release. To go back to

@@ -20,6 +20,7 @@
 
 import { ApiError, api } from "../lib/api";
 import { Field } from "./bits";
+import { offeredNow, useCapabilities } from "../lib/capabilities";
 import { t } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 
@@ -31,7 +32,9 @@ export interface StepUpProof {
 export const NO_PROOF: StepUpProof = { password: "", code: "" };
 
 export function stepUpReady(proof: StepUpProof): boolean {
-  return proof.password.length > 0 && proof.code.trim().length >= 6;
+  // The password alone on the desktop, where it is the only factor (#320).
+  const needsCode = offeredNow().second_factor;
+  return proof.password.length > 0 && (!needsCode || proof.code.trim().length >= 6);
 }
 
 /**
@@ -76,10 +79,15 @@ export function StepUpFields({
   why: string;
 }) {
   const { t } = useLingui();
+  const offered = useCapabilities();
   return (
     <>
       <p className="small muted" style={{ marginTop: 0 }}>
-        <Trans>{why} So this asks for your password and a code — the same as signing in.</Trans>
+        {offered.second_factor ? (
+          <Trans>{why} So this asks for your password and a code — the same as signing in.</Trans>
+        ) : (
+          <Trans>{why} So this asks for your password again.</Trans>
+        )}
       </p>
       <Field label={t({ message: "Your password", comment: "Label of a form field on the password-and-code check" })}>
         <input
@@ -89,15 +97,19 @@ export function StepUpFields({
           onChange={(e) => onChange({ ...proof, password: e.target.value })}
         />
       </Field>
-      <p />
-      <Field label={t`The six digits from your authenticator`}>
-        <input
-          value={proof.code}
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          onChange={(e) => onChange({ ...proof, code: e.target.value })}
-        />
-      </Field>
+      {offered.second_factor ? (
+        <>
+          <p />
+          <Field label={t`The six digits from your authenticator`}>
+            <input
+              value={proof.code}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              onChange={(e) => onChange({ ...proof, code: e.target.value })}
+            />
+          </Field>
+        </>
+      ) : null}
     </>
   );
 }

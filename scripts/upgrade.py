@@ -65,6 +65,7 @@ wrong assumption here.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as dt
 import html
 import http.server
@@ -172,7 +173,7 @@ def stamped() -> str | None:
     path = pathlib.Path(settings.database_url.split("///", 1)[-1])
     if not path.exists():
         return None
-    with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
+    with contextlib.closing(sqlite3.connect(f"file:{path}?mode=ro", uri=True)) as conn:
         try:
             row = conn.execute("SELECT version_num FROM alembic_version").fetchone()
         except sqlite3.OperationalError:
@@ -474,11 +475,13 @@ def _write_report(path: pathlib.Path, outcome: dict) -> None:
     Podman leg, where every apply stalled at step 5). So 0660 whatever the
     umask, as every other file the app writes there.
     """
+    from app import permissions
+
     scratch = path.with_name(path.name + ".tmp")
     scratch.unlink(missing_ok=True)
-    fd = os.open(scratch, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, REPORT_MODE)
+    fd = os.open(scratch, os.O_WRONLY | os.O_CREAT | os.O_EXCL | permissions.O_NOFOLLOW, REPORT_MODE)
     with os.fdopen(fd, "w") as f:
-        os.fchmod(f.fileno(), REPORT_MODE)  # whatever the umask took away
+        permissions.fchmod(f.fileno(), REPORT_MODE)  # whatever the umask took away
         f.write(json.dumps(outcome, indent=2) + "\n")
     scratch.replace(path)
 
@@ -512,8 +515,13 @@ def run(port: int, *, yes: bool, report_to: pathlib.Path | None = None) -> int:
         "log": say.lines,
     }
     folder: pathlib.Path | None = None
+    from app import instance_lock
+
+    held: list[pathlib.Path] = []
 
     def finish(code: int, word: str) -> int:
+        while held:
+            instance_lock.release(held.pop())
         outcome["exit"] = code
         outcome["outcome"] = word
         outcome["finished_at"] = dt.datetime.now().astimezone().isoformat(timespec="seconds")
@@ -537,6 +545,13 @@ def run(port: int, *, yes: bool, report_to: pathlib.Path | None = None) -> int:
                 "Then run this again. It will hold the port with a maintenance page so\n"
                 "anyone visiting sees what is happening rather than a refused connection."
             )
+        # The ledger itself, which is what the port stood for (#318), and the
+        # only check the desktop app -- which has no port -- can answer.
+        try:
+            instance_lock.acquire(settings.data_dir)
+        except instance_lock.LedgerBusy as busy:
+            raise SystemExit(f"{busy}\n\nNothing was changed.") from None
+        held.append(settings.data_dir)
 
         if upcoming and not yes:
             wording = (
@@ -603,14 +618,18 @@ def _migrate(port: int, say: Step, folder: pathlib.Path, outcome: dict, finish) 
     try:
         say("")
         say("Migrating.")
-        done = subprocess.run(
-            [sys.executable, "-m", "alembic", "upgrade", "head"],
-            cwd=ROOT, capture_output=True, text=True,
-        )
-        for line in (done.stdout + done.stderr).splitlines():
-            if line.strip():
-                say(f"    {line.rstrip()}")
-        if done.returncode != 0:
+        # In this process (#318): `sys.executable -m alembic` relaunches a
+        # frozen desktop build instead of migrating it.
+        from app import migrate
+
+        try:
+            migrate.upgrade_to_head(say=lambda line: say(f"    {line}"))
+            failed = False
+        except Exception as problem:  # noqa: BLE001 - every failure is reported, then restored from
+            for line in str(problem).splitlines() or [type(problem).__name__]:
+                say(f"    {line}")
+            failed = True
+        if failed:
             say("")
             say("THE MIGRATION FAILED. Nothing has been started back up.")
             say(f"The database as it was before is at {folder}.")
@@ -640,7 +659,7 @@ def _migrate(port: int, say: Step, folder: pathlib.Path, outcome: dict, finish) 
 
         live = pathlib.Path(settings.database_url.split("///", 1)[-1])
         dropped: list[str] = []
-        with sqlite3.connect(f"file:{live}?mode=ro", uri=True) as conn:
+        with contextlib.closing(sqlite3.connect(f"file:{live}?mode=ro", uri=True)) as conn:
             for table, was in sorted(checked["rows"].items()):
                 now_count = conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
                 outcome["rows"]["after"][table] = now_count

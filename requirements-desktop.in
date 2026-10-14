@@ -1,0 +1,6 @@
+# What freezes the desktop app's backend (#61): the runtime, held to the
+# runtime lock so the frozen app runs exactly what a deployment runs, and
+# PyInstaller. **Edit this file, then run `make lock`** -- see requirements.in.
+-r requirements.in
+-c requirements.txt
+pyinstaller>=6.22.3

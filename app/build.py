@@ -27,6 +27,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
@@ -104,9 +105,18 @@ def from_stamp() -> Build | None:
     )
 
 
+def frozen() -> bool:
+    """Running from a frozen build (the desktop app's PyInstaller bundle),
+    which carries its stamp and has no repository to ask -- and in which
+    starting `git` would only flash a console window on Windows (#319)."""
+    return bool(getattr(sys, "frozen", False))
+
+
 @cache
 def current() -> Build:
     """The build this process started with. The first call fixes it."""
+    if frozen():
+        return from_stamp() or Build()
     return from_git() or from_stamp() or Build()
 
 

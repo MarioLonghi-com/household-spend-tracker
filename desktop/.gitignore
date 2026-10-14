@@ -1,0 +1,7 @@
+node_modules/
+build/
+dist/
+test-results/
+playwright-report/
+# A provisioning profile names a developer's devices: never in the repository.
+*.provisionprofile

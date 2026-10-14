@@ -28,6 +28,7 @@ configured app along with them.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
@@ -79,7 +80,7 @@ class BundleRefused(RuntimeError):
 
 def counts(path: Path) -> dict[str, int]:
     out: dict[str, int] = {}
-    with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
+    with contextlib.closing(sqlite3.connect(f"file:{path}?mode=ro", uri=True)) as conn:
         present = {
             row[0]
             for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
@@ -91,7 +92,7 @@ def counts(path: Path) -> dict[str, int]:
 
 
 def revision(path: Path) -> str | None:
-    with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
+    with contextlib.closing(sqlite3.connect(f"file:{path}?mode=ro", uri=True)) as conn:
         try:
             row = conn.execute("SELECT version_num FROM alembic_version").fetchone()
         except sqlite3.OperationalError:
@@ -115,7 +116,7 @@ def integrity(path: Path) -> str:
     a page it still has.
     """
     try:
-        with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
+        with contextlib.closing(sqlite3.connect(f"file:{path}?mode=ro", uri=True)) as conn:
             return conn.execute("PRAGMA integrity_check").fetchone()[0]
     except sqlite3.DatabaseError as broken:
         # Badly enough damaged and the pragma does not *report* a problem, it
@@ -131,7 +132,7 @@ def a_sealed_secret(path: Path) -> tuple[str, bytes] | None:
     wrong key leaves every row readable and every authenticator refused -- and
     nothing says so until somebody tries to sign in.
     """
-    with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
+    with contextlib.closing(sqlite3.connect(f"file:{path}?mode=ro", uri=True)) as conn:
         try:
             row = conn.execute(
                 "SELECT id, totp_secret FROM users WHERE totp_secret IS NOT NULL LIMIT 1"

@@ -13,6 +13,7 @@ producing a quieter upgrade report six months from now.
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import sqlite3
 
@@ -290,21 +291,20 @@ def world(client, monkeypatch) -> list[str]:
 
 
 def _fake_alembic(monkeypatch, *, then=None) -> None:
-    """Stand in for `alembic upgrade head`: stamp head, then do what `then` says."""
-    import subprocess
-
-    from scripts import upgrade
+    """Stand in for `alembic upgrade head` -- in this process since #318: stamp
+    head, then do what `then` says."""
+    from app import migrate
 
     head = chain()[-1].revision
 
-    def run(argv, **_):
-        assert argv[1:] == ["-m", "alembic", "upgrade", "head"], argv
+    def upgrade_to_head(*, database_url=None, say=None):
         _stamp(head)
         if then is not None:
             then()
-        return subprocess.CompletedProcess(argv, 0, stdout=f"Running upgrade -> {head}", stderr="")
+        if say is not None:
+            say(f"Running upgrade -> {head}")
 
-    monkeypatch.setattr(upgrade.subprocess, "run", run)
+    monkeypatch.setattr(migrate, "upgrade_to_head", upgrade_to_head)
 
 
 def _drill(tmp_path, *argv: str) -> tuple[int, dict]:
@@ -485,15 +485,15 @@ def test_dropped_rows_outrank_a_wrong_key_and_both_are_reported(world, monkeypat
 def test_a_failed_migration_exits_three_and_the_report_says_the_backup_is_there(
     world, monkeypatch, tmp_path
 ):
-    import subprocess
-
+    from app import migrate
     from scripts import upgrade
 
     walked = world
-    monkeypatch.setattr(
-        upgrade.subprocess, "run",
-        lambda argv, **_: subprocess.CompletedProcess(argv, 1, stdout="", stderr="boom: no such column"),
-    )
+
+    def boom(**_):
+        raise RuntimeError("boom: no such column")
+
+    monkeypatch.setattr(migrate, "upgrade_to_head", boom)
 
     code, outcome = _drill(tmp_path)
 
@@ -540,6 +540,7 @@ def test_the_flags_belong_to_their_modes(capsys):
     assert refused.value.code == 2
 
 
+@pytest.mark.skipif(os.name == "nt", reason="permission bits; Windows access is an ACL")
 def test_the_report_is_written_0660_for_the_updates_group_whatever_the_umask(tmp_path):
     """The updater reads it through the `update` volume's group; under a rootless
     engine it is root without capabilities and cannot read a 0600 file (#169)."""

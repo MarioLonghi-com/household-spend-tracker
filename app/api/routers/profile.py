@@ -52,6 +52,14 @@ from ...services import users as user_service
 from ..deps import CurrentUser, SessionDep, client_ip
 
 router = APIRouter(tags=["profile"])
+#: A person's agent keys: their own router so that a deployment without the
+#: agent API -- the desktop app -- leaves them out whole (`app.capabilities`,
+#: #316).
+keys_router = APIRouter(tags=["profile"])
+
+#: The authenticator: seeing, replacing and confirming it. Its own router so
+#: that the desktop, where a password is the only factor (#320), leaves it out.
+authenticator_router = APIRouter(tags=["profile"])
 
 
 @router.post("/me/password", response_model=PasswordChanged)
@@ -83,7 +91,7 @@ def change_password(
     )
 
 
-@router.get("/me/authenticator", response_model=AuthenticatorStatus)
+@authenticator_router.get("/me/authenticator", response_model=AuthenticatorStatus)
 def authenticator_status(user: CurrentUser) -> AuthenticatorStatus:
     """Whether the caller has an authenticator, and whether this server's key
     opens it (#287).
@@ -99,7 +107,7 @@ def authenticator_status(user: CurrentUser) -> AuthenticatorStatus:
     )
 
 
-@router.post("/me/authenticator", response_model=ReenrolmentOffer)
+@authenticator_router.post("/me/authenticator", response_model=ReenrolmentOffer)
 def start_reenrolment(
     body: StartReenrolment, request: Request, session: SessionDep, user: CurrentUser
 ) -> ReenrolmentOffer:
@@ -114,7 +122,7 @@ def start_reenrolment(
     return ReenrolmentOffer(token=token, secret=secret, uri=uri)
 
 
-@router.post("/me/authenticator/confirm", response_model=ReenrolmentDone)
+@authenticator_router.post("/me/authenticator/confirm", response_model=ReenrolmentDone)
 def confirm_reenrolment(
     body: ConfirmReenrolment, request: Request, session: SessionDep, user: CurrentUser
 ) -> ReenrolmentDone:
@@ -227,7 +235,7 @@ def _out(key: AgentKey) -> AgentKeyOut:
     )
 
 
-@router.get("/me/keys", response_model=list[AgentKeyOut])
+@keys_router.get("/me/keys", response_model=list[AgentKeyOut])
 def my_keys(session: SessionDep, user: CurrentUser) -> list[AgentKeyOut]:
     """Every key you have issued, newest first, dead ones included.
 
@@ -238,7 +246,7 @@ def my_keys(session: SessionDep, user: CurrentUser) -> list[AgentKeyOut]:
     return [_out(key) for key in key_service.for_user(session, user)]
 
 
-@router.post("/me/keys", response_model=AgentKeyIssued, status_code=201)
+@keys_router.post("/me/keys", response_model=AgentKeyIssued, status_code=201)
 def issue_key(
     body: IssueAgentKey, request: Request, session: SessionDep, user: CurrentUser
 ) -> AgentKeyIssued:
@@ -282,7 +290,7 @@ def issue_key(
     return AgentKeyIssued(key=_out(key), token=token)
 
 
-@router.post("/me/keys/{key_id}/revoke", response_model=AgentKeyOut)
+@keys_router.post("/me/keys/{key_id}/revoke", response_model=AgentKeyOut)
 def revoke_key(
     key_id: str, session: SessionDep, user: CurrentUser
 ) -> AgentKeyOut:

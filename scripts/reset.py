@@ -34,7 +34,9 @@ import datetime as dt
 import pathlib
 import sys
 
-SIDECARS = ("-wal", "-shm")
+from app import paths
+
+SIDECARS = paths.SIDECARS
 
 
 def main(argv: list[str] | None = None, *, ask=input) -> int:
@@ -47,15 +49,13 @@ def main(argv: list[str] | None = None, *, ask=input) -> int:
     args = parser.parse_args(argv)
 
     from app.config import settings
-    from app.services import backup_bundle
-    from scripts import backup as backup_script
     from scripts import in_a_container
     from scripts.upgrade import port_is_busy
 
     if not settings.database_url.startswith("sqlite:///"):
         raise SystemExit("DATABASE_URL is not SQLite; reset a Postgres deployment with its own tools.")
     live = pathlib.Path(settings.database_url.split("///", 1)[-1]).resolve()
-    key = settings.data_dir / "secret.key"
+    key = paths.key_in(settings.data_dir)
     if not live.exists():
         print(f"There is no ledger at {live}. Nothing to reset.")
         return 0
@@ -65,6 +65,25 @@ def main(argv: list[str] | None = None, *, ask=input) -> int:
             "first; moving a database out from under a running server is how a WAL and "
             "its database start disagreeing."
         )
+
+    from app import instance_lock
+
+    # The ledger, which is what the port stood for (#318).
+    try:
+        instance_lock.acquire(settings.data_dir)
+    except instance_lock.LedgerBusy as busy:
+        raise SystemExit(f"Refusing: {busy}") from None
+    try:
+        return _reset_holding(args, live=live, key=key, ask=ask)
+    finally:
+        instance_lock.release(settings.data_dir)
+
+
+def _reset_holding(args, *, live, key, ask) -> int:
+    from app.config import settings
+    from app.services import backup_bundle
+    from scripts import backup as backup_script
+    from scripts import in_a_container
 
     rows = backup_bundle.counts(live)
     print(f"The ledger at {live}")

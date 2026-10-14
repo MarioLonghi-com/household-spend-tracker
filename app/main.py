@@ -32,7 +32,16 @@ from statements import UnreadableStatement
 #: Re-exported so `from app.main import __version__` keeps working; the
 #: definition is in `app/__init__.py`, where a router can read it without
 #: importing this module and creating a cycle.
-from . import __version__, build, logging_setup, notices, permissions, schema_check
+from . import (
+    __version__,
+    build,
+    capabilities,
+    instance_lock,
+    logging_setup,
+    notices,
+    permissions,
+    schema_check,
+)
 from . import db as db_module
 from .api import dbview, deps, discovery
 from .api.routers import (
@@ -73,7 +82,7 @@ from .services import agent_requests, backup_bundle
 log = logging.getLogger("spendtracker")
 
 #: Reachable before there is anyone to sign in as.
-PUBLIC_PREFIXES = ("/api/health", "/api/setup", "/api/session", "/api/invite", "/api/reset/")
+PUBLIC_PREFIXES = ("/api/health", "/api/capabilities", "/api/setup", "/api/session", "/api/invite", "/api/reset/")
 SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 #: Where every router is mounted. Named once so the mount and anything that
@@ -145,7 +154,7 @@ def announce_ledger() -> None:
         rows.get("households", 0),
         rows.get("users", 0),
     )
-    keyed = keycheck.check(path, settings.secret_key)
+    keyed = keycheck.check(path, settings.key())
     if keyed.refused:
         if settings.secret_key_from_env:
             back = f"setting {SECRET_KEY_ENV} back to the original key"
@@ -186,6 +195,14 @@ async def lifespan(_: FastAPI):
     that already had real data in it.
     """
     permissions.private_dir(settings.data_dir)
+    # This process's ledger, for as long as it runs (#318): upgrade, restore
+    # and reset refuse while it is held, and a second desktop app on the same
+    # folder does not start. Released in the `finally` below, and by the
+    # operating system if the process dies first.
+    instance_lock.acquire(settings.data_dir)
+    # The key, made now if this is the first start: it is no longer made when
+    # the settings are read (#317), and a running instance always has one.
+    settings.key()
 
     # First, so that everything below this line reaches the file. Until this
     # existed the app configured no handler at all: every `log.warning` here
@@ -241,7 +258,7 @@ async def lifespan(_: FastAPI):
     )
 
     with session_scope() as session:
-        if not setup_service.is_configured(session):
+        if not setup_service.is_configured(session) and setup_service.token_needed():
             token = setup_service.rotate_setup_token()
             # To the console as well as the 0600 file, on purpose: in a container
             # `docker compose logs` is the only place the person can read it.
@@ -267,6 +284,10 @@ async def lifespan(_: FastAPI):
         sweeper.cancel()
         with contextlib.suppress(asyncio.CancelledError):
             await sweeper
+        # After the sweep, which may have been writing, and before the lock
+        # goes: nothing else can open the ledger in between.
+        db_module.checkpoint()
+        instance_lock.release(settings.data_dir)
 
 
 # The schema and the two doc viewers are off unless this instance is explicitly
@@ -653,7 +674,8 @@ async def add_security_headers(request: Request, call_next):
     plain_loopback = request.url.scheme == "http" and cookies.is_loopback(
         request_host(request)
     )
-    if not _DEV and settings.cookie_secure and not plain_loopback:
+    # Nor from the desktop app (#316), which has no network for HSTS to pin.
+    if not _DEV and settings.cookie_secure and not plain_loopback and settings.profile == "server":
         response.headers.setdefault(
             "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
         )
@@ -803,6 +825,7 @@ _LLMS_HEADERS = {
 
 @app.get("/llms.txt", include_in_schema=False)
 @app.get("/.well-known/llms.txt", include_in_schema=False)
+@capabilities.needs("agents")
 def llms_txt(request: Request) -> Response:
     """How to use this app, for whoever arrived without a key.
 
@@ -816,6 +839,7 @@ def llms_txt(request: Request) -> Response:
 
 
 @app.get(discovery.WELL_KNOWN, include_in_schema=False)
+@capabilities.needs("agents")
 def agent_descriptor(request: Request) -> JSONResponse:
     """`/llms.txt`, for a caller that went looking in the conventional place.
 
@@ -846,31 +870,57 @@ def health() -> dict:
     }
 
 
-for router in (
-    agent.router,
-    agent_matching.router,
-    agent_links.router,
-    agent_review.router,
-    setup.router,
-    auth.router,
-    households.router,
-    transactions.router,
-    imports.router,
-    identifiers.router,
-    admin.router,
-    updates.router,
-    invites.router,
-    account_resets.router,
-    profile.router,
-    categories.router,
-    receipts.router,
-    reporting.router,
-    stats.router,
-    transfers.router,
-    translations.router,
-    one_time_import.router,
-):
-    app.include_router(router, prefix=API_PREFIX)
+#: What this deployment offers, decided once from the profile (#316). Routes a
+#: capability that is off are removed at the bottom of this module.
+CAPABILITIES = capabilities.for_settings(settings)
+
+
+@app.get("/api/capabilities", tags=["meta"])
+def offered() -> dict[str, bool]:
+    """Which features this deployment offers, for the client to hide the rest.
+
+    Unauthenticated like `/api/health`, and for the same reason: the sign-in
+    screen is drawn before anyone has a session, and it is one of the screens
+    that differ. It says what the software offers here, nothing about who uses
+    it.
+    """
+    return CAPABILITIES.as_dict()
+
+
+#: Every router, with the capability it needs (None: every deployment). One
+#: that is off is never included, so its routes answer as routes that do not
+#: exist (#316) -- and the router objects themselves are left untouched.
+_ROUTERS = (
+    (agent.router, "agents"),
+    (agent_matching.router, "agents"),
+    (agent_links.router, "agents"),
+    (agent_review.router, "agents"),
+    (setup.router, None),
+    (auth.router, None),
+    (auth.recovery_router, "password_reset_by_code"),
+    (households.router, None),
+    (transactions.router, None),
+    (imports.router, None),
+    (identifiers.router, None),
+    (admin.router, None),
+    (admin.resets_router, "account_resets"),
+    (updates.router, "self_update"),
+    (invites.router, "invitations"),
+    (account_resets.router, "account_resets"),
+    (profile.router, None),
+    (profile.keys_router, "agents"),
+    (profile.authenticator_router, "second_factor"),
+    (categories.router, None),
+    (receipts.router, None),
+    (reporting.router, None),
+    (stats.router, None),
+    (transfers.router, None),
+    (translations.router, None),
+    (one_time_import.router, None),
+)
+for router, need in _ROUTERS:
+    if need is None or CAPABILITIES.as_dict()[need]:
+        app.include_router(router, prefix=API_PREFIX)
 
 
 @app.get("/api/openapi.json", include_in_schema=False)
@@ -896,6 +946,7 @@ _SNAP = Path(__file__).parent / "static" / "snap"
 
 
 @app.get("/snap", include_in_schema=False)
+@capabilities.needs("snap")
 def snap(request: Request):
     """The page, behind the session -- but redirecting rather than refusing.
 
@@ -919,6 +970,7 @@ def snap(request: Request):
 
 
 @app.get("/snap/snap.js", include_in_schema=False)
+@capabilities.needs("snap")
 def snap_script() -> FileResponse:
     """Served as its own file, and it has to be.
 
@@ -935,12 +987,13 @@ def snap_script() -> FileResponse:
 
 
 @app.get("/snap/manifest.json", include_in_schema=False)
+@capabilities.needs("snap")
 def snap_manifest() -> FileResponse:
     return FileResponse(_SNAP / "manifest.json", media_type="application/manifest+json")
 
 
 # Mounted before the SPA fallback, which otherwise swallows every unknown path.
-if dbview.enabled():
+if dbview.enabled() and CAPABILITIES.db_view:
 
     @app.get(dbview.MOUNT, include_in_schema=False)
     def _db_root() -> RedirectResponse:
@@ -1020,3 +1073,8 @@ else:
         "app/static/dist is missing, so the SPA is not being served and / will 404. "
         "Run `make client` to build it. The API itself is unaffected."
     )
+
+
+# Last, once every route is registered and before anything is served: what the
+# profile does not offer stops existing (#316). See `app/capabilities.py`.
+UNOFFERED = capabilities.prune(app, CAPABILITIES)

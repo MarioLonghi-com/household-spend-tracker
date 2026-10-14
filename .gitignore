@@ -56,3 +56,6 @@ app/build.json
 
 # The end-to-end self-update scenarios, run locally (tests/self_update/local.py)
 .self-update/
+
+# The frozen desktop backend and PyInstaller's work (scripts/desktop_build.py).
+/build/

@@ -37,6 +37,7 @@ against `expected_origins` whatever this answer said.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import pathlib
@@ -484,7 +485,7 @@ def hosts_in(database: pathlib.Path) -> dict[str, int]:
     An empty answer from a ledger older than passkeys, which has no table.
     """
     try:
-        with sqlite3.connect(f"file:{database}?mode=ro", uri=True) as conn:
+        with contextlib.closing(sqlite3.connect(f"file:{database}?mode=ro", uri=True)) as conn:
             rows = conn.execute("SELECT rp_id, count(*) FROM passkeys GROUP BY rp_id").fetchall()
     except sqlite3.Error:
         return {}
