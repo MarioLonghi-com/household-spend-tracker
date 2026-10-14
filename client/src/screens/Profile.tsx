@@ -44,6 +44,17 @@ import { useCapabilities } from "../lib/capabilities";
 
 type Offer = { token: string; secret: string; uri: string };
 
+/**
+ * The enrolment link, only if it is one (#342). The one `href` on the client
+ * whose scheme comes from the server rather than this code: pyotp builds an
+ * `otpauth://` URI today, and a client-side second lock -- as `theme.ts` keeps
+ * on colours -- means a server that one day answers otherwise cannot put a
+ * `javascript:` link on this screen. Anything else shows the secret alone.
+ */
+export function enrolmentHref(uri: string | null | undefined): string | undefined {
+  return typeof uri === "string" && uri.startsWith("otpauth://totp/") ? uri : undefined;
+}
+
 export function Profile({
   user,
   households,
@@ -546,15 +557,17 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
             : t`Nothing has changed yet — your current authenticator keeps working until a code proves the new one pairs.`}
         </p>
         <p className="mono small secret-box">{offer.secret}</p>
-        <p className="small muted">
-          <Trans>
-            Or open{" "}
-            <a href={offer.uri} className="mono">
-              the enrolment link
-            </a>{" "}
-            on the device with the app.
-          </Trans>
-        </p>
+        {enrolmentHref(offer.uri) && (
+          <p className="small muted">
+            <Trans>
+              Or open{" "}
+              <a href={enrolmentHref(offer.uri)} className="mono">
+                the enrolment link
+              </a>{" "}
+              on the device with the app.
+            </Trans>
+          </p>
+        )}
         <Field label={t`The six digits from the new one`}>
           <input
             value={code}

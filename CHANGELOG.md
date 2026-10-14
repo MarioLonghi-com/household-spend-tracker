@@ -74,6 +74,10 @@ history this repository does not have.
   a minute, not every three seconds.** The panel kept asking every three
   seconds for as long as the tab stayed open. It still notices the app
   coming back. (#340)
+- **The authenticator's enrolment link is shown only when it is one.**
+  The Profile screen put whatever link the server sent into the page; it
+  now offers it only for an `otpauth://` address and otherwise shows the
+  secret alone. Nothing sends anything else today. (#342)
 
 ### Security
 
