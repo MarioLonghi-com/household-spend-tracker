@@ -136,6 +136,13 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "payee.merge_into_itself": {
     message: msg({ id: "error.payee.merge_into_itself", message: "A payee cannot be merged into itself" }),
   },
+  "payee.merge_system": {
+    message: msg({
+      id: "error.payee.merge_system",
+      message:
+        "That is a payee the app keeps for itself, so it cannot be merged. Rename it if the name is the problem",
+    }),
+  },
   "payee.needs_name": {
     message: msg({ id: "error.payee.needs_name", message: "A payee needs a name" }),
   },

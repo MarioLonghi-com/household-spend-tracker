@@ -92,6 +92,49 @@ type RegisterRows = Omit<RegisterPage, "transactions"> & { transactions: Row[] }
 export const REGISTER_PAGE = 500;
 
 /**
+ * How far each next page reaches back over the rows already in hand (#341).
+ *
+ * Pages are asked for by offset, and an offset is a position, not a row: a
+ * row another member deletes above the boundary between two page loads moves
+ * every later row up one, and the row that sat at the boundary was on neither
+ * page -- missing from the register, from "tick all shown" and from the sums
+ * until something refreshed it. So the next page starts this many rows early,
+ * the merge keeps each row once, and a page that shares none of those rows
+ * with the ones in hand -- more deleted than this, between two loads -- says
+ * the join cannot be trusted, and the register starts again from the top.
+ */
+export const PAGE_OVERLAP = 25;
+
+/** Where a page starts, and the ids it should overlap with. */
+type PageParam = { offset: number; tail: string[] };
+
+/** A page as the register holds it: whether it joined up with the one before. */
+type RegisterPageHeld = RegisterRows & { joined: boolean };
+
+/**
+ * Whether a page reaches back into the rows in hand (#341). A first page, an
+ * empty one, and one asked for with nothing to overlap always do.
+ */
+export function joinsUp(page: { transactions: { id: string }[] }, tail: string[]): boolean {
+  if (tail.length === 0 || page.transactions.length === 0) return true;
+  const expected = new Set(tail);
+  return page.transactions.some((row) => expected.has(row.id));
+}
+
+/** The next page's start, or undefined when everything the filter matched is in hand. */
+export function nextPage(last: RegisterRows, lastParam: PageParam): PageParam | undefined {
+  const end = lastParam.offset + last.transactions.length;
+  if (last.transactions.length === 0 || end >= last.total) return undefined;
+  // A later page no longer than the overlap moves nothing forward; asking
+  // again would ask for the same rows for ever.
+  if (lastParam.offset > 0 && last.transactions.length <= PAGE_OVERLAP) return undefined;
+  return {
+    offset: Math.max(end - PAGE_OVERLAP, 0),
+    tail: last.transactions.slice(-PAGE_OVERLAP).map((row) => row.id),
+  };
+}
+
+/**
  * What each cleared state is called on screen, as one letter.
  *
  * Three words in a column nobody reads word by word: "not yet", "cleared",
@@ -731,30 +774,37 @@ export function Register({
     ],
     // The signal lets a superseded search be aborted in flight rather than
     // downloaded and parsed for nobody.
-    queryFn: ({ signal, pageParam }) => {
+    queryFn: async ({ signal, pageParam }): Promise<RegisterPageHeld> => {
       const paged = new URLSearchParams(query);
       paged.set("limit", String(REGISTER_PAGE));
-      paged.set("offset", String(pageParam));
-      return api.get<RegisterRows>(
+      paged.set("offset", String(pageParam.offset));
+      const page = await api.get<RegisterRows>(
         `/households/${household.id}/transactions?${paged.toString()}`,
         { signal },
       );
+      return { ...page, joined: joinsUp(page, pageParam.tail) };
     },
-    initialPageParam: 0,
-    //: The next page starts where the rows in hand end, until `total` -- what
-    //: the filter matched on the server -- is reached.
-    getNextPageParam: (last, pages) => {
-      const loaded = pages.reduce((n, one) => n + one.transactions.length, 0);
-      return last.transactions.length > 0 && loaded < last.total ? loaded : undefined;
-    },
+    initialPageParam: { offset: 0, tail: [] } as PageParam,
+    //: The next page starts a little before the rows in hand end (#341),
+    //: until `total` -- what the filter matched on the server -- is reached.
+    getNextPageParam: (last, _pages, lastParam) => nextPage(last, lastParam),
     enabled: !noAccounts && !noCategories,
   });
+  // A page that did not join up: more rows went above the boundary than the
+  // overlap covers. What is in hand may have a hole in it, so all of it is
+  // asked for again, from the first page.
+  const { refetch: refetchRegister } = register;
+  const lastPage = register.data?.pages.at(-1);
+  useEffect(() => {
+    if (lastPage && !lastPage.joined) void refetchRegister();
+  }, [lastPage, refetchRegister]);
   /**
    * The pages in hand, as one register answer.
    *
-   * A row can appear on two pages when the ledger changed between the two
-   * requests -- a row added above the boundary pushes the last row of page one
-   * onto page two -- so the rows are kept once each, the first time seen.
+   * A row appears on two pages by design -- each page reaches back
+   * `PAGE_OVERLAP` rows (#341) -- and also when a row added above the
+   * boundary pushes the last row of page one onto page two, so the rows are
+   * kept once each, the first time seen.
    * `total` and the badge's count are the newest page's: the latest word on
    * what the filter matches.
    */
@@ -771,8 +821,9 @@ export function Register({
       }
     }
     const newest = pages[pages.length - 1];
+    const { joined: _joined, ...answer } = newest;
     return {
-      ...newest,
+      ...answer,
       transactions,
       has_running_balance: pages[0].has_running_balance,
     };

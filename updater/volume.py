@@ -239,11 +239,20 @@ def read_untrusted(path: Path, owner_uid: int = REQUEST_OWNER_UID, limit: int = 
         os.close(fd)
 
 
+#: The most `read_own_json` reads. The largest file the updater writes is a
+#: history record with its log, tens of kilobytes; the app shares the volume,
+#: and a gigabyte "journal" read whole under the updater's memory limit was a
+#: restart loop (#334).
+MAX_OWN_JSON_BYTES = 4 * 1024 * 1024
+
+
 def read_own_json(path: Path) -> dict | None:
     """Read a file the updater itself wrote (journal, report, handover). None if absent.
 
-    Still never through a symlink: the app shares the volume and could have
-    replaced one.
+    Still never through a symlink, and never more than `MAX_OWN_JSON_BYTES`:
+    the app shares the volume and could have replaced one. Not by owner: the
+    app and the updater run as the same user by default (65532), so an
+    owner check would refuse nothing the app wrote.
     """
     try:
         fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0))
@@ -254,10 +263,16 @@ def read_own_json(path: Path) -> dict | None:
             raise UnsafeFile(f"{Path(path).name} is a symbolic link, which the updater never follows.") from e
         raise
     try:
-        if not stat.S_ISREG(os.fstat(fd).st_mode):
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode):
             return None
+        if st.st_size > MAX_OWN_JSON_BYTES:
+            raise UnsafeFile(f"{Path(path).name} is larger than anything the updater writes.")
         with os.fdopen(fd, "rb", closefd=False) as fh:
-            data = json.load(fh)
+            raw = fh.read(MAX_OWN_JSON_BYTES + 1)
+        if len(raw) > MAX_OWN_JSON_BYTES:
+            raise UnsafeFile(f"{Path(path).name} is larger than anything the updater writes.")
+        data = json.loads(raw)
     finally:
         os.close(fd)
     return data if isinstance(data, dict) else None

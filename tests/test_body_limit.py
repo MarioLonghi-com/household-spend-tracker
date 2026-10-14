@@ -13,9 +13,14 @@ byte -- which would make "nothing was read past the limit" untestable.
 from __future__ import annotations
 
 import asyncio
+import json
+
+import pytest
 
 from app import body_limit
 from app.main import BASE_SECURITY_HEADERS
+from tests.conftest import _setup_owner
+from tests.test_agent_discovery import keyed  # noqa: F401 - a fixture
 
 V1 = "/api/agent/v1"
 BOGUS_KEY = {"authorization": "Bearer stk_not_a_real_key"}
@@ -110,22 +115,29 @@ def test_a_streamed_body_is_cut_off_just_past_the_ceiling(client):
     assert headers["x-frame-options"] == "DENY"
 
 
+def _session_cookie(client) -> dict[str, str]:
+    """The signed-in client's cookies, as the one header a raw request carries."""
+    return {"cookie": "; ".join(f"{k}={v}" for k, v in client.cookies.items())}
+
+
 def test_the_ceiling_is_per_path(client):
     """A 20 MB receipt is a real thing to send; 20 MB of JSON to a lookup is not.
 
-    The receipt upload is let through the ceiling (and then answered by the
-    setup gate, which needs no body at all). The same length on a JSON route is
-    a 413.
+    For a signed-in member the receipt upload is let through the ceiling (and
+    then answered by the route: there is no such household). The same length
+    on a JSON route is a 413.
     """
+    _setup_owner(client)
     declared = {"content-type": "multipart/form-data; boundary=x",
-                "content-length": str(20 * MIB)}
+                "content-length": str(20 * MIB), "origin": "https://testserver",
+                **_session_cookie(client)}
     status, _, _, _ = _drive(
         client.app_module.app,
         path="/api/households/whatever/receipts",
         headers=declared,
         chunks=iter(()),
     )
-    assert status == 503
+    assert status == 404
 
     status, _, _, read = _drive(
         client.app_module.app,
@@ -135,6 +147,54 @@ def test_the_ceiling_is_per_path(client):
     )
     assert status == 413
     assert read["bytes"] == 0
+
+
+@pytest.mark.parametrize(
+    "credential",
+    [
+        {},
+        BOGUS_KEY,
+        {"cookie": "__Host-st_session=made-up; st_session=made-up"},
+    ],
+    ids=["nothing", "made-up key", "made-up cookie"],
+)
+def test_the_large_ceilings_are_for_somebody_signed_in(client, credential):
+    """#337. Chosen by path alone, the receipt and import ceilings let a
+    stranger make the app read and parse tens of megabytes before the 401.
+    Without a live session or key, those paths get the default megabyte --
+    refused unread past the drain, and with a sentence that says why."""
+    _setup_owner(client)
+    client.cookies.clear()
+    for path, size in (
+        ("/api/households/whatever/receipts", 20 * MIB),
+        (f"{V1}/households/whatever/receipts/batch", 30 * MIB),
+    ):
+        status, headers, body, read = _drive(
+            client.app_module.app,
+            path=path,
+            headers={**credential, "content-type": "application/json",
+                     "content-length": str(size)},
+            chunks=_stream(),
+        )
+        assert status == 413, body
+        assert read["bytes"] == 0, "past the default drain, so not read at all"
+        detail = json.loads(body)["detail"]
+        assert "without a signed-in session or a valid key (1 MB)" in detail
+        assert headers["x-frame-options"] == "DENY"
+
+
+def test_a_live_key_gets_the_batch_ceiling(keyed, client):  # noqa: F811
+    """And the same request with a key that is real is let past the default."""
+    under = 3 * MIB
+    status, _, body, read = _drive(
+        client.app_module.app,
+        path=f"{V1}/households/{keyed['household']['id']}/receipts/batch",
+        headers={"authorization": f"Bearer {keyed['token']}",
+                 "content-type": "application/json", "content-length": str(under)},
+        chunks=iter([b'{"receipts": [' + b" " * (under - 16) + b"]}"]),
+    )
+    assert status != 413, body
+    assert read["bytes"] == under
 
 
 def test_every_ceiling_sits_above_the_cap_it_guards():

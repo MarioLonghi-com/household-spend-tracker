@@ -242,7 +242,7 @@ def test_a_one_off_past_its_deadline_is_stopped_removed_and_reported(tmp_path):
         app = w.fake.inspect_of(w.fake.containers[w.app_id])
         body = shapes.oneoff(app, ref(eng.REPOSITORIES[0], B), "drill", "5d3c0b8e-7f0a-4b8e-9f43-0f6f1a2b9c11",
                              ["python", "-m", "scripts.upgrade", "--yes", "--report",
-                              "/var/lib/spend-tracker-update/work/x/drill.json"], ledger_volume="l")  # fmt: skip
+                              "/var/lib/spend-tracker-update/work/x/drill.json"], ledger_volume="spend-tracker_ledger")  # fmt: skip
         (w.volume.root / "work" / "x").mkdir()
         runner = kit.runner
         with pytest.raises(oneoff.TimedOut):

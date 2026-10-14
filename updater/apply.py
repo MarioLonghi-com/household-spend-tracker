@@ -442,6 +442,25 @@ class Apply:
     # Steps 3-10
     # ------------------------------------------------------------------ #
 
+    def still_verifies(self) -> str | None:
+        """Step 1's check of the new app image, again, before a resume runs it (#334).
+
+        The journal lives in the volume the app shares, so the digest a resume
+        reads back is not one the updater can vouch for having verified: a
+        forged journal could name any image of this repository the machine
+        holds. None when it is present and verifies; otherwise why not. The
+        updater image is the handover's to check, and it does (`handover`).
+        """
+        image = prepare.present(self.client, self.new_ref)
+        if image is None:
+            return "the prepared image is no longer on this machine."
+        try:
+            verified = self.kit.trust.verify(APP_REPOSITORY, self.new_ref.split("@", 1)[1], self.to)
+            verify.labels_agree(verified, (image.get("Config") or {}).get("Labels"))
+        except verify.Refused as e:
+            return f"the prepared image no longer verifies: {e.rule}: {e.detail}."
+        return None
+
     def from_step3(self) -> str:
         try:
             self.step3()
@@ -1177,6 +1196,11 @@ class Apply:
                 self.previous_home()
             return self.not_started("the updater restarted before the app was stopped.")
         if action == Action.CONTINUE:
+            problem = self.still_verifies()
+            if problem is not None:
+                with contextlib.suppress(_STEP_ERRORS):
+                    self.previous_home()
+                return self.not_started(problem)
             return self.from_step3()
         if action == Action.RESTORE_PREVIOUS:
             try:
@@ -1187,6 +1211,9 @@ class Apply:
         if action == Action.WAIT_FOR_DRILL:
             verdict = self.await_drill()
             if verdict is None and decision.carry_forward:
+                problem = self.still_verifies()
+                if problem is not None:
+                    return self.rollback("R1", problem)
                 return self.after_drill()
             return self.rollback(*(verdict or ("R1", INTERRUPTED)))
         if action == Action.ROLLBACK:

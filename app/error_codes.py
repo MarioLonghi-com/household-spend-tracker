@@ -92,6 +92,10 @@ REGISTRY: dict[str, Code] = {
     # -- payee: app/services/payees.py, payees and their rules -------------- #
     "payee.merge_different_households": Code("Those payees are in different households"),
     "payee.merge_into_itself": Code("A payee cannot be merged into itself"),
+    "payee.merge_system": Code(
+        "That is a payee the app keeps for itself, so it cannot be merged. Rename it if the "
+        "name is the problem"
+    ),
     "payee.needs_name": Code("A payee needs a name"),
     "payee.other_household": Code("That payee belongs to a different household"),
     "payee.rule_needs_pattern": Code("A rule needs something to match on"),

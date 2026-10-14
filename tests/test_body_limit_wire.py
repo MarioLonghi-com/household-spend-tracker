@@ -21,6 +21,7 @@ import pytest
 import uvicorn
 
 from app import body_limit
+from tests.test_agent_discovery import keyed  # noqa: F401 - a fixture
 
 V1 = "/api/agent/v1"
 MIB = 1024 * 1024
@@ -48,7 +49,7 @@ def served(client):
     thread.join(timeout=10)
 
 
-def _post(port: int, path: str, size: int) -> tuple[int, dict]:
+def _post(port: int, path: str, size: int, token: str = "stk_not_a_real_key") -> tuple[int, dict]:
     """Send the whole body, then read the answer: what a plain client does."""
     conn = http.client.HTTPConnection("127.0.0.1", port, timeout=60)
     body = b'{"receipts": [' + b" " * (size - 16) + b"]}"
@@ -57,7 +58,7 @@ def _post(port: int, path: str, size: int) -> tuple[int, dict]:
         path,
         body=body,
         headers={
-            "Authorization": "Bearer stk_not_a_real_key",
+            "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
             "Host": "testserver",
         },
@@ -68,9 +69,13 @@ def _post(port: int, path: str, size: int) -> tuple[int, dict]:
     return status, payload
 
 
-def test_an_oversized_batch_is_answered_413_not_dropped(served):
-    """The issue's shape: about 38 MB of JSON to the batch, length declared."""
-    status, payload = _post(served, f"{V1}/households/h1/receipts/batch", 38 * MIB)
+def test_an_oversized_batch_is_answered_413_not_dropped(keyed, served):  # noqa: F811
+    """The issue's shape: about 38 MB of JSON to the batch, length declared.
+
+    From a live key: without one the batch's ceiling is the default megabyte
+    (#337), and 38 MB is past that one's drain."""
+    house = keyed["household"]["id"]
+    status, payload = _post(served, f"{V1}/households/{house}/receipts/batch", 38 * MIB, keyed["token"])
     assert status == 413
     assert "larger than this endpoint accepts (32 MB)" in payload["detail"]
 

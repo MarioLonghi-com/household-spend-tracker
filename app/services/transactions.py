@@ -773,6 +773,13 @@ def split(
         "payee_id": txn.payee_id,
         "cleared": txn.cleared,
         "import_id": None,
+        # The statement line this row came from, kept on every part (#331).
+        # `import_id` cannot follow it -- an account holds a key once -- and
+        # without it the importer's dedupe, which reads the keys the account
+        # carries, sees the line as new: an overlapping statement brought the
+        # split money in a second time. `importing._import_ids_in` reads these
+        # back for split parts; a YNAB key the original carried rides along.
+        "import_alt_ids": _keys_of(txn),
         "import_payee_original": txn.import_payee_original,
         "import_source": txn.import_source,
         # Splitting a work expense does not stop it being one, and splitting a
@@ -870,6 +877,13 @@ def _carry_receipts(
         # disagree with.
         session.delete(receipt)
     session.flush()
+
+
+def _keys_of(txn: Transaction) -> list[str] | None:
+    """The statement keys a row answers to: its own `import_id`, then its alternatives."""
+    keys = [txn.import_id] if txn.import_id else []
+    keys += [alt for alt in txn.import_alt_ids or () if isinstance(alt, str) and alt not in keys]
+    return keys or None
 
 
 def parts_of(session: Session, split_id: str) -> list[Transaction]:

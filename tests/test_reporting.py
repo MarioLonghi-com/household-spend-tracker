@@ -18,6 +18,7 @@ from datetime import date
 import pytest
 
 from app.audit.batch import batch
+from app.errors import ValidationError
 from app.models import (
     BatchKind,
     Category,
@@ -28,6 +29,7 @@ from app.models import (
     Transaction,
 )
 from app.services import accounts as account_service
+from app.services import payees as payee_service
 from app.services import reporting as report_service
 
 
@@ -716,3 +718,44 @@ def test_the_reimbursement_count_is_windowed_and_per_currency(
     assert _report(session, household)["excluded"]["reimbursements"] == 1
     assert _report(session, household, currency="GBP")["excluded"]["reimbursements"] == 1
 
+
+
+@pytest.mark.parametrize("which", ["source", "target"])
+def test_a_system_payee_cannot_be_merged_either_way(session, household, owner, accounts, which):
+    """#332. Merged away, "Opening balance" turned a balance into income; merged
+    into, it hid income as an opening balance. Both are refused, and the
+    report reads what it read before."""
+    with batch(session, kind=BatchKind.admin, actor_id=owner.id, household_id=household.id):
+        for name, currency in (("Santander", "EUR"), ("Barclays", "GBP")):
+            account_service.create_account(
+                session,
+                household=household,
+                name=name,
+                type="checking",
+                currency=currency,
+                opening_balance=100_000,
+                opening_date=date(2026, 1, 1),
+            )
+        salary = payee_service.get_or_create(session, household.id, "Employer")
+    _add(
+        session, household, owner, accounts["checking"],
+        when=date(2026, 1, 25), amount=200_000, payee=salary,
+    )
+    opening = session.query(Payee).filter_by(system=SystemPayee.opening_balance).one()
+    before = (_report(session, household)["income"].total_minor,
+              _report(session, household, currency="GBP")["income"].total_minor)
+    assert before == (200_000, 0)
+
+    source, target = (opening, salary) if which == "source" else (salary, opening)
+    with (
+        pytest.raises(ValidationError) as refused,
+        batch(session, kind=BatchKind.manual, actor_id=owner.id, household_id=household.id),
+    ):
+        payee_service.merge(session, source=source, target=target)
+    assert refused.value.code == "payee.merge_system"
+    session.rollback()
+
+    after = (_report(session, household)["income"].total_minor,
+             _report(session, household, currency="GBP")["income"].total_minor)
+    assert after == before
+    assert session.query(Payee).filter_by(system=SystemPayee.opening_balance).count() == 1

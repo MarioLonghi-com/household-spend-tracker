@@ -314,14 +314,30 @@ def _import_ids_in(session: Session, account_id: str) -> set[str]:
     committing one -- which is why it is a function rather than three copies of
     the same `select`. The set is the whole dedupe: a line whose id is in here
     has already landed, however it got there.
+
+    A split's parts count too (#331). The split replaces the imported row and
+    gives up its `import_id`, which no two parts could share; every part keeps
+    the line's keys in `import_alt_ids` instead, and they are read here. Only
+    a part's: the alternatives on any other row are a YNAB row's key, meant for
+    a statement line to *absorb* (`_Twins`), and reading those here would turn
+    that absorption into a skip.
     """
-    return set(
+    seen = set(
         session.execute(
             select(Transaction.import_id).where(
                 Transaction.account_id == account_id, Transaction.import_id.is_not(None)
             )
         ).scalars()
     )
+    for alt_ids in session.execute(
+        select(Transaction.import_alt_ids).where(
+            Transaction.account_id == account_id,
+            Transaction.split_id.is_not(None),
+            Transaction.import_alt_ids.is_not(None),
+        )
+    ).scalars():
+        seen.update(alt for alt in alt_ids or () if isinstance(alt, str))
+    return seen
 
 
 #: Lines whose meaning is fixed by the bank's own wording, whatever the

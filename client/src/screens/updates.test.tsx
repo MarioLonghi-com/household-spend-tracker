@@ -28,6 +28,7 @@ import {
   APPLY_POLL_MS,
   HEALTH_POLL_MS,
   NOT_BACK_AFTER_MS,
+  NOT_BACK_POLL_MS,
   OutcomeBlock,
   ReleaseNotes,
   Updates,
@@ -701,9 +702,31 @@ describe("updating", () => {
 
     healthy = true;
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(HEALTH_POLL_MS);
+      await vi.advanceTimersByTimeAsync(NOT_BACK_POLL_MS);
     });
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("asks once a minute, not every 3 s, once it has said 'not back yet' (#340)", async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url === "/api/health") throw new TypeError("Failed to fetch");
+      return new Response("<html>being updated</html>", { status: 503 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<Updating toVersion="0.10.0" initial={[]} onBack={vi.fn()} />);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2_000 + NOT_BACK_AFTER_MS + HEALTH_POLL_MS);
+    });
+    expect(screen.getByText(/The app has not come back yet/)).toBeTruthy();
+
+    const health = () => fetchMock.mock.calls.filter(([url]) => url === "/api/health").length;
+    const before = health();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60 * 60 * 1_000);
+    });
+    // An hour: sixty, give or take the one in flight -- not twelve hundred.
+    expect(health() - before).toBeGreaterThanOrEqual(59);
+    expect(health() - before).toBeLessThanOrEqual(61);
   });
 
   it("once the app is back, opens Application management rather than reloading onto the register", async () => {

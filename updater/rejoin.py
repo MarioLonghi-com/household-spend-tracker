@@ -64,6 +64,11 @@ STOP_GRACE = 10
 BY_HAND = "docker compose up -d --force-recreate app"
 SIDECAR_SERVICE = "tailscale"
 
+#: What the app is renamed to while its replacement is created (#335). Not
+#: `-previous`, which is the apply's and which a later apply reads as a stale
+#: leftover of its own.
+SET_ASIDE_SUFFIX = "-rejoining"
+
 _ERRORS = (eng.EngineError, eng.NotAllowed, survey.NotStarted)
 
 
@@ -277,9 +282,22 @@ class Rejoin:
         body["Env"] = shapes.own_env(seen, image_config)
         eng.guard_create(body, client.scope)
         name = shapes.name_of(seen)
-        client.stop(str(seen["Id"]), grace=STOP_GRACE)
-        client.remove(str(seen["Id"]), force=True)
-        new_id = client.create(name, body)
+        old_id = str(seen["Id"])
+        # The old one is set aside under another name, not removed, until its
+        # replacement exists (#335). Removed first, a create the engine then
+        # refused -- a name race, a resource limit -- left no app at all and
+        # only a heartbeat line to say so. Set aside, a refused create puts it
+        # back under its own name and starts it, as it was before the repair.
+        client.stop(old_id, grace=STOP_GRACE)
+        client.rename(old_id, name + SET_ASIDE_SUFFIX)
+        try:
+            new_id = client.create(name, body)
+        except BaseException:
+            with contextlib.suppress(eng.EngineError, eng.NotAllowed):
+                client.rename(old_id, name)
+                client.start(old_id)
+            raise
+        client.remove(old_id, force=True)
         client.start(new_id)
 
     def record(self, sentence: str, found: Finding, now: float) -> None:

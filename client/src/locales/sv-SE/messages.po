@@ -4434,6 +4434,11 @@ msgstr "En mottagare kan inte slås ihop med sig själv"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.payee.merge_system"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.payee.needs_name"
 msgstr "En mottagare behöver ett namn"

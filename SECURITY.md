@@ -135,16 +135,30 @@ unread, so a flood of requests cannot lengthen it. The page is reachable only wh
 personal computer, the tailnet on a server.
 
 **What a compromised app can still do.** It already holds the ledger and
-`secret.key`; what it must not gain is the machine. The files the app and the
-updater share are group-writable by design, so an app under someone else's
-control could forge the updater's handover files, its lock or its heartbeat.
+`secret.key`; what it must not gain is the machine, or another installation
+on it. The files the app and the updater share are group-writable by design,
+so an app under someone else's control could forge the updater's handover
+files, its lock, its heartbeat, and the journal of an update in progress.
 The most that buys is a **delay or a forced take-back**: an updater stepping
-aside early, or taking back over from its successor, and updates not
-happening until an owner notices. It can never get unverified code run: an
-updater checks its successor's image with the engine, at the verified digest,
-before it starts it. The same holds for every request: at worst the app makes
-the updater install a genuine, newer release of this application, built by
-this repository's release workflow.
+aside early or taking back over from its successor; an update stopped,
+rolled back, or put into recovery; the app container stopped, renamed or
+replaced by a genuine release; and updates not happening until an owner
+notices. What the updater creates is held to this installation whatever a
+forged file says (#334): only this project's own volumes
+(`<project>_<name>`) and the ones the updater was itself started with, never
+a volume with a driver configuration of its own, and never its own container
+removed or stopped except by the handover that means to. It can never get
+unverified code run: an updater checks its successor's image with the engine,
+at the verified digest, before it starts it, and a resumed update checks the
+new app image again before it runs it. At worst the app makes the updater
+install, or go back to, a genuine release of this application already on
+the machine, built by this repository's release workflow.
+
+The recovery code is the one secret the app can see in passing. The
+recovery page runs as the app's user, so the request file it writes is
+readable by that user for the moment before the updater takes and deletes
+it. An app that is already compromised learns a code it could not otherwise
+use against anything it does not already hold.
 
 **A suggested egress firewall.** Not required, and not set up by anything
 here. The updater container reaches out only while it handles a request an

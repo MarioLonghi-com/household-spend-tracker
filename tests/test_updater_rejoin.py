@@ -273,3 +273,60 @@ def test_the_engine_client_still_refuses_to_restart_the_sidecar(tmp_path):
             except eng.NotAllowed:
                 continue
             raise AssertionError("the sidecar was acted on")
+
+
+def _replace_sidecar(w: World) -> None:
+    """Recreated outside compose: the old id is gone, a new container of the service runs."""
+    old = copy.deepcopy(w.fake.inspect_of(w.fake.containers[w.sidecar_id]))
+    del w.fake.containers[w.sidecar_id]
+    old["Id"] = os.urandom(32).hex()
+    old["State"] = {"Status": "running", "Running": True}
+    w.sidecar_id = w.fake.add_inspected(old)
+    w.epoch += 1
+
+
+def test_a_refused_create_leaves_the_app_where_it_was(tmp_path):
+    """#335. The old app used to be removed before its replacement was created,
+    so an engine that refused the create left no app at all. Now it is set
+    aside under another name, and a refused create puts it back and starts it.
+    The second installation on the engine is untouched either way."""
+    with World(tmp_path, layout="sidecar") as w:
+        other_sidecar, other_app = add_other_project(w)
+        service = w.service()
+        service.tick()
+        old_id = w.app_id
+        w.fake.refuse_create = lambda name, body: "Conflict. The container name is already in use"
+        _replace_sidecar(w)
+        later(w)
+        service.tick()
+
+        assert old_id in w.fake.containers, "the app was removed before its replacement existed"
+        back = w.fake.inspect_of(w.fake.containers[old_id])
+        assert back["Name"] == f"/{w.app_name}"
+        assert back["State"]["Running"] is True
+        assert [c for c in w.fake.calls if c.bare == "/containers/create"] != []
+        assert rejoins(w) == [] and service.heartbeat_problem is not None
+        assert mutating(w, other_sidecar) == [] and mutating(w, other_app) == []
+
+
+def test_the_app_is_set_aside_not_removed_until_its_replacement_exists(tmp_path):
+    with World(tmp_path, layout="sidecar") as w:
+        service = w.service()
+        service.tick()
+        old_id = w.app_id
+        _replace_sidecar(w)
+        later(w)
+        service.tick()
+
+        order = [
+            (c.bare.rsplit("/", 1)[-1], c.query.get("name"))
+            for c in w.fake.calls
+            if c.method != "GET" and (old_id in c.bare or c.bare == "/containers/create")
+        ]
+        assert order == [
+            ("stop", None),
+            ("rename", w.app_name + rejoin.SET_ASIDE_SUFFIX),
+            ("create", w.app_name),
+            (old_id, None),
+        ], order
+        assert old_id not in w.fake.containers and answers(w)
