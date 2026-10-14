@@ -39,6 +39,11 @@ history this repository does not have.
   statement again brought the split amount in a second time and moved the
   balance. Every part now keeps the line's key, and the import skips it.
   (#331)
+- **"Opening balance" and the transfer payee cannot be merged.** Merging
+  "Opening balance" into another payee made every account's opening balance
+  count as income in the reports, and merging a payee into it hid that
+  payee's money as opening balances. Both are refused now; renaming either
+  is still allowed. (#332)
 
 ## 0.11.0 — 2026-10-14
 

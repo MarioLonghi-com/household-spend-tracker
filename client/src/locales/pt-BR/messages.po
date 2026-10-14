@@ -4434,6 +4434,11 @@ msgstr "Um favorecido não pode ser unido a si mesmo"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.payee.merge_system"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.payee.needs_name"
 msgstr "Um favorecido precisa de um nome"

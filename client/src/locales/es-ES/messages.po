@@ -4434,6 +4434,11 @@ msgstr "Un beneficiario no se puede fusionar consigo mismo"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.payee.merge_system"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.payee.needs_name"
 msgstr "Un beneficiario necesita un nombre"
