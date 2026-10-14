@@ -57,6 +57,11 @@ history this repository does not have.
   anyone, and read them in full before saying "sign in first". Without a
   live session or agent key they now take the ordinary 1 MB, and the
   refusal says what would raise it. (#337)
+- **Resetting a password with a recovery code takes as long for an
+  unknown address as for a real one.** It answered both alike but did no
+  work for an address with no account, so the time taken said which
+  addresses were registered. This route is only offered by the desktop
+  app. (#338)
 
 ## 0.11.0 — 2026-10-14
 
