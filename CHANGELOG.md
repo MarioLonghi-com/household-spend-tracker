@@ -62,6 +62,11 @@ history this repository does not have.
   work for an address with no account, so the time taken said which
   addresses were registered. This route is only offered by the desktop
   app. (#338)
+- **Rejoining the app to a replaced network sidecar no longer risks
+  losing the app.** The updater removed the app before creating its
+  replacement, so an engine that refused the create left no app running.
+  It now sets the old one aside and puts it back if the create fails.
+  (#335)
 
 ## 0.11.0 — 2026-10-14
 
