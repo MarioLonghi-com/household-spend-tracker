@@ -572,3 +572,41 @@ def test_a_route_that_chose_its_own_caching_keeps_it(client):
     listed = client.get(f"/api/households/{ledger['ours']['id']}/receipts")
     assert listed.status_code == 200, listed.text
     assert listed.headers["cache-control"] == "no-store"
+
+
+def test_an_unexpected_500_carries_them_too(client):
+    """#336. An exception nothing handles is answered from Starlette's
+    `ServerErrorMiddleware`, outside every middleware the app adds, so the
+    500 used to go out with no header at all. The traceback still reaches
+    the log -- the handler re-raises -- so only the response is under test."""
+    from tests.conftest import _setup_owner
+
+    _setup_owner(client)
+    main = client.app_module
+
+    @main.app.get("/api/test-only-explodes", include_in_schema=False)
+    def explodes():
+        raise RuntimeError("nobody handles this")
+
+    try:
+        quiet = TestClient(main.app, base_url="https://testserver", raise_server_exceptions=False)
+        answer = quiet.get("/api/test-only-explodes")
+    finally:
+        main.app.router.routes.pop()
+
+    assert answer.status_code == 500
+    assert answer.text == "Internal Server Error"
+    for name, value in BASE_SECURITY_HEADERS.items():
+        assert answer.headers[name] == value
+    assert "frame-ancestors 'none'" in answer.headers["Content-Security-Policy"]
+    assert answer.headers["Cache-Control"] == "no-store"
+
+
+@pytest.mark.parametrize("path", ["/%00", "/reports%00.html", "/assets/../%00x"])
+def test_a_nul_in_the_path_is_the_app_shell_not_a_500(spa_built, client, path):
+    """#336. `Path.resolve()` raises on an embedded NUL, which uvicorn decodes
+    from `%00`, so the SPA fallback answered with a bare 500 per request."""
+    answer = client.get(path)
+    assert answer.status_code == 200
+    assert "stand-in" in answer.text
+    assert answer.headers["X-Content-Type-Options"] == "nosniff"

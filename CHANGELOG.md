@@ -48,6 +48,10 @@ history this repository does not have.
   rules.** It made a new payee spelled exactly as the bank wrote it, so a
   rule mapping a card descriptor to "Mercadona" was ignored and the payee
   list gained a duplicate. (#333)
+- **An unexpected server error carries the security headers.** A 500
+  nothing else handled was answered outside the middleware that sets them,
+  so it went out with no content policy or framing protection. And an
+  address with an encoded NUL in it is the app's page, not a 500. (#336)
 
 ## 0.11.0 — 2026-10-14
 
