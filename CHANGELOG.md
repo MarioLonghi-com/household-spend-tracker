@@ -32,6 +32,14 @@ history this repository does not have.
 
 ## Unreleased
 
+### Fixed
+
+- **A split statement line is not imported twice.** Splitting an imported
+  row gave the parts none of the line's identity, so sending an overlapping
+  statement again brought the split amount in a second time and moved the
+  balance. Every part now keeps the line's key, and the import skips it.
+  (#331)
+
 ## 0.11.0 — 2026-10-14
 
 **Reversible: none** — no migration in this release. To go back to
