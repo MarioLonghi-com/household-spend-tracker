@@ -32,7 +32,7 @@ import { Empty, Hint, Problem, SortHeading, sortRows, useSort } from "../compone
 import { bytes } from "../lib/bytes";
 import { BackupList, UpdateBackupList, type Backup } from "./Backups";
 import { Updates } from "./Updates";
-import { useCapabilities } from "../lib/capabilities";
+import { useCapabilities, useProductName } from "../lib/capabilities";
 import { TranslationReview } from "./TranslationReview";
 import type { Household } from "../lib/types";
 import { formatInstant } from "../lib/time";
@@ -699,6 +699,7 @@ function Operations({ me }: { me: Instance }) {
   // The desktop app has no updater of its own: the store it came from keeps
   // it current (#316), so there is nothing here to press.
   const offered = useCapabilities();
+  const productName = useProductName();
   return (
     <section className="card" id="updates" aria-labelledby="updates-title">
       <h2 className="section-title" id="updates-title">
@@ -711,7 +712,7 @@ function Operations({ me }: { me: Instance }) {
       ) : (
         <p className="muted" style={{ marginBottom: 0 }}>
           <Trans comment="On the Application management screen of the desktop app, in place of the updater">
-            This copy of Spend Tracker is kept up to date by the store it was installed from: the App
+            This copy of {productName} is kept up to date by the store it was installed from: the App
             Store on a Mac, the Microsoft Store on Windows.
           </Trans>
         </p>

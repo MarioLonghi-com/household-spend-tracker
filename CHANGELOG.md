@@ -32,6 +32,40 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.12.0 — 2026-10-15
+
+**Reversible: none** — no migration in this release. To go back to
+`0.11.1`, follow *Going back after a successful update* in
+`deploy/UPGRADING.md`. From a checkout, check out `v0.11.1` and restart.
+
+The desktop app takes the name it is listed under on the Mac App Store and the
+Microsoft Store, Household Spend Tracker, and can be built, signed and
+packaged for the Mac App Store. Nothing a server's users see changes.
+
+### Added
+
+- **A Mac App Store build to upload.** `scripts.desktop_build store` builds
+  the app for distribution, `desktop/scripts/package-mas.sh` wraps the
+  store-signed app in the installer package the store takes and checks both
+  signatures, and the desktop README has the steps through to the upload.
+  (#63)
+
+### Fixed
+
+- **A write just after the app starts is no longer refused as "ledger
+  busy".** The tidy-up that runs at every start compacts the ledger's log,
+  and when somebody was reading at that moment it waited for them, holding up
+  every change behind it, for up to five seconds. It no longer waits: a
+  compaction that meets a reader finishes on the next tidy-up. (#349)
+
+### Changed
+
+- **The desktop app is called Household Spend Tracker**, the name it is
+  listed under on the Mac App Store and the Microsoft Store: the window, the
+  menus, the dialogs, and the headings and sentences of the app inside it. The
+  server and the web app are still Spend Tracker. The ledger stays where it
+  was, so an install from before the rename opens the same ledger. (#346)
+
 ## 0.11.1 — 2026-10-14
 
 **Reversible: none** — no migration in this release. To go back to

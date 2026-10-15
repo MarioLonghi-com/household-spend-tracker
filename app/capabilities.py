@@ -88,6 +88,18 @@ def for_settings(settings: Settings) -> Capabilities:
     )
 
 
+#: What the app is called, per profile (#346). The desktop app is listed on both
+#: stores as "Household Spend Tracker" -- the Microsoft Store requires the
+#: package's name to match the one it reserved -- and the server keeps the name
+#: it has always had. Not a capability: nothing is switched on or off by it, so
+#: it travels beside them in `/api/capabilities` rather than among them.
+PRODUCT_NAMES = {"server": "Spend Tracker", "desktop": "Household Spend Tracker"}
+
+
+def product_name(settings: Settings) -> str:
+    return PRODUCT_NAMES[settings.profile]
+
+
 def current() -> Capabilities:
     """What this deployment offers, from the settings as they are now. For code
     that runs per request; `app.main.CAPABILITIES` is the same answer, fixed

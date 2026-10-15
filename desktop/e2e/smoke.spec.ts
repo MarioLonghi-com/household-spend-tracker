@@ -19,8 +19,8 @@ const DIST = path.join(HERE, "..", "dist");
 /** The packaged app: SPENDTRACKER_DESKTOP_APP, else where electron-builder put it. */
 function executable(): string {
   if (process.env.SPENDTRACKER_DESKTOP_APP) return process.env.SPENDTRACKER_DESKTOP_APP;
-  if (process.platform === "win32") return path.join(DIST, "win-unpacked", "Spend Tracker.exe");
-  return path.join(DIST, "mac-arm64", "Spend Tracker.app", "Contents", "MacOS", "Spend Tracker");
+  if (process.platform === "win32") return path.join(DIST, "win-unpacked", "Household Spend Tracker.exe");
+  return path.join(DIST, "mac-arm64", "Household Spend Tracker.app", "Contents", "MacOS", "Household Spend Tracker");
 }
 
 const PASSWORD = "a long and entirely invented passphrase";

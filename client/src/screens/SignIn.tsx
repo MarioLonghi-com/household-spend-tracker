@@ -37,7 +37,7 @@ import {
 } from "../lib/passkeys";
 import { dropGrant, keepGrant } from "../lib/recoveryGrant";
 import type { User } from "../lib/types";
-import { useCapabilities } from "../lib/capabilities";
+import { useCapabilities, useProductName } from "../lib/capabilities";
 import { RecoveryCodeSheet } from "../components/RecoveryCodes";
 import { Trans, useLingui } from "@lingui/react/macro";
 
@@ -84,6 +84,7 @@ function keyReplaced(problem: unknown): problem is Error {
 
 export function SignIn({ onDone }: { onDone: (user: User) => void }) {
   const { t } = useLingui();
+  const productName = useProductName();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -263,7 +264,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
   if (owed) {
     return (
       <form className="centred" onSubmit={enrol}>
-        <h1>Spend Tracker</h1>
+        <h1>{productName}</h1>
         <Problem error={error} />
         <div className="card">
           <h2>
@@ -345,7 +346,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
   if (recovered) {
     return (
       <div className="centred">
-        <h1>Spend Tracker</h1>
+        <h1>{productName}</h1>
         <div className="card" role="status">
           <h2>
             <Trans>You're back in</Trans>
@@ -398,7 +399,7 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
 
   return (
     <form className="centred" onSubmit={submit}>
-      <h1>Spend Tracker</h1>
+      <h1>{productName}</h1>
       <Problem error={error} />
 
       <div className="card">
@@ -533,6 +534,7 @@ function RecoverPassword({
   onDone: (user: User) => void;
 }) {
   const { t } = useLingui();
+  const productName = useProductName();
   const [email, setEmail] = useState(given);
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
@@ -564,7 +566,7 @@ function RecoverPassword({
   if (done) {
     return (
       <div className="centred">
-        <h1>Spend Tracker</h1>
+        <h1>{productName}</h1>
         <div className="card" role="status">
           <h2>
             <Trans comment="Heading on the desktop app's sign-in page, after a new password">Your new recovery code</Trans>
@@ -587,7 +589,7 @@ function RecoverPassword({
 
   return (
     <form className="centred" onSubmit={submit}>
-      <h1>Spend Tracker</h1>
+      <h1>{productName}</h1>
       <Problem error={error} />
       <div className="card">
         <h2>
@@ -595,7 +597,7 @@ function RecoverPassword({
         </h2>
         <p className="muted small">
           <Trans>
-            Use the recovery code you kept when you set up Spend Tracker. It works once; you will be
+            Use the recovery code you kept when you set up {productName}. It works once; you will be
             given a new one.
           </Trans>
         </p>

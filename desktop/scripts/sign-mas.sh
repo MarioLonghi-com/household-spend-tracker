@@ -1,7 +1,7 @@
 #!/bin/sh
 # Sign the Mac App Store app for a sandboxed run on this Mac (#59, #61).
 #
-#   scripts/sign-mas.sh "dist/mas-dev-arm64/Spend Tracker.app" PROFILE.provisionprofile ["Apple Development"]
+#   scripts/sign-mas.sh "dist/mas-dev-arm64/Household Spend Tracker.app" PROFILE.provisionprofile ["Apple Development"]
 #
 # electron-builder makes the app unsigned (`npm run dist:mas`); this does what
 # the spike found a sandboxed Electron app with a frozen Python child needs:
@@ -40,7 +40,11 @@ WORK="$(mktemp -d -t entitlements)"
 sed -e "s/@TEAM_ID@/$TEAM/g" -e "s/@BUNDLE_ID@/$BUNDLE/g" "$HERE/entitlements/mas.plist" > "$WORK/parent.plist"
 CHILD="$HERE/entitlements/mas.inherit.plist"
 
-cp "$PROFILE" "$APP/Contents/embedded.provisionprofile"
+# `cp -X`, and then every extended attribute off the whole app: a profile
+# downloaded in a browser carries com.apple.quarantine, a plain copy carries it
+# into the app, and the store refuses any file that has it (ITMS 91109).
+cp -X "$PROFILE" "$APP/Contents/embedded.provisionprofile"
+xattr -cr "$APP"
 plutil -replace ElectronTeamID -string "$TEAM" "$APP/Contents/Info.plist"
 
 MAIN="$APP/Contents/MacOS/$(basename "$APP" .app)"

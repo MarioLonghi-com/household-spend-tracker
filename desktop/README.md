@@ -5,6 +5,11 @@ client as the server, in an Electron window, for the Mac App Store (Apple
 Silicon) and the Microsoft Store (Windows 11 x64). Epic #49; this folder is
 #61 and #62.
 
+**On the stores it is called Household Spend Tracker** (#346), the name both
+reserved, and the window, menus and the client's headings say so; the client
+reads it from `GET /api/capabilities`. The folders below keep the name
+`Spend Tracker`, so a ledger made before the rename is still the one opened.
+
 ## How it fits together
 
 ```
@@ -60,7 +65,8 @@ build/freeze-venv/bin/pip install --require-hashes -r requirements-desktop.txt
 build/freeze-venv/bin/python -m scripts.desktop_build mac
 ```
 
-`mac` is the plain Mac build; `mas` the Mac App Store one; `win` the MSIX and a folder.
+`mac` is the plain Mac build; `mas` the Mac App Store one, to run here with a
+development profile; `store` the same app for upload; `win` the MSIX and a folder.
 
 `scripts/desktop_build.py` builds the client, stamps the commit, freezes the
 backend (`desktop/backend.spec`), smoke-tests it (`smoke_backend.py`), builds
@@ -92,11 +98,13 @@ Hardware, not the Hardware UUID). With one from the developer account:
 
 ```bash
 build/freeze-venv/bin/python -m scripts.desktop_build mas
-desktop/scripts/sign-mas.sh "desktop/dist/mas-dev-arm64/Spend Tracker.app" ~/path/to/profile.provisionprofile
-open "desktop/dist/mas-dev-arm64/Spend Tracker.app"
+desktop/scripts/sign-mas.sh "desktop/dist/mas-dev-arm64/Household Spend Tracker.app" ~/path/to/profile.provisionprofile
+open "desktop/dist/mas-dev-arm64/Household Spend Tracker.app"
 ```
 
-Profiles stay out of the repository (`.gitignore`). Playwright cannot drive
+Profiles stay out of the repository: keep them with the account's other
+files and pass the path, rather than copying one into `desktop/` (where
+`.gitignore` would at least keep it out of a commit). Playwright cannot drive
 the sandboxed build — it needs a debugging port, and the sandbox allows no
 listener — so that one is checked by hand.
 
@@ -108,7 +116,7 @@ one is signed with a throwaway certificate:
 ```powershell
 powershell -File desktop\scripts\test-certificate.ps1 -Out C:\st-test
 python -m scripts.desktop_build win
-powershell -File desktop\scripts\sign-msix.ps1 -Package "desktop\dist\Spend Tracker <version>.appx" -Pfx C:\st-test\test-signing.pfx
+powershell -File desktop\scripts\sign-msix.ps1 -Package "desktop\dist\Household Spend Tracker <version>.appx" -Pfx C:\st-test\test-signing.pfx
 ```
 
 `sign-msix.ps1` uses the Windows SDK's `signtool`: the copy electron-builder
@@ -116,6 +124,27 @@ carries fails on current Windows 11 with "A required function is not present".
 
 Then the machine's owner trusts `test-signing.cer` (the script says how, and
 how to remove it again) and installs `desktop\dist\*.appx`.
+
+### Uploading to the Mac App Store
+
+The store build is signed with the **App Store** provisioning profile and the
+**Apple Distribution** identity, then packaged for `/Applications` and signed
+with the installer identity (*3rd Party Mac Developer Installer*, called Mac
+Installer Distribution on the developer site). The profile and the App Store
+Connect API key stay outside the repository; pass their paths.
+
+```bash
+build/freeze-venv/bin/python -m scripts.desktop_build store
+desktop/scripts/sign-mas.sh "desktop/dist/mas-arm64/Household Spend Tracker.app" ~/path/to/appstore.provisionprofile "Apple Distribution"
+desktop/scripts/package-mas.sh "desktop/dist/mas-arm64/Household Spend Tracker.app" desktop/dist/household-spend-tracker.pkg
+xcrun altool --upload-app -f desktop/dist/household-spend-tracker.pkg -t macos --apiKey KEY_ID --apiIssuer ISSUER_ID
+```
+
+The build's version is the app's (`desktop/package.json`) and must be the
+version App Store Connect is preparing; a second upload of the same version
+needs a new build number, `SPENDTRACKER_STORE_BUILD=2` for the `store` build.
+`altool` finds the key as `~/private_keys/AuthKey_KEY_ID.p8`. The app's icon
+on App Store Connect comes from this build.
 
 ## Words
 
@@ -126,6 +155,7 @@ The window tells the shell which language it activated (`client/src/lib/desktop.
 
 ## Not yet
 
-- Store signing, TestFlight, Partner Center, listings: #63, after #321 and #58.
+- Partner Center, the store listings' translations and submission: #63, after #321 and #58. The Mac
+  App Store build is signed, packaged and uploaded as above.
 - Electron fuses (no `--inspect`, no `ELECTRON_RUN_AS_NODE`) go on for the
   store builds in #63; the smoke test needs them off.

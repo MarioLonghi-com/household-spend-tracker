@@ -65,10 +65,45 @@ function publish(next: Capabilities): Capabilities {
  */
 export async function loadCapabilities(): Promise<Capabilities> {
   try {
-    return publish((await api.get<Capabilities>("/capabilities")) ?? EVERYTHING);
+    const answer = await api.get<Capabilities & { product_name?: unknown }>("/capabilities");
+    if (!answer) return publish(EVERYTHING);
+    const { product_name: name, ...switches } = answer;
+    setProductName(typeof name === "string" && name.trim() ? name : null);
+    return publish(switches);
   } catch {
     return publish(EVERYTHING);
   }
+}
+
+/**
+ * What the app is called here (#346): "Household Spend Tracker" in the desktop
+ * app, the name both stores list it under, and "Spend Tracker" on a server.
+ * The server says which, beside the capabilities, in the same boot request; a
+ * server too old to say is a server, and keeps the name it always had.
+ */
+export const SERVER_NAME = "Spend Tracker";
+let named: string | null = null;
+const nameListeners = new Set<() => void>();
+
+/** For the boot, and for tests. Null goes back to the server's name. */
+export function setProductName(next: string | null): void {
+  named = next;
+  for (const listener of nameListeners) listener();
+}
+
+/** The name, for code that is not a component (the tab title). */
+export function productNameNow(): string {
+  return named ?? SERVER_NAME;
+}
+
+function subscribeName(listener: () => void): () => void {
+  nameListeners.add(listener);
+  return () => nameListeners.delete(listener);
+}
+
+/** The name, for a component: it redraws if the boot answers after the first paint. */
+export function useProductName(): string {
+  return useSyncExternalStore(subscribeName, productNameNow);
 }
 
 /** For tests: what a deployment offers, as if the boot had asked. Null forgets. */

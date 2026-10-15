@@ -113,6 +113,7 @@ def test_the_server_profile_offers_everything_it_did(monkeypatch, tmp_path, rest
             "snap": True, "agents": True, "invitations": True, "account_resets": True,
             "passkeys": False, "second_factor": True, "password_reset_by_code": False, "self_update": True,
             "upstream_check": True, "db_view": True, "ynab_import": True,
+            "product_name": "Spend Tracker",
         }
         import app.main as main
 
@@ -122,6 +123,8 @@ def test_the_server_profile_offers_everything_it_did(monkeypatch, tmp_path, rest
 def test_the_desktop_profile_offers_only_what_needs_nobody_else(monkeypatch, tmp_path, restore_server):
     with _boot(monkeypatch, tmp_path / "data", profile="desktop") as client:
         offered = client.get("/api/capabilities").json()
+    # The name the stores list it under (#346), beside the switches.
+    assert offered.pop("product_name") == "Household Spend Tracker"
     assert {name for name, on in offered.items() if not on} == NETWORK_ONLY | {"passkeys"}
     assert {name for name, on in offered.items() if on} == {"upstream_check", "ynab_import", "password_reset_by_code"}
 

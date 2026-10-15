@@ -639,6 +639,41 @@ def test_the_checkpoint_empties_the_wal_and_keeps_every_row(wal_db):
     assert _rows(eng) == 300
 
 
+def test_a_reader_never_makes_the_checkpoint_stall_the_writers(wal_db):
+    """#349. A TRUNCATE checkpoint that meets a reader on an older snapshot
+    waits for it -- up to the busy timeout -- and while it waits it holds the
+    write lock, so every request that writes waits behind it and is refused
+    "ledger busy" after the same five seconds. The sweep runs at every start,
+    beside the first requests: on Windows CI that was five tests in one run.
+    It now gives up at once and leaves the checkpoint partial for the next
+    sweep, as a VACUUM that meets a lock already did."""
+    import time
+
+    eng, path = wal_db
+    _fill(eng, 50)
+    reader = eng.connect()
+    try:
+        reader.exec_driver_sql("BEGIN")
+        assert reader.execute(text("SELECT count(*) FROM filler")).scalar_one() == 50
+        _fill(eng, 50)  # frames past the reader's snapshot: TRUNCATE cannot finish
+
+        started = time.monotonic()
+        done = housekeeping.tend_the_file(eng)
+        took = time.monotonic() - started
+
+        assert took < 1.0, f"the checkpoint waited {took:.1f} s for a reader, holding the write lock"
+        assert done["wal_pages"] > 0
+        _fill(eng, 1)  # a writer straight after is not refused
+    finally:
+        reader.exec_driver_sql("ROLLBACK")
+        reader.close()
+    with eng.connect() as conn:
+        assert conn.exec_driver_sql("PRAGMA busy_timeout").scalar_one() == 5000, (
+            "the pooled connection went back with no busy timeout"
+        )
+    assert _rows(eng) == 101
+
+
 def test_a_file_that_is_mostly_free_pages_is_vacuumed(wal_db):
     eng, path = wal_db
     _fill(eng, 3000)
