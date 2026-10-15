@@ -221,9 +221,9 @@ def tend_the_file(engine: Engine) -> dict[str, int]:
     WAL of tens of megabytes beside a ledger that is mostly smaller than that,
     and `make backup`'s warning about copying the file exists because of it.
     `TRUNCATE` copies every committed page back and resets the file to zero
-    bytes. It waits up to the busy timeout for readers, and a reader still
-    open after that leaves the checkpoint partial rather than failing: the
-    next sweep finishes it.
+    bytes. It does not wait for readers: one on an older snapshot leaves the
+    checkpoint partial rather than failing, and the next sweep finishes it.
+    Waiting would hold the write lock for the whole busy timeout (#349).
 
     **The VACUUM.** Deleting rows frees pages inside the file but never
     shrinks it. When more than `VACUUM_FREE_FRACTION` of the file is free --
@@ -245,7 +245,19 @@ def tend_the_file(engine: Engine) -> dict[str, int]:
         # PASSIVE pass first says how much there was, and does most of the
         # copying without waiting on anyone.
         _busy, frames, _copied = conn.exec_driver_sql("PRAGMA wal_checkpoint(PASSIVE)").one()
-        busy, _frames, _copied = conn.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)").one()
+        # No busy wait for the TRUNCATE pass (#349). Waiting on a reader, it
+        # holds the write lock, so every request that writes waits behind it
+        # and is refused "ledger busy" when the same five seconds run out --
+        # at every start, where the sweep runs beside the first requests.
+        # Meeting a reader, it now stops at once; the next sweep finishes it.
+        waited = conn.exec_driver_sql("PRAGMA busy_timeout").scalar_one()
+        conn.exec_driver_sql("PRAGMA busy_timeout=0")
+        try:
+            busy, _frames, _copied = conn.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)").one()
+        finally:
+            # The connection goes back to the pool: the next user of it
+            # must get the timeout it was opened with.
+            conn.exec_driver_sql(f"PRAGMA busy_timeout={int(waited)}")
         done["wal_pages"] = max(frames or 0, 0)
         if busy:
             log.info("housekeeping: WAL checkpoint was partial; a reader held it")

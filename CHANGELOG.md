@@ -50,6 +50,14 @@ packaged for the Mac App Store. Nothing a server's users see changes.
   signatures, and the desktop README has the steps through to the upload.
   (#63)
 
+### Fixed
+
+- **A write just after the app starts is no longer refused as "ledger
+  busy".** The tidy-up that runs at every start compacts the ledger's log,
+  and when somebody was reading at that moment it waited for them, holding up
+  every change behind it, for up to five seconds. It no longer waits: a
+  compaction that meets a reader finishes on the next tidy-up. (#349)
+
 ### Changed
 
 - **The desktop app is called Household Spend Tracker**, the name it is
