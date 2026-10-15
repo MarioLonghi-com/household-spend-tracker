@@ -1,7 +1,8 @@
 """Build the desktop app, start to finish, on the machine it is for (#61).
 
     python -m scripts.desktop_build mac      # macOS, unsigned, to run here
-    python -m scripts.desktop_build mas      # the Mac App Store build, unsigned
+    python -m scripts.desktop_build mas      # the Mac App Store build, unsigned, to run here
+    python -m scripts.desktop_build store    # the Mac App Store build to upload (#63)
     python -m scripts.desktop_build win      # Windows: an MSIX and a plain folder
 
 Run with the Python that should be frozen: a venv made from
@@ -25,8 +26,10 @@ In order, each step's output the next one's input:
 
 `--from N` starts at step N, for the second run of a build being fixed.
 Signing is not here: `desktop/scripts/sign-mas.sh` for a sandboxed run on
-this Mac, `desktop/scripts/sign-msix.ps1` for a test install on Windows, and
-the stores' own in #63.
+this Mac (with a development profile) or for the store (with the App Store
+profile and "Apple Distribution"), then `desktop/scripts/package-mas.sh` for
+the installer package the store takes; `desktop/scripts/sign-msix.ps1` for a
+test install on Windows. `desktop/README.md` has the store steps (#63).
 """
 
 from __future__ import annotations
@@ -45,6 +48,9 @@ FROZEN = ROOT / "build" / "backend" / "spend-tracker-backend"
 TARGETS = {
     "mac": ["--mac", "dir", "--arm64"],
     "mas": ["--mac", "mas-dev", "--arm64", "-c.mac.identity=null"],
+    # The same app, built for distribution rather than for a development
+    # profile: electron-builder's `mas` target, into dist/mas-arm64.
+    "store": ["--mac", "mas", "--arm64", "-c.mac.identity=null"],
     "win": ["--win", "appx", "dir", "--x64"],
 }
 
@@ -75,6 +81,22 @@ def _stamp(python: str) -> None:
     raise SystemExit("no git to ask and no app/build.json: the build would not know its commit")
 
 
+def _build_number(target: str) -> list[str]:
+    """The store build's CFBundleVersion, when it must differ from the version.
+
+    Apple takes one upload per build number: the first of a version can be the
+    version itself (electron-builder's default), and a second upload of the same
+    version -- a build fixed after App Review, say -- needs
+    `SPENDTRACKER_STORE_BUILD=2` and so on. Only the store target reads it.
+    """
+    number = os.environ.get("SPENDTRACKER_STORE_BUILD")
+    if target != "store" or not number:
+        return []
+    if not number.isdigit():
+        raise SystemExit("SPENDTRACKER_STORE_BUILD is a whole number: 2, 3, ...")
+    return [f"-c.buildVersion={number}"]
+
+
 def build(target: str, *, python: str, start: int = 1) -> None:
     npm = _npm()
     executable = FROZEN / ("spend-tracker-backend.exe" if os.name == "nt" else "spend-tracker-backend")
@@ -92,7 +114,7 @@ def build(target: str, *, python: str, start: int = 1) -> None:
         lambda: _run("the shell", [npm, "run", "build"], DESKTOP),
         lambda: _run(
             f"the {target} package",
-            [npm, "exec", "--", "electron-builder", *TARGETS[target], "--publish", "never"],
+            [npm, "exec", "--", "electron-builder", *TARGETS[target], *_build_number(target), "--publish", "never"],
             DESKTOP,
             # Not signed with whatever identity the keychain happens to hold:
             # electron-builder signs ad hoc instead, which is what an Apple
@@ -112,7 +134,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--from", dest="start", type=int, default=1, help="start at this step (1-6)")
     parser.add_argument("--python", default=sys.executable, help="the Python to freeze (default: this one)")
     args = parser.parse_args(argv)
-    if args.target in {"mac", "mas"} and sys.platform != "darwin":
+    if args.target in {"mac", "mas", "store"} and sys.platform != "darwin":
         raise SystemExit("the Mac builds are made on a Mac")
     if args.target == "win" and os.name != "nt":
         raise SystemExit("the Windows build is made on Windows")
