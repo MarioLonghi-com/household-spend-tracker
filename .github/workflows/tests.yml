@@ -523,7 +523,8 @@ jobs:
   # release opened by this frozen backend, its rows counted before and after.
   #
   # Unsigned: an ad-hoc signature on the Mac, none on Windows. Store signing is
-  # #63's, in the protected `release` environment. The Mac App Store build is
+  # release.yml's, on a tag, with the secrets in the `app-store` environment
+  # (#351). The Mac App Store build is
   # made and kept but not run here: a sandboxed app will not start without a
   # provisioning profile, and that is a secret.
   desktop-app:

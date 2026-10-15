@@ -32,6 +32,15 @@ history this repository does not have.
 
 ## Unreleased
 
+### Added
+
+- **A release uploads the Mac App Store build by itself.** Tagging a
+  version now builds the store app, and once the release is public signs
+  it, packages it and uploads it to App Store Connect, then waits until
+  Apple has accepted it. Only a release tag uploads; submitting the build
+  for review stays a person's step. The signing secrets are held in a
+  separate `app-store` environment that only release tags can reach. (#351)
+
 ## 0.12.0 — 2026-10-15
 
 **Reversible: none** — no migration in this release. To go back to
