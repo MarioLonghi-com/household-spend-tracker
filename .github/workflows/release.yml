@@ -84,9 +84,19 @@ name: release
 # does not go public without it. `build` builds one with stand-in digests on
 # every run, dry runs included, and checks it the same way.
 #
+# And the Mac App Store build (#351). `store-build` builds it on an Apple
+# Silicon runner, unsigned, holding no secret; `publish-mac-store`, after the
+# release is public, signs it with the certificates and profile in the
+# `app-store` environment, packages it, uploads it to App Store Connect and
+# waits for Apple to accept it. That environment has no reviewer -- the one
+# click is still `publish`'s -- and admits `v*` tags only, so the signing
+# secrets reach nothing but a tag's run. Only a tag uploads; submitting the
+# build for review is done by a person in App Store Connect.
+#
 # Started by hand (`workflow_dispatch`) from a branch it is a dry run: it
 # builds and smoke-tests both artefacts on both platforms, checks the two
-# platform images carry the same labels, and publishes nothing.
+# platform images carry the same labels, builds the Mac App Store app, and
+# publishes nothing.
 #
 # The Python dependencies are locked with hashes (#46): `make install-prod`
 # installs requirements.txt with `--require-hashes`, so a tarball installs
@@ -943,3 +953,157 @@ jobs:
           }
           resolves "$IMAGE" "$DIGEST"
           resolves "$UPDATER_IMAGE" "$UPDATER_DIGEST"
+
+  # The Mac App Store build (#351), built here and uploaded below, on a tag
+  # only: nothing on `dev`, a branch or a pull request reaches App Store
+  # Connect. Built as tests.yml's desktop-app job builds the Mac app -- the
+  # client, the backend frozen from the hashed lock, the shell -- but as the
+  # `store` target, unsigned, numbered with this run so every upload of a
+  # version has a build number of its own. Like `build` and `image`, it runs
+  # `npm ci` and holds no secret; the signing is `publish-mac-store`'s. A hand-
+  # started dry run builds it too, and stops there.
+  store-build:
+    needs: build
+    runs-on: macos-15
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      PYTHONUTF8: "1"
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      SPENDTRACKER_STORE_BUILD: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: pip install --require-hashes -r requirements-desktop.txt
+      - run: npm ci
+        working-directory: client
+      - run: npm ci
+        working-directory: desktop
+      - name: the Mac App Store build, unsigned
+        run: python -m scripts.desktop_build store
+      # The store attaches a build to the version App Store Connect prepares
+      # by this number, so it has to be the release's.
+      - name: the app says the release's version
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          set -eu
+          app="desktop/dist/mas-arm64/Household Spend Tracker.app"
+          said="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")"
+          build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app/Contents/Info.plist")"
+          # A dry run is named `snapshot-<sha>`; only a tag has a version to match.
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$said" != "$VERSION" ]; then
+            echo "the app says $said, the release is $VERSION"; exit 1
+          fi
+          echo "Household Spend Tracker $said, build $build"
+      # `ditto`, not zip: it keeps the frameworks' symbolic links, which the
+      # signature covers.
+      - name: kept for signing
+        run: ditto -c -k --keepParent "desktop/dist/mas-arm64/Household Spend Tracker.app" "${RUNNER_TEMP}/mac-store-app.zip"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: mac-store-app
+          path: ${{ runner.temp }}/mac-store-app.zip
+          retention-days: 7
+          if-no-files-found: error
+
+  # Signed, packaged and uploaded to App Store Connect (#351), after the
+  # release is public: it needs `publish-release`, so it waits behind the one
+  # `release` approval like every publisher, and an upload never happens for a
+  # release that did not go out. It installs nothing -- the tagged scripts and
+  # entitlements, the app `store-build` made, and macOS's own tools.
+  #
+  # The secrets are in the `app-store` environment, which carries **no
+  # reviewer** -- so no second click -- and whose deployment rule admits `v*`
+  # tags only, so they reach nothing but a tag's run:
+  #   MAS_CERTIFICATES_P12       Apple Distribution and 3rd Party Mac Developer
+  #                              Installer, one .p12, base64
+  #   MAS_CERTIFICATES_PASSWORD  its password
+  #   MAS_PROVISIONING_PROFILE   the App Store profile for the bundle id, base64
+  #   ASC_API_KEY_P8             the App Store Connect API key, as the .p8 says
+  #   ASC_API_KEY_ID, ASC_API_ISSUER_ID
+  # Submitting the build for review stays a person's act in App Store Connect.
+  publish-mac-store:
+    needs: [build, store-build, publish-release]
+    if: github.ref_type == 'tag'
+    environment: app-store
+    runs-on: macos-15
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: mac-store-app
+          path: ${{ runner.temp }}
+      # A keychain of this job's own, first in the search list, with a random
+      # password nobody needs again; the key file where altool looks for it.
+      - name: the signing keychain and the API key, for this job only
+        env:
+          P12: ${{ secrets.MAS_CERTIFICATES_P12 }}
+          P12_PASSWORD: ${{ secrets.MAS_CERTIFICATES_PASSWORD }}
+          PROFILE: ${{ secrets.MAS_PROVISIONING_PROFILE }}
+          KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+          KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+        run: |
+          set -eu
+          missing=""
+          for name in P12 P12_PASSWORD PROFILE KEY_P8 KEY_ID ISSUER_ID; do
+            eval "value=\${$name}"
+            [ -n "$value" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "the app-store environment is missing:$missing (see the comment on this job)"
+            exit 1
+          fi
+          kc="${RUNNER_TEMP}/signing.keychain-db"
+          pw="$(uuidgen)"
+          security create-keychain -p "$pw" "$kc"
+          security set-keychain-settings -lut 21600 "$kc"
+          security unlock-keychain -p "$pw" "$kc"
+          printf '%s' "$P12" | base64 --decode > "${RUNNER_TEMP}/signing.p12"
+          security import "${RUNNER_TEMP}/signing.p12" -k "$kc" -P "$P12_PASSWORD" -f pkcs12 \
+            -T /usr/bin/codesign -T /usr/bin/productbuild
+          rm -f "${RUNNER_TEMP}/signing.p12"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$pw" "$kc" > /dev/null
+          # The user's list is printed one quoted path a line; xargs reads the
+          # quotes, so a path with a space stays one path.
+          security list-keychains -d user | xargs security list-keychains -d user -s "$kc"
+          security find-identity -v "$kc" | sed -n '$p'
+          printf '%s' "$PROFILE" | base64 --decode > "${RUNNER_TEMP}/appstore.provisionprofile"
+          mkdir -p "$HOME/private_keys"
+          printf '%s\n' "$KEY_P8" > "$HOME/private_keys/AuthKey_${KEY_ID}.p8"
+          chmod 600 "$HOME/private_keys/AuthKey_${KEY_ID}.p8"
+          echo "SIGNING_KEYCHAIN=$kc" >> "$GITHUB_ENV"
+      - name: signed for the store, and packaged
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          set -eu
+          ditto -x -k "${RUNNER_TEMP}/mac-store-app.zip" "${RUNNER_TEMP}/app"
+          app="${RUNNER_TEMP}/app/Household Spend Tracker.app"
+          desktop/scripts/sign-mas.sh "$app" "${RUNNER_TEMP}/appstore.provisionprofile" "Apple Distribution"
+          desktop/scripts/package-mas.sh "$app" "${RUNNER_TEMP}/household-spend-tracker-${VERSION}.pkg"
+      - name: uploaded, and accepted by Apple
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          ASC_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+        run: desktop/scripts/upload-mas.sh "${RUNNER_TEMP}/household-spend-tracker-${VERSION}.pkg"
+      - name: the keychain and the key go
+        if: always()
+        run: |
+          [ -n "${SIGNING_KEYCHAIN:-}" ] && security delete-keychain "$SIGNING_KEYCHAIN" || true
+          rm -rf "$HOME/private_keys" "${RUNNER_TEMP}/appstore.provisionprofile"

@@ -127,6 +127,12 @@ how to remove it again) and installs `desktop\dist\*.appx`.
 
 ### Uploading to the Mac App Store
 
+**A release tag does this by itself** (#351): `release.yml` builds the
+`store` target, and once the release is public signs it, packages it and
+uploads it with the secrets in the `app-store` environment, then waits for
+Apple to accept the build. Submitting it for review is done in App Store
+Connect. The steps below are the same ones, for doing it by hand.
+
 The store build is signed with the **App Store** provisioning profile and the
 **Apple Distribution** identity, then packaged for `/Applications` and signed
 with the installer identity (*3rd Party Mac Developer Installer*, called Mac
@@ -137,8 +143,12 @@ Connect API key stay outside the repository; pass their paths.
 build/freeze-venv/bin/python -m scripts.desktop_build store
 desktop/scripts/sign-mas.sh "desktop/dist/mas-arm64/Household Spend Tracker.app" ~/path/to/appstore.provisionprofile "Apple Distribution"
 desktop/scripts/package-mas.sh "desktop/dist/mas-arm64/Household Spend Tracker.app" desktop/dist/household-spend-tracker.pkg
-xcrun altool --upload-app -f desktop/dist/household-spend-tracker.pkg -t macos --apiKey KEY_ID --apiIssuer ISSUER_ID
+ASC_KEY_ID=KEY_ID ASC_ISSUER_ID=ISSUER_ID desktop/scripts/upload-mas.sh desktop/dist/household-spend-tracker.pkg
 ```
+
+`upload-mas.sh` validates, uploads, and then waits for Apple's processing
+verdict: altool says "UPLOAD SUCCEEDED" for a build Apple goes on to refuse.
+`--status DELIVERY_ID` asks about an upload already made.
 
 The build's version is the app's (`desktop/package.json`) and must be the
 version App Store Connect is preparing; a second upload of the same version
