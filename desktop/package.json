@@ -1,7 +1,7 @@
 {
   "name": "spend-tracker-desktop",
   "productName": "Household Spend Tracker",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "description": "Household Spend Tracker: Spend Tracker for one household, on this computer",
   "private": true,
   "license": "AGPL-3.0-or-later",
