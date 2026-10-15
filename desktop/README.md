@@ -65,7 +65,8 @@ build/freeze-venv/bin/pip install --require-hashes -r requirements-desktop.txt
 build/freeze-venv/bin/python -m scripts.desktop_build mac
 ```
 
-`mac` is the plain Mac build; `mas` the Mac App Store one; `win` the MSIX and a folder.
+`mac` is the plain Mac build; `mas` the Mac App Store one, to run here with a
+development profile; `store` the same app for upload; `win` the MSIX and a folder.
 
 `scripts/desktop_build.py` builds the client, stamps the commit, freezes the
 backend (`desktop/backend.spec`), smoke-tests it (`smoke_backend.py`), builds
@@ -124,6 +125,27 @@ carries fails on current Windows 11 with "A required function is not present".
 Then the machine's owner trusts `test-signing.cer` (the script says how, and
 how to remove it again) and installs `desktop\dist\*.appx`.
 
+### Uploading to the Mac App Store
+
+The store build is signed with the **App Store** provisioning profile and the
+**Apple Distribution** identity, then packaged for `/Applications` and signed
+with the installer identity (*3rd Party Mac Developer Installer*, called Mac
+Installer Distribution on the developer site). The profile and the App Store
+Connect API key stay outside the repository; pass their paths.
+
+```bash
+build/freeze-venv/bin/python -m scripts.desktop_build store
+desktop/scripts/sign-mas.sh "desktop/dist/mas-arm64/Household Spend Tracker.app" ~/path/to/appstore.provisionprofile "Apple Distribution"
+desktop/scripts/package-mas.sh "desktop/dist/mas-arm64/Household Spend Tracker.app" desktop/dist/household-spend-tracker.pkg
+xcrun altool --upload-app -f desktop/dist/household-spend-tracker.pkg -t macos --apiKey KEY_ID --apiIssuer ISSUER_ID
+```
+
+The build's version is the app's (`desktop/package.json`) and must be the
+version App Store Connect is preparing; a second upload of the same version
+needs a new build number, `SPENDTRACKER_STORE_BUILD=2` for the `store` build.
+`altool` finds the key as `~/private_keys/AuthKey_KEY_ID.p8`. The app's icon
+on App Store Connect comes from this build.
+
 ## Words
 
 Every word the shell shows is in `src/words.ts`, as Lingui messages in the
@@ -133,6 +155,7 @@ The window tells the shell which language it activated (`client/src/lib/desktop.
 
 ## Not yet
 
-- Store signing, TestFlight, Partner Center, listings: #63, after #321 and #58.
+- Partner Center, the store listings' translations and submission: #63, after #321 and #58. The Mac
+  App Store build is signed, packaged and uploaded as above.
 - Electron fuses (no `--inspect`, no `ELECTRON_RUN_AS_NODE`) go on for the
   store builds in #63; the smoke test needs them off.
