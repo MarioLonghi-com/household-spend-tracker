@@ -5,7 +5,7 @@
 # (#46). CI re-runs the compile and fails a pull request whose lock does not
 # match this file.
 
-fastapi>=0.141.1
+fastapi>=0.143.0
 # Declared rather than left to FastAPI's range: app/hosts.py subclasses
 # Starlette's TrustedHostMiddleware and nine more modules import from it, and a
 # fresh install once broke when a Starlette release FastAPI's floor allowed
@@ -13,9 +13,9 @@ fastapi>=0.141.1
 # subclass is the tightest coupling there is.
 starlette>=1.7.0,<2
 uvicorn[standard]>=0.54.0
-SQLAlchemy>=2.1.1
+SQLAlchemy>=2.1.4
 alembic>=1.20.0
-pydantic>=2.13.5
+pydantic>=2.14.1
 python-multipart>=0.0.32
 argon2-cffi>=25.1.0
 pyotp>=2.10.0
@@ -40,7 +40,7 @@ pypdfium2>=5.13.0
 # iPhone's default format. A manylinux wheel with libheif bundled, so this is a
 # pip install and not an apt-get -- and it is imported inside a try, so an
 # install without it refuses HEIC with a sentence instead of failing at startup.
-pillow-heif>=1.8.0
+pillow-heif>=1.8.1
 
 # The trust store for the outgoing https requests (the YNAB import, the update
 # check): app/services/platform.py uses it directly because the python.org
