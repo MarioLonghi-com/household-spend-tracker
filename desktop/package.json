@@ -21,7 +21,7 @@
     "smoke": "playwright test"
   },
   "devDependencies": {
-    "@babel/core": "8.0.6",
+    "@babel/core": "8.0.7",
     "@lingui/babel-plugin-lingui-macro": "6.8.0",
     "@lingui/conf": "6.8.0",
     "@lingui/core": "6.8.0",
@@ -29,7 +29,7 @@
     "@lingui/vite-plugin": "6.8.0",
     "@playwright/test": "^1.63.0",
     "@rolldown/plugin-babel": "0.2.4",
-    "@types/node": "^24.0.0",
+    "@types/node": "^26.6.5",
     "electron": "44.7.0",
     "electron-builder": "26.15.3",
     "micromatch": "file:../client/vendor/micromatch",
