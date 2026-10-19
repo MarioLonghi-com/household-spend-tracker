@@ -14,7 +14,7 @@ pytest-cov>=7.1.0
 # its own data directory (#241).
 pytest-xdist>=3.8
 httpx>=0.28.1
-ruff>=0.16.9
+ruff>=0.17.0
 
 # Known advisories against what is actually pinned -- the hashed locks,
 # requirements.txt and requirements-dev.txt -- by `make audit`, and a CI job
@@ -30,4 +30,4 @@ xlwt>=1.3
 
 # Writes the locks: `make lock`, and CI's drift check. Locked like everything
 # else, so the lock is always written by the same resolver.
-uv>=0.12.23
+uv>=0.13.0
