@@ -21,4 +21,4 @@ sigstore>=4.5.0,<5
 # The trust store for the registry requests updater/verify.py makes, for the
 # same reason the app declares it in requirements.in: the python.org macOS
 # build reads no system store. Already pinned by requirements.txt.
-certifi>=2026.7.22
+certifi>=2026.10.19
