@@ -35,7 +35,7 @@ pdfplumber>=0.11.10
 # dropped pypdfium2 would have removed PDF previews with no failing test and no
 # error until somebody uploaded one. A dependency you rely on directly is one
 # you declare directly.
-Pillow>=12.3.0
+Pillow>=13.0.0
 pypdfium2>=5.13.0
 # iPhone's default format. A manylinux wheel with libheif bundled, so this is a
 # pip install and not an apt-get -- and it is imported inside a try, so an
