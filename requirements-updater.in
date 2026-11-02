@@ -16,9 +16,9 @@
 # standard library (design notes 7.4). Held to the 4.x API that module is
 # written against; the trusted root the updater embeds is the copy this wheel
 # carries, and tests/test_updater_verify.py fails when the two drift (7.5).
-sigstore>=4.5.0,<5
+sigstore>=4.5.1,<5
 
 # The trust store for the registry requests updater/verify.py makes, for the
 # same reason the app declares it in requirements.in: the python.org macOS
 # build reads no system store. Already pinned by requirements.txt.
-certifi>=2026.7.22
+certifi>=2026.10.23
