@@ -359,7 +359,9 @@ class Service:
         try:
             prepare.run(self.kit, request, records)
         except prepare.PrepareFailed as e:
-            records.finish("refused", e.sentence, requested_by=request.requested_by, started_at=started)
+            records.finish(
+                "refused", e.sentence, requested_by=request.requested_by, started_at=started, code=e.code
+            )
             return "refused"
         except eng.EngineUnavailable:
             records.finish(

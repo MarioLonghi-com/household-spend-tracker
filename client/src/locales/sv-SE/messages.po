@@ -6161,6 +6161,11 @@ msgstr "Senaste ändringar av inloggning"
 msgid "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
 msgstr "Den här installationen, inte någon av huvudböckerna i den. Bara en ägare kan öppna den här skärmen och nå något på den – sökvägarna, loggarna och antalen nedan gäller alla hushåll på den här instansen."
 
+#. Updates section: link after a refusal for want of disk, to the guide's section of that name
+#: src/screens/Updates.tsx
+msgid "Freeing disk for an update"
+msgstr ""
+
 #. Under the count of categories on the household page
 #. placeholder {0}: it.category_groups
 #. placeholder {1}: count(it.category_groups)

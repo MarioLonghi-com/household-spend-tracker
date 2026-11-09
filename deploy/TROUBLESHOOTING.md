@@ -883,7 +883,53 @@ stopped, and the app kept serving. The usual reasons:
   `deploy/tailnet/check.sh`.
 - **The app is not the version that was prepared**, or the prepared images
   are gone: prepare again.
-- **Not enough disk or memory**: below.
+- **Not enough disk**: [Freeing disk for an update](#freeing-disk-for-an-update).
+- **Not enough memory**: below.
+
+### Freeing disk for an update
+
+*"Needs about N GB free, there is M GB: free at least K MB more. That is …"*
+An update needs room for the new images, unpacked, for two copies of the
+ledger (the backup and the migrated one) and for half a gigabyte to spare. The
+sentence says how much each part is. Nothing was changed, and the app kept
+serving. On Docker Desktop and a Podman machine it is the virtual machine's
+disk that counts, not the computer's.
+
+> The steps in this section use simplified technical English.
+
+Free at least the amount the sentence names, then press *Try again*.
+
+1. If the sentence says *Delete the update backups older than the newest 5*,
+   open *Application management → Database → Backups taken by updates* and
+   delete those. The newest five cannot be deleted. The sentence offers this
+   only when there are older ones, and says how much they hold.
+2. **Docker Desktop:** raise the disk limit in *Settings → Resources*.
+3. **A Podman machine:** stop it, give it a larger disk, and start it again.
+   Type `podman machine stop`, then `podman machine set --disk-size 100`
+   (in GB, larger than now: a disk cannot shrink), then
+   `podman machine start`.
+4. **A server with Docker:**
+   1. See where the space is. Type `docker system df`.
+   2. Remove the images that have no name and no container. Type
+      `docker image prune`. This is safe.
+   3. Remove the build cache. Type `docker builder prune`. This is safe: a
+      server that runs published releases builds nothing.
+   4. **Do not type `docker image prune -a` or `docker system prune -a`.**
+      They also remove every image that no container uses: the release you
+      have just prepared, and the previous release once its `…-previous`
+      container is gone. A rollback and the recovery page start from that
+      previous release.
+   5. Make the system journal smaller. Type
+      `sudo journalctl --vacuum-size=200M`.
+   6. Move backups you made yourself (*Back the database up*, `make backup`)
+      off the machine, then delete them from it. Do not delete update backups
+      from a shell; use step 1.
+   7. If that is not enough, make the disk larger. On a virtual machine,
+      grow its disk in the hypervisor, then the partition and the file system
+      inside it (`growpart`, then `resize2fs` or `xfs_growfs`).
+5. **A server with Podman:** the same steps, with `podman` in place of
+   `docker` (`podman system df`, `podman image prune`). The same warning
+   applies to `podman image prune -a`.
 
 ### Everything else, by what you see
 
@@ -894,7 +940,7 @@ stopped, and the app kept serving. The usual reasons:
 | *Preparing failed: ghcr.io could not be reached.* | No route to the registry, or it was down. | *Try again* later. Nothing was changed. |
 | *Preparing failed: the image's origin could not be proven: …* | The release image's build attestation does not say it was built by this repository's release workflow from that tag. Nothing was downloaded. | Do not install it. Report it ([SECURITY.md](../SECURITY.md)), with the sentence. |
 | *Preparing failed: the downloaded image is not the one that was verified.* | The engine pulled something other than the verified digest. It was deleted. | *Try again*. If it repeats, report it as above. |
-| *Needs about N GB free, there is M* | Not enough disk for the images, the backup and a margin. On Docker Desktop and a Podman machine it is the VM's disk that counts. | Delete older update backups under *Database*, or raise Docker Desktop's disk limit in *Settings → Resources*, or give the Podman machine a larger disk. |
+| *Needs about N GB free, there is M GB: free at least K MB more* | Not enough disk for the images, the backup and a margin. On Docker Desktop and a Podman machine it is the VM's disk that counts. | [Freeing disk for an update](#freeing-disk-for-an-update). |
 | *Needs about N MB of memory free, there is M* | The new app and the updater would not fit. | Raise Docker Desktop's memory in *Settings → Resources*, `podman machine set --memory` for a Podman machine, or close other programs. |
 | *The updater cannot use the container engine: permission denied on its socket.* | A server without `SPENDTRACKER_SOCKET_GID`, or with the wrong one. On a personal computer, an install from an older bundle. | [DOCKER.md, The updater, on a server](DOCKER.md#on-a-server); on a personal computer, run the newest zip's launcher. |
 | *Docker Desktop's Enhanced Container Isolation stops containers using the Docker socket…*, or no updater at all under ECI | Docker Business's ECI is on. | [DOCKER.md, Enhanced Container Isolation](DOCKER.md#enhanced-container-isolation). |

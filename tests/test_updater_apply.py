@@ -164,8 +164,25 @@ def test_row_6_short_disk_names_the_need_and_the_remedy_and_pulls_nothing(tmp_pa
     with World(tmp_path, engine="docker-desktop", fixture="docker-desktop") as w:
         w.measured = {**w.measured, "free": 300 * 1024**2}
         record = _refused_prepare(w)
-        assert record["sentence"].startswith("Needs about 1.2 GB free, there is 0.3 GB.")
-        assert "Docker Desktop's disk limit in Settings → Resources" in record["sentence"]
+        assert record["sentence"].startswith("Needs about 1.25 GB free, there is 0.29 GB: free at least 972 MB more.")
+        assert record["sentence"].endswith("Raise Docker Desktop's disk limit in Settings → Resources.")
+        # No update backup to delete, so none is offered; the code is the screen's link (#330).
+        assert "Delete" not in record["sentence"] and record["code"] == "disk_short"
+        assert pulls(w) == []
+
+
+def test_row_6_short_disk_offers_the_update_backups_beyond_the_newest_five(tmp_path):
+    with World(tmp_path, engine="docker-desktop", fixture="docker-desktop") as w:
+        stamps = [f"20261001-00000{i}" for i in range(7)]
+        earlier_updates(w, stamps)
+        # A folder the owner made is on the disk too, and is not one of them.
+        w.ledger.backups["20260901-000000"] = A
+        w.measured = {**w.measured, "free": 300 * 1024**2}
+        record = _refused_prepare(w)
+        assert (
+            "Delete the 2 update backups older than the newest 5 under Database, which frees about 0.06 GB, "
+            "or raise Docker Desktop's disk limit" in record["sentence"]
+        )
         assert pulls(w) == []
 
 
@@ -356,6 +373,21 @@ def test_row_6_at_preflight_short_memory_is_not_started(world):
         and "Needs about 896 MB of memory free, there is 512 MB" in record["sentence"]
     )
     assert touched(world, world.app_id) == []
+
+
+def test_row_6_at_preflight_short_disk_is_not_started_with_its_code(world):
+    service = world.service()
+    service.startup()
+    report = world.prepared(service)
+    world.measured = {**world.measured, "free": 500 * 1024**2}
+    _, record = apply(world, service, report)
+    # At preflight the images are on the disk already: 40 MiB of database twice, and 512.
+    assert record["state"] == "not_started" and record["code"] == "disk_short"
+    assert record["sentence"].startswith(
+        "Not started: Needs about 0.54 GB free, there is 0.48 GB: free at least 52 MB more. "
+        "That is 0.04 GB for two copies of the database and 0.50 GB to spare."
+    )
+    assert touched(world, world.app_id) == [] and world.ledger.drills == 0
 
 
 def test_a_setting_the_updater_will_not_copy_is_refused_before_the_app_stops(world):
