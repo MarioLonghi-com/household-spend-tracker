@@ -3918,6 +3918,13 @@ class FxFetchOut(ORMModel):
 class FxAccountRefOut(ORMModel):
     id: str
     name: str
+    #: The bank, as the account states it (#411).
+    institution: str | None = None
+    country: str | None = None
+    #: English; a translated screen names the country itself.
+    country_name: str | None = None
+    flag: str = ""
+    closed: bool = False
 
 
 class FxMonthOut(ORMModel):

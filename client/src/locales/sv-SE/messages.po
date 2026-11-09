@@ -237,6 +237,7 @@ msgstr ""
 msgid "Receipt, {0}"
 msgstr "Kvitto, {0}"
 
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "this account is closed"
@@ -438,8 +439,10 @@ msgstr "Inte ersatt ändå"
 msgid "Fixed: this is YNAB's own bucket rather than a category of yours (Uncategorized, or Inflow: Ready to Assign), so its rows always arrive uncategorised."
 msgstr "Fast: det här är YNAB:s egen hink och inte en kategori av dina (Uncategorized eller Inflow: Ready to Assign), så dess rader kommer alltid utan kategori."
 
+#. In the list of accounts in a currency on the Exchange rates page: the account names no bank
 #. Net Worth report: the accounts that do not say which bank holds them
 #. Net Worth report: the accounts that do not say which bank holds them
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "No bank set"
@@ -3798,6 +3801,8 @@ msgid "Rates as of"
 msgstr "Kurser per"
 
 #. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
+#. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Closed"
@@ -7155,6 +7160,12 @@ msgstr "Inget väntar."
 msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password."
 msgstr "{name} loggas ut överallt och kan inte logga in förrän hen öppnar den här länken. Den sätter ett nytt lösenord."
 
+#. Button and list on the Exchange rates page: the household's accounts held in this currency code
+#: src/components/CurrencyAccounts.tsx
+#, fuzzy
+msgid "Accounts in {currency}"
+msgstr "Konton i {currency}"
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "Looking up your invitation…"
@@ -10061,6 +10072,7 @@ msgstr ""
 msgid "Last rate"
 msgstr "Senaste kurs"
 
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "no country set"

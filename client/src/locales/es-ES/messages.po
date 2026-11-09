@@ -237,6 +237,7 @@ msgstr ""
 msgid "Receipt, {0}"
 msgstr "Ticket, {0}"
 
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "this account is closed"
@@ -438,8 +439,10 @@ msgstr "Al final no se reembolsó"
 msgid "Fixed: this is YNAB's own bucket rather than a category of yours (Uncategorized, or Inflow: Ready to Assign), so its rows always arrive uncategorised."
 msgstr "Fijo: es el cajón propio de YNAB y no una categoría tuya (Uncategorized o Inflow: Ready to Assign), así que sus filas siempre llegan sin categoría."
 
+#. In the list of accounts in a currency on the Exchange rates page: the account names no bank
 #. Net Worth report: the accounts that do not say which bank holds them
 #. Net Worth report: the accounts that do not say which bank holds them
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "No bank set"
@@ -3798,6 +3801,8 @@ msgid "Rates as of"
 msgstr "Tipos a fecha de"
 
 #. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
+#. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Closed"
@@ -7155,6 +7160,12 @@ msgstr "No hay nada pendiente."
 msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password."
 msgstr "Se cierra la sesión de {name} en todas partes y no podrá iniciar sesión hasta que abra este enlace. Sirve para establecer una contraseña nueva."
 
+#. Button and list on the Exchange rates page: the household's accounts held in this currency code
+#: src/components/CurrencyAccounts.tsx
+#, fuzzy
+msgid "Accounts in {currency}"
+msgstr "Cuentas en {currency}"
+
 #: src/screens/AcceptInvite.tsx
 #, fuzzy
 msgid "Looking up your invitation…"
@@ -10061,6 +10072,7 @@ msgstr ""
 msgid "Last rate"
 msgstr "Último tipo"
 
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "no country set"
