@@ -359,6 +359,19 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
         "This was written off. Set it back to expected before recording a payment for it.",
     }),
   },
+  "report.range_backwards": {
+    message: msg({
+      id: "error.report.range_backwards",
+      message: "The date range ends on {until}, before it starts on {since}",
+    }),
+    dates: ["since", "until"],
+  },
+  "report.range_too_long": {
+    message: msg({
+      id: "error.report.range_too_long",
+      message: "That range has {months} month ends; the most a report shows is {limit}",
+    }),
+  },
   "split.does_not_add_up": {
     message: msg({
       id: "error.split.does_not_add_up",

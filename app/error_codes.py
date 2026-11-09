@@ -208,6 +208,14 @@ REGISTRY: dict[str, Code] = {
     "reimbursement.written_off_cannot_be_paid": Code(
         "This was written off. Set it back to expected before recording a payment for it."
     ),
+    # -- report: app/services/net_worth.py (#397) ----------------------------- #
+    "report.range_backwards": Code(
+        "The date range ends on {until}, before it starts on {since}", ("since", "until")
+    ),
+    "report.range_too_long": Code(
+        "That range has {months} month ends; the most a report shows is {limit}",
+        ("months", "limit"),
+    ),
     # -- split: app/services/transactions.py `split` -------------------------- #
     "split.does_not_add_up": Code(
         "The parts come to {total} and the transaction is {amount}. A split has to "

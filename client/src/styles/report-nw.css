@@ -1,0 +1,170 @@
+/*
+ * The Net Worth report (#397).
+ *
+ * A file of its own, like report-ie.css and reimbursements.css. The chart's
+ * seven part colours are a categorical palette checked for colour-blind
+ * separation and against both surfaces; three of the light ones sit under 3:1
+ * against white, which is why the chart always carries a legend, a tooltip
+ * and its figures as a table. An eighth part and beyond share a neutral
+ * "other" colour rather than a generated one.
+ */
+
+:root {
+  --nw-1: #2a78d6;
+  --nw-2: #eb6834;
+  --nw-3: #1baf7a;
+  --nw-4: #eda100;
+  --nw-5: #e87ba4;
+  --nw-6: #008300;
+  --nw-7: #6250d6;
+  --nw-8: #8a948f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --nw-1: #3987e5;
+    --nw-2: #d95926;
+    --nw-3: #199e70;
+    --nw-4: #c98500;
+    --nw-5: #d55181;
+    --nw-6: #008300;
+    --nw-7: #9085e9;
+    --nw-8: #6f7a76;
+  }
+}
+:root[data-theme="dark"] {
+  --nw-1: #3987e5;
+  --nw-2: #d95926;
+  --nw-3: #199e70;
+  --nw-4: #c98500;
+  --nw-5: #d55181;
+  --nw-6: #008300;
+  --nw-7: #9085e9;
+  --nw-8: #6f7a76;
+}
+
+.nw-s1 { fill: var(--nw-1); background: var(--nw-1); }
+.nw-s2 { fill: var(--nw-2); background: var(--nw-2); }
+.nw-s3 { fill: var(--nw-3); background: var(--nw-3); }
+.nw-s4 { fill: var(--nw-4); background: var(--nw-4); }
+.nw-s5 { fill: var(--nw-5); background: var(--nw-5); }
+.nw-s6 { fill: var(--nw-6); background: var(--nw-6); }
+.nw-s7 { fill: var(--nw-7); background: var(--nw-7); }
+.nw-s8 { fill: var(--nw-8); background: var(--nw-8); }
+
+/* The filter bar: the date range with the two toggles under it. */
+.nw-filters { align-items: flex-end; }
+.nw-toggles { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: flex-end; }
+.nw-toggles label { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+/* styles.css gives every input the full width of its line; a tick box is not a field. */
+.nw-toggles input[type="checkbox"] { width: auto; margin: 0; flex: 0 0 auto; }
+
+.nw-note { margin: 0 0 8px; }
+.nw-scope { margin: 0 0 12px; }
+.nw-takeaway { font-size: 16px; margin: 4px 0 12px; }
+.nw-split { margin: 0 0 8px; }
+.nw-split label { display: inline-flex; align-items: center; gap: 8px; }
+.nw-split select { width: auto; }
+.nw-not-converted { margin: 6px 0 0; padding-left: 18px; }
+.nw-book { margin-top: 18px; }
+
+/* Four figures in a row, wrapping to two and then one on a narrow window. */
+.nw-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
+}
+.nw-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.nw-tile-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.nw-tile strong { font-size: 20px; text-align: left; }
+.nw-tile .pos, .nw-bridge .pos, .nw-table .pos { color: var(--positive); }
+.nw-tile .neg, .nw-bridge .neg, .nw-table .neg { color: var(--danger); }
+
+/* The chart. Text in the ink tokens, never in a part's colour. */
+.nw-chart { margin: 0 0 18px; }
+.nw-chart-area { position: relative; width: 100%; overflow: hidden; }
+.nw-chart svg { display: block; }
+.nw-grid { stroke: var(--line); stroke-width: 1; }
+.nw-axis { stroke: var(--muted); stroke-width: 1; }
+.nw-tick { fill: var(--muted); font-size: 11px; font-family: var(--sans); }
+.nw-gap-mark { fill: var(--warn); font-size: 13px; font-weight: 700; }
+.nw-net { fill: var(--ink); stroke: var(--surface); stroke-width: 2; }
+.nw-hit { fill: transparent; cursor: default; }
+.nw-hit:focus { outline: none; }
+.nw-hit:focus-visible { stroke: var(--accent); stroke-width: 2; }
+.nw-bar.on rect:not(.nw-hit) { opacity: 0.85; }
+
+.nw-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+  font-size: 13px;
+}
+.nw-legend li, .nw-tip li { display: inline-flex; align-items: center; gap: 6px; }
+.nw-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; }
+
+.nw-tip {
+  position: absolute;
+  top: 4px;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  pointer-events: none;
+  box-shadow: 0 2px 8px #0000001f;
+}
+.nw-tip ul { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.nw-chart-table { margin-top: 6px; }
+.nw-chart-table summary { cursor: pointer; color: var(--muted); }
+
+.nw-section { margin: 0 0 18px; }
+
+/* What changed: a statement in four lines, read top to bottom, not a table. */
+.nw-bridge {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) auto;
+  gap: 4px 24px;
+  margin: 0;
+}
+.nw-bridge dt { margin: 0; }
+.nw-bridge dd { margin: 0; text-align: right; }
+.nw-bridge .nw-bridge-end { font-weight: 600; border-top: 1px solid var(--line); padding-top: 4px; }
+
+.nw-table { width: 100%; border-collapse: collapse; }
+.nw-table th, .nw-table td { padding: 4px 8px; border-bottom: 1px solid var(--line); }
+.nw-table td.amount, .nw-table th.amount { text-align: right; white-space: nowrap; }
+
+.nw-explain {
+  margin: 12px 0 24px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.nw-explain summary { cursor: pointer; font-weight: 600; }
+.nw-explain ol { margin: 10px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.nw-explain ul { margin: 4px 0; padding-left: 18px; }
+.nw-explain p { margin: 4px 0; }

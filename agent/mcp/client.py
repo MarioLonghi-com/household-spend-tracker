@@ -209,6 +209,10 @@ class SpendTracker:
         """What work owes, repaid and wrote off, for ONE currency."""
         return self._get(self._house("reports/reimbursements"), currency=currency, **params)
 
+    def net_worth(self, **params: Any) -> dict:
+        """Every account's balance at each month end, added up only where it can be."""
+        return self._get(self._house("reports/net-worth"), **params)
+
     def fx_observed(self, **params: Any) -> dict:
         """The rates the household actually got on its own currency transfers."""
         return self._get(self._house("fx/observed"), **params)

@@ -1,5 +1,6 @@
 /** Shapes the server sends. Kept in one file so a change is one diff. */
 
+import type { RatesStatus } from "./fx";
 import type { Coded } from "./noticeMessages";
 
 export type Role = "owner" | "member";
@@ -1076,3 +1077,129 @@ export interface ReimbursementsReport {
   /** Ascending, only months with a flagged row in this currency. */
   months: ReimbursementMonth[];
 }
+
+/** The Net Worth report (#397): one month end, or today, in one currency. */
+export interface NetWorthPoint {
+  date: string;
+  /** This point is today rather than a month end (closed months off). */
+  today: boolean;
+  net_worth: number;
+  liabilities: number;
+  /** The same values by the split; they add up to `net_worth` exactly. "" is "not set". */
+  parts: Record<string, number>;
+  accounts_without_data: number;
+  stale_rate: boolean;
+  missing_rates: string[];
+}
+
+export interface NetWorthHeadline {
+  net_worth: number;
+  liabilities: number;
+  change_prev: number | null;
+  prev_date: string | null;
+  change_range: number | null;
+  range_start: string;
+}
+
+export interface NetWorthBridge {
+  start: number;
+  fx_effect: number;
+  money_added_or_spent: number;
+  end: number;
+}
+
+export interface NetWorthHeld {
+  key: string;
+  native_minor: number | null;
+  native_currency: string | null;
+  /** A decimal string, never parsed into a float for arithmetic. */
+  rate: string | null;
+  rate_date: string | null;
+  value: number;
+  share: string | null;
+}
+
+/** One currency's own figures, exact. */
+export interface NetWorthBook {
+  currency: string;
+  accounts: number;
+  points: NetWorthPoint[];
+  headline: NetWorthHeadline;
+  bridge: NetWorthBridge;
+  held: NetWorthHeld[];
+}
+
+export interface NetWorthAccount {
+  id: string;
+  name: string;
+  institution: string | null;
+  country: string | null;
+  type: AccountType;
+  is_liability: boolean;
+  closed: boolean;
+  currency: string;
+  native_minor: number;
+  native_change: number;
+  value: number | null;
+  change_range: number | null;
+}
+
+export interface NetWorthRate {
+  currency: string;
+  rate: string;
+  rate_date: string;
+  source: string;
+  stale: boolean;
+  before_as_of: boolean;
+}
+
+/**
+ * The Net Worth report.
+ *
+ * `display_currency` says what the top-level figures are in. Null when several
+ * currencies are in scope and nothing converts them: then `headline` and
+ * `bridge` are null, `points` and `held` are empty, and `currencies` is the
+ * whole answer -- one book per currency, never added up.
+ */
+export interface NetWorth {
+  as_of: string;
+  since: string;
+  until: string;
+  today: string;
+  closed_only: boolean;
+  clipped_from: string | null;
+  split: NetWorthSplit;
+  base_currency: string;
+  display_currency: string | null;
+  converted: boolean;
+  rate_source: { chain: string[]; policy: string } | null;
+  /** The "Rates as of" block (#396): several currencies in scope and a source set up. */
+  rates_status: RatesStatus | null;
+  points: NetWorthPoint[];
+  headline: NetWorthHeadline | null;
+  bridge: NetWorthBridge | null;
+  held: NetWorthHeld[];
+  accounts: NetWorthAccount[];
+  not_converted: { currency: string; native_minor: number; accounts: number }[];
+  currencies: NetWorthBook[];
+  explanation: {
+    accounts_counted: number;
+    accounts_hidden_closed: number;
+    accounts_without_data: number;
+    accounts_without_data_at_start: number;
+    currencies: string[];
+    rates: NetWorthRate[];
+    largest_foreign: {
+      account_id: string;
+      account_name: string;
+      currency: string;
+      native_minor: number;
+      rate: string;
+      value: number;
+    } | null;
+    stale: boolean;
+    missing: string[];
+  };
+}
+
+export type NetWorthSplit = "currency" | "country" | "institution" | "type";

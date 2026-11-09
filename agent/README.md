@@ -503,6 +503,20 @@ are yours — done visibly.**
   whose expenses are in another currency (none stated either).
   `excluded.reimbursements` counts the block's rows. `has_income_group: false`
   means no group carries the role, so every row is an expense.
+- **Net worth:** `GET $H/reports/net-worth?since=…&until=…` — every account's
+  balance at each month end, added up, with what moved it. The one report that
+  is not asked for one currency: `display_currency` says what its figures are
+  in. With one currency in scope (`currency=GBP`, or filters that leave one)
+  they are exact. With several, `converted: true` means each account was
+  converted into the base currency at the household's spot rate on each date
+  (`rate_source`, `explanation.rates`, and `rates_status` for how old the
+  rates are); a currency with no rate is left out and listed in
+  `not_converted`. With no rates at all, `display_currency`, `headline` and
+  `bridge` are null and **there is no total** — read `currencies[]`, each
+  currency's own book, and do not add them. Liabilities are already negative
+  and already inside `net_worth`. `closed_only` (default true) stops at the
+  last month that has ended. Filters repeat: `institution`, `country` (an empty
+  value means "not set"), `currency`, `account_id`.
 - **Rates the household actually got:** `GET $H/fx/observed?pair=EUR/GBP` —
   one entry per linked transfer between two currencies, with both amounts and
   the rate as a decimal **string** (units of `to_currency` per one
