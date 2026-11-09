@@ -39,6 +39,7 @@
   },
   "type": "module",
   "overrides": {
-    "micromatch": "$micromatch"
+    "micromatch": "$micromatch",
+    "minimatch@>=7.0.0 <11.0.1": "11.0.1"
   }
 }
