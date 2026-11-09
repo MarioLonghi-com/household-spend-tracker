@@ -32,6 +32,25 @@ history this repository does not have.
 
 ## Unreleased
 
+**Reversible: none** — no migration; CI only.
+
+### Changed
+
+- **A pull request into `dev` runs the Linux tier of CI only**, and the push
+  that lands it runs the rest. The suite on macOS and Windows, the packaged
+  desktop app and four of the five self-update legs moved to that push, the
+  release pull request and the Monday run, unless the pull request changes
+  the desktop shell or the updater. Pull request runs took 15 to 26 minutes,
+  about 10 of them queueing behind the free plan's limit of twenty jobs at a
+  time, five on macOS. A tree that passes the Linux tier is recorded as
+  `green-fast-<tree>`; `release.yml` still asks for `green-<tree>`, which only
+  a run of every tier records.
+- **The suite runs as three shards** of whole files, `PYTEST_SHARD=i/n` in
+  `tests/conftest.py`, and a last job combines their coverage and applies the
+  85% floor. Coverage measures through `sys.monitoring`
+  (`COVERAGE_CORE=sysmon`), which cost 7% of a run where the trace function
+  cost 18%. No change to `app/`.
+
 ## 0.14.1 — 2026-11-09
 
 **Reversible: none** — no migration in this release. To go back to
