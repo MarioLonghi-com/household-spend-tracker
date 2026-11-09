@@ -33,6 +33,7 @@ import type {
   Household,
   IncomeExpense as Report,
   ReportBehind,
+  ReportEntry,
   ReportLine,
   ReportRow,
   ReportSection,
@@ -41,6 +42,8 @@ import { amountLang, formatDate, listText, monthLabel } from "../../lib/locale";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { categoryName } from "../../lib/labels";
+import { registerHref } from "../../lib/registerLink";
+import { ReportGrid } from "./ReportGrid";
 
 /**
  * Which figure somebody clicked, in the terms the server narrows by.
@@ -219,6 +222,15 @@ export function IncomeExpense({ household }: { household: Household }) {
     [categories.data],
   );
 
+  /** Each group's categories, so a group's figure opens Transactions on exactly those (#401). */
+  const groupCategories = useMemo(
+    () =>
+      new Map(
+        (categories.data ?? []).map((group) => [group.id, group.categories.map((one) => one.id)]),
+      ),
+    [categories.data],
+  );
+
   const query = useMemo(() => {
     const params = new URLSearchParams();
     if (currency) params.set("currency", currency);
@@ -342,6 +354,7 @@ export function IncomeExpense({ household }: { household: Household }) {
             query={query}
             collapsed={collapsed}
             onToggle={toggleCollapsed}
+            groupCategories={groupCategories}
           />
         </>
       )}
@@ -422,6 +435,7 @@ export function ReportTable({
   query,
   collapsed,
   onToggle,
+  groupCategories,
 }: {
   report: Report;
   household: Household;
@@ -429,6 +443,8 @@ export function ReportTable({
   /** The keys of the bands and groups that are folded shut. */
   collapsed: ReadonlySet<string>;
   onToggle: (key: string) => void;
+  /** Each category group's category ids, for the links out of a group's figure. */
+  groupCategories?: ReadonlyMap<string, string[]>;
 }) {
   const [cell, setCell] = useState<Cell | null>(null);
   const onOpen = setCell;
@@ -466,20 +482,12 @@ export function ReportTable({
           stack with nothing to say which month any of them is. A report
           stays a grid on a phone and scrolls sideways, with the category
           column pinned. */}
-      <div className="matrix-scroll">
-        <table className="report">
-          <thead>
-            <tr>
-              <th className="report-label">&nbsp;</th>
-              {months.map((period) => (
-                <th key={period} className="amount">
-                  {monthLabel(period)}
-                </th>
-              ))}
-              <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, the sum">Total</Trans></th>
-              <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, per month">Average</Trans></th>
-            </tr>
-          </thead>
+      <ReportGrid
+        months={months}
+        net={report.net_by_month}
+        currency={currency}
+        head={(hidden) => <HeadCells months={months} hidden={hidden} />}
+      >
 
           <Band
             title={t({ message: "Income", comment: "Tooltip on the Income vs Expense report: noun, money that came in" })}
@@ -607,8 +615,7 @@ export function ReportTable({
               onOpen={onOpen}
             />
           </tfoot>
-        </table>
-      </div>
+      </ReportGrid>
 
       {/* What the report left out, said out loud. A report that quietly drops
           a fifth of the register is a report nobody can check -- and counting
@@ -653,10 +660,119 @@ export function ReportTable({
           query={query}
           currency={currency}
           onClose={() => setCell(null)}
+          link={(entry) =>
+            drillLink(cell, entry, {
+              household: household.id,
+              query,
+              since: report.since,
+              until: report.until,
+              currency,
+              groupCategories,
+            })
+          }
         />
       )}
     </>
   );
+}
+
+/**
+ * The heading row's cells, drawn twice by `ReportGrid`: once on screen in the
+ * band that sticks to the page, and once as words only inside the body table,
+ * so a screen reader still hears each figure under its month.
+ */
+function HeadCells({ months, hidden }: { months: string[]; hidden: boolean }) {
+  const words = (text: ReactNode) => (hidden ? <span className="sr-only">{text}</span> : text);
+  const total = t({ message: "Total", comment: "Column heading on the Income vs Expense report: noun, the sum" });
+  const average = t({ message: "Average", comment: "Column heading on the Income vs Expense report: noun, per month" });
+  return (
+    <>
+      <th className="report-label">{hidden ? null : "\u00a0"}</th>
+      {months.map((period) => (
+        <th key={period} className="amount" scope={hidden ? "col" : undefined}>
+          {words(monthLabel(period))}
+        </th>
+      ))}
+      <th className="amount" scope={hidden ? "col" : undefined}>{words(total)}</th>
+      <th className="amount" scope={hidden ? "col" : undefined}>{words(average)}</th>
+    </>
+  );
+}
+
+/** The last day of a `YYYY-MM` month, as an ISO date. */
+function monthEnd(period: string): string {
+  const [year, month] = period.split("-").map(Number);
+  const day = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return `${period}-${String(day).padStart(2, "0")}`;
+}
+
+/**
+ * Where one row in the bubble opens: Transactions, in a new tab, filtered the
+ * way the figure was, on that row (#401).
+ *
+ * - **Dates:** the cell's month, or the report's window for a Total. A claim's
+ *   expenses can sit months before the repayment that settled them (#398),
+ *   so the range widens to the row's own month rather than open a register
+ *   that hides the very row it was sent to.
+ * - **Categories:** the row's category, "Needs a category" for Uncategorised,
+ *   the group's categories for a group's line. A section total or Net keeps
+ *   the report's own category filter. A reimbursement line crosses
+ *   categories by design -- a repayment and the expenses it covered -- so it
+ *   sets none.
+ * - **Currency and accounts:** the report's.
+ */
+export function drillLink(
+  cell: Cell,
+  entry: Pick<ReportEntry, "id" | "date">,
+  context: {
+    household: string;
+    query: string;
+    since: string;
+    until: string;
+    currency: string;
+    groupCategories?: ReadonlyMap<string, string[]>;
+  },
+): string {
+  const report = new URLSearchParams(context.query);
+  let since = cell.period ? `${cell.period}-01` : context.since;
+  let until = cell.period ? monthEnd(cell.period) : context.until;
+  if (entry.date < since) since = `${entry.date.slice(0, 7)}-01`;
+  if (entry.date > until) until = monthEnd(entry.date.slice(0, 7));
+
+  let categories: string[] | null = null;
+  let backlog: boolean | undefined;
+  if (cell.rowUncategorised) {
+    categories = [];
+    backlog = true;
+  } else if (cell.rowCategoryId) {
+    categories = [cell.rowCategoryId];
+    backlog = false;
+  } else if (cell.rowGroupId) {
+    const ids = context.groupCategories?.get(cell.rowGroupId);
+    if (ids) {
+      categories = ids;
+      backlog = false;
+    }
+  } else if (!cell.direction?.startsWith("reimbursement_")) {
+    const ids = report.getAll("category_id");
+    const withBacklog = report.get("include_uncategorised") !== "false";
+    if (ids.length > 0) {
+      categories = ids;
+      backlog = withBacklog;
+    } else if (!withBacklog) backlog = false;
+  }
+
+  const accounts = report.getAll("account_id");
+  return registerHref({
+    household: context.household,
+    open: entry.id,
+    since,
+    until,
+    categories,
+    backlog,
+    currency: context.currency,
+    accounts: accounts.length > 0 ? accounts : null,
+  });
 }
 
 /**
@@ -679,12 +795,15 @@ function Behind({
   query,
   currency,
   onClose,
+  link,
 }: {
   cell: Cell;
   household: Household;
   query: string;
   currency: string;
   onClose: () => void;
+  /** Where a row opens in Transactions. */
+  link: (entry: ReportEntry) => string;
 }) {
   const params = useMemo(() => {
     const next = new URLSearchParams(query);
@@ -705,7 +824,7 @@ function Behind({
   });
 
   return (
-    <Dialog title={cell.title} onClose={onClose}>
+    <Dialog title={cell.title} onClose={onClose} wide>
       <Problem error={rows.error} />
       {rows.isLoading || !rows.data ? (
         <p className="muted"><Trans comment="Sentence on the Income vs Expense report">Loading…</Trans></p>
@@ -713,6 +832,9 @@ function Behind({
         <Empty><Trans>Nothing went into this one.</Trans></Empty>
       ) : (
         <>
+          <p className="muted small behind-hint">
+            <Trans>Click a transaction to open it in Transactions, in a new tab.</Trans>
+          </p>
           <div className="behind-scroll">
             <table className="behind">
               <thead>
@@ -720,26 +842,47 @@ function Behind({
                   <th><Trans comment="Column heading on the Income vs Expense report: noun, a bank or cash account. See GLOSSARY.md">Account</Trans></th>
                   <th><Trans comment="Column heading on the Income vs Expense report: noun. See GLOSSARY.md">Date</Trans></th>
                   <th><Trans comment="Column heading on the Income vs Expense report: noun, who was paid or who paid. See GLOSSARY.md">Payee</Trans></th>
+                  <th><Trans comment="Column heading on the Income vs Expense report's transaction list: noun. See GLOSSARY.md">Category</Trans></th>
                   <th><Trans comment="Column heading on the Income vs Expense report: noun, the free-text line of a transaction. See GLOSSARY.md">Memo</Trans></th>
                   <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, a sum of money. See GLOSSARY.md">Amount</Trans></th>
                 </tr>
               </thead>
               <tbody>
-                {rows.data.entries.map((entry) => (
-                  <tr key={entry.id}>
+                {rows.data.entries.map((entry) => {
+                  const href = link(entry);
+                  return (
+                  <tr
+                    key={entry.id}
+                    className="behind-row"
+                    onClick={(event) => {
+                      // The date is the link itself; anywhere else on the row
+                      // does what the link does.
+                      if ((event.target as HTMLElement).closest("a")) return;
+                      window.open(href, "_blank", "noopener");
+                    }}
+                  >
                     <td>{entry.account_name}</td>
-                    <td className="mono">{formatDate(entry.date)}</td>
+                    <td className="mono">
+                      <a className="behind-open" href={href} target="_blank" rel="noopener">
+                        {formatDate(entry.date)}
+                        <span className="sr-only">
+                          {t({ message: ", open in Transactions in a new tab", comment: "Screen-reader text after a date on the Income vs Expense report's transaction list" })}
+                        </span>
+                      </a>
+                    </td>
                     <td>{entry.payee_name ?? <span className="muted">—</span>}</td>
+                    <td>{entry.category_name ?? <span className="muted">—</span>}</td>
                     <td className="muted small">{entry.memo ?? ""}</td>
                     <td className="amount">
                       <Figure minor={entry.amount_minor} currency={currency} />
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
               <tfoot>
                 <tr>
-                  <th scope="row" colSpan={4}>
+                  <th scope="row" colSpan={5}>
                     {plural(rows.data.count, {
                       one: `${rows.data.count} transaction`,
                       other: `${rows.data.count} transactions`,

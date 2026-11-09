@@ -447,10 +447,13 @@ export function Dialog({
   title,
   onClose,
   children,
+  wide = false,
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  /** About twice the usual width, for a table of rows rather than a question. */
+  wide?: boolean;
 }) {
   // Re-renders its words when the language changes.
   useLingui();
@@ -512,7 +515,7 @@ export function Dialog({
       <div
         ref={box}
         tabIndex={-1}
-        className="dialog"
+        className={wide ? "dialog dialog-wide" : "dialog"}
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
