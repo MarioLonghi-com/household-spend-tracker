@@ -54,6 +54,30 @@ describe("a group's panel", () => {
     expect(api.patch).toHaveBeenCalledWith("/category-groups/g-bills", { name: "Fixed costs" });
   });
 
+  it("moves the Income role to that group, and sends nothing else", async () => {
+    vi.mocked(api.patch).mockResolvedValue({ ...BILLS, role: "income" });
+    const onSaved = mount();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /The Income group/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await vi.waitFor(() => expect(onSaved).toHaveBeenCalled());
+    expect(api.patch).toHaveBeenCalledWith("/category-groups/g-bills", { role: "income" });
+  });
+
+  it("clears the Income role from the group that has it", async () => {
+    vi.mocked(api.patch).mockResolvedValue({ ...BILLS, role: null });
+    const onSaved = mount({ ...BILLS, role: "income" });
+
+    const box = screen.getByRole("checkbox", { name: /The Income group/ }) as HTMLInputElement;
+    expect(box.checked).toBe(true);
+    fireEvent.click(box);
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await vi.waitFor(() => expect(onSaved).toHaveBeenCalled());
+    expect(api.patch).toHaveBeenCalledWith("/category-groups/g-bills", { role: null });
+  });
+
   it("deletes that group", async () => {
     vi.mocked(api.del).mockResolvedValue(undefined);
     const onSaved = mount();
@@ -134,6 +158,22 @@ describe("a category's panel (#199)", () => {
     await vi.waitFor(() => expect(onSaved).toHaveBeenCalled());
     expect(api.del).toHaveBeenCalledTimes(1);
     expect(api.del).toHaveBeenCalledWith("/categories/c-rent");
+  });
+
+  it("moves the Reimbursement role to that category with the rest of the form", async () => {
+    vi.mocked(api.patch).mockResolvedValue({ ...RENT, role: "reimbursement" });
+    const onSaved = mountCategory();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /The Reimbursement category/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await vi.waitFor(() => expect(onSaved).toHaveBeenCalled());
+    expect(api.patch).toHaveBeenCalledWith("/categories/c-rent", {
+      name: "Rent",
+      group_id: "g-bills",
+      archived: false,
+      role: "reimbursement",
+    });
   });
 
   it("sends nothing when kept", () => {

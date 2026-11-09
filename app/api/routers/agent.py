@@ -86,6 +86,7 @@ from ...services import (
     agent_warnings,
     importing,
     insights,
+    search_query,
 )
 from ...services import identifiers as identifier_service
 from ...services import receipts as receipt_service
@@ -231,7 +232,10 @@ _BASE = f"/api/agent/v{API_VERSION}"
 #: The filter vocabulary, written once. It is `transactions.filtered`'s, which
 #: is the register's -- so an agent that learned it for one endpoint knows it
 #: for all of them.
-_FILTERS = "Filters: account_id, since, until, search, cleared, uncategorised."
+_FILTERS = (
+    "Filters: account_id, since, until, search, cleared, uncategorised. "
+    f"{search_query.SYNTAX}"
+)
 
 #: A receipt's shape, written once: two endpoints answer with one and a third
 #: answers with a list of them. Part of `returns` -- see `ManifestEndpoint`.
@@ -557,7 +561,11 @@ def manifest(agent: CurrentAgent) -> Manifest:
         ],
         categories=[
             ManifestCategory(
-                id=category.id, full_name=category.full_name, archived=category.archived
+                id=category.id,
+                full_name=category.full_name,
+                archived=category.archived,
+                role=category.role,
+                group_role=category.group.role,
             )
             for category in categories
         ],

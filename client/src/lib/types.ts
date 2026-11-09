@@ -95,6 +95,11 @@ export interface Category {
   full_name: string;
   sort_order: number;
   archived: boolean;
+  /**
+   * `reimbursement` on the category whose rows are money work paid back:
+   * Income vs Expense sets them apart (#372). Null on every other.
+   */
+  role?: "reimbursement" | null;
   /** Transactions carrying it. What makes archive and delete different acts. */
   used_by: number;
 }
@@ -103,6 +108,8 @@ export interface CategoryGroup {
   id: string;
   name: string;
   sort_order: number;
+  /** `income` on the group whose rows are income on Income vs Expense (#372). */
+  role?: "income" | null;
   categories: Category[];
 }
 
@@ -347,6 +354,9 @@ export interface RegisterPage {
   /** Rows with no category under every other filter of the request, the
    *  category picker set aside: the count beside "Needs a category". */
   needs_category: number;
+  /** Rows every other filter matched that the currency toggle left out
+   *  (#370); zero when the request named no currency. */
+  hidden_by_currency?: number;
 }
 
 export interface Payee {
@@ -863,8 +873,26 @@ export interface ReportRow {
   count: number;
 }
 
+/**
+ * A figure with no breakdown under it: a category group's subtotal (`key` its
+ * id), or one of the work-reimbursement lines (`name` null). Summed by the
+ * server, so the screen adds nothing up itself.
+ */
+export interface ReportLine {
+  key: string | null;
+  name: string | null;
+  by_month: Record<string, number>;
+  total_minor: number;
+  total: string;
+  average_minor: number;
+  average: string;
+  count: number;
+}
+
 export interface ReportSection {
   rows: ReportRow[];
+  /** One subtotal per category group, largest first. Uncategorised has none. */
+  groups?: ReportLine[];
   by_month: Record<string, number>;
   total_minor: number;
   total: string;
@@ -888,12 +916,21 @@ export interface IncomeExpense {
   months: string[];
   income: ReportSection;
   expense: ReportSection;
+  /** Income plus expense. The reimbursement block is in neither. */
   net_by_month: Record<string, number>;
   net_total_minor: number;
   net_total: string;
   /**
-   * What the flow predicate removed. Printed, so the reader can check.
-   * `reimbursements` is work expenses and the payments that repaid them.
+   * Work reimbursements, for information only (#372): the Reimbursement
+   * category's rows, the flagged expenses already repaid, and the flagged
+   * ones still waiting. Counted in neither income, expenses nor net.
+   */
+  reimbursements: { income: ReportLine; spent: ReportLine; pending: ReportLine };
+  /** False when no group carries the `income` role: every row is an expense. */
+  has_income_group: boolean;
+  /**
+   * What the report left out or set apart. Printed, so the reader can check.
+   * `reimbursements` counts the rows in the reimbursement block.
    */
   excluded: { transfers: number; opening_balances: number; reimbursements: number };
   coverage: { months_in_range: number; months_with_activity: number };

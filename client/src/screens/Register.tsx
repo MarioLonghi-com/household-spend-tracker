@@ -725,6 +725,21 @@ export function Register({
   const noAccounts = accountIds !== null && accountIds.length === 0;
   //: The same answer for categories: nothing ticked, not even the backlog.
   const noCategories = categoryIds !== null && categoryIds.length === 0 && !backlog;
+  //: The currency toggle, as the server is asked it (#370). It used to narrow
+  //: the rows in hand after paging, and under the amount sort -- currency
+  //: first -- a first page of another currency's rows left the table empty
+  //: with the rows it should show on a page nobody asked for. Read against
+  //: the household's own list only, never against the rows: the rows are
+  //: what this asks for. Every currency ticked, or none still held, is no
+  //: narrowing, the same as `columns` below.
+  const held = currencies.data?.currencies ?? [];
+  const keptCurrencies =
+    pickedCurrencies === null ? [] : held.filter((code) => pickedCurrencies.includes(code));
+  const currencyAsked =
+    keptCurrencies.length > 0 && keptCurrencies.length < held.length ? keptCurrencies : [];
+  //: A remembered toggle waits for that list rather than asking for every
+  //: currency first and then again for the ones it shows.
+  const currencyUnknown = pickedCurrencies !== null && currencies.isPending;
   //: What the query asks for, which lags the box by a pause in the typing. The
   //: box itself stays on `search` so it never drops a character.
   const searched = useDebounced(search).trim();
@@ -744,6 +759,7 @@ export function Register({
   if (workFilter) query.set("reimbursement", workFilter);
   if (range.since) query.set("since", range.since);
   if (range.until) query.set("until", range.until);
+  for (const code of currencyAsked) query.append("currency", code);
   //: The picker's ticks add up (#188): each one brings its rows in. Every
   //: category with the backlog unticked is `categorised`, not every id.
   const categoryFiltered = categoryIds !== null || !backlog;
@@ -769,6 +785,7 @@ export function Register({
       range.until,
       categoryFiltered ? (categoryIds ?? ["*"]).join(",") : null,
       categoryFiltered && backlog,
+      currencyAsked.join(","),
       sort,
       direction,
     ],
@@ -788,7 +805,7 @@ export function Register({
     //: The next page starts a little before the rows in hand end (#341),
     //: until `total` -- what the filter matched on the server -- is reached.
     getNextPageParam: (last, _pages, lastParam) => nextPage(last, lastParam),
-    enabled: !noAccounts && !noCategories,
+    enabled: !noAccounts && !noCategories && !currencyUnknown,
   });
   // A page that did not join up: more rows went above the boundary than the
   // overlap covers. What is in hand may have a hole in it, so all of it is
@@ -855,6 +872,7 @@ export function Register({
   }
   backlogQuery.set("uncategorised", "true");
   backlogQuery.set("limit", "1");
+  //: The badge counts what the table would show, so the toggle stays on.
   const backlogAlone = useQuery({
     queryKey: ["register", household.id, "backlog-count", backlogQuery.toString()],
     queryFn: ({ signal }) =>
@@ -862,7 +880,7 @@ export function Register({
         `/households/${household.id}/transactions?${backlogQuery.toString()}`,
         { signal },
       ),
-    enabled: !noAccounts && noCategories,
+    enabled: !noAccounts && noCategories && !currencyUnknown,
   });
   const backlogCount = noCategories
     ? backlogAlone.data?.total
@@ -1080,12 +1098,18 @@ export function Register({
    * figure -- a transaction rendered as though it were for nothing. So the
    * toggle governs the rows as well as the columns, and how many it left out
    * is printed under the table rather than left to be noticed.
+   *
+   * The server does the narrowing now (#370) and says how many rows it left
+   * out (`hidden_by_currency`). This filter stays as the guard for rows in
+   * hand that were asked for before the toggle was known -- the household's
+   * currency list still on its way -- and what it drops is counted with the
+   * server's figure, never instead of it.
    */
   const visible = useMemo(
     () => rows.filter((row) => columns.includes(currencyOf(row))),
     [rows, columns, currencyOf],
   );
-  const hiddenByCurrency = rows.length - visible.length;
+  const hiddenByCurrency = (data?.hidden_by_currency ?? 0) + rows.length - visible.length;
 
   /**
    * The rows in the order they are drawn.
@@ -1147,9 +1171,9 @@ export function Register({
   /**
    * What the selection comes to, one line per currency.
    *
-   * Counted over every row the filter matched rather than over the rows on
-   * screen, so a selection the currency toggle has since hidden is still in
-   * the total that claims to describe it.
+   * Counted over the rows in hand. The currency toggle is a filter the
+   * server applies now (#370), so a selected row it has since hidden is one
+   * of those "outside the current filter" the banner counts, like any other.
    */
   const sums = useMemo(
     () => selectionSums(rows, selected, currencyOf, available),
@@ -1561,21 +1585,24 @@ export function Register({
               filter — or Select all, which is not the same as ticking every one of them.
             </Trans>
           </Empty>
-        ) : data?.transactions.length === 0 ? (
-          <Empty>
-            <Trans>
-              Nothing here yet. Add a row above, or import a statement from the Import screen.
-            </Trans>
-          </Empty>
         ) : visible.length === 0 && hiddenByCurrency > 0 ? (
           /* Only when the toggle is what emptied it. While the request is
              still out there are no rows for a different reason, and an empty
-             table waiting for them is what this screen has always shown. */
+             table waiting for them is what this screen has always shown.
+             Ahead of "Nothing here yet": since the server narrows by
+             currency (#370) an answer with no rows can still have rows the
+             toggle is hiding. */
           <Empty>
             {plural(hiddenByCurrency, {
               one: `Every row here is in a currency the toggle is hiding. Turn one back on to see them — ${hiddenByCurrency} row is waiting.`,
               other: `Every row here is in a currency the toggle is hiding. Turn one back on to see them — ${hiddenByCurrency} rows are waiting.`,
             })}
+          </Empty>
+        ) : data?.transactions.length === 0 ? (
+          <Empty>
+            <Trans>
+              Nothing here yet. Add a row above, or import a statement from the Import screen.
+            </Trans>
           </Empty>
         ) : (
           <div className="table-scroll">

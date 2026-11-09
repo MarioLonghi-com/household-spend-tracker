@@ -162,7 +162,13 @@ def _row_dicts(
 
 
 def _register_page(
-    shown: list[dict], *, total: int, capped: bool, balance: bool, needs_category: int
+    shown: list[dict],
+    *,
+    total: int,
+    capped: bool,
+    balance: bool,
+    needs_category: int,
+    hidden_by_currency: int,
 ) -> Response:
     """The page as JSON, written straight from the dictionaries (#237).
 
@@ -180,6 +186,7 @@ def _register_page(
                 "has_running_balance": balance,
                 "capped": capped,
                 "needs_category": needs_category,
+                "hidden_by_currency": hidden_by_currency,
             }
         ),
         media_type="application/json",
@@ -373,6 +380,9 @@ def register(
     #: The Work expenses filter. `work` and `paid` bring the payments along
     #: with the expenses they repaid; see `transactions._reimbursement_is`.
     reimbursement: ReimbursementView | None = None,
+    #: The currency toggle (#370): only rows on accounts held in these codes.
+    #: Repeats, like `account_id`. See `transactions.filtered`.
+    currency: Annotated[list[str] | None, Query()] = None,
     sort: RegisterSort = RegisterSort.date,
     direction: SortDirection = SortDirection.desc,
     limit: int = Query(default=REGISTER_CEILING, ge=1, le=REGISTER_CEILING),
@@ -393,6 +403,11 @@ def register(
     accounts" is one request. One `account_id` behaves exactly as it always
     did, which is what lets the existing tests stand as the proof of that.
 
+    `currency` repeats too: the register's currency toggle, narrowed here so
+    that the page, `total` and the badge are about the rows it shows (#370).
+    `hidden_by_currency` is how many rows every other filter matched that the
+    toggle left out, for the line under the table that says so.
+
     A running balance is returned only when the view is **one** account in date
     order -- across accounts, under a filter that hides rows, or sorted by
     anything else, the column would be a plausible-looking lie. Two ticked
@@ -409,8 +424,9 @@ def register(
     currencies = txn_service.account_currencies(session, household.id)
     typed_amount = (amount or "").strip()
     amount_spans = txn_service.amount_lookup(currencies, typed_amount) if typed_amount else None
-    stmt = txn_service.filtered(
-        household.id,
+    # Every filter, the currency toggle aside: what `hidden_by_currency` is
+    # counted against.
+    every_filter = dict(
         account_ids=account_id,
         since=since,
         until=until,
@@ -423,10 +439,21 @@ def register(
         source=source,
         reimbursement=reimbursement,
     )
+    stmt = txn_service.filtered(household.id, currencies=currency, **every_filter)
 
     total = session.execute(
         select(func.count()).select_from(stmt.subquery())
     ).scalar_one()
+    hidden_by_currency = 0
+    if currency:
+        hidden_by_currency = (
+            session.execute(
+                select(func.count()).select_from(
+                    txn_service.filtered(household.id, **every_filter).subquery()
+                )
+            ).scalar_one()
+            - total
+        )
 
     # The badge beside "Needs a category" (#188): how many of *these* rows --
     # every other filter applied, the category picker set aside -- have no
@@ -449,6 +476,7 @@ def register(
                 amount=amount_spans,
                 source=source,
                 reimbursement=reimbursement,
+                currencies=currency,
             ).subquery()
         )
     ).scalar_one()
@@ -493,6 +521,9 @@ def register(
         or typed_amount
         or source is not None
         or reimbursement is not None
+        # A toggle that keeps the one account's own currency hides none of
+        # its rows; one that does not leaves no rows to sum.
+        or bool(currency and currencies.get(only_account or "") not in currency)
     )
     whole_account = bool(only_account) and default_order and not narrowed
     rows = _register_rows(session, ordered)
@@ -504,6 +535,7 @@ def register(
             capped=total > len(shown) + offset,
             balance=False,
             needs_category=needs_category,
+            hidden_by_currency=hidden_by_currency,
         )
 
     # The running balance needs the rows in date order with their created_at,
@@ -547,6 +579,7 @@ def register(
         capped=total > len(shown) + offset,
         balance=True,
         needs_category=needs_category,
+        hidden_by_currency=hidden_by_currency,
     )
 
 

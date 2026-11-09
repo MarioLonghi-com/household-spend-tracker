@@ -23,6 +23,8 @@ from app.models import (
     BatchKind,
     Category,
     CategoryGroup,
+    CategoryGroupRole,
+    CategoryRole,
     Payee,
     ReimbursementState,
     SystemPayee,
@@ -35,15 +37,35 @@ from app.services import reporting as report_service
 
 @pytest.fixture()
 def categorised(session, household, owner):
-    """Two categories under one group, so the breakdown has something to break."""
+    """Two groups, so the breakdown has something to break.
+
+    The income group is called "Earnings" rather than "Income" on purpose: the
+    side a row lands on is the group's role (#372), never its name. Its
+    Reimbursement category carries the other role.
+    """
     with batch(session, kind=BatchKind.admin, actor_id=owner.id, household_id=household.id):
-        group = CategoryGroup(household_id=household.id, name="Frequent")
-        session.add(group)
+        earnings = CategoryGroup(
+            household_id=household.id, name="Earnings", role=CategoryGroupRole.income
+        )
+        everyday = CategoryGroup(household_id=household.id, name="Everyday")
+        session.add_all([earnings, everyday])
         session.flush()
-        groceries = Category(household_id=household.id, group_id=group.id, name="Groceries")
-        salary_cat = Category(household_id=household.id, group_id=group.id, name="Salary")
-        session.add_all([groceries, salary_cat])
-    return {"group": group, "groceries": groceries, "salary": salary_cat}
+        groceries = Category(household_id=household.id, group_id=everyday.id, name="Groceries")
+        salary_cat = Category(household_id=household.id, group_id=earnings.id, name="Salary")
+        back = Category(
+            household_id=household.id,
+            group_id=earnings.id,
+            name="Paid back",
+            role=CategoryRole.reimbursement,
+        )
+        session.add_all([groceries, salary_cat, back])
+    return {
+        "group": everyday,
+        "income_group": earnings,
+        "groceries": groceries,
+        "salary": salary_cat,
+        "reimbursement": back,
+    }
 
 
 def _add(session, household, owner, account, *, when, amount, category=None, payee=None):
@@ -186,14 +208,13 @@ def test_two_currencies_are_never_added(session, household, owner, accounts, cat
 # --------------------------------------------------------------------------- #
 
 
-def test_the_sign_decides_the_side_not_the_category(
+def test_the_group_decides_the_side_not_the_sign(
     session, household, owner, accounts, categorised
 ):
-    """A refund against Groceries is income for the month it arrived.
+    """A refund against Groceries reduces Groceries in the month it lands (#372).
 
-    A category is classification and carries no direction, so the only honest
-    answer is the sign of the row. This is also why "Company refunds" can be
-    both and neither side has to be told about it.
+    Deciding by the sign put every refund in income and showed the same
+    category on both halves of the report.
     """
     _add(
         session, household, owner, accounts["checking"],
@@ -206,9 +227,11 @@ def test_the_sign_decides_the_side_not_the_category(
 
     answer = _report(session, household)
 
-    assert answer["expense"].total_minor == -8_000
-    assert answer["income"].total_minor == 2_500
-    assert [row.name for row in answer["income"].rows] == ["Groceries"]
+    assert answer["expense"].total_minor == -5_500
+    assert answer["income"].total_minor == 0
+    assert answer["income"].rows == []
+    assert [row.name for row in answer["expense"].rows] == ["Groceries"]
+    assert answer["expense"].rows[0].count == 2
     assert answer["net_total_minor"] == -5_500
 
 
@@ -243,8 +266,9 @@ def test_uncategorised_is_a_row_of_its_own(session, household, owner, accounts, 
     assert set(rows) == {"Groceries", "Uncategorised"}
     assert rows["Uncategorised"].total_minor == -7_000
     assert rows["Uncategorised"].key is None
-    # Biggest first by magnitude, so the outgoing that matters most is on top.
-    assert [row.name for row in answer["expense"].rows] == ["Uncategorised", "Groceries"]
+    # Uncategorised is last whatever its size: it belongs to no group, and the
+    # groups come first, largest spend first.
+    assert [row.name for row in answer["expense"].rows] == ["Groceries", "Uncategorised"]
 
 
 def test_the_average_divides_by_the_window_not_by_the_months_it_appears_in(
@@ -611,16 +635,20 @@ def _flag(session, household, owner, txn, state=ReimbursementState.expected, *, 
         txn.reimbursed_by_id = paid_by.id if paid_by else None
 
 
-def test_an_exact_claim_is_neither_spending_nor_income(session, household, owner, accounts):
-    """A EUR 240 hotel repaid EUR 240 by work: the report sees only the shop.
+def test_an_exact_claim_is_neither_spending_nor_income(
+    session, household, owner, accounts, categorised
+):
+    """A EUR 240 hotel repaid EUR 240 by work: income and expenses see only the shop.
 
     Left in, both sides grow by 240 and net stays right, which is exactly why
-    nobody would notice -- so the assertion is on each side, not on net.
+    nobody would notice -- so the assertion is on each side, not on net. The
+    two rows are on the report, in the reimbursement block.
     """
     _add(session, household, owner, accounts["checking"], when=date(2026, 1, 5), amount=-5_000)
     hotel = _add(session, household, owner, accounts["card"], when=date(2026, 1, 8), amount=-24_000)
     repaid = _add(
-        session, household, owner, accounts["checking"], when=date(2026, 1, 28), amount=24_000
+        session, household, owner, accounts["checking"], when=date(2026, 1, 28), amount=24_000,
+        category=categorised["reimbursement"],
     )
     _flag(session, household, owner, hotel, paid_by=repaid)
 
@@ -629,6 +657,8 @@ def test_an_exact_claim_is_neither_spending_nor_income(session, household, owner
     assert answer["expense"].total_minor == -5_000, "the hotel was counted as spend"
     assert answer["income"].total_minor == 0, "the repayment was counted as income"
     assert answer["net_total_minor"] == -5_000
+    assert answer["reimbursements"]["income"].total_minor == 24_000
+    assert answer["reimbursements"]["spent"].total_minor == -24_000
     assert answer["excluded"]["reimbursements"] == 2
     assert answer["excluded"]["transfers"] == 0
 
@@ -659,50 +689,67 @@ def test_a_written_off_expense_is_spending_after_all(session, household, owner, 
     assert answer["excluded"]["reimbursements"] == 0
 
 
-def test_an_advance_is_income_until_something_points_at_it(session, household, owner, accounts):
-    """Nothing says what an unlinked advance is, so it counts -- until linked."""
+def test_an_advance_in_the_reimbursement_category_is_set_apart_linked_or_not(
+    session, household, owner, accounts, categorised
+):
+    """The category says what it is, so it is out of income before any link (#372)."""
     advance = _add(
-        session, household, owner, accounts["checking"], when=date(2026, 1, 2), amount=50_000
+        session, household, owner, accounts["checking"], when=date(2026, 1, 2), amount=50_000,
+        category=categorised["reimbursement"],
     )
 
     before = _report(session, household)
-    assert before["income"].total_minor == 50_000
-    assert before["excluded"]["reimbursements"] == 0
+    assert before["income"].total_minor == 0
+    assert before["reimbursements"]["income"].total_minor == 50_000
+    assert before["excluded"]["reimbursements"] == 1
 
     trip = _add(session, household, owner, accounts["card"], when=date(2026, 1, 20), amount=-34_000)
     _flag(session, household, owner, trip, paid_by=advance)
 
     after = _report(session, household)
-    assert after["income"].total_minor == 0, "a linked advance is not income"
+    assert after["income"].total_minor == 0
     assert after["expense"].total_minor == 0
+    assert after["reimbursements"]["income"].total_minor == 50_000
+    assert after["reimbursements"]["spent"].total_minor == -34_000
     assert after["excluded"]["reimbursements"] == 2
 
 
-def test_a_repayment_leaves_every_flow_query_not_only_the_totals(
-    session, household, owner, accounts
+def test_the_block_stays_out_of_the_net_bubble_and_inside_the_window(
+    session, household, owner, accounts, categorised
 ):
-    """`behind` and `flow_span` compose the same predicate, so they agree.
+    """`behind` and `flow_span` compose the same rules as the report.
 
-    A bubble under the Income total that showed the repayment would be handing
-    the reader evidence against a figure that is right.
+    A bubble under Net that showed the repayment would be handing the reader
+    evidence against a figure that is right. The window, though, does reach
+    the work rows: they are on the report, in their own block, and an
+    all-dates window that cut them off would cut the block in half.
     """
     _add(session, household, owner, accounts["checking"], when=date(2026, 2, 10), amount=-900)
     hotel = _add(session, household, owner, accounts["card"], when=date(2026, 1, 3), amount=-24_000)
     repaid = _add(
-        session, household, owner, accounts["checking"], when=date(2026, 3, 30), amount=24_000
+        session, household, owner, accounts["checking"], when=date(2026, 3, 30), amount=24_000,
+        category=categorised["reimbursement"],
     )
     _flag(session, household, owner, hotel, paid_by=repaid)
 
-    drilled = report_service.behind(
-        session, household.id, currency="EUR", since=date(2026, 1, 1), until=date(2026, 3, 31)
-    )
+    window = dict(currency="EUR", since=date(2026, 1, 1), until=date(2026, 3, 31))
+    drilled = report_service.behind(session, household.id, **window)
     assert [e.amount_minor for e in drilled["entries"]] == [-900]
     assert drilled["total_minor"] == -900
 
+    back = report_service.behind(
+        session, household.id, direction=report_service.REIMBURSEMENT_INCOME, **window
+    )
+    assert [e.id for e in back["entries"]] == [repaid.id]
+    spent = report_service.behind(
+        session, household.id, direction=report_service.REIMBURSEMENT_SPENT, **window
+    )
+    assert spent["total_minor"] == -24_000
+
     assert report_service.flow_span(session, household.id, currency="EUR") == (
-        date(2026, 2, 10),
-        date(2026, 2, 10),
-    ), "the work rows set the all-dates window"
+        date(2026, 1, 3),
+        date(2026, 3, 30),
+    )
 
 
 def test_the_reimbursement_count_is_windowed_and_per_currency(
@@ -721,7 +768,9 @@ def test_the_reimbursement_count_is_windowed_and_per_currency(
 
 
 @pytest.mark.parametrize("which", ["source", "target"])
-def test_a_system_payee_cannot_be_merged_either_way(session, household, owner, accounts, which):
+def test_a_system_payee_cannot_be_merged_either_way(
+    session, household, owner, accounts, categorised, which
+):
     """#332. Merged away, "Opening balance" turned a balance into income; merged
     into, it hid income as an opening balance. Both are refused, and the
     report reads what it read before."""
@@ -739,7 +788,7 @@ def test_a_system_payee_cannot_be_merged_either_way(session, household, owner, a
         salary = payee_service.get_or_create(session, household.id, "Employer")
     _add(
         session, household, owner, accounts["checking"],
-        when=date(2026, 1, 25), amount=200_000, payee=salary,
+        when=date(2026, 1, 25), amount=200_000, payee=salary, category=categorised["salary"],
     )
     opening = session.query(Payee).filter_by(system=SystemPayee.opening_balance).one()
     before = (_report(session, household)["income"].total_minor,
