@@ -32,7 +32,12 @@ history this repository does not have.
 
 ## Unreleased
 
-**Reversible: lossy** — two migrations, applied in this order.
+## 0.14.0 — 2026-11-09
+
+**Reversible: lossy** — two migrations, applied in this order. *Go back to
+0.13.1* under Updates restores the backup taken before the upgrade, and
+everything written since goes with it; see *Going back after a successful
+update* in `deploy/UPGRADING.md`.
 
 - `3b6f0d2e9a41` — lossy: exchange rates (#396). Three new tables,
   `fx_rates` (fetched rates, shared by the instance), `fx_manual_rates` (a
@@ -48,6 +53,13 @@ history this repository does not have.
   nothing. Rolling it back divides them again, rounding away any fillér or
   cents entered since. An undo of a HUF or TWD batch from before the upgrade
   puts back the old figure.
+
+Reports can now give one total in the household's base currency, at exchange
+rates the household chooses and fetches by hand: Net worth is the first
+report built on them, and Income vs Expense gains *All, in* the base currency
+and a Latest 12 months card. Income vs Expense also keeps its month headings
+in view, with a month map to move across, and the rows behind a figure open
+in Transactions.
 
 ### Added
 
