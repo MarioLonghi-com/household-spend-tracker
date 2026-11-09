@@ -855,6 +855,75 @@ def test_e7_a_policy_an_older_updater_left_parked_is_not_copied_onto_the_next_ap
 
 
 # --------------------------------------------------------------------------- #
+# #344: rootless Podman refuses the step-3 stop a hand start overtook
+# --------------------------------------------------------------------------- #
+
+
+def steps_started(w: World, rid: str) -> list[str]:
+    return [s["step"] for s in w.journal(rid).started]
+
+
+@pytest.mark.parametrize("settles", [False, True])
+def test_344_a_stop_refused_as_state_improper_is_asked_once_more_and_the_update_goes_on(world, settles):
+    """The 500 `container state improper` once: inspected after a wait, the app
+    is stopped again if the hand start left it running (`settles` False), or
+    left as it is if it stopped by itself meanwhile (True), and E1 holds."""
+    world.fake.improper_stops[world.app_id] = 1
+    if settles:
+
+        def stopped_meanwhile() -> None:
+            app = world.fake.containers.get(world.app_id)
+            if app is not None and world.fake.improper_stops[world.app_id] == 0 and not world.time.settled:
+                world.time.settled = True
+                world.fake.set_state(app, "exited", 0)
+
+        world.time.settled = False
+        world.time.on_sleep = stopped_meanwhile
+    try:
+        req, record = apply(world)
+    finally:
+        world.time.on_sleep = None
+    assert record["state"] == "succeeded", record
+    assert world.ledger.stamp == B and world.ledger.drills == 1
+    assert world.version_of(the_app(world)) == B and world.running_apps() == [the_app(world)]
+    parked = world.by_name(f"{world.app_name}-previous")
+    assert parked["Id"] == world.app_id and parked["State"] == "exited"
+    assert "4" in steps_started(world, req["id"])
+    # Before the rename: the refused stop, then one more only if it still ran.
+    first = stops_of(world)[: 1 if settles else 2]
+    assert first == [world.app_id] * len(first)
+    assert stops_of(world).count(world.app_id) == (1 if settles else 2)
+    assert any("container state improper" in n and "stopped it again" in n for n in record["notes"])
+    world.no_running_app_at_a_mismatched_stamp()
+
+
+def test_344_a_stop_refused_again_is_not_started_and_the_app_is_home(world):
+    world.fake.improper_stops[world.app_id] = 5
+    req, record = apply(world)
+    assert record["state"] == "not_started" and record["failed_step"] == "3", record
+    assert "the app could not be stopped" in record["sentence"]
+    assert "container state improper" in record["sentence"]
+    # Two stops and no third: the retry is bounded.
+    assert stops_of(world).count(world.app_id) == 2
+    assert world.fake.improper_stops[world.app_id] == 3
+    # Nothing moved: A runs under its own name on its own ledger, no drill ran.
+    assert world.ledger.stamp == A and world.ledger.drills == 0 and not world.ledger.backups
+    assert the_app(world)["Id"] == world.app_id and the_app(world)["State"] == "running"
+    assert world.by_name(f"{world.app_name}-previous") is None
+    assert "4" not in steps_started(world, req["id"])
+
+
+def test_344_any_other_refused_stop_is_not_started_without_a_second_try(world):
+    world.fake.refuse_stop.add(world.app_id)
+    _, record = apply(world)
+    assert record["state"] == "not_started" and record["failed_step"] == "3", record
+    assert "permission denied" in record["sentence"]
+    assert stops_of(world).count(world.app_id) == 1
+    assert world.ledger.stamp == A and world.ledger.drills == 0
+    assert the_app(world)["Id"] == world.app_id and the_app(world)["State"] == "running"
+
+
+# --------------------------------------------------------------------------- #
 # #246: the parked app started by hand before or during the drill
 # --------------------------------------------------------------------------- #
 
