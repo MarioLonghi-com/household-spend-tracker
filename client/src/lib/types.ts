@@ -867,6 +867,12 @@ export interface ReportRow {
   /** `unset.category` when `name` is the server's word for no category (#267). */
   name_code?: string | null;
   group_name: string | null;
+  /**
+   * Set when the row is no category but a figure worked out per repayment:
+   * `reimbursement_surplus` in income, `reimbursement_shortfall` in expenses.
+   * `key` is null then, and the row is not Uncategorised.
+   */
+  line?: "reimbursement_surplus" | "reimbursement_shortfall" | null;
   by_month: Record<string, number>;
   total_minor: number;
   total: string;
@@ -918,7 +924,7 @@ export interface IncomeExpense {
   months: string[];
   income: ReportSection;
   expense: ReportSection;
-  /** Income plus expense. The reimbursement block is in neither. */
+  /** Income plus expense, the surplus and shortfall rows included. */
   net_by_month: Record<string, number>;
   net_total_minor: number;
   net_total: string;
@@ -927,7 +933,17 @@ export interface IncomeExpense {
    * category's rows, the flagged expenses already repaid, and the flagged
    * ones still waiting. Counted in neither income, expenses nor net.
    */
-  reimbursements: { income: ReportLine; spent: ReportLine; pending: ReportLine };
+  reimbursements: {
+    income: ReportLine;
+    spent: ReportLine;
+    /** Counted: the surplus row in income plus the shortfall row in expenses. */
+    difference: ReportLine;
+    /** The part of `income` linked to no expense: no difference to state. */
+    unmatched: ReportLine;
+    pending: ReportLine;
+  };
+  /** Repayments whose expenses are in another currency: no difference stated. */
+  reimbursement_mixed?: number;
   /** False when no group carries the `income` role: every row is an expense. */
   has_income_group: boolean;
   /**

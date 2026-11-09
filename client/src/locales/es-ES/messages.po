@@ -120,6 +120,11 @@ msgstr "A"
 msgid "starts with"
 msgstr "empieza por"
 
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "For information. Only the difference is counted: above, as Reimbursement surplus in income or Reimbursement shortfall in expenses."
+msgstr "A título informativo. Solo cuenta la diferencia: arriba, como Excedente de reembolsos en ingresos o Déficit de reembolsos en gastos."
+
 #. Option in a dropdown on the Accounts screen
 #. Option in a dropdown on the Import screen
 #. Option in a dropdown on the one-time import
@@ -340,6 +345,11 @@ msgstr "Coincidencia"
 #, fuzzy
 msgid "Or paste the rows, if your bank only lets you copy them from a page:"
 msgstr "O pega las filas, si tu banco solo deja copiarlas de una página:"
+
+#: src/screens/Categories.tsx
+#, fuzzy
+msgid "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net, and counts only what a repayment came to beyond or short of the expenses linked to it. One category has this; ticking it moves it here."
+msgstr "Ingresos y gastos muestra sus movimientos en Reembolsos del trabajo, fuera de ingresos, gastos y neto, y solo cuenta lo que un reembolso supera o no alcanza respecto a los gastos vinculados. Solo una categoría lo tiene; al marcarla, pasa a esta."
 
 #. Screen-reader name of a warning on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
@@ -1059,11 +1069,6 @@ msgstr "Importado de <0>{0}</0>, línea {1}, el {2}."
 #, fuzzy
 msgid "Your household"
 msgstr "Tu hogar"
-
-#: src/screens/Categories.tsx
-#, fuzzy
-msgid "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net. One category has this; ticking it moves it here."
-msgstr "Ingresos y gastos muestra sus movimientos en Reembolsos del trabajo, fuera de ingresos, gastos y neto. Solo una categoría lo tiene; al marcarla, pasa a esta."
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -3286,11 +3291,6 @@ msgstr "Ese enlace no funciona"
 #, fuzzy
 msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 msgstr "{0, plural, one {También en {1} movimiento más: el mismo archivo, guardado una sola vez.} other {También en {2} movimientos más: el mismo archivo, guardado una sola vez.}}"
-
-#: src/screens/reports/IncomeExpense.tsx
-#, fuzzy
-msgid "For information only — not counted in income, expenses or net."
-msgstr "Solo informativo: no cuenta en ingresos, gastos ni neto."
 
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
@@ -5686,6 +5686,11 @@ msgstr "Una llave de acceso es una forma de entrar que sigue funcionando despué
 msgid "the built SPA; `/` 404s without it"
 msgstr "la SPA compilada; sin ella `/` responde 404"
 
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Work reimbursements, for information: not in income, expenses or net, except the surplus or shortfall shown in them."
+msgstr "Reembolsos del trabajo, a título informativo: no están en ingresos, gastos ni neto, salvo el excedente o el déficit que aparece en ellos."
+
 #. State of the authenticator: it is enrolled and working. See GLOSSARY.md
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -6181,11 +6186,6 @@ msgstr "No se pudo leer"
 #, fuzzy
 msgid "Inbox"
 msgstr "Bandeja de entrada"
-
-#: src/screens/reports/IncomeExpense.tsx
-#, fuzzy
-msgid "Work reimbursements, for information: not in income, expenses or net."
-msgstr "Reembolsos del trabajo, a título informativo: no están en ingresos, gastos ni neto."
 
 #. placeholder {0}: picked.size
 #. placeholder {1}: picked.size
@@ -7171,11 +7171,6 @@ msgstr "No hay nada que revisar."
 msgid "Added"
 msgstr "Añadida"
 
-#: src/screens/reports/IncomeExpense.tsx
-#, fuzzy
-msgid "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.}}"
-msgstr "{work, plural, one {{work} movimiento apartado en Reembolsos del trabajo: lo que el trabajo te devuelve nunca fue un gasto tuyo, y el reembolso no es un ingreso.} other {{work} movimientos apartados en Reembolsos del trabajo: lo que el trabajo te devuelve nunca fue un gasto tuyo, y el reembolso no es un ingreso.}}"
-
 #. placeholder {0}: format(Math.abs(left), currency)
 #: src/screens/Register.tsx
 #, fuzzy
@@ -7743,6 +7738,12 @@ msgstr "{by} restableció tu contraseña y tu aplicación de autenticación para
 #, fuzzy
 msgid "Last used"
 msgstr "Último uso"
+
+#. Line on the Income vs Expense report: repayments beyond or short of their expenses, counted above
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Difference, counted above"
+msgstr "Diferencia, contada arriba"
 
 #. placeholder {0}: user.display_name
 #: src/App.tsx
@@ -8466,6 +8467,12 @@ msgstr "Grupo"
 #, fuzzy
 msgid "{0, plural, one {{1} transfer will be imported as ordinary transactions, with the reason for each} other {{2} transfers will be imported as ordinary transactions, with the reason for each}}"
 msgstr "{0, plural, one {{1} transferencia se importará como movimientos normales, con el motivo de cada uno} other {{2} transferencias se importarán como movimientos normales, con el motivo de cada una}}"
+
+#. Row on the Income vs Expense report: what work paid back beyond what was spent, counted as income
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Reimbursement surplus"
+msgstr "Excedente de reembolsos"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -11196,6 +11203,12 @@ msgstr "escribe cualquier parte"
 msgid "Categorisation"
 msgstr "Categorización"
 
+#. Row on the Income vs Expense report: what work paid back short of what was spent, counted as an expense
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Reimbursement shortfall"
+msgstr "Déficit de reembolsos"
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Reimbursed, with the payment"
@@ -11737,6 +11750,11 @@ msgstr "En Docker Desktop o Podman Desktop, abre Containers, busca <0>{name}</0>
 #: ../desktop/src/words.ts
 msgid "Add to dictionary"
 msgstr ""
+
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income. Only what a repayment came to beyond or short of the expenses linked to it is counted.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income. Only what a repayment came to beyond or short of the expenses linked to it is counted.}}"
+msgstr "{work, plural, one {{work} movimiento apartado en Reembolsos del trabajo: lo que el trabajo te devuelve nunca fue un gasto tuyo, y el reembolso no es un ingreso. Solo cuenta lo que un reembolso supera o no alcanza respecto a los gastos vinculados.} other {{work} movimientos apartados en Reembolsos del trabajo: lo que el trabajo te devuelve nunca fue un gasto tuyo, y el reembolso no es un ingreso. Solo cuenta lo que un reembolso supera o no alcanza respecto a los gastos vinculados.}}"
 
 #. History headline, the kind of act: the instance was set up
 #: src/lib/historyWords.ts
@@ -13876,6 +13894,12 @@ msgstr "Mostrar archivadas"
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 msgstr "Una regla se compara con <0>las palabras del propio banco</0>, no con el beneficiario que ves en el registro. El registro puede decir <1>Amazon</1> mientras el extracto decía <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2>, así que escribe la regla para lo segundo. Abre un movimiento y pulsa <3>¿De dónde ha salido esto?</3> para ver exactamente lo que llegó."
 
+#. Line on the Income vs Expense report: repayments from work with no expense linked to them yet
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Not matched to an expense"
+msgstr "Sin gasto asociado"
+
 #. State of a suggestion: the catalogs carry it
 #: src/screens/TranslationReview.tsx
 #, fuzzy
@@ -14653,6 +14677,11 @@ msgstr "Todavía no hay sugerencias. Elige un idioma de vista previa en tu perfi
 #, fuzzy
 msgid "{0} each, {1} free"
 msgstr "{0} cada uno, {1} libres"
+
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "{mixed, plural, one {{mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it.} other {{mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them.}}"
+msgstr "{mixed, plural, one {{mixed} reembolso cubre gastos en otra moneda, así que no se calcula excedente ni déficit para él.} other {{mixed} reembolsos cubren gastos en otra moneda, así que no se calcula excedente ni déficit para ellos.}}"
 
 #. A changed field in History's detail, lower case: whether the bank has the row (cleared, uncleared, locked)
 #: src/lib/historyWords.ts

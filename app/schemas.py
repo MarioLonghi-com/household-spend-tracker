@@ -3056,6 +3056,11 @@ class ReportRowOut(BaseModel):
     #: category (#267), for a client that words it itself. Null otherwise.
     name_code: str | None = None
     group_name: str | None = None
+    #: Set when the row is no category but a figure worked out per repayment:
+    #: `reimbursement_surplus` in income, `reimbursement_shortfall` in
+    #: expenses. `key` is null then, and the row is not Uncategorised. Drill
+    #: into it with `direction` set to this value.
+    line: str | None = None
     by_month: dict[str, int] = {}
     total_minor: int
     total: str
@@ -3090,10 +3095,19 @@ class ReportReimbursementsOut(BaseModel):
     rows flagged `expected` with their payment linked; `pending` the ones
     still waiting for it. Signs follow the ledger: `income` positive, the two
     spent lines negative.
+
+    `difference` is what the repayments came to beyond (positive) or short of
+    (negative) the expenses linked to them. Unlike the other lines it **is**
+    counted: it is the sum of the surplus row in income and the shortfall row
+    in expenses, shown here as well so the block explains them. `unmatched`
+    is the part of `income` linked to no expense, which has no difference to
+    state.
     """
 
     income: ReportLineOut
     spent: ReportLineOut
+    difference: ReportLineOut
+    unmatched: ReportLineOut
     pending: ReportLineOut
 
 
@@ -3164,6 +3178,10 @@ class IncomeExpenseOut(BaseModel):
     net_total_minor: int
     net_total: str
     reimbursements: ReportReimbursementsOut
+    #: Repayments whose linked expenses are in another currency. No difference
+    #: is stated for them -- the ledger has no rate -- so they stay in the
+    #: block whole, and this says how many there are.
+    reimbursement_mixed: int = 0
     #: False when no category group carries the `income` role: then every
     #: row is an expense line, and the screen says why Income is empty.
     has_income_group: bool = True

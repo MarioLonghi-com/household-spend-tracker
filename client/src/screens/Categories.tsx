@@ -695,7 +695,8 @@ export function CategorySettings({
       <p className="muted small">
         <Trans>
           Income vs Expense shows its rows under Work reimbursements, out of income, spending and
-          net. One category has this; ticking it moves it here.
+          net, and counts only what a repayment came to beyond or short of the expenses linked to
+          it. One category has this; ticking it moves it here.
         </Trans>
       </p>
 

@@ -548,8 +548,11 @@ ENDPOINTS: list[ManifestEndpoint] = [
             "The category group decides the side, never the sign: categories whose "
             "group_role is income are income, every other one (and uncategorised) is an "
             "expense line where refunds net, with a subtotal per group in expense.groups. "
-            "Work reimbursements are set apart in `reimbursements` {income, spent, pending}, "
-            "in neither income, expense nor net. Transfers and opening balances are left "
+            "Work reimbursements are set apart in `reimbursements` {income, spent, difference, "
+            "unmatched, pending}, in neither income, expense nor net -- except what a repayment "
+            "came to beyond or short of its linked expenses, which is a row in income or expense "
+            "with `line` reimbursement_surplus or reimbursement_shortfall, counted in net. "
+            "Transfers and opening balances are left "
             "out; `excluded` counts them and the rows set apart. has_income_group false "
             "means every row is an expense. Filters: since, until (an omitted end is where "
             "the flow starts or stops, and the answer says which), account_id and "
@@ -557,7 +560,8 @@ ENDPOINTS: list[ManifestEndpoint] = [
         ),
         returns=(
             "{currency, since, until, months[], income, expense, net_by_month, "
-            "net_total_minor, net_total, reimbursements, has_income_group, excluded, coverage}"
+            "net_total_minor, net_total, reimbursements, reimbursement_mixed, has_income_group, "
+            "excluded, coverage}"
         ),
         scope="read",
     ),
