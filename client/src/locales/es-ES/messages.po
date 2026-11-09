@@ -1714,6 +1714,7 @@ msgid "Discard the staged one"
 msgstr "Descartar la preparada"
 
 #. Button: replace the recovery code shown
+#. Button: replace the recovery code shown
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Get a new code"
@@ -1766,6 +1767,11 @@ msgstr "Todo lo que no tiene movimiento espera aquí. Fotografía un ticket en l
 #, fuzzy
 msgid "Authenticator"
 msgstr "Aplicación de autenticación"
+
+#. placeholder {0}: offer.backup
+#: src/screens/Updates.tsx
+msgid "The backup <0>{0}</0> is the ledger as it was at {since}, when the app stopped for the update to {from}. Going back replaces the ledger with it."
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -2292,6 +2298,7 @@ msgid "Show the menu"
 msgstr "Mostrar el menú"
 
 #. Button: save the recovery code as a text file
+#. Button: save the recovery code as a text file
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Download as a file"
@@ -2709,6 +2716,11 @@ msgstr "{stored, plural, one {El {0} ticket que ya tiene un original lo conserva
 #, fuzzy
 msgid "Savings"
 msgstr "Ahorro"
+
+#. placeholder {0}: one.batches
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {# change to the instance itself (people, settings)} other {# changes to the instance itself (people, settings)}}"
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3442,6 +3454,7 @@ msgstr "{0, plural, one {{1} categoría plegada} other {{2} categorías plegadas
 #. Button on the Your account panel
 #. Button on the passkeys panel
 #. Button on the passkeys panel
+#. Button: close the go-back confirmation without doing anything
 #. Desktop app dialog button: do nothing and close the dialog
 #: ../desktop/src/words.ts
 #: src/screens/Admin.tsx
@@ -3449,6 +3462,7 @@ msgstr "{0, plural, one {{1} categoría plegada} other {{2} categorías plegadas
 #: src/screens/Passkeys.tsx
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
+#: src/screens/Updates.tsx
 #, fuzzy
 msgid "Cancel"
 msgstr "Cancelar"
@@ -3565,6 +3579,10 @@ msgstr "Añadir un movimiento"
 #, fuzzy
 msgid "order"
 msgstr "orden"
+
+#: src/screens/Updates.tsx
+msgid "Going back stops the app and replaces the ledger with the update's backup."
+msgstr ""
 
 #. Column heading on the Accounts screen
 #. Column name shown beside a value on phones on the Accounts screen
@@ -5090,6 +5108,21 @@ msgstr "El actualizador no puede usar el motor de contenedores ({socket}), así 
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.update.go_back_typed_version"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.go_back_unavailable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.go_back_updater_too_old"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 #, fuzzy
 msgid "error.update.in_flight"
 msgstr "Otra solicitud de actualización está esperando o en curso. Espera a que termine y vuelve a intentarlo"
@@ -5723,6 +5756,11 @@ msgstr "Un hogar reúne las cuentas y el registro. La divisa de aquí solo se us
 #. Desktop app View menu item: make everything smaller
 #: ../desktop/src/words.ts
 msgid "Zoom out"
+msgstr ""
+
+#. Screen-reader name of a warning on the Updates section
+#: src/screens/Updates.tsx
+msgid "What going back loses"
 msgstr ""
 
 #. Account type `other_asset`: something owned that holds value. See GLOSSARY.md
@@ -7097,6 +7135,11 @@ msgstr "Tickets ({0})"
 msgid "a new account"
 msgstr "una cuenta nueva"
 
+#. Updates section: the owner types the version to confirm going back
+#: src/screens/Updates.tsx
+msgid "Type {to} to confirm"
+msgstr ""
+
 #. Button on the Transfers screen: these two rows are not one transfer, never offer them again
 #: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
@@ -7646,6 +7689,7 @@ msgid "Questions about {0}'s ledger. Nothing here changes anything: a report rea
 msgstr "Preguntas sobre el libro de cuentas de {0}. Nada de aquí cambia nada: un informe lee el registro y desaparece, por eso ninguno aparece en el Historial."
 
 #. Button while the update request is sent
+#. Button while the update request is sent
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Starting…"
@@ -7667,6 +7711,10 @@ msgstr "Cambiando…"
 #, fuzzy
 msgid "Started"
 msgstr "Iniciado"
+
+#: src/screens/Updates.tsx
+msgid "The updater is too old to go back. Update the updater first, then come back here."
+msgstr ""
 
 #. A sign-in change in Admin's list: the person's password was reset
 #: src/lib/signInChanges.ts
@@ -7806,6 +7854,10 @@ msgstr ""
 #, fuzzy
 msgid "Not available here"
 msgstr "No disponible aquí"
+
+#: src/screens/Updates.tsx
+msgid "Nothing has been written to the ledger since then."
+msgstr ""
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -8521,6 +8573,11 @@ msgstr "Importe ({currency})"
 msgid "{0, plural, one {Delete 1 receipt} other {Delete {1} receipts}}"
 msgstr "{0, plural, one {Eliminar 1 ticket} other {Eliminar {1} tickets}}"
 
+#. Updates section: outcome of going back one release
+#: src/screens/Updates.tsx
+msgid "Went back to {target} at {at}. The ledger is as it was before the update; what was written after it is gone."
+msgstr ""
+
 #. placeholder {0}: listText(sums.map((one) => one.currency))
 #: src/screens/Register.tsx
 #, fuzzy
@@ -9152,6 +9209,11 @@ msgstr "tipo"
 #, fuzzy
 msgid "Skipped: YNAB Starting Balance"
 msgstr "Omitida: Starting Balance de YNAB"
+
+#. Button: open the confirmation for undoing the last update
+#: src/screens/Updates.tsx
+msgid "Go back to {to}…"
+msgstr ""
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -11051,6 +11113,10 @@ msgstr "Divisa"
 msgid "present only while setup is unfinished"
 msgstr "solo existe mientras la configuración no ha terminado"
 
+#: src/screens/Updates.tsx
+msgid "Going back did not start: {said} Nothing was changed."
+msgstr ""
+
 #. placeholder {0}: formatCount(kept)
 #. placeholder {1}: formatCount(kept)
 #: src/screens/ynab/results.tsx
@@ -11239,6 +11305,11 @@ msgstr "De qué depende"
 #, fuzzy
 msgid "One of your recovery codes"
 msgstr "Uno de tus códigos de recuperación"
+
+#. placeholder {0}: loss.data.passkeys
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {# passkey was registered since then. } other {# passkeys were registered since then. }}"
+msgstr ""
 
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
@@ -12761,6 +12832,10 @@ msgstr "Se puso la categoría a {done} filas y se omitieron {skipped} partes de 
 msgid "Show closed"
 msgstr "Mostrar cerradas"
 
+#: src/screens/Updates.tsx
+msgid "Your recovery code for going back"
+msgstr ""
+
 #. Menu item and the name of its screen
 #. Screen title on the Admin screen
 #: src/App.tsx
@@ -12883,6 +12958,10 @@ msgstr "Claves para programas"
 msgid "Written off"
 msgstr "Dados por perdidos"
 
+#: src/screens/Updates.tsx
+msgid "These changes since then would be lost:"
+msgstr ""
+
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
 #, fuzzy
@@ -12944,6 +13023,11 @@ msgstr "Lo que le ha pasado a esto"
 #, fuzzy
 msgid "Select every pair that does not share a row with another"
 msgstr "Seleccionar todos los pares que no comparten fila con otro"
+
+#. placeholder {0}: offer.from_version
+#: src/screens/Updates.tsx
+msgid "The last update took this instance from {to} to {0}. Going back restores the backup that update took, with {to}, so everything written since then is lost."
+msgstr ""
 
 #. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
@@ -13395,6 +13479,16 @@ msgstr "{inviter} te ha invitado a {PRODUCT} como miembro."
 #, fuzzy
 msgid "Add an account before entering transactions."
 msgstr "Añade una cuenta antes de introducir movimientos."
+
+#. placeholder {0}: code.data!.code
+#: src/screens/Updates.tsx
+msgid "Spend Tracker: recovery code for going back from {from} to {to}\n"
+"\n"
+"{0}\n"
+"\n"
+"If going back fails and cannot finish, the app is replaced by a recovery page, and this code is what opens it. It works only for this and stops working once it has finished.\n"
+""
+msgstr ""
 
 #. Button on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
@@ -14257,6 +14351,12 @@ msgstr "Códigos nuevos"
 msgid "For"
 msgstr "Para"
 
+#. Button: undo the last update
+#. Heading on the Updates screen: undo the last update
+#: src/screens/Updates.tsx
+msgid "Go back to {to}"
+msgstr ""
+
 #. Label on the Backups screen
 #: src/screens/Backups.tsx
 #, fuzzy
@@ -14657,6 +14757,13 @@ msgstr "abierta {0}"
 msgid "At least one currency stays ticked"
 msgstr "Al menos una divisa sigue marcada"
 
+#. placeholder {0}: one.batches
+#. placeholder {1}: one.name ?? ""
+#. placeholder {2}: one.name ?? ""
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {{1}: # change} other {{2}: # changes}}"
+msgstr ""
+
 #. placeholder {0}: app.repository ?? repository
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -14759,6 +14866,10 @@ msgstr "Conciliación"
 #, fuzzy
 msgid "never"
 msgstr "nunca"
+
+#: src/screens/Updates.tsx
+msgid "A passkey registered after the update stops working: the restored ledger does not know it, but the authenticator still offers it, and the sign-in fails without saying why. The member signs in with their password and code and removes it from the authenticator."
+msgstr ""
 
 #. Under a message about a slow step, after a few seconds; elapsed is minutes:seconds
 #: src/components/bits.tsx

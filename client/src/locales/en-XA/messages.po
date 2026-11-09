@@ -1447,6 +1447,7 @@ msgid "Discard the staged one"
 msgstr ""
 
 #. Button: replace the recovery code shown
+#. Button: replace the recovery code shown
 #: src/screens/Updates.tsx
 msgid "Get a new code"
 msgstr ""
@@ -1489,6 +1490,11 @@ msgstr ""
 #. Label on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md
 #: src/screens/Profile.tsx
 msgid "Authenticator"
+msgstr ""
+
+#. placeholder {0}: offer.backup
+#: src/screens/Updates.tsx
+msgid "The backup <0>{0}</0> is the ledger as it was at {since}, when the app stopped for the update to {from}. Going back replaces the ledger with it."
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -1933,6 +1939,7 @@ msgid "Show the menu"
 msgstr ""
 
 #. Button: save the recovery code as a text file
+#. Button: save the recovery code as a text file
 #: src/screens/Updates.tsx
 msgid "Download as a file"
 msgstr ""
@@ -2288,6 +2295,11 @@ msgstr ""
 #. Account type `savings`, and the heading of its group. See GLOSSARY.md
 #: src/lib/labels.ts
 msgid "Savings"
+msgstr ""
+
+#. placeholder {0}: one.batches
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {# change to the instance itself (people, settings)} other {# changes to the instance itself (people, settings)}}"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -2917,6 +2929,7 @@ msgstr ""
 #. Button on the Your account panel
 #. Button on the passkeys panel
 #. Button on the passkeys panel
+#. Button: close the go-back confirmation without doing anything
 #. Desktop app dialog button: do nothing and close the dialog
 #: ../desktop/src/words.ts
 #: src/screens/Admin.tsx
@@ -2924,6 +2937,7 @@ msgstr ""
 #: src/screens/Passkeys.tsx
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
+#: src/screens/Updates.tsx
 msgid "Cancel"
 msgstr ""
 
@@ -3022,6 +3036,10 @@ msgstr ""
 #. A changed field in History's detail, lower case: position in a list
 #: src/lib/historyWords.ts
 msgid "order"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "Going back stops the app and replaces the ledger with the update's backup."
 msgstr ""
 
 #. Column heading on the Accounts screen
@@ -4300,6 +4318,21 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.update.go_back_typed_version"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.go_back_unavailable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.go_back_updater_too_old"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.update.in_flight"
 msgstr ""
 
@@ -4832,6 +4865,11 @@ msgstr ""
 #. Desktop app View menu item: make everything smaller
 #: ../desktop/src/words.ts
 msgid "Zoom out"
+msgstr ""
+
+#. Screen-reader name of a warning on the Updates section
+#: src/screens/Updates.tsx
+msgid "What going back loses"
 msgstr ""
 
 #. Account type `other_asset`: something owned that holds value. See GLOSSARY.md
@@ -6000,6 +6038,11 @@ msgstr ""
 msgid "a new account"
 msgstr ""
 
+#. Updates section: the owner types the version to confirm going back
+#: src/screens/Updates.tsx
+msgid "Type {to} to confirm"
+msgstr ""
+
 #. Button on the Transfers screen: these two rows are not one transfer, never offer them again
 #: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
@@ -6460,6 +6503,7 @@ msgid "Questions about {0}'s ledger. Nothing here changes anything: a report rea
 msgstr ""
 
 #. Button while the update request is sent
+#. Button while the update request is sent
 #: src/screens/Updates.tsx
 msgid "Starting…"
 msgstr ""
@@ -6476,6 +6520,10 @@ msgstr ""
 #. Name of a fact on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Started"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "The updater is too old to go back. Update the updater first, then come back here."
 msgstr ""
 
 #. A sign-in change in Admin's list: the person's password was reset
@@ -6594,6 +6642,10 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "Not available here"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "Nothing has been written to the ledger since then."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -7198,6 +7250,11 @@ msgstr ""
 msgid "{0, plural, one {Delete 1 receipt} other {Delete {1} receipts}}"
 msgstr ""
 
+#. Updates section: outcome of going back one release
+#: src/screens/Updates.tsx
+msgid "Went back to {target} at {at}. The ledger is as it was before the update; what was written after it is gone."
+msgstr ""
+
 #. placeholder {0}: listText(sums.map((one) => one.currency))
 #: src/screens/Register.tsx
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so a figure adding {0} would be a number with nothing behind it."
@@ -7730,6 +7787,11 @@ msgstr ""
 
 #: src/screens/ynab/results.tsx
 msgid "Skipped: YNAB Starting Balance"
+msgstr ""
+
+#. Button: open the confirmation for undoing the last update
+#: src/screens/Updates.tsx
+msgid "Go back to {to}…"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -9335,6 +9397,10 @@ msgstr ""
 msgid "present only while setup is unfinished"
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "Going back did not start: {said} Nothing was changed."
+msgstr ""
+
 #. placeholder {0}: formatCount(kept)
 #. placeholder {1}: formatCount(kept)
 #: src/screens/ynab/results.tsx
@@ -9492,6 +9558,11 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "One of your recovery codes"
+msgstr ""
+
+#. placeholder {0}: loss.data.passkeys
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {# passkey was registered since then. } other {# passkeys were registered since then. }}"
 msgstr ""
 
 #: src/screens/reports/Reimbursements.tsx
@@ -10780,6 +10851,10 @@ msgstr ""
 msgid "Show closed"
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "Your recovery code for going back"
+msgstr ""
+
 #. Menu item and the name of its screen
 #. Screen title on the Admin screen
 #: src/App.tsx
@@ -10883,6 +10958,10 @@ msgstr ""
 msgid "Written off"
 msgstr ""
 
+#: src/screens/Updates.tsx
+msgid "These changes since then would be lost:"
+msgstr ""
+
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
 msgid "12,34"
@@ -10932,6 +11011,11 @@ msgstr ""
 
 #: src/screens/Transfers.tsx
 msgid "Select every pair that does not share a row with another"
+msgstr ""
+
+#. placeholder {0}: offer.from_version
+#: src/screens/Updates.tsx
+msgid "The last update took this instance from {to} to {0}. Going back restores the backup that update took, with {to}, so everything written since then is lost."
 msgstr ""
 
 #. Button on the Payees screen: verb, combine two into one
@@ -11310,6 +11394,16 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Add an account before entering transactions."
+msgstr ""
+
+#. placeholder {0}: code.data!.code
+#: src/screens/Updates.tsx
+msgid "Spend Tracker: recovery code for going back from {from} to {to}\n"
+"\n"
+"{0}\n"
+"\n"
+"If going back fails and cannot finish, the app is replaced by a recovery page, and this code is what opens it. It works only for this and stops working once it has finished.\n"
+""
 msgstr ""
 
 #. Button on the Updates section. See GLOSSARY.md
@@ -12034,6 +12128,12 @@ msgstr ""
 msgid "For"
 msgstr ""
 
+#. Button: undo the last update
+#. Heading on the Updates screen: undo the last update
+#: src/screens/Updates.tsx
+msgid "Go back to {to}"
+msgstr ""
+
 #. Label on the Backups screen
 #: src/screens/Backups.tsx
 msgid "Downloaded."
@@ -12370,6 +12470,13 @@ msgstr ""
 msgid "At least one currency stays ticked"
 msgstr ""
 
+#. placeholder {0}: one.batches
+#. placeholder {1}: one.name ?? ""
+#. placeholder {2}: one.name ?? ""
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {{1}: # change} other {{2}: # changes}}"
+msgstr ""
+
 #. placeholder {0}: app.repository ?? repository
 #: src/screens/Updates.tsx
 msgid "Built by <0>.github/workflows/release.yml</0> at <1>v{to}</1> in {0}. Checked by the updater when it was prepared."
@@ -12454,6 +12561,10 @@ msgstr ""
 #. Text on the Application management screen: has never happened
 #: src/screens/ApplicationManagement.tsx
 msgid "never"
+msgstr ""
+
+#: src/screens/Updates.tsx
+msgid "A passkey registered after the update stops working: the restored ledger does not know it, but the authenticator still offers it, and the sign-in fails without saying why. The member signs in with their password and code and removes it from the authenticator."
 msgstr ""
 
 #. Under a message about a slow step, after a few seconds; elapsed is minutes:seconds

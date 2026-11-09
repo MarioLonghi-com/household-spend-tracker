@@ -46,6 +46,7 @@ from tests.self_update.world import (
     Failure,
     Leg,
     Stack,
+    hash_code,
     new_code,
 )
 from updater.engine import REQUEST_LABEL, ROLE_LABEL
@@ -1092,6 +1093,80 @@ class Run:
             "the new folder's .env carries the pin's app forward",
         )
 
+    def E17(self, r: Result) -> None:
+        """A -> B, a row written at B, then going back from the browser's request (#173).
+
+        The update's backup is restored with A's image, so the row written at B
+        is gone and every table has the rows it had before the update; A runs
+        under the app's name from a container made again from the configuration
+        step 9 saved (C9), with its own restart policy; the pin names A; the
+        ledger B wrote is kept aside; and no `-previous` is left. The updater
+        that goes back is B's: it stays."""
+        s = self.s
+        s.up(A)
+        b = before(s)
+        upd, record = s.update(A, B)
+        r.check(record.get("state") == "succeeded", f"(setup) A -> B succeeded: {record.get('sentence')}")
+        b_app = s.engine.inspect(s.app_name)
+        s.vol.write(
+            "INSERT INTO login_attempts (id, email_canonical, ip, kind, ok, at) "
+            "VALUES ('00000000000000000000000000000017', 'ci-after-update@example.test', NULL, 'password', 0, "
+            "'2026-01-03 00:00:00')"
+        )
+        req = {
+            **s.base("go_back"),
+            "protocol": 2,
+            "from_version": B,
+            "to_version": A,
+            "update_id": upd["id"],
+            "recovery_hash": hash_code(new_code()),
+        }
+        started = time.monotonic()
+        s.send(req)
+        back = s.outcome(req["id"])
+        print(f"   go back {B} -> {A}: {back.get('state')} in {time.monotonic() - started:.0f} s: {back.get('sentence')}")
+        r.check(back.get("state") == "succeeded", f"went back: {back.get('sentence')}")
+        health = s.health()
+        r.check(health.get("version") == A, f"health from where requests arrive says {health.get('version')}")
+        now = s.vol.ledger()
+        r.check(now["stamp"] == s.head(A), f"the ledger is stamped {now['stamp']}, {A}'s head")
+        rows = s.vol.query(
+            "SELECT count(*) FROM login_attempts WHERE email_canonical = 'ci-after-update@example.test'"
+        )
+        r.check(rows == [[0]], f"the row written at {B} is gone: {rows}")
+        was = b.ledger["counts"]
+        moved = {t: (n, now["counts"].get(t)) for t, n in was.items() if now["counts"].get(t) != n}
+        r.check(not moved, f"every table has exactly the rows it had before the update ({len(was)} tables) {moved}")
+        r.check(bool(restored_aside(s)), f"the ledger {B} wrote is kept beside it: {restored_aside(s)}")
+        app = s.engine.inspect(s.app_name)
+        r.check(app["Image"] == s.image_id(s.app_ref(A)), f"{s.app_name} runs {A}'s digest")
+        r.check(
+            app["Id"] not in (b.app["Id"], b_app["Id"]),
+            "it is a container made again from the saved configuration, not the parked one or B's",
+        )
+        want = ((b.app.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
+        got = ((app.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
+        r.check(got == want, f"with the app's own restart policy ({got}, was {want})")
+        r.check(not s.engine.exists(b_app["Id"]), f"{B}'s container is gone")
+        r.check(not s.engine.exists(s.app_name + "-previous"), "no -previous app is left")
+        diff = differences(b.app, app, b.app_image.get("Config"), s.engine.image(app["Image"]).get("Config"))
+        unexpected = set(diff) - ALLOWED - {"HostConfig.OomScoreAdj"}
+        r.check(not unexpected, f"the remade container differs from A's first one only as an update's copy would: {sorted(diff)}")
+        pin = pinned(s)
+        r.check(
+            pin.get("SPENDTRACKER_IMAGE", "").endswith(s.releases[A]["app"]),
+            f".env pins the app at {A}: {pin.get('SPENDTRACKER_IMAGE')}",
+        )
+        r.check(
+            pin.get("SPENDTRACKER_UPDATER_IMAGE", "").endswith(s.releases[B]["updater"]),
+            f"and the updater stays {B}'s: {pin.get('SPENDTRACKER_UPDATER_IMAGE')}",
+        )
+        again = {**req, **s.base("go_back"), "protocol": 2, "from_version": A, "to_version": A}
+        s.send(again)
+        refused = s.outcome(again["id"], 120)
+        r.check(refused.get("state") == "refused", f"going back once more is refused: {refused.get('sentence')}")
+        self.e1 = None  # the stack is no longer E1's
+
 
 #: Scenarios that fail today for a reason in the updater, not in the test: each
 #: still runs and prints every assertion, and its failure does not fail the
@@ -1138,6 +1213,7 @@ SCENARIOS = {
     "E9": "stale and duplicate requests",
     "E14": "updater only (C2)",
     "E15": "the repair launcher (C5)",
+    "E17": "go back one step from the browser (#173)",
 }
 
 

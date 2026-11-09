@@ -150,8 +150,8 @@ def test_the_label_names_are_the_ones_the_updater_reads():
     """Written out in the Dockerfile, built from the ghcr owner in updater/."""
     assert detect.PROTOCOL_LABEL == "com.github.mariolonghi-com.spend-tracker.updater-protocol"  # hygiene: the repo's own address
     found = stages(DOCKERFILE.read_text())
-    assert labels(found["runtime"])[detect.PROTOCOL_LABEL] == "1"
-    assert labels(found["updater"])[handover.PROTOCOLS_LABEL] == "1-1"
+    assert labels(found["runtime"])[detect.PROTOCOL_LABEL] == "2"
+    assert labels(found["updater"])[handover.PROTOCOLS_LABEL] == "1-2"
     # And the app image does not claim a window, nor the updater a protocol.
     assert handover.PROTOCOLS_LABEL not in labels(found["runtime"])
     assert detect.PROTOCOL_LABEL not in labels(found["updater"])
@@ -160,8 +160,8 @@ def test_the_label_names_are_the_ones_the_updater_reads():
 @pytest.mark.parametrize(
     ("old", "new", "rule"),
     [
-        ('updater-protocols="1-1"', 'updater-protocols="1-2"', "the updater's protocols label is (1, 2), not (1, 1)"),
-        ('updater-protocol="1"', 'updater-protocol="2"', "the app's protocol label is not 1"),
+        ('updater-protocols="1-2"', 'updater-protocols="1-1"', "the updater's protocols label is (1, 1), not (1, 2)"),
+        ('updater-protocol="2"', 'updater-protocol="1"', "the app's protocol label is not 2"),
         ('ENTRYPOINT ["python", "-m", "updater"]', 'ENTRYPOINT ["python", "-m", "app"]', "the updater's entry point is not `python -m updater`"),
         ("COPY updater/ ./updater/", "COPY updater/ ./updater/\nCOPY scripts/ ./scripts/", "the updater image copies more than updater/ from the context: ['updater/ ./updater/', 'scripts/ ./scripts/']"),
         ("chmod 2770 /mounts/update", "chmod 0755 /mounts/update", f"/mounts/update is not made {RUNS_AS}, mode 2770, in `updater-deps`"),

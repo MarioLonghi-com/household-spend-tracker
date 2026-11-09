@@ -277,15 +277,19 @@ class Apply:
             started_at=self.ctx.get("started_at"),
             log_tail=tuple(str(x) for x in log[-40:]),
             code=code,
-            extra={
-                "from_version": self.ctx.get("from_version"),
-                "to_version": self.ctx.get("to_version"),
-                "notes": list(self.notes),
-            },
+            extra=self.record_extra(),
         )
         if settle:
             journal.settle(self.vol, self.j)
         return state
+
+    def record_extra(self) -> dict:
+        """The record's keys beyond 5.3's, which files only ever gain (C4)."""
+        return {
+            "from_version": self.ctx.get("from_version"),
+            "to_version": self.ctx.get("to_version"),
+            "notes": list(self.notes),
+        }
 
     def not_started(self, sentence: str, code: str | None = None) -> str:
         return self._finish("not_started", f"Not started: {sentence}", failed_step=self.j.step, code=code)
@@ -522,6 +526,9 @@ class Apply:
         self.park_restart_policy()
 
     def stop_for_step3(self) -> None:
+        self.stop_app(str(self.ctx["previous_id"]))
+
+    def stop_app(self, cid: str) -> None:
         """Step 3's stop, asked once more when rootless Podman's answer overlapped a hand start (#344).
 
         Podman answers a stop that a start overtakes -- the app started by
@@ -531,7 +538,6 @@ class Apply:
         once more if it runs. A second refusal of any kind, or any other
         error the first time, is the step failing, as before: *not started*.
         """
-        cid = str(self.ctx["previous_id"])
         try:
             self.client.stop(cid, grace=STOP_GRACE_SECONDS)
             return
@@ -1130,10 +1136,11 @@ class Apply:
                     return self.needs_recovery(str(e.sentence if isinstance(e, StepFailed) else e))
                 journal.count_rollback_attempt(self.vol, self.j)
                 step = self.j.step if self.j.step in steps else step
-        self.start("R5", "Recording the rollback.")
         return self.finish_rolled_back()
 
     def finish_rolled_back(self) -> str:
+        if self.j.step != "R5":
+            self.start("R5", "Recording the rollback.")
         reason = self.ctx.get("rollback_reason") or INTERRUPTED
         if self.ctx.get("restored"):
             tail = "; the ledger was restored"

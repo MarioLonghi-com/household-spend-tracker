@@ -17,6 +17,11 @@ protocol its requests are written in; an updater accepts every request of
 every protocol in its own window, `PROTOCOLS`. `ping` and `update_updater` are
 frozen at protocol 1 for ever, so an app newer than its updater can always ask
 that updater to replace itself (6.6).
+
+**Protocol 2 adds one kind, `go_back`** (#173): one step back to the release
+the last successful update came from. Every other kind is still written, and
+read, as in protocol 1, so an app that writes `go_back` loses nothing beside
+an updater of window 1-1 but `go_back` itself (`KIND_SINCE`).
 """
 
 from __future__ import annotations
@@ -28,13 +33,17 @@ from datetime import UTC, datetime
 
 #: The protocols this updater accepts, inclusive. Widened only by a release
 #: whose updater reads every request kind of the new protocol.
-PROTOCOLS: tuple[int, int] = (1, 1)
+PROTOCOLS: tuple[int, int] = (1, 2)
 #: The protocol `ping`, `update_updater`, the journal and the handover files
 #: are frozen at, and the one every file the updater writes carries.
 FROZEN_PROTOCOL = 1
 
-REQUEST_KINDS = ("prepare", "apply", "discard", "update_updater", "ping")
+REQUEST_KINDS = ("prepare", "apply", "discard", "update_updater", "ping", "go_back")
 FROZEN_KINDS = ("ping", "update_updater")
+#: The protocol a kind first appears in; a request of it in an older one is refused.
+KIND_SINCE = {"go_back": 2}
+#: The requests that keep a journal (5.6): an apply, and going back after one (#173).
+JOURNAL_KINDS = ("apply", "go_back")
 #: Part 11's actions, sent by the recovery page as `recovery/request.json`.
 RECOVERY_KINDS = (
     "open",
@@ -129,6 +138,9 @@ FIELDS: dict[str, tuple[str, ...]] = {
     ),
     "discard": (*_COMMON, "prepared_id"),
     "update_updater": (*_COMMON, "to_version"),
+    # Protocol 2 (#173): back to the release `update_id` came from. Like an
+    # apply it stops the app and carries a recovery code's hash.
+    "go_back": (*_COMMON, "from_version", "to_version", "update_id", "recovery_hash"),
     # Liveness. Written by the app and, during a handover, by the old updater
     # (H5), so it names no user.
     "ping": ("protocol", "id", "kind", "created_at"),
@@ -273,6 +285,8 @@ class Request:
     updater_digest: str | None = None
     accepted_lossy: tuple[str, ...] | None = None
     recovery_hash: str | None = None
+    #: `go_back`: the apply whose effect is undone (#173).
+    update_id: str | None = None
 
 
 def check_shape(raw: object, ctx_protocols: tuple[int, int] = PROTOCOLS) -> dict:
@@ -294,6 +308,8 @@ def check_shape(raw: object, ctx_protocols: tuple[int, int] = PROTOCOLS) -> dict
         raise Refusal("kind", f"The request asks for {kind!r}, which this updater does not know.")
     if kind in FROZEN_KINDS and protocol != FROZEN_PROTOCOL:
         raise Refusal("frozen", f"A {kind} request is always written in protocol {FROZEN_PROTOCOL}.")
+    if protocol < KIND_SINCE.get(kind, FROZEN_PROTOCOL):
+        raise Refusal("protocol", f"A {kind} request needs protocol {KIND_SINCE[kind]} or later.")
     allowed = FIELDS[kind]
     unknown = sorted(k for k in raw if k not in allowed)
     if unknown:
@@ -353,7 +369,27 @@ def lossy_revisions(report: dict) -> set[str]:
     }
 
 
-def validate(raw: object, ctx: Context, now: float, report: dict | None = None) -> Request:
+@dataclass(frozen=True)
+class LastUpdate:
+    """The newest settled apply or go-back, as far as the volume says (#173): what a go-back undoes.
+
+    `problem` is the owner's sentence when going back from it is not possible;
+    None when it is. Read by `updater.goback.last_update`, from files only.
+    """
+
+    id: str
+    from_version: str | None
+    to_version: str | None
+    problem: str | None = None
+
+
+def validate(
+    raw: object,
+    ctx: Context,
+    now: float,
+    report: dict | None = None,
+    last_update: LastUpdate | None = None,
+) -> Request:
     """Every rule of 5.2 and 5.4 that the updater can check without the engine.
 
     `report` is `prepared/<prepared_id>.json` when the request names one. The
@@ -373,7 +409,7 @@ def validate(raw: object, ctx: Context, now: float, report: dict | None = None) 
 
     if ctx.busy:
         raise Refusal("concurrent", "Another update is in progress. This request was not queued; send it again later.")
-    if ctx.socket == "outdated" and kind in ("prepare", "apply"):
+    if ctx.socket == "outdated" and kind in ("prepare", "apply", "go_back"):
         raise Refusal(
             "outdated",
             "The updater is too old for this container engine. Update the updater first, then try again.",
@@ -415,6 +451,8 @@ def validate(raw: object, ctx: Context, now: float, report: dict | None = None) 
     from_version = _version(raw, "from_version")
     if from_version != running:
         raise Refusal("from_mismatch", f"This instance runs {running}, not {from_version}.")
+    if kind == "go_back":
+        return _go_back(raw, from_version, to_version, last_update)
     if parse_version(to_version) <= parse_version(from_version):
         raise Refusal("not_newer", f"{to_version} is not newer than {from_version}. Self-update never goes back.")
     if kind == "prepare":
@@ -439,6 +477,27 @@ def validate(raw: object, ctx: Context, now: float, report: dict | None = None) 
         raise Refusal(
             "lossy",
             "The accepted lossy migrations are not exactly the ones the prepare report lists.",
+        )
+    if not recovery_hash_ok(raw["recovery_hash"]):
+        raise Refusal(
+            "recovery_hash",
+            "The recovery code's hash is not in the expected scrypt format, or its cost is out of bounds.",
+        )
+    return _request(raw)
+
+
+def _go_back(raw: dict, from_version: str, to_version: str, last: LastUpdate | None) -> Request:
+    """One step back, to the release the last update came from, and nothing else (#173)."""
+    if parse_version(to_version) >= parse_version(from_version):
+        raise Refusal("not_older", f"{to_version} is not older than {from_version}. Going back goes to an older release.")
+    if not is_uuid4(raw["update_id"]) or last is None or last.id != raw["update_id"]:
+        raise Refusal("not_last", "That is not the last update, so it cannot be gone back from.")
+    if last.problem:
+        raise Refusal("cannot_go_back", last.problem)
+    if last.to_version != from_version or last.from_version != to_version:
+        raise Refusal(
+            "not_last",
+            f"The last update went from {last.from_version} to {last.to_version}, not from {to_version} to {from_version}.",
         )
     if not recovery_hash_ok(raw["recovery_hash"]):
         raise Refusal(

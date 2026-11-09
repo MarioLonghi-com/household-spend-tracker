@@ -382,6 +382,7 @@ LINUX_ONLY = {
     "test_launcher_engine.py": "the shell launchers and the container engines",
     "test_placard.py": "the updater's maintenance page, which speaks over a Unix socket",
     "test_update_endpoints.py": "the self-updater, which answers over a Unix socket",
+    "test_update_go_back.py": "the self-updater's going back, over the same volume as test_update_endpoints.py",
     "test_rehearsal_before.py": "the CI rehearsal's bash step",
 }
 LINUX_ONLY_PREFIX = ("test_updater_", "the self-updater, which runs only in its Linux container")

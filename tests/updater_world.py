@@ -40,7 +40,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from tests.updater_fake_engine import FakeEngine, Running, engine_fixture
-from updater import contract, journal, verify, volume
+from updater import contract, journal, shapes, verify, volume
 from updater import engine as eng
 from updater.clock import GapClock
 from updater.detect import PROTOCOL_LABEL, REVISION_LABEL, VERSION_LABEL
@@ -505,6 +505,8 @@ class World(_Fleet):
         self.on_drill = None
         self.placard_runs = True
         self.measured = {"free": 40 * 1024**3, "mem_available": 3 * 1024**3, "database": 20 * 1024**2}
+        #: Backup folders that are on the disk but do not verify (#173).
+        self.corrupt_backups: set[str] = set()
         #: The size of each backup folder the measuring one-off lists.
         self.backup_bytes = 30 * 1024**2
         self.time = FakeTime()
@@ -699,6 +701,17 @@ class World(_Fleet):
             "digest": report["digest"],
             "updater_digest": report["updater_digest"],
             "accepted_lossy": sorted(contract.lossy_revisions(report)),
+            "recovery_hash": RECOVERY_HASH,
+        }
+
+    def go_back_request(self, update_id: str, frm: str = B, to: str = A) -> dict:
+        """Protocol 2's `go_back` (#173): back to `to`, undoing the apply `update_id`."""
+        return {
+            **self.base("go_back"),
+            "protocol": 2,
+            "from_version": frm,
+            "to_version": to,
+            "update_id": update_id,
             "recovery_hash": RECOVERY_HASH,
         }
 
@@ -909,6 +922,13 @@ class World(_Fleet):
         fake.finish(c, 0, json.dumps({**listed, **self.measured}) + "\n")
 
     def _find_backup(self, fake: FakeEngine, c: dict, cmd: list, version: str) -> None:
+        if shapes.VERIFY_BACKUP_SCRIPT in cmd:
+            # Going back (#173): the one folder named, if it is there and verifies.
+            folder = cmd[-1]
+            stamp = folder.rsplit("/", 1)[-1]
+            ok = stamp in self.ledger.backups and stamp not in self.corrupt_backups
+            fake.finish(c, 0, json.dumps({"folder": folder if ok else None}) + "\n")
+            return
         newest = sorted(self.ledger.backups)[-1] if self.ledger.backups else None
         folder = f"/var/lib/spend-tracker/backups/{newest}" if newest else None
         fake.finish(c, 0, json.dumps({"folder": folder}) + "\n")

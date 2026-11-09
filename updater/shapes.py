@@ -634,6 +634,17 @@ FIND_BACKUP_SCRIPT = (
     "print(json.dumps({'folder':found}))\n"
 )
 
+#: Going back (#173): the one update backup named, verified before anything stops.
+VERIFY_BACKUP_SCRIPT = (
+    "import json,os,re,sys,pathlib\n"
+    "from scripts import backup\n"
+    "p=sys.argv[1];found=None\n"
+    "if re.fullmatch(r'/var/lib/spend-tracker/backups/[0-9]{8}-[0-9]{6}',p) and os.path.isdir(p) and not os.path.islink(p):\n"
+    "  try: backup.verify(pathlib.Path(p)); found=p\n"
+    "  except BaseException: pass\n"
+    "print(json.dumps({'folder':found}))\n"
+)
+
 #: B9: remove the named update backups, and nothing whose name is not a stamp.
 PRUNE_SCRIPT = (
     "import json,os,re,shutil,sys\n"

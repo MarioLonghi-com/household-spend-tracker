@@ -89,11 +89,16 @@ TABLE = {
 }
 
 
+#: An apply's steps; a go-back's own (G1-G4) are `GoBack.resume`'s (#173).
+APPLY_JOURNAL_STEPS = journal.APPLY_STEPS + journal.ROLLBACK_STEPS
+
+
 def test_the_table_covers_every_step():
-    assert set(TABLE) == set(journal.STEPS)
+    assert set(TABLE) == set(APPLY_JOURNAL_STEPS)
+    assert set(journal.STEPS) == set(APPLY_JOURNAL_STEPS) | set(journal.GO_BACK_STEPS)
 
 
-@pytest.mark.parametrize("step", journal.STEPS)
+@pytest.mark.parametrize("step", APPLY_JOURNAL_STEPS)
 def test_killed_after_each_journal_write_the_resumed_branch_is_5_6s(vol, step):
     j = killed_at(vol, step)
     assert j.step == step

@@ -506,7 +506,7 @@ def test_the_heartbeat_file_carries_every_key_and_the_real_name(scheme, tmp_path
     }  # fmt: skip
     assert written["problem"] is None
     assert written["container"] == f"{PROJECT}{sep}updater{sep}1"
-    assert (written["protocols"], written["protocol"], written["seen_at"]) == ("1-1", 1, contract.iso(NOW))
+    assert (written["protocols"], written["protocol"], written["seen_at"]) == ("1-2", 1, contract.iso(NOW))
     if scheme == "docker-compose":
         assert (written["engine"], written["api_version"], written["engine_api"]) == ("docker-desktop", "1.52", "1.40-1.56")
         assert written["podman_restart"] == "not_applicable"

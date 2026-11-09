@@ -77,6 +77,18 @@ history this repository does not have.
   `d2b8e6f41c07` adds the permission, off for every existing key.
   **Reversible: lossy** -- downgrading takes the permission away from the
   keys that had it; nothing in the ledger changes. (#366)
+- **Go back to the previous version from the browser.** After a successful
+  update, *Updates* offers *Go back to X.Y.Z*: one step, to the release the
+  last update came from, while its backup is one of the newest five. The
+  confirmation counts what would be lost, the changes since the update's
+  backup in each household, and says what happens to passkeys registered
+  since; it asks for the version typed, a recovery code saved, and your
+  password and a code. The updater checks the previous image and the backup
+  verify before it stops anything, restores the backup with the previous
+  image, and starts the previous version from the configuration it kept
+  after the update. The app now writes update requests up to protocol 2,
+  which adds going back; an updater of 0.12 or older takes every other
+  request as before. (Part of #50, #173)
 
 ### Security
 

@@ -86,6 +86,7 @@ from updater import engine as eng
 from updater.apply import _STEP_ERRORS, Apply, StepFailed
 from updater.contract import RecoveryRequest, Refusal
 from updater.detect import VERSION_LABEL, label_version
+from updater.goback import for_journal
 from updater.site import APP_REPOSITORY, Kit, Records
 from updater.volume import REQUEST_OWNER_UID, UnsafeFile
 
@@ -110,7 +111,7 @@ TAKEN_PREFIX = ".taken-"
 #: The actions that act through the engine, refused once the owner left it to a terminal.
 ENGINE_KINDS = ("retry_rollback", "restore_backup", "start_matching")
 #: The steps after which the app has been stopped (4.2 step 3 onwards).
-_APP_STOPPED_STEPS = ("4", "5", "6", "7", "8", "R1", "R2", "R3", "R4")
+_APP_STOPPED_STEPS = ("4", "5", "6", "7", "8", "R1", "R2", "R3", "R4", "G3")
 _PIN_VERSION = re.compile(r":([0-9]{1,6}\.[0-9]{1,6}\.[0-9]{1,6})@sha256:[0-9a-f]{64}$")
 
 
@@ -223,7 +224,7 @@ def apply_journals(vol: volume.Volume) -> list[journal.Journal]:
             continue
         with contextlib.suppress(UnsafeFile, ValueError, KeyError, OSError):
             j = journal.load(vol, rid)
-            if j is not None and j.kind == "apply":
+            if j is not None and j.kind in contract.JOURNAL_KINDS:
                 found.append(j)
     return found
 
@@ -274,7 +275,7 @@ class Recovery:
             interrupted = j.context.get("recovery_action")
             if not interrupted or j.recovery_hash is None:
                 continue
-            a = Apply(self.kit, j)
+            a = for_journal(self.kit, j)
             with contextlib.suppress(*_STEP_ERRORS, eng.EngineUnavailable):
                 a.recovery_page()
             a.remember(recovery_action=None)
@@ -364,7 +365,7 @@ class Recovery:
         j = None
         with contextlib.suppress(UnsafeFile, ValueError, KeyError, OSError):
             j = journal.load(self.vol, request.id)
-        if j is None or j.kind != "apply":
+        if j is None or j.kind not in contract.JOURNAL_KINDS:
             raise Refusal("unknown", "There is no update with that id.")
         if j.recovery_hash is None:
             raise Refusal("settled", "That update has finished, so its recovery code opens nothing any more.")
@@ -473,7 +474,7 @@ class Recovery:
             return self._refuse_after_code(request, "That is not one of the newest update backups.")
         self.record(j.id, {"kind": kind, "result": "running", "sentence": "Started."})
         self.answer(request, "accepted", "Accepted. The updater is working on it; this page stops meanwhile.")
-        a = Apply(self.kit, j)
+        a = for_journal(self.kit, j)
         a.remember(recovery_action={"kind": kind, "at": contract.iso(self.now())})
         self.kit.sleep(ACCEPT_GRACE_SECONDS)
         self.busy = True
@@ -491,7 +492,8 @@ class Recovery:
         finally:
             self.busy = False
             a.remember(recovery_action=None)
-        result = "done" if state in ("rolled_back", "recovered") else "failed"
+        # A go-back that completes its rollback steps ends `succeeded` (#173).
+        result = "done" if state in ("rolled_back", "recovered", "succeeded") else "failed"
         self.record(j.id, {"kind": kind, "result": result, "sentence": sentence}, replace_last=True)
         self.answer(request, result, sentence)
         return result
@@ -507,14 +509,14 @@ class Recovery:
         sentence = "Left to be finished from a terminal. Nothing serves the ledger until then."
         if doc is None:
             # 11.1's stuck journal: its record is written now, and the journal stops being resumed.
-            a = Apply(self.kit, j)
+            a = for_journal(self.kit, j)
             a._finish("left_for_operator", sentence, failed_step=j.step, settle=False)
             self._carry_log(j.id, [])
         else:
             doc["state"] = "left_for_operator"
             doc["sentence"] = sentence
             volume.write_json(path, doc)
-        Records(self.vol, j.id, "apply", self.kit.clock).say(sentence, state="left_for_operator")
+        Records(self.vol, j.id, j.kind, self.kit.clock).say(sentence, state="left_for_operator")
         self.record(j.id, {"kind": "leave_for_operator", "result": "done", "sentence": sentence})
         self.answer(request, "done", sentence)
         return "done"
@@ -533,7 +535,7 @@ class Recovery:
         state = a.rollback("R1", str(reason))
         self._carry_log(a.id, before)
         record = volume.read_own_json(self.vol.history(a.id)) or {}
-        if state == "rolled_back":
+        if state in ("rolled_back", "succeeded"):
             return state, str(record.get("sentence") or "Rolled back.")
         return state, "Retrying the rollback did not work. Recovery is still open."
 
@@ -689,7 +691,7 @@ class Recovery:
                 last = None
             if last is None or now - last < STUCK_SECONDS:
                 continue
-            a = Apply(self.kit, j)
+            a = for_journal(self.kit, j)
             if survey.running(survey.find(a.client, a.app_name)):
                 continue
             a.recovery_page(stop_app=False)

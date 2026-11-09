@@ -33,6 +33,10 @@ from ...schemas import (
     BackupOut,
     UpdateApply,
     UpdateDiscard,
+    UpdateGoBack,
+    UpdateGoBackHouseholdOut,
+    UpdateGoBackOfferOut,
+    UpdateGoBackOut,
     UpdateHeartbeatOut,
     UpdateOutcomeOut,
     UpdatePrepare,
@@ -93,6 +97,7 @@ def update_state(owner: OwnerOnly) -> UpdateStateOut:
         backups=[
             BackupOut(**asdict(one)) for one in platform_service.backups() if one.kind == "update"
         ],
+        go_back=UpdateGoBackOfferOut(**asdict(offer)) if (offer := updates.go_back_offer(beat)) else None,
     )
 
 
@@ -117,7 +122,7 @@ def _updater_answers(*, kind: str) -> updates.Heartbeat:
             code="update.engine_refused",
             params={"socket": str(beat.socket)},
         )
-    if beat.socket == "outdated" and kind in ("prepare", "apply"):
+    if beat.socket == "outdated" and kind in ("prepare", "apply", "go_back"):
         raise ValidationError(
             "The updater is too old for this container engine. Update the updater first, "
             "then try again",
@@ -357,3 +362,95 @@ def outcome_seen(record_id: str, owner: OwnerOnly) -> Response:
     if not updates.dismiss(record_id):
         raise NotFound("There is no update outcome with that id", code="update.outcome_not_found")
     return Response(status_code=204)
+
+
+# --------------------------------------------------------------------------- #
+# Going back (#173)
+# --------------------------------------------------------------------------- #
+
+_NOTHING_TO_GO_BACK_TO = (
+    "There is nothing to go back to from this version: the last update is not one that can be "
+    "undone from here"
+)
+
+
+def _offer() -> updates.GoBackOffer:
+    offer = updates.go_back_offer(updates.heartbeat())
+    if offer is None:
+        raise NotFound(_NOTHING_TO_GO_BACK_TO, code="update.go_back_unavailable")
+    return offer
+
+
+@router.get("/go-back", response_model=UpdateGoBackOut)
+def go_back_preview(owner: OwnerOnly) -> UpdateGoBackOut:
+    """What going back would undo and lose: the audit log's batches since the update's backup,
+    per household, and the passkeys registered since (3.7). Reads; writes nothing."""
+    offer = _offer()
+    with db.session_scope() as session:
+        loss = updates.go_back_loss(session, offer)
+    return UpdateGoBackOut(
+        offer=UpdateGoBackOfferOut(**asdict(offer)),
+        since=loss.since,
+        households=[UpdateGoBackHouseholdOut(**asdict(one)) for one in loss.households],
+        passkeys=loss.passkeys,
+    )
+
+
+@router.post("/go-back/recovery-code", response_model=UpdateRecoveryCodeOut)
+def go_back_recovery_code(response: Response, owner: OwnerOnly) -> UpdateRecoveryCodeOut:
+    """A fresh recovery code for going back, bound to the update it undoes (11.2, R21)."""
+    response.headers["Cache-Control"] = "no-store"
+    offer = _offer()
+    code_id, code, expires = updates.issue_recovery_code(offer.update_id, owner.id)
+    return UpdateRecoveryCodeOut(
+        id=code_id,
+        code=code,
+        prepared_id=offer.update_id,
+        expires_at=datetime.fromtimestamp(expires, UTC),
+    )
+
+
+@router.post("/go-back", response_model=UpdateRequestOut, status_code=202)
+def go_back(body: UpdateGoBack, owner: OwnerOnly) -> UpdateRequestOut:
+    """Go back one step, to the release the last update came from. **Spends the step-up grant first.**
+
+    Then the version typed must be the one gone back to, the updater must take
+    `go_back` (protocol 2), nothing may be in flight, and the recovery code
+    must be the one drawn for this update. The updater checks all of it again,
+    and the image and the backup, before it stops anything (#173).
+    """
+    stepup.require(db.engine, body.step_up_token, user_id=owner.id)
+    offer = _offer()
+    if body.update_id != offer.update_id:
+        raise ValidationError(_NOTHING_TO_GO_BACK_TO, code="update.go_back_unavailable")
+    if body.typed_version.strip() != offer.to_version:
+        raise ValidationError(
+            f"Type {offer.to_version}, the version to go back to, to confirm",
+            code="update.go_back_typed_version",
+            params={"to_version": offer.to_version},
+        )
+    beat = _updater_answers(kind="go_back")
+    if not updates.window_includes(beat.protocols, updates.KIND_PROTOCOL["go_back"]):
+        raise ValidationError(
+            "The updater is too old to go back. Update the updater first, then try again",
+            code="update.go_back_updater_too_old",
+        )
+    _nothing_in_flight()
+    hashed = updates.take_recovery_hash(body.recovery_code_id, prepared_id=offer.update_id, user_id=owner.id)
+    if hashed is None:
+        raise ValidationError(
+            "That recovery code has expired or belongs to another confirmation. Draw the "
+            "confirmation again for a new one",
+            code="update.recovery_code_unknown",
+        )
+    doc = updates.go_back_request(offer, recovery_hash=hashed, requested_by=owner.id)
+    _write(doc)
+    log.warning(
+        "going back from %s to %s confirmed (request %s, undoing update %s), by %s",
+        _one_line(offer.from_version),
+        _one_line(offer.to_version),
+        doc["id"],
+        offer.update_id,
+        _one_line(owner.email),
+    )
+    return UpdateRequestOut(id=doc["id"], kind="go_back", to_version=offer.to_version)
