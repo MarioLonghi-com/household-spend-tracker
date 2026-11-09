@@ -24,6 +24,7 @@ it, which must be named: a check that passes everything cannot pass here.
 
 from __future__ import annotations
 
+import json
 import pathlib
 import re
 
@@ -259,9 +260,34 @@ def test_multi_arch_over_an_index_the_builder_pushed_keeps_its_platforms_and_dro
     assert [m["platform"]["architecture"] for m in entries] == [arch, "s390x"]
 
 
+def _self_update_legs(doc: dict) -> list[dict]:
+    """The legs, from the JSON in the `changes` job's `legs` step, which hands
+    the `self-update` job the ones a run owes as its matrix."""
+    step = next(s for s in doc["jobs"]["changes"]["steps"] if s.get("id") == "legs")
+    return json.loads(step["run"].split("<<'LEGS'\n", 1)[1].split("\nLEGS\n", 1)[0])
+
+
+def test_the_self_update_matrix_is_the_legs_the_gate_picked():
+    doc = yaml.safe_load((ROOT / ".github" / "workflows" / "tests.yml").read_text())
+    matrix = doc["jobs"]["self-update"]["strategy"]["matrix"]
+    assert matrix == {"include": "${{ fromJSON(needs.changes.outputs.selfupdate_legs) }}"}
+    legs = _self_update_legs(doc)
+    assert [leg["leg"] for leg in legs] == [
+        "docker",
+        "docker-sidecar",
+        "podman-rootless",
+        "podman-rootless-2",
+        "docker-arm",
+    ]
+    # The one leg a pull request into `dev` runs when only something the
+    # updater runs changed: E1 alone, quick, on its own engine.
+    assert [leg["leg"] for leg in legs if leg["smoke"]] == ["docker-arm"]
+    assert next(leg for leg in legs if leg["smoke"])["only"] == "E1"
+
+
 def test_the_podman_legs_publish_every_updater_as_an_index():
     doc = yaml.safe_load((ROOT / ".github" / "workflows" / "tests.yml").read_text())
-    legs = doc["jobs"]["self-update"]["strategy"]["matrix"]["include"]
+    legs = _self_update_legs(doc)
     assert {leg["leg"]: leg["index"] for leg in legs if leg["engine"] == "podman"} == {
         "podman-rootless": True,
         "podman-rootless-2": True,
