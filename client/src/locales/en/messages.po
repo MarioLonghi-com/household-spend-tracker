@@ -102,6 +102,10 @@ msgstr "To"
 msgid "starts with"
 msgstr "starts with"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "For information. Only the difference is counted: above, as Reimbursement surplus in income or Reimbursement shortfall in expenses."
+msgstr "For information. Only the difference is counted: above, as Reimbursement surplus in income or Reimbursement shortfall in expenses."
+
 #. Option in a dropdown on the Accounts screen
 #. Option in a dropdown on the Import screen
 #. Option in a dropdown on the one-time import
@@ -289,6 +293,10 @@ msgstr "Match"
 #: src/screens/Import.tsx
 msgid "Or paste the rows, if your bank only lets you copy them from a page:"
 msgstr "Or paste the rows, if your bank only lets you copy them from a page:"
+
+#: src/screens/Categories.tsx
+msgid "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net, and counts only what a repayment came to beyond or short of the expenses linked to it. One category has this; ticking it moves it here."
+msgstr "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net, and counts only what a repayment came to beyond or short of the expenses linked to it. One category has this; ticking it moves it here."
 
 #. Screen-reader name of a warning on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
@@ -892,10 +900,6 @@ msgstr "Imported from <0>{0}</0>, line {1}, on {2}."
 #: src/App.tsx
 msgid "Your household"
 msgstr "Your household"
-
-#: src/screens/Categories.tsx
-msgid "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net. One category has this; ticking it moves it here."
-msgstr "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net. One category has this; ticking it moves it here."
 
 #: src/screens/Passkeys.tsx
 msgid "Passkeys need this app opened at its HTTPS address, {address}."
@@ -2785,10 +2789,6 @@ msgstr "That link doesn't work"
 #: src/screens/Register.tsx
 msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 msgstr "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
-
-#: src/screens/reports/IncomeExpense.tsx
-msgid "For information only — not counted in income, expenses or net."
-msgstr "For information only — not counted in income, expenses or net."
 
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
@@ -4806,6 +4806,10 @@ msgstr "A passkey is a way in that keeps working after this browser is closed."
 msgid "the built SPA; `/` 404s without it"
 msgstr "the built SPA; `/` 404s without it"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Work reimbursements, for information: not in income, expenses or net, except the surplus or shortfall shown in them."
+msgstr "Work reimbursements, for information: not in income, expenses or net, except the surplus or shortfall shown in them."
+
 #. State of the authenticator: it is enrolled and working. See GLOSSARY.md
 #: src/screens/Profile.tsx
 msgctxt "authenticator state"
@@ -5225,10 +5229,6 @@ msgstr "Could not read"
 #: src/screens/Receipts.tsx
 msgid "Inbox"
 msgstr "Inbox"
-
-#: src/screens/reports/IncomeExpense.tsx
-msgid "Work reimbursements, for information: not in income, expenses or net."
-msgstr "Work reimbursements, for information: not in income, expenses or net."
 
 #. placeholder {0}: picked.size
 #. placeholder {1}: picked.size
@@ -6070,10 +6070,6 @@ msgstr "Nothing to look at."
 msgid "Added"
 msgstr "Added"
 
-#: src/screens/reports/IncomeExpense.tsx
-msgid "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.}}"
-msgstr "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.}}"
-
 #. placeholder {0}: format(Math.abs(left), currency)
 #: src/screens/Register.tsx
 msgid "{0} left to account for"
@@ -6550,6 +6546,11 @@ msgstr "{by} reset your password and your authenticator for {email} on {when}. E
 #: src/screens/Passkeys.tsx
 msgid "Last used"
 msgstr "Last used"
+
+#. Line on the Income vs Expense report: repayments beyond or short of their expenses, counted above
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Difference, counted above"
+msgstr "Difference, counted above"
 
 #. placeholder {0}: user.display_name
 #: src/App.tsx
@@ -7163,6 +7164,11 @@ msgstr "Group"
 #: src/screens/ynab/results.tsx
 msgid "{0, plural, one {{1} transfer will be imported as ordinary transactions, with the reason for each} other {{2} transfers will be imported as ordinary transactions, with the reason for each}}"
 msgstr "{0, plural, one {{1} transfer will be imported as ordinary transactions, with the reason for each} other {{2} transfers will be imported as ordinary transactions, with the reason for each}}"
+
+#. Row on the Income vs Expense report: what work paid back beyond what was spent, counted as income
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Reimbursement surplus"
+msgstr "Reimbursement surplus"
 
 #: src/screens/Register.tsx
 msgid "Import is in the menu on the left — this screen was given no way to navigate"
@@ -9473,6 +9479,11 @@ msgstr "type any part"
 msgid "Categorisation"
 msgstr "Categorisation"
 
+#. Row on the Income vs Expense report: what work paid back short of what was spent, counted as an expense
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Reimbursement shortfall"
+msgstr "Reimbursement shortfall"
+
 #: src/screens/Register.tsx
 msgid "Reimbursed, with the payment"
 msgstr "Reimbursed, with the payment"
@@ -9933,6 +9944,10 @@ msgstr "In Docker Desktop or Podman Desktop, open Containers, find <0>{name}</0>
 #: ../desktop/src/words.ts
 msgid "Add to dictionary"
 msgstr "Add to dictionary"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income. Only what a repayment came to beyond or short of the expenses linked to it is counted.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income. Only what a repayment came to beyond or short of the expenses linked to it is counted.}}"
+msgstr "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income. Only what a repayment came to beyond or short of the expenses linked to it is counted.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income. Only what a repayment came to beyond or short of the expenses linked to it is counted.}}"
 
 #. History headline, the kind of act: the instance was set up
 #: src/lib/historyWords.ts
@@ -11742,6 +11757,11 @@ msgstr "Show archived"
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 msgstr "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 
+#. Line on the Income vs Expense report: repayments from work with no expense linked to them yet
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Not matched to an expense"
+msgstr "Not matched to an expense"
+
 #. State of a suggestion: the catalogs carry it
 #: src/screens/TranslationReview.tsx
 msgctxt "suggestion state"
@@ -12394,6 +12414,10 @@ msgstr "No suggestions yet. Choose a preview language in your profile, then use 
 #: src/screens/ApplicationManagement.tsx
 msgid "{0} each, {1} free"
 msgstr "{0} each, {1} free"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{mixed, plural, one {{mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it.} other {{mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them.}}"
+msgstr "{mixed, plural, one {{mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it.} other {{mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them.}}"
 
 #. A changed field in History's detail, lower case: whether the bank has the row (cleared, uncleared, locked)
 #: src/lib/historyWords.ts

@@ -72,7 +72,18 @@ type Side =
   | "out"
   | "reimbursement_income"
   | "reimbursement_spent"
-  | "reimbursement_pending";
+  | "reimbursement_pending"
+  | "reimbursement_surplus"
+  | "reimbursement_shortfall"
+  | "reimbursement_difference"
+  | "reimbursement_unmatched";
+
+/** The name of a row worked out per repayment, in the screen's own words. */
+function derivedName(line: NonNullable<ReportRow["line"]>): string {
+  return line === "reimbursement_surplus"
+    ? t({ message: "Reimbursement surplus", comment: "Row on the Income vs Expense report: what work paid back beyond what was spent, counted as income" })
+    : t({ message: "Reimbursement shortfall", comment: "Row on the Income vs Expense report: what work paid back short of what was spent, counted as an expense" });
+}
 
 /**
  * The element the Reports shell leaves beside an open report's `<h1>`.
@@ -427,6 +438,7 @@ export function ReportTable({
   // Its own sentence rather than a third clause of the one above: a ledger
   // with work expenses and no transfers in the window must still say so.
   const work = report.excluded.reimbursements;
+  const mixed = report.reimbursement_mixed ?? 0;
   const block = report.reimbursements;
 
   return (
@@ -550,7 +562,7 @@ export function ReportTable({
               </th>
               <td colSpan={months.length + 2} className="muted small">
                 <Trans>
-                  For information only — not counted in income, expenses or net.
+                  For information. Only the difference is counted: above, as Reimbursement surplus in income or Reimbursement shortfall in expenses.
                 </Trans>
               </td>
             </tr>
@@ -566,6 +578,22 @@ export function ReportTable({
               label={t({ message: "Amount spent, reimbursed", comment: "Line on the Income vs Expense report: work expenses that have been paid back" })}
               line={block.spent}
               side="reimbursement_spent"
+              months={months}
+              currency={currency}
+              onOpen={onOpen}
+            />
+            <Aside
+              label={t({ message: "Difference, counted above", comment: "Line on the Income vs Expense report: repayments beyond or short of their expenses, counted above" })}
+              line={block.difference}
+              side="reimbursement_difference"
+              months={months}
+              currency={currency}
+              onOpen={onOpen}
+            />
+            <Aside
+              label={t({ message: "Not matched to an expense", comment: "Line on the Income vs Expense report: repayments from work with no expense linked to them yet" })}
+              line={block.unmatched}
+              side="reimbursement_unmatched"
               months={months}
               currency={currency}
               onOpen={onOpen}
@@ -595,8 +623,16 @@ export function ReportTable({
         {work > 0 ? (
           <>
             {plural(work, {
-              one: `${work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.`,
-              other: `${work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.`,
+              one: `${work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income. Only what a repayment came to beyond or short of the expenses linked to it is counted.`,
+              other: `${work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income. Only what a repayment came to beyond or short of the expenses linked to it is counted.`,
+            })}{" "}
+          </>
+        ) : null}
+        {mixed > 0 ? (
+          <>
+            {plural(mixed, {
+              one: `${mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it.`,
+              other: `${mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them.`,
             })}{" "}
           </>
         ) : null}
@@ -994,8 +1030,12 @@ function Group({
         <tr className="report-group">
           <th className="report-label">
             <Fold open={!shut} label={group.label} onToggle={() => onToggle(key)} />
+            {/* Folded, the heading's own figures are the group's months
+                rolled up, so it reads as one line of the report rather than
+                announcing what is hidden. The count stays for a screen
+                reader, which has no caret to see. */}
             {shut && (
-              <span className="muted small report-folded">
+              <span className="sr-only">
                 {plural(group.rows.length, {
                   one: `${group.rows.length} category folded away`,
                   other: `${group.rows.length} categories folded away`,
@@ -1040,7 +1080,7 @@ function Group({
       {!shut &&
         group.rows.map((row) => (
           <Line
-            key={row.key ?? "none"}
+            key={row.line ?? row.key ?? "none"}
             row={row}
             months={months}
             currency={currency}
@@ -1065,10 +1105,15 @@ function Line({
   tone: "in" | "out";
   onOpen: (cell: Cell) => void;
 }) {
-  const which = { rowCategoryId: row.key, rowUncategorised: row.key === null };
-  const name = categoryName(row.key, row.name);
+  // A row worked out per repayment is no category: it drills by its line,
+  // and the server answers with each repayment and the expenses it covered.
+  const derived = row.line ?? null;
+  const which = derived
+    ? { direction: derived as Side }
+    : { rowCategoryId: row.key, rowUncategorised: row.key === null };
+  const name = derived ? derivedName(derived) : categoryName(row.key, row.name);
   return (
-    <tr className={row.key === null ? "report-unset" : undefined}>
+    <tr className={derived ? "report-derived" : row.key === null ? "report-unset" : undefined}>
       {/* The group used to be printed small beside every category name. It is
           the heading above the row now, so repeating it on each line would be
           saying the same thing twice in the narrowest column on screen. */}
@@ -1214,7 +1259,7 @@ function Headline({ report }: { report: Report }) {
         </div>
       </dl>
       <p id="report-aside-note" className="muted small">
-        <Trans>Work reimbursements, for information: not in income, expenses or net.</Trans>
+        <Trans>Work reimbursements, for information: not in income, expenses or net, except the surplus or shortfall shown in them.</Trans>
       </p>
       </div>
     </div>

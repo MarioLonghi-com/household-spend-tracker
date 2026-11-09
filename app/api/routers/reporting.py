@@ -42,8 +42,9 @@ def _row_out(row: report_service.Row, currency: str) -> ReportRowOut:
     return ReportRowOut(
         key=row.key,
         name=row.name,
-        name_code="unset.category" if row.key is None else None,
+        name_code="unset.category" if row.key is None and row.line is None else None,
         group_name=row.group_name,
+        line=row.line,
         by_month=row.by_month,
         total_minor=row.total_minor,
         total=format_amount(row.total_minor, currency, with_symbol=False),
@@ -162,6 +163,7 @@ def income_expense(
                 for name, line in answer["reimbursements"].items()
             }
         ),
+        reimbursement_mixed=answer["reimbursement_mixed"],
         has_income_group=answer["has_income_group"],
         excluded=ExcludedOut(**answer["excluded"]),
         coverage=CoverageOut(**answer["coverage"]),
@@ -188,7 +190,11 @@ def behind_a_figure(
     direction: Annotated[
         str | None,
         Query(
-            pattern="^(in|out|reimbursement_income|reimbursement_spent|reimbursement_pending)$"
+            pattern=(
+                "^(in|out|reimbursement_income|reimbursement_spent|reimbursement_pending"
+                "|reimbursement_surplus|reimbursement_shortfall|reimbursement_unmatched"
+                "|reimbursement_difference)$"
+            )
         ),
     ] = None,
 ) -> ReportBehindOut:
@@ -197,7 +203,11 @@ def behind_a_figure(
     Every argument the report takes, plus those that say **which figure**:
     `period` for one month column, `row_category_id` / `row_uncategorised` for
     one category row, `row_group_id` for one group's subtotal, and `direction` for one line: `in` and `out` for income
-    and expense, and the three work-reimbursement lines by name (#372). Each
+    and expense, the three work-reimbursement lines by name (#372), and the
+    lines worked out per repayment -- `reimbursement_surplus`,
+    `reimbursement_shortfall`, `reimbursement_difference` and
+    `reimbursement_unmatched` -- which answer with each repayment and the
+    expenses it covered. Each
     is optional, and leaving one out widens the answer in exactly the way the
     corresponding cell is wider -- no `period` is the Total column, no
     `direction` is the Net row, which is income and expense together and

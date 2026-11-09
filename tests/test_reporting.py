@@ -689,10 +689,11 @@ def test_a_written_off_expense_is_spending_after_all(session, household, owner, 
     assert answer["excluded"]["reimbursements"] == 0
 
 
-def test_an_advance_in_the_reimbursement_category_is_set_apart_linked_or_not(
+def test_an_advance_is_set_apart_and_only_its_surplus_is_counted(
     session, household, owner, accounts, categorised
 ):
-    """The category says what it is, so it is out of income before any link (#372)."""
+    """The category says what it is, so it is out of income before any link
+    (#372); once linked, what it came to beyond the expenses is income."""
     advance = _add(
         session, household, owner, accounts["checking"], when=date(2026, 1, 2), amount=50_000,
         category=categorised["reimbursement"],
@@ -701,16 +702,25 @@ def test_an_advance_in_the_reimbursement_category_is_set_apart_linked_or_not(
     before = _report(session, household)
     assert before["income"].total_minor == 0
     assert before["reimbursements"]["income"].total_minor == 50_000
+    # Linked to nothing: no difference to state, so none is counted.
+    assert before["reimbursements"]["unmatched"].total_minor == 50_000
+    assert before["reimbursements"]["difference"].total_minor == 0
     assert before["excluded"]["reimbursements"] == 1
 
     trip = _add(session, household, owner, accounts["card"], when=date(2026, 1, 20), amount=-34_000)
     _flag(session, household, owner, trip, paid_by=advance)
 
     after = _report(session, household)
-    assert after["income"].total_minor == 0
+    assert after["income"].total_minor == 16_000
+    assert [(row.line, row.total_minor) for row in after["income"].rows] == [
+        ("reimbursement_surplus", 16_000)
+    ]
     assert after["expense"].total_minor == 0
+    assert after["net_total_minor"] == 16_000
     assert after["reimbursements"]["income"].total_minor == 50_000
     assert after["reimbursements"]["spent"].total_minor == -34_000
+    assert after["reimbursements"]["unmatched"].total_minor == 0
+    assert after["reimbursements"]["difference"].by_month == {"2026-01": 16_000}
     assert after["excluded"]["reimbursements"] == 2
 
 

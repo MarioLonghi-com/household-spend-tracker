@@ -110,6 +110,8 @@ function aReport(over: Partial<Report> = {}): Report {
     reimbursements: {
       income: line([0, 35500]),
       spent: line([-30000, 0], null, 1),
+      difference: line([0, 5500], null, 1),
+      unmatched: line([0, 0], null, 0),
       pending: line([0, -4000], null, 1),
     },
     has_income_group: true,
@@ -222,13 +224,44 @@ describe("the report table", () => {
       "Work reimbursements",
       "Reimbursement income",
       "Amount spent, reimbursed",
+      "Difference, counted above",
+      "Not matched to an expense",
       "Pending reimbursement",
     ]);
-    const pending = [...document.querySelectorAll("tr.report-aside")][2];
+    const difference = [...document.querySelectorAll("tr.report-aside")][2];
+    expect(
+      [...difference.querySelectorAll("td.amount")].map((cell) => cell.textContent?.trim()),
+    ).toEqual([0, 5500, 5500, 2750].map((n) => format(n, "EUR")));
+    const pending = [...document.querySelectorAll("tr.report-aside")][4];
     expect([...pending.querySelectorAll("td.amount")].map((cell) => cell.textContent?.trim())).toEqual(
       [0, -4000, -4000, -2000].map((n) => format(n, "EUR")),
     );
-    expect(document.body.textContent).toContain("not counted in income, expenses or net");
+    expect(document.body.textContent).toContain("Only the difference is counted");
+  });
+
+  it("names a surplus row itself, never Uncategorised, and keeps it apart from the groups", () => {
+    const surplus: ReportRow = {
+      ...row("Reimbursement surplus", null, [0, 5500], null),
+      line: "reimbursement_surplus",
+    };
+    const income = section(
+      [row("Salary", "Earnings", [300000, 300000]), surplus],
+      [300000, 305500],
+    );
+    render(<Harness report={aReport({ income })} />);
+    const labels = [...document.querySelectorAll("table.report tbody th.report-label")].map(
+      (cell) => cell.textContent?.trim(),
+    );
+    expect(labels).toContain("Reimbursement surplus");
+    // The one Uncategorised row is the expense side's own; the surplus row is
+    // keyless too, and must not be read as a second one.
+    expect(labels.filter((label) => label === "Uncategorised")).toHaveLength(1);
+    expect(document.querySelectorAll("tr.report-unset")).toHaveLength(1);
+    const tr = [...document.querySelectorAll("tr.report-derived")];
+    expect(tr).toHaveLength(1);
+    expect([...tr[0].querySelectorAll("td.amount")].map((cell) => cell.textContent?.trim())).toEqual(
+      [0, 5500, 5500, 2750].map((n) => format(n, "EUR")),
+    );
   });
 
   it("puts the headline figures above the table, the reimbursement ones apart", () => {
@@ -302,10 +335,17 @@ describe("the report table", () => {
     expect(labels()).toContain("Uncategorised");
   });
 
-  it("says how many categories a fold took away", () => {
+  it("rolls a folded group up into its months, and tells only a screen reader the count", () => {
     render(<Harness />);
     fireEvent.click(screen.getByRole("button", { name: "Transport" }));
-    expect(document.body.textContent).toContain("2 categories folded away");
+
+    const heading = screen.getByRole("button", { name: "Transport" }).closest("tr")!;
+    expect([...heading.querySelectorAll("td.amount")].map((cell) => cell.textContent?.trim())).toEqual(
+      [-8000, -10000, -18000, -9000].map((n) => format(n, "EUR")),
+    );
+    const said = heading.querySelector(".sr-only");
+    expect(said?.textContent).toBe("2 categories folded away");
+    expect(heading.querySelector(".report-folded")).toBeNull();
   });
 
   it("colours the net line by its sign and keeps the minus on a negative", () => {
@@ -364,6 +404,14 @@ describe("what the report says it left out", () => {
   it("stays quiet at zero", () => {
     render(<Harness />);
     expect(notes()).not.toContain("set apart");
+    expect(notes()).not.toContain("another currency");
+  });
+
+  it("says how many repayments cover expenses in another currency", () => {
+    render(<Harness report={aReport({ reimbursement_mixed: 2 })} />);
+    expect(notes()).toContain(
+      "2 repayments cover expenses in another currency, so no surplus or shortfall is worked out for them.",
+    );
   });
 });
 

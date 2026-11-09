@@ -251,7 +251,6 @@ table.report tfoot tr.report-aside-heading td {
 table.report tfoot tr.report-aside th,
 table.report tfoot tr.report-aside td { color: var(--muted); font-weight: 400; }
 
-.report-folded { display: block; font-weight: 400; text-transform: none; letter-spacing: 0; }
 
 /* --------------------------------------------------------------------------
    Total and Average stay on the right while the months scroll
