@@ -103,6 +103,13 @@ CARRIED_WHOLE = (
     # message, the words, a note, who and when. The household's own words
     # about the app's, with nothing secret in them.
     "translation_suggestions",
+    # Exchange rates (#396). `fx_rates` is public data -- ECB reference rates
+    # anyone can download -- shared by every household; `fx_manual_rates` is a
+    # household's own rates, typed or imported; `fx_fetches` says who pressed
+    # Fetch now, when, and what came back. Nothing secret in any of them.
+    "fx_fetches",
+    "fx_manual_rates",
+    "fx_rates",
 )
 
 #: table -> {column: replacement}, for tables worth reading with the secret

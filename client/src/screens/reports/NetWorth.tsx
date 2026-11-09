@@ -41,6 +41,8 @@ import type {
 } from "../../lib/types";
 import type { RegisterPreset } from "../Register";
 import { countryName, useCountries } from "../Accounts";
+import { RatesAsOf } from "../../components/RatesAsOf";
+import { sourceLabel } from "../../lib/fx";
 import {
   OPEN_NET_WORTH,
   UNSET_ID,
@@ -138,9 +140,12 @@ export function partSlots(
 export function NetWorth({
   household,
   onOpenRegister,
+  onOpenExchangeRates,
 }: {
   household: Household;
   onOpenRegister?: (preset: RegisterPreset) => void;
+  /** Settings → Exchange rates, where rates are fetched or entered (#396). */
+  onOpenExchangeRates?: () => void;
 }) {
   // What the address asked for, when the report was opened from one;
   // otherwise its defaults.
@@ -213,6 +218,7 @@ export function NetWorth({
           slots={slots}
           countries={countries.data}
           onOpenRegister={onOpenRegister}
+          onOpenExchangeRates={onOpenExchangeRates}
         />
       )}
     </div>
@@ -374,6 +380,7 @@ function Body({
   slots,
   countries,
   onOpenRegister,
+  onOpenExchangeRates,
 }: {
   report: Report;
   view: NetWorthView;
@@ -382,6 +389,7 @@ function Body({
   slots: Map<string, number>;
   countries: Country[] | undefined;
   onOpenRegister?: (preset: RegisterPreset) => void;
+  onOpenExchangeRates?: () => void;
 }) {
   const asOf = formatDate(report.as_of);
   const display = report.display_currency;
@@ -404,9 +412,14 @@ function Body({
 
   return (
     <>
-      {/* The "Rates as of" line (#396 §5.2) goes here, drawn from
-          `report.rates_status`, when the page converts. Nothing converts until
-          exchange rates exist, so there is nothing to draw yet. */}
+      {/* "Rates as of" (#396 §5.2), from the same response as the figures.
+          The server sends it only when several currencies are in scope and a
+          source is set up; with one currency nothing converts and it is
+          absent. With no rate stored yet it says so, and links to where they
+          are fetched. */}
+      {report.rates_status && (
+        <RatesAsOf status={report.rates_status} onOpen={onOpenExchangeRates} />
+      )}
 
       {report.clipped_from && (
         <p className="muted small nw-note">
@@ -423,7 +436,14 @@ function Body({
 
       {!main && (
         <div className="banner info" role="note">
-          {t`These accounts are in ${heldIn}, and there are no exchange rates to convert between them, so each currency is shown on its own and nothing is added across them.`}
+          {t`These accounts are in ${heldIn}, and there are no exchange rates to convert between them, so each currency is shown on its own and nothing is added across them.`}{" "}
+          {onOpenExchangeRates && (
+            <button type="button" className="link" onClick={onOpenExchangeRates}>
+              {report.rates_status
+                ? t({ message: "Fetch or enter rates on the Exchange rates page", comment: "Link on the Net Worth report to Settings, Exchange rates, when no rate is stored yet" })
+                : t({ message: "Choose a source of rates on the Exchange rates page", comment: "Link on the Net Worth report to Settings, Exchange rates, when the household's source list is empty" })}
+            </button>
+          )}
         </div>
       )}
       {report.not_converted.length > 0 && (
@@ -477,7 +497,7 @@ function Body({
       <AccountsTable
         report={report}
         countries={countries}
-        onOpen={(id) => onOpenRegister?.({ accounts: [id], until: report.as_of })}
+        onOpen={(id) => onOpenRegister?.({ accounts: [id], range: { since: null, until: report.as_of } })}
       />
 
       <HowItAdds report={report} />
@@ -1103,7 +1123,7 @@ function HowItAdds({ report }: { report: Report }) {
   const bridge = report.bridge;
   const fxEffect = bridge && display ? signed(bridge.fx_effect, display, true) : "";
   const moneyMoved = bridge && display ? signed(bridge.money_added_or_spent, display, report.converted) : "";
-  const sources = listText(report.rate_source?.chain ?? []);
+  const sources = listText((report.rate_source?.chain ?? []).map((one) => sourceLabel(one)));
   const inCurrencies = listText(ex.currencies);
   const missing = listText(ex.missing);
   const emptyAtStart = ex.accounts_without_data_at_start;
@@ -1154,9 +1174,10 @@ function HowItAdds({ report }: { report: Report }) {
                   const figure = rate.rate;
                   const base = display ?? "";
                   const published = formatDate(rate.rate_date);
+                  const from = sourceLabel(rate.source);
                   return (
                     <li key={code}>
-                      {t({ message: `${code}: ${figure} per 1 ${base}, published ${published}`, comment: "Net Worth explanation: one exchange rate, e.g. GBP: 0.8500 per 1 EUR, published 2026-10-30" })}
+                      {t({ message: `${code}: ${figure} per 1 ${base}, published ${published} (${from})`, comment: "Net Worth explanation: one rate, e.g. GBP: 0.85 per 1 EUR, published 2026-10-30 (ECB)" })}
                       {rate.before_as_of && ` — ${t`the last rate before ${asOf}`}`}
                       {rate.stale && ` — ${t`older than the limit set for rates`}`}
                     </li>

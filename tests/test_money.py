@@ -87,3 +87,32 @@ def test_milliunits_become_the_currencys_own_minor_units(milliunits, currency, m
 def test_milliunits_that_do_not_convert_exactly_are_refused_not_rounded(milliunits, currency, said):
     with pytest.raises(MoneyError, match=said):
         from_milliunits(milliunits, currency)
+
+
+#: ISO 4217's minor unit for every code `money._EXPONENTS` lists, and for the
+#: two it used to list wrongly. From the standard's list one (2025), typed out
+#: here so the table in `app/money.py` is checked against a second copy.
+ISO_4217_MINOR_UNITS = {
+    "JPY": 0, "KRW": 0, "CLP": 0, "ISK": 0, "VND": 0,
+    "BHD": 3, "IQD": 3, "JOD": 3, "KWD": 3, "LYD": 3, "OMR": 3, "TND": 3,
+    "HUF": 2, "TWD": 2, "EUR": 2, "GBP": 2, "SEK": 2, "BRL": 2, "USD": 2,
+}
+
+
+def test_every_listed_exponent_is_the_one_iso_4217_gives():
+    from app.money import _EXPONENTS, exponent
+
+    assert set(_EXPONENTS) <= set(ISO_4217_MINOR_UNITS), "a listed code this test does not know"
+    wrong = {
+        code: (exponent(code), iso)
+        for code, iso in ISO_4217_MINOR_UNITS.items()
+        if exponent(code) != iso
+    }
+    assert wrong == {}, "money.py disagrees with ISO 4217 (ours, ISO's)"
+
+
+def test_a_forint_amount_has_two_decimals_now():
+    from app.money import parse_exact, to_minor
+
+    assert to_minor("1234.56", "HUF") == 123_456
+    assert parse_exact("1234.56", "TWD") == 123_456

@@ -109,10 +109,13 @@ msgstr "Hantering av appen"
 msgid "Opening your ledger…"
 msgstr ""
 
+#. Label of a date field: the last day of a range to fetch
+#. Label of a date filter: the last day shown
 #. Label of a form field on the Transfers screen: the end of a range, or where money goes
 #. Label of a form field on the one-time import: the end of a range, or where money goes
 #. Text on the date range picker: the end of a range, or where money goes
 #: src/components/DateRange.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/OneTimeImport.tsx
 #: src/screens/Transfer.tsx
 #, fuzzy
@@ -249,6 +252,12 @@ msgstr "Befintliga konton i {currency}"
 msgid "Payments from work"
 msgstr "Betalningar från jobbet"
 
+#. placeholder {0}: household.base_currency
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "The ledger never converts: every amount stays in its account's currency. Reports may show figures in {0}, the base currency, at the rates this page keeps, and every converted figure says which rate and date it used. Rates are fetched only when someone presses Fetch now."
+msgstr "Boken räknar aldrig om: varje belopp stannar i sitt kontos valuta. Rapporter kan visa siffror i {0}, basvalutan, med kurserna som den här sidan sparar, och varje omräknad siffra anger vilken kurs och vilket datum den använde. Kurser hämtas bara när någon trycker på Hämta nu."
+
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "An owner can administer this instance, and stays one whatever you later do to your own password or authenticator."
@@ -355,6 +364,12 @@ msgstr "Markera {0}"
 msgid "No browsers were being trusted."
 msgstr "Inga webbläsare var betrodda."
 
+#. A month on the strip: no transactions and no rates
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "nothing"
+msgstr "inget"
+
 #. Menu item and the name of its screen. See GLOSSARY.md
 #. Screen title on the History screen. See GLOSSARY.md
 #: src/App.tsx
@@ -362,6 +377,11 @@ msgstr "Inga webbläsare var betrodda."
 #, fuzzy
 msgid "History"
 msgstr "Historik"
+
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Show my own rates next to the rate in use"
+msgstr "Visa mina egna kurser bredvid kursen som används"
 
 #. placeholder {0}: formatDate(sheet.data.last_statement_date)
 #. placeholder {1}: format(sheet.data.last_statement_balance ?? 0, account.currency)
@@ -527,6 +547,12 @@ msgstr "ingen beskrivning"
 #, fuzzy
 msgid "Process"
 msgstr "Process"
+
+#. State of a currency on the Exchange rates page: its newest rate is older than the limit
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Stale"
+msgstr "Inaktuell"
 
 #. What the import detected: which column holds the date. Lower case, inside a list
 #: src/lib/labels.ts
@@ -728,10 +754,12 @@ msgstr "{unloaded, plural, one {Visar {0} – {1} rad till att läsa in – visa
 #. Column heading on Application management's suggestions: when it was suggested
 #. Column heading on the Admin screen: noun, the time
 #. Column heading on the History screen: noun, the time
+#. Column heading on the fetch history: when the fetch started
 #. Column name shown beside a value on phones on Application management's suggestions
 #. Column name shown beside a value on phones on the History screen: noun, the time
 #. Name of a fact on the History screen: noun, the time
 #: src/screens/Admin.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/History.tsx
 #: src/screens/TranslationReview.tsx
 #, fuzzy
@@ -764,6 +792,12 @@ msgstr "Du är inloggad. Serverns hemliga nyckel har bytts ut, så autentisering
 #, fuzzy
 msgid "Import a statement"
 msgstr "Importera ett kontoutdrag"
+
+#. Heading on the Exchange rates page: many rates from one CSV file
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "From a file"
+msgstr "Från en fil"
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -801,6 +835,12 @@ msgstr "Lista"
 msgid "<0>{0}</0> of {1, plural, one {{2} row would move.} other {{3} rows would move.}}"
 msgstr "<0>{0}</0> av {1, plural, one {{2} rad skulle flyttas.} other {{3} rader skulle flyttas.}}"
 
+#. A month on the strip: covered by rates
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "has rates"
+msgstr "har kurser"
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "This browser does not support passkeys yet."
@@ -837,6 +877,12 @@ msgstr "Återställningslänkar fungerar en gång och slutar gälla. Be en ägar
 #, fuzzy
 msgid "Each currency gets its own report instead. Nothing on this screen ever adds two together."
 msgstr "Varje valuta får i stället en egen rapport. Inget på den här skärmen lägger någonsin ihop två."
+
+#. Short name of the European Central Bank, a source of exchange rates
+#: src/lib/fx.ts
+#, fuzzy
+msgid "ECB"
+msgstr "ECB"
 
 #. Heading on the Your account panel. See GLOSSARY.md
 #: src/screens/Profile.tsx
@@ -908,6 +954,11 @@ msgstr "Hämtar dina planer från YNAB…"
 #, fuzzy
 msgid "I have my authenticator after all"
 msgstr "Jag har min autentiseringsapp ändå"
+
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Another household on this instance is fetching rates. Wait for it to finish."
+msgstr "Ett annat hushåll på den här instansen hämtar kurser. Vänta tills det är klart."
 
 #. Tooltip on a folder path on Application management
 #: src/screens/ApplicationManagement.tsx
@@ -1020,9 +1071,12 @@ msgstr "Det går jämnt ut"
 msgid "{waited, plural, one {Not reimbursed yet · {waited} day} other {Not reimbursed yet · {waited} days}}"
 msgstr "{waited, plural, one {Inte ersatt än · {waited} dag} other {Inte ersatt än · {waited} dagar}}"
 
+#. Button: add this rate source to the end of the list
 #. Screen-reader name of a button on the Accounts screen
 #. placeholder {0}: one.value
+#. placeholder {0}: sourceLabel(source)
 #: src/screens/Accounts.tsx
+#: src/screens/ExchangeRates.tsx
 #, fuzzy
 msgid "Add {0}"
 msgstr "Lägg till {0}"
@@ -1101,6 +1155,12 @@ msgstr "Uppladdat"
 #, fuzzy
 msgid "Nothing went into this one."
 msgstr "Inget hamnade i den här."
+
+#. Column heading on the Exchange rates page: how many rates are stored
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Rates"
+msgstr "Kurser"
 
 #. Backups screen: the backup was passed to the phone's share menu
 #: src/screens/Backups.tsx
@@ -1458,6 +1518,12 @@ msgstr "Allt som appen och dess bibliotek har att säga. För att felsöka någo
 msgid "Work expense — not reimbursed yet"
 msgstr "Jobbutlägg – inte ersatt än"
 
+#. placeholder {0}: data.stale_days
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "{0, plural, one {stale after # day} other {stale after # days}}"
+msgstr "{0, plural, one {inaktuell efter # dag} other {inaktuell efter # dagar}}"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Somebody gave {user} a new authenticator"
@@ -1484,6 +1550,14 @@ msgstr "Återkalla den här inbjudan?"
 #, fuzzy
 msgid "Only for a bank whose statement holds several accounts in one file, told apart by a Product column (Revolut's account statement). This account takes the rows with this value; the others are skipped. A current account takes the Current rows unless you say otherwise."
 msgstr "Bara för en bank vars kontoutdrag har flera konton i en fil, åtskilda av en Product-kolumn (Revoluts kontoutdrag). Det här kontot tar raderna med det här värdet; de andra hoppas över. Ett lönekonto tar Current-raderna om du inte anger något annat."
+
+#. Label of the rate field: how many units of the first currency one unit of the base buys
+#. placeholder {0}: currency || "…"
+#. placeholder {1}: household.base_currency
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Rate: {0} per 1 {1}"
+msgstr "Kurs: {0} per 1 {1}"
 
 #. Database size: the main file plus recent writes not yet copied into it
 #. placeholder {0}: bytes(me.size.main_bytes)
@@ -1541,6 +1615,13 @@ msgstr "Logga in"
 msgid "{by} added {user} as an owner"
 msgstr "{by} lade till {user} som ägare"
 
+#. Column heading on the Exchange rates page: transaction dates with no rate
+#. Label of a tile on the Exchange rates page: transaction dates with no recent rate
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Gaps"
+msgstr "Luckor"
+
 #. Tooltip on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
@@ -1573,6 +1654,16 @@ msgstr "Du är redan inloggad"
 msgid "Withdrawing a link stops it working. It does not undo the reset: the account stays shut, and the way back in is a new link."
 msgstr "Att dra tillbaka en länk gör att den slutar fungera. Det ångrar inte återställningen: kontot förblir stängt, och vägen tillbaka in är en ny länk."
 
+#. Link from the Rates as of line to the page of that name
+#. Menu item and the name of its screen: rates for converting one currency into another
+#. Title of the Exchange rates page
+#: src/App.tsx
+#: src/components/RatesAsOf.tsx
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Exchange rates"
+msgstr "Växelkurser"
+
 #: src/components/ReenrolmentDue.tsx
 #, fuzzy
 msgid "This server's secret key was replaced, so your authenticator no longer works here, and until you set up a new one every sign-in will ask for another recovery code."
@@ -1603,6 +1694,13 @@ msgstr "Förblir som den är."
 #, fuzzy
 msgid "Yes, detach it"
 msgstr "Ja, koppla loss det"
+
+#. Heading on the Exchange rates page: currencies no source has a rate for
+#. State of a currency on the Exchange rates page: no source has a rate for it
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Not covered"
+msgstr "Utan täckning"
 
 #. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
@@ -1643,6 +1741,12 @@ msgstr "Koppla isär"
 msgid "Remove this part"
 msgstr "Ta bort den här delen"
 
+#. State of an exchange rate: older than the household's limit
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "stale"
+msgstr "inaktuell"
+
 #. Button on the receipts: verb, try again
 #: src/components/Receipts.tsx
 #, fuzzy
@@ -1679,6 +1783,12 @@ msgstr "Jag förstår att YNAB:s statusar Reconciled, Cleared och Uncleared åte
 #, fuzzy
 msgid "Revision"
 msgstr "Revision"
+
+#. Column heading on the fetch history: the date range and currencies requested
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Dates asked for"
+msgstr "Begärda datum"
 
 #. Column heading on the Payees screen
 #. Column heading on the Rules screen
@@ -1869,6 +1979,8 @@ msgid "Once it is confirmed, keep only this entry for the account in your app: t
 msgstr "När den är bekräftad, behåll bara den här posten för kontot i appen: den gamla kan inte fungera här, och inte heller en som du skannade tidigare men aldrig bekräftade."
 
 #. Label on the one-time import's results: it did not work
+#. State of a fetch of exchange rates: it did not work
+#: src/screens/ExchangeRates.tsx
 #: src/screens/ynab/results.tsx
 #, fuzzy
 msgid "Failed"
@@ -1934,6 +2046,8 @@ msgctxt "new category"
 msgid "New"
 msgstr "Ny"
 
+#. Column heading for buttons, read by screen readers only
+#. Column heading for buttons, read by screen readers only
 #. Hidden column heading over row buttons
 #. Screen-reader name on Application management's suggestions
 #. Screen-reader name on the Accounts screen
@@ -1945,6 +2059,7 @@ msgstr "Ny"
 #. Screen-reader text on the passkeys panel
 #: src/screens/Accounts.tsx
 #: src/screens/Backups.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Payees.tsx
 #: src/screens/Transfers.tsx
@@ -2031,6 +2146,12 @@ msgstr "{ended, plural, one {{ended} annan webbläsare loggades ut.} other {{end
 #, fuzzy
 msgid "Turned on for every household by whoever runs this server, so it cannot be changed here."
 msgstr "Påslaget för alla hushåll av den som driver servern, så det kan inte ändras här."
+
+#. Button on the Exchange rates page: open the controls to fetch a date range again
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Refetch a range…"
+msgstr "Hämta ett intervall igen…"
 
 #. Value of a fact on the History screen
 #: src/screens/History.tsx
@@ -2230,6 +2351,12 @@ msgstr "Väntar på lösennyckeln…"
 msgid "Name as the bank writes it"
 msgstr "Namnet som banken skriver det"
 
+#. Added to the Rates as of line: currency codes with no exchange rate
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "{codes} not converted"
+msgstr "{codes} inte omräknade"
+
 #: src/components/UpdatedNotice.tsx
 #, fuzzy
 msgid "Updated just now with changes made elsewhere."
@@ -2341,6 +2468,12 @@ msgstr "Överhoppad"
 msgid "That is more than you chose: what was already reset for them stays reset, so the link has to set it too."
 msgstr "Det är mer än du valde: det som redan återställts för personen förblir återställt, så länken måste ställa in det också."
 
+#. placeholder {0}: row.error ?? ""
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "The fetch failed: {0}"
+msgstr "Hämtningen misslyckades: {0}"
+
 #. Label of a form field on the Your account panel
 #. Label of a form field on the Your account panel
 #. Label of a form field on the password-and-code check
@@ -2368,6 +2501,11 @@ msgstr "Ångra"
 #, fuzzy
 msgid "Saved. It is in the next download of suggestions, on Application management."
 msgstr "Sparat. Den kommer med i nästa nedladdning av förslag, under Hantering av appen."
+
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Enter a rate by hand"
+msgstr "Ange en kurs för hand"
 
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
@@ -2591,6 +2729,13 @@ msgstr "Utestående"
 msgid "Money set aside at a bank. Same as a current account, kept apart so the register reads clearly."
 msgstr "Pengar som sparas på banken. Som ett lönekonto, men hålls isär så att registret blir tydligt."
 
+#. Under the Coverage tile: currency codes with no rate
+#. placeholder {0}: tiles.missing.join(", ")
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "missing: {0}"
+msgstr "saknas: {0}"
+
 #. State of the desktop app's recovery code: spent, a new one is needed
 #: src/screens/Profile.tsx
 msgid "Used"
@@ -2634,6 +2779,12 @@ msgstr "Räknar…"
 msgid "Income vs Expense"
 msgstr "Inkomster och utgifter"
 
+#. Label of a number field on the Exchange rates page
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Treat a rate as stale after (days)"
+msgstr "Räkna en kurs som inaktuell efter (dagar)"
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Into which account"
@@ -2644,6 +2795,12 @@ msgstr "Till vilket konto"
 #, fuzzy
 msgid "use the bank's: {0}"
 msgstr "använd bankens: {0}"
+
+#. placeholder {0}: row.age_days
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "{0, plural, one {# day} other {# days}}"
+msgstr "{0, plural, one {# dag} other {# dagar}}"
 
 #. Label of a form field on the Register screen: noun, being paid back by work
 #. Name of a fact on the Reimbursements report: noun, being paid back by work
@@ -2673,6 +2830,12 @@ msgstr "Återbetalt"
 #, fuzzy
 msgid "Expenses"
 msgstr "Utgifter"
+
+#. Link on the Net Worth report to Settings, Exchange rates, when no rate is stored yet
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Fetch or enter rates on the Exchange rates page"
+msgstr "Hämta eller ange kurser på sidan Växelkurser"
 
 #. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
@@ -2798,6 +2961,12 @@ msgstr "{by} återställde lösenordet och autentiseringsappen för {user}"
 #, fuzzy
 msgid "{0} reconciled · {1} cleared · {2} uncleared"
 msgstr "{0} avstämda · {1} bokförda · {2} ej bokförda"
+
+#. Column heading on Browse rates: the rate as the source quotes it
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "As published"
+msgstr "Publicerad"
 
 #: src/screens/Household.tsx
 #, fuzzy
@@ -3003,6 +3172,12 @@ msgstr "Två hushåll som är öppna i samma webbläsare ser likadana ut, och de
 msgid "Open in Transactions"
 msgstr "Öppna i Transaktioner"
 
+#. A changed field in History's detail, lower case: which exchange rate a month's figures use
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "monthly rate"
+msgstr "månadskurs"
+
 #. Column heading on the household page: noun, bank or cash accounts. See GLOSSARY.md
 #. Column name shown beside a value on phones on the household page: noun, bank or cash accounts. See GLOSSARY.md
 #. Label on the household page: noun, bank or cash accounts. See GLOSSARY.md
@@ -3048,6 +3223,12 @@ msgstr "Tagen {0}, så detta öppnar de tio dagarna före och efter."
 msgid "Put them in <0>{0}</0> too?"
 msgstr "Lägga dem i <0>{0}</0> också?"
 
+#. Column heading on Browse rates: the rate your own transfers gave that day
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Your transfers"
+msgstr "Dina överföringar"
+
 #. Where an update failed: its first step
 #: src/screens/Updates.tsx
 msgid "while starting the update"
@@ -3086,6 +3267,12 @@ msgstr "Källapp"
 #, fuzzy
 msgid "Repaid by {payment}"
 msgstr "Återbetalt genom {payment}"
+
+#. Label of a picker on the Exchange rates page
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Rate used for monthly figures"
+msgstr "Kurs för månadssiffror"
 
 #. List item on the Backups screen: conjunction between two choices
 #. Sentence on the sign-in page: conjunction between two choices
@@ -3239,6 +3426,15 @@ msgstr "Det här skriver bokens egna värden till en fil i klartext. Stäng av d
 msgid "Now"
 msgstr "Nu"
 
+#. Beside a rate being entered: the rate stored for that date, which it would replace
+#. Beside a rate being entered: the rate stored for that date, which it would replace
+#. placeholder {0}: checked.replaces
+#. placeholder {0}: row.replaces
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "replaces {0}"
+msgstr "ersätter {0}"
+
 #. Label on the household page
 #: src/screens/Household.tsx
 #, fuzzy
@@ -3344,15 +3540,18 @@ msgstr "Ja, återkalla den"
 msgid "while checking everything was ready"
 msgstr ""
 
+#. Button in a confirmation: yes, delete the rate
 #. Button on Application management: delete this suggestion
 #. Button on the Backups screen: verb
 #. Button on the Categories screen: verb
+#. Button on the Exchange rates page: delete this rate
 #. Button on the Register screen: verb
 #. Button on the Rules screen: verb
 #. Button on the receipts: verb
 #. Button: delete this backup
 #: src/screens/Backups.tsx
 #: src/screens/Categories.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Receipts.tsx
 #: src/screens/Register.tsx
 #: src/screens/Rules.tsx
@@ -3398,6 +3597,13 @@ msgstr "Skrivs till <0>{0}</0>, roteras vid en megabyte och sparas i fem filer. 
 msgid "Step {0} of {1} — <0>{2}</0>"
 msgstr "Steg {0} av {1} – <0>{2}</0>"
 
+#. placeholder {0}: formatInstant(status.fetched_at)
+#. placeholder {1}: status.fetched_by
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "Rates as of {asOf} · {sources} · fetched {0} by {1}"
+msgstr "Kurser per {asOf} · {sources} · hämtade {0} av {1}"
+
 #. Logging style on Application management: the default amount of logging
 #: src/lib/labels.ts
 #, fuzzy
@@ -3409,6 +3615,12 @@ msgstr "Normal"
 #, fuzzy
 msgid "Filters"
 msgstr "Filter"
+
+#. The Rates as of line while a fetch of exchange rates runs
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "Fetching rates…"
+msgstr "Hämtar kurser…"
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -3523,6 +3735,14 @@ msgstr "System"
 msgid "Check the repository"
 msgstr "Kontrollera repot"
 
+#. Label of a tile on the Exchange rates page: the date of the oldest newest rate
+#. Name of the line saying how old the exchange rates on a page are
+#: src/components/RatesAsOf.tsx
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Rates as of"
+msgstr "Kurser per"
+
 #. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -3592,6 +3812,9 @@ msgstr "Och sedan"
 msgid "{0, plural, one {{1} category folded away} other {{2} categories folded away}}"
 msgstr "{0, plural, one {{1} kategori hopfälld} other {{2} kategorier hopfällda}}"
 
+#. Button in a confirmation: do nothing
+#. Button in a confirmation: do nothing
+#. Button in a confirmation: do nothing
 #. Button on the Admin screen
 #. Button on the Admin screen
 #. Button on the Import screen
@@ -3605,6 +3828,7 @@ msgstr "{0, plural, one {{1} kategori hopfälld} other {{2} kategorier hopfälld
 #. Desktop app dialog button: do nothing and close the dialog
 #: ../desktop/src/words.ts
 #: src/screens/Admin.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Profile.tsx
@@ -3635,6 +3859,14 @@ msgstr "Laddar upp {0}…"
 #, fuzzy
 msgid "the last rate before {asOf}"
 msgstr "den senaste kursen före {asOf}"
+
+#. placeholder {0}: count(keep.data.added)
+#. placeholder {1}: count(keep.data.replaced)
+#. placeholder {2}: count(keep.data.unchanged)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Saved: {0} added, {1} replaced, {2} unchanged."
+msgstr "Sparat: {0} tillagda, {1} ersatta, {2} oförändrade."
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -3712,7 +3944,9 @@ msgstr "Gör {0} till medlem?"
 #. Button on the Your account panel: finish and close
 #. Button on the one-time import: finish and close
 #. Screen title on the account reset page
+#. State of a fetch of exchange rates: it finished and stored what came back
 #: src/screens/Admin.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/OneTimeImport.tsx
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
@@ -3730,6 +3964,12 @@ msgstr "Aktivera personen igen först: ett inaktiverat konto kan inte följa en 
 #, fuzzy
 msgid "Add a transaction"
 msgstr "Lägg till en transaktion"
+
+#. Heading on the Exchange rates page: rates a member typed or imported
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Rates entered by hand"
+msgstr "Kurser angivna för hand"
 
 #. A changed field in History's detail, lower case: position in a list
 #: src/lib/historyWords.ts
@@ -3789,6 +4029,19 @@ msgstr "De två stämmer inte överens."
 #, fuzzy
 msgid "Amount arriving ({0})"
 msgstr "Belopp som kommer in ({0})"
+
+#. Name of the month strip, read by screen readers: {0} is a currency code
+#. placeholder {0}: chosen.currency
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Months of {0}"
+msgstr "Månader för {0}"
+
+#. Label of a tile on the Exchange rates page
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Last fetch"
+msgstr "Senaste hämtning"
 
 #. Table cell on the Admin screen
 #: src/screens/Admin.tsx
@@ -3859,6 +4112,11 @@ msgstr "Inget väntar. Varje kvitto sitter på en transaktion."
 msgid "Open the menu"
 msgstr "Öppna menyn"
 
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "not a currency code ISO 4217 has assigned, so no source will ever publish a rate for it. An account's currency cannot be changed: open a new account in the right code and move its rows, or ask the operator for a one-off correction."
+msgstr "är ingen valutakod som ISO 4217 har tilldelat, så ingen källa kommer någonsin att publicera en kurs för den. Ett kontos valuta kan inte ändras: öppna ett nytt konto med rätt kod och flytta dess rader, eller be operatören om en engångsrättelse."
+
 #: src/lib/reimbursement.ts
 #: src/screens/Register.tsx
 #, fuzzy
@@ -3928,6 +4186,12 @@ msgstr "T – Överföringar"
 msgid "This screen could not be shown"
 msgstr "Den här skärmen kunde inte visas"
 
+#. Button on the Exchange rates page: save every rate in the file
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Save these rates"
+msgstr "Spara de här kurserna"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "Reset: password and authenticator"
@@ -3970,6 +4234,12 @@ msgstr "Mönstret drog över sin tiondels sekund. En import skulle lägga det å
 msgid "Pending reimbursement"
 msgstr "Väntande ersättning"
 
+#. Heading on the Exchange rates page: one cell per month, showing which have rates
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Month by month"
+msgstr "Månad för månad"
+
 #. Application management: what app.log holds
 #: src/lib/labels.ts
 #, fuzzy
@@ -3982,10 +4252,13 @@ msgid "Pick an accent colour"
 msgstr "Välj en accentfärg"
 
 #. Column heading on the Reimbursements report: the start of a range, or where money comes from
+#. Label of a date field: the first day of a range to fetch
+#. Label of a date filter: the first day shown
 #. Label of a form field on the Transfers screen: the start of a range, or where money comes from
 #. Label of a form field on the one-time import: the start of a range, or where money comes from
 #. Text on the date range picker: the start of a range, or where money comes from
 #: src/components/DateRange.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/OneTimeImport.tsx
 #: src/screens/reports/Reimbursements.tsx
 #: src/screens/Transfer.tsx
@@ -4003,6 +4276,13 @@ msgstr "Ingen kategori behövs"
 #, fuzzy
 msgid "not counted"
 msgstr "inte räknat"
+
+#. placeholder {0}: deleting.currency
+#. placeholder {1}: formatDate(deleting.date)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Delete the {0} rate of {1}?"
+msgstr "Ta bort kursen för {0} den {1}?"
 
 #. Application management: how to send the suggestions on; the links follow
 #: src/screens/TranslationReview.tsx
@@ -4371,6 +4651,117 @@ msgstr "{email} är ingen e-postadress"
 #, fuzzy
 msgid "error.email.too_long"
 msgstr "E-postadressen är för lång (högst {max} tecken)"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx_manual.column_twice"
+msgstr "Filen har kolumnen {column} två gånger"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx_manual.missing_column"
+msgstr "Filen saknar kolumnen {columns}. Första raden ska namnge kolumnerna: {known}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx_manual.no_rates"
+msgstr "Det finns inga kurser i filen"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx_manual.not_csv"
+msgstr "Rad {line} i filen kan inte läsas som CSV. Spara den som CSV från kalkylarket igen, eller utgå från mallen."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx_manual.not_found"
+msgstr "Växelkursen finns inte"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx_manual.rows_refused"
+msgstr "{refused} av {rows, plural, one {# kurs} other {# kurser}} kan inte sparas, så ingen sparades. Inget har ändrats; rätta dem och försök igen."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx_manual.too_many_rows"
+msgstr "Filen innehåller fler än {max} kurser -- dela den i två"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx_manual.unknown_column"
+msgstr "Filen har en kolumn som inte känns igen: {columns}. Kolumnerna är {known}."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx.fetch_running"
+msgstr "En hämtning pågår redan -- vänta tills den är klar"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx.no_foreign_currency"
+msgstr "Hushållet har alla konton i sin basvaluta, så det finns ingen kurs att hämta"
+
+#. ECB: the European Central Bank, which publishes exchange rates
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx.nothing_to_fetch"
+msgstr "Ingen källa i hushållets kedja hämtas -- lägg till ECB först"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx.range_backwards"
+msgstr "Intervallet börjar {since}, efter att det slutar {until}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx.range_in_future"
+msgstr "{until} ligger i framtiden, och ingen kurs är publicerad för den dagen än"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx.range_needs_dates"
+msgstr "För att hämta ett intervall igen behövs ett första och ett sista datum"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx.source_twice"
+msgstr "{source} finns två gånger i kedjan"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx.stale_days_range"
+msgstr "En kurs kan räknas som inaktuell efter {min} till {max} dagar"
+
+#. month_avg, month_end and spot are the API's own names and stay as they are
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx.unknown_policy"
+msgstr "{policy} är ingen kurs för månadssiffror -- använd month_avg, month_end eller spot"
+
+#. manual, ecb and own are the API's names for rate sources and stay as they are
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.fx.unknown_source"
+msgstr "{source} är ingen källa för växelkurser -- använd manual, ecb eller own"
 
 #. Batch: one act in History. See GLOSSARY.md
 #. js-lingui-explicit-id
@@ -5677,6 +6068,11 @@ msgstr "Inga mottagare än. En dyker upp första gången du namnger någon på e
 msgid "New category name for {0}"
 msgstr "Namn på ny kategori för {0}"
 
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Change where rates come from?"
+msgstr "Ändra varifrån kurserna kommer?"
+
 #. Stands in for a household's name the panel no longer knows. Lower case
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -5705,6 +6101,12 @@ msgstr "Duplicera"
 #, fuzzy
 msgid "suggested"
 msgstr "föreslaget"
+
+#. Column heading on the fetch history: done, failed or running
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Outcome"
+msgstr "Utfall"
 
 #. Net Worth chart tooltip: the last point, which is today's date
 #: src/screens/reports/NetWorth.tsx
@@ -5767,12 +6169,6 @@ msgstr ""
 msgid "No households yet."
 msgstr "Inga hushåll än."
 
-#. Net Worth explanation: one exchange rate, e.g. GBP: 0.8500 per 1 EUR, published 2026-10-30
-#: src/screens/reports/NetWorth.tsx
-#, fuzzy
-msgid "{code}: {figure} per 1 {base}, published {published}"
-msgstr "{code}: {figure} per 1 {base}, publicerad {published}"
-
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Changed {done} row and left {skipped} alone — only money out that is not a transfer can be a work expense."
@@ -5784,6 +6180,12 @@ msgstr "Ändrade {done} rad och lämnade {skipped} orörda – bara pengar ut so
 msgctxt "history table"
 msgid "payee rule"
 msgstr "mottagarregel"
+
+#. A changed field in History's detail, lower case: an exchange rate entered by hand
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "rate"
+msgstr "kurs"
 
 #. The container engine, by product name; the version may be empty
 #: src/screens/Updates.tsx
@@ -5936,6 +6338,14 @@ msgstr "Uppdateringen misslyckades {where}, så den ångrades. Du kör {running}
 msgid "Register"
 msgstr "Register"
 
+#. Value of the Coverage tile: currencies with a rate, of those held
+#. placeholder {0}: count(tiles.covered)
+#. placeholder {1}: count(tiles.total)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "{0} of {1}"
+msgstr "{0} av {1}"
+
 #: src/screens/Payees.tsx
 #, fuzzy
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
@@ -6029,6 +6439,19 @@ msgstr "Klicka för att ändra"
 msgid "Detach"
 msgstr "Koppla loss"
 
+#. placeholder {0}: household.base_currency
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Every account is in {0}, so no report converts anything."
+msgstr "Alla konton är i {0}, så ingen rapport räknar om något."
+
+#. A duration in seconds, like 1.4 s
+#. placeholder {0}: (Math.round(ms / 100) / 10).toString()
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "{0} s"
+msgstr "{0} s"
+
 #. Label on the receipts
 #. placeholder {0}: formatInstant(receipt.created_at)
 #. placeholder {1}: receipt.uploaded_by_name
@@ -6037,7 +6460,10 @@ msgstr "Koppla loss"
 msgid "{0} by {1}"
 msgstr "{0} av {1}"
 
+#. Column heading on the Exchange rates page: an exchange rate as entered
 #. Column heading on the Net Worth report: an exchange rate
+#. Column heading on the rates import: an exchange rate
+#: src/screens/ExchangeRates.tsx
 #: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Rate"
@@ -6157,6 +6583,12 @@ msgstr "{0} blir alltid {1} – och mottagaren lades till"
 msgid "Received"
 msgstr "Mottaget"
 
+#. Option on the Exchange rates page: each figure uses its own day's rate
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Daily rate per row"
+msgstr "Dagskurs per rad"
+
 #. Title of a panel on the Admin screen
 #. placeholder {0}: confirming.user.display_name
 #: src/screens/Admin.tsx
@@ -6171,9 +6603,11 @@ msgstr "Kategorisera automatiskt utifrån mottagarens historik"
 
 #. Column heading on the Admin screen: preposition, done by a person
 #. Column heading on the History screen: preposition, done by a person
+#. Column heading on the fetch history: who pressed Fetch now
 #. Column name shown beside a value on phones on the History screen: preposition, done by a person
 #. Name of a fact on the History screen: preposition, done by a person
 #: src/screens/Admin.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/History.tsx
 #, fuzzy
 msgid "By"
@@ -6259,6 +6693,11 @@ msgstr "Ignorera"
 #, fuzzy
 msgid "Receipt notes saved."
 msgstr "Kvittots anteckningar sparade."
+
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Rate sources, in order: the first with a rate within the stale limit is used. The base currency is set on the household page."
+msgstr "Kurskällor, i ordning: den första med en kurs inom åldersgränsen används. Basvalutan anges på hushållssidan."
 
 #. Step name in the one-time import: pick which YNAB plan (budget) to bring over
 #: src/lib/labels.ts
@@ -6488,6 +6927,12 @@ msgstr "Dess kategorier är inkomster i Inkomster och utgifter"
 msgid "none yet"
 msgstr "inga än"
 
+#. Button: move this rate source one place later in the list
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Down"
+msgstr "Ned"
+
 #: src/screens/Transfer.tsx
 #, fuzzy
 msgid "Pick two different accounts — money cannot move to itself."
@@ -6642,6 +7087,12 @@ msgstr "Återställ din inloggning"
 msgid "{imported} The whole import — transactions, accounts, categories and payees — can be undone from <0>History</0> as one entry."
 msgstr "{imported} Hela importen – transaktioner, konton, kategorier och mottagare – kan ångras från <0>Historik</0> som en enda post."
 
+#. Button on the Exchange rates page: keep the settings
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Save settings"
+msgstr "Spara inställningar"
+
 #. Heading on the household page
 #: src/screens/Household.tsx
 #, fuzzy
@@ -6649,6 +7100,8 @@ msgid "By currency"
 msgstr "Per valuta"
 
 #. Column heading on the Reimbursements report: noun, a calendar month
+#. Label of a field: the month a rate is for
+#: src/screens/ExchangeRates.tsx
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
 msgid "Month"
@@ -6809,6 +7262,13 @@ msgstr "{count, plural, one {# kategori} other {# kategorier}}"
 #, fuzzy
 msgid "history.count.category_groups"
 msgstr "{count, plural, one {# kategorigrupp} other {# kategorigrupper}}"
+
+#. History: exchange rates a member entered by hand
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "history.count.fx_manual_rates"
+msgstr "{count, plural, one {# växelkurs} other {# växelkurser}}"
 
 #. History: a count of changed rows of one kind: people in a household
 #. js-lingui-explicit-id
@@ -7373,6 +7833,12 @@ msgstr "Rader"
 msgid "{0, plural, one {Link {1} selected} other {Link {2} selected}}"
 msgstr "{0, plural, one {Koppla {1} markerat} other {Koppla {2} markerade}}"
 
+#. A changed field in History's detail, lower case: after how many days an exchange rate counts as old
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "stale limit"
+msgstr "åldersgräns"
+
 #: src/screens/Reconcile.tsx
 #, fuzzy
 msgid "This account has never been reconciled, so you are starting from the beginning of its history."
@@ -7420,7 +7886,9 @@ msgstr "Markera som öppen"
 msgid "Nothing to look at."
 msgstr "Inget att titta på."
 
+#. Column heading on the fetch history: rates newly stored
 #. Column heading on the passkeys panel: the date the passkey was added
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Added"
@@ -7458,6 +7926,12 @@ msgstr "<0>{purgingName}</0> och dess {0} rader raderas. Inget i den har nått r
 msgctxt "starting balance rows"
 msgid "Skip"
 msgstr "Hoppa över"
+
+#. Heading on the Exchange rates page
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "What reports will say"
+msgstr "Vad rapporterna kommer att visa"
 
 #. Review mode: label of the note written for translators
 #: src/components/SuggestWording.tsx
@@ -7537,6 +8011,12 @@ msgstr "Ett löpande saldo kräver ett konto, sortering på datum med nyast för
 #, fuzzy
 msgid "{0, plural, one {It goes as one act, so the History screen puts it back in one undo.} other {They go as one act, so the History screen puts them all back in one undo.}}"
 msgstr "{0, plural, one {Det försvinner i ett enda steg, så skärmen Historik återställer det med en enda ångring.} other {De försvinner i ett enda steg, så skärmen Historik återställer alla med en enda ångring.}}"
+
+#. Screen-reader name of the month map on the Income vs Expense report: drag or use the arrow keys to move
+#: src/screens/reports/ReportGrid.tsx
+#, fuzzy
+msgid "Months in view"
+msgstr "Månader som visas"
 
 #. Button on the History screen
 #: src/screens/History.tsx
@@ -7624,6 +8104,12 @@ msgstr "Dela upp"
 msgid "is exactly"
 msgstr "är exakt"
 
+#. Button: keep this rate in place of the one stored for that date
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Replace the rate"
+msgstr "Ersätt kursen"
+
 #: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Net worth chart"
@@ -7645,6 +8131,14 @@ msgstr "{0} avslutade"
 #, fuzzy
 msgid "New codes made. Every earlier code, used or not, has stopped working."
 msgstr "Nya koder skapade. Alla tidigare koder, använda eller inte, har slutat fungera."
+
+#. placeholder {0}: one.currencies.join(", ")
+#. placeholder {1}: sourceLabel(one.source)
+#. placeholder {2}: formatDate(one.since)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Would fetch {0} from {1}, from {2} to today."
+msgstr "Skulle hämta {0} från {1}, från {2} till i dag."
 
 #. Sentence on the Register screen
 #: src/screens/Register.tsx
@@ -7692,6 +8186,12 @@ msgstr "Klicka på en för detaljerna, eller på datumet för att hitta betalnin
 #, fuzzy
 msgid "Came from a statement. Its line key is <0>{0}</0>, which is what stops the same line being imported twice."
 msgstr "Kom från ett kontoutdrag. Dess radnyckel är <0>{0}</0>, och det är den som hindrar att samma rad importeras två gånger."
+
+#. Column heading on the fetch history: how long the fetch took
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Took"
+msgstr "Tid"
 
 #. Label on the household page. See GLOSSARY.md
 #: src/screens/Household.tsx
@@ -7859,6 +8359,12 @@ msgstr "Skapa det"
 msgid "amount column"
 msgstr "beloppskolumn"
 
+#. Kind of fetch of exchange rates: only the dates not stored yet
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Missing only"
+msgstr "Bara saknade"
+
 #. placeholder {0}: withdrawing.display_name
 #. placeholder {1}: withdrawing.email
 #: src/screens/Admin.tsx
@@ -7875,6 +8381,13 @@ msgstr "Kategori: behövs inte, det här är ena delen av en överföring"
 #, fuzzy
 msgid "no git history and no build stamp to ask"
 msgstr "ingen git-historik och ingen byggstämpel att fråga"
+
+#. placeholder {0}: count(found.data.limit)
+#. placeholder {1}: count(found.data.total)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "The newest {0} of {1} rates. Narrow the dates to see older ones."
+msgstr "De {0} senaste av {1} kurser. Begränsa datumen för att se äldre."
 
 #. Column heading on the Application management screen
 #. Desktop app menu bar: the File menu
@@ -7902,6 +8415,12 @@ msgstr "Ställ in en ny autentiseringsapp – en ny telefon, eller en som du int
 msgid "{0, plural, one {Finish and lock {1} row} other {Finish and lock {2} rows}}"
 msgstr "{0, plural, one {Slutför och lås {1} rad} other {Slutför och lås {2} rader}}"
 
+#. placeholder {0}: chosen.currency
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "No transactions and no rates in {0} yet."
+msgstr "Inga transaktioner och inga kurser i {0} än."
+
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -7912,6 +8431,14 @@ msgstr "Visa en kod att skanna"
 #, fuzzy
 msgid "Passkeys need this app opened at its HTTPS address."
 msgstr "Lösennycklar kräver att appen öppnas på sin HTTPS-adress."
+
+#. Column heading: the rate as units per one unit of the base currency
+#. Column heading: the rate as units per one unit of the base currency
+#. placeholder {0}: household.base_currency
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Per 1 {0}"
+msgstr "Per 1 {0}"
 
 #. Button in review mode: back to finding another message
 #: src/components/SuggestWording.tsx
@@ -7941,6 +8468,14 @@ msgstr "Lönekonto"
 #, fuzzy
 msgid "Every transaction and every rule that names <0>{0}</0> will name <1>{1}</1> instead, and those payees will be gone. Each merge is one act in History, so it can be undone there."
 msgstr "Varje transaktion och varje regel som nämner <0>{0}</0> kommer att nämna <1>{1}</1> i stället, och de mottagarna försvinner. Varje sammanslagning är ett steg i Historik, så den kan ångras där."
+
+#. Under the Manual rates tile: when they last changed, and who changed them
+#. placeholder {0}: formatInstant(tiles.manual_changed_at)
+#. placeholder {1}: tiles.manual_changed_by ? ` · ${tiles.manual_changed_by}` : ""
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "last change {0}{1}"
+msgstr "senast ändrade {0}{1}"
 
 #. placeholder {0}: one.display_name
 #: src/screens/Admin.tsx
@@ -7987,6 +8522,12 @@ msgstr ""
 #, fuzzy
 msgid "Reset: password"
 msgstr "Återställning: lösenord"
+
+#. Heading on the Exchange rates page: the list of rates entered by hand
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Stored"
+msgstr "Sparade"
 
 #. Sentence after a refusal: how long to wait before trying again
 #: src/components/bits.tsx
@@ -8130,6 +8671,11 @@ msgstr ""
 msgid "Not available here"
 msgstr "Inte tillgängligt här"
 
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "With no source, nothing converts: every report shows one currency at a time."
+msgstr "Utan någon källa räknas inget om: varje rapport visar en valuta i taget."
+
 #. Net Worth explanation, point 1
 #: src/screens/reports/NetWorth.tsx
 #, fuzzy
@@ -8194,6 +8740,11 @@ msgstr "Hur mycket hushållet har, alla konton tillsammans, vid varje månadsslu
 msgid "Gather the accounts by country"
 msgstr "Samla kontona per land"
 
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Nobody has fetched rates for this household yet."
+msgstr "Ingen har hämtat kurser för det här hushållet än."
+
 #. Label of a form field on the one-time import
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -8218,6 +8769,12 @@ msgstr "Databas"
 #, fuzzy
 msgid "Start a one-time import"
 msgstr "Starta en engångsimport"
+
+#. Net Worth explanation: one rate, e.g. GBP: 0.85 per 1 EUR, published 2026-10-30 (ECB)
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "{code}: {figure} per 1 {base}, published {published} ({from})"
+msgstr "{code}: {figure} per 1 {base}, publicerad {published} ({from})"
 
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -8297,6 +8854,7 @@ msgstr "Koppla loss det här kvittot?"
 
 #. Column heading on the Categories screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column heading on the Import screen: noun, what a transaction was for. See GLOSSARY.md
+#. Column heading on the Income vs Expense report's transaction list: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
@@ -8311,6 +8869,7 @@ msgstr "Koppla loss det här kvittot?"
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
 msgid "Category"
@@ -8427,6 +8986,12 @@ msgstr "produktkolumn"
 msgid "Set work expense on the selected rows"
 msgstr "Ange jobbutlägg för de markerade raderna"
 
+#. A month on the strip: it has transactions and no rate within the limit
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "transactions without a rate"
+msgstr "transaktioner utan kurs"
+
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 #, fuzzy
@@ -8470,6 +9035,12 @@ msgstr "Anteckning"
 msgid "How import works"
 msgstr "Så fungerar importen"
 
+#. A changed field in History's detail, lower case: whether the rates of your own transfers are shown
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "own rates shown"
+msgstr "egna kurser visas"
+
 #: src/screens/Receipts.tsx
 #, fuzzy
 msgid "Attach to a transaction"
@@ -8498,15 +9069,35 @@ msgstr "Välj en mapp…"
 msgid "Bank"
 msgstr "Bank"
 
+#. Option of a filter: no currency chosen
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Every currency"
+msgstr "Alla valutor"
+
 #. Table cell on the household page
 #: src/screens/Household.tsx
 #, fuzzy
 msgid "(main)"
 msgstr "(huvud)"
 
+#. Link on the Net Worth report to Settings, Exchange rates, when the household's source list is empty
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Choose a source of rates on the Exchange rates page"
+msgstr "Välj en källa för kurser på sidan Växelkurser"
+
 #: ../desktop/src/words.ts
 msgid "A backup was made first. This can take a minute."
 msgstr ""
+
+#. placeholder {0}: count(row.rates_added)
+#. placeholder {1}: count(row.rates_unchanged)
+#. placeholder {2}: seconds(row.duration_ms)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Added {0} rates, {1} unchanged, {2}."
+msgstr "Lade till {0} kurser, {1} oförändrade, {2}."
 
 #. Headline figure on the Income vs Expense report: work expenses that have been paid back
 #. Line on the Income vs Expense report: work expenses that have been paid back
@@ -8534,6 +9125,17 @@ msgstr "Upphör"
 msgid "what this instance has been saying"
 msgstr "vad den här instansen har sagt"
 
+#. Where an exchange rate came from: a member typed or imported it
+#: src/lib/fx.ts
+#, fuzzy
+msgid "entered by hand"
+msgstr "angiven för hand"
+
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "No rates entered by hand."
+msgstr "Inga kurser angivna för hand."
+
 #: src/screens/SignIn.tsx
 #, fuzzy
 msgid "Until you do, every sign-in will ask for another recovery code. To do it later, open your account — your name in the menu — and set up a new authenticator there. In this tab, while you stay signed in and for up to a day, the code you just used still covers it; after that, or anywhere else, it takes one more recovery code."
@@ -8555,6 +9157,13 @@ msgstr "Varje koppling har ett namn eller en person bakom sig."
 #, fuzzy
 msgid "Account for {0}"
 msgstr "Konto för {0}"
+
+#. Button on the Exchange rates page: list the stored rates of this currency
+#. Heading on the Exchange rates page: the stored rates, filtered
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Browse rates"
+msgstr "Bläddra bland kurser"
 
 #. Column heading on the accounts import: noun, what the account held on the day it starts. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md
@@ -8626,6 +9235,14 @@ msgstr "pågår"
 msgid "How much to write down"
 msgstr "Hur mycket som ska skrivas ned"
 
+#. Title of a confirmation: fetch the rates of these dates again
+#. placeholder {0}: formatDate(since)
+#. placeholder {1}: formatDate(until)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Refetch {0} to {1}?"
+msgstr "Hämta {0} till {1} igen?"
+
 #: src/screens/TransferSections.tsx
 #, fuzzy
 msgid "Waiting for the other statement"
@@ -8666,6 +9283,12 @@ msgstr "Använd den här planen"
 #, fuzzy
 msgid "The server made {user} an owner"
 msgstr "Servern gjorde {user} till ägare"
+
+#. Where an exchange rate came from: what the household's own currency transfers gave
+#: src/lib/fx.ts
+#, fuzzy
+msgid "your own transfers"
+msgstr "dina egna överföringar"
 
 #. A changed field in History's detail, lower case: whether an account is closed
 #. Beside an account flagged closed on the Net Worth report
@@ -8711,6 +9334,7 @@ msgid "owner"
 msgstr "ägare"
 
 #: src/screens/Categories.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Undo in History brings it back."
@@ -8780,6 +9404,18 @@ msgstr "Överskott på ersättningar"
 msgid "Import is in the menu on the left — this screen was given no way to navigate"
 msgstr "Importera finns i menyn till vänster – den här skärmen har inget sätt att navigera"
 
+#. placeholder {0}: preview.data.rows.length
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "{0, plural, one {# rate ready to save. Nothing has been saved yet.} other {# rates ready to save. Nothing has been saved yet.}}"
+msgstr "{0, plural, one {# kurs klar att spara. Inget har sparats än.} other {# kurser klara att spara. Inget har sparats än.}}"
+
+#. placeholder {0}: preview.data.rows.length
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "{0, plural, one {{refused} of # line has a problem, so nothing can be saved yet. Correct the file and choose it again.} other {{refused} of # lines have a problem, so nothing can be saved yet. Correct the file and choose it again.}}"
+msgstr "{0, plural, one {{refused} av # rad har ett problem, så inget kan sparas än. Rätta filen och välj den igen.} other {{refused} av # rader har ett problem, så inget kan sparas än. Rätta filen och välj den igen.}}"
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "How banks write our names"
@@ -8801,10 +9437,27 @@ msgstr "Raden exakt som den kom"
 msgid "Where it can be reached"
 msgstr "Var den kan nås"
 
+#. Option: a rate for a whole month
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "A month"
+msgstr "En månad"
+
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "{oldest, plural, one {Rates as of {asOf}, # day old · fetch them on the Exchange rates page} other {Rates as of {asOf}, # days old · fetch them on the Exchange rates page}}"
+msgstr "{oldest, plural, one {Kurser per {asOf}, # dag gamla · hämta dem på sidan Växelkurser} other {Kurser per {asOf}, # dagar gamla · hämta dem på sidan Växelkurser}}"
+
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
 msgid "Flags are left behind."
 msgstr "Flaggor följer inte med."
+
+#. A changed field in History's detail, lower case: where a household's exchange rates come from, in order
+#: src/lib/historyWords.ts
+#, fuzzy
+msgid "rate sources"
+msgstr "kurskällor"
 
 #. Label of a form field on the Admin screen
 #: src/screens/Admin.tsx
@@ -8834,6 +9487,12 @@ msgstr "Varje kod fungerar en gång, och de visas bara nu. Dina gamla fungerar i
 #, fuzzy
 msgid "Running now"
 msgstr "Körs nu"
+
+#. Label of a tile on the Exchange rates page: rates entered by hand
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Manual rates"
+msgstr "Manuella kurser"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -9103,6 +9762,12 @@ msgstr "{0, plural, one {Importerade {1} transaktion i en omgång.} other {Impor
 msgid "Backups taken by updates"
 msgstr "Säkerhetskopior tagna av uppdateringar"
 
+#. Option on the Exchange rates page: a month's figures use the mean of its daily rates
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Monthly average"
+msgstr "Månadsgenomsnitt"
+
 #. Update confirmation, Updater row: the updater running is newer than the release's
 #: src/screens/Updates.tsx
 msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
@@ -9178,6 +9843,11 @@ msgstr "{0} ännu ej bokförda"
 msgid "The server reset {user}'s password and authenticator"
 msgstr "Servern återställde lösenordet och autentiseringsappen för {user}"
 
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Click a transaction to open it in Transactions, in a new tab."
+msgstr "Klicka på en transaktion för att öppna den i Transaktioner, i en ny flik."
+
 #: src/screens/Admin.tsx
 #: src/screens/Household.tsx
 #, fuzzy
@@ -9195,6 +9865,12 @@ msgstr "Hela raden som den skrevs"
 msgid "payee"
 msgstr "mottagare"
 
+#. Said after the settings were kept
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Saved."
+msgstr "Sparat."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "The six digits from the new one"
@@ -9204,6 +9880,12 @@ msgstr "De sex siffrorna från den nya"
 #: src/screens/Updates.tsx
 msgid "while handing over to the new updater before the app stopped"
 msgstr ""
+
+#. State of a currency on the Exchange rates page: only rates entered by hand
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Manual only"
+msgstr "Bara manuella"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -9227,6 +9909,11 @@ msgstr ""
 msgid "use the button below"
 msgstr "använd knappen nedan"
 
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "No exchange rates yet · fetch them on the Exchange rates page"
+msgstr "Inga växelkurser än · hämta dem på sidan Växelkurser"
+
 #: src/components/StepUp.tsx
 #, fuzzy
 msgid "Your account is under your name in the menu."
@@ -9242,6 +9929,12 @@ msgstr "Frågar…"
 #: ../desktop/src/words.ts
 msgid "Choose a folder you can see, in Documents or one that syncs, so you can find your backups and copy them elsewhere."
 msgstr ""
+
+#. Column heading on the Exchange rates page: date of the newest stored rate
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Last rate"
+msgstr "Senaste kurs"
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -9279,6 +9972,14 @@ msgstr "Alla konton"
 msgid "This file looks like it is for <0>{0}</0> ({1}), not the account chosen above."
 msgstr "Den här filen ser ut att höra till <0>{0}</0> ({1}), inte kontot som valts ovan."
 
+#. placeholder {0}: found.data.total
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "{0, plural, one {# rate} other {# rates}}"
+msgstr "{0, plural, one {# kurs} other {# kurser}}"
+
+#. Column heading on Browse rates: the rate's date
+#. Column heading on the Exchange rates page: the day or month a rate is for
 #. Column heading on the Income vs Expense report: noun. See GLOSSARY.md
 #. Column heading on the Net Worth report. See GLOSSARY.md
 #. Column heading on the Reconcile screen: noun. See GLOSSARY.md
@@ -9286,17 +9987,20 @@ msgstr "Den här filen ser ut att höra till <0>{0}</0> ({1}), inte kontot som v
 #. Column heading on the Transfers screen: noun. See GLOSSARY.md
 #. Column heading on the one-time import's results: noun. See GLOSSARY.md
 #. Column heading on the one-time import's results: noun. See GLOSSARY.md
+#. Column heading on the rates import: a day or a month
 #. Column name shown beside a value on phones on the Register screen: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Reimbursements report: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Transfers screen: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the one-time import's results: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the one-time import's results: noun. See GLOSSARY.md
+#. Label of a field: the day a rate is for
 #. Label of a form field on the Register screen: noun. See GLOSSARY.md
 #. Label of a form field on the Transfers screen: noun. See GLOSSARY.md
 #. Label on the Import screen: noun. See GLOSSARY.md
 #. Label on the Register screen: noun. See GLOSSARY.md
 #. Label on the Register screen: noun. See GLOSSARY.md
 #. Name of a fact on the Reimbursements report: noun. See GLOSSARY.md
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Import.tsx
 #: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
@@ -9353,6 +10057,12 @@ msgstr "Servern gav {user} en ny autentiseringsapp"
 msgctxt "rule list"
 msgid "regex"
 msgstr "regex"
+
+#. Button: move this rate source one place earlier in the list
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Up"
+msgstr "Upp"
 
 #. Rules screen: how many rows already in the ledger a rule being tried would match
 #. placeholder {0}: formatCount(trial.data.matches)
@@ -9482,6 +10192,11 @@ msgstr "Spend Tracker: återställningskod för uppdateringen från {from} till 
 "\n"
 "Om uppdateringen misslyckas och inte kan ångra sig själv ersätts appen av en återställningssida, och det är den här koden som öppnar den. Den fungerar bara för den här uppdateringen och slutar fungera när uppdateringen är klar.\n"
 ""
+
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Every rate fetched for these dates replaces the one stored, and past converted figures that used it change. Rates entered by hand are not touched."
+msgstr "Varje kurs som hämtas för de här datumen ersätter den sparade, och tidigare omräknade siffror som använde den ändras. Kurser angivna för hand rörs inte."
 
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
@@ -10983,8 +11698,10 @@ msgid "{count, plural, one {{count} day} other {{count} days}}"
 msgstr "{count, plural, one {{count} dag} other {{count} dagar}}"
 
 #. Column heading on the accounts import
+#. Column heading on the rates import
 #. Column name shown beside a value on phones on the accounts import
 #: src/screens/AccountImport.tsx
+#: src/screens/ExchangeRates.tsx
 #, fuzzy
 msgid "Problems"
 msgstr "Problem"
@@ -11012,6 +11729,12 @@ msgstr "Nej, bara den här"
 msgctxt "history table"
 msgid "member"
 msgstr "medlem"
+
+#. Beside a rate being entered: the same rate is stored for that date
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "already stored"
+msgstr "redan sparad"
 
 #. State of the authenticator: it was removed and has to be set up again
 #: src/screens/Profile.tsx
@@ -11067,6 +11790,12 @@ msgstr "Inget"
 #, fuzzy
 msgid "Made for {0}, cannot be used here."
 msgstr "Skapad för {0}, kan inte användas här."
+
+#. Heading on the Exchange rates page: past presses of Fetch now
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Fetch history"
+msgstr "Hämtningshistorik"
 
 #. Button: replace the updater container, leave the app and its data as they are
 #: src/screens/Updates.tsx
@@ -11225,6 +11954,12 @@ msgstr "Dubbletter importerade ändå"
 #, fuzzy
 msgid "how this works"
 msgstr "hur det här fungerar"
+
+#. Option of a filter: no source chosen
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Every source"
+msgstr "Alla källor"
 
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -11427,12 +12162,19 @@ msgstr "avgiftskolumn"
 msgid "Recovered"
 msgstr "Återfått"
 
+#. Column heading on Browse rates. See GLOSSARY.md
 #. Column heading on the Accounts screen: noun. See GLOSSARY.md
+#. Column heading on the Exchange rates page. See GLOSSARY.md
+#. Column heading on the Exchange rates page. See GLOSSARY.md
 #. Column heading on the accounts import: noun. See GLOSSARY.md
 #. Column heading on the household page: noun. See GLOSSARY.md
+#. Column heading on the rates import. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the accounts import: noun. See GLOSSARY.md
+#. Label of a field on the Exchange rates page. See GLOSSARY.md
+#. Label of a filter on the Exchange rates page. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
+#. Label of a picker on the Exchange rates page. See GLOSSARY.md
 #. Name of a fact on the one-time import: noun. See GLOSSARY.md
 #. Option: split the Net Worth chart by currency
 #. Screen-reader name on the Income vs Expense report: noun. See GLOSSARY.md
@@ -11442,6 +12184,7 @@ msgstr "Återfått"
 #. Text on the Reimbursements report: noun. See GLOSSARY.md
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Household.tsx
 #: src/screens/OneTimeImport.tsx
 #: src/screens/Register.tsx
@@ -11499,6 +12242,11 @@ msgstr "Ditt namn"
 #, fuzzy
 msgid "{by} reset {user}'s authenticator"
 msgstr "{by} återställde autentiseringsappen för {user}"
+
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "no source in the chain publishes a rate for it."
+msgstr "ingen källa i kedjan publicerar en kurs för den."
 
 #. Text on the Admin screen: nothing so far
 #: src/screens/Admin.tsx
@@ -11680,6 +12428,8 @@ msgid "opening balance"
 msgstr "ingående saldo"
 
 #. Table cell on the passkeys panel: has never happened
+#. Value of the Last fetch tile when nobody has fetched rates
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Never"
@@ -11897,6 +12647,12 @@ msgstr ""
 msgid "Backup saved"
 msgstr ""
 
+#. Column heading on the Exchange rates page: days since the newest rate
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Age"
+msgstr "Ålder"
+
 #: src/App.tsx
 #: src/screens/ynab/results.tsx
 #, fuzzy
@@ -11961,6 +12717,12 @@ msgstr "den maskerade kopian som `/db` visar, om en har byggts"
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s IBAN, so its next statement picks the account itself?"
 msgstr "Filens namn innehåller <0>{0}</0>. Spara det som IBAN för <1>{1}</1>, så att nästa kontoutdrag väljer kontot själv?"
 
+#. State of a fetch of exchange rates: still going
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Running"
+msgstr "Pågår"
+
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -11968,9 +12730,11 @@ msgid "Disabling…"
 msgstr "Inaktiverar…"
 
 #. Column heading on the accounts import: noun, a line of a file
+#. Column heading on the rates import: noun, a line of a file
 #. Column name shown beside a value on phones on the accounts import: noun, a line of a file
 #. Label on the Import screen: noun, a line of a file
 #: src/screens/AccountImport.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Line"
@@ -12026,6 +12790,11 @@ msgstr "För en <0>betalkanal</0> snarare än en butik. <1>SQ *</1>, <2>PAGO MOV
 #, fuzzy
 msgid "Reset link for {name}"
 msgstr "Återställningslänk för {name}"
+
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Your own transfers' rates include the bank's spread and fees, and exist only on the days you exchanged money, so neighbouring months may use different kinds of rate."
+msgstr "Kurserna från dina egna överföringar innehåller bankens påslag och avgifter och finns bara de dagar du växlade pengar, så närliggande månader kan använda olika sorters kurs."
 
 #. Heading on the sign-in page
 #. Screen-reader name, ReenrolmentDue (shared)
@@ -12096,6 +12865,12 @@ msgstr "Behåll den"
 #, fuzzy
 msgid "In Docker Desktop or Podman Desktop, open Containers, find <0>{name}</0> and press Start."
 msgstr "I Docker Desktop eller Podman Desktop öppnar du Containers, letar upp <0>{name}</0> och trycker på Start."
+
+#. Button: keep this exchange rate
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Add the rate"
+msgstr "Lägg till kursen"
 
 #. Desktop app right-click menu on a misspelt word: stop marking it as misspelt
 #: ../desktop/src/words.ts
@@ -12204,6 +12979,13 @@ msgstr "ta bort den här biten och se vad som blir kvar"
 msgid "Transfer to {0}"
 msgstr "Överföring till {0}"
 
+#. placeholder {0}: formatInstant(status.manual_changed_at)
+#. placeholder {1}: status.manual_changed_by
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "Rates as of {asOf} · entered by hand · last change {0} by {1}"
+msgstr "Kurser per {asOf} · angivna för hand · senast ändrade {0} av {1}"
+
 #. Option in a dropdown on the one-time import's mapping step
 #. placeholder {0}: nameOf.get(heldBy!) ?? heldBy
 #: src/screens/ynab/mapping.tsx
@@ -12215,6 +12997,13 @@ msgstr "används av {0}"
 #, fuzzy
 msgid "Left out, the zip restores onto this instance as it is. Anywhere else, every authenticator is refused unless you supply the key separately, and the zip's README says how."
 msgstr "Utan den återställs zip-filen till den här instansen som den är. Någon annanstans nekas alla autentiseringsappar om du inte anger nyckeln separat, och zip-filens README förklarar hur."
+
+#. Button on the Exchange rates page: fetch the missing exchange rates now
+#. Heading on the Exchange rates page: the button that fetches rates, and what it does
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Fetch now"
+msgstr "Hämta nu"
 
 #: src/screens/History.tsx
 #, fuzzy
@@ -12264,6 +13053,12 @@ msgstr "Pengar in inom {PAYMENT_PICKER_DAYS} dagar före eller efter {0}. Före 
 #, fuzzy
 msgid "Out of"
 msgstr "Från"
+
+#. Screen-reader text after a date on the Income vs Expense report's transaction list
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid ", open in Transactions in a new tab"
+msgstr ", öppna i Transaktioner i en ny flik"
 
 #. Column heading on the Admin screen
 #: src/screens/Admin.tsx
@@ -12319,6 +13114,12 @@ msgstr "{action}: {name}"
 #, fuzzy
 msgid "Held in light, whatever this device is set to."
 msgstr "Låst i ljust, oavsett vad enheten är inställd på."
+
+#. Where an exchange rate came from: none was needed, the amount is already in the base currency
+#: src/lib/fx.ts
+#, fuzzy
+msgid "base currency"
+msgstr "basvaluta"
 
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -12647,6 +13448,14 @@ msgstr "det som blir kvar"
 msgid "Undoing puts back <0>{count}</0> rows exactly as they were before. Anything changed since is overwritten, and undoing the undo is the only way back."
 msgstr "Att ångra återställer <0>{count}</0> rader precis som de var innan. Allt som ändrats sedan dess skrivs över, och att ångra ångringen är enda vägen tillbaka."
 
+#. placeholder {0}: checked.currency
+#. placeholder {1}: checked.inverse
+#. placeholder {2}: household.base_currency
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "1 {0} = {1} {2}"
+msgstr "1 {0} = {1} {2}"
+
 #. Value of a fact on the one-time import (flags)
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -12695,6 +13504,12 @@ msgstr "{app}, via dess CSV-export"
 #, fuzzy
 msgid "may add and delete categories"
 msgstr "får lägga till och ta bort kategorier"
+
+#. Column heading on the Exchange rates page: where today's rate comes from
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Source in use"
+msgstr "Källa som används"
 
 #. Shown in a dropdown when the search finds nothing
 #: src/components/GroupedPicker.tsx
@@ -12802,7 +13617,9 @@ msgstr "{0, plural, one {{who} är också här} other {{who} är också här}}"
 #. Button on the Register screen: verb
 #. Button on the passkeys panel: verb
 #. Button on the passkeys panel: verb
+#. Button: take this rate source out of the list
 #: src/screens/Accounts.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Passkeys.tsx
 #: src/screens/Register.tsx
 #, fuzzy
@@ -12906,6 +13723,12 @@ msgstr "Inte numrerad: i en OFX-fil räknar kolumnen Rad ovan transaktioner, int
 msgid "Hide the {code} columns"
 msgstr "Dölj kolumnerna för {code}"
 
+#. Option on the Exchange rates page: a month's figures use its last rate
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Month-end rate"
+msgstr "Kurs vid månadsslut"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "What is it for"
@@ -12978,6 +13801,12 @@ msgstr "Arkiverade"
 #, fuzzy
 msgid "Let it add and change transactions, not only read them"
 msgstr "Låt den lägga till och ändra transaktioner, inte bara läsa dem"
+
+#. Option: a rate for one day
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "A day"
+msgstr "En dag"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -13085,6 +13914,12 @@ msgstr "Vad detta skulle göra"
 #, fuzzy
 msgid "(SHA-256 of the original)"
 msgstr "(SHA-256 för originalet)"
+
+#. Label of a file field on the Exchange rates page
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Rates file"
+msgstr "Kursfil"
 
 #: src/screens/AccountImport.tsx
 #, fuzzy
@@ -13230,11 +14065,13 @@ msgid "colour"
 msgstr "färg"
 
 #. Button on the Accounts screen
+#. Heading on the Exchange rates page
 #. Heading on the household page
 #. Text on the household page
 #. Text on the shared controls
 #: src/components/bits.tsx
 #: src/screens/Accounts.tsx
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Household.tsx
 #, fuzzy
 msgid "Settings"
@@ -13339,7 +14176,9 @@ msgid "call it one payee"
 msgstr "kalla det en mottagare"
 
 #. Column heading on the Admin screen: noun
+#. Column heading on the Exchange rates page
 #: src/screens/Admin.tsx
+#: src/screens/ExchangeRates.tsx
 #, fuzzy
 msgid "Status"
 msgstr "Status"
@@ -13388,6 +14227,12 @@ msgstr "Nycklar för program"
 msgid "Written off"
 msgstr "Avskrivna"
 
+#. Column heading on the Exchange rates page: date of the oldest stored rate
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "First rate"
+msgstr "Första kurs"
+
 #: src/screens/Updates.tsx
 msgid "These changes since then would be lost:"
 msgstr ""
@@ -13397,6 +14242,12 @@ msgstr ""
 #, fuzzy
 msgid "12,34"
 msgstr "12,34"
+
+#. Column heading on the fetch history: rates already stored
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Unchanged"
+msgstr "Oförändrade"
 
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
@@ -13518,6 +14369,12 @@ msgstr "En rubrik som kategorierna ligger under – Räkningar, Vardag, det som 
 msgid "One ledger: its accounts, its register, its receipts and the people who can reach them."
 msgstr "En bok: dess konton, dess register, dess kvitton och de personer som kommer åt dem."
 
+#. placeholder {0}: household.base_currency
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "A rate is units of the currency per 1 {0}, the way the ECB quotes it. A monthly rate covers every day of its month."
+msgstr "En kurs är enheter av valutan per 1 {0}, så som ECB anger den. En månadskurs gäller varje dag i sin månad."
+
 #: src/screens/reports/IncomeExpense.tsx
 #, fuzzy
 msgid "No category group is marked as Income, so every row is counted as an expense. Mark the group that holds your income on the Categories screen."
@@ -13598,6 +14455,13 @@ msgstr "Lösennycklar"
 #, fuzzy
 msgid "Import it anyway"
 msgstr "Importera ändå"
+
+#. Button in a confirmation: yes, fetch the range again
+#. Button on the Exchange rates page: fetch the chosen date range again
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Refetch"
+msgstr "Hämta igen"
 
 #. Option in a dropdown on the Register screen
 #: src/screens/Register.tsx
@@ -13726,6 +14590,12 @@ msgstr "{count, plural, one {{shown} transaktion} other {{shown} transaktioner}}
 msgid "Mark applied"
 msgstr "Markera som tillämpad"
 
+#. Screen-reader name of the right arrow on the Income vs Expense report's month map
+#: src/screens/reports/ReportGrid.tsx
+#, fuzzy
+msgid "Later months"
+msgstr "Senare månader"
+
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Close without copying? The link cannot be shown again."
@@ -13759,6 +14629,12 @@ msgstr "Inget i registret än."
 #, fuzzy
 msgid "bank"
 msgstr "bank"
+
+#. Button in a confirmation: yes, change the rate settings
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Change it"
+msgstr "Ändra"
 
 #: src/screens/Categories.tsx
 #, fuzzy
@@ -13917,6 +14793,12 @@ msgstr "via {via}"
 msgid "{inviter} invited you to {PRODUCT} as a member."
 msgstr "{inviter} har bjudit in dig till {PRODUCT} som medlem."
 
+#. Screen-reader name of the left arrow on the Income vs Expense report's month map
+#: src/screens/reports/ReportGrid.tsx
+#, fuzzy
+msgid "Earlier months"
+msgstr "Tidigare månader"
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Add an account before entering transactions."
@@ -14064,6 +14946,12 @@ msgstr "Väntande återställningslänkar"
 msgid "Sign in with a passkey"
 msgstr "Logga in med en lösennyckel"
 
+#. placeholder {0}: data.base_currency
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Every account is in {0}: there is no rate to keep."
+msgstr "Alla konton är i {0}: det finns ingen kurs att spara."
+
 #. What was reset, inside a sentence: the authenticator. Lower case. See GLOSSARY.md
 #: src/lib/signInChanges.ts
 #, fuzzy
@@ -14109,10 +14997,14 @@ msgstr "Uppdateraren är nu också {updaterVersion}."
 msgid "Applying…"
 msgstr "Tillämpar…"
 
+#. Column heading on Browse rates: where the rate came from
 #. Column heading on the Register screen: noun, where it came from
+#. Column heading on the fetch history: where rates were fetched from
 #. Column name for resizing the column on the Register screen: noun, where it came from
 #. Column name shown beside a value on phones on the Register screen: noun, where it came from
 #. Label of a choice on the Register screen: noun, where it came from
+#. Label of a filter on the Exchange rates page: where rates come from
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Source"
@@ -14149,6 +15041,12 @@ msgstr ""
 msgid "Build my own"
 msgstr "Bygg mina egna"
 
+#. Button on the Exchange rates page: show the month strip of this currency
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Months"
+msgstr "Månader"
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Edit the memo"
@@ -14166,6 +15064,11 @@ msgstr "ungefärligt – {shown}"
 #, fuzzy
 msgid "In"
 msgstr "In"
+
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "Rates as of {asOf} · entered by hand"
+msgstr "Kurser per {asOf} · angivna för hand"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -14255,6 +15158,11 @@ msgstr "Produkt i kontoutdraget"
 #, fuzzy
 msgid "The updater stayed on {updaterVersion} and will try again:"
 msgstr "Uppdateraren stannade på {updaterVersion} och försöker igen:"
+
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "dates with a transaction and no rate within the limit"
+msgstr "datum med en transaktion och ingen kurs inom gränsen"
 
 #. placeholder {0}: offer.count
 #: src/screens/Import.tsx
@@ -14510,6 +15418,12 @@ msgstr "De här mottagarna skiljer sig bara i accenter, streck eller mellanslag 
 msgid "The bar comes back once the parts add up."
 msgstr "Stapeln kommer tillbaka när delarna går jämnt ut."
 
+#. Kind of fetch of exchange rates: the dates given, replacing what is stored
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Refetch a range"
+msgstr "Hämta ett intervall igen"
+
 #. Label on the Accounts screen
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -14616,6 +15530,13 @@ msgstr "De här kontona är i {heldIn} och det finns inga växelkurser att räkn
 msgid "Nothing in that window. Widen the dates above."
 msgstr "Inget i det intervallet. Vidga datumen ovan."
 
+#. Column heading on the Exchange rates page: share of transaction dates with a rate
+#. Label of a tile on the Exchange rates page: how many currencies have a rate
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Coverage"
+msgstr "Täckning"
+
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -14715,6 +15636,11 @@ msgstr "<0>▾</0> markerar de två vars saldo normalt är negativt – du är s
 msgid "This year"
 msgstr "I år"
 
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Columns <0>currency,date,rate</0>: a date as <1>YYYY-MM-DD</1>, or a month as <2>YYYY-MM</2>. All or none: one line with a problem keeps the whole file out. <3>Download the template</3>."
+msgstr "Kolumner <0>currency,date,rate</0>: ett datum som <1>YYYY-MM-DD</1>, eller en månad som <2>YYYY-MM</2>. Allt eller inget: en rad med ett problem håller hela filen utanför. <3>Ladda ner mallen</3>."
+
 #: src/screens/AccountImport.tsx
 #, fuzzy
 msgid "One row per account, under the template's header row. <0>Download the template</0>, fill it in with a spreadsheet, and save it as CSV."
@@ -14758,6 +15684,11 @@ msgstr "inte migrerad"
 #, fuzzy
 msgid "A code from your current authenticator"
 msgstr "En kod från din nuvarande autentiseringsapp"
+
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Past converted figures will change: every report converts with the new choice from its next load. The change is written to History."
+msgstr "Tidigare omräknade siffror ändras: varje rapport räknar om med det nya valet från nästa gång den laddas. Ändringen skrivs till Historik."
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -14826,6 +15757,13 @@ msgstr "En annan nyare version"
 msgid "From the photograph's own metadata."
 msgstr "Från fotots egna metadata."
 
+#. What kind of row changed, lower case, singular, in History beside its id: a rate entered by hand
+#: src/lib/historyWords.ts
+#, fuzzy
+msgctxt "history table"
+msgid "exchange rate"
+msgstr "växelkurs"
+
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "Update by replacing the compose bundle with the newest release's: your data and version are kept."
@@ -14848,11 +15786,19 @@ msgstr "Nya koder"
 #. Column heading on the Accounts screen
 #. Column heading on the Admin screen
 #. Column name shown beside a value on phones on the Accounts screen
+#. Label of a picker: whether a rate is for one day or a whole month
 #: src/screens/Accounts.tsx
 #: src/screens/Admin.tsx
+#: src/screens/ExchangeRates.tsx
 #, fuzzy
 msgid "For"
 msgstr "För"
+
+#. Heading on the Exchange rates page: one row per currency the household holds
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Per currency"
+msgstr "Per valuta"
 
 #. Button: undo the last update
 #. Heading on the Updates screen: undo the last update
@@ -14942,9 +15888,13 @@ msgid "on {date}"
 msgstr "{date}"
 
 #. Label of a choice on the one-time import
+#. Screen-reader text on the Income vs Expense report's month map: the first and last month in view
+#. placeholder {0}: monthLabel(months[from])
 #. placeholder {0}: one.first_month ?? "…"
+#. placeholder {1}: monthLabel(months[to])
 #. placeholder {1}: one.last_month ?? "…"
 #: src/screens/OneTimeImport.tsx
+#: src/screens/reports/ReportGrid.tsx
 #, fuzzy
 msgid "{0} to {1}"
 msgstr "{0} till {1}"
@@ -14963,6 +15913,12 @@ msgstr "<0>{0}</0>, tagen av uppdateringen från {1}, {2}. Mappen tas bort och <
 #, fuzzy
 msgid "Revoked {0}"
 msgstr "Återkallad {0}"
+
+#. Column heading on the Exchange rates page: days your own transfers give a rate
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Own rates"
+msgstr "Egna kurser"
 
 #. Name of a fact on the one-time import
 #: src/screens/OneTimeImport.tsx
@@ -15038,6 +15994,11 @@ msgstr "Sedlar och mynt i en plånbok eller en burk. Inget importeras hit – du
 #, fuzzy
 msgid "How the change is split."
 msgstr "Hur förändringen delas upp."
+
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "Rates as of {asOf} · {sources}"
+msgstr "Kurser per {asOf} · {sources}"
 
 #. Button on the Application management screen: verb, close this panel
 #. Button on the Your account panel: verb, close this panel
@@ -15265,7 +16226,9 @@ msgstr "Jag har sparat den"
 
 #. Button on the Register screen
 #. Desktop app dialog button: close the dialog
+#. State of a currency on the Exchange rates page: it has a fresh rate
 #: ../desktop/src/words.ts
+#: src/screens/ExchangeRates.tsx
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "OK"
@@ -15295,6 +16258,15 @@ msgstr "Minst en valuta förblir markerad"
 msgid "{0, plural, one {{1}: # change} other {{2}: # changes}}"
 msgstr ""
 
+#. While a fetch runs: the source, the currency codes, the first date
+#. placeholder {0}: sourceLabel(row.source)
+#. placeholder {1}: row.currencies.join(" ")
+#. placeholder {2}: formatDate(row.requested_since)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Fetching {0}, {1} from {2}…"
+msgstr "Hämtar från {0}: {1} från {2}…"
+
 #. placeholder {0}: app.repository ?? repository
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -15319,6 +16291,12 @@ msgstr "Hela importen är en enda post i Historik, och att ångra den där tar b
 #, fuzzy
 msgid "{0, plural, one {{1} transfer imported as ordinary transactions, with the reason for each} other {{2} transfers imported as ordinary transactions, with the reason for each}}"
 msgstr "{0, plural, one {{1} överföring importerad som vanlig transaktion, med skälet} other {{2} överföringar importerade som vanliga transaktioner, med skälet för var och en}}"
+
+#. Button on the Exchange rates page: enter a rate for this currency by hand
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Enter a rate"
+msgstr "Ange en kurs"
 
 #. placeholder {0}: ++step
 #: src/screens/Backups.tsx
@@ -15413,6 +16391,18 @@ msgstr ""
 msgid "Stored as"
 msgstr "Sparad som"
 
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "No exchange rates yet · enter them on the Exchange rates page"
+msgstr "Inga växelkurser än · ange dem på sidan Växelkurser"
+
+#. placeholder {0}: formatInstant(status.last_fetch_failed!.at)
+#. placeholder {1}: status.last_fetch_failed!.error
+#: src/components/RatesAsOf.tsx
+#, fuzzy
+msgid "Rates as of {asOf} · the last fetch failed on {0}: {1}"
+msgstr "Kurser per {asOf} · senaste hämtningen misslyckades {0}: {1}"
+
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "The backup taken before it is listed under Database; keep it for at least a day of use."
@@ -15428,6 +16418,12 @@ msgstr "Markera kvittot från {0}"
 #, fuzzy
 msgid "DD/MM/YYYY"
 msgstr "DD/MM/ÅÅÅÅ"
+
+#. Column heading on the fetch history: missing only, or a range again
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Mode"
+msgstr "Läge"
 
 #: src/screens/OneTimeImport.tsx
 #, fuzzy

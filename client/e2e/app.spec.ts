@@ -809,6 +809,7 @@ test("the household section lists its pages in order, payees under a heading", a
     "Accounts",
     "Transfers",
     "Categories",
+    "Exchange rates",
     "# Payee",
     "Payee Merge",
     "Payee Categorisation",
@@ -887,6 +888,40 @@ test("the Reports header opens an index, and the index opens the report", async 
   // browser history to press.
   await page.locator(".crumbs").getByRole("button", { name: "Reports" }).click();
   await expect(page.locator("main").getByRole("button", { name: /Income vs Expense/ })).toBeVisible();
+});
+
+test("the report's heading follows the page, and a figure's row opens in Transactions (#401)", async ({ page, context }) => {
+  await go(page, "Income vs Expense");
+  await page.getByRole("button", { name: "Latest 12 months" }).click();
+
+  // Twelve months are wider than either screen, so the month map is the way across.
+  await expect(page.getByRole("scrollbar", { name: "Months in view" })).toBeVisible();
+
+  // Scrolled down the page, the heading is still at the top of what you read.
+  // Far enough down that the table's top has gone off the screen, at either width.
+  const main = page.locator("main.content");
+  await page.locator(".ie-grid-body tfoot").evaluate((el) => el.scrollIntoView({ block: "center" }));
+  const [mainTop, headTop] = await Promise.all([
+    main.evaluate((el) => el.getBoundingClientRect().top),
+    page.locator(".ie-grid-head").evaluate((el) => el.getBoundingClientRect().top),
+  ]);
+  expect(Math.abs(headTop - mainTop)).toBeLessThan(2);
+  await main.evaluate((el) => (el.scrollTop = 0));
+
+  // A Total opens its rows; a row opens Transactions in a new tab, on itself.
+  const total = page
+    .locator(".ie-grid-body tbody tr:has(button.figure-open) td.amount:nth-last-child(2) button.figure-open")
+    .first();
+  await total.click();
+  const dialog = page.getByRole("dialog");
+  const link = dialog.locator("a.behind-open").first();
+  await expect(link).toBeVisible();
+  const [tab] = await Promise.all([context.waitForEvent("page"), link.click()]);
+  await tab.getByRole("heading", { name: "Transactions", exact: true }).waitFor();
+  await expect(tab.locator("tr.row-sent")).toHaveCount(1);
+  // The report is still where it was, with its bubble open.
+  await expect(dialog).toBeVisible();
+  await tab.close();
 });
 
 test("the report is also one click from the menu", async ({ page }) => {

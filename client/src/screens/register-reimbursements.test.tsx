@@ -457,3 +457,42 @@ describe("the bulk banner", () => {
     );
   });
 });
+
+describe("arriving from a report figure's row (#401)", () => {
+  it("asks for the figure's filters, opens that row and marks it among its neighbours", async () => {
+    // The register drops a ticked category it does not know, so this one exists.
+    const answer = vi.mocked(api.get).getMockImplementation()!;
+    vi.mocked(api.get).mockImplementation(((path: string) =>
+      path.includes("/categories")
+        ? Promise.resolve([{ id: "g-work", name: "Work", categories: [{ id: "cat-travel", name: "Travel" }] }])
+        : answer(path)) as typeof api.get);
+    mount({
+      open: TAXI.id,
+      range: { since: "2026-10-01", until: "2026-10-31" },
+      categories: ["cat-travel"],
+      backlog: false,
+      currencies: ["EUR"],
+    });
+    // The register's own listing, not the panel's lookup of the payment that
+    // repaid the row it opened.
+    const listing = () => asked.filter((one) => one.has("sort")).at(-1)!;
+    await waitFor(() => expect(asked.some((one) => one.has("sort"))).toBe(true));
+    expect(listing().getAll("currency")).toEqual(["EUR"]);
+    expect(listing().get("since")).toBe("2026-10-01");
+    expect(listing().get("until")).toBe("2026-10-31");
+    expect(listing().getAll("category_id")).toEqual(["cat-travel"]);
+    expect(listing().get("uncategorised")).toBeNull();
+
+    // The panel is open on the row, and the row itself is marked.
+    await waitFor(() => expect(document.querySelector("tr.row-sent")).not.toBeNull());
+    const marked = [...document.querySelectorAll("tr.row-sent")];
+    expect(marked).toHaveLength(1);
+    expect(marked[0].getAttribute("data-txn")).toBe(TAXI.id);
+  });
+
+  it("marks nothing when nobody was sent", async () => {
+    mount();
+    await screen.findByText("Bakery");
+    expect(document.querySelector("tr.row-sent")).toBeNull();
+  });
+});

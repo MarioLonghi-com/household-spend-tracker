@@ -1064,6 +1064,62 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "ynab.amount_too_long": {
     message: msg({ id: "error.ynab.amount_too_long", message: "Line {line} of this file has an amount longer than {max} characters, which YNAB never writes -- it may not be a YNAB export, or it may be damaged" }),
   },
+  "fx.nothing_to_fetch": {
+    message: msg({ id: "error.fx.nothing_to_fetch", message: "No source in this household's chain is fetched -- add the ECB to it first", comment: "ECB: the European Central Bank, which publishes exchange rates" }),
+  },
+  "fx.no_foreign_currency": {
+    message: msg({ id: "error.fx.no_foreign_currency", message: "This household keeps every account in its base currency, so there is no rate to fetch" }),
+  },
+  "fx.range_needs_dates": {
+    message: msg({ id: "error.fx.range_needs_dates", message: "Refetching a range needs a first and a last date" }),
+  },
+  "fx.range_backwards": {
+    message: msg({ id: "error.fx.range_backwards", message: "The range starts on {since}, after it ends on {until}" }),
+    dates: ["since", "until"],
+  },
+  "fx.range_in_future": {
+    message: msg({ id: "error.fx.range_in_future", message: "{until} is in the future, and no rate is published for it yet" }),
+    dates: ["until"],
+  },
+  "fx.fetch_running": {
+    message: msg({ id: "error.fx.fetch_running", message: "A fetch is already running -- wait for it to finish" }),
+  },
+  "fx.unknown_source": {
+    message: msg({ id: "error.fx.unknown_source", message: "{source} is not a source of exchange rates -- use manual, ecb or own", comment: "manual, ecb and own are the API's names for rate sources and stay as they are" }),
+  },
+  "fx.source_twice": {
+    message: msg({ id: "error.fx.source_twice", message: "{source} is in the chain twice" }),
+  },
+  "fx.stale_days_range": {
+    message: msg({ id: "error.fx.stale_days_range", message: "A rate can be treated as stale after {min} to {max} days" }),
+  },
+  "fx.unknown_policy": {
+    message: msg({ id: "error.fx.unknown_policy", message: "{policy} is not a rate for monthly figures -- use month_avg, month_end or spot", comment: "month_avg, month_end and spot are the API's own names and stay as they are" }),
+  },
+  "fx_manual.rows_refused": {
+    message: msg({ id: "error.fx_manual.rows_refused", message: "{refused} of {rows, plural, one {# rate} other {# rates}} cannot be saved, so none were. Nothing has been changed; correct them and try again." }),
+  },
+  "fx_manual.not_found": {
+    message: msg({ id: "error.fx_manual.not_found", message: "No such exchange rate" }),
+  },
+  "fx_manual.no_rates": {
+    message: msg({ id: "error.fx_manual.no_rates", message: "There are no rates in this file" }),
+  },
+  "fx_manual.too_many_rows": {
+    message: msg({ id: "error.fx_manual.too_many_rows", message: "This file has more than {max} rates in it -- split it in two" }),
+  },
+  "fx_manual.not_csv": {
+    message: msg({ id: "error.fx_manual.not_csv", message: "Line {line} of this file cannot be read as CSV. Save it from the spreadsheet as CSV again, or start from the template." }),
+  },
+  "fx_manual.unknown_column": {
+    message: msg({ id: "error.fx_manual.unknown_column", message: "This file has a column this does not know: {columns}. The columns are {known}." }),
+  },
+  "fx_manual.missing_column": {
+    message: msg({ id: "error.fx_manual.missing_column", message: "This file has no {columns} column. The first line should name the columns: {known}." }),
+  },
+  "fx_manual.column_twice": {
+    message: msg({ id: "error.fx_manual.column_twice", message: "This file has the column {column} twice" }),
+  },
   "request.cross_origin": {
     message: msg({ id: "error.request.cross_origin", message: "That request did not come from this app" }),
   },

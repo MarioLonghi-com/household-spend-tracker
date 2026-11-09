@@ -152,8 +152,10 @@ manifest names the endpoint for every step.
 3. **Work expenses**: find the rows a corporate expense claim describes by
    amount, date and merchant, and flag them as money an employer will pay back.
 4. **The combined position**: balances, summaries and reports per currency,
-   accounts with their country, and the exchange rates the household actually
-   got. Converting is yours, and you say which rate you used.
+   accounts with their country, the exchange rates the household actually
+   got, and the rates its chain reads with how old they are (`fx/rates`,
+   `fx/status`). The ledger never converts. A report that converts says which
+   rates it used; when you convert yourself, say which rate you used.
 5. **Transfers**: see what the transfer matcher suggested and what it left
    alone, link the pairs it missed — including between two currencies — and
    rule out wrong suggestions. A person confirms your links.

@@ -1,26 +1,29 @@
 """Net Worth: every account's balance at each month end, added up (#397).
 
-The one report here that **may** add two currencies, and only through a rate.
-Every other report answers one currency at a time because the ledger never
-converts; this one exists to answer "how much does the household have, all
-accounts together", which in a household with a EUR and a GBP account has no
-answer without a rate. So the rule `insights.py` states -- **no response ever
-sums two currencies** -- is kept here in the only way it can be:
+The one report here that **adds** two currencies, and only through a rate
+(#396's `services/fx.py`). Every other report answers one currency at a time;
+this one exists to answer "how much does the household have, all accounts
+together", which in a household with a EUR and a GBP account has no answer
+without a rate. So the rule that **no figure ever sums two currencies
+unconverted** is kept here in the only way it can be:
 
 - **One currency in scope:** everything is in that currency, exactly, and no
   rate is asked for. The report works with no rate source at all.
-- **Several, and rates available:** each account is converted into the
-  household's base currency *first*, at the rate on that date, and the
-  converted values are added. A currency with no rate is left out of the total
-  and listed under ``not_converted``; it is never treated as zero or as 1.
-- **Several, and no rates:** no grand total. ``display_currency`` is null, the
-  top-level figures are absent, and ``currencies`` carries each currency's own
-  book side by side.
+- **Several, and rates to convert with:** each account is converted into the
+  household's base currency *first*, at the spot rate on that date, and the
+  converted values are added. A currency with no rate is left out of the
+  total and listed under ``not_converted``; never treated as zero or as 1.
+- **Several, and no rates** -- no source in the chain, or none stored yet for
+  any currency on screen: no grand total. ``display_currency`` is null, the
+  top-level figures are absent, and ``currencies`` carries each currency's
+  own book side by side.
 
-Conversion happens behind one seam, :func:`rates_for`, which answers "no
-rates" until the exchange-rates service (#396) lands and is pointed at it.
-Nothing converted is stored: a rate entered tomorrow changes the next answer,
-and a change of base currency needs no migration.
+Every conversion goes through one seam, :func:`rates_for` -- the household's
+`fx.Rates`, at `FxPolicy.spot` -- and this module never divides an amount by
+a rate. Nothing converted is stored: a rate entered tomorrow changes the next
+answer, and a change of base currency needs no migration. ``rates_status``
+is `fx.rates_status` for the currencies on screen, so the "Rates as of" line
+and the figures come from one response.
 
 **Balances are one query whatever the number of points**
 (:func:`insights.monthly_movements`), read at each point as a running sum.
@@ -47,10 +50,9 @@ from typing import Protocol
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import money
 from ..errors import ValidationError
-from ..models import Account, Household
-from . import insights
+from ..models import Account, FxPolicy, Household
+from . import fx, insights
 
 
 class Split(enum.StrEnum):
@@ -76,21 +78,13 @@ MAX_POINTS = 1200
 # --------------------------------------------------------------------------- #
 
 
-@dataclass(frozen=True, slots=True)
-class RateUsed:
-    """One rate: units of the currency per one unit of the base currency."""
-
-    rate: Decimal
-    #: The date the rate was published. Earlier than the date asked for over a
-    #: weekend or a holiday: the last published rate on or before it.
-    rate_date: Date
-    source: str
-    #: Older than the household's staleness limit. Still used, and flagged.
-    stale: bool
-
-
 class Rates(Protocol):
-    """What this report needs from an exchange-rate source, and nothing more."""
+    """What this report needs from an exchange-rate source, and nothing more.
+
+    `FxRates` is the household's, through `services/fx.py`; tests hand in a
+    fixed table of their own. Every conversion goes through `convert`, which
+    is `fx`'s: this module never divides an amount by a rate.
+    """
 
     #: The sources tried in order, as the response's `rate_source` names them.
     chain: tuple[str, ...]
@@ -98,60 +92,76 @@ class Rates(Protocol):
     policy: str
 
     def available(self) -> bool:
-        """Whether a rate source is set up at all. False means "never convert"."""
+        """Whether any rate source is set up. False means "never convert"."""
         ...
 
-    def rate_on(self, currency: str, on_date: Date) -> RateUsed | None:
+    def rate_on(self, currency: str, on_date: Date) -> fx.RateUsed | None:
         """The last rate on or before `on_date`, or None when there is none."""
         ...
 
-    def status(self, currencies: list[str]) -> dict | None:
-        """The "Rates as of" block for the currencies this answer converted."""
+    def convert(self, minor: int, currency: str, on_date: Date) -> fx.Converted | None:
+        """`minor` of `currency` in minor units of the base currency, or None."""
+        ...
+
+    def status(self, currencies: list[str]) -> fx.RatesStatus | None:
+        """The "Rates as of" block for the currencies this answer converts."""
         ...
 
 
 class NoRates:
-    """No rate source: a report in one currency, or per-currency books."""
+    """No rates at all: a report in one currency, or per-currency books."""
 
     chain: tuple[str, ...] = ()
-    policy = "spot"
+    policy = FxPolicy.spot.value
 
     def available(self) -> bool:
         return False
 
-    def rate_on(self, currency: str, on_date: Date) -> RateUsed | None:
+    def rate_on(self, currency: str, on_date: Date) -> fx.RateUsed | None:
         return None
 
-    def status(self, currencies: list[str]) -> dict | None:
+    def convert(self, minor: int, currency: str, on_date: Date) -> fx.Converted | None:
+        return None
+
+    def status(self, currencies: list[str]) -> fx.RatesStatus | None:
         return None
 
 
 NO_RATES = NoRates()
 
 
-def rates_for(session: Session, household: Household) -> Rates:
-    """The household's rates, for this one request.
+class FxRates:
+    """The household's rates (#396), read once for this request, at the spot policy.
 
-    The one place the exchange-rates service plugs in (#396). Until it does,
-    there is no rate anywhere in the schema and the answer is "none": a report
-    in one currency still works, and one spanning several shows each
-    currency's own figures and never a sum.
+    A balance is what an account held on one day, so it converts at the rate
+    on that day -- `FxPolicy.spot` -- whatever the household chose for monthly
+    figures.
     """
-    return NO_RATES
+
+    policy = FxPolicy.spot.value
+
+    def __init__(self, session: Session, household: Household, *, today: Date | None = None):
+        self.session = session
+        self.household = household
+        self.rates = fx.rates(session, household, today=today)
+        self.chain = tuple(source.value for source in self.rates.chain)
+
+    def available(self) -> bool:
+        return bool(self.chain)
+
+    def rate_on(self, currency: str, on_date: Date) -> fx.RateUsed | None:
+        return self.rates.rate_on(currency, on_date, policy=FxPolicy.spot)
+
+    def convert(self, minor: int, currency: str, on_date: Date) -> fx.Converted | None:
+        return self.rates.convert(minor, currency, on_date, policy=FxPolicy.spot)
+
+    def status(self, currencies: list[str]) -> fx.RatesStatus | None:
+        return fx.rates_status(self.session, self.household, currencies, rates=self.rates)
 
 
-def convert(minor: int, currency: str, to_currency: str, used: RateUsed) -> int:
-    """`minor` of `currency` in `to_currency`, at `used`: divided, then rounded once.
-
-    In `Decimal` at each currency's own exponent, never a float, and rounded by
-    `money.to_minor` -- the rule every entered amount already follows.
-    """
-    return money.to_minor(money.to_decimal(minor, currency) / used.rate, to_currency)
-
-
-def rate_text(rate: Decimal) -> str:
-    """A rate as the decimal string the money API sends. Never a float."""
-    return format(rate, "f")
+def rates_for(session: Session, household: Household, *, today: Date | None = None) -> Rates:
+    """The household's rates, for this one request."""
+    return FxRates(session, household, today=today)
 
 
 # --------------------------------------------------------------------------- #
@@ -368,7 +378,7 @@ class NetWorth:
     display_currency: str | None
     converted: bool
     rate_source: RateSource | None
-    rates_status: dict | None
+    rates_status: fx.RatesStatus | None
     points: list[Point]
     headline: Headline | None
     bridge: Bridge | None
@@ -411,28 +421,39 @@ def _history(movements: dict[str, int], points: list[Date]) -> list[int | None]:
 
 
 class _Valuer:
-    """Values an account's balance in one display currency, caching each rate."""
+    """Values an account's balance in one display currency, through the rates.
+
+    In its own currency a balance is its value. Otherwise `Rates.convert`
+    makes it -- `fx`'s arithmetic, rounded once -- and a missing rate is a
+    value of None, never zero.
+    """
 
     def __init__(self, display: str, rates: Rates, points: list[Date]):
         self.display = display
         self.rates = rates
         self.points = points
-        self._cache: dict[tuple[str, int], RateUsed | None] = {}
+        self._cache: dict[tuple[str, int], fx.RateUsed | None] = {}
 
-    def rate(self, currency: str, at: int) -> RateUsed | None:
+    def rate(self, currency: str, at: int) -> fx.RateUsed | None:
         key = (currency, at)
         if key not in self._cache:
             self._cache[key] = self.rates.rate_on(currency, self.points[at])
         return self._cache[key]
 
-    def value(self, currency: str, balance: int, at: int) -> tuple[int | None, RateUsed | None]:
+    def value(self, currency: str, balance: int, at: int) -> tuple[int | None, fx.RateUsed | None]:
         """(value, rate used). Value None: a foreign balance with no rate."""
+        return self.value_at(currency, balance, at, at)
+
+    def value_at(
+        self, currency: str, balance: int, at: int, rate_at: int
+    ) -> tuple[int | None, fx.RateUsed | None]:
+        """`balance`, held at point `at`, valued at the rate of point `rate_at`."""
         if currency == self.display or balance == 0:
             return balance, None
-        used = self.rate(currency, at)
-        if used is None:
+        converted = self.rates.convert(balance, currency, self.points[rate_at])
+        if converted is None:
             return None, None
-        return convert(balance, currency, self.display, used), used
+        return converted.amount_minor, converted.rate_used
 
 
 def _share(value: int, total: int) -> str | None:
@@ -500,12 +521,11 @@ def _book(
         opening = history[account.id][0]
         if not opening or account.currency == valuer.display:
             continue
-        at_start, at_end = valuer.rate(account.currency, 0), valuer.rate(account.currency, last)
-        if at_start is None or at_end is None:
+        then, _ = valuer.value_at(account.currency, opening, 0, 0)
+        now, _ = valuer.value_at(account.currency, opening, 0, last)
+        if then is None or now is None:
             continue
-        fx_effect += convert(opening, account.currency, valuer.display, at_end) - convert(
-            opening, account.currency, valuer.display, at_start
-        )
+        fx_effect += now - then
     bridge = Bridge(
         start=first.net_worth,
         fx_effect=fx_effect,
@@ -533,7 +553,7 @@ def _book(
                 if account.currency != valuer.display:
                     rate = valuer.rate(account.currency, last)
                     if rate is not None:
-                        line.rate, line.rate_date = rate_text(rate.rate), rate.rate_date
+                        line.rate, line.rate_date = fx.rate_text(rate.rate), rate.rate_date
         line.value += value
         if line.native_minor is not None:
             line.native_minor += balance
@@ -599,7 +619,7 @@ def report(
             code="report.range_backwards",
             params={"since": since.isoformat(), "until": until.isoformat()},
         )
-    rates = rates if rates is not None else rates_for(session, household)
+    rates = rates if rates is not None else rates_for(session, household, today=today)
     until = until or today
 
     everyone = (
@@ -658,10 +678,16 @@ def report(
     if len(in_scope) == 1:
         main = native[in_scope[0]]
         valuer = _Valuer(in_scope[0], NO_RATES, points)
-    elif in_scope and rates.available():
-        valuer = _Valuer(household.base_currency, rates, points)
-        main = _book(accounts, history, points, span.today_point, valuer, split)
-        converted = True
+    elif len(in_scope) > 1 and rates.available():
+        # Converted only when the rates give something to convert with: a
+        # chain with no rate stored for any currency on screen yet ("No
+        # exchange rates yet") shows each currency's own book instead of a
+        # total of the base-currency accounts alone.
+        trial = _Valuer(household.base_currency.upper(), rates, points)
+        if any(trial.rate(code, last) for code in in_scope if code != trial.display):
+            valuer = trial
+            main = _book(accounts, history, points, span.today_point, valuer, split)
+            converted = True
 
     # The accounts table: one row per account with a balance on the "as of"
     # date. A closed one is left out unless asked for; its past still counts.
@@ -728,7 +754,7 @@ def report(
             explanation.rates.append(
                 RateLine(
                     currency=code,
-                    rate=rate_text(used.rate),
+                    rate=fx.rate_text(used.rate),
                     rate_date=used.rate_date,
                     source=used.source,
                     stale=used.stale,
@@ -754,10 +780,17 @@ def report(
                 account_name=largest.name,
                 currency=largest.currency,
                 native_minor=largest.native_minor,
-                rate=rate_text(used.rate),
+                rate=fx.rate_text(used.rate),
                 value=largest.value or 0,
             )
-        rates_status = rates.status([one.currency for one in explanation.rates])
+
+    # The "Rates as of" line: whenever several currencies are in scope and a
+    # source is set up -- converted or not, so a page with no rates yet says
+    # so -- and never for one currency, where nothing is converted.
+    if len(in_scope) > 1 and rates.available():
+        rates_status = rates.status(
+            [code for code in in_scope if code != household.base_currency.upper()]
+        )
 
     return NetWorth(
         as_of=points[last],

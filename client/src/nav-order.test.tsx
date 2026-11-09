@@ -87,6 +87,7 @@ describe("the household's section of the menu", () => {
       "Accounts",
       "Transfers",
       "Categories",
+      "Exchange rates",
       "# Payee",
       "Payee Merge",
       "Payee Categorisation",

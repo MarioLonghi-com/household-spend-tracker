@@ -32,6 +32,23 @@ history this repository does not have.
 
 ## Unreleased
 
+**Reversible: lossy** — two migrations, applied in this order.
+
+- `3b6f0d2e9a41` — lossy: exchange rates (#396). Three new tables,
+  `fx_rates` (fetched rates, shared by the instance), `fx_manual_rates` (a
+  household's own) and `fx_fetches` (who fetched what), and four rate settings
+  on each household, set to manual then ECB, stale after 7 days, monthly
+  average, own rates shown. Rolling it back drops all of them: fetched rates
+  can be fetched again, rates entered by hand are lost. Nothing in the ledger
+  changes.
+- `8e1c4a7f5d02` — lossy: forint (HUF) and New Taiwan dollar (TWD) amounts
+  have two decimals, as ISO 4217 gives them, where the code had none. Every
+  stored HUF and TWD transaction amount and statement balance is multiplied
+  by 100, so each keeps its meaning; a ledger without such an account changes
+  nothing. Rolling it back divides them again, rounding away any fillér or
+  cents entered since. An undo of a HUF or TWD batch from before the upgrade
+  puts back the old figure.
+
 ### Added
 
 - **Reports → Net worth** (#397): how much the household has, all accounts
@@ -45,12 +62,73 @@ history this repository does not have.
     changed from the start of the range to its end, where the money is held,
     every account with its change, and a section explaining how each figure
     on the page was put together.
-  - With one currency in scope everything is exact. With several, the page
-    shows each currency's own figures side by side and never adds them: the
-    conversion into the base currency arrives with exchange rates (#396).
+  - With one currency in scope everything is exact. With several, each
+    account is converted into the base currency at the household's rate on
+    each date (#396), marked "≈", with the exchange-rate effect split out and
+    the "Rates as of" line on top. A currency with no rate is left out of the
+    total and named; with no rates at all, each currency's own figures are
+    shown side by side and never added.
   - Balances for every point come from one query, however long the range.
   - The agent API has the same report, answered by the same function, at
     `GET …/reports/net-worth`.
+- **Exchange rates, chosen per household (#396, phase 1).** A new page,
+  *Household → Exchange rates*, is both the settings and the sync dashboard.
+  The ledger still never converts; this is what reports will convert with.
+  - **Where rates come from** is a chain: manual rates, then the European
+    Central Bank's reference rates, by default. The household's own linked
+    transfers can be added, off by default and with a warning. The stale
+    limit and the rate used for monthly figures (monthly average, month-end,
+    or each row's day) are settings too. Any member may change them; the
+    page asks first, because past converted figures change, and History
+    records it.
+  - **Fetch now** is the only way rates arrive from outside: no schedule, no
+    fetch on page load. One request to `data-api.ecb.europa.eu` carrying only
+    currency codes and dates; it backfills from the earliest transaction the
+    first time and from the last stored rate after. *Refetch a range*
+    replaces a bad download. One fetch at a time per instance; a fetch
+    interrupted by a restart is marked failed at the next start. Who fetched
+    what is kept for 90 days.
+  - **Rates entered by hand**, one at a time or from a `currency,date,rate`
+    CSV file (all or none, with a dry run), for a day or a whole month,
+    shown with their inverse. Edits and deletions are undone in History.
+  - **The dashboard**: last fetch, rates as of, coverage, gaps and manual
+    rates; one row per currency with its source, span, age and coverage of
+    transaction dates; a month-by-month strip; the fetch history; the stored
+    rates beside your own transfers' rates; and the currencies no source
+    covers, including an account in a code ISO 4217 never assigned.
+  - **"Rates as of"**, the line every converting page will carry, saying
+    how old its rates are and when someone last fetched them. It is shown on
+    the Exchange rates page; the reports that convert follow in phase 2.
+  - **For programs**: `GET …/fx/rates` and `GET …/fx/status` on the agent
+    API, read only. A key cannot fetch, enter rates or change the chain. The
+    manifest's currency convention now reads that reports may convert
+    through the household's chosen rates and say which.
+  - `docs/CURRENCY-CONVERSION.md`, *How the tracker converts currencies*.
+
+### Changed
+
+- **Income vs Expense keeps its headings in view and has a way across**
+  (#401). The month headings now stay at the top of the page as you scroll
+  down a long report; before, they scrolled away with it.
+  - A month map travels with them: every month in the range, each with its
+    net as a small bar, and an outline over the months on screen. Drag the
+    outline, click a month, use the arrows or the arrow keys. It replaces the
+    scrollbar that sat under the last row.
+  - Total and Average stay pinned at the right while the months scroll, on
+    anything wider than a phone.
+  - A long report opens on its latest months.
+- **The rows behind a figure open in Transactions** (#401). The list a
+  figure opens is twice as wide, with a Category column. Click a
+  transaction and Transactions opens in a new tab, filtered the way the
+  figure was -- its category or group, its month, the report's currency and
+  accounts -- with that transaction highlighted and its panel open. The
+  report stays where it was.
+
+### Fixed
+
+- **Forint and New Taiwan dollar amounts have two decimals,** as ISO 4217
+  gives them; the code had zero. Stored figures are rescaled by the
+  migration above, and a test now holds the exponent table to ISO 4217.
 
 ## 0.13.1 — 2026-11-09
 

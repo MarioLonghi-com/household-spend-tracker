@@ -18,7 +18,8 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { CurrencyToggle, HeadSlot, ReportTable, groupRows, toggleFold } from "./IncomeExpense";
+import { CurrencyToggle, HeadSlot, ReportTable, drillLink, groupRows, toggleFold } from "./IncomeExpense";
+import { registerPresetFrom } from "../../lib/registerLink";
 import type { Household, IncomeExpense as Report, ReportLine, ReportRow } from "../../lib/types";
 import { format } from "../../lib/money";
 
@@ -122,13 +123,14 @@ function aReport(over: Partial<Report> = {}): Report {
 }
 
 /** The screen's own fold state, driven through the screen's own transition. */
-function Harness({ report = aReport() }: { report?: Report }) {
+function Harness({ report = aReport(), query = "currency=EUR" }: { report?: Report; query?: string }) {
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set());
   return (
     <ReportTable
       report={report}
       household={{ id: "household-1" } as Household}
-      query="currency=EUR"
+      query={query}
+      groupCategories={new Map([["group-housing", ["rent", "power"]]])}
       collapsed={collapsed}
       onToggle={(key) => setCollapsed((was) => toggleFold(was, key))}
     />
@@ -508,3 +510,95 @@ describe("in en-XA, the report shows no English", () => {
   });
 });
 
+
+describe("a figure's rows open in Transactions (#401)", () => {
+  const context = {
+    household: "household-1",
+    query: "currency=EUR&account_id=acc-1",
+    since: "2026-08-01",
+    until: "2026-09-30",
+    currency: "EUR",
+    groupCategories: new Map([["group-housing", ["rent", "power"]]]),
+  };
+  const read = (href: string) => registerPresetFrom(href.slice(1));
+
+  it("filters a category's month to that category, that month, the currency and the accounts", () => {
+    const preset = read(drillLink({ title: "", period: "2026-08", rowCategoryId: "rent", direction: "out" }, { id: "t1", date: "2026-08-02" }, context));
+    expect(preset).toEqual({
+      open: "t1",
+      range: { since: "2026-08-01", until: "2026-08-31" },
+      categories: ["rent"],
+      backlog: false,
+      currencies: ["EUR"],
+      accounts: ["acc-1"],
+    });
+  });
+
+  it("opens a group's figure on the group's categories, and Uncategorised on Needs a category", () => {
+    const group = read(drillLink({ title: "", rowGroupId: "group-housing", direction: "out" }, { id: "t1", date: "2026-09-02" }, context));
+    expect(group?.categories).toEqual(["rent", "power"]);
+    expect(group?.range).toEqual({ since: "2026-08-01", until: "2026-09-30" });
+    const unset = read(drillLink({ title: "", period: "2026-09", rowUncategorised: true, direction: "out" }, { id: "t2", date: "2026-09-12" }, context));
+    expect(unset?.categories).toEqual([]);
+    expect(unset?.backlog).toBe(true);
+  });
+
+  it("keeps the report's own category filter for a section total", () => {
+    const preset = read(
+      drillLink({ title: "", period: "2026-08", direction: "out" }, { id: "t1", date: "2026-08-02" }, {
+        ...context,
+        query: "currency=EUR&category_id=rent&category_id=fuel&include_uncategorised=false",
+      }),
+    );
+    expect(preset?.categories).toEqual(["rent", "fuel"]);
+    expect(preset?.backlog).toBe(false);
+  });
+
+  it("sets no category on a reimbursement line, and widens to a claim's earlier expense", () => {
+    const preset = read(
+      drillLink({ title: "", period: "2026-09", direction: "reimbursement_surplus" }, { id: "hotel", date: "2026-06-14" }, context),
+    );
+    expect(preset?.categories).toBeNull();
+    expect(preset?.range).toEqual({ since: "2026-06-01", until: "2026-09-30" });
+  });
+
+  it("puts the link on each row of the bubble, which is twice as wide as a dialog", async () => {
+    const { api } = await import("../../lib/api");
+    vi.mocked(api.get).mockResolvedValue({
+      entries: [{ id: "t-rent", account_name: "Visa", date: "2026-08-02", payee_name: "Landlord", category_name: "Rent", memo: null, amount_minor: -120000 }],
+      count: 1,
+      total_minor: -120000,
+      capped: false,
+    });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <Harness query="currency=EUR&account_id=acc-1" />
+      </QueryClientProvider>,
+    );
+    const rent = [...document.querySelectorAll("table.report tbody tr")].find(
+      (tr) => tr.querySelector("th")?.textContent === "Rent",
+    )!;
+    fireEvent.click(rent.querySelector<HTMLButtonElement>("button.figure-open")!);
+    await screen.findByText("Landlord");
+
+    expect(document.querySelector(".dialog")?.classList.contains("dialog-wide")).toBe(true);
+    const link = document.querySelector<HTMLAnchorElement>("table.behind a.behind-open")!;
+    expect(link.target).toBe("_blank");
+    expect(read(link.getAttribute("href")!)).toEqual({
+      open: "t-rent",
+      range: { since: "2026-08-01", until: "2026-08-31" },
+      categories: ["rent"],
+      backlog: false,
+      currencies: ["EUR"],
+      accounts: ["acc-1"],
+    });
+    // The category is a column of its own now there is room for it.
+    expect(screen.getByRole("columnheader", { name: "Category" })).toBeTruthy();
+
+    const open = vi.spyOn(window, "open").mockReturnValue(null);
+    fireEvent.click(screen.getByText("Landlord"));
+    expect(open).toHaveBeenCalledWith(link.getAttribute("href"), "_blank", "noopener");
+    open.mockRestore();
+  });
+});

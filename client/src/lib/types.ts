@@ -1,5 +1,6 @@
 /** Shapes the server sends. Kept in one file so a change is one diff. */
 
+import type { RatesStatus } from "./fx";
 import type { Coded } from "./noticeMessages";
 
 export type Role = "owner" | "member";
@@ -1172,8 +1173,8 @@ export interface NetWorth {
   display_currency: string | null;
   converted: boolean;
   rate_source: { chain: string[]; policy: string } | null;
-  /** The "Rates as of" block from the exchange-rates service (#396). */
-  rates_status: Record<string, unknown> | null;
+  /** The "Rates as of" block (#396): several currencies in scope and a source set up. */
+  rates_status: RatesStatus | null;
   points: NetWorthPoint[];
   headline: NetWorthHeadline | null;
   bridge: NetWorthBridge | null;

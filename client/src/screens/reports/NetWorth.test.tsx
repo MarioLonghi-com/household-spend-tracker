@@ -40,6 +40,7 @@ import {
 import { REPORTS } from "../Reports";
 import { format } from "../../lib/money";
 import type { Account, Household, NetWorth as Report, NetWorthBook } from "../../lib/types";
+import type { RatesStatus } from "../../lib/fx";
 
 const HOUSEHOLD = { id: "house-1", name: "Ours", base_currency: "EUR" } as unknown as Household;
 
@@ -126,12 +127,13 @@ function converted(): Report {
   return base({
     display_currency: "EUR", converted: true,
     rate_source: { chain: ["manual", "ecb"], policy: "spot" },
+    rates_status: status(),
     points,
     headline: { net_worth: 2141176, liabilities: 0, change_prev: 141176, prev_date: "2025-10-31", change_range: 141176, range_start: "2025-10-31" },
     bridge: { start: 2000000, fx_effect: -58824, money_added_or_spent: 200000, end: 2141176 },
     held: [
       { key: "EUR", native_minor: 1200000, native_currency: "EUR", rate: null, rate_date: null, value: 1200000, share: "0.5604" },
-      { key: "GBP", native_minor: 800000, native_currency: "GBP", rate: "0.8500", rate_date: "2026-10-30", value: 941176, share: "0.4396" },
+      { key: "GBP", native_minor: 800000, native_currency: "GBP", rate: "0.85", rate_date: "2026-10-30", value: 941176, share: "0.4396" },
     ],
     currencies: [book("EUR", 1000000, 1200000, 1), book("GBP", 800000, 800000, 1)],
     accounts: [
@@ -140,8 +142,8 @@ function converted(): Report {
     ],
     explanation: {
       ...base().explanation, accounts_counted: 2,
-      rates: [{ currency: "GBP", rate: "0.8500", rate_date: "2026-10-30", source: "manual", stale: false, before_as_of: true }],
-      largest_foreign: { account_id: "gbp", account_name: "Savings GBP", currency: "GBP", native_minor: 800000, rate: "0.8500", value: 941176 },
+      rates: [{ currency: "GBP", rate: "0.85", rate_date: "2026-10-30", source: "manual", stale: false, before_as_of: true }],
+      largest_foreign: { account_id: "gbp", account_name: "Savings GBP", currency: "GBP", native_minor: 800000, rate: "0.85", value: 941176 },
     },
   });
 }
@@ -169,14 +171,26 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
-function mount(onOpenRegister = vi.fn()) {
+function mount(onOpenRegister = vi.fn(), onOpenExchangeRates = vi.fn()) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const view = render(
     <QueryClientProvider client={client}>
-      <NetWorth household={HOUSEHOLD} onOpenRegister={onOpenRegister} />
+      <NetWorth household={HOUSEHOLD} onOpenRegister={onOpenRegister} onOpenExchangeRates={onOpenExchangeRates} />
     </QueryClientProvider>,
   );
-  return { onOpenRegister, ...view };
+  return { onOpenRegister, onOpenExchangeRates, ...view };
+}
+
+/** A `rates_status` block, as `fx.rates_status` sends it. */
+function status(over: Partial<RatesStatus> = {}): RatesStatus {
+  return {
+    as_of: "2026-10-30", stale: false, running: false, fetched_at: null, fetched_by: null,
+    last_fetch_failed: null, chain: ["manual", "ecb"], stale_days: 7, remote_in_chain: true,
+    manual_changed_at: null, manual_changed_by: null,
+    per_currency: [{ currency: "GBP", rate_date: "2026-10-30", source: "ecb", stale: false, age_days: 10 }],
+    not_converted: [],
+    ...over,
+  };
 }
 
 describe("the choices and the address", () => {
@@ -264,7 +278,7 @@ describe("the report as a screen", () => {
     fireEvent.click(within(table).getByRole("button", { name: /Value in EUR/ }));
     expect(names()).toEqual(["Visa", "Santander"]);
     fireEvent.click(within(table).getByRole("button", { name: "Santander" }));
-    expect(onOpenRegister).toHaveBeenCalledWith({ accounts: ["santander"], until: "2026-10-31" });
+    expect(onOpenRegister).toHaveBeenCalledWith({ accounts: ["santander"], range: { since: null, until: "2026-10-31" } });
   });
 
   it("with two currencies and no rates shows each on its own and never a sum", async () => {
@@ -289,8 +303,26 @@ describe("the report as a screen", () => {
     const text = document.body.textContent ?? "";
     expect(text).toContain(`≈ ${format(2141176, "EUR")}`);
     expect(text).toContain(`≈ ${format(-58824, "EUR")}`);
-    expect(text).toContain(`${format(800000, "GBP")} ÷ 0.8500 = ${format(941176, "EUR")}`);
+    expect(text).toContain(`${format(800000, "GBP")} ÷ 0.85 = ${format(941176, "EUR")}`);
     expect(text).toContain("the last rate before 2026-10-31");
+    expect(text).toContain("GBP: 0.85 per 1 EUR, published 2026-10-30 (entered by hand)");
+    expect(text).toContain("Rates come from entered by hand and ECB");
+    // The "Rates as of" line, from the same response, under the filter bar.
+    expect(screen.getByRole("status").textContent).toContain("Rates as of 2026-10-30");
+  });
+
+  it("with no rate stored yet says so on the line and links to the Exchange rates page", async () => {
+    answer = () => ({ ...noRates(), rates_status: status({ as_of: null, per_currency: [], not_converted: ["GBP"] }) });
+    const { onOpenExchangeRates } = mount();
+    expect(await screen.findByText(/No exchange rates yet/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Fetch or enter rates on the Exchange rates page" }));
+    expect(onOpenExchangeRates).toHaveBeenCalledTimes(1);
+  });
+
+  it("in one currency has no Rates as of line", async () => {
+    mount();
+    await screen.findByText(/^On 2026-10-31/);
+    expect(screen.queryByText(/Rates as of/)).toBeNull();
   });
 
   it("writes its filters into the address and gives the address back when it closes", async () => {

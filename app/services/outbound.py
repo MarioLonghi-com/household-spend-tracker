@@ -1,13 +1,15 @@
 """The two rules every outbound GET in this app keeps (#219, #225).
 
-**Nothing leaves the instance unless the owner presses a button, and no
+**Nothing leaves the instance unless a person presses a button, and no
 request says anything about the instance.** That is the promise, and it is
 the one that stays as the list of requests grows. This app's own requests:
 the YNAB client (``one_time_import/ynab_api``), when an owner runs the
 one-time import, and the owner's "check for updates" button
 (``platform.check_upstream``), which reads the repository's published
-releases. Both talk to one fixed host, and neither has any business following
-a redirect or waiting forever.
+releases. And a member's "Fetch now" on the Exchange rates page
+(``fx_sources.fetch_ecb``), which reads the ECB's reference rates (#396). Each
+talks to one fixed host, and none has any business following a redirect or
+waiting forever.
 
 The self-updater, which runs in its own container, makes requests of its own
 -- to ghcr.io, api.github.com and Sigstore -- and only while it handles a

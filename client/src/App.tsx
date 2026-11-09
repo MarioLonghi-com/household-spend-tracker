@@ -27,6 +27,7 @@ import { Admin } from "./screens/Admin";
 import { ApplicationManagement } from "./screens/ApplicationManagement";
 import { History } from "./screens/History";
 import { HouseholdPage } from "./screens/Household";
+import { ExchangeRates } from "./screens/ExchangeRates";
 import { Import } from "./screens/Import";
 import { ImportGuide } from "./screens/ImportGuide";
 import { Payees } from "./screens/Payees";
@@ -36,6 +37,7 @@ import { REPORTS, Report, Reports, reportFor, reportScreen } from "./screens/Rep
 import type { ReportScreen } from "./screens/Reports";
 import { Register } from "./screens/Register";
 import type { RegisterPreset } from "./screens/Register";
+import { registerPresetFrom } from "./lib/registerLink";
 import { Profile } from "./screens/Profile";
 import { applyColours } from "./lib/theme";
 import { claimScreens, readSticky, writeSticky } from "./lib/sticky";
@@ -60,6 +62,7 @@ type Screen =
   | "reports"
   | ReportScreen
   | "household"
+  | "exchange-rates"
   | "payees"
   | "payee-categorisation"
   | "transfers"
@@ -185,6 +188,8 @@ export function menu(householdName: string, offered: Capabilities = EVERYTHING):
         { key: "accounts", label: t({ message: "Accounts", comment: "Menu item and the name of its screen: noun, bank or cash accounts. See GLOSSARY.md" }) },
         { key: "transfers", label: t({ message: "Transfers", comment: "Menu item and the name of its screen: noun, money moved between your own accounts. See GLOSSARY.md" }) },
         { key: "categories", label: t({ message: "Categories", comment: "Menu item and the name of its screen. See GLOSSARY.md" }) },
+        // Where reports' rates come from, and the record of fetching them (#396).
+        { key: "exchange-rates", label: t({ message: "Exchange rates", comment: "Menu item and the name of its screen: rates for converting one currency into another" }) },
         {
           heading: t({ message: "Payee", comment: "Heading on the app's menu and frame: noun, who was paid or who paid. See GLOSSARY.md" }),
           children: [
@@ -260,8 +265,11 @@ function returnTo(): string | null {
  * arrives in a query string. `application` is the owner's; the shell opens
  * the register instead for anybody else (`OWNER_ONLY_OPENS`). Read once, then
  * the address goes back to `/`.
+ *
+ * `register` is the one that carries more: a report's bubble opens a row in
+ * Transactions with the figure's filters (#401), read by `registerPresetFrom`.
  */
-const OPENS_IN_NEW_TAB = ["accounts", "history", "rules", "application", "report-net-worth"] as const;
+const OPENS_IN_NEW_TAB = ["register", "accounts", "history", "rules", "application", "report-net-worth"] as const;
 
 /**
  * Of those, the ones that keep the address while they are open: the Net Worth
@@ -287,7 +295,11 @@ export function firstScreen(opened: { screen: OpensInNewTab | null }, role: User
  * the address back the second call found `?open=` gone and answered "nothing"
  * (#110). `putTheAddressBack` does that half, from an effect.
  */
-export function openedAt(): { screen: OpensInNewTab | null; household: string } {
+export function openedAt(): {
+  screen: OpensInNewTab | null;
+  household: string;
+  register?: RegisterPreset;
+} {
   const query = new URLSearchParams(window.location.search);
   const wanted = query.get("open");
   const screen = OPENS_IN_NEW_TAB.find((one) => one === wanted) ?? null;
@@ -295,7 +307,12 @@ export function openedAt(): { screen: OpensInNewTab | null; household: string } 
   // into an API path (#197). The shell still checks it against the member's
   // households before using it; this is the fence at the door.
   const household = screen ? (query.get("household") ?? "") : "";
-  return { screen, household: /^[\w-]{1,64}$/.test(household) ? household : "" };
+  const register = screen === "register" ? registerPresetFrom(window.location.search) : null;
+  return {
+    screen,
+    household: /^[\w-]{1,64}$/.test(household) ? household : "",
+    ...(register ? { register } : {}),
+  };
 }
 
 /**
@@ -567,7 +584,9 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
   //: Work expenses view, and maybe one row's panel. Held here because the
   //: register is unmounted while a report is on screen, so it cannot be told
   //: afterwards; it reads this once as it mounts.
-  const [registerPreset, setRegisterPreset] = useState<RegisterPreset | null>(null);
+  const [registerPreset, setRegisterPreset] = useState<RegisterPreset | null>(
+    () => opened.register ?? null,
+  );
   const [householdId, setHouseholdId] = useState<string>(opened.household);
   const [navOpen, setNavOpen] = useState(false);
   //: The desktop menu folded down to its rail (#161). Per browser, like the
@@ -892,6 +911,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
         {screen === "accounts" && <Accounts household={household} onOpenRegister={openRegister} />}
         {screen === "payees" && <Payees household={household} />}
         {screen === "categories" && <Categories household={household} />}
+        {screen === "exchange-rates" && <ExchangeRates household={household} />}
         {screen === "receipts" && <Receipts household={household} />}
         {screen === "reports" && (
           <Reports household={household} onOpen={(key) => go(reportScreen(key))} />
@@ -902,6 +922,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
             screen={screen as ReportScreen}
             onBack={() => go("reports")}
             onOpenRegister={openRegister}
+            onOpenExchangeRates={() => go("exchange-rates")}
           />
         )}
         {screen === "household" && (

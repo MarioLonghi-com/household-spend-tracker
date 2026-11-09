@@ -129,9 +129,11 @@ CONVENTIONS = {
         "EUR 12.50 is -1250 for a purchase."
     ),
     "currency": (
-        "Per account, never per household. This ledger never converts, so no "
-        "endpoint sums two currencies and no response carries a grand total "
-        "across them."
+        "Per account, never per household. The ledger never converts. Reports may "
+        "convert into the base currency through the household's chosen rates; each "
+        "converted response says which (rates_used, rates_status). Rows and balances "
+        "are never converted, and no endpoint sums two currencies except a report "
+        "that says it converted them."
     ),
     "dates": "ISO 8601, the account's own dates, no timezone.",
     #: Now that a write exists, this describes it. It was deliberately absent

@@ -5,10 +5,10 @@ report goes wrong is a 200 with a wrong total in it: two currencies added
 without a rate, a card's debt counted as money, a running month treated as
 closed, a part of a split that does not add up to the whole.
 
-Exchange rates come from #396, which is not in the schema yet. The report
-reaches them through one seam, `net_worth.rates_for`; the tests that need
-rates hand it a small fixed table (`TableRates`) instead, so the arithmetic
-of §5 is held now and the seam only has to be pointed at the real service.
+Exchange rates come from #396 (`services/fx.py`), reached through one seam,
+`net_worth.rates_for`. Some tests hand it a small fixed table (`TableRates`) to hold the arithmetic of
+§5 on its own; the tests under "Through services/fx.py" store real manual
+and ECB rates and hold the household's own path to the same figures.
 """
 
 from __future__ import annotations
@@ -20,12 +20,13 @@ import pytest
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
+from app import money
 from app.audit.batch import batch
 from app.errors import ValidationError
-from app.models import AccountType, BatchKind, Household, User
+from app.models import AccountType, BatchKind, FxManualRate, FxPeriod, FxSource, Household, User
 from app.services import accounts as account_service
 from app.services import agent_keys as key_service
-from app.services import insights
+from app.services import fx, fx_fetching, fx_sources, insights
 from app.services import net_worth as nw
 from app.services import transactions as txn_service
 from tests.conftest import HEADERS, _setup_owner
@@ -35,7 +36,12 @@ TODAY = date(2026, 11, 9)
 
 
 class TableRates:
-    """A fixed rate table standing in for #396: units per one EUR, by date."""
+    """A fixed rate table handed to the seam: units per one EUR, by date.
+
+    For the arithmetic of §5 without a fetch. Its `convert` divides the way
+    `fx.Rates.convert` does -- `money.to_minor` of the decimal quotient -- and
+    the tests further down hold the real `fx` path to the same figures.
+    """
 
     chain = ("manual", "ecb")
     policy = "spot"
@@ -48,21 +54,33 @@ class TableRates:
     def available(self) -> bool:
         return True
 
-    def rate_on(self, currency: str, on_date: date) -> nw.RateUsed | None:
+    def rate_on(self, currency: str, on_date: date) -> fx.RateUsed | None:
         found = [row for row in self.table.get(currency, []) if row[0] <= on_date]
         if not found:
             return None
         when, rate = found[-1]
-        return nw.RateUsed(
+        return fx.RateUsed(
             rate=Decimal(rate),
             rate_date=when,
             source="manual",
             stale=(on_date - when).days > self.stale_days,
         )
 
-    def status(self, currencies: list[str]) -> dict | None:
+    def convert(self, minor: int, currency: str, on_date: date) -> fx.Converted | None:
+        used = self.rate_on(currency, on_date)
+        if used is None:
+            return None
+        value = money.to_decimal(minor, currency) / used.rate
+        return fx.Converted(amount_minor=money.to_minor(value, "EUR"), rate_used=used)
+
+    def status(self, currencies: list[str]) -> fx.RatesStatus:
         self.asked_status.append(list(currencies))
-        return {"currencies": list(currencies)}
+        return fx.RatesStatus(
+            as_of=None, stale=False, running=False, fetched_at=None, fetched_by=None,
+            last_fetch_failed=None, chain=list(self.chain), stale_days=self.stale_days,
+            remote_in_chain=True, manual_changed_at=None, manual_changed_by=None,
+            per_currency=[], not_converted=list(currencies),
+        )
 
 
 def _account(session, household, owner, name, type_, currency, **kw):
@@ -421,15 +439,15 @@ def test_the_synthetic_example_gives_exactly_the_four_numbers(session, household
     assert answer.headline.change_range == 141176
     # The worked line §4.6 shows: £8,000.00 ÷ 0.8500 = €9,411.76.
     largest = answer.explanation.largest_foreign
-    assert (largest.native_minor, largest.rate, largest.value) == (800000, "0.8500", 941176)
+    assert (largest.native_minor, largest.rate, largest.value) == (800000, "0.85", 941176)
     gbp = next(line for line in answer.held if line.key == "GBP")
     assert (gbp.native_minor, gbp.rate, gbp.rate_date, gbp.value) == (
-        800000, "0.8500", date(2026, 10, 30), 941176
+        800000, "0.85", date(2026, 10, 30), 941176
     )
     # The rate is a day older than the "as of" date: the last one before it.
     assert answer.explanation.rates[0].before_as_of is True
     assert answer.rate_source.chain == ["manual", "ecb"]
-    assert answer.rates_status == {"currencies": ["GBP"]}
+    assert rates.asked_status == [["GBP"]]
 
 
 def test_a_currency_with_no_rate_is_left_out_listed_and_named(session, household, ledger, owner):
@@ -468,7 +486,7 @@ def test_rates_status_names_only_the_converted_currencies_and_is_absent_with_one
     single = _report(session, household, rates=rates, filters=EUR_ONLY)
 
     assert rates.asked_status == [["GBP"]]
-    assert converted.rates_status == {"currencies": ["GBP"]}
+    assert converted.rates_status.not_converted == ["GBP"]
     assert single.rates_status is None
 
 
@@ -510,6 +528,125 @@ def test_an_account_opened_in_the_range_counts_as_zero_and_is_marked(session, ho
     assert [one.accounts_without_data for one in answer.points] == [1, 1, 0]
     assert [one.net_worth for one in answer.points] == [1000, 1000, 3000]
     assert answer.explanation.accounts_without_data_at_start == 1
+
+
+# --------------------------------------------------------------------------- #
+# Through services/fx.py: the household's own stored rates
+# --------------------------------------------------------------------------- #
+
+
+def _manual_rate(session, household, owner, currency, day, rate):
+    with batch(session, kind=BatchKind.manual, actor_id=owner.id, household_id=household.id):
+        session.add(
+            FxManualRate(
+                household_id=household.id, quote_currency=household.base_currency,
+                currency=currency, date=day, period=FxPeriod.day, rate=rate,
+                created_by_id=owner.id,
+            )
+        )
+    session.commit()
+
+
+def _ecb(session, rows: list[tuple[str, str, str]]) -> None:
+    fx_fetching.store(
+        session, FxSource.ecb,
+        [fx_sources.Published("EUR", code, date.fromisoformat(day), rate) for code, day, rate in rows],
+    )
+    session.commit()
+
+
+def test_the_synthetic_example_through_the_households_own_rates(session, household, owner):
+    """§5.6 again, with the rates stored as a person would enter them."""
+    eur = _account(session, household, owner, "Savings EUR", "savings", "EUR",
+                   opening_balance=1000000, opening_date=date(2025, 10, 1))
+    _account(session, household, owner, "Savings GBP", "savings", "GBP",
+             opening_balance=800000, opening_date=date(2025, 10, 1))
+    _row(session, household, owner, eur, date(2026, 5, 1), 200000)
+    _manual_rate(session, household, owner, "GBP", date(2025, 10, 31), "0.8000")
+    _manual_rate(session, household, owner, "GBP", date(2026, 10, 30), "0.8500")
+
+    answer = _report(session, household, since=date(2025, 10, 1), until=date(2026, 10, 31))
+
+    assert answer.converted is True and answer.display_currency == "EUR"
+    assert (answer.bridge.start, answer.bridge.end) == (2000000, 2141176)
+    assert (answer.bridge.fx_effect, answer.bridge.money_added_or_spent) == (-58824, 200000)
+    assert answer.rate_source.chain == ["manual", "ecb"]
+    assert answer.rate_source.policy == "spot"
+    rate = answer.explanation.rates[0]
+    assert (rate.currency, rate.rate, rate.rate_date, rate.source) == (
+        "GBP", "0.85", date(2026, 10, 30), "manual"
+    )
+    assert answer.rates_status.per_currency[0].currency == "GBP"
+    assert answer.rates_status.not_converted == []
+
+
+def test_a_balance_converts_at_the_spot_rate_not_the_monthly_average(
+    session, household, owner
+):
+    """The household's monthly policy is for flows; a balance is one day's."""
+    assert household.fx_monthly_policy == "month_avg"
+    _account(session, household, owner, "Sterling", "savings", "GBP",
+             opening_balance=100000, opening_date=date(2026, 9, 1))
+    _account(session, household, owner, "Euro", "checking", "EUR",
+             opening_balance=100, opening_date=date(2026, 9, 1))
+    _ecb(session, [("GBP", "2026-10-01", "0.5"), ("GBP", "2026-10-30", "0.8")])
+
+    answer = _report(session, household, since=date(2026, 10, 1), until=date(2026, 10, 31))
+    # 1,000.00 GBP at 0.8 (30 Oct, the last before the 31st), not at the mean 0.65.
+    assert answer.headline.net_worth == 125000 + 100
+    assert answer.held[0].rate_date == date(2026, 10, 30)
+
+
+def test_rates_status_is_the_oldest_rate_on_screen_and_absent_with_one_currency(
+    session, household, owner
+):
+    """§9: `rates_status.as_of` is the weakest link; one currency has no line."""
+    for code in ("GBP", "SEK"):
+        _account(session, household, owner, code, "savings", code,
+                 opening_balance=1000, opening_date=date(2026, 9, 1))
+    _account(session, household, owner, "Euro", "checking", "EUR",
+             opening_balance=1000, opening_date=date(2026, 9, 1))
+    _ecb(session, [("GBP", "2026-11-06", "0.88"), ("SEK", "2026-11-02", "11.1")])
+
+    both = _report(session, household)
+    assert [one.currency for one in both.rates_status.per_currency] == ["GBP", "SEK"]
+    assert both.rates_status.as_of == date(2026, 11, 2)
+
+    alone = _report(session, household, filters=nw.Filters(currencies=["GBP"]))
+    assert alone.rates_status is None and alone.converted is False
+
+
+def test_a_chain_with_no_rate_yet_shows_each_currency_and_says_why(session, household, ledger):
+    """The default chain, never fetched: no total, and the line says there are no rates."""
+    answer = _report(session, household)
+
+    assert answer.converted is False and answer.headline is None
+    assert {book.currency for book in answer.currencies} == {"EUR", "GBP"}
+    assert answer.rates_status.per_currency == []
+    assert answer.rates_status.not_converted == ["GBP"]
+    assert answer.rates_status.remote_in_chain is True
+
+
+def test_an_empty_chain_converts_nothing_and_shows_no_rates_line(session, household, ledger, owner):
+    with batch(session, kind=BatchKind.admin, actor_id=owner.id, household_id=household.id):
+        household.fx_chain = ""
+    session.commit()
+    _ecb(session, [("GBP", "2026-10-30", "0.8")])
+
+    answer = _report(session, household)
+    assert answer.converted is False and answer.rates_status is None
+    assert answer.headline is None
+
+
+def test_a_stale_stored_rate_converts_and_is_flagged(session, household, owner, ledger):
+    _ecb(session, [("GBP", "2026-09-01", "0.8")])
+    answer = _report(session, household)
+
+    assert answer.converted is True
+    assert answer.headline.net_worth == 650000 + 125000
+    assert answer.points[-1].stale_rate is True
+    assert answer.explanation.stale is True
+    assert answer.rates_status.stale is True
 
 
 # --------------------------------------------------------------------------- #
@@ -602,13 +739,30 @@ def test_one_currency_over_http_is_exact(client, world):
 
 def test_the_route_uses_the_seam_for_rates(client, world, monkeypatch):
     rates = TableRates({"GBP": [(date(2025, 1, 1), "0.9")]})
-    monkeypatch.setattr(nw, "rates_for", lambda _session, _household: rates)
+    monkeypatch.setattr(nw, "rates_for", lambda _session, _household, today=None: rates)
     body = _person(client, world["house"], since="2025-06-01", until="2025-06-30").json()
 
     assert body["display_currency"] == "EUR" and body["converted"] is True
     # 3,750.00 EUR + 910.00 GBP / 0.9 = 1,011.11
     assert body["headline"]["net_worth"] == 375000 + 101111
     assert body["rate_source"] == {"chain": ["manual", "ecb"], "policy": "spot"}
+
+
+def test_over_http_a_stored_rate_converts_and_the_agent_agrees(client, world):
+    with Session(client.app_module.db_engine, expire_on_commit=False) as s:
+        _ecb(s, [("GBP", "2025-06-27", "0.9")])
+    params = {"since": "2025-06-01", "until": "2025-06-30"}
+    person = _person(client, world["house"], **params).json()
+    assert _agent(client, world, **params).json() == person
+
+    assert person["display_currency"] == "EUR" and person["converted"] is True
+    # 3,750.00 EUR + 910.00 GBP / 0.9 = 1,011.11
+    assert person["headline"]["net_worth"] == 375000 + 101111
+    assert person["rate_source"] == {"chain": ["manual", "ecb"], "policy": "spot"}
+    status = person["rates_status"]
+    assert [one["currency"] for one in status["per_currency"]] == ["GBP"]
+    assert status["per_currency"][0]["rate_date"] == "2025-06-27"
+    assert status["as_of"] == "2025-06-27"
 
 
 def test_a_backwards_range_is_a_422_with_its_code(client, world):

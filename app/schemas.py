@@ -3436,12 +3436,15 @@ class NetWorthRateSourceOut(BaseModel):
 class NetWorthOut(BaseModel):
     """The Net Worth report (#397): every account's balance at each month end.
 
-    **The one report that may add two currencies, and only through a rate.**
+    **The one report that adds two currencies, and only through a rate** --
+    the household's, at the spot policy, through `services/fx.py`.
     `display_currency` says what the top-level figures are in: the one
     currency in scope, exactly, or the base currency when `converted`. With
     several currencies and no rates it is **null**, and so are `headline` and
     `bridge` -- `points` and `held` are empty -- because that total does not
     exist. `currencies` always carries each currency's own book, unconverted.
+    `rates_status` is the "Rates as of" block for the currencies on screen,
+    present whenever several are in scope and a rate source is set up.
     """
 
     as_of: Date
@@ -3455,7 +3458,7 @@ class NetWorthOut(BaseModel):
     display_currency: str | None = None
     converted: bool
     rate_source: NetWorthRateSourceOut | None = None
-    rates_status: dict | None = None
+    rates_status: RatesStatusOut | None = None
     points: list[NetWorthPointOut]
     headline: NetWorthHeadlineOut | None = None
     bridge: NetWorthBridgeOut | None = None
@@ -3747,3 +3750,234 @@ class TranslationSuggestionOut(ORMModel):
 class TranslationSuggestionsMark(BaseModel):
     ids: list[str] = Field(min_length=1, max_length=500)
     status: SuggestionStatus
+
+
+# --------------------------------------------------------------------------- #
+# Exchange rates (#396)
+# --------------------------------------------------------------------------- #
+#
+# The ledger never converts. These shapes carry the rates a *report* may
+# convert with, and how old they are. A rate is always a decimal STRING:
+# units of the currency per one unit of the household's base currency, unless
+# a field says otherwise.
+
+
+class FxSettingsOut(BaseModel):
+    """Where a household's rates come from and how they are used (#396 §3)."""
+
+    base_currency: str
+    #: Source names in order: `manual`, `ecb`, `own`. Empty: nothing converts.
+    chain: list[str]
+    stale_days: int
+    #: `month_avg`, `month_end` or `spot`.
+    monthly_policy: str
+    show_own_rates: bool
+
+
+class FxSettingsIn(BaseModel):
+    """The whole setting: every field is sent, as `PUT` means."""
+
+    chain: list[Annotated[str, Field(max_length=16)]] = Field(max_length=8)
+    stale_days: int
+    monthly_policy: str = Field(max_length=16)
+    show_own_rates: bool
+
+
+class CurrencyStatusOut(ORMModel):
+    currency: str
+    rate_date: Date | None = None
+    source: str | None = None
+    stale: bool
+    age_days: int | None = None
+
+
+class FailedFetchOut(ORMModel):
+    at: datetime
+    error: str
+
+
+class RatesStatusOut(ORMModel):
+    """How old a converting response's rates are: what "Rates as of" draws from.
+
+    Built by `services.fx.rates_status` for the currencies the response
+    converted, in the same response as the figures, so the line and the
+    numbers under it can never disagree. `as_of` is the oldest of
+    `per_currency`'s rate dates; `not_converted` lists the currencies with no
+    rate at all.
+    """
+
+    as_of: Date | None = None
+    stale: bool
+    running: bool
+    fetched_at: datetime | None = None
+    fetched_by: str | None = None
+    last_fetch_failed: FailedFetchOut | None = None
+    chain: list[str]
+    stale_days: int
+    remote_in_chain: bool
+    manual_changed_at: datetime | None = None
+    manual_changed_by: str | None = None
+    per_currency: list[CurrencyStatusOut]
+    not_converted: list[str]
+
+
+class FxFetchIn(BaseModel):
+    """One press of Fetch now. `range` needs `since` and `until`, and overwrites."""
+
+    mode: Literal["missing", "range"] = "missing"
+    since: Date | None = None
+    until: Date | None = None
+
+
+class FxFetchOut(ORMModel):
+    id: str
+    source: str
+    mode: str
+    requested_since: Date
+    requested_until: Date
+    currencies: list[str]
+    started_at: datetime
+    finished_at: datetime | None = None
+    #: `running`, `ok` or `failed`.
+    outcome: str
+    rates_added: int
+    rates_unchanged: int
+    error: str | None = None
+    started_by: str | None = None
+    duration_ms: int | None = None
+
+
+class FxAccountRefOut(ORMModel):
+    id: str
+    name: str
+
+
+class FxMonthOut(ORMModel):
+    month: str
+    #: `rates`, `gap` or `empty`.
+    state: str
+
+
+class FxCurrencyOut(ORMModel):
+    currency: str
+    accounts: list[FxAccountRefOut]
+    source_in_use: str | None = None
+    first_rate: Date | None = None
+    last_rate: Date | None = None
+    rates: int
+    age_days: int | None = None
+    transaction_dates: int
+    coverage_percent: int | None = None
+    gaps: int
+    #: `ok`, `stale`, `not_covered` or `manual_only`.
+    status: str
+    own_rates: int
+    iso: bool
+    months: list[FxMonthOut]
+
+
+class FxNotCoveredOut(ORMModel):
+    currency: str
+    #: `not_iso` or `no_source`.
+    reason: str
+    accounts: list[FxAccountRefOut]
+
+
+class FxWouldFetchOut(ORMModel):
+    source: str
+    mode: str
+    currencies: list[str]
+    since: Date
+    until: Date
+
+
+class FxTilesOut(ORMModel):
+    last_fetch: FxFetchOut | None = None
+    as_of: Date | None = None
+    stale: bool
+    covered: int
+    total: int
+    missing: list[str]
+    gaps: int
+    manual_count: int
+    manual_changed_at: datetime | None = None
+    manual_changed_by: str | None = None
+
+
+class FxStatusOut(ORMModel):
+    """The Exchange rates page, which is also the sync dashboard (#396 §5.3)."""
+
+    base_currency: str
+    chain: list[str]
+    stale_days: int
+    monthly_policy: str
+    show_own_rates: bool
+    tiles: FxTilesOut
+    running: bool
+    running_fetches: list[FxFetchOut]
+    would_fetch: list[FxWouldFetchOut]
+    would_fetch_refused: str | None = None
+    would_fetch_reason: str | None = None
+    currencies: list[FxCurrencyOut]
+    not_covered: list[FxNotCoveredOut]
+    history: list[FxFetchOut]
+    rates_status: RatesStatusOut
+
+
+class FxRateOut(BaseModel):
+    """One stored rate, as it is stored, with what it means in the base."""
+
+    #: Only a manual rate has one: it is the id DELETE takes.
+    id: str | None = None
+    #: `ecb` or `manual`.
+    source: str
+    quote_currency: str
+    currency: str
+    date: Date
+    #: `day`, or `month` for a manual monthly rate dated its first day.
+    period: str
+    #: Units of `currency` per one `quote_currency`, as stored.
+    rate: str
+    #: Units of `currency` per one base, crossed on the same date when the
+    #: source quotes against something else. Null when it cannot be crossed.
+    rate_in_base: str | None = None
+    #: The household's own transfers' rate on that date, in base terms.
+    own_rate: str | None = None
+
+
+class FxRatesOut(BaseModel):
+    base_currency: str
+    total: int
+    limit: int
+    rates: list[FxRateOut]
+
+
+class FxManualIn(BaseModel):
+    """One rate from the editor. `date` is a day (YYYY-MM-DD) or a month (YYYY-MM)."""
+
+    currency: str = Field(max_length=8)
+    date: str = Field(max_length=16)
+    rate: str = Field(max_length=48)
+    dry_run: bool = False
+
+
+class FxManualRowOut(BaseModel):
+    """One rate's verdict. Saveable when `problems` is empty."""
+
+    line: int
+    currency: str
+    date: str
+    rate: str
+    period: str | None = None
+    inverse: str | None = None
+    replaces: str | None = None
+    unchanged: bool
+    problems: list[str]
+
+
+class FxManualOut(BaseModel):
+    dry_run: bool
+    added: int
+    replaced: int
+    unchanged: int
+    rows: list[FxManualRowOut]
