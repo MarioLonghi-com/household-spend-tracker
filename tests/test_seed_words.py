@@ -33,7 +33,8 @@ ROOT = Path(__file__).resolve().parent.parent
 #: What every household was seeded with before #268, written out rather than
 #: read from the module under test.
 ENGLISH_TREE = [
-    ("Income", ["Salary", "Other Income"]),
+    # Reimbursements joined in 0.13.0 (#372), carrying its role.
+    ("Income", ["Salary", "Other Income", "Reimbursements"]),
     ("Bills", ["Rent / Mortgage", "Electricity", "Water", "Internet", "Phone", "Insurance"]),
     ("Everyday", ["Groceries", "Eating Out", "Transport", "Household", "Health"]),
     ("Quality of Life", ["Travel", "Subscriptions", "Gifts", "Hobbies"]),
@@ -48,6 +49,7 @@ PLANTED = {
         "seed.group.income": "Receitas",
         "seed.category.salary": "Salário",
         "seed.category.other_income": "Outras receitas",
+        "seed.category.reimbursements": "Reembolsos",
         "seed.group.bills": "Contas fixas",
         "seed.category.rent_mortgage": "Aluguel / Financiamento",
         "seed.category.electricity": "Luz",
@@ -169,7 +171,7 @@ def test_two_households_seeded_in_two_languages_get_their_own_words(
     swedish = _make(session, member, "Vårt hushåll", "sv-SE")
 
     portuguese = _tree(session, brazilian.id)
-    assert portuguese[0] == ("Receitas", ["Salário", "Outras receitas"])
+    assert portuguese[0] == ("Receitas", ["Salário", "Outras receitas", "Reembolsos"])
     assert portuguese[2] == ("Dia a dia", ["Supermercado", "Restaurantes", "Transporte", "Casa", "Saúde"])
     assert len(portuguese) == len(ENGLISH_TREE)
 

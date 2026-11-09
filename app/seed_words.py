@@ -37,6 +37,11 @@ OPENING_BALANCE = "seed.opening_balance"
 #: The seeded group that is seeded carrying the ``income`` role (#372).
 INCOME_GROUP = "seed.group.income"
 
+#: The seeded category that is seeded carrying the ``reimbursement`` role (#372),
+#: so Income vs Expense keeps work paid back out of income and expenses from the
+#: first day rather than from the day somebody finds the setting.
+REIMBURSEMENT_CATEGORY = "seed.category.reimbursements"
+
 #: id -> English. The English is byte for byte what households were seeded with
 #: before this module existed.
 ENGLISH: dict[str, str] = {
@@ -44,6 +49,7 @@ ENGLISH: dict[str, str] = {
     "seed.group.income": "Income",
     "seed.category.salary": "Salary",
     "seed.category.other_income": "Other Income",
+    "seed.category.reimbursements": "Reimbursements",
     "seed.group.bills": "Bills",
     "seed.category.rent_mortgage": "Rent / Mortgage",
     "seed.category.electricity": "Electricity",
@@ -70,7 +76,10 @@ ENGLISH: dict[str, str] = {
 
 #: The starter tree, by id, in the order it is seeded.
 TREE: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("seed.group.income", ("seed.category.salary", "seed.category.other_income")),
+    (
+        "seed.group.income",
+        ("seed.category.salary", "seed.category.other_income", "seed.category.reimbursements"),
+    ),
     (
         "seed.group.bills",
         (

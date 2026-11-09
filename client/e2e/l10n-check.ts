@@ -156,4 +156,4 @@ export const QA_ACCOUNTS = [
  * were typed in every language; a household made after #268 gets them in its
  * own language.
  */
-export const SEEDED_DATA = new Set(["Opening balance", "Income", "Household"]);
+export const SEEDED_DATA = new Set(["Opening balance", "Income", "Household", "Reimbursements"]);

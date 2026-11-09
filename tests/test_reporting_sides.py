@@ -410,6 +410,21 @@ def test_seeding_marks_the_income_group(session, household, owner):
     assert marked == ["Income"]
 
 
+def test_seeding_marks_the_reimbursements_category(session, household, owner):
+    """A new household's report keeps work paid back apart from the first day."""
+    with batch(session, kind=BatchKind.admin, actor_id=owner.id, household_id=household.id):
+        category_service.seed_defaults(session, household.id)
+    marked = session.execute(
+        select(Category.name, CategoryGroup.role)
+        .join(CategoryGroup, Category.group_id == CategoryGroup.id)
+        .where(
+            Category.household_id == household.id,
+            Category.role == CategoryRole.reimbursement,
+        )
+    ).all()
+    assert marked == [("Reimbursements", CategoryGroupRole.income)]
+
+
 def test_interest_lands_in_the_group_carrying_the_role_whatever_it_is_called(
     session, household, owner, tree
 ):

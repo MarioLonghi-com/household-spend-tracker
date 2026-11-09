@@ -10189,6 +10189,12 @@ msgstr ""
 msgid "seed.category.phone"
 msgstr ""
 
+#. Name of a category seeded into a new household for money paid back, such as work expenses; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.reimbursements"
+msgstr ""
+
 #. Name of a category seeded into a new household; the person can rename it
 #. js-lingui-explicit-id
 #: src/lib/seedWords.ts
