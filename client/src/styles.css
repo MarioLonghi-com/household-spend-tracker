@@ -496,7 +496,7 @@ tr:has(td.editing) { position: relative; }
   max-height: min(60vh, 440px); overflow-y: auto;
 }
 .bubble::before {
-  content: ""; position: absolute; top: -5px; left: 10px; width: 8px; height: 8px;
+  content: ""; position: absolute; top: -5px; left: var(--bubble-arrow, 10px); width: 8px; height: 8px;
   background: var(--surface); border-left: 1px solid var(--line); border-top: 1px solid var(--line);
   transform: rotate(45deg);
 }

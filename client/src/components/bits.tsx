@@ -1,7 +1,7 @@
 /** Small shared pieces. Nothing here knows about the domain. */
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { ApiError } from "../lib/api";
 import { fixed, moneyKey, sortRows } from "../lib/sorting";
 import type { FixedGroup, SortDirection, SortKeyPart, SortValue } from "../lib/sorting";
@@ -245,11 +245,39 @@ export function Money({ minor, currency }: { minor: number; currency: string }) 
  * phone and invisible to a keyboard. It closes on Escape and on a click
  * anywhere else, so it never sits on top of the form you are trying to fill in.
  */
+/**
+ * How far to move a bubble sideways so all of it is on screen (#412).
+ *
+ * The bubble opens rightwards from its button, which is right for a button
+ * near the left of the window and runs off the edge for one near the right.
+ * Negative moves it left. It keeps a 16px margin from both edges and, when it
+ * is wider than the room between them, keeps its left edge on screen, where
+ * the text starts.
+ */
+export function bubbleNudge(left: number, right: number, viewport: number, margin = 16): number {
+  let shift = Math.min(0, viewport - margin - right);
+  if (left + shift < margin) shift = margin - left;
+  return shift;
+}
+
 export function Hint({ label, children }: { label: string; children: ReactNode }) {
   // Re-renders its words when the language changes.
   useLingui();
   const [open, setOpen] = useState(false);
+  const [shift, setShift] = useState(0);
   const holder = useRef<HTMLSpanElement>(null);
+  const bubble = useRef<HTMLSpanElement>(null);
+
+  // Measured before paint, so the bubble never shows half off the window and
+  // then jumps. The arrow moves the other way, to keep pointing at the button.
+  useLayoutEffect(() => {
+    if (!open || !bubble.current) {
+      setShift(0);
+      return;
+    }
+    const box = bubble.current.getBoundingClientRect();
+    setShift(bubbleNudge(box.left, box.right, window.innerWidth));
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -283,7 +311,16 @@ export function Hint({ label, children }: { label: string; children: ReactNode }
         ?
       </button>
       {open && (
-        <span className="bubble" role="note">
+        <span
+          ref={bubble}
+          className="bubble"
+          role="note"
+          style={
+            shift
+              ? ({ transform: `translateX(${shift}px)`, "--bubble-arrow": `${Math.max(6, 10 - shift)}px` } as CSSProperties)
+              : undefined
+          }
+        >
           {children}
         </span>
       )}

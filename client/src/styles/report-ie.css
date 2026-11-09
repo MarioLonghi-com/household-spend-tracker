@@ -352,6 +352,20 @@ table.report tfoot tr.report-aside td { color: var(--muted); font-weight: 400; }
   z-index: 1;
 }
 
+/* Opaque, as anything pinned must be (#413). Their wash, `--stripe-head`, is
+   a translucent tint meant to lie over the surface; on a cell that stays put
+   while the months slide under it, the passing figures showed through. The
+   tint is laid over the surface instead, so the colour is the same and the
+   cell is solid. Row hover keeps its own (opaque) colour. */
+.ie-pin-right table.report :is(tbody, tfoot) td.amount:is(:last-child, :nth-last-child(2)) {
+  background-color: var(--surface);
+  background-image: linear-gradient(var(--stripe-head), var(--stripe-head));
+}
+.ie-pin-right table.report tbody tr:hover td.amount:is(:last-child, :nth-last-child(2)) {
+  background-color: var(--surface-2);
+  background-image: none;
+}
+
 /* A shadow where figures have gone under a pinned column, so a cut-off month
    reads as "more this way" rather than as the edge of the report. */
 .ie-grid.ie-left-hidden table.report :is(.report-label, tfoot th, .report-total th, .report-heading th) {
