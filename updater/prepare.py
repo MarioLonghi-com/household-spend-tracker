@@ -23,6 +23,14 @@ ledger's filesystem -- the VM's disk on Docker Desktop and `podman machine`.
 A registry gives only compressed sizes, so the unpacked size is estimated as
 `UNPACK_FACTOR` times the compressed size of the images not yet on the engine.
 
+A refusal says the shortfall, so its two figures never read as equal (#330):
+the need is rounded up, the free space down, and the megabytes to free are
+named, with what the need is made of. It offers *delete older update
+backups* only when the same one-off found more than `KEEP_BACKUPS` of them
+on the disk -- the newest five cannot be deleted (B9) -- and says how much
+the older ones hold. Its record carries the code `disk_short`, by which the
+screen links to *Freeing disk for an update* in `deploy/TROUBLESHOOTING.md`.
+
 **Memory (8.5, C14).** `MemAvailable` from the same one-off: at least 256 MiB
 to pull, and -- at preflight -- the app's `mem_limit` plus 128 MiB, counting
 768 MiB when the app has no limit.
@@ -32,6 +40,9 @@ from __future__ import annotations
 
 import contextlib
 import json
+import math
+import os
+from dataclasses import dataclass
 
 from updater import contract, handover, oneoff, shapes, survey, verify, volume
 from updater import engine as eng
@@ -44,6 +55,12 @@ CHECK_SECONDS = 10 * 60
 MEASURE_SECONDS = 2 * 60
 
 MIB = 1024 * 1024
+GIB = 1024 * MIB
+#: How many update backups are protected (A12, B9): the newest five.
+KEEP_BACKUPS = 5
+#: The history record's code for a refusal for want of disk (#330).
+DISK_SHORT = "disk_short"
+MEMORY_SHORT = "memory_short"
 #: Compressed to unpacked, for the disk floor. Python images unpack to about
 #: two and a half to three times their compressed size; this errs high.
 UNPACK_FACTOR = 3
@@ -55,13 +72,34 @@ DEFAULT_APP_MEMORY = 768 * MIB
 
 
 class PrepareFailed(Exception):
-    def __init__(self, sentence: str) -> None:
+    def __init__(self, sentence: str, code: str | None = None) -> None:
         super().__init__(sentence)
         self.sentence = sentence
+        self.code = code
+
+
+@dataclass(frozen=True)
+class Problem:
+    """A floor of 8.5 not met: the owner's sentence, and the record's code for it."""
+
+    code: str
+    sentence: str
+
+
+def _gb_up(n: int) -> str:
+    return f"{math.ceil(n * 100 / GIB) / 100:.2f} GB"
+
+
+def _gb_down(n: int) -> str:
+    return f"{math.floor(n * 100 / GIB) / 100:.2f} GB"
 
 
 def _gb(n: int) -> str:
-    return f"{n / 1024**3:.1f} GB"
+    return f"{n / GIB:.2f} GB"
+
+
+def _mb_up(n: int) -> str:
+    return f"{-(-n // MIB)} MB"
 
 
 def _mb(n: int) -> str:
@@ -70,12 +108,10 @@ def _mb(n: int) -> str:
 
 def disk_where(engine: str) -> str:
     if engine == "docker-desktop":
-        return "Delete older update backups under Database, or raise Docker Desktop's disk limit in Settings → Resources."
+        return "raise Docker Desktop's disk limit in Settings → Resources"
     if engine == "podman-machine":
-        return "Delete older update backups under Database, or give the Podman machine a larger disk."
-    return (
-        "Delete older update backups under Database, or free space on the disk that holds the containers."
-    )
+        return "give the Podman machine a larger disk"
+    return "free space on the disk that holds the containers"
 
 
 def memory_where(engine: str) -> str:
@@ -86,16 +122,96 @@ def memory_where(engine: str) -> str:
     return "Free memory on the machine running the containers."
 
 
-def floor_problem(measured: dict, *, engine: str, new_image_bytes: int, memory_needed: int) -> str | None:
-    """The sentence when a floor of 8.5 is not met; None when both are."""
+def update_backup_names(vol: volume.Volume) -> set[str]:
+    """The backup folders the updater's drills took, by folder name: the ones a history record names (R22)."""
+    names = set()
+    for path in (vol.root / "history").glob("*.json"):
+        if not contract.is_uuid4(path.name[: -len(".json")]):
+            continue
+        doc = volume.read_own_json(path) or {}
+        if isinstance(doc.get("backup"), str):
+            names.add(os.path.basename(doc["backup"]))
+    return {n for n in names if shapes.BACKUP_STAMP.fullmatch(n)}
+
+
+def deletable_backups(measured: dict, update_backups: set[str] | frozenset[str]) -> dict[str, int]:
+    """The update backups on the disk beyond the newest five, with their sizes: what *Delete* may remove.
+
+    From the measuring one-off's listing of `backups/`, which is what is on
+    the disk; the history alone also names backups already pruned.
+    """
+    listed = measured.get("backups")
+    if not isinstance(listed, dict):
+        return {}
+    found = {
+        name: size
+        for name, size in listed.items()
+        if name in update_backups and isinstance(size, int) and not isinstance(size, bool) and size >= 0
+    }
+    older = sorted(found, reverse=True)[KEEP_BACKUPS:]
+    return {name: found[name] for name in older}
+
+
+def disk_sentence(
+    need: int, free: int, *, images: int, database: int, engine: str, deletable: dict[str, int]
+) -> str:
+    """The refusal for want of disk (#330): both figures, the shortfall, the parts, and what can be done."""
+    parts = []
+    if images:
+        parts.append(f"{_gb(images)} for the new images")
+    parts.append(f"{_gb(2 * database)} for two copies of the database")
+    parts.append(f"{_gb(DISK_SPARE)} to spare")
+    made_of = ", ".join(parts[:-1]) + " and " + parts[-1]
+    where = disk_where(engine)
+    if deletable:
+        count = len(deletable)
+        what = "the update backup" if count == 1 else f"the {count} update backups"
+        remedy = (
+            f"Delete {what} older than the newest {KEEP_BACKUPS} under Database, which frees about "
+            f"{_gb(sum(deletable.values()))}, or {where}."
+        )
+    else:
+        remedy = where[0].upper() + where[1:] + "."
+    return (
+        f"Needs about {_gb_up(need)} free, there is {_gb_down(free)}: free at least "
+        f"{_mb_up(need - free)} more. That is {made_of}. {remedy}"
+    )
+
+
+def floor_problem(
+    measured: dict,
+    *,
+    engine: str,
+    new_image_bytes: int,
+    memory_needed: int,
+    update_backups: set[str] | frozenset[str] = frozenset(),
+) -> Problem | None:
+    """What is short when a floor of 8.5 is not met; None when both are.
+
+    `update_backups` names the folders that are update backups (the history's,
+    `update_backup_names`), so the sentence offers deleting only those.
+    """
     database = int(measured.get("database") or 0)
     free = measured.get("free")
-    need = new_image_bytes * UNPACK_FACTOR + 2 * database + DISK_SPARE
+    images = new_image_bytes * UNPACK_FACTOR
+    need = images + 2 * database + DISK_SPARE
     if isinstance(free, int) and free < need:
-        return f"Needs about {_gb(need)} free, there is {_gb(free)}. {disk_where(engine)}"
+        sentence = disk_sentence(
+            need,
+            free,
+            images=images,
+            database=database,
+            engine=engine,
+            deletable=deletable_backups(measured, update_backups),
+        )
+        return Problem(DISK_SHORT, sentence)
     available = measured.get("mem_available")
     if isinstance(available, int) and available < memory_needed:
-        return f"Needs about {_mb(memory_needed)} of memory free, there is {_mb(available)}. {memory_where(engine)}"
+        return Problem(
+            MEMORY_SHORT,
+            f"Needs about {_mb_up(memory_needed)} of memory free, there is {_mb(available)}. "
+            f"{memory_where(engine)}",
+        )
     return None
 
 
@@ -170,9 +286,10 @@ def run(kit: Kit, request: contract.Request, records: Records) -> dict:
         engine=kit.site.engine,
         new_image_bytes=missing,
         memory_needed=PULL_MEMORY,
+        update_backups=update_backup_names(kit.site.volume),
     )
     if problem:
-        raise PrepareFailed(problem)
+        raise PrepareFailed(problem.sentence, problem.code)
 
     records.say("Verifying where both images came from.", step="P4")
     verified = {}

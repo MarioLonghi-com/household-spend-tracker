@@ -31,7 +31,7 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
-from updater import contract, journal, trail, volume
+from updater import contract, goback, journal, trail, volume
 from updater.contract import Context, History, Refusal, Request, Status
 from updater.volume import REQUEST_OWNER_UID, UnsafeFile, Volume
 
@@ -117,7 +117,10 @@ def _answer(
             report = None
             if isinstance(raw, dict) and contract.is_uuid4(raw.get("prepared_id")):
                 report = volume.read_own_json(vol.prepared(raw["prepared_id"]))
-            request = contract.validate(raw, ctx, now, report)
+            last = None
+            if isinstance(raw, dict) and raw.get("kind") == "go_back":
+                last = goback.last_update(vol)  # files only, like the rest of intake
+            request = contract.validate(raw, ctx, now, report, last)
         except Refusal as e:
             refusal = e
 
@@ -155,7 +158,7 @@ def _answer(
     trail.line(request.id, None, f"{request.kind} taken", _taken(request))
     status = Status(id=request.id, kind=request.kind, state="accepted", updated_at=contract.iso(now))
     volume.write_json(vol.status, status.to_dict())
-    if request.kind == "apply":
+    if request.kind in contract.JOURNAL_KINDS:
         # Step 0's journal entry. It stores the recovery code's hash -- the code
         # itself never reaches the volume (Part 11).
         journal.begin(vol, request, owner=me, now=now)

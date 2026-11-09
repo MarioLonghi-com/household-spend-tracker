@@ -59,6 +59,12 @@ shared namespace, stop a running `-previous` once and try again; and R3 puts
 the original policy back. An engine that cannot change a restart policy is
 noted, not fatal: the retry still stands.
 
+**At the stop itself** (#344) rootless Podman can answer a stop that the
+hand start overtook with a 500, `container state improper`, finishing
+neither. Step 3 takes that one answer as transient: it waits a moment,
+inspects, and stops the app once more if it runs. A stop refused again is
+the step failing: *not started*, the app back under its name.
+
 **During the drill** (#246) the danger is the ledger, not the port: the old
 app would read and write it while the drill backs it up and migrates it. So
 before step 5 starts the drill, and at every poll while it runs, the updater
@@ -100,7 +106,7 @@ PRUNE_SECONDS = 5 * 60
 STOP_GRACE_SECONDS = 30
 HOOK_DEFAULT_SECONDS = 300
 #: How many update backups are protected (A12, B9).
-KEEP_BACKUPS = 5
+KEEP_BACKUPS = prepare.KEEP_BACKUPS
 #: How often the drill's remaining time is saved to the journal while it runs.
 SAVE_DEADLINE_EVERY = 30.0
 
@@ -146,10 +152,20 @@ HOLDER_GRACE_SECONDS = 5
 #: not stopped: Docker wakes a stop's caller before its state is saved (#246).
 HOLDER_SETTLE_TRIES = 5
 HOLDER_SETTLE_SECONDS = 0.5
+#: How long step 3 waits after a stop refused as `container state improper` (#344).
+STATE_IMPROPER_WAIT_SECONDS = 2.0
+#: The end of rootless Podman's answer to a stop that a concurrent start overtook (#344).
+STATE_IMPROPER = "container state improper"
+
 #: This request's own one-offs that may run with the ledger while the drill
 #: does: the drill itself, and the maintenance page, which mounts it read-only.
 OWN_LEDGER_ROLES = ("drill", "placard")
 LEDGER_HELD = "the previous version was started by hand during the update and could not be stopped"
+
+
+def state_improper(e: eng.EngineError) -> bool:
+    """Podman's 500 for a stop or start overlapping another, which finishes neither (#344)."""
+    return e.status == 500 and STATE_IMPROPER in e.message
 
 
 class LedgerHeld(Exception):
@@ -243,7 +259,12 @@ class Apply:
         return found
 
     def _finish(
-        self, state: str, sentence: str, failed_step: str | None = None, settle: bool = True
+        self,
+        state: str,
+        sentence: str,
+        failed_step: str | None = None,
+        settle: bool = True,
+        code: str | None = None,
     ) -> str:
         report = volume.read_own_json(self.drill_report_path()) or {}
         log = report.get("log") if isinstance(report.get("log"), list) else []
@@ -255,18 +276,23 @@ class Apply:
             backup=self.ctx.get("backup"),
             started_at=self.ctx.get("started_at"),
             log_tail=tuple(str(x) for x in log[-40:]),
-            extra={
-                "from_version": self.ctx.get("from_version"),
-                "to_version": self.ctx.get("to_version"),
-                "notes": list(self.notes),
-            },
+            code=code,
+            extra=self.record_extra(),
         )
         if settle:
             journal.settle(self.vol, self.j)
         return state
 
-    def not_started(self, sentence: str) -> str:
-        return self._finish("not_started", f"Not started: {sentence}", failed_step=self.j.step)
+    def record_extra(self) -> dict:
+        """The record's keys beyond 5.3's, which files only ever gain (C4)."""
+        return {
+            "from_version": self.ctx.get("from_version"),
+            "to_version": self.ctx.get("to_version"),
+            "notes": list(self.notes),
+        }
+
+    def not_started(self, sentence: str, code: str | None = None) -> str:
+        return self._finish("not_started", f"Not started: {sentence}", failed_step=self.j.step, code=code)
 
     # ------------------------------------------------------------------ #
     # Steps 0-2a
@@ -290,7 +316,7 @@ class Apply:
             if self.step2a():
                 return "handed_over"
         except survey.NotStarted as e:
-            return self.not_started(e.sentence)
+            return self.not_started(e.sentence, e.code)
         except (eng.EngineError, eng.NotAllowed) as e:
             return self.not_started(f"the container engine refused a check ({e}).")
         fresh = journal.load(self.vol, self.id)
@@ -347,9 +373,10 @@ class Apply:
             engine=self.kit.site.engine,
             new_image_bytes=0,
             memory_needed=prepare.app_memory(app.inspect) + prepare.MEMORY_SPARE,
+            update_backups=prepare.update_backup_names(self.vol),
         )
         if problem:
-            raise survey.NotStarted(problem)
+            raise survey.NotStarted(problem.sentence, problem.code)
         # The copy is built now and put to the engine client's guard, so a
         # setting the updater will not copy refuses here, not at step 7.
         try:
@@ -494,9 +521,38 @@ class Apply:
             # Recorded before anything changes, so a rollback after a crash
             # anywhere from here on knows what to put back.
             self.remember(previous_restart_policy=self.own_restart_policy(self.previous()))
-        self.client.stop(self.ctx["previous_id"], grace=STOP_GRACE_SECONDS)
+        self.stop_for_step3()
         self.client.rename(self.ctx["previous_id"], parked)
         self.park_restart_policy()
+
+    def stop_for_step3(self) -> None:
+        self.stop_app(str(self.ctx["previous_id"]))
+
+    def stop_app(self, cid: str) -> None:
+        """Step 3's stop, asked once more when rootless Podman's answer overlapped a hand start (#344).
+
+        Podman answers a stop that a start overtakes -- the app started by
+        hand the moment it stopped (E7) -- with a 500 whose message ends
+        `container state improper`, finishing neither. That answer is
+        transient: after a short wait the container is inspected, and stopped
+        once more if it runs. A second refusal of any kind, or any other
+        error the first time, is the step failing, as before: *not started*.
+        """
+        try:
+            self.client.stop(cid, grace=STOP_GRACE_SECONDS)
+            return
+        except eng.EngineError as e:
+            if not state_improper(e):
+                raise
+            refused = e
+        self.records.say("The engine refused the stop while the app was being started; trying once more.")
+        self.kit.sleep(STATE_IMPROPER_WAIT_SECONDS)
+        if survey.running(self.client.inspect(cid)):
+            self.client.stop(cid, grace=STOP_GRACE_SECONDS)
+        self.notes.append(
+            f"The app was started while the updater stopped it, and the engine refused the stop "
+            f"({refused}); the updater stopped it again."
+        )
 
     def own_restart_policy(self, inspect: dict) -> dict:
         """The app's restart policy -- or, if it is `no` because an earlier apply parked it and a
@@ -930,14 +986,7 @@ class Apply:
 
     def prune(self) -> None:
         """B9: update backups beyond the newest five go, after a successful update only."""
-        names = set()
-        for path in (self.vol.root / "history").glob("*.json"):
-            stem = path.name[: -len(".json")]
-            if not contract.is_uuid4(stem):
-                continue
-            doc = volume.read_own_json(path) or {}
-            if isinstance(doc.get("backup"), str):
-                names.add(os.path.basename(doc["backup"]))
+        names = prepare.update_backup_names(self.vol)
         if isinstance(self.ctx.get("backup"), str):
             names.add(os.path.basename(self.ctx["backup"]))
         stamps = sorted((n for n in names if shapes.BACKUP_STAMP.fullmatch(n)), reverse=True)
@@ -1087,10 +1136,11 @@ class Apply:
                     return self.needs_recovery(str(e.sentence if isinstance(e, StepFailed) else e))
                 journal.count_rollback_attempt(self.vol, self.j)
                 step = self.j.step if self.j.step in steps else step
-        self.start("R5", "Recording the rollback.")
         return self.finish_rolled_back()
 
     def finish_rolled_back(self) -> str:
+        if self.j.step != "R5":
+            self.start("R5", "Recording the rollback.")
         reason = self.ctx.get("rollback_reason") or INTERRUPTED
         if self.ctx.get("restored"):
             tail = "; the ledger was restored"

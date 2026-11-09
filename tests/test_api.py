@@ -353,7 +353,7 @@ OBJECT_ID_PARAMS = {"account_id", "transaction_id", "payee_id", "rule_id", "batc
 
 def test_every_household_scoped_route_declares_the_check(client):
     """Structural, so it cannot be fooled by a 422 that never reached the check."""
-    from app.api.deps import current_agent, current_household
+    from app.api.deps import current_agent, current_household, quiet_household
     from tests.test_agent_access import _dependencies_of
 
     offenders = []
@@ -379,7 +379,9 @@ def test_every_household_scoped_route_declares_the_check(client):
                 for d in route.dependant.dependencies
                 for s in d.dependencies
             }
-            if current_household not in declared | sub:
+            # `quiet_household` is the same membership check for a poll that
+            # must not touch the session (#369).
+            if not {current_household, quiet_household} & (declared | sub):
                 offenders.append(f"{sorted(route.methods)} {route.path} (no current_household)")
         elif names & OBJECT_ID_PARAMS:
             source = inspect.getsource(route.endpoint)
@@ -1200,8 +1202,18 @@ def test_the_spa_fallback_cannot_be_walked_out_of(spa_built, client):
         """One GET, with the path exactly as written."""
         sent: list[dict] = []
 
+        delivered = False
+
         async def receive():
-            return {"type": "http.request", "body": b"", "more_body": False}
+            # What a real server does: the (empty) body once, then nothing until
+            # the client goes away. Starlette >= 1.10's BaseHTTPMiddleware
+            # listens for that disconnect and refuses a second `http.request`,
+            # so answering every call with the body is not an ASGI server.
+            nonlocal delivered
+            if not delivered:
+                delivered = True
+                return {"type": "http.request", "body": b"", "more_body": False}
+            await asyncio.Event().wait()
 
         async def send(message):
             sent.append(message)

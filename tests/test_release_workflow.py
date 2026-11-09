@@ -7,6 +7,12 @@ it. These tests keep it that way -- a publishing job that stopped depending on
 `publish` would reach Releases or ghcr.io without anybody's click, and nothing
 else would notice.
 
+The Mac App Store upload (#351) is a publisher like the others, behind the
+same gate. Its secrets sit in an `app-store` environment with no reviewer --
+a tag-only store for secrets, not a second gate -- and that environment is
+allowed on that job alone. The job that builds the app runs `npm ci` and
+must never see a secret.
+
 Each rule is checked against the real workflow, and then against a copy that
 breaks it, so a check that passes everything cannot pass here.
 """
@@ -20,7 +26,11 @@ import yaml
 
 WORKFLOW = pathlib.Path(__file__).resolve().parent.parent / ".github" / "workflows" / "release.yml"
 GATE = "publish"
-PUBLISHING = ("publish", "publish-image", "publish-bundle", "publish-release")
+PUBLISHING = ("publish", "publish-image", "publish-bundle", "publish-release", "publish-mac-store")
+#: The environments a job may run in, and the one job each is for.
+ENVIRONMENTS = {GATE: "release", "publish-mac-store": "app-store"}
+#: Jobs that install packages, and so must hold nothing secret.
+BUILDERS = ("build", "image", "store-build")
 
 
 def _jobs() -> dict:
@@ -62,9 +72,16 @@ def problems(jobs: dict) -> list[str]:
             found.append("`publish-bundle` can run before the images are pushed")
         if not _depends_on(jobs, "publish-release", "publish-bundle"):
             found.append("`publish-release` can make the release public without its zip")
-    gated = sorted(n for n, j in jobs.items() if j.get("environment"))
-    if gated != [GATE]:
-        found.append(f"jobs with an environment: {gated}, expected only `{GATE}`")
+    for name, job in jobs.items():
+        wanted = ENVIRONMENTS.get(name)
+        if job.get("environment") != wanted:
+            found.append(f"`{name}` runs in environment {job.get('environment')!r}, expected {wanted!r}")
+    # The App Store upload is not uploaded for a release that did not go out.
+    if "publish-mac-store" in jobs and not _depends_on(jobs, "publish-mac-store", "publish-release"):
+        found.append("`publish-mac-store` can upload before the release is public")
+    for name in BUILDERS:
+        if name in jobs and "secrets." in yaml.safe_dump(jobs[name]):
+            found.append(f"`{name}` installs packages and reads a secret")
     return found
 
 
@@ -79,6 +96,8 @@ def test_a_publisher_that_stops_needing_the_gate_is_caught() -> None:
     jobs["publish-release"]["needs"] = ["build"]
     assert problems(jobs) == [
         "`publish-release` can run without `publish`'s approval",
+        # And the upload behind it loses the gate with it (#351).
+        "`publish-mac-store` can run without `publish`'s approval",
         "`publish-release` can make the release public without its zip",
     ]
 
@@ -90,12 +109,48 @@ def test_losing_the_environment_is_caught() -> None:
 
 
 def test_a_second_gated_job_is_caught() -> None:
-    """Three approvals per release is the failure this design avoids."""
     jobs = copy.deepcopy(_jobs())
     jobs["publish-image"]["environment"] = "release"
     assert problems(jobs) == [
-        "jobs with an environment: ['publish', 'publish-image'], expected only `publish`"
+        "`publish-image` runs in environment 'release', expected None"
     ]
+
+
+def test_the_app_store_environment_belongs_to_the_upload_alone() -> None:
+    """#351: `app-store` is where the signing secrets live. On any other job --
+    or the release gate moved onto the upload -- it is caught."""
+    jobs = copy.deepcopy(_jobs())
+    jobs["publish-image"]["environment"] = "app-store"
+    assert problems(jobs) == [
+        "`publish-image` runs in environment 'app-store', expected None"
+    ]
+    jobs = copy.deepcopy(_jobs())
+    jobs["publish-mac-store"]["environment"] = "release"
+    assert problems(jobs) == [
+        "`publish-mac-store` runs in environment 'release', expected 'app-store'"
+    ]
+
+
+def test_an_upload_before_the_release_is_public_is_caught() -> None:
+    jobs = copy.deepcopy(_jobs())
+    jobs["publish-mac-store"]["needs"] = ["build", "store-build", "publish"]
+    assert problems(jobs) == ["`publish-mac-store` can upload before the release is public"]
+    jobs["publish-mac-store"]["needs"] = ["build", "store-build"]
+    assert "`publish-mac-store` can run without `publish`'s approval" in problems(jobs)
+
+
+def test_an_upload_on_a_branch_is_caught() -> None:
+    jobs = copy.deepcopy(_jobs())
+    del jobs["publish-mac-store"]["if"]
+    assert problems(jobs) == ["`publish-mac-store` is not limited to tag pushes"]
+
+
+def test_a_builder_that_reads_a_secret_is_caught() -> None:
+    """The job that runs `npm ci` must not hold the signing secrets: anything a
+    compromised dependency ran would run beside them."""
+    jobs = copy.deepcopy(_jobs())
+    jobs["store-build"]["env"]["P12"] = "${{ secrets.MAS_CERTIFICATES_P12 }}"
+    assert problems(jobs) == ["`store-build` installs packages and reads a secret"]
 
 
 def test_a_publisher_that_runs_on_a_branch_is_caught() -> None:

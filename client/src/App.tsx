@@ -8,6 +8,8 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLedgerListener } from "./lib/ledgerListener";
+import { UpdatedNotice } from "./components/UpdatedNotice";
 import { api, setUnauthorizedHandler } from "./lib/api";
 import { EVERYTHING, loadCapabilities, productNameNow, useCapabilities, useProductName } from "./lib/capabilities";
 import type { Capabilities } from "./lib/capabilities";
@@ -596,6 +598,9 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
   // `householdId` can come from a query string (#197).
   const list = households.data ?? [];
   const household = list.find((h) => h.id === householdId) ?? list[0];
+  // Changes made elsewhere -- the other member, an agent, another tab --
+  // refresh what is on screen (#369). See `lib/ledgerListener.ts`.
+  const refreshedAt = useLedgerListener(household?.id);
   const inboxId = household?.id;
 
   // The nav badge's count. Its own small query rather than a field on
@@ -861,6 +866,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
         {/* Owners only, and only for what somebody else did (#286): the
             price of resets that need no step-up is that they are seen. */}
         <SignInNotice user={user} onOpen={() => go("admin")} />
+        <UpdatedNotice at={refreshedAt} />
         <ScreenBoundary resetKey={`${screen}:${household.id}`}>
         {/* The register has an Import button of its own, and navigation lives
             here rather than in a screen. `onGo` takes the screen's name as a

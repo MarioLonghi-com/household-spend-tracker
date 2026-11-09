@@ -10,7 +10,7 @@ from dataclasses import asdict
 from datetime import date as Date
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, Response, UploadFile
+from fastapi import APIRouter, File, Form, Query, Response, UploadFile
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 from sqlalchemy import func, select
@@ -19,7 +19,7 @@ from starlette.concurrency import run_in_threadpool
 
 from ... import countries, theming
 from ...audit.batch import batch
-from ...models import Account, BatchKind, BlobRole, Receipt, ReceiptBlob, User
+from ...models import Account, Batch, BatchKind, BlobRole, Change, Receipt, ReceiptBlob, User
 from ...schemas import (
     AccountCreate,
     AccountImportOut,
@@ -32,6 +32,7 @@ from ...schemas import (
     HouseholdCreate,
     HouseholdOut,
     HouseholdUpdate,
+    LatestChangeOut,
     MemberOut,
     PaletteOut,
     ReconcileCandidate,
@@ -45,7 +46,15 @@ from ...services import accounts as account_service
 from ...services import households as household_service
 from ...services import receipts as receipt_service
 from ...services.households import UNSET
-from ..deps import CurrentHousehold, CurrentUser, OwnerOnly, SessionDep, load_for
+from ..deps import (
+    CurrentHousehold,
+    CurrentUser,
+    OwnerOnly,
+    QuietHousehold,
+    QuietUser,
+    SessionDep,
+    load_for,
+)
 from ..uploads import read_capped, refuse_declared_size
 
 
@@ -215,6 +224,50 @@ class HouseholdStatsOut(BaseModel):
     #: With the flag and the name already resolved, for the same reason
     #: `/countries` is a route rather than a bundled table.
     countries: list[CountryOut]
+
+
+@router.get("/households/{household_id}/changes/latest", response_model=LatestChangeOut)
+def latest_change(
+    household: QuietHousehold,
+    user: QuietUser,
+    session: SessionDep,
+    since: Annotated[int | None, Query(ge=0)] = None,
+) -> LatestChangeOut:
+    """How far the household's audit log has got, and who moved it since `since`.
+
+    What an open page polls to notice a change made somewhere else -- the other
+    member, an agent, another tab -- without refetching anything until there is
+    one (#369). Every write is a batch and every batch's rows are `changes`
+    rows in `seq` order, so the newest `seq` answers "anything new since N?" in
+    one indexed read.
+
+    **It writes nothing.** `QuietUser` does not touch the session, so a tab
+    left open neither turns its polls into WAL writes nor keeps an idle
+    session alive. Another household's id is a 404, like everywhere else.
+    """
+    newest = session.execute(
+        select(func.max(Change.seq)).where(Change.household_id == household.id)
+    ).scalar_one()
+    seq = int(newest or 0)
+    if since is None or seq <= since:
+        return LatestChangeOut(seq=seq)
+
+    def any_where(*conditions) -> bool:
+        return (
+            session.execute(
+                select(Change.seq)
+                .join(Batch, Batch.id == Change.batch_id)
+                .where(Change.household_id == household.id, Change.seq > since, *conditions)
+                .limit(1)
+            ).first()
+            is not None
+        )
+
+    return LatestChangeOut(
+        seq=seq,
+        elsewhere=any_where((Batch.actor_id != user.id) | Batch.agent_key_id.is_not(None)),
+        mine=any_where(Batch.actor_id == user.id, Batch.agent_key_id.is_(None)),
+    )
 
 
 @router.get("/households/{household_id}/stats", response_model=HouseholdStatsOut)

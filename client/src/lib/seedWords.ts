@@ -39,6 +39,12 @@ export const SEED_WORDS = [
       "Name of a category seeded into a new household; the person can rename it",
   }),
   msg({
+    id: "seed.category.reimbursements",
+    message: "Reimbursements",
+    comment:
+      "Name of a category seeded into a new household for money paid back, such as work expenses; the person can rename it",
+  }),
+  msg({
     id: "seed.group.bills",
     message: "Bills",
     comment:

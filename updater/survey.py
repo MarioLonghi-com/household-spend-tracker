@@ -28,9 +28,10 @@ SERVICE_LABELS = ("com.docker.compose.service", "io.podman.compose.service")
 class NotStarted(Exception):
     """A reason not to start, found before anything changed. `sentence` is the owner's."""
 
-    def __init__(self, sentence: str) -> None:
+    def __init__(self, sentence: str, code: str | None = None) -> None:
         super().__init__(sentence)
         self.sentence = sentence
+        self.code = code
 
 
 def service_of(labels: object) -> str | None:

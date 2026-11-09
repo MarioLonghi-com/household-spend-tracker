@@ -25,21 +25,21 @@ register without being that:
 - **Opening balances.** What an account held when tracking started is not
   income. Left in, the first month of a freshly imported ledger reports the
   account balance as money earned.
-- **Work expenses, and the payments that repaid them.** A hotel the employer
-  pays back is not the household's spending, and the transfer that pays it
-  back is not the household's income. Left in, both sides of the report are
-  inflated by the same figure -- net is right, and every other number on the
-  page is wrong, exactly as transfers made it before they were excluded.
-  Decided for this build (G(i), 2026-09-25): money that comes back is not spending,
-  and money still owed is a receivable rather than a cost, so an ``expected``
-  row is out whether or not its payment has arrived. A ``written_off`` row is
-  a cost after all and stays in, in its own month.
 - **Rows in another currency.** Not excluded so much as never asked for; see
   above.
 
-The first three are what :func:`flow_rows` removes, and it is written **once**
+The first two are what :func:`flow_rows` removes, and it is written **once**
 here so that every report composes the same predicate rather than the same
 intentions. Two copies of this rule is how they come to disagree.
+
+Work reimbursements are flow -- money did leave and arrive -- but they are not
+the household's income or spending: a hotel the employer pays back was never
+its spending, and the payment back is not its income. Left in, both sides are
+inflated by the same figure, net is right and every other number on the page
+is wrong. So Income vs Expense **sets them apart** in a block of their own
+rather than dropping them (#372), and :func:`side` is the one place that says
+which rows those are. A ``written_off`` row is a cost after all and stays an
+expense, in its own month (G(i), 2026-09-25).
 """
 
 from __future__ import annotations
@@ -47,13 +47,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date as Date
 
-from sqlalchemy import Boolean, Select, and_, func, literal_column, or_, select
+from sqlalchemy import Boolean, Select, and_, case, func, literal_column, or_, select
 from sqlalchemy.orm import Session, aliased
 
 from ..models import (
     Account,
     Category,
     CategoryGroup,
+    CategoryGroupRole,
+    CategoryRole,
     Payee,
     Receipt,
     ReimbursementState,
@@ -90,30 +92,15 @@ def flow_rows(household_id: str) -> Select:
     deleted keeps the second and loses the first -- `ondelete="SET NULL"` on
     the self-reference says so -- and it is still not spending.
 
-    Work expenses leave too (decided for this build, G(i), 2026-09-25), on both sides:
-
-    - A row flagged ``expected`` is out **whether or not it has been repaid**.
-      Repaid, it was never the household's spending; not yet repaid, it is
-      money owed to the household -- a receivable, not a cost. Either way it
-      is not an expense, and waiting for the payment before removing it would
-      make last month's figures move when the money arrives.
-    - A row some other row's ``reimbursed_by_id`` points at is the payment,
-      and money coming back is not income. Leaving it in would inflate income
-      by exactly what the first rule took out of expense.
-    - ``written_off`` **stays**. Work declined to pay, so it was spending
-      after all, in the month it happened.
-
-    An advance with nothing linked to it yet is still income here, because
-    nothing yet says what it is. The moment an expense points at it, it
-    leaves -- the same way an expense flagged today leaves a month already
-    looked at.
+    Work expenses and their repayments are **kept**: they are flow, and
+    :func:`side` is what puts them in a block of their own rather than in
+    income or expenses (#372).
     """
     return (
         select(Transaction)
         .where(Transaction.household_id == household_id)
         .where(_mostly(Transaction.transfer_transaction_id.is_(None)))
         .where(_mostly(Transaction.transfer_account_id.is_(None)))
-        .where(_not_reimbursement(household_id))
         .outerjoin(Payee, Payee.id == Transaction.payee_id)
         .where(
             or_(
@@ -138,48 +125,92 @@ def _mostly(condition):
     return func.likelihood(condition, literal_column("0.9375"), type_=Boolean)
 
 
-def _is_payment(household_id: str):
-    """True for a row that some row in the household names as its repayment.
+# --------------------------------------------------------------------------- #
+# Where a row lands on Income vs Expense (#372)
+# --------------------------------------------------------------------------- #
 
-    The ids are read **once**, as a subquery SQLite keeps as a list, and never
-    as a list in Python -- not a correlated EXISTS probed once per row. The
-    probe was 14s a query over 10,403 transactions, three queries per report
-    (#297), because its speed was the planner's guess: `reimbursed_by_id` is
-    NULL on nearly every row, so exact statistics call its index useless and
-    every row rescanned the table, and no statistics at all let it probe the
-    household index instead, which in a one-household ledger is the same
-    thing. Read once, it is one pass over the household whatever
-    `sqlite_stat1` says.
+#: In the Income group: income, whatever the sign.
+INCOME = "in"
+#: Anywhere else, or uncategorised: an expense line, whatever the sign.
+EXPENSE = "out"
+#: In the Reimbursement category: money work paid back, linked or not.
+REIMBURSEMENT_INCOME = "reimbursement_income"
+#: Flagged `expected` and linked to the payment that repaid it.
+REIMBURSEMENT_SPENT = "reimbursement_spent"
+#: Flagged `expected` and still waiting for its payment.
+REIMBURSEMENT_PENDING = "reimbursement_pending"
 
-    `IS NOT NULL` is what keeps the negation honest. `id NOT IN (..., NULL)`
-    is NULL for every row, and a NULL predicate drops the row: one expense
-    with no link in the list and the report would be empty.
+#: The two sides that make income, expenses and net.
+COUNTED = (INCOME, EXPENSE)
+#: The block shown for information and counted in none of them.
+SET_APART = (REIMBURSEMENT_INCOME, REIMBURSEMENT_SPENT, REIMBURSEMENT_PENDING)
+SIDES = COUNTED + SET_APART
+
+
+def side():
+    """Which line of Income vs Expense a row lands on, as one SQL expression.
+
+    The rules, in order -- a row lands in the first that applies:
+
+    1. its category carries the ``reimbursement`` role: Reimbursement income,
+       any sign, linked or not;
+    2. flagged ``expected`` and linked to a payment: Amount spent, reimbursed;
+    3. flagged ``expected`` with no payment yet: Pending reimbursement;
+    4. its group carries the ``income`` role: income, under its category,
+       whatever the sign;
+    5. anything else, uncategorised included: an expense line, whatever the
+       sign, so a refund in Groceries reduces Groceries in its month.
+
+    **The sign never decides the side.** Deciding by sign put every refund in
+    income and showed Hotel on both halves of the report. Being somebody's
+    repayment no longer decides anything either: a salary that also carried a
+    claim's repayment is still Salary (rule 4), and only the Reimbursement
+    category sets a payment apart. A ``written_off`` row matches none of 1-3,
+    so it is an expense, as decided when reimbursements were built.
+
+    Reads the two roles rather than any name, so renaming or translating the
+    Income group or the Reimbursement category changes nothing. Needs
+    `Category` and `CategoryGroup` joined, which :func:`classified_rows` does.
+    It reads only the row's own columns -- no subquery over who repaid whom,
+    which was 14s a query over 10,403 rows until #297 rewrote it.
     """
-    expense = aliased(Transaction)
-    return Transaction.id.in_(
-        select(expense.reimbursed_by_id)
-        .where(expense.household_id == household_id)
-        .where(expense.reimbursed_by_id.is_not(None))
+    expected = Transaction.reimbursement == ReimbursementState.expected
+    return case(
+        (Category.role == CategoryRole.reimbursement, REIMBURSEMENT_INCOME),
+        (and_(expected, Transaction.reimbursed_by_id.is_not(None)), REIMBURSEMENT_SPENT),
+        (expected, REIMBURSEMENT_PENDING),
+        (CategoryGroup.role == CategoryGroupRole.income, INCOME),
+        else_=EXPENSE,
     )
 
 
-def _is_reimbursement(household_id: str):
-    """What :func:`flow_rows` leaves out for being a work expense or its payment."""
-    return or_(
-        Transaction.reimbursement == ReimbursementState.expected,
-        _is_payment(household_id),
+def classified_rows(household_id: str) -> Select:
+    """:func:`flow_rows` with what :func:`side` reads joined on.
+
+    Outer joins, because an uncategorised row is a real state and rule 5's.
+    """
+    return (
+        flow_rows(household_id)
+        .outerjoin(Category, Category.id == Transaction.category_id)
+        .outerjoin(CategoryGroup, CategoryGroup.id == Category.group_id)
     )
 
 
-def _not_reimbursement(household_id: str):
-    # `reimbursement != 'expected'` alone is NULL on the NULL rows -- nearly
-    # every row -- and a NULL predicate drops the row. Say it out loud.
-    return and_(
-        or_(
-            Transaction.reimbursement.is_(None),
-            Transaction.reimbursement != ReimbursementState.expected,
-        ),
-        ~_is_payment(household_id),
+def has_income_group(session: Session, household_id: str) -> bool:
+    """Whether any group carries the ``income`` role.
+
+    Without one every row is an expense line, which is the rule working
+    rather than a fault -- so the report says so in a line rather than
+    showing an Income section that is empty for no visible reason.
+    """
+    return (
+        session.execute(
+            select(CategoryGroup.id)
+            .where(CategoryGroup.household_id == household_id)
+            .where(CategoryGroup.role == CategoryGroupRole.income)
+            .limit(1)
+        ).first()
+        is not None
     )
 
 
@@ -192,10 +223,9 @@ def excluded_counts(session: Session, household_id: str, **window) -> dict[str, 
     first time anybody looked.
 
     Each row is counted once, under the first reason that applies: a transfer
-    leg, then an opening balance, then a work expense or its payment. The
-    rules that set a flag already refuse transfer legs, so the overlap should
-    be empty -- but "should" is not what a count is for, and three numbers
-    that add up to more rows than were dropped would be.
+    leg, then an opening balance. The work-reimbursement count is not made
+    here -- those rows are on the report, in their own block, and
+    :func:`income_expense` counts them off the same query that drew it.
     """
     base = select(func.count()).select_from(Transaction).where(
         Transaction.household_id == household_id
@@ -211,26 +241,14 @@ def excluded_counts(session: Session, household_id: str, **window) -> dict[str, 
         )
     ).scalar_one()
     openings = session.execute(
-        base.join(Payee, Payee.id == Transaction.payee_id).where(
-            Payee.system == SystemPayee.opening_balance
-        )
-    ).scalar_one()
-    reimbursements = session.execute(
         base.where(Transaction.transfer_transaction_id.is_(None))
         .where(Transaction.transfer_account_id.is_(None))
-        .outerjoin(Payee, Payee.id == Transaction.payee_id)
-        .where(
-            or_(
-                Payee.system.is_(None),
-                Payee.system != SystemPayee.opening_balance,
-            )
-        )
-        .where(_is_reimbursement(household_id))
+        .join(Payee, Payee.id == Transaction.payee_id)
+        .where(Payee.system == SystemPayee.opening_balance)
     ).scalar_one()
     return {
         "transfers": int(transfers or 0),
         "opening_balances": int(openings or 0),
-        "reimbursements": int(reimbursements or 0),
     }
 
 
@@ -362,10 +380,35 @@ class Row:
 
 
 @dataclass(slots=True)
+class Line:
+    """A figure across the window with no breakdown under it.
+
+    A category group's subtotal, and each of the three work-reimbursement
+    lines. Summed by the server like every other figure on the report, so the
+    screen adds nothing up itself and every average rounds the same way.
+    """
+
+    key: str | None = None
+    name: str | None = None
+    by_month: dict[str, int] = field(default_factory=dict)
+    total_minor: int = 0
+    count: int = 0
+    average_minor: int = 0
+
+    def add(self, month: str, amount: int, count: int) -> None:
+        self.by_month[month] = self.by_month.get(month, 0) + amount
+        self.total_minor += amount
+        self.count += count
+
+
+@dataclass(slots=True)
 class Section:
-    """Income or Expense: its rows, and its own totals per month."""
+    """Income or Expense: its rows, its groups' subtotals, and its own totals."""
 
     rows: list[Row] = field(default_factory=list)
+    #: One subtotal per category group with a row in this section, in the
+    #: order the rows are in. Uncategorised belongs to no group and has none.
+    groups: list[Line] = field(default_factory=list)
     by_month: dict[str, int] = field(default_factory=dict)
     total_minor: int = 0
     count: int = 0
@@ -396,15 +439,14 @@ def income_expense(
     no last column; the answer says which dates it settled on, so the screen
     never has to guess what it is showing.
 
-    Which side a row lands on is decided by the **sign of the transaction**,
-    not by anything stored about the category. A category is classification --
-    it answers "what was this?" and carries no notion of direction -- so a
-    refund against Groceries is money coming in and belongs in income for the
-    month it arrived. Deciding by category instead would need a direction
-    column that does not exist and would be wrong the first time a category saw
-    both signs, which "Company refunds" does by definition.
+    Which line a row lands on is :func:`side` -- **the category group decides,
+    never the sign** (#372). Income is the group carrying the ``income`` role;
+    every other category, and Uncategorised, is an expense line where refunds
+    and charges net per month. Work reimbursements are their own block,
+    ``reimbursements``, shown for information and counted in neither income,
+    expenses nor net.
 
-    Zero-amount rows are counted in neither: they move no money, and putting
+    Zero-amount rows are counted nowhere: they move no money, and putting
     them on one side would make that side's row count disagree with its total.
 
     One query, grouped in SQL. The register's own measurement is the warning
@@ -435,32 +477,41 @@ def income_expense(
     divisor = len(months) or 1
 
     period = func.strftime("%Y-%m", Transaction.date)
-    # `direction` is the sign, resolved in SQL so the grouping happens in the
-    # database rather than over rows dragged into Python.
-    direction = func.iif(Transaction.amount > 0, "in", "out")
+    # Resolved in SQL so the grouping happens in the database rather than
+    # over rows dragged into Python.
+    where = side()
 
     stmt = (
-        flow_rows(household_id)
+        classified_rows(household_id)
         .with_only_columns(
-            direction.label("direction"),
+            where.label("side"),
             period.label("period"),
             Category.id.label("category_id"),
             Category.name.label("category_name"),
+            CategoryGroup.id.label("group_id"),
             CategoryGroup.name.label("group_name"),
             func.sum(Transaction.amount).label("total"),
             func.count().label("n"),
         )
-        .outerjoin(Category, Category.id == Transaction.category_id)
-        .outerjoin(CategoryGroup, CategoryGroup.id == Category.group_id)
         .where(Transaction.amount != 0)
-        .group_by(direction, period, Category.id, Category.name, CategoryGroup.name)
+        .group_by(
+            where, period, Category.id, Category.name, CategoryGroup.id, CategoryGroup.name
+        )
     )
     stmt = _windowed(stmt, **window)
 
-    sections = {"in": Section(), "out": Section()}
+    sections = {INCOME: Section(), EXPENSE: Section()}
+    block = {one: Line(key=one) for one in SET_APART}
     seen: dict[tuple[str, str | None], Row] = {}
+    group_lines: dict[tuple[str, str], Line] = {}
 
-    for way, month, cat_id, cat_name, group_name, total, n in session.execute(stmt).all():
+    for way, month, cat_id, cat_name, group_id, group_name, total, n in session.execute(
+        stmt
+    ).all():
+        amount, count = int(total or 0), int(n or 0)
+        if way in block:
+            block[way].add(month, amount, count)
+            continue
         section = sections[way]
         row = seen.get((way, cat_id))
         if row is None:
@@ -471,50 +522,92 @@ def income_expense(
             )
             seen[(way, cat_id)] = row
             section.rows.append(row)
-        amount, count = int(total or 0), int(n or 0)
         row.by_month[month] = row.by_month.get(month, 0) + amount
         row.total_minor += amount
         row.count += count
+        if group_id is not None:
+            line = group_lines.get((way, group_id))
+            if line is None:
+                line = Line(key=group_id, name=group_name)
+                group_lines[(way, group_id)] = line
+                section.groups.append(line)
+            line.add(month, amount, count)
         section.by_month[month] = section.by_month.get(month, 0) + amount
         section.total_minor += amount
         section.count += count
 
-    for section in sections.values():
+    for way, section in sections.items():
         for row in section.rows:
             row.average_minor = _mean(row.total_minor, divisor)
-        # Largest first, by magnitude: an expense total is negative, so sorting
-        # on the raw figure would put the biggest outgoing at the bottom.
-        section.rows.sort(key=lambda r: (-abs(r.total_minor), r.name))
+        for line in section.groups:
+            line.average_minor = _mean(line.total_minor, divisor)
         section.average_minor = _mean(section.total_minor, divisor)
+        _order(section, largest=(lambda total: -total) if way == INCOME else (lambda total: total))
+    for line in block.values():
+        line.average_minor = _mean(line.total_minor, divisor)
 
     with_activity = {
         month
-        for section in sections.values()
-        for month in section.by_month
+        for lines in (*sections.values(), *block.values())
+        for month in lines.by_month
     }
+
+    excluded = excluded_counts(session, household_id, **window)
+    # The rows set apart, counted off the query that drew the block, so the
+    # screen's "N rows set apart" is the block's own count and nothing else.
+    excluded["reimbursements"] = sum(line.count for line in block.values())
 
     return {
         "currency": currency,
         "since": since,
         "until": until,
         "months": months,
-        "income": sections["in"],
-        "expense": sections["out"],
+        "income": sections[INCOME],
+        "expense": sections[EXPENSE],
         # Net is the one sum this module *does* make, and it is safe: both
         # sides are already the same currency by construction, because the
-        # currency was a filter rather than a grouping.
+        # currency was a filter rather than a grouping. The reimbursement
+        # block is not in it -- that is what setting it apart means.
         "net_by_month": {
-            month: sections["in"].by_month.get(month, 0)
-            + sections["out"].by_month.get(month, 0)
+            month: sections[INCOME].by_month.get(month, 0)
+            + sections[EXPENSE].by_month.get(month, 0)
             for month in months
         },
-        "net_total_minor": sections["in"].total_minor + sections["out"].total_minor,
-        "excluded": excluded_counts(session, household_id, **window),
+        "net_total_minor": sections[INCOME].total_minor + sections[EXPENSE].total_minor,
+        "reimbursements": {
+            "income": block[REIMBURSEMENT_INCOME],
+            "spent": block[REIMBURSEMENT_SPENT],
+            "pending": block[REIMBURSEMENT_PENDING],
+        },
+        "has_income_group": has_income_group(session, household_id),
+        "excluded": excluded,
         "coverage": {
             "months_in_range": len(months),
             "months_with_activity": len(with_activity),
         },
     }
+
+
+def _order(section: Section, *, largest) -> None:
+    """Groups by size, then each group's categories by size; Uncategorised last.
+
+    "Largest" is the side's own sense of it -- the most money in for income,
+    the most money out for expenses -- so on the expense side a category that
+    refunds outweighed sorts after every category with spending in it rather
+    than above them for being large and positive. The rows are put in group
+    order here because the screen gathers them under their headings in the
+    order they arrive.
+    """
+    section.groups.sort(key=lambda line: (largest(line.total_minor), line.name or ""))
+    rank = {line.name: n for n, line in enumerate(section.groups)}
+    section.rows.sort(
+        key=lambda row: (
+            row.group_name is None,
+            rank.get(row.group_name, 0),
+            largest(row.total_minor),
+            row.name,
+        )
+    )
 
 
 def _mean(total: int, divisor: int) -> int:
@@ -593,6 +686,7 @@ def behind(
     period: str | None = None,
     row_category_id: str | None = None,
     row_uncategorised: bool = False,
+    row_group_id: str | None = None,
     direction: str | None = None,
     limit: int = DRILL_CEILING,
 ) -> dict:
@@ -613,10 +707,12 @@ def behind(
       for a Total row. They are two arguments rather than one because
       "Uncategorised" is a real row but **is not an id**, which is the same
       reason `include_uncategorised` is separate from `category_ids`.
-    - ``direction`` is which band, absent for Net -- where both sides are the
-      honest answer, because a net figure is made of both.
+    - ``row_group_id`` is one category group's subtotal line (#372).
+    - ``direction`` is which line of :data:`SIDES` -- income, expense, or one
+      of the three work-reimbursement lines -- and is absent for Net, which is
+      income and expense together and never the reimbursement block.
     """
-    stmt = flow_rows(household_id).where(Transaction.amount != 0)
+    stmt = classified_rows(household_id).where(Transaction.amount != 0)
     stmt = _windowed(
         stmt,
         since=since,
@@ -633,10 +729,14 @@ def behind(
         stmt = stmt.where(Transaction.category_id.is_(None))
     elif row_category_id:
         stmt = stmt.where(Transaction.category_id == row_category_id)
-    if direction == "in":
-        stmt = stmt.where(Transaction.amount > 0)
-    elif direction == "out":
-        stmt = stmt.where(Transaction.amount < 0)
+    if row_group_id:
+        stmt = stmt.where(Category.group_id == row_group_id)
+    if direction is None:
+        stmt = stmt.where(side().in_(COUNTED))
+    elif direction in SIDES:
+        stmt = stmt.where(side() == direction)
+    else:
+        raise ValueError(f"no such line: {direction!r}")
 
     # The total is counted over the whole match, before the cap, so a capped
     # bubble still reconciles against the cell it came from.
@@ -657,9 +757,9 @@ def behind(
             Transaction.amount,
         )
         # `Account` is already joined -- `_windowed` attaches it for the
-        # currency, which is required here. Joining it again is not a second
-        # copy of a filter but an ambiguous column and a failed query.
-        .outerjoin(Category, Category.id == Transaction.category_id)
+        # currency, which is required here -- and `Category` is, by
+        # `classified_rows`. Joining either again is not a second copy of a
+        # filter but an ambiguous column and a failed query.
         .order_by(Transaction.date.desc(), Transaction.created_at.desc())
         .limit(limit)
     ).all()

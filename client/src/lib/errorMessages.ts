@@ -60,6 +60,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "category.group_not_found": {
     message: msg({ id: "error.category.group_not_found", message: "No such category group" }),
   },
+  "category.group_by_id_or_name": {
+    message: msg({ id: "error.category.group_by_id_or_name", message: "Name the group by group_id or by group_name, one of the two" }),
+  },
   "category.in_use": {
     message: msg({
       id: "error.category.in_use",
@@ -532,6 +535,27 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
         "Another update request is waiting or running. Wait for it to finish, then try again",
     }),
   },
+  "update.go_back_unavailable": {
+    message: msg({
+      id: "error.update.go_back_unavailable",
+      message:
+        "There is nothing to go back to from this version: the last update is not one that can be undone from here",
+    }),
+  },
+  "update.go_back_typed_version": {
+    message: msg({
+      id: "error.update.go_back_typed_version",
+      message:
+        "Type {to_version}, the version to go back to, to confirm",
+    }),
+  },
+  "update.go_back_updater_too_old": {
+    message: msg({
+      id: "error.update.go_back_updater_too_old",
+      message:
+        "The updater is too old to go back. Update the updater first, then try again",
+    }),
+  },
   "update.lossy_mismatch": {
     message: msg({
       id: "error.update.lossy_mismatch",
@@ -661,6 +685,12 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   },
   "agent_key.read_only_commit": {
     message: msg({ id: "error.agent_key.read_only_commit", message: "A read-only key has nothing to commit" }),
+  },
+  "agent_key.read_only_categories": {
+    message: msg({ id: "error.agent_key.read_only_categories", message: "A read-only key cannot be allowed to change categories" }),
+  },
+  "agent_key.may_not_edit_categories": {
+    message: msg({ id: "error.agent_key.may_not_edit_categories", message: "That key may not add or delete categories. A person can, on the Categories screen, or give the program a key that is allowed to" }),
   },
   "agent_key.not_issuer": {
     message: msg({ id: "error.agent_key.not_issuer", message: "Only the person who issued a key can revoke it" }),

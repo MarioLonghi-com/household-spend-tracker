@@ -70,6 +70,29 @@ def current_user(request: Request, session: SessionDep) -> User:
 CurrentUser = Annotated[User, Depends(current_user)]
 
 
+def current_user_quietly(request: Request, session: SessionDep) -> User:
+    """`current_user`, without recording that the session is in use.
+
+    For a request the browser makes on its own rather than one a person made:
+    the open page asking every few seconds whether anything changed (#369).
+    Touching the session there would be a write a minute from every open tab
+    -- the WAL churn `sessions.touch` exists to avoid -- and, worse, would keep
+    an idle session alive for as long as a tab was left open, which is the
+    one thing the idle timeout is for. Everything else about the check is the
+    same: a missing, expired or disabled session is still a 401.
+    """
+    row = session_service.lookup(session, cookies.session_value(request))
+    if row is None:
+        raise Unauthorized("sign in first", code="auth.sign_in_first")
+    user = session.get(User, row.user_id)
+    if user is None or user.disabled_at is not None:
+        raise Unauthorized("sign in first", code="auth.sign_in_first")
+    return user
+
+
+QuietUser = Annotated[User, Depends(current_user_quietly)]
+
+
 def require_owner(user: CurrentUser) -> User:
     """403 is right here: they are signed in, so they know the thing exists."""
     if user.role is not Role.owner:
@@ -93,6 +116,14 @@ def current_household(household_id: str, user: CurrentUser, session: SessionDep)
 
 
 CurrentHousehold = Annotated[Household, Depends(current_household)]
+
+
+def quiet_household(household_id: str, user: QuietUser, session: SessionDep) -> Household:
+    """`current_household` for a `QuietUser`: the same 404 for a non-member."""
+    return household_service.get_for(session, household_id, user)
+
+
+QuietHousehold = Annotated[Household, Depends(quiet_household)]
 
 
 def load_for[T](session: Session, user: User, model: type[T], object_id: str) -> T:
@@ -376,6 +407,31 @@ def agent_may_split(agent: AgentWriter) -> AgentContext:
 
 
 AgentSplitter = Annotated[AgentContext, Depends(agent_may_split)]
+
+
+def agent_may_edit_categories(agent: AgentWriter) -> AgentContext:
+    """Whether this key may add categories and delete an unused one (#366).
+
+    A permission of its own, not carried by `write`: categorising a row and
+    changing the household's category tree are different kinds of act. A key
+    without it is refused the way a read key is refused a write -- a 403 --
+    with a sentence that says who can do it instead.
+
+    Deleting is allowed here, against §1.2's "no key deletes", on the split's
+    argument: nothing is lost. Only a category nothing carries can go, the
+    delete is a logged row in one batch, and one undo in History puts it back.
+    `test_agent_access.py` names the route and holds it to this dependency.
+    """
+    if not agent.key.may_edit_categories:
+        raise Forbidden(
+            "that key may not add or delete categories. A person can, on the "
+            "Categories screen, or give the program a key that is allowed to.",
+            code="agent_key.may_not_edit_categories",
+        )
+    return agent
+
+
+AgentCategoryEditor = Annotated[AgentContext, Depends(agent_may_edit_categories)]
 
 
 class _Attributed:

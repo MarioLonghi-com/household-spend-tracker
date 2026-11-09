@@ -725,6 +725,21 @@ export function Register({
   const noAccounts = accountIds !== null && accountIds.length === 0;
   //: The same answer for categories: nothing ticked, not even the backlog.
   const noCategories = categoryIds !== null && categoryIds.length === 0 && !backlog;
+  //: The currency toggle, as the server is asked it (#370). It used to narrow
+  //: the rows in hand after paging, and under the amount sort -- currency
+  //: first -- a first page of another currency's rows left the table empty
+  //: with the rows it should show on a page nobody asked for. Read against
+  //: the household's own list only, never against the rows: the rows are
+  //: what this asks for. Every currency ticked, or none still held, is no
+  //: narrowing, the same as `columns` below.
+  const held = currencies.data?.currencies ?? [];
+  const keptCurrencies =
+    pickedCurrencies === null ? [] : held.filter((code) => pickedCurrencies.includes(code));
+  const currencyAsked =
+    keptCurrencies.length > 0 && keptCurrencies.length < held.length ? keptCurrencies : [];
+  //: A remembered toggle waits for that list rather than asking for every
+  //: currency first and then again for the ones it shows.
+  const currencyUnknown = pickedCurrencies !== null && currencies.isPending;
   //: What the query asks for, which lags the box by a pause in the typing. The
   //: box itself stays on `search` so it never drops a character.
   const searched = useDebounced(search).trim();
@@ -744,6 +759,7 @@ export function Register({
   if (workFilter) query.set("reimbursement", workFilter);
   if (range.since) query.set("since", range.since);
   if (range.until) query.set("until", range.until);
+  for (const code of currencyAsked) query.append("currency", code);
   //: The picker's ticks add up (#188): each one brings its rows in. Every
   //: category with the backlog unticked is `categorised`, not every id.
   const categoryFiltered = categoryIds !== null || !backlog;
@@ -769,6 +785,7 @@ export function Register({
       range.until,
       categoryFiltered ? (categoryIds ?? ["*"]).join(",") : null,
       categoryFiltered && backlog,
+      currencyAsked.join(","),
       sort,
       direction,
     ],
@@ -788,7 +805,7 @@ export function Register({
     //: The next page starts a little before the rows in hand end (#341),
     //: until `total` -- what the filter matched on the server -- is reached.
     getNextPageParam: (last, _pages, lastParam) => nextPage(last, lastParam),
-    enabled: !noAccounts && !noCategories,
+    enabled: !noAccounts && !noCategories && !currencyUnknown,
   });
   // A page that did not join up: more rows went above the boundary than the
   // overlap covers. What is in hand may have a hole in it, so all of it is
@@ -855,6 +872,7 @@ export function Register({
   }
   backlogQuery.set("uncategorised", "true");
   backlogQuery.set("limit", "1");
+  //: The badge counts what the table would show, so the toggle stays on.
   const backlogAlone = useQuery({
     queryKey: ["register", household.id, "backlog-count", backlogQuery.toString()],
     queryFn: ({ signal }) =>
@@ -862,7 +880,7 @@ export function Register({
         `/households/${household.id}/transactions?${backlogQuery.toString()}`,
         { signal },
       ),
-    enabled: !noAccounts && noCategories,
+    enabled: !noAccounts && noCategories && !currencyUnknown,
   });
   const backlogCount = noCategories
     ? backlogAlone.data?.total
@@ -906,6 +924,13 @@ export function Register({
   });
 
   const rows = useMemo(() => data?.transactions ?? [], [data]);
+  //: The open row as the register has it now, not as it was clicked: when the
+  //: ledger is refreshed from a change made elsewhere (#369), the panel is
+  //: handed the newer version and decides what to do with it.
+  const openedLive = useMemo(
+    () => (opened ? rows.find((one) => one.id === opened.id) ?? null : null),
+    [opened, rows],
+  );
 
   //: Two existing rows made the two legs of one transfer (issues #70, #71):
   //: one from each bank's statement, in the same currency or not.
@@ -1080,12 +1105,18 @@ export function Register({
    * figure -- a transaction rendered as though it were for nothing. So the
    * toggle governs the rows as well as the columns, and how many it left out
    * is printed under the table rather than left to be noticed.
+   *
+   * The server does the narrowing now (#370) and says how many rows it left
+   * out (`hidden_by_currency`). This filter stays as the guard for rows in
+   * hand that were asked for before the toggle was known -- the household's
+   * currency list still on its way -- and what it drops is counted with the
+   * server's figure, never instead of it.
    */
   const visible = useMemo(
     () => rows.filter((row) => columns.includes(currencyOf(row))),
     [rows, columns, currencyOf],
   );
-  const hiddenByCurrency = rows.length - visible.length;
+  const hiddenByCurrency = (data?.hidden_by_currency ?? 0) + rows.length - visible.length;
 
   /**
    * The rows in the order they are drawn.
@@ -1147,9 +1178,9 @@ export function Register({
   /**
    * What the selection comes to, one line per currency.
    *
-   * Counted over every row the filter matched rather than over the rows on
-   * screen, so a selection the currency toggle has since hidden is still in
-   * the total that claims to describe it.
+   * Counted over the rows in hand. The currency toggle is a filter the
+   * server applies now (#370), so a selected row it has since hidden is one
+   * of those "outside the current filter" the banner counts, like any other.
    */
   const sums = useMemo(
     () => selectionSums(rows, selected, currencyOf, available),
@@ -1492,7 +1523,7 @@ export function Register({
                 label={t({ message: "All categories", comment: "Text on a dropdown that picks several on the Register screen" })}
                 groups={categoryOptions}
                 value={categoryIds}
-                onChange={(ids) => pickCategories(ids, backlog)}
+                onChange={(ids, tick) => pickCategories(ids, tick ?? backlog)}
                 extra={{
                   label: t`Needs a category`,
                   count: backlogCount,
@@ -1561,21 +1592,24 @@ export function Register({
               filter — or Select all, which is not the same as ticking every one of them.
             </Trans>
           </Empty>
-        ) : data?.transactions.length === 0 ? (
-          <Empty>
-            <Trans>
-              Nothing here yet. Add a row above, or import a statement from the Import screen.
-            </Trans>
-          </Empty>
         ) : visible.length === 0 && hiddenByCurrency > 0 ? (
           /* Only when the toggle is what emptied it. While the request is
              still out there are no rows for a different reason, and an empty
-             table waiting for them is what this screen has always shown. */
+             table waiting for them is what this screen has always shown.
+             Ahead of "Nothing here yet": since the server narrows by
+             currency (#370) an answer with no rows can still have rows the
+             toggle is hiding. */
           <Empty>
             {plural(hiddenByCurrency, {
               one: `Every row here is in a currency the toggle is hiding. Turn one back on to see them — ${hiddenByCurrency} row is waiting.`,
               other: `Every row here is in a currency the toggle is hiding. Turn one back on to see them — ${hiddenByCurrency} rows are waiting.`,
             })}
+          </Empty>
+        ) : data?.transactions.length === 0 ? (
+          <Empty>
+            <Trans>
+              Nothing here yet. Add a row above, or import a statement from the Import screen.
+            </Trans>
           </Empty>
         ) : (
           <div className="table-scroll">
@@ -2156,7 +2190,7 @@ export function Register({
 
       {opened && (
         <TransactionPanel
-          txn={opened}
+          txn={openedLive ?? opened}
           household={household}
           accountNameOf={(id) => accountsById.get(id)?.name ?? ""}
           householdId={household.id}
@@ -3664,7 +3698,19 @@ function Guarded({
   );
 }
 
-function TransactionPanel({
+/** Whether two versions of a row agree on every fact the panel edits. */
+export function sameFacts(a: Transaction, b: Transaction): boolean {
+  return (
+    a.date === b.date &&
+    (a.payee_name ?? null) === (b.payee_name ?? null) &&
+    a.amount === b.amount &&
+    (a.memo ?? null) === (b.memo ?? null) &&
+    a.cleared === b.cleared &&
+    (a.category_id ?? null) === (b.category_id ?? null)
+  );
+}
+
+export function TransactionPanel({
   txn,
   household,
   accountNameOf,
@@ -3711,8 +3757,40 @@ function TransactionPanel({
   //: across a save, so "what has changed" has to be measured against the last
   //: answer rather than against the row that was clicked minutes ago.
   const [row, setRow] = useState(txn);
+  //: A newer version of the row that arrived while there were unsaved edits
+  //: here -- somebody else changed it (#369). Held rather than applied, and
+  //: autosave waits, so neither their change nor this one is lost silently.
+  const [theirs, setTheirs] = useState<Transaction | null>(null);
+
+  /** Put the row's facts into the fields, as opening the panel does. */
+  function adopt(next: Transaction) {
+    setDate(next.date);
+    setPayee(next.payee_name ?? "");
+    setOutflow(next.amount < 0 ? toInput(next.amount, currency) : "");
+    setInflow(next.amount > 0 ? toInput(next.amount, currency) : "");
+    setMemo(next.memo ?? "");
+    setCleared(next.cleared);
+    setCategoryId(next.category_id ?? null);
+    setRow(next);
+    setTheirs(null);
+  }
+
+  // The register refetches when another member, an agent or another tab
+  // changes the ledger, and hands the panel the newer row. This panel's own
+  // save already set `row` to the answer, so an arrival with the same facts is
+  // that save coming back; anything else was changed elsewhere. With nothing
+  // typed here the fields simply follow it; with edits in hand it is said,
+  // and the person chooses.
   useEffect(() => {
-    setRow(txn);
+    if (sameFacts(txn, row)) {
+      setRow(txn);
+      return;
+    }
+    if (dirty) setTheirs(txn);
+    else adopt(txn);
+    // `row` and `dirty` are read as they are when the new row arrives; this
+    // runs for the arrival, not for every keystroke.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [txn]);
 
   const locked = row.cleared === "reconciled";
@@ -3789,7 +3867,7 @@ function TransactionPanel({
    * refuses outright.
    */
   function autoSave() {
-    if (dirty && !save.isPending && !locked) save.mutate();
+    if (dirty && !save.isPending && !locked && theirs === null) save.mutate();
   }
 
 
@@ -3808,6 +3886,31 @@ function TransactionPanel({
   return (
     <Panel title={`${formatDate(txn.date)} · ${accountName}`} onClose={onClose}>
       <Problem error={save.error ?? (confirming ? null : remove.error) ?? copy.error} />
+      {theirs ? (
+        <div className="banner warn changed-elsewhere" role="alert">
+          <p style={{ marginTop: 0 }}>
+            <Trans>
+              This transaction was changed somewhere else while you were editing it. Nothing has
+              been saved over it.
+            </Trans>
+          </p>
+          <div className="row">
+            <button className="primary" onClick={() => adopt(theirs)}>
+              <Trans>Show the new version</Trans>
+            </button>
+            <button
+              onClick={() => {
+                // Measured against their version from now on, and saved.
+                setRow(theirs);
+                setTheirs(null);
+                save.mutate();
+              }}
+            >
+              <Trans>Keep my changes</Trans>
+            </button>
+          </div>
+        </div>
+      ) : null}
       {txn.split_id ? (
         <div className="banner info">
           <Trans>

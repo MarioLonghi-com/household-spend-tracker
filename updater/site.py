@@ -126,6 +126,7 @@ class Records:
         started_at: float | None = None,
         log_tail: tuple[str, ...] = (),
         extra: dict | None = None,
+        code: str | None = None,
     ) -> dict:
         now = self.clock.now()
         record = contract.History(
@@ -134,6 +135,7 @@ class Records:
             state=state,
             sentence=sentence,
             finished_at=contract.iso(now),
+            code=code,
             requested_by=requested_by,
             failed_step=failed_step,
             backup=backup,

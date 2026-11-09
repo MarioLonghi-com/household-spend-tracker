@@ -52,6 +52,7 @@ REGISTRY: dict[str, Code] = {
         ("name", "held", "archived"),
     ),
     "category.group_not_found": Code("No such category group"),
+    "category.group_by_id_or_name": Code("Name the group by group_id or by group_name, one of the two"),
     "category.in_use": Code(
         "{count, plural, one {# transaction is} other {# transactions are}} categorised as "
         "{name}. Archive it instead, and they keep their category.",
@@ -285,6 +286,16 @@ REGISTRY: dict[str, Code] = {
         "The updater cannot use the container engine ({socket}), so it cannot update anything",
         ("socket",)
     ),
+    "update.go_back_unavailable": Code(
+        "There is nothing to go back to from this version: the last update is not one that can be undone from here"
+    ),
+    "update.go_back_typed_version": Code(
+        "Type {to_version}, the version to go back to, to confirm",
+        ("to_version",)
+    ),
+    "update.go_back_updater_too_old": Code(
+        "The updater is too old to go back. Update the updater first, then try again"
+    ),
     "update.in_flight": Code(
         "Another update request is waiting or running. Wait for it to finish, then try again"
     ),
@@ -345,6 +356,11 @@ REGISTRY: dict[str, Code] = {
     "agent_key.needs_label": Code("Give the key a label, so you know what it is for"),
     "agent_key.lifetime": Code("A key can last between a day and {max_days} days", ("max_days",)),
     "agent_key.read_only_commit": Code("A read-only key has nothing to commit"),
+    "agent_key.read_only_categories": Code("A read-only key cannot be allowed to change categories"),
+    "agent_key.may_not_edit_categories": Code(
+        "That key may not add or delete categories. A person can, on the Categories screen, "
+        "or give the program a key that is allowed to"
+    ),
     "agent_key.not_issuer": Code("Only the person who issued a key can revoke it"),
     # -- invite: app/services/invitations.py, app/api/routers/invites.py (#267) --- #
     "invite.not_found": Code("No such invitation"),

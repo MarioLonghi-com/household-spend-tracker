@@ -46,7 +46,9 @@ def _packages(lock: str) -> list[list[str]]:
 @pytest.mark.parametrize("name", ["requirements.txt", "requirements-updater.txt", "requirements-dev.txt"])
 def test_every_package_in_a_lock_is_pinned_exactly_and_hashed(name):
     entries = _packages((ROOT / name).read_text(encoding="utf-8"))
-    assert len(entries) > 30, f"{name} has {len(entries)} packages; is it a lock at all?"
+    # A floor, not a count: sigstore 4.5.1 dropped pyopenssl and pyasn1, and
+    # the updater's lock fell from 31 packages to 29 with nothing wrong.
+    assert len(entries) > 20, f"{name} has {len(entries)} packages; is it a lock at all?"
     loose = [e[0] for e in entries if not re.match(r"^[A-Za-z0-9._-]+==\S+", e[0])]
     unhashed = [e[0] for e in entries if not any("--hash=sha256:" in line for line in e)]
     assert loose == [], f"not pinned with == in {name}: {loose}"

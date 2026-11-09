@@ -60,9 +60,16 @@ each with fixed fields, validated by the updater as if the app were hostile:
 
 - *prepare* and *apply* a **newer, published release of this application**,
   named by its version: never an image, a path, a command or a mount, never
-  an older release, never a prerelease, and never while the app runs an image
-  built locally;
+  an older release (going back, below, is the one way to an older one), never
+  a prerelease, and never while the app runs an image built locally;
 - *discard* a prepared update;
+- *go back* one step (#173): to the release **the last successful update
+  came from**, and only that one -- by the image digest that update recorded
+  and verified, verified again now as that release, with that update's own
+  backup, and with the previous container made again from the configuration
+  the updater saved after the update. Never further back, never from an
+  update a later one superseded, and never with an image or a backup that
+  does not verify;
 - replace the updater with **the updater of this release or a newer one**;
 - the recovery page's requests, each of which carries the recovery code.
 

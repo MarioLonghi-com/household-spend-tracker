@@ -32,6 +32,174 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.13.0 — 2026-11-09
+
+**Reversible: lossy** — two migrations, applied in this order.
+
+- `a7e3c1d95b20` — lossy: a category group and a category can carry a role,
+  Income or Reimbursement (#372), and the migration marks a group called
+  `Income` and a category called `Reimbursement` or `Reimbursements`. Rolling
+  it back drops both columns, so which group is Income and which category is
+  Reimbursement, as moved on Categories, is forgotten. No transaction changes.
+- `d2b8e6f41c07` — lossy: an agent key can be allowed to edit categories
+  (#366), off for every existing key. Rolling it back takes the permission
+  away from the keys that had it; they go back to categorising only. Nothing
+  in the ledger changes.
+
+The updater writes update requests up to protocol 2 for going back, so update
+the updater along with the app; a 0.12 updater still takes every other request.
+
+Fixes and the Register first. Income vs Expense decides a row's side by its
+category group and gives work reimbursements their own block. The Register's
+search takes AND, OR, phrases and exclusions, and an open page refreshes when
+someone else changes the ledger. The owner can go back to the previous version
+from the browser. Every dependency moved up, closing every Dependabot alert
+that had a fix.
+
+### Added
+
+- **An open page notices changes made elsewhere and refreshes itself.**
+  When the other member categorises rows, an agent commits an import, or
+  you edit in another tab, the page on screen refetches in the background
+  within about twenty seconds, keeping its scroll, the register's place and
+  anything half-typed, and says *Updated just now* for a moment. It asks one
+  small question of the household's audit log
+  (`GET /households/{id}/changes/latest`), only while the tab is visible,
+  less often while nothing changes (up to every two minutes), and the
+  question writes nothing -- not even the session's last-seen time, so an
+  idle tab does not keep a session alive. If the transaction open in the
+  register's panel changed underneath unsaved edits, the panel says so and
+  saves nothing until you choose *Show the new version* or *Keep my
+  changes*. (#369)
+
+- **A release uploads the Mac App Store build by itself.** Tagging a
+  version now builds the store app, and once the release is public signs
+  it, packages it and uploads it to App Store Connect, then waits until
+  Apple has accepted it. Only a release tag uploads; submitting the build
+  for review stays a person's step. The signing secrets are held in a
+  separate `app-store` environment that only release tags can reach. (#351)
+- **The Register's search takes AND, OR, phrases and exclusions.** Several
+  words must all match, each in whichever field it is in -- payee Lidl,
+  memo "birthday" -- where the box used to look for the whole text as one
+  phrase; `OR` or `|` between two terms finds either, `"quotes"` keep a
+  phrase together, and `-word` leaves out the rows that mention it. `%` and
+  `_` stay literal in every form, and a stray `OR` or an unclosed quote is
+  read as text rather than refused. Parsed on the server, so the agent's
+  register read and summaries take the same language, and the manifest and
+  `agent/README.md` describe it. A search that worked before finds at least
+  what it found. (#367)
+- **An agent can add a category, and delete one nothing uses, when its key
+  allows it.** `POST …/categories` adds one in a group named by id or by name
+  (making the group when there is none), and `POST
+  …/categories/{id}/delete` deletes a category no row carries; one that is
+  carried is refused and stays, since archiving it is a person's. Both go
+  through the Categories screen's own service, one History entry each with
+  the key named, and Undo takes them back. They need a new permission,
+  *Let it add categories, and delete one nothing uses*, chosen when the key
+  is made and shown in the key list and the manifest — `write` alone does
+  not carry it. The MCP sample has a tool for each. Migration
+  `d2b8e6f41c07` adds the permission, off for every existing key.
+  **Reversible: lossy** -- downgrading takes the permission away from the
+  keys that had it; nothing in the ledger changes. (#366)
+- **Go back to the previous version from the browser.** After a successful
+  update, *Updates* offers *Go back to X.Y.Z*: one step, to the release the
+  last update came from, while its backup is one of the newest five. The
+  confirmation counts what would be lost, the changes since the update's
+  backup in each household, and says what happens to passkeys registered
+  since; it asks for the version typed, a recovery code saved, and your
+  password and a code. The updater checks the previous image and the backup
+  verify before it stops anything, restores the backup with the previous
+  image, and starts the previous version from the configuration it kept
+  after the update. The app now writes update requests up to protocol 2,
+  which adds going back; an updater of 0.12 or older takes every other
+  request as before. (Part of #50, #173)
+
+### Security
+
+- **Every dependency moved up, and every open Dependabot alert with a fix
+  is closed.** Python: Pillow 13.0.0, certifi 2026.10.23, pyasn1 0.6.5,
+  dnspython 2.9.1, FastAPI 0.162, Starlette 1.10, SQLAlchemy 2.1.6, Pydantic
+  2.14, sigstore 4.5.1 and the rest of the weekly groups; the dev tools uv
+  0.13.6, filelock 4.2.6 and setuptools 84.2.1. Client and desktop: Lingui
+  6.11, Babel 8.0.10, Vite 8.3, Vitest 5.0; the desktop shell Electron
+  44.10.1 (45 below) with undici and fast-uri patched underneath. Every version is at
+  least seven days old, the same cooldown Dependabot keeps. The ten
+  Dependabot pull requests are replaced by this one: their lock files did
+  not match `make lock`. (#373)
+- **The GitHub Actions move up too**, all still pinned to a commit.
+- **The desktop shell moves to Electron 45.2.1** (#384), and the tailnet
+  sidecar's Tailscale image to v1.104.4 (#383). Both came from Dependabot
+  after the round above. Its `@rolldown/plugin-babel` 0.3.0 bumps (#385,
+  #386) are not taken: Lingui 6.11's Vite plugin accepts only 0.1 and 0.2.
+- **The desktop build tools no longer carry a vulnerable minimatch**
+  (GHSA-g3hv-75wg-m249, Dependabot alert 245). electron-builder 26.18 still
+  asks for minimatch 9 and 10, so an npm override lifts just the copies in
+  the vulnerable range to 11.0.1; the 3.x and 5.x copies other tools need
+  stay. Build time only: nothing in the app or the installers runs it.
+
+### Changed
+
+- **Every workflow installs with `python -m pip`.** On Windows a bare
+  `pip install` refuses to replace pip itself, and the dev lock pins pip
+  (pip-audit needs it), so the Windows pytest leg failed whenever the
+  runner's pip and the pin differed.
+- **Dependabot also watches `deploy/tailnet/compose.yaml`**, so the pinned
+  Tailscale sidecar tag moves like everything else. (Part of #99)
+- **Income vs Expense puts a row on a side by its category group, not its
+  sign, and sets work reimbursements apart.** The group marked Income is
+  income; every other category, and Uncategorised, is an expense line where
+  refunds and charges net per month, with a subtotal per group, largest
+  spend first. Rows in the category marked Reimbursement, flagged expenses
+  already repaid, and flagged ones still waiting are three lines in a
+  *Work reimbursements* block under Net, for information only and counted
+  in neither income, expenses nor net; a payment in any other category (a
+  salary that also repaid a claim) stays where its category puts it.
+  Headline figures sit above the table, and Total and Average stay pinned on
+  the right on wide screens. Which group is Income and which category is
+  Reimbursement are shown and moved on Categories, and the agent manifest
+  lists them. Migration `a7e3c1d95b20` adds the two markers and sets them on
+  a group called `Income` and a category called `Reimbursement(s)`. A new
+  household's starter tree now has a *Reimbursements* category in Income,
+  already marked, so the block works from the first day.
+  **Reversible: lossy** -- downgrading forgets which group and category
+  carry the markers; no transaction changes. (#372)
+
+### Fixed
+
+- **Select none in a category filter means none.** On the Register it
+  used to leave *Needs a category* ticked, so the register showed the
+  uncategorised rows and switched to oldest first; it now clears that
+  tick too and shows the "nothing ticked" notice, and Select all ticks
+  it again so the filter reads *All categories*. The Income vs Expense
+  report's *Uncategorised* tick follows the same buttons. (#371)
+- **The Import screen names each account with its bank.** *Into which
+  account* lists an account as `Current | Harbour Bank (EUR)` rather than
+  `Current (EUR)`, so two accounts with similar names at two banks can be
+  told apart; an account with no bank set reads as before. (#365)
+- **An update on rootless Podman goes on when the app is started by hand
+  as it stops.** Podman answered that stop with "container state improper"
+  and the update ended as *Not started: the app could not be stopped*. The
+  updater now waits a moment, looks again, and stops the app once more if
+  it is running; a stop refused a second time is still *Not started*, with
+  the app back as it was. (#344)
+- **An update refused for want of disk says how much to free.** It read
+  "Needs about 0.9 GB free, there is 0.9 GB" when the shortfall was a few
+  megabytes. The need is now rounded up and the free space down, the
+  megabytes to free are named, and so is what the need is made of: the new
+  images, two copies of the database and the margin. It offers deleting
+  older update backups only when there are more than the five that are
+  kept, and says how much they hold. The refusal links to a new section,
+  *Freeing disk for an update*, in `deploy/TROUBLESHOOTING.md`. (#330)
+- **Showing one currency and sorting by its amount no longer empties the
+  Register.** The currency toggle used to hide rows in the browser after a
+  page of 500 had arrived, and the amount sort puts one currency's rows
+  before the other's, so the first page could hold none of the currency
+  shown. The register now asks the server for the currencies shown
+  (`currency=`, repeatable, on `GET /households/{id}/transactions`), so the
+  pages, the count and the *Needs a category* badge are about the rows on
+  screen, and the reply's `hidden_by_currency` says how many the toggle
+  left out. (#370)
+
 ## 0.12.0 — 2026-10-15
 
 **Reversible: none** — no migration in this release. To go back to

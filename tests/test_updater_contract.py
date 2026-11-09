@@ -150,7 +150,7 @@ def refused_then_valid(fake, vol, ctx, bad, kind, code, *, good_ctx=None):
 
 SHAPE_REFUSALS = {
     "a list": (lambda v: [1, 2], "prepare", "not_json"),
-    "protocol 2": (lambda v: valid("prepare", v, protocol=2), "prepare", "protocol"),
+    "protocol 3": (lambda v: valid("prepare", v, protocol=3), "prepare", "protocol"),
     "protocol as text": (lambda v: valid("prepare", v, protocol="1"), "prepare", "protocol"),
     "protocol as true": (lambda v: valid("prepare", v, protocol=True), "prepare", "protocol"),
     "an unknown kind": (lambda v: {**valid("prepare", v), "kind": "build"}, "prepare", "kind"),
@@ -474,7 +474,7 @@ def test_the_heartbeat_carries_every_key_of_5_3():
         "rootless", "layout", "socket", "hook", "busy", "role", "protocols", "api_version",
         "engine_api", "container", "socket_sentence", "podman_restart", "problem",
     }  # fmt: skip
-    assert (beat["protocol"], beat["protocols"]) == (1, "1-1")
+    assert (beat["protocol"], beat["protocols"]) == (1, "1-2")
     with pytest.raises(ValueError):
         contract.Heartbeat(**{**beat, "engine": "lxc"})
     with pytest.raises(ValueError):

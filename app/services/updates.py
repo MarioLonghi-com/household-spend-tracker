@@ -63,9 +63,12 @@ from ..permissions import O_NOFOLLOW, O_NONBLOCK, fchmod
 
 log = logging.getLogger("spendtracker")
 
-#: The protocol this app's requests are written in. Also the app image's
-#: `…updater-protocol` label (C4).
-PROTOCOL = 1
+#: The newest protocol this app's requests are written in. Also the app
+#: image's `…updater-protocol` label (C4). Protocol 2 adds `go_back` (#173);
+#: every other kind is still written in protocol 1 (`KIND_PROTOCOL`), so an
+#: updater of window 1-1 takes everything but going back.
+PROTOCOL = 2
+KIND_PROTOCOL = {"go_back": 2}
 
 #: The group every file in the volume belongs to (C11), and the mode of the
 #: request this app writes. Group-readable, not group-writable: the updater
@@ -115,6 +118,7 @@ FIELDS: dict[str, tuple[str, ...]] = {
     ),
     "discard": (*_COMMON, "prepared_id"),
     "update_updater": (*_COMMON, "to_version"),
+    "go_back": (*_COMMON, "from_version", "to_version", "update_id", "recovery_hash"),
 }
 
 
@@ -732,8 +736,8 @@ def write_request(doc: dict) -> Path:
     there is no volume to write into.
     """
     kind = doc.get("kind")
-    if kind not in FIELDS or set(doc) != set(FIELDS[kind]) or doc.get("protocol") != PROTOCOL:
-        raise ValueError(f"not a protocol {PROTOCOL} {kind} request")  # a bug here, not input
+    if kind not in FIELDS or set(doc) != set(FIELDS[kind]) or doc.get("protocol") != protocol_of(kind):
+        raise ValueError(f"not a protocol {protocol_of(kind)} {kind} request")  # a bug here, not input
     where = root()
     try:
         st = os.lstat(where)
@@ -782,9 +786,14 @@ def write_request(doc: dict) -> Path:
     return target
 
 
+def protocol_of(kind: object) -> int:
+    """The protocol a request of `kind` is written in: the one it first appeared in."""
+    return KIND_PROTOCOL.get(kind, 1) if isinstance(kind, str) else 1
+
+
 def _base(kind: str, requested_by: str, now: float | None) -> dict:
     return {
-        "protocol": PROTOCOL,
+        "protocol": protocol_of(kind),
         "id": str(uuid.uuid4()),
         "kind": kind,
         "created_at": iso(time.time() if now is None else now),
@@ -828,3 +837,143 @@ def discard_request(prepared_id: str, *, requested_by: str, now: float | None = 
 
 def update_updater_request(to_version: str, *, requested_by: str, now: float | None = None) -> dict:
     return {**_base("update_updater", requested_by, now), "to_version": to_version}
+
+
+def go_back_request(
+    offer: GoBackOffer, *, recovery_hash: str, requested_by: str, now: float | None = None
+) -> dict:
+    return {
+        **_base("go_back", requested_by, now),
+        "from_version": __version__,
+        "to_version": offer.to_version,
+        "update_id": offer.update_id,
+        "recovery_hash": recovery_hash,
+    }
+
+
+# --------------------------------------------------------------------------- #
+# Going back (#173)
+# --------------------------------------------------------------------------- #
+#
+# One step back, to the release the last successful update came from, while
+# its backup is one of the newest five and the update kept the previous
+# container's configuration. The updater decides the rest -- the image still
+# there and verifying, the backup on the disk and verifying -- before it
+# stops anything; these are what the app can see from the volume, so the
+# screen offers only what has a chance.
+
+
+@dataclass(frozen=True)
+class GoBackOffer:
+    update_id: str
+    #: The release gone back to, and the one this instance runs.
+    to_version: str
+    from_version: str
+    #: When the update finished, and the backup it took -- the ledger as it was
+    #: when the app stopped, which is what going back restores.
+    updated_at: str | None
+    backup: str
+    #: Whether the updater's window takes protocol 2, `go_back`'s (C4).
+    updater_can: bool
+
+
+def window_includes(protocols: str | None, protocol: int) -> bool:
+    """Whether an updater window like `1-2`, as the heartbeat writes it, takes `protocol`."""
+    m = re.fullmatch(r"([0-9]{1,3})-([0-9]{1,3})", protocols or "")
+    return bool(m) and int(m.group(1)) <= protocol <= int(m.group(2))
+
+
+def go_back_offer(beat: Heartbeat | None = None) -> GoBackOffer | None:
+    """What *Go back* would undo, or None when the volume says it cannot.
+
+    The newest settled apply or go-back must be a successful apply to this
+    version, its backup one of the newest five that exist, and its
+    `history/<id>.previous.json` there.
+    """
+    records = [
+        (record_id, doc)
+        for record_id, doc in _documents(root() / "history")
+        if doc.get("kind") in ("apply", "go_back") and doc.get("state") in SETTLED - {"not_started", "refused"}
+        and isinstance(doc.get("finished_at"), str)
+    ]
+    if not records:
+        return None
+    record_id, doc = max(records, key=lambda one: one[1]["finished_at"])
+    frm, to, backup = doc.get("from_version"), doc.get("to_version"), doc.get("backup")
+    if (
+        doc.get("kind") != "apply"
+        or doc.get("state") != "succeeded"
+        or to != __version__
+        or not is_version(frm)
+        or not isinstance(backup, str)
+    ):
+        return None
+    if read_json(root() / "history" / f"{record_id}.previous.json") is None:
+        return None
+    from . import platform
+
+    stamp = Path(backup).name
+    if not any(one.name == stamp and one.protected for one in platform.backups() if one.kind == "update"):
+        return None
+    return GoBackOffer(
+        update_id=record_id,
+        to_version=str(frm),
+        from_version=__version__,
+        updated_at=_str(doc, "finished_at"),
+        backup=stamp,
+        updater_can=beat is not None and window_includes(beat.protocols, KIND_PROTOCOL["go_back"]),
+    )
+
+
+@dataclass(frozen=True)
+class HouseholdLoss:
+    household_id: str | None
+    #: None for the instance-wide acts: setup, a user created, an owner's change.
+    name: str | None
+    batches: int
+
+
+@dataclass(frozen=True)
+class GoBackLoss:
+    """What going back would take with it: everything written since the update's backup (Case C)."""
+
+    since: str
+    households: list[HouseholdLoss]
+    #: Passkeys registered since: gone from the ledger, still on the authenticators (3.7).
+    passkeys: int
+
+
+def go_back_loss(session, offer: GoBackOffer) -> GoBackLoss:
+    """The audit log's batches since the backup was taken, per household, and the passkeys since.
+
+    The backup is the ledger as it was when the app stopped for the update,
+    so what is newer than it is what going back loses. A household with
+    nothing since is not listed.
+    """
+    from sqlalchemy import func, select
+
+    from ..models.audit import Batch
+    from ..models.auth import Passkey
+    from ..models.domain import Household
+    from . import platform
+
+    found = next((one for one in platform.backups() if one.name == offer.backup), None)
+    since = (found.made_at if found else datetime.now(UTC)).astimezone(UTC).replace(tzinfo=None)
+    counted = session.execute(
+        select(Batch.household_id, func.count(Batch.id))
+        .where(Batch.started_at >= since)
+        .group_by(Batch.household_id)
+    ).all()
+    names = dict(session.execute(select(Household.id, Household.name)).all())
+    households = [
+        HouseholdLoss(household_id=hid, name=names.get(hid) if hid else None, batches=int(n))
+        for hid, n in counted
+        if n
+    ]
+    households.sort(key=lambda one: (one.household_id is None, (one.name or "").casefold()))
+    passkeys = session.scalar(select(func.count(Passkey.id)).where(Passkey.created_at >= since)) or 0
+    return GoBackLoss(
+        since=since.replace(tzinfo=UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        households=households,
+        passkeys=int(passkeys),
+    )

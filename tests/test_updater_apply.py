@@ -164,8 +164,25 @@ def test_row_6_short_disk_names_the_need_and_the_remedy_and_pulls_nothing(tmp_pa
     with World(tmp_path, engine="docker-desktop", fixture="docker-desktop") as w:
         w.measured = {**w.measured, "free": 300 * 1024**2}
         record = _refused_prepare(w)
-        assert record["sentence"].startswith("Needs about 1.2 GB free, there is 0.3 GB.")
-        assert "Docker Desktop's disk limit in Settings → Resources" in record["sentence"]
+        assert record["sentence"].startswith("Needs about 1.25 GB free, there is 0.29 GB: free at least 972 MB more.")
+        assert record["sentence"].endswith("Raise Docker Desktop's disk limit in Settings → Resources.")
+        # No update backup to delete, so none is offered; the code is the screen's link (#330).
+        assert "Delete" not in record["sentence"] and record["code"] == "disk_short"
+        assert pulls(w) == []
+
+
+def test_row_6_short_disk_offers_the_update_backups_beyond_the_newest_five(tmp_path):
+    with World(tmp_path, engine="docker-desktop", fixture="docker-desktop") as w:
+        stamps = [f"20261001-00000{i}" for i in range(7)]
+        earlier_updates(w, stamps)
+        # A folder the owner made is on the disk too, and is not one of them.
+        w.ledger.backups["20260901-000000"] = A
+        w.measured = {**w.measured, "free": 300 * 1024**2}
+        record = _refused_prepare(w)
+        assert (
+            "Delete the 2 update backups older than the newest 5 under Database, which frees about 0.06 GB, "
+            "or raise Docker Desktop's disk limit" in record["sentence"]
+        )
         assert pulls(w) == []
 
 
@@ -356,6 +373,21 @@ def test_row_6_at_preflight_short_memory_is_not_started(world):
         and "Needs about 896 MB of memory free, there is 512 MB" in record["sentence"]
     )
     assert touched(world, world.app_id) == []
+
+
+def test_row_6_at_preflight_short_disk_is_not_started_with_its_code(world):
+    service = world.service()
+    service.startup()
+    report = world.prepared(service)
+    world.measured = {**world.measured, "free": 500 * 1024**2}
+    _, record = apply(world, service, report)
+    # At preflight the images are on the disk already: 40 MiB of database twice, and 512.
+    assert record["state"] == "not_started" and record["code"] == "disk_short"
+    assert record["sentence"].startswith(
+        "Not started: Needs about 0.54 GB free, there is 0.48 GB: free at least 52 MB more. "
+        "That is 0.04 GB for two copies of the database and 0.50 GB to spare."
+    )
+    assert touched(world, world.app_id) == [] and world.ledger.drills == 0
 
 
 def test_a_setting_the_updater_will_not_copy_is_refused_before_the_app_stops(world):
@@ -852,6 +884,75 @@ def test_e7_a_policy_an_older_updater_left_parked_is_not_copied_onto_the_next_ap
     assert record["state"] == "succeeded", record
     assert world.journal(req["id"]).context["previous_restart_policy"]["Name"] == "unless-stopped"
     assert policy_of(world, the_app(world)["Id"])["Name"] == "unless-stopped"
+
+
+# --------------------------------------------------------------------------- #
+# #344: rootless Podman refuses the step-3 stop a hand start overtook
+# --------------------------------------------------------------------------- #
+
+
+def steps_started(w: World, rid: str) -> list[str]:
+    return [s["step"] for s in w.journal(rid).started]
+
+
+@pytest.mark.parametrize("settles", [False, True])
+def test_344_a_stop_refused_as_state_improper_is_asked_once_more_and_the_update_goes_on(world, settles):
+    """The 500 `container state improper` once: inspected after a wait, the app
+    is stopped again if the hand start left it running (`settles` False), or
+    left as it is if it stopped by itself meanwhile (True), and E1 holds."""
+    world.fake.improper_stops[world.app_id] = 1
+    if settles:
+
+        def stopped_meanwhile() -> None:
+            app = world.fake.containers.get(world.app_id)
+            if app is not None and world.fake.improper_stops[world.app_id] == 0 and not world.time.settled:
+                world.time.settled = True
+                world.fake.set_state(app, "exited", 0)
+
+        world.time.settled = False
+        world.time.on_sleep = stopped_meanwhile
+    try:
+        req, record = apply(world)
+    finally:
+        world.time.on_sleep = None
+    assert record["state"] == "succeeded", record
+    assert world.ledger.stamp == B and world.ledger.drills == 1
+    assert world.version_of(the_app(world)) == B and world.running_apps() == [the_app(world)]
+    parked = world.by_name(f"{world.app_name}-previous")
+    assert parked["Id"] == world.app_id and parked["State"] == "exited"
+    assert "4" in steps_started(world, req["id"])
+    # Before the rename: the refused stop, then one more only if it still ran.
+    first = stops_of(world)[: 1 if settles else 2]
+    assert first == [world.app_id] * len(first)
+    assert stops_of(world).count(world.app_id) == (1 if settles else 2)
+    assert any("container state improper" in n and "stopped it again" in n for n in record["notes"])
+    world.no_running_app_at_a_mismatched_stamp()
+
+
+def test_344_a_stop_refused_again_is_not_started_and_the_app_is_home(world):
+    world.fake.improper_stops[world.app_id] = 5
+    req, record = apply(world)
+    assert record["state"] == "not_started" and record["failed_step"] == "3", record
+    assert "the app could not be stopped" in record["sentence"]
+    assert "container state improper" in record["sentence"]
+    # Two stops and no third: the retry is bounded.
+    assert stops_of(world).count(world.app_id) == 2
+    assert world.fake.improper_stops[world.app_id] == 3
+    # Nothing moved: A runs under its own name on its own ledger, no drill ran.
+    assert world.ledger.stamp == A and world.ledger.drills == 0 and not world.ledger.backups
+    assert the_app(world)["Id"] == world.app_id and the_app(world)["State"] == "running"
+    assert world.by_name(f"{world.app_name}-previous") is None
+    assert "4" not in steps_started(world, req["id"])
+
+
+def test_344_any_other_refused_stop_is_not_started_without_a_second_try(world):
+    world.fake.refuse_stop.add(world.app_id)
+    _, record = apply(world)
+    assert record["state"] == "not_started" and record["failed_step"] == "3", record
+    assert "permission denied" in record["sentence"]
+    assert stops_of(world).count(world.app_id) == 1
+    assert world.ledger.stamp == A and world.ledger.drills == 0
+    assert the_app(world)["Id"] == world.app_id and the_app(world)["State"] == "running"
 
 
 # --------------------------------------------------------------------------- #

@@ -167,6 +167,26 @@ export interface UpdateState {
   report: Report | null;
   outcome: Outcome | null;
   backups: unknown[];
+  /** One step back to the release the last update came from (#173), or null. */
+  go_back?: GoBackOffer | null;
+}
+
+export interface GoBackOffer {
+  update_id: string;
+  /** The release gone back to, and the one running. */
+  to_version: string;
+  from_version: string;
+  updated_at: string | null;
+  backup: string;
+  /** Whether the updater takes a go-back (its window includes protocol 2). */
+  updater_can: boolean;
+}
+
+export interface GoBackLoss {
+  offer: GoBackOffer;
+  since: string;
+  households: { household_id: string | null; name: string | null; batches: number }[];
+  passkeys: number;
 }
 
 export interface RecoveryCode {
@@ -385,13 +405,15 @@ export function Updates({
   const beat = it.heartbeat;
 
   const busy = it.status && !SETTLED.has(it.status.state) ? it.status : null;
-  const applyInFlight = applying !== null || (busy?.kind === "apply" && it.in_flight);
+  const applyInFlight =
+    applying !== null || ((busy?.kind === "apply" || busy?.kind === "go_back") && it.in_flight);
 
   return (
     <div className="updates">
       {it.outcome && (
         <OutcomeBlock
           outcome={it.outcome}
+          repository={repository}
           running={it.running}
           heartbeat={beat}
           lastPrepared={lastPrepared}
@@ -431,6 +453,7 @@ export function Updates({
           onDiscarded={refresh}
         />
       ) : (
+        <>
         <Check
           state={it}
           repository={repository}
@@ -443,7 +466,240 @@ export function Updates({
           onUpdaterOnly={(version) => updaterOnly.mutate(version)}
           updatingUpdater={updaterOnly.isPending}
         />
+        {it.go_back ? <GoBack offer={it.go_back} onStarted={(to) => setApplying(to)} /> : null}
+        </>
       )}
+    </div>
+  );
+}
+
+// --------------------------------------------------------------------------- //
+// Going back one step (#173)
+// --------------------------------------------------------------------------- //
+
+/**
+ * *Go back to X.Y.Z*: the last update undone, from the browser.
+ *
+ * Offered only while the server says it can be (the last settled update is a
+ * successful one to this version, its backup is one of the newest five, its
+ * previous configuration was kept); the updater checks the image and the
+ * backup again before it stops anything. The confirmation says what would be
+ * lost -- the audit log's changes since the backup, per household -- and the
+ * passkey caveat, and asks for the version typed, a recovery code saved, and
+ * the password and a code.
+ */
+function GoBack({ offer, onStarted }: { offer: GoBackOffer; onStarted: (toVersion: string) => void }) {
+  const { t } = useLingui();
+  const [open, setOpen] = useState(false);
+  const to = offer.to_version;
+  return (
+    <div className="update-go-back" data-go-back={to}>
+      <h3 className="section-title">
+        <Trans comment="Heading on the Updates screen: undo the last update">Go back to {to}</Trans>
+      </h3>
+      <p className="small">
+        <Trans>
+          The last update took this instance from {to} to {offer.from_version}. Going back restores
+          the backup that update took, with {to}, so everything written since then is lost.
+        </Trans>
+      </p>
+      {open ? (
+        <GoBackConfirm offer={offer} onStarted={onStarted} onCancel={() => setOpen(false)} />
+      ) : (
+        <button onClick={() => setOpen(true)}>
+          {t({ message: `Go back to ${to}…`, comment: "Button: open the confirmation for undoing the last update" })}
+        </button>
+      )}
+    </div>
+  );
+}
+
+export function GoBackConfirm({
+  offer,
+  onStarted,
+  onCancel,
+}: {
+  offer: GoBackOffer;
+  onStarted: (toVersion: string) => void;
+  onCancel: () => void;
+}) {
+  const { t } = useLingui();
+  const to = offer.to_version;
+  const from = offer.from_version;
+  const loss = useQuery({
+    queryKey: ["application", "update", "go-back", offer.update_id],
+    queryFn: () => api.get<GoBackLoss>(`${BASE}/go-back`),
+    staleTime: 0,
+    retry: false,
+  });
+  const code = useQuery({
+    queryKey: ["application", "update", "go-back-code", offer.update_id],
+    queryFn: () => api.post<RecoveryCode>(`${BASE}/go-back/recovery-code`),
+    staleTime: Infinity,
+    gcTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const [typed, setTyped] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [proof, setProof] = useState<StepUpProof>(NO_PROOF);
+  const ready =
+    offer.updater_can && typed.trim() === to && saved && stepUpReady(proof) && !!code.data && !!loss.data;
+
+  const goBack = useMutation({
+    mutationFn: async () => {
+      const token = await stepUpToken(proof);
+      setProof(spent);
+      return api.post<UpdateRequest>(`${BASE}/go-back`, {
+        update_id: offer.update_id,
+        typed_version: typed,
+        recovery_code_id: code.data!.id,
+        step_up_token: token,
+      });
+    },
+    onSuccess: () => onStarted(to),
+  });
+  const newCode = () => {
+    setSaved(false);
+    void code.refetch();
+  };
+
+  const since = loss.data ? timeOf(loss.data.since) : null;
+  const households = loss.data?.households ?? [];
+  return (
+    <div className="update-confirm" data-confirm="go-back">
+      {!offer.updater_can ? (
+        <div className="banner warn" data-go-back-updater="too-old">
+          <Trans>
+            The updater is too old to go back. Update the updater first, then come back here.
+          </Trans>
+        </div>
+      ) : null}
+      <Problem error={loss.error} />
+      {loss.data ? (
+        <div className="banner warn" role="group" aria-label={t({ message: "What going back loses", comment: "Screen-reader name of a warning on the Updates section" })}>
+          <p style={{ marginTop: 0 }}>
+            <Trans>
+              The backup <span className="mono">{offer.backup}</span> is the ledger as it was at{" "}
+              {since}, when the app stopped for the update to {from}. Going back replaces the ledger
+              with it.
+            </Trans>
+          </p>
+          {households.length === 0 ? (
+            <p data-lost="nothing">
+              <Trans>Nothing has been written to the ledger since then.</Trans>
+            </p>
+          ) : (
+            <>
+              <p>
+                <strong>
+                  <Trans>These changes since then would be lost:</Trans>
+                </strong>
+              </p>
+              <ul data-lost="households">
+                {households.map((one) => (
+                  <li key={one.household_id ?? "instance"}>
+                    {one.household_id === null
+                      ? plural(one.batches, {
+                          one: "# change to the instance itself (people, settings)",
+                          other: "# changes to the instance itself (people, settings)",
+                        })
+                      : plural(one.batches, {
+                          one: `${one.name ?? ""}: # change`,
+                          other: `${one.name ?? ""}: # changes`,
+                        })}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <p data-passkeys={loss.data.passkeys} style={{ marginBottom: 0 }}>
+            {loss.data.passkeys > 0
+              ? plural(loss.data.passkeys, {
+                  one: "# passkey was registered since then. ",
+                  other: "# passkeys were registered since then. ",
+                })
+              : null}
+            <Trans>
+              A passkey registered after the update stops working: the restored ledger does not know
+              it, but the authenticator still offers it, and the sign-in fails without saying why.
+              The member signs in with their password and code and removes it from the authenticator.
+            </Trans>
+          </p>
+        </div>
+      ) : null}
+
+      <div className="update-recovery">
+        <h4 className="section-title">
+          <Trans>Your recovery code for going back</Trans>
+        </h4>
+        <Problem error={code.error} />
+        {code.data ? (
+          <p className="row" style={{ flexWrap: "wrap", gap: 8 }}>
+            <code className="recovery-code" data-testid="go-back-recovery-code">
+              {code.data.code}
+            </code>
+            <button
+              onClick={() =>
+                saveText(
+                  `spend-tracker-recovery-code-back-to-${to}.txt`,
+                  t`Spend Tracker: recovery code for going back from ${from} to ${to}\n\n${code.data!.code}\n\nIf going back fails and cannot finish, the app is replaced by a recovery page, and this code is what opens it. It works only for this and stops working once it has finished.\n`,
+                )
+              }
+            >
+              {t({ message: "Download as a file", comment: "Button: save the recovery code as a text file" })}
+            </button>
+            <button className="link" onClick={newCode} disabled={code.isFetching}>
+              {t({ message: "Get a new code", comment: "Button: replace the recovery code shown" })}
+            </button>
+          </p>
+        ) : null}
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={saved}
+            disabled={!code.data}
+            onChange={(event) => setSaved(event.target.checked)}
+          />{" "}
+          <Trans>I have saved the recovery code.</Trans>
+        </label>
+      </div>
+
+      <label className="field">
+        <span>
+          <Trans comment="Updates section: the owner types the version to confirm going back">
+            Type {to} to confirm
+          </Trans>
+        </span>
+        <input
+          value={typed}
+          onChange={(event) => setTyped(event.target.value)}
+          autoComplete="off"
+          spellCheck={false}
+          data-testid="go-back-typed"
+        />
+      </label>
+
+      <div className="update-stepup">
+        <StepUpFields
+          proof={proof}
+          onChange={setProof}
+          why={t`Going back stops the app and replaces the ledger with the update's backup.`}
+        />
+      </div>
+
+      <div className="row update-actions">
+        <button className="danger" disabled={!ready || goBack.isPending} onClick={() => goBack.mutate()}>
+          {goBack.isPending
+            ? t({ message: "Starting…", comment: "Button while the update request is sent" })
+            : t({ message: `Go back to ${to}`, comment: "Button: undo the last update" })}
+        </button>
+        <button disabled={goBack.isPending} onClick={onCancel}>
+          {t({ message: "Cancel", comment: "Button: close the go-back confirmation without doing anything" })}
+        </button>
+      </div>
+      <Problem error={goBack.error} />
     </div>
   );
 }
@@ -1385,8 +1641,32 @@ export function whereItFailed(step: string | null | undefined): string {
   }
 }
 
+/** The record's code for a refusal for want of disk (#330). */
+const DISK_SHORT = "disk_short";
+
+/** Where TROUBLESHOOTING says how to free disk for an update, for a refusal with code `disk_short` (#330). */
+function FreeingDisk({ outcome, repository }: { outcome: Outcome; repository?: string }) {
+  if (outcome.code !== DISK_SHORT || !repository) return null;
+  return (
+    <>
+      {" "}
+      <a
+        href={`${repository}/blob/main/deploy/TROUBLESHOOTING.md#freeing-disk-for-an-update`}
+        target="_blank"
+        rel="noreferrer noopener"
+        data-help="freeing-disk"
+      >
+        <Trans comment="Updates section: link after a refusal for want of disk, to the guide's section of that name">
+          Freeing disk for an update
+        </Trans>
+      </a>
+    </>
+  );
+}
+
 export function OutcomeBlock({
   outcome,
+  repository,
   running,
   heartbeat,
   lastPrepared,
@@ -1394,6 +1674,8 @@ export function OutcomeBlock({
   onChanged,
 }: {
   outcome: Outcome;
+  /** The repository's address, for the guide a refusal links to. */
+  repository?: string;
   running: string;
   heartbeat: Heartbeat | null;
   lastPrepared: string | null;
@@ -1516,14 +1798,43 @@ export function OutcomeBlock({
         body = (
           <p style={{ margin: 0 }} data-outcome="not_started">
             <Trans>The update did not start: {said} Nothing was changed.</Trans>
+            <FreeingDisk outcome={outcome} repository={repository} />
           </p>
         );
+    }
+  } else if (outcome.kind === "go_back") {
+    const target = outcome.to_version ?? running;
+    if (outcome.state === "succeeded") {
+      body = (
+        <p style={{ margin: 0 }} data-outcome="went_back">
+          <Trans comment="Updates section: outcome of going back one release">
+            Went back to {target} at {at}. The ledger is as it was before the update; what was
+            written after it is gone.
+          </Trans>
+        </p>
+      );
+    } else if (outcome.state === "not_started" || outcome.state === "refused") {
+      tone = "banner warn";
+      body = (
+        <p style={{ margin: 0 }} data-outcome="go_back_not_started">
+          <Trans>Going back did not start: {said} Nothing was changed.</Trans>
+          <FreeingDisk outcome={outcome} repository={repository} />
+        </p>
+      );
+    } else {
+      tone = "banner warn";
+      body = (
+        <p style={{ margin: 0 }} data-outcome={`go_back_${outcome.state}`}>
+          {said || outcome.state}
+        </p>
+      );
     }
   } else if (outcome.kind === "prepare" && failed) {
     tone = "banner warn";
     body = (
       <p style={{ margin: 0 }} data-outcome="prepare_failed">
-        <Trans>Preparing the update failed: {said} Nothing was changed.</Trans>{" "}
+        <Trans>Preparing the update failed: {said} Nothing was changed.</Trans>
+        <FreeingDisk outcome={outcome} repository={repository} />{" "}
         {lastPrepared ? (
           <button onClick={() => onPrepare(lastPrepared)}>
             {t({ message: "Try again", comment: "Button: prepare the same release again" })}

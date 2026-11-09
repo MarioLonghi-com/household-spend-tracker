@@ -119,11 +119,6 @@ msgstr "Choose…"
 msgid "New password"
 msgstr "New password"
 
-#. Tooltip on the Income vs Expense report: noun, money that went out
-#: src/screens/reports/IncomeExpense.tsx
-msgid "Expense"
-msgstr "Expense"
-
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #: src/lib/labels.ts
@@ -546,6 +541,10 @@ msgstr "What happens"
 msgid "The end of {open}"
 msgstr "The end of {open}"
 
+#: src/screens/Profile.tsx
+msgid "Categorising rows does not need this. It is for a program that should also change the category list itself; each change is in History, and Undo there takes it back."
+msgstr "Categorising rows does not need this. It is for a program that should also change the category list itself; each change is in History, and Undo there takes it back."
+
 #. Label on the Admin screen
 #. Label on the household page
 #: src/screens/Admin.tsx
@@ -715,10 +714,6 @@ msgstr "Asking YNAB for your plans…"
 #: src/screens/SignIn.tsx
 msgid "I have my authenticator after all"
 msgstr "I have my authenticator after all"
-
-#: src/screens/Profile.tsx
-msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
-msgstr "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 
 #. Tooltip on a folder path on Application management
 #: src/screens/ApplicationManagement.tsx
@@ -897,6 +892,10 @@ msgstr "Imported from <0>{0}</0>, line {1}, on {2}."
 #: src/App.tsx
 msgid "Your household"
 msgstr "Your household"
+
+#: src/screens/Categories.tsx
+msgid "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net. One category has this; ticking it moves it here."
+msgstr "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net. One category has this; ticking it moves it here."
 
 #: src/screens/Passkeys.tsx
 msgid "Passkeys need this app opened at its HTTPS address, {address}."
@@ -1402,6 +1401,10 @@ msgstr "Copied"
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr "This file only. The payee’s rule is left as it is for future statements."
 
+#: src/screens/Profile.tsx
+msgid "Let it add categories, and delete one nothing uses"
+msgstr "Let it add categories, and delete one nothing uses"
+
 #. Column heading on the Admin screen: noun
 #. Column heading on the Admin screen: noun
 #. Column heading on the Payees screen: noun
@@ -1443,6 +1446,7 @@ msgstr "What came in, what went out, and what it was for — month by month."
 msgid "Discard the staged one"
 msgstr "Discard the staged one"
 
+#. Button: replace the recovery code shown
 #. Button: replace the recovery code shown
 #: src/screens/Updates.tsx
 msgid "Get a new code"
@@ -1487,6 +1491,11 @@ msgstr "Anything without a transaction waits here. Photograph a receipt at the t
 #: src/screens/Profile.tsx
 msgid "Authenticator"
 msgstr "Authenticator"
+
+#. placeholder {0}: offer.backup
+#: src/screens/Updates.tsx
+msgid "The backup <0>{0}</0> is the ledger as it was at {since}, when the app stopped for the update to {from}. Going back replaces the ledger with it."
+msgstr "The backup <0>{0}</0> is the ledger as it was at {since}, when the app stopped for the update to {from}. Going back replaces the ledger with it."
 
 #: src/screens/Profile.tsx
 msgid "Once it is confirmed, keep only this entry for the account in your app: the old one cannot work here, and nor can one you scanned earlier and never confirmed."
@@ -1784,6 +1793,10 @@ msgstr "Waiting for the passkey…"
 msgid "Name as the bank writes it"
 msgstr "Name as the bank writes it"
 
+#: src/components/UpdatedNotice.tsx
+msgid "Updated just now with changes made elsewhere."
+msgstr "Updated just now with changes made elsewhere."
+
 #. Backups screen: the list is empty
 #: src/screens/Backups.tsx
 msgid "Nothing backed up yet."
@@ -1845,11 +1858,6 @@ msgstr "Latest 3 months"
 #: src/screens/Admin.tsx
 msgid "Make them an owner"
 msgstr "Make them an owner"
-
-#. Label on the Income vs Expense report
-#: src/screens/reports/IncomeExpense.tsx
-msgid "Total expense"
-msgstr "Total expense"
 
 #. History headline, the kind of act: a change to accounts, categories or settings
 #: src/lib/historyWords.ts
@@ -1930,6 +1938,7 @@ msgstr "Search"
 msgid "Show the menu"
 msgstr "Show the menu"
 
+#. Button: save the recovery code as a text file
 #. Button: save the recovery code as a text file
 #: src/screens/Updates.tsx
 msgid "Download as a file"
@@ -2033,6 +2042,11 @@ msgstr "Account"
 msgid "Writing…"
 msgstr "Writing…"
 
+#. Headline figure on the Income vs Expense report: money work paid back
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Reimbursements received"
+msgstr "Reimbursements received"
+
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Revoking…"
@@ -2123,6 +2137,8 @@ msgstr "use the bank's: {0}"
 
 #. Label of a form field on the Register screen: noun, being paid back by work
 #. Name of a fact on the Reimbursements report: noun, being paid back by work
+#. Tag beside a name on the Categories screen: the category holding money work paid back
+#: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 #: src/screens/reports/Reimbursements.tsx
 msgid "Reimbursement"
@@ -2132,6 +2148,12 @@ msgstr "Reimbursement"
 #: src/screens/reports/Reimbursements.tsx
 msgid "Repaid"
 msgstr "Repaid"
+
+#. Heading on the Income vs Expense report: noun, money that went out
+#. Headline figure on the Income vs Expense report: noun, money that went out
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Expenses"
+msgstr "Expenses"
 
 #. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
@@ -2275,6 +2297,11 @@ msgstr "{stored, plural, one {The {0} receipt that already has an original keeps
 msgid "Savings"
 msgstr "Savings"
 
+#. placeholder {0}: one.batches
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {# change to the instance itself (people, settings)} other {# changes to the instance itself (people, settings)}}"
+msgstr "{0, plural, one {# change to the instance itself (people, settings)} other {# changes to the instance itself (people, settings)}}"
+
 #: src/screens/Register.tsx
 msgid "A split needs at least two parts"
 msgstr "A split needs at least two parts"
@@ -2310,6 +2337,10 @@ msgstr "Preparing {toVersion}"
 #: src/screens/Register.tsx
 msgid "Nothing recorded. Rows created before the audit log existed have no history."
 msgstr "Nothing recorded. Rows created before the audit log existed have no history."
+
+#: src/screens/Register.tsx
+msgid "Keep my changes"
+msgstr "Keep my changes"
 
 #. Button on the Backups screen: verb
 #. Link on the Backups screen
@@ -2755,6 +2786,10 @@ msgstr "That link doesn't work"
 msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 msgstr "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "For information only — not counted in income, expenses or net."
+msgstr "For information only — not counted in income, expenses or net."
+
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 msgid "Payee Merge"
@@ -2894,6 +2929,7 @@ msgstr "{0, plural, one {{1} category folded away} other {{2} categories folded 
 #. Button on the Your account panel
 #. Button on the passkeys panel
 #. Button on the passkeys panel
+#. Button: close the go-back confirmation without doing anything
 #. Desktop app dialog button: do nothing and close the dialog
 #: ../desktop/src/words.ts
 #: src/screens/Admin.tsx
@@ -2901,6 +2937,7 @@ msgstr "{0, plural, one {{1} category folded away} other {{2} categories folded 
 #: src/screens/Passkeys.tsx
 #: src/screens/Profile.tsx
 #: src/screens/Register.tsx
+#: src/screens/Updates.tsx
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -2952,6 +2989,10 @@ msgstr "{0, plural, one {and {1} more payee — {2} in all.} other {and {3} more
 msgid "Changing the setting below writes a line into <0>all three</0>, on both sides of the change — including when you turn it <1>down</1>, which is the one that used to leave no trace at all."
 msgstr "Changing the setting below writes a line into <0>all three</0>, on both sides of the change — including when you turn it <1>down</1>, which is the one that used to leave no trace at all."
 
+#: src/screens/Categories.tsx
+msgid "The Income group — its categories are income on Income vs Expense"
+msgstr "The Income group — its categories are income on Income vs Expense"
+
 #: src/screens/ApplicationManagement.tsx
 msgid "Writes a complete, compacted copy into the backups directory above, with this instance still serving. It does <0>not</0> copy <1>secret.key</1> there: without that key every authenticator is refused, so a copy that leaves this machine either carries it (tick the box below) or travels with it separately."
 msgstr "Writes a complete, compacted copy into the backups directory above, with this instance still serving. It does <0>not</0> copy <1>secret.key</1> there: without that key every authenticator is refused, so a copy that leaves this machine either carries it (tick the box below) or travels with it separately."
@@ -2996,6 +3037,10 @@ msgstr "Add a transaction"
 #: src/lib/historyWords.ts
 msgid "order"
 msgstr "order"
+
+#: src/screens/Updates.tsx
+msgid "Going back stops the app and replaces the ledger with the update's backup."
+msgstr "Going back stops the app and replaces the ledger with the update's backup."
 
 #. Column heading on the Accounts screen
 #. Column name shown beside a value on phones on the Accounts screen
@@ -3106,6 +3151,7 @@ msgid "Worth a look"
 msgstr "Worth a look"
 
 #. Column heading on the Income vs Expense report: income minus spending
+#. Headline figure on the Income vs Expense report: income minus spending
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Net"
 msgstr "Net"
@@ -3166,6 +3212,11 @@ msgstr "{0} will not be imported, with the reason for each"
 #: src/screens/Rules.tsx
 msgid "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
 msgstr "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
+
+#. Line on the Income vs Expense report: work expenses not paid back yet
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Pending reimbursement"
+msgstr "Pending reimbursement"
 
 #. Application management: what app.log holds
 #: src/lib/labels.ts
@@ -3326,6 +3377,11 @@ msgstr "A key can last between a day and {max_days} days"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.agent_key.may_not_edit_categories"
+msgstr "That key may not add or delete categories. A person can, on the Categories screen, or give the program a key that is allowed to"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.agent_key.needs_label"
 msgstr "Give the key a label, so you know what it is for"
 
@@ -3339,6 +3395,11 @@ msgstr "No such key"
 #: src/lib/errorMessages.ts
 msgid "error.agent_key.not_issuer"
 msgstr "Only the person who issued a key can revoke it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.read_only_categories"
+msgstr "A read-only key cannot be allowed to change categories"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3420,6 +3481,11 @@ msgstr "{name} is archived, so it cannot be a default"
 #: src/lib/errorMessages.ts
 msgid "error.category.choose_default"
 msgstr "Choose the category to always use"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_by_id_or_name"
+msgstr "Name the group by group_id or by group_name, one of the two"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4252,6 +4318,21 @@ msgstr "The updater cannot use the container engine ({socket}), so it cannot upd
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.update.go_back_typed_version"
+msgstr "Type {to_version}, the version to go back to, to confirm"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.go_back_unavailable"
+msgstr "There is nothing to go back to from this version: the last update is not one that can be undone from here"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.update.go_back_updater_too_old"
+msgstr "The updater is too old to go back. Update the updater first, then try again"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.update.in_flight"
 msgstr "Another update request is waiting or running. Wait for it to finish, then try again"
 
@@ -4752,6 +4833,10 @@ msgstr "Register"
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
 msgstr "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
 
+#: src/screens/Profile.tsx
+msgid "No key can undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here. Nor can it delete anything, except a category nothing uses, and only when you allow it below."
+msgstr "No key can undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here. Nor can it delete anything, except a category nothing uses, and only when you allow it below."
+
 #. How a rule matches, inside the rule list: the bank's text starts with the pattern
 #: src/screens/Rules.tsx
 msgctxt "rule list"
@@ -4781,6 +4866,11 @@ msgstr "A household holds the accounts and the register. The currency here is on
 #: ../desktop/src/words.ts
 msgid "Zoom out"
 msgstr "Zoom out"
+
+#. Screen-reader name of a warning on the Updates section
+#: src/screens/Updates.tsx
+msgid "What going back loses"
+msgstr "What going back loses"
 
 #. Account type `other_asset`: something owned that holds value. See GLOSSARY.md
 #: src/lib/labels.ts
@@ -5028,6 +5118,10 @@ msgstr "Your account"
 msgid "Role"
 msgstr "Role"
 
+#: src/screens/Categories.tsx
+msgid "Money work pays back: set apart on Income vs Expense"
+msgstr "Money work pays back: set apart on Income vs Expense"
+
 #. Screen title on the Payee Categorisation screen. See GLOSSARY.md
 #: src/screens/PayeeCategorisation.tsx
 msgid "Payee categorisation"
@@ -5132,6 +5226,10 @@ msgstr "Could not read"
 msgid "Inbox"
 msgstr "Inbox"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Work reimbursements, for information: not in income, expenses or net."
+msgstr "Work reimbursements, for information: not in income, expenses or net."
+
 #. placeholder {0}: picked.size
 #. placeholder {1}: picked.size
 #: src/screens/Receipts.tsx
@@ -5164,6 +5262,10 @@ msgstr "Updating to {toVersion}"
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as an owner."
 msgstr "{inviter} invited you to {PRODUCT} as an owner."
+
+#: src/screens/Categories.tsx
+msgid "Its categories are income on Income vs Expense"
+msgstr "Its categories are income on Income vs Expense"
 
 #. Table cell on the Admin screen: nothing so far
 #: src/screens/Admin.tsx
@@ -5201,6 +5303,11 @@ msgstr "Recent sign-in changes"
 #: src/screens/ApplicationManagement.tsx
 msgid "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
 msgstr "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
+
+#. Updates section: link after a refusal for want of disk, to the guide's section of that name
+#: src/screens/Updates.tsx
+msgid "Freeing disk for an update"
+msgstr "Freeing disk for an update"
 
 #. Under the count of categories on the household page
 #. placeholder {0}: it.category_groups
@@ -5932,6 +6039,11 @@ msgstr "Receipts ({0})"
 msgid "a new account"
 msgstr "a new account"
 
+#. Updates section: the owner types the version to confirm going back
+#: src/screens/Updates.tsx
+msgid "Type {to} to confirm"
+msgstr "Type {to} to confirm"
+
 #. Button on the Transfers screen: these two rows are not one transfer, never offer them again
 #: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
@@ -5957,6 +6069,10 @@ msgstr "Nothing to look at."
 #: src/screens/Passkeys.tsx
 msgid "Added"
 msgstr "Added"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.}}"
+msgstr "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.}}"
 
 #. placeholder {0}: format(Math.abs(left), currency)
 #: src/screens/Register.tsx
@@ -6253,6 +6369,11 @@ msgstr "Python {0}"
 msgid "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
 msgstr "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
 
+#. Headline figure on the Income vs Expense report: work expenses not paid back yet
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Still to be reimbursed"
+msgstr "Still to be reimbursed"
+
 #: src/screens/Profile.tsx
 msgid "Your new authenticator is the only one that works now."
 msgstr "Your new authenticator is the only one that works now."
@@ -6383,6 +6504,7 @@ msgid "Questions about {0}'s ledger. Nothing here changes anything: a report rea
 msgstr "Questions about {0}'s ledger. Nothing here changes anything: a report reads the register and is gone, which is why none of them appear in History."
 
 #. Button while the update request is sent
+#. Button while the update request is sent
 #: src/screens/Updates.tsx
 msgid "Starting…"
 msgstr "Starting…"
@@ -6400,6 +6522,10 @@ msgstr "Changing…"
 #: src/screens/ApplicationManagement.tsx
 msgid "Started"
 msgstr "Started"
+
+#: src/screens/Updates.tsx
+msgid "The updater is too old to go back. Update the updater first, then come back here."
+msgstr "The updater is too old to go back. Update the updater first, then come back here."
 
 #. A sign-in change in Admin's list: the person's password was reset
 #: src/lib/signInChanges.ts
@@ -6433,6 +6559,10 @@ msgstr "This browser is signed in as {0}. An invitation makes a new account, so 
 #: src/screens/Accounts.tsx
 msgid "the last four, or the part the bank prints"
 msgstr "the last four, or the part the bank prints"
+
+#: src/screens/Register.tsx
+msgid "Show the new version"
+msgstr "Show the new version"
 
 #: src/screens/Admin.tsx
 msgid "A suggestion, not a restriction: it fills in the address on the acceptance screen and the person can change it. <0>The link is the credential</0> — whoever opens it gets this role, so treat it like a password."
@@ -6514,6 +6644,10 @@ msgstr "View"
 #: src/screens/Profile.tsx
 msgid "Not available here"
 msgstr "Not available here"
+
+#: src/screens/Updates.tsx
+msgid "Nothing has been written to the ledger since then."
+msgstr "Nothing has been written to the ledger since then."
 
 #: src/screens/Register.tsx
 msgid "One line per currency, and no total across them."
@@ -6622,6 +6756,10 @@ msgstr "Step {0}, done:"
 #: src/screens/Receipts.tsx
 msgid "Open the receipt from {when}"
 msgstr "Open the receipt from {when}"
+
+#: src/screens/Register.tsx
+msgid "This transaction was changed somewhere else while you were editing it. Nothing has been saved over it."
+msgstr "This transaction was changed somewhere else while you were editing it. Nothing has been saved over it."
 
 #. Button on the Backups screen: make the zip file to download
 #: src/screens/Backups.tsx
@@ -6813,6 +6951,12 @@ msgstr "(main)"
 #: ../desktop/src/words.ts
 msgid "A backup was made first. This can take a minute."
 msgstr "A backup was made first. This can take a minute."
+
+#. Headline figure on the Income vs Expense report: work expenses that have been paid back
+#. Line on the Income vs Expense report: work expenses that have been paid back
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Amount spent, reimbursed"
+msgstr "Amount spent, reimbursed"
 
 #. Heading on the household page
 #: src/screens/Household.tsx
@@ -7106,6 +7250,11 @@ msgstr "Amount ({currency})"
 #: src/screens/Receipts.tsx
 msgid "{0, plural, one {Delete 1 receipt} other {Delete {1} receipts}}"
 msgstr "{0, plural, one {Delete 1 receipt} other {Delete {1} receipts}}"
+
+#. Updates section: outcome of going back one release
+#: src/screens/Updates.tsx
+msgid "Went back to {target} at {at}. The ledger is as it was before the update; what was written after it is gone."
+msgstr "Went back to {target} at {at}. The ledger is as it was before the update; what was written after it is gone."
 
 #. placeholder {0}: listText(sums.map((one) => one.currency))
 #: src/screens/Register.tsx
@@ -7568,6 +7717,10 @@ msgstr "The category is chosen from how the last {0} transactions for {name} wer
 msgid "No reset links pending."
 msgstr "No reset links pending."
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{items, plural, one {({items} item)} other {({items} items)}}"
+msgstr "{items, plural, one {({items} item)} other {({items} items)}}"
+
 #: src/screens/Updates.tsx
 msgid "The end of the update's log"
 msgstr "The end of the update's log"
@@ -7641,6 +7794,11 @@ msgstr "kind"
 #: src/screens/ynab/results.tsx
 msgid "Skipped: YNAB Starting Balance"
 msgstr "Skipped: YNAB Starting Balance"
+
+#. Button: open the confirmation for undoing the last update
+#: src/screens/Updates.tsx
+msgid "Go back to {to}…"
+msgstr "Go back to {to}…"
 
 #: src/screens/Profile.tsx
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
@@ -8560,6 +8718,10 @@ msgstr "This lands as one entry in History, so the whole import can be undone in
 msgid "Email"
 msgstr "Email"
 
+#: src/screens/Categories.tsx
+msgid "The Reimbursement category — money work pays back"
+msgstr "The Reimbursement category — money work pays back"
+
 #: src/screens/Reconcile.tsx
 msgid "The difference has to be zero first"
 msgstr "The difference has to be zero first"
@@ -8783,6 +8945,11 @@ msgstr "The link for {0} ({1}) stops working at once. Their password stays reset
 #: src/screens/ResetAccount.tsx
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+
+#. Label on the Income vs Expense report
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Total expenses"
+msgstr "Total expenses"
 
 #. Label on the Import screen
 #: src/screens/Import.tsx
@@ -9236,6 +9403,10 @@ msgstr "Currency"
 msgid "present only while setup is unfinished"
 msgstr "present only while setup is unfinished"
 
+#: src/screens/Updates.tsx
+msgid "Going back did not start: {said} Nothing was changed."
+msgstr "Going back did not start: {said} Nothing was changed."
+
 #. placeholder {0}: formatCount(kept)
 #. placeholder {1}: formatCount(kept)
 #: src/screens/ynab/results.tsx
@@ -9394,6 +9565,11 @@ msgstr "What it depends on"
 #: src/screens/Profile.tsx
 msgid "One of your recovery codes"
 msgstr "One of your recovery codes"
+
+#. placeholder {0}: loss.data.passkeys
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {# passkey was registered since then. } other {# passkeys were registered since then. }}"
+msgstr "{0, plural, one {# passkey was registered since then. } other {# passkeys were registered since then. }}"
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "Show in Transactions"
@@ -10019,6 +10195,12 @@ msgstr "Other Income"
 msgid "seed.category.phone"
 msgstr "Phone"
 
+#. Name of a category seeded into a new household for money paid back, such as work expenses; the person can rename it
+#. js-lingui-explicit-id
+#: src/lib/seedWords.ts
+msgid "seed.category.reimbursements"
+msgstr "Reimbursements"
+
 #. Name of a category seeded into a new household; the person can rename it
 #. js-lingui-explicit-id
 #: src/lib/seedWords.ts
@@ -10216,6 +10398,10 @@ msgstr "Payee naming rules"
 #: src/screens/Register.tsx
 msgid "{app}, via its CSV export"
 msgstr "{app}, via its CSV export"
+
+#: src/screens/Profile.tsx
+msgid "may add and delete categories"
+msgstr "may add and delete categories"
 
 #. Shown in a dropdown when the search finds nothing
 #: src/components/GroupedPicker.tsx
@@ -10677,6 +10863,10 @@ msgstr "Set the category on {done} rows and skipped {skipped} transfer legs — 
 msgid "Show closed"
 msgstr "Show closed"
 
+#: src/screens/Updates.tsx
+msgid "Your recovery code for going back"
+msgstr "Your recovery code for going back"
+
 #. Menu item and the name of its screen
 #. Screen title on the Admin screen
 #: src/App.tsx
@@ -10780,6 +10970,10 @@ msgstr "Keys for programs"
 msgid "Written off"
 msgstr "Written off"
 
+#: src/screens/Updates.tsx
+msgid "These changes since then would be lost:"
+msgstr "These changes since then would be lost:"
+
 #: src/screens/Register.tsx
 #: src/screens/Transfer.tsx
 msgid "12,34"
@@ -10830,6 +11024,11 @@ msgstr "What has happened to this"
 #: src/screens/Transfers.tsx
 msgid "Select every pair that does not share a row with another"
 msgstr "Select every pair that does not share a row with another"
+
+#. placeholder {0}: offer.from_version
+#: src/screens/Updates.tsx
+msgid "The last update took this instance from {to} to {0}. Going back restores the backup that update took, with {to}, so everything written since then is lost."
+msgstr "The last update took this instance from {to} to {0}. Going back restores the backup that update took, with {to}, so everything written since then is lost."
 
 #. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
@@ -10882,6 +11081,10 @@ msgstr "A heading the categories sit under — Bills, Everyday, whatever divides
 #: src/screens/Household.tsx
 msgid "One ledger: its accounts, its register, its receipts and the people who can reach them."
 msgstr "One ledger: its accounts, its register, its receipts and the people who can reach them."
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "No category group is marked as Income, so every row is counted as an expense. Mark the group that holds your income on the Categories screen."
+msgstr "No category group is marked as Income, so every row is counted as an expense. Mark the group that holds your income on the Categories screen."
 
 #. Review mode: the language's messages are loading
 #: src/components/SuggestWording.tsx
@@ -11205,6 +11408,21 @@ msgstr "{inviter} invited you to {PRODUCT} as a member."
 msgid "Add an account before entering transactions."
 msgstr "Add an account before entering transactions."
 
+#. placeholder {0}: code.data!.code
+#: src/screens/Updates.tsx
+msgid "Spend Tracker: recovery code for going back from {from} to {to}\n"
+"\n"
+"{0}\n"
+"\n"
+"If going back fails and cannot finish, the app is replaced by a recovery page, and this code is what opens it. It works only for this and stops working once it has finished.\n"
+""
+msgstr "Spend Tracker: recovery code for going back from {from} to {to}\n"
+"\n"
+"{0}\n"
+"\n"
+"If going back fails and cannot finish, the app is replaced by a recovery page, and this code is what opens it. It works only for this and stops working once it has finished.\n"
+""
+
 #. Button on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
 msgid "Open the recovery page"
@@ -11295,6 +11513,11 @@ msgstr "Create the key"
 #: src/screens/Household.tsx
 msgid "Currencies"
 msgstr "Currencies"
+
+#. Heading on the Income vs Expense report: money spent for work and paid back
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Work reimbursements"
+msgstr "Work reimbursements"
 
 #: src/screens/Admin.tsx
 msgid "Pending reset links"
@@ -11662,14 +11885,14 @@ msgstr "{hiddenByCurrency, plural, one {Every row here is in a currency the togg
 msgid "All categories"
 msgstr "All categories"
 
-#: src/screens/reports/IncomeExpense.tsx
-msgid "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
-msgstr "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
-
 #. Review mode: label of the box for the better translation
 #: src/components/SuggestWording.tsx
 msgid "Your wording"
 msgstr "Your wording"
+
+#: src/screens/Categories.tsx
+msgid "One group is the Income group. Every other category is counted as spending, where refunds and charges net out. Ticking this moves it here from the group that has it now."
+msgstr "One group is the Income group. Every other category is counted as spending, where refunds and charges net out. Ticking this moves it here from the group that has it now."
 
 #. History headline, the kind of act: a statement was imported
 #: src/lib/historyWords.ts
@@ -11783,7 +12006,10 @@ msgstr "Setup token"
 msgid "Verbose, plus every statement and every row it returned — which means transactions, payees and amounts written into a file in plain text. Turn it on to diagnose something and turn it off afterwards."
 msgstr "Verbose, plus every statement and every row it returned — which means transactions, payees and amounts written into a file in plain text. Turn it on to diagnose something and turn it off afterwards."
 
+#. Headline figure on the Income vs Expense report: noun, money that came in
+#. Tag beside a group name on the Categories screen: this is the group counted as income
 #. Tooltip on the Income vs Expense report: noun, money that came in
+#: src/screens/Categories.tsx
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Income"
 msgstr "Income"
@@ -11918,6 +12144,12 @@ msgstr "New codes"
 #: src/screens/Admin.tsx
 msgid "For"
 msgstr "For"
+
+#. Button: undo the last update
+#. Heading on the Updates screen: undo the last update
+#: src/screens/Updates.tsx
+msgid "Go back to {to}"
+msgstr "Go back to {to}"
 
 #. Label on the Backups screen
 #: src/screens/Backups.tsx
@@ -12255,6 +12487,13 @@ msgstr "opened {0}"
 msgid "At least one currency stays ticked"
 msgstr "At least one currency stays ticked"
 
+#. placeholder {0}: one.batches
+#. placeholder {1}: one.name ?? ""
+#. placeholder {2}: one.name ?? ""
+#: src/screens/Updates.tsx
+msgid "{0, plural, one {{1}: # change} other {{2}: # changes}}"
+msgstr "{0, plural, one {{1}: # change} other {{2}: # changes}}"
+
 #. placeholder {0}: app.repository ?? repository
 #: src/screens/Updates.tsx
 msgid "Built by <0>.github/workflows/release.yml</0> at <1>v{to}</1> in {0}. Checked by the updater when it was prepared."
@@ -12341,6 +12580,10 @@ msgstr "Reconciliation"
 msgid "never"
 msgstr "never"
 
+#: src/screens/Updates.tsx
+msgid "A passkey registered after the update stops working: the restored ledger does not know it, but the authenticator still offers it, and the sign-in fails without saying why. The member signs in with their password and code and removes it from the authenticator."
+msgstr "A passkey registered after the update stops working: the restored ledger does not know it, but the authenticator still offers it, and the sign-in fails without saying why. The member signs in with their password and code and removes it from the authenticator."
+
 #. Under a message about a slow step, after a few seconds; elapsed is minutes:seconds
 #: src/components/bits.tsx
 msgid "Still working ({elapsed}). This can take a few minutes; keep this window open."
@@ -12367,6 +12610,11 @@ msgstr "DD/MM/YYYY"
 #: src/screens/OneTimeImport.tsx
 msgid "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."
 msgstr "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."
+
+#. Line on the Income vs Expense report: money work paid back
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Reimbursement income"
+msgstr "Reimbursement income"
 
 #. Application management, Where the files are: the file secret.key
 #: src/lib/labels.ts

@@ -1,7 +1,7 @@
 {
   "name": "spend-tracker-desktop",
   "productName": "Household Spend Tracker",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Household Spend Tracker: Spend Tracker for one household, on this computer",
   "private": true,
   "license": "AGPL-3.0-or-later",
@@ -21,17 +21,17 @@
     "smoke": "playwright test"
   },
   "devDependencies": {
-    "@babel/core": "8.0.6",
-    "@lingui/babel-plugin-lingui-macro": "6.8.0",
-    "@lingui/conf": "6.8.0",
-    "@lingui/core": "6.8.0",
-    "@lingui/format-po": "6.8.0",
-    "@lingui/vite-plugin": "6.8.0",
+    "@babel/core": "8.0.10",
+    "@lingui/babel-plugin-lingui-macro": "6.11.0",
+    "@lingui/conf": "6.11.0",
+    "@lingui/core": "6.11.0",
+    "@lingui/format-po": "6.11.0",
+    "@lingui/vite-plugin": "6.11.0",
     "@playwright/test": "^1.63.0",
     "@rolldown/plugin-babel": "0.2.4",
     "@types/node": "^24.0.0",
-    "electron": "44.7.0",
-    "electron-builder": "26.15.3",
+    "electron": "45.2.1",
+    "electron-builder": "26.18.0",
     "micromatch": "file:../client/vendor/micromatch",
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
@@ -39,6 +39,7 @@
   },
   "type": "module",
   "overrides": {
-    "micromatch": "$micromatch"
+    "micromatch": "$micromatch",
+    "minimatch@>=7.0.0 <11.0.1": "11.0.1"
   }
 }

@@ -42,7 +42,7 @@ import contextlib
 import os
 import threading
 
-from updater import contract, detect, intake, journal, oneoff, prepare, survey, volume
+from updater import contract, detect, goback, intake, journal, oneoff, prepare, survey, volume
 from updater import engine as eng
 from updater.apply import Apply
 from updater.recovery import Recovery, apply_journals
@@ -205,7 +205,7 @@ class Service:
             if not contract.is_uuid4(rid) or os.path.lexists(self.vol.history(rid)):
                 continue
             j = journal.load(self.vol, rid)
-            if j is not None and j.kind == "apply":
+            if j is not None and j.kind in contract.JOURNAL_KINDS:
                 found.append(j)
         return found
 
@@ -232,7 +232,7 @@ class Service:
                         pass
                 self.busy = True
                 try:
-                    outcomes.append(Apply(self.kit, j).resume())
+                    outcomes.append(goback.for_journal(self.kit, j).resume())
                 finally:
                     self.busy = False
             self.resume_pending = False
@@ -291,6 +291,14 @@ class Service:
                 assert j is not None
                 try:
                     return Apply(self.kit, j).run(request)
+                except eng.EngineUnavailable:
+                    self.resume_pending = True
+                    return None
+            if request.kind == "go_back":
+                j = journal.load(self.vol, request.id)
+                assert j is not None
+                try:
+                    return goback.GoBack(self.kit, j).run(request)
                 except eng.EngineUnavailable:
                     self.resume_pending = True
                     return None
@@ -359,7 +367,9 @@ class Service:
         try:
             prepare.run(self.kit, request, records)
         except prepare.PrepareFailed as e:
-            records.finish("refused", e.sentence, requested_by=request.requested_by, started_at=started)
+            records.finish(
+                "refused", e.sentence, requested_by=request.requested_by, started_at=started, code=e.code
+            )
             return "refused"
         except eng.EngineUnavailable:
             records.finish(

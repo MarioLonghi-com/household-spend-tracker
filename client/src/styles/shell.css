@@ -274,3 +274,21 @@ html[lang="en-XA"] nav.side :is(button, a, .nav-subhead) {
   hyphens: auto;
   overflow-wrap: anywhere;
 }
+
+/* "Updated just now", after a refresh from a change made elsewhere (#369).
+   Fixed at the bottom so arriving and leaving moves nothing on the page --
+   the point is to explain rows that moved, not to move more of them. */
+.updated-notice {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 40;
+  pointer-events: none;
+}
+.updated-notice > span {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
