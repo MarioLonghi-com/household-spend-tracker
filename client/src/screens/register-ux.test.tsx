@@ -243,13 +243,12 @@ describe("the register's remembered settings", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Type" }));
     fireEvent.click(screen.getByRole("button", { name: "Payee" }));
-    // Select none leaves the backlog as the only tick: the old checkbox.
+    // Select none, then the backlog on its own: the old checkbox. (Select
+    // none clears the backlog too since #371.)
     fireEvent.click(screen.getByRole("button", { name: /All categories/ }));
-    fireEvent.click(
-      within(screen.getByRole("group", { name: "All categories" })).getByRole("button", {
-        name: "Select none",
-      }),
-    );
+    const categories = screen.getByRole("group", { name: "All categories" });
+    fireEvent.click(within(categories).getByRole("button", { name: "Select none" }));
+    fireEvent.click(within(categories).getByRole("checkbox", { name: /Needs a category/ }));
     await waitFor(() => expect(last().get("search")).toBe("taxi"));
     await waitFor(() => expect(last().get("amount")).toBe("12"));
     const before = last().toString();

@@ -64,6 +64,15 @@ history this repository does not have.
 - **Dependabot also watches `deploy/tailnet/compose.yaml`**, so the pinned
   Tailscale sidecar tag moves like everything else. (Part of #99)
 
+### Fixed
+
+- **Select none in a category filter means none.** On the Register it
+  used to leave *Needs a category* ticked, so the register showed the
+  uncategorised rows and switched to oldest first; it now clears that
+  tick too and shows the "nothing ticked" notice, and Select all ticks
+  it again so the filter reads *All categories*. The Income vs Expense
+  report's *Uncategorised* tick follows the same buttons. (#371)
+
 ## 0.12.0 — 2026-10-15
 
 **Reversible: none** — no migration in this release. To go back to

@@ -1492,7 +1492,7 @@ export function Register({
                 label={t({ message: "All categories", comment: "Text on a dropdown that picks several on the Register screen" })}
                 groups={categoryOptions}
                 value={categoryIds}
-                onChange={(ids) => pickCategories(ids, backlog)}
+                onChange={(ids, tick) => pickCategories(ids, tick ?? backlog)}
                 extra={{
                   label: t`Needs a category`,
                   count: backlogCount,
