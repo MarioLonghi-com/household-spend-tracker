@@ -331,7 +331,7 @@ jobs:
           # Every tag, to say whether this version is taken, and origin/main,
           # to say which migrations are new since the last release.
           fetch-depth: 0
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       # Standard library only: no install step, nothing third-party runs here.
@@ -351,10 +351,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - run: pip install "$(grep -oE '^ruff==[^ ]+' requirements-dev.txt)"
+      - run: python -m pip install "$(grep -oE '^ruff==[^ ]+' requirements-dev.txt)"
       - name: ruff
         run: ruff check app/ statements/ updater/ tests/ scripts/ desktop/
       - name: no bulk statements against audited tables
@@ -374,10 +374,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - run: pip install "$(grep -oE '^uv==[^ ]+' requirements-dev.txt)"
+      - run: python -m pip install "$(grep -oE '^uv==[^ ]+' requirements-dev.txt)"
       - run: make lock UV=uv
       - name: the committed locks are what the .in files compile to
         run: |
@@ -412,12 +412,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - run: pip install --require-hashes -r requirements-dev.txt
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+      - run: python -m pip install --require-hashes -r requirements-dev.txt
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -454,11 +454,11 @@ jobs:
           # needs it, and a step that runs third-party code -- npm's
           # install scripts, say -- can read it.
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - run: pip install --require-hashes -r requirements-dev.txt
+      - run: python -m pip install --require-hashes -r requirements-dev.txt
 
       # tests/test_migrations.py -- the check that a model change shipped with
       # its migration -- is part of this run. It used to run a second time as
@@ -498,7 +498,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -554,18 +554,18 @@ jobs:
           # The last release's tag, for the rehearsal.
           fetch-depth: 0
           fetch-tags: true
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: |
             client/package-lock.json
             desktop/package-lock.json
-      - run: pip install --require-hashes -r requirements-desktop.txt
+      - run: python -m pip install --require-hashes -r requirements-desktop.txt
       - run: npm ci
         working-directory: client
       - run: npm ci
@@ -603,7 +603,7 @@ jobs:
           data="$SPENDTRACKER_DATA_DIR"
           unset SPENDTRACKER_DATA_DIR
           python desktop/rehearse_backend.py "$exe" "$data"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: desktop-${{ matrix.target }}
           path: |
@@ -612,7 +612,7 @@ jobs:
             desktop/dist/mas-dev-arm64/
           if-no-files-found: ignore
           retention-days: 7
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: failure()
         with:
           name: desktop-${{ matrix.target }}-failure
@@ -633,7 +633,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -674,15 +674,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
       # The server's own dependencies only. The dev extras are for pytest, and
       # this job does not run it.
-      - run: pip install --require-hashes -r requirements.txt
+      - run: python -m pip install --require-hashes -r requirements.txt
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -722,7 +722,7 @@ jobs:
 
       # Only when something failed, and only then worth the upload. The trace
       # is what makes a red E2E on a machine you cannot see into diagnosable.
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: failure()
         with:
           name: playwright-report
@@ -765,11 +765,11 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - run: pip install --require-hashes -r requirements.txt
+      - run: python -m pip install --require-hashes -r requirements.txt
 
       - name: work out what "before" is
         id: before
@@ -821,7 +821,7 @@ jobs:
           DATABASE_URL: sqlite:///./ci-data/rehearsal.sqlite3
         run: |
           git checkout --detach "$GITHUB_SHA"
-          pip install --require-hashes -r requirements.txt
+          python -m pip install --require-hashes -r requirements.txt
           python -m alembic upgrade head
 
       # The assertion this job exists for. A table that existed before and has
@@ -895,20 +895,20 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       # Pinned: this job exists to distrust what gets installed, and an
       # unpinned auditor is the one package it would install on faith.
       # Read from the dev lock, so it moves when Dependabot moves that.
-      - run: pip install "$(grep -oE '^pip-audit==[^ ]+' requirements-dev.txt)"
+      - run: python -m pip install "$(grep -oE '^pip-audit==[^ ]+' requirements-dev.txt)"
       # The locks as written, nothing resolved (`--disable-pip`): exactly the
       # set an install gets (#46).
       - name: python dependencies
         continue-on-error: true
         run: pip-audit --require-hashes --disable-pip -r requirements.txt -r requirements-updater.txt -r requirements-dev.txt -r requirements-desktop.txt
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -1304,11 +1304,11 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - run: pip install --require-hashes -r requirements-dev.txt
+      - run: python -m pip install --require-hashes -r requirements-dev.txt
       # Outside the checkout: the releases' build context is the checkout.
       - run: |
           echo "STAGED=$RUNNER_TEMP/self-update" >> "$GITHUB_ENV"
@@ -1349,7 +1349,7 @@ jobs:
           echo "127.0.0.1 ghcr.io" | sudo tee -a /etc/hosts > /dev/null
           sudo mkdir -p /etc/containers/certs.d/ghcr.io
           sudo cp "$STAGED/ghcr.crt" /etc/containers/certs.d/ghcr.io/ca.crt
-          pip install --require-hashes --no-deps -r tests/self_update/podman-compose.txt
+          python -m pip install --require-hashes --no-deps -r tests/self_update/podman-compose.txt
           # S20: a rootless engine's services start at boot only with
           # lingering, and podman-restart is what restores `unless-stopped`.
           sudo loginctl enable-linger "$(id -un)"
@@ -1422,7 +1422,7 @@ jobs:
               print(f"| {r['scenario']} {r['title']} | {r['result']} | {r['seconds']} | {note or ''} |")
           PY
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: always()
         with:
           name: self-update-${{ matrix.leg }}
@@ -1491,7 +1491,7 @@ jobs:
           mkdir -p green
           echo "$GITHUB_RUN_ID" > green/run
           echo "GREEN_NAME=green-$TREE" >> "$GITHUB_ENV"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: env.GREEN_NAME != ''
         with:
           name: ${{ env.GREEN_NAME }}

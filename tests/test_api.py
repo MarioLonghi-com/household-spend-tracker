@@ -1200,8 +1200,18 @@ def test_the_spa_fallback_cannot_be_walked_out_of(spa_built, client):
         """One GET, with the path exactly as written."""
         sent: list[dict] = []
 
+        delivered = False
+
         async def receive():
-            return {"type": "http.request", "body": b"", "more_body": False}
+            # What a real server does: the (empty) body once, then nothing until
+            # the client goes away. Starlette >= 1.10's BaseHTTPMiddleware
+            # listens for that disconnect and refuses a second `http.request`,
+            # so answering every call with the body is not an ASGI server.
+            nonlocal delivered
+            if not delivered:
+                delivered = True
+                return {"type": "http.request", "body": b"", "more_body": False}
+            await asyncio.Event().wait()
 
         async def send(message):
             sent.append(message)
