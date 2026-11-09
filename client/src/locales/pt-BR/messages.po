@@ -12050,8 +12050,9 @@ msgstr "Telefone"
 #. Name of a category seeded into a new household for money paid back, such as work expenses; the person can rename it
 #. js-lingui-explicit-id
 #: src/lib/seedWords.ts
+#, fuzzy
 msgid "seed.category.reimbursements"
-msgstr ""
+msgstr "Reembolsos"
 
 #. Name of a category seeded into a new household; the person can rename it
 #. js-lingui-explicit-id
