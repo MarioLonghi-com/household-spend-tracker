@@ -261,7 +261,14 @@ function returnTo(): string | null {
  * the register instead for anybody else (`OWNER_ONLY_OPENS`). Read once, then
  * the address goes back to `/`.
  */
-const OPENS_IN_NEW_TAB = ["accounts", "history", "rules", "application"] as const;
+const OPENS_IN_NEW_TAB = ["accounts", "history", "rules", "application", "report-net-worth"] as const;
+
+/**
+ * Of those, the ones that keep the address while they are open: the Net Worth
+ * report writes its filters there so a view can be bookmarked (#397), and
+ * hands `/` back when it closes (`screens/reports/netWorthView.ts`).
+ */
+const KEEPS_ITS_ADDRESS: readonly OpensInNewTab[] = ["report-net-worth"];
 type OpensInNewTab = (typeof OPENS_IN_NEW_TAB)[number];
 
 /** Of those, the ones only an owner is shown -- the menu hides them too. */
@@ -304,7 +311,9 @@ export function sectionAt(opened: { screen: OpensInNewTab | null }): "updates" |
 
 /** Once a screen has been opened from `?open=`, the address goes back to `/`. */
 export function putTheAddressBack(opened: { screen: OpensInNewTab | null }): void {
-  if (opened.screen) window.history.replaceState(null, "", "/");
+  if (opened.screen && !KEEPS_ITS_ADDRESS.includes(opened.screen)) {
+    window.history.replaceState(null, "", "/");
+  }
 }
 
 /** `/invite/<token>` is a real URL people are handed, so the shell reads it first. */

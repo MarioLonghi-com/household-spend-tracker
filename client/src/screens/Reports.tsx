@@ -19,12 +19,13 @@
 import type { ReactNode } from "react";
 import { IncomeExpense } from "./reports/IncomeExpense";
 import { Reimbursements } from "./reports/Reimbursements";
+import { NetWorth } from "./reports/NetWorth";
 import type { Household } from "../lib/types";
 import type { RegisterPreset } from "./Register";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 
-export type ReportKey = "income-expense" | "reimbursements";
+export type ReportKey = "income-expense" | "reimbursements" | "net-worth";
 
 /**
  * What a report may ask of the shell, which owns navigation.
@@ -71,6 +72,18 @@ export const REPORTS: {
     },
     render: (household, nav) => (
       <Reimbursements household={household} onOpenRegister={nav.openRegister} />
+    ),
+  },
+  {
+    key: "net-worth",
+    get label() {
+      return t({ message: "Net worth", comment: "Label on the Reports screen: everything the household has, less what it owes" });
+    },
+    get blurb() {
+      return t`How much the household has, all accounts together, at each month end — and what moved it.`;
+    },
+    render: (household, nav) => (
+      <NetWorth household={household} onOpenRegister={nav.openRegister} />
     ),
   },
 ];

@@ -411,6 +411,8 @@ export type RegisterPreset = {
   accounts?: string[];
   /** A transaction to open in the side panel once the rows arrive. */
   open?: string;
+  /** Rows up to and including this date only: the Net Worth report's "as of" (#397). */
+  until?: string;
 };
 
 /**
@@ -648,7 +650,7 @@ export function Register({
   const [workFilter, setWorkFilter] = useFilter<"" | ReimbursementView>(
     h, "work", "", isWork, sent(preset?.reimbursement ?? ""),
   );
-  const [range, setRange] = useFilter<Range>(h, "range", ALL_DATES, isRange, sent(ALL_DATES));
+  const [range, setRange] = useFilter<Range>(h, "range", ALL_DATES, isRange, sent(preset?.until ? { since: null, until: preset.until } : ALL_DATES));
   const [sort, setSort] = useSticky<SortKey>("register", h, "sort", "date", isSortKey);
   const [direction, setDirection] = useSticky<SortDirection>(
     "register", h, "direction", "desc", isDirection,

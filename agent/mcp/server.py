@@ -313,6 +313,23 @@ def reimbursements_report(currency: str, since: str | None = None, until: str | 
 
 
 @mcp.tool()
+def net_worth(
+    since: str | None = None,
+    until: str | None = None,
+    currency: list[str] | None = None,
+    closed_only: bool = True,
+) -> str:
+    """The household's net worth at each month end. When display_currency is
+    null there is NO total: read currencies[], one book per currency, and never
+    add them without saying the rate. Liabilities are negative and included."""
+    return _answer(
+        lambda: _api.net_worth(
+            since=since, until=until, currency=currency, closed_only=closed_only
+        )
+    )
+
+
+@mcp.tool()
 def observed_fx(pair: str | None = None, since: str | None = None, until: str | None = None) -> str:
     """The exchange rates this household actually got on its own transfers
     between currencies (pair like "EUR/GBP"). Rates are decimal strings. Use

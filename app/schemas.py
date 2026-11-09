@@ -3318,6 +3318,155 @@ class ReimbursementsOut(BaseModel):
 
 
 # --------------------------------------------------------------------------- #
+# Net Worth (#397)
+# --------------------------------------------------------------------------- #
+
+
+class NetWorthPointOut(BaseModel):
+    """One month end (or today): the total and its parts, in one currency."""
+
+    date: Date
+    today: bool
+    net_worth: int
+    liabilities: int
+    #: The same values summed by the split; they add up to `net_worth` exactly.
+    #: The key is "" for an account with no bank or no country.
+    parts: dict[str, int]
+    accounts_without_data: int
+    stale_rate: bool
+    missing_rates: list[str]
+
+
+class NetWorthHeadlineOut(BaseModel):
+    net_worth: int
+    liabilities: int
+    change_prev: int | None = None
+    prev_date: Date | None = None
+    change_range: int | None = None
+    range_start: Date
+
+
+class NetWorthBridgeOut(BaseModel):
+    start: int
+    fx_effect: int
+    money_added_or_spent: int
+    end: int
+
+
+class NetWorthHeldOut(BaseModel):
+    key: str
+    native_minor: int | None = None
+    native_currency: str | None = None
+    #: Units of `native_currency` per one of the display currency, a decimal
+    #: string. Null for the display currency itself.
+    rate: str | None = None
+    rate_date: Date | None = None
+    value: int
+    #: Of the total, a decimal string to four places; null on a total of 0.
+    share: str | None = None
+
+
+class NetWorthBookOut(BaseModel):
+    """One currency's own figures, exact and unconverted."""
+
+    currency: str
+    accounts: int
+    points: list[NetWorthPointOut]
+    headline: NetWorthHeadlineOut
+    bridge: NetWorthBridgeOut
+    held: list[NetWorthHeldOut]
+
+
+class NetWorthAccountOut(BaseModel):
+    id: str
+    name: str
+    institution: str | None = None
+    country: str | None = None
+    type: AccountType
+    is_liability: bool
+    closed: bool
+    currency: str
+    native_minor: int
+    native_change: int
+    value: int | None = None
+    change_range: int | None = None
+
+
+class NetWorthNotConvertedOut(BaseModel):
+    currency: str
+    native_minor: int
+    accounts: int
+
+
+class NetWorthRateOut(BaseModel):
+    currency: str
+    rate: str
+    rate_date: Date
+    source: str
+    stale: bool
+    before_as_of: bool
+
+
+class NetWorthLargestForeignOut(BaseModel):
+    account_id: str
+    account_name: str
+    currency: str
+    native_minor: int
+    rate: str
+    value: int
+
+
+class NetWorthExplanationOut(BaseModel):
+    accounts_counted: int
+    accounts_hidden_closed: int
+    accounts_without_data: int
+    accounts_without_data_at_start: int
+    currencies: list[str]
+    rates: list[NetWorthRateOut] = []
+    largest_foreign: NetWorthLargestForeignOut | None = None
+    stale: bool = False
+    missing: list[str] = []
+
+
+class NetWorthRateSourceOut(BaseModel):
+    chain: list[str]
+    policy: str
+
+
+class NetWorthOut(BaseModel):
+    """The Net Worth report (#397): every account's balance at each month end.
+
+    **The one report that may add two currencies, and only through a rate.**
+    `display_currency` says what the top-level figures are in: the one
+    currency in scope, exactly, or the base currency when `converted`. With
+    several currencies and no rates it is **null**, and so are `headline` and
+    `bridge` -- `points` and `held` are empty -- because that total does not
+    exist. `currencies` always carries each currency's own book, unconverted.
+    """
+
+    as_of: Date
+    since: Date
+    until: Date
+    today: Date
+    closed_only: bool
+    clipped_from: Date | None = None
+    split: str
+    base_currency: str
+    display_currency: str | None = None
+    converted: bool
+    rate_source: NetWorthRateSourceOut | None = None
+    rates_status: dict | None = None
+    points: list[NetWorthPointOut]
+    headline: NetWorthHeadlineOut | None = None
+    bridge: NetWorthBridgeOut | None = None
+    held: list[NetWorthHeldOut]
+    accounts: list[NetWorthAccountOut]
+    not_converted: list[NetWorthNotConvertedOut]
+    currencies: list[NetWorthBookOut]
+    explanation: NetWorthExplanationOut
+
+
+# --------------------------------------------------------------------------- #
 # One-time Import (#183)
 # --------------------------------------------------------------------------- #
 
