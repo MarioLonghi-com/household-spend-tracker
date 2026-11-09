@@ -153,7 +153,9 @@ that had a fix.
   the right on wide screens. Which group is Income and which category is
   Reimbursement are shown and moved on Categories, and the agent manifest
   lists them. Migration `a7e3c1d95b20` adds the two markers and sets them on
-  a group called `Income` and a category called `Reimbursement(s)`.
+  a group called `Income` and a category called `Reimbursement(s)`. A new
+  household's starter tree now has a *Reimbursements* category in Income,
+  already marked, so the block works from the first day.
   **Reversible: lossy** -- downgrading forgets which group and category
   carry the markers; no transaction changes. (#372)
 

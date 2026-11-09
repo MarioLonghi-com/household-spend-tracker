@@ -88,6 +88,11 @@ def seed_defaults(
                 group_id=group.id,
                 name=seed_words.word(message_id, locale),
                 sort_order=order,
+                role=(
+                    CategoryRole.reimbursement
+                    if message_id == seed_words.REIMBURSEMENT_CATEGORY
+                    else None
+                ),
             )
             session.add(category)
             made.append(category)
