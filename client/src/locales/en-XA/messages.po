@@ -197,6 +197,7 @@ msgstr ""
 msgid "Receipt, {0}"
 msgstr ""
 
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/Accounts.tsx
 msgid "this account is closed"
 msgstr ""
@@ -366,8 +367,10 @@ msgstr ""
 msgid "Fixed: this is YNAB's own bucket rather than a category of yours (Uncategorized, or Inflow: Ready to Assign), so its rows always arrive uncategorised."
 msgstr ""
 
+#. In the list of accounts in a currency on the Exchange rates page: the account names no bank
 #. Net Worth report: the accounts that do not say which bank holds them
 #. Net Worth report: the accounts that do not say which bank holds them
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/reports/NetWorth.tsx
 msgid "No bank set"
 msgstr ""
@@ -3185,6 +3188,8 @@ msgid "Rates as of"
 msgstr ""
 
 #. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
+#. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/Accounts.tsx
 msgid "Closed"
 msgstr ""
@@ -5998,6 +6003,11 @@ msgstr ""
 msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password."
 msgstr ""
 
+#. Button and list on the Exchange rates page: the household's accounts held in this currency code
+#: src/components/CurrencyAccounts.tsx
+msgid "Accounts in {currency}"
+msgstr ""
+
 #: src/screens/AcceptInvite.tsx
 msgid "Looking up your invitation…"
 msgstr ""
@@ -8454,6 +8464,7 @@ msgstr ""
 msgid "Last rate"
 msgstr ""
 
+#: src/components/CurrencyAccounts.tsx
 #: src/screens/Accounts.tsx
 msgid "no country set"
 msgstr ""

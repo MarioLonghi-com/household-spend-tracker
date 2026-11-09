@@ -504,6 +504,14 @@ tr:has(td.editing) { position: relative; }
 .bubble dt { font-weight: 600; white-space: nowrap; }
 .bubble dd { margin: 0; color: var(--muted); }
 .bubble p:last-child { margin-bottom: 0; }
+/* Placed by `placeBubble` (components/CurrencyAccounts.tsx, #411): fixed, so a
+   table's own scroller does not clip it. Opened above its button, the arrow
+   points down from its foot. */
+.bubble.fixed-bubble { position: fixed; }
+.bubble.fixed-bubble.above::before { top: auto; bottom: -5px; transform: rotate(225deg); }
+.currency-accounts { list-style: none; margin: 0; padding: 0; min-width: 200px; }
+.currency-accounts li + li { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+.currency-account-name { font-weight: 600; }
 .field-head { display: flex; align-items: center; gap: 6px; font-weight: 600; }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
