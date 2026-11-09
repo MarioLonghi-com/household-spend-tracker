@@ -40,6 +40,16 @@ history this repository does not have.
   Apple has accepted it. Only a release tag uploads; submitting the build
   for review stays a person's step. The signing secrets are held in a
   separate `app-store` environment that only release tags can reach. (#351)
+- **The Register's search takes AND, OR, phrases and exclusions.** Several
+  words must all match, each in whichever field it is in -- payee Lidl,
+  memo "birthday" -- where the box used to look for the whole text as one
+  phrase; `OR` or `|` between two terms finds either, `"quotes"` keep a
+  phrase together, and `-word` leaves out the rows that mention it. `%` and
+  `_` stay literal in every form, and a stray `OR` or an unclosed quote is
+  read as text rather than refused. Parsed on the server, so the agent's
+  register read and summaries take the same language, and the manifest and
+  `agent/README.md` describe it. A search that worked before finds at least
+  what it found. (#367)
 
 ### Security
 

@@ -321,6 +321,15 @@ and In are one column read two ways: `amount=12.50` finds a 12.50 debit and a
 matches nothing; the rows that come back carry their sign. **It is for
 looking at rows, never for adding them up** — that is `summary` or a report.
 
+**`search` is a small language, not one substring.** Every word must match,
+each in the payee, the memo or the bank's own text (`lidl birthday` is the
+Lidl row whose memo says birthday); `OR` in capitals, or `|`, between two
+terms is either (`lidl OR aldi`), and binds tighter than the gaps between
+words; `"quotes"` keep a phrase as one term; a leading `-` excludes
+(`coffee -decaf`). `%` and `_` are the characters themselves. Nothing is
+refused: an `OR` with no term on one side is the word "OR", and an unclosed
+quote runs to the end.
+
 **c. Change them, in one act.**
 
 ```bash
