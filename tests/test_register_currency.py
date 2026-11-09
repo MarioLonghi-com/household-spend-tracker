@@ -178,3 +178,143 @@ def test_the_amount_column_sorts_by_currency_first_then_figure(client, world):
     assert [(r["currency"], r["amount"]) for r in back["transactions"]] == list(
         reversed(pairs)
     )
+
+
+# --------------------------------------------------------------------------- #
+# The currency toggle, narrowed on the server (#370)
+# --------------------------------------------------------------------------- #
+
+
+def _more_euros(client, world, count: int = 3) -> None:
+    """Enough EUR rows that the currency sorting first fills a page alone."""
+    for at in range(count):
+        made = client.post(
+            f"/api/households/{world['house']}/transactions",
+            json={
+                "account_id": world["spain"]["id"],
+                "date": f"2026-02-0{at + 1}",
+                "amount": -(10_000 + at),
+            },
+            headers=HEADERS,
+        )
+        assert made.status_code == 201, made.text
+
+
+@pytest.mark.parametrize(
+    ("shown", "direction", "crowded_out", "expected"),
+    [
+        # Under asc CHF and EUR -- six rows -- come before the first GBP one,
+        # so a first page of two used to hold no pound at all.
+        ("GBP", "asc", True, [("GBP", -8_000), ("GBP", 5_000)]),
+        ("GBP", "desc", False, [("GBP", 5_000), ("GBP", -8_000)]),
+        # Under desc both GBP rows come first and fill the page.
+        ("EUR", "desc", True, [("EUR", 120_000), ("EUR", -4_250)]),
+        ("EUR", "asc", False, [("EUR", -10_002), ("EUR", -10_001)]),
+    ],
+)
+def test_the_toggle_pages_over_the_currency_it_shows(
+    client, world, shown, direction, crowded_out, expected
+):
+    """The bug: one currency shown, sorted by its amount, and the table empty.
+
+    The toggle used to filter the rows already in hand, after paging, while
+    the amount sort is currency first -- so the first page was all the other
+    currency. Asked for on the server, the first page is this currency's rows
+    in this currency's order.
+    """
+    _more_euros(client, world)
+    unfiltered = _register(
+        client, world["house"], sort="amount", direction=direction, limit=2
+    )
+    unfiltered_shown = [r for r in unfiltered["transactions"] if r["currency"] == shown]
+    assert (unfiltered_shown == []) is crowded_out, (
+        "the premise: without the filter, the first page is another currency's "
+        "exactly when that currency sorts first"
+    )
+
+    page = _register(
+        client, world["house"], sort="amount", direction=direction, limit=2, currency=shown
+    )
+    assert [(row["currency"], row["amount"]) for row in page["transactions"]] == expected
+    held = {"GBP": 2, "EUR": 5}[shown]
+    assert page["total"] == held
+    # Eight rows in all; the rest are what the line under the table counts.
+    assert page["hidden_by_currency"] == 8 - held
+    assert page["capped"] is (held > 2)
+
+
+def test_two_currencies_keep_both_and_leave_the_third_out(client, world):
+    page = _register(
+        client, world["house"], sort="amount", direction="asc", currency=["EUR", "GBP"]
+    )
+
+    assert [(row["currency"], row["amount"]) for row in page["transactions"]] == [
+        ("EUR", -4_250),
+        ("EUR", 120_000),
+        ("GBP", -8_000),
+        ("GBP", 5_000),
+    ]
+    assert page["total"] == 4
+    assert page["hidden_by_currency"] == 1, "the closed CHF account's row"
+
+
+def test_no_toggle_hides_nothing_and_says_so(client, world):
+    page = _register(client, world["house"])
+
+    assert page["total"] == 5
+    assert page["hidden_by_currency"] == 0
+
+
+def test_a_currency_nobody_holds_matches_no_row_and_counts_every_one(client, world):
+    """Toggling to a currency with no rows hides everything -- the screen's
+    "every row here is in a currency the toggle is hiding" -- and the count is
+    what it says is waiting."""
+    page = _register(client, world["house"], currency="USD")
+
+    assert page["transactions"] == []
+    assert page["total"] == 0
+    assert page["hidden_by_currency"] == 5
+
+
+def test_the_badge_counts_the_backlog_in_the_currencies_shown(client, world):
+    """Every row in the fixture needs a category; the badge counts these rows."""
+    assert _register(client, world["house"])["needs_category"] == 5
+    assert _register(client, world["house"], currency="GBP")["needs_category"] == 2
+
+
+def test_the_toggle_keeps_one_accounts_running_balance_when_it_shows_its_currency(
+    client, world
+):
+    """One account in its own currency hides none of its rows, so its balance
+    is still the account's; in another currency there is nothing to sum."""
+    own = _register(client, world["house"], account_id=world["spain"]["id"], currency="EUR")
+    assert own["has_running_balance"] is True
+    assert [row["running_balance"] for row in own["transactions"]] == [115_750, -4_250]
+
+    other = _register(client, world["house"], account_id=world["spain"]["id"], currency="GBP")
+    assert other["transactions"] == []
+    assert other["has_running_balance"] is False
+    assert other["hidden_by_currency"] == 2
+
+
+def test_the_toggle_is_one_households(client, world):
+    """A second household holding pounds adds nothing to the first's GBP view."""
+    second = client.post(
+        "/api/households", json={"name": "Theirs", "base_currency": "GBP"}, headers=HEADERS
+    ).json()
+    theirs = client.post(
+        f"/api/households/{second['id']}/accounts",
+        json={"name": "Their Pounds", "type": "checking", "currency": "GBP"},
+        headers=HEADERS,
+    ).json()
+    made = client.post(
+        f"/api/households/{second['id']}/transactions",
+        json={"account_id": theirs["id"], "date": "2026-01-10", "amount": -777},
+        headers=HEADERS,
+    )
+    assert made.status_code == 201, made.text
+
+    ours = _register(client, world["house"], currency="GBP")
+    assert ours["total"] == 2
+    assert {row["account_id"] for row in ours["transactions"]} == {world["london"]["id"]}
+    assert _register(client, second["id"], currency="GBP")["total"] == 1

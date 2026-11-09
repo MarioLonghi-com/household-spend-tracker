@@ -90,6 +90,15 @@ history this repository does not have.
   older update backups only when there are more than the five that are
   kept, and says how much they hold. The refusal links to a new section,
   *Freeing disk for an update*, in `deploy/TROUBLESHOOTING.md`. (#330)
+- **Showing one currency and sorting by its amount no longer empties the
+  Register.** The currency toggle used to hide rows in the browser after a
+  page of 500 had arrived, and the amount sort puts one currency's rows
+  before the other's, so the first page could hold none of the currency
+  shown. The register now asks the server for the currencies shown
+  (`currency=`, repeatable, on `GET /households/{id}/transactions`), so the
+  pages, the count and the *Needs a category* badge are about the rows on
+  screen, and the reply's `hidden_by_currency` says how many the toggle
+  left out. (#370)
 
 ## 0.12.0 — 2026-10-15
 
