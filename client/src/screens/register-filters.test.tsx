@@ -310,10 +310,11 @@ describe("the category picker", () => {
     expect(boxes[0].closest("label")?.textContent).toMatch(/^Needs a category/);
   });
 
-  it("asks for the backlog alone after Select none, oldest first", async () => {
+  it("asks for the backlog alone when it is ticked on its own, oldest first", async () => {
     mount();
     const pop = await open();
     fireEvent.click(within(pop).getByRole("button", { name: "Select none" }));
+    tick(pop, "Needs a category");
     await waitFor(() => expect(last().get("uncategorised")).toBe("true"));
     expect(last().getAll("category_id")).toEqual([]);
     expect(last().get("categorised")).toBeNull();
@@ -325,6 +326,7 @@ describe("the category picker", () => {
     mount();
     const pop = await open();
     fireEvent.click(within(pop).getByRole("button", { name: "Select none" }));
+    tick(pop, "Needs a category");
     await waitFor(() => expect(last().get("direction")).toBe("asc"));
     tick(pop, "Groceries");
     await waitFor(() => expect(last().getAll("category_id")).toEqual(["cat-groceries"]));
@@ -336,7 +338,6 @@ describe("the category picker", () => {
     mount();
     const pop = await open();
     fireEvent.click(within(pop).getByRole("button", { name: "Select none" }));
-    tick(pop, "Needs a category");
     tick(pop, "Bills");
     await waitFor(() => expect(last().getAll("category_id").sort()).toEqual(["cat-power", "cat-rent"]));
     expect(last().get("uncategorised")).toBeNull();
@@ -357,11 +358,45 @@ describe("the category picker", () => {
     mount();
     const pop = await open();
     fireEvent.click(within(pop).getByRole("button", { name: "Select none" }));
+    tick(pop, "Needs a category");
     await waitFor(() => expect(last().get("uncategorised")).toBe("true"));
     const before = asked.length;
     tick(pop, "Needs a category");
     expect(await screen.findByText(/No categories are ticked/)).toBeTruthy();
     expect(asked.length).toBe(before);
+  });
+
+  it("clears the backlog too on Select none, and leaves the order alone (#371)", async () => {
+    mount();
+    const pop = await open();
+    await waitFor(() => expect(asked.length).toBeGreaterThan(0));
+    const before = asked.length;
+    fireEvent.click(within(pop).getByRole("button", { name: "Select none" }));
+    expect(within(pop).getByRole("checkbox", { name: /Needs a category/ })).toHaveProperty(
+      "checked",
+      false,
+    );
+    expect(await screen.findByText(/No categories are ticked/)).toBeTruthy();
+    expect(asked.length).toBe(before);
+    // The backlog-only worklist order did not fire: the next view is still
+    // newest first.
+    tick(pop, "Groceries");
+    await waitFor(() => expect(last().getAll("category_id")).toEqual(["cat-groceries"]));
+    expect(last().get("uncategorised")).toBeNull();
+    expect(last().get("direction")).toBe("desc");
+  });
+
+  it("ticks the backlog too on Select all, back to no filter at all (#371)", async () => {
+    mount();
+    const pop = await open();
+    tick(pop, "Needs a category");
+    await waitFor(() => expect(last().get("categorised")).toBe("true"));
+    expect(screen.getByRole("button", { name: /4 of 5/ })).toBeTruthy();
+    fireEvent.click(within(pop).getByRole("button", { name: "Select all" }));
+    await waitFor(() => expect(last().get("categorised")).toBeNull());
+    expect(last().get("uncategorised")).toBeNull();
+    expect(last().getAll("category_id")).toEqual([]);
+    expect(screen.getByRole("button", { name: /^All categories/ })).toBeTruthy();
   });
 
   it("shows how many rows need a category from the register's own answer", async () => {
@@ -389,7 +424,6 @@ describe("the category picker", () => {
     });
     await waitFor(() => expect(last().get("amount")).toBe("12"));
     fireEvent.click(within(pop).getByRole("button", { name: "Select none" }));
-    tick(pop, "Needs a category");
     await waitFor(() => expect(counted.length).toBe(1));
     const count = counted[0];
     expect(count.get("uncategorised")).toBe("true");
