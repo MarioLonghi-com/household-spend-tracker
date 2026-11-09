@@ -378,6 +378,31 @@ def agent_may_split(agent: AgentWriter) -> AgentContext:
 AgentSplitter = Annotated[AgentContext, Depends(agent_may_split)]
 
 
+def agent_may_edit_categories(agent: AgentWriter) -> AgentContext:
+    """Whether this key may add categories and delete an unused one (#366).
+
+    A permission of its own, not carried by `write`: categorising a row and
+    changing the household's category tree are different kinds of act. A key
+    without it is refused the way a read key is refused a write -- a 403 --
+    with a sentence that says who can do it instead.
+
+    Deleting is allowed here, against §1.2's "no key deletes", on the split's
+    argument: nothing is lost. Only a category nothing carries can go, the
+    delete is a logged row in one batch, and one undo in History puts it back.
+    `test_agent_access.py` names the route and holds it to this dependency.
+    """
+    if not agent.key.may_edit_categories:
+        raise Forbidden(
+            "that key may not add or delete categories. A person can, on the "
+            "Categories screen, or give the program a key that is allowed to.",
+            code="agent_key.may_not_edit_categories",
+        )
+    return agent
+
+
+AgentCategoryEditor = Annotated[AgentContext, Depends(agent_may_edit_categories)]
+
+
 class _Attributed:
     """`batch()` with the key stamped on the row it opens.
 

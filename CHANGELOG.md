@@ -50,6 +50,19 @@ history this repository does not have.
   register read and summaries take the same language, and the manifest and
   `agent/README.md` describe it. A search that worked before finds at least
   what it found. (#367)
+- **An agent can add a category, and delete one nothing uses, when its key
+  allows it.** `POST …/categories` adds one in a group named by id or by name
+  (making the group when there is none), and `POST
+  …/categories/{id}/delete` deletes a category no row carries; one that is
+  carried is refused and stays, since archiving it is a person's. Both go
+  through the Categories screen's own service, one History entry each with
+  the key named, and Undo takes them back. They need a new permission,
+  *Let it add categories, and delete one nothing uses*, chosen when the key
+  is made and shown in the key list and the manifest — `write` alone does
+  not carry it. The MCP sample has a tool for each. Migration
+  `d2b8e6f41c07` adds the permission, off for every existing key.
+  **Reversible: lossy** -- downgrading takes the permission away from the
+  keys that had it; nothing in the ledger changes. (#366)
 - **Go back to the previous version from the browser.** After a successful
   update, *Updates* offers *Go back to X.Y.Z*: one step, to the release the
   last update came from, while its backup is one of the newest five. The

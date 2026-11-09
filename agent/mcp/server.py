@@ -246,6 +246,25 @@ def split_transactions(splits: list[dict]) -> str:
     return _answer(lambda: _api.split(splits))
 
 
+@mcp.tool()
+def create_category(
+    name: str, group_id: str | None = None, group_name: str | None = None
+) -> str:
+    """Add a category when nothing in the manifest fits: give group_id, or
+    group_name (an existing group by name, or a new one). Check the manifest
+    first -- a near-duplicate of an existing category is worse than none. Needs
+    a key with may_edit_categories. One act, one undo for a person."""
+    return _answer(lambda: _api.create_category(name, group_id=group_id, group_name=group_name))
+
+
+@mcp.tool()
+def delete_category(category_id: str) -> str:
+    """Delete a category NOTHING carries (one you just made by mistake, say).
+    A category any row carries is refused and stays: archiving it is a
+    person's. Needs a key with may_edit_categories. One undo for a person."""
+    return _answer(lambda: _api.delete_category(category_id))
+
+
 # --------------------------------------------------------------------------- #
 # Transfers the matcher missed (README, job 5)
 # --------------------------------------------------------------------------- #

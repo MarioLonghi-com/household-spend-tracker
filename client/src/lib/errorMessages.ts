@@ -60,6 +60,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "category.group_not_found": {
     message: msg({ id: "error.category.group_not_found", message: "No such category group" }),
   },
+  "category.group_by_id_or_name": {
+    message: msg({ id: "error.category.group_by_id_or_name", message: "Name the group by group_id or by group_name, one of the two" }),
+  },
   "category.in_use": {
     message: msg({
       id: "error.category.in_use",
@@ -682,6 +685,12 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   },
   "agent_key.read_only_commit": {
     message: msg({ id: "error.agent_key.read_only_commit", message: "A read-only key has nothing to commit" }),
+  },
+  "agent_key.read_only_categories": {
+    message: msg({ id: "error.agent_key.read_only_categories", message: "A read-only key cannot be allowed to change categories" }),
+  },
+  "agent_key.may_not_edit_categories": {
+    message: msg({ id: "error.agent_key.may_not_edit_categories", message: "That key may not add or delete categories. A person can, on the Categories screen, or give the program a key that is allowed to" }),
   },
   "agent_key.not_issuer": {
     message: msg({ id: "error.agent_key.not_issuer", message: "Only the person who issued a key can revoke it" }),

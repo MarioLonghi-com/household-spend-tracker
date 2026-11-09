@@ -264,6 +264,22 @@ class SpendTracker:
         reimbursement: keep|clear}]}]. Needs may_commit; one act, one undo."""
         return self._write("POST", self._house("transactions/split"), {"splits": splits})
 
+    def create_category(
+        self, name: str, *, group_id: str | None = None, group_name: str | None = None
+    ) -> dict:
+        """A new category in a group by id, or by name (made if missing).
+        Needs may_edit_categories; one act, one undo."""
+        body: dict[str, Any] = {"name": name}
+        if group_id is not None:
+            body["group_id"] = group_id
+        if group_name is not None:
+            body["group_name"] = group_name
+        return self._write("POST", self._house("categories"), body)
+
+    def delete_category(self, category_id: str) -> dict:
+        """Delete a category nothing carries. Needs may_edit_categories."""
+        return self._write("POST", self._house(f"categories/{category_id}/delete"), {})
+
     def transfer_findings(self, *, limit: int = 100) -> dict:
         """The matcher's suggested pairs, lone legs, and links awaiting a person."""
         return self._get(self._house("transfers/findings"), limit=limit)

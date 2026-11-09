@@ -174,7 +174,9 @@ manifest names the endpoint for every step.
 
 Not a matter of which scope you were given — no key can do these at all:
 
-- delete anything,
+- delete anything -- except, on a key the person allowed it, the row a
+  split replaces (`may_commit`) and a category nothing carries
+  (`may_edit_categories`), both of which one undo puts back,
 - undo anything,
 - create or revoke a key, including its own,
 - touch passwords, authenticators, devices or who is in a household,
