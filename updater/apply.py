@@ -59,6 +59,12 @@ shared namespace, stop a running `-previous` once and try again; and R3 puts
 the original policy back. An engine that cannot change a restart policy is
 noted, not fatal: the retry still stands.
 
+**At the stop itself** (#344) rootless Podman can answer a stop that the
+hand start overtook with a 500, `container state improper`, finishing
+neither. Step 3 takes that one answer as transient: it waits a moment,
+inspects, and stops the app once more if it runs. A stop refused again is
+the step failing: *not started*, the app back under its name.
+
 **During the drill** (#246) the danger is the ledger, not the port: the old
 app would read and write it while the drill backs it up and migrates it. So
 before step 5 starts the drill, and at every poll while it runs, the updater
@@ -146,10 +152,20 @@ HOLDER_GRACE_SECONDS = 5
 #: not stopped: Docker wakes a stop's caller before its state is saved (#246).
 HOLDER_SETTLE_TRIES = 5
 HOLDER_SETTLE_SECONDS = 0.5
+#: How long step 3 waits after a stop refused as `container state improper` (#344).
+STATE_IMPROPER_WAIT_SECONDS = 2.0
+#: The end of rootless Podman's answer to a stop that a concurrent start overtook (#344).
+STATE_IMPROPER = "container state improper"
+
 #: This request's own one-offs that may run with the ledger while the drill
 #: does: the drill itself, and the maintenance page, which mounts it read-only.
 OWN_LEDGER_ROLES = ("drill", "placard")
 LEDGER_HELD = "the previous version was started by hand during the update and could not be stopped"
+
+
+def state_improper(e: eng.EngineError) -> bool:
+    """Podman's 500 for a stop or start overlapping another, which finishes neither (#344)."""
+    return e.status == 500 and STATE_IMPROPER in e.message
 
 
 class LedgerHeld(Exception):
@@ -494,9 +510,36 @@ class Apply:
             # Recorded before anything changes, so a rollback after a crash
             # anywhere from here on knows what to put back.
             self.remember(previous_restart_policy=self.own_restart_policy(self.previous()))
-        self.client.stop(self.ctx["previous_id"], grace=STOP_GRACE_SECONDS)
+        self.stop_for_step3()
         self.client.rename(self.ctx["previous_id"], parked)
         self.park_restart_policy()
+
+    def stop_for_step3(self) -> None:
+        """Step 3's stop, asked once more when rootless Podman's answer overlapped a hand start (#344).
+
+        Podman answers a stop that a start overtakes -- the app started by
+        hand the moment it stopped (E7) -- with a 500 whose message ends
+        `container state improper`, finishing neither. That answer is
+        transient: after a short wait the container is inspected, and stopped
+        once more if it runs. A second refusal of any kind, or any other
+        error the first time, is the step failing, as before: *not started*.
+        """
+        cid = str(self.ctx["previous_id"])
+        try:
+            self.client.stop(cid, grace=STOP_GRACE_SECONDS)
+            return
+        except eng.EngineError as e:
+            if not state_improper(e):
+                raise
+            refused = e
+        self.records.say("The engine refused the stop while the app was being started; trying once more.")
+        self.kit.sleep(STATE_IMPROPER_WAIT_SECONDS)
+        if survey.running(self.client.inspect(cid)):
+            self.client.stop(cid, grace=STOP_GRACE_SECONDS)
+        self.notes.append(
+            f"The app was started while the updater stopped it, and the engine refused the stop "
+            f"({refused}); the updater stopped it again."
+        )
 
     def own_restart_policy(self, inspect: dict) -> dict:
         """The app's restart policy -- or, if it is `no` because an earlier apply parked it and a
