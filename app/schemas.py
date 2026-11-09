@@ -224,6 +224,21 @@ class HouseholdCreate(BaseModel):
     locale: SeedLocale = None
 
 
+class LatestChangeOut(BaseModel):
+    """Where this household's audit log has got to, for an open page to poll (#369).
+
+    `seq` is the newest `changes.seq` in the household, 0 when it has none.
+    With `since`, the two flags say who made the changes after it: `elsewhere`
+    when any was by another member or through an agent key, `mine` when any
+    was by the asking person in a browser -- which is this tab, or another of
+    theirs, and only the page knows whether it has just saved something.
+    """
+
+    seq: int
+    elsewhere: bool = False
+    mine: bool = False
+
+
 class HouseholdOut(ORMModel):
     id: str
     name: str

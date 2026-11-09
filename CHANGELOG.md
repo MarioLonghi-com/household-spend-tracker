@@ -34,6 +34,20 @@ history this repository does not have.
 
 ### Added
 
+- **An open page notices changes made elsewhere and refreshes itself.**
+  When the other member categorises rows, an agent commits an import, or
+  you edit in another tab, the page on screen refetches in the background
+  within about twenty seconds, keeping its scroll, the register's place and
+  anything half-typed, and says *Updated just now* for a moment. It asks one
+  small question of the household's audit log
+  (`GET /households/{id}/changes/latest`), only while the tab is visible,
+  less often while nothing changes (up to every two minutes), and the
+  question writes nothing -- not even the session's last-seen time, so an
+  idle tab does not keep a session alive. If the transaction open in the
+  register's panel changed underneath unsaved edits, the panel says so and
+  saves nothing until you choose *Show the new version* or *Keep my
+  changes*. (#369)
+
 - **A release uploads the Mac App Store build by itself.** Tagging a
   version now builds the store app, and once the release is public signs
   it, packages it and uploads it to App Store Connect, then waits until

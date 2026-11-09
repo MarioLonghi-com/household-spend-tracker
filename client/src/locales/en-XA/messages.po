@@ -1784,6 +1784,10 @@ msgstr ""
 msgid "Name as the bank writes it"
 msgstr ""
 
+#: src/components/UpdatedNotice.tsx
+msgid "Updated just now with changes made elsewhere."
+msgstr ""
+
 #. Backups screen: the list is empty
 #: src/screens/Backups.tsx
 msgid "Nothing backed up yet."
@@ -2309,6 +2313,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "Nothing recorded. Rows created before the audit log existed have no history."
+msgstr ""
+
+#: src/screens/Register.tsx
+msgid "Keep my changes"
 msgstr ""
 
 #. Button on the Backups screen: verb
@@ -6433,6 +6441,10 @@ msgstr ""
 msgid "the last four, or the part the bank prints"
 msgstr ""
 
+#: src/screens/Register.tsx
+msgid "Show the new version"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "A suggestion, not a restriction: it fills in the address on the acceptance screen and the person can change it. <0>The link is the credential</0> — whoever opens it gets this role, so treat it like a password."
 msgstr ""
@@ -6620,6 +6632,10 @@ msgstr ""
 #: src/components/Receipts.tsx
 #: src/screens/Receipts.tsx
 msgid "Open the receipt from {when}"
+msgstr ""
+
+#: src/screens/Register.tsx
+msgid "This transaction was changed somewhere else while you were editing it. Nothing has been saved over it."
 msgstr ""
 
 #. Button on the Backups screen: make the zip file to download

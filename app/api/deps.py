@@ -70,6 +70,29 @@ def current_user(request: Request, session: SessionDep) -> User:
 CurrentUser = Annotated[User, Depends(current_user)]
 
 
+def current_user_quietly(request: Request, session: SessionDep) -> User:
+    """`current_user`, without recording that the session is in use.
+
+    For a request the browser makes on its own rather than one a person made:
+    the open page asking every few seconds whether anything changed (#369).
+    Touching the session there would be a write a minute from every open tab
+    -- the WAL churn `sessions.touch` exists to avoid -- and, worse, would keep
+    an idle session alive for as long as a tab was left open, which is the
+    one thing the idle timeout is for. Everything else about the check is the
+    same: a missing, expired or disabled session is still a 401.
+    """
+    row = session_service.lookup(session, cookies.session_value(request))
+    if row is None:
+        raise Unauthorized("sign in first", code="auth.sign_in_first")
+    user = session.get(User, row.user_id)
+    if user is None or user.disabled_at is not None:
+        raise Unauthorized("sign in first", code="auth.sign_in_first")
+    return user
+
+
+QuietUser = Annotated[User, Depends(current_user_quietly)]
+
+
 def require_owner(user: CurrentUser) -> User:
     """403 is right here: they are signed in, so they know the thing exists."""
     if user.role is not Role.owner:
@@ -93,6 +116,14 @@ def current_household(household_id: str, user: CurrentUser, session: SessionDep)
 
 
 CurrentHousehold = Annotated[Household, Depends(current_household)]
+
+
+def quiet_household(household_id: str, user: QuietUser, session: SessionDep) -> Household:
+    """`current_household` for a `QuietUser`: the same 404 for a non-member."""
+    return household_service.get_for(session, household_id, user)
+
+
+QuietHousehold = Annotated[Household, Depends(quiet_household)]
 
 
 def load_for[T](session: Session, user: User, model: type[T], object_id: str) -> T:
