@@ -1602,6 +1602,46 @@ class UpdateOutcomeOut(BaseModel):
     to_version: str | None = None
 
 
+class UpdateGoBackOfferOut(BaseModel):
+    """What *Go back* would undo (#173): the last update, while the volume says it can be."""
+
+    update_id: str
+    #: The release gone back to, and the one running now.
+    to_version: str
+    from_version: str
+    updated_at: str | None = None
+    #: The update's backup, which going back restores.
+    backup: str
+    #: Whether the updater takes `go_back` (its window includes protocol 2).
+    updater_can: bool
+
+
+class UpdateGoBackHouseholdOut(BaseModel):
+    household_id: str | None = None
+    #: None for instance-wide acts.
+    name: str | None = None
+    batches: int
+
+
+class UpdateGoBackOut(BaseModel):
+    """`GET …/go-back`: the offer, and what going back would lose."""
+
+    offer: UpdateGoBackOfferOut
+    since: str
+    households: list[UpdateGoBackHouseholdOut] = []
+    passkeys: int = 0
+
+
+class UpdateGoBack(BaseModel):
+    update_id: str = Field(max_length=64)
+    #: The version, typed by the owner, as the confirmation asks.
+    typed_version: str = Field(max_length=20)
+    #: From `POST …/go-back/recovery-code`.
+    recovery_code_id: str = Field(max_length=64)
+    #: From `POST /me/step-up`. Spent first, whatever happens next.
+    step_up_token: str | None = Field(default=None, max_length=200)
+
+
 class UpdateStateOut(BaseModel):
     """`GET /admin/application/update`. Reads the volume; asks nobody outside.
 
@@ -1619,6 +1659,8 @@ class UpdateStateOut(BaseModel):
     report: UpdateReportOut | None = None
     outcome: UpdateOutcomeOut | None = None
     backups: list[BackupOut] = []
+    #: One step back to the release the last update came from (#173), or None.
+    go_back: UpdateGoBackOfferOut | None = None
 
 
 class UpdatePrepare(BaseModel):

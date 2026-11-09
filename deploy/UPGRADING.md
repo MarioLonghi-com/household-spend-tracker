@@ -205,9 +205,37 @@ replaced by an older one.
 
 ### Going back after a successful update
 
-There is no button for it. Going back is [Case C](#rolling-back-three-cases-and-only-one-is-easy)
+Going back is [Case C](#rolling-back-three-cases-and-only-one-is-easy)
 whatever the migrations said: the only way back is the update's backup,
-**and everything written since the update goes with it**. From a terminal, in
+**and everything written since the update goes with it**.
+
+**From the browser**, one step back: to the release the last update came
+from. *Updates* offers *Go back to X.Y.Z* while the last update is a
+successful one to the version you run, its backup is one of the newest five,
+and the updater kept the previous version's configuration.
+
+1. Press *Go back to X.Y.Z…*.
+2. Read what would be lost: the changes since the backup, for each
+   household, and the changes to the instance itself.
+3. Read the passkey sentence (below).
+4. Save the recovery code. Tick *I have saved the recovery code*.
+5. Type the version you go back to.
+6. Type your password and a code from your authenticator.
+7. Press *Go back to X.Y.Z*. Wait for the page to reload, as for an update.
+
+The updater checks first that the previous image is still on the machine and
+still verifies as that release, and that the backup is on the disk and
+verifies. If one of them is not, nothing is stopped: *Going back did not
+start*. Otherwise it stops the app, restores the backup **with the previous
+image**, starts the previous version from the configuration it saved after
+the update, checks it answers, and pins it in `.env` and `pin/release.env`.
+The ledger it replaced stays beside it as `spendtracker.sqlite3.before-restore-<stamp>`.
+If the restore or the start fails three times, the recovery page opens, with
+the code you saved. The updater stays on its version: a newer updater works
+with an older app. Going back once more, to the release before that, is not
+offered.
+
+**From a terminal**, which also works when the browser does not offer it: in
 the compose directory, with the old version as `X.Y.Z` and the backup's stamp
 from *Backups taken by updates*:
 

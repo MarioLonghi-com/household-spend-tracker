@@ -960,6 +960,8 @@ Free at least the amount the sentence names, then press *Try again*.
 | The maintenance page, with no recovery link, for minutes after the update | The update is still running; the page is from the previous version. | Wait. It goes when the new version answers, or after a rollback. |
 | A container called `…-previous` in Docker Desktop's list | The previous app or updater, kept stopped after an update until the next one. | Leave it stopped. Its restart policy is `no` while it is parked. If the previous **app** is started by hand mid-update, the updater stops it once and starts the new version; a rollback gives it its own restart policy back. |
 | Containers named like the app plus `-placard-…`, `-drill-…`, `-restore-…` or `-probe-…` | One-off containers of an update, removed when they finish. | Leave them while an update runs. Afterwards, a stopped one can be removed. |
+| *Going back did not start: …* | The previous version's image is gone or no longer verifies, the update's backup is not on the disk or does not verify, or a `…-previous` app container is running. Nothing was stopped. | Read the sentence. Going back from a terminal still works with a backup ([UPGRADING.md](UPGRADING.md#going-back-after-a-successful-update)). |
+| *Go back* is not offered | The last update did not succeed, a later one ran, its backup is no longer one of the newest five, or the updater is older than 0.13. | [UPGRADING.md, Going back after a successful update](UPGRADING.md#going-back-after-a-successful-update), from a terminal. |
 | You closed the tab mid-update | Nothing: the update does not need it. | Open *Updates* again. The outcome waits there until you dismiss it. |
 
 ---

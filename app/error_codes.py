@@ -285,6 +285,16 @@ REGISTRY: dict[str, Code] = {
         "The updater cannot use the container engine ({socket}), so it cannot update anything",
         ("socket",)
     ),
+    "update.go_back_unavailable": Code(
+        "There is nothing to go back to from this version: the last update is not one that can be undone from here"
+    ),
+    "update.go_back_typed_version": Code(
+        "Type {to_version}, the version to go back to, to confirm",
+        ("to_version",)
+    ),
+    "update.go_back_updater_too_old": Code(
+        "The updater is too old to go back. Update the updater first, then try again"
+    ),
     "update.in_flight": Code(
         "Another update request is waiting or running. Wait for it to finish, then try again"
     ),

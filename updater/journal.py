@@ -32,7 +32,10 @@ from updater.volume import Volume
 #: The apply steps of 4.2 and the rollback steps of 4.3, in order.
 APPLY_STEPS = ("0", "1", "2", "2a", "3", "4", "5", "6", "7", "8", "9", "10")
 ROLLBACK_STEPS = ("R1", "R2", "R3", "R4", "R5")
-STEPS = APPLY_STEPS + ROLLBACK_STEPS
+#: Going back after a successful update (#173): preflight, the previous
+#: container recreated, the app stopped, then R1-R4, then the record.
+GO_BACK_STEPS = ("G1", "G2", "G3", "G4")
+STEPS = APPLY_STEPS + ROLLBACK_STEPS + GO_BACK_STEPS
 
 #: Rollback attempts in all before the update `needs_recovery` (4.3, 5.6).
 MAX_ROLLBACK_ATTEMPTS = 3

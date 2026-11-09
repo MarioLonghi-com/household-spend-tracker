@@ -243,6 +243,8 @@ SCREENS = TS_FILE.resolve().parent.parent / "screens"
         ("UpdateMigrationOut", "Migration", "Updates.tsx"),
         ("UpdateOutcomeOut", "Outcome", "Updates.tsx"),
         ("UpdateRecoveryCodeOut", "RecoveryCode", "Updates.tsx"),
+        ("UpdateGoBackOfferOut", "GoBackOffer", "Updates.tsx"),
+        ("UpdateGoBackOut", "GoBackLoss", "Updates.tsx"),
         ("UpdateRequestOut", "UpdateRequest", "Updates.tsx"),
     ],
 )

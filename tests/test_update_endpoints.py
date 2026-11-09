@@ -205,6 +205,9 @@ def _routes(rid: str, record: str) -> list[tuple[str, str, dict | None]]:
         ("post", f"{BASE}/discard", {"prepared_id": rid}),
         ("post", f"{BASE}/updater", {"to_version": NEXT}),
         ("post", f"{BASE}/outcome/{record}/seen", None),
+        ("get", f"{BASE}/go-back", None),
+        ("post", f"{BASE}/go-back/recovery-code", None),
+        ("post", f"{BASE}/go-back", {"update_id": record, "typed_version": "0.1.0", "recovery_code_id": "x"}),
         ("delete", "/api/admin/application/backups/20261001-101010", None),
     ]
 
@@ -277,7 +280,7 @@ def test_the_state_reads_what_the_updater_wrote_and_ignores_what_it_does_not_kno
 
     got = client.get(BASE, headers=HEADERS).json()
     assert got["case"] == "working"
-    assert got["running"] == __version__ and got["protocol"] == 1
+    assert got["running"] == __version__ and got["protocol"] == 2
     assert got["heartbeat"]["fresh"] is True
     assert got["heartbeat"]["container"] == beat["container"]
     assert got["heartbeat"]["engine_api"] == "1.40-1.51"
@@ -852,7 +855,13 @@ def test_the_updater_only_is_allowed_when_the_engine_has_outgrown_it(world):
 
 def test_every_request_the_app_writes_has_exactly_the_updaters_keys():
     assert {k: v for k, v in contract.FIELDS.items() if k != "ping"} == updates.FIELDS
-    assert updates.PROTOCOL == contract.FROZEN_PROTOCOL
+    # The newest protocol the app writes is the top of the updater's window,
+    # and each kind is written in the one it first appeared in (#173).
+    assert updates.PROTOCOL == contract.PROTOCOLS[1] == 2
+    assert updates.KIND_PROTOCOL == contract.KIND_SINCE
+    assert {kind: updates.protocol_of(kind) for kind in updates.FIELDS} == {
+        "prepare": 1, "apply": 1, "discard": 1, "update_updater": 1, "go_back": 2,
+    }  # fmt: skip
     assert updates.SETTLED | {"accepted", "running", "needs_recovery"} == set(contract.STATES)
     assert updates.VERSION.pattern == contract.VERSION.pattern
 

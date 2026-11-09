@@ -1273,7 +1273,7 @@ jobs:
             engine: podman
             layout: loopback
             runner: ubuntu-latest
-            only: E1,E10,E11,E13,E12,E11b,E2,E3,E4
+            only: E1,E10,E11,E13,E12,E11b,E2,E3,E4,E17
             variants: B1,B2,B3,B4,C
             # A's updater starting at all as 0:0 with cap_drop ALL (844b32f),
             # and, as the standby after its handover, not taking back from a

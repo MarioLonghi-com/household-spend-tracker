@@ -173,7 +173,7 @@ LABEL org.opencontainers.image.title="Spend Tracker updater" \
       org.opencontainers.image.source="https://github.com/MarioLonghi-com/household-spend-tracker" \
       org.opencontainers.image.url="https://github.com/MarioLonghi-com/household-spend-tracker" \
       org.opencontainers.image.licenses="AGPL-3.0-or-later" \
-      com.github.mariolonghi-com.spend-tracker.updater-protocols="1-1"
+      com.github.mariolonghi-com.spend-tracker.updater-protocols="1-2"
 # `python -m updater` finds the package in the working directory.
 WORKDIR /opt/spend-tracker-updater
 ENV PATH="/venv/bin:$PATH" \
@@ -204,13 +204,13 @@ LABEL org.opencontainers.image.title="Spend Tracker" \
       org.opencontainers.image.url="https://github.com/MarioLonghi-com/household-spend-tracker" \
       org.opencontainers.image.documentation="https://github.com/MarioLonghi-com/household-spend-tracker/blob/main/deploy/DOCKER.md" \
       org.opencontainers.image.licenses="AGPL-3.0-or-later"
-# The protocol this app writes its update requests in (C4), the same number
-# as `PROTOCOL` in app/services/updates.py -- tests/test_updater_image.py
-# holds the two together. The updater reads it off the image before it agrees
-# to run an apply, and a successor updater goes first only when its own
-# `…updater-protocols` window includes it. The name is the reverse of the
+# The newest protocol this app writes its update requests in (C4), the same
+# number as `PROTOCOL` in app/services/updates.py -- tests/test_updater_image.py
+# holds the two together. Protocol 2 adds `go_back` (#173); every other kind
+# is still written in protocol 1. A successor updater goes first only when its
+# own `…updater-protocols` window includes it. The name is the reverse of the
 # ghcr namespace, as updater/detect.py builds it.
-LABEL com.github.mariolonghi-com.spend-tracker.updater-protocol="1"
+LABEL com.github.mariolonghi-com.spend-tracker.updater-protocol="2"
 WORKDIR /app
 ENV PATH="/venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
