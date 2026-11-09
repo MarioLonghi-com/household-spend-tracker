@@ -834,6 +834,8 @@ export interface AgentKey {
   /** Computed from one stored value — `write` implies `read`. */
   scopes: string[];
   may_commit: boolean;
+  /** May add categories and delete an unused one (#366). */
+  may_edit_categories?: boolean;
   created_at: string;
   expires_at: string;
   last_used_at: string | null;

@@ -546,6 +546,10 @@ msgstr "What happens"
 msgid "The end of {open}"
 msgstr "The end of {open}"
 
+#: src/screens/Profile.tsx
+msgid "Categorising rows does not need this. It is for a program that should also change the category list itself; each change is in History, and Undo there takes it back."
+msgstr "Categorising rows does not need this. It is for a program that should also change the category list itself; each change is in History, and Undo there takes it back."
+
 #. Label on the Admin screen
 #. Label on the household page
 #: src/screens/Admin.tsx
@@ -715,10 +719,6 @@ msgstr "Asking YNAB for your plans…"
 #: src/screens/SignIn.tsx
 msgid "I have my authenticator after all"
 msgstr "I have my authenticator after all"
-
-#: src/screens/Profile.tsx
-msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
-msgstr "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 
 #. Tooltip on a folder path on Application management
 #: src/screens/ApplicationManagement.tsx
@@ -1401,6 +1401,10 @@ msgstr "Copied"
 #: src/screens/Import.tsx
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr "This file only. The payee’s rule is left as it is for future statements."
+
+#: src/screens/Profile.tsx
+msgid "Let it add categories, and delete one nothing uses"
+msgstr "Let it add categories, and delete one nothing uses"
 
 #. Column heading on the Admin screen: noun
 #. Column heading on the Admin screen: noun
@@ -3326,6 +3330,11 @@ msgstr "A key can last between a day and {max_days} days"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.agent_key.may_not_edit_categories"
+msgstr "That key may not add or delete categories. A person can, on the Categories screen, or give the program a key that is allowed to"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.agent_key.needs_label"
 msgstr "Give the key a label, so you know what it is for"
 
@@ -3339,6 +3348,11 @@ msgstr "No such key"
 #: src/lib/errorMessages.ts
 msgid "error.agent_key.not_issuer"
 msgstr "Only the person who issued a key can revoke it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.read_only_categories"
+msgstr "A read-only key cannot be allowed to change categories"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3420,6 +3434,11 @@ msgstr "{name} is archived, so it cannot be a default"
 #: src/lib/errorMessages.ts
 msgid "error.category.choose_default"
 msgstr "Choose the category to always use"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_by_id_or_name"
+msgstr "Name the group by group_id or by group_name, one of the two"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4751,6 +4770,10 @@ msgstr "Register"
 #: src/screens/Payees.tsx
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
 msgstr "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
+
+#: src/screens/Profile.tsx
+msgid "No key can undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here. Nor can it delete anything, except a category nothing uses, and only when you allow it below."
+msgstr "No key can undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here. Nor can it delete anything, except a category nothing uses, and only when you allow it below."
 
 #. How a rule matches, inside the rule list: the bank's text starts with the pattern
 #: src/screens/Rules.tsx
@@ -10216,6 +10239,10 @@ msgstr "Payee naming rules"
 #: src/screens/Register.tsx
 msgid "{app}, via its CSV export"
 msgstr "{app}, via its CSV export"
+
+#: src/screens/Profile.tsx
+msgid "may add and delete categories"
+msgstr "may add and delete categories"
 
 #. Shown in a dropdown when the search finds nothing
 #: src/components/GroupedPicker.tsx

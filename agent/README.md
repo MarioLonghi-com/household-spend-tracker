@@ -45,6 +45,7 @@ shell history and in `ps`.
 | Attaching receipts, categorising, writing memos, flagging work expenses, linking transfers | `write` |
 | Committing a staged import without a person reviewing it first | `write` + `may_commit` |
 | Splitting a row into parts (it replaces the row) | `write` + `may_commit` |
+| Adding a category (and its group), deleting one nothing carries | `write` + `may_edit_categories` |
 
 ## 2. Ask what you can reach
 
@@ -59,7 +60,8 @@ curl -s -H "Authorization: Bearer $SPENDTRACKER_TOKEN" \
 {
   "api_version": "1",
   "household": {"id": "7f3c…", "name": "Home", "base_currency": "EUR"},
-  "key": {"label": "the analyst", "scopes": ["read"], "may_commit": false},
+  "key": {"label": "the analyst", "scopes": ["read"], "may_commit": false,
+          "may_edit_categories": false},
   "accounts": [
     {"id": "3b52…", "name": "Current", "type": "checking", "currency": "EUR",
      "minor_exponent": 2, "country": "ES", "institution": "…", "is_liability": false,
@@ -347,6 +349,24 @@ bank's words should stay and send them back as part of the new text. `null`
 empties it. A reconciled row is left alone and listed in `locked`. Like every
 write, it is one batch and one undo.
 
+**e. When nothing fits, add a category — if the key may.** A key with
+`may_edit_categories` (the person ticks it when they make the key; `write`
+alone does not carry it) can add one, in a group named by id or by name:
+
+```bash
+curl -s "${auth[@]}" "${json[@]}" -X POST "$H/categories" -d '{
+  "name": "Pet food", "group_name": "Everyday"}'
+```
+
+A `group_name` that does not exist yet is made too (`made_group: true`). A
+name already taken is refused: read the manifest's `categories[]` first, and
+prefer an existing category to a near-duplicate of it. `POST
+$H/categories/{id}/delete` deletes one **nothing carries** — the one you just
+made by mistake, say; a category any row carries is refused (409, with how
+many) and stays, because archiving it is a person's. Each is one entry in
+History, with your key named, and one undo. Without the permission both
+answer `403`.
+
 ### 3. Work expenses read off a corporate portal
 
 You are reading the lines of an expense claim — date, merchant, amount,
@@ -585,8 +605,9 @@ fifty receipts is three calls, not fifty.
 
 Keys expire: 90 days by default, 365 at most, and the expiry does not slide.
 
-**No key can ever** delete anything (the one exception is the row a split
-replaces, and only with `may_commit` — see job 3), undo anything, unlink a transfer or a
+**No key can ever** delete anything (the two exceptions: the row a split
+replaces, only with `may_commit` — see job 3 — and a category nothing carries,
+only with `may_edit_categories` — see job 2), undo anything, unlink a transfer or a
 repayment, create or revoke a key, touch passwords, authenticators, devices or
 household membership, or reach the database browser. That is not a scope you
 were not given — those routes ask for a signed-in person and always will.

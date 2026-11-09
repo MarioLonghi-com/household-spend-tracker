@@ -546,6 +546,10 @@ msgstr ""
 msgid "The end of {open}"
 msgstr ""
 
+#: src/screens/Profile.tsx
+msgid "Categorising rows does not need this. It is for a program that should also change the category list itself; each change is in History, and Undo there takes it back."
+msgstr ""
+
 #. Label on the Admin screen
 #. Label on the household page
 #: src/screens/Admin.tsx
@@ -714,10 +718,6 @@ msgstr ""
 
 #: src/screens/SignIn.tsx
 msgid "I have my authenticator after all"
-msgstr ""
-
-#: src/screens/Profile.tsx
-msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 msgstr ""
 
 #. Tooltip on a folder path on Application management
@@ -1400,6 +1400,10 @@ msgstr ""
 
 #: src/screens/Import.tsx
 msgid "This file only. The payee’s rule is left as it is for future statements."
+msgstr ""
+
+#: src/screens/Profile.tsx
+msgid "Let it add categories, and delete one nothing uses"
 msgstr ""
 
 #. Column heading on the Admin screen: noun
@@ -3326,6 +3330,11 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.agent_key.may_not_edit_categories"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.agent_key.needs_label"
 msgstr ""
 
@@ -3338,6 +3347,11 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.agent_key.not_issuer"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.read_only_categories"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -3419,6 +3433,11 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.category.choose_default"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_by_id_or_name"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -4750,6 +4769,10 @@ msgstr ""
 
 #: src/screens/Payees.tsx
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
+msgstr ""
+
+#: src/screens/Profile.tsx
+msgid "No key can undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here. Nor can it delete anything, except a category nothing uses, and only when you allow it below."
 msgstr ""
 
 #. How a rule matches, inside the rule list: the bank's text starts with the pattern
@@ -10209,6 +10232,10 @@ msgstr ""
 
 #: src/screens/Register.tsx
 msgid "{app}, via its CSV export"
+msgstr ""
+
+#: src/screens/Profile.tsx
+msgid "may add and delete categories"
 msgstr ""
 
 #. Shown in a dropdown when the search finds nothing

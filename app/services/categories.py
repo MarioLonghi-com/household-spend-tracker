@@ -207,6 +207,40 @@ def create_category(
     return category
 
 
+def create_category_in_group(
+    session: Session,
+    household_id: str,
+    *,
+    name: str,
+    group_id: str | None = None,
+    group_name: str | None = None,
+) -> tuple[Category, CategoryGroup | None]:
+    """A new category in a group named by id, or by name -- made if need be.
+
+    For a caller that knows the group by what it is called rather than by id
+    (an agent reading the manifest's ``full_name``): ``group_name`` uses the
+    household's group of that name, matched without regard to case, and makes
+    one only when there is none. Exactly one of the two is given.
+
+    Returns the category, and the group when this call made it, so the caller
+    can say so. Both through :func:`create_group` and :func:`create_category`,
+    so the refusals are the screen's.
+    """
+    if (group_id is None) == (group_name is None):
+        raise ValidationError(
+            "name the group by group_id or by group_name, one of the two",
+            code="category.group_by_id_or_name",
+        )
+    made: CategoryGroup | None = None
+    if group_name is not None:
+        found = _group_named(session, household_id, group_name.strip())
+        if found is None:
+            made = found = create_group(session, household_id, group_name)
+        group_id = found.id
+    category = create_category(session, household_id, group_id=group_id, name=name)
+    return category, made
+
+
 def update_category(
     session: Session,
     category: Category,

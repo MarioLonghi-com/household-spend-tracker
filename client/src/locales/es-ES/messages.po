@@ -645,6 +645,11 @@ msgstr "Qué pasa"
 msgid "The end of {open}"
 msgstr "El final de {open}"
 
+#: src/screens/Profile.tsx
+#, fuzzy
+msgid "Categorising rows does not need this. It is for a program that should also change the category list itself; each change is in History, and Undo there takes it back."
+msgstr "Categorizar movimientos no lo necesita. Es para un programa que también deba cambiar la lista de categorías; cada cambio queda en el Historial, y Deshacer allí lo revierte."
+
 #. Label on the Admin screen
 #. Label on the household page
 #: src/screens/Admin.tsx
@@ -846,11 +851,6 @@ msgstr "Pidiendo tus planes a YNAB…"
 #, fuzzy
 msgid "I have my authenticator after all"
 msgstr "Al final sí tengo mi aplicación de autenticación"
-
-#: src/screens/Profile.tsx
-#, fuzzy
-msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
-msgstr "Ninguna clave puede eliminar nada, deshacer nada, cambiar quién está en un hogar, tocar contraseñas ni aplicaciones de autenticación, ni crear otra clave, elijas lo que elijas aquí."
 
 #. Tooltip on a folder path on Application management
 #: src/screens/ApplicationManagement.tsx
@@ -1662,6 +1662,11 @@ msgstr "Copiado"
 #, fuzzy
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr "Solo este archivo. La regla del beneficiario se queda como está para los próximos extractos."
+
+#: src/screens/Profile.tsx
+#, fuzzy
+msgid "Let it add categories, and delete one nothing uses"
+msgstr "Permitir que añada categorías y borre una que nada use"
 
 #. Column heading on the Admin screen: noun
 #. Column heading on the Admin screen: noun
@@ -3926,6 +3931,12 @@ msgstr "Una clave puede durar entre un día y {max_days} días"
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.agent_key.may_not_edit_categories"
+msgstr "Esa clave no puede añadir ni borrar categorías. Una persona puede hacerlo en la pantalla Categorías, o dar al programa una clave que lo permita"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.agent_key.needs_label"
 msgstr "Ponle un nombre a la clave, para saber para qué sirve"
 
@@ -3941,6 +3952,12 @@ msgstr "Esa clave no existe"
 #, fuzzy
 msgid "error.agent_key.not_issuer"
 msgstr "Solo quien emitió una clave puede revocarla"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.agent_key.read_only_categories"
+msgstr "A una clave de solo lectura no se le puede permitir cambiar categorías"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4038,6 +4055,12 @@ msgstr "{name} está archivada, así que no puede ser predeterminada"
 #, fuzzy
 msgid "error.category.choose_default"
 msgstr "Elige la categoría que se usará siempre"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.category.group_by_id_or_name"
+msgstr "Indica el grupo por group_id o por group_name, uno de los dos"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -5626,6 +5649,11 @@ msgstr "Registro"
 #, fuzzy
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
 msgstr "Solo merece la pena hacerlo antes para uno al que vas a escribirle una regla. Nombrar a alguien en un movimiento lo crea igualmente."
+
+#: src/screens/Profile.tsx
+#, fuzzy
+msgid "No key can undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here. Nor can it delete anything, except a category nothing uses, and only when you allow it below."
+msgstr "Ninguna clave puede deshacer nada, cambiar quién está en un hogar, tocar contraseñas o autenticadores, ni crear otra clave, elijas lo que elijas aquí. Tampoco puede borrar nada, salvo una categoría que nada use, y solo si lo permites abajo."
 
 #. How a rule matches, inside the rule list: the bank's text starts with the pattern
 #: src/screens/Rules.tsx
@@ -12084,6 +12112,11 @@ msgstr "Reglas de nombre de beneficiarios"
 #, fuzzy
 msgid "{app}, via its CSV export"
 msgstr "{app}, mediante su exportación CSV"
+
+#: src/screens/Profile.tsx
+#, fuzzy
+msgid "may add and delete categories"
+msgstr "puede añadir y borrar categorías"
 
 #. Shown in a dropdown when the search finds nothing
 #: src/components/GroupedPicker.tsx
