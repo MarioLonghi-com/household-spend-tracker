@@ -52,6 +52,29 @@ describe("opening a screen in a new tab", () => {
     expect(window.location.search).toBe("");
   });
 
+  it("opens Transactions on a row with a report figure's filters, and puts the address back (#401)", () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/?open=register&household=hh-2&txn=t-1&since=2026-08-01&until=2026-08-31&category=cat-1&backlog=0&currency=EUR",
+    );
+    const opened = openedAt();
+    expect(opened).toEqual({
+      screen: "register",
+      household: "hh-2",
+      register: {
+        open: "t-1",
+        range: { since: "2026-08-01", until: "2026-08-31" },
+        categories: ["cat-1"],
+        backlog: false,
+        currencies: ["EUR"],
+        accounts: undefined,
+      },
+    });
+    putTheAddressBack(opened);
+    expect(window.location.search).toBe("");
+  });
+
   it("ignores a screen it was not built to open", () => {
     window.history.replaceState(null, "", "/?open=settings&household=hh-2");
     const opened = openedAt();

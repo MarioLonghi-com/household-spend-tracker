@@ -844,3 +844,10 @@ input.no-category:disabled {
   display: inline-block; width: 10px; height: 10px; margin-right: 6px;
   border-radius: 2px; background: var(--part);
 }
+
+/* The row a report's bubble sent somebody to (#401): marked for as long as
+   the register is open, so it can be found again once the panel is shut. */
+tr.row-sent > td {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+tr.row-sent > td:first-child { box-shadow: inset 3px 0 0 var(--accent); }

@@ -7277,6 +7277,12 @@ msgstr "Um saldo acumulado precisa de uma conta, ordem por data com as mais rece
 msgid "{0, plural, one {It goes as one act, so the History screen puts it back in one undo.} other {They go as one act, so the History screen puts them all back in one undo.}}"
 msgstr "{0, plural, one {Ele sai como um único ato, então a tela Histórico o traz de volta com um só desfazer.} other {Eles saem como um único ato, então a tela Histórico traz todos de volta com um só desfazer.}}"
 
+#. Screen-reader name of the month map on the Income vs Expense report: drag or use the arrow keys to move
+#: src/screens/reports/ReportGrid.tsx
+#, fuzzy
+msgid "Months in view"
+msgstr "Meses visíveis"
+
 #. Button on the History screen
 #: src/screens/History.tsx
 #, fuzzy
@@ -8007,6 +8013,7 @@ msgstr "Desanexar este comprovante?"
 
 #. Column heading on the Categories screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column heading on the Import screen: noun, what a transaction was for. See GLOSSARY.md
+#. Column heading on the Income vs Expense report's transaction list: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
@@ -8021,6 +8028,7 @@ msgstr "Desanexar este comprovante?"
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
 msgid "Category"
@@ -8865,6 +8873,11 @@ msgstr "{0} ainda não compensadas"
 #, fuzzy
 msgid "The server reset {user}'s password and authenticator"
 msgstr "O servidor redefiniu a senha e o autenticador de {user}"
+
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Click a transaction to open it in Transactions, in a new tab."
+msgstr "Clique numa transação para abri-la em Transações, numa nova aba."
 
 #: src/screens/Admin.tsx
 #: src/screens/Household.tsx
@@ -11904,6 +11917,12 @@ msgstr "Entradas de dinheiro até {PAYMENT_PICKER_DAYS} dias antes ou depois de 
 msgid "Out of"
 msgstr "Saindo de"
 
+#. Screen-reader text after a date on the Income vs Expense report's transaction list
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid ", open in Transactions in a new tab"
+msgstr ", abrir em Transações numa nova aba"
+
 #. Column heading on the Admin screen
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -13309,6 +13328,12 @@ msgstr "{count, plural, one {{shown} transação} other {{shown} transações}}"
 msgid "Mark applied"
 msgstr "Marcar como aplicada"
 
+#. Screen-reader name of the right arrow on the Income vs Expense report's month map
+#: src/screens/reports/ReportGrid.tsx
+#, fuzzy
+msgid "Later months"
+msgstr "Meses seguintes"
+
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "Close without copying? The link cannot be shown again."
@@ -13499,6 +13524,12 @@ msgstr "via {via}"
 #, fuzzy
 msgid "{inviter} invited you to {PRODUCT} as a member."
 msgstr "{inviter} convidou você para o {PRODUCT} como membro."
+
+#. Screen-reader name of the left arrow on the Income vs Expense report's month map
+#: src/screens/reports/ReportGrid.tsx
+#, fuzzy
+msgid "Earlier months"
+msgstr "Meses anteriores"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -14459,9 +14490,13 @@ msgid "their authenticator and recovery codes are cleared"
 msgstr "o autenticador e os códigos de recuperação da pessoa são apagados"
 
 #. Label of a choice on the one-time import
+#. Screen-reader text on the Income vs Expense report's month map: the first and last month in view
+#. placeholder {0}: monthLabel(months[from])
 #. placeholder {0}: one.first_month ?? "…"
+#. placeholder {1}: monthLabel(months[to])
 #. placeholder {1}: one.last_month ?? "…"
 #: src/screens/OneTimeImport.tsx
+#: src/screens/reports/ReportGrid.tsx
 #, fuzzy
 msgid "{0} to {1}"
 msgstr "{0} a {1}"

@@ -36,6 +36,7 @@ import { REPORTS, Report, Reports, reportFor, reportScreen } from "./screens/Rep
 import type { ReportScreen } from "./screens/Reports";
 import { Register } from "./screens/Register";
 import type { RegisterPreset } from "./screens/Register";
+import { registerPresetFrom } from "./lib/registerLink";
 import { Profile } from "./screens/Profile";
 import { applyColours } from "./lib/theme";
 import { claimScreens, readSticky, writeSticky } from "./lib/sticky";
@@ -260,8 +261,11 @@ function returnTo(): string | null {
  * arrives in a query string. `application` is the owner's; the shell opens
  * the register instead for anybody else (`OWNER_ONLY_OPENS`). Read once, then
  * the address goes back to `/`.
+ *
+ * `register` is the one that carries more: a report's bubble opens a row in
+ * Transactions with the figure's filters (#401), read by `registerPresetFrom`.
  */
-const OPENS_IN_NEW_TAB = ["accounts", "history", "rules", "application"] as const;
+const OPENS_IN_NEW_TAB = ["register", "accounts", "history", "rules", "application"] as const;
 type OpensInNewTab = (typeof OPENS_IN_NEW_TAB)[number];
 
 /** Of those, the ones only an owner is shown -- the menu hides them too. */
@@ -280,7 +284,11 @@ export function firstScreen(opened: { screen: OpensInNewTab | null }, role: User
  * the address back the second call found `?open=` gone and answered "nothing"
  * (#110). `putTheAddressBack` does that half, from an effect.
  */
-export function openedAt(): { screen: OpensInNewTab | null; household: string } {
+export function openedAt(): {
+  screen: OpensInNewTab | null;
+  household: string;
+  register?: RegisterPreset;
+} {
   const query = new URLSearchParams(window.location.search);
   const wanted = query.get("open");
   const screen = OPENS_IN_NEW_TAB.find((one) => one === wanted) ?? null;
@@ -288,7 +296,12 @@ export function openedAt(): { screen: OpensInNewTab | null; household: string } 
   // into an API path (#197). The shell still checks it against the member's
   // households before using it; this is the fence at the door.
   const household = screen ? (query.get("household") ?? "") : "";
-  return { screen, household: /^[\w-]{1,64}$/.test(household) ? household : "" };
+  const register = screen === "register" ? registerPresetFrom(window.location.search) : null;
+  return {
+    screen,
+    household: /^[\w-]{1,64}$/.test(household) ? household : "",
+    ...(register ? { register } : {}),
+  };
 }
 
 /**
@@ -558,7 +571,9 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
   //: Work expenses view, and maybe one row's panel. Held here because the
   //: register is unmounted while a report is on screen, so it cannot be told
   //: afterwards; it reads this once as it mounts.
-  const [registerPreset, setRegisterPreset] = useState<RegisterPreset | null>(null);
+  const [registerPreset, setRegisterPreset] = useState<RegisterPreset | null>(
+    () => opened.register ?? null,
+  );
   const [householdId, setHouseholdId] = useState<string>(opened.household);
   const [navOpen, setNavOpen] = useState(false);
   //: The desktop menu folded down to its rail (#161). Per browser, like the
