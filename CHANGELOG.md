@@ -49,6 +49,10 @@ history this repository does not have.
   tick too and shows the "nothing ticked" notice, and Select all ticks
   it again so the filter reads *All categories*. The Income vs Expense
   report's *Uncategorised* tick follows the same buttons. (#371)
+- **The Import screen names each account with its bank.** *Into which
+  account* lists an account as `Current | Harbour Bank (EUR)` rather than
+  `Current (EUR)`, so two accounts with similar names at two banks can be
+  told apart; an account with no bank set reads as before. (#365)
 - **An update on rootless Podman goes on when the app is started by hand
   as it stops.** Podman answered that stop with "container state improper"
   and the update ended as *Not started: the app could not be stopped*. The
