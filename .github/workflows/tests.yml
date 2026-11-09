@@ -502,7 +502,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - run: pip install --require-hashes -r requirements-dev.txt
+      - run: python -m pip install --require-hashes -r requirements-dev.txt
       # The launcher's shellcheck test fails rather than skips in CI, and only
       # the Linux runner image carries shellcheck.
       - name: shellcheck

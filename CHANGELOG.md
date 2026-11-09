@@ -53,6 +53,10 @@ history this repository does not have.
   account* lists an account as `Current | Harbour Bank (EUR)` rather than
   `Current (EUR)`, so two accounts with similar names at two banks can be
   told apart; an account with no bank set reads as before. (#365)
+- **CI's Windows test leg installs its requirements again.** The pinned
+  `pip` in `requirements-dev.txt` cannot replace itself through the `pip`
+  launcher on Windows, so `pytest-desktop-os (windows-latest)` stopped at
+  its install step; it runs `python -m pip` now.
 
 ## 0.12.0 — 2026-10-15
 
