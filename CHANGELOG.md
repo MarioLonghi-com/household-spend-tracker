@@ -111,6 +111,11 @@ history this repository does not have.
   tested -- came out green. The verdict is now `scripts/ci_ok.py`: only
   `success` or `skipped`, and `changes` must have succeeded, since it decides
   every skip. A test keeps every job of the workflow in `ci-ok`'s `needs`.
+- **A push to `dev` no longer cancels the run on the one before.** It
+  queues: the run going finishes, and of those waiting only the newest tip
+  runs next. Three merges ten minutes apart each cancelled the macOS and
+  Windows suite on the previous tip at about its tenth minute, so no `dev`
+  commit got that tier's verdict. Pull requests still cancel.
 
 ## 0.14.1 — 2026-11-09
 

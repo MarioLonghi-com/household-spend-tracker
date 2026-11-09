@@ -115,3 +115,12 @@ def test_ci_ok_always_runs_and_hands_its_needs_to_the_script():
     assert verdict[0]["env"]["NEEDS"] == "${{ toJSON(needs) }}"
     # Nothing in the verdict may be decided by an inline deny-list again.
     assert not any("cancelled" in step.get("run", "") for step in job["steps"])
+
+
+def test_pushes_to_dev_queue_and_pull_requests_cancel():
+    """A newer push to `dev` must not cancel the deferred tier already running."""
+    concurrency = yaml.safe_load(WORKFLOW.read_text())["concurrency"]
+    assert "'dev'" in concurrency["group"]
+    assert concurrency["cancel-in-progress"] == (
+        "${{ !(github.event_name == 'push' && github.ref == 'refs/heads/dev') }}"
+    )

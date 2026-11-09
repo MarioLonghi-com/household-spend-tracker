@@ -84,12 +84,16 @@ permissions:
 # of its own (`run_id`) -- a shared group would still queue them and drop all
 # but the newest waiting one, `cancel-in-progress` or not.
 #
-# Pushes to `dev` are the exception (2026-11-09): they share one group, since
-# a newer `dev` tip makes the deferred tier on the older one worthless, and a
-# release is cut from the tip.
+# Pushes to `dev` share one group (2026-11-09), and queue rather than cancel
+# (#407): the run going finishes, and of those waiting only the newest tip
+# runs after it. Cancelling starved the deferred tier -- three merges ten
+# minutes apart each cancelled the macOS and Windows suite on the one before
+# at about its tenth minute, so no `dev` commit got a verdict and each showed
+# a red `ci-ok`. Queued, a burst of merges costs one extra run, not all of
+# them.
 concurrency:
   group: tests-${{ github.event.pull_request.number || (github.event_name == 'push' && github.ref == 'refs/heads/dev' && 'dev') || github.run_id }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/dev') }}
 
 env:
   PYTHON_VERSION: "3.12"
