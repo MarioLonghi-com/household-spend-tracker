@@ -744,6 +744,10 @@ class Run:
         once. The drill is created only after the check before step 5, so
         clicking once it exists reaches the poll's check and no other.
 
+        On rootless Podman the first click can overtake the stop itself, which
+        the engine then answers with a 500, `container state improper`: step 3
+        looks again and stops it once more (#344), so the update still goes on.
+
         Both clicks are made with the apply's owner paused -- and the second
         with the drill paused too, when it still runs -- so the person is
         always quicker than the updater, as the scenario needs: a person, not
