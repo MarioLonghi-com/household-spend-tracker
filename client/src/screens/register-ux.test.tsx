@@ -129,12 +129,17 @@ beforeEach(() => {
     // The badge's count beside Needs a category (#188) asks for one row;
     // it is not the register's request.
     if (path.includes("/transactions?") && !path.includes("limit=1")) {
-      asked.push(new URLSearchParams(path.split("?")[1]));
+      const params = new URLSearchParams(path.split("?")[1]);
+      asked.push(params);
+      // The currency toggle narrows on the server (#370), so this one does too.
+      const wanted = params.getAll("currency");
+      const kept = ROWS.filter((one) => wanted.length === 0 || wanted.includes(one.currency ?? "EUR"));
       return Promise.resolve({
-        transactions: ROWS,
-        total: ROWS.length,
+        transactions: kept,
+        total: kept.length,
         has_running_balance: false,
         capped: false,
+        hidden_by_currency: ROWS.length - kept.length,
       });
     }
     if (path.endsWith("/reports/currencies")) return Promise.resolve({ currencies: ["EUR", "GBP"] });
@@ -416,6 +421,8 @@ describe("the heading's select-all box", () => {
     fireEvent.click(
       within(screen.getByRole("group", { name: "Currencies shown" })).getByRole("button", { name: "GBP" }),
     );
+    await waitFor(() => expect(asked.at(-1)?.getAll("currency")).toEqual(["EUR"]));
+    await waitFor(() => expect(screen.queryByText("Newsagent")).toBeNull());
     fireEvent.click(all());
     // The three euro rows; the pound rows are not on screen to tick.
     expect(screen.getByText(/3 selected\./)).toBeTruthy();

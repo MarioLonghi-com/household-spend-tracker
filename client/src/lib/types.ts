@@ -347,6 +347,9 @@ export interface RegisterPage {
   /** Rows with no category under every other filter of the request, the
    *  category picker set aside: the count beside "Needs a category". */
   needs_category: number;
+  /** Rows every other filter matched that the currency toggle left out
+   *  (#370); zero when the request named no currency. */
+  hidden_by_currency?: number;
 }
 
 export interface Payee {
