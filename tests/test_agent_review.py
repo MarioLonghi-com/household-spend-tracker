@@ -213,6 +213,9 @@ def test_transfer_legs_and_work_expenses_say_what_they_are(client, world):
         {},
         {"uncategorised": "true"},
         {"search": "mercadona"},
+        # The search language reaches the agent's read too (#367).
+        {"search": "mercadona OR lawson"},
+        {"search": "-mercadona"},
         {"since": "2026-07-10", "until": "2026-08-09"},
         {"amount": "45.50"},
         {"amount": "1500"},

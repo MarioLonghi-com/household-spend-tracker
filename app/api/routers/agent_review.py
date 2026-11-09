@@ -27,7 +27,7 @@ from pydantic import BaseModel
 from ...errors import ValidationError
 from ...models import ClearedState, LinkSource, RegisterSource, ReimbursementState, ReimbursementView
 from ...schemas import IncomeExpenseOut, ManifestEndpoint, ReimbursementsOut
-from ...services import insights, review
+from ...services import insights, review, search_query
 from ...services import transactions as txn_service
 from ..deps import CurrentAgent
 from . import agent
@@ -498,7 +498,8 @@ ENDPOINTS: list[ManifestEndpoint] = [
             "person's register's own: account_id (repeatable), since, until, search, "
             "cleared, uncategorised, amount (unsigned decimal string, every currency), "
             "source (transfer|split|imported|manual), reimbursement (work|owed|paid|"
-            "off), category_id, payee_id. Each row carries its own currency. "
+            f"off), category_id, payee_id. {search_query.SYNTAX} "
+            "Each row carries its own currency. "
             "This is for reading, not arithmetic: for totals ask /summary, which adds "
             "exactly and per currency."
         ),
