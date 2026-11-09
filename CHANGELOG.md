@@ -122,11 +122,15 @@ that had a fix.
   2.14, sigstore 4.5.1 and the rest of the weekly groups; the dev tools uv
   0.13.6, filelock 4.2.6 and setuptools 84.2.1. Client and desktop: Lingui
   6.11, Babel 8.0.10, Vite 8.3, Vitest 5.0; the desktop shell Electron
-  44.10.1 with undici and fast-uri patched underneath. Every version is at
+  44.10.1 (45 below) with undici and fast-uri patched underneath. Every version is at
   least seven days old, the same cooldown Dependabot keeps. The ten
   Dependabot pull requests are replaced by this one: their lock files did
   not match `make lock`. (#373)
 - **The GitHub Actions move up too**, all still pinned to a commit.
+- **The desktop shell moves to Electron 45.2.1** (#384), and the tailnet
+  sidecar's Tailscale image to v1.104.4 (#383). Both came from Dependabot
+  after the round above. Its `@rolldown/plugin-babel` 0.3.0 bumps (#385,
+  #386) are not taken: Lingui 6.11's Vite plugin accepts only 0.1 and 0.2.
 
 ### Changed
 
