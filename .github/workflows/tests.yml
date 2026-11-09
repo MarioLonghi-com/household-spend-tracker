@@ -502,7 +502,9 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - run: pip install --require-hashes -r requirements-dev.txt
+      # `python -m pip`: the lock pins pip itself, and on Windows `pip.exe`
+      # refuses to replace itself ("To modify pip, please run ...").
+      - run: python -m pip install --require-hashes -r requirements-dev.txt
       # The launcher's shellcheck test fails rather than skips in CI, and only
       # the Linux runner image carries shellcheck.
       - name: shellcheck
