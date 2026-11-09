@@ -131,6 +131,11 @@ that had a fix.
   sidecar's Tailscale image to v1.104.4 (#383). Both came from Dependabot
   after the round above. Its `@rolldown/plugin-babel` 0.3.0 bumps (#385,
   #386) are not taken: Lingui 6.11's Vite plugin accepts only 0.1 and 0.2.
+- **The desktop build tools no longer carry a vulnerable minimatch**
+  (GHSA-g3hv-75wg-m249, Dependabot alert 245). electron-builder 26.18 still
+  asks for minimatch 9 and 10, so an npm override lifts just the copies in
+  the vulnerable range to 11.0.1; the 3.x and 5.x copies other tools need
+  stay. Build time only: nothing in the app or the installers runs it.
 
 ### Changed
 
