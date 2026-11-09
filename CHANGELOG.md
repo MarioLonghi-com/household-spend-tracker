@@ -41,6 +41,29 @@ history this repository does not have.
   for review stays a person's step. The signing secrets are held in a
   separate `app-store` environment that only release tags can reach. (#351)
 
+### Security
+
+- **Every dependency moved up, and every open Dependabot alert with a fix
+  is closed.** Python: Pillow 13.0.0, certifi 2026.10.23, pyasn1 0.6.5,
+  dnspython 2.9.1, FastAPI 0.162, Starlette 1.10, SQLAlchemy 2.1.6, Pydantic
+  2.14, sigstore 4.5.1 and the rest of the weekly groups; the dev tools uv
+  0.13.6, filelock 4.2.6 and setuptools 84.2.1. Client and desktop: Lingui
+  6.11, Babel 8.0.10, Vite 8.3, Vitest 5.0; the desktop shell Electron
+  44.10.1 with undici and fast-uri patched underneath. Every version is at
+  least seven days old, the same cooldown Dependabot keeps. The ten
+  Dependabot pull requests are replaced by this one: their lock files did
+  not match `make lock`. (#373)
+- **The GitHub Actions move up too**, all still pinned to a commit.
+
+### Changed
+
+- **Every workflow installs with `python -m pip`.** On Windows a bare
+  `pip install` refuses to replace pip itself, and the dev lock pins pip
+  (pip-audit needs it), so the Windows pytest leg failed whenever the
+  runner's pip and the pin differed.
+- **Dependabot also watches `deploy/tailnet/compose.yaml`**, so the pinned
+  Tailscale sidecar tag moves like everything else. (Part of #99)
+
 ### Fixed
 
 - **Select none in a category filter means none.** On the Register it

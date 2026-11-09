@@ -42,7 +42,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -74,7 +74,7 @@ jobs:
           # and used for the old code too: releases before the lock (0.7.1
           # and earlier) pin without hashes, and `--require-hashes` refuses
           # them. The old migrations and seed run on the newer libraries.
-          pip install --require-hashes -r requirements.txt
+          python -m pip install --require-hashes -r requirements.txt
           git checkout --detach "$BEFORE"
           python -m alembic upgrade head
           python -m scripts.seed_demo --reset --months 24 > /dev/null
@@ -98,7 +98,7 @@ jobs:
           DATABASE_URL: sqlite:///./bench-data/bench.sqlite3
         run: |
           git checkout --detach "$GITHUB_SHA"
-          pip install --require-hashes -r requirements.txt
+          python -m pip install --require-hashes -r requirements.txt
           start=$(date +%s.%N)
           python -m alembic upgrade head 2>&1 | tee upgrade.log
           end=$(date +%s.%N)
