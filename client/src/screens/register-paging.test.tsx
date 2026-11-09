@@ -15,7 +15,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 
 vi.mock("../lib/api", () => ({
   api: {
@@ -73,12 +73,34 @@ let asked: URLSearchParams[] = [];
 //: Rows another member has deleted since the register first asked.
 const gone = new Set<string>();
 
-/** The fake server's order: by date or by amount, largest first under desc. */
+//: The currencies the household holds. USD has no rows, so a toggle showing
+//: it alone hides every row there is.
+let held = ["EUR", "GBP"];
+
+/**
+ * The fake server's order: by date, or by amount the way `_ordering` does it
+ * -- currency first, then the figure, both turned together -- so under desc
+ * every GBP row comes before the first EUR one. And `currency` narrows, the
+ * way `transactions.filtered` does (#370).
+ */
 function order(params: URLSearchParams) {
-  const sorted = LEDGER.filter((one) => !gone.has(one.id));
-  if (params.get("sort") === "amount") sorted.sort((a, b) => b.amount - a.amount);
+  const wanted = params.getAll("currency");
+  const sorted = LEDGER.filter(
+    (one) => !gone.has(one.id) && (wanted.length === 0 || wanted.includes(one.currency)),
+  );
+  if (params.get("sort") === "amount")
+    sorted.sort((a, b) =>
+      a.currency === b.currency ? b.amount - a.amount : b.currency.localeCompare(a.currency),
+    );
   if (params.get("direction") === "asc") sorted.reverse();
   return sorted;
+}
+
+/** Rows every other filter matched that the currency filter left out. */
+function hiddenByCurrency(params: URLSearchParams) {
+  const wanted = params.getAll("currency");
+  if (wanted.length === 0) return 0;
+  return LEDGER.filter((one) => !gone.has(one.id) && !wanted.includes(one.currency)).length;
 }
 
 //: jsdom has no IntersectionObserver. This one never fires, so the rows move
@@ -98,6 +120,7 @@ beforeEach(() => {
   window.localStorage.clear();
   asked = [];
   gone.clear();
+  held = ["EUR", "GBP"];
   vi.mocked(api.get).mockReset();
   vi.mocked(api.get).mockImplementation(((path: string) => {
     if (path.includes("/transactions?")) {
@@ -113,10 +136,11 @@ beforeEach(() => {
         has_running_balance: false,
         capped: sorted.length > offset + transactions.length,
         needs_category: sorted.length,
+        hidden_by_currency: hiddenByCurrency(params),
       });
     }
     if (path.endsWith("/reports/currencies"))
-      return Promise.resolve({ currencies: ["EUR", "GBP"] });
+      return Promise.resolve({ currencies: held });
     if (path.endsWith("/accounts"))
       return Promise.resolve([
         { id: "acc-eur", name: "Current", currency: "EUR", type: "checking", country: null },
@@ -251,5 +275,65 @@ describe("the register's pages", () => {
     for (const index of [499, 500, 501, 549, 550]) {
       expect(screen.getByText(`row ${index}`)).toBeTruthy();
     }
+  });
+});
+
+describe("the currency toggle, under paging (#370)", () => {
+  const toggle = (code: string) =>
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Currencies shown" })).getByRole("button", {
+        name: code,
+      }),
+    );
+
+  it.each(["desc", "asc"])(
+    "asks the server for the one currency shown, so sorting by its amount %s finds its rows",
+    async (way) => {
+      mount();
+      await screen.findByText("row 0");
+      toggle("GBP");
+      await waitFor(() => expect(asked.at(-1)?.getAll("currency")).toEqual(["EUR"]));
+      fireEvent.click(screen.getByTitle("Sort by Out EUR"));
+      if (way === "asc") {
+        await waitFor(() => expect(asked.at(-1)?.get("direction")).toBe("desc"));
+        fireEvent.click(screen.getByTitle("Sort by Out EUR"));
+      }
+      await waitFor(() => expect(asked.at(-1)?.get("direction")).toBe(way));
+      const last = asked.at(-1)!;
+      expect(last.get("sort")).toBe("amount");
+      expect(last.getAll("currency")).toEqual(["EUR"]);
+      expect(last.get("offset")).toBe("0");
+      // The first page is EUR rows, in the server's order: the largest EUR
+      // figure first under desc, the smallest under asc.
+      const euros = LEDGER.filter((one) => one.currency === "EUR");
+      const figures = euros.map((one) => one.amount);
+      const first = order(last)[0];
+      expect(first.currency).toBe("EUR");
+      expect(first.amount).toBe(way === "desc" ? Math.max(...figures) : Math.min(...figures));
+      await waitFor(() =>
+        expect(document.querySelector(".register-card tbody tr")?.textContent).toContain(
+          `${first.memo}`,
+        ),
+      );
+      const drawn = [...document.querySelectorAll(".register-card tbody tr")].slice(0, 5);
+      const memos = order(last).slice(0, 5).map((one) => one.memo);
+      drawn.forEach((tr, at) => expect(tr.textContent).toContain(memos[at]));
+      expect(screen.queryByText(/currency the toggle is hiding/)).toBeNull();
+      // Every GBP row is left out by the server, and the table says how many.
+      expect(document.body.textContent).toContain(
+        `${(COUNT / 2).toLocaleString("en")} rows are not shown`,
+      );
+    },
+  );
+
+  it("still says so when the toggle hides every row there is", async () => {
+    held = ["EUR", "GBP", "USD"];
+    mount();
+    await screen.findByText("row 0");
+    toggle("EUR");
+    toggle("GBP");
+    await waitFor(() => expect(asked.at(-1)?.getAll("currency")).toEqual(["USD"]));
+    expect(await screen.findByText(/currency the toggle is hiding/)).toBeTruthy();
+    expect(document.body.textContent).toMatch(/1,?234 rows are waiting/);
   });
 });

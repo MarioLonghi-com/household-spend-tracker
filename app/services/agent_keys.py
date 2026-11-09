@@ -67,6 +67,7 @@ def issue(
     agent_name: str | None = None,
     scope: AgentScope | str = AgentScope.read,
     may_commit: bool = False,
+    may_edit_categories: bool = False,
     days: int = DEFAULT_DAYS,
 ) -> tuple[AgentKey, str]:
     """Mint a key. Returns the row and the token, which is shown exactly once.
@@ -104,6 +105,12 @@ def issue(
         # checkbox. Refused here rather than ignored, because ignoring it would
         # store a flag that reads as true and behaves as false.
         raise ValidationError("a read-only key has nothing to commit", code="agent_key.read_only_commit")
+    if may_edit_categories and not chosen.may_write:
+        # The same contradiction: changing the category tree is a write.
+        raise ValidationError(
+            "a read-only key cannot be allowed to change categories",
+            code="agent_key.read_only_categories",
+        )
 
     value, digest = tokens.issue()
     # One reading of the clock for both columns, like `sessions.issue`. Letting
@@ -120,6 +127,7 @@ def issue(
         household_id=household.id,
         scope=chosen,
         may_commit=may_commit,
+        may_edit_categories=may_edit_categories,
         created_at=now,
         expires_at=now + timedelta(days=days),
     )

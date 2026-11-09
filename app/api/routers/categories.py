@@ -64,6 +64,7 @@ def list_categories(
                 id=group.id,
                 name=group.name,
                 sort_order=group.sort_order,
+                role=group.role,
                 categories=[
                     _category_out(one, counts)
                     for one in group.categories
@@ -109,7 +110,7 @@ def create_group(
     with batch(session, kind=BatchKind.admin, actor_id=user.id, household_id=household.id):
         group = category_service.create_group(session, household.id, body.name)
     return CategoryGroupOut(
-        id=group.id, name=group.name, sort_order=group.sort_order, categories=[]
+        id=group.id, name=group.name, sort_order=group.sort_order, role=group.role, categories=[]
     )
 
 
@@ -117,16 +118,26 @@ def create_group(
 def rename_group(
     group_id: str, body: CategoryGroupUpdate, session: SessionDep, user: CurrentUser
 ) -> CategoryGroupOut:
+    """Rename a group, or move the Income role to it (#372), or both.
+
+    A field left out of the body is left alone, so `role` sent as null --
+    "this is not the Income group any more" -- is told apart from `role` not
+    sent at all.
+    """
     group = load_for(session, user, CategoryGroup, group_id)
     counts = _usage_counts(session, group.household_id)
     with batch(
         session, kind=BatchKind.admin, actor_id=user.id, household_id=group.household_id
     ):
-        category_service.rename_group(session, group, body.name)
+        if body.name is not None:
+            category_service.rename_group(session, group, body.name)
+        if "role" in body.model_fields_set:
+            category_service.set_group_role(session, group, body.role)
     return CategoryGroupOut(
         id=group.id,
         name=group.name,
         sort_order=group.sort_order,
+        role=group.role,
         categories=[_category_out(one, counts) for one in group.categories],
     )
 
@@ -169,6 +180,8 @@ def update_category(
             archived=body.archived,
             sort_order=body.sort_order,
         )
+        if "role" in body.model_fields_set:
+            category_service.set_category_role(session, category, body.role)
     return _category_out(category, _usage_counts(session, category.household_id))
 
 

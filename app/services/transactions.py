@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from datetime import date as Date
 from decimal import Decimal
 
-from sqlalchemy import and_, false, or_, select
+from sqlalchemy import and_, false, func, or_, select
 from sqlalchemy.orm import Session, aliased
 
 from ..errors import Conflict, CurrencyMismatch, NotFound, ValidationError
@@ -34,6 +34,7 @@ from ..models import (
 from ..money import format_amount, magnitude_span, minor_factor
 from . import categories as category_service
 from . import payees as payee_service
+from . import search_query
 
 #: Distinguishes "leave this alone" from "set this to nothing". One object,
 #: defined once -- the previous build defined a second one in its router, so
@@ -1011,6 +1012,7 @@ def filtered(
     payee_id: str | None = None,
     category_ids: list[str] | None = None,
     categorised: bool = False,
+    currencies: list[str] | None = None,
 ):
     """A ``select(Transaction)`` narrowed by the household's filter vocabulary.
 
@@ -1039,6 +1041,11 @@ def filtered(
     is how a mis-categorisation is checked -- and they live here rather than
     there so the register can take them up without a second meaning.
 
+    ``search`` is a small query language, not one substring (#367): words
+    each must match, ``OR`` or ``|`` between two terms is either, quotes keep
+    a phrase, a leading ``-`` excludes. ``search_query`` reads it, and the
+    agent's reads take the same meaning because they call this.
+
     ``category_ids`` and ``categorised`` are the register's category picker
     (#188), and together with ``uncategorised`` they are **one** filter whose
     parts add up rather than narrow: "Needs a category" plus Groceries is the
@@ -1048,12 +1055,32 @@ def filtered(
     without listing every id in a URL. The singular ``category_id`` stays an
     *and*, because it is the agent's "this category, within whatever else I
     asked" and changing that would be changing the agent's answers.
+
+    ``currencies`` keeps the rows whose *account* is held in one of these
+    codes: the register's currency toggle (#370). It used to be applied in
+    the client to the rows already in hand, after paging -- so under the
+    amount sort, which is currency first, a first page of 500 euro rows held
+    no pound at all when only pounds were shown, and the table emptied. Here
+    the page, `total` and the counts are about the rows the toggle shows.
+    Like ``account_ids``, an empty list narrows nothing; a code nobody holds
+    matches no row.
     """
     stmt = select(Transaction).where(Transaction.household_id == household_id)
     if account_id:
         stmt = stmt.where(Transaction.account_id == account_id)
     if account_ids:
         stmt = stmt.where(Transaction.account_id.in_(account_ids))
+    if currencies:
+        # An alias, so the amount sort's join onto `Account` -- added to this
+        # statement later -- cannot correlate the subquery away.
+        held = aliased(Account)
+        stmt = stmt.where(
+            Transaction.account_id.in_(
+                select(held.id).where(
+                    held.household_id == household_id, held.currency.in_(currencies)
+                )
+            )
+        )
     if since:
         stmt = stmt.where(Transaction.date >= since)
     if until:
@@ -1111,17 +1138,36 @@ def filtered(
             if amount
             else false()
         )
-    if search:
-        # `autoescape`: what was typed is text, not a pattern. Without it "%"
-        # and "_" matched every row, and "100%" could not find "100% cotton"
-        # as itself (issue #239).
-        term = search.strip()
-        payee_ids = select(Payee.id).where(
-            Payee.household_id == household_id, Payee.name.icontains(term, autoescape=True)
-        )
+    groups = search_query.parse(search)
+    if groups:
+        # Words AND, `OR` / `|` within a group, quotes keep a phrase, `-`
+        # excludes (#367); the language is in `search_query`. Every group
+        # must match, and a group matches when any of its terms does.
         stmt = stmt.where(
-            Transaction.memo.icontains(term, autoescape=True)
-            | Transaction.import_payee_original.icontains(term, autoescape=True)
-            | Transaction.payee_id.in_(payee_ids)
+            and_(*(or_(*(_search_term(household_id, term) for term in group)) for group in groups))
         )
     return stmt
+
+
+def _search_term(household_id: str, term: search_query.Term):
+    """One term of the search box: the row mentions it, or -- excluded -- does not.
+
+    "Mentions" is what one search always was: the memo, the bank's own payee
+    text or the payee's name holds the text. `autoescape`: what was typed is
+    text, not a pattern. Without it "%" and "_" matched every row, and "100%"
+    could not find "100% cotton" as itself (issue #239).
+
+    Every column is coalesced, so the condition is true or false and never
+    NULL: an empty memo does not mention "decaf", and without the coalesce
+    `-decaf` would have dropped every row with no memo rather than kept it.
+    """
+    text = term.text.strip() or term.text
+    payee_ids = select(Payee.id).where(
+        Payee.household_id == household_id, Payee.name.icontains(text, autoescape=True)
+    )
+    mentions = or_(
+        func.coalesce(Transaction.memo, "").icontains(text, autoescape=True),
+        func.coalesce(Transaction.import_payee_original, "").icontains(text, autoescape=True),
+        func.coalesce(Transaction.payee_id, "").in_(payee_ids),
+    )
+    return ~mentions if term.excluded else mentions

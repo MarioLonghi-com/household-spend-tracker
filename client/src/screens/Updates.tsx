@@ -392,6 +392,7 @@ export function Updates({
       {it.outcome && (
         <OutcomeBlock
           outcome={it.outcome}
+          repository={repository}
           running={it.running}
           heartbeat={beat}
           lastPrepared={lastPrepared}
@@ -1385,8 +1386,32 @@ export function whereItFailed(step: string | null | undefined): string {
   }
 }
 
+/** The record's code for a refusal for want of disk (#330). */
+const DISK_SHORT = "disk_short";
+
+/** Where TROUBLESHOOTING says how to free disk for an update, for a refusal with code `disk_short` (#330). */
+function FreeingDisk({ outcome, repository }: { outcome: Outcome; repository?: string }) {
+  if (outcome.code !== DISK_SHORT || !repository) return null;
+  return (
+    <>
+      {" "}
+      <a
+        href={`${repository}/blob/main/deploy/TROUBLESHOOTING.md#freeing-disk-for-an-update`}
+        target="_blank"
+        rel="noreferrer noopener"
+        data-help="freeing-disk"
+      >
+        <Trans comment="Updates section: link after a refusal for want of disk, to the guide's section of that name">
+          Freeing disk for an update
+        </Trans>
+      </a>
+    </>
+  );
+}
+
 export function OutcomeBlock({
   outcome,
+  repository,
   running,
   heartbeat,
   lastPrepared,
@@ -1394,6 +1419,8 @@ export function OutcomeBlock({
   onChanged,
 }: {
   outcome: Outcome;
+  /** The repository's address, for the guide a refusal links to. */
+  repository?: string;
   running: string;
   heartbeat: Heartbeat | null;
   lastPrepared: string | null;
@@ -1516,6 +1543,7 @@ export function OutcomeBlock({
         body = (
           <p style={{ margin: 0 }} data-outcome="not_started">
             <Trans>The update did not start: {said} Nothing was changed.</Trans>
+            <FreeingDisk outcome={outcome} repository={repository} />
           </p>
         );
     }
@@ -1523,7 +1551,8 @@ export function OutcomeBlock({
     tone = "banner warn";
     body = (
       <p style={{ margin: 0 }} data-outcome="prepare_failed">
-        <Trans>Preparing the update failed: {said} Nothing was changed.</Trans>{" "}
+        <Trans>Preparing the update failed: {said} Nothing was changed.</Trans>
+        <FreeingDisk outcome={outcome} repository={repository} />{" "}
         {lastPrepared ? (
           <button onClick={() => onPrepare(lastPrepared)}>
             {t({ message: "Try again", comment: "Button: prepare the same release again" })}

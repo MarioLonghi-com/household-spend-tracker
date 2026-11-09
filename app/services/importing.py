@@ -44,6 +44,7 @@ from ..models import (
     BatchStatus,
     Category,
     CategoryGroup,
+    CategoryGroupRole,
     ClearedState,
     ImportLine,
     ImportOutcome,
@@ -1502,7 +1503,14 @@ def _commit(
             wanted = (hint["name"], hint["group"])
             if wanted not in ensured:
                 ensured[wanted] = category_service.ensure(
-                    session, account.household_id, hint["name"], group_name=hint["group"]
+                    session,
+                    account.household_id,
+                    hint["name"],
+                    group_name=hint["group"],
+                    # "Income" here is the importer's own fixed word, not the
+                    # household's: interest goes to whichever group carries
+                    # the role, whatever the household calls it (#372).
+                    group_role=CategoryGroupRole.income if hint["group"] == "Income" else None,
                 )
             category = ensured[wanted]
 

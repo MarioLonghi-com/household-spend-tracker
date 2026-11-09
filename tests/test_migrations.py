@@ -299,3 +299,67 @@ def test_upgrade_head_on_a_fresh_install_makes_the_ledgers_folder(tmp_path):
     assert stamped == chain()[-1].revision
     if os.name != "nt":
         assert data.stat().st_mode & 0o777 == 0o700
+
+
+# --------------------------------------------------------------------------- #
+# a7e3c1d95b20: the Income group and the Reimbursement category (#372)
+# --------------------------------------------------------------------------- #
+
+#: The revision before category roles.
+BEFORE_ROLES = "c4d9e2a7b318"
+
+
+def test_the_roles_backfill_marks_one_of_each_per_household_and_no_guesses(tmp_path, monkeypatch):
+    """One household with two candidates of each, one that renamed its group.
+
+    The exact seeded word wins over a case variant, the Reimbursement category
+    inside the marked group wins over one elsewhere, and a household whose
+    group is called something else is left for a person to mark.
+    """
+    import sqlite3
+
+    db = tmp_path / "roles.sqlite3"
+    url = f"sqlite:///{db}"
+    monkeypatch.setenv("DATABASE_URL", url)
+    cfg = _config(url)
+    command.upgrade(cfg, BEFORE_ROLES)
+
+    groups = [
+        ("g1", "h1", "income"),
+        ("g2", "h1", "Income"),
+        ("g3", "h1", "Travel"),
+        ("g4", "h2", "Ingresos"),
+    ]
+    categories = [
+        ("c1", "h1", "g3", "Reimbursements"),
+        ("c2", "h1", "g2", "reimbursement"),
+        ("c3", "h1", "g2", "Salary"),
+        ("c4", "h2", "g4", "Reimbursement"),
+    ]
+    with sqlite3.connect(db) as conn:
+        conn.executemany(
+            "INSERT INTO category_groups (id, household_id, name, sort_order, created_at,"
+            " updated_at) VALUES (?, ?, ?, 0, datetime('now'), datetime('now'))",
+            groups,
+        )
+        conn.executemany(
+            "INSERT INTO categories (id, household_id, group_id, name, sort_order, archived,"
+            " created_at, updated_at) VALUES (?, ?, ?, ?, 0, 0, datetime('now'), datetime('now'))",
+            categories,
+        )
+
+    command.upgrade(cfg, "head")
+
+    with sqlite3.connect(db) as conn:
+        group_roles = dict(conn.execute("SELECT id, role FROM category_groups").fetchall())
+        category_roles = dict(conn.execute("SELECT id, role FROM categories").fetchall())
+    assert group_roles == {"g1": None, "g2": "income", "g3": None, "g4": None}
+    # h2's group was renamed, so it is unmarked -- but its category is still
+    # called Reimbursement, and that is what the name can prove.
+    assert category_roles == {"c1": None, "c2": "reimbursement", "c3": None, "c4": "reimbursement"}
+
+    command.downgrade(cfg, BEFORE_ROLES)
+    with sqlite3.connect(db) as conn:
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(category_groups)")}
+        assert "role" not in columns
+        assert conn.execute("SELECT count(*) FROM categories").fetchone() == (4,)

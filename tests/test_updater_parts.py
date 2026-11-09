@@ -154,10 +154,101 @@ def test_the_disk_floor_counts_unpacked_images_twice_the_database_and_half_a_gig
         prepare.floor_problem(measured, engine="docker-engine", new_image_bytes=400 * MIB, memory_needed=0)
         is None
     )
+    # 500 -> 1500 + 200 + 512 = 2212 MiB against 2000: 212 MiB short.
     short = prepare.floor_problem(
         measured, engine="docker-engine", new_image_bytes=500 * MIB, memory_needed=0
     )
-    assert short.startswith("Needs about 2.2 GB free, there is 2.0 GB.")
+    assert short.code == "disk_short"
+    assert short.sentence == (
+        "Needs about 2.17 GB free, there is 1.95 GB: free at least 212 MB more. "
+        "That is 1.46 GB for the new images, 0.20 GB for two copies of the database and 0.50 GB to spare. "
+        "Free space on the disk that holds the containers."
+    )
+
+
+def test_a_shortfall_under_the_rounding_step_never_reads_as_two_equal_figures():
+    """#330: 0.9 GB needed and 0.9 GB there. Rounded alike, both figures were
+    the same; the need is rounded up and the free space down, and the
+    megabytes to free are said."""
+    # 100 compressed -> 300 + 200 + 512 = 1012 MiB needed; half a MiB short.
+    measured = {"free": 1012 * MIB - MIB // 2, "database": 100 * MIB}
+    short = prepare.floor_problem(measured, engine="docker-engine", new_image_bytes=100 * MIB, memory_needed=0)
+    assert short.sentence.startswith("Needs about 0.99 GB free, there is 0.98 GB: free at least 1 MB more.")
+    # Rounded to one figure as before, both read 1.0 GB.
+    assert f"{1012 * MIB / 1024**3:.1f}" == f"{(1012 * MIB - MIB // 2) / 1024**3:.1f}"
+    # At preflight there is no image to pull, and the sentence leaves it out.
+    measured = {"free": 700 * MIB, "database": 100 * MIB}
+    short = prepare.floor_problem(measured, engine="podman-machine", new_image_bytes=0, memory_needed=0)
+    assert short.sentence == (
+        "Needs about 0.70 GB free, there is 0.68 GB: free at least 12 MB more. "
+        "That is 0.20 GB for two copies of the database and 0.50 GB to spare. "
+        "Give the Podman machine a larger disk."
+    )
+
+
+def _backups(*stamps: str, each: int = 50 * MIB) -> dict:
+    return {stamp: each for stamp in stamps}
+
+
+UPDATE_STAMPS = [f"20261001-00000{i}" for i in range(7)]
+
+
+def test_delete_older_update_backups_is_offered_only_when_more_than_five_are_on_the_disk():
+    base = {"free": 100 * MIB, "database": 10 * MIB}
+    names = set(UPDATE_STAMPS)
+    # Five update backups, and two folders the owner made by hand: nothing deletable.
+    five = {**base, "backups": {**_backups(*UPDATE_STAMPS[2:]), **_backups("20260901-000000", "20260902-000000")}}
+    short = prepare.floor_problem(
+        five, engine="docker-desktop", new_image_bytes=0, memory_needed=0, update_backups=names
+    )
+    assert "Delete" not in short.sentence and "update backup" not in short.sentence
+    assert short.sentence.endswith("Raise Docker Desktop's disk limit in Settings → Resources.")
+    # Seven on the disk: the two oldest are what Delete may remove, and what they hold is said.
+    seven = {**base, "backups": {**_backups(*UPDATE_STAMPS[:2], each=80 * MIB), **_backups(*UPDATE_STAMPS[2:])}}
+    short = prepare.floor_problem(
+        seven, engine="docker-desktop", new_image_bytes=0, memory_needed=0, update_backups=names
+    )
+    assert short.sentence.endswith(
+        "Delete the 2 update backups older than the newest 5 under Database, which frees about 0.16 GB, "
+        "or raise Docker Desktop's disk limit in Settings → Resources."
+    )
+    assert prepare.deletable_backups(seven, names) == {UPDATE_STAMPS[1]: 80 * MIB, UPDATE_STAMPS[0]: 80 * MIB}
+    # Six: one, said in the singular. Seven named by the history, but only six on the disk.
+    six = {**base, "backups": _backups(*UPDATE_STAMPS[1:])}
+    short = prepare.floor_problem(
+        six, engine="docker-engine", new_image_bytes=0, memory_needed=0, update_backups=names
+    )
+    assert "Delete the update backup older than the newest 5 under Database, which frees about 0.05 GB" in (
+        short.sentence
+    )
+    # A listing the one-off could not make offers nothing.
+    assert prepare.deletable_backups({**base, "backups": None}, names) == {}
+
+
+def test_the_measure_script_lists_the_backup_folders_on_the_disk(tmp_path):
+    """The one-off's script, run here with its two paths moved into `tmp_path`."""
+    data = tmp_path / "data"
+    (data / "backups" / "20261001-000000").mkdir(parents=True)
+    (data / "backups" / "20261001-000000" / "spendtracker.sqlite3").write_bytes(b"x" * 3000)
+    (data / "backups" / "20261001-000000" / "manifest.json").write_bytes(b"{}")
+    (data / "backups" / "20261002-000000").mkdir()
+    (data / "backups" / "20261002-000000" / "secret.key").write_bytes(b"k" * 32)
+    (data / "backups" / "not-a-stamp").mkdir()
+    (data / "backups" / "spendtracker-20261003.sqlite3").write_bytes(b"y" * 10)
+    os.symlink(data / "backups" / "20261001-000000", data / "backups" / "20261004-000000")
+    (data / "spendtracker.sqlite3").write_bytes(b"z" * 4096)
+    meminfo = tmp_path / "meminfo"
+    meminfo.write_text("MemTotal: 2048 kB\nMemAvailable: 1024 kB\n")
+    script = shapes.MEASURE_SCRIPT.replace("/var/lib/spend-tracker", str(data)).replace(
+        "/proc/meminfo", str(meminfo)
+    )
+    import subprocess
+    import sys
+
+    out = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, check=True)
+    doc = json.loads(out.stdout.strip().splitlines()[-1])
+    assert doc["backups"] == {"20261001-000000": 3002, "20261002-000000": 32}
+    assert doc["database"] == 4096 and doc["mem_available"] == 1024 * 1024 and doc["free"] > 0
 
 
 def test_with_no_mem_limit_the_app_counts_as_768_mib():

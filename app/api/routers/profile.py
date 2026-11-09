@@ -227,6 +227,7 @@ def _out(key: AgentKey) -> AgentKeyOut:
         household_id=key.household_id,
         scopes=key.scope.granted,
         may_commit=key.may_commit,
+        may_edit_categories=key.may_edit_categories,
         created_at=key.created_at,
         expires_at=key.expires_at,
         last_used_at=key.last_used_at,
@@ -285,6 +286,7 @@ def issue_key(
             agent_name=body.agent_name,
             scope=body.scope,
             may_commit=body.may_commit,
+            may_edit_categories=body.may_edit_categories,
             days=body.days,
         )
     return AgentKeyIssued(key=_out(key), token=token)

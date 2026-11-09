@@ -24,6 +24,8 @@ from ..models import (
     Categorisation,
     Category,
     CategoryGroup,
+    CategoryGroupRole,
+    CategoryRole,
     Payee,
     SystemPayee,
     Transaction,
@@ -74,6 +76,9 @@ def seed_defaults(
             household_id=household_id,
             name=seed_words.word(group_id, locale),
             sort_order=group_order,
+            # Marked rather than recognised later by its name (#372): the name
+            # is in the household's language and theirs to change.
+            role=CategoryGroupRole.income if group_id == seed_words.INCOME_GROUP else None,
         )
         session.add(group)
         session.flush()
@@ -207,6 +212,40 @@ def create_category(
     return category
 
 
+def create_category_in_group(
+    session: Session,
+    household_id: str,
+    *,
+    name: str,
+    group_id: str | None = None,
+    group_name: str | None = None,
+) -> tuple[Category, CategoryGroup | None]:
+    """A new category in a group named by id, or by name -- made if need be.
+
+    For a caller that knows the group by what it is called rather than by id
+    (an agent reading the manifest's ``full_name``): ``group_name`` uses the
+    household's group of that name, matched without regard to case, and makes
+    one only when there is none. Exactly one of the two is given.
+
+    Returns the category, and the group when this call made it, so the caller
+    can say so. Both through :func:`create_group` and :func:`create_category`,
+    so the refusals are the screen's.
+    """
+    if (group_id is None) == (group_name is None):
+        raise ValidationError(
+            "name the group by group_id or by group_name, one of the two",
+            code="category.group_by_id_or_name",
+        )
+    made: CategoryGroup | None = None
+    if group_name is not None:
+        found = _group_named(session, household_id, group_name.strip())
+        if found is None:
+            made = found = create_group(session, household_id, group_name)
+        group_id = found.id
+    category = create_category(session, household_id, group_id=group_id, name=name)
+    return category, made
+
+
 def update_category(
     session: Session,
     category: Category,
@@ -260,6 +299,47 @@ def rename_group(session: Session, group: CategoryGroup, name: str) -> CategoryG
         )
     group.name = clean
     return group
+
+
+def set_group_role(
+    session: Session, group: CategoryGroup, role: CategoryGroupRole | None
+) -> CategoryGroup:
+    """Give ``group`` the role, taking it from whichever group had it (#372).
+
+    A move rather than a second marker: Income vs Expense reads the group
+    carrying ``income`` as the income side, and one household has one. The
+    group that loses it is an ordinary logged update in the caller's batch, so
+    undo gives it back. ``None`` clears it, and the report then says the
+    household has no Income group.
+    """
+    if role is not None:
+        for other in session.execute(
+            select(CategoryGroup).where(
+                CategoryGroup.household_id == group.household_id,
+                CategoryGroup.role == role,
+                CategoryGroup.id != group.id,
+            )
+        ).scalars():
+            other.role = None
+    group.role = role
+    return group
+
+
+def set_category_role(
+    session: Session, category: Category, role: CategoryRole | None
+) -> Category:
+    """Give ``category`` the role, taking it from whichever category had it (#372)."""
+    if role is not None:
+        for other in session.execute(
+            select(Category).where(
+                Category.household_id == category.household_id,
+                Category.role == role,
+                Category.id != category.id,
+            )
+        ).scalars():
+            other.role = None
+    category.role = role
+    return category
 
 
 def usage(session: Session, category_id: str) -> int:
@@ -347,20 +427,43 @@ def _category_named(session: Session, household_id: str, name: str) -> Category 
     ).scalar_one_or_none()
 
 
-def ensure(session: Session, household_id: str, name: str, *, group_name: str) -> Category:
+def ensure(
+    session: Session,
+    household_id: str,
+    name: str,
+    *,
+    group_name: str,
+    group_role: CategoryGroupRole | None = None,
+) -> Category:
     """The household's category by this name, made (and its group) if it has none.
 
     For categories the importer knows it needs -- *Interest income*, *Bank
     fees*, *Investments* -- rather than ones a person invented. Matched by name
     without regard to case, so a household that already made "Bank Fees" keeps
     using its own.
+
+    ``group_role`` puts a new category in the group carrying that role, under
+    whatever name the household gave it (#372), and only failing that in the
+    group called ``group_name``. A group made here because neither exists is
+    given the role, so interest is income on the report the day it arrives.
     """
     found = _category_named(session, household_id, name)
     if found is not None:
         return found
-    group = _group_named(session, household_id, group_name)
+    group = None
+    if group_role is not None:
+        group = session.execute(
+            select(CategoryGroup)
+            .where(CategoryGroup.household_id == household_id, CategoryGroup.role == group_role)
+            .order_by(CategoryGroup.sort_order, CategoryGroup.name)
+            .limit(1)
+        ).scalar_one_or_none()
     if group is None:
-        group = CategoryGroup(household_id=household_id, name=group_name, sort_order=100)
+        group = _group_named(session, household_id, group_name)
+    if group is None:
+        group = CategoryGroup(
+            household_id=household_id, name=group_name, sort_order=100, role=group_role
+        )
         session.add(group)
         session.flush()
     category = Category(household_id=household_id, group_id=group.id, name=name, sort_order=100)

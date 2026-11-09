@@ -28,6 +28,8 @@ from .models.enums import (
     BatchKind,
     BatchStatus,
     Categorisation,
+    CategoryGroupRole,
+    CategoryRole,
     ChangeOp,
     ClearedState,
     IdentifierKind,
@@ -818,6 +820,9 @@ class RegisterPage(BaseModel):
     #: category picker set aside -- for the count beside "Needs a category".
     #: Carried here so one register load is one request (#101).
     needs_category: int = 0
+    #: Rows every other filter matched that the currency toggle left out
+    #: (#370): zero when no `currency` was asked.
+    hidden_by_currency: int = 0
 
 
 # --------------------------------------------------------------------------- #
@@ -2048,6 +2053,9 @@ class CategoryOut(ORMModel):
     full_name: str
     sort_order: int
     archived: bool
+    #: `reimbursement` on the category whose rows Income vs Expense shows in
+    #: its work-reimbursements block (#372); null on every other.
+    role: CategoryRole | None = None
     #: How many transactions carry it. What makes "delete" and "archive"
     #: different choices rather than two words for the same button.
     used_by: int = 0
@@ -2057,6 +2065,9 @@ class CategoryGroupOut(ORMModel):
     id: str
     name: str
     sort_order: int
+    #: `income` on the group whose rows are income on Income vs Expense
+    #: (#372); null on every other.
+    role: CategoryGroupRole | None = None
     categories: list[CategoryOut] = []
 
 
@@ -2065,7 +2076,14 @@ class CategoryGroupCreate(BaseModel):
 
 
 class CategoryGroupUpdate(BaseModel):
-    name: str = Field(min_length=1, max_length=120)
+    """A rename, a role, or both. A field left out is left as it is.
+
+    `role` sent as null clears it; sent as `income` it moves it here from
+    whichever group had it (#372).
+    """
+
+    name: str | None = Field(default=None, min_length=1, max_length=120)
+    role: CategoryGroupRole | None = None
 
 
 class CategoryCreate(BaseModel):
@@ -2078,6 +2096,9 @@ class CategoryUpdate(BaseModel):
     group_id: str | None = None
     archived: bool | None = None
     sort_order: int | None = Field(default=None, ge=0, le=10_000)
+    #: Left out, unchanged; null clears it; `reimbursement` moves it here from
+    #: whichever category had it (#372).
+    role: CategoryRole | None = None
 
 
 class SeedCategories(BaseModel):
@@ -2264,6 +2285,8 @@ class ManifestKey(BaseModel):
     #: implication is ours to apply rather than the agent's to remember.
     scopes: list[str]
     may_commit: bool
+    #: Whether this key may add categories and delete an unused one (#366).
+    may_edit_categories: bool = False
     expires_at: datetime
 
 
@@ -2305,6 +2328,12 @@ class ManifestCategory(BaseModel):
     #: "Food: Groceries" -- the form a model should both read and write.
     full_name: str
     archived: bool
+    #: `reimbursement` on the category whose rows are money work paid back,
+    #: set apart on Income vs Expense (#372); null otherwise.
+    role: CategoryRole | None = None
+    #: `income` when the category's group is the income side of Income vs
+    #: Expense (#372); null otherwise, which makes it an expense line.
+    group_role: CategoryGroupRole | None = None
 
 
 class ManifestAuth(BaseModel):
@@ -2461,6 +2490,7 @@ class AgentKeyOut(ORMModel):
     #: The list, computed from the one stored value. `write` implies `read`.
     scopes: list[str]
     may_commit: bool
+    may_edit_categories: bool = False
     created_at: datetime
     expires_at: datetime
     last_used_at: datetime | None = None
@@ -2482,6 +2512,8 @@ class IssueAgentKey(BaseModel):
     household_id: str
     scope: AgentScope = AgentScope.read
     may_commit: bool = False
+    #: Let it add categories and delete an unused one (#366). Needs `write`.
+    may_edit_categories: bool = False
     days: int = 90
 
 
@@ -2990,8 +3022,44 @@ class ReportRowOut(BaseModel):
     count: int
 
 
+class ReportLineOut(BaseModel):
+    """A figure across the window with no breakdown under it (#372).
+
+    A category group's subtotal (`key` its id, `name` its name), or one of the
+    three work-reimbursement lines (`key` the line, `name` null -- the client
+    words it). `by_month` holds only the months it has anything in.
+    """
+
+    key: str | None = None
+    name: str | None = None
+    by_month: dict[str, int] = {}
+    total_minor: int
+    total: str
+    average_minor: int
+    average: str
+    count: int
+
+
+class ReportReimbursementsOut(BaseModel):
+    """Work reimbursements on Income vs Expense: for information only (#372).
+
+    Counted in neither income, expenses nor net. `income` is every row in the
+    category carrying the `reimbursement` role, linked or not; `spent` the
+    rows flagged `expected` with their payment linked; `pending` the ones
+    still waiting for it. Signs follow the ledger: `income` positive, the two
+    spent lines negative.
+    """
+
+    income: ReportLineOut
+    spent: ReportLineOut
+    pending: ReportLineOut
+
+
 class ReportSectionOut(BaseModel):
     rows: list[ReportRowOut] = []
+    #: One subtotal per category group with a row in the section, largest
+    #: first and in the order the rows are in. Uncategorised has none.
+    groups: list[ReportLineOut] = []
     by_month: dict[str, int] = {}
     total_minor: int
     total: str
@@ -3007,9 +3075,10 @@ class ExcludedOut(BaseModel):
     cannot check. Counting transfers as spend overstated outflow by 41.5% on
     the real ledger, and these numbers are how anybody would have noticed.
 
-    `reimbursements` counts work expenses flagged `expected` and the payments
-    that repaid them -- both out of flow since 2026-09-25, because money that
-    comes back is not spending and money owed is a receivable, not a cost.
+    `reimbursements` counts the rows in the work-reimbursements block (#372):
+    on the report, but set apart from income, expenses and net, because money
+    that comes back is not spending and money owed is a receivable, not a
+    cost.
     """
 
     transfers: int = 0
@@ -3048,9 +3117,14 @@ class IncomeExpenseOut(BaseModel):
     months: list[str]
     income: ReportSectionOut
     expense: ReportSectionOut
+    #: Income plus expense. The reimbursement block is in neither.
     net_by_month: dict[str, int]
     net_total_minor: int
     net_total: str
+    reimbursements: ReportReimbursementsOut
+    #: False when no category group carries the `income` role: then every
+    #: row is an expense line, and the screen says why Income is empty.
+    has_income_group: bool = True
     excluded: ExcludedOut
     coverage: CoverageOut
 

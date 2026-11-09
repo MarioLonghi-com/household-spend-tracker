@@ -34,6 +34,9 @@ LOCALE_TAG = re.compile(r"[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}")
 
 OPENING_BALANCE = "seed.opening_balance"
 
+#: The seeded group that is seeded carrying the ``income`` role (#372).
+INCOME_GROUP = "seed.group.income"
+
 #: id -> English. The English is byte for byte what households were seeded with
 #: before this module existed.
 ENGLISH: dict[str, str] = {

@@ -37,6 +37,8 @@ from .enums import (
     AccountType,
     BlobRole,
     Categorisation,
+    CategoryGroupRole,
+    CategoryRole,
     ClearedState,
     IdentifierKind,
     LinkSource,
@@ -294,6 +296,16 @@ class CategoryGroup(Base, UUIDPrimaryKey, Timestamped):
     )
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    #: ``income`` on the group whose rows are income on Income vs Expense
+    #: (#372); null on every other. A marker rather than the name, because the
+    #: name is the household's to rename or translate.
+    #:
+    #: One per household is the service's rule (`categories.set_group_role`
+    #: moves it), not a unique index: undo replays a move in one flush, and
+    #: SQLite would check the index against whichever UPDATE the unit of work
+    #: happened to issue first. A report reads every marked group as income,
+    #: so two -- after undoing one move of several -- is a state it can answer.
+    role: Mapped[CategoryGroupRole | None] = mapped_column(EnumStr(CategoryGroupRole, 16))
 
     household: Mapped[Household] = relationship("Household", back_populates="category_groups")
     categories: Mapped[list[Category]] = relationship(
@@ -331,6 +343,11 @@ class Category(Base, UUIDPrimaryKey, Timestamped):
     #: categorised. Deleting a used category would silently rewrite history;
     #: archiving keeps the past readable and keeps the list short.
     archived: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    #: ``reimbursement`` on the category holding money work paid back (#372);
+    #: null on every other. Income vs Expense shows its rows in their own
+    #: block, out of income, expenses and net. One per household, kept by
+    #: `categories.set_category_role` for the reason the group's is.
+    role: Mapped[CategoryRole | None] = mapped_column(EnumStr(CategoryRole, 16))
 
     household: Mapped[Household] = relationship("Household", back_populates="categories")
     group: Mapped[CategoryGroup] = relationship("CategoryGroup", back_populates="categories")

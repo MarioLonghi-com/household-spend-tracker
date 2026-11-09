@@ -119,11 +119,6 @@ msgstr "Choose…"
 msgid "New password"
 msgstr "New password"
 
-#. Tooltip on the Income vs Expense report: noun, money that went out
-#: src/screens/reports/IncomeExpense.tsx
-msgid "Expense"
-msgstr "Expense"
-
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #: src/lib/labels.ts
@@ -546,6 +541,10 @@ msgstr "What happens"
 msgid "The end of {open}"
 msgstr "The end of {open}"
 
+#: src/screens/Profile.tsx
+msgid "Categorising rows does not need this. It is for a program that should also change the category list itself; each change is in History, and Undo there takes it back."
+msgstr "Categorising rows does not need this. It is for a program that should also change the category list itself; each change is in History, and Undo there takes it back."
+
 #. Label on the Admin screen
 #. Label on the household page
 #: src/screens/Admin.tsx
@@ -715,10 +714,6 @@ msgstr "Asking YNAB for your plans…"
 #: src/screens/SignIn.tsx
 msgid "I have my authenticator after all"
 msgstr "I have my authenticator after all"
-
-#: src/screens/Profile.tsx
-msgid "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
-msgstr "No key can delete anything, undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here."
 
 #. Tooltip on a folder path on Application management
 #: src/screens/ApplicationManagement.tsx
@@ -897,6 +892,10 @@ msgstr "Imported from <0>{0}</0>, line {1}, on {2}."
 #: src/App.tsx
 msgid "Your household"
 msgstr "Your household"
+
+#: src/screens/Categories.tsx
+msgid "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net. One category has this; ticking it moves it here."
+msgstr "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net. One category has this; ticking it moves it here."
 
 #: src/screens/Passkeys.tsx
 msgid "Passkeys need this app opened at its HTTPS address, {address}."
@@ -1402,6 +1401,10 @@ msgstr "Copied"
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr "This file only. The payee’s rule is left as it is for future statements."
 
+#: src/screens/Profile.tsx
+msgid "Let it add categories, and delete one nothing uses"
+msgstr "Let it add categories, and delete one nothing uses"
+
 #. Column heading on the Admin screen: noun
 #. Column heading on the Admin screen: noun
 #. Column heading on the Payees screen: noun
@@ -1850,11 +1853,6 @@ msgstr "Latest 3 months"
 msgid "Make them an owner"
 msgstr "Make them an owner"
 
-#. Label on the Income vs Expense report
-#: src/screens/reports/IncomeExpense.tsx
-msgid "Total expense"
-msgstr "Total expense"
-
 #. History headline, the kind of act: a change to accounts, categories or settings
 #: src/lib/historyWords.ts
 msgid "Setup change"
@@ -2037,6 +2035,11 @@ msgstr "Account"
 msgid "Writing…"
 msgstr "Writing…"
 
+#. Headline figure on the Income vs Expense report: money work paid back
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Reimbursements received"
+msgstr "Reimbursements received"
+
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Revoking…"
@@ -2127,6 +2130,8 @@ msgstr "use the bank's: {0}"
 
 #. Label of a form field on the Register screen: noun, being paid back by work
 #. Name of a fact on the Reimbursements report: noun, being paid back by work
+#. Tag beside a name on the Categories screen: the category holding money work paid back
+#: src/screens/Categories.tsx
 #: src/screens/Register.tsx
 #: src/screens/reports/Reimbursements.tsx
 msgid "Reimbursement"
@@ -2136,6 +2141,12 @@ msgstr "Reimbursement"
 #: src/screens/reports/Reimbursements.tsx
 msgid "Repaid"
 msgstr "Repaid"
+
+#. Heading on the Income vs Expense report: noun, money that went out
+#. Headline figure on the Income vs Expense report: noun, money that went out
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Expenses"
+msgstr "Expenses"
 
 #. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
@@ -2763,6 +2774,10 @@ msgstr "That link doesn't work"
 msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 msgstr "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "For information only — not counted in income, expenses or net."
+msgstr "For information only — not counted in income, expenses or net."
+
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 msgid "Payee Merge"
@@ -2960,6 +2975,10 @@ msgstr "{0, plural, one {and {1} more payee — {2} in all.} other {and {3} more
 msgid "Changing the setting below writes a line into <0>all three</0>, on both sides of the change — including when you turn it <1>down</1>, which is the one that used to leave no trace at all."
 msgstr "Changing the setting below writes a line into <0>all three</0>, on both sides of the change — including when you turn it <1>down</1>, which is the one that used to leave no trace at all."
 
+#: src/screens/Categories.tsx
+msgid "The Income group — its categories are income on Income vs Expense"
+msgstr "The Income group — its categories are income on Income vs Expense"
+
 #: src/screens/ApplicationManagement.tsx
 msgid "Writes a complete, compacted copy into the backups directory above, with this instance still serving. It does <0>not</0> copy <1>secret.key</1> there: without that key every authenticator is refused, so a copy that leaves this machine either carries it (tick the box below) or travels with it separately."
 msgstr "Writes a complete, compacted copy into the backups directory above, with this instance still serving. It does <0>not</0> copy <1>secret.key</1> there: without that key every authenticator is refused, so a copy that leaves this machine either carries it (tick the box below) or travels with it separately."
@@ -3114,6 +3133,7 @@ msgid "Worth a look"
 msgstr "Worth a look"
 
 #. Column heading on the Income vs Expense report: income minus spending
+#. Headline figure on the Income vs Expense report: income minus spending
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Net"
 msgstr "Net"
@@ -3174,6 +3194,11 @@ msgstr "{0} will not be imported, with the reason for each"
 #: src/screens/Rules.tsx
 msgid "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
 msgstr "That pattern ran past its tenth of a second. An import would set it aside part way through and carry on without it, so it would work sometimes and not others. Simplify it."
+
+#. Line on the Income vs Expense report: work expenses not paid back yet
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Pending reimbursement"
+msgstr "Pending reimbursement"
 
 #. Application management: what app.log holds
 #: src/lib/labels.ts
@@ -3334,6 +3359,11 @@ msgstr "A key can last between a day and {max_days} days"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.agent_key.may_not_edit_categories"
+msgstr "That key may not add or delete categories. A person can, on the Categories screen, or give the program a key that is allowed to"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.agent_key.needs_label"
 msgstr "Give the key a label, so you know what it is for"
 
@@ -3347,6 +3377,11 @@ msgstr "No such key"
 #: src/lib/errorMessages.ts
 msgid "error.agent_key.not_issuer"
 msgstr "Only the person who issued a key can revoke it"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.agent_key.read_only_categories"
+msgstr "A read-only key cannot be allowed to change categories"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -3428,6 +3463,11 @@ msgstr "{name} is archived, so it cannot be a default"
 #: src/lib/errorMessages.ts
 msgid "error.category.choose_default"
 msgstr "Choose the category to always use"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.category.group_by_id_or_name"
+msgstr "Name the group by group_id or by group_name, one of the two"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4760,6 +4800,10 @@ msgstr "Register"
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
 msgstr "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
 
+#: src/screens/Profile.tsx
+msgid "No key can undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here. Nor can it delete anything, except a category nothing uses, and only when you allow it below."
+msgstr "No key can undo anything, change who is in a household, touch passwords or authenticators, or create another key — whatever you choose here. Nor can it delete anything, except a category nothing uses, and only when you allow it below."
+
 #. How a rule matches, inside the rule list: the bank's text starts with the pattern
 #: src/screens/Rules.tsx
 msgctxt "rule list"
@@ -5036,6 +5080,10 @@ msgstr "Your account"
 msgid "Role"
 msgstr "Role"
 
+#: src/screens/Categories.tsx
+msgid "Money work pays back: set apart on Income vs Expense"
+msgstr "Money work pays back: set apart on Income vs Expense"
+
 #. Screen title on the Payee Categorisation screen. See GLOSSARY.md
 #: src/screens/PayeeCategorisation.tsx
 msgid "Payee categorisation"
@@ -5140,6 +5188,10 @@ msgstr "Could not read"
 msgid "Inbox"
 msgstr "Inbox"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Work reimbursements, for information: not in income, expenses or net."
+msgstr "Work reimbursements, for information: not in income, expenses or net."
+
 #. placeholder {0}: picked.size
 #. placeholder {1}: picked.size
 #: src/screens/Receipts.tsx
@@ -5172,6 +5224,10 @@ msgstr "Updating to {toVersion}"
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as an owner."
 msgstr "{inviter} invited you to {PRODUCT} as an owner."
+
+#: src/screens/Categories.tsx
+msgid "Its categories are income on Income vs Expense"
+msgstr "Its categories are income on Income vs Expense"
 
 #. Table cell on the Admin screen: nothing so far
 #: src/screens/Admin.tsx
@@ -5209,6 +5265,11 @@ msgstr "Recent sign-in changes"
 #: src/screens/ApplicationManagement.tsx
 msgid "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
 msgstr "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
+
+#. Updates section: link after a refusal for want of disk, to the guide's section of that name
+#: src/screens/Updates.tsx
+msgid "Freeing disk for an update"
+msgstr "Freeing disk for an update"
 
 #. Under the count of categories on the household page
 #. placeholder {0}: it.category_groups
@@ -5966,6 +6027,10 @@ msgstr "Nothing to look at."
 msgid "Added"
 msgstr "Added"
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.}}"
+msgstr "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.}}"
+
 #. placeholder {0}: format(Math.abs(left), currency)
 #: src/screens/Register.tsx
 msgid "{0} left to account for"
@@ -6260,6 +6325,11 @@ msgstr "Python {0}"
 #: src/components/RecoveryCodes.tsx
 msgid "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
 msgstr "Each one works once, and they are shown only now. They are how you get back in if you lose your phone but still know your password."
+
+#. Headline figure on the Income vs Expense report: work expenses not paid back yet
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Still to be reimbursed"
+msgstr "Still to be reimbursed"
 
 #: src/screens/Profile.tsx
 msgid "Your new authenticator is the only one that works now."
@@ -6829,6 +6899,12 @@ msgstr "(main)"
 #: ../desktop/src/words.ts
 msgid "A backup was made first. This can take a minute."
 msgstr "A backup was made first. This can take a minute."
+
+#. Headline figure on the Income vs Expense report: work expenses that have been paid back
+#. Line on the Income vs Expense report: work expenses that have been paid back
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Amount spent, reimbursed"
+msgstr "Amount spent, reimbursed"
 
 #. Heading on the household page
 #: src/screens/Household.tsx
@@ -7583,6 +7659,10 @@ msgstr "The category is chosen from how the last {0} transactions for {name} wer
 #: src/screens/Admin.tsx
 msgid "No reset links pending."
 msgstr "No reset links pending."
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{items, plural, one {({items} item)} other {({items} items)}}"
+msgstr "{items, plural, one {({items} item)} other {({items} items)}}"
 
 #: src/screens/Updates.tsx
 msgid "The end of the update's log"
@@ -8576,6 +8656,10 @@ msgstr "This lands as one entry in History, so the whole import can be undone in
 msgid "Email"
 msgstr "Email"
 
+#: src/screens/Categories.tsx
+msgid "The Reimbursement category — money work pays back"
+msgstr "The Reimbursement category — money work pays back"
+
 #: src/screens/Reconcile.tsx
 msgid "The difference has to be zero first"
 msgstr "The difference has to be zero first"
@@ -8799,6 +8883,11 @@ msgstr "The link for {0} ({1}) stops working at once. Their password stays reset
 #: src/screens/ResetAccount.tsx
 msgid "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "Your password for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+
+#. Label on the Income vs Expense report
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Total expenses"
+msgstr "Total expenses"
 
 #. Label on the Import screen
 #: src/screens/Import.tsx
@@ -10233,6 +10322,10 @@ msgstr "Payee naming rules"
 msgid "{app}, via its CSV export"
 msgstr "{app}, via its CSV export"
 
+#: src/screens/Profile.tsx
+msgid "may add and delete categories"
+msgstr "may add and delete categories"
+
 #. Shown in a dropdown when the search finds nothing
 #: src/components/GroupedPicker.tsx
 msgid "Nothing matches that."
@@ -10899,6 +10992,10 @@ msgstr "A heading the categories sit under — Bills, Everyday, whatever divides
 msgid "One ledger: its accounts, its register, its receipts and the people who can reach them."
 msgstr "One ledger: its accounts, its register, its receipts and the people who can reach them."
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "No category group is marked as Income, so every row is counted as an expense. Mark the group that holds your income on the Categories screen."
+msgstr "No category group is marked as Income, so every row is counted as an expense. Mark the group that holds your income on the Categories screen."
+
 #. Review mode: the language's messages are loading
 #: src/components/SuggestWording.tsx
 msgid "Reading the messages…"
@@ -11312,6 +11409,11 @@ msgstr "Create the key"
 msgid "Currencies"
 msgstr "Currencies"
 
+#. Heading on the Income vs Expense report: money spent for work and paid back
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Work reimbursements"
+msgstr "Work reimbursements"
+
 #: src/screens/Admin.tsx
 msgid "Pending reset links"
 msgstr "Pending reset links"
@@ -11678,14 +11780,14 @@ msgstr "{hiddenByCurrency, plural, one {Every row here is in a currency the togg
 msgid "All categories"
 msgstr "All categories"
 
-#: src/screens/reports/IncomeExpense.tsx
-msgid "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
-msgstr "{work, plural, one {{work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.} other {{work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.}}"
-
 #. Review mode: label of the box for the better translation
 #: src/components/SuggestWording.tsx
 msgid "Your wording"
 msgstr "Your wording"
+
+#: src/screens/Categories.tsx
+msgid "One group is the Income group. Every other category is counted as spending, where refunds and charges net out. Ticking this moves it here from the group that has it now."
+msgstr "One group is the Income group. Every other category is counted as spending, where refunds and charges net out. Ticking this moves it here from the group that has it now."
 
 #. History headline, the kind of act: a statement was imported
 #: src/lib/historyWords.ts
@@ -11799,7 +11901,10 @@ msgstr "Setup token"
 msgid "Verbose, plus every statement and every row it returned — which means transactions, payees and amounts written into a file in plain text. Turn it on to diagnose something and turn it off afterwards."
 msgstr "Verbose, plus every statement and every row it returned — which means transactions, payees and amounts written into a file in plain text. Turn it on to diagnose something and turn it off afterwards."
 
+#. Headline figure on the Income vs Expense report: noun, money that came in
+#. Tag beside a group name on the Categories screen: this is the group counted as income
 #. Tooltip on the Income vs Expense report: noun, money that came in
+#: src/screens/Categories.tsx
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Income"
 msgstr "Income"
@@ -12383,6 +12488,11 @@ msgstr "DD/MM/YYYY"
 #: src/screens/OneTimeImport.tsx
 msgid "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."
 msgstr "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."
+
+#. Line on the Income vs Expense report: money work paid back
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Reimbursement income"
+msgstr "Reimbursement income"
 
 #. Application management, Where the files are: the file secret.key
 #: src/lib/labels.ts

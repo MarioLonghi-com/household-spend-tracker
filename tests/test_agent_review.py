@@ -213,6 +213,9 @@ def test_transfer_legs_and_work_expenses_say_what_they_are(client, world):
         {},
         {"uncategorised": "true"},
         {"search": "mercadona"},
+        # The search language reaches the agent's read too (#367).
+        {"search": "mercadona OR lawson"},
+        {"search": "-mercadona"},
         {"since": "2026-07-10", "until": "2026-08-09"},
         {"amount": "45.50"},
         {"amount": "1500"},
@@ -392,12 +395,18 @@ def test_income_expense_is_one_currency_and_the_persons_own_answer(client, world
     assert agent == human
 
     assert agent["currency"] == "EUR"
-    expense = -(2001 + 2002 + 2003 + 2004) - 4550 - 3120 - 500 - 600 - 700
-    assert agent["expense"]["total_minor"] == expense
-    assert agent["income"]["total_minor"] == 250000
-    assert agent["net_total_minor"] == 250000 + expense
+    spent = -(2001 + 2002 + 2003 + 2004) - 4550 - 3120 - 500 - 600 - 700
+    # The salary carries no category, and the group decides the side, never
+    # the sign (#372): uncategorised is an expense line, and it nets there.
+    assert agent["expense"]["total_minor"] == spent + 250000
+    assert agent["income"]["total_minor"] == 0
+    assert agent["net_total_minor"] == 250000 + spent
+    # The hotel, a work expense nobody has repaid, is in the block and in
+    # neither side.
+    assert agent["reimbursements"]["pending"]["total_minor"] == -18000
+    assert agent["reimbursements"]["pending"]["count"] == 1
     # The EUR legs: one each of the GBP and JPY transfers, both of the card
-    # one -- and the hotel, a work expense.
+    # one -- and the hotel, set apart.
     assert agent["excluded"] == {"transfers": 4, "opening_balances": 0, "reimbursements": 1}
 
 

@@ -916,6 +916,7 @@ function KeysSection({ households }: { households: Household[] }) {
                 <div className="small muted">
                   {named(key.household_id)} · {listText(key.scopes.map(scopeWord))}
                   {key.may_commit ? ` · ${t`may apply imports`}` : ""}
+                  {key.may_edit_categories ? ` · ${t`may add and delete categories`}` : ""}
                 </div>
                 <div className="small muted">
                   {key.revoked_at
@@ -968,7 +969,7 @@ function KeysSection({ households }: { households: Household[] }) {
  * never sits in the page waiting to be used. It is single-use and dies in five
  * minutes either way.
  */
-function IssueKey({
+export function IssueKey({
   households,
   onDone,
   onCancel,
@@ -983,6 +984,7 @@ function IssueKey({
   const [householdId, setHouseholdId] = useState(households[0]?.id ?? "");
   const [mayWrite, setMayWrite] = useState(false);
   const [mayCommit, setMayCommit] = useState(false);
+  const [mayEditCategories, setMayEditCategories] = useState(false);
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
 
@@ -999,6 +1001,7 @@ function IssueKey({
         household_id: householdId,
         scope: mayWrite ? "write" : "read",
         may_commit: mayWrite && mayCommit,
+        may_edit_categories: mayWrite && mayEditCategories,
       });
     },
     onSuccess: (made) => onDone(made.token, made.key.label),
@@ -1055,8 +1058,9 @@ function IssueKey({
           <Hint label={t`what a key can never do`}>
             <p>
               <Trans>
-                No key can delete anything, undo anything, change who is in a household, touch
-                passwords or authenticators, or create another key — whatever you choose here.
+                No key can undo anything, change who is in a household, touch passwords or
+                authenticators, or create another key — whatever you choose here. Nor can it
+                delete anything, except a category nothing uses, and only when you allow it below.
               </Trans>
             </p>
             <p className="muted small" style={{ marginBottom: 0 }}>
@@ -1073,7 +1077,10 @@ function IssueKey({
             checked={mayWrite}
             onChange={(e) => {
               setMayWrite(e.target.checked);
-              if (!e.target.checked) setMayCommit(false);
+              if (!e.target.checked) {
+                setMayCommit(false);
+                setMayEditCategories(false);
+              }
             }}
           />
           <Trans>Let it add and change transactions, not only read them</Trans>
@@ -1094,6 +1101,24 @@ function IssueKey({
           <Trans>
             Normally a program stages an import and you review it before anything lands in the
             register. This skips that.
+          </Trans>
+        </p>
+      ) : null}
+      {mayWrite ? (
+        <label className="check" style={{ marginTop: 6 }}>
+          <input
+            type="checkbox"
+            checked={mayEditCategories}
+            onChange={(e) => setMayEditCategories(e.target.checked)}
+          />
+          <Trans>Let it add categories, and delete one nothing uses</Trans>
+        </label>
+      ) : null}
+      {mayWrite && mayEditCategories ? (
+        <p className="small muted">
+          <Trans>
+            Categorising rows does not need this. It is for a program that should also change the
+            category list itself; each change is in History, and Undo there takes it back.
           </Trans>
         </p>
       ) : null}

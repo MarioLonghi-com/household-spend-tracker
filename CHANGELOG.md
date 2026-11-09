@@ -54,6 +54,29 @@ history this repository does not have.
   Apple has accepted it. Only a release tag uploads; submitting the build
   for review stays a person's step. The signing secrets are held in a
   separate `app-store` environment that only release tags can reach. (#351)
+- **The Register's search takes AND, OR, phrases and exclusions.** Several
+  words must all match, each in whichever field it is in -- payee Lidl,
+  memo "birthday" -- where the box used to look for the whole text as one
+  phrase; `OR` or `|` between two terms finds either, `"quotes"` keep a
+  phrase together, and `-word` leaves out the rows that mention it. `%` and
+  `_` stay literal in every form, and a stray `OR` or an unclosed quote is
+  read as text rather than refused. Parsed on the server, so the agent's
+  register read and summaries take the same language, and the manifest and
+  `agent/README.md` describe it. A search that worked before finds at least
+  what it found. (#367)
+- **An agent can add a category, and delete one nothing uses, when its key
+  allows it.** `POST …/categories` adds one in a group named by id or by name
+  (making the group when there is none), and `POST
+  …/categories/{id}/delete` deletes a category no row carries; one that is
+  carried is refused and stays, since archiving it is a person's. Both go
+  through the Categories screen's own service, one History entry each with
+  the key named, and Undo takes them back. They need a new permission,
+  *Let it add categories, and delete one nothing uses*, chosen when the key
+  is made and shown in the key list and the manifest — `write` alone does
+  not carry it. The MCP sample has a tool for each. Migration
+  `d2b8e6f41c07` adds the permission, off for every existing key.
+  **Reversible: lossy** -- downgrading takes the permission away from the
+  keys that had it; nothing in the ledger changes. (#366)
 
 ### Security
 
@@ -77,6 +100,22 @@ history this repository does not have.
   runner's pip and the pin differed.
 - **Dependabot also watches `deploy/tailnet/compose.yaml`**, so the pinned
   Tailscale sidecar tag moves like everything else. (Part of #99)
+- **Income vs Expense puts a row on a side by its category group, not its
+  sign, and sets work reimbursements apart.** The group marked Income is
+  income; every other category, and Uncategorised, is an expense line where
+  refunds and charges net per month, with a subtotal per group, largest
+  spend first. Rows in the category marked Reimbursement, flagged expenses
+  already repaid, and flagged ones still waiting are three lines in a
+  *Work reimbursements* block under Net, for information only and counted
+  in neither income, expenses nor net; a payment in any other category (a
+  salary that also repaid a claim) stays where its category puts it.
+  Headline figures sit above the table, and Total and Average stay pinned on
+  the right on wide screens. Which group is Income and which category is
+  Reimbursement are shown and moved on Categories, and the agent manifest
+  lists them. Migration `a7e3c1d95b20` adds the two markers and sets them on
+  a group called `Income` and a category called `Reimbursement(s)`.
+  **Reversible: lossy** -- downgrading forgets which group and category
+  carry the markers; no transaction changes. (#372)
 
 ### Fixed
 
@@ -96,6 +135,23 @@ history this repository does not have.
   updater now waits a moment, looks again, and stops the app once more if
   it is running; a stop refused a second time is still *Not started*, with
   the app back as it was. (#344)
+- **An update refused for want of disk says how much to free.** It read
+  "Needs about 0.9 GB free, there is 0.9 GB" when the shortfall was a few
+  megabytes. The need is now rounded up and the free space down, the
+  megabytes to free are named, and so is what the need is made of: the new
+  images, two copies of the database and the margin. It offers deleting
+  older update backups only when there are more than the five that are
+  kept, and says how much they hold. The refusal links to a new section,
+  *Freeing disk for an update*, in `deploy/TROUBLESHOOTING.md`. (#330)
+- **Showing one currency and sorting by its amount no longer empties the
+  Register.** The currency toggle used to hide rows in the browser after a
+  page of 500 had arrived, and the amount sort puts one currency's rows
+  before the other's, so the first page could hold none of the currency
+  shown. The register now asks the server for the currencies shown
+  (`currency=`, repeatable, on `GET /households/{id}/transactions`), so the
+  pages, the count and the *Needs a category* badge are about the rows on
+  screen, and the reply's `hidden_by_currency` says how many the toggle
+  left out. (#370)
 
 ## 0.12.0 — 2026-10-15
 
