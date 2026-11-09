@@ -803,6 +803,9 @@ class RegisterPage(BaseModel):
     #: category picker set aside -- for the count beside "Needs a category".
     #: Carried here so one register load is one request (#101).
     needs_category: int = 0
+    #: Rows every other filter matched that the currency toggle left out
+    #: (#370): zero when no `currency` was asked.
+    hidden_by_currency: int = 0
 
 
 # --------------------------------------------------------------------------- #

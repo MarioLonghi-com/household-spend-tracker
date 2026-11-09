@@ -1011,6 +1011,7 @@ def filtered(
     payee_id: str | None = None,
     category_ids: list[str] | None = None,
     categorised: bool = False,
+    currencies: list[str] | None = None,
 ):
     """A ``select(Transaction)`` narrowed by the household's filter vocabulary.
 
@@ -1048,12 +1049,32 @@ def filtered(
     without listing every id in a URL. The singular ``category_id`` stays an
     *and*, because it is the agent's "this category, within whatever else I
     asked" and changing that would be changing the agent's answers.
+
+    ``currencies`` keeps the rows whose *account* is held in one of these
+    codes: the register's currency toggle (#370). It used to be applied in
+    the client to the rows already in hand, after paging -- so under the
+    amount sort, which is currency first, a first page of 500 euro rows held
+    no pound at all when only pounds were shown, and the table emptied. Here
+    the page, `total` and the counts are about the rows the toggle shows.
+    Like ``account_ids``, an empty list narrows nothing; a code nobody holds
+    matches no row.
     """
     stmt = select(Transaction).where(Transaction.household_id == household_id)
     if account_id:
         stmt = stmt.where(Transaction.account_id == account_id)
     if account_ids:
         stmt = stmt.where(Transaction.account_id.in_(account_ids))
+    if currencies:
+        # An alias, so the amount sort's join onto `Account` -- added to this
+        # statement later -- cannot correlate the subquery away.
+        held = aliased(Account)
+        stmt = stmt.where(
+            Transaction.account_id.in_(
+                select(held.id).where(
+                    held.household_id == household_id, held.currency.in_(currencies)
+                )
+            )
+        )
     if since:
         stmt = stmt.where(Transaction.date >= since)
     if until:

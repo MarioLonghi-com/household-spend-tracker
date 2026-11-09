@@ -49,6 +49,15 @@ history this repository does not have.
   tick too and shows the "nothing ticked" notice, and Select all ticks
   it again so the filter reads *All categories*. The Income vs Expense
   report's *Uncategorised* tick follows the same buttons. (#371)
+- **Showing one currency and sorting by its amount no longer empties the
+  Register.** The currency toggle used to hide rows in the browser after a
+  page of 500 had arrived, and the amount sort puts one currency's rows
+  before the other's, so the first page could hold none of the currency
+  shown. The register now asks the server for the currencies shown
+  (`currency=`, repeatable, on `GET /households/{id}/transactions`), so the
+  pages, the count and the *Needs a category* badge are about the rows on
+  screen, and the reply's `hidden_by_currency` says how many the toggle
+  left out. (#370)
 
 ## 0.12.0 — 2026-10-15
 
