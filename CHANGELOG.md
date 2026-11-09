@@ -32,6 +32,26 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.14.1 — 2026-11-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.14.0`, use *Go back to 0.14.0* under Updates, or follow *Going back after
+a successful update* in `deploy/UPGRADING.md`. From a checkout, check out
+`v0.14.0` and restart.
+
+Two fixes to Income vs Expense from 0.14.0.
+
+### Fixed
+
+- **Total and Average are solid while the months scroll under them** (#413).
+  Pinned in 0.14.0, the two columns kept a see-through tint, so the passing
+  month figures showed through and mixed with them.
+- **The (?) explanations stay inside the window** (#412). A bubble opened
+  rightwards from its button whatever room there was; beside the currency
+  choices it ran off the right edge. It now moves left as far as it needs to,
+  keeping 16px from each edge, and its arrow still points at the button. This
+  is the shared control, so every (?) in the app benefits.
+
 ## 0.14.0 — 2026-11-09
 
 **Reversible: lossy** — two migrations, applied in this order. *Go back to

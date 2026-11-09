@@ -908,6 +908,21 @@ test("the report's heading follows the page, and a figure's row opens in Transac
   expect(Math.abs(headTop - mainTop)).toBeLessThan(2);
   await main.evaluate((el) => (el.scrollTop = 0));
 
+  // Total and Average are solid where they are pinned: the months that slide
+  // under them must not show through (#413).
+  const body = page.locator(".ie-grid-body");
+  await body.evaluate((el) => (el.scrollLeft = el.scrollWidth / 3));
+  const alphas = await page.locator(".ie-pin-right .ie-grid-body tbody td.amount:last-child").evaluateAll((cells) =>
+    cells.map((cell) => {
+      const colour = getComputedStyle(cell).backgroundColor;
+      const parts = colour.match(/[\d.]+/g) ?? [];
+      return parts.length === 4 ? Number(parts[3]) : 1;
+    }),
+  );
+  // Pinned only above phone width: on a phone there is nothing pinned to check.
+  if (test.info().project.name === "desktop") expect(alphas.length).toBeGreaterThan(0);
+  expect(alphas.every((alpha) => alpha === 1)).toBe(true);
+
   // A Total opens its rows; a row opens Transactions in a new tab, on itself.
   const total = page
     .locator(".ie-grid-body tbody tr:has(button.figure-open) td.amount:nth-last-child(2) button.figure-open")
