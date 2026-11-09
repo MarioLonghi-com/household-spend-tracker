@@ -12,8 +12,9 @@ gets a few hundred tokens with the totals already right.
 > [!danger] The one rule every function in this module exists to keep
 > **No response ever sums two currencies.**
 >
-> The ledger never converts -- currency lives on the account, and there is no
-> rate anywhere in this schema. The previous build produced three wrong
+> The ledger never converts -- currency lives on the account. Since #396 a
+> *report* may convert into the base currency, through `services/fx.py` and
+> nowhere else; nothing here does. The previous build produced three wrong
 > reports from exactly this, by the simple route of somebody
 > writing `SUM(amount)` across a household that had both.
 >

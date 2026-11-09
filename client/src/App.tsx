@@ -27,6 +27,7 @@ import { Admin } from "./screens/Admin";
 import { ApplicationManagement } from "./screens/ApplicationManagement";
 import { History } from "./screens/History";
 import { HouseholdPage } from "./screens/Household";
+import { ExchangeRates } from "./screens/ExchangeRates";
 import { Import } from "./screens/Import";
 import { ImportGuide } from "./screens/ImportGuide";
 import { Payees } from "./screens/Payees";
@@ -61,6 +62,7 @@ type Screen =
   | "reports"
   | ReportScreen
   | "household"
+  | "exchange-rates"
   | "payees"
   | "payee-categorisation"
   | "transfers"
@@ -186,6 +188,8 @@ export function menu(householdName: string, offered: Capabilities = EVERYTHING):
         { key: "accounts", label: t({ message: "Accounts", comment: "Menu item and the name of its screen: noun, bank or cash accounts. See GLOSSARY.md" }) },
         { key: "transfers", label: t({ message: "Transfers", comment: "Menu item and the name of its screen: noun, money moved between your own accounts. See GLOSSARY.md" }) },
         { key: "categories", label: t({ message: "Categories", comment: "Menu item and the name of its screen. See GLOSSARY.md" }) },
+        // Where reports' rates come from, and the record of fetching them (#396).
+        { key: "exchange-rates", label: t({ message: "Exchange rates", comment: "Menu item and the name of its screen: rates for converting one currency into another" }) },
         {
           heading: t({ message: "Payee", comment: "Heading on the app's menu and frame: noun, who was paid or who paid. See GLOSSARY.md" }),
           children: [
@@ -898,6 +902,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
         {screen === "accounts" && <Accounts household={household} onOpenRegister={openRegister} />}
         {screen === "payees" && <Payees household={household} />}
         {screen === "categories" && <Categories household={household} />}
+        {screen === "exchange-rates" && <ExchangeRates household={household} />}
         {screen === "receipts" && <Receipts household={household} />}
         {screen === "reports" && (
           <Reports household={household} onOpen={(key) => go(reportScreen(key))} />

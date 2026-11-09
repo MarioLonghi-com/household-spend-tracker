@@ -41,6 +41,8 @@ Retention, in one place. Each figure is the constant the sweep uses, and
 - account resets: 30 days after they expired (`account_resets.RETENTION`).
   A used or withdrawn one is deleted there and then, so only lapsed links
   wait, and only so an owner can see that one lapsed (#284)
+- exchange-rate fetches: 90 days (`fx_fetching.RETENTION`), the Exchange
+  rates page's history of who pressed Fetch now (#396)
 
 The database file, too (#103). Nothing in `app/` ever checkpointed the WAL:
 SQLite's automatic checkpoint copies pages back into the main file but never
@@ -71,7 +73,7 @@ from ..services import account_resets as account_reset_service
 from ..services import agent_imports as agent_import_service
 from ..services import agent_keys as agent_key_service
 from ..services import agent_requests as agent_request_service
-from ..services import backup_bundle, importing
+from ..services import backup_bundle, fx_fetching, importing
 from ..services import invitations as invitation_service
 from ..services import receipts as receipt_service
 from . import passkeys, ratelimit, stepup
@@ -150,6 +152,10 @@ def sweep(engine: Engine) -> dict[str, int]:
         # replays change images and `receipt_blobs` has none: see
         # `services/receipts.py::sweep_orphan_blobs`.
         removed["receipt_blobs"] = receipt_service.sweep_orphan_blobs(own)
+
+        # Who pressed Fetch now and what came back, past the ninety days the
+        # Exchange rates page shows. Not audited, so a bulk delete (#396).
+        removed["fx_fetches"] = fx_fetching.sweep(own, now=now)
 
         own.commit()
 

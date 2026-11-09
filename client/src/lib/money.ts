@@ -10,7 +10,7 @@ import { formatLocale, numberFormat } from "./locale";
 
 // ISO 4217 exponents that are not 2. Everything unlisted uses 2.
 export const EXPONENTS: Record<string, number> = {
-  JPY: 0, KRW: 0, CLP: 0, ISK: 0, VND: 0, HUF: 0, TWD: 0,
+  JPY: 0, KRW: 0, CLP: 0, ISK: 0, VND: 0,
   BHD: 3, IQD: 3, JOD: 3, KWD: 3, LYD: 3, OMR: 3, TND: 3,
 };
 

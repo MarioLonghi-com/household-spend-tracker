@@ -6,9 +6,11 @@ module is bound by the same rule:
 
 > **No response ever sums two currencies.**
 
-The ledger never converts. Currency lives on the account, there is no rate
-anywhere in this schema, and `Household.base_currency` is a default for new
-accounts rather than the roll-up its docstring claims. So currency here is a
+The ledger never converts. Currency lives on the account, and the only
+place an amount meets a rate is `services/fx.py` (#396): a report that offers
+figures in the base currency converts each row there, says which rates it
+used, and carries `rates_status`. Nothing in this module divides by a rate,
+and `tests/test_fx_service.py` greps for it. So currency here is a
 **facet**: the caller names one, and gets a report about that one. There is no
 "all currencies" total, not as a zero and not as a null, because the number
 does not exist.

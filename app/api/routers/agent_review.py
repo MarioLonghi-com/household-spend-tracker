@@ -1,8 +1,9 @@
 """Reading the ledger to review it and analyse it (#134).
 
-A filtered read of rows, the categorisation review, the reports, and the
-exchange rates the household actually got -- stories 2 and 4 of #134. Every
-figure stays per currency: nothing here converts or sums across two.
+A filtered read of rows, the categorisation review, the reports, the exchange
+rates the household actually got -- stories 2 and 4 of #134 -- and the rates
+its chain reads, with how old they are (#396). Every figure stays per
+currency: nothing here converts or sums across two.
 
 Same door as `agent.py`: every route hangs off `current_agent`, so the
 capability floor (§1.2 -- no delete, no undo, nothing touching auth, admin,
@@ -26,11 +27,12 @@ from pydantic import BaseModel
 
 from ...errors import ValidationError
 from ...models import ClearedState, LinkSource, RegisterSource, ReimbursementState, ReimbursementView
-from ...schemas import IncomeExpenseOut, ManifestEndpoint, ReimbursementsOut
+from ...schemas import FxRatesOut, FxStatusOut, IncomeExpenseOut, ManifestEndpoint, ReimbursementsOut
 from ...services import insights, review, search_query
 from ...services import transactions as txn_service
 from ..deps import CurrentAgent
 from . import agent
+from . import fx as human_fx
 from . import reporting as human_reports
 from .agent import _house
 
@@ -491,6 +493,39 @@ def fx_observed(
     )
 
 
+@router.get("/households/{household_id}/fx/rates", response_model=FxRatesOut)
+def fx_rates(
+    household_id: str,
+    agent: CurrentAgent,
+    request: Request,
+    currency: Annotated[str | None, Query(min_length=3, max_length=3)] = None,
+    since: Date | None = None,
+    until: Date | None = None,
+    source: Annotated[str | None, Query(pattern="^(ecb|manual)$")] = None,
+    limit: int = Query(default=500, ge=1, le=human_fx.MAX_RATES),
+) -> FxRatesOut:
+    """The stored rates the household's chain reads, answered by the person's route.
+
+    Read only: a key cannot fetch rates, enter them or change where they come
+    from (#396 §5.1).
+    """
+    house = _house(agent, household_id)
+    answer = human_fx.stored_rates(
+        agent.session, house, currency=currency, since=since, until=until, source=source, limit=limit
+    )
+    request.state.agent_rows = len(answer.rates)
+    return answer
+
+
+@router.get("/households/{household_id}/fx/status", response_model=FxStatusOut)
+def fx_status(household_id: str, agent: CurrentAgent, request: Request) -> FxStatusOut:
+    """The Exchange rates page as data, so an agent can say how old the rates it read are."""
+    house = _house(agent, household_id)
+    answer = human_fx.status_out(agent.session, house)
+    request.state.agent_rows = len(answer.currencies)
+    return answer
+
+
 # --------------------------------------------------------------------------- #
 # What the manifest says about them
 # --------------------------------------------------------------------------- #
@@ -594,6 +629,44 @@ ENDPOINTS: list[ManifestEndpoint] = [
             "make and show. An empty list means there are no such transfers."
         ),
         returns="{since, until, pair, total, observations[]}",
+        scope="read",
+    ),
+    ManifestEndpoint(
+        method="GET",
+        path=f"{_HOUSE}/fx/rates",
+        says=(
+            "The exchange rates the household's chain reads, as stored, newest first: the "
+            "ECB's reference rates (shared by the instance, fetched only when a member "
+            "presses Fetch now) and the rates members entered by hand. Each has source, "
+            "quote_currency, currency, date, period (day, or month for a monthly manual "
+            "rate dated its first day) and rate -- units of currency per ONE quote_currency, "
+            "a decimal STRING: parse it as a decimal, never a float. rate_in_base is the "
+            "same rate per one base currency, crossed through the quote currency on that "
+            "date; own_rate is what the household's own transfers gave that day, in the "
+            "same terms. Filters: currency, since, until, source (ecb|manual), limit "
+            "(default 500, max 5000). A key reads rates; it cannot fetch, enter or delete "
+            "them, or change where they come from."
+        ),
+        returns="{base_currency, total, limit, rates[]}",
+        scope="read",
+    ),
+    ManifestEndpoint(
+        method="GET",
+        path=f"{_HOUSE}/fx/status",
+        says=(
+            "How old the household's exchange rates are and what has been fetched: its "
+            "chain (sources in order: manual, ecb, own), stale_days, monthly_policy; tiles "
+            "(last_fetch, as_of, coverage, gaps, manual rates); one row per currency it "
+            "holds with the source in use, the span and age of its rates, its coverage of "
+            "transaction dates and a month strip; the fetch history; what no source "
+            "covers; and rates_status, the block a converting report carries. Say how old "
+            "a rate is whenever you use one."
+        ),
+        returns=(
+            "{base_currency, chain, stale_days, monthly_policy, show_own_rates, tiles, "
+            "running, running_fetches[], would_fetch[], would_fetch_refused, "
+            "would_fetch_reason, currencies[], not_covered[], history[], rates_status}"
+        ),
         scope="read",
     ),
 ]

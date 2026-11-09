@@ -69,6 +69,7 @@ NOUNS: dict[str, tuple[str, str]] = {
     "transfer_rejections": ("pair marked not a transfer", "pairs marked not a transfer"),
     "ignored_identifier_suggestions": ("ignored identifier suggestion", "ignored identifier suggestions"),
     "translation_suggestions": ("suggested wording", "suggested wordings"),
+    "fx_manual_rates": ("exchange rate", "exchange rates"),
 }
 
 #: Fields worth naming when they change, and how to say them.
@@ -93,6 +94,11 @@ FIELD_WORDS: dict[str, str] = {
     "institution": "bank",
     "reimbursement": "work expense",
     "reimbursed_by_id": "reimbursed by",
+    "rate": "rate",
+    "fx_chain": "rate sources",
+    "fx_stale_days": "stale limit",
+    "fx_monthly_policy": "monthly rate",
+    "fx_show_own_rates": "own rates shown",
 }
 
 

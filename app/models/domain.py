@@ -85,6 +85,18 @@ class Household(Base, UUIDPrimaryKey, Timestamped):
     receipts_keep_original: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
     )
+    #: Where reports take exchange rates from, in order (#396 §4.2): source
+    #: names from `FxSource`, comma-separated. The first source with a rate
+    #: within the stale limit wins. Empty means no source: nothing converts.
+    #: Columns rather than a JSON blob, like `theme` and `date_format` above.
+    fx_chain: Mapped[str] = mapped_column(String(64), default="manual,ecb", nullable=False)
+    #: A rate older than this many days is shown as stale. Stale is a flag,
+    #: never a block: the figure is still converted, and says so.
+    fx_stale_days: Mapped[int] = mapped_column(Integer, default=7, nullable=False)
+    #: Which rate a monthly figure uses: an `FxPolicy` value.
+    fx_monthly_policy: Mapped[str] = mapped_column(String(16), default="month_avg", nullable=False)
+    #: Show the rates the household's own transfers imply beside the rate in use.
+    fx_show_own_rates: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     members: Mapped[list[HouseholdMember]] = relationship(
         "HouseholdMember", back_populates="household", cascade="all, delete-orphan"
@@ -131,6 +143,11 @@ class Household(Base, UUIDPrimaryKey, Timestamped):
     #: is RESTRICT so this is the only way a key can go, and the hook walks it.
     agent_keys: Mapped[list[AgentKey]] = relationship(  # noqa: F821
         "AgentKey", back_populates="household", cascade="all, delete-orphan"
+    )
+    #: Through the ORM for the same reason: each manual rate a household takes
+    #: with it is logged, and comes back with an undo of the deletion.
+    fx_manual_rates: Mapped[list[FxManualRate]] = relationship(  # noqa: F821
+        "FxManualRate", back_populates="household", cascade="all, delete-orphan"
     )
 
 
