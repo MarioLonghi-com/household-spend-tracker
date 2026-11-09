@@ -809,6 +809,7 @@ test("the household section lists its pages in order, payees under a heading", a
     "Accounts",
     "Transfers",
     "Categories",
+    "Exchange rates",
     "# Payee",
     "Payee Merge",
     "Payee Categorisation",
