@@ -51,7 +51,15 @@ export function GroupedPicker({
   label: string;
   groups: PickerGroup[];
   value: Selection;
-  onChange: (next: Selection) => void;
+  /**
+   * `extraChecked` comes only from the footer: Select all ticks the extra
+   * slice as well and Select none clears it (#371), so "none" means none and
+   * "all" reads as the untouched label. It arrives in the same call as the
+   * ids, so a caller that reacts to the pair -- the register's backlog-only
+   * re-sort -- sees the end state once rather than a half-way one. A tick of
+   * a single item or group leaves the extra alone and passes `undefined`.
+   */
+  onChange: (next: Selection, extraChecked?: boolean) => void;
   extra?: {
     label: string;
     hint?: string;
@@ -260,10 +268,10 @@ export function GroupedPicker({
           </div>
 
           <div className="picker-foot">
-            <button type="button" className="link" onClick={() => onChange(null)}>
+            <button type="button" className="link" onClick={() => onChange(null, extra ? true : undefined)}>
               Select all
             </button>
-            <button type="button" className="link" onClick={() => onChange([])}>
+            <button type="button" className="link" onClick={() => onChange([], extra ? false : undefined)}>
               Select none
             </button>
             <button type="button" className="primary" onClick={() => setOpen(false)}>

@@ -43,6 +43,12 @@ history this repository does not have.
 
 ### Fixed
 
+- **Select none in a category filter means none.** On the Register it
+  used to leave *Needs a category* ticked, so the register showed the
+  uncategorised rows and switched to oldest first; it now clears that
+  tick too and shows the "nothing ticked" notice, and Select all ticks
+  it again so the filter reads *All categories*. The Income vs Expense
+  report's *Uncategorised* tick follows the same buttons. (#371)
 - **An update on rootless Podman goes on when the app is started by hand
   as it stops.** Podman answered that stop with "container state improper"
   and the update ended as *Not started: the app could not be stopped*. The
