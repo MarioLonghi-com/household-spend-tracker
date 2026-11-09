@@ -370,3 +370,33 @@ class SystemPayee(enum.StrEnum):
     opening_balance = "opening_balance"
     #: The auto-managed "Transfer : <Account>" payees. Not spend, not income.
     transfer = "transfer"
+
+
+class CategoryGroupRole(enum.StrEnum):
+    """What a category group *is* to a report, when it is more than a heading.
+
+    One value, and it decides which side of Income vs Expense a row lands on
+    (#372): a row in the group carrying ``income`` is income whatever its sign,
+    and a row anywhere else is an expense line where refunds and charges net.
+
+    Stored rather than read off the name, because the name is the household's
+    own word -- renamed, translated, typed in another language at setup -- and
+    a report keyed on "Income" would move every salary into expenses the day
+    somebody called the group "Ingresos". At most one group per household
+    carries it, which a partial unique index holds.
+    """
+
+    income = "income"
+
+
+class CategoryRole(enum.StrEnum):
+    """What a category *is* to a report, when it is more than a label.
+
+    One value. A row in the category carrying ``reimbursement`` is money work
+    paid back, whatever its sign and whether or not an expense is linked to
+    it: Income vs Expense shows it in its own block and counts it in neither
+    income, expenses nor net (#372). Stored for the same reason as
+    :class:`CategoryGroupRole`, and at most one per household.
+    """
+
+    reimbursement = "reimbursement"

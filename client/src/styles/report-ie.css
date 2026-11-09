@@ -194,3 +194,95 @@ table.report td.amount:nth-last-child(2) {
      which is narrower here. */
   table.report tbody tr.report-group .report-label { min-width: 140px; }
 }
+
+/* --------------------------------------------------------------------------
+   Headline figures, and the work-reimbursement block (#372)
+
+   Income, expenses and net in a row above the table; beside them, set apart
+   by a rule and a muted ink, the three reimbursement figures that are in none
+   of the first three. The block in the table takes the same muted ink, under
+   a heading that says it is for information only.
+   -------------------------------------------------------------------------- */
+
+.report-headline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  align-items: flex-start;
+  margin: 0 0 14px;
+}
+.report-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+}
+.report-figures dt {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.report-figures dd {
+  margin: 2px 0 0;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  font-weight: 600;
+}
+.report-figures dd.net-up { color: var(--positive); }
+.report-figures dd.net-down { color: var(--danger); }
+.report-figures-aside {
+  border-left: 1px solid var(--line);
+  padding-left: 24px;
+}
+.report-figures-aside dd { font-size: 15px; font-weight: 500; color: var(--muted); }
+.report-figures-aside p { margin: 6px 0 0; }
+
+.report-no-income { margin: 0 0 12px; }
+
+table.report tfoot tr.report-aside-heading th,
+table.report tfoot tr.report-aside-heading td {
+  border-top: 2px solid var(--line);
+  padding-top: 18px;
+  font-weight: 600;
+  background: var(--surface);
+}
+table.report tfoot tr.report-aside th,
+table.report tfoot tr.report-aside td { color: var(--muted); font-weight: 400; }
+
+.report-folded { display: block; font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+/* --------------------------------------------------------------------------
+   Total and Average stay on the right while the months scroll
+
+   Wide screens only: on a phone the two would take most of the width and
+   leave a sliver of months, so there they scroll with the rest. Both columns
+   get a fixed width so the second one knows how far from the edge to stick.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 721px) {
+  table.report th.amount:last-child,
+  table.report td.amount:last-child,
+  table.report th.amount:nth-last-child(2),
+  table.report td.amount:nth-last-child(2) {
+    position: sticky;
+    z-index: 1;
+    min-width: 130px;
+    width: 130px;
+    box-sizing: border-box;
+  }
+  table.report th.amount:last-child,
+  table.report td.amount:last-child { right: 0; }
+  table.report th.amount:nth-last-child(2),
+  table.report td.amount:nth-last-child(2) { right: 130px; }
+  table.report thead th.amount:last-child,
+  table.report thead th.amount:nth-last-child(2) { z-index: 3; }
+  /* A pinned cell needs a background of its own, or the months scroll
+     visibly under it. The striped rule above gives the body one; these are
+     the rows it does not reach. */
+  table.report tr.report-group td.amount:last-child,
+  table.report tr.report-group td.amount:nth-last-child(2),
+  table.report tr.report-aside-heading td,
+  table.report tr.report-heading td { background: var(--surface); }
+}

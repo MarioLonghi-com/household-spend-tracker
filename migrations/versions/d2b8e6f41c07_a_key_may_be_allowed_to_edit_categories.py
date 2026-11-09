@@ -10,7 +10,7 @@ existing key could do changes.
 Reversible: lossy -- downgrading drops the permission from every key that had it; nothing in the ledger changes, and those keys go back to categorising only.
 
 Revision ID: d2b8e6f41c07
-Revises: c4d9e2a7b318
+Revises: a7e3c1d95b20
 Create Date: 2026-11-09 12:00:00.000000
 """
 
@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "d2b8e6f41c07"
-down_revision: str | Sequence[str] | None = "c4d9e2a7b318"
+down_revision: str | Sequence[str] | None = "a7e3c1d95b20"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

@@ -567,16 +567,28 @@ def test_the_report_over_http_carries_the_contract_shape(client):
     assert windowed["outstanding"] == 2_340
 
 
-def test_the_income_expense_answer_counts_the_work_rows_it_left_out(client):
+def test_the_income_expense_answer_sets_the_work_rows_apart_and_counts_them(client):
+    """The taxi and the hotel are in the block; the repayment is not (#372).
+
+    It is linked as the hotel's payment but carries no category, and being a
+    payment no longer sets a row apart -- only the Reimbursement category
+    does. So it is an ordinary uncategorised row, an expense line it nets.
+    """
     world = _http_world(client)
     body = client.get(
         f"/api/households/{world['house']['id']}/reports/income-expense"
         "?currency=EUR&since=2026-09-01&until=2026-09-30"
     ).json()
 
-    assert body["excluded"]["reimbursements"] == 3, "taxi, hotel and its repayment"
-    assert body["expense"]["total_minor"] == 0
+    assert body["excluded"]["reimbursements"] == 2, "taxi and hotel"
+    block = body["reimbursements"]
+    assert (block["spent"]["total_minor"], block["spent"]["count"]) == (-8_450, 1)
+    assert (block["pending"]["total_minor"], block["pending"]["count"]) == (-2_340, 1)
+    assert block["income"]["total_minor"] == 0
+    assert block["pending"]["by_month"] == {"2026-09": -2_340}
+    assert body["expense"]["total_minor"] == 8_450
     assert body["income"]["total_minor"] == 0
+    assert body["net_total_minor"] == 8_450
 
 
 def test_t30_another_household_answers_404_and_a_currency_is_required(client):

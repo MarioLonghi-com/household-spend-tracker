@@ -43,6 +43,8 @@ from .enums import (
     BatchStatus,
     BlobRole,
     Categorisation,
+    CategoryGroupRole,
+    CategoryRole,
     ChangeOp,
     ClearedState,
     IdentifierKind,
@@ -63,7 +65,7 @@ from .enums import (
 
 __all__ = [
     "Account", "AccountIdentifier", "AccountReset", "AccountType", "AgentKey", "AgentReplay", "AgentRequest", "AgentScope", "Base", "Batch", "BatchKind", "BatchStatus", "BlobRole", "Categorisation",
-    "Category", "CategoryGroup", "Change", "ChangeOp",
+    "Category", "CategoryGroup", "CategoryGroupRole", "CategoryRole", "Change", "ChangeOp",
     "ClearedState", "EnumStr", "IdentifierKind", "Household", "HouseholdMember", "IgnoredIdentifierSuggestion", "ImportLine", "ImportOutcome",
     "Instance", "InstanceState", "Invitation", "LinkSource", "LoginAttempt", "MatchType", "NAMING_CONVENTION", "Payee", "Reconciliation",
     "Passkey", "PayeeRule", "PendingSignIn", "StepUpGrant", "Receipt", "ReceiptBlob", "RecoveryCode", "RegisterSort", "RegisterSource", "ReimbursementState", "ReimbursementView", "RuleAction", "SortDirection", "Role", "SuggestionStatus", "SystemPayee", "Timestamped", "Transaction", "TransferRejection", "TranslationSuggestion", "TrustedDevice",
