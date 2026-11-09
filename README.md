@@ -666,8 +666,10 @@ A running instance also serves **`/llms.txt`** to anybody, with no key: what
 this is, how a person issues one, and the conventions worth knowing before
 writing anything. It is the only thing served to a caller holding nothing.
 
-No key can delete, undo, issue another key, or touch authentication — those
-routes ask for a signed-in person. Everything a key does appears in History
+No key can undo, issue another key, or touch authentication — those routes
+ask for a signed-in person — and none can delete, except two things a person
+allows on the key itself: the row a split replaces (`may_commit`) and a
+category nothing carries (`may_edit_categories`). Everything a key does appears in History
 under both the person's name and the key's.
 
 ## Contributing

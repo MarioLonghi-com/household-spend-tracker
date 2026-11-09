@@ -10,6 +10,11 @@ Everything in this router hangs off `current_agent`, which is what makes the
 capability floor structural rather than a check. There is no delete here, no
 undo, nothing touching auth, admin, membership or `/db`, and there never will
 be -- `test_agent_access.py` walks the route table and fails if there is.
+Two routes replace or remove a row behind a trust a person grants on top of
+`write`, each named by that test and held to its dependency: a split
+(`may_commit`) and deleting an unused category (`may_edit_categories`, in
+`agent_categories.py`) -- both only because nothing is lost and one undo puts
+it back.
 """
 
 from __future__ import annotations
@@ -538,6 +543,7 @@ def manifest(agent: CurrentAgent) -> Manifest:
             agent_name=agent.key.agent_name,
             scopes=agent.key.scope.granted,
             may_commit=agent.key.may_commit,
+            may_edit_categories=agent.key.may_edit_categories,
             expires_at=agent.key.expires_at,
         ),
         accounts=[

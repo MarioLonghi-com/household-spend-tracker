@@ -320,6 +320,11 @@ FORBIDDEN_TO_AGENTS = (
 def test_the_capability_floor_is_structural_and_not_a_check(client):
     """§1.2: no key may delete, undo, or touch auth, admin, membership or /db.
 
+    Two named exceptions replace or remove a row, both POSTs held to a trust a
+    person grants on top of `write` and both because nothing is lost: a split
+    (`may_commit`, the test below) and deleting a category nothing carries
+    (`may_edit_categories`, #366, `test_agent_categories.py`).
+
     None of that is enforced by an `if`. It is enforced by those routes asking
     for `current_user` and never for `current_agent`, which means the floor
     cannot be lowered without somebody editing a route signature. This walks the

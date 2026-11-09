@@ -2270,6 +2270,8 @@ class ManifestKey(BaseModel):
     #: implication is ours to apply rather than the agent's to remember.
     scopes: list[str]
     may_commit: bool
+    #: Whether this key may add categories and delete an unused one (#366).
+    may_edit_categories: bool = False
     expires_at: datetime
 
 
@@ -2473,6 +2475,7 @@ class AgentKeyOut(ORMModel):
     #: The list, computed from the one stored value. `write` implies `read`.
     scopes: list[str]
     may_commit: bool
+    may_edit_categories: bool = False
     created_at: datetime
     expires_at: datetime
     last_used_at: datetime | None = None
@@ -2494,6 +2497,8 @@ class IssueAgentKey(BaseModel):
     household_id: str
     scope: AgentScope = AgentScope.read
     may_commit: bool = False
+    #: Let it add categories and delete an unused one (#366). Needs `write`.
+    may_edit_categories: bool = False
     days: int = 90
 
 

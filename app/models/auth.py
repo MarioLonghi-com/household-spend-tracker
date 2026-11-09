@@ -442,6 +442,13 @@ class AgentKey(Base, UUIDPrimaryKey):
     #: False is the honest default: the preview exists so that nothing is
     #: written before somebody looked, and that is more true of an agent.
     may_commit: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    #: Whether this key may add categories (and a group for them) and delete
+    #: an unused one (#366). Its own flag rather than part of `write`: tagging
+    #: a row and changing the household's category tree are different kinds
+    #: of act, and a key trusted with last month's spend should not, on that
+    #: alone, be able to delete Groceries or add forty near-duplicates of it.
+    #: False is the default, as for `may_commit`.
+    may_edit_categories: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
     #: Mandatory and non-sliding, like `trusted_devices.expires_at`. A key that
     #: renews itself on use is a key that lives forever.
