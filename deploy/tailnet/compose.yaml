@@ -34,7 +34,7 @@ services:
   tailscale:
     # Pinned. `:latest` moves underneath a restart; Dependabot's docker entry
     # moves this one with a pull request.
-    image: tailscale/tailscale:v1.102.5
+    image: tailscale/tailscale:v1.104.4
     # The node's name on the tailnet, and so its MagicDNS name and certificate.
     hostname: spend-tracker
     environment:
