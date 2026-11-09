@@ -378,7 +378,9 @@ TAMPER = {
         "log entry"),
     "integratedTime past the certificate": (
         lambda b: _entry(b).__setitem__("integratedTime", str(int(_entry(b)["integratedTime"]) + 86400)),
-        "expired"),
+        # sigstore 4.5.1 words it "cert is not valid at validation time";
+        # 4.5.0 said "expired". Either names the reason, which is the point.
+        ("expired", "not valid at validation time")),
     "signature replaced by another release's": (
         lambda b: b["dsseEnvelope"]["signatures"][0].__setitem__(
             "sig", json.loads(bundle("0.7.0"))["dsseEnvelope"]["signatures"][0]["sig"]),
@@ -395,7 +397,8 @@ def test_v4_a_tampered_bundle_is_refused(version, case):
     with pytest.raises(V.Refused) as e:
         run(version, data=json.dumps(data).encode())
     assert e.value.rule == "signature"
-    assert words in e.value.detail.lower()
+    words = (words,) if isinstance(words, str) else words
+    assert any(w in e.value.detail.lower() for w in words), e.value.detail
 
 
 # --------------------------------------------------------------------------- #
