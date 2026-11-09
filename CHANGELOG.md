@@ -51,6 +51,15 @@ history this repository does not have.
   (`COVERAGE_CORE=sysmon`), which cost 7% of a run where the trace function
   cost 18%. No change to `app/`.
 
+### Fixed
+
+- **`ci-ok` passes only a run that did the work** (#407). It failed on
+  `failure` or `cancelled` and passed anything else, so two runs whose
+  `changes` job GitHub abandoned -- everything after it skipped, nothing
+  tested -- came out green. The verdict is now `scripts/ci_ok.py`: only
+  `success` or `skipped`, and `changes` must have succeeded, since it decides
+  every skip. A test keeps every job of the workflow in `ci-ok`'s `needs`.
+
 ## 0.14.1 — 2026-11-09
 
 **Reversible: none** — no migration in this release. To go back to
