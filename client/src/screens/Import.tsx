@@ -401,6 +401,20 @@ function OneTimeImportLink({ onGo }: { onGo?: (screen: string) => void }) {
   );
 }
 
+/**
+ * An account as the "Into which account" dropdown lists it (#365): its name,
+ * then its bank, then its currency -- "Current | Big Bank (EUR)". The bank is
+ * what tells two accounts with the same kind of name apart when a statement
+ * arrives, and the currency stays because a statement in the wrong currency
+ * is the mistake this choice is most likely to make. No bank, no bar.
+ */
+export function importAccountLabel(account: Pick<Account, "name" | "institution" | "currency">): string {
+  const bank = account.institution?.trim();
+  return bank
+    ? `${account.name} | ${bank} (${account.currency})`
+    : `${account.name} (${account.currency})`;
+}
+
 export function Import({
   household,
   onGo,
@@ -899,7 +913,7 @@ export function Import({
                 <option value="">{t({ message: "Choose…", comment: "Option in a dropdown on the Import screen" })}</option>
                 {(accounts.data ?? []).map((one) => (
                   <option key={one.id} value={one.id}>
-                    {one.name} ({one.currency})
+                    {importAccountLabel(one)}
                   </option>
                 ))}
               </select>
