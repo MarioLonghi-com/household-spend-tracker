@@ -32,6 +32,16 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.13.1 — 2026-11-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.13.0`, use *Go back to 0.13.0* under Updates, or follow *Going back after
+a successful update* in `deploy/UPGRADING.md`. From a checkout, check out
+`v0.13.0` and restart.
+
+Income vs Expense now counts what a work repayment came to beyond or short of
+the expenses linked to it, and a folded category group shows its months.
+
 ### Changed
 
 - **Income vs Expense counts what a work repayment differs by.** Each
