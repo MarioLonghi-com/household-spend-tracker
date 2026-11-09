@@ -49,6 +49,10 @@ history this repository does not have.
   tick too and shows the "nothing ticked" notice, and Select all ticks
   it again so the filter reads *All categories*. The Income vs Expense
   report's *Uncategorised* tick follows the same buttons. (#371)
+- **The Import screen names each account with its bank.** *Into which
+  account* lists an account as `Current | Harbour Bank (EUR)` rather than
+  `Current (EUR)`, so two accounts with similar names at two banks can be
+  told apart; an account with no bank set reads as before. (#365)
 - **Showing one currency and sorting by its amount no longer empties the
   Register.** The currency toggle used to hide rows in the browser after a
   page of 500 had arrived, and the amount sort puts one currency's rows
