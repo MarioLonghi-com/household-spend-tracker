@@ -924,6 +924,13 @@ export function Register({
   });
 
   const rows = useMemo(() => data?.transactions ?? [], [data]);
+  //: The open row as the register has it now, not as it was clicked: when the
+  //: ledger is refreshed from a change made elsewhere (#369), the panel is
+  //: handed the newer version and decides what to do with it.
+  const openedLive = useMemo(
+    () => (opened ? rows.find((one) => one.id === opened.id) ?? null : null),
+    [opened, rows],
+  );
 
   //: Two existing rows made the two legs of one transfer (issues #70, #71):
   //: one from each bank's statement, in the same currency or not.
@@ -2183,7 +2190,7 @@ export function Register({
 
       {opened && (
         <TransactionPanel
-          txn={opened}
+          txn={openedLive ?? opened}
           household={household}
           accountNameOf={(id) => accountsById.get(id)?.name ?? ""}
           householdId={household.id}
@@ -3691,7 +3698,19 @@ function Guarded({
   );
 }
 
-function TransactionPanel({
+/** Whether two versions of a row agree on every fact the panel edits. */
+export function sameFacts(a: Transaction, b: Transaction): boolean {
+  return (
+    a.date === b.date &&
+    (a.payee_name ?? null) === (b.payee_name ?? null) &&
+    a.amount === b.amount &&
+    (a.memo ?? null) === (b.memo ?? null) &&
+    a.cleared === b.cleared &&
+    (a.category_id ?? null) === (b.category_id ?? null)
+  );
+}
+
+export function TransactionPanel({
   txn,
   household,
   accountNameOf,
@@ -3738,8 +3757,40 @@ function TransactionPanel({
   //: across a save, so "what has changed" has to be measured against the last
   //: answer rather than against the row that was clicked minutes ago.
   const [row, setRow] = useState(txn);
+  //: A newer version of the row that arrived while there were unsaved edits
+  //: here -- somebody else changed it (#369). Held rather than applied, and
+  //: autosave waits, so neither their change nor this one is lost silently.
+  const [theirs, setTheirs] = useState<Transaction | null>(null);
+
+  /** Put the row's facts into the fields, as opening the panel does. */
+  function adopt(next: Transaction) {
+    setDate(next.date);
+    setPayee(next.payee_name ?? "");
+    setOutflow(next.amount < 0 ? toInput(next.amount, currency) : "");
+    setInflow(next.amount > 0 ? toInput(next.amount, currency) : "");
+    setMemo(next.memo ?? "");
+    setCleared(next.cleared);
+    setCategoryId(next.category_id ?? null);
+    setRow(next);
+    setTheirs(null);
+  }
+
+  // The register refetches when another member, an agent or another tab
+  // changes the ledger, and hands the panel the newer row. This panel's own
+  // save already set `row` to the answer, so an arrival with the same facts is
+  // that save coming back; anything else was changed elsewhere. With nothing
+  // typed here the fields simply follow it; with edits in hand it is said,
+  // and the person chooses.
   useEffect(() => {
-    setRow(txn);
+    if (sameFacts(txn, row)) {
+      setRow(txn);
+      return;
+    }
+    if (dirty) setTheirs(txn);
+    else adopt(txn);
+    // `row` and `dirty` are read as they are when the new row arrives; this
+    // runs for the arrival, not for every keystroke.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [txn]);
 
   const locked = row.cleared === "reconciled";
@@ -3816,7 +3867,7 @@ function TransactionPanel({
    * refuses outright.
    */
   function autoSave() {
-    if (dirty && !save.isPending && !locked) save.mutate();
+    if (dirty && !save.isPending && !locked && theirs === null) save.mutate();
   }
 
 
@@ -3835,6 +3886,31 @@ function TransactionPanel({
   return (
     <Panel title={`${formatDate(txn.date)} · ${accountName}`} onClose={onClose}>
       <Problem error={save.error ?? (confirming ? null : remove.error) ?? copy.error} />
+      {theirs ? (
+        <div className="banner warn changed-elsewhere" role="alert">
+          <p style={{ marginTop: 0 }}>
+            <Trans>
+              This transaction was changed somewhere else while you were editing it. Nothing has
+              been saved over it.
+            </Trans>
+          </p>
+          <div className="row">
+            <button className="primary" onClick={() => adopt(theirs)}>
+              <Trans>Show the new version</Trans>
+            </button>
+            <button
+              onClick={() => {
+                // Measured against their version from now on, and saved.
+                setRow(theirs);
+                setTheirs(null);
+                save.mutate();
+              }}
+            >
+              <Trans>Keep my changes</Trans>
+            </button>
+          </div>
+        </div>
+      ) : null}
       {txn.split_id ? (
         <div className="banner info">
           <Trans>
