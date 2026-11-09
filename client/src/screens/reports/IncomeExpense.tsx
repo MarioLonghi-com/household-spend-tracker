@@ -268,7 +268,10 @@ export function IncomeExpense({ household }: { household: Household }) {
             label={t({ message: "All categories", comment: "Text on a dropdown that picks several on the Income vs Expense report" })}
             groups={categoryOptions}
             value={chosenCategories}
-            onChange={setChosenCategories}
+            onChange={(ids, tick) => {
+              setChosenCategories(ids);
+              if (tick !== undefined) setWithUncategorised(tick);
+            }}
             extra={{
               label: t({ message: "Uncategorised", comment: "Label on the Income vs Expense report: having no category. See GLOSSARY.md" }),
               hint: t`(rows with no category yet)`,
