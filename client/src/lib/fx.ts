@@ -123,12 +123,21 @@ export interface FxRate {
   rate: string;
   rate_in_base: string | null;
   own_rate: string | null;
+  /** A month's line (#410): the date of the rate its policy used, and its age. */
+  rate_date?: string | null;
+  stale?: boolean | null;
 }
 
 export interface FxRates {
   base_currency: string;
+  /** `day`, or a month per line: `month_avg` / `month_end` (#410). */
+  granularity?: string;
   total: number;
   limit: number;
+  /** Where `rates` starts in the whole list. */
+  offset?: number;
+  /** Where in `rates` a jump landed, or null. */
+  focus?: number | null;
   rates: FxRate[];
 }
 
