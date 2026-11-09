@@ -57,6 +57,15 @@ export interface FxFetch {
 export interface FxAccountRef {
   id: string;
   name: string;
+  /** The bank, as the account states it (#411). */
+  institution: string | null;
+  /** ISO 3166-1 alpha-2, or null when the account never said. */
+  country: string | null;
+  /** The country's English name; `countryName` gives another language its own. */
+  country_name: string | null;
+  /** The flag for `country`, or the UN's when there is none. Built server-side. */
+  flag: string;
+  closed: boolean;
 }
 
 export interface FxCurrency {

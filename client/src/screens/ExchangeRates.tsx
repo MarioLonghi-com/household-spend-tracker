@@ -22,6 +22,7 @@ import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { ApiError, api } from "../lib/api";
 import { Dialog, Field, Problem, SortHeading, sortRows, useSort } from "../components/bits";
+import { CurrencyAccounts } from "../components/CurrencyAccounts";
 import { RatesAsOf } from "../components/RatesAsOf";
 import { problemText } from "../lib/errorMessages";
 import { formatCount, formatDate, monthLabel } from "../lib/locale";
@@ -487,7 +488,7 @@ function Currencies({
             {rows.map((row) => (
               <tr key={row.currency}>
                 <td data-primary="true">
-                  <span className="mono">{row.currency}</span>
+                  <span className="mono">{row.currency}</span> <CurrencyAccounts currency={row.currency} accounts={row.accounts} />
                   <div className="small muted">{row.accounts.map((a) => a.name).join(", ")}</div>
                 </td>
                 <td className="small">{row.source_in_use ? sourceLabel(row.source_in_use) : "—"}</td>

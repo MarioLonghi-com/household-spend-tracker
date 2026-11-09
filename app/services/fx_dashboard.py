@@ -15,6 +15,7 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from .. import countries
 from .. import currencies as iso
 from ..errors import DomainError, ValidationError
 from ..models import (
@@ -54,8 +55,32 @@ class FetchView:
 
 @dataclass(frozen=True, slots=True)
 class AccountRef:
+    """An account in a currency, as the (i) beside that currency lists it (#411)."""
+
     id: str
     name: str
+    #: The bank, as the account states it; NULL when it never said.
+    institution: str | None
+    #: ISO 3166-1 alpha-2, NULL when not stated.
+    country: str | None
+    #: The country's English name, which a translated screen replaces with its
+    #: own. NULL when no country is stated.
+    country_name: str | None
+    flag: str
+    closed: bool
+
+
+def account_ref(account: Account) -> AccountRef:
+    code = account.country
+    return AccountRef(
+        id=account.id,
+        name=account.name,
+        institution=account.institution,
+        country=code,
+        country_name=countries.BY_CODE.get(code, code) if code else None,
+        flag=countries.flag(code),
+        closed=account.closed,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -189,7 +214,7 @@ def status(session: Session, household: Household, *, today: Date | None = None)
     ).scalars():
         code = account.currency.upper()
         if code != base:
-            accounts.setdefault(code, []).append(AccountRef(id=account.id, name=account.name))
+            accounts.setdefault(code, []).append(account_ref(account))
 
     dates_by_currency: dict[str, list[Date]] = {}
     for code, day in session.execute(

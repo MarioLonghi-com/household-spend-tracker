@@ -492,6 +492,45 @@ def test_an_account_in_a_code_iso_never_assigned_is_listed_as_not_covered(client
     assert any(a["currency"] == "GPB" for a in accounts)
 
 
+def test_each_currency_lists_its_accounts_with_bank_country_and_closed(client, world):
+    """What the (i) beside a currency reads (#411): two accounts in SEK, one closed."""
+    h = world["house"]
+    kronor = world["accounts"]["SEK"]["id"]
+    answer = client.patch(
+        f"/api/accounts/{kronor}",
+        json={"institution": "Nordbank", "country": "se", "closed": True},
+        headers=HEADERS,
+    )
+    assert answer.status_code == 200, answer.text
+    answer = client.post(
+        f"/api/households/{h}/accounts",
+        json={"name": "Buffer", "type": "savings", "currency": "SEK"},
+        headers=HEADERS,
+    )
+    assert answer.status_code == 201, answer.text
+
+    status = client.get(f"/api/households/{h}/fx/status").json()
+    sek = next(row for row in status["currencies"] if row["currency"] == "SEK")
+    by_name = {a["name"]: a for a in sek["accounts"]}
+    assert list(by_name) == ["Buffer", "Kronor"]
+    assert {k: by_name["Kronor"][k] for k in ("institution", "country", "country_name", "closed")} == {
+        "institution": "Nordbank",
+        "country": "SE",
+        "country_name": "Sweden",
+        "closed": True,
+    }
+    assert by_name["Kronor"]["flag"] == "\U0001F1F8\U0001F1EA"
+    assert {k: by_name["Buffer"][k] for k in ("institution", "country", "country_name", "closed")} == {
+        "institution": None,
+        "country": None,
+        "country_name": None,
+        "closed": False,
+    }
+    # The other currency's list is its own: nothing of SEK's leaks into GBP.
+    gbp = next(row for row in status["currencies"] if row["currency"] == "GBP")
+    assert [(a["name"], a["closed"]) for a in gbp["accounts"]] == [("Pounds", False)]
+
+
 def test_the_browsed_rates_carry_their_base_meaning_and_own_rate(client, world):
     h = world["house"]
     client.post(f"/api/households/{h}/fx/fetch", json={}, headers=HEADERS)

@@ -34,6 +34,17 @@ history this repository does not have.
 
 **Reversible: none** — no migration; CI only.
 
+### Added
+
+- **Exchange rates: an (i) beside each currency lists the accounts in it**
+  (#411), so it is clear why that currency is being fetched: each account's
+  name, bank and country, a closed one tagged *Closed*, sorted by name. A
+  long list scrolls inside the bubble, which stays inside the window at every
+  width, on a phone too and for a currency at the right of the table. It is a
+  button named *Accounts in SEK* and so on; Tab reaches the list and Escape
+  closes it. The status endpoint's account entries now carry `institution`,
+  `country`, `country_name`, `flag` and `closed`.
+
 ### Changed
 
 - **A pull request into `dev` runs the Linux tier of CI only**, and the push
