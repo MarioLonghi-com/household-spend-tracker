@@ -27,6 +27,8 @@ from ...schemas import (
     ReportBehindOut,
     ReportCurrenciesOut,
     ReportEntryOut,
+    ReportLineOut,
+    ReportReimbursementsOut,
     ReportRowOut,
     ReportSectionOut,
 )
@@ -51,9 +53,23 @@ def _row_out(row: report_service.Row, currency: str) -> ReportRowOut:
     )
 
 
+def _line_out(line: report_service.Line, currency: str) -> ReportLineOut:
+    return ReportLineOut(
+        key=line.key,
+        name=line.name,
+        by_month=line.by_month,
+        total_minor=line.total_minor,
+        total=format_amount(line.total_minor, currency, with_symbol=False),
+        average_minor=line.average_minor,
+        average=format_amount(line.average_minor, currency, with_symbol=False),
+        count=line.count,
+    )
+
+
 def _section_out(section: report_service.Section, currency: str) -> ReportSectionOut:
     return ReportSectionOut(
         rows=[_row_out(row, currency) for row in section.rows],
+        groups=[_line_out(line, currency) for line in section.groups],
         by_month=section.by_month,
         total_minor=section.total_minor,
         total=format_amount(section.total_minor, currency, with_symbol=False),
@@ -140,6 +156,13 @@ def income_expense(
         net_by_month=answer["net_by_month"],
         net_total_minor=answer["net_total_minor"],
         net_total=format_amount(answer["net_total_minor"], currency_code, with_symbol=False),
+        reimbursements=ReportReimbursementsOut(
+            **{
+                name: _line_out(line, currency_code)
+                for name, line in answer["reimbursements"].items()
+            }
+        ),
+        has_income_group=answer["has_income_group"],
         excluded=ExcludedOut(**answer["excluded"]),
         coverage=CoverageOut(**answer["coverage"]),
     )
@@ -161,17 +184,24 @@ def behind_a_figure(
     period: Annotated[str | None, Query(pattern=r"^\d{4}-\d{2}$")] = None,
     row_category_id: Annotated[str | None, Query()] = None,
     row_uncategorised: bool = False,
-    direction: Annotated[str | None, Query(pattern="^(in|out)$")] = None,
+    row_group_id: Annotated[str | None, Query()] = None,
+    direction: Annotated[
+        str | None,
+        Query(
+            pattern="^(in|out|reimbursement_income|reimbursement_spent|reimbursement_pending)$"
+        ),
+    ] = None,
 ) -> ReportBehindOut:
     """The transactions that add up to one figure on the report.
 
-    Every argument the report takes, plus three that say **which figure**:
+    Every argument the report takes, plus those that say **which figure**:
     `period` for one month column, `row_category_id` / `row_uncategorised` for
-    one category row, and `direction` for one band. Each is optional, and
-    leaving one out widens the answer in exactly the way the corresponding
-    cell is wider -- no `period` is the Total column, no `direction` is the Net
-    row, where both sides are the honest answer because a net figure is made
-    of both.
+    one category row, `row_group_id` for one group's subtotal, and `direction` for one line: `in` and `out` for income
+    and expense, and the three work-reimbursement lines by name (#372). Each
+    is optional, and leaving one out widens the answer in exactly the way the
+    corresponding cell is wider -- no `period` is the Total column, no
+    `direction` is the Net row, which is income and expense together and
+    never the reimbursement block.
 
     The service composes the same `flow_rows` and the same window the report
     does, so what comes back sums to the figure that was clicked. A
@@ -191,6 +221,7 @@ def behind_a_figure(
         period=period,
         row_category_id=row_category_id,
         row_uncategorised=row_uncategorised,
+        row_group_id=row_group_id,
         direction=direction,
     )
     code = currency.upper()

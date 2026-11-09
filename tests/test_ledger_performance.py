@@ -1342,25 +1342,19 @@ def test_the_flow_reports_start_from_the_household_even_with_statistics():
 @pytest.mark.parametrize(
     "statistics", [None, "sampled", "full"], ids=["no-statistics", "sampled", "full"]
 )
-def test_the_flow_reports_read_the_repayments_once_whatever_the_statistics(statistics):
-    """The "is this row somebody's repayment?" check, over every flow row.
+def test_the_flow_reports_read_no_repayment_subquery_whatever_the_statistics(statistics):
+    """Which side a row lands on reads the row's own columns and nothing else.
 
-    As a correlated EXISTS it was a probe per row, and which index the probe
-    used was the planner's guess. With no statistics it searched the household
-    index, which in a one-household ledger is every row; with full statistics
-    it called the link index useless, `reimbursed_by_id` being NULL on nearly
-    every row, and scanned. Either way each row read the whole table again:
-    Income vs Expense took 41s over 10,403 transactions (#297). Read once as a
-    list, no statistics can turn it back into a probe -- so the plan has no
-    correlated subquery in it under none, under what housekeeping writes, and
-    under a full `ANALYZE`.
-
-    `NOT IN` is also where a rewrite could change an answer, so the rows each
-    household keeps and drops are counted against the links themselves. Some
-    links cross households, and a link names a repayment only for the
-    household of the expense holding it.
+    The "is this row somebody's repayment?" check was a probe per row as a
+    correlated EXISTS -- Income vs Expense took 41s over 10,403 transactions
+    (#297) -- and then a list read once. Since #372 being a repayment decides
+    nothing (only the Reimbursement category sets a payment apart), so the
+    report's plan holds no subquery at all, under no statistics, under what
+    housekeeping writes, and under a full `ANALYZE`. The rows each household
+    lands in the block are counted against the flags themselves, because a
+    link crossing households must not move a row of the other one.
     """
-    from app.services.reporting import _is_reimbursement, flow_rows
+    from app.services.reporting import REIMBURSEMENT_SPENT, classified_rows, side
 
     engine = create_engine("sqlite://")
     Base.metadata.create_all(engine)
@@ -1382,8 +1376,9 @@ def test_the_flow_reports_read_the_repayments_once_whatever_the_statistics(stati
         conn.execute(
             text(
                 "INSERT INTO transactions (id, household_id, account_id, date, amount, cleared,"
-                " created_at, updated_at, reimbursed_by_id) VALUES (:id, :house, :house,"
-                " :day, -100, 'uncleared', '2026-01-01', '2026-01-01', :paid_by)"
+                " created_at, updated_at, reimbursed_by_id, reimbursement) VALUES (:id, :house,"
+                " :house, :day, -100, 'uncleared', '2026-01-01', '2026-01-01', :paid_by,"
+                " CASE WHEN :paid_by IS NULL THEN NULL ELSE 'expected' END)"
             ),
             rows,
         )
@@ -1393,21 +1388,19 @@ def test_the_flow_reports_read_the_repayments_once_whatever_the_statistics(stati
             conn.execute(text("ANALYZE"))
 
     for house in (ours, theirs):
-        payments = {r["paid_by"] for r in rows if r["house"] == house and r["paid_by"]}
-        to_drop = sum(1 for r in rows if r["house"] == house and r["id"] in payments)
-        assert to_drop, "the fixture must give each household a repayment to drop"
-        kept = flow_rows(house).with_only_columns(func.count())
-        dropped = select(func.count()).select_from(Transaction).where(
-            Transaction.household_id == house, _is_reimbursement(house)
-        )
-        for statement in (kept, dropped):
+        flagged = sum(1 for r in rows if r["house"] == house and r["paid_by"])
+        assert flagged, "the fixture must give each household a repaid expense"
+        kept = classified_rows(house).with_only_columns(func.count())
+        set_apart = kept.where(side() == REIMBURSEMENT_SPENT)
+        for statement in (kept, set_apart):
             plan = _plan(engine, statement)
-            assert "CORRELATED" not in plan, plan
-            assert "LIST SUBQUERY" in plan, plan
+            assert "SUBQUERY" not in plan, plan
+            first = plan.splitlines()[0]
+            assert first.startswith("SEARCH transactions"), plan
         with engine.connect() as conn:
             in_house = sum(1 for r in rows if r["house"] == house)
-            assert conn.execute(kept).scalar_one() == in_house - to_drop
-            assert conn.execute(dropped).scalar_one() == to_drop
+            assert conn.execute(kept).scalar_one() == in_house
+            assert conn.execute(set_apart).scalar_one() == flagged
 
 
 def test_insights_aggregate_the_filtered_rows_directly(engine, session, household, accounts, owner):

@@ -19,7 +19,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { CurrencyToggle, HeadSlot, ReportTable, groupRows, toggleFold } from "./IncomeExpense";
-import type { Household, IncomeExpense as Report, ReportRow } from "../../lib/types";
+import type { Household, IncomeExpense as Report, ReportLine, ReportRow } from "../../lib/types";
+import { format } from "../../lib/money";
 
 // `globals` is off in vite.config.ts, so Testing Library never finds an
 // `afterEach` to hang its own cleanup on and every render would pile up in the
@@ -56,10 +57,26 @@ function row(
   };
 }
 
-function section(rows: ReportRow[], byMonth: [number, number]) {
+/** A line with no breakdown: a group's subtotal or a reimbursement line. */
+function line(values: [number, number], name: string | null = null, count = 2): ReportLine {
+  const total = values[0] + values[1];
+  return {
+    key: name ? `group-${name.toLowerCase()}` : null,
+    name,
+    by_month: { "2026-08": values[0], "2026-09": values[1] },
+    total_minor: total,
+    total: String(total),
+    average_minor: Math.trunc(total / 2),
+    average: String(Math.trunc(total / 2)),
+    count,
+  };
+}
+
+function section(rows: ReportRow[], byMonth: [number, number], groups: ReportLine[] = []) {
   const total = byMonth[0] + byMonth[1];
   return {
     rows,
+    groups,
     by_month: { "2026-08": byMonth[0], "2026-09": byMonth[1] },
     total_minor: total,
     total: String(total),
@@ -85,10 +102,17 @@ function aReport(over: Partial<Report> = {}): Report {
         row("Uncategorised", null, [-1000, -400000], null),
       ],
       [-137000, -139000],
+      [line([-128000, -129000], "Housing"), line([-8000, -10000], "Transport")],
     ),
     net_by_month: { "2026-08": 163000, "2026-09": -39000 },
     net_total_minor: 124000,
     net_total: "124000",
+    reimbursements: {
+      income: line([0, 35500]),
+      spent: line([-30000, 0], null, 1),
+      pending: line([0, -4000], null, 1),
+    },
+    has_income_group: true,
     excluded: { transfers: 0, opening_balances: 0, reimbursements: 0 },
     coverage: { months_in_range: 2, months_with_activity: 2 },
     ...over,
@@ -154,12 +178,12 @@ describe("the report table", () => {
 
     // And it sits *between* the groups: a heading, then the categories under
     // it, then the next heading -- with the ungrouped row last and unheaded.
+    // Income is one group by construction, so it carries no group heading.
     expect(labels()).toEqual([
       "Income",
-      "Earnings",
       "Salary",
       "Total income",
-      "Expense",
+      "Expenses",
       "Housing",
       "Rent",
       "Power",
@@ -167,15 +191,80 @@ describe("the report table", () => {
       "Fuel",
       "Tickets",
       "Uncategorised",
-      "Total expense",
+      "Total expenses",
     ]);
+  });
+
+  it("puts the server's subtotal on each group heading, and keeps it when folded", () => {
+    render(<Harness />);
+    const housing = () =>
+      screen.getByRole("button", { name: "Housing" }).closest("tr") as HTMLElement;
+    const figures = () =>
+      [...housing().querySelectorAll("td.amount")].map((cell) => cell.textContent?.trim());
+
+    // Aug, Sep, Total, Average -- the group line from the response, not a sum
+    // of Rent and Power made here (they add to -128,000 and -129,000 too, but
+    // the average is the server's -128,500).
+    expect(figures()).toEqual([-128000, -129000, -257000, -128500].map((n) => format(n, "EUR")));
+
+    fireEvent.click(screen.getByRole("button", { name: "Housing" }));
+    expect(labels()).not.toContain("Rent");
+    expect(figures()).toEqual([-128000, -129000, -257000, -128500].map((n) => format(n, "EUR")));
+  });
+
+  it("shows the work reimbursements under Net, apart from it", () => {
+    render(<Harness />);
+    const foot = [...document.querySelectorAll("table.report tfoot th.report-label")].map(
+      (cell) => cell.textContent?.trim(),
+    );
+    expect(foot).toEqual([
+      "Net",
+      "Work reimbursements",
+      "Reimbursement income",
+      "Amount spent, reimbursed",
+      "Pending reimbursement",
+    ]);
+    const pending = [...document.querySelectorAll("tr.report-aside")][2];
+    expect([...pending.querySelectorAll("td.amount")].map((cell) => cell.textContent?.trim())).toEqual(
+      [0, -4000, -4000, -2000].map((n) => format(n, "EUR")),
+    );
+    expect(document.body.textContent).toContain("not counted in income, expenses or net");
+  });
+
+  it("puts the headline figures above the table, the reimbursement ones apart", () => {
+    render(<Harness />);
+    const figures = (selector: string) =>
+      [...document.querySelectorAll(`${selector} > div`)].map((one) =>
+        [one.querySelector("dt")?.textContent, one.querySelector("dd")?.textContent],
+      );
+    expect(figures(".report-headline > dl.report-figures")).toEqual([
+      ["Income", format(600000, "EUR")],
+      ["Expenses", format(-276000, "EUR")],
+      ["Net", format(124000, "EUR")],
+    ]);
+    // Net is income plus expenses and nothing from the block below.
+    expect(figures(".report-figures-aside > dl")).toEqual([
+      ["Reimbursements received", format(35500, "EUR")],
+      ["Amount spent, reimbursed", format(-30000, "EUR")],
+      ["Still to be reimbursed", `${format(-4000, "EUR")} (1 item)`],
+    ]);
+  });
+
+  it("says when no group is marked Income, and only then", () => {
+    const { unmount } = render(<Harness />);
+    expect(document.querySelector(".report-no-income")).toBeNull();
+    unmount();
+    render(<Harness report={aReport({ has_income_group: false })} />);
+    expect(document.querySelector(".report-no-income")?.textContent).toContain(
+      "No category group is marked as Income",
+    );
   });
 
   it("folds a band away and keeps its total on screen", () => {
     render(<Harness />);
     expect(labels()).toContain("Rent");
 
-    fireEvent.click(screen.getByRole("button", { name: "Expense" }));
+    fireEvent.click(screen.getByRole("button", { name: "Expenses" }));
 
     // The categories and their group headings are gone...
     expect(labels()).not.toContain("Rent");
@@ -186,14 +275,13 @@ describe("the report table", () => {
     // ...and the figure the band exists to give is still there.
     expect(labels()).toEqual([
       "Income",
-      "Earnings",
       "Salary",
       "Total income",
-      "Expense",
-      "Total expense",
+      "Expenses",
+      "Total expenses",
     ]);
 
-    fireEvent.click(screen.getByRole("button", { name: "Expense" }));
+    fireEvent.click(screen.getByRole("button", { name: "Expenses" }));
     expect(labels()).toContain("Rent");
   });
 
@@ -245,7 +333,7 @@ describe("the report table", () => {
     // The inverted banding is keyed off these two being the last cells in the
     // row -- `td.amount:last-child` and `:nth-last-child(2)` -- so their
     // position is load-bearing rather than cosmetic.
-    expect(cells.slice(-2)).toEqual(["Average", "Total"]);
+    expect(cells.slice(-2)).toEqual(["Total", "Average"]);
     expect(cells.slice(1, -2)).toEqual(["Aug 2026", "Sep 2026"]);
   });
 });
@@ -253,14 +341,14 @@ describe("the report table", () => {
 describe("what the report says it left out", () => {
   const notes = () => document.querySelector(".report-notes")?.textContent ?? "";
 
-  it("counts the work expenses and repayments beside the transfers", () => {
+  it("counts the rows set apart beside the transfers", () => {
     render(
       <Harness
         report={aReport({ excluded: { transfers: 2, opening_balances: 0, reimbursements: 3 } })}
       />,
     );
     expect(notes()).toContain("Not counted: 2 transfer legs and 0 opening balances.");
-    expect(notes()).toContain("3 work expenses and repayments left out");
+    expect(notes()).toContain("3 rows set apart under Work reimbursements");
   });
 
   it("says it even when nothing else was left out, and in the singular for one", () => {
@@ -269,13 +357,13 @@ describe("what the report says it left out", () => {
         report={aReport({ excluded: { transfers: 0, opening_balances: 0, reimbursements: 1 } })}
       />,
     );
-    expect(notes()).toContain("1 work expense or repayment left out");
+    expect(notes()).toContain("1 row set apart under Work reimbursements");
     expect(notes()).not.toContain("Not counted");
   });
 
   it("stays quiet at zero", () => {
     render(<Harness />);
-    expect(notes()).not.toContain("work expense");
+    expect(notes()).not.toContain("set apart");
   });
 });
 
@@ -351,10 +439,11 @@ describe("in en-XA, the report shows no English", () => {
       );
       expect(left()).toEqual([]);
 
-      // Fold the expense band and a group in the income band.
+      // Fold a group in the expense band, then the income band.
       const folds = Array.from(document.querySelectorAll<HTMLButtonElement>("button.fold"));
-      fireEvent.click(folds[1]);
-      fireEvent.click(folds.find((one) => one.textContent?.includes("Earnings"))!);
+      fireEvent.click(folds.find((one) => one.textContent?.includes("Housing"))!);
+      expect(left()).toEqual([]);
+      fireEvent.click(folds[0]);
       expect(left()).toEqual([]);
 
       // What went into a figure.

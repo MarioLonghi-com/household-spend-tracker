@@ -41,6 +41,25 @@ history this repository does not have.
   for review stays a person's step. The signing secrets are held in a
   separate `app-store` environment that only release tags can reach. (#351)
 
+### Changed
+
+- **Income vs Expense puts a row on a side by its category group, not its
+  sign, and sets work reimbursements apart.** The group marked Income is
+  income; every other category, and Uncategorised, is an expense line where
+  refunds and charges net per month, with a subtotal per group, largest
+  spend first. Rows in the category marked Reimbursement, flagged expenses
+  already repaid, and flagged ones still waiting are three lines in a
+  *Work reimbursements* block under Net, for information only and counted
+  in neither income, expenses nor net; a payment in any other category (a
+  salary that also repaid a claim) stays where its category puts it.
+  Headline figures sit above the table, and Total and Average stay pinned on
+  the right on wide screens. Which group is Income and which category is
+  Reimbursement are shown and moved on Categories, and the agent manifest
+  lists them. Migration `a7e3c1d95b20` adds the two markers and sets them on
+  a group called `Income` and a category called `Reimbursement(s)`.
+  **Reversible: lossy** -- downgrading forgets which group and category
+  carry the markers; no transaction changes. (#372)
+
 ## 0.12.0 — 2026-10-15
 
 **Reversible: none** — no migration in this release. To go back to

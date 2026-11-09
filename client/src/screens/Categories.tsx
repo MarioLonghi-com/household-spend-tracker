@@ -214,6 +214,16 @@ export function Categories({ household }: { household: Household }) {
                 >
                   {group.name}
                 </button>
+                {/* Which group is income on Income vs Expense (#372). Shown
+                    here because it is the household's choice, and the panel
+                    behind the heading is where it moves. */}
+                {group.role === "income" ? (
+                  <span className="tag" title={t`Its categories are income on Income vs Expense`}>
+                    <Trans comment="Tag beside a group name on the Categories screen: this is the group counted as income">
+                      Income
+                    </Trans>
+                  </span>
+                ) : null}
               </h2>
               <button className="link" onClick={() => setAddingTo(group)}>
                 <Trans>
@@ -280,6 +290,13 @@ export function Categories({ household }: { household: Household }) {
                       {/* The phone card's headline; see "Tables on a phone". */}
                       <td data-primary="true">
                         {category.name}
+                        {category.role === "reimbursement" ? (
+                          <span className="tag" title={t`Money work pays back: set apart on Income vs Expense`}>
+                            <Trans comment="Tag beside a name on the Categories screen: the category holding money work paid back">
+                              Reimbursement
+                            </Trans>
+                          </span>
+                        ) : null}
                         {category.archived ? (
                           <span className="tag closed" title={t({ message: "archived", comment: "Tooltip on the Categories screen: adjective, kept but hidden from pickers. See GLOSSARY.md" })}>
                             <Trans comment="Tag beside a name on the Categories screen: adjective, kept but hidden from pickers. See GLOSSARY.md">
@@ -430,10 +447,16 @@ export function GroupSettings({
   onSaved: () => void;
 }) {
   const [name, setName] = useState(group.name);
+  const [income, setIncome] = useState(group.role === "income");
   //: Delete asks first (#199); Undo in History is four steps away.
   const [confirming, setConfirming] = useState(false);
+  const changed = name.trim() !== group.name || income !== (group.role === "income");
   const save = useMutation({
-    mutationFn: () => api.patch(`/category-groups/${group.id}`, { name }),
+    mutationFn: () =>
+      api.patch(`/category-groups/${group.id}`, {
+        ...(name.trim() !== group.name ? { name } : {}),
+        ...(income !== (group.role === "income") ? { role: income ? "income" : null } : {}),
+      }),
     onSuccess: onSaved,
   });
   const remove = useMutation({
@@ -448,10 +471,28 @@ export function GroupSettings({
       <Field label={t({ message: "Name", comment: "Label of a form field on the Categories screen: noun" })}>
         <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       </Field>
+      <p />
+      <label className="small">
+        <input
+          type="checkbox"
+          checked={income}
+          onChange={(e) => setIncome(e.target.checked)}
+          style={{ width: "auto", marginRight: 8 }}
+        />
+        <Trans>
+          The Income group — its categories are income on Income vs Expense
+        </Trans>
+      </label>
+      <p className="muted small">
+        <Trans>
+          One group is the Income group. Every other category is counted as spending, where
+          refunds and charges net out. Ticking this moves it here from the group that has it now.
+        </Trans>
+      </p>
       <div className="row" style={{ marginTop: 16 }}>
         <button
           className="primary"
-          disabled={!name.trim() || name.trim() === group.name || save.isPending}
+          disabled={!name.trim() || !changed || save.isPending}
           onClick={() => {
             remove.reset();
             save.mutate();
@@ -584,12 +625,20 @@ export function CategorySettings({
   const [name, setName] = useState(category.name);
   const [groupId, setGroupId] = useState(category.group_id);
   const [archived, setArchived] = useState(category.archived);
+  const [reimbursement, setReimbursement] = useState(category.role === "reimbursement");
   //: Delete asks first (#199); Undo in History is four steps away.
   const [confirming, setConfirming] = useState(false);
 
   const save = useMutation({
     mutationFn: () =>
-      api.patch(`/categories/${category.id}`, { name, group_id: groupId, archived }),
+      api.patch(`/categories/${category.id}`, {
+        name,
+        group_id: groupId,
+        archived,
+        ...(reimbursement !== (category.role === "reimbursement")
+          ? { role: reimbursement ? "reimbursement" : null }
+          : {}),
+      }),
     onSuccess: onSaved,
   });
   const remove = useMutation({
@@ -630,6 +679,23 @@ export function CategorySettings({
         <Trans>
           Archiving takes it out of the lists and leaves it on everything it ever categorised, so
           the past still reads correctly.
+        </Trans>
+      </p>
+      <label className="small">
+        <input
+          type="checkbox"
+          checked={reimbursement}
+          onChange={(e) => setReimbursement(e.target.checked)}
+          style={{ width: "auto", marginRight: 8 }}
+        />
+        <Trans>
+          The Reimbursement category — money work pays back
+        </Trans>
+      </label>
+      <p className="muted small">
+        <Trans>
+          Income vs Expense shows its rows under Work reimbursements, out of income, spending and
+          net. One category has this; ticking it moves it here.
         </Trans>
       </p>
 
