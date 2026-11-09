@@ -47,6 +47,15 @@ EXPECTED_EXCLUDED: frozenset[str] = frozenset(
         # every update. The audited half is `receipts`, which is what people
         # actually change.
         "receipt_blobs",
+        # Published exchange rates (#396). A fetch writes them, not a person,
+        # and outside a batch; they are public data that can be fetched again,
+        # and nobody's to undo. The half people write is `fx_manual_rates`,
+        # which is audited.
+        "fx_rates",
+        # One row per source per press of Fetch now: an operational log, like
+        # the housekeeping counts, swept after ninety days. The rates a fetch
+        # wrote are the data, and those are `fx_rates`.
+        "fx_fetches",
     }
 )
 

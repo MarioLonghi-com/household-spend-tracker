@@ -1,8 +1,10 @@
 """Reading the ledger to review it and analyse it (#134).
 
-A filtered read of rows, the categorisation review, the reports, and the
-exchange rates the household actually got -- stories 2 and 4 of #134. Every
-figure stays per currency: nothing here converts or sums across two.
+A filtered read of rows, the categorisation review, the reports, the exchange
+rates the household actually got -- stories 2 and 4 of #134 -- and the rates
+its chain reads, with how old they are (#396). Every figure stays per
+currency, except Income vs Expense asked for `in_base`: that converts each
+row through `services/fx.py`, as the person's route does, and says so.
 
 Same door as `agent.py`: every route hangs off `current_agent`, so the
 capability floor (§1.2 -- no delete, no undo, nothing touching auth, admin,
@@ -26,11 +28,20 @@ from pydantic import BaseModel
 
 from ...errors import ValidationError
 from ...models import ClearedState, LinkSource, RegisterSource, ReimbursementState, ReimbursementView
-from ...schemas import IncomeExpenseOut, ManifestEndpoint, ReimbursementsOut
+from ...schemas import (
+    FxRatesOut,
+    FxStatusOut,
+    IncomeExpenseOut,
+    ManifestEndpoint,
+    NetWorthOut,
+    ReimbursementsOut,
+)
 from ...services import insights, review, search_query
 from ...services import transactions as txn_service
+from ...services.net_worth import Split
 from ..deps import CurrentAgent
 from . import agent
+from . import fx as human_fx
 from . import reporting as human_reports
 from .agent import _house
 
@@ -366,7 +377,7 @@ def categorisation_review(
 
 
 # --------------------------------------------------------------------------- #
-# Reports: the person's own, one currency at a time
+# Reports: the person's own, one currency at a time or converted into the base
 # --------------------------------------------------------------------------- #
 
 
@@ -377,7 +388,8 @@ def income_expense(
     household_id: str,
     agent: CurrentAgent,
     request: Request,
-    currency: Annotated[str, Query(min_length=3, max_length=3)],
+    currency: Annotated[str | None, Query(min_length=3, max_length=3)] = None,
+    in_base: bool = False,
     since: Date | None = None,
     until: Date | None = None,
     account_id: Annotated[list[str] | None, Query()] = None,
@@ -387,14 +399,16 @@ def income_expense(
     """The Income vs Expense report, answered by the person's route itself.
 
     Called rather than re-assembled, so the two cannot disagree about a figure
-    or about what `excluded` counts. `currency` is required and singular there
-    for the reason every report gives, and so it is here.
+    or about what `excluded` counts. One `currency`, or `in_base=true` for
+    every currency converted into the base (#396 phase 2) -- exactly one of
+    the two, as on the person's route.
     """
     house = _house(agent, household_id)
     answer = human_reports.income_expense(
         household=house,
         session=agent.session,
         currency=currency,
+        in_base=in_base,
         since=since,
         until=until,
         account_id=account_id,
@@ -431,6 +445,40 @@ def reimbursements(
     request.state.agent_rows = (
         answer.outstanding_count + answer.recovered_count + answer.written_off_count
     )
+    return answer
+
+
+@router.get("/households/{household_id}/reports/net-worth", response_model=NetWorthOut)
+def net_worth(
+    household_id: str,
+    agent: CurrentAgent,
+    request: Request,
+    since: Date | None = None,
+    until: Date | None = None,
+    closed_only: bool = True,
+    institution: Annotated[list[str] | None, Query()] = None,
+    country: Annotated[list[str] | None, Query()] = None,
+    currency: Annotated[list[str] | None, Query()] = None,
+    account_id: Annotated[list[str] | None, Query()] = None,
+    include_closed_accounts: bool = False,
+    split: Split = Split.currency,
+) -> NetWorthOut:
+    """The Net Worth report, answered by the person's route itself (#397)."""
+    house = _house(agent, household_id)
+    answer = human_reports.net_worth(
+        household=house,
+        session=agent.session,
+        since=since,
+        until=until,
+        closed_only=closed_only,
+        institution=institution,
+        country=country,
+        currency=currency,
+        account_id=account_id,
+        include_closed_accounts=include_closed_accounts,
+        split=split,
+    )
+    request.state.agent_rows = len(answer.accounts)
     return answer
 
 
@@ -491,6 +539,39 @@ def fx_observed(
     )
 
 
+@router.get("/households/{household_id}/fx/rates", response_model=FxRatesOut)
+def fx_rates(
+    household_id: str,
+    agent: CurrentAgent,
+    request: Request,
+    currency: Annotated[str | None, Query(min_length=3, max_length=3)] = None,
+    since: Date | None = None,
+    until: Date | None = None,
+    source: Annotated[str | None, Query(pattern="^(ecb|manual)$")] = None,
+    limit: int = Query(default=500, ge=1, le=human_fx.MAX_RATES),
+) -> FxRatesOut:
+    """The stored rates the household's chain reads, answered by the person's route.
+
+    Read only: a key cannot fetch rates, enter them or change where they come
+    from (#396 §5.1).
+    """
+    house = _house(agent, household_id)
+    answer = human_fx.stored_rates(
+        agent.session, house, currency=currency, since=since, until=until, source=source, limit=limit
+    )
+    request.state.agent_rows = len(answer.rates)
+    return answer
+
+
+@router.get("/households/{household_id}/fx/status", response_model=FxStatusOut)
+def fx_status(household_id: str, agent: CurrentAgent, request: Request) -> FxStatusOut:
+    """The Exchange rates page as data, so an agent can say how old the rates it read are."""
+    house = _house(agent, household_id)
+    answer = human_fx.status_out(agent.session, house)
+    request.state.agent_rows = len(answer.currencies)
+    return answer
+
+
 # --------------------------------------------------------------------------- #
 # What the manifest says about them
 # --------------------------------------------------------------------------- #
@@ -542,9 +623,15 @@ ENDPOINTS: list[ManifestEndpoint] = [
         method="GET",
         path=f"{_HOUSE}/reports/income-expense",
         says=(
-            "The Income vs Expense report for ONE currency (currency is required): income "
+            "The Income vs Expense report for ONE currency (currency=EUR): income "
             "and expense by category and month, net, in that currency only. Ask once per "
             "currency the manifest's accounts hold and never add the answers together. "
+            "Or in_base=true instead of currency: every currency in the household's base "
+            "currency, each row converted on its own at the household's chosen rates; then "
+            "converted is true, rate_source says the chain and policy, rates_used every rate "
+            "used, not_converted the rows with no rate (left out of every figure), and "
+            "rates_status how old the rates are -- say so when you quote a figure. A "
+            "repayment whose expenses are in another currency is not converted either way. "
             "The category group decides the side, never the sign: categories whose "
             "group_role is income are income, every other one (and uncategorised) is an "
             "expense line where refunds net, with a subtotal per group in expense.groups. "
@@ -561,7 +648,8 @@ ENDPOINTS: list[ManifestEndpoint] = [
         returns=(
             "{currency, since, until, months[], income, expense, net_by_month, "
             "net_total_minor, net_total, reimbursements, reimbursement_mixed, has_income_group, "
-            "excluded, coverage}"
+            "excluded, coverage, converted, rate_source, rates_used[], not_converted[], "
+            "rates_status}"
         ),
         scope="read",
     ),
@@ -584,6 +672,34 @@ ENDPOINTS: list[ManifestEndpoint] = [
     ),
     ManifestEndpoint(
         method="GET",
+        path=f"{_HOUSE}/reports/net-worth",
+        says=(
+            "The Net Worth report: every account's balance at each month end in the range, "
+            "added up, with what moved it. Amounts are integer minor units of "
+            "display_currency. With one currency in scope that currency is exact; with "
+            "several it is the base currency only when converted is true, and when nothing "
+            "converts display_currency is null, headline and bridge are null and there is "
+            "NO total -- read currencies[], each currency's own book, and never add them. "
+            "Liabilities (credit cards, other_liability) are negative and already inside "
+            "net_worth. closed_only (default true) stops at the last month that has ended; "
+            "clipped_from says the range was cut. Filters, all repeatable, OR within one "
+            "and AND across: institution, country (an empty value is 'not set'), currency, "
+            "account_id; plus since, until (omit for all dates), include_closed_accounts "
+            "and split (currency|country|institution|type) for points[].parts and held[]. "
+            "When converted, every foreign account is converted at the household's spot rate "
+            "on each date (rate_source, explanation.rates), a currency with no rate is left "
+            "out and listed in not_converted, and rates_status says how old the rates are. "
+            "Rates are decimal strings. /balances stays the unconverted per-account view."
+        ),
+        returns=(
+            "{as_of, since, until, today, closed_only, clipped_from, split, base_currency, "
+            "display_currency, converted, rate_source, rates_status, points[], headline, "
+            "bridge, held[], accounts[], not_converted[], currencies[], explanation}"
+        ),
+        scope="read",
+    ),
+    ManifestEndpoint(
+        method="GET",
         path=f"{_HOUSE}/fx/observed",
         says=(
             "The exchange rates this household actually got: one entry per linked "
@@ -594,6 +710,44 @@ ENDPOINTS: list[ManifestEndpoint] = [
             "make and show. An empty list means there are no such transfers."
         ),
         returns="{since, until, pair, total, observations[]}",
+        scope="read",
+    ),
+    ManifestEndpoint(
+        method="GET",
+        path=f"{_HOUSE}/fx/rates",
+        says=(
+            "The exchange rates the household's chain reads, as stored, newest first: the "
+            "ECB's reference rates (shared by the instance, fetched only when a member "
+            "presses Fetch now) and the rates members entered by hand. Each has source, "
+            "quote_currency, currency, date, period (day, or month for a monthly manual "
+            "rate dated its first day) and rate -- units of currency per ONE quote_currency, "
+            "a decimal STRING: parse it as a decimal, never a float. rate_in_base is the "
+            "same rate per one base currency, crossed through the quote currency on that "
+            "date; own_rate is what the household's own transfers gave that day, in the "
+            "same terms. Filters: currency, since, until, source (ecb|manual), limit "
+            "(default 500, max 5000). A key reads rates; it cannot fetch, enter or delete "
+            "them, or change where they come from."
+        ),
+        returns="{base_currency, total, limit, rates[]}",
+        scope="read",
+    ),
+    ManifestEndpoint(
+        method="GET",
+        path=f"{_HOUSE}/fx/status",
+        says=(
+            "How old the household's exchange rates are and what has been fetched: its "
+            "chain (sources in order: manual, ecb, own), stale_days, monthly_policy; tiles "
+            "(last_fetch, as_of, coverage, gaps, manual rates); one row per currency it "
+            "holds with the source in use, the span and age of its rates, its coverage of "
+            "transaction dates and a month strip; the fetch history; what no source "
+            "covers; and rates_status, the block a converting report carries. Say how old "
+            "a rate is whenever you use one."
+        ),
+        returns=(
+            "{base_currency, chain, stale_days, monthly_policy, show_own_rates, tiles, "
+            "running, running_fetches[], would_fetch[], would_fetch_refused, "
+            "would_fetch_reason, currencies[], not_covered[], history[], rates_status}"
+        ),
         scope="read",
     ),
 ]

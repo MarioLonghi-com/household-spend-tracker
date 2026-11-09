@@ -18,7 +18,19 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { CurrencyToggle, HeadSlot, ReportTable, groupRows, toggleFold } from "./IncomeExpense";
+import {
+  ALL_IN_BASE,
+  CurrencyToggle,
+  HeadSlot,
+  ReportTable,
+  closedMonths,
+  drillLink,
+  groupRows,
+  latestTwelve,
+  toggleFold,
+} from "./IncomeExpense";
+import { Reports } from "../Reports";
+import { registerPresetFrom } from "../../lib/registerLink";
 import type { Household, IncomeExpense as Report, ReportLine, ReportRow } from "../../lib/types";
 import { format } from "../../lib/money";
 
@@ -122,13 +134,14 @@ function aReport(over: Partial<Report> = {}): Report {
 }
 
 /** The screen's own fold state, driven through the screen's own transition. */
-function Harness({ report = aReport() }: { report?: Report }) {
+function Harness({ report = aReport(), query = "currency=EUR" }: { report?: Report; query?: string }) {
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set());
   return (
     <ReportTable
       report={report}
       household={{ id: "household-1" } as Household}
-      query="currency=EUR"
+      query={query}
+      groupCategories={new Map([["group-housing", ["rent", "power"]]])}
       collapsed={collapsed}
       onToggle={(key) => setCollapsed((was) => toggleFold(was, key))}
     />
@@ -508,3 +521,261 @@ describe("in en-XA, the report shows no English", () => {
   });
 });
 
+
+describe("a figure's rows open in Transactions (#401)", () => {
+  const context = {
+    household: "household-1",
+    query: "currency=EUR&account_id=acc-1",
+    since: "2026-08-01",
+    until: "2026-09-30",
+    currency: "EUR",
+    groupCategories: new Map([["group-housing", ["rent", "power"]]]),
+  };
+  const read = (href: string) => registerPresetFrom(href.slice(1));
+
+  it("filters a category's month to that category, that month, the currency and the accounts", () => {
+    const preset = read(drillLink({ title: "", period: "2026-08", rowCategoryId: "rent", direction: "out" }, { id: "t1", date: "2026-08-02" }, context));
+    expect(preset).toEqual({
+      open: "t1",
+      range: { since: "2026-08-01", until: "2026-08-31" },
+      categories: ["rent"],
+      backlog: false,
+      currencies: ["EUR"],
+      accounts: ["acc-1"],
+    });
+  });
+
+  it("opens a group's figure on the group's categories, and Uncategorised on Needs a category", () => {
+    const group = read(drillLink({ title: "", rowGroupId: "group-housing", direction: "out" }, { id: "t1", date: "2026-09-02" }, context));
+    expect(group?.categories).toEqual(["rent", "power"]);
+    expect(group?.range).toEqual({ since: "2026-08-01", until: "2026-09-30" });
+    const unset = read(drillLink({ title: "", period: "2026-09", rowUncategorised: true, direction: "out" }, { id: "t2", date: "2026-09-12" }, context));
+    expect(unset?.categories).toEqual([]);
+    expect(unset?.backlog).toBe(true);
+  });
+
+  it("keeps the report's own category filter for a section total", () => {
+    const preset = read(
+      drillLink({ title: "", period: "2026-08", direction: "out" }, { id: "t1", date: "2026-08-02" }, {
+        ...context,
+        query: "currency=EUR&category_id=rent&category_id=fuel&include_uncategorised=false",
+      }),
+    );
+    expect(preset?.categories).toEqual(["rent", "fuel"]);
+    expect(preset?.backlog).toBe(false);
+  });
+
+  it("sets no category on a reimbursement line, and widens to a claim's earlier expense", () => {
+    const preset = read(
+      drillLink({ title: "", period: "2026-09", direction: "reimbursement_surplus" }, { id: "hotel", date: "2026-06-14" }, context),
+    );
+    expect(preset?.categories).toBeNull();
+    expect(preset?.range).toEqual({ since: "2026-06-01", until: "2026-09-30" });
+  });
+
+  it("puts the link on each row of the bubble, which is twice as wide as a dialog", async () => {
+    const { api } = await import("../../lib/api");
+    vi.mocked(api.get).mockResolvedValue({
+      entries: [{ id: "t-rent", account_name: "Visa", date: "2026-08-02", payee_name: "Landlord", category_name: "Rent", memo: null, amount_minor: -120000 }],
+      count: 1,
+      total_minor: -120000,
+      capped: false,
+    });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <Harness query="currency=EUR&account_id=acc-1" />
+      </QueryClientProvider>,
+    );
+    const rent = [...document.querySelectorAll("table.report tbody tr")].find(
+      (tr) => tr.querySelector("th")?.textContent === "Rent",
+    )!;
+    fireEvent.click(rent.querySelector<HTMLButtonElement>("button.figure-open")!);
+    await screen.findByText("Landlord");
+
+    expect(document.querySelector(".dialog")?.classList.contains("dialog-wide")).toBe(true);
+    const link = document.querySelector<HTMLAnchorElement>("table.behind a.behind-open")!;
+    expect(link.target).toBe("_blank");
+    expect(read(link.getAttribute("href")!)).toEqual({
+      open: "t-rent",
+      range: { since: "2026-08-01", until: "2026-08-31" },
+      categories: ["rent"],
+      backlog: false,
+      currencies: ["EUR"],
+      accounts: ["acc-1"],
+    });
+    // The category is a column of its own now there is room for it.
+    expect(screen.getByRole("columnheader", { name: "Category" })).toBeTruthy();
+
+    const open = vi.spyOn(window, "open").mockReturnValue(null);
+    fireEvent.click(screen.getByText("Landlord"));
+    expect(open).toHaveBeenCalledWith(link.getAttribute("href"), "_blank", "noopener");
+    open.mockRestore();
+  });
+});
+
+
+describe("All, in the base currency (#396 phase 2)", () => {
+  /** A converted report: GBP and USD went in, SEK had no rate. */
+  const converted = () =>
+    aReport({
+      converted: true,
+      rate_source: { chain: ["manual", "ecb"], policy: "month_avg" },
+      rates_used: [
+        { currency: "USD", rate: "1.25", rate_date: "2026-08-01", source: "manual", via: null, stale: false },
+        { currency: "GBP", rate: "0.8", rate_date: "2026-09-01", source: "ecb", via: null, stale: true },
+      ],
+      not_converted: [{ currency: "SEK", count: 3, months: ["2026-08", "2026-09"] }],
+      reimbursement_mixed: 1,
+    });
+
+  it("offers the base beside the currencies, and checks it when chosen", () => {
+    const chosen: string[] = [];
+    render(<CurrencyToggle value={ALL_IN_BASE} options={["EUR", "GBP"]} base="EUR" onChange={(next) => chosen.push(next)} />);
+    const radios = screen.getAllByRole("radio");
+    expect(radios.map((one) => one.textContent)).toEqual(["EUR", "GBP", "All, in EUR"]);
+    expect(radios.map((one) => one.getAttribute("aria-checked"))).toEqual(["false", "false", "true"]);
+    fireEvent.click(radios[1]);
+    expect(chosen).toEqual(["GBP"]);
+  });
+
+  it("is not offered when there is nothing to convert", () => {
+    render(<CurrencyToggle value="EUR" options={["EUR"]} base={null} onChange={() => undefined} />);
+    expect(screen.getAllByRole("radio").map((one) => one.textContent)).toEqual(["EUR"]);
+  });
+
+  it("marks every converted figure, and no zero, with ≈", () => {
+    render(<Harness report={converted()} query="in_base=true" />);
+    const net = document.querySelector("tr.report-net")!;
+    expect(net.textContent).toContain(`≈ ${format(163000, "EUR")}`);
+    expect(document.querySelector(".report-headline")!.textContent).toContain(`≈ ${format(300000 * 2, "EUR")}`);
+    // The unmatched line is all zeroes: nothing to mark.
+    const zero = [...document.querySelectorAll("tfoot td.amount span.muted")].map((one) => one.textContent);
+    expect(zero).toContain(format(0, "EUR"));
+    expect(zero.some((text) => text?.startsWith("≈"))).toBe(false);
+  });
+
+  it("per currency, nothing is marked", () => {
+    render(<Harness />);
+    expect(document.body.textContent).not.toContain("≈");
+  });
+
+  it("names the rows it had no rate for, and says the mixed claims stay uncounted in the base too", () => {
+    render(<Harness report={converted()} query="in_base=true" />);
+    const said = document.querySelector(".report-notes")!.textContent ?? "";
+    expect(said).toContain(
+      "3 rows in SEK have no exchange rate, so they are left out of every figure: Aug 2026 and Sep 2026.",
+    );
+    expect(said).toContain(
+      "1 repayment covers expenses in another currency, so no surplus or shortfall is worked out for it, in EUR either: a claim is not converted across currencies yet.",
+    );
+  });
+
+  it("lists the rates it used, and sorts them at the headings", () => {
+    render(<Harness report={converted()} query="in_base=true" />);
+    const rates = document.querySelector("details.report-rates")!;
+    expect(rates.querySelector("summary")!.textContent).toBe("2 exchange rates used · Monthly average");
+    const firsts = () => [...rates.querySelectorAll("tbody tr")].map((tr) => tr.querySelector("td")!.textContent);
+    expect(firsts()).toEqual(["GBP", "USD"]);
+    const rows = () => [...rates.querySelectorAll("tbody tr")].map((tr) => tr.textContent);
+    expect(rows()[0]).toContain("stale");
+    // By rate, largest first: the column a person sorts to find the odd one.
+    fireEvent.click(screen.getByRole("button", { name: /Per 1 EUR/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Per 1 EUR/ }));
+    expect(firsts()).toEqual(["GBP", "USD"]);
+    fireEvent.click(screen.getByRole("button", { name: /Rate date/ }));
+    expect(firsts()).toEqual(["GBP", "USD"]);
+    fireEvent.click(screen.getByRole("button", { name: /Rate date/ }));
+    expect(firsts()).toEqual(["USD", "GBP"]);
+  });
+
+  it("opens a figure on each row's own amount, its rate and what it counted for", async () => {
+    const { api } = await import("../../lib/api");
+    vi.mocked(api.get).mockResolvedValue({
+      entries: [
+        { id: "t-gbp", account_name: "UK", date: "2026-08-03", payee_name: "Tesco", category_name: "Rent", memo: null,
+          amount_minor: -8000, amount: "-80.00", currency: "GBP", converted_minor: -10000, converted: "-100.00",
+          rate: "0.8", rate_date: "2026-08-01", rate_source: "manual", rate_via: null, rate_stale: false },
+        { id: "t-eur", account_name: "Visa", date: "2026-08-02", payee_name: "Landlord", category_name: "Rent", memo: null,
+          amount_minor: -110000, amount: "-1100.00", currency: "EUR", converted_minor: -110000, converted: "-1100.00",
+          rate: "1", rate_date: "2026-08-02", rate_source: "base", rate_via: null, rate_stale: false },
+      ],
+      currency: "EUR",
+      converted: true,
+      count: 2,
+      total_minor: -120000,
+      capped: false,
+    });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <Harness report={converted()} query="in_base=true&account_id=acc-1" />
+      </QueryClientProvider>,
+    );
+    const rent = [...document.querySelectorAll("table.report tbody tr")].find(
+      (tr) => tr.querySelector("th")?.textContent === "Rent",
+    )!;
+    fireEvent.click(rent.querySelector<HTMLButtonElement>("button.figure-open")!);
+    await screen.findByText("Tesco");
+
+    const row = (payee: string) =>
+      [...document.querySelectorAll(".dialog table.behind tbody tr")].find((tr) => tr.textContent?.includes(payee))!;
+    const cells = (tr: Element) => [...tr.querySelectorAll("td")].map((td) => td.textContent);
+    // Its own amount, exact; the rate; then the converted amount, marked.
+    expect(cells(row("Tesco")).slice(-3)).toEqual([format(-8000, "GBP"), "0.8", `≈ ${format(-10000, "EUR")}`]);
+    // An amount already in the base needed no rate.
+    expect(cells(row("Landlord")).slice(-2)[0]).toBe("—");
+    // The total is the cell's figure, in the base.
+    expect(document.querySelector(".dialog table.behind tfoot")!.textContent).toContain(`≈ ${format(-120000, "EUR")}`);
+    // And a row opens Transactions in every currency: the figure held them all.
+    const link = row("Tesco").querySelector<HTMLAnchorElement>("a.behind-open")!;
+    expect(registerPresetFrom(link.getAttribute("href")!.slice(1))?.currencies ?? null).toBeNull();
+    expect(registerPresetFrom(link.getAttribute("href")!.slice(1))?.accounts).toEqual(["acc-1"]);
+
+    // Sorted by amount, currencies never interleave: the base first.
+    fireEvent.click(screen.getByRole("button", { name: /^Amount/ }));
+    expect([...document.querySelectorAll(".dialog table.behind tbody tr")].map((tr) => tr.querySelector("td")!.textContent)).toEqual(["Visa", "UK"]);
+  });
+
+  it("in en-XA, says it all in the language", async () => {
+    const { activate } = await import("../../lib/i18n");
+    const { untranslated } = await import("../../test-pseudo");
+    await activate("en-XA");
+    try {
+      const report = converted();
+      const data = new Set(
+        [...report.income.rows, ...report.expense.rows].flatMap((one) => [one.name, one.group_name ?? ""]),
+      );
+      render(
+        <>
+          <Harness report={report} query="in_base=true" />
+          <CurrencyToggle value={ALL_IN_BASE} options={["EUR", "GBP"]} base="EUR" onChange={() => undefined} />
+        </>,
+      );
+      fireEvent.click(document.querySelector<HTMLButtonElement>(".currency-toggle .hint-open")!);
+      document.querySelector("details.report-rates")!.setAttribute("open", "");
+      expect(untranslated(document.body).filter((word) => !data.has(word))).toEqual([]);
+    } finally {
+      await activate("en");
+    }
+  });
+});
+
+describe("the Latest 12 months view", () => {
+  it("is the twelve closed months: the month in progress is left out", () => {
+    expect(closedMonths(12, new Date(2026, 10, 9))).toEqual({ since: "2025-11-01", until: "2026-10-31" });
+    // On a month's last day that month has not passed yet.
+    expect(closedMonths(12, new Date(2026, 0, 31))).toEqual({ since: "2025-01-01", until: "2025-12-31" });
+  });
+
+  it("is a card on the Reports index that opens Income vs Expense in the base", () => {
+    const opened: unknown[][] = [];
+    render(<Reports household={{ id: "h", name: "Home" } as Household} onOpen={(...args) => opened.push(args)} />);
+    fireEvent.click(screen.getByRole("button", { name: /Latest 12 months/ }));
+    expect(opened).toHaveLength(1);
+    const [key, preset] = opened[0] as [string, ReturnType<typeof latestTwelve>];
+    expect(key).toBe("income-expense");
+    expect(preset).toEqual(latestTwelve());
+    expect(preset.currency).toBe(ALL_IN_BASE);
+  });
+});

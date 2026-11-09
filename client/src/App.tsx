@@ -27,15 +27,17 @@ import { Admin } from "./screens/Admin";
 import { ApplicationManagement } from "./screens/ApplicationManagement";
 import { History } from "./screens/History";
 import { HouseholdPage } from "./screens/Household";
+import { ExchangeRates } from "./screens/ExchangeRates";
 import { Import } from "./screens/Import";
 import { ImportGuide } from "./screens/ImportGuide";
 import { Payees } from "./screens/Payees";
 import { PayeeCategorisation } from "./screens/PayeeCategorisation";
 import { Receipts } from "./screens/Receipts";
 import { REPORTS, Report, Reports, reportFor, reportScreen } from "./screens/Reports";
-import type { ReportScreen } from "./screens/Reports";
+import type { ReportPreset, ReportScreen } from "./screens/Reports";
 import { Register } from "./screens/Register";
 import type { RegisterPreset } from "./screens/Register";
+import { registerPresetFrom } from "./lib/registerLink";
 import { Profile } from "./screens/Profile";
 import { applyColours } from "./lib/theme";
 import { claimScreens, readSticky, writeSticky } from "./lib/sticky";
@@ -60,6 +62,7 @@ type Screen =
   | "reports"
   | ReportScreen
   | "household"
+  | "exchange-rates"
   | "payees"
   | "payee-categorisation"
   | "transfers"
@@ -185,6 +188,8 @@ export function menu(householdName: string, offered: Capabilities = EVERYTHING):
         { key: "accounts", label: t({ message: "Accounts", comment: "Menu item and the name of its screen: noun, bank or cash accounts. See GLOSSARY.md" }) },
         { key: "transfers", label: t({ message: "Transfers", comment: "Menu item and the name of its screen: noun, money moved between your own accounts. See GLOSSARY.md" }) },
         { key: "categories", label: t({ message: "Categories", comment: "Menu item and the name of its screen. See GLOSSARY.md" }) },
+        // Where reports' rates come from, and the record of fetching them (#396).
+        { key: "exchange-rates", label: t({ message: "Exchange rates", comment: "Menu item and the name of its screen: rates for converting one currency into another" }) },
         {
           heading: t({ message: "Payee", comment: "Heading on the app's menu and frame: noun, who was paid or who paid. See GLOSSARY.md" }),
           children: [
@@ -260,8 +265,18 @@ function returnTo(): string | null {
  * arrives in a query string. `application` is the owner's; the shell opens
  * the register instead for anybody else (`OWNER_ONLY_OPENS`). Read once, then
  * the address goes back to `/`.
+ *
+ * `register` is the one that carries more: a report's bubble opens a row in
+ * Transactions with the figure's filters (#401), read by `registerPresetFrom`.
  */
-const OPENS_IN_NEW_TAB = ["accounts", "history", "rules", "application"] as const;
+const OPENS_IN_NEW_TAB = ["register", "accounts", "history", "rules", "application", "report-net-worth"] as const;
+
+/**
+ * Of those, the ones that keep the address while they are open: the Net Worth
+ * report writes its filters there so a view can be bookmarked (#397), and
+ * hands `/` back when it closes (`screens/reports/netWorthView.ts`).
+ */
+const KEEPS_ITS_ADDRESS: readonly OpensInNewTab[] = ["report-net-worth"];
 type OpensInNewTab = (typeof OPENS_IN_NEW_TAB)[number];
 
 /** Of those, the ones only an owner is shown -- the menu hides them too. */
@@ -280,7 +295,11 @@ export function firstScreen(opened: { screen: OpensInNewTab | null }, role: User
  * the address back the second call found `?open=` gone and answered "nothing"
  * (#110). `putTheAddressBack` does that half, from an effect.
  */
-export function openedAt(): { screen: OpensInNewTab | null; household: string } {
+export function openedAt(): {
+  screen: OpensInNewTab | null;
+  household: string;
+  register?: RegisterPreset;
+} {
   const query = new URLSearchParams(window.location.search);
   const wanted = query.get("open");
   const screen = OPENS_IN_NEW_TAB.find((one) => one === wanted) ?? null;
@@ -288,7 +307,12 @@ export function openedAt(): { screen: OpensInNewTab | null; household: string } 
   // into an API path (#197). The shell still checks it against the member's
   // households before using it; this is the fence at the door.
   const household = screen ? (query.get("household") ?? "") : "";
-  return { screen, household: /^[\w-]{1,64}$/.test(household) ? household : "" };
+  const register = screen === "register" ? registerPresetFrom(window.location.search) : null;
+  return {
+    screen,
+    household: /^[\w-]{1,64}$/.test(household) ? household : "",
+    ...(register ? { register } : {}),
+  };
 }
 
 /**
@@ -304,7 +328,9 @@ export function sectionAt(opened: { screen: OpensInNewTab | null }): "updates" |
 
 /** Once a screen has been opened from `?open=`, the address goes back to `/`. */
 export function putTheAddressBack(opened: { screen: OpensInNewTab | null }): void {
-  if (opened.screen) window.history.replaceState(null, "", "/");
+  if (opened.screen && !KEEPS_ITS_ADDRESS.includes(opened.screen)) {
+    window.history.replaceState(null, "", "/");
+  }
 }
 
 /** `/invite/<token>` is a real URL people are handed, so the shell reads it first. */
@@ -558,7 +584,14 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
   //: Work expenses view, and maybe one row's panel. Held here because the
   //: register is unmounted while a report is on screen, so it cannot be told
   //: afterwards; it reads this once as it mounts.
-  const [registerPreset, setRegisterPreset] = useState<RegisterPreset | null>(null);
+  const [registerPreset, setRegisterPreset] = useState<RegisterPreset | null>(
+    () => opened.register ?? null,
+  );
+  //: The settings a preset card on the Reports index opened a report with
+  //: (#396 §8), with a count so pressing the same card again starts afresh.
+  const [reportPreset, setReportPreset] = useState<{ preset: ReportPreset; n: number } | null>(
+    null,
+  );
   const [householdId, setHouseholdId] = useState<string>(opened.household);
   const [navOpen, setNavOpen] = useState(false);
   //: The desktop menu folded down to its rail (#161). Per browser, like the
@@ -676,6 +709,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
     // Going anywhere from the menu is a fresh start: a filter a report sent
     // somebody to must not come back the next time they open the register.
     setRegisterPreset(null);
+    setReportPreset(null);
     setScreen(to);
     setNavOpen(false);
   };
@@ -883,16 +917,27 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
         {screen === "accounts" && <Accounts household={household} onOpenRegister={openRegister} />}
         {screen === "payees" && <Payees household={household} />}
         {screen === "categories" && <Categories household={household} />}
+        {screen === "exchange-rates" && <ExchangeRates household={household} />}
         {screen === "receipts" && <Receipts household={household} />}
         {screen === "reports" && (
-          <Reports household={household} onOpen={(key) => go(reportScreen(key))} />
+          <Reports
+            household={household}
+            onOpen={(key, preset) => {
+              go(reportScreen(key));
+              if (preset) setReportPreset((was) => ({ preset, n: (was?.n ?? 0) + 1 }));
+            }}
+          />
         )}
         {openReport && (
           <Report
+            // A preset starts the report afresh; the menu's way in starts it plain.
+            key={`${screen}-${reportPreset?.n ?? 0}`}
             household={household}
             screen={screen as ReportScreen}
+            preset={reportPreset?.preset}
             onBack={() => go("reports")}
             onOpenRegister={openRegister}
+            onOpenExchangeRates={() => go("exchange-rates")}
           />
         )}
         {screen === "household" && (

@@ -3187,12 +3187,64 @@ class IncomeExpenseOut(BaseModel):
     has_income_group: bool = True
     excluded: ExcludedOut
     coverage: CoverageOut
+    #: True when the report is every currency in the base currency (#396
+    #: phase 2): `currency` is then the base, every figure is a sum of rows
+    #: each converted on its own, and the four fields below say how.
+    converted: bool = False
+    rate_source: RateSourceOut | None = None
+    rates_used: list[RateUsedOut] = []
+    #: Rows with no rate: left out of every figure, never counted as 0 or 1.
+    not_converted: list[NotConvertedOut] = []
+    #: What the "Rates as of" line is drawn from. Null per currency.
+    rates_status: RatesStatusOut | None = None
+
+
+class RateSourceOut(BaseModel):
+    """Where a converted report's rates came from: the chain, and the policy."""
+
+    chain: list[str]
+    #: `month_avg`, `month_end` or `spot`: which date's rate a row converts at.
+    policy: str
+
+
+class RateUsedOut(BaseModel):
+    """One rate a converted report used.
+
+    `rate` is a decimal STRING, units of `currency` per one base currency;
+    converting divides by it. `rate_date` is the rate's own date (for a
+    monthly average, the last daily it was taken from), not a row's.
+    """
+
+    currency: str
+    rate: str
+    rate_date: Date
+    source: str
+    #: The currency the rate was crossed through, e.g. EUR for the ECB.
+    via: str | None = None
+    stale: bool
+
+
+class NotConvertedOut(BaseModel):
+    """Rows in one currency a converted report left out: no rate for them."""
+
+    currency: str
+    count: int
+    #: The `YYYY-MM` months those rows are in.
+    months: list[str]
 
 
 class ReportCurrenciesOut(BaseModel):
-    """Which currencies this household holds accounts in, busiest first."""
+    """Which currencies this household holds accounts in, busiest first.
+
+    `base_offered`: there is a currency other than the base to convert, so
+    the report offers "All, in {base}". `base_ready`: the household's chain
+    has a rate for every one of them, so the report opens on it (#396 §8).
+    """
 
     currencies: list[str]
+    base_currency: str
+    base_offered: bool = False
+    base_ready: bool = False
 
 
 class ReportEntryOut(BaseModel):
@@ -3204,8 +3256,19 @@ class ReportEntryOut(BaseModel):
     payee_name: str | None = None
     category_name: str | None = None
     memo: str | None = None
+    #: The row's own amount, in its own `currency`.
     amount_minor: int
     amount: str
+    currency: str
+    #: In a converted report: what the row counted for, in the base currency,
+    #: and the rate it was converted at. Null per currency.
+    converted_minor: int | None = None
+    converted: str | None = None
+    rate: str | None = None
+    rate_date: Date | None = None
+    rate_source: str | None = None
+    rate_via: str | None = None
+    rate_stale: bool | None = None
 
 
 class ReportBehindOut(BaseModel):
@@ -3218,6 +3281,11 @@ class ReportBehindOut(BaseModel):
     """
 
     entries: list[ReportEntryOut] = []
+    #: The currency `total_minor` is in: the base, in a converted report.
+    currency: str
+    #: True when every entry was converted and the total is of the converted
+    #: amounts, which then equals the converted figure that was clicked.
+    converted: bool = False
     total_minor: int
     total: str
     count: int
@@ -3315,6 +3383,158 @@ class ReimbursementsOut(BaseModel):
     outstanding_rows: list[ReimbursementOutstandingOut] = []
     claims: list[ReimbursementClaimOut] = []
     months: list[ReimbursementMonthOut] = []
+
+
+# --------------------------------------------------------------------------- #
+# Net Worth (#397)
+# --------------------------------------------------------------------------- #
+
+
+class NetWorthPointOut(BaseModel):
+    """One month end (or today): the total and its parts, in one currency."""
+
+    date: Date
+    today: bool
+    net_worth: int
+    liabilities: int
+    #: The same values summed by the split; they add up to `net_worth` exactly.
+    #: The key is "" for an account with no bank or no country.
+    parts: dict[str, int]
+    accounts_without_data: int
+    stale_rate: bool
+    missing_rates: list[str]
+
+
+class NetWorthHeadlineOut(BaseModel):
+    net_worth: int
+    liabilities: int
+    change_prev: int | None = None
+    prev_date: Date | None = None
+    change_range: int | None = None
+    range_start: Date
+
+
+class NetWorthBridgeOut(BaseModel):
+    start: int
+    fx_effect: int
+    money_added_or_spent: int
+    end: int
+
+
+class NetWorthHeldOut(BaseModel):
+    key: str
+    native_minor: int | None = None
+    native_currency: str | None = None
+    #: Units of `native_currency` per one of the display currency, a decimal
+    #: string. Null for the display currency itself.
+    rate: str | None = None
+    rate_date: Date | None = None
+    value: int
+    #: Of the total, a decimal string to four places; null on a total of 0.
+    share: str | None = None
+
+
+class NetWorthBookOut(BaseModel):
+    """One currency's own figures, exact and unconverted."""
+
+    currency: str
+    accounts: int
+    points: list[NetWorthPointOut]
+    headline: NetWorthHeadlineOut
+    bridge: NetWorthBridgeOut
+    held: list[NetWorthHeldOut]
+
+
+class NetWorthAccountOut(BaseModel):
+    id: str
+    name: str
+    institution: str | None = None
+    country: str | None = None
+    type: AccountType
+    is_liability: bool
+    closed: bool
+    currency: str
+    native_minor: int
+    native_change: int
+    value: int | None = None
+    change_range: int | None = None
+
+
+class NetWorthNotConvertedOut(BaseModel):
+    currency: str
+    native_minor: int
+    accounts: int
+
+
+class NetWorthRateOut(BaseModel):
+    currency: str
+    rate: str
+    rate_date: Date
+    source: str
+    stale: bool
+    before_as_of: bool
+
+
+class NetWorthLargestForeignOut(BaseModel):
+    account_id: str
+    account_name: str
+    currency: str
+    native_minor: int
+    rate: str
+    value: int
+
+
+class NetWorthExplanationOut(BaseModel):
+    accounts_counted: int
+    accounts_hidden_closed: int
+    accounts_without_data: int
+    accounts_without_data_at_start: int
+    currencies: list[str]
+    rates: list[NetWorthRateOut] = []
+    largest_foreign: NetWorthLargestForeignOut | None = None
+    stale: bool = False
+    missing: list[str] = []
+
+
+class NetWorthRateSourceOut(BaseModel):
+    chain: list[str]
+    policy: str
+
+
+class NetWorthOut(BaseModel):
+    """The Net Worth report (#397): every account's balance at each month end.
+
+    **The one report that adds two currencies, and only through a rate** --
+    the household's, at the spot policy, through `services/fx.py`.
+    `display_currency` says what the top-level figures are in: the one
+    currency in scope, exactly, or the base currency when `converted`. With
+    several currencies and no rates it is **null**, and so are `headline` and
+    `bridge` -- `points` and `held` are empty -- because that total does not
+    exist. `currencies` always carries each currency's own book, unconverted.
+    `rates_status` is the "Rates as of" block for the currencies on screen,
+    present whenever several are in scope and a rate source is set up.
+    """
+
+    as_of: Date
+    since: Date
+    until: Date
+    today: Date
+    closed_only: bool
+    clipped_from: Date | None = None
+    split: str
+    base_currency: str
+    display_currency: str | None = None
+    converted: bool
+    rate_source: NetWorthRateSourceOut | None = None
+    rates_status: RatesStatusOut | None = None
+    points: list[NetWorthPointOut]
+    headline: NetWorthHeadlineOut | None = None
+    bridge: NetWorthBridgeOut | None = None
+    held: list[NetWorthHeldOut]
+    accounts: list[NetWorthAccountOut]
+    not_converted: list[NetWorthNotConvertedOut]
+    currencies: list[NetWorthBookOut]
+    explanation: NetWorthExplanationOut
 
 
 # --------------------------------------------------------------------------- #
@@ -3598,3 +3818,238 @@ class TranslationSuggestionOut(ORMModel):
 class TranslationSuggestionsMark(BaseModel):
     ids: list[str] = Field(min_length=1, max_length=500)
     status: SuggestionStatus
+
+
+# --------------------------------------------------------------------------- #
+# Exchange rates (#396)
+# --------------------------------------------------------------------------- #
+#
+# The ledger never converts. These shapes carry the rates a *report* may
+# convert with, and how old they are. A rate is always a decimal STRING:
+# units of the currency per one unit of the household's base currency, unless
+# a field says otherwise.
+
+
+class FxSettingsOut(BaseModel):
+    """Where a household's rates come from and how they are used (#396 §3)."""
+
+    base_currency: str
+    #: Source names in order: `manual`, `ecb`, `own`. Empty: nothing converts.
+    chain: list[str]
+    stale_days: int
+    #: `month_avg`, `month_end` or `spot`.
+    monthly_policy: str
+    show_own_rates: bool
+
+
+class FxSettingsIn(BaseModel):
+    """The whole setting: every field is sent, as `PUT` means."""
+
+    chain: list[Annotated[str, Field(max_length=16)]] = Field(max_length=8)
+    stale_days: int
+    monthly_policy: str = Field(max_length=16)
+    show_own_rates: bool
+
+
+class CurrencyStatusOut(ORMModel):
+    currency: str
+    rate_date: Date | None = None
+    source: str | None = None
+    stale: bool
+    age_days: int | None = None
+
+
+class FailedFetchOut(ORMModel):
+    at: datetime
+    error: str
+
+
+class RatesStatusOut(ORMModel):
+    """How old a converting response's rates are: what "Rates as of" draws from.
+
+    Built by `services.fx.rates_status` for the currencies the response
+    converted, in the same response as the figures, so the line and the
+    numbers under it can never disagree. `as_of` is the oldest of
+    `per_currency`'s rate dates; `not_converted` lists the currencies with no
+    rate at all.
+    """
+
+    as_of: Date | None = None
+    stale: bool
+    running: bool
+    fetched_at: datetime | None = None
+    fetched_by: str | None = None
+    last_fetch_failed: FailedFetchOut | None = None
+    chain: list[str]
+    stale_days: int
+    remote_in_chain: bool
+    manual_changed_at: datetime | None = None
+    manual_changed_by: str | None = None
+    per_currency: list[CurrencyStatusOut]
+    not_converted: list[str]
+
+
+class FxFetchIn(BaseModel):
+    """One press of Fetch now. `range` needs `since` and `until`, and overwrites."""
+
+    mode: Literal["missing", "range"] = "missing"
+    since: Date | None = None
+    until: Date | None = None
+
+
+class FxFetchOut(ORMModel):
+    id: str
+    source: str
+    mode: str
+    requested_since: Date
+    requested_until: Date
+    currencies: list[str]
+    started_at: datetime
+    finished_at: datetime | None = None
+    #: `running`, `ok` or `failed`.
+    outcome: str
+    rates_added: int
+    rates_unchanged: int
+    error: str | None = None
+    started_by: str | None = None
+    duration_ms: int | None = None
+
+
+class FxAccountRefOut(ORMModel):
+    id: str
+    name: str
+
+
+class FxMonthOut(ORMModel):
+    month: str
+    #: `rates`, `gap` or `empty`.
+    state: str
+
+
+class FxCurrencyOut(ORMModel):
+    currency: str
+    accounts: list[FxAccountRefOut]
+    source_in_use: str | None = None
+    first_rate: Date | None = None
+    last_rate: Date | None = None
+    rates: int
+    age_days: int | None = None
+    transaction_dates: int
+    coverage_percent: int | None = None
+    gaps: int
+    #: `ok`, `stale`, `not_covered` or `manual_only`.
+    status: str
+    own_rates: int
+    iso: bool
+    months: list[FxMonthOut]
+
+
+class FxNotCoveredOut(ORMModel):
+    currency: str
+    #: `not_iso` or `no_source`.
+    reason: str
+    accounts: list[FxAccountRefOut]
+
+
+class FxWouldFetchOut(ORMModel):
+    source: str
+    mode: str
+    currencies: list[str]
+    since: Date
+    until: Date
+
+
+class FxTilesOut(ORMModel):
+    last_fetch: FxFetchOut | None = None
+    as_of: Date | None = None
+    stale: bool
+    covered: int
+    total: int
+    missing: list[str]
+    gaps: int
+    manual_count: int
+    manual_changed_at: datetime | None = None
+    manual_changed_by: str | None = None
+
+
+class FxStatusOut(ORMModel):
+    """The Exchange rates page, which is also the sync dashboard (#396 §5.3)."""
+
+    base_currency: str
+    chain: list[str]
+    stale_days: int
+    monthly_policy: str
+    show_own_rates: bool
+    tiles: FxTilesOut
+    running: bool
+    running_fetches: list[FxFetchOut]
+    would_fetch: list[FxWouldFetchOut]
+    would_fetch_refused: str | None = None
+    would_fetch_reason: str | None = None
+    currencies: list[FxCurrencyOut]
+    not_covered: list[FxNotCoveredOut]
+    history: list[FxFetchOut]
+    rates_status: RatesStatusOut
+
+
+class FxRateOut(BaseModel):
+    """One stored rate, as it is stored, with what it means in the base."""
+
+    #: Only a manual rate has one: it is the id DELETE takes.
+    id: str | None = None
+    #: `ecb` or `manual`.
+    source: str
+    quote_currency: str
+    currency: str
+    date: Date
+    #: `day`, or `month` for a manual monthly rate dated its first day.
+    period: str
+    #: Units of `currency` per one `quote_currency`, as stored.
+    rate: str
+    #: Units of `currency` per one base, crossed on the same date when the
+    #: source quotes against something else. Null when it cannot be crossed.
+    rate_in_base: str | None = None
+    #: The household's own transfers' rate on that date, in base terms.
+    own_rate: str | None = None
+
+
+class FxRatesOut(BaseModel):
+    base_currency: str
+    total: int
+    limit: int
+    rates: list[FxRateOut]
+
+
+class FxManualIn(BaseModel):
+    """One rate from the editor. `date` is a day (YYYY-MM-DD) or a month (YYYY-MM)."""
+
+    currency: str = Field(max_length=8)
+    date: str = Field(max_length=16)
+    rate: str = Field(max_length=48)
+    dry_run: bool = False
+
+
+class FxManualRowOut(BaseModel):
+    """One rate's verdict. Saveable when `problems` is empty."""
+
+    line: int
+    currency: str
+    date: str
+    rate: str
+    period: str | None = None
+    inverse: str | None = None
+    replaces: str | None = None
+    unchanged: bool
+    problems: list[str]
+
+
+class FxManualOut(BaseModel):
+    dry_run: bool
+    added: int
+    replaced: int
+    unchanged: int
+    rows: list[FxManualRowOut]
+
+
+# `IncomeExpenseOut` names `RatesStatusOut`, which is defined further down.
+IncomeExpenseOut.model_rebuild()

@@ -268,6 +268,11 @@ EMPTY_HOUSEHOLD_QUERY = {
     "locale": "pt-BR",
 }
 
+#: Optional parameters of which a read needs one: Income vs Expense takes a
+#: `currency` or `in_base`, never neither (#396 phase 2). Each is given where a
+#: route takes it, and the walk then asks again with the other one.
+EMPTY_HOUSEHOLD_EITHER = ({"currency": "EUR"}, {"in_base": "true"})
+
 
 def test_every_screen_works_on_a_brand_new_household(client):
     """An empty household is the first thing anyone sees.
@@ -299,9 +304,15 @@ def test_every_screen_works_on_a_brand_new_household(client):
             failed.append(f"{route.served_path} needs {unknown}: add them to EMPTY_HOUSEHOLD_QUERY")
             continue
         path = route.served_path.replace("{household_id}", house["id"])
-        response = client.get(path, params={name: EMPTY_HOUSEHOLD_QUERY[name] for name in wanted})
-        if response.status_code != 200:
-            failed.append(f"{route.served_path} -> {response.status_code} {response.text[:200]}")
+        params = {name: EMPTY_HOUSEHOLD_QUERY[name] for name in wanted}
+        taken = {p.alias for p in route.dependant.query_params}
+        eithers = [one for one in EMPTY_HOUSEHOLD_EITHER if set(one) <= taken] or [{}]
+        for either in eithers:
+            response = client.get(path, params=params | either)
+            if response.status_code != 200:
+                failed.append(
+                    f"{route.served_path} {either} -> {response.status_code} {response.text[:200]}"
+                )
     assert not failed, "\n".join(failed)
 
     for path in ("/api/me", "/api/presence", "/api/households"):

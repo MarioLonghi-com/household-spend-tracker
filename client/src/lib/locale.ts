@@ -227,6 +227,19 @@ export function monthLabel(period: string): string {
   );
 }
 
+/**
+ * A month's short name alone, from a `YYYY-MM` period: "Mar". The English
+ * table in English, as `monthLabel` has it; `Intl` in another language. For
+ * places too narrow for the year, such as the month map on Income vs Expense.
+ */
+export function monthShort(period: string): string {
+  const index = Number(period.split("-")[1]) - 1;
+  if (speaksEnglish() || !(index >= 0 && index < 12)) return ENGLISH_MONTHS[index] ?? period;
+  return dateTimeFormat({ month: "short", timeZone: "UTC" }, uiLanguage()).format(
+    Date.UTC(2026, index, 1),
+  );
+}
+
 const ENGLISH_MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",

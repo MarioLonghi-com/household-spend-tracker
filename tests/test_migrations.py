@@ -363,3 +363,53 @@ def test_the_roles_backfill_marks_one_of_each_per_household_and_no_guesses(tmp_p
         columns = {row[1] for row in conn.execute("PRAGMA table_info(category_groups)")}
         assert "role" not in columns
         assert conn.execute("SELECT count(*) FROM categories").fetchone() == (4,)
+
+
+def _insert(conn, table: str, values: dict) -> None:
+    """A row with ``values`` and a stand-in for every other NOT NULL column."""
+    filler = {"INTEGER": 0, "BOOLEAN": 0, "DATE": "2026-01-01", "DATETIME": "2026-01-01 00:00:00"}
+    row = dict(values)
+    for _cid, name, kind, notnull, default, _pk in conn.execute(f"PRAGMA table_info({table})"):
+        if notnull and default is None and name not in row:
+            row[name] = filler.get(kind.split("(")[0].upper(), "x")
+    columns = ", ".join(row)
+    conn.execute(f"INSERT INTO {table} ({columns}) VALUES ({', '.join('?' for _ in row)})", list(row.values()))
+
+
+def test_forint_and_taiwan_dollar_figures_keep_their_meaning_across_the_new_exponent(tmp_path, monkeypatch):
+    """HUF and TWD moved from no decimals to ISO 4217's two (#396 §8).
+
+    1,000 forint stored as 1000 must read as 1,000 forint afterwards, so it is
+    100000 now; a euro figure is untouched; and rolling back gives 1000 again.
+    """
+    import sqlite3
+
+    db = tmp_path / "huf.sqlite3"
+    url = f"sqlite:///{db}"
+    monkeypatch.setenv("DATABASE_URL", url)
+    cfg = _config(url)
+    command.upgrade(cfg, "3b6f0d2e9a41")
+
+    with sqlite3.connect(db) as conn:
+        _insert(conn, "households", {"id": "h1", "name": "H", "base_currency": "EUR"})
+        for account, currency in (("forint", "HUF"), ("dollar", "TWD"), ("euro", "EUR")):
+            _insert(conn, "accounts", {"id": account, "household_id": "h1", "name": account,
+                                       "type": "checking", "currency": currency})
+        for txn, account, amount in (("t1", "forint", 1000), ("t2", "dollar", -25),
+                                     ("t3", "euro", 1000)):
+            _insert(conn, "transactions", {"id": txn, "household_id": "h1", "account_id": account,
+                                           "amount": amount})
+        _insert(conn, "reconciliations", {"id": "r1", "account_id": "forint", "statement_balance": 1000})
+
+    def figures():
+        with sqlite3.connect(db) as conn:
+            return (
+                dict(conn.execute("SELECT id, amount FROM transactions").fetchall()),
+                conn.execute("SELECT statement_balance FROM reconciliations").fetchone()[0],
+            )
+
+    command.upgrade(cfg, "8e1c4a7f5d02")
+    assert figures() == ({"t1": 100_000, "t2": -2_500, "t3": 1000}, 100_000)
+
+    command.downgrade(cfg, "3b6f0d2e9a41")
+    assert figures() == ({"t1": 1000, "t2": -25, "t3": 1000}, 1000)

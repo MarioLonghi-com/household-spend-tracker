@@ -12,8 +12,9 @@ gets a few hundred tokens with the totals already right.
 > [!danger] The one rule every function in this module exists to keep
 > **No response ever sums two currencies.**
 >
-> The ledger never converts -- currency lives on the account, and there is no
-> rate anywhere in this schema. The previous build produced three wrong
+> The ledger never converts -- currency lives on the account. Since #396 a
+> *report* may convert into the base currency, through `services/fx.py` and
+> nowhere else; nothing here does. The previous build produced three wrong
 > reports from exactly this, by the simple route of somebody
 > writing `SUM(amount)` across a household that had both.
 >
@@ -295,6 +296,45 @@ def balances(
         .order_by(Account.sort_order, Account.name)
     )
     return [(account, int(total or 0)) for account, total in session.execute(stmt).all()]
+
+
+def monthly_movements(
+    session: Session,
+    household_id: str,
+    *,
+    until: Date,
+    account_ids: list[str] | None = None,
+) -> dict[str, dict[str, int]]:
+    """Each account's net movement per calendar month, up to `until`, in one query.
+
+    The same arithmetic as :func:`balances` -- every row on the account, the
+    opening balance included, dated on or before the cut-off -- gathered by
+    `YYYY-MM` instead of summed whole, so that a caller wanting the balance at
+    a run of month ends gets all of them from **one** round trip: the balance
+    at the end of a month is the running sum of these up to that month. One
+    query per point was the Net Worth prototype's shortcut (#397): 25 calls,
+    about two seconds.
+
+    `until` is also the last day counted, so the month holding it is cut
+    there: a cut-off of today leaves out a row dated next week, which has not
+    happened yet. A month with no rows is absent rather than zero, which is
+    how a caller tells "no data yet" from "a balance of nothing".
+
+    Per account, so per currency: nothing here is summed across two.
+    """
+    period = func.strftime("%Y-%m", Transaction.date)
+    stmt = (
+        select(Transaction.account_id, period, func.sum(Transaction.amount))
+        .where(Transaction.household_id == household_id)
+        .where(Transaction.date <= until)
+        .group_by(Transaction.account_id, period)
+    )
+    if account_ids is not None:
+        stmt = stmt.where(Transaction.account_id.in_(account_ids))
+    answer: dict[str, dict[str, int]] = {}
+    for account_id, month, total in session.execute(stmt).all():
+        answer.setdefault(account_id, {})[month] = int(total or 0)
+    return answer
 
 
 def formatted(minor: int, currency: str) -> str:

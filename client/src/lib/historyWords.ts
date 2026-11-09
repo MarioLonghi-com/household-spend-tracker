@@ -129,6 +129,21 @@ export const HISTORY_FIELDS: Record<string, string> = {
   get reimbursed_by_id() {
     return t({ message: "reimbursed by", comment: "A changed field in History's detail, lower case" });
   },
+  get rate() {
+    return t({ message: "rate", comment: "A changed field in History's detail, lower case: an exchange rate entered by hand" });
+  },
+  get fx_chain() {
+    return t({ message: "rate sources", comment: "A changed field in History's detail, lower case: where a household's exchange rates come from, in order" });
+  },
+  get fx_stale_days() {
+    return t({ message: "stale limit", comment: "A changed field in History's detail, lower case: after how many days an exchange rate counts as old" });
+  },
+  get fx_monthly_policy() {
+    return t({ message: "monthly rate", comment: "A changed field in History's detail, lower case: which exchange rate a month's figures use" });
+  },
+  get fx_show_own_rates() {
+    return t({ message: "own rates shown", comment: "A changed field in History's detail, lower case: whether the rates of your own transfers are shown" });
+  },
 };
 
 /** What a changed row is, by its table. Lower case, singular, beside the row's id. */
@@ -180,6 +195,9 @@ export const HISTORY_TABLES: Record<string, string> = {
   },
   get translation_suggestions() {
     return t({ message: "suggested wording", context: "history table", comment: "What kind of row changed, lower case, singular, in History beside its id: a better translation an owner suggested" });
+  },
+  get fx_manual_rates() {
+    return t({ message: "exchange rate", context: "history table", comment: "What kind of row changed, lower case, singular, in History beside its id: a rate entered by hand" });
   },
 };
 
@@ -442,6 +460,7 @@ export const HISTORY_COUNTS: Record<string, MessageDescriptor> = {
   transfer_rejections: msg({ id: "history.count.transfer_rejections", message: "{count, plural, one {# pair marked not a transfer} other {# pairs marked not a transfer}}", comment: "History: two rows a person said are not one transfer" }),
   ignored_identifier_suggestions: msg({ id: "history.count.ignored_identifier_suggestions", message: "{count, plural, one {# ignored identifier suggestion} other {# ignored identifier suggestions}}", comment: "History: suggested account numbers a person dismissed" }),
   translation_suggestions: msg({ id: "history.count.translation_suggestions", message: "{count, plural, one {# suggested wording} other {# suggested wordings}}", comment: "History: better translations an owner suggested in review mode" }),
+  fx_manual_rates: msg({ id: "history.count.fx_manual_rates", message: "{count, plural, one {# exchange rate} other {# exchange rates}}", comment: "History: exchange rates a member entered by hand" }),
 };
 
 /** The words History supplies itself, by set and key: the server's `WORDS`. */

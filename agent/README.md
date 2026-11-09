@@ -114,10 +114,11 @@ json=(-H "Content-Type: application/json" -H "Idempotency-Key: $(uuidgen)")
   account. Negative is money out. On a write you may send `amount` as a
   decimal **string** (`"12.50"`) instead — **a JSON float is refused**, and so
   is a string with more decimals than its currency has.
-- **Currency lives on the account, never on the household.** Nothing converts.
-  No endpoint sums two currencies, and no response carries a grand total across
-  them. When you convert — and for advice across countries you will — say which
-  rate, from where, and for what date. See [job 4](#4-the-combined-position-across-countries-and-currencies).
+- **Currency lives on the account, never on the household.** The ledger never
+  converts. Reports may convert into the base currency through the household's
+  chosen rates; each converted response says which. Rows and balances are never
+  converted. When you convert yourself — and for advice across countries you
+  will — say which rate, from where, and for what date. See [job 4](#4-the-combined-position-across-countries-and-currencies).
 - **Dates are ISO 8601**, the account's own dates, no timezone.
 - Every figure comes back twice: `*_minor` for arithmetic, and a formatted
   string for the sentence you are writing. Use the integer for sums.
@@ -502,16 +503,48 @@ are yours — done visibly.**
   whose expenses are in another currency (none stated either).
   `excluded.reimbursements` counts the block's rows. `has_income_group: false`
   means no group carries the role, so every row is an expense.
+- **Income vs Expense in the base currency:** `GET
+  $H/reports/income-expense?in_base=true&since=…`, instead of `currency` —
+  every currency converted into the household's base currency, **each row on
+  its own** at the household's chosen rates and only then added. The answer
+  has `converted: true`, `rate_source` (the chain and the policy),
+  `rates_used` (every rate, with its date and source), `not_converted` (rows
+  with no rate: left out of every figure, never counted as zero) and
+  `rates_status` (how old the rates are). Quote the rates' age with the
+  figures. A repayment whose expenses are in another currency still has no
+  surplus or shortfall worked out (`reimbursement_mixed`).
+- **Net worth:** `GET $H/reports/net-worth?since=…&until=…` — every account's
+  balance at each month end, added up, with what moved it. The one report that
+  is not asked for one currency: `display_currency` says what its figures are
+  in. With one currency in scope (`currency=GBP`, or filters that leave one)
+  they are exact. With several, `converted: true` means each account was
+  converted into the base currency at the household's spot rate on each date
+  (`rate_source`, `explanation.rates`, and `rates_status` for how old the
+  rates are); a currency with no rate is left out and listed in
+  `not_converted`. With no rates at all, `display_currency`, `headline` and
+  `bridge` are null and **there is no total** — read `currencies[]`, each
+  currency's own book, and do not add them. Liabilities are already negative
+  and already inside `net_worth`. `closed_only` (default true) stops at the
+  last month that has ended. Filters repeat: `institution`, `country` (an empty
+  value means "not set"), `currency`, `account_id`.
 - **Rates the household actually got:** `GET $H/fx/observed?pair=EUR/GBP` —
   one entry per linked transfer between two currencies, with both amounts and
   the rate as a decimal **string** (units of `to_currency` per one
   `from_currency`). An empty list means there are none, not that the rate is
   zero.
+- **Rates the household's chain reads:** `GET $H/fx/rates?currency=GBP&since=…`
+  — the ECB's reference rates (fetched only when a member presses Fetch now)
+  and the rates members entered by hand, each with its source and date, the
+  rate as a decimal **string** in units of `currency` per one `quote_currency`,
+  and `rate_in_base` per one base currency. `GET $H/fx/status` says how old
+  they are, what was last fetched, and what no source covers. A key reads
+  these; it cannot fetch, enter or delete rates, or change the chain.
 
 When you convert:
 
-1. Keep each currency's figures separate until the last step, and convert
-   totals, not rows.
+1. Prefer the report's own conversion (`in_base=true`) where there is one.
+   Otherwise keep each currency's figures separate until the last step, and
+   convert totals, not rows.
 2. State the rate, its source (an observed rate from the ledger, with its date,
    or a published rate you looked up) and the date it applies to.
 3. Never write a converted figure back into the ledger. Nothing here stores

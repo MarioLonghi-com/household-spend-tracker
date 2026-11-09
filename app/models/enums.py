@@ -400,3 +400,65 @@ class CategoryRole(enum.StrEnum):
     """
 
     reimbursement = "reimbursement"
+
+
+class FxSource(enum.StrEnum):
+    """Where an exchange rate comes from (#396 §2).
+
+    Each value is a source with behaviour behind it, and nothing else is: the
+    spec's other central banks and a commercial API are later adapters, and
+    each joins this list with the code that fetches it.
+
+    - ``manual``: `fx_manual_rates`, typed or imported by a member.
+    - ``ecb``: the European Central Bank's reference rates, against EUR,
+      fetched into `fx_rates` when a member presses Fetch now.
+    - ``own``: the rates the household's own linked cross-currency transfers
+      imply (`review.observed_rates`). Off by default; a household may put it
+      in its chain, first if it likes, knowing it mixes kinds of rate.
+    """
+
+    manual = "manual"
+    ecb = "ecb"
+    own = "own"
+
+    @property
+    def is_remote(self) -> bool:
+        """Fetched from outside the instance, and so only by Fetch now."""
+        return self is FxSource.ecb
+
+
+class FxPeriod(enum.StrEnum):
+    """What a manual rate covers: one day, or a whole calendar month."""
+
+    day = "day"
+    month = "month"
+
+
+class FxPolicy(enum.StrEnum):
+    """Which rate a figure on a date is converted at (#396 §6).
+
+    - ``spot``: the last rate on or before the date.
+    - ``month_avg``: the mean of the daily rates in the date's calendar month.
+    - ``month_end``: the last rate on or before the month's last day.
+    """
+
+    spot = "spot"
+    month_avg = "month_avg"
+    month_end = "month_end"
+
+
+class FxFetchMode(enum.StrEnum):
+    """What one press of Fetch now asks for (#396 §5.1)."""
+
+    #: Every date after the last stored rate, or since the earliest
+    #: transaction in that currency the first time. What the button does.
+    missing = "missing"
+    #: Since and until, overwriting what it fetches. For repairing a bad
+    #: download, behind a secondary control.
+    range = "range"
+
+
+class FxFetchOutcome(enum.StrEnum):
+    running = "running"
+    ok = "ok"
+    failed = "failed"
