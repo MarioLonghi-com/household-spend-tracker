@@ -32,10 +32,45 @@ history this repository does not have.
 
 ## Unreleased
 
-**Reversible: none** — no migration.
+**Reversible: lossy** — one migration.
+
+- `ce59881171a4` — lossy: how far each fetch of exchange rates got (#409).
+  Four columns on `fx_fetches`: `chunks_total`, `chunks_done`, and
+  `chunk_since`/`chunk_until`, the dates of the request in flight or of the
+  one a failed fetch stopped on. A fetch recorded before it reads as 1 of 1.
+  Rolling it back drops the four columns, so the fetch history forgets how
+  far each fetch got; the rates themselves stay, and nothing in the ledger
+  changes.
+
+### Fixed
+
+- **A fetch of exchange rates over a long range no longer fails as one
+  request** (#409). Fetch now asked the ECB for the whole range at once, so
+  a backfill to the first transaction years back could pass the 32 MB or
+  120 s limit on one answer, and then kept nothing. It now asks for one
+  calendar year per request, oldest first, and stores each year as it
+  arrives: a failure part-way keeps the years before it, the history says
+  which request it stopped on and its dates, and the next Fetch now carries
+  on from the last stored rate.
+- **The fetch belongs to the household, not the page.** It keeps running
+  when whoever pressed leaves the page or signs out. Anyone in the household
+  who opens *Exchange rates* sees that it is running, who started it, the
+  currencies and dates being fetched and how far it has got ("4 of 12", with
+  a progress bar), and the page asks again every second until it ends. A
+  second Fetch now while one runs is still refused with the existing 409.
+  `fx/status` gives the progress on each fetch, `running_fetches` and
+  `history` alike.
 
 ### Added
 
+- **Exchange rates: an (i) beside each currency lists the accounts in it**
+  (#411), so it is clear why that currency is being fetched: each account's
+  name, bank and country, a closed one tagged *Closed*, sorted by name. A
+  long list scrolls inside the bubble, which stays inside the window at every
+  width, on a phone too and for a currency at the right of the table. It is a
+  button named *Accounts in SEK* and so on; Tab reaches the list and Escape
+  closes it. The status endpoint's account entries now carry `institution`,
+  `country`, `country_name`, `flag` and `closed`.
 - **Browse rates on the Exchange rates page reads a long range a page at a
   time** (#410). The server orders the rates and answers a hundred at once
   (`GET …/fx/rates` takes `offset`, `sort` and `direction`), so years of daily
@@ -50,17 +85,6 @@ history this repository does not have.
   source, dates, view, order and page are kept in the address, so a reload or
   a bookmark opens the same list. The agent route takes the same paging,
   ordering and granularity.
-
-### Added
-
-- **Exchange rates: an (i) beside each currency lists the accounts in it**
-  (#411), so it is clear why that currency is being fetched: each account's
-  name, bank and country, a closed one tagged *Closed*, sorted by name. A
-  long list scrolls inside the bubble, which stays inside the window at every
-  width, on a phone too and for a currency at the right of the table. It is a
-  button named *Accounts in SEK* and so on; Tab reaches the list and Escape
-  closes it. The status endpoint's account entries now carry `institution`,
-  `country`, `country_name`, `flag` and `closed`.
 
 ### Changed
 

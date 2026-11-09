@@ -52,6 +52,13 @@ export interface FxFetch {
   error: string | null;
   started_by: string | null;
   duration_ms: number | null;
+  /** Requests in all: the range is asked for a calendar year at a time (#409). */
+  chunks_total: number;
+  /** Of those, how many are stored. */
+  chunks_done: number;
+  /** The dates of the request in flight, or of the one it stopped on. */
+  chunk_since: string | null;
+  chunk_until: string | null;
 }
 
 export interface FxAccountRef {

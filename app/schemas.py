@@ -3913,6 +3913,14 @@ class FxFetchOut(ORMModel):
     error: str | None = None
     started_by: str | None = None
     duration_ms: int | None = None
+    #: How far it got (#409): the range is asked for a calendar year per
+    #: request, and each year is stored as it arrives.
+    chunks_total: int = 0
+    chunks_done: int = 0
+    #: The dates of the request in flight while it runs, or of the one it
+    #: stopped on when it failed.
+    chunk_since: Date | None = None
+    chunk_until: Date | None = None
 
 
 class FxAccountRefOut(ORMModel):
