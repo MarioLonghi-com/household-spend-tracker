@@ -1,0 +1,34 @@
+/* ---------------------------------------------------------------------------
+   Browse rates on the Exchange rates page (#410)
+   ---------------------------------------------------------------------------
+
+   A page of a hundred rates is taller than the window, so the column headings
+   stay in view while it scrolls. `main.content` is the scroller they stick to:
+   the `.table-scroll` wrapper's `overflow-x: auto` would otherwise make the
+   wrapper the sticky container, and the wrapper never scrolls vertically, so
+   the headings would scroll away with it. Six short columns fit the card, so
+   nothing is lost by letting it overflow visibly.
+
+   Sticky measures `top` from inside the scroller's padding -- 20px on
+   `main.content` -- so the headings are pulled up by exactly that, as the
+   income-and-expense grid's head and the register's selection dock are. On a
+   phone the table is a card per row with its headings hidden, so there is
+   nothing to stick there. */
+@media (min-width: 769px) {
+  .fx-browse-scroll { overflow: visible; }
+  .fx-browse-table thead th {
+    position: sticky;
+    top: -20px;
+    z-index: 2;
+    background: var(--surface);
+    box-shadow: inset 0 -1px 0 var(--line);
+  }
+}
+
+.fx-browse-pager {
+  justify-content: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 8px 0;
+}

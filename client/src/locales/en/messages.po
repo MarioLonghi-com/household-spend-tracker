@@ -45,6 +45,11 @@ msgstr "Mentions"
 msgid "Suggest a better wording"
 msgstr "Suggest a better wording"
 
+#. Button on Browse rates
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Next page"
+msgstr "Next page"
+
 #. Button on the Your account panel
 #: src/screens/Profile.tsx
 msgid "Creating…"
@@ -93,7 +98,6 @@ msgid "Opening your ledger…"
 msgstr "Opening your ledger…"
 
 #. Label of a date field: the last day of a range to fetch
-#. Label of a date filter: the last day shown
 #. Label of a form field on the Transfers screen: the end of a range, or where money goes
 #. Label of a form field on the one-time import: the end of a range, or where money goes
 #. Text on the date range picker: the end of a range, or where money goes
@@ -902,6 +906,14 @@ msgstr "In ({currency})"
 msgid "currency column"
 msgstr "currency column"
 
+#. Which rows of the list Browse rates is showing
+#. placeholder {0}: count(offset + 1)
+#. placeholder {1}: count(offset + answer.rates.length)
+#. placeholder {2}: count(total)
+#: src/screens/exchangeRates/Browse.tsx
+msgid "{0}–{1} of {2} rates"
+msgstr "{0}–{1} of {2} rates"
+
 #: src/screens/Register.tsx
 msgid "Set the category on the selected rows"
 msgstr "Set the category on the selected rows"
@@ -1137,6 +1149,11 @@ msgstr "This update changes your ledger in a way that cannot be undone"
 #: src/screens/Register.tsx
 msgid "Keep editing"
 msgstr "Keep editing"
+
+#. Button on Browse rates: jump to the date or month typed beside it
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Go"
+msgstr "Go"
 
 #. Table cell on the Admin screen
 #. Table cell on the household page
@@ -1481,10 +1498,12 @@ msgstr "Unlink"
 msgid "Remove this part"
 msgstr "Remove this part"
 
+#. Beside a month's rate on Browse rates: older than the household's stale limit
 #. State of an exchange rate: older than the household's limit
 #. State of an exchange rate: older than the household's limit
 #. State of an exchange rate: older than the household's limit
 #: src/components/RatesAsOf.tsx
+#: src/screens/exchangeRates/Browse.tsx
 #: src/screens/reports/IncomeExpense.tsx
 msgid "stale"
 msgstr "stale"
@@ -1954,6 +1973,11 @@ msgstr "{0} — not a local file"
 msgid "The six digits"
 msgstr "The six digits"
 
+#. Label of a choice on Browse rates: a line per day, or a line per month
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Show"
+msgstr "Show"
+
 #: src/screens/Register.tsx
 msgid "Find the payment…"
 msgstr "Find the payment…"
@@ -2306,6 +2330,11 @@ msgstr "{count, plural, one {{refused} of {count} row has a problem, so nothing 
 msgid "Delete this transaction?"
 msgstr "Delete this transaction?"
 
+#. Button on Browse rates
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Previous page"
+msgstr "Previous page"
+
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 msgid "Check the code"
@@ -2518,7 +2547,7 @@ msgid "{0} reconciled · {1} cleared · {2} uncleared"
 msgstr "{0} reconciled · {1} cleared · {2} uncleared"
 
 #. Column heading on Browse rates: the rate as the source quotes it
-#: src/screens/ExchangeRates.tsx
+#: src/screens/exchangeRates/Browse.tsx
 msgid "As published"
 msgstr "As published"
 
@@ -2564,6 +2593,11 @@ msgstr "Discarding…"
 #: src/screens/Household.tsx
 msgid "{stored, plural, one {The {0} receipt that already has an original keeps it — nothing here deletes anything.} other {The {1} receipts that already have an original keep it — nothing here deletes anything.}}"
 msgstr "{stored, plural, one {The {0} receipt that already has an original keeps it — nothing here deletes anything.} other {The {1} receipts that already have an original keep it — nothing here deletes anything.}}"
+
+#. Button on Browse rates
+#: src/screens/exchangeRates/Browse.tsx
+msgid "First page"
+msgstr "First page"
 
 #. Account type `savings`, and the heading of its group. See GLOSSARY.md
 #. Account type `savings`, and the heading of its group. See GLOSSARY.md
@@ -2755,7 +2789,7 @@ msgid "Put them in <0>{0}</0> too?"
 msgstr "Put them in <0>{0}</0> too?"
 
 #. Column heading on Browse rates: the rate your own transfers gave that day
-#: src/screens/ExchangeRates.tsx
+#: src/screens/exchangeRates/Browse.tsx
 msgid "Your transfers"
 msgstr "Your transfers"
 
@@ -3435,6 +3469,11 @@ msgstr "In {currency}"
 msgid "{0, plural, one {1 receipt deleted. The History screen can put it back.} other {{1} receipts deleted, as one act. The History screen can put them all back.}}"
 msgstr "{0, plural, one {1 receipt deleted. The History screen can put it back.} other {{1} receipts deleted, as one act. The History screen can put them all back.}}"
 
+#. Accessible name of the page buttons under Browse rates
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Pages of rates"
+msgstr "Pages of rates"
+
 #: src/screens/ynab/results.tsx
 msgid "No row failed here, so compare the account in YNAB with what arrived."
 msgstr "No row failed here, so compare the account in YNAB with what arrived."
@@ -3639,7 +3678,6 @@ msgstr "Pick an accent colour"
 
 #. Column heading on the Reimbursements report: the start of a range, or where money comes from
 #. Label of a date field: the first day of a range to fetch
-#. Label of a date filter: the first day shown
 #. Label of a form field on the Transfers screen: the start of a range, or where money comes from
 #. Label of a form field on the one-time import: the start of a range, or where money comes from
 #. Text on the date range picker: the start of a range, or where money comes from
@@ -5513,6 +5551,13 @@ msgstr "{0} s"
 msgid "{0} by {1}"
 msgstr "{0} by {1}"
 
+#. Where Browse rates is in its list of pages
+#. placeholder {0}: count(page)
+#. placeholder {1}: count(pages)
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Page {0} of {1}"
+msgstr "Page {0} of {1}"
+
 #. Column heading on the Exchange rates page: an exchange rate as entered
 #. Column heading on the Net Worth report: an exchange rate
 #. Column heading on the rates import: an exchange rate
@@ -5668,6 +5713,10 @@ msgstr "Every new receipt will take about <0>70× more space</0> in the database
 #: src/screens/Register.tsx
 msgid "{0} — all hidden"
 msgstr "{0} — all hidden"
+
+#: src/screens/exchangeRates/Browse.tsx
+msgid "{total, plural, one {# rate} other {# rates}}"
+msgstr "{total, plural, one {# rate} other {# rates}}"
 
 #. Logging style on Application management: write everything
 #: src/lib/labels.ts
@@ -6065,9 +6114,11 @@ msgstr "Save settings"
 msgid "By currency"
 msgstr "By currency"
 
+#. Column heading on Browse rates: the month a line is for
 #. Column heading on the Reimbursements report: noun, a calendar month
 #. Label of a field: the month a rate is for
 #: src/screens/ExchangeRates.tsx
+#: src/screens/exchangeRates/Browse.tsx
 #: src/screens/reports/Reimbursements.tsx
 msgid "Month"
 msgstr "Month"
@@ -7164,12 +7215,6 @@ msgstr "Category: no category needed, this is one leg of a transfer"
 msgid "no git history and no build stamp to ask"
 msgstr "no git history and no build stamp to ask"
 
-#. placeholder {0}: count(found.data.limit)
-#. placeholder {1}: count(found.data.total)
-#: src/screens/ExchangeRates.tsx
-msgid "The newest {0} of {1} rates. Narrow the dates to see older ones."
-msgstr "The newest {0} of {1} rates. Narrow the dates to see older ones."
-
 #. Column heading on the Application management screen
 #. Desktop app menu bar: the File menu
 #. Label of a form field on the Import screen
@@ -7207,7 +7252,6 @@ msgstr "Show a code to scan"
 msgid "Passkeys need this app opened at its HTTPS address."
 msgstr "Passkeys need this app opened at its HTTPS address."
 
-#. Column heading: the rate as units per one unit of the base currency
 #. Column heading: the rate as units per one unit of the base currency
 #. placeholder {0}: household.base_currency
 #: src/screens/ExchangeRates.tsx
@@ -7750,7 +7794,7 @@ msgid "Bank"
 msgstr "Bank"
 
 #. Option of a filter: no currency chosen
-#: src/screens/ExchangeRates.tsx
+#: src/screens/exchangeRates/Browse.tsx
 msgid "Every currency"
 msgstr "Every currency"
 
@@ -7827,6 +7871,7 @@ msgstr "Account for {0}"
 #. Button on the Exchange rates page: list the stored rates of this currency
 #. Heading on the Exchange rates page: the stored rates, filtered
 #: src/screens/ExchangeRates.tsx
+#: src/screens/exchangeRates/Browse.tsx
 msgid "Browse rates"
 msgstr "Browse rates"
 
@@ -8022,6 +8067,11 @@ msgstr "Group"
 msgid "{0, plural, one {{1} transfer will be imported as ordinary transactions, with the reason for each} other {{2} transfers will be imported as ordinary transactions, with the reason for each}}"
 msgstr "{0, plural, one {{1} transfer will be imported as ordinary transactions, with the reason for each} other {{2} transfers will be imported as ordinary transactions, with the reason for each}}"
 
+#. Label on Browse rates: open the list at this day
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Jump to date"
+msgstr "Jump to date"
+
 #. Row on the Income vs Expense report: what work paid back beyond what was spent, counted as income
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Reimbursement surplus"
@@ -8048,6 +8098,11 @@ msgstr "How banks write our names"
 #: src/screens/Accounts.tsx
 msgid "Where the account is held. Optional, and separate from the currency — a euro account can sit in any number of countries."
 msgstr "Where the account is held. Optional, and separate from the currency — a euro account can sit in any number of countries."
+
+#. Option on Browse rates: list each stored rate on its own line
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Every rate, by day"
+msgstr "Every rate, by day"
 
 #: src/screens/Register.tsx
 msgid "The line exactly as it arrived"
@@ -8513,11 +8568,6 @@ msgstr "All accounts"
 msgid "This file looks like it is for <0>{0}</0> ({1}), not the account chosen above."
 msgstr "This file looks like it is for <0>{0}</0> ({1}), not the account chosen above."
 
-#. placeholder {0}: found.data.total
-#: src/screens/ExchangeRates.tsx
-msgid "{0, plural, one {# rate} other {# rates}}"
-msgstr "{0, plural, one {# rate} other {# rates}}"
-
 #. Column heading on Browse rates: the rate's date
 #. Column heading on the Exchange rates page: the day or month a rate is for
 #. Column heading on the Income vs Expense report: noun. See GLOSSARY.md
@@ -8541,6 +8591,7 @@ msgstr "{0, plural, one {# rate} other {# rates}}"
 #. Label on the Register screen: noun. See GLOSSARY.md
 #. Name of a fact on the Reimbursements report: noun. See GLOSSARY.md
 #: src/screens/ExchangeRates.tsx
+#: src/screens/exchangeRates/Browse.tsx
 #: src/screens/Import.tsx
 #: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
@@ -8609,6 +8660,8 @@ msgid "Somebody reset {user}'s password"
 msgstr "Somebody reset {user}'s password"
 
 #. Column heading in the list of exchange rates a report used: units of the currency per one base currency
+#. Column heading: the rate as units per one unit of the base currency
+#: src/screens/exchangeRates/Browse.tsx
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Per 1 {base}"
 msgstr "Per 1 {base}"
@@ -10200,7 +10253,7 @@ msgid "how this works"
 msgstr "how this works"
 
 #. Option of a filter: no source chosen
-#: src/screens/ExchangeRates.tsx
+#: src/screens/exchangeRates/Browse.tsx
 msgid "Every source"
 msgstr "Every source"
 
@@ -10398,6 +10451,7 @@ msgstr "Recovered"
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/ExchangeRates.tsx
+#: src/screens/exchangeRates/Browse.tsx
 #: src/screens/Household.tsx
 #: src/screens/OneTimeImport.tsx
 #: src/screens/Register.tsx
@@ -10495,6 +10549,11 @@ msgstr "Categorisation"
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Reimbursement shortfall"
 msgstr "Reimbursement shortfall"
+
+#. Label on Browse rates: open the list at this month
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Jump to month"
+msgstr "Jump to month"
 
 #: src/screens/Register.tsx
 msgid "Reimbursed, with the payment"
@@ -10602,6 +10661,12 @@ msgstr "{0, plural, one {# passkey was registered since then. } other {# passkey
 #: src/screens/reports/Reimbursements.tsx
 msgid "Show in Transactions"
 msgstr "Show in Transactions"
+
+#. Option on Browse rates: this granularity is the household's rate policy
+#. placeholder {0}: granularityWord(granularity)
+#: src/screens/exchangeRates/Browse.tsx
+msgid "{0} (as reports use)"
+msgstr "{0} (as reports use)"
 
 #. Label of a form field on the Accounts screen: noun, what the account held on the day it starts. See GLOSSARY.md
 #: src/screens/Accounts.tsx
@@ -11401,6 +11466,11 @@ msgstr "Using a recovery code signed you out everywhere, forgot every trusted br
 #: src/screens/AccountImport.tsx
 msgid "IBAN"
 msgstr "IBAN"
+
+#. Column heading on Browse rates by month: the date of the rate the month's figure used
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Rate's date"
+msgstr "Rate's date"
 
 #. Section heading on the Net Worth report
 #: src/screens/reports/NetWorth.tsx
@@ -12423,6 +12493,11 @@ msgstr "Part"
 msgid "What is holding it (optional)"
 msgstr "What is holding it (optional)"
 
+#. Button on Browse rates
+#: src/screens/exchangeRates/Browse.tsx
+msgid "Last page"
+msgstr "Last page"
+
 #: src/screens/Profile.tsx
 msgid "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
 msgstr "Every code you have now, used or not, stops working and ten new ones replace them. Nobody is signed out."
@@ -12800,6 +12875,7 @@ msgstr "Applying…"
 #. Label of a choice on the Register screen: noun, where it came from
 #. Label of a filter on the Exchange rates page: where rates come from
 #: src/screens/ExchangeRates.tsx
+#: src/screens/exchangeRates/Browse.tsx
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Source"

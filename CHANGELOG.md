@@ -71,6 +71,20 @@ history this repository does not have.
   button named *Accounts in SEK* and so on; Tab reaches the list and Escape
   closes it. The status endpoint's account entries now carry `institution`,
   `country`, `country_name`, `flag` and `closed`.
+- **Browse rates on the Exchange rates page reads a long range a page at a
+  time** (#410). The server orders the rates and answers a hundred at once
+  (`GET …/fx/rates` takes `offset`, `sort` and `direction`), so years of daily
+  rates for several currencies no longer arrive, or draw, all together. Every
+  column sorts at its heading through the server, and the headings stay in
+  view while a page scrolls. **Show** lists every rate by day, or one line per
+  currency per month at the monthly average or the month-end rate
+  (`granularity`), found exactly as a report finds it under that rate policy,
+  with the date of the rate it used; the household's own policy is marked.
+  The dates are the shared date range control, and **Jump to** a date or a
+  month opens the page holding it (`at`) with that row marked. The currency,
+  source, dates, view, order and page are kept in the address, so a reload or
+  a bookmark opens the same list. The agent route takes the same paging,
+  ordering and granularity.
 
 ### Changed
 

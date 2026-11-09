@@ -41,6 +41,7 @@ import {
   type FxStatus,
 } from "../lib/fx";
 import type { Household } from "../lib/types";
+import { Browse, useBrowseView } from "./exchangeRates/Browse";
 
 const count = (n: number) => formatCount(n);
 
@@ -100,7 +101,7 @@ export function ExchangeRates({ household }: { household: Household }) {
 
   // Shared between the per-currency rows and the forms below them.
   const [enterFor, setEnterFor] = useState<string | null>(null);
-  const [browseFor, setBrowseFor] = useState<string>("");
+  const browse = useBrowseView(household.id);
   const [stripFor, setStripFor] = useState<string>("");
   const manualRef = useRef<HTMLElement>(null);
   const browseRef = useRef<HTMLElement>(null);
@@ -147,7 +148,7 @@ export function ExchangeRates({ household }: { household: Household }) {
               manualRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
             onBrowse={(code) => {
-              setBrowseFor(code);
+              browse.choose({ currency: code });
               browseRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
             onMonths={setStripFor}
@@ -209,7 +210,14 @@ export function ExchangeRates({ household }: { household: Household }) {
           <History history={data.history} />
 
           <section className="card" ref={browseRef}>
-            <Browse household={household} data={data} currency={browseFor} onCurrency={setBrowseFor} />
+            <Browse
+              household={household}
+              data={data}
+              view={browse.view}
+              onView={browse.setView}
+              onChoose={browse.choose}
+              fromAddress={browse.fromAddress}
+            />
           </section>
         </>
       )}
@@ -1215,135 +1223,5 @@ function History({ history }: { history: FxFetch[] }) {
         </div>
       )}
     </section>
-  );
-}
-
-// --------------------------------------------------------------------------- //
-// Browse the stored rates
-// --------------------------------------------------------------------------- //
-
-type BrowseSort = "date" | "currency" | "source" | "rate" | "in_base" | "own";
-
-function Browse({
-  household,
-  data,
-  currency,
-  onCurrency,
-}: {
-  household: Household;
-  data: FxStatus;
-  currency: string;
-  onCurrency: (code: string) => void;
-}) {
-  const [since, setSince] = useState("");
-  const [until, setUntil] = useState("");
-  const [source, setSource] = useState("");
-  const params = new URLSearchParams();
-  if (currency) params.set("currency", currency);
-  if (since) params.set("since", since);
-  if (until) params.set("until", until);
-  if (source) params.set("source", source);
-  const query = params.toString();
-  const found = useQuery({
-    queryKey: ["fx-rates", household.id, query],
-    queryFn: ({ signal }) => api.get<FxRates>(`/households/${household.id}/fx/rates?${query}`, { signal }),
-  });
-  const { sort, direction, onSort } = useSort<BrowseSort>("date", "desc");
-  const rows = useMemo(
-    () =>
-      sortRows(found.data?.rates ?? [], sort, direction, (row, column) => {
-        switch (column) {
-          case "date":
-            return row.date;
-          case "currency":
-            return row.currency;
-          case "source":
-            return sourceLabel(row.source);
-          case "rate":
-            return [row.quote_currency, Number(row.rate)];
-          case "in_base":
-            return row.rate_in_base === null ? null : Number(row.rate_in_base);
-          case "own":
-            return row.own_rate === null ? null : Number(row.own_rate);
-        }
-      }),
-    [found.data, sort, direction],
-  );
-  const heading = { sort, direction, onSort };
-  return (
-    <>
-      <h2 className="section-title">
-        <Trans comment="Heading on the Exchange rates page: the stored rates, filtered">Browse rates</Trans>
-      </h2>
-      <div className="row" style={{ gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
-        <Field label={t({ message: "Currency", comment: "Label of a filter on the Exchange rates page. See GLOSSARY.md" })}>
-          <select value={currency} onChange={(e) => onCurrency(e.target.value)}>
-            <option value="">{t({ message: "Every currency", comment: "Option of a filter: no currency chosen" })}</option>
-            {data.currencies.map((one) => (
-              <option key={one.currency} value={one.currency}>
-                {one.currency}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label={t({ message: "From", comment: "Label of a date filter: the first day shown" })}>
-          <input type="date" value={since} onChange={(e) => setSince(e.target.value)} />
-        </Field>
-        <Field label={t({ message: "To", comment: "Label of a date filter: the last day shown" })}>
-          <input type="date" value={until} onChange={(e) => setUntil(e.target.value)} />
-        </Field>
-        <Field label={t({ message: "Source", comment: "Label of a filter on the Exchange rates page: where rates come from" })}>
-          <select value={source} onChange={(e) => setSource(e.target.value)}>
-            <option value="">{t({ message: "Every source", comment: "Option of a filter: no source chosen" })}</option>
-            <option value="ecb">{sourceLabel("ecb")}</option>
-            <option value="manual">{sourceLabel("manual")}</option>
-          </select>
-        </Field>
-      </div>
-      <Problem error={found.error} />
-      {found.data && (
-        <>
-          <p className="small muted">
-            {found.data.total > found.data.limit
-              ? t`The newest ${count(found.data.limit)} of ${count(found.data.total)} rates. Narrow the dates to see older ones.`
-              : plural(found.data.total, { one: "# rate", other: "# rates" })}
-          </p>
-          {rows.length > 0 && (
-            <div className="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <SortHeading label={t({ message: "Date", comment: "Column heading on Browse rates: the rate's date" })} column="date" {...heading} />
-                    <SortHeading label={t({ message: "Currency", comment: "Column heading on Browse rates. See GLOSSARY.md" })} column="currency" {...heading} />
-                    <SortHeading label={t({ message: "Source", comment: "Column heading on Browse rates: where the rate came from" })} column="source" {...heading} />
-                    <SortHeading label={t({ message: "As published", comment: "Column heading on Browse rates: the rate as the source quotes it" })} column="rate" align="right" {...heading} />
-                    <SortHeading label={t({ message: `Per 1 ${household.base_currency}`, comment: "Column heading: the rate as units per one unit of the base currency" })} column="in_base" align="right" {...heading} />
-                    {data.show_own_rates && (
-                      <SortHeading label={t({ message: "Your transfers", comment: "Column heading on Browse rates: the rate your own transfers gave that day" })} column="own" align="right" {...heading} />
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => (
-                    <tr key={`${row.source}${row.quote_currency}${row.currency}${row.date}${row.period}`}>
-                      <td className="mono small">
-                        {row.period === "month" ? monthLabel(row.date.slice(0, 7)) : formatDate(row.date)}
-                      </td>
-                      <td className="mono">{row.currency}</td>
-                      <td className="small">{sourceLabel(row.source)}</td>
-                      <td className="amount mono">
-                        {row.rate} <span className="muted">/ {row.quote_currency}</span>
-                      </td>
-                      <td className="amount mono">{row.rate_in_base ?? "—"}</td>
-                      {data.show_own_rates && <td className="amount mono">{row.own_rate ?? "—"}</td>}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
-      )}
-    </>
   );
 }

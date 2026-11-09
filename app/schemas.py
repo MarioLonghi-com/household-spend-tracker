@@ -4026,12 +4026,22 @@ class FxRateOut(BaseModel):
     rate_in_base: str | None = None
     #: The household's own transfers' rate on that date, in base terms.
     own_rate: str | None = None
+    #: A month's line (#410) only: the date of the rate its policy used, and
+    #: whether that rate is older than the stale limit. Null on a stored row.
+    rate_date: Date | None = None
+    stale: bool | None = None
 
 
 class FxRatesOut(BaseModel):
     base_currency: str
+    #: `day`, or `month_avg` / `month_end`: a month per line (#410).
+    granularity: str = "day"
+    #: Every row the filters matched; `rates` is the page from `offset`.
     total: int
     limit: int
+    offset: int = 0
+    #: Where in `rates` a jump (`at`) landed, or null when none was asked.
+    focus: int | None = None
     rates: list[FxRateOut]
 
 

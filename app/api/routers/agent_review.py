@@ -549,6 +549,10 @@ def fx_rates(
     until: Date | None = None,
     source: Annotated[str | None, Query(pattern="^(ecb|manual)$")] = None,
     limit: int = Query(default=500, ge=1, le=human_fx.MAX_RATES),
+    offset: int = Query(default=0, ge=0),
+    granularity: human_fx.GranularityParam = "day",
+    sort: human_fx.SortParam = "date",
+    direction: human_fx.DirectionParam = "desc",
 ) -> FxRatesOut:
     """The stored rates the household's chain reads, answered by the person's route.
 
@@ -557,7 +561,17 @@ def fx_rates(
     """
     house = _house(agent, household_id)
     answer = human_fx.stored_rates(
-        agent.session, house, currency=currency, since=since, until=until, source=source, limit=limit
+        agent.session,
+        house,
+        currency=currency,
+        since=since,
+        until=until,
+        source=source,
+        limit=limit,
+        offset=offset,
+        granularity=granularity,
+        sort=sort,
+        direction=direction,
     )
     request.state.agent_rows = len(answer.rates)
     return answer
@@ -725,10 +739,15 @@ ENDPOINTS: list[ManifestEndpoint] = [
             "same rate per one base currency, crossed through the quote currency on that "
             "date; own_rate is what the household's own transfers gave that day, in the "
             "same terms. Filters: currency, since, until, source (ecb|manual), limit "
-            "(default 500, max 5000). A key reads rates; it cannot fetch, enter or delete "
-            "them, or change where they come from."
+            "(default 500, max 5000) and offset: total counts every row the filters "
+            "matched, rates is the page from offset. sort (date, currency, source, rate, "
+            "in_base, rate_date, own) and direction (asc|desc) order it. granularity "
+            "month_avg or month_end lists one line per currency per month instead, the "
+            "rate that policy gives per one base (as reports find it), with rate_date and "
+            "stale; day (the default) lists the rows as stored. A key reads rates; it "
+            "cannot fetch, enter or delete them, or change where they come from."
         ),
-        returns="{base_currency, total, limit, rates[]}",
+        returns="{base_currency, granularity, total, limit, offset, focus, rates[]}",
         scope="read",
     ),
     ManifestEndpoint(
