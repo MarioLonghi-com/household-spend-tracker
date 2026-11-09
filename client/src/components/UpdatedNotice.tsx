@@ -23,7 +23,10 @@ export function UpdatedNotice({ at }: { at: Date | null }) {
   }, [at]);
 
   return (
-    <div className="updated-notice" role="status" aria-live="polite">
+    // A live region without `role="status"`: the shell is on every screen,
+    // and a second status region would be one more for anything on a screen
+    // that announces its own ("Saved.") to be confused with.
+    <div className="updated-notice" aria-live="polite">
       {shown ? (
         <span className="small muted">
           <Trans>Updated just now with changes made elsewhere.</Trans>
