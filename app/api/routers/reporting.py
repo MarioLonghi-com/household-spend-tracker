@@ -31,6 +31,7 @@ from ...schemas import (
     CoverageOut,
     ExcludedOut,
     IncomeExpenseOut,
+    NetWorthOut,
     NotConvertedOut,
     RateSourceOut,
     RatesStatusOut,
@@ -45,6 +46,7 @@ from ...schemas import (
     ReportSectionOut,
 )
 from ...services import fx
+from ...services import net_worth as net_worth_service
 from ...services import reporting as report_service
 from ..deps import CurrentHousehold, SessionDep
 
@@ -369,3 +371,50 @@ def reimbursements(
         session, household.id, currency=currency.upper(), since=since, until=until
     )
     return ReimbursementsOut.model_validate(asdict(answer))
+
+
+@router.get("/households/{household_id}/reports/net-worth", response_model=NetWorthOut)
+def net_worth(
+    household: CurrentHousehold,
+    session: SessionDep,
+    since: Annotated[Date | None, Query()] = None,
+    until: Annotated[Date | None, Query()] = None,
+    closed_only: bool = True,
+    institution: Annotated[list[str] | None, Query()] = None,
+    country: Annotated[list[str] | None, Query()] = None,
+    currency: Annotated[list[str] | None, Query()] = None,
+    account_id: Annotated[list[str] | None, Query()] = None,
+    include_closed_accounts: bool = False,
+    split: net_worth_service.Split = net_worth_service.Split.currency,
+) -> NetWorthOut:
+    """How much the household has, all accounts together, at each month end (#397).
+
+    Unlike every other report, `currency` is **optional and repeatable**: it
+    is a filter over accounts, not the facet the answer is in. The answer says
+    what it is in -- `display_currency` -- and when several currencies are in
+    scope with no exchange rates, that is null and there is no total, only
+    each currency's own book under `currencies`.
+
+    `institution`, `country`, `currency` and `account_id` repeat; values inside
+    one widen the selection and the filters narrow each other. An empty
+    `institution=` or `country=` is "No bank set" or "No country set".
+    `since` and `until` may each be omitted ("All dates"): the start is then
+    the first month an account in scope has a row, the end today.
+    `closed_only` (default on) stops at the last month that has ended.
+    """
+    answer = net_worth_service.report(
+        session,
+        household,
+        since=since,
+        until=until,
+        closed_only=closed_only,
+        filters=net_worth_service.Filters(
+            institutions=institution,
+            countries=[code.upper() for code in country] if country is not None else None,
+            currencies=[code.upper() for code in currency] if currency is not None else None,
+            account_ids=account_id,
+        ),
+        include_closed_accounts=include_closed_accounts,
+        split=split,
+    )
+    return NetWorthOut.model_validate(asdict(answer))

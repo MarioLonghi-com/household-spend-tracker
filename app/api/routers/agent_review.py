@@ -28,9 +28,17 @@ from pydantic import BaseModel
 
 from ...errors import ValidationError
 from ...models import ClearedState, LinkSource, RegisterSource, ReimbursementState, ReimbursementView
-from ...schemas import FxRatesOut, FxStatusOut, IncomeExpenseOut, ManifestEndpoint, ReimbursementsOut
+from ...schemas import (
+    FxRatesOut,
+    FxStatusOut,
+    IncomeExpenseOut,
+    ManifestEndpoint,
+    NetWorthOut,
+    ReimbursementsOut,
+)
 from ...services import insights, review, search_query
 from ...services import transactions as txn_service
+from ...services.net_worth import Split
 from ..deps import CurrentAgent
 from . import agent
 from . import fx as human_fx
@@ -440,6 +448,40 @@ def reimbursements(
     return answer
 
 
+@router.get("/households/{household_id}/reports/net-worth", response_model=NetWorthOut)
+def net_worth(
+    household_id: str,
+    agent: CurrentAgent,
+    request: Request,
+    since: Date | None = None,
+    until: Date | None = None,
+    closed_only: bool = True,
+    institution: Annotated[list[str] | None, Query()] = None,
+    country: Annotated[list[str] | None, Query()] = None,
+    currency: Annotated[list[str] | None, Query()] = None,
+    account_id: Annotated[list[str] | None, Query()] = None,
+    include_closed_accounts: bool = False,
+    split: Split = Split.currency,
+) -> NetWorthOut:
+    """The Net Worth report, answered by the person's route itself (#397)."""
+    house = _house(agent, household_id)
+    answer = human_reports.net_worth(
+        household=house,
+        session=agent.session,
+        since=since,
+        until=until,
+        closed_only=closed_only,
+        institution=institution,
+        country=country,
+        currency=currency,
+        account_id=account_id,
+        include_closed_accounts=include_closed_accounts,
+        split=split,
+    )
+    request.state.agent_rows = len(answer.accounts)
+    return answer
+
+
 # --------------------------------------------------------------------------- #
 # Observed exchange rates
 # --------------------------------------------------------------------------- #
@@ -625,6 +667,34 @@ ENDPOINTS: list[ManifestEndpoint] = [
             "outstanding_count, oldest_outstanding, recovered, recovered_count, "
             "written_off, written_off_count, unmatched, outstanding_rows[], claims[], "
             "months[]}"
+        ),
+        scope="read",
+    ),
+    ManifestEndpoint(
+        method="GET",
+        path=f"{_HOUSE}/reports/net-worth",
+        says=(
+            "The Net Worth report: every account's balance at each month end in the range, "
+            "added up, with what moved it. Amounts are integer minor units of "
+            "display_currency. With one currency in scope that currency is exact; with "
+            "several it is the base currency only when converted is true, and when nothing "
+            "converts display_currency is null, headline and bridge are null and there is "
+            "NO total -- read currencies[], each currency's own book, and never add them. "
+            "Liabilities (credit cards, other_liability) are negative and already inside "
+            "net_worth. closed_only (default true) stops at the last month that has ended; "
+            "clipped_from says the range was cut. Filters, all repeatable, OR within one "
+            "and AND across: institution, country (an empty value is 'not set'), currency, "
+            "account_id; plus since, until (omit for all dates), include_closed_accounts "
+            "and split (currency|country|institution|type) for points[].parts and held[]. "
+            "When converted, every foreign account is converted at the household's spot rate "
+            "on each date (rate_source, explanation.rates), a currency with no rate is left "
+            "out and listed in not_converted, and rates_status says how old the rates are. "
+            "Rates are decimal strings. /balances stays the unconverted per-account view."
+        ),
+        returns=(
+            "{as_of, since, until, today, closed_only, clipped_from, split, base_currency, "
+            "display_currency, converted, rate_source, rates_status, points[], headline, "
+            "bridge, held[], accounts[], not_converted[], currencies[], explanation}"
         ),
         scope="read",
     ),

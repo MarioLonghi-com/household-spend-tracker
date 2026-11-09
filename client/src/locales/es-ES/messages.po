@@ -12,6 +12,11 @@ msgstr ""
 msgid "The name looks like its IBAN."
 msgstr "El nombre parece ser su IBAN."
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Stops at {asOf}, the last closed month: the month still running is left out."
+msgstr "Termina el {asOf}, el último mes cerrado: el mes en curso queda fuera."
+
 #. placeholder {0}: formatCount(analysis.totals.starting_balance_rows)
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -123,6 +128,12 @@ msgstr "A"
 msgid "starts with"
 msgstr "empieza por"
 
+#. Button on the Net Worth report: put every filter back to its default
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Reset the filters"
+msgstr "Restablecer los filtros"
+
 #: src/screens/reports/IncomeExpense.tsx
 #, fuzzy
 msgid "For information. Only the difference is counted: above, as Reimbursement surplus in income or Reimbursement shortfall in expenses."
@@ -146,6 +157,12 @@ msgstr "Elegir…"
 #, fuzzy
 msgid "New password"
 msgstr "Nueva contraseña"
+
+#. Tile on the Net Worth report: change since the previous month end
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Since the month before"
+msgstr "Desde el mes anterior"
 
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
 #. Account type `cash`: notes and coins, and the heading of its group. See GLOSSARY.md
@@ -269,6 +286,12 @@ msgctxt "rule list"
 msgid "contains"
 msgstr "contiene"
 
+#. Net Worth report: opens the chart's figures as a table
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "The chart as a table"
+msgstr "El gráfico como tabla"
+
 #: src/screens/Backups.tsx
 #, fuzzy
 msgid "Opens your device's share sheet. Pick Drive or Dropbox there, and choose the folder in that app."
@@ -284,6 +307,11 @@ msgstr "Agrupados por lo que envió el banco, sin la referencia de cada movimien
 #, fuzzy
 msgid "To month"
 msgstr "Mes final"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "No accounts match these filters."
+msgstr "Ninguna cuenta coincide con estos filtros."
 
 #. Where an update failed
 #: src/screens/Updates.tsx
@@ -305,6 +333,7 @@ msgstr "Añade esto a tu aplicación de autenticación y escribe los seis dígit
 
 #. Button on the Register screen: noun, account type
 #. Column heading on the Accounts screen: noun, account type
+#. Column heading on the Net Worth report: the account type
 #. Column heading on the accounts import: noun, account type
 #. Column name shown beside a value on phones on the Accounts screen: noun, account type
 #. Column name shown beside a value on phones on the accounts import: noun, account type
@@ -312,9 +341,16 @@ msgstr "Añade esto a tu aplicación de autenticación y escribe los seis dígit
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Type"
 msgstr "Tipo"
+
+#. Heading in the bank filter on the Net Worth report
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Banks"
+msgstr "Bancos"
 
 #. Screen-reader name on the Register screen
 #. placeholder {0}: formatDate(txn.date)
@@ -397,6 +433,13 @@ msgstr "Al final no se reembolsó"
 msgid "Fixed: this is YNAB's own bucket rather than a category of yours (Uncategorized, or Inflow: Ready to Assign), so its rows always arrive uncategorised."
 msgstr "Fijo: es el cajón propio de YNAB y no una categoría tuya (Uncategorized o Inflow: Ready to Assign), así que sus filas siempre llegan sin categoría."
 
+#. Net Worth report: the accounts that do not say which bank holds them
+#. Net Worth report: the accounts that do not say which bank holds them
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "No bank set"
+msgstr "Sin banco indicado"
+
 #: src/screens/Household.tsx
 #, fuzzy
 msgid "You can pick a palette and one accent of your own. You cannot reach the text and background colours, so no household can be made unreadable — and the accent is checked for contrast before it is saved."
@@ -470,6 +513,11 @@ msgstr "Una de las cinco copias de seguridad de actualización más recientes: s
 #: src/screens/SignIn.tsx
 msgid "Change password and sign in"
 msgstr ""
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "The exchange-rate effect is what the balances held at the start would be worth at the end rates, less what they were worth at the start rates: {fxEffect}. The rest of the change, {moneyMoved}, is money added or spent, including money that arrived during the range and then moved with the rate."
+msgstr "El efecto del tipo de cambio es lo que valdrían los saldos del inicio a los tipos del final, menos lo que valían a los tipos del inicio: {fxEffect}. El resto del cambio, {moneyMoved}, es dinero añadido o gastado, incluido el dinero que llegó durante el periodo y luego se movió con el tipo."
 
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -891,6 +939,11 @@ msgstr "{0} está disponible."
 msgid "Reading this instance…"
 msgstr "Leyendo esta instancia…"
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Nothing is converted: there are no exchange rates, so each currency keeps its own figures and they are never added together."
+msgstr "No se convierte nada: no hay tipos de cambio, así que cada divisa conserva sus propias cifras y nunca se suman entre sí."
+
 #. Button on the passkeys panel
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -918,8 +971,10 @@ msgstr "Otro hogar de esta instancia está obteniendo tipos. Espera a que termin
 msgid "this path does not exist"
 msgstr "esta ruta no existe"
 
+#. Screen-reader name on the Net Worth report
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Group accounts by"
 msgstr "Agrupar cuentas por"
@@ -1050,6 +1105,12 @@ msgstr "Añadir una regla"
 msgid "{why} So this asks for your password again."
 msgstr ""
 
+#. Net Worth explanation, point 7
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Closed months."
+msgstr "Meses cerrados."
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "One part of a split"
@@ -1135,6 +1196,12 @@ msgstr "Importado de <0>{0}</0>, línea {1}, el {2}."
 msgid "Your household"
 msgstr "Tu hogar"
 
+#. Text on a dropdown that picks several on the Net Worth report
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "All countries"
+msgstr "Todos los países"
+
 #: src/screens/Passkeys.tsx
 #, fuzzy
 msgid "Passkeys need this app opened at its HTTPS address, {address}."
@@ -1207,6 +1274,12 @@ msgstr "¿Para qué era?"
 msgid "Every row was imported."
 msgstr "Se importaron todas las filas."
 
+#. Label before the split choice on the Net Worth report: what the bars are divided by
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Split by"
+msgstr "Dividir por"
+
 #. Screen-reader name on the one-time import's results
 #. placeholder {0}: formatDate(row.date)
 #. placeholder {1}: row.payee ?? ""
@@ -1230,6 +1303,12 @@ msgstr "Nuevo hogar"
 #, fuzzy
 msgid "Mark cleared"
 msgstr "Marcar como contabilizado"
+
+#. Tile on the Net Worth report: credit cards and other liabilities, already subtracted
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Owed on cards and debts"
+msgstr "Debido en tarjetas y deudas"
 
 #: src/components/Receipts.tsx
 #, fuzzy
@@ -1831,6 +1910,12 @@ msgstr "Ya está en el libro"
 msgid "What came in, what went out, and what it was for — month by month."
 msgstr "Lo que entró, lo que salió y para qué fue, mes a mes."
 
+#. Under the owed figure on the Net Worth report
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "already subtracted"
+msgstr "ya restado"
+
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "Discard the staged one"
@@ -1917,6 +2002,11 @@ msgstr "Con <0>coincide con el patrón</0> esto es una plantilla, así que <1>\\
 #: ../desktop/src/words.ts
 msgid "The upgrade did not keep every row, so Household Spend Tracker stopped"
 msgstr ""
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Nothing is converted: every account here is in {display}, so the figures are exact."
+msgstr "No se convierte nada: todas las cuentas están en {display}, así que las cifras son exactas."
 
 #. placeholder {0}: formatCount(RAW_TEXT_LIMIT)
 #: src/screens/Import.tsx
@@ -2035,6 +2125,11 @@ msgstr "Nada: comprueba que estás comparando con lo que escribió el banco y no
 msgid "Out"
 msgstr "Salida"
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "older than the limit set for rates"
+msgstr "más antiguo que el límite fijado para los tipos"
+
 #. placeholder {0}: one.account
 #. placeholder {1}: money(one.ynab_balance_minor, one.currency)
 #. placeholder {2}: money(one.imported_minor, one.currency)
@@ -2133,6 +2228,12 @@ msgstr "Una copia a tamaño de pantalla y una miniatura. Unos <0>33 KB</0> por t
 #, fuzzy
 msgid "Covered"
 msgstr "Cubierto"
+
+#. Line on the Net Worth report: the change that was not exchange rates
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Money added or spent"
+msgstr "Dinero añadido o gastado"
 
 #: src/lib/labels.ts
 #, fuzzy
@@ -2343,6 +2444,11 @@ msgstr "Últimos 3 meses"
 msgid "Make them an owner"
 msgstr "Hacerle propietario"
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Net worth on {startDate}"
+msgstr "Patrimonio neto el {startDate}"
+
 #. History headline, the kind of act: a change to accounts, categories or settings
 #: src/lib/historyWords.ts
 #, fuzzy
@@ -2537,6 +2643,7 @@ msgstr "Por la fecha en que se produjo el gasto."
 
 #. Column heading on the Accounts screen: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the Income vs Expense report: noun, a bank or cash account. See GLOSSARY.md
+#. Column heading on the Net Worth report: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the Reimbursements report: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun, a bank or cash account. See GLOSSARY.md
 #. Column heading on the accounts import: noun, a bank or cash account. See GLOSSARY.md
@@ -2554,12 +2661,18 @@ msgstr "Por la fecha en que se produjo el gasto."
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/NetWorth.tsx
 #: src/screens/reports/Reimbursements.tsx
 #: src/screens/TransferSections.tsx
 #: src/screens/ynab/results.tsx
 #, fuzzy
 msgid "Account"
 msgstr "Cuenta"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Showing {asOf}, the last closed month."
+msgstr "Se muestra el {asOf}, el último mes cerrado."
 
 #. Button on the Application management screen
 #: src/screens/ApplicationManagement.tsx
@@ -2707,6 +2820,12 @@ msgstr "{0, plural, one {# día} other {# días}}"
 msgid "Reimbursement"
 msgstr "Reembolso"
 
+#. Net Worth explanation, point 8
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Gaps."
+msgstr "Huecos."
+
 #. Name of a fact on the Reimbursements report: paid back by work
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
@@ -2719,6 +2838,12 @@ msgstr "Devuelto"
 #, fuzzy
 msgid "Expenses"
 msgstr "Gastos"
+
+#. Link on the Net Worth report to Settings, Exchange rates, when no rate is stored yet
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Fetch or enter rates on the Exchange rates page"
+msgstr "Descarga o introduce los tipos en la página Tipos de cambio"
 
 #. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
@@ -2745,6 +2870,11 @@ msgstr "Transferencia"
 #, fuzzy
 msgid "Hide the menu"
 msgstr "Ocultar el menú"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "On {asOf} the household held {total} across {held}."
+msgstr "El {asOf} el hogar tenía {total} en {held}."
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -2941,6 +3071,11 @@ msgstr "Preparando {toVersion}"
 msgid "Nothing recorded. Rows created before the audit log existed have no history."
 msgstr "No hay nada registrado. Las filas creadas antes de que existiera el registro de auditoría no tienen historial."
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "No rate for {missing}, so those accounts are left out of the total. "
+msgstr "No hay tipo para {missing}, así que esas cuentas quedan fuera del total. "
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Keep my changes"
@@ -3064,6 +3199,7 @@ msgstr "tipo mensual"
 #. Name of a fact on the one-time import's results: noun, bank or cash accounts. See GLOSSARY.md
 #. Name of a fact on the one-time import: noun, bank or cash accounts. See GLOSSARY.md
 #. Screen title on the Accounts screen: noun, bank or cash accounts. See GLOSSARY.md
+#. Section heading on the Net Worth report: noun, bank or cash accounts. See GLOSSARY.md
 #. Step name in the one-time import: map the other app's accounts. See GLOSSARY.md
 #. Text on the Register screen: noun, bank or cash accounts. See GLOSSARY.md
 #: src/App.tsx
@@ -3072,6 +3208,7 @@ msgstr "tipo mensual"
 #: src/screens/Household.tsx
 #: src/screens/OneTimeImport.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/NetWorth.tsx
 #: src/screens/ynab/results.tsx
 #, fuzzy
 msgid "Accounts"
@@ -3175,6 +3312,11 @@ msgstr "Descartar"
 msgid "Download .txt"
 msgstr "Descargar .txt"
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "On {asOf} the household held {total} across {held}, up {moved} on {start}."
+msgstr "El {asOf} el hogar tenía {total} en {held}, {moved} más que el {start}."
+
 #. Application management, Where the files are: the built web pages
 #: src/lib/labels.ts
 #, fuzzy
@@ -3257,6 +3399,12 @@ msgstr "Todas las fechas: del {0} al {1}."
 #: ../desktop/src/words.ts
 msgid "Cut"
 msgstr ""
+
+#. Net Worth explanation, point 6
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "What \"≈\" means."
+msgstr "Qué significa \"≈\"."
 
 #. Text on the Register screen
 #: src/screens/Register.tsx
@@ -3360,6 +3508,11 @@ msgstr ""
 #, fuzzy
 msgid "{0, plural, one {This account does not add up to YNAB’s balance.} other {These accounts do not add up to YNAB’s balance.}}"
 msgstr "{0, plural, one {Esta cuenta no cuadra con el saldo de YNAB.} other {Estas cuentas no cuadran con el saldo de YNAB.}}"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Closed months only is on, so the page stops at {asOf}, the end of the last month that has finished. The running month is left out because its imports are usually incomplete and its card bills unpaid."
+msgstr "Solo meses cerrados está activado, así que la página termina el {asOf}, el final del último mes que ha terminado. El mes en curso queda fuera porque sus importaciones suelen estar incompletas y sus facturas de tarjeta sin pagar."
 
 #: src/screens/TransferSections.tsx
 #, fuzzy
@@ -3699,6 +3852,11 @@ msgstr "{0, plural, one {{1} categoría plegada} other {{2} categorías plegadas
 msgid "Cancel"
 msgstr "Cancelar"
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Net worth at each month end, split into its parts."
+msgstr "Patrimonio neto a cada fin de mes, dividido en sus partes."
+
 #: src/screens/Payees.tsx
 #, fuzzy
 msgid "The one you keep is the one you choose here."
@@ -3710,6 +3868,11 @@ msgstr "El que conservas es el que eliges aquí."
 #, fuzzy
 msgid "Uploading {0}…"
 msgstr "Subiendo {0}…"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "the last rate before {asOf}"
+msgstr "el último tipo antes del {asOf}"
 
 #. placeholder {0}: count(keep.data.added)
 #. placeholder {1}: count(keep.data.replaced)
@@ -3954,6 +4117,11 @@ msgstr "Dejarlo como está"
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in."
 msgstr "Escanea esto con tu aplicación de autenticación y escribe los seis dígitos que muestre. Comprobamos el código ahora, para que sepas que funciona aquí y no lo descubras la próxima vez que inicies sesión."
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "As of {asOf}, with the month still open."
+msgstr "A fecha de {asOf}, con el mes aún abierto."
+
 #: src/screens/Receipts.tsx
 #, fuzzy
 msgid "Nothing waiting. Every receipt is on a transaction."
@@ -3999,6 +4167,18 @@ msgstr "Neto"
 #, fuzzy
 msgid "Update to {to}"
 msgstr "Actualizar a {to}"
+
+#. Net Worth report: the chart's last point when the running month is shown
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Today"
+msgstr "Hoy"
+
+#. Tile on the Net Worth report: change since the first point
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Since the start of the range"
+msgstr "Desde el inicio del periodo"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -4188,6 +4368,11 @@ msgstr "{0, plural, one {Devuelve {1} gasto} other {Devuelve {2} gastos}}"
 #, fuzzy
 msgid "skip rows"
 msgstr "filas omitidas"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "In one currency there is no exchange-rate effect: the whole change, {moneyMoved}, is money added or spent."
+msgstr "En una sola divisa no hay efecto del tipo de cambio: todo el cambio, {moneyMoved}, es dinero añadido o gastado."
 
 #. Button on the Categories screen: verb
 #. Desktop app menu bar: the Edit menu
@@ -5150,6 +5335,18 @@ msgstr "Pide una moneda, o todas las monedas en la moneda base: una de las dos"
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.report.range_backwards"
+msgstr "El periodo termina el {until}, antes de empezar el {since}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
+msgid "error.report.range_too_long"
+msgstr "Ese periodo tiene {months} fines de mes; un informe muestra como máximo {limit}"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.request.cross_origin"
 msgstr "Esa solicitud no vino de esta aplicación"
 
@@ -5937,6 +6134,21 @@ msgstr "sugerido"
 msgid "Outcome"
 msgstr "Resultado"
 
+#. Net Worth chart tooltip: the last point, which is today's date
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Today, {tipDate}"
+msgstr "Hoy, {tipDate}"
+
+#. Column heading on the Net Worth report: the total
+#. Label on the Reports screen: everything the household has, less what it owes
+#. Tile on the Net Worth report: the total
+#: src/screens/Reports.tsx
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Net worth"
+msgstr "Patrimonio neto"
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "{app}, via the {app} API"
@@ -6091,6 +6303,12 @@ msgstr "Borrar la selección"
 #, fuzzy
 msgid "what makes a good one"
 msgstr "qué hace buena una contraseña"
+
+#. Text on a dropdown that picks several on the Net Worth report
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "All banks"
+msgstr "Todos los bancos"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -6281,8 +6499,10 @@ msgid "{0} by {1}"
 msgstr "{0} por {1}"
 
 #. Column heading on the Exchange rates page: an exchange rate as entered
+#. Column heading on the Net Worth report: an exchange rate
 #. Column heading on the rates import: an exchange rate
 #: src/screens/ExchangeRates.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Rate"
 msgstr "Tipo"
@@ -6305,12 +6525,14 @@ msgid "Replace"
 msgstr "Sustituir"
 
 #. Column heading on the Accounts screen: noun, the amount an account holds. See GLOSSARY.md
+#. Column heading on the Net Worth report: in the account's own currency
 #. Column heading on the Register screen: noun, the amount an account holds. See GLOSSARY.md
 #. Column heading on the one-time import's mapping step: noun, the amount an account holds. See GLOSSARY.md
 #. Column name for resizing the column on the Register screen: noun, the amount an account holds. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, the amount an account holds. See GLOSSARY.md
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/NetWorth.tsx
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
 msgid "Balance"
@@ -6385,6 +6607,12 @@ msgstr "Últimos 12 meses"
 #, fuzzy
 msgid "Nothing written yet. The file appears the next time this instance starts."
 msgstr "Todavía no se ha escrito nada. El archivo aparecerá la próxima vez que se inicie esta instancia."
+
+#. Toggle on the Net Worth report: list accounts flagged closed in the tables
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Show closed accounts"
+msgstr "Mostrar cuentas cerradas"
 
 #. placeholder {0}: done.payee_name
 #. placeholder {1}: done.category_name
@@ -6552,6 +6780,12 @@ msgstr "Rol"
 msgid "Money work pays back: set apart on Income vs Expense"
 msgstr "Dinero que devuelve el trabajo: aparte en Ingresos y gastos"
 
+#. Option: split the Net Worth chart by account type
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Account type"
+msgstr "Tipo de cuenta"
+
 #. Screen title on the Payee Categorisation screen. See GLOSSARY.md
 #: src/screens/PayeeCategorisation.tsx
 #, fuzzy
@@ -6612,6 +6846,12 @@ msgstr "¿Restablecer el inicio de sesión de {name}?"
 msgid "A payment from work"
 msgstr "Un pago del trabajo"
 
+#. Net Worth report: under the total, the date it is for
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "as of {asOf}"
+msgstr "a fecha de {asOf}"
+
 #. Button on the Register screen
 #: src/screens/Register.tsx
 #, fuzzy
@@ -6658,6 +6898,12 @@ msgstr "No hay ninguna cuenta marcada, así que no hay nada que mostrar. Marca u
 #, fuzzy
 msgid "fills in the acceptance screen"
 msgstr "rellena la pantalla de aceptación"
+
+#. Net Worth explanation, point 2
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "How each balance is found."
+msgstr "Cómo se obtiene cada saldo."
 
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -6928,6 +7174,11 @@ msgstr "una categoría nueva"
 #, fuzzy
 msgid "Machine"
 msgstr "Máquina"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Counts every account these filters let through: current accounts, savings, cash, credit cards, other assets and other debts. Not counted: investments, property, vehicles, pensions, and loans not kept as an account."
+msgstr "Cuenta todas las cuentas que dejan pasar estos filtros: cuentas corrientes, ahorro, efectivo, tarjetas de crédito, otros activos y otras deudas. No cuenta: inversiones, inmuebles, vehículos, pensiones ni préstamos que no se llevan como cuenta."
 
 #. Button on the Admin screen: verb, copy to the clipboard
 #. Desktop app Edit menu item (clipboard)
@@ -7774,6 +8025,12 @@ msgstr "Buscar beneficiarios"
 msgid "Next"
 msgstr "Siguiente"
 
+#. Column heading on the Net Worth report: the balance in the page's currency
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Value in {display}"
+msgstr "Valor en {display}"
+
 #. Button on the Accounts screen: verb
 #. Button on the Categories screen: verb
 #. Button on the Categories screen: verb
@@ -7910,6 +8167,11 @@ msgstr "Sustituir el tipo"
 #, fuzzy
 msgid "The ledger never converts: currency lives on the account. A total mixing {0} as they stand would be a number with nothing behind it."
 msgstr "El libro nunca convierte: la moneda va con la cuenta. Un total que mezclara {0} tal cual sería una cifra sin nada detrás."
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Net worth chart"
+msgstr "Gráfico del patrimonio neto"
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -8090,6 +8352,11 @@ msgstr "Cada uno funciona una vez y solo se muestran ahora. Son la forma de volv
 #, fuzzy
 msgid "Still to be reimbursed"
 msgstr "Pendiente de reembolso"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Investments, property, vehicles, pensions, and loans not kept as an account are left out by design: the tracker does not record them."
+msgstr "Las inversiones, inmuebles, vehículos, pensiones y préstamos que no se llevan como cuenta quedan fuera a propósito: la aplicación no los registra."
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -8421,15 +8688,18 @@ msgstr "Terminar"
 
 #. Button on the Register screen: noun. See GLOSSARY.md
 #. Column heading on the Accounts screen: noun. See GLOSSARY.md
+#. Column heading on the Net Worth report
 #. Column heading on the accounts import: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Accounts screen: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the accounts import: noun. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
+#. Option: split the Net Worth chart by country
 #. Screen-reader name on the Accounts screen: noun. See GLOSSARY.md
 #: src/screens/AccountImport.tsx
 #: src/screens/Accounts.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Country"
 msgstr "País"
@@ -8464,9 +8734,20 @@ msgstr "No disponible aquí"
 msgid "With no source, nothing converts: every report shows one currency at a time."
 msgstr "Sin ninguna fuente no se convierte nada: cada informe muestra una divisa cada vez."
 
+#. Net Worth explanation, point 1
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Which accounts are counted."
+msgstr "Qué cuentas se incluyen."
+
 #: src/screens/Updates.tsx
 msgid "Nothing has been written to the ledger since then."
 msgstr ""
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "No exchange rate for {unconverted}, so those accounts are left out of the total and listed below."
+msgstr "No hay tipo de cambio para {unconverted}, así que esas cuentas quedan fuera del total y se listan abajo."
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -8507,6 +8788,11 @@ msgstr "Las reglas se pueden sugerir tras la primera importación de un extracto
 msgid "Save to Drive/Dropbox…"
 msgstr "Guardar en Drive/Dropbox…"
 
+#: src/screens/Reports.tsx
+#, fuzzy
+msgid "How much the household has, all accounts together, at each month end — and what moved it."
+msgstr "Cuánto tiene el hogar, todas las cuentas juntas, a cada fin de mes, y qué lo ha movido."
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Gather the accounts by country"
@@ -8541,6 +8827,12 @@ msgstr "Base de datos"
 #, fuzzy
 msgid "Start a one-time import"
 msgstr "Iniciar una importación única"
+
+#. Net Worth explanation: one rate, e.g. GBP: 0.85 per 1 EUR, published 2026-10-30 (ECB)
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "{code}: {figure} per 1 {base}, published {published} ({from})"
+msgstr "{code}: {figure} por 1 {base}, publicado el {published} ({from})"
 
 #: src/screens/Rules.tsx
 #, fuzzy
@@ -8826,8 +9118,11 @@ msgid "Choose a folder…"
 msgstr "Elegir una carpeta…"
 
 #. Column heading on the Accounts screen: noun, the institution that holds an account. See GLOSSARY.md
+#. Column heading on the Net Worth report: the institution holding the account
 #. Column name shown beside a value on phones on the Accounts screen: noun, the institution that holds an account. See G…
+#. Option: split the Net Worth chart by bank
 #: src/screens/Accounts.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Bank"
 msgstr "Banco"
@@ -8843,6 +9138,12 @@ msgstr "Todas las divisas"
 #, fuzzy
 msgid "(main)"
 msgstr "(principal)"
+
+#. Link on the Net Worth report to Settings, Exchange rates, when the household's source list is empty
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Choose a source of rates on the Exchange rates page"
+msgstr "Elige una fuente de tipos en la página Tipos de cambio"
 
 #: ../desktop/src/words.ts
 msgid "A backup was made first. This can take a minute."
@@ -9048,8 +9349,10 @@ msgid "your own transfers"
 msgstr "tus propias transferencias"
 
 #. A changed field in History's detail, lower case: whether an account is closed
+#. Beside an account flagged closed on the Net Worth report
 #. Tag beside a name on the one-time import's mapping step: adjective, an account no longer in use. See GLOSSARY.md
 #: src/lib/historyWords.ts
+#: src/screens/reports/NetWorth.tsx
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
 msgid "closed"
@@ -9109,6 +9412,12 @@ msgstr "La fila entera tal como era antes de irse"
 #, fuzzy
 msgid "Import"
 msgstr "Importar"
+
+#. Column heading on the Net Worth report
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "In its own currency"
+msgstr "En su propia divisa"
 
 #. Label on the Payees screen
 #. placeholder {0}: kept.name
@@ -9271,7 +9580,9 @@ msgid "Both, because the two accounts are in different currencies and we will no
 msgstr "Los dos, porque las cuentas están en divisas distintas y no nos vamos a inventar un tipo de cambio: usa la cifra que tu banco abonó de verdad."
 
 #. Column heading in the list of exchange rates a report used: the rate's own date
+#. Column heading on the Net Worth report: when the exchange rate was published
 #: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Rate date"
 msgstr "Fecha del tipo"
@@ -9390,6 +9701,11 @@ msgstr "Propietario"
 #, fuzzy
 msgid "What was in the account on the day you started tracking it — usually a date in the past, the one your first statement opens with."
 msgstr "Lo que había en la cuenta el día que empezaste a seguirla: normalmente una fecha pasada, la del inicio de tu primer extracto."
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "{hidden, plural, one {# closed account is not listed. Its balances still count in the months it held money; tick Show closed accounts to list it.} other {# closed accounts are not listed. Their balances still count in the months they held money; tick Show closed accounts to list them.}}"
+msgstr "{hidden, plural, one {# cuenta cerrada no aparece. Sus saldos siguen contando en los meses en que tuvo dinero; marca Mostrar cuentas cerradas para verla.} other {# cuentas cerradas no aparecen. Sus saldos siguen contando en los meses en que tuvieron dinero; marca Mostrar cuentas cerradas para verlas.}}"
 
 #. Option in a dropdown on the Register screen
 #. Option in a dropdown on the Register screen
@@ -9700,9 +10016,11 @@ msgid "That report does not exist."
 msgstr "Ese informe no existe."
 
 #. Text on a dropdown that picks several on the Income vs Expense report
+#. Text on a dropdown that picks several on the Net Worth report
 #. Text on a dropdown that picks several on the Register screen
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "All accounts"
 msgstr "Todas las cuentas"
@@ -9723,6 +10041,7 @@ msgstr "{0, plural, one {# tipo} other {# tipos}}"
 #. Column heading on Browse rates: the rate's date
 #. Column heading on the Exchange rates page: the day or month a rate is for
 #. Column heading on the Income vs Expense report: noun. See GLOSSARY.md
+#. Column heading on the Net Worth report. See GLOSSARY.md
 #. Column heading on the Reconcile screen: noun. See GLOSSARY.md
 #. Column heading on the Reimbursements report: noun. See GLOSSARY.md
 #. Column heading on the Transfers screen: noun. See GLOSSARY.md
@@ -9746,6 +10065,7 @@ msgstr "{0, plural, one {# tipo} other {# tipos}}"
 #: src/screens/Reconcile.tsx
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/NetWorth.tsx
 #: src/screens/reports/Reimbursements.tsx
 #: src/screens/Transfer.tsx
 #: src/screens/TransferSections.tsx
@@ -10850,6 +11170,11 @@ msgstr "Una transferencia de YNAB cuyo otro lado se omite, está fuera del inter
 msgid "Currencies shown"
 msgstr "Divisas mostradas"
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "On {asOf} the household held {total} across {held}, down {moved} on {start}."
+msgstr "El {asOf} el hogar tenía {total} en {held}, {moved} menos que el {start}."
+
 #: src/screens/Accounts.tsx
 #, fuzzy
 msgid "Both are a real transaction in the register, reconciled, dated the day tracking started. Changing them here edits that row and keeps it reconciled — <0>show it in the register</0>. Zero removes it."
@@ -10953,8 +11278,10 @@ msgstr "El que está en pantalla va a la bandeja y el archivo nuevo ocupa su lug
 msgid "type to search — leave empty for none"
 msgstr "escribe para buscar; déjalo vacío para ninguno"
 
+#. Heading in the country filter on the Net Worth report
 #. Label on the household page
 #: src/screens/Household.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Countries"
 msgstr "Países"
@@ -11192,6 +11519,11 @@ msgstr "{0, plural, one {en {1} grupo, {2} archivadas} other {en {3} grupos, {4}
 msgid "Reset"
 msgstr "Restablecimiento"
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "At least one rate is older than the limit set for rates; it is still used, and marked."
+msgstr "Al menos un tipo es más antiguo que el límite fijado; se usa igualmente y queda marcado."
+
 #: src/screens/Rules.tsx
 #, fuzzy
 msgid "Order (lower runs first)"
@@ -11287,6 +11619,12 @@ msgstr "Contabilizado: el banco ya lo tiene"
 #, fuzzy
 msgid "Add <0>{0}</0>"
 msgstr "Añadir <0>{0}</0>"
+
+#. Text on a dropdown that picks several on the Net Worth report
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "All currencies"
+msgstr "Todas las divisas"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -11806,6 +12144,7 @@ msgstr "Ignorarla y seguir"
 #. Sentence on the Payees screen
 #. Text on the Income vs Expense report
 #. Text on the Income vs Expense report
+#. Text on the Net Worth report
 #. Text on the Reimbursements report
 #. Text on the app's menu and frame
 #. Text on the app's menu and frame
@@ -11813,6 +12152,7 @@ msgstr "Ignorarla y seguir"
 #: src/App.tsx
 #: src/screens/Payees.tsx
 #: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/NetWorth.tsx
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
 msgid "Loading…"
@@ -11903,6 +12243,7 @@ msgstr "Recuperado"
 #. Label of a form field on the Accounts screen: noun. See GLOSSARY.md
 #. Label of a picker on the Exchange rates page. See GLOSSARY.md
 #. Name of a fact on the one-time import: noun. See GLOSSARY.md
+#. Option: split the Net Worth chart by currency
 #. Screen-reader name on the Income vs Expense report: noun. See GLOSSARY.md
 #. Screen-reader name on the Reimbursements report: noun. See GLOSSARY.md
 #. Text on the Income vs Expense report: noun. See GLOSSARY.md
@@ -11915,6 +12256,7 @@ msgstr "Recuperado"
 #: src/screens/OneTimeImport.tsx
 #: src/screens/Register.tsx
 #: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/NetWorth.tsx
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
 msgid "Currency"
@@ -11942,6 +12284,12 @@ msgstr "{kept, plural, one {{0} movimiento conservó el texto del propio banco} 
 #, fuzzy
 msgid "accent"
 msgstr "acento"
+
+#. Heading of the explanation at the foot of the Net Worth report
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "How the amounts are put together"
+msgstr "Cómo se calculan las cifras"
 
 #. What the import detected: comma or point before decimals. Lower case, inside a list
 #: src/lib/labels.ts
@@ -12200,6 +12548,11 @@ msgstr ""
 msgid "Keep it plugged in and awake until this finishes. If it sleeps, the update resumes or rolls back when it wakes."
 msgstr "Mantenlo enchufado y sin suspender hasta que esto termine. Si se suspende, la actualización continúa o se revierte cuando se reactive."
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "{emptyAtStart, plural, one {# account had no rows yet at the start of the range and counts as nothing until its first one. } other {# accounts had no rows yet at the start of the range and count as nothing until their first one. }}"
+msgstr "{emptyAtStart, plural, one {# cuenta no tenía movimientos al inicio del periodo y cuenta como nada hasta el primero. } other {# cuentas no tenían movimientos al inicio del periodo y cuentan como nada hasta el primero. }}"
+
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -12228,7 +12581,9 @@ msgid "Authenticator, with its recovery codes"
 msgstr "Autenticador, con sus códigos de recuperación"
 
 #. Option in a dropdown on the Income vs Expense report
+#. Option in a dropdown on the Net Worth report
 #: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "by country"
 msgstr "por país"
@@ -12616,6 +12971,11 @@ msgstr "Configuración inicial"
 msgid "State"
 msgstr "Estado"
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Rates come from {sources}, the last one published on or before each date."
+msgstr "Los tipos vienen de {sources}: el último publicado en cada fecha o antes."
+
 #. Name of a fact on the History screen: noun, one act in History, undone as a whole
 #: src/screens/History.tsx
 #, fuzzy
@@ -12741,6 +13101,11 @@ msgstr "Eso no es un importe en {currency}"
 msgid "Import accounts from a file"
 msgstr "Importar cuentas desde un archivo"
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "* Some accounts had no rows yet at that date and count as nothing there: an early bar can be missing imports rather than missing money."
+msgstr "* Algunas cuentas aún no tenían movimientos en esa fecha y cuentan como nada: una barra temprana puede reflejar importaciones que faltan, no dinero que falta."
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "You have not given a key to anything."
@@ -12773,6 +13138,11 @@ msgstr ", abrir en Transacciones en una pestaña nueva"
 #, fuzzy
 msgid "Resets"
 msgstr "Restablecimientos"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "The filters above let through {counted}, in {inCurrencies}."
+msgstr "Los filtros de arriba dejan pasar {counted}, en {inCurrencies}."
 
 #: src/screens/OneTimeImport.tsx
 #, fuzzy
@@ -13026,6 +13396,12 @@ msgstr "Calidad de vida"
 msgid "seed.opening_balance"
 msgstr "Saldo inicial"
 
+#. Toggle on the Net Worth report: stop at the last month that has ended
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Closed months only"
+msgstr "Solo meses cerrados"
+
 #: src/screens/ynab/mapping.tsx
 #, fuzzy
 msgid "YNAB's own bucket, always uncategorised"
@@ -13055,6 +13431,12 @@ msgstr "Usar un código de recuperación ha cerrado tu sesión en todas partes, 
 msgid "IBAN"
 msgstr "IBAN"
 
+#. Section heading on the Net Worth report
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Where it is held"
+msgstr "Dónde está"
+
 #. Label on the date range picker
 #: src/components/DateRange.tsx
 #, fuzzy
@@ -13066,6 +13448,11 @@ msgstr "Todas las fechas"
 #, fuzzy
 msgid "Transfers linked"
 msgstr "Transferencias vinculadas"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "A rate used here is older than the limit set for it."
+msgstr "Un tipo usado aquí es más antiguo que el límite fijado."
 
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -13249,6 +13636,11 @@ msgstr "<0>Última comprobación.</0> {count} fila vuelve a como estaba {0}."
 msgid "Merge into {0}"
 msgstr "Fusionar con {0}"
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Converted figures depend on the rate source: a different source gives slightly different numbers. The amounts in each account's own currency are exact."
+msgstr "Las cifras convertidas dependen de la fuente de los tipos: otra fuente da números algo distintos. Los importes en la divisa de cada cuenta son exactos."
+
 #. placeholder {0}: either(codes)
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
@@ -13330,6 +13722,11 @@ msgstr "¿Dejarlas también <0>sin categoría</0>?"
 msgid "I have saved the recovery code."
 msgstr "He guardado el código de recuperación."
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Open {name} in the register, up to {asOf}"
+msgstr "Abrir {name} en el registro, hasta el {asOf}"
+
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "The app is about to stop. This page keeps checking and reloads when it is back. Keep this computer awake and Docker running until it says it has finished."
@@ -13409,6 +13806,13 @@ msgstr "Tipo de fin de mes"
 #, fuzzy
 msgid "What is it for"
 msgstr "Para qué es"
+
+#. Net Worth report: the accounts that do not say which country they are in
+#. Net Worth report: the accounts that do not say which country they are in
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "No country set"
+msgstr "Sin país indicado"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -13500,6 +13904,11 @@ msgstr "Texto más grande en la tabla"
 #, fuzzy
 msgid "Save"
 msgstr "Guardar"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Every transaction on the account up to and including the date, the opening balance included. A transfer between two of your accounts moves money from one balance to the other and does not change the total; between two currencies, the total moves only by the difference in conversion."
+msgstr "Todos los movimientos de la cuenta hasta esa fecha incluida, con el saldo inicial. Una transferencia entre dos de tus cuentas mueve dinero de un saldo a otro y no cambia el total; entre dos divisas, el total solo se mueve por la diferencia de conversión."
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -14210,6 +14619,18 @@ msgstr "Dejarlas fuera; aparecen en el informe."
 msgid "The other side of each was not imported, so there is nothing here to link it to."
 msgstr "La otra parte de cada una no se importó, así que aquí no hay nada con qué vincularla."
 
+#. Net Worth explanation, point 3
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "How each foreign balance is converted."
+msgstr "Cómo se convierte cada saldo en otra divisa."
+
+#. Column heading on the Net Worth report: one part of the split (a currency, country, bank or type)
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Part"
+msgstr "Parte"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "What is holding it (optional)"
@@ -14562,13 +14983,21 @@ msgstr "Cuando el banco dice"
 msgid "Remove {0}"
 msgstr "Quitar {0}"
 
+#. Section heading on the Net Worth report
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "What changed"
+msgstr "Qué ha cambiado"
+
 #: src/screens/Profile.tsx
 #, fuzzy
 msgid "Create the key"
 msgstr "Crear la clave"
 
+#. Heading in the currency filter on the Net Worth report
 #. Label on the household page: noun
 #: src/screens/Household.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Currencies"
 msgstr "Divisas"
@@ -14731,6 +15160,11 @@ msgstr "sin rama"
 msgid "Show the log"
 msgstr ""
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Closed months only is off, so the last point is today, {asOf}, in a month still running."
+msgstr "Solo meses cerrados está desactivado, así que el último punto es hoy, {asOf}, en un mes aún en curso."
+
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
 msgid "<0>SPENDTRACKER_SECRET_KEY</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Setting it back to the original key ends this for everyone who has not re-enrolled yet."
@@ -14753,8 +15187,10 @@ msgid "Income vs Expense over the last twelve whole months, every currency in yo
 msgstr "Ingresos y gastos de los últimos doce meses completos, todas las monedas en tu moneda base."
 
 #. Column heading on the Accounts screen
+#. Column heading on the Net Worth report: the amount in the currency the page is in
 #. Text on the Accounts screen
 #: src/screens/Accounts.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "Value"
 msgstr "Valor"
@@ -14901,6 +15337,11 @@ msgstr "Quién"
 msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."
 msgstr "Vacío es la respuesta habitual: <0>PAGO MOVIL BAR MARISOL</0> pasa a ser <1>Bar Marisol</1>."
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "{withoutData, plural, one {# account had no data yet} other {# accounts had no data yet}}"
+msgstr "{withoutData, plural, one {# cuenta aún no tenía datos} other {# cuentas aún no tenían datos}}"
+
 #. Update confirmation, Updater row: the release's updater is newer than the one running
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -14966,6 +15407,11 @@ msgstr "Volver a configurar"
 msgid "A transfer needs two open accounts. Add another on the Accounts screen first."
 msgstr "Una transferencia necesita dos cuentas abiertas. Añade otra antes en la pantalla Cuentas."
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "{count, plural, one {# account} other {# accounts}}"
+msgstr "{count, plural, one {# cuenta} other {# cuentas}}"
+
 #. placeholder {0}: household.name
 #: src/screens/Import.tsx
 #, fuzzy
@@ -14977,6 +15423,11 @@ msgstr "<0>¿Vienes de otra aplicación de presupuestos?</0> Aquí los extractos
 #, fuzzy
 msgid "Discarding the prepared update"
 msgstr "Descartando la actualización preparada"
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Net worth on {endDate}"
+msgstr "Patrimonio neto el {endDate}"
 
 #. Text on the Reimbursements report
 #. placeholder {0}: days(oldest)
@@ -14990,6 +15441,12 @@ msgstr "la más antigua {0}"
 msgid "Double click, or press Enter twice, to edit"
 msgstr "Haz doble clic, o pulsa Intro dos veces, para editar"
 
+#. Column heading on the Net Worth report: since the start of the range
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Change in the range"
+msgstr "Cambio en el periodo"
+
 #: src/components/RecoveryModeBanner.tsx
 #, fuzzy
 msgid "<0>secret.key</0> does not open {locked, plural, one {1 member's authenticator} other {{locked} members' authenticators}}; they will be asked for a recovery code, then to set up a new authenticator. Putting the original key back ends this for everyone who has not re-enrolled yet."
@@ -14999,6 +15456,12 @@ msgstr "<0>secret.key</0> no abre {locked, plural, one {la aplicación de autent
 #, fuzzy
 msgid "You sign in with your password and authenticator code."
 msgstr "Inicias sesión con tu contraseña y el código de la aplicación de autenticación."
+
+#. Net Worth explanation, point 4
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "How the total is built."
+msgstr "Cómo se forma el total."
 
 #. Heading on the one-time import: noun, YNAB's coloured markers on rows
 #. Name of a fact on the one-time import: noun, YNAB's coloured markers on rows
@@ -15125,10 +15588,21 @@ msgstr "Cada movimiento nuevo de este beneficiario recibe una categoría sin que
 msgid "Updater"
 msgstr "Actualizador"
 
+#. Line on the Net Worth report: how much exchange rates moved the start balances
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Exchange-rate effect"
+msgstr "Efecto del tipo de cambio"
+
 #: src/screens/Updates.tsx
 #, fuzzy
 msgid "The image is kept so you can try again."
 msgstr "La imagen se conserva para que puedas volver a intentarlo."
+
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "These accounts are in {heldIn}, and there are no exchange rates to convert between them, so each currency is shown on its own and nothing is added across them."
+msgstr "Estas cuentas están en {heldIn} y no hay tipos de cambio para convertir entre ellas, así que cada divisa se muestra por separado y no se suma nada entre ellas."
 
 #: src/components/RowPicker.tsx
 #, fuzzy
@@ -15187,7 +15661,9 @@ msgid "the number other statements quote"
 msgstr "el número que citan otros extractos"
 
 #. Option in a dropdown on the Income vs Expense report
+#. Option in a dropdown on the Net Worth report
 #: src/screens/reports/IncomeExpense.tsx
+#: src/screens/reports/NetWorth.tsx
 #, fuzzy
 msgid "by type"
 msgstr "por tipo"
@@ -15474,10 +15950,21 @@ msgstr "Añadir transferencia entre cuentas"
 msgid "Updates run in the updater (<0>{container}</0>, version {updaterVersion}, on {engine}). Nothing installs until you confirm it."
 msgstr "Las actualizaciones se ejecutan en el actualizador (<0>{container}</0>, versión {updaterVersion}, en {engine}). No se instala nada hasta que lo confirmes."
 
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Each account's value is rounded to the cent, then the values are added. Credit cards and other debts already hold a negative balance, so they subtract by themselves."
+msgstr "El valor de cada cuenta se redondea al céntimo y luego se suman los valores. Las tarjetas de crédito y otras deudas ya tienen saldo negativo, así que restan por sí solas."
+
 #: src/screens/Admin.tsx
 #, fuzzy
 msgid "their authenticator and recovery codes are cleared"
 msgstr "se borran su autenticador y sus códigos de recuperación"
+
+#. Net Worth report: the date a figure or table is for, e.g. on 2026-10-31
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "on {date}"
+msgstr "el {date}"
 
 #. Label of a choice on the one-time import
 #. Screen-reader text on the Income vs Expense report's month map: the first and last month in view
@@ -15580,6 +16067,12 @@ msgstr "Texto más pequeño, más filas en pantalla"
 #, fuzzy
 msgid "Notes and coins in a wallet or a tin. Nothing imports into it — you enter what you spend."
 msgstr "Billetes y monedas en una cartera o una lata. No se importa nada en ella: anotas lo que gastas."
+
+#. Net Worth explanation, point 5
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "How the change is split."
+msgstr "Cómo se reparte el cambio."
 
 #: src/components/RatesAsOf.tsx
 #, fuzzy
@@ -15718,6 +16211,12 @@ msgstr "{0} cada uno, {1} libres"
 #, fuzzy
 msgid "{mixed, plural, one {{mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it.} other {{mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them.}}"
 msgstr "{mixed, plural, one {{mixed} reembolso cubre gastos en otra moneda, así que no se calcula excedente ni déficit para él.} other {{mixed} reembolsos cubren gastos en otra moneda, así que no se calcula excedente ni déficit para ellos.}}"
+
+#. Column heading on the Net Worth report: percentage of the total
+#: src/screens/reports/NetWorth.tsx
+#, fuzzy
+msgid "Share"
+msgstr "Proporción"
 
 #. A changed field in History's detail, lower case: whether the bank has the row (cleared, uncleared, locked)
 #: src/lib/historyWords.ts

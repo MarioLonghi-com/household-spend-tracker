@@ -51,6 +51,26 @@ history this repository does not have.
 
 ### Added
 
+- **Reports → Net worth** (#397): how much the household has, all accounts
+  together, at each month end, and what moved it. Every account type counts;
+  credit cards and other liabilities subtract by their own negative balance.
+  - Filters for dates, bank, country, currency and accounts, kept in the
+    address so a filtered view can be bookmarked; *Closed months only* (on by
+    default) stops at the last month that has ended, and *Show closed
+    accounts* puts closed ones back in the table.
+  - A headline, a trend chart split by currency, country, bank or type, what
+    changed from the start of the range to its end, where the money is held,
+    every account with its change, and a section explaining how each figure
+    on the page was put together.
+  - With one currency in scope everything is exact. With several, each
+    account is converted into the base currency at the household's rate on
+    each date (#396), marked "≈", with the exchange-rate effect split out and
+    the "Rates as of" line on top. A currency with no rate is left out of the
+    total and named; with no rates at all, each currency's own figures are
+    shown side by side and never added.
+  - Balances for every point come from one query, however long the range.
+  - The agent API has the same report, answered by the same function, at
+    `GET …/reports/net-worth`.
 - **Exchange rates, chosen per household (#396, phase 1).** A new page,
   *Household → Exchange rates*, is both the settings and the sync dashboard.
   The ledger still never converts; this is what reports will convert with.

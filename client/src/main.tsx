@@ -15,6 +15,7 @@ import "./styles/receipts.css";
 import "./styles/categories.css";
 import "./styles/report-ie.css";
 import "./styles/reimbursements.css";
+import "./styles/report-nw.css";
 import "./styles/import.css";
 import "./styles/shell.css";
 import "./styles/one-time-import.css";

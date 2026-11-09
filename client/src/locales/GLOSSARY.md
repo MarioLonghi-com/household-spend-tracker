@@ -93,6 +93,7 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | category | [Categories](../screens/Categories.tsx) | categoria | categoría | kategori | | draft |
 | category group | [Categories](../screens/Categories.tsx) | grupo de categorias | grupo de categorías | kategorigrupp | | draft |
 | Cleared (state `cleared`) | [Register `CLEARED_PILLS`](../screens/Register.tsx) | Compensada | Contabilizada | Bokförd | "the bank has it". es-ES and sv-SE use the word their banks show for a posted movement; *conciliada* is reconcile and must not be used here | draft |
+| closed month | [Net worth](../screens/reports/NetWorth.tsx) | mês encerrado | mes cerrado | avslutad månad | A month whose last day has passed by the calendar (#397) | draft |
 | closed (account) | [Accounts](../screens/Accounts.tsx) | encerrada | cerrada | avslutat | Agrees with *conta* / *cuenta* / *konto* | draft |
 | container engine | [Updates](../screens/Updates.tsx) | motor de contêineres | motor de contenedores | containermotor | Docker or Podman, which runs the app and the updater. Application management's fact is "Engine" alone; same row | draft |
 | country | [Accounts](../screens/Accounts.tsx) | país | país | land | Country names come from `Intl.DisplayNames`, never from the catalog | draft |
@@ -127,6 +128,7 @@ today; once #52 lands, labels move to `lib/labels.ts` and the links follow.
 | merge (payees) | [Payees](../screens/Payees.tsx) | unir; união | fusionar; fusión | slå ihop; sammanslagning | Two payees become one | draft |
 | migration | [Updates](../screens/Updates.tsx) | migração | migración | migrering | A change to the database's structure that an update runs | draft |
 | Needs a look (import outcome `needs_review`) | [Import `OUTCOME_WORDS`](../screens/Import.tsx) | Precisa de revisão | Hay que revisarla | Behöver granskas | | draft |
+| Net worth (report) | [Reports `REPORTS`](../screens/Reports.tsx) | Patrimônio líquido | Patrimonio neto | Nettoförmögenhet | Everything the household has, less what it owes (#397) | draft |
 | New (import outcome `created`) | [Import `OUTCOME_WORDS`](../screens/Import.tsx) | Nova | Nueva | Ny | Agrees with *transação* / *transacción* / *transaktion* | draft |
 | Not a work expense | [`REIMBURSEMENT_LABELS`](../lib/reimbursement.ts) | Não é despesa de trabalho | No es un gasto de trabajo | Inget jobbutlägg | | draft |
 | Not for this account (import outcome `skipped`) | [Import `OUTCOME_WORDS`](../screens/Import.tsx) | Não é desta conta | No es de esta cuenta | Inte för det här kontot | | draft |

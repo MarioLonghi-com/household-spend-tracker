@@ -19,20 +19,22 @@
 import type { ReactNode } from "react";
 import { IncomeExpense, latestTwelve, type IncomeExpensePreset } from "./reports/IncomeExpense";
 import { Reimbursements } from "./reports/Reimbursements";
+import { NetWorth } from "./reports/NetWorth";
 import type { Household } from "../lib/types";
 import type { RegisterPreset } from "./Register";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 
-export type ReportKey = "income-expense" | "reimbursements";
+export type ReportKey = "income-expense" | "reimbursements" | "net-worth";
 
 /**
  * What a report may ask of the shell, which owns navigation.
  *
  * Open the register already narrowed, which is how the Reimbursements report
  * sends somebody from a figure to the rows behind it; and open the Exchange
- * rates page, where the "Rates as of" line on a converted report points. A
- * report is still read-only -- it goes somewhere else to act.
+ * rates page, where a converting report sends somebody whose rates are
+ * missing or old (#396, #397). A report is still read-only -- it goes
+ * somewhere else to act.
  */
 export type ReportNav = {
   openRegister: (preset: RegisterPreset) => void;
@@ -85,6 +87,22 @@ export const REPORTS: {
     },
     render: (household, nav) => (
       <Reimbursements household={household} onOpenRegister={nav.openRegister} />
+    ),
+  },
+  {
+    key: "net-worth",
+    get label() {
+      return t({ message: "Net worth", comment: "Label on the Reports screen: everything the household has, less what it owes" });
+    },
+    get blurb() {
+      return t`How much the household has, all accounts together, at each month end — and what moved it.`;
+    },
+    render: (household, nav) => (
+      <NetWorth
+        household={household}
+        onOpenRegister={nav.openRegister}
+        onOpenExchangeRates={nav.openExchangeRates}
+      />
     ),
   },
 ];
@@ -191,7 +209,7 @@ export function Report({
   preset?: ReportPreset;
   onBack: () => void;
   onOpenRegister: ReportNav["openRegister"];
-  onOpenExchangeRates?: () => void;
+  onOpenExchangeRates?: ReportNav["openExchangeRates"];
 }) {
   const report = reportFor(screen);
   if (!report) {
