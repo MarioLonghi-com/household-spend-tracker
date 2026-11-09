@@ -421,6 +421,48 @@ def test_income_expense_never_mixes_a_second_currency_in(client, world):
     assert "250000" not in str(gbp)
 
 
+def test_income_expense_in_the_base_currency_is_the_persons_own_answer(client, world):
+    """`in_base` for an agent is the person's report, conversion and all (#396 phase 2).
+
+    GBP has a monthly rate of 0.8 per EUR for July and August, entered by the
+    person; JPY has none, so the Lawson row is left out and listed.
+    """
+    house = world["house"]["id"]
+    for month in ("2026-07", "2026-08"):
+        entered = client.post(
+            f"/api/households/{house}/fx/rates/manual",
+            json={"currency": "GBP", "date": month, "rate": "0.8"},
+            headers=HEADERS,
+        )
+        assert entered.status_code in (200, 201), entered.text
+    params = {"in_base": "true", "since": "2026-07-01", "until": "2026-09-30"}
+    agent = _get(client, world, "/reports/income-expense", **params).json()
+    human = client.get(
+        f"/api/households/{house}/reports/income-expense", params=params, headers=HEADERS
+    ).json()
+    assert agent == human
+
+    assert (agent["currency"], agent["converted"]) == ("EUR", True)
+    eur = 250000 - (2001 + 2002 + 2003 + 2004) - 4550 - 3120 - 500 - 600 - 700
+    # Tesco -15.00, -30.00, -45.00 and the written-off taxi -40.00, each / 0.8.
+    gbp = -1875 - 3750 - 5625 - 5000
+    assert agent["expense"]["total_minor"] == eur + gbp
+    assert agent["not_converted"] == [{"currency": "JPY", "count": 1, "months": ["2026-07"]}]
+    assert agent["rates_status"]["not_converted"] == ["JPY"]
+    assert [(r["currency"], r["rate"], r["source"]) for r in agent["rates_used"]] == [
+        ("GBP", "0.8", "manual"), ("GBP", "0.8", "manual"),
+    ]
+
+
+def test_income_expense_wants_a_currency_or_the_base_never_both(client, world):
+    both = _get(client, world, "/reports/income-expense", currency="EUR", in_base="true")
+    assert both.status_code == 422
+    # An agent is answered in words alone, as for every coded refusal.
+    assert both.json() == {
+        "detail": "Ask for one currency, or for every currency in the base currency -- one of the two"
+    }
+
+
 def test_reimbursements_per_currency(client, world):
     eur = _get(client, world, "/reports/reimbursements", currency="EUR").json()
     gbp = _get(client, world, "/reports/reimbursements", currency="GBP").json()

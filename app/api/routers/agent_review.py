@@ -3,7 +3,8 @@
 A filtered read of rows, the categorisation review, the reports, the exchange
 rates the household actually got -- stories 2 and 4 of #134 -- and the rates
 its chain reads, with how old they are (#396). Every figure stays per
-currency: nothing here converts or sums across two.
+currency, except Income vs Expense asked for `in_base`: that converts each
+row through `services/fx.py`, as the person's route does, and says so.
 
 Same door as `agent.py`: every route hangs off `current_agent`, so the
 capability floor (§1.2 -- no delete, no undo, nothing touching auth, admin,
@@ -368,7 +369,7 @@ def categorisation_review(
 
 
 # --------------------------------------------------------------------------- #
-# Reports: the person's own, one currency at a time
+# Reports: the person's own, one currency at a time or converted into the base
 # --------------------------------------------------------------------------- #
 
 
@@ -379,7 +380,8 @@ def income_expense(
     household_id: str,
     agent: CurrentAgent,
     request: Request,
-    currency: Annotated[str, Query(min_length=3, max_length=3)],
+    currency: Annotated[str | None, Query(min_length=3, max_length=3)] = None,
+    in_base: bool = False,
     since: Date | None = None,
     until: Date | None = None,
     account_id: Annotated[list[str] | None, Query()] = None,
@@ -389,14 +391,16 @@ def income_expense(
     """The Income vs Expense report, answered by the person's route itself.
 
     Called rather than re-assembled, so the two cannot disagree about a figure
-    or about what `excluded` counts. `currency` is required and singular there
-    for the reason every report gives, and so it is here.
+    or about what `excluded` counts. One `currency`, or `in_base=true` for
+    every currency converted into the base (#396 phase 2) -- exactly one of
+    the two, as on the person's route.
     """
     house = _house(agent, household_id)
     answer = human_reports.income_expense(
         household=house,
         session=agent.session,
         currency=currency,
+        in_base=in_base,
         since=since,
         until=until,
         account_id=account_id,
@@ -577,9 +581,15 @@ ENDPOINTS: list[ManifestEndpoint] = [
         method="GET",
         path=f"{_HOUSE}/reports/income-expense",
         says=(
-            "The Income vs Expense report for ONE currency (currency is required): income "
+            "The Income vs Expense report for ONE currency (currency=EUR): income "
             "and expense by category and month, net, in that currency only. Ask once per "
             "currency the manifest's accounts hold and never add the answers together. "
+            "Or in_base=true instead of currency: every currency in the household's base "
+            "currency, each row converted on its own at the household's chosen rates; then "
+            "converted is true, rate_source says the chain and policy, rates_used every rate "
+            "used, not_converted the rows with no rate (left out of every figure), and "
+            "rates_status how old the rates are -- say so when you quote a figure. A "
+            "repayment whose expenses are in another currency is not converted either way. "
             "The category group decides the side, never the sign: categories whose "
             "group_role is income are income, every other one (and uncategorised) is an "
             "expense line where refunds net, with a subtotal per group in expense.groups. "
@@ -596,7 +606,8 @@ ENDPOINTS: list[ManifestEndpoint] = [
         returns=(
             "{currency, since, until, months[], income, expense, net_by_month, "
             "net_total_minor, net_total, reimbursements, reimbursement_mixed, has_income_group, "
-            "excluded, coverage}"
+            "excluded, coverage, converted, rate_source, rates_used[], not_converted[], "
+            "rates_status}"
         ),
         scope="read",
     ),

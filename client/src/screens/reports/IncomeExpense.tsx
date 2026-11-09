@@ -2,23 +2,29 @@
  * Income against expense, month by month, broken down by category.
  *
  * **One currency at a time, and the toggle at the top is the whole point.**
- * This ledger never converts -- currency lives on the account and there is no
- * rate anywhere in the schema -- so a column adding EUR to GBP would be a
- * number with no meaning. The previous build shipped three reports that did
- * exactly that. Here the currency is a *facet*: you pick one, and everything
- * on screen is about that one. There is no "all currencies" option, because
- * there is no answer to give.
+ * The ledger never converts -- currency lives on the account -- so a column
+ * adding EUR to GBP as they stand would be a number with no meaning. The
+ * previous build shipped three reports that did exactly that. Here the
+ * currency is a *facet*: you pick one, and everything on screen is about that
+ * one.
+ *
+ * **Or "All, in {base}"** (#396 phase 2): every currency, each row converted by
+ * the server at the household's chosen rates before anything is added. Every
+ * figure then carries "≈", the "Rates as of" line says how old the rates are,
+ * and the rows with no rate are named rather than counted. The screen never
+ * converts anything itself.
  *
  * The report is **read-only**. Nothing here writes, so nothing here opens a
  * batch and there is no undo, because there is nothing to undo.
  */
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { createContext, Fragment, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
-import { Dialog, Empty, Hint, Problem } from "../../components/bits";
+import { Dialog, Empty, Hint, Problem, SortHeading, useSort } from "../../components/bits";
+import { RatesAsOf } from "../../components/RatesAsOf";
 import { DateRange, monthsBack, type Range } from "../../components/DateRange";
 import {
   GroupedPicker,
@@ -35,9 +41,12 @@ import type {
   ReportBehind,
   ReportEntry,
   ReportLine,
+  ReportRateUsed,
   ReportRow,
   ReportSection,
 } from "../../lib/types";
+import { policyWord, sourceLabel } from "../../lib/fx";
+import { fixed, moneyKey, sortRows } from "../../lib/sorting";
 import { amountLang, formatDate, listText, monthLabel } from "../../lib/locale";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
@@ -80,6 +89,47 @@ type Side =
   | "reimbursement_shortfall"
   | "reimbursement_difference"
   | "reimbursement_unmatched";
+
+/**
+ * The toggle's value for "All, in {base}": every currency, converted (#396).
+ *
+ * Not a currency code -- a code is three capital letters -- so it can never
+ * collide with one, and it travels to the server as `in_base=true`.
+ */
+export const ALL_IN_BASE = "all";
+
+/**
+ * Settings a preset opens the report with, from a card on the Reports index.
+ *
+ * Only the starting state: once open, the report is the report, and every
+ * control on it works as ever.
+ */
+export type IncomeExpensePreset = { range: Range; currency: string | null };
+
+/**
+ * The latest `months` **closed** months: the month in progress left out.
+ *
+ * A month is closed once its last day has passed, so whatever today is, the
+ * current month is still open and the window ends with last month. What the
+ * "Latest 12 months" card asks for: a year of whole months, none half-counted.
+ */
+export function closedMonths(months: number, today = new Date()): Range {
+  return monthsBack(months, new Date(today.getFullYear(), today.getMonth() - 1, 1));
+}
+
+/** The "Latest 12 months" view: closed months, every currency in the base (#396 §8). */
+export function latestTwelve(today = new Date()): IncomeExpensePreset {
+  return { range: closedMonths(12, today), currency: ALL_IN_BASE };
+}
+
+/**
+ * Whether the figures under it were converted, so each says "≈".
+ *
+ * A context rather than a prop through every band, group and line: it is one
+ * fact about the whole report, and a figure that forgot to ask would be a
+ * converted number that looked exact.
+ */
+const Converted = createContext(false);
 
 /** The name of a row worked out per repayment, in the screen's own words. */
 function derivedName(line: NonNullable<ReportRow["line"]>): string {
@@ -139,11 +189,30 @@ export function toggleFold(current: ReadonlySet<string>, key: string): ReadonlyS
   return next;
 }
 
-export function IncomeExpense({ household }: { household: Household }) {
-  const [currency, setCurrency] = useState<string | null>(null);
+/** What `/reports/currencies` answers: the toggle's choices. */
+type Offer = {
+  currencies: string[];
+  base_currency: string;
+  /** There is a currency other than the base, so "All, in {base}" is offered. */
+  base_offered: boolean;
+  /** The chain has a rate for every one of them: the report opens on it. */
+  base_ready: boolean;
+};
+
+export function IncomeExpense({
+  household,
+  preset,
+  onOpenExchangeRates,
+}: {
+  household: Household;
+  preset?: IncomeExpensePreset;
+  /** Where the "Rates as of" line sends somebody to fetch or enter rates. */
+  onOpenExchangeRates?: () => void;
+}) {
+  const [currency, setCurrency] = useState<string | null>(() => preset?.currency ?? null);
   // Six months back, inclusive of this one. The default the report opens on:
   // long enough that a pattern is visible, short enough to fit on a screen.
-  const [range, setRange] = useState<Range>(() => monthsBack(6));
+  const [range, setRange] = useState<Range>(() => preset?.range ?? monthsBack(6));
   const [grouping, setGrouping] = useState<AccountGrouping>("country");
   const [chosenAccounts, setChosenAccounts] = useState<Selection>(null);
   const [chosenCategories, setChosenCategories] = useState<Selection>(null);
@@ -170,9 +239,7 @@ export function IncomeExpense({ household }: { household: Household }) {
   const currencies = useQuery({
     queryKey: ["report-currencies", household.id],
     queryFn: () =>
-      api.get<{ currencies: string[] }>(
-        `/households/${household.id}/reports/currencies`,
-      ),
+      api.get<Offer>(`/households/${household.id}/reports/currencies`),
   });
 
   const accounts = useQuery({
@@ -186,25 +253,32 @@ export function IncomeExpense({ household }: { household: Household }) {
   });
 
   const available = currencies.data?.currencies ?? [];
+  const offer = currencies.data;
+  const base = offer?.base_offered ? offer.base_currency : null;
+  const inBase = currency === ALL_IN_BASE;
 
-  // The busiest currency, until somebody picks another. Kept in an effect
-  // rather than in the query's initial data because the list arrives after the
-  // first render, and defaulting to `available[0]` inline would re-pick it
-  // every time the list refetched -- overriding a choice the person had made.
+  // The busiest currency, until somebody picks another -- or "All, in {base}"
+  // once the household has a working chain of rates (#396 §8). Kept in an
+  // effect rather than in the query's initial data because the list arrives
+  // after the first render, and defaulting inline would re-pick it every time
+  // the list refetched -- overriding a choice the person had made. A preset
+  // asking for the base where there is nothing to convert falls back too.
   useEffect(() => {
-    if (currency === null && available.length > 0) setCurrency(available[0]);
-  }, [available, currency]);
+    if (!offer || available.length === 0) return;
+    if (currency === null) setCurrency(offer.base_ready ? ALL_IN_BASE : available[0]);
+    else if (currency === ALL_IN_BASE && !offer.base_offered) setCurrency(available[0]);
+  }, [offer, available, currency]);
 
   /**
-   * Only the accounts in the currency on screen.
+   * Only the accounts in the currency on screen -- every account in the base.
    *
    * A EUR report cannot say anything about a GBP account, so offering one in
    * the filter invites a person to tick it and watch nothing change -- which
    * reads as a broken filter rather than as the currency rule working.
    */
   const inCurrency = useMemo(
-    () => (accounts.data ?? []).filter((one) => one.currency === currency),
-    [accounts.data, currency],
+    () => (accounts.data ?? []).filter((one) => inBase || one.currency === currency),
+    [accounts.data, currency, inBase],
   );
 
   const accountOptions = useMemo(
@@ -233,14 +307,15 @@ export function IncomeExpense({ household }: { household: Household }) {
 
   const query = useMemo(() => {
     const params = new URLSearchParams();
-    if (currency) params.set("currency", currency);
+    if (inBase) params.set("in_base", "true");
+    else if (currency) params.set("currency", currency);
     if (range.since) params.set("since", range.since);
     if (range.until) params.set("until", range.until);
     for (const id of chosenAccounts ?? []) params.append("account_id", id);
     for (const id of chosenCategories ?? []) params.append("category_id", id);
     if (!withUncategorised) params.set("include_uncategorised", "false");
     return params.toString();
-  }, [currency, range, chosenAccounts, chosenCategories, withUncategorised]);
+  }, [currency, inBase, range, chosenAccounts, chosenCategories, withUncategorised]);
 
   const report = useQuery({
     queryKey: ["income-expense", household.id, query],
@@ -277,7 +352,7 @@ export function IncomeExpense({ household }: { household: Household }) {
           for exactly this; `HeadSlot` falls back to a line of its own where
           there is no slot. */}
       <HeadSlot>
-        <CurrencyToggle value={currency} options={available} onChange={setCurrency} />
+        <CurrencyToggle value={currency} options={available} base={base} onChange={setCurrency} />
       </HeadSlot>
 
       <div className="report-bar">
@@ -332,6 +407,13 @@ export function IncomeExpense({ household }: { household: Household }) {
 
       <Problem error={report.error} />
 
+      {/* How old the rates are, under the filter bar and above the first
+          figure, drawn from the report's own answer so the two cannot
+          disagree (#396 §5.2). Per currency there is none, and no line. */}
+      {report.data?.rates_status && (
+        <RatesAsOf status={report.data.rates_status} onOpen={onOpenExchangeRates} />
+      )}
+
       {report.isLoading || !report.data ? (
         <div className="muted"><Trans comment="Text on the Income vs Expense report">Loading…</Trans></div>
       ) : (
@@ -365,18 +447,22 @@ export function IncomeExpense({ household }: { household: Household }) {
 /**
  * The currency switch.
  *
- * Radio buttons in spirit -- exactly one is always chosen and there is no
- * "all". A select would imply a list you could leave unanswered, and a
- * checkbox set would imply you could tick two, which is the one thing this
- * report must never do.
+ * Radio buttons in spirit -- exactly one is always chosen. A select would
+ * imply a list you could leave unanswered, and a checkbox set would imply you
+ * could tick two, which is the one thing this report must never do as they
+ * stand. "All, in {base}" is one more choice beside them, not a tick of
+ * several: the server converts every row before it adds anything (#396).
  */
 export function CurrencyToggle({
   value,
   options,
+  base = null,
   onChange,
 }: {
   value: string | null;
   options: string[];
+  /** The base currency, when "All, in {base}" is offered; null when it is not. */
+  base?: string | null;
   onChange: (next: string) => void;
 }) {
   return (
@@ -397,21 +483,39 @@ export function CurrencyToggle({
             {code}
           </button>
         ))}
+        {base && (
+          <button
+            type="button"
+            role="radio"
+            aria-checked={value === ALL_IN_BASE}
+            className={value === ALL_IN_BASE ? "chip active" : "chip"}
+            onClick={() => onChange(ALL_IN_BASE)}
+          >
+            {t({ message: `All, in ${base}`, comment: "Choice on the Income vs Expense report: every currency, converted into the household's base currency" })}
+          </button>
+        )}
       </div>
-      {options.length > 1 && (
+      {(options.length > 1 || base) && (
         <Hint label={t`why one currency at a time`}>
           <p>
             <Trans>
-              This ledger never converts. Currency lives on the account, and there is no exchange
-              rate stored anywhere — so a total mixing {listText(options)} would be a number with
-              nothing behind it.
+              The ledger never converts: currency lives on the account. A total mixing{" "}
+              {listText(options)} as they stand would be a number with nothing behind it.
             </Trans>
           </p>
           <p className="muted small" style={{ marginBottom: 0 }}>
-            <Trans>
-              Each currency gets its own report instead. Nothing on this screen ever adds two
-              together.
-            </Trans>
+            {base ? (
+              <Trans>
+                Each currency gets its own report. All, in {base} converts every row at your
+                household's exchange rates before adding anything, marks each figure ≈, and names
+                the rows it had no rate for.
+              </Trans>
+            ) : (
+              <Trans>
+                Each currency gets its own report instead. Nothing on this screen ever adds two
+                together.
+              </Trans>
+            )}
           </p>
         </Hint>
       )}
@@ -427,6 +531,16 @@ function legs(count: number): string {
 /** "2 opening balances", likewise. */
 function openings(count: number): string {
   return plural(count, { one: `${count} opening balance`, other: `${count} opening balances` });
+}
+
+/** The sentence for rows a converted report had no rate for. */
+function leftOut(one: { currency: string; count: number; months: string[] }): string {
+  const code = one.currency;
+  const months = listText(one.months.map(monthLabel));
+  return plural(one.count, {
+    one: `# row in ${code} has no exchange rate, so it is left out of every figure: ${months}.`,
+    other: `# rows in ${code} have no exchange rate, so they are left out of every figure: ${months}.`,
+  });
 }
 
 export function ReportTable({
@@ -456,9 +570,10 @@ export function ReportTable({
   const work = report.excluded.reimbursements;
   const mixed = report.reimbursement_mixed ?? 0;
   const block = report.reimbursements;
+  const converted = Boolean(report.converted);
 
   return (
-    <>
+    <Converted.Provider value={converted}>
       <Headline report={report} />
 
       {/* Without a group marked Income every row is an expense line -- the
@@ -637,12 +752,20 @@ export function ReportTable({
         ) : null}
         {mixed > 0 ? (
           <>
-            {plural(mixed, {
-              one: `${mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it.`,
-              other: `${mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them.`,
-            })}{" "}
+            {converted
+              ? plural(mixed, {
+                  one: `${mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it, in ${currency} either: a claim is not converted across currencies yet.`,
+                  other: `${mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them, in ${currency} either: a claim is not converted across currencies yet.`,
+                })
+              : plural(mixed, {
+                  one: `${mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it.`,
+                  other: `${mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them.`,
+                })}{" "}
           </>
         ) : null}
+        {(report.not_converted ?? []).map((one) => (
+          <Fragment key={one.currency}>{leftOut(one)} </Fragment>
+        ))}
         {gaps > 0 ? (
           <>
             {t({ message: plural(report.coverage.months_with_activity, {
@@ -653,12 +776,17 @@ export function ReportTable({
         ) : null}
       </p>
 
+      {converted && report.rates_used && (
+        <RatesUsed rates={report.rates_used} policy={report.rate_source?.policy ?? null} base={currency} />
+      )}
+
       {cell && (
         <Behind
           cell={cell}
           household={household}
           query={query}
           currency={currency}
+          converted={converted}
           onClose={() => setCell(null)}
           link={(entry) =>
             drillLink(cell, entry, {
@@ -666,13 +794,108 @@ export function ReportTable({
               query,
               since: report.since,
               until: report.until,
-              currency,
+              // Every currency is in a converted figure, so its rows open on
+              // Transactions in every currency rather than in the base alone.
+              currency: converted ? null : currency,
               groupCategories,
             })
           }
         />
       )}
-    </>
+    </Converted.Provider>
+  );
+}
+
+type RateColumn = "currency" | "rate" | "date" | "source";
+
+/** "via EUR": the currency a rate was crossed through. */
+function crossed(pivot: string): string {
+  return t({ message: `via ${pivot}`, comment: "After an exchange rate's source: the currency it was crossed through, like via EUR" });
+}
+
+/**
+ * Every rate the figures were converted at: the "which rate" of every "≈".
+ *
+ * Folded away under the notes, because it is how to check a figure rather
+ * than a figure; sorted at its headings like every list.
+ */
+export function RatesUsed({
+  rates,
+  policy,
+  base,
+}: {
+  rates: ReportRateUsed[];
+  policy: string | null;
+  base: string;
+}) {
+  const order = useSort<RateColumn>("currency");
+  const rows = useMemo(
+    () =>
+      sortRows(
+        rates,
+        order.sort,
+        order.direction,
+        (one, column) =>
+          column === "currency"
+            ? [one.currency, fixed(one.rate_date)]
+            : column === "rate"
+              ? [fixed(one.currency), Number(one.rate)]
+              : column === "date"
+                ? one.rate_date
+                : sourceLabel(one.source),
+      ),
+    [rates, order.sort, order.direction],
+  );
+  if (rates.length === 0) return null;
+  const heading = (label: string, column: RateColumn, right = false) => (
+    <SortHeading
+      label={label}
+      column={column}
+      sort={order.sort}
+      direction={order.direction}
+      onSort={order.onSort}
+      align={right ? "right" : undefined}
+    />
+  );
+  return (
+    <details className="report-rates">
+      <summary className="small">
+        {t({
+          message: plural(rates.length, {
+            one: `# exchange rate used`,
+            other: `# exchange rates used`,
+          }),
+          comment: "Opens the list of exchange rates the Income vs Expense report converted at",
+        })}
+        {policy ? ` · ${policyWord(policy)}` : ""}
+      </summary>
+      <div className="behind-scroll">
+        <table className="behind">
+          <thead>
+            <tr>
+              {heading(t({ message: "Currency", comment: "Column heading in the list of exchange rates a report used: noun. See GLOSSARY.md" }), "currency")}
+              {heading(t({ message: `Per 1 ${base}`, comment: "Column heading in the list of exchange rates a report used: units of the currency per one base currency" }), "rate", true)}
+              {heading(t({ message: "Rate date", comment: "Column heading in the list of exchange rates a report used: the rate's own date" }), "date")}
+              {heading(t({ message: "Source", comment: "Column heading in the list of exchange rates a report used: where the rate came from" }), "source")}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((one) => (
+              <tr key={`${one.currency}-${one.rate_date}-${one.source}-${one.rate}`}>
+                <td>{one.currency}</td>
+                <td className="amount mono">{one.rate}</td>
+                <td className="mono">{formatDate(one.rate_date)}</td>
+                <td>
+                  {sourceLabel(one.source)}
+                  {one.via ? ` · ${crossed(one.via)}` : ""}
+                  {one.stale ? ` · ${t({ message: "stale", comment: "State of an exchange rate: older than the household's limit" })}` : ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </details>
   );
 }
 
@@ -719,7 +942,8 @@ function monthEnd(period: string): string {
  *   the report's own category filter. A reimbursement line crosses
  *   categories by design -- a repayment and the expenses it covered -- so it
  *   sets none.
- * - **Currency and accounts:** the report's.
+ * - **Currency and accounts:** the report's. A converted report sets no
+ *   currency: the figure was made of rows in every currency.
  */
 export function drillLink(
   cell: Cell,
@@ -729,7 +953,8 @@ export function drillLink(
     query: string;
     since: string;
     until: string;
-    currency: string;
+    /** Null in a converted report: its figures hold every currency. */
+    currency: string | null;
     groupCategories?: ReadonlyMap<string, string[]>;
   },
 ): string {
@@ -775,6 +1000,17 @@ export function drillLink(
   });
 }
 
+type BehindColumn =
+  | "server"
+  | "account"
+  | "date"
+  | "payee"
+  | "category"
+  | "memo"
+  | "amount"
+  | "rate"
+  | "converted";
+
 /**
  * The rows behind one figure.
  *
@@ -787,13 +1023,16 @@ export function drillLink(
  *
  * It prints its own total, and that total is counted over the whole match
  * rather than over the rows shown, so a capped list still adds up to the cell
- * it came from.
+ * it came from. In a converted report each row keeps its own amount and
+ * currency, and two columns say what it was converted at and to; the total is
+ * of the converted amounts, and is the figure that was clicked.
  */
 function Behind({
   cell,
   household,
   query,
   currency,
+  converted = false,
   onClose,
   link,
 }: {
@@ -801,6 +1040,8 @@ function Behind({
   household: Household;
   query: string;
   currency: string;
+  /** The report converted every row into `currency`, its base. */
+  converted?: boolean;
   onClose: () => void;
   /** Where a row opens in Transactions. */
   link: (entry: ReportEntry) => string;
@@ -823,6 +1064,45 @@ function Behind({
       ),
   });
 
+  // Newest first, as the server sent them, until a heading is clicked.
+  const order = useSort<BehindColumn>("server");
+  const entries = useMemo(
+    () =>
+      sortRows(rows.data?.entries ?? [], order.sort, order.direction, (entry, column) => {
+        switch (column) {
+          case "account":
+            return entry.account_name;
+          case "date":
+            return entry.date;
+          case "payee":
+            return entry.payee_name;
+          case "category":
+            return entry.category_name;
+          case "memo":
+            return entry.memo;
+          case "amount":
+            return moneyKey(entry.currency ?? currency, entry.amount_minor, currency);
+          case "rate":
+            return [fixed(entry.currency), entry.rate ? Number(entry.rate) : null];
+          case "converted":
+            return entry.converted_minor;
+          default:
+            return null;
+        }
+      }),
+    [rows.data, order.sort, order.direction, currency],
+  );
+  const heading = (label: string, column: BehindColumn, right = false) => (
+    <SortHeading
+      label={label}
+      column={column}
+      sort={order.sort}
+      direction={order.direction}
+      onSort={order.onSort}
+      align={right ? "right" : undefined}
+    />
+  );
+
   return (
     <Dialog title={cell.title} onClose={onClose} wide>
       <Problem error={rows.error} />
@@ -839,16 +1119,18 @@ function Behind({
             <table className="behind">
               <thead>
                 <tr>
-                  <th><Trans comment="Column heading on the Income vs Expense report: noun, a bank or cash account. See GLOSSARY.md">Account</Trans></th>
-                  <th><Trans comment="Column heading on the Income vs Expense report: noun. See GLOSSARY.md">Date</Trans></th>
-                  <th><Trans comment="Column heading on the Income vs Expense report: noun, who was paid or who paid. See GLOSSARY.md">Payee</Trans></th>
-                  <th><Trans comment="Column heading on the Income vs Expense report's transaction list: noun. See GLOSSARY.md">Category</Trans></th>
-                  <th><Trans comment="Column heading on the Income vs Expense report: noun, the free-text line of a transaction. See GLOSSARY.md">Memo</Trans></th>
-                  <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, a sum of money. See GLOSSARY.md">Amount</Trans></th>
+                  {heading(t({ message: "Account", comment: "Column heading on the Income vs Expense report: noun, a bank or cash account. See GLOSSARY.md" }), "account")}
+                  {heading(t({ message: "Date", comment: "Column heading on the Income vs Expense report: noun. See GLOSSARY.md" }), "date")}
+                  {heading(t({ message: "Payee", comment: "Column heading on the Income vs Expense report: noun, who was paid or who paid. See GLOSSARY.md" }), "payee")}
+                  {heading(t({ message: "Category", comment: "Column heading on the Income vs Expense report's transaction list: noun. See GLOSSARY.md" }), "category")}
+                  {heading(t({ message: "Memo", comment: "Column heading on the Income vs Expense report: noun, the free-text line of a transaction. See GLOSSARY.md" }), "memo")}
+                  {heading(t({ message: "Amount", comment: "Column heading on the Income vs Expense report: noun, a sum of money. See GLOSSARY.md" }), "amount", true)}
+                  {converted && heading(t({ message: `Rate, per 1 ${currency}`, comment: "Column heading on the Income vs Expense report: the exchange rate a row was converted at" }), "rate", true)}
+                  {converted && heading(t({ message: `In ${currency}`, comment: "Column heading on the Income vs Expense report: a row's amount converted into the base currency" }), "converted", true)}
                 </tr>
               </thead>
               <tbody>
-                {rows.data.entries.map((entry) => {
+                {entries.map((entry) => {
                   const href = link(entry);
                   return (
                   <tr
@@ -874,22 +1156,38 @@ function Behind({
                     <td>{entry.category_name ?? <span className="muted">—</span>}</td>
                     <td className="muted small">{entry.memo ?? ""}</td>
                     <td className="amount">
-                      <Figure minor={entry.amount_minor} currency={currency} />
+                      <Figure minor={entry.amount_minor} currency={entry.currency ?? currency} approx={false} />
                     </td>
+                    {converted && (
+                      <td className="amount mono small">
+                        {entry.rate && entry.rate_source !== "base" ? (
+                          <span title={`${entry.rate_date ? formatDate(entry.rate_date) : ""} · ${sourceLabel(entry.rate_source)}${entry.rate_stale ? ` · ${t({ message: "stale", comment: "State of an exchange rate: older than the household's limit" })}` : ""}`}>
+                            {entry.rate}
+                          </span>
+                        ) : (
+                          <span className="muted">—</span>
+                        )}
+                      </td>
+                    )}
+                    {converted && (
+                      <td className="amount">
+                        <Figure minor={entry.converted_minor ?? 0} currency={currency} />
+                      </td>
+                    )}
                   </tr>
                   );
                 })}
               </tbody>
               <tfoot>
                 <tr>
-                  <th scope="row" colSpan={5}>
+                  <th scope="row" colSpan={converted ? 7 : 5}>
                     {plural(rows.data.count, {
                       one: `${rows.data.count} transaction`,
                       other: `${rows.data.count} transactions`,
                     })}
                   </th>
                   <td className="amount">
-                    <Figure minor={rows.data.total_minor} currency={currency} strong />
+                    <Figure minor={rows.data.total_minor} currency={rows.data.currency ?? currency} strong />
                   </td>
                 </tr>
               </tfoot>
@@ -1359,7 +1657,13 @@ function Headline({ report }: { report: Report }) {
   const block = report.reimbursements;
   const items = block.pending.count;
   const lang = amountLang();
-  const money = (minor: number) => <span lang={lang}>{format(minor, currency)}</span>;
+  const approx = useContext(Converted);
+  const money = (minor: number) => (
+    <span lang={lang}>
+      {approx && minor !== 0 ? "≈ " : ""}
+      {format(minor, currency)}
+    </span>
+  );
   return (
     <div className="report-headline">
       <dl className="report-figures">
@@ -1422,6 +1726,7 @@ function Figure({
   currency,
   strong,
   signed,
+  approx,
   onOpen,
   cell,
 }: {
@@ -1430,10 +1735,17 @@ function Figure({
   strong?: boolean;
   /** Colour this one by its sign, and say the sign in words for a reader. */
   signed?: boolean;
+  /**
+   * Converted, so marked "≈". Read from the report when not given; a row's
+   * own amount in the drill-through says `false`, because it is exact.
+   */
+  approx?: boolean;
   onOpen?: (cell: Cell) => void;
   cell?: Cell;
 }) {
-  const text = format(minor, currency);
+  const inherited = useContext(Converted);
+  // A zero is a zero in any currency: no "≈" in front of nothing.
+  const text = ((approx ?? inherited) && minor !== 0 ? "≈ " : "") + format(minor, currency);
   const lang = amountLang();
 
   // A zero has nothing behind it, so it is not offered as something to open.

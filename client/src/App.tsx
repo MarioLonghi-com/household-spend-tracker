@@ -34,7 +34,7 @@ import { Payees } from "./screens/Payees";
 import { PayeeCategorisation } from "./screens/PayeeCategorisation";
 import { Receipts } from "./screens/Receipts";
 import { REPORTS, Report, Reports, reportFor, reportScreen } from "./screens/Reports";
-import type { ReportScreen } from "./screens/Reports";
+import type { ReportPreset, ReportScreen } from "./screens/Reports";
 import { Register } from "./screens/Register";
 import type { RegisterPreset } from "./screens/Register";
 import { registerPresetFrom } from "./lib/registerLink";
@@ -578,6 +578,11 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
   const [registerPreset, setRegisterPreset] = useState<RegisterPreset | null>(
     () => opened.register ?? null,
   );
+  //: The settings a preset card on the Reports index opened a report with
+  //: (#396 §8), with a count so pressing the same card again starts afresh.
+  const [reportPreset, setReportPreset] = useState<{ preset: ReportPreset; n: number } | null>(
+    null,
+  );
   const [householdId, setHouseholdId] = useState<string>(opened.household);
   const [navOpen, setNavOpen] = useState(false);
   //: The desktop menu folded down to its rail (#161). Per browser, like the
@@ -695,6 +700,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
     // Going anywhere from the menu is a fresh start: a filter a report sent
     // somebody to must not come back the next time they open the register.
     setRegisterPreset(null);
+    setReportPreset(null);
     setScreen(to);
     setNavOpen(false);
   };
@@ -905,14 +911,24 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
         {screen === "exchange-rates" && <ExchangeRates household={household} />}
         {screen === "receipts" && <Receipts household={household} />}
         {screen === "reports" && (
-          <Reports household={household} onOpen={(key) => go(reportScreen(key))} />
+          <Reports
+            household={household}
+            onOpen={(key, preset) => {
+              go(reportScreen(key));
+              if (preset) setReportPreset((was) => ({ preset, n: (was?.n ?? 0) + 1 }));
+            }}
+          />
         )}
         {openReport && (
           <Report
+            // A preset starts the report afresh; the menu's way in starts it plain.
+            key={`${screen}-${reportPreset?.n ?? 0}`}
             household={household}
             screen={screen as ReportScreen}
+            preset={reportPreset?.preset}
             onBack={() => go("reports")}
             onOpenRegister={openRegister}
+            onOpenExchangeRates={() => go("exchange-rates")}
           />
         )}
         {screen === "household" && (

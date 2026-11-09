@@ -1107,6 +1107,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "fx_manual.column_twice": {
     message: msg({ id: "error.fx_manual.column_twice", message: "This file has the column {column} twice" }),
   },
+  "report.currency_or_base": {
+    message: msg({ id: "error.report.currency_or_base", message: "Ask for one currency, or for every currency in the base currency -- one of the two" }),
+  },
   "request.cross_origin": {
     message: msg({ id: "error.request.cross_origin", message: "That request did not come from this app" }),
   },

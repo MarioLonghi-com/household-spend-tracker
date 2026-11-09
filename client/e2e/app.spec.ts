@@ -879,7 +879,7 @@ test("the Reports header opens an index, and the index opens the report", async 
   // The index names what each report answers, rather than being a row of tabs
   // above one of them.
   // Scoped to the page: the nav has an entry of the same name, by design.
-  const card = page.locator("main").getByRole("button", { name: /Income vs Expense/ });
+  const card = page.locator("main").getByRole("button", { name: /^Income vs Expense/ });
   await expect(card).toBeVisible();
   await card.click();
 
@@ -887,7 +887,7 @@ test("the Reports header opens an index, and the index opens the report", async 
   // And the way back, for somebody who arrived here from the nav and has no
   // browser history to press.
   await page.locator(".crumbs").getByRole("button", { name: "Reports" }).click();
-  await expect(page.locator("main").getByRole("button", { name: /Income vs Expense/ })).toBeVisible();
+  await expect(page.locator("main").getByRole("button", { name: /^Income vs Expense/ })).toBeVisible();
 });
 
 test("the report's heading follows the page, and a figure's row opens in Transactions (#401)", async ({ page, context }) => {
@@ -922,6 +922,40 @@ test("the report's heading follows the page, and a figure's row opens in Transac
   // The report is still where it was, with its bubble open.
   await expect(dialog).toBeVisible();
   await tab.close();
+});
+
+test("Latest 12 months opens Income vs Expense on closed months, every currency in EUR (#396)", async ({ page }) => {
+  await go(page, "Reports");
+  await page.locator("main").getByRole("button", { name: /Latest 12 months/ }).click();
+  await expect(page.getByRole("heading", { name: "Income vs Expense" })).toBeVisible();
+
+  // Every currency, converted: the seed holds a GBP account beside the EUR ones.
+  await expect(page.getByRole("radio", { name: "All, in EUR" })).toHaveAttribute("aria-checked", "true");
+
+  // Twelve closed months: the last column is last month, not this one.
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const now = new Date();
+  const last = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const heads = page.locator(".ie-grid-head thead th");
+  await expect(heads).toHaveCount(15);
+  await expect(heads.nth(12)).toHaveText(`${months[last.getMonth()]} ${last.getFullYear()}`);
+
+  // Every figure is a converted one, and says so.
+  const total = page
+    .locator(".ie-grid-body tbody tr:has(button.figure-open) td.amount:nth-last-child(2) button.figure-open")
+    .first();
+  const figure = (await total.innerText()).trim();
+  expect(figure.startsWith("≈")).toBe(true);
+
+  // Its rows: each in its own currency, with what it was converted to, adding
+  // up to the figure -- and opening Transactions in every currency.
+  await total.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("columnheader", { name: /In EUR/ })).toBeVisible();
+  await expect(dialog.getByRole("columnheader", { name: /Rate, per 1 EUR/ })).toBeVisible();
+  await expect(dialog.locator("tfoot td.amount")).toHaveText(figure);
+  const href = await dialog.locator("a.behind-open").first().getAttribute("href");
+  expect(href).not.toContain("currency=");
 });
 
 test("the report is also one click from the menu", async ({ page }) => {

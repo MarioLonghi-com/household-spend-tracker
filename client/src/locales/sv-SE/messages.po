@@ -328,6 +328,11 @@ msgstr "Markera {0}"
 msgid "No browsers were being trusted."
 msgstr "Inga webbläsare var betrodda."
 
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "{mixed, plural, one {{mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it, in {currency} either: a claim is not converted across currencies yet.} other {{mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them, in {currency} either: a claim is not converted across currencies yet.}}"
+msgstr "{mixed, plural, one {{mixed} återbetalning täcker utgifter i en annan valuta, så inget överskott eller underskott räknas fram för den, inte heller i {currency}: en ersättning räknas ännu inte om mellan valutor.} other {{mixed} återbetalningar täcker utgifter i en annan valuta, så inget överskott eller underskott räknas fram för dem, inte heller i {currency}: en ersättning räknas ännu inte om mellan valutor.}}"
+
 #. A month on the strip: no transactions and no rates
 #: src/screens/ExchangeRates.tsx
 #, fuzzy
@@ -1663,7 +1668,10 @@ msgid "Remove this part"
 msgstr "Ta bort den här delen"
 
 #. State of an exchange rate: older than the household's limit
+#. State of an exchange rate: older than the household's limit
+#. State of an exchange rate: older than the household's limit
 #: src/components/RatesAsOf.tsx
+#: src/screens/reports/IncomeExpense.tsx
 #, fuzzy
 msgid "stale"
 msgstr "inaktuell"
@@ -3022,6 +3030,12 @@ msgstr "incheckad {0}"
 msgid "the first {0} loaded"
 msgstr "de första {0} inlästa"
 
+#. Column heading on the Income vs Expense report: the exchange rate a row was converted at
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Rate, per 1 {currency}"
+msgstr "Kurs, per 1 {currency}"
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "The server added {user} as an owner"
@@ -3836,6 +3850,12 @@ msgstr "Varje transaktion och varje regel som nämner <0>{0}</0> kommer i ställ
 #, fuzzy
 msgid "Through the agent key {via}"
 msgstr "Via agentnyckeln {via}"
+
+#. Column heading on the Income vs Expense report: a row's amount converted into the base currency
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "In {currency}"
+msgstr "I {currency}"
 
 #. placeholder {0}: gone.length
 #. placeholder {1}: gone.length
@@ -5124,6 +5144,12 @@ msgstr "Det här är avskrivet. Ändra tillbaka till ”Jobbet ska betala tillba
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 #, fuzzy
+msgid "error.report.currency_or_base"
+msgstr "Be om en valuta, eller om alla valutor i basvalutan: det ena av de två"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+#, fuzzy
 msgid "error.request.cross_origin"
 msgstr "Den begäran kom inte från den här appen"
 
@@ -5991,6 +6017,12 @@ msgstr "förhandsvisning"
 msgid "The ledger stopped unexpectedly"
 msgstr ""
 
+#. After an exchange rate's source: the currency it was crossed through, like via EUR
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "via {pivot}"
+msgstr "via {pivot}"
+
 #. Button on the Payees screen
 #: src/screens/Payees.tsx
 #, fuzzy
@@ -6132,6 +6164,12 @@ msgstr "{0} av {1}"
 #, fuzzy
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
 msgstr "Bara värt att göra i förväg för en som du ska skriva en regel för. Att namnge någon på en transaktion skapar den ändå."
+
+#. placeholder {0}: one.count
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "{0, plural, one {# row in {code} has no exchange rate, so it is left out of every figure: {months}.} other {# rows in {code} have no exchange rate, so they are left out of every figure: {months}.}}"
+msgstr "{0, plural, one {# rad i {code} saknar växelkurs och räknas därför inte med i någon siffra: {months}.} other {# rader i {code} saknar växelkurs och räknas därför inte med i någon siffra: {months}.}}"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -6308,6 +6346,13 @@ msgstr "Själva filen"
 msgid "Re-enable"
 msgstr "Återaktivera"
 
+#. Opens the list of exchange rates the Income vs Expense report converted at
+#. placeholder {0}: rates.length
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "{0, plural, one {# exchange rate used} other {# exchange rates used}}"
+msgstr "{0, plural, one {# växelkurs använd} other {# växelkurser använda}}"
+
 #. Column heading on the Accounts screen: state, the bank has the row. See GLOSSARY.md
 #. Column heading on the Register screen: state, the bank has the row. See GLOSSARY.md
 #. Column name for resizing the column on the Register screen: state, the bank has the row. See GLOSSARY.md
@@ -6328,8 +6373,10 @@ msgstr "Bokfört"
 msgid "the plan <0>{0}</0>"
 msgstr "planen <0>{0}</0>"
 
+#. A card on the Reports screen: Income vs Expense over the twelve months before this one
 #. Label on the date range picker
 #: src/components/DateRange.tsx
+#: src/screens/Reports.tsx
 #, fuzzy
 msgid "Latest 12 months"
 msgstr "Senaste 12 månaderna"
@@ -6356,7 +6403,7 @@ msgid "Received"
 msgstr "Mottaget"
 
 #. Option on the Exchange rates page: each figure uses its own day's rate
-#: src/screens/ExchangeRates.tsx
+#: src/lib/fx.ts
 #, fuzzy
 msgid "Daily rate per row"
 msgstr "Dagskurs per rad"
@@ -7544,6 +7591,11 @@ msgstr "Borttaget: {counts}"
 msgid "history.unknown"
 msgstr "?"
 
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Each currency gets its own report. All, in {base} converts every row at your household's exchange rates before adding anything, marks each figure ≈, and names the rows it had no rate for."
+msgstr "Varje valuta får sin egen rapport. Alla, i {base} räknar om varje rad med hushållets växelkurser innan något läggs ihop, märker varje siffra med ≈ och namnger raderna som saknade kurs."
+
 #: src/lib/signInChanges.ts
 #, fuzzy
 msgid "The server reset {user}'s authenticator"
@@ -7852,6 +7904,12 @@ msgstr "är exakt"
 #, fuzzy
 msgid "Replace the rate"
 msgstr "Ersätt kursen"
+
+#. placeholder {0}: listText(options)
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "The ledger never converts: currency lives on the account. A total mixing {0} as they stand would be a number with nothing behind it."
+msgstr "Huvudboken räknar aldrig om: valutan hör till kontot. En summa som blandar {0} som de är vore en siffra utan något bakom sig."
 
 #: src/screens/Accounts.tsx
 #, fuzzy
@@ -9212,6 +9270,12 @@ msgstr "Ersatt av betalningen ovan"
 msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
 msgstr "Båda, eftersom kontona har olika valutor och vi inte hittar på en växelkurs – ta beloppet som banken faktiskt satte in."
 
+#. Column heading in the list of exchange rates a report used: the rate's own date
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Rate date"
+msgstr "Kursdatum"
+
 #. Application management, Where the files are: the backups folder. See GLOSSARY.md
 #: src/lib/labels.ts
 #, fuzzy
@@ -9443,7 +9507,7 @@ msgid "Backups taken by updates"
 msgstr "Säkerhetskopior tagna av uppdateringar"
 
 #. Option on the Exchange rates page: a month's figures use the mean of its daily rates
-#: src/screens/ExchangeRates.tsx
+#: src/lib/fx.ts
 #, fuzzy
 msgid "Monthly average"
 msgstr "Månadsgenomsnitt"
@@ -9754,6 +9818,12 @@ msgstr "Den gör anspråk på <0>{0}</0> av {1, plural, one {{2} rad som redan f
 #, fuzzy
 msgid "Somebody reset {user}'s password"
 msgstr "Någon återställde lösenordet för {user}"
+
+#. Column heading in the list of exchange rates a report used: units of the currency per one base currency
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Per 1 {base}"
+msgstr "Per 1 {base}"
 
 #. Table cell on the passkeys panel
 #: src/screens/Passkeys.tsx
@@ -11818,6 +11888,7 @@ msgstr "avgiftskolumn"
 msgid "Recovered"
 msgstr "Återfått"
 
+#. Column heading in the list of exchange rates a report used: noun. See GLOSSARY.md
 #. Column heading on Browse rates. See GLOSSARY.md
 #. Column heading on the Accounts screen: noun. See GLOSSARY.md
 #. Column heading on the Exchange rates page. See GLOSSARY.md
@@ -12180,6 +12251,12 @@ msgstr "Det finns redan en väntande återställningslänk för {name}. Den här
 #, fuzzy
 msgid "No payment linked yet"
 msgstr "Ingen betalning kopplad än"
+
+#. Choice on the Income vs Expense report: every currency, converted into the household's base currency
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "All, in {base}"
+msgstr "Alla, i {base}"
 
 #. Update confirmation, Updater row: the release's updater is the same version as the one running, built again
 #: src/screens/Updates.tsx
@@ -13323,7 +13400,7 @@ msgid "Hide the {code} columns"
 msgstr "Dölj kolumnerna för {code}"
 
 #. Option on the Exchange rates page: a month's figures use its last rate
-#: src/screens/ExchangeRates.tsx
+#: src/lib/fx.ts
 #, fuzzy
 msgid "Month-end rate"
 msgstr "Kurs vid månadsslut"
@@ -13794,7 +13871,6 @@ msgid "Dates"
 msgstr "Datum"
 
 #. placeholder {0}: listText(options)
-#: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/Reimbursements.tsx
 #, fuzzy
 msgid "This ledger never converts. Currency lives on the account, and there is no exchange rate stored anywhere — so a total mixing {0} would be a number with nothing behind it."
@@ -14564,6 +14640,7 @@ msgstr "Uppdateraren är nu också {updaterVersion}."
 msgid "Applying…"
 msgstr "Tillämpar…"
 
+#. Column heading in the list of exchange rates a report used: where the rate came from
 #. Column heading on Browse rates: where the rate came from
 #. Column heading on the Register screen: noun, where it came from
 #. Column heading on the fetch history: where rates were fetched from
@@ -14573,6 +14650,7 @@ msgstr "Tillämpar…"
 #. Label of a filter on the Exchange rates page: where rates come from
 #: src/screens/ExchangeRates.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 #, fuzzy
 msgid "Source"
 msgstr "Källa"
@@ -14668,6 +14746,11 @@ msgstr "Medlemmar"
 #, fuzzy
 msgid "An account cannot have been opened in the future."
 msgstr "Ett konto kan inte ha öppnats i framtiden."
+
+#: src/screens/Reports.tsx
+#, fuzzy
+msgid "Income vs Expense over the last twelve whole months, every currency in your base currency."
+msgstr "Inkomster och utgifter de senaste tolv hela månaderna, alla valutor i din basvaluta."
 
 #. Column heading on the Accounts screen
 #. Text on the Accounts screen

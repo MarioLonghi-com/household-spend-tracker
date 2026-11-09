@@ -20,6 +20,19 @@ uses, how it is rounded, and how old the rates are. Issue #396 is the design.
 Totals are built by converting each row or account first and adding the
 converted figures, never by converting a sum of two currencies.
 
+### Income vs Expense, "All, in {base}"
+
+The first report that converts. Its currency toggle offers **All, in
+{base}** beside the currencies whenever the household holds one other than
+the base, and opens on it once every such currency has a rate. Each row is
+converted at its own date's rate under the household's policy, then added;
+the rows behind a figure show each one's own amount, rate and converted
+amount, and add up to the figure. A repayment's surplus or shortfall is
+worked out in the claim's own currency first and its rows converted at the
+repayment's rate; a claim whose expenses are in another currency than its
+repayment is not converted yet. **Latest 12 months** on the Reports index is
+this view over the twelve closed months.
+
 ## Where rates come from
 
 Each household has a **chain**: an ordered list of sources, set on
