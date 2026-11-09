@@ -107,6 +107,10 @@ class FakeEngine:
     delay: float = 0.0
     #: Container ids whose stop the engine refuses, as when it cannot kill one (#246).
     refuse_stop: set = field(default_factory=set)
+    #: Rootless Podman: a stop that a hand start overtook answers 500
+    #: `container state improper` and leaves the container running. Container
+    #: id -> how many stops answer so (#344).
+    improper_stops: dict = field(default_factory=dict)
     #: Docker 28: a stop answers once the container has exited, but the
     #: listing still says `running` for a moment. This many listings do (#246).
     stale_listings_after_stop: int = 0
@@ -403,6 +407,13 @@ class FakeEngine:
                 return 204, b""
             if method == "POST" and action == "/stop" and c["Id"] in self.refuse_stop:
                 return 500, {"message": f"cannot stop container {c['Id']}: permission denied"}
+            if method == "POST" and action == "/stop" and self.improper_stops.get(c["Id"]):
+                self.improper_stops[c["Id"]] -= 1
+                self.set_state(c, "running")
+                return 500, {
+                    "message": f"container {c['Id']} is running or paused, refusing to clean up: "
+                    "container state improper"
+                }
             if method == "POST" and action == "/stop":
                 if self.stop_delay:
                     import time

@@ -24,6 +24,10 @@ from collections.abc import Mapping
 
 #: Below every engine's window that the matrix and the canary run.
 API = "v1.41"
+#: Podman 5's answer to removing the last container of the rootless network
+#: namespace when it could not signal the namespace's network process.
+NETNS_TEARDOWN = "rootless netns"
+NETNS_RETRIES = 3
 
 
 class Unreachable(Exception):
@@ -162,13 +166,28 @@ class Engine:
         self.call("POST", f"/containers/{urllib.parse.quote(ref, safe='')}/kill")
 
     def remove(self, ref: str) -> None:
-        try:
-            self.call(
-                "DELETE", f"/containers/{urllib.parse.quote(ref, safe='')}", {"force": "true", "v": "false"}
-            )
-        except Failed as e:
-            if e.status != 404:
-                raise
+        """Force-remove `ref`; gone already is fine.
+
+        Podman 5 tears the rootless network namespace down when its last
+        container leaves it, and can answer that removal with a 500, `rootless
+        netns: kill network process: permission denied`, having cleaned up
+        the namespace anyway: asked again, the removal goes through. Only
+        between scenarios does the last container go -- the app always runs
+        during one -- so this is the driver's to absorb, a few times.
+        """
+        for attempt in range(NETNS_RETRIES + 1):
+            try:
+                self.call(
+                    "DELETE", f"/containers/{urllib.parse.quote(ref, safe='')}", {"force": "true", "v": "false"}
+                )
+                return
+            except Failed as e:
+                if e.status == 404:
+                    return
+                if e.status != 500 or NETNS_TEARDOWN not in str(e) or attempt == NETNS_RETRIES:
+                    raise
+                print(f"   (podman's rootless netns teardown refused removing {ref[:12]}; again)", flush=True)
+                time.sleep(1)
 
     def remove_volume(self, name: str) -> None:
         try:
