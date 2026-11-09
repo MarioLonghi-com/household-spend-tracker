@@ -17,7 +17,7 @@ from .errors import ValidationError
 # ISO 4217 exponent for the currencies we care about; anything unlisted gets 2,
 # which is right for the overwhelming majority.
 _EXPONENTS: Final[dict[str, int]] = {
-    "JPY": 0, "KRW": 0, "CLP": 0, "ISK": 0, "VND": 0, "HUF": 0, "TWD": 0,
+    "JPY": 0, "KRW": 0, "CLP": 0, "ISK": 0, "VND": 0,
     "BHD": 3, "IQD": 3, "JOD": 3, "KWD": 3, "LYD": 3, "OMR": 3, "TND": 3,
 }
 

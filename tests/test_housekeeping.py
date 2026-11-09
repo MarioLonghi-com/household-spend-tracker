@@ -379,6 +379,8 @@ def test_the_sweep_leaves_everything_that_is_still_live(db, household_id):
         # Unaudited, so no batch -- and inside the retention window, so it stays.
         s.add(AgentRequest(agent_key_id="a-key", at=now, method="GET",
                            route="/api/agent/v1/manifest", status=200))
+        # A fetch from yesterday: inside the ninety days, so it stays (#396).
+        s.add(_a_fetch(household_id, user, started_at=now - timedelta(days=1)))
         s.commit()
     # An invitation still outstanding (#211).
     from app.models import Invitation
@@ -400,10 +402,13 @@ def test_the_sweep_leaves_everything_that_is_still_live(db, household_id):
                        "backup_downloads": 0,
                        "invitations": 0,
                        "account_resets": 0,
+                       "fx_fetches": 0,
                        # Nothing deleted here, so no free pages to reclaim.
                        "free_pages": 0}
+    from app.models import FxFetch
+
     for model in (WebSession, PendingSignIn, TrustedDevice, LoginAttempt, StepUpGrant,
-                  AgentKey, AgentRequest, Invitation):
+                  AgentKey, AgentRequest, Invitation, FxFetch):
         assert _count(factory, model) == 1, f"{model.__tablename__} lost a live row"
 
 
@@ -530,6 +535,42 @@ def test_the_log_of_a_swept_invitation_does_not_keep_the_address(db):
     assert not any("someone.private" in f"{c.before}{c.after}" for c in logged)
 
 
+def _a_fetch(household_id, user, *, started_at):
+    """One finished press of Fetch now (#396)."""
+    from datetime import date
+
+    from app.models import FxFetch, FxFetchMode, FxFetchOutcome, FxSource
+
+    return FxFetch(
+        household_id=household_id, started_by_id=user.id, source=FxSource.ecb,
+        mode=FxFetchMode.missing, requested_since=date(2026, 1, 1),
+        requested_until=date(2026, 1, 2), currencies=["GBP"], started_at=started_at,
+        finished_at=started_at, outcome=FxFetchOutcome.ok, rates_added=2,
+    )
+
+
+def test_fetch_history_past_ninety_days_is_swept_and_the_rest_kept(db, household_id):
+    """The Exchange rates page shows ninety days of who fetched what (#396 §4.4)."""
+    from app.models import FxFetch
+    from app.services.fx_fetching import RETENTION
+
+    engine, factory, user = db
+    now = utcnow()
+    with factory() as s:
+        old = _a_fetch(household_id, user, started_at=now - RETENTION - timedelta(days=1))
+        recent = _a_fetch(household_id, user, started_at=now - RETENTION + timedelta(days=1))
+        s.add_all([old, recent])
+        s.commit()
+        old_id, recent_id = old.id, recent.id
+
+    removed = housekeeping.sweep(engine)
+
+    assert removed["fx_fetches"] == 1
+    with factory() as s:
+        assert s.get(FxFetch, old_id) is None
+        assert s.get(FxFetch, recent_id) is not None
+
+
 def test_the_retention_list_says_what_the_sweeps_do():
     """The module docstring states each window; this holds it to the constants."""
     from app.auth import ratelimit
@@ -542,6 +583,10 @@ def test_the_retention_list_says_what_the_sweeps_do():
     from app.services import account_resets
 
     assert f"account resets: {account_resets.RETENTION.days} days" in doc
+
+    from app.services import fx_fetching
+
+    assert f"exchange-rate fetches: {fx_fetching.RETENTION.days} days" in doc
 
 
 # --------------------------------------------------------------------------- #

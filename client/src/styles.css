@@ -1668,3 +1668,15 @@ table.passkeys tr.fresh td { background: color-mix(in srgb, var(--accent) 14%, t
   .method-head { flex-direction: column; align-items: stretch; }
   table.passkeys td.actions { white-space: normal; }
 }
+
+/* Exchange rates (#396). The Rates as of line, and the month strip: one cell
+   per month, solid with rates, hatched with a gap, hollow with nothing. The
+   state is in each cell's name too, never in its colour alone. */
+.rates-as-of { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 0 0 8px; }
+.rates-as-of.warn { color: var(--warn); }
+.fx-strip { list-style: none; display: flex; flex-wrap: wrap; gap: 3px; padding: 0; margin: 10px 0; }
+.fx-cell { display: inline-block; width: 14px; height: 14px; border-radius: 2px; border: 1px solid var(--line); vertical-align: middle; }
+.fx-cell.rates { background: var(--accent); border-color: var(--accent); }
+.fx-cell.gap { background: repeating-linear-gradient(45deg, var(--warn) 0 2px, transparent 2px 5px); border-color: var(--warn); }
+.fx-cell.empty { background: transparent; }
+.fx-legend .fx-cell { margin: 0 2px 0 8px; }

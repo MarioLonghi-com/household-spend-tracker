@@ -114,10 +114,11 @@ json=(-H "Content-Type: application/json" -H "Idempotency-Key: $(uuidgen)")
   account. Negative is money out. On a write you may send `amount` as a
   decimal **string** (`"12.50"`) instead — **a JSON float is refused**, and so
   is a string with more decimals than its currency has.
-- **Currency lives on the account, never on the household.** Nothing converts.
-  No endpoint sums two currencies, and no response carries a grand total across
-  them. When you convert — and for advice across countries you will — say which
-  rate, from where, and for what date. See [job 4](#4-the-combined-position-across-countries-and-currencies).
+- **Currency lives on the account, never on the household.** The ledger never
+  converts. Reports may convert into the base currency through the household's
+  chosen rates; each converted response says which. Rows and balances are never
+  converted. When you convert yourself — and for advice across countries you
+  will — say which rate, from where, and for what date. See [job 4](#4-the-combined-position-across-countries-and-currencies).
 - **Dates are ISO 8601**, the account's own dates, no timezone.
 - Every figure comes back twice: `*_minor` for arithmetic, and a formatted
   string for the sentence you are writing. Use the integer for sums.
@@ -507,6 +508,13 @@ are yours — done visibly.**
   the rate as a decimal **string** (units of `to_currency` per one
   `from_currency`). An empty list means there are none, not that the rate is
   zero.
+- **Rates the household's chain reads:** `GET $H/fx/rates?currency=GBP&since=…`
+  — the ECB's reference rates (fetched only when a member presses Fetch now)
+  and the rates members entered by hand, each with its source and date, the
+  rate as a decimal **string** in units of `currency` per one `quote_currency`,
+  and `rate_in_base` per one base currency. `GET $H/fx/status` says how old
+  they are, what was last fetched, and what no source covers. A key reads
+  these; it cannot fetch, enter or delete rates, or change the chain.
 
 When you convert:
 

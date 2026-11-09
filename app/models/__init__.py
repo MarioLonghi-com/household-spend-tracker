@@ -47,6 +47,11 @@ from .enums import (
     CategoryRole,
     ChangeOp,
     ClearedState,
+    FxFetchMode,
+    FxFetchOutcome,
+    FxPeriod,
+    FxPolicy,
+    FxSource,
     IdentifierKind,
     ImportOutcome,
     InstanceState,
@@ -62,8 +67,10 @@ from .enums import (
     SuggestionStatus,
     SystemPayee,
 )
+from .fx import FxFetch, FxManualRate, FxRate
 
 __all__ = [
+    "FxFetch", "FxFetchMode", "FxFetchOutcome", "FxManualRate", "FxPeriod", "FxPolicy", "FxRate", "FxSource",
     "Account", "AccountIdentifier", "AccountReset", "AccountType", "AgentKey", "AgentReplay", "AgentRequest", "AgentScope", "Base", "Batch", "BatchKind", "BatchStatus", "BlobRole", "Categorisation",
     "Category", "CategoryGroup", "CategoryGroupRole", "CategoryRole", "Change", "ChangeOp",
     "ClearedState", "EnumStr", "IdentifierKind", "Household", "HouseholdMember", "IgnoredIdentifierSuggestion", "ImportLine", "ImportOutcome",

@@ -59,6 +59,7 @@ from .api.routers import (
     agent_review,
     auth,
     categories,
+    fx,
     households,
     identifiers,
     imports,
@@ -83,7 +84,7 @@ from .db import engine as db_engine
 from .errors import DomainError, TooManyAttempts
 from .hosts import AllowedHosts, request_host
 from .services import agent_keys as agent_key_service
-from .services import agent_requests, backup_bundle
+from .services import agent_requests, backup_bundle, fx_fetching
 
 log = logging.getLogger("spendtracker")
 
@@ -262,6 +263,13 @@ async def lifespan(_: FastAPI):
         running.branch or "no branch",
         running.source,
     )
+
+    # A fetch the last process was running when it stopped never finished;
+    # say so, so the dashboard never shows one running that is not (#396).
+    # A one-off write, not a task: nothing here fetches.
+    interrupted = fx_fetching.mark_interrupted(db_engine)
+    if interrupted:
+        log.warning("%d exchange-rate fetch(es) were interrupted by a restart", interrupted)
 
     with session_scope() as session:
         if not setup_service.is_configured(session) and setup_service.token_needed():
@@ -948,6 +956,7 @@ _ROUTERS = (
     (stats.router, None),
     (transfers.router, None),
     (translations.router, None),
+    (fx.router, None),
     (one_time_import.router, None),
 )
 for router, need in _ROUTERS:
