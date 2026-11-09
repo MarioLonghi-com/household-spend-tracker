@@ -170,3 +170,15 @@ export function sourceLabel(source: string | null | undefined): string {
       return source ?? "—";
   }
 }
+
+/** A monthly policy's name, as the settings and a converted report say it. */
+export function policyWord(policy: string): string {
+  switch (policy) {
+    case "month_end":
+      return t({ message: "Month-end rate", comment: "Option on the Exchange rates page: a month's figures use its last rate" });
+    case "spot":
+      return t({ message: "Daily rate per row", comment: "Option on the Exchange rates page: each figure uses its own day's rate" });
+    default:
+      return t({ message: "Monthly average", comment: "Option on the Exchange rates page: a month's figures use the mean of its daily rates" });
+  }
+}

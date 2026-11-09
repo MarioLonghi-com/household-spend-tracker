@@ -98,12 +98,38 @@ history this repository does not have.
     covers, including an account in a code ISO 4217 never assigned.
   - **"Rates as of"**, the line every converting page will carry, saying
     how old its rates are and when someone last fetched them. It is shown on
-    the Exchange rates page; the reports that convert follow in phase 2.
+    the Exchange rates page and on Income vs Expense in the base currency.
   - **For programs**: `GET …/fx/rates` and `GET …/fx/status` on the agent
     API, read only. A key cannot fetch, enter rates or change the chain. The
     manifest's currency convention now reads that reports may convert
     through the household's chosen rates and say which.
   - `docs/CURRENCY-CONVERSION.md`, *How the tracker converts currencies*.
+- **Income vs Expense in the base currency (#396, phase 2).** The currency
+  toggle has one more choice, **All, in {base}**: every currency on one
+  report, each row converted on its own at the household's chosen rate for
+  its date (the monthly average by default) and only then added. Nothing
+  converted is stored.
+  - Every converted figure is marked "≈", the "Rates as of" line sits under
+    the filters and links to the Exchange rates page, and a folded list
+    names every rate used, sortable at its headings.
+  - A row with no rate is left out of every figure and named under the
+    table, with its months; it is never counted as zero or at 1.
+  - The report keeps its sections, groups and reimbursement block. A
+    repayment's surplus or shortfall is still worked out in the claim's own
+    currency, then converted at the repayment's rate; a claim whose expenses
+    are in another currency stays uncounted, and the report says so.
+  - The rows behind a figure keep their own amount and currency, with the
+    rate and the converted amount beside them, and add up to the figure.
+    They open Transactions in every currency, not one.
+  - The report opens on it once the household has a working chain: a rate
+    for every currency it holds. Until then it opens per currency, as before.
+  - **Latest 12 months**, a card on the Reports index: Income vs Expense
+    over the twelve closed months -- the month in progress left out -- every
+    currency in the base.
+  - **For programs**: `in_base=true` instead of `currency` on
+    `…/reports/income-expense`, for a person and an agent alike, with
+    `converted`, `rate_source`, `rates_used`, `not_converted` and
+    `rates_status` in the answer. Asking for both, or neither, is refused.
 
 ### Changed
 

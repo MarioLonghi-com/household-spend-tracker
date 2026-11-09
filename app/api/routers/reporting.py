@@ -1,5 +1,11 @@
 """Reports: read-only arithmetic over the ledger, one currency at a time.
 
+Or, for Income vs Expense, every currency in the household's base currency
+(#396 phase 2): `in_base=true` instead of a `currency`. Every row is then
+converted on its own through `services/fx.py`, the response says which rates
+it used and which rows it could not convert, and it carries `rates_status`
+for the "Rates as of" line. Nothing converted is stored.
+
 Every route here is a `GET` and nothing in this module opens a batch. A report
 is a question, not an act -- it stores nothing, changes nothing and has no undo
 because it has nothing to undo. That is worth saying once at the top rather
@@ -18,12 +24,18 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
+from ...errors import ValidationError
+from ...models import Household
 from ...money import format_amount
 from ...schemas import (
     CoverageOut,
     ExcludedOut,
     IncomeExpenseOut,
     NetWorthOut,
+    NotConvertedOut,
+    RateSourceOut,
+    RatesStatusOut,
+    RateUsedOut,
     ReimbursementsOut,
     ReportBehindOut,
     ReportCurrenciesOut,
@@ -33,6 +45,7 @@ from ...schemas import (
     ReportRowOut,
     ReportSectionOut,
 )
+from ...services import fx
 from ...services import net_worth as net_worth_service
 from ...services import reporting as report_service
 from ..deps import CurrentHousehold, SessionDep
@@ -82,6 +95,22 @@ def _section_out(section: report_service.Section, currency: str) -> ReportSectio
     )
 
 
+def _which(household: Household, session, currency: str | None, in_base: bool):
+    """``(currency, rates)`` for the service: exactly one of the two is set.
+
+    Neither or both is refused with a code: a report that guessed which was
+    meant would answer a question nobody asked, in the wrong currency.
+    """
+    if (currency is None) == (not in_base):
+        raise ValidationError(
+            "Ask for one currency, or for every currency in the base currency -- one of the two",
+            code="report.currency_or_base",
+        )
+    if in_base:
+        return None, fx.rates(session, household)
+    return currency.upper(), None
+
+
 @router.get(
     "/households/{household_id}/reports/currencies", response_model=ReportCurrenciesOut
 )
@@ -93,11 +122,42 @@ def report_currencies(
     Read from the accounts rather than from `Household.base_currency`, which is
     a default for new accounts and not a statement about what the household
     holds. Busiest first, so the report opens on the currency most of the
-    ledger is in rather than on whichever one sorts first alphabetically.
+    ledger is in rather than on whichever one sorts first alphabetically --
+    unless the household has a working chain of exchange rates, when
+    `base_ready` says to open on "All, in {base}" instead (#396 §8).
     """
+    currencies = report_service.currencies_in_use(session, household.id)
+    rates = fx.rates(session, household)
+    offered, ready = report_service.base_offer(rates, currencies)
     return ReportCurrenciesOut(
-        currencies=report_service.currencies_in_use(session, household.id)
+        currencies=currencies,
+        base_currency=rates.base,
+        base_offered=offered,
+        base_ready=ready,
     )
+
+
+def _converted_fields(
+    session, household: Household, converting: report_service.Converting | None
+) -> dict:
+    """What a converted report says about its own conversion. Nothing per currency."""
+    if converting is None:
+        return {}
+    rates = converting.rates
+    return {
+        "converted": True,
+        "rate_source": RateSourceOut(
+            chain=[source.value for source in rates.chain], policy=rates.monthly_policy.value
+        ),
+        "rates_used": [
+            RateUsedOut(**{**used, "rate": fx.rate_text(used["rate"])})
+            for used in converting.rates_used()
+        ],
+        "not_converted": [NotConvertedOut(**one) for one in converting.not_converted()],
+        "rates_status": RatesStatusOut.model_validate(
+            fx.rates_status(session, household, converting.currencies, rates=rates)
+        ),
+    }
 
 
 @router.get(
@@ -106,7 +166,8 @@ def report_currencies(
 def income_expense(
     household: CurrentHousehold,
     session: SessionDep,
-    currency: Annotated[str, Query(min_length=3, max_length=3)],
+    currency: Annotated[str | None, Query(min_length=3, max_length=3)] = None,
+    in_base: bool = False,
     since: Annotated[Date | None, Query()] = None,
     until: Annotated[Date | None, Query()] = None,
     account_id: Annotated[list[str] | None, Query()] = None,
@@ -115,11 +176,14 @@ def income_expense(
 ) -> IncomeExpenseOut:
     """Income against expense across the window, broken down by category.
 
-    `currency` is **required and singular**, which is the whole design. The
-    ledger never converts, so a report spanning two currencies would be adding
-    figures that have no sum; making the caller name one means the question is
-    answerable before it is asked. The client's currency toggle is the shape
-    this takes on screen.
+    **One currency, or all of them converted** -- and the caller says which.
+    `currency` names one: the ledger never converts, so that report adds
+    nothing across two currencies. `in_base=true` instead asks for every
+    currency in the household's base currency, each row converted on its own
+    at the household's chosen rates (#396 phase 2): `converted` is then true,
+    `rates_used` and `not_converted` say how, and `rates_status` says how old
+    the rates are. Neither or both is refused (`report.currency_or_base`).
+    The client's currency toggle is the shape this takes on screen.
 
     `account_id` and `category_id` repeat for several values -- the accounts
     filter groups by country and type on the client, but that is a way of
@@ -138,10 +202,12 @@ def income_expense(
     the columns of this report are calendar months, so an open end has no last
     column and the screen must not have to guess what it is showing.
     """
+    code, rates = _which(household, session, currency, in_base)
     answer = report_service.income_expense(
         session,
         household.id,
-        currency=currency.upper(),
+        currency=code,
+        rates=rates,
         since=since,
         until=until,
         account_ids=account_id or None,
@@ -169,6 +235,33 @@ def income_expense(
         has_income_group=answer["has_income_group"],
         excluded=ExcludedOut(**answer["excluded"]),
         coverage=CoverageOut(**answer["coverage"]),
+        **_converted_fields(session, household, answer["converting"]),
+    )
+
+
+def _entry_out(entry: report_service.Entry, base: str) -> ReportEntryOut:
+    rate = entry.rate
+    return ReportEntryOut(
+        id=entry.id,
+        date=entry.date,
+        account_name=entry.account_name,
+        payee_name=entry.payee_name,
+        category_name=entry.category_name,
+        memo=entry.memo,
+        amount_minor=entry.amount_minor,
+        amount=format_amount(entry.amount_minor, entry.currency, with_symbol=False),
+        currency=entry.currency,
+        converted_minor=entry.converted_minor,
+        converted=(
+            format_amount(entry.converted_minor, base, with_symbol=False)
+            if entry.converted_minor is not None
+            else None
+        ),
+        rate=fx.rate_text(rate.rate) if rate is not None else None,
+        rate_date=rate.rate_date if rate is not None else None,
+        rate_source=rate.source if rate is not None else None,
+        rate_via=rate.via if rate is not None else None,
+        rate_stale=rate.stale if rate is not None else None,
     )
 
 
@@ -179,7 +272,8 @@ def income_expense(
 def behind_a_figure(
     household: CurrentHousehold,
     session: SessionDep,
-    currency: Annotated[str, Query(min_length=3, max_length=3)],
+    currency: Annotated[str | None, Query(min_length=3, max_length=3)] = None,
+    in_base: bool = False,
     since: Annotated[Date | None, Query()] = None,
     until: Annotated[Date | None, Query()] = None,
     account_id: Annotated[list[str] | None, Query()] = None,
@@ -215,16 +309,22 @@ def behind_a_figure(
     `direction` is the Net row, which is income and expense together and
     never the reimbursement block.
 
+    With `in_base=true` every entry keeps its own amount and currency and
+    adds what it was converted to and at which rate; `total_minor` is the sum
+    of the converted amounts, in the base currency, and equals the figure.
+
     The service composes the same `flow_rows` and the same window the report
     does, so what comes back sums to the figure that was clicked. A
     drill-through written against the register instead would show transfer
     legs and opening balances the report had excluded, and hand somebody
     checking a number the evidence that it was wrong when it was right.
     """
+    code, rates = _which(household, session, currency, in_base)
     answer = report_service.behind(
         session,
         household.id,
-        currency=currency.upper(),
+        currency=code,
+        rates=rates,
         since=since,
         until=until,
         account_ids=account_id or None,
@@ -236,23 +336,13 @@ def behind_a_figure(
         row_group_id=row_group_id,
         direction=direction,
     )
-    code = currency.upper()
+    total_currency = code or rates.base
     return ReportBehindOut(
-        entries=[
-            ReportEntryOut(
-                id=entry.id,
-                date=entry.date,
-                account_name=entry.account_name,
-                payee_name=entry.payee_name,
-                category_name=entry.category_name,
-                memo=entry.memo,
-                amount_minor=entry.amount_minor,
-                amount=format_amount(entry.amount_minor, code, with_symbol=False),
-            )
-            for entry in answer["entries"]
-        ],
+        entries=[_entry_out(entry, total_currency) for entry in answer["entries"]],
+        currency=total_currency,
+        converted=rates is not None,
         total_minor=answer["total_minor"],
-        total=format_amount(answer["total_minor"], code, with_symbol=False),
+        total=format_amount(answer["total_minor"], total_currency, with_symbol=False),
         count=answer["count"],
         capped=answer["capped"],
     )

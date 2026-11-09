@@ -1494,6 +1494,9 @@ table.report .amount {
 .report-unset .report-label { font-style: italic; color: var(--muted); }
 
 .report-notes { margin-top: 12px; max-width: 70ch; }
+/* The rates a converted report used (#396): how to check a "≈", folded under the notes. */
+.report-rates { margin-top: 8px; max-width: 70ch; }
+.report-rates summary { cursor: pointer; }
 
 @media (max-width: 720px) {
   table.report .report-label,

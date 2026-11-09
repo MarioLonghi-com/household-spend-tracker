@@ -17,7 +17,7 @@
  */
 
 import type { ReactNode } from "react";
-import { IncomeExpense } from "./reports/IncomeExpense";
+import { IncomeExpense, latestTwelve, type IncomeExpensePreset } from "./reports/IncomeExpense";
 import { Reimbursements } from "./reports/Reimbursements";
 import { NetWorth } from "./reports/NetWorth";
 import type { Household } from "../lib/types";
@@ -32,14 +32,20 @@ export type ReportKey = "income-expense" | "reimbursements" | "net-worth";
  *
  * Open the register already narrowed, which is how the Reimbursements report
  * sends somebody from a figure to the rows behind it; and open the Exchange
- * rates page, which is where a converting report sends somebody whose rates
- * are missing or old (#397). A report is still read-only -- it goes
+ * rates page, where a converting report sends somebody whose rates are
+ * missing or old (#396, #397). A report is still read-only -- it goes
  * somewhere else to act.
  */
 export type ReportNav = {
   openRegister: (preset: RegisterPreset) => void;
   openExchangeRates?: () => void;
 };
+
+/**
+ * Settings a report opens with, from a preset card on the index. Only
+ * Income vs Expense has any; its own type says what they are.
+ */
+export type ReportPreset = IncomeExpensePreset;
 
 /** What the shell calls the screen showing one report. */
 export type ReportScreen = `report-${ReportKey}`;
@@ -53,7 +59,7 @@ export const REPORTS: {
   /** As the nav and the index both say it. One spelling, in one place. */
   label: string;
   blurb: string;
-  render: (household: Household, nav: ReportNav) => ReactNode;
+  render: (household: Household, nav: ReportNav, preset?: ReportPreset) => ReactNode;
 }[] = [
   {
     key: "income-expense",
@@ -63,7 +69,13 @@ export const REPORTS: {
     get blurb() {
       return t`What came in, what went out, and what it was for — month by month.`;
     },
-    render: (household) => <IncomeExpense household={household} />,
+    render: (household, nav, preset) => (
+      <IncomeExpense
+        household={household}
+        preset={preset}
+        onOpenExchangeRates={nav.openExchangeRates}
+      />
+    ),
   },
   {
     key: "reimbursements",
@@ -99,13 +111,44 @@ export function reportFor(screen: string): (typeof REPORTS)[number] | undefined 
   return REPORTS.find((one) => reportScreen(one.key) === screen);
 }
 
+/**
+ * Ready-made views of a report: a card on the index, not a report of their own.
+ *
+ * A preset opens the report it names with settings chosen for one question,
+ * and from there it *is* that report -- every control works as ever. "Latest
+ * 12 months" (#396 §8) is Income vs Expense over the twelve closed months,
+ * every currency in the base: the year as it stands, with no month
+ * half-counted. `settings` is a function so the months are today's when the
+ * card is pressed, not when the page was loaded.
+ */
+export const PRESETS: {
+  key: string;
+  report: ReportKey;
+  label: string;
+  blurb: string;
+  settings: () => ReportPreset;
+}[] = [
+  {
+    key: "latest-12-months",
+    report: "income-expense",
+    get label() {
+      return t({ message: "Latest 12 months", comment: "A card on the Reports screen: Income vs Expense over the twelve months before this one" });
+    },
+    get blurb() {
+      return t`Income vs Expense over the last twelve whole months, every currency in your base currency.`;
+    },
+    settings: () => latestTwelve(),
+  },
+];
+
 /** The index. Every report there is, and what each one answers. */
 export function Reports({
   household,
   onOpen,
 }: {
   household: Household;
-  onOpen: (key: ReportKey) => void;
+  /** Open a report; a preset card passes the settings it opens with. */
+  onOpen: (key: ReportKey, preset?: ReportPreset) => void;
 }) {
   return (
     <>
@@ -128,6 +171,18 @@ export function Reports({
             </button>
           </li>
         ))}
+        {PRESETS.map((one) => (
+          <li key={one.key}>
+            <button
+              type="button"
+              className="report-card"
+              onClick={() => onOpen(one.report, one.settings())}
+            >
+              <span className="report-card-name">{one.label}</span>
+              <span className="muted small">{one.blurb}</span>
+            </button>
+          </li>
+        ))}
       </ul>
     </>
   );
@@ -143,12 +198,15 @@ export function Reports({
 export function Report({
   household,
   screen,
+  preset,
   onBack,
   onOpenRegister,
   onOpenExchangeRates,
 }: {
   household: Household;
   screen: ReportScreen;
+  /** The settings a preset card opened this report with, if one did. */
+  preset?: ReportPreset;
   onBack: () => void;
   onOpenRegister: ReportNav["openRegister"];
   onOpenExchangeRates?: ReportNav["openExchangeRates"];
@@ -202,10 +260,11 @@ export function Report({
         {report.blurb}
       </p>
 
-      {report.render(household, {
-        openRegister: onOpenRegister,
-        openExchangeRates: onOpenExchangeRates,
-      })}
+      {report.render(
+        household,
+        { openRegister: onOpenRegister, openExchangeRates: onOpenExchangeRates },
+        preset,
+      )}
     </>
   );
 }

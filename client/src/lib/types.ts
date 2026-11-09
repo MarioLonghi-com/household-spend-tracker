@@ -953,6 +953,27 @@ export interface IncomeExpense {
    */
   excluded: { transfers: number; opening_balances: number; reimbursements: number };
   coverage: { months_in_range: number; months_with_activity: number };
+  /**
+   * True for "All, in {base}" (#396 phase 2): `currency` is the base, and every
+   * figure is a sum of rows each converted on its own. The fields below say how.
+   */
+  converted?: boolean;
+  rate_source?: { chain: string[]; policy: string } | null;
+  rates_used?: ReportRateUsed[];
+  /** Rows with no rate: left out of every figure, never counted as 0 or 1. */
+  not_converted?: { currency: string; count: number; months: string[] }[];
+  /** What the "Rates as of" line is drawn from. Null per currency. */
+  rates_status?: RatesStatus | null;
+}
+
+/** One rate a converted report used: units of `currency` per one base, as a string. */
+export interface ReportRateUsed {
+  currency: string;
+  rate: string;
+  rate_date: string;
+  source: string;
+  via: string | null;
+  stale: boolean;
 }
 
 /** One transaction behind a figure on a report. */
@@ -963,8 +984,18 @@ export interface ReportEntry {
   payee_name: string | null;
   category_name: string | null;
   memo: string | null;
+  /** The row's own amount, in its own `currency`. */
   amount_minor: number;
   amount: string;
+  currency: string;
+  /** In a converted report: what it counted for, in the base, and at which rate. */
+  converted_minor?: number | null;
+  converted?: string | null;
+  rate?: string | null;
+  rate_date?: string | null;
+  rate_source?: string | null;
+  rate_via?: string | null;
+  rate_stale?: boolean | null;
 }
 
 /**
@@ -975,6 +1006,9 @@ export interface ReportEntry {
  */
 export interface ReportBehind {
   entries: ReportEntry[];
+  /** The currency `total_minor` is in: the base, when `converted`. */
+  currency: string;
+  converted?: boolean;
   total_minor: number;
   total: string;
   count: number;

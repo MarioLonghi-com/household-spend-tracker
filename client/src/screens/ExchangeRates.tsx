@@ -28,6 +28,7 @@ import { formatCount, formatDate, monthLabel } from "../lib/locale";
 import { formatInstant, localToday } from "../lib/time";
 import {
   SOURCES,
+  policyWord,
   sourceLabel,
   type FxCurrency,
   type FxFetch,
@@ -70,17 +71,6 @@ function modeWord(mode: string): string {
   return mode === "range"
     ? t({ message: "Refetch a range", comment: "Kind of fetch of exchange rates: the dates given, replacing what is stored" })
     : t({ message: "Missing only", comment: "Kind of fetch of exchange rates: only the dates not stored yet" });
-}
-
-function policyWord(policy: string): string {
-  switch (policy) {
-    case "month_end":
-      return t({ message: "Month-end rate", comment: "Option on the Exchange rates page: a month's figures use its last rate" });
-    case "spot":
-      return t({ message: "Daily rate per row", comment: "Option on the Exchange rates page: each figure uses its own day's rate" });
-    default:
-      return t({ message: "Monthly average", comment: "Option on the Exchange rates page: a month's figures use the mean of its daily rates" });
-  }
 }
 
 function seconds(ms: number | null): string {

@@ -309,6 +309,10 @@ msgstr ""
 msgid "No browsers were being trusted."
 msgstr ""
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{mixed, plural, one {{mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it, in {currency} either: a claim is not converted across currencies yet.} other {{mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them, in {currency} either: a claim is not converted across currencies yet.}}"
+msgstr ""
+
 #. A month on the strip: no transactions and no rates
 #: src/screens/ExchangeRates.tsx
 msgid "nothing"
@@ -1470,7 +1474,10 @@ msgid "Remove this part"
 msgstr ""
 
 #. State of an exchange rate: older than the household's limit
+#. State of an exchange rate: older than the household's limit
+#. State of an exchange rate: older than the household's limit
 #: src/components/RatesAsOf.tsx
+#: src/screens/reports/IncomeExpense.tsx
 msgid "stale"
 msgstr ""
 
@@ -2669,6 +2676,11 @@ msgstr ""
 msgid "the first {0} loaded"
 msgstr ""
 
+#. Column heading on the Income vs Expense report: the exchange rate a row was converted at
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Rate, per 1 {currency}"
+msgstr ""
+
 #: src/lib/signInChanges.ts
 msgid "The server added {user} as an owner"
 msgstr ""
@@ -3392,6 +3404,11 @@ msgstr ""
 
 #: src/components/bits.tsx
 msgid "Through the agent key {via}"
+msgstr ""
+
+#. Column heading on the Income vs Expense report: a row's amount converted into the base currency
+#: src/screens/reports/IncomeExpense.tsx
+msgid "In {currency}"
 msgstr ""
 
 #. placeholder {0}: gone.length
@@ -4490,6 +4507,11 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
+msgid "error.report.currency_or_base"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
 msgid "error.report.range_backwards"
 msgstr ""
 
@@ -5242,6 +5264,11 @@ msgstr ""
 msgid "The ledger stopped unexpectedly"
 msgstr ""
 
+#. After an exchange rate's source: the currency it was crossed through, like via EUR
+#: src/screens/reports/IncomeExpense.tsx
+msgid "via {pivot}"
+msgstr ""
+
 #. Button on the Payees screen
 #: src/screens/Payees.tsx
 msgid "Add payee"
@@ -5365,6 +5392,11 @@ msgstr ""
 
 #: src/screens/Payees.tsx
 msgid "Only worth doing ahead of time for one you are about to write a rule for. Naming somebody on a transaction creates them anyway."
+msgstr ""
+
+#. placeholder {0}: one.count
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{0, plural, one {# row in {code} has no exchange rate, so it is left out of every figure: {months}.} other {# rows in {code} have no exchange rate, so they are left out of every figure: {months}.}}"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -5520,6 +5552,12 @@ msgstr ""
 msgid "Re-enable"
 msgstr ""
 
+#. Opens the list of exchange rates the Income vs Expense report converted at
+#. placeholder {0}: rates.length
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{0, plural, one {# exchange rate used} other {# exchange rates used}}"
+msgstr ""
+
 #. Column heading on the Accounts screen: state, the bank has the row. See GLOSSARY.md
 #. Column heading on the Register screen: state, the bank has the row. See GLOSSARY.md
 #. Column name for resizing the column on the Register screen: state, the bank has the row. See GLOSSARY.md
@@ -5538,8 +5576,10 @@ msgstr ""
 msgid "the plan <0>{0}</0>"
 msgstr ""
 
+#. A card on the Reports screen: Income vs Expense over the twelve months before this one
 #. Label on the date range picker
 #: src/components/DateRange.tsx
+#: src/screens/Reports.tsx
 msgid "Latest 12 months"
 msgstr ""
 
@@ -5567,7 +5607,7 @@ msgid "Received"
 msgstr ""
 
 #. Option on the Exchange rates page: each figure uses its own day's rate
-#: src/screens/ExchangeRates.tsx
+#: src/lib/fx.ts
 msgid "Daily rate per row"
 msgstr ""
 
@@ -6594,6 +6634,10 @@ msgstr ""
 msgid "history.unknown"
 msgstr ""
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Each currency gets its own report. All, in {base} converts every row at your household's exchange rates before adding anything, marks each figure ≈, and names the rows it had no rate for."
+msgstr ""
+
 #: src/lib/signInChanges.ts
 msgid "The server reset {user}'s authenticator"
 msgstr ""
@@ -6861,6 +6905,11 @@ msgstr ""
 #. Button: keep this rate in place of the one stored for that date
 #: src/screens/ExchangeRates.tsx
 msgid "Replace the rate"
+msgstr ""
+
+#. placeholder {0}: listText(options)
+#: src/screens/reports/IncomeExpense.tsx
+msgid "The ledger never converts: currency lives on the account. A total mixing {0} as they stand would be a number with nothing behind it."
 msgstr ""
 
 #: src/screens/reports/NetWorth.tsx
@@ -8051,7 +8100,9 @@ msgstr ""
 msgid "Both, because the two accounts are in different currencies and we will not invent a rate — take the figure your bank actually credited."
 msgstr ""
 
+#. Column heading in the list of exchange rates a report used: the rate's own date
 #. Column heading on the Net Worth report: when the exchange rate was published
+#: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/NetWorth.tsx
 msgid "Rate date"
 msgstr ""
@@ -8257,7 +8308,7 @@ msgid "Backups taken by updates"
 msgstr ""
 
 #. Option on the Exchange rates page: a month's figures use the mean of its daily rates
-#: src/screens/ExchangeRates.tsx
+#: src/lib/fx.ts
 msgid "Monthly average"
 msgstr ""
 
@@ -8527,6 +8578,11 @@ msgstr ""
 
 #: src/lib/signInChanges.ts
 msgid "Somebody reset {user}'s password"
+msgstr ""
+
+#. Column heading in the list of exchange rates a report used: units of the currency per one base currency
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Per 1 {base}"
 msgstr ""
 
 #. Table cell on the passkeys panel
@@ -10281,6 +10337,7 @@ msgstr ""
 msgid "Recovered"
 msgstr ""
 
+#. Column heading in the list of exchange rates a report used: noun. See GLOSSARY.md
 #. Column heading on Browse rates. See GLOSSARY.md
 #. Column heading on the Accounts screen: noun. See GLOSSARY.md
 #. Column heading on the Exchange rates page. See GLOSSARY.md
@@ -10602,6 +10659,11 @@ msgstr ""
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "No payment linked yet"
+msgstr ""
+
+#. Choice on the Income vs Expense report: every currency, converted into the household's base currency
+#: src/screens/reports/IncomeExpense.tsx
+msgid "All, in {base}"
 msgstr ""
 
 #. Update confirmation, Updater row: the release's updater is the same version as the one running, built again
@@ -11607,7 +11669,7 @@ msgid "Hide the {code} columns"
 msgstr ""
 
 #. Option on the Exchange rates page: a month's figures use its last rate
-#: src/screens/ExchangeRates.tsx
+#: src/lib/fx.ts
 msgid "Month-end rate"
 msgstr ""
 
@@ -12014,7 +12076,6 @@ msgid "Dates"
 msgstr ""
 
 #. placeholder {0}: listText(options)
-#: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/Reimbursements.tsx
 msgid "This ledger never converts. Currency lives on the account, and there is no exchange rate stored anywhere — so a total mixing {0} would be a number with nothing behind it."
 msgstr ""
@@ -12678,6 +12739,7 @@ msgstr ""
 msgid "Applying…"
 msgstr ""
 
+#. Column heading in the list of exchange rates a report used: where the rate came from
 #. Column heading on Browse rates: where the rate came from
 #. Column heading on the Register screen: noun, where it came from
 #. Column heading on the fetch history: where rates were fetched from
@@ -12687,6 +12749,7 @@ msgstr ""
 #. Label of a filter on the Exchange rates page: where rates come from
 #: src/screens/ExchangeRates.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 msgid "Source"
 msgstr ""
 
@@ -12771,6 +12834,10 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "An account cannot have been opened in the future."
+msgstr ""
+
+#: src/screens/Reports.tsx
+msgid "Income vs Expense over the last twelve whole months, every currency in your base currency."
 msgstr ""
 
 #. Column heading on the Accounts screen

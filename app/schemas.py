@@ -3187,12 +3187,64 @@ class IncomeExpenseOut(BaseModel):
     has_income_group: bool = True
     excluded: ExcludedOut
     coverage: CoverageOut
+    #: True when the report is every currency in the base currency (#396
+    #: phase 2): `currency` is then the base, every figure is a sum of rows
+    #: each converted on its own, and the four fields below say how.
+    converted: bool = False
+    rate_source: RateSourceOut | None = None
+    rates_used: list[RateUsedOut] = []
+    #: Rows with no rate: left out of every figure, never counted as 0 or 1.
+    not_converted: list[NotConvertedOut] = []
+    #: What the "Rates as of" line is drawn from. Null per currency.
+    rates_status: RatesStatusOut | None = None
+
+
+class RateSourceOut(BaseModel):
+    """Where a converted report's rates came from: the chain, and the policy."""
+
+    chain: list[str]
+    #: `month_avg`, `month_end` or `spot`: which date's rate a row converts at.
+    policy: str
+
+
+class RateUsedOut(BaseModel):
+    """One rate a converted report used.
+
+    `rate` is a decimal STRING, units of `currency` per one base currency;
+    converting divides by it. `rate_date` is the rate's own date (for a
+    monthly average, the last daily it was taken from), not a row's.
+    """
+
+    currency: str
+    rate: str
+    rate_date: Date
+    source: str
+    #: The currency the rate was crossed through, e.g. EUR for the ECB.
+    via: str | None = None
+    stale: bool
+
+
+class NotConvertedOut(BaseModel):
+    """Rows in one currency a converted report left out: no rate for them."""
+
+    currency: str
+    count: int
+    #: The `YYYY-MM` months those rows are in.
+    months: list[str]
 
 
 class ReportCurrenciesOut(BaseModel):
-    """Which currencies this household holds accounts in, busiest first."""
+    """Which currencies this household holds accounts in, busiest first.
+
+    `base_offered`: there is a currency other than the base to convert, so
+    the report offers "All, in {base}". `base_ready`: the household's chain
+    has a rate for every one of them, so the report opens on it (#396 §8).
+    """
 
     currencies: list[str]
+    base_currency: str
+    base_offered: bool = False
+    base_ready: bool = False
 
 
 class ReportEntryOut(BaseModel):
@@ -3204,8 +3256,19 @@ class ReportEntryOut(BaseModel):
     payee_name: str | None = None
     category_name: str | None = None
     memo: str | None = None
+    #: The row's own amount, in its own `currency`.
     amount_minor: int
     amount: str
+    currency: str
+    #: In a converted report: what the row counted for, in the base currency,
+    #: and the rate it was converted at. Null per currency.
+    converted_minor: int | None = None
+    converted: str | None = None
+    rate: str | None = None
+    rate_date: Date | None = None
+    rate_source: str | None = None
+    rate_via: str | None = None
+    rate_stale: bool | None = None
 
 
 class ReportBehindOut(BaseModel):
@@ -3218,6 +3281,11 @@ class ReportBehindOut(BaseModel):
     """
 
     entries: list[ReportEntryOut] = []
+    #: The currency `total_minor` is in: the base, in a converted report.
+    currency: str
+    #: True when every entry was converted and the total is of the converted
+    #: amounts, which then equals the converted figure that was clicked.
+    converted: bool = False
     total_minor: int
     total: str
     count: int
@@ -3981,3 +4049,7 @@ class FxManualOut(BaseModel):
     replaced: int
     unchanged: int
     rows: list[FxManualRowOut]
+
+
+# `IncomeExpenseOut` names `RatesStatusOut`, which is defined further down.
+IncomeExpenseOut.model_rebuild()

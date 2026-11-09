@@ -518,6 +518,8 @@ REGISTRY: dict[str, Code] = {
     "fx_manual.unknown_column": Code("This file has a column this does not know: {columns}. The columns are {known}.", ("columns", "known")),
     "fx_manual.missing_column": Code("This file has no {columns} column. The first line should name the columns: {known}.", ("columns", "known")),
     "fx_manual.column_twice": Code("This file has the column {column} twice", ("column",)),
+    # -- report: app/api/routers/reporting.py, Income vs Expense (#396 phase 2) --- #
+    "report.currency_or_base": Code("Ask for one currency, or for every currency in the base currency -- one of the two"),
     # -- request, ledger, setup, statement: app/main.py, refusals built in a handler or a middleware (#267) --- #
     "request.cross_origin": Code("That request did not come from this app"),
     "request.invalid": Code("Some of what was sent is not right: {fields}", ("fields",)),

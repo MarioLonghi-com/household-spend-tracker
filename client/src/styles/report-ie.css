@@ -25,8 +25,11 @@
    toggle actually lands. It is a child of `.row`, and `.row > *` in styles.css
    gives every child `flex: 1 1 140px` -- so a filled slot would grow into all
    the free space and push the heading across to the right margin. The id wins
-   that outright, and the toggle keeps its own `flex: 0 0 auto`. */
-#report-head-slot { flex: 0 0 auto; }
+   that outright. It may still shrink, down to the row's width and no
+   further: with "All, in {base}" beside four currencies (#396) the chips are
+   wider than a phone, and a slot that would not shrink pushed the page
+   sideways instead of letting them wrap. */
+#report-head-slot { flex: 0 1 auto; min-width: 0; max-width: 100%; }
 
 /* The fallback line, for the report rendered outside that shell: same left
    edge, one line down. `HeadSlot` draws this one only when there is no slot,

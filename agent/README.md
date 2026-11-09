@@ -503,6 +503,16 @@ are yours — done visibly.**
   whose expenses are in another currency (none stated either).
   `excluded.reimbursements` counts the block's rows. `has_income_group: false`
   means no group carries the role, so every row is an expense.
+- **Income vs Expense in the base currency:** `GET
+  $H/reports/income-expense?in_base=true&since=…`, instead of `currency` —
+  every currency converted into the household's base currency, **each row on
+  its own** at the household's chosen rates and only then added. The answer
+  has `converted: true`, `rate_source` (the chain and the policy),
+  `rates_used` (every rate, with its date and source), `not_converted` (rows
+  with no rate: left out of every figure, never counted as zero) and
+  `rates_status` (how old the rates are). Quote the rates' age with the
+  figures. A repayment whose expenses are in another currency still has no
+  surplus or shortfall worked out (`reimbursement_mixed`).
 - **Net worth:** `GET $H/reports/net-worth?since=…&until=…` — every account's
   balance at each month end, added up, with what moved it. The one report that
   is not asked for one currency: `display_currency` says what its figures are
@@ -532,8 +542,9 @@ are yours — done visibly.**
 
 When you convert:
 
-1. Keep each currency's figures separate until the last step, and convert
-   totals, not rows.
+1. Prefer the report's own conversion (`in_base=true`) where there is one.
+   Otherwise keep each currency's figures separate until the last step, and
+   convert totals, not rows.
 2. State the rate, its source (an observed rate from the ledger, with its date,
    or a published rate you looked up) and the date it applies to.
 3. Never write a converted figure back into the ledger. Nothing here stores

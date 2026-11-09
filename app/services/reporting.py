@@ -1,10 +1,11 @@
 """Flow reporting: what came in, what went out, and what it was for.
 
-Every function here answers in **one currency at a time**. That is not a
-convenience -- `insights.py` already carries the argument at length, and this
-module is bound by the same rule:
+Every function here answers in **one currency at a time**, or -- Income vs
+Expense only -- in the base currency with every row converted first. That is
+not a convenience -- `insights.py` already carries the argument at length, and
+this module is bound by the same rule:
 
-> **No response ever sums two currencies.**
+> **No response ever sums two currencies as they stand.**
 
 The ledger never converts. Currency lives on the account, and the only
 place an amount meets a rate is `services/fx.py` (#396): a report that offers
@@ -12,8 +13,9 @@ figures in the base currency converts each row there, says which rates it
 used, and carries `rates_status`. Nothing in this module divides by a rate,
 and `tests/test_fx_service.py` greps for it. So currency here is a
 **facet**: the caller names one, and gets a report about that one. There is no
-"all currencies" total, not as a zero and not as a null, because the number
-does not exist.
+"all currencies" total of unconverted amounts, not as a zero and not as a
+null, because the number does not exist; :class:`Converting` is the only way
+two currencies meet, and it meets them in the base, row by row.
 
 Where this differs from `insights.py` is the predicate. `insights` answers
 questions about *rows* -- an agent asking "what did I spend at Mercadona" wants
@@ -29,6 +31,17 @@ register without being that:
   account balance as money earned.
 - **Rows in another currency.** Not excluded so much as never asked for; see
   above.
+
+**Or every currency, in the base currency (#396 phase 2).** Income vs Expense
+may also be asked for "All, in {base}": then every row is converted on its
+own, at the household's chosen rate for its date, through `services/fx.py`
+(:class:`Converting`), and only then added. A row with no rate is left out of every
+figure and listed, never counted as zero or at 1. Rows keep the report's
+structure -- sections, groups, the reimbursement block -- and a repayment's
+surplus or shortfall is still worked out in the claim's own currency first;
+its rows are then converted at the repayment's rate, so the figure is the
+same difference, in the base currency. A claim whose expenses are in another
+currency than its repayment stays uncounted, as it is per currency.
 
 The first two are what :func:`flow_rows` removes, and it is written **once**
 here so that every report composes the same predicate rather than the same
@@ -60,6 +73,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date as Date
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Select, and_, case, func, literal_column, or_, select
 from sqlalchemy.orm import Session, aliased
@@ -76,6 +90,9 @@ from ..models import (
     SystemPayee,
     Transaction,
 )
+
+if TYPE_CHECKING:
+    from .fx import Rates, RateUsed
 
 #: What an uncategorised row is called on a report.
 #:
@@ -234,9 +251,12 @@ def claim_lines(household_id: str, **window) -> Select:
 
     One row per transaction in the category carrying the ``reimbursement``
     role that :func:`income_expense` would draw: ``(id, period, amount,
-    covered, linked, foreign)``. ``covered`` sums the linked expenses in the
-    report's currency (negative, as the ledger signs them), ``linked`` counts
-    them, and ``foreign`` counts the ones in any other currency.
+    covered, linked, foreign, currency, date)``. ``covered`` sums the linked
+    expenses in the repayment's own currency (negative, as the ledger signs
+    them), ``linked`` counts them, and ``foreign`` counts the ones in any
+    other currency. ``currency`` and ``date`` are the repayment's, which is
+    what a report in the base currency converts the claim at. Per currency
+    the repayment's currency *is* the report's, the window filters on it.
 
     Read by :func:`claim_side`: linked to nothing is unmatched, any foreign
     expense means no difference can be stated, and otherwise ``amount +
@@ -251,27 +271,28 @@ def claim_lines(household_id: str, **window) -> Select:
     """
     expense = aliased(Transaction)
     expense_account = aliased(Account)
-    currency = window.get("currency")
+    payment = aliased(Transaction)
+    payment_account = aliased(Account)
+    same = expense_account.currency == payment_account.currency
     linked = (
         select(
             expense.reimbursed_by_id.label("payment_id"),
             func.count().label("linked"),
-            func.sum(
-                case((expense_account.currency == currency, expense.amount), else_=0)
-            ).label("covered"),
-            func.sum(case((expense_account.currency != currency, 1), else_=0)).label(
-                "foreign"
-            ),
+            func.sum(case((same, expense.amount), else_=0)).label("covered"),
+            func.sum(case((same, 0), else_=1)).label("foreign"),
         )
         .join(expense_account, expense_account.id == expense.account_id)
+        .join(payment, payment.id == expense.reimbursed_by_id)
+        .join(payment_account, payment_account.id == payment.account_id)
         .where(expense.household_id == household_id)
-        .where(expense.reimbursed_by_id.is_not(None))
         .where(expense.reimbursement == ReimbursementState.expected)
         .group_by(expense.reimbursed_by_id)
         .subquery()
     )
+    own = aliased(Account)
     stmt = (
         classified_rows(household_id)
+        .join(own, own.id == Transaction.account_id)
         .outerjoin(linked, linked.c.payment_id == Transaction.id)
         .where(Category.role == CategoryRole.reimbursement)
         .where(Transaction.amount != 0)
@@ -282,9 +303,34 @@ def claim_lines(household_id: str, **window) -> Select:
             func.coalesce(linked.c.covered, 0),
             func.coalesce(linked.c.linked, 0),
             func.coalesce(linked.c.foreign, 0),
+            own.currency,
+            Transaction.date,
         )
     )
     return _windowed(stmt, **window)
+
+
+def _claim_expenses(
+    session: Session, household_id: str, payment_ids: list[str]
+) -> dict[str, list[int]]:
+    """The amounts of the expenses each repayment covered, by repayment.
+
+    The rows :func:`claim_lines` sums into ``covered``: flagged ``expected``
+    and linked to the payment, whatever their date. A report in the base
+    currency converts each of them, rather than their sum, so the figure is
+    the sum of what the drill-through shows row by row.
+    """
+    out: dict[str, list[int]] = {pid: [] for pid in payment_ids}
+    for start in range(0, len(payment_ids), 500):
+        chunk = payment_ids[start : start + 500]
+        for pid, amount in session.execute(
+            select(Transaction.reimbursed_by_id, Transaction.amount)
+            .where(Transaction.household_id == household_id)
+            .where(Transaction.reimbursed_by_id.in_(chunk))
+            .where(Transaction.reimbursement == ReimbursementState.expected)
+        ).all():
+            out[pid].append(int(amount))
+    return out
 
 
 def claim_side(amount: int, covered: int, linked: int, foreign: int) -> tuple[str | None, int]:
@@ -369,6 +415,7 @@ def _windowed(
     account_ids: list[str] | None = None,
     category_ids: list[str] | None = None,
     include_uncategorised: bool = True,
+    join_account: bool = False,
 ) -> Select:
     """The filter vocabulary every report on this module shares.
 
@@ -377,12 +424,15 @@ def _windowed(
     a person can tick and untick like any other, but it is not an id, so a list
     of ids cannot express it -- and a `None` inside that list would be a value
     the caller has to remember to special-case.
+
+    ``join_account`` joins `Account` even with no currency to filter on: a
+    report in the base currency reads each row's currency off it.
     """
     if since:
         stmt = stmt.where(Transaction.date >= since)
     if until:
         stmt = stmt.where(Transaction.date <= until)
-    if currency or account_ids:
+    if currency or account_ids or join_account:
         stmt = stmt.join(Account, Account.id == Transaction.account_id)
     if currency:
         stmt = stmt.where(Account.currency == currency)
@@ -407,7 +457,7 @@ def flow_span(
     session: Session,
     household_id: str,
     *,
-    currency: str,
+    currency: str | None,
     account_ids: list[str] | None = None,
 ) -> tuple[Date, Date] | None:
     """The first and last dates this household has any *flow* on, in one currency.
@@ -420,7 +470,8 @@ def flow_span(
     looking at the whole history.
 
     Narrowed by currency and by the account filter for the same reason the
-    report is: the span of a EUR report is the span of the EUR rows. Returns
+    report is: the span of a EUR report is the span of the EUR rows. With no
+    currency -- a report in the base currency -- it is every currency's span. Returns
     None when there is no flow at all, which is a real state -- a household
     whose only transactions are transfers has nothing to report and no window
     to report it over.
@@ -527,11 +578,95 @@ class Section:
     average_minor: int = 0
 
 
+class Converting:
+    """What a report in the base currency kept while it converted (#396 phase 2).
+
+    One per request, around the request's one `fx.Rates`. Every amount goes
+    through :meth:`row` or :meth:`claim`, which convert **each row on its
+    own** and say ``None`` when there is no rate -- the caller then leaves
+    that row out of every figure. Along the way it notes every currency met,
+    every rate used and every row left out, which is what the response says
+    about itself: ``rates_used``, ``not_converted`` and the currencies its
+    ``rates_status`` is built for.
+    """
+
+    def __init__(self, rates: Rates) -> None:
+        self.rates = rates
+        self.base = rates.base
+        #: Every currency a row of the report was in, base included.
+        self.currencies: set[str] = set()
+        #: Every rate used: (currency, rate_date, source, rate, via, stale).
+        self._used: set[tuple] = set()
+        #: currency -> [rows left out, the months they are in].
+        self._left: dict[str, list] = {}
+
+    def _note(self, code: str, used: RateUsed) -> None:
+        if used.source != "base":
+            self._used.add((code, used.rate_date, used.source, used.rate, used.via, used.stale))
+
+    def row(self, amount: int, code: str, day: Date, month: str, *, again: bool = False) -> int | None:
+        """One row's amount in the base currency, at its own date's rate.
+
+        ``again`` for a row already met on another line of the report -- a
+        repayment is on the block's income line *and* on the unmatched one --
+        so a row left out is counted once.
+        """
+        self.currencies.add(code)
+        done = self.rates.convert(amount, code, day)
+        if done is None:
+            if not again:
+                left = self._left.setdefault(code, [0, set()])
+                left[0] += 1
+                left[1].add(month)
+            return None
+        self._note(code, done.rate_used)
+        return done.amount_minor
+
+    def claim(self, amounts: list[int], code: str, day: Date, month: str) -> int | None:
+        """A repayment and the expenses it covered, all at the repayment's rate.
+
+        Every amount is in ``code``: a claim with an expense in another
+        currency is never converted (phase 3 of #396). Each is converted on
+        its own and the results added, which is what the drill-through shows.
+        With no rate the claim is not counted; its repayment, which has the
+        same currency and date, was already listed as not converted.
+        """
+        figures = [self.rates.convert(amount, code, day) for amount in amounts]
+        if any(one is None for one in figures):
+            return None
+        self._note(code, figures[0].rate_used)
+        return sum(one.amount_minor for one in figures)
+
+    def rates_used(self) -> list[dict]:
+        """Every rate a figure was converted at, by currency and then date."""
+        return [
+            {
+                "currency": code,
+                "rate": rate,
+                "rate_date": rate_date,
+                "source": source,
+                "via": via,
+                "stale": stale,
+            }
+            for code, rate_date, source, rate, via, stale in sorted(
+                self._used, key=lambda used: (used[0], used[1], used[2])
+            )
+        ]
+
+    def not_converted(self) -> list[dict]:
+        """Every currency with rows left out, how many, and in which months."""
+        return [
+            {"currency": code, "count": left[0], "months": sorted(left[1])}
+            for code, left in sorted(self._left.items())
+        ]
+
+
 def income_expense(
     session: Session,
     household_id: str,
     *,
-    currency: str,
+    currency: str | None = None,
+    rates: Rates | None = None,
     since: Date | None = None,
     until: Date | None = None,
     account_ids: list[str] | None = None,
@@ -540,9 +675,13 @@ def income_expense(
 ) -> dict:
     """Income against expense, by month, broken down by category.
 
-    **One currency.** The caller names it and this reports on it; there is no
-    variant that spans two, because adding them is the error this whole module
-    is arranged to make impossible.
+    **One currency, or every currency in the base currency.** Name a
+    ``currency`` and the report is about that one and nothing is converted.
+    Pass ``rates`` instead (the request's `fx.Rates`) and every row is
+    converted on its own into the household's base currency and only then
+    added (#396 phase 2); a row with no rate is left out of every figure and
+    listed in ``not_converted``. Never both: adding two currencies without a
+    rate is the error this whole module is arranged to make impossible.
 
     Either end of the window may be omitted, and an omitted end is resolved to
     where this household's flow actually starts or stops -- which is what "all
@@ -560,15 +699,23 @@ def income_expense(
     by, which :func:`claim_lines` works out and which is counted, as the
     *Reimbursement surplus* row in income or the *Reimbursement shortfall*
     row in expenses. The block shows that difference too, as ``difference``,
-    so the reader sees where the counted figure came from.
+    so the reader sees where the counted figure came from. In the base
+    currency the difference is still decided in the claim's own currency; its
+    rows are then converted at the repayment's rate (:meth:`Converting.claim`).
 
     Zero-amount rows are counted nowhere: they move no money, and putting
     them on one side would make that side's row count disagree with its total.
 
-    One query, grouped in SQL. The register's own measurement is the warning
-    against the alternative: 863ms to build ORM objects for twenty thousand
-    rows against 228ms to read the columns.
+    Per currency it is one query, grouped in SQL. The register's own
+    measurement is the warning against the alternative: 863ms to build ORM
+    objects for twenty thousand rows against 228ms to read the columns. In the
+    base currency the rows are read as columns, one per transaction, because
+    each is converted before anything is added.
     """
+    if (currency is None) == (rates is None):
+        raise ValueError("name one currency, or pass the rates to convert every currency")
+    converting = Converting(rates) if rates is not None else None
+
     if since is None or until is None:
         span = flow_span(
             session, household_id, currency=currency, account_ids=account_ids
@@ -597,25 +744,6 @@ def income_expense(
     # over rows dragged into Python.
     where = side()
 
-    stmt = (
-        classified_rows(household_id)
-        .with_only_columns(
-            where.label("side"),
-            period.label("period"),
-            Category.id.label("category_id"),
-            Category.name.label("category_name"),
-            CategoryGroup.id.label("group_id"),
-            CategoryGroup.name.label("group_name"),
-            func.sum(Transaction.amount).label("total"),
-            func.count().label("n"),
-        )
-        .where(Transaction.amount != 0)
-        .group_by(
-            where, period, Category.id, Category.name, CategoryGroup.id, CategoryGroup.name
-        )
-    )
-    stmt = _windowed(stmt, **window)
-
     sections = {INCOME: Section(), EXPENSE: Section()}
     block = {
         one: Line(key=one)
@@ -624,13 +752,10 @@ def income_expense(
     seen: dict[tuple[str, str | None], Row] = {}
     group_lines: dict[tuple[str, str], Line] = {}
 
-    for way, month, cat_id, cat_name, group_id, group_name, total, n in session.execute(
-        stmt
-    ).all():
-        amount, count = int(total or 0), int(n or 0)
+    def take(way, month, cat_id, cat_name, group_id, group_name, amount, count) -> None:
         if way in block:
             block[way].add(month, amount, count)
-            continue
+            return
         section = sections[way]
         row = seen.get((way, cat_id))
         if row is None:
@@ -655,6 +780,52 @@ def income_expense(
         section.total_minor += amount
         section.count += count
 
+    if converting is None:
+        stmt = (
+            classified_rows(household_id)
+            .with_only_columns(
+                where.label("side"),
+                period.label("period"),
+                Category.id.label("category_id"),
+                Category.name.label("category_name"),
+                CategoryGroup.id.label("group_id"),
+                CategoryGroup.name.label("group_name"),
+                func.sum(Transaction.amount).label("total"),
+                func.count().label("n"),
+            )
+            .where(Transaction.amount != 0)
+            .group_by(
+                where, period, Category.id, Category.name, CategoryGroup.id, CategoryGroup.name
+            )
+        )
+        stmt = _windowed(stmt, **window)
+        for way, month, cat_id, cat_name, group_id, group_name, total, n in session.execute(
+            stmt
+        ).all():
+            take(way, month, cat_id, cat_name, group_id, group_name, int(total or 0), int(n or 0))
+    else:
+        stmt = _windowed(
+            classified_rows(household_id).where(Transaction.amount != 0),
+            **window,
+            join_account=True,
+        ).with_only_columns(
+            where.label("side"),
+            period.label("period"),
+            Transaction.date,
+            Category.id,
+            Category.name,
+            CategoryGroup.id,
+            CategoryGroup.name,
+            Account.currency,
+            Transaction.amount,
+        )
+        for way, month, day, cat_id, cat_name, group_id, group_name, code, amount in session.execute(
+            stmt
+        ).all():
+            figure = converting.row(int(amount), code, _as_date(day), month)
+            if figure is not None:
+                take(way, month, cat_id, cat_name, group_id, group_name, figure, 1)
+
     # What each repayment differs from its expenses by: counted, in the
     # repayment's month, on a line of its own in income or expenses.
     derived = {
@@ -663,11 +834,25 @@ def income_expense(
     }
     lines: dict[str, Row] = {}
     mixed = 0
-    for _id, month, amount, covered, linked, foreign in session.execute(
-        claim_lines(household_id, **window)
-    ).all():
+    claims = session.execute(claim_lines(household_id, **window)).all()
+    parts = (
+        _claim_expenses(
+            session,
+            household_id,
+            [one[0] for one in claims if int(one[4]) and not int(one[5])],
+        )
+        if converting is not None
+        else {}
+    )
+    for pid, month, amount, covered, linked, foreign, code, day in claims:
         if int(linked) == 0:
-            block[REIMBURSEMENT_UNMATCHED].add(month, int(amount), 1)
+            figure = (
+                int(amount)
+                if converting is None
+                else converting.row(int(amount), code, _as_date(day), month, again=True)
+            )
+            if figure is not None:
+                block[REIMBURSEMENT_UNMATCHED].add(month, figure, 1)
             continue
         if int(foreign):
             mixed += 1
@@ -675,6 +860,10 @@ def income_expense(
         line, difference = claim_side(amount, covered, linked, foreign)
         if line is None:
             continue
+        if converting is not None:
+            difference = converting.claim([int(amount), *parts[pid]], code, _as_date(day), month)
+            if difference is None:
+                continue
         way, name = derived[line]
         row = lines.get(line)
         if row is None:
@@ -711,17 +900,19 @@ def income_expense(
     excluded["reimbursements"] = sum(block[one].count for one in SET_APART)
 
     return {
-        "currency": currency,
+        "currency": currency if converting is None else converting.base,
         "since": since,
         "until": until,
         "months": months,
         "income": sections[INCOME],
         "expense": sections[EXPENSE],
         # Net is the one sum this module *does* make, and it is safe: both
-        # sides are already the same currency by construction, because the
-        # currency was a filter rather than a grouping. The reimbursement
-        # block is not in it -- that is what setting it apart means -- but the
-        # surplus and shortfall rows are, being rows of the two sections.
+        # sides are in one currency by construction -- per currency because
+        # the currency was a filter rather than a grouping, in the base
+        # currency because every row was converted before it was added. The
+        # reimbursement block is not in it -- that is what setting it apart
+        # means -- but the surplus and shortfall rows are, being rows of the
+        # two sections.
         "net_by_month": {
             month: sections[INCOME].by_month.get(month, 0)
             + sections[EXPENSE].by_month.get(month, 0)
@@ -736,7 +927,9 @@ def income_expense(
             "pending": block[REIMBURSEMENT_PENDING],
         },
         # Repayments whose expenses are in another currency: no difference
-        # can be stated without a rate, so the screen says how many there are.
+        # can be stated without converting the claim across currencies, which
+        # not even the base currency does yet (#396 phase 3), so the screen
+        # says how many there are.
         "reimbursement_mixed": mixed,
         "has_income_group": has_income_group(session, household_id),
         "excluded": excluded,
@@ -744,6 +937,10 @@ def income_expense(
             "months_in_range": len(months),
             "months_with_activity": len(with_activity),
         },
+        # In the base currency: what was converted and how, and what was not.
+        # The router turns `converting` into `rates_used`, `not_converted` and
+        # `rates_status`.
+        "converting": converting,
     }
 
 
@@ -809,6 +1006,21 @@ def currencies_in_use(session: Session, household_id: str) -> list[str]:
     return [row[0] for row in rows]
 
 
+def base_offer(rates: Rates, currencies: list[str]) -> tuple[bool, bool]:
+    """Whether to offer "All, in {base}", and whether to open on it.
+
+    Offered whenever there is something to convert: a currency in use other
+    than the base. Opened on only once the household has a **working
+    chain** -- a source in it, and a rate from it for every such currency --
+    because until then the per-currency report is the one with every figure
+    in it (#396 §8). A stale rate still works: stale is a flag, not a block.
+    """
+    foreign = [code for code in currencies if code.upper() != rates.base]
+    offered = bool(foreign)
+    ready = offered and bool(rates.chain) and all(rates.latest(code) is not None for code in foreign)
+    return offered, ready
+
+
 #: How many rows one drill-through will hand over.
 #:
 #: A cell on the Total column of an all-dates report can be thousands of rows,
@@ -822,7 +1034,12 @@ DRILL_CEILING = 500
 
 @dataclass(slots=True)
 class Entry:
-    """One transaction behind a figure, as the bubble shows it."""
+    """One transaction behind a figure, as the bubble shows it.
+
+    ``amount_minor`` is always the row's own amount in its own ``currency``.
+    In the base currency ``converted_minor`` is what the figure counted and
+    ``rate`` the rate it was converted at; per currency both are None.
+    """
 
     id: str
     date: Date
@@ -831,13 +1048,22 @@ class Entry:
     category_name: str | None
     memo: str | None
     amount_minor: int
+    currency: str
+    converted_minor: int | None = None
+    rate: RateUsed | None = None
+
+    @property
+    def counted(self) -> int:
+        """What this row adds to the figure it is behind."""
+        return self.amount_minor if self.converted_minor is None else self.converted_minor
 
 
 def behind(
     session: Session,
     household_id: str,
     *,
-    currency: str,
+    currency: str | None = None,
+    rates: Rates | None = None,
     since: Date | None = None,
     until: Date | None = None,
     account_ids: list[str] | None = None,
@@ -859,6 +1085,13 @@ def behind(
     person checking a figure would be handed the evidence that it was wrong
     when it was right. The sum of what comes back here is the figure that was
     clicked, and there is a test that asserts exactly that.
+
+    ``currency`` or ``rates``, as for :func:`income_expense`. In the base
+    currency every row keeps its own amount and currency and carries what it
+    was converted to and at which rate; the total is the sum of the converted
+    amounts, and a row with no rate is not here, because it is not in the
+    figure either. Each row is converted the way the report converted it:
+    at its own date's rate, or at its repayment's for a claim's rows.
 
     The narrowing arguments each correspond to something clickable:
 
@@ -882,6 +1115,8 @@ def behind(
     """
     if direction is not None and direction not in LINES:
         raise ValueError(f"no such line: {direction!r}")
+    if (currency is None) == (rates is None):
+        raise ValueError("name one currency, or pass the rates to convert every currency")
     window = dict(
         since=since,
         until=until,
@@ -905,7 +1140,7 @@ def behind(
             EXPENSE: (REIMBURSEMENT_SHORTFALL,),
         }[direction]
     extra, extra_total, extra_count = _claim_entries(
-        session, household_id, claims, window, period, limit
+        session, household_id, claims, window, period, limit, rates
     )
     if direction in CLAIM_LINES:
         return {
@@ -916,7 +1151,7 @@ def behind(
         }
 
     stmt = classified_rows(household_id).where(Transaction.amount != 0)
-    stmt = _windowed(stmt, **window)
+    stmt = _windowed(stmt, **window, join_account=rates is not None)
 
     if period:
         stmt = stmt.where(func.strftime("%Y-%m", Transaction.date) == period)
@@ -928,44 +1163,43 @@ def behind(
         stmt = stmt.where(Category.group_id == row_group_id)
     stmt = stmt.where(side().in_(COUNTED) if direction is None else side() == direction)
 
-    # The total is counted over the whole match, before the cap, so a capped
-    # bubble still reconciles against the cell it came from.
-    totals = session.execute(
-        stmt.with_only_columns(func.sum(Transaction.amount), func.count())
-    ).one()
-    total_minor = int(totals[0] or 0)
-    count = int(totals[1] or 0)
+    columns = stmt.with_only_columns(
+        Transaction.id,
+        Transaction.date,
+        Account.name,
+        Payee.name,
+        Category.name,
+        Transaction.memo,
+        Transaction.amount,
+        Account.currency,
+    )
+    # `Account` is already joined -- `_windowed` attaches it for the
+    # currency, or because it was asked to -- and `Category` is, by
+    # `classified_rows`. Joining either again is not a second copy of a
+    # filter but an ambiguous column and a failed query.
+    ordered = columns.order_by(Transaction.date.desc(), Transaction.created_at.desc())
 
-    rows = session.execute(
-        stmt.with_only_columns(
-            Transaction.id,
-            Transaction.date,
-            Account.name,
-            Payee.name,
-            Category.name,
-            Transaction.memo,
-            Transaction.amount,
-        )
-        # `Account` is already joined -- `_windowed` attaches it for the
-        # currency, which is required here -- and `Category` is, by
-        # `classified_rows`. Joining either again is not a second copy of a
-        # filter but an ambiguous column and a failed query.
-        .order_by(Transaction.date.desc(), Transaction.created_at.desc())
-        .limit(limit)
-    ).all()
+    if rates is None:
+        # The total is counted over the whole match, before the cap, so a
+        # capped bubble still reconciles against the cell it came from.
+        totals = session.execute(
+            stmt.with_only_columns(func.sum(Transaction.amount), func.count())
+        ).one()
+        total_minor = int(totals[0] or 0)
+        count = int(totals[1] or 0)
+        entries = [_entry(row) for row in session.execute(ordered.limit(limit)).all()]
+    else:
+        # Each row is converted before it is counted, so the total is made
+        # here over every row rather than in SQL, and the cap comes after.
+        entries = []
+        for row in session.execute(ordered).all():
+            done = rates.convert(int(row[6]), row[7], _as_date(row[1]))
+            if done is not None:
+                entries.append(_entry(row, done.amount_minor, done.rate_used))
+        total_minor = sum(one.counted for one in entries)
+        count = len(entries)
+        entries = entries[:limit]
 
-    entries = [
-        Entry(
-            id=row[0],
-            date=_as_date(row[1]),
-            account_name=row[2],
-            payee_name=row[3],
-            category_name=row[4],
-            memo=row[5],
-            amount_minor=int(row[6]),
-        )
-        for row in rows
-    ]
     if extra:
         # Newest first across both, as each list already is; `sorted` is
         # stable, so rows of one date keep the order their query gave them.
@@ -980,6 +1214,22 @@ def behind(
     }
 
 
+def _entry(row, converted: int | None = None, rate: RateUsed | None = None) -> Entry:
+    """An `Entry` from ``(id, date, account, payee, category, memo, amount, currency)``."""
+    return Entry(
+        id=row[0],
+        date=_as_date(row[1]),
+        account_name=row[2],
+        payee_name=row[3],
+        category_name=row[4],
+        memo=row[5],
+        amount_minor=int(row[6]),
+        currency=row[7],
+        converted_minor=converted,
+        rate=rate,
+    )
+
+
 def _claim_entries(
     session: Session,
     household_id: str,
@@ -987,6 +1237,7 @@ def _claim_entries(
     window: dict,
     period: str | None,
     limit: int,
+    rates: Rates | None = None,
 ) -> tuple[list[Entry], int, int]:
     """The rows behind lines worked out per repayment: ``(entries, total, count)``.
 
@@ -994,6 +1245,10 @@ def _claim_entries(
     linked to it, so the rows sum to the difference. For the unmatched line,
     the repayments alone -- there is nothing linked to show. Entries are
     newest first and capped at ``limit``; the total and the count are not.
+
+    With ``rates``, every row of a claim is converted at its repayment's
+    date, as :meth:`Converting.claim` does, and a claim whose repayment has
+    no rate is left out, as the report left it out.
     """
     if not lines:
         return [], 0, 0
@@ -1002,15 +1257,21 @@ def _claim_entries(
         stmt = stmt.where(func.strftime("%Y-%m", Transaction.date) == period)
     payments: list[str] = []
     with_expenses: list[str] = []
-    for pid, _month, amount, covered, linked, foreign in session.execute(stmt).all():
+    #: payment id -> (currency, date): what each row of its claim converts at.
+    paid: dict[str, tuple[str, Date]] = {}
+    for pid, _month, amount, covered, linked, foreign, code, day in session.execute(stmt).all():
         if int(linked) == 0:
-            if REIMBURSEMENT_UNMATCHED in lines:
-                payments.append(pid)
-            continue
-        line, _difference = claim_side(amount, covered, linked, foreign)
-        if line in lines:
-            payments.append(pid)
+            if REIMBURSEMENT_UNMATCHED not in lines:
+                continue
+        else:
+            line, _difference = claim_side(amount, covered, linked, foreign)
+            if line not in lines:
+                continue
             with_expenses.append(pid)
+        if rates is not None and rates.rate_on(code, _as_date(day)) is None:
+            continue
+        payments.append(pid)
+        paid[pid] = (code, _as_date(day))
     if not payments:
         return [], 0, 0
 
@@ -1028,6 +1289,8 @@ def _claim_entries(
                 Category.name,
                 Transaction.memo,
                 Transaction.amount,
+                Account.currency,
+                Transaction.reimbursed_by_id,
             )
             .join(Account, Account.id == Transaction.account_id)
             .outerjoin(Payee, Payee.id == Transaction.payee_id)
@@ -1044,20 +1307,16 @@ def _claim_entries(
             )
             .order_by(Transaction.date.desc(), Transaction.created_at.desc())
         ).all()
-        entries.extend(
-            Entry(
-                id=row[0],
-                date=_as_date(row[1]),
-                account_name=row[2],
-                payee_name=row[3],
-                category_name=row[4],
-                memo=row[5],
-                amount_minor=int(row[6]),
-            )
-            for row in rows
-        )
+        for row in rows:
+            if rates is None:
+                entries.append(_entry(row))
+                continue
+            owner = row[0] if row[0] in paid else row[8]
+            _code, day = paid[owner]
+            done = rates.convert(int(row[6]), row[7], day)
+            entries.append(_entry(row, done.amount_minor, done.rate_used))
     entries.sort(key=lambda one: one.date, reverse=True)
-    total = sum(one.amount_minor for one in entries)
+    total = sum(one.counted for one in entries)
     return entries[:limit], total, len(entries)
 
 
