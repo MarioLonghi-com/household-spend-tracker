@@ -396,6 +396,12 @@ msgstr "Visa mina egna kurser bredvid kursen som används"
 msgid "Last proved to <0>{0}</0> at {1}. Everything up to there is locked and is not counted again."
 msgstr "Senast avstämt till <0>{0}</0> den {1}. Allt fram till dit är låst och räknas inte igen."
 
+#. placeholder {0}: formatInstant(row.started_at)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Started at {0}. Each year is stored as it arrives."
+msgstr "Startad {0}. Varje år sparas när det kommer in."
+
 #. Column heading on the Rules screen: how a rule compares the bank's text (contains, starts with…)
 #. Column heading on the Rules screen: how a rule compares the bank's text (contains, starts with…)
 #: src/screens/Rules.tsx
@@ -3005,6 +3011,15 @@ msgstr "Vad som hände"
 #, fuzzy
 msgid "Into"
 msgstr "Till"
+
+#. In the fetch history: which request a failed fetch stopped on, like 3 of 12, and its dates
+#. placeholder {0}: chunkOf(row)
+#. placeholder {1}: formatDate(row.chunk_since)
+#. placeholder {2}: formatDate(row.chunk_until ?? row.requested_until)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Stopped at {0}, {1} to {2}."
+msgstr "Stoppade vid {0}, {1} till {2}."
 
 #. Button on the Import screen
 #: src/screens/Import.tsx
@@ -6376,8 +6391,11 @@ msgid "Register"
 msgstr "Register"
 
 #. Value of the Coverage tile: currencies with a rate, of those held
+#. Which request of a fetch, like 4 of 12; a fetch asks for one year of rates per request
+#. placeholder {0}: count(step)
 #. placeholder {0}: count(tiles.covered)
 #. placeholder {1}: count(tiles.total)
+#. placeholder {1}: count(total)
 #: src/screens/ExchangeRates.tsx
 #, fuzzy
 msgid "{0} of {1}"
@@ -11397,6 +11415,11 @@ msgstr "Ändra"
 msgid "Undoing puts back <0>{count}</0> row exactly as they were before. Anything changed since is overwritten, and undoing the undo is the only way back."
 msgstr "Att ångra lägger tillbaka <0>{count}</0> rad exakt som den var innan. Allt som ändrats sedan skrivs över, och att ångra ångringen är enda vägen tillbaka."
 
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "The rates before {day} are stored; Fetch now carries on from the last of them."
+msgstr "Kurserna före {day} är sparade; Hämta nu fortsätter från den sista av dem."
+
 #. placeholder {0}: recovered.passkeys
 #: src/screens/SignIn.tsx
 #, fuzzy
@@ -12396,6 +12419,12 @@ msgstr "hushåll"
 #, fuzzy
 msgid "Your password and your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
 msgstr "Ditt lösenord och din autentiseringsapp för {email} återställdes från servern den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in båda igen nedan."
+
+#. While a fetch runs: codes, source, this request's dates, which request (4 of 12), the whole range
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Fetching {codes} from {source}: {from} to {to}, {step}, of {since} to {until}."
+msgstr "Hämtar {codes} från {source}: {from} till {to}, {step}, av {since} till {until}."
 
 #: src/screens/Import.tsx
 #, fuzzy
@@ -14459,6 +14488,12 @@ msgstr "En bok: dess konton, dess register, dess kvitton och de personer som kom
 msgid "A rate is units of the currency per 1 {0}, the way the ECB quotes it. A monthly rate covers every day of its month."
 msgstr "En kurs är enheter av valutan per 1 {0}, så som ECB anger den. En månadskurs gäller varje dag i sin månad."
 
+#. Accessible name of the bar showing how far a fetch of exchange rates has got
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Fetch progress"
+msgstr "Hämtningens förlopp"
+
 #: src/screens/reports/IncomeExpense.tsx
 #, fuzzy
 msgid "No category group is marked as Income, so every row is counted as an expense. Mark the group that holds your income on the Categories screen."
@@ -15504,6 +15539,11 @@ msgstr ""
 msgid "These payees differ only in accents, dashes or spaces you cannot see, which no longer tell two names apart. Nothing has been merged: review each and choose the spelling to keep."
 msgstr "De här mottagarna skiljer sig bara i accenter, streck eller mellanslag som du inte kan se, och som inte längre skiljer två namn åt. Inget har slagits ihop: granska var och en och välj stavningen som ska behållas."
 
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "The rates before {day} were refetched and stored; refetch from {day} to finish."
+msgstr "Kurserna före {day} hämtades om och sparades; hämta om från {day} för att bli klar."
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "The bar comes back once the parts add up."
@@ -15752,6 +15792,12 @@ msgstr ""
 #, fuzzy
 msgid "New account name for {0}"
 msgstr "Nytt kontonamn för {0}"
+
+#. placeholder {0}: formatInstant(row.started_at)
+#: src/screens/ExchangeRates.tsx
+#, fuzzy
+msgid "Started by {who} at {0}. It carries on if they leave the page; each year is stored as it arrives."
+msgstr "Startad av {who} {0}. Den fortsätter även om personen lämnar sidan; varje år sparas när det kommer in."
 
 #. Update confirmation, why both factors are asked for: an update with no migration
 #: src/screens/Updates.tsx
@@ -16348,15 +16394,6 @@ msgstr "Minst en valuta förblir markerad"
 #: src/screens/Updates.tsx
 msgid "{0, plural, one {{1}: # change} other {{2}: # changes}}"
 msgstr ""
-
-#. While a fetch runs: the source, the currency codes, the first date
-#. placeholder {0}: sourceLabel(row.source)
-#. placeholder {1}: row.currencies.join(" ")
-#. placeholder {2}: formatDate(row.requested_since)
-#: src/screens/ExchangeRates.tsx
-#, fuzzy
-msgid "Fetching {0}, {1} from {2}…"
-msgstr "Hämtar från {0}: {1} från {2}…"
 
 #. placeholder {0}: app.repository ?? repository
 #: src/screens/Updates.tsx

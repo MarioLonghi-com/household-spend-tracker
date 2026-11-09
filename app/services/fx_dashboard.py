@@ -51,6 +51,12 @@ class FetchView:
     started_by: str | None
     #: Whole milliseconds, NULL while it runs.
     duration_ms: int | None
+    #: How far it got (#409): requests in all, and how many are stored.
+    chunks_total: int
+    chunks_done: int
+    #: The dates of the request in flight, or the one it stopped on.
+    chunk_since: Date | None
+    chunk_until: Date | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -191,6 +197,10 @@ def fetch_view(session: Session, row: FxFetch) -> FetchView:
         error=row.error,
         started_by=fx._name(session, row.started_by_id),
         duration_ms=duration,
+        chunks_total=row.chunks_total,
+        chunks_done=row.chunks_done,
+        chunk_since=row.chunk_since,
+        chunk_until=row.chunk_until,
     )
 
 

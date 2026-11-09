@@ -367,20 +367,20 @@ function FetchNow({ household, data, onDone }: { household: Household; data: FxS
         </Dialog>
       )}
       <Problem error={start.error} />
-      {running && (
-        <p className="small" role="status">
-          {data.running_fetches.length > 0
-            ? data.running_fetches.map((row) =>
-                t({ message: `Fetching ${sourceLabel(row.source)}, ${row.currencies.join(" ")} from ${formatDate(row.requested_since)}…`, comment: "While a fetch runs: the source, the currency codes, the first date" }),
-              )
-            : t`Another household on this instance is fetching rates. Wait for it to finish.`}
-        </p>
-      )}
+      {running &&
+        (data.running_fetches.length > 0 ? (
+          data.running_fetches.map((row) => <FetchProgress key={row.id} row={row} />)
+        ) : (
+          <p className="small" role="status">
+            {t`Another household on this instance is fetching rates. Wait for it to finish.`}
+          </p>
+        ))}
       {!running && finished &&
         mine.map((row) =>
           row.outcome === "failed" ? (
             <p key={row.id} className="small neg" role="status">
               {t`The fetch failed: ${row.error ?? ""}`}
+              {row.chunk_since && row.chunks_done > 0 ? <> {storedBefore(row)}</> : null}
             </p>
           ) : (
             <p key={row.id} className="small" role="status">
@@ -389,6 +389,57 @@ function FetchNow({ household, data, onDone }: { household: Household; data: FxS
           ),
         )}
     </section>
+  );
+}
+
+/** "3 of 12": the request in flight, or the one a failed fetch stopped on (#409). */
+function chunkOf(row: FxFetch): string {
+  const total = Math.max(row.chunks_total, 1);
+  const step = Math.min(row.chunks_done + 1, total);
+  return t({ message: `${count(step)} of ${count(total)}`, comment: "Which request of a fetch, like 4 of 12; a fetch asks for one year of rates per request" });
+}
+
+/** After a failure part-way: the years before it are kept. */
+function storedBefore(row: FxFetch): string {
+  const day = formatDate(row.chunk_since ?? row.requested_since);
+  return row.mode === "range"
+    ? t`The rates before ${day} were refetched and stored; refetch from ${day} to finish.`
+    : t`The rates before ${day} are stored; Fetch now carries on from the last of them.`;
+}
+
+/**
+ * A fetch that is running, for whoever opens the page (#409): which dates are
+ * being fetched, how far it has got, and who started it. The fetch belongs to
+ * the household, so it carries on when that person leaves.
+ */
+function FetchProgress({ row }: { row: FxFetch }) {
+  const total = Math.max(row.chunks_total, 1);
+  const from = formatDate(row.chunk_since ?? row.requested_since);
+  const to = formatDate(row.chunk_until ?? row.requested_until);
+  const since = formatDate(row.requested_since);
+  const until = formatDate(row.requested_until);
+  const codes = row.currencies.join(" ");
+  const source = sourceLabel(row.source);
+  const step = chunkOf(row);
+  const who = row.started_by;
+  return (
+    <div className="banner info working" role="status">
+      <span className="spinner" aria-hidden="true" />
+      <div>
+        <div>
+          {t({
+            message: `Fetching ${codes} from ${source}: ${from} to ${to}, ${step}, of ${since} to ${until}.`,
+            comment: "While a fetch runs: codes, source, this request's dates, which request (4 of 12), the whole range",
+          })}
+        </div>
+        <progress max={total} value={row.chunks_done} aria-label={t({ message: "Fetch progress", comment: "Accessible name of the bar showing how far a fetch of exchange rates has got" })} />
+        <div className="small muted">
+          {who
+            ? t`Started by ${who} at ${formatInstant(row.started_at)}. It carries on if they leave the page; each year is stored as it arrives.`
+            : t`Started at ${formatInstant(row.started_at)}. Each year is stored as it arrives.`}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1146,7 +1197,16 @@ function History({ history }: { history: FxFetch[] }) {
                   <td className="amount">{seconds(row.duration_ms)}</td>
                   <td className={row.outcome === "failed" ? "small neg" : "small"}>
                     {outcomeWord(row.outcome)}
+                    {row.outcome === "running" ? ` · ${chunkOf(row)}` : null}
                     {row.error ? <div>{row.error}</div> : null}
+                    {row.outcome === "failed" && row.chunk_since && row.chunks_total > 1 ? (
+                      <div className="muted">
+                        {t({
+                          message: `Stopped at ${chunkOf(row)}, ${formatDate(row.chunk_since)} to ${formatDate(row.chunk_until ?? row.requested_until)}.`,
+                          comment: "In the fetch history: which request a failed fetch stopped on, like 3 of 12, and its dates",
+                        })}
+                      </div>
+                    ) : null}
                   </td>
                 </tr>
               ))}
