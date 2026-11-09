@@ -31,7 +31,7 @@ const HOUSE = { id: "h1", name: "Home", base_currency: "EUR" } as Household;
 function currency(code: string, age: number, over: Partial<FxCurrency> = {}): FxCurrency {
   return {
     currency: code,
-    accounts: [{ id: `a-${code}`, name: `${code} account` }],
+    accounts: [{ id: `a-${code}`, name: `${code} account`, institution: null, country: null, country_name: null, flag: "", closed: false }],
     source_in_use: "ecb",
     first_rate: "2026-10-29",
     last_rate: "2026-11-04",

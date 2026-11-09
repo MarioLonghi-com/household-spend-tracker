@@ -18,6 +18,7 @@ import "./styles/reimbursements.css";
 import "./styles/report-nw.css";
 import "./styles/import.css";
 import "./styles/shell.css";
+import "./styles/fx-rates.css";
 import "./styles/one-time-import.css";
 
 const client = new QueryClient({

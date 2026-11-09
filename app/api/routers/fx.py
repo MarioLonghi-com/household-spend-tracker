@@ -18,12 +18,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, File, Form, Query, Response, UploadFile
 from fastapi.responses import PlainTextResponse
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from ...audit.batch import batch
-from ...models import BatchKind, FxFetchMode, FxPeriod, FxRate, FxSource, Household
+from ...models import BatchKind, FxFetchMode, Household
 from ...schemas import (
     FxFetchIn,
     FxFetchOut,
@@ -36,7 +35,7 @@ from ...schemas import (
     FxSettingsOut,
     FxStatusOut,
 )
-from ...services import fx, fx_dashboard, fx_fetching, fx_manual
+from ...services import fx, fx_browse, fx_dashboard, fx_fetching, fx_manual
 from ..deps import CurrentHousehold, CurrentUser, SessionDep
 from ..uploads import read_capped, refuse_declared_size
 
@@ -96,6 +95,11 @@ def get_status(household: CurrentHousehold, session: SessionDep) -> FxStatusOut:
 
 MAX_RATES = 5000
 
+#: The query parameters both `fx/rates` routes share, so they cannot disagree.
+SortParam = Annotated[str, Query(pattern=f"^({'|'.join(fx_browse.SORTS)})$")]
+DirectionParam = Annotated[str, Query(pattern="^(asc|desc)$")]
+GranularityParam = Annotated[str, Query(pattern=f"^({'|'.join(fx_browse.GRANULARITIES)})$")]
+
 
 def stored_rates(
     session: Session,
@@ -106,65 +110,55 @@ def stored_rates(
     until: Date | None,
     source: str | None,
     limit: int,
+    offset: int = 0,
+    granularity: str = fx_browse.DAY,
+    sort: str = "date",
+    direction: str = "desc",
+    at: Date | None = None,
 ) -> FxRatesOut:
-    """The rows the chain reads, as stored, newest first, with their base meaning.
+    """A page of the rows the chain reads, newest first unless sorted otherwise.
 
-    Shared by the person's route and the agent's, so they cannot disagree.
+    Stored rows with their base meaning, or a month per line (#410). Shared by
+    the person's route and the agent's, so they cannot disagree.
     """
-    rates = fx.rates(session, household)
-    base = rates.base
-    wanted = {currency.upper()} if currency else set(fx_fetching.held_currencies(session, household))
-    rows: list[FxRateOut] = []
-
-    def in_base(src: FxSource, code: str, day: Date) -> str | None:
-        for point in rates.series(src, code).within(day, day):
-            return fx.rate_text(point.rate)
-        return None
-
-    def own(code: str, day: Date) -> str | None:
-        value = rates.own_rate(code, day)
-        return fx.rate_text(value) if value is not None else None
-
-    if source in (None, FxSource.ecb.value) and wanted:
-        stmt = select(FxRate).where(FxRate.source == FxSource.ecb, FxRate.currency.in_(wanted))
-        if since:
-            stmt = stmt.where(FxRate.date >= since)
-        if until:
-            stmt = stmt.where(FxRate.date <= until)
-        for row in session.execute(stmt).scalars():
-            rows.append(
-                FxRateOut(
-                    source=row.source.value,
-                    quote_currency=row.quote_currency,
-                    currency=row.currency,
-                    date=row.date,
-                    period=FxPeriod.day.value,
-                    rate=row.rate,
-                    rate_in_base=in_base(FxSource.ecb, row.currency, row.date)
-                    if row.currency != base
-                    else None,
-                    own_rate=own(row.currency, row.date),
-                )
+    found = fx_browse.page(
+        session,
+        household,
+        currency=currency,
+        since=since,
+        until=until,
+        source=source,
+        granularity=granularity,
+        sort=sort,
+        direction=direction,
+        limit=limit,
+        offset=offset,
+        at=at,
+    )
+    return FxRatesOut(
+        base_currency=found.base,
+        granularity=found.granularity,
+        total=found.total,
+        limit=limit,
+        offset=found.offset,
+        focus=found.focus,
+        rates=[
+            FxRateOut(
+                id=row.id,
+                source=row.source,
+                quote_currency=row.quote_currency,
+                currency=row.currency,
+                date=row.date,
+                period=row.period.value,
+                rate=row.rate_text,
+                rate_in_base=row.in_base_shown,
+                own_rate=fx.rate_text(row.own) if row.own is not None else None,
+                rate_date=row.rate_date,
+                stale=row.stale,
             )
-    if source in (None, FxSource.manual.value):
-        for row in fx_manual.list_rates(session, household.id, currency=currency, since=since, until=until):
-            rows.append(
-                FxRateOut(
-                    id=row.id,
-                    source=FxSource.manual.value,
-                    quote_currency=row.quote_currency,
-                    currency=row.currency,
-                    date=row.date,
-                    period=row.period.value,
-                    rate=row.rate,
-                    rate_in_base=(
-                        row.rate if row.quote_currency == base else in_base(FxSource.manual, row.currency, row.date)
-                    ),
-                    own_rate=own(row.currency, row.date),
-                )
-            )
-    rows.sort(key=lambda r: (r.date, r.currency, r.source), reverse=True)
-    return FxRatesOut(base_currency=base, total=len(rows), limit=limit, rates=rows[:limit])
+            for row in found.rows
+        ],
+    )
 
 
 @router.get(f"{_HOUSE}/rates", response_model=FxRatesOut)
@@ -176,10 +170,31 @@ def get_rates(
     until: Date | None = None,
     source: Annotated[str | None, Query(pattern="^(ecb|manual)$")] = None,
     limit: int = Query(default=500, ge=1, le=MAX_RATES),
+    offset: int = Query(default=0, ge=0),
+    granularity: GranularityParam = fx_browse.DAY,
+    sort: SortParam = "date",
+    direction: DirectionParam = "desc",
+    at: Date | None = None,
 ) -> FxRatesOut:
-    """Stored rates as decimal strings, with their source and their base meaning."""
+    """Stored rates as decimal strings, with their source and their base meaning.
+
+    A page at a time (`limit`, `offset`), in the order of `sort` and
+    `direction`; by day as stored, or a month per line by a rate policy
+    (`granularity`). `at` answers the page holding the row nearest that date.
+    """
     return stored_rates(
-        session, household, currency=currency, since=since, until=until, source=source, limit=limit
+        session,
+        household,
+        currency=currency,
+        since=since,
+        until=until,
+        source=source,
+        limit=limit,
+        offset=offset,
+        granularity=granularity,
+        sort=sort,
+        direction=direction,
+        at=at,
     )
 
 

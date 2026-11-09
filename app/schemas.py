@@ -3913,11 +3913,26 @@ class FxFetchOut(ORMModel):
     error: str | None = None
     started_by: str | None = None
     duration_ms: int | None = None
+    #: How far it got (#409): the range is asked for a calendar year per
+    #: request, and each year is stored as it arrives.
+    chunks_total: int = 0
+    chunks_done: int = 0
+    #: The dates of the request in flight while it runs, or of the one it
+    #: stopped on when it failed.
+    chunk_since: Date | None = None
+    chunk_until: Date | None = None
 
 
 class FxAccountRefOut(ORMModel):
     id: str
     name: str
+    #: The bank, as the account states it (#411).
+    institution: str | None = None
+    country: str | None = None
+    #: English; a translated screen names the country itself.
+    country_name: str | None = None
+    flag: str = ""
+    closed: bool = False
 
 
 class FxMonthOut(ORMModel):
@@ -4011,12 +4026,22 @@ class FxRateOut(BaseModel):
     rate_in_base: str | None = None
     #: The household's own transfers' rate on that date, in base terms.
     own_rate: str | None = None
+    #: A month's line (#410) only: the date of the rate its policy used, and
+    #: whether that rate is older than the stale limit. Null on a stored row.
+    rate_date: Date | None = None
+    stale: bool | None = None
 
 
 class FxRatesOut(BaseModel):
     base_currency: str
+    #: `day`, or `month_avg` / `month_end`: a month per line (#410).
+    granularity: str = "day"
+    #: Every row the filters matched; `rates` is the page from `offset`.
     total: int
     limit: int
+    offset: int = 0
+    #: Where in `rates` a jump (`at`) landed, or null when none was asked.
+    focus: int | None = None
     rates: list[FxRateOut]
 
 

@@ -52,11 +52,27 @@ export interface FxFetch {
   error: string | null;
   started_by: string | null;
   duration_ms: number | null;
+  /** Requests in all: the range is asked for a calendar year at a time (#409). */
+  chunks_total: number;
+  /** Of those, how many are stored. */
+  chunks_done: number;
+  /** The dates of the request in flight, or of the one it stopped on. */
+  chunk_since: string | null;
+  chunk_until: string | null;
 }
 
 export interface FxAccountRef {
   id: string;
   name: string;
+  /** The bank, as the account states it (#411). */
+  institution: string | null;
+  /** ISO 3166-1 alpha-2, or null when the account never said. */
+  country: string | null;
+  /** The country's English name; `countryName` gives another language its own. */
+  country_name: string | null;
+  /** The flag for `country`, or the UN's when there is none. Built server-side. */
+  flag: string;
+  closed: boolean;
 }
 
 export interface FxCurrency {
@@ -123,12 +139,21 @@ export interface FxRate {
   rate: string;
   rate_in_base: string | null;
   own_rate: string | null;
+  /** A month's line (#410): the date of the rate its policy used, and its age. */
+  rate_date?: string | null;
+  stale?: boolean | null;
 }
 
 export interface FxRates {
   base_currency: string;
+  /** `day`, or a month per line: `month_avg` / `month_end` (#410). */
+  granularity?: string;
   total: number;
   limit: number;
+  /** Where `rates` starts in the whole list. */
+  offset?: number;
+  /** Where in `rates` a jump landed, or null. */
+  focus?: number | null;
   rates: FxRate[];
 }
 

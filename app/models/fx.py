@@ -141,3 +141,13 @@ class FxFetch(Base, UUIDPrimaryKey):
     rates_unchanged: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     #: The reason in words when it failed.
     error: Mapped[str | None] = mapped_column(Text)
+    #: How far it got (#409). The range is asked for one calendar year per
+    #: request, and each year is stored as it arrives: `chunks_total` requests
+    #: in all, `chunks_done` of them stored. A fetch from before #409 made one
+    #: request, and reads as 1 of 1.
+    chunks_total: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    chunks_done: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    #: The dates of the request in flight while it runs, and of the one it
+    #: stopped on when it failed. NULL once it finished.
+    chunk_since: Mapped[date | None] = mapped_column(Date)
+    chunk_until: Mapped[date | None] = mapped_column(Date)
