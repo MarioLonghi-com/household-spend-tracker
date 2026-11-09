@@ -59,6 +59,14 @@ history this repository does not have.
   updater now waits a moment, looks again, and stops the app once more if
   it is running; a stop refused a second time is still *Not started*, with
   the app back as it was. (#344)
+- **An update refused for want of disk says how much to free.** It read
+  "Needs about 0.9 GB free, there is 0.9 GB" when the shortfall was a few
+  megabytes. The need is now rounded up and the free space down, the
+  megabytes to free are named, and so is what the need is made of: the new
+  images, two copies of the database and the margin. It offers deleting
+  older update backups only when there are more than the five that are
+  kept, and says how much they hold. The refusal links to a new section,
+  *Freeing disk for an update*, in `deploy/TROUBLESHOOTING.md`. (#330)
 
 ## 0.12.0 — 2026-10-15
 

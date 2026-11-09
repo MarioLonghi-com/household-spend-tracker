@@ -505,6 +505,8 @@ class World(_Fleet):
         self.on_drill = None
         self.placard_runs = True
         self.measured = {"free": 40 * 1024**3, "mem_available": 3 * 1024**3, "database": 20 * 1024**2}
+        #: The size of each backup folder the measuring one-off lists.
+        self.backup_bytes = 30 * 1024**2
         self.time = FakeTime()
         self.clock = GapClock(self.time, self.time.monotonic)
         self.volume = Volume(tmp_path / "update")
@@ -902,7 +904,9 @@ class World(_Fleet):
         fake.finish(c, 0, json.dumps(doc), "a warning on stderr\n")
 
     def _measure(self, fake: FakeEngine, c: dict, cmd: list, version: str) -> None:
-        fake.finish(c, 0, json.dumps(self.measured) + "\n")
+        # The backup folders on the disk, as the script lists them (#330).
+        listed = {"backups": {stamp: self.backup_bytes for stamp in self.ledger.backups}}
+        fake.finish(c, 0, json.dumps({**listed, **self.measured}) + "\n")
 
     def _find_backup(self, fake: FakeEngine, c: dict, cmd: list, version: str) -> None:
         newest = sorted(self.ledger.backups)[-1] if self.ledger.backups else None

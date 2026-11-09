@@ -6161,6 +6161,11 @@ msgstr "Cambios recientes en el inicio de sesión"
 msgid "This installation, rather than any of the ledgers in it. Only an owner can open this screen, and only an owner can reach anything on it — the paths, the logs and the counts below are about every household on this instance."
 msgstr "Esta instalación, no ninguno de los libros de cuentas que contiene. Solo un propietario puede abrir esta pantalla y acceder a lo que hay en ella: las rutas, los registros y los recuentos de abajo se refieren a todos los hogares de esta instancia."
 
+#. Updates section: link after a refusal for want of disk, to the guide's section of that name
+#: src/screens/Updates.tsx
+msgid "Freeing disk for an update"
+msgstr ""
+
 #. Under the count of categories on the household page
 #. placeholder {0}: it.category_groups
 #. placeholder {1}: count(it.category_groups)
