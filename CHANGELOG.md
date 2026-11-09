@@ -32,6 +32,30 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.13.0 — 2026-11-09
+
+**Reversible: lossy** — two migrations, applied in this order.
+
+- `a7e3c1d95b20` — lossy: a category group and a category can carry a role,
+  Income or Reimbursement (#372), and the migration marks a group called
+  `Income` and a category called `Reimbursement` or `Reimbursements`. Rolling
+  it back drops both columns, so which group is Income and which category is
+  Reimbursement, as moved on Categories, is forgotten. No transaction changes.
+- `d2b8e6f41c07` — lossy: an agent key can be allowed to edit categories
+  (#366), off for every existing key. Rolling it back takes the permission
+  away from the keys that had it; they go back to categorising only. Nothing
+  in the ledger changes.
+
+The updater writes update requests up to protocol 2 for going back, so update
+the updater along with the app; a 0.12 updater still takes every other request.
+
+Fixes and the Register first. Income vs Expense decides a row's side by its
+category group and gives work reimbursements their own block. The Register's
+search takes AND, OR, phrases and exclusions, and an open page refreshes when
+someone else changes the ledger. The owner can go back to the previous version
+from the browser. Every dependency moved up, closing every Dependabot alert
+that had a fix.
+
 ### Added
 
 - **An open page notices changes made elsewhere and refreshes itself.**
