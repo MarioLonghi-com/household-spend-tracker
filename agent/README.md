@@ -81,7 +81,10 @@ curl -s -H "Authorization: Bearer $SPENDTRACKER_TOKEN" \
   returns. It only lists what exists — a test fails if it names a route that
   does not — so prefer it over this page when they disagree.
 - `categories[].full_name` is the name to use when you talk about a category;
-  `id` is the one to send.
+  `id` is the one to send. `group_role: "income"` marks the categories that
+  are income on Income vs Expense, and `role: "reimbursement"` the one whose
+  rows are money work paid back. Read these, never the names: a household
+  renames and translates its categories.
 
 The full OpenAPI schema is served to any caller holding a key:
 
@@ -461,8 +464,16 @@ are yours — done visibly.**
 - **Reports:** `GET $H/reports/income-expense?currency=EUR&since=…` and
   `…/reports/reimbursements?currency=GBP`. **One currency per call** — call
   once per currency the manifest's accounts hold. Income vs Expense leaves out
-  transfers, opening balances and work expenses with their repayments, and
-  counts each in `excluded` so you can say so.
+  transfers and opening balances, counted in `excluded`. **The category group
+  decides the side, never the sign:** a category whose `group_role` in the
+  manifest is `income` is income, and every other category (and uncategorised) is an expense line
+  where refunds and charges net, with a subtotal per group in
+  `expense.groups`. Work reimbursements are set apart in `reimbursements`
+  (`income` = rows in the category whose `role` is `reimbursement`; `spent` = flagged
+  expenses with their payment linked; `pending` = flagged and not yet
+  repaid) — for information only, in neither income, expenses nor net;
+  `excluded.reimbursements` counts their rows. `has_income_group: false`
+  means no group carries the role, so every row is an expense.
 - **Rates the household actually got:** `GET $H/fx/observed?pair=EUR/GBP` —
   one entry per linked transfer between two currencies, with both amounts and
   the rate as a decimal **string** (units of `to_currency` per one

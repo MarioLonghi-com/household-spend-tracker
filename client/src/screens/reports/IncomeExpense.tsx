@@ -33,6 +33,7 @@ import type {
   Household,
   IncomeExpense as Report,
   ReportBehind,
+  ReportLine,
   ReportRow,
   ReportSection,
 } from "../../lib/types";
@@ -55,8 +56,23 @@ type Cell = {
   period?: string;
   rowCategoryId?: string | null;
   rowUncategorised?: boolean;
-  direction?: "in" | "out";
+  /** One category group's subtotal line (#372). */
+  rowGroupId?: string;
+  direction?: Side;
 };
+
+/**
+ * Which line of the report a figure is on, in the server's words (#372).
+ *
+ * `in` and `out` are the two sides that make net; the other three are the
+ * work-reimbursement block, shown for information and counted in neither.
+ */
+type Side =
+  | "in"
+  | "out"
+  | "reimbursement_income"
+  | "reimbursement_spent"
+  | "reimbursement_pending";
 
 /**
  * The element the Reports shell leaves beside an open report's `<h1>`.
@@ -411,9 +427,23 @@ export function ReportTable({
   // Its own sentence rather than a third clause of the one above: a ledger
   // with work expenses and no transfers in the window must still say so.
   const work = report.excluded.reimbursements;
+  const block = report.reimbursements;
 
   return (
     <>
+      <Headline report={report} />
+
+      {/* Without a group marked Income every row is an expense line -- the
+          rule working, not a fault -- so the empty Income band says why. */}
+      {!report.has_income_group && (
+        <p className="muted small report-no-income">
+          <Trans>
+            No category group is marked as Income, so every row is counted as an expense. Mark
+            the group that holds your income on the Categories screen.
+          </Trans>
+        </p>
+      )}
+
       {/* `matrix-scroll`, not the shared `table-scroll`.
 
           Below 768px `table-scroll` turns every row into a card -- the right
@@ -434,8 +464,8 @@ export function ReportTable({
                   {monthLabel(period)}
                 </th>
               ))}
-              <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, per month">Average</Trans></th>
               <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, the sum">Total</Trans></th>
+              <th className="amount"><Trans comment="Column heading on the Income vs Expense report: noun, per month">Average</Trans></th>
             </tr>
           </thead>
 
@@ -450,8 +480,9 @@ export function ReportTable({
             onOpen={setCell}
           />
           <Band
-            title={t({ message: "Expense", comment: "Tooltip on the Income vs Expense report: noun, money that went out" })}
+            title={t({ message: "Expenses", comment: "Heading on the Income vs Expense report: noun, money that went out" })}
             tone="out"
+            grouped
             section={report.expense}
             months={months}
             currency={currency}
@@ -490,11 +521,6 @@ export function ReportTable({
                   />
                 </td>
               ))}
-              {/* The average of a net is not a figure with rows behind it --
-                  it is arithmetic over two other averages -- so there is
-                  nothing to drill into and the cell says so rather than
-                  offering a bubble that would have to invent its contents. */}
-              <td className="amount muted">—</td>
               <td className="amount">
                 <Figure
                   minor={report.net_total_minor}
@@ -505,7 +531,53 @@ export function ReportTable({
                   cell={{ title: t`Net — whole period` }}
                 />
               </td>
+              {/* The average of a net is not a figure with rows behind it --
+                  it is arithmetic over two other averages -- so there is
+                  nothing to drill into and the cell says so rather than
+                  offering a bubble that would have to invent its contents. */}
+              <td className="amount muted">—</td>
             </tr>
+
+            {/* Work reimbursements, below the bottom line and apart from it.
+                In the footer rather than a body of their own because a
+                browser draws the footer last whatever comes after it in the
+                source, and this block belongs under Net, not above it. */}
+            <tr className="report-aside-heading">
+              <th scope="rowgroup" className="report-label">
+                <Trans comment="Heading on the Income vs Expense report: money spent for work and paid back">
+                  Work reimbursements
+                </Trans>
+              </th>
+              <td colSpan={months.length + 2} className="muted small">
+                <Trans>
+                  For information only — not counted in income, expenses or net.
+                </Trans>
+              </td>
+            </tr>
+            <Aside
+              label={t({ message: "Reimbursement income", comment: "Line on the Income vs Expense report: money work paid back" })}
+              line={block.income}
+              side="reimbursement_income"
+              months={months}
+              currency={currency}
+              onOpen={onOpen}
+            />
+            <Aside
+              label={t({ message: "Amount spent, reimbursed", comment: "Line on the Income vs Expense report: work expenses that have been paid back" })}
+              line={block.spent}
+              side="reimbursement_spent"
+              months={months}
+              currency={currency}
+              onOpen={onOpen}
+            />
+            <Aside
+              label={t({ message: "Pending reimbursement", comment: "Line on the Income vs Expense report: work expenses not paid back yet" })}
+              line={block.pending}
+              side="reimbursement_pending"
+              months={months}
+              currency={currency}
+              onOpen={onOpen}
+            />
           </tfoot>
         </table>
       </div>
@@ -523,8 +595,8 @@ export function ReportTable({
         {work > 0 ? (
           <>
             {plural(work, {
-              one: `${work} work expense or repayment left out: what work pays you back was never your spending, and the repayment is not income.`,
-              other: `${work} work expenses and repayments left out: what work pays you back was never your spending, and the repayment is not income.`,
+              one: `${work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.`,
+              other: `${work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.`,
             })}{" "}
           </>
         ) : null}
@@ -583,6 +655,7 @@ function Behind({
     if (cell.period) next.set("period", cell.period);
     if (cell.rowUncategorised) next.set("row_uncategorised", "true");
     else if (cell.rowCategoryId) next.set("row_category_id", cell.rowCategoryId);
+    if (cell.rowGroupId) next.set("row_group_id", cell.rowGroupId);
     if (cell.direction) next.set("direction", cell.direction);
     return next.toString();
   }, [query, cell]);
@@ -749,6 +822,7 @@ function Fold({
 function Band({
   title,
   tone,
+  grouped = false,
   section,
   months,
   currency,
@@ -758,6 +832,12 @@ function Band({
 }: {
   title: string;
   tone: "in" | "out";
+  /**
+   * Gather the rows under their groups, each with its subtotal. Expenses do;
+   * income is one group by construction (#372), so a heading over it would
+   * repeat Total income one line further up.
+   */
+  grouped?: boolean;
   section: ReportSection;
   months: string[];
   currency: string;
@@ -767,10 +847,20 @@ function Band({
 }) {
   const key = bandKey(tone);
   const shut = collapsed.has(key);
-  const groups = useMemo(() => groupRows(section.rows), [section.rows]);
+  const groups = useMemo(
+    () =>
+      grouped
+        ? groupRows(section.rows)
+        : [{ key: "", label: null, rows: section.rows } satisfies RowGroup],
+    [grouped, section.rows],
+  );
+  const subtotals = useMemo(
+    () => new Map((section.groups ?? []).map((line) => [line.name ?? "", line])),
+    [section.groups],
+  );
   // A whole phrase per band, not "Total" plus the band's name lower-cased:
   // case and word order are the translator's.
-  const total = tone === "in" ? t({ message: "Total income", comment: "Label on the Income vs Expense report" }) : t({ message: "Total expense", comment: "Label on the Income vs Expense report" });
+  const total = tone === "in" ? t({ message: "Total income", comment: "Label on the Income vs Expense report" }) : t({ message: "Total expenses", comment: "Label on the Income vs Expense report" });
 
   return (
     <tbody className={`report-band report-${tone}`}>
@@ -810,6 +900,7 @@ function Band({
           <Group
             key={group.key}
             group={group}
+            subtotal={subtotals.get(group.key)}
             tone={tone}
             months={months}
             currency={currency}
@@ -838,11 +929,6 @@ function Band({
             />
           </td>
         ))}
-        {/* An average has no rows behind it -- it is the total divided by the
-            months on screen -- so it is not offered as something to open. */}
-        <td className="amount">
-          <Figure minor={section.average_minor} currency={currency} />
-        </td>
         <td className="amount">
           <Figure
             minor={section.total_minor}
@@ -852,27 +938,34 @@ function Band({
             cell={{ title: total, direction: tone }}
           />
         </td>
+        {/* An average has no rows behind it -- it is the total divided by the
+            months on screen -- so it is not offered as something to open. */}
+        <td className="amount">
+          <Figure minor={section.average_minor} currency={currency} />
+        </td>
       </tr>
     </tbody>
   );
 }
 
 /**
- * One category group: a heading that breaks the list, and its categories.
+ * One category group: a heading that breaks the list, its subtotal, and its
+ * categories.
  *
  * The heading is a band of its own rather than an indent, because what it has
  * to do is **separate** -- a reader going down a column of twenty categories
  * needs to see where Housing stops and Transport starts, and an indent does
  * not say that at a glance.
  *
- * It carries no figures. Everything else on this report is a number the server
- * computed and can be asked to justify row by row; a subtotal added up here
- * would be the one figure on screen with no drill-through behind it, and its
- * average would round differently from every other average in the table. The
- * group totals belong in the response before they belong on the screen.
+ * Its figures are the server's subtotal for the group (#372), never a sum
+ * made here: every figure on this report is one the server computed and can
+ * be asked to justify row by row, and a subtotal added up on screen would
+ * round its average differently from every other. Folding the group keeps
+ * them, the way folding a band keeps its total.
  */
 function Group({
   group,
+  subtotal,
   tone,
   months,
   currency,
@@ -881,6 +974,7 @@ function Group({
   onOpen,
 }: {
   group: RowGroup;
+  subtotal: ReportLine | undefined;
   tone: "in" | "out";
   months: string[];
   currency: string;
@@ -892,6 +986,7 @@ function Group({
   // Rows with no group have no heading, so there is nothing to fold them with
   // and they are always shown.
   const shut = group.label !== null && collapsed.has(key);
+  const which = subtotal?.key ? { rowGroupId: subtotal.key } : null;
 
   return (
     <>
@@ -899,16 +994,45 @@ function Group({
         <tr className="report-group">
           <th className="report-label">
             <Fold open={!shut} label={group.label} onToggle={() => onToggle(key)} />
-          </th>
-          <td colSpan={months.length + 2}>
             {shut && (
-              <span className="muted small">
+              <span className="muted small report-folded">
                 {plural(group.rows.length, {
                   one: `${group.rows.length} category folded away`,
                   other: `${group.rows.length} categories folded away`,
                 })}
               </span>
             )}
+          </th>
+          {months.map((period) => (
+            <td key={period} className="amount">
+              {subtotal && (
+                <Figure
+                  minor={subtotal.by_month[period] ?? 0}
+                  currency={currency}
+                  onOpen={which ? onOpen : undefined}
+                  cell={{
+                    title: `${group.label} — ${monthLabel(period)}`,
+                    period,
+                    direction: tone,
+                    ...which,
+                  }}
+                />
+              )}
+            </td>
+          ))}
+          <td className="amount">
+            {subtotal && (
+              <Figure
+                minor={subtotal.total_minor}
+                currency={currency}
+                strong
+                onOpen={which ? onOpen : undefined}
+                cell={{ title: group.label, direction: tone, ...which }}
+              />
+            )}
+          </td>
+          <td className="amount">
+            {subtotal && <Figure minor={subtotal.average_minor} currency={currency} />}
           </td>
         </tr>
       )}
@@ -967,9 +1091,6 @@ function Line({
         </td>
       ))}
       <td className="amount">
-        <Figure minor={row.average_minor} currency={currency} />
-      </td>
-      <td className="amount">
         <Figure
           minor={row.total_minor}
           currency={currency}
@@ -978,7 +1099,125 @@ function Line({
           cell={{ title: name, direction: tone, ...which }}
         />
       </td>
+      <td className="amount">
+        <Figure minor={row.average_minor} currency={currency} />
+      </td>
     </tr>
+  );
+}
+
+/**
+ * One line of the work-reimbursement block, under Net and apart from it.
+ *
+ * Opened like any other figure: the server narrows the drill-through by the
+ * same rule that put the rows on this line, so the bubble adds up to it.
+ */
+function Aside({
+  label,
+  line,
+  side,
+  months,
+  currency,
+  onOpen,
+}: {
+  label: string;
+  line: ReportLine;
+  side: Side;
+  months: string[];
+  currency: string;
+  onOpen: (cell: Cell) => void;
+}) {
+  return (
+    <tr className="report-aside">
+      <th scope="row" className="report-label">
+        {label}
+      </th>
+      {months.map((period) => (
+        <td key={period} className="amount">
+          <Figure
+            minor={line.by_month[period] ?? 0}
+            currency={currency}
+            onOpen={onOpen}
+            cell={{ title: `${label} — ${monthLabel(period)}`, period, direction: side }}
+          />
+        </td>
+      ))}
+      <td className="amount">
+        <Figure
+          minor={line.total_minor}
+          currency={currency}
+          strong
+          onOpen={onOpen}
+          cell={{ title: label, direction: side }}
+        />
+      </td>
+      <td className="amount">
+        <Figure minor={line.average_minor} currency={currency} />
+      </td>
+    </tr>
+  );
+}
+
+/**
+ * The figures somebody opens the report for, above the table (#372).
+ *
+ * Income, expenses and net first; then, set apart and said to be for
+ * information, what work paid back, what that covered, and what is still
+ * owed with how many items. Every figure is the server's total -- nothing is
+ * added up here -- and the three set-apart ones are in none of the first three.
+ */
+function Headline({ report }: { report: Report }) {
+  const { currency } = report;
+  const block = report.reimbursements;
+  const items = block.pending.count;
+  const lang = amountLang();
+  const money = (minor: number) => <span lang={lang}>{format(minor, currency)}</span>;
+  return (
+    <div className="report-headline">
+      <dl className="report-figures">
+        <div>
+          <dt><Trans comment="Headline figure on the Income vs Expense report: noun, money that came in">Income</Trans></dt>
+          <dd>{money(report.income.total_minor)}</dd>
+        </div>
+        <div>
+          <dt><Trans comment="Headline figure on the Income vs Expense report: noun, money that went out">Expenses</Trans></dt>
+          <dd>{money(report.expense.total_minor)}</dd>
+        </div>
+        <div>
+          <dt><Trans comment="Headline figure on the Income vs Expense report: income minus spending">Net</Trans></dt>
+          <dd className={report.net_total_minor > 0 ? "net-up" : report.net_total_minor < 0 ? "net-down" : undefined}>
+            {money(report.net_total_minor)}
+          </dd>
+        </div>
+      </dl>
+      <div className="report-figures-aside">
+      <dl className="report-figures" aria-describedby="report-aside-note">
+        <div>
+          <dt><Trans comment="Headline figure on the Income vs Expense report: money work paid back">Reimbursements received</Trans></dt>
+          <dd>{money(block.income.total_minor)}</dd>
+        </div>
+        <div>
+          <dt><Trans comment="Headline figure on the Income vs Expense report: work expenses that have been paid back">Amount spent, reimbursed</Trans></dt>
+          <dd>{money(block.spent.total_minor)}</dd>
+        </div>
+        <div>
+          <dt><Trans comment="Headline figure on the Income vs Expense report: work expenses not paid back yet">Still to be reimbursed</Trans></dt>
+          <dd>
+            {money(block.pending.total_minor)}{" "}
+            <span className="muted small">
+              {plural(items, {
+                one: `(${items} item)`,
+                other: `(${items} items)`,
+              })}
+            </span>
+          </dd>
+        </div>
+      </dl>
+      <p id="report-aside-note" className="muted small">
+        <Trans>Work reimbursements, for information: not in income, expenses or net.</Trans>
+      </p>
+      </div>
+    </div>
   );
 }
 

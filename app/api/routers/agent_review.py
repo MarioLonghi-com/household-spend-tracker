@@ -401,7 +401,14 @@ def income_expense(
         category_id=category_id,
         include_uncategorised=include_uncategorised,
     )
-    request.state.agent_rows = answer.income.count + answer.expense.count
+    block = answer.reimbursements
+    request.state.agent_rows = (
+        answer.income.count
+        + answer.expense.count
+        + block.income.count
+        + block.spent.count
+        + block.pending.count
+    )
     return answer
 
 
@@ -538,14 +545,19 @@ ENDPOINTS: list[ManifestEndpoint] = [
             "The Income vs Expense report for ONE currency (currency is required): income "
             "and expense by category and month, net, in that currency only. Ask once per "
             "currency the manifest's accounts hold and never add the answers together. "
-            "Transfers, opening balances and work expenses with their repayments are left "
-            "out and counted in `excluded`. Filters: since, until (an omitted end is where "
+            "The category group decides the side, never the sign: categories whose "
+            "group_role is income are income, every other one (and uncategorised) is an "
+            "expense line where refunds net, with a subtotal per group in expense.groups. "
+            "Work reimbursements are set apart in `reimbursements` {income, spent, pending}, "
+            "in neither income, expense nor net. Transfers and opening balances are left "
+            "out; `excluded` counts them and the rows set apart. has_income_group false "
+            "means every row is an expense. Filters: since, until (an omitted end is where "
             "the flow starts or stops, and the answer says which), account_id and "
             "category_id (both repeatable), include_uncategorised."
         ),
         returns=(
             "{currency, since, until, months[], income, expense, net_by_month, "
-            "net_total_minor, net_total, excluded, coverage}"
+            "net_total_minor, net_total, reimbursements, has_income_group, excluded, coverage}"
         ),
         scope="read",
     ),

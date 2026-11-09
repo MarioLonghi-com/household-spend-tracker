@@ -561,7 +561,11 @@ def manifest(agent: CurrentAgent) -> Manifest:
         ],
         categories=[
             ManifestCategory(
-                id=category.id, full_name=category.full_name, archived=category.archived
+                id=category.id,
+                full_name=category.full_name,
+                archived=category.archived,
+                role=category.role,
+                group_role=category.group.role,
             )
             for category in categories
         ],
