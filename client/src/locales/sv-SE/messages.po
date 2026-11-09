@@ -120,6 +120,11 @@ msgstr "Till"
 msgid "starts with"
 msgstr "börjar med"
 
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "For information. Only the difference is counted: above, as Reimbursement surplus in income or Reimbursement shortfall in expenses."
+msgstr "Som information. Bara skillnaden räknas: ovan, som Överskott på ersättningar bland inkomster eller Underskott på ersättningar bland utgifter."
+
 #. Option in a dropdown on the Accounts screen
 #. Option in a dropdown on the Import screen
 #. Option in a dropdown on the one-time import
@@ -340,6 +345,11 @@ msgstr "Matchning"
 #, fuzzy
 msgid "Or paste the rows, if your bank only lets you copy them from a page:"
 msgstr "Eller klistra in raderna, om banken bara låter dig kopiera dem från en sida:"
+
+#: src/screens/Categories.tsx
+#, fuzzy
+msgid "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net, and counts only what a repayment came to beyond or short of the expenses linked to it. One category has this; ticking it moves it here."
+msgstr "Inkomster och utgifter visar dess rader under Utlägg i jobbet, utanför inkomster, utgifter och netto, och räknar bara det en ersättning överstiger eller understiger de kopplade utläggen med. En kategori har detta; kryssar du i det flyttas det hit."
 
 #. Screen-reader name of a warning on the Updates section. See GLOSSARY.md
 #: src/screens/Updates.tsx
@@ -1059,11 +1069,6 @@ msgstr "Importerad från <0>{0}</0>, rad {1}, den {2}."
 #, fuzzy
 msgid "Your household"
 msgstr "Ditt hushåll"
-
-#: src/screens/Categories.tsx
-#, fuzzy
-msgid "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net. One category has this; ticking it moves it here."
-msgstr "Inkomster och utgifter visar dess rader under Utlägg i jobbet, utanför inkomster, utgifter och netto. En kategori har detta; kryssar du i det flyttas det hit."
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -3286,11 +3291,6 @@ msgstr "Den länken fungerar inte"
 #, fuzzy
 msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 msgstr "{0, plural, one {Även på {1} annan transaktion – samma fil, sparad en gång.} other {Även på {2} andra transaktioner – samma fil, sparad en gång.}}"
-
-#: src/screens/reports/IncomeExpense.tsx
-#, fuzzy
-msgid "For information only — not counted in income, expenses or net."
-msgstr "Endast som information – räknas inte i inkomster, utgifter eller netto."
 
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
@@ -5686,6 +5686,11 @@ msgstr "En lösennyckel är ett sätt att komma in som fortsätter fungera efter
 msgid "the built SPA; `/` 404s without it"
 msgstr "den byggda SPA:n; utan den svarar `/` med 404"
 
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Work reimbursements, for information: not in income, expenses or net, except the surplus or shortfall shown in them."
+msgstr "Utlägg i jobbet, som information: inte i inkomster, utgifter eller netto, utom det överskott eller underskott som visas där."
+
 #. State of the authenticator: it is enrolled and working. See GLOSSARY.md
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -6181,11 +6186,6 @@ msgstr "Kunde inte läsas"
 #, fuzzy
 msgid "Inbox"
 msgstr "Inkorg"
-
-#: src/screens/reports/IncomeExpense.tsx
-#, fuzzy
-msgid "Work reimbursements, for information: not in income, expenses or net."
-msgstr "Utlägg i jobbet, som information: inte i inkomster, utgifter eller netto."
 
 #. placeholder {0}: picked.size
 #. placeholder {1}: picked.size
@@ -7171,11 +7171,6 @@ msgstr "Inget att titta på."
 msgid "Added"
 msgstr "Tillagd"
 
-#: src/screens/reports/IncomeExpense.tsx
-#, fuzzy
-msgid "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.}}"
-msgstr "{work, plural, one {{work} rad hålls isär under Utlägg i jobbet: det jobbet betalar tillbaka var aldrig dina utgifter, och ersättningen är ingen inkomst.} other {{work} rader hålls isär under Utlägg i jobbet: det jobbet betalar tillbaka var aldrig dina utgifter, och ersättningen är ingen inkomst.}}"
-
 #. placeholder {0}: format(Math.abs(left), currency)
 #: src/screens/Register.tsx
 #, fuzzy
@@ -7743,6 +7738,12 @@ msgstr "{by} återställde ditt lösenord och din autentiseringsapp för {email}
 #, fuzzy
 msgid "Last used"
 msgstr "Senast använd"
+
+#. Line on the Income vs Expense report: repayments beyond or short of their expenses, counted above
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Difference, counted above"
+msgstr "Skillnad, räknad ovan"
 
 #. placeholder {0}: user.display_name
 #: src/App.tsx
@@ -8466,6 +8467,12 @@ msgstr "Grupp"
 #, fuzzy
 msgid "{0, plural, one {{1} transfer will be imported as ordinary transactions, with the reason for each} other {{2} transfers will be imported as ordinary transactions, with the reason for each}}"
 msgstr "{0, plural, one {{1} överföring importeras som vanliga transaktioner, med skälet för var och en} other {{2} överföringar importeras som vanliga transaktioner, med skälet för var och en}}"
+
+#. Row on the Income vs Expense report: what work paid back beyond what was spent, counted as income
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Reimbursement surplus"
+msgstr "Överskott på ersättningar"
 
 #: src/screens/Register.tsx
 #, fuzzy
@@ -11196,6 +11203,12 @@ msgstr "skriv vilken del som helst"
 msgid "Categorisation"
 msgstr "Kategorisering"
 
+#. Row on the Income vs Expense report: what work paid back short of what was spent, counted as an expense
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Reimbursement shortfall"
+msgstr "Underskott på ersättningar"
+
 #: src/screens/Register.tsx
 #, fuzzy
 msgid "Reimbursed, with the payment"
@@ -11737,6 +11750,11 @@ msgstr "I Docker Desktop eller Podman Desktop öppnar du Containers, letar upp <
 #: ../desktop/src/words.ts
 msgid "Add to dictionary"
 msgstr ""
+
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income. Only what a repayment came to beyond or short of the expenses linked to it is counted.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income. Only what a repayment came to beyond or short of the expenses linked to it is counted.}}"
+msgstr "{work, plural, one {{work} rad hålls isär under Utlägg i jobbet: det jobbet betalar tillbaka var aldrig dina utgifter, och ersättningen är ingen inkomst. Bara det en ersättning överstiger eller understiger de kopplade utläggen med räknas.} other {{work} rader hålls isär under Utlägg i jobbet: det jobbet betalar tillbaka var aldrig dina utgifter, och ersättningen är ingen inkomst. Bara det en ersättning överstiger eller understiger de kopplade utläggen med räknas.}}"
 
 #. History headline, the kind of act: the instance was set up
 #: src/lib/historyWords.ts
@@ -13876,6 +13894,12 @@ msgstr "Visa arkiverade"
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 msgstr "En regel matchas mot <0>bankens egna ord</0>, inte mottagaren du ser i registret. Registret kan säga <1>Amazon</1> medan kontoutdraget sa <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> – så skriv regeln för det senare. Öppna en transaktion och tryck på <3>Var kom det här ifrån?</3> för att se exakt vad som kom in."
 
+#. Line on the Income vs Expense report: repayments from work with no expense linked to them yet
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "Not matched to an expense"
+msgstr "Inte kopplad till ett utlägg"
+
 #. State of a suggestion: the catalogs carry it
 #: src/screens/TranslationReview.tsx
 #, fuzzy
@@ -14653,6 +14677,11 @@ msgstr "Inga förslag än. Välj ett förhandsvisningsspråk i din profil och an
 #, fuzzy
 msgid "{0} each, {1} free"
 msgstr "{0} var, {1} ledigt"
+
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "{mixed, plural, one {{mixed} repayment covers expenses in another currency, so no surplus or shortfall is worked out for it.} other {{mixed} repayments cover expenses in another currency, so no surplus or shortfall is worked out for them.}}"
+msgstr "{mixed, plural, one {{mixed} ersättning täcker utlägg i en annan valuta, så inget överskott eller underskott räknas ut för den.} other {{mixed} ersättningar täcker utlägg i en annan valuta, så inget överskott eller underskott räknas ut för dem.}}"
 
 #. A changed field in History's detail, lower case: whether the bank has the row (cleared, uncleared, locked)
 #: src/lib/historyWords.ts

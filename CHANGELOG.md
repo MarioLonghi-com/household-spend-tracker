@@ -32,6 +32,37 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.13.1 — 2026-11-09
+
+**Reversible: none** — no migration in this release. To go back to
+`0.13.0`, use *Go back to 0.13.0* under Updates, or follow *Going back after
+a successful update* in `deploy/UPGRADING.md`. From a checkout, check out
+`v0.13.0` and restart.
+
+Income vs Expense now counts what a work repayment came to beyond or short of
+the expenses linked to it, and a folded category group shows its months.
+
+### Changed
+
+- **Income vs Expense counts what a work repayment differs by.** Each
+  repayment in the Reimbursement category is compared with the work expenses
+  linked to it. What it came to beyond them is income, on a *Reimbursement
+  surplus* row in the repayment's month: 200 spent and 300 paid back is 100
+  of income. What it fell short is an expense, on a *Reimbursement
+  shortfall* row. The rest stays set apart as before.
+  - The Work reimbursements block gains *Difference, counted above* and
+    *Not matched to an expense*: a repayment linked to no expense states no
+    difference until it is linked.
+  - A claim whose expenses are in another currency states none either, and
+    the report says how many there are.
+  - Every new figure opens to the repayment and the expenses it covered,
+    which add up to it.
+  - The agent's report and manifest carry the same rows.
+- **A folded category group reads as one line of the report.** Its heading
+  shows the group's total for each month, its Total and its Average, and no
+  longer says how many categories it folded away; a screen reader still
+  hears the count.
+
 ## 0.13.0 — 2026-11-09
 
 **Reversible: lossy** — two migrations, applied in this order.

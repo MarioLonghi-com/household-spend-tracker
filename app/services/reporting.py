@@ -40,6 +40,18 @@ is wrong. So Income vs Expense **sets them apart** in a block of their own
 rather than dropping them (#372), and :func:`side` is the one place that says
 which rows those are. A ``written_off`` row is a cost after all and stays an
 expense, in its own month (G(i), 2026-09-25).
+
+**What a repayment differs by is counted.** A repayment of 300 against 200 of
+linked expenses leaves the household 100 better off, and that 100 is income;
+one of 150 against 200 leaves it 50 worse off, and that is a cost. So each
+repayment in the Reimbursement category is compared with the expenses linked
+to it, and the difference lands in Income as *Reimbursement surplus* or in
+Expenses as *Reimbursement shortfall*, in the repayment's month. The part that
+merely pays back what was spent stays set apart. A repayment linked to nothing
+has no difference to state -- counting it whole would overstate income
+whenever linking lags -- and neither has one whose expenses are in another
+currency, which this ledger cannot convert. :func:`claim_lines` is the one
+place that says which repayments those are.
 """
 
 from __future__ import annotations
@@ -139,12 +151,31 @@ REIMBURSEMENT_INCOME = "reimbursement_income"
 REIMBURSEMENT_SPENT = "reimbursement_spent"
 #: Flagged `expected` and still waiting for its payment.
 REIMBURSEMENT_PENDING = "reimbursement_pending"
+#: A repayment that came to more than the expenses linked to it: the
+#: difference, counted in income in the repayment's month.
+REIMBURSEMENT_SURPLUS = "reimbursement_surplus"
+#: A repayment that came to less: the difference, counted in expenses.
+REIMBURSEMENT_SHORTFALL = "reimbursement_shortfall"
+#: A repayment linked to no expense: set apart, with no difference to state.
+REIMBURSEMENT_UNMATCHED = "reimbursement_unmatched"
+#: The block's view of the two counted lines together: surplus less shortfall.
+REIMBURSEMENT_DIFFERENCE = "reimbursement_difference"
 
 #: The two sides that make income, expenses and net.
 COUNTED = (INCOME, EXPENSE)
 #: The block shown for information and counted in none of them.
 SET_APART = (REIMBURSEMENT_INCOME, REIMBURSEMENT_SPENT, REIMBURSEMENT_PENDING)
 SIDES = COUNTED + SET_APART
+#: The lines worked out per repayment rather than read off one row's columns.
+#: The first two are counted, in income and expenses; the other two are views
+#: of the block. Every one of them can be drilled into.
+CLAIM_LINES = (
+    REIMBURSEMENT_SURPLUS,
+    REIMBURSEMENT_SHORTFALL,
+    REIMBURSEMENT_UNMATCHED,
+    REIMBURSEMENT_DIFFERENCE,
+)
+LINES = SIDES + CLAIM_LINES
 
 
 def side():
@@ -194,6 +225,81 @@ def classified_rows(household_id: str) -> Select:
         .outerjoin(Category, Category.id == Transaction.category_id)
         .outerjoin(CategoryGroup, CategoryGroup.id == Category.group_id)
     )
+
+
+def claim_lines(household_id: str, **window) -> Select:
+    """Every repayment in the window, with what its linked expenses add up to.
+
+    One row per transaction in the category carrying the ``reimbursement``
+    role that :func:`income_expense` would draw: ``(id, period, amount,
+    covered, linked, foreign)``. ``covered`` sums the linked expenses in the
+    report's currency (negative, as the ledger signs them), ``linked`` counts
+    them, and ``foreign`` counts the ones in any other currency.
+
+    Read by :func:`claim_side`: linked to nothing is unmatched, any foreign
+    expense means no difference can be stated, and otherwise ``amount +
+    covered`` is the surplus (positive) or the shortfall (negative).
+
+    The repayment is narrowed by the report's window like any row; its
+    expenses are not, because an expense is often paid months before the
+    money comes back and a claim cut in half by the date picker would show a
+    difference that is an artefact of the picker. Only expenses flagged
+    ``expected`` count -- rule 2 of :func:`side`, the rows already set apart --
+    so a written-off row, which is an expense already, is never counted twice.
+    """
+    expense = aliased(Transaction)
+    expense_account = aliased(Account)
+    currency = window.get("currency")
+    linked = (
+        select(
+            expense.reimbursed_by_id.label("payment_id"),
+            func.count().label("linked"),
+            func.sum(
+                case((expense_account.currency == currency, expense.amount), else_=0)
+            ).label("covered"),
+            func.sum(case((expense_account.currency != currency, 1), else_=0)).label(
+                "foreign"
+            ),
+        )
+        .join(expense_account, expense_account.id == expense.account_id)
+        .where(expense.household_id == household_id)
+        .where(expense.reimbursed_by_id.is_not(None))
+        .where(expense.reimbursement == ReimbursementState.expected)
+        .group_by(expense.reimbursed_by_id)
+        .subquery()
+    )
+    stmt = (
+        classified_rows(household_id)
+        .outerjoin(linked, linked.c.payment_id == Transaction.id)
+        .where(Category.role == CategoryRole.reimbursement)
+        .where(Transaction.amount != 0)
+        .with_only_columns(
+            Transaction.id,
+            func.strftime("%Y-%m", Transaction.date),
+            Transaction.amount,
+            func.coalesce(linked.c.covered, 0),
+            func.coalesce(linked.c.linked, 0),
+            func.coalesce(linked.c.foreign, 0),
+        )
+    )
+    return _windowed(stmt, **window)
+
+
+def claim_side(amount: int, covered: int, linked: int, foreign: int) -> tuple[str | None, int]:
+    """Which counted line a repayment's difference lands on, and the difference.
+
+    ``(None, 0)`` when there is nothing to count: a repayment linked to no
+    expense (:data:`REIMBURSEMENT_UNMATCHED` says so in the block), one with an
+    expense in another currency, or one that came to exactly what was spent.
+    """
+    if linked == 0 or foreign:
+        return None, 0
+    difference = int(amount) + int(covered)
+    if difference > 0:
+        return REIMBURSEMENT_SURPLUS, difference
+    if difference < 0:
+        return REIMBURSEMENT_SHORTFALL, difference
+    return None, 0
 
 
 def has_income_group(session: Session, household_id: str) -> bool:
@@ -369,6 +475,10 @@ class Row:
     by_month: dict[str, int] = field(default_factory=dict)
     total_minor: int = 0
     count: int = 0
+    #: Set on a row that is no category but a line worked out per repayment
+    #: -- :data:`REIMBURSEMENT_SURPLUS` in income, :data:`REIMBURSEMENT_SHORTFALL`
+    #: in expenses -- and None on every category row, Uncategorised included.
+    line: str | None = None
     #: Mean per calendar month in the window, filled in by the caller.
     #:
     #: Not computed by the row, because the divisor is a property of the
@@ -444,7 +554,11 @@ def income_expense(
     every other category, and Uncategorised, is an expense line where refunds
     and charges net per month. Work reimbursements are their own block,
     ``reimbursements``, shown for information and counted in neither income,
-    expenses nor net.
+    expenses nor net -- except what a repayment differs from its expenses
+    by, which :func:`claim_lines` works out and which is counted, as the
+    *Reimbursement surplus* row in income or the *Reimbursement shortfall*
+    row in expenses. The block shows that difference too, as ``difference``,
+    so the reader sees where the counted figure came from.
 
     Zero-amount rows are counted nowhere: they move no money, and putting
     them on one side would make that side's row count disagree with its total.
@@ -501,7 +615,10 @@ def income_expense(
     stmt = _windowed(stmt, **window)
 
     sections = {INCOME: Section(), EXPENSE: Section()}
-    block = {one: Line(key=one) for one in SET_APART}
+    block = {
+        one: Line(key=one)
+        for one in (*SET_APART, REIMBURSEMENT_DIFFERENCE, REIMBURSEMENT_UNMATCHED)
+    }
     seen: dict[tuple[str, str | None], Row] = {}
     group_lines: dict[tuple[str, str], Line] = {}
 
@@ -536,6 +653,40 @@ def income_expense(
         section.total_minor += amount
         section.count += count
 
+    # What each repayment differs from its expenses by: counted, in the
+    # repayment's month, on a line of its own in income or expenses.
+    derived = {
+        REIMBURSEMENT_SURPLUS: (INCOME, "Reimbursement surplus"),
+        REIMBURSEMENT_SHORTFALL: (EXPENSE, "Reimbursement shortfall"),
+    }
+    lines: dict[str, Row] = {}
+    mixed = 0
+    for _id, month, amount, covered, linked, foreign in session.execute(
+        claim_lines(household_id, **window)
+    ).all():
+        if int(linked) == 0:
+            block[REIMBURSEMENT_UNMATCHED].add(month, int(amount), 1)
+            continue
+        if int(foreign):
+            mixed += 1
+            continue
+        line, difference = claim_side(amount, covered, linked, foreign)
+        if line is None:
+            continue
+        way, name = derived[line]
+        row = lines.get(line)
+        if row is None:
+            row = lines[line] = Row(key=None, name=name, group_name=None, line=line)
+            sections[way].rows.append(row)
+        section = sections[way]
+        row.by_month[month] = row.by_month.get(month, 0) + difference
+        row.total_minor += difference
+        row.count += 1
+        section.by_month[month] = section.by_month.get(month, 0) + difference
+        section.total_minor += difference
+        section.count += 1
+        block[REIMBURSEMENT_DIFFERENCE].add(month, difference, 1)
+
     for way, section in sections.items():
         for row in section.rows:
             row.average_minor = _mean(row.total_minor, divisor)
@@ -555,7 +706,7 @@ def income_expense(
     excluded = excluded_counts(session, household_id, **window)
     # The rows set apart, counted off the query that drew the block, so the
     # screen's "N rows set apart" is the block's own count and nothing else.
-    excluded["reimbursements"] = sum(line.count for line in block.values())
+    excluded["reimbursements"] = sum(block[one].count for one in SET_APART)
 
     return {
         "currency": currency,
@@ -567,7 +718,8 @@ def income_expense(
         # Net is the one sum this module *does* make, and it is safe: both
         # sides are already the same currency by construction, because the
         # currency was a filter rather than a grouping. The reimbursement
-        # block is not in it -- that is what setting it apart means.
+        # block is not in it -- that is what setting it apart means -- but the
+        # surplus and shortfall rows are, being rows of the two sections.
         "net_by_month": {
             month: sections[INCOME].by_month.get(month, 0)
             + sections[EXPENSE].by_month.get(month, 0)
@@ -577,8 +729,13 @@ def income_expense(
         "reimbursements": {
             "income": block[REIMBURSEMENT_INCOME],
             "spent": block[REIMBURSEMENT_SPENT],
+            "difference": block[REIMBURSEMENT_DIFFERENCE],
+            "unmatched": block[REIMBURSEMENT_UNMATCHED],
             "pending": block[REIMBURSEMENT_PENDING],
         },
+        # Repayments whose expenses are in another currency: no difference
+        # can be stated without a rate, so the screen says how many there are.
+        "reimbursement_mixed": mixed,
         "has_income_group": has_income_group(session, household_id),
         "excluded": excluded,
         "coverage": {
@@ -602,6 +759,7 @@ def _order(section: Section, *, largest) -> None:
     rank = {line.name: n for n, line in enumerate(section.groups)}
     section.rows.sort(
         key=lambda row: (
+            row.line is not None,
             row.group_name is None,
             rank.get(row.group_name, 0),
             largest(row.total_minor),
@@ -708,13 +866,21 @@ def behind(
       "Uncategorised" is a real row but **is not an id**, which is the same
       reason `include_uncategorised` is separate from `category_ids`.
     - ``row_group_id`` is one category group's subtotal line (#372).
-    - ``direction`` is which line of :data:`SIDES` -- income, expense, or one
-      of the three work-reimbursement lines -- and is absent for Net, which is
-      income and expense together and never the reimbursement block.
+    - ``direction`` is which line of :data:`LINES` -- income, expense, one
+      of the work-reimbursement lines, or one worked out per repayment -- and
+      is absent for Net, which is income and expense together and never the
+      reimbursement block.
+
+    A line worked out per repayment (:data:`CLAIM_LINES`) is shown as the
+    repayments behind it **with the expenses each one covered**: the payment
+    of 300 and the two expenses of 100 add up to the surplus of 100, which is
+    the figure clicked. Income, Expenses and Net include those rows too when
+    no category row narrows them, because the surplus and the shortfall are
+    in those totals.
     """
-    stmt = classified_rows(household_id).where(Transaction.amount != 0)
-    stmt = _windowed(
-        stmt,
+    if direction is not None and direction not in LINES:
+        raise ValueError(f"no such line: {direction!r}")
+    window = dict(
         since=since,
         until=until,
         currency=currency,
@@ -722,6 +888,33 @@ def behind(
         category_ids=category_ids,
         include_uncategorised=include_uncategorised,
     )
+    a_row = bool(row_uncategorised or row_category_id or row_group_id)
+    claims: tuple[str, ...] = ()
+    if direction in CLAIM_LINES:
+        claims = (
+            (REIMBURSEMENT_SURPLUS, REIMBURSEMENT_SHORTFALL)
+            if direction == REIMBURSEMENT_DIFFERENCE
+            else (direction,)
+        )
+    elif not a_row and direction in (None, INCOME, EXPENSE):
+        claims = {
+            None: (REIMBURSEMENT_SURPLUS, REIMBURSEMENT_SHORTFALL),
+            INCOME: (REIMBURSEMENT_SURPLUS,),
+            EXPENSE: (REIMBURSEMENT_SHORTFALL,),
+        }[direction]
+    extra, extra_total, extra_count = _claim_entries(
+        session, household_id, claims, window, period, limit
+    )
+    if direction in CLAIM_LINES:
+        return {
+            "entries": extra[:limit],
+            "total_minor": extra_total,
+            "count": extra_count,
+            "capped": extra_count > min(len(extra), limit),
+        }
+
+    stmt = classified_rows(household_id).where(Transaction.amount != 0)
+    stmt = _windowed(stmt, **window)
 
     if period:
         stmt = stmt.where(func.strftime("%Y-%m", Transaction.date) == period)
@@ -731,12 +924,7 @@ def behind(
         stmt = stmt.where(Transaction.category_id == row_category_id)
     if row_group_id:
         stmt = stmt.where(Category.group_id == row_group_id)
-    if direction is None:
-        stmt = stmt.where(side().in_(COUNTED))
-    elif direction in SIDES:
-        stmt = stmt.where(side() == direction)
-    else:
-        raise ValueError(f"no such line: {direction!r}")
+    stmt = stmt.where(side().in_(COUNTED) if direction is None else side() == direction)
 
     # The total is counted over the whole match, before the cap, so a capped
     # bubble still reconciles against the cell it came from.
@@ -764,8 +952,97 @@ def behind(
         .limit(limit)
     ).all()
 
+    entries = [
+        Entry(
+            id=row[0],
+            date=_as_date(row[1]),
+            account_name=row[2],
+            payee_name=row[3],
+            category_name=row[4],
+            memo=row[5],
+            amount_minor=int(row[6]),
+        )
+        for row in rows
+    ]
+    if extra:
+        # Newest first across both, as each list already is; `sorted` is
+        # stable, so rows of one date keep the order their query gave them.
+        entries = sorted(entries + extra, key=lambda one: one.date, reverse=True)[:limit]
+    total_minor += extra_total
+    count += extra_count
     return {
-        "entries": [
+        "entries": entries,
+        "total_minor": total_minor,
+        "count": count,
+        "capped": count > len(entries),
+    }
+
+
+def _claim_entries(
+    session: Session,
+    household_id: str,
+    lines: tuple[str, ...],
+    window: dict,
+    period: str | None,
+    limit: int,
+) -> tuple[list[Entry], int, int]:
+    """The rows behind lines worked out per repayment: ``(entries, total, count)``.
+
+    For a surplus or shortfall, each repayment on that line and every expense
+    linked to it, so the rows sum to the difference. For the unmatched line,
+    the repayments alone -- there is nothing linked to show. Entries are
+    newest first and capped at ``limit``; the total and the count are not.
+    """
+    if not lines:
+        return [], 0, 0
+    stmt = claim_lines(household_id, **window)
+    if period:
+        stmt = stmt.where(func.strftime("%Y-%m", Transaction.date) == period)
+    payments: list[str] = []
+    with_expenses: list[str] = []
+    for pid, _month, amount, covered, linked, foreign in session.execute(stmt).all():
+        if int(linked) == 0:
+            if REIMBURSEMENT_UNMATCHED in lines:
+                payments.append(pid)
+            continue
+        line, _difference = claim_side(amount, covered, linked, foreign)
+        if line in lines:
+            payments.append(pid)
+            with_expenses.append(pid)
+    if not payments:
+        return [], 0, 0
+
+    entries: list[Entry] = []
+    expanded = set(with_expenses)
+    for start in range(0, len(payments), 500):
+        chunk = payments[start : start + 500]
+        linked_chunk = [pid for pid in chunk if pid in expanded]
+        rows = session.execute(
+            select(
+                Transaction.id,
+                Transaction.date,
+                Account.name,
+                Payee.name,
+                Category.name,
+                Transaction.memo,
+                Transaction.amount,
+            )
+            .join(Account, Account.id == Transaction.account_id)
+            .outerjoin(Payee, Payee.id == Transaction.payee_id)
+            .outerjoin(Category, Category.id == Transaction.category_id)
+            .where(Transaction.household_id == household_id)
+            .where(
+                or_(
+                    Transaction.id.in_(chunk),
+                    and_(
+                        Transaction.reimbursed_by_id.in_(linked_chunk),
+                        Transaction.reimbursement == ReimbursementState.expected,
+                    ),
+                )
+            )
+            .order_by(Transaction.date.desc(), Transaction.created_at.desc())
+        ).all()
+        entries.extend(
             Entry(
                 id=row[0],
                 date=_as_date(row[1]),
@@ -776,11 +1053,10 @@ def behind(
                 amount_minor=int(row[6]),
             )
             for row in rows
-        ],
-        "total_minor": total_minor,
-        "count": count,
-        "capped": count > len(rows),
-    }
+        )
+    entries.sort(key=lambda one: one.date, reverse=True)
+    total = sum(one.amount_minor for one in entries)
+    return entries[:limit], total, len(entries)
 
 
 # --------------------------------------------------------------------------- #

@@ -491,8 +491,16 @@ are yours — done visibly.**
   `expense.groups`. Work reimbursements are set apart in `reimbursements`
   (`income` = rows in the category whose `role` is `reimbursement`; `spent` = flagged
   expenses with their payment linked; `pending` = flagged and not yet
-  repaid) — for information only, in neither income, expenses nor net;
-  `excluded.reimbursements` counts their rows. `has_income_group: false`
+  repaid) — for information only, in neither income, expenses nor net.
+  **Except the difference:** a repayment in that category is compared with
+  the flagged expenses linked to it, and what it came to beyond them is a row
+  in `income.rows` with `line: "reimbursement_surplus"` (what it fell short,
+  `line: "reimbursement_shortfall"` in `expense.rows`), in the repayment's
+  month and counted in net. `reimbursements.difference` shows the same
+  figure, `reimbursements.unmatched` the repayments linked to nothing (no
+  difference is stated for them), and `reimbursement_mixed` counts the ones
+  whose expenses are in another currency (none stated either).
+  `excluded.reimbursements` counts the block's rows. `has_income_group: false`
   means no group carries the role, so every row is an expense.
 - **Rates the household actually got:** `GET $H/fx/observed?pair=EUR/GBP` —
   one entry per linked transfer between two currencies, with both amounts and
