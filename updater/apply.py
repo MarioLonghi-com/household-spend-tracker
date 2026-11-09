@@ -106,7 +106,7 @@ PRUNE_SECONDS = 5 * 60
 STOP_GRACE_SECONDS = 30
 HOOK_DEFAULT_SECONDS = 300
 #: How many update backups are protected (A12, B9).
-KEEP_BACKUPS = 5
+KEEP_BACKUPS = prepare.KEEP_BACKUPS
 #: How often the drill's remaining time is saved to the journal while it runs.
 SAVE_DEADLINE_EVERY = 30.0
 
@@ -259,7 +259,12 @@ class Apply:
         return found
 
     def _finish(
-        self, state: str, sentence: str, failed_step: str | None = None, settle: bool = True
+        self,
+        state: str,
+        sentence: str,
+        failed_step: str | None = None,
+        settle: bool = True,
+        code: str | None = None,
     ) -> str:
         report = volume.read_own_json(self.drill_report_path()) or {}
         log = report.get("log") if isinstance(report.get("log"), list) else []
@@ -271,6 +276,7 @@ class Apply:
             backup=self.ctx.get("backup"),
             started_at=self.ctx.get("started_at"),
             log_tail=tuple(str(x) for x in log[-40:]),
+            code=code,
             extra={
                 "from_version": self.ctx.get("from_version"),
                 "to_version": self.ctx.get("to_version"),
@@ -281,8 +287,8 @@ class Apply:
             journal.settle(self.vol, self.j)
         return state
 
-    def not_started(self, sentence: str) -> str:
-        return self._finish("not_started", f"Not started: {sentence}", failed_step=self.j.step)
+    def not_started(self, sentence: str, code: str | None = None) -> str:
+        return self._finish("not_started", f"Not started: {sentence}", failed_step=self.j.step, code=code)
 
     # ------------------------------------------------------------------ #
     # Steps 0-2a
@@ -306,7 +312,7 @@ class Apply:
             if self.step2a():
                 return "handed_over"
         except survey.NotStarted as e:
-            return self.not_started(e.sentence)
+            return self.not_started(e.sentence, e.code)
         except (eng.EngineError, eng.NotAllowed) as e:
             return self.not_started(f"the container engine refused a check ({e}).")
         fresh = journal.load(self.vol, self.id)
@@ -363,9 +369,10 @@ class Apply:
             engine=self.kit.site.engine,
             new_image_bytes=0,
             memory_needed=prepare.app_memory(app.inspect) + prepare.MEMORY_SPARE,
+            update_backups=prepare.update_backup_names(self.vol),
         )
         if problem:
-            raise survey.NotStarted(problem)
+            raise survey.NotStarted(problem.sentence, problem.code)
         # The copy is built now and put to the engine client's guard, so a
         # setting the updater will not copy refuses here, not at step 7.
         try:
@@ -973,14 +980,7 @@ class Apply:
 
     def prune(self) -> None:
         """B9: update backups beyond the newest five go, after a successful update only."""
-        names = set()
-        for path in (self.vol.root / "history").glob("*.json"):
-            stem = path.name[: -len(".json")]
-            if not contract.is_uuid4(stem):
-                continue
-            doc = volume.read_own_json(path) or {}
-            if isinstance(doc.get("backup"), str):
-                names.add(os.path.basename(doc["backup"]))
+        names = prepare.update_backup_names(self.vol)
         if isinstance(self.ctx.get("backup"), str):
             names.add(os.path.basename(self.ctx["backup"]))
         stamps = sorted((n for n in names if shapes.BACKUP_STAMP.fullmatch(n)), reverse=True)

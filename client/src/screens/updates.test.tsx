@@ -485,7 +485,11 @@ describe("A9: each outcome", () => {
     to_version: "0.10.0",
   };
 
-  function show(outcome: Outcome, heartbeat: Heartbeat | null = beat({ updater_version: "0.10.0" })) {
+  function show(
+    outcome: Outcome,
+    heartbeat: Heartbeat | null = beat({ updater_version: "0.10.0" }),
+    repository = "https://github.com/example/spend-tracker",
+  ) {
     post.mockResolvedValue(null);
     const onChanged = vi.fn();
     const client = new QueryClient();
@@ -493,6 +497,7 @@ describe("A9: each outcome", () => {
       <QueryClientProvider client={client}>
         <OutcomeBlock
           outcome={outcome}
+          repository={repository}
           running={outcome.state === "succeeded" ? "0.10.0" : "0.8.0"}
           heartbeat={heartbeat}
           lastPrepared="0.10.0"
@@ -615,6 +620,27 @@ describe("A9: each outcome", () => {
     expect(document.querySelector('[data-outcome="not_started"]')!.textContent).toContain(
       "The digests do not match the report. Nothing was changed.",
     );
+  });
+
+  it("a refusal for want of disk links to Freeing disk for an update, and no other refusal does (#330)", () => {
+    const short = "Needs about 0.94 GB free, there is 0.89 GB: free at least 47 MB more.";
+    const guide =
+      "https://github.com/example/spend-tracker/blob/main/deploy/TROUBLESHOOTING.md#freeing-disk-for-an-update";
+    for (const [kind, state, where] of [
+      ["prepare", "refused", "prepare_failed"],
+      ["apply", "not_started", "not_started"],
+    ] as const) {
+      show({ ...base, kind, state, code: "disk_short", sentence: short });
+      const said = document.querySelector(`[data-outcome="${where}"]`)!;
+      const link = said.querySelector<HTMLAnchorElement>('a[data-help="freeing-disk"]')!;
+      expect(link.textContent).toBe("Freeing disk for an update");
+      expect(link.getAttribute("href")).toBe(guide);
+      expect(said.textContent).toContain(`${short} Nothing was changed. Freeing disk for an update`);
+      cleanup();
+      show({ ...base, kind, state, code: "memory_short", sentence: "Needs about 896 MB of memory free." });
+      expect(document.querySelector('a[data-help="freeing-disk"]')).toBeNull();
+      cleanup();
+    }
   });
 
   it("recovered: what was done, from which backup, and the version now running", () => {

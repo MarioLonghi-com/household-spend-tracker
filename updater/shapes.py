@@ -600,13 +600,23 @@ HEALTH_SCRIPT = (
 )
 
 #: Free disk under the ledger, available memory, and the database's size (8.5).
+#: 8.5's figures, and each `backups/<stamp>/` folder on the disk with the size
+#: of the files directly in it, as the screen counts it (#330). A listing that
+#: fails is `null`, never a failed measurement.
 MEASURE_SCRIPT = (
-    "import json,os\n"
+    "import json,os,re\n"
     "d='/var/lib/spend-tracker';s=os.statvfs(d);m=None\n"
     "for l in open('/proc/meminfo'):\n"
     "  if l.startswith('MemAvailable:'): m=int(l.split()[1])*1024\n"
     "db=sum(os.path.getsize(os.path.join(d,f)) for f in os.listdir(d) if f.startswith('spendtracker.sqlite3'))\n"
-    "print(json.dumps({'free':s.f_bavail*s.f_frsize,'mem_available':m,'database':db}))\n"
+    "r=os.path.join(d,'backups');b={}\n"
+    "try:\n"
+    "  for n in (os.listdir(r) if os.path.isdir(r) else []):\n"
+    "    p=os.path.join(r,n)\n"
+    "    if re.fullmatch(r'[0-9]{8}-[0-9]{6}',n) and os.path.isdir(p) and not os.path.islink(p):\n"
+    "      b[n]=sum(e.stat(follow_symlinks=False).st_size for e in os.scandir(p) if e.is_file(follow_symlinks=False))\n"
+    "except OSError: b=None\n"
+    "print(json.dumps({'free':s.f_bavail*s.f_frsize,'mem_available':m,'database':db,'backups':b}))\n"
 )
 
 #: 5.6's "no drill report": a backup folder made since the drill started, verified.
