@@ -41,6 +41,15 @@ history this repository does not have.
   for review stays a person's step. The signing secrets are held in a
   separate `app-store` environment that only release tags can reach. (#351)
 
+### Fixed
+
+- **An update on rootless Podman goes on when the app is started by hand
+  as it stops.** Podman answered that stop with "container state improper"
+  and the update ended as *Not started: the app could not be stopped*. The
+  updater now waits a moment, looks again, and stops the app once more if
+  it is running; a stop refused a second time is still *Not started*, with
+  the app back as it was. (#344)
+
 ## 0.12.0 — 2026-10-15
 
 **Reversible: none** — no migration in this release. To go back to
