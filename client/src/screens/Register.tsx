@@ -411,6 +411,15 @@ export type RegisterPreset = {
   accounts?: string[];
   /** A transaction to open in the side panel once the rows arrive. */
   open?: string;
+  /**
+   * The rest of a link from a report's bubble (#401): the dates, categories
+   * and currency the figure was made of. Absent is "no filter", as for
+   * `accounts`; `categories: []` with `backlog` is "Needs a category" alone.
+   */
+  range?: Range;
+  categories?: Selection;
+  backlog?: boolean;
+  currencies?: string[] | null;
 };
 
 /**
@@ -633,7 +642,7 @@ export function Register({
     "register", h, "grouping", "country", isGrouping,
   );
   const [pickedCurrencies, setPickedCurrencies] = useFilter<string[] | null>(
-    h, "currencies", null, isIdsOrEverything, sent(null),
+    h, "currencies", null, isIdsOrEverything, sent(preset?.currencies ?? null),
   );
   const [search, setSearch] = useFilter(h, "search", "", undefined, sent(""));
   //: The amount lookup (#123): one box for every money column, Out and In in
@@ -648,7 +657,7 @@ export function Register({
   const [workFilter, setWorkFilter] = useFilter<"" | ReimbursementView>(
     h, "work", "", isWork, sent(preset?.reimbursement ?? ""),
   );
-  const [range, setRange] = useFilter<Range>(h, "range", ALL_DATES, isRange, sent(ALL_DATES));
+  const [range, setRange] = useFilter<Range>(h, "range", ALL_DATES, isRange, sent(preset?.range ?? ALL_DATES));
   const [sort, setSort] = useSticky<SortKey>("register", h, "sort", "date", isSortKey);
   const [direction, setDirection] = useSticky<SortDirection>(
     "register", h, "direction", "desc", isDirection,
@@ -665,9 +674,9 @@ export function Register({
   //: replaced stored "only the backlog" as `uncategorised`, which read back
   //: here would mean the opposite of what it says.
   const [categoryIds, setCategoryIds] = useFilter<Selection>(
-    h, "categories", null, isIdsOrEverything, sent(null),
+    h, "categories", null, isIdsOrEverything, sent(preset?.categories ?? null),
   );
-  const [backlog, setBacklogTick] = useFilter(h, "backlog", true, isBoolean, sent(true));
+  const [backlog, setBacklogTick] = useFilter(h, "backlog", true, isBoolean, sent(preset?.backlog ?? true));
   //: Categorising is the one recurring chore here, and it is a worklist:
   //: what still needs doing, oldest first, worked forward. The register's own
   //: default stays newest-first -- right for "what happened lately", wrong for
@@ -1238,6 +1247,9 @@ export function Register({
   //: is among have arrived, and then forgotten -- the panel is not reopened
   //: every time the register refetches behind it.
   const openOnArrival = useRef(preset?.open ?? null);
+  //: The row a link was about (#401), marked for as long as this register is
+  //: open so it can be found again after the panel is closed.
+  const [sentRow] = useState(preset?.open ?? null);
   //: Not on the pages in hand is not yet "not there": the next page is asked
   //: for until the row turns up or the filter has no more to give.
   useEffect(() => {
@@ -1248,7 +1260,16 @@ export function Register({
       return;
     }
     openOnArrival.current = null;
-    if (wanted) setOpened(wanted);
+    if (wanted) {
+      setOpened(wanted);
+      // Brought into view as well as opened: the panel says which row, the
+      // highlight says where it sits among its neighbours.
+      requestAnimationFrame(() =>
+        document
+          .querySelector(`tr[data-txn="${wanted.id}"]`)
+          ?.scrollIntoView?.({ block: "center" }),
+      );
+    }
   }, [data, hasNextPage, loadMore]);
 
   function pickRow(index: number, event: React.MouseEvent) {
@@ -1775,7 +1796,11 @@ export function Register({
                 {page.visible.map((txn, index) => (
                   <tr
                     key={txn.id}
-                    className={selected.has(txn.id) ? "row-pick selected" : "row-pick"}
+                    data-txn={txn.id}
+                    className={
+                      (selected.has(txn.id) ? "row-pick selected" : "row-pick") +
+                      (txn.id === sentRow ? " row-sent" : "")
+                    }
                     onClick={(event) => pickRow(index, event)}
                   >
                     <td data-select="true">

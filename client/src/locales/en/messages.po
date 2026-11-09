@@ -6566,6 +6566,11 @@ msgstr "A running balance needs one account, newest-first by date, and no filter
 msgid "{0, plural, one {It goes as one act, so the History screen puts it back in one undo.} other {They go as one act, so the History screen puts them all back in one undo.}}"
 msgstr "{0, plural, one {It goes as one act, so the History screen puts it back in one undo.} other {They go as one act, so the History screen puts them all back in one undo.}}"
 
+#. Screen-reader name of the month map on the Income vs Expense report: drag or use the arrow keys to move
+#: src/screens/reports/ReportGrid.tsx
+msgid "Months in view"
+msgstr "Months in view"
+
 #. Button on the History screen
 #: src/screens/History.tsx
 msgid "Undo this"
@@ -7240,6 +7245,7 @@ msgstr "Detach this receipt?"
 
 #. Column heading on the Categories screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column heading on the Import screen: noun, what a transaction was for. See GLOSSARY.md
+#. Column heading on the Income vs Expense report's transaction list: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
@@ -7254,6 +7260,7 @@ msgstr "Detach this receipt?"
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/Reimbursements.tsx
 msgid "Category"
 msgstr "Category"
@@ -8050,6 +8057,10 @@ msgstr "{0} not yet cleared"
 #: src/lib/signInChanges.ts
 msgid "The server reset {user}'s password and authenticator"
 msgstr "The server reset {user}'s password and authenticator"
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Click a transaction to open it in Transactions, in a new tab."
+msgstr "Click a transaction to open it in Transactions, in a new tab."
 
 #: src/screens/Admin.tsx
 #: src/screens/Household.tsx
@@ -10726,6 +10737,11 @@ msgstr "Money in within {PAYMENT_PICKER_DAYS} days either side of {0}. Either si
 msgid "Out of"
 msgstr "Out of"
 
+#. Screen-reader text after a date on the Income vs Expense report's transaction list
+#: src/screens/reports/IncomeExpense.tsx
+msgid ", open in Transactions in a new tab"
+msgstr ", open in Transactions in a new tab"
+
 #. Column heading on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Resets"
@@ -11972,6 +11988,11 @@ msgstr "{count, plural, one {{shown} transaction} other {{shown} transactions}}"
 msgid "Mark applied"
 msgstr "Mark applied"
 
+#. Screen-reader name of the right arrow on the Income vs Expense report's month map
+#: src/screens/reports/ReportGrid.tsx
+msgid "Later months"
+msgstr "Later months"
+
 #: src/screens/Admin.tsx
 msgid "Close without copying? The link cannot be shown again."
 msgstr "Close without copying? The link cannot be shown again."
@@ -12135,6 +12156,11 @@ msgstr "via {via}"
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as a member."
 msgstr "{inviter} invited you to {PRODUCT} as a member."
+
+#. Screen-reader name of the left arrow on the Income vs Expense report's month map
+#: src/screens/reports/ReportGrid.tsx
+msgid "Earlier months"
+msgstr "Earlier months"
 
 #: src/screens/Register.tsx
 msgid "Add an account before entering transactions."
@@ -13001,9 +13027,13 @@ msgid "their authenticator and recovery codes are cleared"
 msgstr "their authenticator and recovery codes are cleared"
 
 #. Label of a choice on the one-time import
+#. Screen-reader text on the Income vs Expense report's month map: the first and last month in view
+#. placeholder {0}: monthLabel(months[from])
 #. placeholder {0}: one.first_month ?? "…"
+#. placeholder {1}: monthLabel(months[to])
 #. placeholder {1}: one.last_month ?? "…"
 #: src/screens/OneTimeImport.tsx
+#: src/screens/reports/ReportGrid.tsx
 msgid "{0} to {1}"
 msgstr "{0} to {1}"
 

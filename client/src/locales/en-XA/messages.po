@@ -6565,6 +6565,11 @@ msgstr ""
 msgid "{0, plural, one {It goes as one act, so the History screen puts it back in one undo.} other {They go as one act, so the History screen puts them all back in one undo.}}"
 msgstr ""
 
+#. Screen-reader name of the month map on the Income vs Expense report: drag or use the arrow keys to move
+#: src/screens/reports/ReportGrid.tsx
+msgid "Months in view"
+msgstr ""
+
 #. Button on the History screen
 #: src/screens/History.tsx
 msgid "Undo this"
@@ -7239,6 +7244,7 @@ msgstr ""
 
 #. Column heading on the Categories screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column heading on the Import screen: noun, what a transaction was for. See GLOSSARY.md
+#. Column heading on the Income vs Expense report's transaction list: noun. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
 #. Column name shown beside a value on phones on the Register screen: noun, what a transaction was for. See GLOSSARY.md
@@ -7253,6 +7259,7 @@ msgstr ""
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Register.tsx
+#: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/Reimbursements.tsx
 msgid "Category"
 msgstr ""
@@ -8048,6 +8055,10 @@ msgstr ""
 
 #: src/lib/signInChanges.ts
 msgid "The server reset {user}'s password and authenticator"
+msgstr ""
+
+#: src/screens/reports/IncomeExpense.tsx
+msgid "Click a transaction to open it in Transactions, in a new tab."
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -10720,6 +10731,11 @@ msgstr ""
 msgid "Out of"
 msgstr ""
 
+#. Screen-reader text after a date on the Income vs Expense report's transaction list
+#: src/screens/reports/IncomeExpense.tsx
+msgid ", open in Transactions in a new tab"
+msgstr ""
+
 #. Column heading on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Resets"
@@ -11966,6 +11982,11 @@ msgstr ""
 msgid "Mark applied"
 msgstr ""
 
+#. Screen-reader name of the right arrow on the Income vs Expense report's month map
+#: src/screens/reports/ReportGrid.tsx
+msgid "Later months"
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Close without copying? The link cannot be shown again."
 msgstr ""
@@ -12128,6 +12149,11 @@ msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as a member."
+msgstr ""
+
+#. Screen-reader name of the left arrow on the Income vs Expense report's month map
+#: src/screens/reports/ReportGrid.tsx
+msgid "Earlier months"
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -12990,9 +13016,13 @@ msgid "their authenticator and recovery codes are cleared"
 msgstr ""
 
 #. Label of a choice on the one-time import
+#. Screen-reader text on the Income vs Expense report's month map: the first and last month in view
+#. placeholder {0}: monthLabel(months[from])
 #. placeholder {0}: one.first_month ?? "…"
+#. placeholder {1}: monthLabel(months[to])
 #. placeholder {1}: one.last_month ?? "…"
 #: src/screens/OneTimeImport.tsx
+#: src/screens/reports/ReportGrid.tsx
 msgid "{0} to {1}"
 msgstr ""
 

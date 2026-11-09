@@ -285,3 +285,150 @@ table.report tfoot tr.report-aside td { color: var(--muted); font-weight: 400; }
   table.report tr.report-aside-heading td,
   table.report tr.report-heading td { background: var(--surface); }
 }
+
+/* --------------------------------------------------------------------------
+   The frame: a heading that sticks, and the month map (#401)
+
+   See `ReportGrid.tsx` for why the heading is a table of its own. Both tables
+   are laid out `fixed` from one `<colgroup>`, so the label cells' old
+   `min-width` is set aside here: in a fixed layout the column says how wide.
+   -------------------------------------------------------------------------- */
+
+.ie-grid { position: relative; }
+
+.ie-grid table.report { table-layout: fixed; }
+.ie-grid table.report .report-label,
+.ie-grid table.report tfoot th,
+.ie-grid table.report .report-total th,
+.ie-grid table.report .report-heading th { min-width: 0; }
+.ie-grid table.report .report-label { white-space: normal; overflow-wrap: break-word; }
+
+/* The band that sticks: the map, then the drawn heading. `main.content` is the
+   page's scroller, so it sticks to the top of what you are reading. */
+/* Sticky measures `top` from inside the scroller's padding: 20px on
+   `main.content`, 12px on a phone. At `top: 0` rows showed through that strip
+   above the band, so it is pulled up by exactly the padding, as the
+   register's selection dock is pulled down. */
+.ie-grid-head {
+  position: sticky;
+  top: -20px;
+  z-index: 4;
+  background: var(--paper);
+  box-shadow: 0 8px 10px -12px rgb(0 0 0 / 0.45);
+}
+@media (max-width: 768px) {
+  .ie-grid-head { top: -12px; }
+}
+.ie-grid-head-scroll { overflow: hidden; }
+.ie-grid-head-scroll table.report thead th { position: static; }
+.ie-grid-head-scroll table.report thead th.report-label { position: sticky; left: 0; }
+
+/* The figures scroll sideways under it. The map is the way across, so the
+   box's own bar -- which sat under the last row -- is not drawn. */
+.ie-grid-body { scrollbar-width: none; }
+.ie-grid-body::-webkit-scrollbar { display: none; }
+
+/* The body's own heading row: words for a screen reader, no height. */
+.ie-grid .report-sr-head th {
+  position: static;
+  height: 0;
+  padding: 0;
+  border: 0;
+  line-height: 0;
+}
+
+/* Total and Average stay at the right edge while the months pass under them. */
+.ie-pin-right table.report .amount:nth-last-child(2) {
+  position: sticky;
+  right: var(--ie-summary);
+  z-index: 1;
+}
+.ie-pin-right table.report .amount:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+}
+
+/* A shadow where figures have gone under a pinned column, so a cut-off month
+   reads as "more this way" rather than as the edge of the report. */
+.ie-grid.ie-left-hidden table.report :is(.report-label, tfoot th, .report-total th, .report-heading th) {
+  box-shadow: 7px 0 8px -7px rgb(0 0 0 / 0.3);
+}
+.ie-grid.ie-pin-right.ie-right-hidden table.report .amount:nth-last-child(2) {
+  box-shadow: -7px 0 8px -7px rgb(0 0 0 / 0.3);
+}
+
+/* The month map. One slot per month, the net as a bar above or below the
+   line, and the outline over the months in view. */
+.ie-map { display: flex; align-items: stretch; gap: 6px; padding: 6px 0 4px; }
+.ie-map-step {
+  flex: 0 0 30px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+.ie-map-track {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  border-radius: var(--radius);
+}
+.ie-map-track:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ie-map-month {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 1px 0;
+}
+.ie-map-year { height: 10px; font: 600 9px/10px var(--mono); color: var(--accent); }
+.ie-map-bars { position: relative; width: 100%; height: 22px; }
+.ie-map-bars::after {
+  content: "";
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  top: 50%;
+  border-top: 1px solid var(--line);
+}
+.ie-map-bars i { position: absolute; left: 30%; right: 30%; border-radius: 1px; opacity: 0.75; }
+.ie-map-bars i.up { bottom: 50%; background: var(--positive); }
+.ie-map-bars i.down { top: 50%; background: var(--danger); }
+.ie-map-name {
+  height: 12px;
+  font: 500 10px/12px var(--mono);
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+}
+.ie-map-month.in-view .ie-map-name { color: var(--ink); }
+.ie-map-lens {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  cursor: grab;
+}
+.ie-map-lens.dragging { cursor: grabbing; }
+
+/* --------------------------------------------------------------------------
+   The bubble behind a figure, now twice as wide (#401), and its rows open
+   the transaction in Transactions, in a new tab.
+   -------------------------------------------------------------------------- */
+
+.dialog.dialog-wide { width: min(1180px, 100%); }
+table.behind tbody tr.behind-row { cursor: pointer; }
+table.behind tbody tr.behind-row:hover td { background: var(--surface-2); }
+table.behind .behind-open { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; }
+table.behind .behind-open:hover,
+table.behind .behind-open:focus-visible { color: var(--accent); text-decoration-style: solid; }
+.behind-hint { margin: 0 0 8px; }

@@ -85,6 +85,25 @@ history this repository does not have.
     through the household's chosen rates and say which.
   - `docs/CURRENCY-CONVERSION.md`, *How the tracker converts currencies*.
 
+### Changed
+
+- **Income vs Expense keeps its headings in view and has a way across**
+  (#401). The month headings now stay at the top of the page as you scroll
+  down a long report; before, they scrolled away with it.
+  - A month map travels with them: every month in the range, each with its
+    net as a small bar, and an outline over the months on screen. Drag the
+    outline, click a month, use the arrows or the arrow keys. It replaces the
+    scrollbar that sat under the last row.
+  - Total and Average stay pinned at the right while the months scroll, on
+    anything wider than a phone.
+  - A long report opens on its latest months.
+- **The rows behind a figure open in Transactions** (#401). The list a
+  figure opens is twice as wide, with a Category column. Click a
+  transaction and Transactions opens in a new tab, filtered the way the
+  figure was -- its category or group, its month, the report's currency and
+  accounts -- with that transaction highlighted and its panel open. The
+  report stays where it was.
+
 ### Fixed
 
 - **Forint and New Taiwan dollar amounts have two decimals,** as ISO 4217
