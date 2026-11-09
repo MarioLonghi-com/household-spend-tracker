@@ -7615,6 +7615,10 @@ msgstr ""
 msgid "No reset links pending."
 msgstr ""
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{items, plural, one {({items} item)} other {({items} items)}}"
+msgstr ""
+
 #: src/screens/Updates.tsx
 msgid "The end of the update's log"
 msgstr ""
@@ -11605,13 +11609,6 @@ msgstr ""
 
 #: src/screens/Updates.tsx
 msgid "A prepared update goes stale after 24 hours, or as soon as the running version changes. Discard removes it and asks the updater to delete the images it downloaded."
-msgstr ""
-
-#. placeholder {0}: block.pending.count
-#. placeholder {1}: block.pending.count
-#. placeholder {2}: block.pending.count
-#: src/screens/reports/IncomeExpense.tsx
-msgid "{0, plural, one {({1} item)} other {({2} items)}}"
 msgstr ""
 
 #: src/screens/Import.tsx

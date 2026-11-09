@@ -7616,6 +7616,10 @@ msgstr "The category is chosen from how the last {0} transactions for {name} wer
 msgid "No reset links pending."
 msgstr "No reset links pending."
 
+#: src/screens/reports/IncomeExpense.tsx
+msgid "{items, plural, one {({items} item)} other {({items} items)}}"
+msgstr "{items, plural, one {({items} item)} other {({items} items)}}"
+
 #: src/screens/Updates.tsx
 msgid "The end of the update's log"
 msgstr "The end of the update's log"
@@ -11612,13 +11616,6 @@ msgstr "If you mean to replace an earlier run, undo it from History first."
 #: src/screens/Updates.tsx
 msgid "A prepared update goes stale after 24 hours, or as soon as the running version changes. Discard removes it and asks the updater to delete the images it downloaded."
 msgstr "A prepared update goes stale after 24 hours, or as soon as the running version changes. Discard removes it and asks the updater to delete the images it downloaded."
-
-#. placeholder {0}: block.pending.count
-#. placeholder {1}: block.pending.count
-#. placeholder {2}: block.pending.count
-#: src/screens/reports/IncomeExpense.tsx
-msgid "{0, plural, one {({1} item)} other {({2} items)}}"
-msgstr "{0, plural, one {({1} item)} other {({2} items)}}"
 
 #: src/screens/Import.tsx
 msgid "The memo this row will carry"

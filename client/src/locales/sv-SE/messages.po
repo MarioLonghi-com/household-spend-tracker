@@ -1061,8 +1061,9 @@ msgid "Your household"
 msgstr "Ditt hushåll"
 
 #: src/screens/Categories.tsx
+#, fuzzy
 msgid "Income vs Expense shows its rows under Work reimbursements, out of income, spending and net. One category has this; ticking it moves it here."
-msgstr ""
+msgstr "Inkomster och utgifter visar dess rader under Utlägg i jobbet, utanför inkomster, utgifter och netto. En kategori har detta; kryssar du i det flyttas det hit."
 
 #: src/screens/Passkeys.tsx
 #, fuzzy
@@ -2400,8 +2401,9 @@ msgstr "Skriver…"
 
 #. Headline figure on the Income vs Expense report: money work paid back
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "Reimbursements received"
-msgstr ""
+msgstr "Mottagna ersättningar"
 
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
@@ -2527,8 +2529,9 @@ msgstr "Återbetalt"
 #. Heading on the Income vs Expense report: noun, money that went out
 #. Headline figure on the Income vs Expense report: noun, money that went out
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "Expenses"
-msgstr ""
+msgstr "Utgifter"
 
 #. Button on the Payees screen: verb, combine two into one
 #: src/screens/Payees.tsx
@@ -3258,8 +3261,9 @@ msgid "{0, plural, one {Also on {1} other transaction — the same file, stored 
 msgstr "{0, plural, one {Även på {1} annan transaktion – samma fil, sparad en gång.} other {Även på {2} andra transaktioner – samma fil, sparad en gång.}}"
 
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "For information only — not counted in income, expenses or net."
-msgstr ""
+msgstr "Endast som information – räknas inte i inkomster, utgifter eller netto."
 
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
@@ -3490,8 +3494,9 @@ msgid "Changing the setting below writes a line into <0>all three</0>, on both s
 msgstr "Att ändra inställningen nedan skriver en rad i <0>alla tre</0>, på båda sidor om ändringen – även när du <1>sänker</1> den, vilket var just det fall som tidigare inte lämnade några spår alls."
 
 #: src/screens/Categories.tsx
+#, fuzzy
 msgid "The Income group — its categories are income on Income vs Expense"
-msgstr ""
+msgstr "Inkomstgruppen – dess kategorier är inkomster i Inkomster och utgifter"
 
 #: src/screens/ApplicationManagement.tsx
 #, fuzzy
@@ -3754,8 +3759,9 @@ msgstr "Mönstret drog över sin tiondels sekund. En import skulle lägga det å
 
 #. Line on the Income vs Expense report: work expenses not paid back yet
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "Pending reimbursement"
-msgstr ""
+msgstr "Väntande ersättning"
 
 #. Application management: what app.log holds
 #: src/lib/labels.ts
@@ -5971,8 +5977,9 @@ msgid "Role"
 msgstr "Roll"
 
 #: src/screens/Categories.tsx
+#, fuzzy
 msgid "Money work pays back: set apart on Income vs Expense"
-msgstr ""
+msgstr "Pengar som jobbet betalar tillbaka: hålls isär i Inkomster och utgifter"
 
 #. Screen title on the Payee Categorisation screen. See GLOSSARY.md
 #: src/screens/PayeeCategorisation.tsx
@@ -6100,8 +6107,9 @@ msgid "Inbox"
 msgstr "Inkorg"
 
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "Work reimbursements, for information: not in income, expenses or net."
-msgstr ""
+msgstr "Utlägg i jobbet, som information: inte i inkomster, utgifter eller netto."
 
 #. placeholder {0}: picked.size
 #. placeholder {1}: picked.size
@@ -6144,8 +6152,9 @@ msgid "{inviter} invited you to {PRODUCT} as an owner."
 msgstr "{inviter} har bjudit in dig till {PRODUCT} som ägare."
 
 #: src/screens/Categories.tsx
+#, fuzzy
 msgid "Its categories are income on Income vs Expense"
-msgstr ""
+msgstr "Dess kategorier är inkomster i Inkomster och utgifter"
 
 #. Table cell on the Admin screen: nothing so far
 #: src/screens/Admin.tsx
@@ -7077,8 +7086,9 @@ msgid "Added"
 msgstr "Tillagd"
 
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "{work, plural, one {{work} row set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.} other {{work} rows set apart under Work reimbursements: what work pays you back was never your spending, and the repayment is not income.}}"
-msgstr ""
+msgstr "{work, plural, one {{work} rad hålls isär under Utlägg i jobbet: det jobbet betalar tillbaka var aldrig dina utgifter, och ersättningen är ingen inkomst.} other {{work} rader hålls isär under Utlägg i jobbet: det jobbet betalar tillbaka var aldrig dina utgifter, och ersättningen är ingen inkomst.}}"
 
 #. placeholder {0}: format(Math.abs(left), currency)
 #: src/screens/Register.tsx
@@ -7434,8 +7444,9 @@ msgstr "Varje kod fungerar en gång, och de visas bara nu. Det är så du kommer
 
 #. Headline figure on the Income vs Expense report: work expenses not paid back yet
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "Still to be reimbursed"
-msgstr ""
+msgstr "Återstår att ersätta"
 
 #: src/screens/Profile.tsx
 #, fuzzy
@@ -8101,8 +8112,9 @@ msgstr ""
 #. Headline figure on the Income vs Expense report: work expenses that have been paid back
 #. Line on the Income vs Expense report: work expenses that have been paid back
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "Amount spent, reimbursed"
-msgstr ""
+msgstr "Utlagt och ersatt"
 
 #. Heading on the household page
 #: src/screens/Household.tsx
@@ -8994,6 +9006,11 @@ msgstr "Kategorin väljs utifrån hur de senaste {0} transaktionerna för {name}
 #, fuzzy
 msgid "No reset links pending."
 msgstr "Inga väntande återställningslänkar."
+
+#: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
+msgid "{items, plural, one {({items} item)} other {({items} items)}}"
+msgstr "{items, plural, one {({items} post)} other {({items} poster)}}"
 
 #: src/screens/Updates.tsx
 #, fuzzy
@@ -10173,8 +10190,9 @@ msgid "Email"
 msgstr "E-post"
 
 #: src/screens/Categories.tsx
+#, fuzzy
 msgid "The Reimbursement category — money work pays back"
-msgstr ""
+msgstr "Ersättningskategorin – pengar som jobbet betalar tillbaka"
 
 #: src/screens/Reconcile.tsx
 #, fuzzy
@@ -10444,8 +10462,9 @@ msgstr "Ditt lösenord för {email} återställdes från servern den {when}. All
 
 #. Label on the Income vs Expense report
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "Total expenses"
-msgstr ""
+msgstr "Summa utgifter"
 
 #. Label on the Import screen
 #: src/screens/Import.tsx
@@ -12928,8 +12947,9 @@ msgid "One ledger: its accounts, its register, its receipts and the people who c
 msgstr "En bok: dess konton, dess register, dess kvitton och de personer som kommer åt dem."
 
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "No category group is marked as Income, so every row is counted as an expense. Mark the group that holds your income on the Categories screen."
-msgstr ""
+msgstr "Ingen kategorigrupp är markerad som inkomster, så varje rad räknas som en utgift. Markera gruppen med dina inkomster på skärmen Kategorier."
 
 #. Review mode: the language's messages are loading
 #: src/components/SuggestWording.tsx
@@ -13428,8 +13448,9 @@ msgstr "Valutor"
 
 #. Heading on the Income vs Expense report: money spent for work and paid back
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "Work reimbursements"
-msgstr ""
+msgstr "Utlägg i jobbet"
 
 #: src/screens/Admin.tsx
 #, fuzzy
@@ -13730,13 +13751,6 @@ msgstr "Om du vill ersätta en tidigare körning, ångra den först i Historik."
 msgid "A prepared update goes stale after 24 hours, or as soon as the running version changes. Discard removes it and asks the updater to delete the images it downloaded."
 msgstr "En förberedd uppdatering blir inaktuell efter 24 timmar, eller så snart den version som körs ändras. Kasta tar bort den och ber uppdateraren radera avbildningarna den laddade ner."
 
-#. placeholder {0}: block.pending.count
-#. placeholder {1}: block.pending.count
-#. placeholder {2}: block.pending.count
-#: src/screens/reports/IncomeExpense.tsx
-msgid "{0, plural, one {({1} item)} other {({2} items)}}"
-msgstr ""
-
 #: src/screens/Import.tsx
 #, fuzzy
 msgid "The memo this row will carry"
@@ -13880,8 +13894,9 @@ msgid "Your wording"
 msgstr "Din formulering"
 
 #: src/screens/Categories.tsx
+#, fuzzy
 msgid "One group is the Income group. Every other category is counted as spending, where refunds and charges net out. Ticking this moves it here from the group that has it now."
-msgstr ""
+msgstr "En grupp är inkomstgruppen. Alla andra kategorier räknas som utgifter, där återbetalningar och debiteringar tar ut varandra. Kryssar du i detta flyttas det hit från gruppen som har det nu."
 
 #. History headline, the kind of act: a statement was imported
 #: src/lib/historyWords.ts
@@ -14721,8 +14736,9 @@ msgstr "Du behöver bara filen *Register.csv, inte *Plan.csv. Hela export-zip-fi
 
 #. Line on the Income vs Expense report: money work paid back
 #: src/screens/reports/IncomeExpense.tsx
+#, fuzzy
 msgid "Reimbursement income"
-msgstr ""
+msgstr "Ersättningsinkomster"
 
 #. Application management, Where the files are: the file secret.key
 #: src/lib/labels.ts

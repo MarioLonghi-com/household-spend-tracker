@@ -1169,6 +1169,7 @@ function Aside({
 function Headline({ report }: { report: Report }) {
   const { currency } = report;
   const block = report.reimbursements;
+  const items = block.pending.count;
   const lang = amountLang();
   const money = (minor: number) => <span lang={lang}>{format(minor, currency)}</span>;
   return (
@@ -1204,9 +1205,9 @@ function Headline({ report }: { report: Report }) {
           <dd>
             {money(block.pending.total_minor)}{" "}
             <span className="muted small">
-              {plural(block.pending.count, {
-                one: `(${block.pending.count} item)`,
-                other: `(${block.pending.count} items)`,
+              {plural(items, {
+                one: `(${items} item)`,
+                other: `(${items} items)`,
               })}
             </span>
           </dd>
