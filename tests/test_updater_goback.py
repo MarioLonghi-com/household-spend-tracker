@@ -12,7 +12,7 @@ import os
 
 import pytest
 
-from tests.updater_world import APP, UPD, A, B, World, digest, ref
+from tests.updater_world import APP, UPD, A, B, World, digest, platform_digest, ref
 from updater import engine as eng
 from updater import journal, pin, volume
 from updater.apply import previous_name
@@ -105,6 +105,24 @@ def test_a_parked_container_compose_removed_does_not_matter(world):
     _, record = go_back(world, service, upd["id"])
     assert record["state"] == "succeeded", record
     assert world.version_of(the_app(world)) == A and world.ledger.stamp == A
+
+
+def test_a_previous_image_recorded_by_its_platform_digest_is_verified_by_the_index_one(world):
+    """Podman lists the platform manifest's digest beside the index digest a
+    release attests (#287). The update recorded the one the app ran by; going
+    back verifies, runs and pins by a digest that verifies."""
+    service, upd = updated(world)
+    platform = f"{APP}@{platform_digest(APP, A)}"
+    world.fake.images[ref(APP, A)]["RepoDigests"] = [platform, ref(APP, A)]
+    world.fake.images[platform] = world.fake.images[ref(APP, A)]
+    path = world.volume.journal(upd["id"])
+    doc = volume.read_own_json(path)
+    doc["context"]["old_ref"] = platform
+    volume.write_json(path, doc)
+    _, record = go_back(world, service, upd["id"])
+    assert record["state"] == "succeeded", record
+    assert world.fake.inspect_of(the_app(world))["Config"]["Image"] == ref(APP, A)
+    assert pin.read(world.project_dir)[pin.APP_KEY] == f"{APP}:{A}@{digest(APP, A)}"
 
 
 def test_going_back_twice_is_refused_one_step_only(world):

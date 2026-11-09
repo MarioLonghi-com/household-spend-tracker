@@ -234,11 +234,7 @@ class GoBack(Apply):
             raise survey.NotStarted(
                 f"The image of {self.back_to} is no longer on this machine, so the updater cannot go back to it."
             )
-        try:
-            verified = self.kit.trust.verify(APP_REPOSITORY, old_ref.split("@", 1)[1], self.back_to)
-            verify.labels_agree(verified, (image.get("Config") or {}).get("Labels"))
-        except verify.Refused as e:
-            raise survey.NotStarted(f"The image of {self.back_to} no longer verifies: {e.rule}: {e.detail}.") from None
+        old_ref = self.verified_ref(old_ref, image)
         sidecar = None
         if app.layout == "sidecar":
             sidecar = survey.sidecar_of(client, app.inspect)
@@ -295,6 +291,34 @@ class GoBack(Apply):
                 if sidecar
                 else None
             ),
+        )
+
+    def verified_ref(self, recorded: str, image: dict) -> str:
+        """The previous image by a digest that verifies as `back_to`, or `NotStarted`.
+
+        The update recorded the reference the app ran by, which on Podman can
+        be the platform manifest's digest rather than the index digest a
+        release attests (#287, as for the updater's identity). Every digest
+        the engine lists for the image in this repository is tried, the
+        recorded one first; the first that verifies is the one run and pinned.
+        """
+        listed = [
+            ref.split("@", 1)[1]
+            for ref in image.get("RepoDigests") or []
+            if isinstance(ref, str) and ref.startswith(APP_REPOSITORY + "@")
+        ]
+        refusal: verify.Refused | None = None
+        for digest in dict.fromkeys([recorded.split("@", 1)[1], *listed]):
+            try:
+                verified = self.kit.trust.verify(APP_REPOSITORY, digest, self.back_to)
+                verify.labels_agree(verified, (image.get("Config") or {}).get("Labels"))
+            except verify.Refused as e:
+                refusal = refusal or e
+                continue
+            return f"{APP_REPOSITORY}@{digest}"
+        assert refusal is not None
+        raise survey.NotStarted(
+            f"The image of {self.back_to} no longer verifies: {refusal.rule}: {refusal.detail}."
         )
 
     def backup_verifies(self, app: survey.App, folder: str) -> bool:
