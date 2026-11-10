@@ -32,6 +32,19 @@ history this repository does not have.
 
 ## Unreleased
 
+### Added
+
+- **A release builds the Microsoft Store package** (#63), as it has built
+  and uploaded the Mac App Store one since 0.13.0. The tag's run freezes the
+  backend on Windows, packages the MSIX with the Store's identity (three
+  repository variables, `MSIX_IDENTITY_NAME`, `MSIX_PUBLISHER` and
+  `MSIX_PUBLISHER_DISPLAY_NAME`; a tag with them unset fails before anything
+  is published) and reads the identity, the version and the four languages
+  back from the package itself. Once the release is public it attests the
+  package and attaches it as `household-spend-tracker-<version>-microsoft-store.msix`,
+  for a person to upload in Partner Center. The package declares the four
+  languages the app speaks; `desktop/README.md` has the steps.
+
 ## 0.15.0 — 2026-11-10
 
 **Reversible: lossy** — one migration.
