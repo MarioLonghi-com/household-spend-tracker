@@ -102,6 +102,12 @@ history this repository does not have.
 
 ### Fixed
 
+- **Screen-reader-only text in a table no longer widens the page on a
+  phone.** The Income vs Expense report says each month and "surplus" or
+  "shortfall" to a screen reader in text drawn off screen; that text was
+  positioned against the page rather than the table's scroller, so on a phone
+  the page itself could be dragged sideways while the table stayed put. Both
+  table scrollers now contain it.
 - **Recovery restores a backup by whichever digest of the old release
   verifies** (#421). The journal records the reference the app ran by, which
   on Podman can be the platform manifest's digest rather than the index

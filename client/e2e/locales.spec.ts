@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { catalog, englishOnly, inspect, SEEDED_DATA } from "./l10n-check";
+import { catalog, englishOnly, inspect, SEEDED_DATA, settled } from "./l10n-check";
 
 /**
  * Every screen in each draft language, before anyone reviews it (#271).
@@ -66,6 +66,7 @@ test("every screen speaks the language, keeps its placeholders and fits", async 
     const name = (await target.innerText()).trim();
     await target.click();
     await page.waitForLoadState("networkidle");
+    await settled(page);
     await record(name);
   }
 
@@ -73,6 +74,7 @@ test("every screen speaks the language, keeps its placeholders and fits", async 
   await openMenu(page);
   await page.locator("nav.side .presence button.link").first().click();
   await page.waitForLoadState("networkidle");
+  await settled(page);
   await record("profile");
 
   expect(problems).toEqual([]);

@@ -58,6 +58,18 @@ export interface Findings {
   overflowing: string[];
 }
 
+/**
+ * Two animation frames, so the screen is painted before it is read:
+ * `networkidle` says the data arrived, not that React has committed it.
+ * Read any earlier, a screen was inspected half-drawn -- and its faults
+ * missed one run and found the next (the report's screen-reader text, #58).
+ */
+export async function settled(page: Page) {
+  await page.evaluate(
+    () => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))),
+  );
+}
+
 /** Read one screen. `english` is `englishOnly(locale)`, or [] for English itself. */
 export async function inspect(page: Page, english: string[]): Promise<Findings> {
   return page.evaluate((englishOnly) => {
