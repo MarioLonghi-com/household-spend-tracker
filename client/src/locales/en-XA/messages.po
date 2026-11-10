@@ -484,6 +484,10 @@ msgstr ""
 msgid "Stale"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker is free software: you can redistribute it and change it under the GNU Affero General Public License, version 3 or any later version."
+msgstr ""
+
 #. What the import detected: which column holds the date. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "date column"
@@ -3547,6 +3551,10 @@ msgstr ""
 
 #: src/screens/History.tsx
 msgid "Leave it alone"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "This text, and Chromium's own notices, are in {folder}."
 msgstr ""
 
 #: src/screens/AcceptInvite.tsx
@@ -7224,6 +7232,11 @@ msgstr ""
 #: src/screens/ApplicationManagement.tsx
 #: src/screens/Import.tsx
 msgid "File"
+msgstr ""
+
+#. Desktop app Licences window: heading over the licences of the libraries the app is built on
+#: ../desktop/src/words.ts
+msgid "Third-party notices"
 msgstr ""
 
 #: src/screens/Profile.tsx
@@ -11116,6 +11129,10 @@ msgstr ""
 msgid "Oldest transaction"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "The third-party notices did not ship with this build."
+msgstr ""
+
 #. Button on the Payee Categorisation screen
 #. placeholder {0}: formatCount(rest)
 #: src/screens/PayeeCategorisation.tsx
@@ -12784,6 +12801,11 @@ msgstr ""
 msgid "Remove {0}"
 msgstr ""
 
+#. Desktop app menu item and About dialog button: open the window with the app's licence and the third-party notices
+#: ../desktop/src/words.ts
+msgid "Licences"
+msgstr ""
+
 #. Section heading on the Net Worth report
 #: src/screens/reports/NetWorth.tsx
 msgid "What changed"
@@ -14002,6 +14024,11 @@ msgstr ""
 
 #: src/screens/TranslationReview.tsx
 msgid "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
+msgstr ""
+
+#. Desktop app Licences window: label above the link to this version's source on GitHub
+#: ../desktop/src/words.ts
+msgid "Source code for this version"
 msgstr ""
 
 #: src/screens/Import.tsx

@@ -484,6 +484,10 @@ msgstr "Processo"
 msgid "Stale"
 msgstr "Desatualizada"
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker is free software: you can redistribute it and change it under the GNU Affero General Public License, version 3 or any later version."
+msgstr "Household Spend Tracker é software livre: você pode redistribuí-lo e modificá-lo sob a GNU Affero General Public License, versão 3 ou qualquer versão posterior."
+
 #. What the import detected: which column holds the date. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "date column"
@@ -3548,6 +3552,10 @@ msgstr "O trabalho pagou {0} a menos que estas despesas. Se não vai pagar o res
 #: src/screens/History.tsx
 msgid "Leave it alone"
 msgstr "Deixar como está"
+
+#: ../desktop/src/words.ts
+msgid "This text, and Chromium's own notices, are in {folder}."
+msgstr "Este texto, e os avisos do próprio Chromium, estão em {folder}."
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
@@ -7226,6 +7234,11 @@ msgstr "sem histórico do git nem carimbo de build para consultar"
 #: src/screens/Import.tsx
 msgid "File"
 msgstr "Arquivo"
+
+#. Desktop app Licences window: heading over the licences of the libraries the app is built on
+#: ../desktop/src/words.ts
+msgid "Third-party notices"
+msgstr "Avisos de terceiros"
 
 #: src/screens/Profile.tsx
 msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
@@ -11122,6 +11135,10 @@ msgstr "Uma linha por requisição HTTP. Mecânico, e abafa todo o resto."
 msgid "Oldest transaction"
 msgstr "Transação mais antiga"
 
+#: ../desktop/src/words.ts
+msgid "The third-party notices did not ship with this build."
+msgstr "Os avisos de terceiros não foram incluídos nesta compilação."
+
 #. Button on the Payee Categorisation screen
 #. placeholder {0}: formatCount(rest)
 #: src/screens/PayeeCategorisation.tsx
@@ -12795,6 +12812,11 @@ msgstr "Quando o banco diz"
 msgid "Remove {0}"
 msgstr "Remover {0}"
 
+#. Desktop app menu item and About dialog button: open the window with the app's licence and the third-party notices
+#: ../desktop/src/words.ts
+msgid "Licences"
+msgstr "Licenças"
+
 #. Section heading on the Net Worth report
 #: src/screens/reports/NetWorth.tsx
 msgid "What changed"
@@ -14014,6 +14036,11 @@ msgstr "{0} {1} — um controle de gastos auto-hospedado e multimoeda para uma c
 #: src/screens/TranslationReview.tsx
 msgid "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
 msgstr "O seletor de idioma do seu perfil passa a oferecer Português, Español e Svenska como prévias: tradução automática, em revisão. Ninguém mais os vê, e o inglês continua sendo o padrão em todo o resto."
+
+#. Desktop app Licences window: label above the link to this version's source on GitHub
+#: ../desktop/src/words.ts
+msgid "Source code for this version"
+msgstr "Código-fonte desta versão"
 
 #: src/screens/Import.tsx
 msgid "Open that import"

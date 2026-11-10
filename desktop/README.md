@@ -70,7 +70,36 @@ development profile; `store` the same app for upload; `win` the MSIX and a folde
 
 `scripts/desktop_build.py` builds the client, stamps the commit, freezes the
 backend (`desktop/backend.spec`), smoke-tests it (`smoke_backend.py`), builds
-the shell and packages it into `desktop/dist`. `--from N` starts at step N.
+the shell, writes the third-party notices, packages it into `desktop/dist`
+and reads Electron's fuses back from the result. `--from N` starts at step N.
+
+### Fuses and notices (#63)
+
+**The store builds have Electron's fuses on.** `scripts/fuses.cjs`, run as
+electron-builder's `afterPack` hook, turns `RunAsNode`,
+`EnableNodeOptionsEnvironmentVariable` and `EnableNodeCliInspectArguments`
+off and `OnlyLoadAppFromAsar` and `EnableEmbeddedAsarIntegrityValidation`
+on -- before anything is signed or packed, since the flip rewrites the
+binary. The `store` and `win` targets get them; `mac` and `mas` stay as
+Electron ships them, because the smoke test's Playwright needs the debugging
+port they close. `SPENDTRACKER_FUSES=on|off` overrides either way, and the
+build's last step reads the fuses back and fails if they are not as the mode
+says. For a fused build Playwright cannot drive, `launch_check.py` starts it
+on a fresh ledger and checks the backend came up:
+
+```bash
+SPENDTRACKER_FUSES=on build/freeze-venv/bin/python -m scripts.desktop_build mac --from 7
+python desktop/launch_check.py "desktop/dist/mac-arm64/Household Spend Tracker.app"
+```
+
+**About → Licences** shows the AGPL line, the link to this version's source
+(`…/tree/v<version>`, from `package.json`) and `THIRD-PARTY-NOTICES.txt`,
+which `scripts/third_party_notices.py` writes at build time from what ships:
+the runtime lock less what `backend.spec` excludes (`pip-licenses`), and the
+packages the client's and the shell's Vite builds bundled
+(`client/bundled-packages.ts`, then `license-checker-rseidelsohn`). Chromium's
+own `LICENSES.chromium.html` goes beside it. The build refuses to package
+without them.
 
 ### Checks
 
@@ -167,5 +196,3 @@ The window tells the shell which language it activated (`client/src/lib/desktop.
 
 - Partner Center, the store listings' translations and submission: #63, after #321 and #58. The Mac
   App Store build is signed, packaged and uploaded as above.
-- Electron fuses (no `--inspect`, no `ELECTRON_RUN_AS_NODE`) go on for the
-  store builds in #63; the smoke test needs them off.

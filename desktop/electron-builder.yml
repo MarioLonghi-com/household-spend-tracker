@@ -4,6 +4,11 @@
 #
 # Store signing is #63's: these builds are unsigned (macOS) or signed with a
 # test certificate afterwards (MSIX, scripts/sign-msix.ps1).
+#
+# Electron's fuses (#63) are flipped by `afterPack` when SPENDTRACKER_FUSES is
+# `on`, which scripts/desktop_build.py sets for the store and Windows builds
+# and leaves off for the build the smoke test drives. scripts/fuses.cjs says
+# which fuses and why, and reads them back afterwards.
 
 appId: app.spendtracker.spendtracker
 # The name both stores list the app under (#346). The ledger's folder keeps
@@ -23,10 +28,18 @@ files:
 asar: true
 npmRebuild: false
 
-# The frozen backend, run from the install location, read-only.
+afterPack: scripts/fuses.cjs
+
+# The frozen backend, run from the install location, read-only; and the
+# third-party notices the Licences window shows (#63), written by
+# scripts/third_party_notices.py, with Chromium's own beside them.
 extraResources:
   - from: ../build/backend/spend-tracker-backend
     to: backend
+  - from: ../build/THIRD-PARTY-NOTICES.txt
+    to: THIRD-PARTY-NOTICES.txt
+  - from: ../build/LICENSES.chromium.html
+    to: LICENSES.chromium.html
 
 mac:
   category: public.app-category.finance

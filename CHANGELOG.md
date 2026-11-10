@@ -32,6 +32,18 @@ history this repository does not have.
 
 ## Unreleased
 
+**Reversible: none.**
+
+- Desktop: the store builds have Electron's fuses on (#63) -- no
+  `ELECTRON_RUN_AS_NODE`, no `NODE_OPTIONS`, no `--inspect`, the app loaded
+  from its asar only and that asar's integrity checked -- flipped before
+  signing and read back from the binary by the build; CI proves the smoke
+  test's build unfused and the store's fused, and that the fused app starts.
+  About → Licences shows the licence, the link to this version's source and
+  the third-party notices, generated at build time from what the app ships
+  (`pip-licenses` over the frozen set, a licence tool over what Vite
+  bundled); the build refuses to package without them.
+
 ## 0.15.0 — 2026-11-10
 
 **Reversible: lossy** — one migration.

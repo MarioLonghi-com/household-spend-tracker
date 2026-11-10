@@ -484,6 +484,10 @@ msgstr "Process"
 msgid "Stale"
 msgstr "Stale"
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker is free software: you can redistribute it and change it under the GNU Affero General Public License, version 3 or any later version."
+msgstr "Household Spend Tracker is free software: you can redistribute it and change it under the GNU Affero General Public License, version 3 or any later version."
+
 #. What the import detected: which column holds the date. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "date column"
@@ -3548,6 +3552,10 @@ msgstr "Work paid {0} less than these expenses. If it will not pay the rest, spl
 #: src/screens/History.tsx
 msgid "Leave it alone"
 msgstr "Leave it alone"
+
+#: ../desktop/src/words.ts
+msgid "This text, and Chromium's own notices, are in {folder}."
+msgstr "This text, and Chromium's own notices, are in {folder}."
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
@@ -7226,6 +7234,11 @@ msgstr "no git history and no build stamp to ask"
 #: src/screens/Import.tsx
 msgid "File"
 msgstr "File"
+
+#. Desktop app Licences window: heading over the licences of the libraries the app is built on
+#: ../desktop/src/words.ts
+msgid "Third-party notices"
+msgstr "Third-party notices"
 
 #: src/screens/Profile.tsx
 msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
@@ -11122,6 +11135,10 @@ msgstr "One line per HTTP request. Mechanical, and it drowns everything else."
 msgid "Oldest transaction"
 msgstr "Oldest transaction"
 
+#: ../desktop/src/words.ts
+msgid "The third-party notices did not ship with this build."
+msgstr "The third-party notices did not ship with this build."
+
 #. Button on the Payee Categorisation screen
 #. placeholder {0}: formatCount(rest)
 #: src/screens/PayeeCategorisation.tsx
@@ -12795,6 +12812,11 @@ msgstr "When the bank says"
 msgid "Remove {0}"
 msgstr "Remove {0}"
 
+#. Desktop app menu item and About dialog button: open the window with the app's licence and the third-party notices
+#: ../desktop/src/words.ts
+msgid "Licences"
+msgstr "Licences"
+
 #. Section heading on the Net Worth report
 #: src/screens/reports/NetWorth.tsx
 msgid "What changed"
@@ -14014,6 +14036,11 @@ msgstr "{0} {1} — a self-hosted, multi-currency spend tracker for one househol
 #: src/screens/TranslationReview.tsx
 msgid "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
 msgstr "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
+
+#. Desktop app Licences window: label above the link to this version's source on GitHub
+#: ../desktop/src/words.ts
+msgid "Source code for this version"
+msgstr "Source code for this version"
 
 #: src/screens/Import.tsx
 msgid "Open that import"
