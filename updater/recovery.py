@@ -562,22 +562,10 @@ class Recovery:
         image = prepare.present(a.client, ref)
         if image is None:
             raise StepFailed(f"{version} is no longer on this machine")
-        listed = [
-            r.split("@", 1)[1]
-            for r in image.get("RepoDigests") or []
-            if isinstance(r, str) and r.startswith(APP_REPOSITORY + "@")
-        ]
-        refusal: verify.Refused | None = None
-        for digest in dict.fromkeys([ref.split("@", 1)[1], *listed]):
-            try:
-                verified = self.kit.trust.verify(APP_REPOSITORY, digest, version)
-                verify.labels_agree(verified, (image.get("Config") or {}).get("Labels"))
-            except verify.Refused as e:
-                refusal = refusal or e
-                continue
-            return image, f"{APP_REPOSITORY}@{digest}"
-        assert refusal is not None
-        raise StepFailed(f"{version} no longer verifies ({refusal.rule})")
+        try:
+            return image, prepare.verified_app_ref(self.kit, ref, image, version)
+        except verify.Refused as refusal:
+            raise StepFailed(f"{version} no longer verifies ({refusal.rule})") from None
 
     def _start(self, a: Apply, ref: str, version: str, revision: str | None, image: dict | None = None) -> None:
         """`version` serving under the app's name, and answering. Raises `StepFailed`.

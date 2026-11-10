@@ -300,26 +300,15 @@ class GoBack(Apply):
         be the platform manifest's digest rather than the index digest a
         release attests (#287, as for the updater's identity). Every digest
         the engine lists for the image in this repository is tried, the
-        recorded one first; the first that verifies is the one run and pinned.
+        recorded one first; the first that verifies is the one run and pinned
+        (`prepare.verified_app_ref`).
         """
-        listed = [
-            ref.split("@", 1)[1]
-            for ref in image.get("RepoDigests") or []
-            if isinstance(ref, str) and ref.startswith(APP_REPOSITORY + "@")
-        ]
-        refusal: verify.Refused | None = None
-        for digest in dict.fromkeys([recorded.split("@", 1)[1], *listed]):
-            try:
-                verified = self.kit.trust.verify(APP_REPOSITORY, digest, self.back_to)
-                verify.labels_agree(verified, (image.get("Config") or {}).get("Labels"))
-            except verify.Refused as e:
-                refusal = refusal or e
-                continue
-            return f"{APP_REPOSITORY}@{digest}"
-        assert refusal is not None
-        raise survey.NotStarted(
-            f"The image of {self.back_to} no longer verifies: {refusal.rule}: {refusal.detail}."
-        )
+        try:
+            return prepare.verified_app_ref(self.kit, recorded, image, self.back_to)
+        except verify.Refused as refusal:
+            raise survey.NotStarted(
+                f"The image of {self.back_to} no longer verifies: {refusal.rule}: {refusal.detail}."
+            ) from None
 
     def backup_verifies(self, app: survey.App, folder: str) -> bool:
         """The update's backup on the disk, verified by the running image's `scripts.backup`."""

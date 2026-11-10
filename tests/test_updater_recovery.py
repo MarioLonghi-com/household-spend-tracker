@@ -26,6 +26,7 @@ from app.services import updates
 from tests.updater_world import APP, HEAD, A, B, C, World, digest, image_doc, platform_digest, ref
 from updater import contract, pin, recovery, volume
 from updater import engine as eng
+from updater.apply import previous_name
 
 #: Seven groups of four Crockford symbols, as the app makes them; with a 0 and
 #: a 1, so the O and I/L readings have something to stand for.
@@ -349,6 +350,97 @@ def test_a_backup_recorded_by_the_platform_digest_is_restored_by_the_digest_that
     assert world.fake.inspect_of(running[0])["Config"]["Image"] == ref(APP, A)
     assert pin.read(world.project_dir)[pin.APP_KEY] == f"{APP}:{A}@{digest(APP, A)}"
     assert world.journal(second["id"]).recovery_hash is None
+
+
+#: Podman lists a multi-arch image's index and platform digests in either
+#: order (#287); an update records whichever `survey.published_ref` met first.
+PODMAN_ORDERS = ["index_first", "platform_first"]
+
+
+def recorded_as(w: World, update_id: str, order: str) -> str:
+    """The old image as the update recorded it: the platform's digest when Podman listed it first."""
+    old_ref = w.journal(update_id).context["old_ref"]
+    assert old_ref == (f"{APP}@{platform_digest(APP, A)}" if order == "platform_first" else ref(APP, A))
+    return old_ref
+
+
+def started_and_pinned_by_the_index(w: World, *, came_home: bool = False) -> None:
+    """A serving, pinned by the digest its release attests whatever was recorded,
+    and -- unless the parked container itself came home, as it was -- run by it."""
+    running = w.running_apps()
+    assert [w.version_of(c) for c in running] == [A]
+    seen = w.fake.inspect_of(running[0])
+    assert seen["Image"] == w.fake.images[ref(APP, A)]["Id"]
+    if not came_home:
+        assert seen["Config"]["Image"] == ref(APP, A)
+    assert pin.read(w.project_dir)[pin.APP_KEY] == f"{APP}:{A}@{digest(APP, A)}"
+
+
+@pytest.mark.parametrize("order", PODMAN_ORDERS)
+def test_a_rollback_on_podman_puts_back_the_previous_version_in_either_digest_order(tmp_path, order):
+    """R2-R4 run the recorded reference, which needs no attestation: it is the
+    image the app ran by a moment ago. Either digest names that image."""
+    with World(tmp_path, multiarch=order) as w:
+        service = w.service()
+        service.startup()
+        w.drill = "migration-fails"
+        req, record = apply(w, service)
+        assert record["state"] == "rolled_back", record
+        recorded_as(w, req["id"], order)
+        assert w.ledger.stamp == A
+        assert [w.version_of(c) for c in w.running_apps()] == [A]
+        w.no_running_app_at_a_mismatched_stamp()
+
+
+@pytest.mark.parametrize("order", PODMAN_ORDERS)
+def test_restoring_a_backup_on_podman_verifies_by_the_index_digest_in_either_order(tmp_path, order):
+    """Recovery re-verifies the image that took the backup (11.3). It tries
+    every digest the engine lists for it, never only the first (#421): in
+    `platform_first` the recorded one is the platform's, which no
+    attestation names, and the restore was refused "(subject)"."""
+    with World(tmp_path, multiarch=order) as w:
+        service, first, second = two_updates_the_second_needing_recovery(w)
+        recorded_as(w, first["id"], order)
+        older = os.path.basename(w.journal(first["id"]).context["backup"])
+        w.restore_fails = 0
+        got = recover(w, service, second["id"], "restore_backup", backup=older)
+        assert got["state"] == "done", got.get("sentence") or got
+        record = w.history(second["id"])
+        assert record["state"] == "recovered" and older in record["sentence"]
+        assert w.ledger.stamp == A
+        started_and_pinned_by_the_index(w)
+        assert w.journal(second["id"]).recovery_hash is None
+
+
+@pytest.mark.parametrize("order", PODMAN_ORDERS)
+def test_starting_the_matching_version_on_podman_verifies_by_the_index_digest_in_either_order(tmp_path, order):
+    with World(tmp_path, multiarch=order) as w:
+        service, req = needing_recovery(w, restore_fails=0, broken={A})
+        recorded_as(w, req["id"], order)
+        assert w.ledger.stamp == A and w.running_apps() == []
+        w.broken.clear()
+        got = recover(w, service, req["id"], "start_matching", revision=HEAD[A])
+        assert got["state"] == "done", got.get("sentence") or got
+        assert w.history(req["id"])["state"] == "recovered"
+        # The parked A is A's image by either digest, so it comes home rather
+        # than being made again.
+        assert w.by_name(previous_name(w.app_name)) is None
+        started_and_pinned_by_the_index(w, came_home=True)
+        w.no_running_app_at_a_mismatched_stamp()
+
+
+@pytest.mark.parametrize("order", PODMAN_ORDERS)
+def test_a_digest_no_attestation_names_is_still_refused_in_either_order(tmp_path, order):
+    """Trying every digest widens nothing: with the release's attestation
+    gone (forged here), neither digest verifies and A is not started."""
+    with World(tmp_path, multiarch=order) as w:
+        service, req = needing_recovery(w, restore_fails=0, broken={A})
+        w.broken.clear()
+        w.forged.add((APP, A))
+        got = recover(w, service, req["id"], "start_matching", revision=HEAD[A])
+        assert got["state"] == "failed" and f"{A} no longer verifies" in got["sentence"], got
+        assert w.history(req["id"])["state"] == "needs_recovery"
+        assert w.running_apps() == []
 
 
 def test_a_backup_whose_version_is_gone_is_not_restored(world):

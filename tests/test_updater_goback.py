@@ -125,6 +125,22 @@ def test_a_previous_image_recorded_by_its_platform_digest_is_verified_by_the_ind
     assert pin.read(world.project_dir)[pin.APP_KEY] == f"{APP}:{A}@{digest(APP, A)}"
 
 
+@pytest.mark.parametrize("order", ["index_first", "platform_first"])
+def test_going_back_on_podman_verifies_by_the_index_digest_in_either_order(tmp_path, order):
+    """The update recorded the old image by whichever digest Podman listed
+    first (#287); going back verifies, runs and pins by the one a release
+    attests, in either order (#421)."""
+    with World(tmp_path, multiarch=order) as w:
+        service, upd = updated(w)
+        recorded = w.journal(upd["id"]).context["old_ref"]
+        assert recorded == (f"{APP}@{platform_digest(APP, A)}" if order == "platform_first" else ref(APP, A))
+        _, record = go_back(w, service, upd["id"])
+        assert record["state"] == "succeeded", record
+        assert w.version_of(the_app(w)) == A and w.ledger.stamp == A
+        assert w.fake.inspect_of(the_app(w))["Config"]["Image"] == ref(APP, A)
+        assert pin.read(w.project_dir)[pin.APP_KEY] == f"{APP}:{A}@{digest(APP, A)}"
+
+
 def test_going_back_twice_is_refused_one_step_only(world):
     service, upd = updated(world)
     _, record = go_back(world, service, upd["id"])

@@ -32,6 +32,19 @@ history this repository does not have.
 
 ## Unreleased
 
+### Changed
+
+- **Going back and recovery re-verify the previous release through one
+  function** (#421). The fix in 0.15.0 left two copies of the loop that tries
+  each digest Podman lists for a multi-arch image (#287) -- one in going back,
+  one in recovery; they are now `prepare.verified_app_ref`, so the two cannot
+  drift apart. No behaviour changes: each digest must still pass every
+  verification rule and agree with the image's labels. Tests now record the
+  old image the way an update does, with Podman's two digests in both orders,
+  through the rollback, going back, *Restore this backup* and *Start the
+  version that matches*, and check that a digest no attestation names is
+  still refused.
+
 ## 0.15.0 — 2026-11-10
 
 **Reversible: lossy** — one migration.

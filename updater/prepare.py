@@ -259,6 +259,39 @@ def by_digest(repository: str, digest: str) -> str:
     return f"{repository}@{digest}"
 
 
+def verified_app_ref(kit: Kit, recorded: str, image: dict, version: str) -> str:
+    """A previous app image by the digest a release of `version` attests, or `verify.Refused`.
+
+    An update records the reference the app ran by (`survey.published_ref`),
+    and on Podman, pulled by a multi-arch index, that can be the platform
+    manifest's digest: the engine lists both in `RepoDigests`, in no order
+    anybody promises (#287), and a release attests the index alone. So no
+    single digest is taken on trust or by position. The recorded one is tried
+    first, then every one the engine lists for `image` in the app repository,
+    as the updater's own identity does (`handover.own_digests`); each must
+    pass `verify` and agree with the image's labels in full, and the first
+    that does is the one to run and pin by. With none, the first refusal.
+    Going back (`goback`) and recovery's restore and start (`recovery`) ask
+    this; it met the E8 drill about every other run on rootless Podman (#421).
+    """
+    listed = [
+        m.group(2)
+        for r in image.get("RepoDigests") or []
+        if (m := eng.IMAGE_BY_DIGEST.fullmatch(r) if isinstance(r, str) else None) and m.group(1) == APP_REPOSITORY
+    ]
+    refusal: verify.Refused | None = None
+    for digest in dict.fromkeys([recorded.split("@", 1)[1], *listed]):
+        try:
+            verified = kit.trust.verify(APP_REPOSITORY, digest, version)
+            verify.labels_agree(verified, (image.get("Config") or {}).get("Labels"))
+        except verify.Refused as e:
+            refusal = refusal or e
+            continue
+        return by_digest(APP_REPOSITORY, digest)
+    assert refusal is not None
+    raise refusal
+
+
 def run(kit: Kit, request: contract.Request, records: Records) -> dict:
     """P2-P7 for a validated prepare request. Returns the report, or raises `PrepareFailed`."""
     client = kit.client
