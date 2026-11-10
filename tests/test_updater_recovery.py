@@ -23,7 +23,7 @@ from pathlib import Path
 import pytest
 
 from app.services import updates
-from tests.updater_world import APP, HEAD, A, B, C, World, image_doc, ref
+from tests.updater_world import APP, HEAD, A, B, C, World, digest, image_doc, platform_digest, ref
 from updater import contract, pin, recovery, volume
 from updater import engine as eng
 
@@ -140,7 +140,7 @@ def test_a_right_code_opens_recovery_once_per_request_in_any_typed_form(world):
     service, req = needing_recovery(world)
     for n, typed in enumerate(TYPED, start=1):
         got = recover(world, service, req["id"], "open", typed)
-        assert got["state"] == "done", got
+        assert got["state"] == "done", got.get("sentence") or got
         assert [a["kind"] for a in actions(world, req["id"])] == ["open"] * n
         # The request was taken: a second tick does nothing more.
         service.tick()
@@ -310,7 +310,7 @@ def test_restore_a_different_backup_with_the_version_that_took_it(world):
     assert ref(APP, A) in world.fake.images  # still on the machine: the second update did not finish
     world.restore_fails = 0
     got = recover(world, service, second["id"], "restore_backup", backup=older)
-    assert got["state"] == "done", got
+    assert got["state"] == "done", got.get("sentence") or got
     record = world.history(second["id"])
     assert record["state"] == "recovered" and older in record["sentence"]
     assert world.ledger.stamp == A
@@ -318,6 +318,37 @@ def test_restore_a_different_backup_with_the_version_that_took_it(world):
     assert pin.read(world.project_dir)[pin.APP_KEY].startswith(f"{APP}:{A}@")
     assert world.journal(second["id"]).recovery_hash is None
     world.no_running_app_at_a_mismatched_stamp()
+
+
+def test_a_backup_recorded_by_the_platform_digest_is_restored_by_the_digest_that_verifies(world):
+    """Podman lists the platform manifest's digest beside the index digest a
+    release attests (#287), and the update recorded the one the app ran by.
+    Restoring that update's backup verified the recorded digest alone and
+    refused -- "no longer verifies (subject)" -- about every other E8 run on
+    the rootless Podman leg (#421). Every digest the image carries is tried."""
+    service, first, second = two_updates_the_second_needing_recovery(world)
+    older = os.path.basename(world.journal(first["id"]).context["backup"])
+    platform = f"{APP}@{platform_digest(APP, A)}"
+    world.fake.images[ref(APP, A)]["RepoDigests"] = [platform, ref(APP, A)]
+    world.fake.images[platform] = world.fake.images[ref(APP, A)]
+    # The first update ran from A and recorded it by the platform's digest; the
+    # second ran from B, and its journal is left as it is.
+    path = world.volume.journal(first["id"])
+    doc = volume.read_own_json(path)
+    doc["context"]["old_ref"] = platform
+    volume.write_json(path, doc)
+    world.restore_fails = 0
+    got = recover(world, service, second["id"], "restore_backup", backup=older)
+    assert got["state"] == "done", got.get("sentence") or got
+    record = world.history(second["id"])
+    assert record["state"] == "recovered" and older in record["sentence"]
+    assert world.ledger.stamp == A
+    running = world.running_apps()
+    assert [world.version_of(c) for c in running] == [A]
+    # Started and pinned by the digest that verifies, not the one recorded.
+    assert world.fake.inspect_of(running[0])["Config"]["Image"] == ref(APP, A)
+    assert pin.read(world.project_dir)[pin.APP_KEY] == f"{APP}:{A}@{digest(APP, A)}"
+    assert world.journal(second["id"]).recovery_hash is None
 
 
 def test_a_backup_whose_version_is_gone_is_not_restored(world):
@@ -346,7 +377,7 @@ def test_start_the_version_that_matches_the_ledger_old_or_new(world):
     assert world.ledger.stamp == A and world.running_apps() == []
     world.broken.clear()
     got = recover(world, service, req["id"], "start_matching", revision=HEAD[A])
-    assert got["state"] == "done", got
+    assert got["state"] == "done", got.get("sentence") or got
     assert world.history(req["id"])["state"] == "recovered"
     assert [world.version_of(c) for c in world.running_apps()] == [A]
     world.no_running_app_at_a_mismatched_stamp()
@@ -364,7 +395,7 @@ def test_start_matching_the_new_version_when_the_migration_did_land(tmp_path):
         assert not any(c.query.get("name") == w.app_name for c in created), "A was started on B's ledger"
         w.broken.clear()
         got = recover(w, service, req["id"], "start_matching", revision=HEAD[B])
-        assert got["state"] == "done", got
+        assert got["state"] == "done", got.get("sentence") or got
         assert [w.version_of(c) for c in w.running_apps()] == [B]
         assert pin.read(w.project_dir)[pin.APP_KEY].startswith(f"{APP}:{B}@")
         for c in [c for c in w.fake.calls if c.bare == "/containers/create"]:

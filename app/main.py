@@ -102,9 +102,19 @@ API_PREFIX = "/api"
 #: should not be the only thing that ever runs it.
 HOUSEKEEPING_INTERVAL_SECONDS = 6 * 60 * 60
 
+#: How long after start the first sweep waits. The sweep used to start with the
+#: app, beside its first requests: on the Windows runner, where every file
+#: operation is slow, its checkpoint and statistics held the write lock while
+#: the first POST after setup waited out `busy_timeout` and was refused
+#: "ledger busy" (409), and a sweep still running at shutdown left the WAL
+#: unfolded. Nothing a person does depends on the sweep having run, and a
+#: desktop session shorter than this is a session that would not have expired
+#: anything anyway.
+HOUSEKEEPING_FIRST_DELAY_SECONDS = 30.0
+
 
 async def _housekeeping_loop() -> None:
-    """Sweep at startup and then on a timer, for the life of the process.
+    """Sweep after a short delay and then on a timer, for the life of the process.
 
     On a threadpool worker: `sweep` is ordinary blocking SQLAlchemy, and running
     it on the event loop would stall every request for the length of a delete.
@@ -113,16 +123,26 @@ async def _housekeeping_loop() -> None:
     Nothing a user does depends on this having run, and an instance that refuses
     to serve a ledger because it could not delete a fortnight-old session row
     has its priorities backwards.
+
+    A sweep in flight is finished before the loop lets itself be cancelled: a
+    thread cannot be cancelled, so without the shield the shutdown's checkpoint
+    ran beside a sweep still writing and found "a reader held it". Shielded,
+    the cancel is answered once the thread returns, and the checkpoint that
+    follows it finds the ledger quiet.
     """
+    await asyncio.sleep(HOUSEKEEPING_FIRST_DELAY_SECONDS)
     while True:
+        sweep = asyncio.ensure_future(asyncio.to_thread(housekeeping.sweep, db_engine))
         try:
-            removed = await asyncio.to_thread(housekeeping.sweep, db_engine)
+            removed = await asyncio.shield(sweep)
             if any(removed.values()):
                 log.info(
                     "housekeeping: %s",
                     ", ".join(f"{table} {count}" for table, count in removed.items() if count),
                 )
         except asyncio.CancelledError:
+            with contextlib.suppress(Exception):
+                await sweep
             raise
         except Exception:  # pragma: no cover - defensive; a sweep is never load-bearing
             log.exception("housekeeping sweep failed; will try again later")

@@ -8,6 +8,7 @@ passed against the code that had no caller at all.
 
 from __future__ import annotations
 
+import time
 from datetime import timedelta
 
 import pytest
@@ -450,6 +451,8 @@ def test_booting_the_app_actually_runs_a_sweep(monkeypatch, tmp_path):
     import app.main as main
 
     importlib.reload(main)
+    # The first sweep waits for the instance to settle; here it may not.
+    monkeypatch.setattr(main, "HOUSEKEEPING_FIRST_DELAY_SECONDS", 0)
 
     from fastapi.testclient import TestClient
 
@@ -458,6 +461,85 @@ def test_booting_the_app_actually_runs_a_sweep(monkeypatch, tmp_path):
 
     assert calls, "the app booted without ever sweeping"
     assert calls[0] is db_module.engine
+
+
+def _booted(monkeypatch, tmp_path, sweep):
+    """The real app through its real lifespan, with `sweep` in the sweep's place.
+
+    Returns the reloaded `app.main` and `app.db` modules.
+    """
+    import importlib
+
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'boot.sqlite3'}")
+    monkeypatch.setenv("SPENDTRACKER_DATA_DIR", str(tmp_path))
+    import app.config as config
+
+    importlib.reload(config)
+    import app.db as db_module
+
+    importlib.reload(db_module)
+    Base.metadata.create_all(db_module.engine)
+    from tests.conftest import _stamp_head
+
+    _stamp_head(db_module.engine)
+    import app.auth.housekeeping as hk
+
+    monkeypatch.setattr(hk, "sweep", sweep)
+    import app.main as main
+
+    importlib.reload(main)
+    return main, db_module
+
+
+def test_the_first_sweep_waits_for_the_instance_to_settle(monkeypatch, tmp_path):
+    """It used to start with the app, beside its first requests. On the Windows
+    runner its checkpoint held the write lock while the first POST after setup
+    waited out `busy_timeout` and was refused "ledger busy" (409). The first
+    requests now find the ledger quiet; the sweep comes thirty seconds later.
+    """
+    calls: list[object] = []
+    main, db_module = _booted(monkeypatch, tmp_path, lambda engine: calls.append(engine) or {})
+    assert main.HOUSEKEEPING_FIRST_DELAY_SECONDS >= 10
+
+    from fastapi.testclient import TestClient
+
+    with TestClient(main.app, base_url="https://testserver") as client:
+        assert client.get("/api/health").status_code == 200
+        time.sleep(0.2)
+        assert calls == [], "the sweep ran beside the first request"
+    assert calls == []
+
+
+def test_a_sweep_in_flight_finishes_before_the_shutdown_checkpoint(monkeypatch, tmp_path):
+    """A thread cannot be cancelled. Cancelling the loop while `sweep` ran on
+    one left the sweep writing beside the shutdown's checkpoint, which then
+    found "a reader held it" and left the WAL unfolded (seen on Windows).
+    The checkpoint now runs after the sweep has returned.
+    """
+    order: list[str] = []
+
+    def slow_sweep(engine):
+        time.sleep(0.5)
+        order.append("sweep returned")
+        return {}
+
+    main, db_module = _booted(monkeypatch, tmp_path, slow_sweep)
+    monkeypatch.setattr(main, "HOUSEKEEPING_FIRST_DELAY_SECONDS", 0)
+    real_checkpoint = db_module.checkpoint
+
+    def noted_checkpoint():
+        order.append("checkpoint")
+        real_checkpoint()
+
+    monkeypatch.setattr(db_module, "checkpoint", noted_checkpoint)
+
+    from fastapi.testclient import TestClient
+
+    with TestClient(main.app, base_url="https://testserver") as client:
+        assert client.get("/api/health").status_code == 200
+        time.sleep(0.1)  # the sweep is under way, not finished
+
+    assert order == ["sweep returned", "checkpoint"]
 
 
 # --------------------------------------------------------------------------- #

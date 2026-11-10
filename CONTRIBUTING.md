@@ -240,6 +240,16 @@ such record.
 failure or cancellation, and reads a skip as "not owed", so gating or renaming
 a job never leaves a required check waiting for a run that will not come.
 
+**A re-run is not a green run.** When a job fails and *Re-run failed jobs*
+passes, the ruleset sees the green `ci-ok` and lets the pull request merge,
+but the commit's **check suite** keeps the first attempt's `failure`, and
+Scorecard's CI-Tests check counts that merged pull request as untested
+(code-scanning alert 53, 2026-11-09: 10 of 11). Treat a failed job as a fault
+to fix or a flake to file -- #421 was found this way -- and when it was a flake,
+push the branch again (a rebase on `dev` will do) so the merged commit has a
+run that passed first time. The alert clears by itself once the offending
+commit leaves the last thirty on `dev`.
+
 The suite runs as `pytest -n auto --dist loadfile` (pytest-xdist), in CI as
 three shards side by side: `PYTEST_SHARD=2/3` keeps the second third of the
 test files, dealt by `tests/conftest.py`, and a last job combines the shards'

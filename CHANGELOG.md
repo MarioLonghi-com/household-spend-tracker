@@ -100,7 +100,29 @@ history this repository does not have.
   `fx/status` gives the progress on each fetch, `running_fetches` and
   `history` alike.
 
+### Fixed
+
+- **Recovery restores a backup by whichever digest of the old release
+  verifies** (#421). The journal records the reference the app ran by, which
+  on Podman can be the platform manifest's digest rather than the index
+  digest a release attests (#287, as for the updater's identity and for
+  going back). *Restore this backup* and *Start the version that matches*
+  verified that one digest alone and refused -- "no longer verifies
+  (subject)" -- about every other time on rootless Podman; every digest the
+  engine lists for the image is now tried, the recorded one first, and the
+  recovered app is started and pinned by the one that verifies.
+- **The housekeeping sweep no longer runs beside the first requests.** It
+  starts thirty seconds after the app does, and a sweep still writing when
+  the app stops is finished before the shutdown checkpoint rather than left
+  running beside it. On a slow disk the old timing held the ledger's write
+  lock past `busy_timeout` for the first write after setup ("ledger busy",
+  409) and left the WAL unfolded at shutdown.
+
 ### Changed (CI)
+
+- **The self-update drill's E8 fails at once when the recovery restore is
+  refused**, naming the updater's reason, instead of waiting ten minutes for
+  the old release to answer (#421).
 
 - **A pull request into `dev` runs the Linux tier of CI only**, and the push
   that lands it runs the rest. The suite on macOS and Windows, the packaged

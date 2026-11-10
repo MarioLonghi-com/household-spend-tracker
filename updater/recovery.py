@@ -546,21 +546,50 @@ class Recovery:
             a.client.remove(found["Id"], force=True)
         a.runner.discard(a.name("placard"))
 
-    def _usable(self, a: Apply, ref: str, version: str) -> dict:
-        """The image, still present and still verifying (11.3's confinement). Raises `StepFailed`."""
+    def _usable(self, a: Apply, ref: str, version: str) -> tuple[dict, str]:
+        """The image, still present and still verifying (11.3's confinement), and the
+        reference it verifies by. Raises `StepFailed`.
+
+        The journal recorded the reference the app ran by, which on Podman can
+        be the platform manifest's digest rather than the index digest a release
+        attests -- as for the updater's identity and for going back (#287,
+        `goback.verified_ref`). Every digest the engine lists for the image in
+        this repository is tried, the recorded one first, and the first that
+        verifies is the one the recovered app is started from and pinned as.
+        The E8 drill on rootless Podman met this about every other run (#421):
+        the restore was accepted, then "98.0.0 no longer verifies (subject)".
+        """
         image = prepare.present(a.client, ref)
         if image is None:
             raise StepFailed(f"{version} is no longer on this machine")
-        try:
-            verified = self.kit.trust.verify(APP_REPOSITORY, ref.split("@", 1)[1], version)
-            verify.labels_agree(verified, (image.get("Config") or {}).get("Labels"))
-        except verify.Refused as e:
-            raise StepFailed(f"{version} no longer verifies ({e.rule})") from None
-        return image
+        listed = [
+            r.split("@", 1)[1]
+            for r in image.get("RepoDigests") or []
+            if isinstance(r, str) and r.startswith(APP_REPOSITORY + "@")
+        ]
+        refusal: verify.Refused | None = None
+        for digest in dict.fromkeys([ref.split("@", 1)[1], *listed]):
+            try:
+                verified = self.kit.trust.verify(APP_REPOSITORY, digest, version)
+                verify.labels_agree(verified, (image.get("Config") or {}).get("Labels"))
+            except verify.Refused as e:
+                refusal = refusal or e
+                continue
+            return image, f"{APP_REPOSITORY}@{digest}"
+        assert refusal is not None
+        raise StepFailed(f"{version} no longer verifies ({refusal.rule})")
 
-    def _start(self, a: Apply, ref: str, version: str, revision: str | None) -> None:
-        """`version` serving under the app's name, and answering. Raises `StepFailed`."""
-        if ref == a.ctx.get("old_ref"):
+    def _start(self, a: Apply, ref: str, version: str, revision: str | None, image: dict | None = None) -> None:
+        """`version` serving under the app's name, and answering. Raises `StepFailed`.
+
+        The previous container comes home when `ref` names its image -- by the
+        digest the journal recorded or by another the engine lists for it.
+        """
+        recorded = a.ctx.get("old_ref")
+        same = ref == recorded or (
+            isinstance(recorded, str) and recorded in ((image or {}).get("RepoDigests") or [])
+        )
+        if same:
             a.previous_home()
         else:
             prev = a.previous()
@@ -600,12 +629,12 @@ class Recovery:
         if source is None:  # pragma: no cover - checked before accepting
             return self._fail_back(a, "that backup is not an update backup")
         try:
-            image = self._usable(a, source.ref, source.version)
+            image, ref = self._usable(a, source.ref, source.version)
             self._clear(a)
             prev = a.previous()
             body = shapes.oneoff(
                 prev,
-                source.ref,
+                ref,
                 "restore",
                 a.id,
                 ["python", "-m", "scripts.restore", f"{shapes.LEDGER_PATH}/backups/{stamp}", "--yes"],
@@ -617,11 +646,11 @@ class Recovery:
             if result.exit_code != 0:
                 raise StepFailed(f"the backup {stamp} could not be restored (exit {result.exit_code})")
             revision = source.revision or ((image.get("Config") or {}).get("Labels") or {}).get(verify.REVISION_LABEL)
-            self._start(a, source.ref, source.version, revision)
+            self._start(a, ref, source.version, revision, image)
         except (*_STEP_ERRORS, oneoff.TimedOut) as e:
             return self._fail_back(a, str(e.sentence if isinstance(e, StepFailed) else e))
         return self._recovered(
-            a, source.ref, source.version, f"Recovered: the backup {stamp} was restored and {source.version} started."
+            a, ref, source.version, f"Recovered: the backup {stamp} was restored and {source.version} started."
         )
 
     def known_heads(self, a: Apply) -> dict[str, tuple[str, str, str | None]]:
@@ -647,7 +676,7 @@ class Recovery:
             return self._fail_back(a, f"no version on this machine is known to be at {revision}")
         ref, version, label = known
         try:
-            image = self._usable(a, ref, version)
+            image, ref = self._usable(a, ref, version)
             self._clear(a)
             body = shapes.oneoff(
                 a.previous(),
@@ -666,7 +695,7 @@ class Recovery:
             at, head = facts.get("database_stamped"), facts.get("code_head")
             if at != revision or head != revision:
                 raise StepFailed(f"the ledger is at {at or 'an unknown revision'}, which {version} does not run as it is")
-            self._start(a, ref, version, label)
+            self._start(a, ref, version, label, image)
         except (*_STEP_ERRORS, oneoff.TimedOut) as e:
             return self._fail_back(a, str(e.sentence if isinstance(e, StepFailed) else e))
         return self._recovered(a, ref, version, f"Recovered: {version} matches the ledger and was started.")
