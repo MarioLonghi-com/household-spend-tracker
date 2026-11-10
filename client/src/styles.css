@@ -223,7 +223,14 @@ th, td { padding: 7px 9px; text-align: left; border-bottom: 1px solid var(--line
 th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
 tbody tr:hover { background: var(--surface-2); }
 tbody tr.selected { background: var(--surface-2); }
-.table-scroll { overflow-x: auto; }
+/* `position: relative` on both scrollers, so that an absolutely positioned
+   descendant -- `.sr-only` text in a cell, above all -- is contained by the
+   scroller and scrolls with the table. Without it the containing block is the
+   page: a screen-reader label in the sixth month's column sat 800px from the
+   left edge of a 393px phone, and the page itself scrolled sideways while the
+   table it belonged to did not (the per-language walk, #271, found it on the
+   Income vs Expense report). */
+.table-scroll { overflow-x: auto; position: relative; }
 
 /* The per-row actions stay put while the middle columns scroll under them.
    At 1024px the accounts table is 806px wide inside a 760px card, and what
@@ -1427,7 +1434,7 @@ tr.row-pick :where(button, a, input, select, textarea, label) { cursor: revert; 
 /* A report scrolls sideways at every width and never becomes cards -- see
    the note in IncomeExpense.tsx. Deliberately not `.table-scroll`, whose
    mobile rules are built for one-row-per-thing lists. */
-.matrix-scroll { overflow-x: auto; }
+.matrix-scroll { overflow-x: auto; position: relative; }
 
 table.report { border-collapse: collapse; width: 100%; font-size: 13px; }
 table.report th,
