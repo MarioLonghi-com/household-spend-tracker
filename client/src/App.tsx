@@ -49,7 +49,7 @@ import { Transfers } from "./screens/Transfers";
 import type { Household, User } from "./lib/types";
 import { plural, t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
-import { DRAFT_LOCALES, onReviewingChange, reviewing, setReviewer } from "./lib/i18n";
+import { onReviewingChange, reviewing, setReviewer, TRANSLATED_LOCALES } from "./lib/i18n";
 import { reviewAllowed } from "./lib/review";
 import { SuggestWording } from "./components/SuggestWording";
 import { Trans } from "@lingui/react/macro";
@@ -982,7 +982,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
       {profileOpen && (
         <Profile user={user} households={list} onClose={() => setProfileOpen(false)} />
       )}
-      {review && DRAFT_LOCALES.includes(i18n.locale) && (
+      {review && TRANSLATED_LOCALES.includes(i18n.locale) && (
         <SuggestWording household={household} locale={i18n.locale} />
       )}
     </div>

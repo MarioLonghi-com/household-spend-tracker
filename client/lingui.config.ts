@@ -2,9 +2,9 @@
  * Lingui: where the messages are, which locales exist, and which are served.
  *
  * `locales` is every catalog that exists, not every language a person can
- * pick. Which ones the app serves is `SERVED_LOCALES` in `src/lib/i18n.ts`,
- * and until #58 that is English alone: the pt-BR, es-ES and sv-SE catalogs
- * hold drafts, every one marked `#, fuzzy`, and none is bundled.
+ * pick. Which ones the app serves is `SERVED_LOCALES` in `src/lib/i18n.ts`:
+ * English and, since 0.15.0 (#58), pt-BR, es-ES and sv-SE. A further
+ * language would start here as `#, fuzzy` drafts, bundled but unserved.
  *
  * `en-XA` is the pseudo-locale: every English message with its letters
  * accented and padded, so an unextracted string stands out as plain ASCII and

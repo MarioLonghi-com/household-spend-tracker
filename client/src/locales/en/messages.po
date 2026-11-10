@@ -2667,6 +2667,11 @@ msgstr "Download {0}"
 msgid "The link for {0} ({1}) stops working at once. Their password and authenticator stays reset, so they cannot sign in until you make them a new link."
 msgstr "The link for {0} ({1}) stops working at once. Their password and authenticator stays reset, so they cannot sign in until you make them a new link."
 
+#. Application management: nobody has suggested a wording yet
+#: src/screens/TranslationReview.tsx
+msgid "No suggestions yet. Choose a language other than English in your profile, then use “Suggest a better wording”."
+msgstr "No suggestions yet. Choose a language other than English in your profile, then use “Suggest a better wording”."
+
 #: src/screens/History.tsx
 #: src/screens/Register.tsx
 msgid "Reading the log…"
@@ -6927,11 +6932,6 @@ msgstr "Use the recovery code you kept when you set up {productName}. It works o
 #: src/screens/Passkeys.tsx
 msgid "Passkeys are not set up on this server."
 msgstr "Passkeys are not set up on this server."
-
-#. Beside a language's name in the language picker: its words are a draft, being reviewed
-#: src/components/LanguagePicker.tsx
-msgid "Preview — machine translated, under review"
-msgstr "Preview — machine translated, under review"
 
 #: src/screens/Admin.tsx
 msgid "anyone with the link"
@@ -13820,11 +13820,6 @@ msgstr "that import was discarded — nothing was written"
 #: src/screens/History.tsx
 msgid "Putting it back…"
 msgstr "Putting it back…"
-
-#. Application management: nobody has suggested a wording yet
-#: src/screens/TranslationReview.tsx
-msgid "No suggestions yet. Choose a preview language in your profile, then use “Suggest a better wording”."
-msgstr "No suggestions yet. Choose a preview language in your profile, then use “Suggest a better wording”."
 
 #. Text on the Application management screen
 #. placeholder {0}: bytes(me.size.page_size)

@@ -25,29 +25,39 @@ afterEach(async () => {
 /** Plain ASCII letters: what an unextracted string looks like under en-XA. */
 const ascii = /^[\x20-\x7e]*$/;
 
-describe("English is the only language served", () => {
-  it("offers English alone, so the picker is not drawn", () => {
-    expect(SERVED_LOCALES).toEqual(["en"]);
-    const { container } = render(<LanguagePicker />);
+describe("three languages are served beside English (#58)", () => {
+  it("offers all four, each named in itself, so the picker is drawn", () => {
+    expect(SERVED_LOCALES).toEqual(["en", "pt-BR", "es-ES", "sv-SE"]);
+    render(<LanguagePicker />);
+    expect(screen.getAllByRole("option").map((one) => one.textContent)).toEqual([
+      "English",
+      "português (Brasil)",
+      "español de España",
+      "svenska (Sverige)",
+    ]);
+  });
+
+  it("is not drawn with English alone", () => {
+    const { container } = render(<LanguagePicker served={["en"]} />);
     expect(container.innerHTML).toBe("");
   });
 
-  it("draws the picker once a second language is served", () => {
-    render(<LanguagePicker served={["en", "sv-SE"]} />);
-    expect(screen.getByRole("option", { name: "svenska (Sverige)" })).toBeTruthy();
-    expect(screen.getByRole("option", { name: "English" })).toBeTruthy();
-  });
-
-  it.each(["pt-BR", "es-ES", "sv-SE"])("will not activate the draft %s, stored or asked for", async (locale) => {
+  it.each([
+    ["pt-BR", "Transações"],
+    ["es-ES", "Movimientos"],
+    ["sv-SE", "Transaktioner"],
+  ])("activates %s, stored on the device, and the shell speaks it", async (locale, register) => {
     window.localStorage.setItem(LOCALE_KEY, locale);
-    expect(storedLocale()).toBeNull();
-    expect(await activate(locale)).toBe("en");
-    expect([i18n.locale, uiLanguage()]).toEqual(["en", "en"]);
-    expect(pageLabel(menu("Casa Doe"), "register")).toBe("Transactions");
+    expect(storedLocale()).toBe(locale);
+    expect(await activate(locale)).toBe(locale);
+    expect([i18n.locale, uiLanguage(), document.documentElement.lang]).toEqual([locale, locale, locale]);
+    expect(pageLabel(menu("Casa Doe"), "register")).toBe(register);
   });
 
-  it("answers English to a browser that asks for any of the drafts", () => {
-    expect(negotiate(["pt-BR", "sv-SE", "es-ES"])).toBe("en");
+  it("answers a browser that asks for one of them in that language, and English otherwise", () => {
+    expect(negotiate(["pt-BR", "sv-SE", "es-ES"])).toBe("pt-BR");
+    expect(negotiate(["sv"])).toBe("sv-SE");
+    expect(negotiate(["fr-FR", "de"])).toBe("en");
   });
 
   it("keeps every English word the shell had", () => {

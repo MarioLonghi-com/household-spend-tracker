@@ -72,9 +72,11 @@ sharing a checkout with a session you cannot see.
 - **The client's words come from Lingui catalogs** (`client/src/locales/`,
   `lib/i18n.ts`). A message written with the `t`, `msg` or `plural` macros or
   `<Trans>` is extracted by `npm run extract`, and CI fails when the catalogs
-  are behind the source. Only English is served: a translated catalog holds
-  `#, fuzzy` drafts and has no loader until #58 ships it, and the picker stays
-  hidden until then. A new error code needs its message in
+  are behind the source. English, pt-BR, es-ES and sv-SE are served
+  (`SERVED_LOCALES`, #58), and a served catalog may hold no `#, fuzzy` and no
+  missing entry: **a new or changed message ships with its three translations
+  in the same change**, or `catalogs.test.ts` fails. A further language holds
+  fuzzy drafts, unserved, until reviewed. A new error code needs its message in
   `client/src/lib/errorMessages.ts` as well as `app/error_codes.py`. A
   message of one or two words, or one whose English alone is ambiguous,
   carries a translator `comment` (`client/src/locales/README.md`, #228).

@@ -2667,6 +2667,11 @@ msgstr ""
 msgid "The link for {0} ({1}) stops working at once. Their password and authenticator stays reset, so they cannot sign in until you make them a new link."
 msgstr ""
 
+#. Application management: nobody has suggested a wording yet
+#: src/screens/TranslationReview.tsx
+msgid "No suggestions yet. Choose a language other than English in your profile, then use “Suggest a better wording”."
+msgstr ""
+
 #: src/screens/History.tsx
 #: src/screens/Register.tsx
 msgid "Reading the log…"
@@ -6925,11 +6930,6 @@ msgstr ""
 
 #: src/screens/Passkeys.tsx
 msgid "Passkeys are not set up on this server."
-msgstr ""
-
-#. Beside a language's name in the language picker: its words are a draft, being reviewed
-#: src/components/LanguagePicker.tsx
-msgid "Preview — machine translated, under review"
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -13808,11 +13808,6 @@ msgstr ""
 
 #: src/screens/History.tsx
 msgid "Putting it back…"
-msgstr ""
-
-#. Application management: nobody has suggested a wording yet
-#: src/screens/TranslationReview.tsx
-msgid "No suggestions yet. Choose a preview language in your profile, then use “Suggest a better wording”."
 msgstr ""
 
 #. Text on the Application management screen

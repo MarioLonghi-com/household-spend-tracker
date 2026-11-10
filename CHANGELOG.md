@@ -46,6 +46,18 @@ history this repository does not have.
 
 ### Added
 
+- **Three languages beside English: Brazilian Portuguese, Spanish (Spain)
+  and Swedish** (#48, #58). Profile's language picker now offers them to
+  everyone, each named in itself; the choice is per device, and a first visit
+  takes the browser's language when it is one of them, English otherwise. The
+  whole app speaks the language: every screen, the error sentences a screen
+  shows for a refusal (by its code), History, the desktop app's menus and
+  dialogs, and a new household's starter categories and *Opening balance*
+  payee, seeded in the language of the device that made it. Amounts and dates
+  are written the way the language writes them. The household reviewed the
+  translations in the app (0.10.0's review mode); review mode stays, and on a
+  screen shown in a translated language still offers *Suggest a better
+  wording*. English is unchanged.
 - **Exchange rates: an (i) beside each currency lists the accounts in it**
   (#411), so it is clear why that currency is being fetched: each account's
   name, bank and country, a closed one tagged *Closed*, sorted by name. A
