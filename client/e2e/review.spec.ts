@@ -1,11 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
 /**
- * Review mode, the way the household will use it (#272): an owner turns it on
- * for this device, picks a draft language in their profile, suggests a better
+ * Review mode, the way the household uses it (#272): an owner turns it on
+ * for this device, picks a language in their profile, suggests a better
  * wording for a message, finds it in Application management's list and its
- * download, and turns review mode off again -- after which English is back
- * and no language can be chosen.
+ * download, and turns review mode off again -- after which the language
+ * stays (every served language is anyone's, #58) and only the suggesting is
+ * gone.
  *
  * Runs after the English specs (see playwright.config.ts): it leaves a
  * suggestion behind, which is a row in History.
@@ -27,29 +28,27 @@ async function openProfile(page: Page) {
   await page.locator("nav.side .presence button.link").first().click();
 }
 
-test("an owner reviews a draft in the app and suggests a better wording", async ({ page }, info) => {
+test("an owner reviews a language in the app and suggests a better wording", async ({ page }, info) => {
   test.setTimeout(90_000);
   await page.goto("/");
   await page.locator(".register-card").waitFor();
 
-  // Off: the profile offers no language at all.
+  // Review mode off: the four languages are offered all the same (#58), and
+  // nothing offers to suggest a wording.
   await openProfile(page);
-  await expect(page.getByRole("combobox", { name: "Language" })).toHaveCount(0);
+  const languages = ["English", "português (Brasil)", "español de España", "svenska (Sverige)"];
+  await expect(page.getByRole("combobox", { name: "Language" }).locator("option")).toHaveText(languages);
   await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Suggest a better wording" })).toHaveCount(0);
 
   // On, for this device, from Application management.
   await go(page, "Application management");
   await page.getByRole("checkbox", { name: /Review translations on this device/ }).check();
 
-  // The previews are offered beside English; Portuguese is chosen.
+  // Portuguese is chosen, as anyone could.
   await openProfile(page);
   const picker = page.getByRole("combobox", { name: "Language" });
-  await expect(picker.locator("option")).toHaveText([
-    "English",
-    /Preview — machine translated, under review/,
-    /Preview — machine translated, under review/,
-    /Preview — machine translated, under review/,
-  ]);
+  await expect(picker.locator("option")).toHaveText(languages);
   await picker.selectOption("pt-BR");
   await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
   await page.keyboard.press("Escape");
@@ -74,11 +73,15 @@ test("an owner reviews a draft in the app and suggests a better wording", async 
     exported.suggestions.filter((one: { suggested: string }) => one.suggested === words),
   ).toEqual([expect.objectContaining({ locale: "pt-BR", message: "Snap a Receipt", context: "", suggested: words })]);
 
-  // Off again: English is back, and the profile offers no language.
+  // Off again: the language stays, the suggesting goes.
   await page.getByRole("checkbox", { name: /Revisar traduções neste dispositivo/ }).uncheck();
+  await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
+  await expect(page.getByRole("heading", { name: "Gerenciamento do aplicativo", level: 1 })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sugerir uma redação melhor" })).toHaveCount(0);
+
+  // Back to English, through the picker, for the specs that follow.
+  await openProfile(page);
+  await page.getByRole("combobox", { name: "Idioma" }).selectOption("en");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.getByRole("heading", { name: "Application management", level: 1 })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Suggest a better wording" })).toHaveCount(0);
-  await openProfile(page);
-  await expect(page.getByRole("combobox", { name: "Language" })).toHaveCount(0);
 });

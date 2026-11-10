@@ -7,9 +7,9 @@
  *
  * The window says which language it activated (`lib/desktop.ts` in the
  * client, through the preload), and only a language the window may show
- * arrives: drafts only in review mode or a QA build, as there. The shell keeps
- * the last one in its settings, so the splash and an early dialog are in it
- * before the window has loaded.
+ * arrives -- the served ones (#58), as there. The shell keeps the last one in
+ * its settings, so the splash and an early dialog are in it before the
+ * window has loaded.
  */
 
 import { i18n, type MessageDescriptor, type Messages } from "@lingui/core";

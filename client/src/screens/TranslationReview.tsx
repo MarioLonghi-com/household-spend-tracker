@@ -1,12 +1,12 @@
 /**
  * Application management's Translations section: review mode (#272).
  *
- * The household reviews the draft languages in the app before #58 ships them.
- * An owner turns review mode on **on this device**; Profile's language picker
- * then offers the drafts as previews, and a "Suggest a better wording" button
- * keeps their better words. Here they are listed, downloaded for
- * `scripts/apply_translation_suggestions.py`, marked applied once the
- * catalogs carry them, or deleted.
+ * The household reviewed the three languages in the app before #58 shipped
+ * them, and can keep improving them the same way. An owner turns review mode
+ * on **on this device**; a screen shown in a translated language then has a
+ * "Suggest a better wording" button, which keeps their better words. Here
+ * they are listed, downloaded for `scripts/apply_translation_suggestions.py`,
+ * marked applied once the catalogs carry them, or deleted.
  *
  * Off by default. Off, the only thing on this screen is the switch, and
  * nothing anywhere else changes.
@@ -19,7 +19,7 @@ import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { api } from "../lib/api";
 import { Empty, Problem, SortHeading, useSort } from "../components/bits";
-import { DRAFT_LOCALES, onReviewingChange, reviewing, setReviewer } from "../lib/i18n";
+import { onReviewingChange, reviewing, setReviewer, TRANSLATED_LOCALES } from "../lib/i18n";
 import { reviewStored, storeReview } from "../lib/review";
 import { sortRows } from "../lib/sorting";
 import { formatInstant } from "../lib/time";
@@ -143,7 +143,7 @@ function Suggestions({ household }: { household: Household }) {
             All languages (JSON)
           </Trans>
         </a>
-        {DRAFT_LOCALES.map((locale) => (
+        {TRANSLATED_LOCALES.map((locale) => (
           <a key={locale} href={`/api${base}/export.po?locale=${locale}`} download lang={locale}>
             {`${ownName(locale)} (.po)`}
           </a>
@@ -153,7 +153,7 @@ function Suggestions({ household }: { household: Household }) {
       {list.data && list.data.length === 0 ? (
         <Empty>
           <Trans comment="Application management: nobody has suggested a wording yet">
-            No suggestions yet. Choose a preview language in your profile, then use “Suggest a better wording”.
+            No suggestions yet. Choose a language other than English in your profile, then use “Suggest a better wording”.
           </Trans>
         </Empty>
       ) : null}

@@ -1,29 +1,26 @@
 /**
  * Which catalog the words come from (#53, part of #48).
  *
- * **English is the only language served.** The pt-BR, es-ES and sv-SE
- * catalogs exist and hold drafts, and nobody is offered them -- with one
- * exception: an owner who turns on **review mode** on their own device
- * (#272, Application management) gets them in Profile's language picker,
- * labelled as previews, so the household can review the drafts in the app.
- * Their loaders are in the bundle for that, as chunks loaded only when chosen.
- * #58 ships a language, once it is reviewed, by adding it to
- * `SERVED_LOCALES` -- and `src/locales/catalogs.test.ts` refuses a served
- * catalog that still holds a fuzzy or missing entry.
+ * **Four languages are served** since 0.15.0 (#58): English, and the
+ * Brazilian Portuguese, Spanish and Swedish the household reviewed in the app
+ * (#272). Each is in Profile's language picker for everyone, chosen per
+ * device (#48), and `src/locales/catalogs.test.ts` refuses a served catalog
+ * that holds a fuzzy or missing entry -- so a new message ships with its
+ * three translations, or not at all. A further language starts as `#, fuzzy`
+ * drafts and joins `SERVED_LOCALES` once reviewed.
+ *
+ * **Review mode** (#272) is still an owner's, per device: on, "Suggest a
+ * better wording" is offered on every screen shown in a translated language,
+ * and Application management lists what the household suggested.
  *
  * `en-XA` is the pseudo-locale, for CI and development only. It is never
  * offered in the picker; it is reached by storing it under `LOCALE_KEY`
  * (Playwright's en-XA pass does exactly that), and it is what makes an
  * unextracted string visible as plain ASCII among accented text.
  *
- * **The drafts in a QA build (#271).** In `vite build --mode qa`, which is
- * what `npm run e2e` builds, a draft stored on the device is reached the way
- * en-XA is, without review mode. That is how the end-to-end pass walks every
- * screen in each language. The mode is fixed when the bundle is built, so in
- * any other build only review mode reaches a draft.
- *
  * English is loaded with the bundle and activated before the first render, so
- * there is never a frame without words. Another catalog loads lazily.
+ * there is never a frame without words. Another catalog loads lazily, as its
+ * own chunk, the first time a device chooses it.
  */
 
 import { i18n, type Messages } from "@lingui/core";
@@ -35,17 +32,14 @@ export { i18n };
 /** The language the source is written in, and the one served when nothing else is. */
 export const SOURCE_LOCALE = "en";
 
-/** What the language picker offers. One entry means the picker is not shown. */
-export const SERVED_LOCALES: readonly string[] = [SOURCE_LOCALE];
+/** The languages besides English, in the picker's order. Reviewed and shipped in 0.15.0 (#58). */
+export const TRANSLATED_LOCALES: readonly string[] = ["pt-BR", "es-ES", "sv-SE"];
+
+/** What the language picker offers. One entry would mean the picker is not shown. */
+export const SERVED_LOCALES: readonly string[] = [SOURCE_LOCALE, ...TRANSLATED_LOCALES];
 
 /** Reachable by storing it, never offered: the pseudo-locale. */
 export const PSEUDO_LOCALE = "en-XA";
-
-/** The languages whose catalogs hold drafts, not yet served (#58). */
-export const DRAFT_LOCALES: readonly string[] = ["pt-BR", "es-ES", "sv-SE"];
-
-/** A build made for the end-to-end QA pass, and nothing else (#271). */
-const QA_BUILD = import.meta.env.MODE === "qa";
 
 /** Where this device's choice of language is kept. Per device, as #48 decided. */
 export const LOCALE_KEY = "spendtracker.locale";
@@ -63,11 +57,11 @@ const LOADERS: Record<string, () => Promise<{ messages: Messages }>> = {
 };
 
 
-/** Whether this device is reviewing the drafts: an owner, review mode on (#272). */
+/** Whether this device is reviewing the translations: an owner, review mode on (#272). */
 let reviewer = false;
 const listeners = new Set<() => void>();
 
-/** Whether the drafts are offered here, as previews. */
+/** Whether "Suggest a better wording" is offered here. */
 export function reviewing(): boolean {
   return reviewer;
 }
@@ -79,22 +73,15 @@ export function onReviewingChange(listener: () => void): () => void {
 }
 
 /**
- * Turn the previews on or off for this device. The shell calls it with
+ * Turn review mode on or off for this device. The shell calls it with
  * "owner, and review mode on" once it knows who is signed in, and with
- * `false` when they leave. Turning on brings back a draft this device chose
- * before; turning off puts a draft that is showing back to English.
+ * `false` when they leave. The language itself is not touched: every served
+ * language is anyone's to keep, review mode or not.
  */
 export async function setReviewer(allowed: boolean): Promise<void> {
   if (allowed === reviewer) return;
   reviewer = allowed;
   for (const listener of listeners) listener();
-  if (allowed) {
-    const chosen = rawStoredLocale();
-    if (chosen && DRAFT_LOCALES.includes(chosen)) await activate(chosen);
-  } else if (DRAFT_LOCALES.includes(i18n.locale)) {
-    // Even in a QA build: turning review off is asking for English back.
-    await activate(SOURCE_LOCALE);
-  }
 }
 
 i18n.load(SOURCE_LOCALE, english);
@@ -102,13 +89,9 @@ i18n.activate(SOURCE_LOCALE);
 
 const loaded = new Set<string>([SOURCE_LOCALE]);
 
-/** Whether a locale can be activated at all: served, the pseudo-locale, or a draft -- under review, or in a QA build. */
+/** Whether a locale can be activated at all: served, or the pseudo-locale. */
 export function isReachable(locale: string): boolean {
-  return (
-    SERVED_LOCALES.includes(locale) ||
-    locale === PSEUDO_LOCALE ||
-    ((reviewer || QA_BUILD) && DRAFT_LOCALES.includes(locale))
-  );
+  return SERVED_LOCALES.includes(locale) || locale === PSEUDO_LOCALE;
 }
 
 /**
@@ -169,8 +152,6 @@ export async function activate(locale: string): Promise<string> {
     const { messages } = await loader();
     i18n.load(target, messages);
     loaded.add(target);
-    // Review mode may have been turned off while the catalog arrived.
-    if (!isReachable(target)) return i18n.locale;
   }
   i18n.activate(target);
   document.documentElement.lang = target;

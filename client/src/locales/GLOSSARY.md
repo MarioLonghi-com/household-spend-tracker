@@ -4,10 +4,10 @@ One agreed rendering per term, so every screen translates the same word the
 same way. The draft translations (#175 pt-BR, #176 es-ES, #177 sv-SE) follow
 this table; when a draft needs a word that is not here, add the row first.
 
-**Every row is a draft.** Nothing here has been reviewed by a native speaker.
-That review is #58, and it is what turns *draft* into *reviewed*. Until then a
-translator may propose a better word on the issue -- change the row, then the
-catalogs, never only the catalogs.
+**Reviewed and shipped.** The household reviewed the three languages in the
+app (#272) and they are served since 0.15.0 (#58). A better word is still
+welcome, through *Suggest a better wording* in the app or here -- change the
+row, then the catalogs, never only the catalogs.
 
 The English terms are the ones the screens use today, taken from the code
 rather than invented. Where the English itself says one thing two ways, the row

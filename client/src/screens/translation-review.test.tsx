@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 
 /**
- * Review mode (#272): an owner, on their own device, reviews the drafts.
+ * Review mode (#272): an owner, on their own device, reviews the translations.
  *
- * Off -- the default, and always for a member -- the languages cannot be
- * chosen and nothing English changes. On, Profile's picker offers each draft
- * as a preview, a draft can be shown, and "Suggest a better wording" sends
- * the reviewer's words with the message they are for.
+ * The languages themselves are everyone's since 0.15.0 (#58): the picker is
+ * the same with review mode off -- the default, and always for a member -- or
+ * on, and turning it off leaves the language alone. What review mode adds is
+ * "Suggest a better wording", which sends the reviewer's words with the
+ * message they are for.
  */
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -59,18 +60,23 @@ afterEach(async () => {
 });
 
 describe("with review mode off", () => {
-  it("offers no language, stored or asked for, to an owner or a member", async () => {
+  it("shows the language the device stored all the same, to an owner or a member (#58)", async () => {
     window.localStorage.setItem(LOCALE_KEY, "pt-BR");
     expect([reviewAllowed("owner"), reviewAllowed("member")]).toEqual([false, false]);
     await setReviewer(reviewAllowed("owner"));
     expect([reviewing(), isReachable("pt-BR"), storedLocale(), await activate("pt-BR")]).toEqual([
       false,
-      false,
-      null,
-      "en",
+      true,
+      "pt-BR",
+      "pt-BR",
     ]);
-    const { container } = render(<LanguagePicker />);
-    expect(container.innerHTML).toBe("");
+    render(<LanguagePicker />);
+    expect(screen.getAllByRole("option").map((one) => one.textContent)).toEqual([
+      "English",
+      "português (Brasil)",
+      "español de España",
+      "svenska (Sverige)",
+    ]);
   });
 
   it("is off for a member even when the device has the switch on", () => {
@@ -89,27 +95,23 @@ describe("with review mode off", () => {
 });
 
 describe("with review mode on", () => {
-  it("offers each draft as a preview beside English, and shows the one chosen", async () => {
+  it("offers the same languages, none labelled a preview, and shows the one chosen", async () => {
     await setReviewer(true);
     render(<LanguagePicker />);
     const options = screen.getAllByRole("option").map((one) => one.textContent);
-    expect(options).toEqual([
-      "English",
-      "português (Brasil) — Preview — machine translated, under review",
-      "español de España — Preview — machine translated, under review",
-      "svenska (Sverige) — Preview — machine translated, under review",
-    ]);
+    expect(options).toEqual(["English", "português (Brasil)", "español de España", "svenska (Sverige)"]);
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "sv-SE" } });
     await waitFor(() => expect(i18n.locale).toBe("sv-SE"));
     expect([document.documentElement.lang, window.localStorage.getItem(LOCALE_KEY)]).toEqual(["sv-SE", "sv-SE"]);
   });
 
-  it("puts a draft back to English when it is turned off, and brings it back when on", async () => {
+  it("leaves the language alone when it is turned off", async () => {
     window.localStorage.setItem(LOCALE_KEY, "es-ES");
+    await activate("es-ES");
     await setReviewer(true);
-    expect(i18n.locale).toBe("es-ES");
+    expect([reviewing(), i18n.locale]).toEqual([true, "es-ES"]);
     await setReviewer(false);
-    expect([i18n.locale, isReachable("es-ES")]).toEqual(["en", false]);
+    expect([reviewing(), i18n.locale, isReachable("es-ES")]).toEqual([false, "es-ES", true]);
   });
 
   it("turns on from the switch, which is kept on this device", async () => {

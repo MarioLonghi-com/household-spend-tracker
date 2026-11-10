@@ -1,19 +1,20 @@
 /**
  * What the catalogs may hold (#53).
  *
- * A draft translation is marked `#, fuzzy` until a native speaker has reviewed
- * it (#58), and a fuzzy entry is never served. Lingui itself ignores the flag
- * -- a fuzzy `msgstr` would be shown like any other -- so the rule is held
- * here, from both sides:
+ * A draft translation is marked `#, fuzzy` until it has been reviewed (#58),
+ * and a fuzzy entry is never served. Lingui itself ignores the flag -- a
+ * fuzzy `msgstr` would be shown like any other -- so the rule is held here,
+ * from both sides:
  *
  * - a catalog that is not served holds fuzzy drafts and, once the household
  *   has reviewed some in the app, reviewed entries without the flag (#272) --
  *   `scripts/apply_translation_suggestions.py` is what takes the flag off;
- * - a catalog that is served may hold no fuzzy entry and no missing one.
+ * - a catalog that is served may hold no fuzzy entry and no missing one. The
+ *   three shipped in 0.15.0 are served, so a new message needs its three
+ *   translations in the same change, or this fails.
  *
  * Which catalogs are served is `SERVED_LOCALES`; the loaders in `lib/i18n.ts`
- * are the only way a catalog reaches the bundle, and its tests show a draft
- * locale cannot be activated.
+ * are the only way a catalog reaches the bundle.
  */
 import { describe, expect, it } from "vitest";
 import { compileMessageOrThrow } from "@lingui/message-utils/compileMessage";
@@ -135,8 +136,8 @@ describe("the catalogs", () => {
     },
   );
 
-  it("serves no draft language yet", () => {
-    expect(SERVED_LOCALES.filter((one) => translated.includes(one))).toEqual([]);
+  it("serves English and every translated language, in the picker's order (#58)", () => {
+    expect(SERVED_LOCALES).toEqual([SOURCE_LOCALE, ...translated]);
   });
 });
 
