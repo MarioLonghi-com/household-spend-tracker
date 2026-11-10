@@ -46,7 +46,7 @@ list` is what resolves a short name back to it.
 
 **Trunks keep their bare names.** `main` and `dev` are not working branches and
 they are not renamed. `main` is in the CI trigger
-(`.github/workflows/tests.yml` fires on `push` to `main`), in every clone, and
+(`.github/workflows/tests.yml` fires on `push` to both), in every clone, and
 in the remote's default. A `br/` prefix on it would buy clarity nobody needed
 and break three things that did.
 
@@ -200,7 +200,7 @@ Branch off `dev`. Open the PR into `dev`. `dev` → `main` is a separate merge a
 it is the one that deploys.
 
 **CI runs on every pull request into `dev` or `main`**, and again on the push
-that lands one on `main`. On a pull request, each job runs only when the change
+that lands one. On a pull request, each job runs only when the change
 touches what that job is the check for: lint and the full pytest suite for
 Python and the requirements; the client's typecheck, vitest and build for
 `client/`; the browser tests for anything a browser could see; the upgrade
@@ -211,14 +211,28 @@ what it installs; the dependency audit for the manifests. The lists are the
 `repo_wide` (data hygiene, pasted secrets, client/server agreement, the
 version's five copies) run on every pull request, whatever it touches, with
 the client's dependencies installed so the money-rounding comparison runs
-rather than skips. A push to `main`, the Monday schedule and a hand-started run
-owe everything.
+rather than skips. A push, the Monday schedule and a hand-started run owe
+everything.
+
+**A pull request into `dev` runs the Linux tier only.** The suite on macOS and
+Windows, the packaged desktop app and all but one leg of the self-update
+matrix are the deferred tier: they run on the push that lands the pull request
+on `dev`, on the release pull request into `main`, and on Monday. A red one
+there is a red `dev`, to fix before the release. Two exceptions run before the
+merge: a change to the desktop shell (`desktop/`, its build script, its lock)
+still builds and drives the packaged app, and a change to the updater or the
+self-update driver still runs every leg. Before this split a pull request
+started up to twenty-two jobs, and the free plan runs twenty at a time, five
+of them on macOS, so two pull requests from parallel worktrees left the macOS
+and Windows jobs queueing for a quarter of an hour.
 
 **One tree, one full run.** When every job passes, `ci-ok` records the tree
-(`git rev-parse HEAD^{tree}`) as an artifact named `green-<tree>`, and the next
-run on an identical tree -- the `dev` → `main` release PR, the push that lands
-it -- skips the suite, the browser tests and the image, and says so in its
-summary. The rehearsal still runs on the release PR, because there its "before"
+(`git rev-parse HEAD^{tree}`) as an artifact: `green-fast-<tree>` from a pull
+request into `dev`, `green-<tree>` from a run of every tier. The next run on an
+identical tree skips what the record covers and says so in its summary: the
+push that lands a pull request on `dev` skips the Linux tier and runs the
+deferred one, and the `dev` → `main` release PR and the push that lands it
+skip both. The rehearsal still runs on the release PR, because there its "before"
 is the last release. `release.yml` refuses to publish a tag whose tree has no
 such record.
 
@@ -226,7 +240,20 @@ such record.
 failure or cancellation, and reads a skip as "not owed", so gating or renaming
 a job never leaves a required check waiting for a run that will not come.
 
-The suite runs as `pytest -n auto --dist loadfile` (pytest-xdist). Each worker
+**A re-run is not a green run.** When a job fails and *Re-run failed jobs*
+passes, the ruleset sees the green `ci-ok` and lets the pull request merge,
+but the commit's **check suite** keeps the first attempt's `failure`, and
+Scorecard's CI-Tests check counts that merged pull request as untested
+(code-scanning alert 53, 2026-11-09: 10 of 11). Treat a failed job as a fault
+to fix or a flake to file -- #421 was found this way -- and when it was a flake,
+push the branch again (a rebase on `dev` will do) so the merged commit has a
+run that passed first time. The alert clears by itself once the offending
+commit leaves the last thirty on `dev`.
+
+The suite runs as `pytest -n auto --dist loadfile` (pytest-xdist), in CI as
+three shards side by side: `PYTEST_SHARD=2/3` keeps the second third of the
+test files, dealt by `tests/conftest.py`, and a last job combines the shards'
+coverage and applies the 85% floor to the whole. Each worker
 gets its own `SPENDTRACKER_DATA_DIR` under the one it was given, and
 `tests/conftest.py` hashes passwords with test-grade argon2 -- real argon2id,
 low work factor -- because the setup wizard most HTTP tests walk used to spend
@@ -253,7 +280,9 @@ old; security updates arrive on their own whenever they are published.
 
 `self-update` in `tests.yml` -- one of the jobs `ci-ok` requires -- runs when a change touches the updater, `deploy/`,
 the drill and restore scripts, the maintenance page, the migrations, the
-Dockerfile or a compose file. It builds release A from the merge base and B
+Dockerfile or a compose file. On a pull request into `dev` it runs every leg
+only when the updater or `tests/self_update/` changed; otherwise it runs the
+docker-arm leg, E1 alone, and the push to `dev` runs the rest. It builds release A from the merge base and B
 from the change -- plus a few variants of B built `FROM` it, such as one whose
 migration fails after writing a row -- pushes them to a registry that answers
 as `ghcr.io` on the runner, and updates a running A through **the updater in

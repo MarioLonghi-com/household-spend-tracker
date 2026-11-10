@@ -125,8 +125,10 @@ jobs:
   # Did CI pass on exactly this tree? Looked up the same way tests.yml's
   # `changes` job looks it up: an unexpired `green-<tree>` artifact, from a run
   # of tests.yml on this repository's own branches, that concluded `success`.
-  # The release pull request records it, or the pull request into `dev` whose
-  # tree the release carries unchanged.
+  # The release pull request records it, or the push to `dev` that landed the
+  # tree the release carries unchanged. A pull request into `dev` records only
+  # `green-fast-<tree>`, which does not count: it never ran macOS, Windows or
+  # most of the self-update matrix.
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 5

@@ -14,13 +14,23 @@ What one press does:
 2. Asks each source for every missing date: from the last stored rate, or the
    first time from the earliest transaction in that currency, up to today.
    *Refetch a range* asks for the dates given instead, and overwrites.
-3. Upserts the rows. Rerunning a day changes nothing.
-4. Writes one `fx_fetches` row per source with the outcome and the counts.
+3. **One calendar year per request** (#409), oldest first, and each year is
+   upserted and committed as it arrives. A backfill over many years used to
+   be one answer, which could pass the size or time limit in
+   `fx_sources`; now a failure part-way keeps the years before it, and the
+   next press of Fetch now starts from the last stored rate -- where it
+   stopped. Rerunning a day changes nothing.
+4. Writes one `fx_fetches` row per source with the outcome and the counts,
+   and, while it runs, how far it has got: the year in flight and how many
+   of how many are stored. A failure leaves the year it stopped on there.
 
 **One fetch at a time per instance.** A second press while one runs answers
 409. The work runs off the request, in a thread, so the button answers at
-once and the page polls `fx/status`. A fetch the process did not finish -- a
-restart mid-fetch -- is marked failed, "interrupted", at the next boot.
+once and the page polls `fx/status`. The fetch belongs to the household, not
+to the page: it carries on when whoever pressed leaves or signs out, and any
+member who opens the page sees it running, who started it and how far it has
+got. A fetch the process did not finish -- a restart mid-fetch -- is marked
+failed, "interrupted", at the next boot.
 
 A failed fetch keeps the rates already stored and never touches a report.
 """
@@ -79,6 +89,21 @@ class Plan:
     currencies: list[str]
     since: Date
     until: Date
+
+
+def chunks(since: Date, until: Date) -> list[tuple[Date, Date]]:
+    """The requests a range is fetched in: one per calendar year, oldest first.
+
+    The first and the last are cut to the range, so 2021-06-01 to 2024-02-10
+    is four: the rest of 2021, 2022, 2023, and 2024 to 10 February.
+    """
+    out: list[tuple[Date, Date]] = []
+    cursor = since
+    while cursor <= until:
+        end = min(Date(cursor.year, 12, 31), until)
+        out.append((cursor, end))
+        cursor = end + timedelta(days=1)
+    return out
 
 
 def held_currencies(session: Session, household: Household) -> list[str]:
@@ -223,6 +248,8 @@ def start(
                 requested_until=one.until,
                 currencies=one.currencies,
                 outcome=FxFetchOutcome.running,
+                chunks_total=len(chunks(one.since, one.until)),
+                chunks_done=0,
             )
             for one in plans
         ]
@@ -252,42 +279,68 @@ def run(fetch_ids: list[str], *, get=None) -> None:
 
 
 def _one(session: Session, fetch_id: str, *, get=None) -> None:
+    """Fetch one source's range a year at a time, committing each year.
+
+    Before each request the row says which dates are in flight, and is
+    committed, so a member polling the page sees it. After each, the year's
+    rates and the row's counts are committed together. A failure rolls back
+    only the year it was on, and leaves its dates on the row.
+    """
     fetch = session.get(FxFetch, fetch_id)
     if fetch is None or fetch.outcome is not FxFetchOutcome.running:
         return
     began = time.monotonic()
-    try:
-        if fetch.source is FxSource.ecb:
-            published = fx_sources.fetch_ecb(
-                fetch.currencies, fetch.requested_since, fetch.requested_until, get=get
-            )
-        else:  # pragma: no cover - every remote FxSource has an adapter above
-            raise fx_sources.SourceError(f"no adapter for {fetch.source.value}")
-        added, unchanged = store(
-            session, fetch.source, published, overwrite=fetch.mode is FxFetchMode.range
+    spans = chunks(fetch.requested_since, fetch.requested_until)
+    fetch.chunks_total = len(spans)
+    overwrite = fetch.mode is FxFetchMode.range
+    error: str | None = None
+    for number, (since, until) in enumerate(spans, start=1):
+        fetch.chunk_since, fetch.chunk_until = since, until
+        session.commit()
+        try:
+            if fetch.source is FxSource.ecb:
+                published = fx_sources.fetch_ecb(fetch.currencies, since, until, get=get)
+            else:  # pragma: no cover - every remote FxSource has an adapter above
+                raise fx_sources.SourceError(f"no adapter for {fetch.source.value}")
+            added, unchanged = store(session, fetch.source, published, overwrite=overwrite)
+        except fx_sources.SourceError as exc:
+            error = str(exc)
+        except Exception as exc:
+            log.exception("exchange-rate fetch %s failed", fetch_id)
+            error = f"the fetch stopped on an error: {type(exc).__name__}"
+        if error is not None:
+            # Only this year's rates go; the years before it are committed.
+            session.rollback()
+            fetch = session.get(FxFetch, fetch_id)
+            fetch.outcome = FxFetchOutcome.failed
+            fetch.error = error
+            break
+        fetch.rates_added += added
+        fetch.rates_unchanged += unchanged
+        fetch.chunks_done = number
+        session.commit()
+        log.info(
+            "exchange rates: %s %s to %s, %d of %d, %d added, %d unchanged",
+            fetch.source.value,
+            since.isoformat(),
+            until.isoformat(),
+            number,
+            len(spans),
+            added,
+            unchanged,
         )
-    except fx_sources.SourceError as exc:
-        session.rollback()
-        fetch = session.get(FxFetch, fetch_id)
-        fetch.outcome = FxFetchOutcome.failed
-        fetch.error = str(exc)
-    except Exception as exc:
-        log.exception("exchange-rate fetch %s failed", fetch_id)
-        session.rollback()
-        fetch = session.get(FxFetch, fetch_id)
-        fetch.outcome = FxFetchOutcome.failed
-        fetch.error = f"the fetch stopped on an error: {type(exc).__name__}"
     else:
         fetch.outcome = FxFetchOutcome.ok
-        fetch.rates_added = added
-        fetch.rates_unchanged = unchanged
+        fetch.chunk_since = fetch.chunk_until = None
     fetch.finished_at = utcnow()
     session.commit()
     log.info(
-        "exchange rates: %s %s in %.1f s, %d added, %d unchanged%s",
+        "exchange rates: %s %s in %.1f s, %d of %d requests, %d added, %d unchanged%s",
         fetch.source.value,
         fetch.outcome.value,
         time.monotonic() - began,
+        fetch.chunks_done,
+        fetch.chunks_total,
         fetch.rates_added,
         fetch.rates_unchanged,
         f" ({fetch.error})" if fetch.error else "",

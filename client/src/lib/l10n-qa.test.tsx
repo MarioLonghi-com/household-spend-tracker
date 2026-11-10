@@ -63,8 +63,12 @@ describe("an amount's lang", () => {
   });
 });
 
-describe("the drafts outside a QA build", () => {
-  it.each(["pt-BR", "es-ES", "sv-SE"])("%s cannot be reached", (locale) => {
+describe("what a device may show, in any build", () => {
+  it.each(["en", "pt-BR", "es-ES", "sv-SE", "en-XA"])("%s can be reached", (locale) => {
+    expect(isReachable(locale)).toBe(true);
+  });
+
+  it.each(["fr-FR", "pt-PT", "nl"])("%s, which no catalog serves, cannot", (locale) => {
     expect(isReachable(locale)).toBe(false);
   });
 });

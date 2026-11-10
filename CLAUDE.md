@@ -72,9 +72,11 @@ sharing a checkout with a session you cannot see.
 - **The client's words come from Lingui catalogs** (`client/src/locales/`,
   `lib/i18n.ts`). A message written with the `t`, `msg` or `plural` macros or
   `<Trans>` is extracted by `npm run extract`, and CI fails when the catalogs
-  are behind the source. Only English is served: a translated catalog holds
-  `#, fuzzy` drafts and has no loader until #58 ships it, and the picker stays
-  hidden until then. A new error code needs its message in
+  are behind the source. English, pt-BR, es-ES and sv-SE are served
+  (`SERVED_LOCALES`, #58), and a served catalog may hold no `#, fuzzy` and no
+  missing entry: **a new or changed message ships with its three translations
+  in the same change**, or `catalogs.test.ts` fails. A further language holds
+  fuzzy drafts, unserved, until reviewed. A new error code needs its message in
   `client/src/lib/errorMessages.ts` as well as `app/error_codes.py`. A
   message of one or two words, or one whose English alone is ambiguous,
   carries a translator `comment` (`client/src/locales/README.md`, #228).
@@ -124,13 +126,19 @@ sharing a checkout with a session you cannot see.
 
 ## Where the checks run
 
-**CI runs on pushes to `main` and on pull requests into `main` or `dev`.**
+**CI runs on pushes to `main` and `dev` and on pull requests into either.**
 `.github/workflows/tests.yml` runs ruff, the bulk-statement grep, the full
-pytest suite (under pytest-xdist; the migration check is part of it), the seed
-smoke test, the client typecheck, vitest and build, Playwright end-to-end at
-two widths, a dependency audit and review, the **upgrade rehearsal**, and the
-container image on both of its bases -- each only when the change touches what
-it checks, and the heavy ones only once per tree (the `green-<tree>` record).
+pytest suite (three shards under pytest-xdist, coverage combined after; the
+migration check is part of it), the seed smoke test, the client typecheck,
+vitest and build, Playwright end-to-end at two widths, a dependency audit and
+review, the **upgrade rehearsal**, and the container image on both of its
+bases -- each only when the change touches what it checks, and the heavy ones
+only once per tree. **Two tiers:** a pull request into `dev` runs the Linux
+tier and records `green-fast-<tree>`; the macOS and Windows suite, the
+packaged desktop app and most of the self-update matrix wait for the push to
+`dev`, the release pull request and the Monday run, which record
+`green-<tree>`. A pull request that changes the desktop shell or the updater
+still runs those jobs before it merges.
 **`ci-ok` is the single check a ruleset should require.** A pull request into
 `main` also runs **`release-ready`** (`scripts/release_check.py`): the version
 moved past the last tag, the CHANGELOG has a dated section for it with nothing

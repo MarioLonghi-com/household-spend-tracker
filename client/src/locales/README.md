@@ -1,9 +1,12 @@
 # The catalogs
 
 `messages.po` per locale, written by `npm run extract` from the source and
-never edited by hand except for `msgstr` and its `#, fuzzy` flag. Only English
-is served; the others hold drafts until #58. `GLOSSARY.md` is the term base:
-one agreed word per concept in each language.
+never edited by hand except for `msgstr` and its `#, fuzzy` flag. English,
+pt-BR, es-ES and sv-SE are served (#58, since 0.15.0), so **a new message
+ships with its three translations**: `catalogs.test.ts` refuses a served
+catalog with a fuzzy or missing entry. A further language would hold `#,
+fuzzy` drafts, unserved, until reviewed. `GLOSSARY.md` is the term base: one
+agreed word per concept in each language.
 
 ## Translator notes (#228)
 
@@ -86,10 +89,10 @@ its English and to the plural forms its language needs; the en-XA walk in
 
 ## Review in the app (#272)
 
-The household reviews the drafts in the app, not in these files. An owner
-turns on *Review translations on this device* in Application management;
-Profile's language picker then offers each draft as a preview, and *Suggest a
-better wording* keeps a better wording for any message. Application
+The household reviews the translations in the app, not in these files. An
+owner turns on *Review translations on this device* in Application
+management; a screen shown in a translated language then has *Suggest a
+better wording*, which keeps a better wording for any message. Application
 management lists them and downloads them as JSON or as one language's `.po`
 patch. To apply a download, on a branch:
 

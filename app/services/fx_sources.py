@@ -94,7 +94,9 @@ def fetch_ecb(
     """Every ECB reference rate for ``currencies`` from ``since`` to ``until``.
 
     One request for all of them: the SDMX API returns every currency of a date
-    range in one answer. ``get`` is for tests, which never reach the network.
+    range in one answer. `fx_fetching` asks a calendar year at a time (#409),
+    so one answer stays far inside :data:`ANSWER_LIMIT` and
+    :data:`ANSWER_SECONDS` however long the range. ``get`` is for tests, which never reach the network.
     """
     codes = sorted({c.upper() for c in currencies} - {"EUR"})
     if not codes:

@@ -973,6 +973,27 @@ test("Latest 12 months opens Income vs Expense on closed months, every currency 
   expect(href).not.toContain("currency=");
 });
 
+test("the (i) beside a currency lists its accounts, all of it inside the window (#411)", async ({ page }) => {
+  await go(page, "Exchange rates");
+  // The seed's GBP account is the one that puts GBP on this page.
+  const open = page.getByRole("button", { name: "Accounts in GBP" });
+  await open.click();
+  const list = page.getByRole("region", { name: "Accounts in GBP" });
+  await expect(list.getByRole("listitem").filter({ hasText: "UK Savings" })).toBeVisible();
+
+  const box = (await list.boundingBox())!;
+  const viewport = page.viewportSize()!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+  expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+
+  // Escape closes it, and the keyboard is back on the (i).
+  await page.keyboard.press("Escape");
+  await expect(list).toHaveCount(0);
+  await expect(open).toBeFocused();
+});
+
 test("the report is also one click from the menu", async ({ page }) => {
   await go(page, "Income vs Expense");
   await expect(page.getByRole("heading", { name: "Income vs Expense" })).toBeVisible();

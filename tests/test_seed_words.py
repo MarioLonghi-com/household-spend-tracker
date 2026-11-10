@@ -5,8 +5,9 @@ two households seeded in two languages get each its own words, stored as
 ordinary names; and the server's words, the client's catalog messages and
 `app/seed_catalog.json` agree.
 
-No language is reviewed yet, so the real catalog seeds English for every
-locale. The tests that need translated words plant a reviewed catalog.
+pt-BR, es-ES and sv-SE are reviewed and served since 0.15.0 (#58), so the real
+catalog seeds a household asking for one of them in its words, and English for
+any other. The tests about the mechanism plant a catalog of their own.
 """
 
 from __future__ import annotations
@@ -127,11 +128,11 @@ def _open_account(session, owner, household, name: str, currency: str, amount: i
 # --------------------------------------------------------------------------- #
 
 
-@pytest.mark.parametrize("locale", [None, "en", "pt-BR", "sv-SE", "es-ES", "fr-FR"])
-def test_with_no_reviewed_language_every_locale_seeds_the_english_it_always_did(
+@pytest.mark.parametrize("locale", [None, "en", "en-GB", "fr-FR", "nl"])
+def test_a_language_the_catalog_has_not_reviewed_seeds_the_english_it_always_did(
     session, owner, locale
 ):
-    """The real catalog holds drafts only, and a draft is never seeded."""
+    """English asked for, or a language nobody has translated: the tree as it was."""
     first = _make(session, owner, "First", locale)
     second = _make(session, owner, "Second")
 
@@ -142,6 +143,23 @@ def test_with_no_reviewed_language_every_locale_seeds_the_english_it_always_did(
     account, row = _open_account(session, owner, first, "Checking", "EUR", 120_000)
     assert _payees(session, first.id) == [("Opening balance", SystemPayee.opening_balance)]
     assert row.memo == "Opening balance"
+
+
+@pytest.mark.parametrize("locale", ["pt-BR", "es-ES", "sv-SE", "pt-PT", "es-MX"])
+def test_a_shipped_language_seeds_its_own_words_from_the_real_catalog(session, owner, locale):
+    """The catalog as committed, not a planted one (#58): the group and its
+    categories carry that language's words, and the opening-balance payee too."""
+    words = seed_words.catalog()[seed_words.resolve(locale) or ""]
+    house = _make(session, owner, "Casa", locale)
+    tree = _tree(session, house.id)
+    assert tree[0] == (
+        words["seed.group.income"],
+        [words["seed.category.salary"], words["seed.category.other_income"], words["seed.category.reimbursements"]],
+    )
+    assert tree[0] != ENGLISH_TREE[0]
+    assert len(tree) == len(ENGLISH_TREE)
+    _open_account(session, owner, house, "Checking", "EUR", 120_000)
+    assert _payees(session, house.id) == [(words["seed.opening_balance"], SystemPayee.opening_balance)]
 
 
 def test_an_english_household_is_seeded_in_english_beside_a_translated_one(

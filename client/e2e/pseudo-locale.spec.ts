@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { inspect } from "./l10n-check";
+import { inspect, settled } from "./l10n-check";
 
 /**
  * One pass in the en-XA pseudo-locale, at the phone's width (#53).
@@ -89,6 +89,7 @@ test("every screen the menu opens is extracted (#271)", async ({ page }) => {
     const name = (await target.innerText()).trim();
     await target.click();
     await page.waitForLoadState("networkidle");
+    await settled(page);
     const found = await inspect(page, []);
     problems.push(...found.sentences.map((one) => `${name}: ${one.slice(0, 90)}`));
     problems.push(...found.placeholders.map((one) => `${name}: a placeholder left: ${one.slice(0, 90)}`));

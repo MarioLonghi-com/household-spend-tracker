@@ -32,11 +32,28 @@ name: tests
 #      from the rehearsal against the last release.
 #   4. **One required check, `ci-ok`.** A ruleset that requires it and nothing
 #      else never waits forever for a job that was renamed or gated off.
+#   5. **Two tiers of pull request, since 2026-11-09.** A pull request into
+#      `dev` runs the Linux tier: lint, the suite in three shards, the client,
+#      e2e, the rehearsal, the image, and the self-update matrix only when the
+#      updater itself changed -- one smoke leg when only something it runs
+#      did. The macOS and Windows suite, the packaged desktop app (unless the
+#      shell changed) and the rest of the self-update matrix are the deferred
+#      tier: the push to `dev`, the release pull request into `main` and the
+#      Monday run. A full pull request run started up to twenty-two jobs, and
+#      the free plan runs twenty at a time, five of them on macOS: two pull
+#      requests from parallel worktrees left the macOS and Windows jobs
+#      waiting a quarter of an hour before they started. A tree that passes
+#      the Linux tier is recorded as `green-fast-<tree>`; only a run of every
+#      tier records `green-<tree>`, which is what `release.yml` asks for.
 #
 # Every job has a timeout and asks for exactly the permissions it uses.
 on:
+  # `dev` too, since 2026-11-09: the push that lands a pull request runs the
+  # deferred tier on that tree -- macOS, Windows, the packaged app, every
+  # self-update leg -- and records it in full. What the pull request already
+  # ran on the same tree is skipped.
   push:
-    branches: [main]
+    branches: [main, dev]
   # `dev` as well as `main`, since 2026-09-23. `dev` is where work actually
   # lands: a PR into it that nobody can see the checks on is the same "review"
   # problem the main trigger was added to fix, one branch earlier.
@@ -66,9 +83,17 @@ permissions:
 # cancelled: each of those reports on a commit that stays, so each gets a group
 # of its own (`run_id`) -- a shared group would still queue them and drop all
 # but the newest waiting one, `cancel-in-progress` or not.
+#
+# Pushes to `dev` share one group (2026-11-09), and queue rather than cancel
+# (#407): the run going finishes, and of those waiting only the newest tip
+# runs after it. Cancelling starved the deferred tier -- three merges ten
+# minutes apart each cancelled the macOS and Windows suite on the one before
+# at about its tenth minute, so no `dev` commit got a verdict and each showed
+# a red `ci-ok`. Queued, a burst of merges costs one extra run, not all of
+# them.
 concurrency:
-  group: tests-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: true
+  group: tests-${{ github.event.pull_request.number || (github.event_name == 'push' && github.ref == 'refs/heads/dev' && 'dev') || github.run_id }}
+  cancel-in-progress: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/dev') }}
 
 env:
   PYTHON_VERSION: "3.12"
@@ -95,10 +120,19 @@ jobs:
       selfupdate: ${{ steps.diff.outputs.selfupdate }}
       desktop: ${{ steps.diff.outputs.desktop }}
       desktopapp: ${{ steps.diff.outputs.desktopapp }}
+      desktopshell: ${{ steps.diff.outputs.desktopshell }}
+      # true: every tier is owed -- anything but a pull request into `dev`,
+      # or one that changes this file. false: the Linux tier only.
+      full: ${{ steps.diff.outputs.full }}
+      # The self-update legs this run owes, a JSON list for that job's matrix.
+      selfupdate_legs: ${{ steps.legs.outputs.legs }}
       tree: ${{ steps.green.outputs.tree }}
       # The id of an earlier successful run of this workflow on the identical
       # tree, or empty. The heavy jobs skip when it is set.
       green: ${{ steps.green.outputs.green }}
+      # The same from a run that passed at least the Linux tier: a
+      # `green-fast-<tree>` record or a full one. The Linux tier skips on it.
+      linux_green: ${{ steps.green.outputs.linux_green }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -128,9 +162,10 @@ jobs:
           tree="$(git rev-parse 'HEAD^{tree}')"
           echo "tree=$tree" >> "$GITHUB_OUTPUT"
           echo "tree $tree"
-          green=""
-          if [ "$EVENT" = "pull_request" ] || [ "$EVENT" = "push" ]; then
-            runs="$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=green-${tree}&per_page=20" \
+          # lookup <artifact name>: the id of a successful run of this file
+          # that uploaded it, or nothing.
+          lookup() {
+            runs="$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=$1&per_page=20" \
                 --jq '.artifacts[]
                       | select(.expired == false)
                       | select(.workflow_run.head_repository_id == .workflow_run.repository_id)
@@ -139,18 +174,32 @@ jobs:
               said="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}" \
                 --jq '[.conclusion, .path] | join(" ")' 2>/dev/null || true)"
               if [ "$said" = "success .github/workflows/tests.yml" ]; then
-                green="$run_id"; break
+                echo "$run_id"
+                return
               fi
             done
+          }
+          green=""
+          fast=""
+          if [ "$EVENT" = "pull_request" ] || [ "$EVENT" = "push" ]; then
+            green="$(lookup "green-${tree}")"
+            if [ -z "$green" ]; then fast="$(lookup "green-fast-${tree}")"; fi
           fi
           if [ -n "$green" ]; then
-            echo "this tree already passed in run $green -- the suite, e2e and the image are skipped"
+            echo "this tree already passed every tier in run $green -- the suite, e2e and the image are skipped"
             {
               echo "### Already green"
-              echo "Tree \`$tree\` passed in [run $green](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/$green)."
+              echo "Tree \`$tree\` passed every tier in [run $green](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/$green)."
+            } >> "$GITHUB_STEP_SUMMARY"
+          elif [ -n "$fast" ]; then
+            echo "this tree already passed the Linux tier in run $fast -- only the deferred tier can run"
+            {
+              echo "### Already green on Linux"
+              echo "Tree \`$tree\` passed the Linux tier in [run $fast](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/$fast)."
             } >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "green=$green" >> "$GITHUB_OUTPUT"
+          echo "linux_green=${green:-$fast}" >> "$GITHUB_OUTPUT"
 
       # A full run bills about twenty-four minutes, eleven of them pytest, and it
       # ran on every pull request -- a one-line Dependabot bump to the dev
@@ -187,11 +236,13 @@ jobs:
       - id: diff
         env:
           EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          jobs="python client code image rehearsal audit lock selfupdate desktop desktopapp"
+          jobs="python client code image rehearsal audit lock selfupdate desktop desktopapp desktopshell updater"
           everything() {
             echo "$1: everything runs"
             for job in $jobs; do echo "$job=true" >> "$GITHUB_OUTPUT"; done
+            echo "full=true" >> "$GITHUB_OUTPUT"
             exit 0
           }
           [ "$EVENT" = "pull_request" ] || everything "not a pull request"
@@ -201,6 +252,12 @@ jobs:
           git diff --name-only --no-renames HEAD^1 HEAD > changed.txt
           echo "changed:"; sed 's/^/  /' changed.txt
           grep -qx '.github/workflows/tests.yml' changed.txt && everything "the workflow changed"
+
+          # A release pull request owes every tier, path-gated like any other;
+          # a pull request into `dev` owes the Linux tier alone.
+          if [ "$BASE_REF" = "main" ]; then full=true; else full=false; fi
+          echo "full=$full" >> "$GITHUB_OUTPUT"
+          echo "full: $full"
 
           # decide <job>, with that job's path patterns on stdin
           decide() {
@@ -310,6 +367,89 @@ jobs:
           ^requirements(-desktop)?\.txt$
           ^alembic\.ini$
           PATHS
+
+          # The desktop shell itself and what packages it. A pull request into
+          # `dev` that changes these still builds and drives the packaged app
+          # before it merges; any other change to what the app freezes waits
+          # for the deferred tier.
+          decide desktopshell <<'PATHS'
+          ^desktop/
+          ^scripts/desktop_build\.py$
+          ^requirements-desktop\.(in|txt)$
+          PATHS
+
+          # The updater itself and the self-update job's own driver. A pull
+          # request into `dev` that changes these runs every self-update leg;
+          # any other change on `selfupdate`'s list -- a migration, the
+          # Dockerfile, deploy/ -- runs the smoke leg and leaves the rest to
+          # the deferred tier.
+          decide updater <<'PATHS'
+          ^updater/
+          ^tests/self_update/
+          PATHS
+
+      # Which self-update legs this run owes, as that job's matrix. The legs
+      # live here rather than in the job because a pull request into `dev`
+      # runs a subset of them, and a matrix cannot be narrowed after the fact:
+      # an `include` that matches no combination is added, not dropped.
+      #
+      # The legs (design notes 15.5) are described above the `self-update`
+      # job. Per leg: `only` the scenarios it runs (empty: all), `variants`
+      # the B variants it builds, `index` whether every updater is pushed as a
+      # two-platform OCI index, `smoke` whether it is the one leg a pull
+      # request into `dev` runs when only something the updater runs changed.
+      #
+      # `a_floor`: a commit release A must contain for the leg to run at all.
+      # When the merge base predates it, A is built from the floor instead --
+      # a commit of the change under review that A's updater needs on that
+      # engine or layout -- and the run says so. Once the merge base has it,
+      # the floor is a no-op. docker-sidecar's is the sidecar copy without
+      # ExposedPorts (E11b runs A's updater); the Podman legs' is A's updater
+      # starting at all as 0:0 with cap_drop ALL (844b32f) and, as the standby
+      # after its handover, not taking back from a successor podman-compose
+      # recreates (0ecbf81; E12).
+      #
+      # Rootless Podman is the slowest engine here: two shards, run side by
+      # side, each building its own releases.
+      - id: legs
+        env:
+          EVENT: ${{ github.event_name }}
+          SELFUPDATE: ${{ steps.diff.outputs.selfupdate }}
+          UPDATER: ${{ steps.diff.outputs.updater }}
+          FULL: ${{ steps.diff.outputs.full }}
+          GREEN: ${{ steps.green.outputs.green }}
+          LINUX_GREEN: ${{ steps.green.outputs.linux_green }}
+        run: |
+          if [ "$EVENT" = "schedule" ] || [ "$EVENT" = "workflow_dispatch" ]; then pick=all
+          elif [ "$SELFUPDATE" != "true" ]; then pick=none
+          elif [ "$FULL" = "true" ]; then
+            if [ -z "$GREEN" ]; then pick=all; else pick=none; fi
+          elif [ -n "$LINUX_GREEN" ]; then pick=none
+          elif [ "$UPDATER" = "true" ]; then pick=all
+          else pick=smoke
+          fi
+          echo "self-update legs: $pick"
+          jq -c --arg pick "$pick" \
+            '[.[] | select($pick == "all" or ($pick == "smoke" and .smoke)) | del(.smoke)]' \
+            > legs.json <<'LEGS'
+          [
+            {"leg": "docker", "engine": "docker", "layout": "loopback", "runner": "ubuntu-latest",
+             "only": "", "variants": "", "a_floor": "", "index": false, "smoke": false},
+            {"leg": "docker-sidecar", "engine": "docker", "layout": "sidecar", "runner": "ubuntu-latest",
+             "only": "", "variants": "", "a_floor": "51926060257c831732734c67a6cba6a6e36a8f88",
+             "index": false, "smoke": false},
+            {"leg": "podman-rootless", "engine": "podman", "layout": "loopback", "runner": "ubuntu-latest",
+             "only": "E1,E10,E11,E13,E12,E11b,E2,E3,E4,E17", "variants": "B1,B2,B3,B4,C",
+             "a_floor": "0ecbf8125f64a55672db60e59720eeb6e1550890", "index": true, "smoke": false},
+            {"leg": "podman-rootless-2", "engine": "podman", "layout": "loopback", "runner": "ubuntu-latest",
+             "only": "E5,E6,E7,E8,E9,E14,E15", "variants": "B1,B2,C",
+             "a_floor": "0ecbf8125f64a55672db60e59720eeb6e1550890", "index": true, "smoke": false},
+            {"leg": "docker-arm", "engine": "docker", "layout": "loopback", "runner": "ubuntu-24.04-arm",
+             "only": "E1", "variants": "none", "a_floor": "", "index": false, "smoke": true}
+          ]
+          LEGS
+          cat legs.json
+          echo "legs=$(cat legs.json)" >> "$GITHUB_OUTPUT"
 
   # --------------------------------------------------------------------------- #
   # Tier 0: about a minute each
@@ -433,9 +573,21 @@ jobs:
   # Tier 1: the suite, the client, the browser, the upgrade
   # --------------------------------------------------------------------------- #
 
-  # The whole suite with the coverage gate, across the runner's cores.
-  # `--dist loadfile` keeps a file's tests on one worker; pytest-cov combines
-  # the workers' data itself, and the 85% floor applies to the combined figure.
+  # The whole suite, in three shards of whole files, each across its runner's
+  # cores. One job took twelve minutes, every one of them on the critical
+  # path of every pull request (2026-11-09). `PYTEST_SHARD` picks the shard
+  # (tests/conftest.py); `--dist loadfile` keeps a file's tests on one
+  # worker; pytest-cov combines the workers' data itself.
+  #
+  # A shard measures coverage and applies no floor -- a third of the suite
+  # would fail the 85% by construction. `pytest-coverage` combines the three
+  # and applies the floor in pyproject.toml to the whole.
+  #
+  # `COVERAGE_CORE=sysmon` measures through Python 3.12's sys.monitoring
+  # rather than a trace function. On the API and ledger-performance tests it
+  # cut what coverage costs from 18% of the run to 7%. It cannot measure
+  # branches on 3.12, and nothing here asks it to.
+  #
   # `--durations=20` so the slowest tests are in every log, and `-ra` so every
   # skip and failure is named in the summary.
   #
@@ -443,9 +595,16 @@ jobs:
   # already passed; `ci-ok` reads a skip as "not owed".
   pytest:
     needs: changes
-    if: needs.changes.outputs.python == 'true' && needs.changes.outputs.green == ''
+    if: needs.changes.outputs.python == 'true' && needs.changes.outputs.linux_green == ''
+    name: pytest (${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    env:
+      COVERAGE_CORE: sysmon
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -461,21 +620,57 @@ jobs:
       - run: python -m pip install --require-hashes -r requirements-dev.txt
 
       # tests/test_migrations.py -- the check that a model change shipped with
-      # its migration -- is part of this run. It used to run a second time as
-      # a step of its own for legibility; `-ra` names a failing test in the
-      # summary, so the second run is gone.
+      # its migration -- is part of this run, in whichever shard holds it.
       - name: pytest
-        run: python -m pytest -n auto --dist loadfile --durations=20 -ra
+        run: python -m pytest -n auto --dist loadfile --durations=20 -ra --cov-report= --cov-fail-under=0
         env:
           SPENDTRACKER_DATA_DIR: ./ci-data
+          PYTEST_SHARD: ${{ matrix.shard }}/3
+
+      # Renamed because upload-artifact leaves hidden files out unless told.
+      - run: mv .coverage "coverage-${{ matrix.shard }}.data"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: coverage-${{ matrix.shard }}
+          path: coverage-${{ matrix.shard }}.data
+          if-no-files-found: error
+          retention-days: 1
 
       # The seed builds months of activity through the real services, so it
       # exercises in one run everything the unit tests reach in isolation.
+      # Once per run, not once per shard.
       - name: the demo seed still builds
+        if: matrix.shard == 1
         run: python -m scripts.seed_demo --reset --months 3
         env:
           SPENDTRACKER_DATA_DIR: ./ci-data
           DATABASE_URL: sqlite:///./ci-data/seed.sqlite3
+
+  # The three shards' coverage, combined, against the floor pyproject.toml
+  # sets for the whole suite -- the figure one unsharded run used to apply.
+  # Only coverage itself is installed, at the version requirements-dev.txt
+  # locks. Skipped with `pytest`, since it needs every shard's data.
+  pytest-coverage:
+    needs: pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: python -m pip install "$(grep -oE '^coverage==[^ ]+' requirements-dev.txt)"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          pattern: coverage-*
+          merge-multiple: true
+      - name: the whole suite's coverage, against the floor
+        run: |
+          floor="$(grep -oE 'cov-fail-under=[0-9]+' pyproject.toml | cut -d= -f2)"
+          coverage combine coverage-*.data
+          coverage report --show-missing --fail-under="$floor"
 
   # The same suite on the two operating systems the desktop app ships for
   # (#49). Everything above runs on Linux, where the server and the image do;
@@ -487,7 +682,11 @@ jobs:
   # being POSIX-only would only move the number.
   pytest-desktop-os:
     needs: changes
-    if: needs.changes.outputs.desktop == 'true' && needs.changes.outputs.green == ''
+    # The deferred tier: never on a pull request into `dev`.
+    if: >-
+      needs.changes.outputs.desktop == 'true'
+      && needs.changes.outputs.full == 'true'
+      && needs.changes.outputs.green == ''
     strategy:
       fail-fast: false
       matrix:
@@ -531,7 +730,14 @@ jobs:
   # provisioning profile, and that is a secret.
   desktop-app:
     needs: changes
-    if: needs.changes.outputs.desktopapp == 'true' && needs.changes.outputs.green == ''
+    # The deferred tier, except that a pull request into `dev` that changes
+    # the shell itself (`desktopshell`) still owes it.
+    if: >-
+      needs.changes.outputs.desktopapp == 'true'
+      && needs.changes.outputs.green == ''
+      && (needs.changes.outputs.full == 'true'
+          || (needs.changes.outputs.desktopshell == 'true'
+              && needs.changes.outputs.linux_green == ''))
     strategy:
       fail-fast: false
       matrix:
@@ -665,7 +871,7 @@ jobs:
   # when nothing a browser could see changed, and when the tree already passed.
   e2e:
     needs: changes
-    if: needs.changes.outputs.code == 'true' && needs.changes.outputs.green == ''
+    if: needs.changes.outputs.code == 'true' && needs.changes.outputs.linux_green == ''
     runs-on: ubuntu-latest
     # Thirty since #271 added a walk of every screen in each draft language,
     # at both widths -- about four minutes on top of the English suite.
@@ -757,7 +963,7 @@ jobs:
     needs: changes
     if: >-
       needs.changes.outputs.rehearsal == 'true'
-      && (needs.changes.outputs.green == '' || github.base_ref == 'main')
+      && (needs.changes.outputs.linux_green == '' || github.base_ref == 'main')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -975,7 +1181,7 @@ jobs:
       || github.event_name == 'workflow_dispatch'
       || (github.event_name == 'pull_request'
           && needs.changes.outputs.image == 'true'
-          && needs.changes.outputs.green == '')
+          && needs.changes.outputs.linux_green == '')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -1229,76 +1435,23 @@ jobs:
   # **Required: in `ci-ok`'s needs**, since the matrix ran green on every leg
   # three times on one tree (#243). Path-filtered like every job here: a
   # change that touches none of the paths above is not owed it, and ci-ok
-  # reads its skip as such.
+  # reads its skip as such. A pull request into `dev` owes every leg only
+  # when it changes the updater or this job's driver; when it changes only
+  # something the updater runs -- a migration, the Dockerfile -- it owes the
+  # docker-arm leg, E1 alone, and the rest wait for the deferred tier
+  # (2026-11-09).
   self-update:
     needs: changes
-    if: >-
-      github.event_name == 'schedule'
-      || github.event_name == 'workflow_dispatch'
-      || (github.event_name == 'pull_request'
-          && needs.changes.outputs.selfupdate == 'true'
-          && needs.changes.outputs.green == '')
+    if: needs.changes.outputs.selfupdate_legs != '' && needs.changes.outputs.selfupdate_legs != '[]'
     name: self-update (${{ matrix.leg }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     strategy:
       fail-fast: false
+      # The legs, and which of them this run owes: the `legs` step of
+      # `changes`.
       matrix:
-        include:
-          # `a_floor`: a commit release A must contain for the leg to run at
-          # all. When the merge base predates it, A is built from the floor
-          # instead -- a commit of the change under review that A's updater
-          # needs on that engine or layout -- and the run says so. Once the
-          # merge base has it, the floor is a no-op.
-          - leg: docker
-            engine: docker
-            layout: loopback
-            runner: ubuntu-latest
-            only: ""
-            variants: ""
-            a_floor: ""
-            index: false
-          - leg: docker-sidecar
-            engine: docker
-            layout: sidecar
-            runner: ubuntu-latest
-            only: ""
-            variants: ""
-            # The sidecar copy without ExposedPorts (E11b runs A's updater).
-            a_floor: 51926060257c831732734c67a6cba6a6e36a8f88
-            index: false
-          # Rootless Podman is the slowest engine here: two shards, run side
-          # by side, each building its own releases.
-          - leg: podman-rootless
-            engine: podman
-            layout: loopback
-            runner: ubuntu-latest
-            only: E1,E10,E11,E13,E12,E11b,E2,E3,E4,E17
-            variants: B1,B2,B3,B4,C
-            # A's updater starting at all as 0:0 with cap_drop ALL (844b32f),
-            # and, as the standby after its handover, not taking back from a
-            # successor podman-compose recreates (0ecbf81; E12).
-            a_floor: 0ecbf8125f64a55672db60e59720eeb6e1550890
-            # Every updater a two-platform OCI index, pulled by the index's
-            # digest: Podman lists the platform manifest's digest beside it
-            # in RepoDigests, as it does a release's (#287).
-            index: true
-          - leg: podman-rootless-2
-            engine: podman
-            layout: loopback
-            runner: ubuntu-latest
-            only: E5,E6,E7,E8,E9,E14,E15
-            variants: B1,B2,C
-            a_floor: 0ecbf8125f64a55672db60e59720eeb6e1550890
-            index: true
-          - leg: docker-arm
-            engine: docker
-            layout: loopback
-            runner: ubuntu-24.04-arm
-            only: E1
-            variants: none
-            a_floor: ""
-            index: false
+        include: ${{ fromJSON(needs.changes.outputs.selfupdate_legs) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -1448,6 +1601,7 @@ jobs:
       - lint
       - repo-wide
       - pytest
+      - pytest-coverage
       - pytest-desktop-os
       - desktop-app
       - client
@@ -1462,35 +1616,57 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      # The verdict is an allow-list since #407: `success` or `skipped`, and
+      # `changes` must have succeeded, since it decides every skip. The old
+      # deny-list (`failure`, `cancelled`) passed two runs of #405 whose
+      # `changes` job GitHub abandoned: everything after it was skipped and
+      # nothing had been tested. Only the script is checked out; the runner's
+      # own Python runs it, standard library only.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/__init__.py
+            scripts/ci_ok.py
+          sparse-checkout-cone-mode: false
       - name: every job passed or was not owed
         env:
           NEEDS: ${{ toJSON(needs) }}
-        run: |
-          echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
-          bad=$(echo "$NEEDS" | jq -r '[to_entries[] | select(.value.result == "failure" or .value.result == "cancelled") | .key] | join(", ")')
-          if [ -n "$bad" ]; then
-            echo "not ok: $bad"
-            exit 1
-          fi
-          echo "ok"
+        run: python3 -m scripts.ci_ok
 
       # Only a run that did the work records the tree, and only from this
       # repository's own branches: a fork's run cannot mint one. The artifact
       # holds nothing but this run's id; its name is the record. Ninety days,
       # the longest a public repository keeps one, covers any release cadence
       # here -- and an expired record only costs a full run.
+      #
+      # A run of every tier records `green-<tree>`, which skips both tiers
+      # and is what release.yml asks for. A pull request into `dev` records
+      # `green-fast-<tree>`, which skips the Linux tier only.
       - name: record this tree as green
         if: >-
           needs.changes.outputs.tree != ''
-          && needs.changes.outputs.green == ''
           && (github.event_name != 'pull_request'
               || github.event.pull_request.head.repo.full_name == github.repository)
         env:
           TREE: ${{ needs.changes.outputs.tree }}
+          FULL: ${{ needs.changes.outputs.full }}
+          GREEN: ${{ needs.changes.outputs.green }}
+          LINUX_GREEN: ${{ needs.changes.outputs.linux_green }}
         run: |
+          name=""
+          if [ "$FULL" = "true" ]; then
+            if [ -z "$GREEN" ]; then name="green-$TREE"; fi
+          elif [ -z "$LINUX_GREEN" ]; then
+            name="green-fast-$TREE"
+          fi
+          if [ -z "$name" ]; then
+            echo "this tree's record already exists"
+            exit 0
+          fi
           mkdir -p green
           echo "$GITHUB_RUN_ID" > green/run
-          echo "GREEN_NAME=green-$TREE" >> "$GITHUB_ENV"
+          echo "GREEN_NAME=$name" >> "$GITHUB_ENV"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: env.GREEN_NAME != ''
         with:

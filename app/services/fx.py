@@ -469,6 +469,34 @@ class Rates:
             return point.rate
         return None
 
+    def rate_from(
+        self, source: FxSource, currency: str, on_date: Date, *, policy: FxPolicy | None = None
+    ) -> RateUsed | None:
+        """What one source alone gives ``currency`` on ``on_date`` under ``policy``.
+
+        The same finding `rate_on` does for each source in the chain, without
+        the chain: for a list filtered to one source (#410). Never converts.
+        """
+        currency = currency.upper()
+        if currency == self.base:
+            return None
+        policy = FxPolicy(policy) if policy is not None else self.monthly_policy
+        found = self._find(self.series(FxSource(source), currency), on_date, policy)
+        return self._used(FxSource(source), found) if found is not None else None
+
+    def own_rate_in_month(self, currency: str, month: Date, policy: FxPolicy) -> Decimal | None:
+        """The household's own rate for ``month`` under ``policy``, or ``None``.
+
+        Only from transfers inside that month: a month with none says nothing,
+        rather than borrowing an earlier month's rate the way a conversion may.
+        """
+        if currency.upper() == self.base:
+            return None
+        found = self._find(self._own_series(currency.upper()), month, FxPolicy(policy))
+        if found is None or not (_month_start(month) <= found.point.date <= _month_end(month)):
+            return None
+        return found.point.rate
+
 
 def rates(session: Session, household: Household, *, today: Date | None = None) -> Rates:
     """The household's rates for one request. See :class:`Rates`."""

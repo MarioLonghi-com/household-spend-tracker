@@ -6,9 +6,9 @@ image carries the built client, not its sources. This copies the one slice it
 needs -- the ``seed.*`` messages -- out of each translated catalog.
 
 **Reviewed translations only.** An entry marked ``#, fuzzy`` is a draft, and a
-draft is never seeded, exactly as the client never serves one. Until #58 has
-reviewed a language its slice is empty, and a household asking for it is
-seeded in English.
+draft is never seeded, exactly as the client never serves one. A language not
+yet reviewed has an empty slice, and a household asking for it is seeded in
+English; the three shipped in 0.15.0 (#58) have theirs.
 
     python -m scripts.seed_catalog          write it
     python -m scripts.seed_catalog --check  exit 1 if it is out of date

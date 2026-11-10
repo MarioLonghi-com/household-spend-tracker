@@ -32,6 +32,130 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.15.0 — 2026-11-10
+
+**Reversible: lossy** — one migration.
+
+- `ce59881171a4` — lossy: how far each fetch of exchange rates got (#409).
+  Four columns on `fx_fetches`: `chunks_total`, `chunks_done`, and
+  `chunk_since`/`chunk_until`, the dates of the request in flight or of the
+  one a failed fetch stopped on. A fetch recorded before it reads as 1 of 1.
+  Rolling it back drops the four columns, so the fetch history forgets how
+  far each fetch got; the rates themselves stay, and nothing in the ledger
+  changes.
+
+### Added
+
+- **Three languages beside English: Brazilian Portuguese, Spanish (Spain)
+  and Swedish** (#48, #58). Profile's language picker now offers them to
+  everyone, each named in itself; the choice is per device, and a first visit
+  takes the browser's language when it is one of them, English otherwise. The
+  whole app speaks the language: every screen, the error sentences a screen
+  shows for a refusal (by its code), History, the desktop app's menus and
+  dialogs, and a new household's starter categories and *Opening balance*
+  payee, seeded in the language of the device that made it. Amounts and dates
+  are written the way the language writes them. The household reviewed the
+  translations in the app (0.10.0's review mode); review mode stays, and on a
+  screen shown in a translated language still offers *Suggest a better
+  wording*. English is unchanged.
+- **Exchange rates: an (i) beside each currency lists the accounts in it**
+  (#411), so it is clear why that currency is being fetched: each account's
+  name, bank and country, a closed one tagged *Closed*, sorted by name. A
+  long list scrolls inside the bubble, which stays inside the window at every
+  width, on a phone too and for a currency at the right of the table. It is a
+  button named *Accounts in SEK* and so on; Tab reaches the list and Escape
+  closes it. The status endpoint's account entries now carry `institution`,
+  `country`, `country_name`, `flag` and `closed`.
+- **Browse rates on the Exchange rates page reads a long range a page at a
+  time** (#410). The server orders the rates and answers a hundred at once
+  (`GET …/fx/rates` takes `offset`, `sort` and `direction`), so years of daily
+  rates for several currencies no longer arrive, or draw, all together. Every
+  column sorts at its heading through the server, and the headings stay in
+  view while a page scrolls. **Show** lists every rate by day, or one line per
+  currency per month at the monthly average or the month-end rate
+  (`granularity`), found exactly as a report finds it under that rate policy,
+  with the date of the rate it used; the household's own policy is marked.
+  The dates are the shared date range control, and **Jump to** a date or a
+  month opens the page holding it (`at`) with that row marked. The currency,
+  source, dates, view, order and page are kept in the address, so a reload or
+  a bookmark opens the same list. The agent route takes the same paging,
+  ordering and granularity.
+
+### Fixed
+
+- **A fetch of exchange rates over a long range no longer fails as one
+  request** (#409). *Fetch now* asked the ECB for the whole range at once, so
+  a backfill to the first transaction years back could pass the 32 MB or
+  120 s limit on one answer, and then kept nothing. It now asks for one
+  calendar year per request, oldest first, and stores each year as it
+  arrives: a failure part-way keeps the years before it, the history says
+  which request it stopped on and its dates, and the next Fetch now carries
+  on from the last stored rate.
+- **The fetch belongs to the household, not the page.** It keeps running
+  when whoever pressed leaves the page or signs out. Anyone in the household
+  who opens *Exchange rates* sees that it is running, who started it, the
+  currencies and dates being fetched and how far it has got ("4 of 12", with
+  a progress bar), and the page asks again every second until it ends. A
+  second Fetch now while one runs is still refused with the existing 409.
+  `fx/status` gives the progress on each fetch, `running_fetches` and
+  `history` alike.
+
+### Fixed
+
+- **Screen-reader-only text in a table no longer widens the page on a
+  phone.** The Income vs Expense report says each month and "surplus" or
+  "shortfall" to a screen reader in text drawn off screen; that text was
+  positioned against the page rather than the table's scroller, so on a phone
+  the page itself could be dragged sideways while the table stayed put. Both
+  table scrollers now contain it.
+- **Recovery restores a backup by whichever digest of the old release
+  verifies** (#421). The journal records the reference the app ran by, which
+  on Podman can be the platform manifest's digest rather than the index
+  digest a release attests (#287, as for the updater's identity and for
+  going back). *Restore this backup* and *Start the version that matches*
+  verified that one digest alone and refused -- "no longer verifies
+  (subject)" -- about every other time on rootless Podman; every digest the
+  engine lists for the image is now tried, the recorded one first, and the
+  recovered app is started and pinned by the one that verifies.
+- **The housekeeping sweep no longer runs beside the first requests.** It
+  starts thirty seconds after the app does, and a sweep still writing when
+  the app stops is finished before the shutdown checkpoint rather than left
+  running beside it. On a slow disk the old timing held the ledger's write
+  lock past `busy_timeout` for the first write after setup ("ledger busy",
+  409) and left the WAL unfolded at shutdown.
+
+### Changed (CI)
+
+- **The self-update drill's E8 fails at once when the recovery restore is
+  refused**, naming the updater's reason, instead of waiting ten minutes for
+  the old release to answer (#421).
+
+- **A pull request into `dev` runs the Linux tier of CI only**, and the push
+  that lands it runs the rest. The suite on macOS and Windows, the packaged
+  desktop app and four of the five self-update legs moved to that push, the
+  release pull request and the Monday run, unless the pull request changes
+  the desktop shell or the updater. Pull request runs took 15 to 26 minutes,
+  about 10 of them queueing behind the free plan's limit of twenty jobs at a
+  time, five on macOS. A tree that passes the Linux tier is recorded as
+  `green-fast-<tree>`; `release.yml` still asks for `green-<tree>`, which only
+  a run of every tier records.
+- **The suite runs as three shards** of whole files, `PYTEST_SHARD=i/n` in
+  `tests/conftest.py`, and a last job combines their coverage and applies the
+  85% floor. Coverage measures through `sys.monitoring`
+  (`COVERAGE_CORE=sysmon`), which cost 7% of a run where the trace function
+  cost 18%. No change to `app/`.
+- **`ci-ok` passes only a run that did the work** (#407). It failed on
+  `failure` or `cancelled` and passed anything else, so two runs whose
+  `changes` job GitHub abandoned -- everything after it skipped, nothing
+  tested -- came out green. The verdict is now `scripts/ci_ok.py`: only
+  `success` or `skipped`, and `changes` must have succeeded, since it decides
+  every skip. A test keeps every job of the workflow in `ci-ok`'s `needs`.
+- **A push to `dev` no longer cancels the run on the one before.** It
+  queues: the run going finishes, and of those waiting only the newest tip
+  runs next. Three merges ten minutes apart each cancelled the macOS and
+  Windows suite on the previous tip at about its tenth minute, so no `dev`
+  commit got that tier's verdict. Pull requests still cancel.
+
 ## 0.14.1 — 2026-11-09
 
 **Reversible: none** — no migration in this release. To go back to

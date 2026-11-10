@@ -15,6 +15,7 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from .. import countries
 from .. import currencies as iso
 from ..errors import DomainError, ValidationError
 from ..models import (
@@ -50,12 +51,42 @@ class FetchView:
     started_by: str | None
     #: Whole milliseconds, NULL while it runs.
     duration_ms: int | None
+    #: How far it got (#409): requests in all, and how many are stored.
+    chunks_total: int
+    chunks_done: int
+    #: The dates of the request in flight, or the one it stopped on.
+    chunk_since: Date | None
+    chunk_until: Date | None
 
 
 @dataclass(frozen=True, slots=True)
 class AccountRef:
+    """An account in a currency, as the (i) beside that currency lists it (#411)."""
+
     id: str
     name: str
+    #: The bank, as the account states it; NULL when it never said.
+    institution: str | None
+    #: ISO 3166-1 alpha-2, NULL when not stated.
+    country: str | None
+    #: The country's English name, which a translated screen replaces with its
+    #: own. NULL when no country is stated.
+    country_name: str | None
+    flag: str
+    closed: bool
+
+
+def account_ref(account: Account) -> AccountRef:
+    code = account.country
+    return AccountRef(
+        id=account.id,
+        name=account.name,
+        institution=account.institution,
+        country=code,
+        country_name=countries.BY_CODE.get(code, code) if code else None,
+        flag=countries.flag(code),
+        closed=account.closed,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -166,6 +197,10 @@ def fetch_view(session: Session, row: FxFetch) -> FetchView:
         error=row.error,
         started_by=fx._name(session, row.started_by_id),
         duration_ms=duration,
+        chunks_total=row.chunks_total,
+        chunks_done=row.chunks_done,
+        chunk_since=row.chunk_since,
+        chunk_until=row.chunk_until,
     )
 
 
@@ -189,7 +224,7 @@ def status(session: Session, household: Household, *, today: Date | None = None)
     ).scalars():
         code = account.currency.upper()
         if code != base:
-            accounts.setdefault(code, []).append(AccountRef(id=account.id, name=account.name))
+            accounts.setdefault(code, []).append(account_ref(account))
 
     dates_by_currency: dict[str, list[Date]] = {}
     for code, day in session.execute(

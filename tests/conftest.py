@@ -400,7 +400,40 @@ def pytest_ignore_collect(collection_path, config):
     return None
 
 
+def _shard(items: list, spec: str) -> tuple[list, list]:
+    """`PYTEST_SHARD=i/n`: this run's share of the suite, in whole files.
+
+    CI runs the suite as three shards side by side (`pytest` in tests.yml).
+    Files are dealt largest first, ties by path, each to the shard with the
+    fewest tests so far -- a function of the collection alone, so every
+    xdist worker and every runner computes the same split, and every file
+    lands in exactly one shard. Returns (kept, deselected).
+    """
+    index, total = (int(part) for part in spec.split("/"))
+    if not 1 <= index <= total:
+        raise pytest.UsageError(f"PYTEST_SHARD={spec}: want i/n with 1 <= i <= n")
+    by_file: dict[str, list] = {}
+    for item in items:
+        by_file.setdefault(item.nodeid.split("::")[0], []).append(item)
+    load = [0] * total
+    mine: set[str] = set()
+    for path, its in sorted(by_file.items(), key=lambda kv: (-len(kv[1]), kv[0])):
+        least = min(range(total), key=lambda k: (load[k], k))
+        load[least] += len(its)
+        if least == index - 1:
+            mine.add(path)
+    kept = [item for item in items if item.nodeid.split("::")[0] in mine]
+    dropped = [item for item in items if item.nodeid.split("::")[0] not in mine]
+    return kept, dropped
+
+
 def pytest_collection_modifyitems(config, items) -> None:
+    spec = os.environ.get("PYTEST_SHARD")
+    if spec:
+        kept, dropped = _shard(items, spec)
+        if dropped:
+            config.hook.pytest_deselected(items=dropped)
+        items[:] = kept
     if os.name != "nt":
         return
     for item in items:
