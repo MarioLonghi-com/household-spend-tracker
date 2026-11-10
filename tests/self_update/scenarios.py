@@ -895,7 +895,7 @@ class Run:
             s.vol.corrupt(path)
             corrupted["path"] = path
 
-        _, record = s.update(A, B2, code=code, during=corrupt)
+        req, record = s.update(A, B2, code=code, during=corrupt)
         r.check(
             record.get("state") == "needs_recovery", f"the update needs recovery: {record.get('sentence')}"
         )
@@ -936,12 +936,22 @@ class Run:
             cookie=cookie,
         )
         r.check(act["status"] == 202, f"restoring that backup is accepted ({act['status']})")
-        health = s.wait_for(
-            lambda: (lambda h: h if h.get("version") == A else None)(s.health()),
-            "A to answer",
-            600,
-            every=3,
-        )
+
+        # A answering, or the action recorded as failed in the journal -- the
+        # updater answers 202 before it verifies and starts A, so a refusal
+        # there used to be ten minutes of waiting on health (#421).
+        def restored_or_failed() -> dict | None:
+            done = [
+                one
+                for one in (s.vol.read(f"history/{req['id']}.json") or {}).get("recovery") or []
+                if one.get("kind") == "restore_backup" and one.get("result") == "failed"
+            ]
+            if done:
+                raise Failure(f"the restore failed: {done[-1].get('sentence')}")
+            h = s.health()
+            return h if h.get("version") == A else None
+
+        health = s.wait_for(restored_or_failed, "A to answer", 600, every=3)
         r.check(health.get("version") == A, "A answers again")
         now = s.vol.ledger()
         want = (manifest or {}).get("rows") or {}
