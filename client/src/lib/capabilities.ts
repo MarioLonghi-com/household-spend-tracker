@@ -19,6 +19,12 @@ export type Capabilities = {
   second_factor: boolean;
   /** A forgotten password is replaced with the recovery code: the desktop's way back in (#320). */
   password_reset_by_code: boolean;
+  /**
+   * The desktop app may open after a biometric prompt (#432). Whether this
+   * computer has a sensor is the shell's to say (`lib/desktop.ts`): both
+   * have to be true before Profile offers it.
+   */
+  device_unlock: boolean;
   self_update: boolean;
   upstream_check: boolean;
   db_view: boolean;
@@ -39,6 +45,7 @@ export const EVERYTHING: Capabilities = {
   passkeys: true,
   second_factor: true,
   password_reset_by_code: false,
+  device_unlock: false,
   self_update: true,
   upstream_check: true,
   db_view: true,

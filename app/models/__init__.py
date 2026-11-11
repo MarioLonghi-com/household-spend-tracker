@@ -6,6 +6,7 @@ from .auth import (
     AgentKey,
     AgentReplay,
     AgentRequest,
+    DeviceUnlock,
     Instance,
     Invitation,
     LoginAttempt,
@@ -75,6 +76,6 @@ __all__ = [
     "Category", "CategoryGroup", "CategoryGroupRole", "CategoryRole", "Change", "ChangeOp",
     "ClearedState", "EnumStr", "IdentifierKind", "Household", "HouseholdMember", "IgnoredIdentifierSuggestion", "ImportLine", "ImportOutcome",
     "Instance", "InstanceState", "Invitation", "LinkSource", "LoginAttempt", "MatchType", "NAMING_CONVENTION", "Payee", "Reconciliation",
-    "Passkey", "PayeeRule", "PendingSignIn", "StepUpGrant", "Receipt", "ReceiptBlob", "RecoveryCode", "RegisterSort", "RegisterSource", "ReimbursementState", "ReimbursementView", "RuleAction", "SortDirection", "Role", "SuggestionStatus", "SystemPayee", "Timestamped", "Transaction", "TransferRejection", "TranslationSuggestion", "TrustedDevice",
+    "Passkey", "PayeeRule", "DeviceUnlock", "PendingSignIn", "StepUpGrant", "Receipt", "ReceiptBlob", "RecoveryCode", "RegisterSort", "RegisterSource", "ReimbursementState", "ReimbursementView", "RuleAction", "SortDirection", "Role", "SuggestionStatus", "SystemPayee", "Timestamped", "Transaction", "TransferRejection", "TranslationSuggestion", "TrustedDevice",
     "UUIDPrimaryKey", "User", "WebAuthnChallenge", "WebSession", "new_id", "utcnow",
 ]

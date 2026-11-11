@@ -116,6 +116,11 @@ export const DIALOG = {
   aboutDetail: (version: string) => msg`Version ${version}. Licensed under the GNU AGPL, version 3 or later.`,
 };
 
+export const PROMPT = {
+  /** Touch ID's reason, shown by macOS after the app's name: "… is trying to open your ledger". */
+  unlock: msg({ message: "open your ledger", comment: "macOS Touch ID prompt, after the app's name: '… is trying to open your ledger'" }),
+};
+
 /** The Licences window (#63): the AGPL line, the source of this version, the notices. */
 export const LICENCES = {
   free: msg`Household Spend Tracker is free software: you can redistribute it and change it under the GNU Affero General Public License, version 3 or any later version.`,

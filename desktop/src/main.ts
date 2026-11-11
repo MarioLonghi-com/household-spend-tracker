@@ -14,8 +14,11 @@
  *    checks, backs up and migrates the ledger first (`app/desktop/launch.py`),
  *    and says "upgrading" when it does. A start that stops -- a newer ledger,
  *    an upgrade to confirm or one that failed -- ends in a dialog;
- * 3. the window opens on the sign-in screen: the session lives in this
- *    process's memory only, so every launch asks for the password;
+ * 3. where Touch ID is turned on (#432, `unlock.ts`), the prompt comes
+ *    first, and passing it signs the window in before it opens; otherwise,
+ *    or on a cancel, the window opens on the sign-in screen: the session
+ *    lives in this process's memory only, so every launch asks for the
+ *    password or the prompt;
  * 4. the first launch of a day makes a backup;
  * 5. closing the window quits: a backup if anything changed since the last
  *    one, then the backend stops -- its shutdown cancels housekeeping and
@@ -30,8 +33,10 @@ import {
   ipcMain,
   Menu,
   protocol,
+  safeStorage,
   session,
   shell,
+  systemPreferences,
   type MessageBoxOptions,
   type OpenDialogOptions,
   type WebContents,
@@ -40,17 +45,18 @@ import fs from "node:fs";
 import path from "node:path";
 import { Backend, type Launch } from "./backend";
 import { bringIn, defaultFolder, deliver, localDay, type Made } from "./backups";
-import { LANGUAGE_CHANNEL, SYSTEM_LOCALE_ARG } from "./bridge";
+import { LANGUAGE_CHANNEL, SYSTEM_LOCALE_ARG, UNLOCK_ARG } from "./bridge";
 import { contextTemplate } from "./context";
 import { CookieJar } from "./cookies";
 import { language, say, useLanguage } from "./i18n";
 import { Licences } from "./licences-window";
 import * as menu from "./menu";
 import { placesIn, rootFor } from "./places";
-import { handler, ORIGIN } from "./scheme";
+import { forwardedHeaders, handler, ORIGIN } from "./scheme";
 import * as stored from "./settings";
 import { Splash } from "./splash";
-import { BUTTON, DIALOG, MENU, PRODUCT_NAME, SPLASH } from "./words";
+import { observe, openWithPrompt, UnlockStore } from "./unlock";
+import { BUTTON, DIALOG, MENU, PRODUCT_NAME, PROMPT, SPLASH } from "./words";
 
 protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } },
@@ -71,6 +77,52 @@ let window: BrowserWindow | null = null;
 let splash: Splash | null = null;
 const licences = new Licences();
 let log: fs.WriteStream | null = null;
+
+// --------------------------------------------------------------------------- //
+// Touch ID (#432)
+// --------------------------------------------------------------------------- //
+
+/** The secret the backend issued, encrypted by the operating system, in its own file. */
+const unlock = new UnlockStore(
+  places.unlock,
+  {
+    available: () => safeStorage.isEncryptionAvailable(),
+    encrypt: (text) => safeStorage.encryptString(text),
+    decrypt: (data) => safeStorage.decryptString(data),
+  },
+  (line) => log?.write(`shell: ${line}\n`),
+);
+
+/** Whether this computer can prompt for Touch ID and keep the secret: a Mac with a sensor and a keychain. */
+function canPromptTouchID(): boolean {
+  return process.platform === "darwin" && systemPreferences.canPromptTouchID() && safeStorage.isEncryptionAvailable();
+}
+
+/** The shell's own sign-in with the secret, after the prompt: the window then boots signed in. */
+async function signInWithSecret(backend: Backend, secret: string): Promise<number> {
+  const request = new Request(`${ORIGIN}/api/session/device-unlock`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+  });
+  const answer = await backend.send(
+    { method: "POST", path: "/api/session/device-unlock", query: "", headers: forwardedHeaders(request, jar) },
+    Buffer.from(JSON.stringify({ secret }), "utf8"),
+  );
+  if (answer === null) return 0;
+  jar.take((answer.head.headers as [string, string][]).filter(([key]) => key.toLowerCase() === "set-cookie").map(([, value]) => value));
+  return Number(answer.head.status);
+}
+
+async function openWithTouchID(backend: Backend): Promise<void> {
+  const outcome = await openWithPrompt({
+    store: unlock,
+    canPrompt: canPromptTouchID,
+    prompt: () => systemPreferences.promptTouchID(say(PROMPT.unlock)),
+    signIn: (secret) => signInWithSecret(backend, secret),
+    log: (line) => log?.write(`shell: ${line}\n`),
+  });
+  if (outcome !== "nothing-held") log?.write(`shell: touch id: ${outcome}\n`);
+}
 
 /** A message box over the window when there is one, on its own when there is not. */
 function ask(options: MessageBoxOptions) {
@@ -364,6 +416,8 @@ async function restoreFromBackup(): Promise<void> {
   stopping = true;
   await running?.stop();
   jar.clear();
+  // The restored ledger forgets every Touch ID secret (`app/desktop/restore.py`); so does the shell.
+  unlock.forget();
   const restoring = spawnBackend({ SPENDTRACKER_RESTORE_FROM: copy });
   const answer = await restoring.restored();
   await restoring.stop(10_000);
@@ -413,7 +467,7 @@ function webPreferences(): Electron.WebPreferences {
     nodeIntegration: false,
     webviewTag: false,
     spellcheck: true,
-    additionalArguments: [`${SYSTEM_LOCALE_ARG}${app.getSystemLocale()}`],
+    additionalArguments: [`${SYSTEM_LOCALE_ARG}${app.getSystemLocale()}`, ...(canPromptTouchID() ? [`${UNLOCK_ARG}touch_id`] : [])],
   };
 }
 
@@ -517,7 +571,7 @@ async function start(): Promise<void> {
   session.defaultSession.setPermissionRequestHandler((_contents, permission, callback) =>
     callback(permission === "clipboard-sanitized-write" || permission === "fullscreen"),
   );
-  protocol.handle("app", handler(current, jar));
+  protocol.handle("app", handler(current, jar, (passing, headers) => observe(unlock, passing, headers)));
   app.on("web-contents-created", (_event, contents) => guard(contents));
   ipcMain.on(LANGUAGE_CHANNEL, (event, locale: unknown) => {
     if (typeof locale !== "string" || !isOurs(event.senderFrame?.url ?? "")) return;
@@ -534,6 +588,7 @@ async function start(): Promise<void> {
     return;
   }
   adopt(backend);
+  await openWithTouchID(backend);
   window = createWindow();
   window.on("closed", () => {
     window = null;
@@ -570,4 +625,5 @@ if (!app.requestSingleInstanceLock()) {
   language,
   settings: () => settings,
   backendExecutable: () => live?.executable ?? null,
+  unlockHeld: () => unlock.held(),
 };

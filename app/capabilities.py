@@ -58,6 +58,11 @@ class Capabilities:
     #: desktop's way back in, where there is no second owner to send a reset
     #: link and no authenticator for the recovery codes to stand in for (#320).
     password_reset_by_code: bool
+    #: Opening the app after a biometric prompt -- Touch ID -- with a secret
+    #: the backend issued for it, instead of typing the password at launch
+    #: (#432). The desktop's alone: the shell is the only thing that can hold
+    #: the secret and gate it, and the web client never sees any of it.
+    device_unlock: bool
     #: The self-updater beside a container. The stores update the desktop app.
     self_update: bool
     #: The check for a newer release on GitHub, which only reads.
@@ -81,6 +86,7 @@ def for_settings(settings: Settings) -> Capabilities:
         passkeys=server and bool(settings.rp_id),
         second_factor=server,
         password_reset_by_code=not server,
+        device_unlock=not server,
         self_update=server,
         upstream_check=True,
         db_view=server and str(settings.db_view).lower() not in {"off", "0", "false", "no"},

@@ -822,6 +822,11 @@ msgstr ""
 msgid "Asking YNAB for your plans…"
 msgstr ""
 
+#. Button on the Your account panel: stop opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn off"
+msgstr ""
+
 #: src/screens/SignIn.tsx
 msgid "I have my authenticator after all"
 msgstr ""
@@ -2131,6 +2136,7 @@ msgstr ""
 msgid "The fetch failed: {0}"
 msgstr ""
 
+#. Label of a form field on the Your account panel
 #. Label of a form field on the Your account panel
 #. Label of a form field on the Your account panel
 #. Label of a form field on the password-and-code check
@@ -3594,6 +3600,10 @@ msgstr ""
 msgid "Net"
 msgstr ""
 
+#: src/screens/Profile.tsx
+msgid "Open the app with Touch ID at the next launch instead of typing your password. Your password is never stored: the app keeps a secret of its own, on this computer only, in the keychain, and asks for Touch ID before it uses it. Your password still works, and is still what a forgotten one is recovered from."
+msgstr ""
+
 #. Button: install the prepared release
 #. Heading on the Updates screen
 #: src/screens/Updates.tsx
@@ -3884,6 +3894,11 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.auth.code_wrong"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.device_unlock_refused"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -4488,6 +4503,11 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.profile.same_password"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.unlock_method_unknown"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -7081,6 +7101,11 @@ msgstr ""
 msgid "You are a member of anything you create, whether or not you tick yourself."
 msgstr ""
 
+#. Button on the Your account panel: start opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn on"
+msgstr ""
+
 #: src/screens/Register.tsx
 msgid "Work will not pay this. It counts as your spending."
 msgstr ""
@@ -7716,6 +7741,12 @@ msgstr ""
 #. placeholder {1}: account.name
 #: src/screens/Import.tsx
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
+msgstr ""
+
+#. State on the Your account panel: Touch ID unlock is turned off
+#: src/screens/Profile.tsx
+msgctxt "unlock state"
+msgid "Off"
 msgstr ""
 
 #: src/screens/Admin.tsx
@@ -11553,6 +11584,12 @@ msgstr ""
 msgid "whatever is left"
 msgstr ""
 
+#. State on the Your account panel: Touch ID unlock is turned on
+#: src/screens/Profile.tsx
+msgctxt "unlock state"
+msgid "On"
+msgstr ""
+
 #: src/screens/History.tsx
 msgid "Undoing puts back <0>{count}</0> rows exactly as they were before. Anything changed since is overwritten, and undoing the undo is the only way back."
 msgstr ""
@@ -12425,6 +12462,11 @@ msgstr ""
 msgid "U — Uncleared"
 msgstr ""
 
+#. Label on the Your account panel of the desktop app, on a Mac with Touch ID
+#: src/screens/Profile.tsx
+msgid "Open with Touch ID"
+msgstr ""
+
 #. How a rule matches, inside the rule list: the bank's text contains the pattern
 #: src/screens/Rules.tsx
 msgid "contains"
@@ -12664,6 +12706,11 @@ msgstr ""
 
 #: src/screens/History.tsx
 msgid "Every row it changed"
+msgstr ""
+
+#. Button on the Your account panel: stop opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn off Touch ID"
 msgstr ""
 
 #: src/screens/Receipts.tsx
@@ -13118,6 +13165,11 @@ msgstr ""
 msgid "If you mean to replace an earlier run, undo it from History first."
 msgstr ""
 
+#. macOS Touch ID prompt, after the app's name: '… is trying to open your ledger'
+#: ../desktop/src/words.ts
+msgid "open your ledger"
+msgstr ""
+
 #: src/screens/Updates.tsx
 msgid "A prepared update goes stale after 24 hours, or as soon as the running version changes. Discard removes it and asks the updater to delete the images it downloaded."
 msgstr ""
@@ -13358,6 +13410,10 @@ msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 msgid "An owner can administer this instance: people, households and invitations."
+msgstr ""
+
+#: src/screens/Profile.tsx
+msgid "The next launch asks for Touch ID instead of your password. If the prompt is cancelled or fails, the password screen is shown as before, with nothing counted against you. Changing your password, using your recovery code or restoring a backup turns this off again."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -14071,6 +14127,11 @@ msgstr ""
 
 #: src/screens/Updates.tsx
 msgid "The backup taken before it is listed under Database; keep it for at least a day of use."
+msgstr ""
+
+#. Button on the Your account panel: start opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn on Touch ID"
 msgstr ""
 
 #. placeholder {0}: (one.captured_at ?? one.created_at).slice(0, 10)

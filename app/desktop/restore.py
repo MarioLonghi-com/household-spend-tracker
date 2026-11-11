@@ -19,7 +19,11 @@ semantics without the conversation:
    backup into the backups folder before asking for this, so the aside copy
    is the second way back, not the only one;
 5. **copy the backup in.** `secret.key` stays as it is: the desktop has no
-   authenticators (#320), so there is nothing in a ledger the key must open.
+   authenticators (#320), so there is nothing in a ledger the key must open;
+6. **forget Touch ID** (#432): every `device_unlocks` row in the restored
+   ledger goes, so a secret the shell holds -- this computer's or, when the
+   file is how a ledger moves, another's -- opens nothing until the person
+   turns it on again. The shell forgets its own copy beside this.
 
 An older backup is not migrated here. The next start does it the way every
 start does (`launch.prepare`): backed up, migrated, counted.
@@ -67,6 +71,21 @@ def _drop_older_asides(directory: Path, keep_stamp: str) -> None:
     for old in directory.glob(f"*{ASIDE}*"):
         if not old.name.endswith(keep_stamp) and old.is_file():
             old.unlink()
+
+
+def _forget_device_unlocks(database: Path) -> None:
+    """Step 6. A ledger from before the table existed has nothing to forget;
+    the next start's migration makes it."""
+    import contextlib
+    import sqlite3
+
+    with contextlib.closing(sqlite3.connect(database)) as conn:
+        try:
+            conn.execute("DELETE FROM device_unlocks")
+            conn.commit()
+        except sqlite3.OperationalError as problem:
+            if "no such table" not in str(problem):
+                raise
 
 
 def restore(source: Path, *, now: datetime | None = None) -> Restored:
@@ -131,6 +150,7 @@ def restore(source: Path, *, now: datetime | None = None) -> Restored:
                     aside.rename(path)
                 raise
             _drop_older_asides(live.parent, stamp)
+            _forget_device_unlocks(live)
     return Restored(
         RESTORED,
         revision=revision,

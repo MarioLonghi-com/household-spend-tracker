@@ -822,6 +822,11 @@ msgstr "Byt namn"
 msgid "Asking YNAB for your plans…"
 msgstr "Hämtar dina planer från YNAB…"
 
+#. Button on the Your account panel: stop opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn off"
+msgstr "Stäng av"
+
 #: src/screens/SignIn.tsx
 msgid "I have my authenticator after all"
 msgstr "Jag har min autentiseringsapp ändå"
@@ -2131,6 +2136,7 @@ msgstr "Det är mer än du valde: det som redan återställts för personen för
 msgid "The fetch failed: {0}"
 msgstr "Hämtningen misslyckades: {0}"
 
+#. Label of a form field on the Your account panel
 #. Label of a form field on the Your account panel
 #. Label of a form field on the Your account panel
 #. Label of a form field on the password-and-code check
@@ -3594,6 +3600,10 @@ msgstr "Värda en titt"
 msgid "Net"
 msgstr "Netto"
 
+#: src/screens/Profile.tsx
+msgid "Open the app with Touch ID at the next launch instead of typing your password. Your password is never stored: the app keeps a secret of its own, on this computer only, in the keychain, and asks for Touch ID before it uses it. Your password still works, and is still what a forgotten one is recovered from."
+msgstr "Öppna appen med Touch ID vid nästa start i stället för att skriva ditt lösenord. Ditt lösenord sparas aldrig: appen har en egen hemlighet, bara på den här datorn, i nyckelringen, och ber om Touch ID innan den används. Ditt lösenord fungerar fortfarande, och är fortfarande det som återställs om du glömmer det."
+
 #. Button: install the prepared release
 #. Heading on the Updates screen
 #: src/screens/Updates.tsx
@@ -3885,6 +3895,11 @@ msgstr "Kontots autentiseringsapp har återställts, så det finns ingen kod att
 #: src/lib/errorMessages.ts
 msgid "error.auth.code_wrong"
 msgstr "Den koden stämmer inte, eller har redan använts"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.device_unlock_refused"
+msgstr "Den upplåsningshemligheten stämmer inte, eller har återkallats"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4489,6 +4504,11 @@ msgstr "Det lösenordet och den koden från autentiseringsappen bevisar inte att
 #: src/lib/errorMessages.ts
 msgid "error.profile.same_password"
 msgstr "Det är redan ditt lösenord"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.unlock_method_unknown"
+msgstr "Det finns ingen sådan upplåsningsmetod"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -7082,6 +7102,11 @@ msgstr "Bockat här"
 msgid "You are a member of anything you create, whether or not you tick yourself."
 msgstr "Du är medlem i allt du skapar, oavsett om du bockar för dig själv eller inte."
 
+#. Button on the Your account panel: start opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn on"
+msgstr "Slå på"
+
 #: src/screens/Register.tsx
 msgid "Work will not pay this. It counts as your spending."
 msgstr "Jobbet betalar inte detta. Det räknas som din utgift."
@@ -7718,6 +7743,12 @@ msgstr "M – Inskriven för hand"
 #: src/screens/Import.tsx
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
 msgstr "Filens namn innehåller <0>{0}</0>. Spara det som filmärkning för <1>{1}</1>, så att nästa kontoutdrag väljer kontot själv?"
+
+#. State on the Your account panel: Touch ID unlock is turned off
+#: src/screens/Profile.tsx
+msgctxt "unlock state"
+msgid "Off"
+msgstr "Av"
 
 #: src/screens/Admin.tsx
 msgid "Yes, make them a member"
@@ -11559,6 +11590,12 @@ msgstr "Koppla markerade"
 msgid "whatever is left"
 msgstr "det som blir kvar"
 
+#. State on the Your account panel: Touch ID unlock is turned on
+#: src/screens/Profile.tsx
+msgctxt "unlock state"
+msgid "On"
+msgstr "På"
+
 #: src/screens/History.tsx
 msgid "Undoing puts back <0>{count}</0> rows exactly as they were before. Anything changed since is overwritten, and undoing the undo is the only way back."
 msgstr "Att ångra återställer <0>{count}</0> rader precis som de var innan. Allt som ändrats sedan dess skrivs över, och att ångra ångringen är enda vägen tillbaka."
@@ -12431,6 +12468,11 @@ msgstr "Hämta igen"
 msgid "U — Uncleared"
 msgstr "U – Ej bokförda"
 
+#. Label on the Your account panel of the desktop app, on a Mac with Touch ID
+#: src/screens/Profile.tsx
+msgid "Open with Touch ID"
+msgstr "Öppna med Touch ID"
+
 #. How a rule matches, inside the rule list: the bank's text contains the pattern
 #: src/screens/Rules.tsx
 msgid "contains"
@@ -12671,6 +12713,11 @@ msgstr "Sök {0}"
 #: src/screens/History.tsx
 msgid "Every row it changed"
 msgstr "Varje rad den ändrade"
+
+#. Button on the Your account panel: stop opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn off Touch ID"
+msgstr "Stäng av Touch ID"
 
 #: src/screens/Receipts.tsx
 msgid "This receipt carries no date of its own, so the window is around when it was uploaded."
@@ -13129,6 +13176,11 @@ msgstr "Uppdateraren som följer med {to} har också kontrollerats och tar över
 msgid "If you mean to replace an earlier run, undo it from History first."
 msgstr "Om du vill ersätta en tidigare körning, ångra den först i Historik."
 
+#. macOS Touch ID prompt, after the app's name: '… is trying to open your ledger'
+#: ../desktop/src/words.ts
+msgid "open your ledger"
+msgstr "öppna din bok"
+
 #: src/screens/Updates.tsx
 msgid "A prepared update goes stale after 24 hours, or as soon as the running version changes. Discard removes it and asks the updater to delete the images it downloaded."
 msgstr "En förberedd uppdatering blir inaktuell efter 24 timmar, eller så snart den version som körs ändras. Kasta tar bort den och ber uppdateraren radera avbildningarna den laddade ner."
@@ -13370,6 +13422,10 @@ msgstr "{0} inte importerade, med skälet för var och en"
 #: src/screens/AcceptInvite.tsx
 msgid "An owner can administer this instance: people, households and invitations."
 msgstr "En ägare kan administrera instansen: personer, hushåll och inbjudningar."
+
+#: src/screens/Profile.tsx
+msgid "The next launch asks for Touch ID instead of your password. If the prompt is cancelled or fails, the password screen is shown as before, with nothing counted against you. Changing your password, using your recovery code or restoring a backup turns this off again."
+msgstr "Nästa start ber om Touch ID i stället för ditt lösenord. Om du avbryter eller det misslyckas visas lösenordsskärmen som förut, utan att något räknas mot dig. Att byta lösenord, använda din återställningskod eller återställa en säkerhetskopia stänger av detta igen."
 
 #: src/screens/Register.tsx
 msgid "No categories are ticked, not even Needs a category, so there is nothing to show. Tick one in the categories filter, or Select all."
@@ -14083,6 +14139,11 @@ msgstr "Kurser per {asOf} · senaste hämtningen misslyckades {0}: {1}"
 #: src/screens/Updates.tsx
 msgid "The backup taken before it is listed under Database; keep it for at least a day of use."
 msgstr "Säkerhetskopian som togs före den finns under Databas; behåll den i minst en dags användning."
+
+#. Button on the Your account panel: start opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn on Touch ID"
+msgstr "Slå på Touch ID"
 
 #. placeholder {0}: (one.captured_at ?? one.created_at).slice(0, 10)
 #: src/screens/Receipts.tsx

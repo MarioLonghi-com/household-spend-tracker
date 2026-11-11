@@ -32,7 +32,11 @@ history this repository does not have.
 
 ## Unreleased
 
-**Reversible: none.**
+**Reversible: clean** — one migration.
+
+- `e4b7a2c91d05` — clean: adds the `device_unlocks` table (#432), the hash of
+  the secret the desktop app presents after Touch ID. Rolling it back drops
+  the table; whoever had Touch ID on turns it on again from Profile.
 
 ### Added
 
@@ -55,6 +59,19 @@ history this repository does not have.
   the third-party notices, generated at build time from what the app ships
   (`pip-licenses` over the frozen set, a licence tool over what Vite
   bundled); the build refuses to package without them.
+
+- **Open with Touch ID** on the Mac desktop app (#432, from #112). A
+  convenience on top of the password, never instead of it: once turned on in
+  Profile, with the password, the next launch asks for Touch ID and opens
+  signed in. The password is never stored. What the app keeps is a secret the
+  backend issued for this one purpose, bound to this ledger, held encrypted by
+  macOS in the app's own folder, and presented only after the prompt; the
+  backend keeps its hash, like a session. A cancelled or failed prompt shows
+  the password screen as before, with nothing counted. Turning it off,
+  changing the password, replacing a forgotten password with the recovery
+  code, restoring a backup and an account reset all end it. The server
+  profile has none of it, and a Mac without a sensor shows nothing. Windows
+  Hello stays open on #432.
 
 ## 0.15.0 — 2026-11-10
 

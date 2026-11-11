@@ -41,6 +41,7 @@ import { plural, t } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { listText } from "../lib/locale";
 import { useCapabilities } from "../lib/capabilities";
+import { desktop } from "../lib/desktop";
 
 type Offer = { token: string; secret: string; uri: string };
 
@@ -158,7 +159,7 @@ function AppearanceSection() {
   );
 }
 
-type Method = "password" | "authenticator" | "recovery";
+type Method = "password" | "authenticator" | "recovery" | "unlock";
 
 /**
  * Every way into this account, in one place (#47 §3).
@@ -184,6 +185,12 @@ function SignInMethods({ user }: { user: User }) {
   });
   const passkeys = usePasskeys();
   const state = usePasskeyState();
+  // Only where the server offers it and this computer can prompt (#432).
+  const unlock = useQuery({
+    queryKey: ["device-unlock"],
+    queryFn: () => api.get<DeviceUnlockStatus>("/me/device-unlock"),
+    enabled: offered.device_unlock && desktop()?.unlock === "touch_id",
+  });
 
   const usable = (passkeys.data ?? []).filter((one) => one.usable_here).length;
   const locked = authenticator.data?.locked_by_key === true;
@@ -240,6 +247,18 @@ function SignInMethods({ user }: { user: User }) {
         {offered.second_factor ? (
           <MethodRow slug="passkeys" name={t({ message: "Passkeys", comment: "Label on the Your account panel. See GLOSSARY.md" })} state={passkeyState} open>
             <PasskeysSection />
+          </MethodRow>
+        ) : null}
+        {offered.device_unlock && desktop()?.unlock === "touch_id" ? (
+          <MethodRow
+            slug="touch-id"
+            name={t({ message: "Open with Touch ID", comment: "Label on the Your account panel of the desktop app, on a Mac with Touch ID" })}
+            state={!unlock.data ? "" : unlock.data.enabled ? t({ message: "On", context: "unlock state", comment: "State on the Your account panel: Touch ID unlock is turned on" }) : t({ message: "Off", context: "unlock state", comment: "State on the Your account panel: Touch ID unlock is turned off" })}
+            action={!unlock.data ? undefined : unlock.data.enabled ? t({ message: "Turn off", comment: "Button on the Your account panel: stop opening the app with Touch ID" }) : t({ message: "Turn on", comment: "Button on the Your account panel: start opening the app with Touch ID" })}
+            open={open === "unlock"}
+            onToggle={() => toggle("unlock")}
+          >
+            <DeviceUnlockSection onDone={() => setOpen(null)} />
           </MethodRow>
         ) : null}
         <MethodRow
@@ -439,6 +458,101 @@ function PasswordSection({ titled = true }: { titled?: boolean }) {
         <Trans comment="Button on the Your account panel">Change password</Trans>
       </button>
     </section>
+  );
+}
+
+/** Whether a Touch ID secret stands for this person (#432). Never the secret itself. */
+interface DeviceUnlockStatus {
+  enabled: boolean;
+  method: string | null;
+  created_at: string | null;
+}
+
+/**
+ * Opening the desktop app with Touch ID (#432): a convenience on top of the
+ * password, never instead of it.
+ *
+ * Turning it on asks for the password now, like every change to how you sign
+ * in, and asks the server for a secret the shell will present after the
+ * prompt. The page never sees that secret: the shell takes it off the answer
+ * before it arrives here. Turning it off asks for nothing, as removing a
+ * passkey does -- taking a way in away is the safe direction. Either way the
+ * next launch does what the row now says.
+ */
+export function DeviceUnlockSection({ onDone }: { onDone?: () => void }) {
+  const { t } = useLingui();
+  const queries = useQueryClient();
+  const [password, setPassword] = useState("");
+  const status = useQuery({
+    queryKey: ["device-unlock"],
+    queryFn: () => api.get<DeviceUnlockStatus>("/me/device-unlock"),
+  });
+  const turnOn = useMutation({
+    mutationFn: () => api.post<DeviceUnlockStatus>("/me/device-unlock", { password, method: "touch_id" }),
+    onSuccess: (next) => {
+      setPassword("");
+      queries.setQueryData(["device-unlock"], next);
+      onDone?.();
+    },
+  });
+  const turnOff = useMutation({
+    mutationFn: () => api.del("/me/device-unlock"),
+    onSuccess: () => {
+      queries.setQueryData(["device-unlock"], { enabled: false, method: null, created_at: null });
+      onDone?.();
+    },
+  });
+
+  if (!status.data) return <Problem error={status.error} />;
+
+  if (status.data.enabled) {
+    return (
+      <section>
+        <Problem error={turnOff.error} />
+        <p className="small" style={{ marginTop: 0 }}>
+          <Trans>
+            The next launch asks for Touch ID instead of your password. If the prompt is cancelled
+            or fails, the password screen is shown as before, with nothing counted against you.
+            Changing your password, using your recovery code or restoring a backup turns this
+            off again.
+          </Trans>
+        </p>
+        <button type="button" disabled={turnOff.isPending} onClick={() => turnOff.mutate()}>
+          <Trans comment="Button on the Your account panel: stop opening the app with Touch ID">Turn off Touch ID</Trans>
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (password.length > 0) turnOn.mutate();
+      }}
+    >
+      <Problem error={turnOn.error} />
+      <p className="small" style={{ marginTop: 0 }}>
+        <Trans>
+          Open the app with Touch ID at the next launch instead of typing your password. Your
+          password is never stored: the app keeps a secret of its own, on this computer only, in
+          the keychain, and asks for Touch ID before it uses it. Your password still works, and
+          is still what a forgotten one is recovered from.
+        </Trans>
+      </p>
+      <Field label={t({ message: "Your password", comment: "Label of a form field on the Your account panel" })}>
+        <input
+          type="password"
+          value={password}
+          autoComplete="current-password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </Field>
+      <p />
+      <button className="primary" type="submit" disabled={password.length === 0 || turnOn.isPending}>
+        <Trans comment="Button on the Your account panel: start opening the app with Touch ID">Turn on Touch ID</Trans>
+      </button>
+    </form>
   );
 }
 

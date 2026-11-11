@@ -53,6 +53,9 @@ from app.config import settings  # noqa: E402
 PURGE = (
     "sessions",
     "trusted_devices",
+    # The desktop's biometric-unlock secret (#432): a trusted device by
+    # another name, and purged like one.
+    "device_unlocks",
     "pending_sign_ins",
     "step_up_grants",
     # A challenge is spent or swept within minutes; there is nothing to browse.
