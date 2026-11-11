@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import babel from "@rolldown/plugin-babel";
 import { lingui, linguiTransformerBabelPreset } from "@lingui/vite-plugin";
 import { fileURLToPath } from "node:url";
+import { bundledPackages } from "../client/bundled-packages.ts";
 
 // Every Lingui piece -- the plugin, the Babel preset, the macro inside it --
 // looks for its config from the working directory; the shell's is the client's.
@@ -29,6 +30,9 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     lingui(),
     babel({ presets: [linguiTransformerBabelPreset()] }),
+    // What the main process bundled, for the third-party notices (#63). The
+    // preload bundles nothing of its own and would only overwrite the list.
+    ...(mode === "preload" ? [] : [bundledPackages(fileURLToPath(new URL("../build/shell-bundled-packages.json", import.meta.url)))]),
   ],
   build: {
     outDir: "build",

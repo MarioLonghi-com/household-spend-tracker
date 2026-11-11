@@ -4,3 +4,6 @@
 -r requirements.in
 -c requirements.txt
 pyinstaller>=6.22.3
+# The third-party notices the desktop app shows under About > Licences (#63):
+# scripts/third_party_notices.py reads the frozen set's licences with it.
+pip-licenses>=5.5.5

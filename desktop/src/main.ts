@@ -44,12 +44,13 @@ import { LANGUAGE_CHANNEL, SYSTEM_LOCALE_ARG } from "./bridge";
 import { contextTemplate } from "./context";
 import { CookieJar } from "./cookies";
 import { language, say, useLanguage } from "./i18n";
+import { Licences } from "./licences-window";
 import * as menu from "./menu";
 import { placesIn, rootFor } from "./places";
 import { handler, ORIGIN } from "./scheme";
 import * as stored from "./settings";
 import { Splash } from "./splash";
-import { BUTTON, DIALOG, PRODUCT_NAME, SPLASH } from "./words";
+import { BUTTON, DIALOG, MENU, PRODUCT_NAME, SPLASH } from "./words";
 
 protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } },
@@ -68,6 +69,7 @@ useLanguage(settings.language);
 
 let window: BrowserWindow | null = null;
 let splash: Splash | null = null;
+const licences = new Licences();
 let log: fs.WriteStream | null = null;
 
 /** A message box over the window when there is one, on its own when there is not. */
@@ -450,15 +452,23 @@ function setMenu(): void {
         });
       },
       showLedger: () => void shell.openPath(places.ledger),
-      about: () =>
-        void ask({
-          type: "info",
-          message: PRODUCT_NAME,
-          detail: say(DIALOG.aboutDetail(app.getVersion())),
-          buttons: [say(BUTTON.ok)],
-        }),
+      about: () => void about(),
+      licences: () => licences.show(window),
     }),
   );
+}
+
+/** The About box: the version and the licence, with the Licences window a button away (#63). */
+async function about(): Promise<void> {
+  const answer = await ask({
+    type: "info",
+    message: PRODUCT_NAME,
+    detail: say(DIALOG.aboutDetail(app.getVersion())),
+    buttons: [say(BUTTON.ok), say(MENU.licences)],
+    defaultId: 0,
+    cancelId: 0,
+  });
+  if (answer.response === 1) licences.show(window);
 }
 
 function createWindow(): BrowserWindow {
