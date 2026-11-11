@@ -32,6 +32,8 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.16.0 — 2026-11-11
+
 **Reversible: clean** — one migration.
 
 - `e4b7a2c91d05` — clean: adds the `device_unlocks` table (#432), the hash of
@@ -59,7 +61,6 @@ history this repository does not have.
   the third-party notices, generated at build time from what the app ships
   (`pip-licenses` over the frozen set, a licence tool over what Vite
   bundled); the build refuses to package without them.
-
 - **Open with Touch ID** on the Mac desktop app (#432, from #112). A
   convenience on top of the password, never instead of it: once turned on in
   Profile, with the password, the next launch asks for Touch ID and opens
