@@ -363,7 +363,7 @@ jobs:
           decide desktopapp <<'PATHS'
           ^desktop/
           ^(app|statements|migrations|client)/
-          ^scripts/(desktop_build|backup|upgrade|build_stamp)\.py$
+          ^scripts/(desktop_build|third_party_notices|backup|upgrade|build_stamp)\.py$
           ^requirements(-desktop)?\.txt$
           ^alembic\.ini$
           PATHS
@@ -374,7 +374,8 @@ jobs:
           # for the deferred tier.
           decide desktopshell <<'PATHS'
           ^desktop/
-          ^scripts/desktop_build\.py$
+          ^scripts/(desktop_build|third_party_notices)\.py$
+          ^client/bundled-packages\.ts$
           ^requirements-desktop\.(in|txt)$
           PATHS
 
@@ -779,11 +780,18 @@ jobs:
       - name: the shell's own tests
         run: npm run typecheck && npm test
         working-directory: desktop
-      - name: build
+      # Fuses off (#63): the smoke test drives the packaged app with
+      # Playwright, which needs the debugging port the fuses close. The build
+      # that goes to a store is made again below, fused, and read back.
+      - name: build, fuses off
         run: python -m scripts.desktop_build ${{ matrix.target }}
+        env:
+          SPENDTRACKER_FUSES: "off"
       - name: the Mac App Store build, unsigned
         if: matrix.target == 'mac'
-        run: python -m scripts.desktop_build mas --from 6
+        run: python -m scripts.desktop_build mas --from 7
+        env:
+          SPENDTRACKER_FUSES: "off"
       - name: the packaged app, end to end
         run: npm run smoke
         working-directory: desktop
@@ -809,6 +817,29 @@ jobs:
           data="$SPENDTRACKER_DATA_DIR"
           unset SPENDTRACKER_DATA_DIR
           python desktop/rehearse_backend.py "$exe" "$data"
+
+      # The same package, fused, as a store gets it (#63): step 8 of the build
+      # reads the five fuses back from the binary and fails if any did not
+      # take. Then the one thing Playwright cannot check on a fused app: that
+      # it starts -- loads its app from the asar, passes the asar integrity
+      # check, spawns its backend -- and quits. The MSIX uploaded below is
+      # packed from this fused folder; so are the Mac artefacts.
+      - name: the same package, fused, read back
+        run: python -m scripts.desktop_build ${{ matrix.target }} --from 7
+        env:
+          SPENDTRACKER_FUSES: "on"
+      - name: the fused app starts, and quits
+        shell: bash
+        run: |
+          set -eu
+          app="desktop/dist/mac-arm64/Household Spend Tracker.app"
+          [ "${{ matrix.target }}" = win ] && app="desktop/dist/win-unpacked/Household Spend Tracker.exe"
+          python desktop/launch_check.py "$app"
+      - name: the Mac App Store build, fused, read back
+        if: matrix.target == 'mac'
+        run: python -m scripts.desktop_build mas --from 7
+        env:
+          SPENDTRACKER_FUSES: "on"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: desktop-${{ matrix.target }}

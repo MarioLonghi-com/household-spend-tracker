@@ -261,6 +261,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "profile.wrong_password": {
     message: msg({ id: "error.profile.wrong_password", message: "That is not your current password" }),
   },
+  "profile.unlock_method_unknown": {
+    message: msg({ id: "error.profile.unlock_method_unknown", message: "No such unlock method" }),
+  },
   "receipt.no_such_copy": {
     message: msg({ id: "error.receipt.no_such_copy", message: "That receipt has no copy of that kind" }),
   },
@@ -674,6 +677,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   },
   "auth.new_code_wrong": {
     message: msg({ id: "error.auth.new_code_wrong", message: "That code is not right. Check the time on your phone and try again." }),
+  },
+  "auth.device_unlock_refused": {
+    message: msg({ id: "error.auth.device_unlock_refused", message: "That unlock secret is not right, or has been revoked" }),
   },
   "email.not_an_address": {
     message: msg({ id: "error.email.not_an_address", message: "{email} is not an email address" }),

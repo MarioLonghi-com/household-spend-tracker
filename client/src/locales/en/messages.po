@@ -484,6 +484,10 @@ msgstr "Process"
 msgid "Stale"
 msgstr "Stale"
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker is free software: you can redistribute it and change it under the GNU Affero General Public License, version 3 or any later version."
+msgstr "Household Spend Tracker is free software: you can redistribute it and change it under the GNU Affero General Public License, version 3 or any later version."
+
 #. What the import detected: which column holds the date. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "date column"
@@ -817,6 +821,11 @@ msgstr "Rename"
 #: src/screens/OneTimeImport.tsx
 msgid "Asking YNAB for your plans…"
 msgstr "Asking YNAB for your plans…"
+
+#. Button on the Your account panel: stop opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn off"
+msgstr "Turn off"
 
 #: src/screens/SignIn.tsx
 msgid "I have my authenticator after all"
@@ -2127,6 +2136,7 @@ msgstr "That is more than you chose: what was already reset for them stays reset
 msgid "The fetch failed: {0}"
 msgstr "The fetch failed: {0}"
 
+#. Label of a form field on the Your account panel
 #. Label of a form field on the Your account panel
 #. Label of a form field on the Your account panel
 #. Label of a form field on the password-and-code check
@@ -3590,6 +3600,10 @@ msgstr "Worth a look"
 msgid "Net"
 msgstr "Net"
 
+#: src/screens/Profile.tsx
+msgid "Open the app with Touch ID at the next launch instead of typing your password. Your password is never stored: the app keeps a secret of its own, on this computer only, in the keychain, and asks for Touch ID before it uses it. Your password still works, and is still what a forgotten one is recovered from."
+msgstr "Open the app with Touch ID at the next launch instead of typing your password. Your password is never stored: the app keeps a secret of its own, on this computer only, in the keychain, and asks for Touch ID before it uses it. Your password still works, and is still what a forgotten one is recovered from."
+
 #. Button: install the prepared release
 #. Heading on the Updates screen
 #: src/screens/Updates.tsx
@@ -3881,6 +3895,11 @@ msgstr "This account's authenticator was reset, so there is no code to give. Use
 #: src/lib/errorMessages.ts
 msgid "error.auth.code_wrong"
 msgstr "That code is not right, or has already been used"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.device_unlock_refused"
+msgstr "That unlock secret is not right, or has been revoked"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4485,6 +4504,11 @@ msgstr "That password and authenticator code do not prove it is you"
 #: src/lib/errorMessages.ts
 msgid "error.profile.same_password"
 msgstr "That is already your password"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.unlock_method_unknown"
+msgstr "No such unlock method"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -7078,6 +7102,11 @@ msgstr "Ticked here"
 msgid "You are a member of anything you create, whether or not you tick yourself."
 msgstr "You are a member of anything you create, whether or not you tick yourself."
 
+#. Button on the Your account panel: start opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn on"
+msgstr "Turn on"
+
 #: src/screens/Register.tsx
 msgid "Work will not pay this. It counts as your spending."
 msgstr "Work will not pay this. It counts as your spending."
@@ -7226,6 +7255,11 @@ msgstr "no git history and no build stamp to ask"
 #: src/screens/Import.tsx
 msgid "File"
 msgstr "File"
+
+#. Desktop app Licences window: heading over the licences of the libraries the app is built on
+#: ../desktop/src/words.ts
+msgid "Third-party notices"
+msgstr "Third-party notices"
 
 #: src/screens/Profile.tsx
 msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
@@ -7709,6 +7743,12 @@ msgstr "M — Entered by hand"
 #: src/screens/Import.tsx
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
 msgstr "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
+
+#. State on the Your account panel: Touch ID unlock is turned off
+#: src/screens/Profile.tsx
+msgctxt "unlock state"
+msgid "Off"
+msgstr "Off"
 
 #: src/screens/Admin.tsx
 msgid "Yes, make them a member"
@@ -8820,6 +8860,10 @@ msgstr "The recovery code you signed in with covers this, so no other code is as
 #: src/screens/Categories.tsx
 msgid "New transactions arrive blank and you choose each time. Right for a payee that is genuinely different every time."
 msgstr "New transactions arrive blank and you choose each time. Right for a payee that is genuinely different every time."
+
+#: ../desktop/src/words.ts
+msgid "These notices are also in {folder}."
+msgstr "These notices are also in {folder}."
 
 #: src/screens/Register.tsx
 msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."
@@ -11122,6 +11166,10 @@ msgstr "One line per HTTP request. Mechanical, and it drowns everything else."
 msgid "Oldest transaction"
 msgstr "Oldest transaction"
 
+#: ../desktop/src/words.ts
+msgid "The third-party notices did not ship with this build."
+msgstr "The third-party notices did not ship with this build."
+
 #. Button on the Payee Categorisation screen
 #. placeholder {0}: formatCount(rest)
 #: src/screens/PayeeCategorisation.tsx
@@ -11541,6 +11589,12 @@ msgstr "Link selected"
 #: src/screens/Rules.tsx
 msgid "whatever is left"
 msgstr "whatever is left"
+
+#. State on the Your account panel: Touch ID unlock is turned on
+#: src/screens/Profile.tsx
+msgctxt "unlock state"
+msgid "On"
+msgstr "On"
 
 #: src/screens/History.tsx
 msgid "Undoing puts back <0>{count}</0> rows exactly as they were before. Anything changed since is overwritten, and undoing the undo is the only way back."
@@ -12414,6 +12468,11 @@ msgstr "Refetch"
 msgid "U — Uncleared"
 msgstr "U — Uncleared"
 
+#. Label on the Your account panel of the desktop app, on a Mac with Touch ID
+#: src/screens/Profile.tsx
+msgid "Open with Touch ID"
+msgstr "Open with Touch ID"
+
 #. How a rule matches, inside the rule list: the bank's text contains the pattern
 #: src/screens/Rules.tsx
 msgid "contains"
@@ -12655,6 +12714,11 @@ msgstr "Search {0}"
 msgid "Every row it changed"
 msgstr "Every row it changed"
 
+#. Button on the Your account panel: stop opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn off Touch ID"
+msgstr "Turn off Touch ID"
+
 #: src/screens/Receipts.tsx
 msgid "This receipt carries no date of its own, so the window is around when it was uploaded."
 msgstr "This receipt carries no date of its own, so the window is around when it was uploaded."
@@ -12794,6 +12858,11 @@ msgstr "When the bank says"
 #: src/screens/Passkeys.tsx
 msgid "Remove {0}"
 msgstr "Remove {0}"
+
+#. Desktop app menu item and About dialog button: open the window with the app's licence and the third-party notices
+#: ../desktop/src/words.ts
+msgid "Licences"
+msgstr "Licences"
 
 #. Section heading on the Net Worth report
 #: src/screens/reports/NetWorth.tsx
@@ -13107,6 +13176,11 @@ msgstr "The updater that ships with {to} was checked too, and takes over the upd
 msgid "If you mean to replace an earlier run, undo it from History first."
 msgstr "If you mean to replace an earlier run, undo it from History first."
 
+#. macOS Touch ID prompt, after the app's name: '… is trying to open your ledger'
+#: ../desktop/src/words.ts
+msgid "open your ledger"
+msgstr "open your ledger"
+
 #: src/screens/Updates.tsx
 msgid "A prepared update goes stale after 24 hours, or as soon as the running version changes. Discard removes it and asks the updater to delete the images it downloaded."
 msgstr "A prepared update goes stale after 24 hours, or as soon as the running version changes. Discard removes it and asks the updater to delete the images it downloaded."
@@ -13348,6 +13422,10 @@ msgstr "{0} not imported, with the reason for each"
 #: src/screens/AcceptInvite.tsx
 msgid "An owner can administer this instance: people, households and invitations."
 msgstr "An owner can administer this instance: people, households and invitations."
+
+#: src/screens/Profile.tsx
+msgid "The next launch asks for Touch ID instead of your password. If the prompt is cancelled or fails, the password screen is shown as before, with nothing counted against you. Changing your password, using your recovery code or restoring a backup turns this off again."
+msgstr "The next launch asks for Touch ID instead of your password. If the prompt is cancelled or fails, the password screen is shown as before, with nothing counted against you. Changing your password, using your recovery code or restoring a backup turns this off again."
 
 #: src/screens/Register.tsx
 msgid "No categories are ticked, not even Needs a category, so there is nothing to show. Tick one in the categories filter, or Select all."
@@ -14015,6 +14093,11 @@ msgstr "{0} {1} — a self-hosted, multi-currency spend tracker for one househol
 msgid "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
 msgstr "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
 
+#. Desktop app Licences window: label above the link to this version's source on GitHub
+#: ../desktop/src/words.ts
+msgid "Source code for this version"
+msgstr "Source code for this version"
+
 #: src/screens/Import.tsx
 msgid "Open that import"
 msgstr "Open that import"
@@ -14056,6 +14139,11 @@ msgstr "Rates as of {asOf} · the last fetch failed on {0}: {1}"
 #: src/screens/Updates.tsx
 msgid "The backup taken before it is listed under Database; keep it for at least a day of use."
 msgstr "The backup taken before it is listed under Database; keep it for at least a day of use."
+
+#. Button on the Your account panel: start opening the app with Touch ID
+#: src/screens/Profile.tsx
+msgid "Turn on Touch ID"
+msgstr "Turn on Touch ID"
 
 #. placeholder {0}: (one.captured_at ?? one.created_at).slice(0, 10)
 #: src/screens/Receipts.tsx

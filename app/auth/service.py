@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from ..errors import ProofRefused, Unauthorized
 from ..models import RecoveryCode, User, utcnow
 from ..services import agent_keys
-from . import devices, email_canonical, keycheck, passwords, ratelimit, sessions, totp
+from . import devices, email_canonical, keycheck, passwords, ratelimit, sessions, totp, unlock
 
 #: One sentence for every way a sign-in can fail on the first step. Saying
 #: "no such account" would confirm which addresses exist.
@@ -245,6 +245,7 @@ def redeem_recovery_code(session: Session, engine, user: User, code: str, *, ip:
     matched.used_at = utcnow()
     sessions.revoke_all_for(session, user.id)
     devices.revoke_all_for(session, user.id)
+    unlock.revoke_all_for(session, user.id)
     revoked = 0
     for key in agent_keys.for_user(session, user):
         if key.live():
@@ -291,6 +292,9 @@ def replace_password_with_recovery_code(
     user.password_hash = passwords.hash_password(new_password)
     sessions.revoke_all_for(session, user.id)
     devices.revoke_all_for(session, user.id)
+    # And the desktop's Touch ID secret (#432): whoever turned it on knew the
+    # password this code has just replaced.
+    unlock.revoke_all_for(session, user.id)
 
 
 def complete_sign_in(

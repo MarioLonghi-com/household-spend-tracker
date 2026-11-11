@@ -31,6 +31,14 @@ reads it from `GET /api/capabilities`. The folders below keep the name
 - **The session lives in the shell's memory** (`src/cookies.ts`): Chromium
   keeps no cookie from `protocol.handle`, and a session that ends with the app
   is what "a password at every launch" asks for.
+- **Open with Touch ID** (#432, `src/unlock.ts`): on a Mac with a sensor,
+  Profile offers it, with the password. The backend then issues a secret for
+  this one purpose and keeps its hash (`app/auth/unlock.py`); the shell takes
+  the secret off that answer before the page sees it, keeps it encrypted with
+  `safeStorage` in `unlock.secret`, and at the next launch prompts for Touch
+  ID and signs in with it before the window opens. A cancelled prompt leaves
+  the password screen. Turning it off, a password change, the recovery code,
+  a restore and an account reset all end it. The password is never stored.
 
 ## Where things are
 
@@ -39,6 +47,7 @@ reads it from `GET /api/capabilities`. The folders below keep the name
 | The app | `/Applications`, read-only | `C:\Program Files\WindowsApps\…`, read-only |
 | The ledger, its logs, upgrade backups | the sandbox container's `Application Support/Spend Tracker/Ledger` | `%LOCALAPPDATA%\Spend Tracker\Ledger` |
 | The shell's settings and log | `…/Spend Tracker/shell.json`, `shell.log` | `%LOCALAPPDATA%\Spend Tracker\shell.json`, `shell.log` |
+| The Touch ID secret, encrypted (#432) | `…/Spend Tracker/unlock.secret`, only while it is on | — (Windows Hello stays open on #432) |
 | Backups | a folder the person chooses; until then `…/Spend Tracker/Backups` | `Documents\Spend Tracker Backups`, or the folder chosen |
 
 Both data folders survive an uninstall. On Windows that is because the folder
@@ -70,7 +79,37 @@ development profile; `store` the same app for upload; `win` the MSIX and a folde
 
 `scripts/desktop_build.py` builds the client, stamps the commit, freezes the
 backend (`desktop/backend.spec`), smoke-tests it (`smoke_backend.py`), builds
-the shell and packages it into `desktop/dist`. `--from N` starts at step N.
+the shell, writes the third-party notices, packages it into `desktop/dist`
+and reads Electron's fuses back from the result. `--from N` starts at step N.
+
+### Fuses and notices (#63)
+
+**The store builds have Electron's fuses on.** `scripts/fuses.cjs`, run as
+electron-builder's `afterPack` hook, turns `RunAsNode`,
+`EnableNodeOptionsEnvironmentVariable` and `EnableNodeCliInspectArguments`
+off and `OnlyLoadAppFromAsar` and `EnableEmbeddedAsarIntegrityValidation`
+on -- before anything is signed or packed, since the flip rewrites the
+binary. The `store` and `win` targets get them; `mac` and `mas` stay as
+Electron ships them, because the smoke test's Playwright needs the debugging
+port they close. `SPENDTRACKER_FUSES=on|off` overrides either way, and the
+build's last step reads the fuses back and fails if they are not as the mode
+says. For a fused build Playwright cannot drive, `launch_check.py` starts it
+on a fresh ledger and checks the backend came up:
+
+```bash
+SPENDTRACKER_FUSES=on build/freeze-venv/bin/python -m scripts.desktop_build mac --from 7
+python desktop/launch_check.py "desktop/dist/mac-arm64/Household Spend Tracker.app"
+```
+
+**About → Licences** shows the AGPL line, the link to this version's source
+(`…/tree/v<version>`, from `package.json`) and `THIRD-PARTY-NOTICES.txt`,
+which `scripts/third_party_notices.py` writes at build time from what ships:
+the runtime lock less what `backend.spec` excludes (`pip-licenses`), and the
+packages the client's and the shell's Vite builds bundled
+(`client/bundled-packages.ts`, then `license-checker-rseidelsohn`). Chromium's
+own `LICENSES.chromium.html` electron-builder keeps from the Electron
+download. The build refuses to package without the notices, and checks both
+files are in the package.
 
 ### Checks
 
@@ -156,6 +195,32 @@ needs a new build number, `SPENDTRACKER_STORE_BUILD=2` for the `store` build.
 `altool` finds the key as `~/private_keys/AuthKey_KEY_ID.p8`. The app's icon
 on App Store Connect comes from this build.
 
+### Uploading to the Microsoft Store
+
+**A release tag builds it by itself** (#63): `release.yml` freezes the
+backend on a Windows runner, packages the MSIX with the Store's identity
+from three repository variables (`MSIX_IDENTITY_NAME`, `MSIX_PUBLISHER`,
+`MSIX_PUBLISHER_DISPLAY_NAME`; the job fails on a tag that lacks them),
+checks the identity, the version and the languages in the package's own
+manifest, and once the release is public attests it and attaches
+`household-spend-tracker-<version>-microsoft-store.msix` to the release.
+The Store signs it, so it is unsigned and installs nowhere as it is.
+Uploading it is a person's step, in Partner Center: *Packages*, then
+submit. Partner Center takes one package per version, so a package fixed
+after certification needs a new release.
+
+By hand, the same package comes from the environment the script reads:
+
+```powershell
+$env:SPENDTRACKER_APPX_IDENTITY_NAME = "<Package/Identity/Name>"
+$env:SPENDTRACKER_APPX_PUBLISHER = "CN=<guid>"
+$env:SPENDTRACKER_APPX_PUBLISHER_DISPLAY_NAME = "<publisher display name>"
+python -m scripts.desktop_build win
+```
+
+All three or none: with none set the package carries the test identity in
+`electron-builder.yml`, for `sign-msix.ps1` and a test install.
+
 ## Words
 
 Every word the shell shows is in `src/words.ts`, as Lingui messages in the
@@ -165,7 +230,5 @@ The window tells the shell which language it activated (`client/src/lib/desktop.
 
 ## Not yet
 
-- Partner Center, the store listings' translations and submission: #63, after #321 and #58. The Mac
-  App Store build is signed, packaged and uploaded as above.
-- Electron fuses (no `--inspect`, no `ELECTRON_RUN_AS_NODE`) go on for the
-  store builds in #63; the smoke test needs them off.
+- The store listings' translations and both submissions: #63, after #321.
+  Both store builds are made by a release tag as above.

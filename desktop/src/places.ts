@@ -7,6 +7,7 @@
  *                           logs, the backups an upgrade takes first
  *     <root>/shell.json     the shell's own settings (`settings.ts`)
  *     <root>/shell.log      the backend's standard error, this launch
+ *     <root>/unlock.secret  the Touch ID secret, encrypted (`unlock.ts`, #432)
  *
  * `<root>` is the operating system's per-user application data, never a
  * synced folder and never inside the app:
@@ -38,6 +39,8 @@ export type Places = {
   ledger: string;
   settings: string;
   log: string;
+  /** The Touch ID secret, encrypted by the operating system; absent when off. */
+  unlock: string;
   /** Where a backup chosen for restore is copied before the backend reads it. */
   incoming: string;
 };
@@ -65,6 +68,7 @@ export function placesIn(root: string): Places {
     ledger,
     settings: path.join(root, "shell.json"),
     log: path.join(root, "shell.log"),
+    unlock: path.join(root, "unlock.secret"),
     incoming: path.join(ledger, ".incoming"),
   };
 }

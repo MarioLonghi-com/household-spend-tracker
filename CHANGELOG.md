@@ -32,6 +32,48 @@ history this repository does not have.
 
 ## Unreleased
 
+## 0.16.0 — 2026-11-11
+
+**Reversible: clean** — one migration.
+
+- `e4b7a2c91d05` — clean: adds the `device_unlocks` table (#432), the hash of
+  the secret the desktop app presents after Touch ID. Rolling it back drops
+  the table; whoever had Touch ID on turns it on again from Profile.
+
+### Added
+
+- **A release builds the Microsoft Store package** (#63), as it has built
+  and uploaded the Mac App Store one since 0.13.0. The tag's run freezes the
+  backend on Windows, packages the MSIX with the Store's identity (three
+  repository variables, `MSIX_IDENTITY_NAME`, `MSIX_PUBLISHER` and
+  `MSIX_PUBLISHER_DISPLAY_NAME`; a tag with them unset fails before anything
+  is published) and reads the identity, the version and the four languages
+  back from the package itself. Once the release is public it attests the
+  package and attaches it as `household-spend-tracker-<version>-microsoft-store.msix`,
+  for a person to upload in Partner Center. The package declares the four
+  languages the app speaks; `desktop/README.md` has the steps.
+- Desktop: the store builds have Electron's fuses on (#63) -- no
+  `ELECTRON_RUN_AS_NODE`, no `NODE_OPTIONS`, no `--inspect`, the app loaded
+  from its asar only and that asar's integrity checked -- flipped before
+  signing and read back from the binary by the build; CI proves the smoke
+  test's build unfused and the store's fused, and that the fused app starts.
+  About → Licences shows the licence, the link to this version's source and
+  the third-party notices, generated at build time from what the app ships
+  (`pip-licenses` over the frozen set, a licence tool over what Vite
+  bundled); the build refuses to package without them.
+- **Open with Touch ID** on the Mac desktop app (#432, from #112). A
+  convenience on top of the password, never instead of it: once turned on in
+  Profile, with the password, the next launch asks for Touch ID and opens
+  signed in. The password is never stored. What the app keeps is a secret the
+  backend issued for this one purpose, bound to this ledger, held encrypted by
+  macOS in the app's own folder, and presented only after the prompt; the
+  backend keeps its hash, like a session. A cancelled or failed prompt shows
+  the password screen as before, with nothing counted. Turning it off,
+  changing the password, replacing a forgotten password with the recovery
+  code, restoring a backup and an account reset all end it. The server
+  profile has none of it, and a Mac without a sensor shows nothing. Windows
+  Hello stays open on #432.
+
 ## 0.15.0 — 2026-11-10
 
 **Reversible: lossy** — one migration.

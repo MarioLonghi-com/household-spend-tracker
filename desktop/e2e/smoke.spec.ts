@@ -85,6 +85,20 @@ async function menuTitles(app: ElectronApplication): Promise<string[]> {
   return app.evaluate(({ Menu }) => (Menu.getApplicationMenu()?.items ?? []).map((item) => item.label));
 }
 
+/** The Licences window (#63): a `data:` page, unlike the app's own windows and the splash. */
+async function licencesWindow(app: ElectronApplication): Promise<Page> {
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    const found = app.windows().find((page) => page.url().startsWith("data:text/html"));
+    if (found) {
+      await found.waitForLoadState("domcontentloaded");
+      return found;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error("the Licences window never opened");
+}
+
 type Answer = { status: number; data: any };
 
 /** Requests from inside the window: the same path the SPA's own take. */
@@ -158,10 +172,46 @@ test("set up, add, back up, relaunch: the ledger, the language and the backups a
   if (locale === "en") expect(titles).toContain("File");
   else expect(titles.some((title) => /[^\x00-\x7f]/.test(title) && !title.includes("Spend Tracker"))).toBe(true);
 
+  // About → Licences (#63): the source of this version, and the notices
+  // that shipped with the package, in the window's language.
+  await clickMenu(app, "licences");
+  const licences = await licencesWindow(app);
+  const version = await app.evaluate(({ app }) => app.getVersion());
+  await expect(licences.locator("a")).toHaveAttribute("href", `https://github.com/MarioLonghi-com/household-spend-tracker/tree/v${version}`);
+  await expect(licences.locator("pre")).toContainText("The backend (Python)");
+  await expect(licences.locator("pre")).toContainText("react ");
+  const heading = await licences.locator("h2").textContent();
+  if (locale === "en") expect(heading).toBe("Third-party notices");
+  else expect(heading).toMatch(/[^\x00-\x7f]/);
+  await licences.close();
+
   await answerDialogs(app, 0);
   await clickMenu(app, "back-up-now");
   await expect.poll(() => ours(backups).length, { timeout: 30_000 }).toBe(1);
   expect((await asked(app)).length).toBe(1);
+
+  // Touch ID (#432), as far as a machine with no sensor can go: turning it
+  // on hands the secret to the shell and never to the page; turning it off
+  // takes it back. Off again before the relaunch, so a Mac that *has* a
+  // sensor is not asked for a fingerprint by a test.
+  const held = () => app.evaluate(() => (globalThis as any).spendTrackerShell.unlockHeld() as boolean);
+  const canKeep = await app.evaluate(({ safeStorage }) => safeStorage.isEncryptionAvailable());
+  const turnedOn = await page.evaluate(async () => {
+    const response = await fetch("/api/me/device-unlock", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ password: "a long and entirely invented passphrase", method: "touch_id" }),
+    });
+    return { status: response.status, header: response.headers.get("x-spend-tracker-device-unlock"), text: await response.text() };
+  });
+  expect(turnedOn.status, turnedOn.text).toBe(200);
+  expect(turnedOn.header).toBeNull();
+  expect(turnedOn.text).toContain('"enabled":true');
+  expect(await held()).toBe(canKeep);
+  expect(fs.existsSync(path.join(root, "unlock.secret"))).toBe(canKeep);
+  expect((await call(page, "DELETE", "/api/me/device-unlock")).status).toBe(204);
+  expect(await held()).toBe(false);
+  expect((await call(page, "GET", "/api/me/device-unlock")).data.enabled).toBe(false);
 
   const executablePath = await app.evaluate(() => (globalThis as any).spendTrackerShell.backendExecutable());
   expect(executablePath.toLowerCase()).toContain(path.join("resources", "backend").toLowerCase());

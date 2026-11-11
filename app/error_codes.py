@@ -155,6 +155,7 @@ REGISTRY: dict[str, Code] = {
         "That password and authenticator code do not prove it is you"
     ),
     "profile.same_password": Code("That is already your password"),
+    "profile.unlock_method_unknown": Code("No such unlock method"),
     "profile.wrong_password": Code("That is not your current password"),
     # -- receipt: app/api/routers/agent.py, the agent's file routes (#44) ----- #
     "receipt.no_such_copy": Code("That receipt has no copy of that kind"),
@@ -354,6 +355,7 @@ REGISTRY: dict[str, Code] = {
     "auth.code_wrong": Code("That code is not right, or has already been used"),
     "auth.recovery_code_wrong": Code("That recovery code is not right, or has already been used"),
     "auth.new_code_wrong": Code("That code is not right. Check the time on your phone and try again."),
+    "auth.device_unlock_refused": Code("That unlock secret is not right, or has been revoked"),
     # -- email: app/auth/email_canonical.py (#267) ------------------------------- #
     "email.not_an_address": Code("{email} is not an email address", ("email",)),
     "email.too_long": Code("That email address is too long (max {max} characters)", ("max",)),

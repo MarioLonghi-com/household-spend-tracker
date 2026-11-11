@@ -71,8 +71,20 @@ def _households(database: Path) -> list[str]:
         return sorted(name for (name,) in conn.execute("SELECT name FROM households"))
 
 
+def _upcoming():
+    """The migrations an older ledger (`_older_ledger`) still has to run: from
+    the newest lossy one to the head, so the shell is put exactly one lossy
+    step whatever clean ones follow it."""
+    from scripts.upgrade import chain
+
+    steps = chain()
+    last_lossy = max(i for i, one in enumerate(steps) if one.reversible == "lossy")
+    return steps[last_lossy:]
+
+
 def _older_ledger(client, database: Path, *names: str) -> str:
-    """A ledger with an owner and `names` households, one migration behind head."""
+    """A ledger with an owner and `names` households, behind head by the
+    newest lossy migration and whatever clean ones came after it."""
     from alembic import command
 
     from scripts.upgrade import chain
@@ -81,7 +93,8 @@ def _older_ledger(client, database: Path, *names: str) -> str:
     for name in names:
         made = client.post("/api/households", json={"name": name}, headers=HEADERS)
         assert made.status_code == 201, made.text
-    previous = chain()[-2].revision
+    revisions = [one.revision for one in chain()]
+    previous = revisions[revisions.index(_upcoming()[0].revision) - 1]
     client.__exit__(None, None, None)
     import app.db as db
 
@@ -125,12 +138,12 @@ def test_an_older_ledger_is_backed_up_migrated_and_counted_and_its_neighbour_lef
 
     assert prepared.outcome == launch.READY, prepared.log
     assert (prepared.stamp_before, prepared.stamp_after) == (previous, chain()[-1].revision)
-    assert asked == [[chain()[-1].title]], "the one lossy step was put to the shell"
+    assert asked == [[_upcoming()[0].title]], "the one lossy step was put to the shell"
     assert _households(older) == ["Ours", "The flat"]
     assert prepared.backup is not None and prepared.backup.parent == older.parent / "backups"
     assert _stamp(prepared.backup / "spendtracker.sqlite3") == previous
     assert _households(prepared.backup / "spendtracker.sqlite3") == ["Ours", "The flat"]
-    assert "migrating 1 step(s)" in (prepared.backup / "upgrade.log").read_text()
+    assert f"migrating {len(_upcoming())} step(s)" in (prepared.backup / "upgrade.log").read_text()
     assert _stamp(neighbour / "spendtracker.sqlite3") == neighbour_stamp
 
 

@@ -25,7 +25,7 @@ from sqlalchemy import select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from ..auth import crypto, devices, keycheck, passwords, ratelimit, sessions, stepup, tokens, totp
+from ..auth import crypto, devices, keycheck, passwords, ratelimit, sessions, stepup, tokens, totp, unlock
 from ..auth import service as auth_service
 from ..errors import ProofRefused, ValidationError
 from ..models import RecoveryCode, User, utcnow
@@ -91,6 +91,14 @@ def _check_current_password(
     if not passwords.verify_password(user.password_hash, current):
         raise ProofRefused("that isn't your current password", code="profile.wrong_password")
     ratelimit.release(engine, held)
+
+
+def check_current_password(
+    session: Session, engine: Engine, user: User, current: str, *, ip: str | None
+) -> None:
+    """`_check_current_password`, for a route that proves the password and
+    then does its own thing: turning on Touch ID (#432)."""
+    _check_current_password(session, engine, user, current, ip=ip)
 
 
 @dataclass(frozen=True, slots=True)
@@ -160,6 +168,8 @@ def change_password(
     revoked = devices.revoke_all_for(session, user.id)
     sessions.drop_pending_for(session, user.id)
     stepup.drop_for(session, user.id)
+    # The desktop's Touch ID secret was bought with the old password too (#432).
+    unlock.revoke_all_for(session, user.id)
     live = sum(1 for key in agent_keys.for_user(session, user) if key.live())
     return PasswordChange(sessions_ended=ended, devices_revoked=revoked, keys_still_live=live)
 
@@ -356,6 +366,7 @@ def complete_reenrolment(
     ended = sessions.revoke_all_for(session, user.id, except_hash=keep_session_hash)
     sessions.drop_pending_for(session, user.id)
     stepup.drop_for(session, user.id)
+    unlock.revoke_all_for(session, user.id)
     return ReenrolmentResult(devices_revoked=revoked, sessions_ended=ended)
 
 
@@ -460,6 +471,7 @@ def shut_every_door(session: Session, user: User) -> DoorsShut:
     revoked = devices.revoke_all_for(session, user.id)
     sessions.drop_pending_for(session, user.id)
     stepup.drop_for(session, user.id)
+    unlock.revoke_all_for(session, user.id)
     keys = 0
     for key in agent_keys.for_user(session, user):
         if key.live():

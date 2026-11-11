@@ -15,12 +15,17 @@
  * - **The cookie jar** (`cookies.ts`): Chromium keeps no cookie from these
  *   responses.
  *
+ * And one thing for Touch ID (#432, `unlock.ts`): an `observe` sees every
+ * answer's headers on the way to the window and may keep some back -- the
+ * secret the backend issues travels in one, and the page never sees it.
+ *
  * A request that arrives while the backend is being restarted (a restore)
  * waits for the new one.
  */
 
 import type { Backend } from "./backend";
 import type { CookieJar } from "./cookies";
+import type { Passing } from "./unlock";
 
 export const ORIGIN = "app://localhost";
 
@@ -41,7 +46,9 @@ export function forwardedHeaders(request: Request, jar: CookieJar): [string, str
   return headers;
 }
 
-export function handler(current: () => Promise<Backend>, jar: CookieJar) {
+export type Observe = (passing: Passing, headers: readonly [string, string][]) => [string, string][];
+
+export function handler(current: () => Promise<Backend>, jar: CookieJar, observe: Observe = (_passing, headers) => [...headers]) {
   return async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
     if (url.host !== "localhost") return new Response(null, { status: 404 });
@@ -54,14 +61,15 @@ export function handler(current: () => Promise<Backend>, jar: CookieJar) {
     if (answer === null) {
       return new Response("The ledger is not running.", { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } });
     }
+    const status = Number(answer.head.status);
     const out = new Headers();
     const setCookies: string[] = [];
-    for (const [key, value] of answer.head.headers as [string, string][]) {
+    const shown = observe({ method: request.method, path: url.pathname, status }, answer.head.headers as [string, string][]);
+    for (const [key, value] of shown) {
       if (key.toLowerCase() === "set-cookie") setCookies.push(value);
       else out.append(key, value);
     }
     jar.take(setCookies);
-    const status = Number(answer.head.status);
     const empty = EMPTY.has(status) || request.method === "HEAD";
     return new Response(empty ? null : new Uint8Array(answer.body), { status, headers: out });
   };
