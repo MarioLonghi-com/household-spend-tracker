@@ -3,6 +3,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import babel from "@rolldown/plugin-babel";
 import { lingui, linguiTransformerBabelPreset } from "@lingui/vite-plugin";
+import { fileURLToPath } from "node:url";
+import { bundledPackages } from "./bundled-packages.ts";
 
 // The client is served by FastAPI in production, out of app/static/dist. In
 // development Vite serves it and proxies the API, so cookies stay same-origin
@@ -14,7 +16,14 @@ export default defineConfig(({ mode }) => ({
   // the ones importing a Lingui macro -- so the rest of the build stays on
   // Vite's own transform. The Lingui 6 plugin has no `macroTransform` option;
   // `@rolldown/plugin-babel` is the documented route, not a fallback.
-  plugins: [react(), lingui(), babel({ presets: [linguiTransformerBabelPreset()] })],
+  // The last one lists the packages this build bundled, for the desktop
+  // app's third-party notices (#63, `bundled-packages.ts`).
+  plugins: [
+    react(),
+    lingui(),
+    babel({ presets: [linguiTransformerBabelPreset()] }),
+    bundledPackages(fileURLToPath(new URL("../build/client-bundled-packages.json", import.meta.url))),
+  ],
   build: {
     outDir: "../app/static/dist",
     emptyOutDir: true,

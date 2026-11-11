@@ -18,6 +18,7 @@ export type Actions = {
   showBackups: () => void;
   showLedger: () => void;
   about: () => void;
+  licences: () => void;
 };
 
 /** Ids the end-to-end smoke test clicks, since it cannot open a native menu. */
@@ -27,6 +28,7 @@ export const IDS = {
   chooseFolder: "choose-backups-folder",
   showBackups: "show-backups-folder",
   showLedger: "show-ledger-folder",
+  licences: "licences",
 } as const;
 
 export function build(actions: Actions, platform: NodeJS.Platform = process.platform): Menu {
@@ -77,7 +79,10 @@ export function build(actions: Actions, platform: NodeJS.Platform = process.plat
   };
   const help: MenuItemConstructorOptions = {
     label: say(MENU.help),
-    submenu: [{ label: say(MENU.about), click: actions.about }],
+    submenu: [
+      { label: say(MENU.about), click: actions.about },
+      { id: IDS.licences, label: say(MENU.licences), click: actions.licences },
+    ],
   };
   const template: MenuItemConstructorOptions[] = [file, edit, view, window, help];
   if (mac) {
@@ -85,6 +90,7 @@ export function build(actions: Actions, platform: NodeJS.Platform = process.plat
       label: PRODUCT_NAME,
       submenu: [
         { label: say(MENU.about), click: actions.about },
+        { id: IDS.licences, label: say(MENU.licences), click: actions.licences },
         { type: "separator" },
         { role: "hide", label: say(MENU.hide) },
         { role: "hideOthers", label: say(MENU.hideOthers) },
@@ -93,7 +99,7 @@ export function build(actions: Actions, platform: NodeJS.Platform = process.plat
         { role: "quit", label: say(MENU.quit) },
       ],
     });
-    // On a Mac "About" lives in the app menu; Help keeps only what is left.
+    // On a Mac "About" and "Licences" live in the app menu; Help keeps only what is left.
     help.submenu = [];
     template.pop();
   }

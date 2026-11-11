@@ -50,6 +50,15 @@ history this repository does not have.
   package and attaches it as `household-spend-tracker-<version>-microsoft-store.msix`,
   for a person to upload in Partner Center. The package declares the four
   languages the app speaks; `desktop/README.md` has the steps.
+- Desktop: the store builds have Electron's fuses on (#63) -- no
+  `ELECTRON_RUN_AS_NODE`, no `NODE_OPTIONS`, no `--inspect`, the app loaded
+  from its asar only and that asar's integrity checked -- flipped before
+  signing and read back from the binary by the build; CI proves the smoke
+  test's build unfused and the store's fused, and that the fused app starts.
+  About → Licences shows the licence, the link to this version's source and
+  the third-party notices, generated at build time from what the app ships
+  (`pip-licenses` over the frozen set, a licence tool over what Vite
+  bundled); the build refuses to package without them.
 
 - **Open with Touch ID** on the Mac desktop app (#432, from #112). A
   convenience on top of the password, never instead of it: once turned on in

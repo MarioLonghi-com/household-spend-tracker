@@ -484,6 +484,10 @@ msgstr "Proceso"
 msgid "Stale"
 msgstr "Desactualizada"
 
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker is free software: you can redistribute it and change it under the GNU Affero General Public License, version 3 or any later version."
+msgstr "Household Spend Tracker es software libre: puedes redistribuirlo y modificarlo bajo la Licencia Pública General Affero de GNU, versión 3 o cualquier versión posterior."
+
 #. What the import detected: which column holds the date. Lower case, inside a list
 #: src/lib/labels.ts
 msgid "date column"
@@ -7252,6 +7256,11 @@ msgstr "no hay historial de git ni sello de compilación que consultar"
 msgid "File"
 msgstr "Archivo"
 
+#. Desktop app Licences window: heading over the licences of the libraries the app is built on
+#: ../desktop/src/words.ts
+msgid "Third-party notices"
+msgstr "Avisos de terceros"
+
 #: src/screens/Profile.tsx
 msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
 msgstr "Configura una nueva aplicación de autenticación: un móvil nuevo, o una que ya no tienes. La actual sigue funcionando hasta que se compruebe la nueva."
@@ -8851,6 +8860,10 @@ msgstr "El código de recuperación con el que iniciaste sesión lo cubre, así 
 #: src/screens/Categories.tsx
 msgid "New transactions arrive blank and you choose each time. Right for a payee that is genuinely different every time."
 msgstr "Los movimientos nuevos llegan en blanco y eliges cada vez. Lo adecuado para un beneficiario que de verdad es distinto cada vez."
+
+#: ../desktop/src/words.ts
+msgid "These notices are also in {folder}."
+msgstr "Estos avisos están también en {folder}."
 
 #: src/screens/Register.tsx
 msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."
@@ -11153,6 +11166,10 @@ msgstr "Una línea por petición HTTP. Mecánico, y ahoga todo lo demás."
 msgid "Oldest transaction"
 msgstr "Movimiento más antiguo"
 
+#: ../desktop/src/words.ts
+msgid "The third-party notices did not ship with this build."
+msgstr "Los avisos de terceros no se incluyeron en esta compilación."
+
 #. Button on the Payee Categorisation screen
 #. placeholder {0}: formatCount(rest)
 #: src/screens/PayeeCategorisation.tsx
@@ -12842,6 +12859,11 @@ msgstr "Cuando el banco dice"
 msgid "Remove {0}"
 msgstr "Quitar {0}"
 
+#. Desktop app menu item and About dialog button: open the window with the app's licence and the third-party notices
+#: ../desktop/src/words.ts
+msgid "Licences"
+msgstr "Licencias"
+
 #. Section heading on the Net Worth report
 #: src/screens/reports/NetWorth.tsx
 msgid "What changed"
@@ -14070,6 +14092,11 @@ msgstr "{0} {1}: un control de gastos autoalojado y multidivisa para un hogar, b
 #: src/screens/TranslationReview.tsx
 msgid "Your profile's language picker then offers Português, Español and Svenska as previews: machine translated, under review. Nobody else is offered them, and English stays the default everywhere else."
 msgstr "El selector de idioma de tu perfil ofrece entonces Português, Español y Svenska como vistas previas: traducción automática, en revisión. A nadie más se le ofrecen, y el inglés sigue siendo el predeterminado en todo lo demás."
+
+#. Desktop app Licences window: label above the link to this version's source on GitHub
+#: ../desktop/src/words.ts
+msgid "Source code for this version"
+msgstr "Código fuente de esta versión"
 
 #: src/screens/Import.tsx
 msgid "Open that import"

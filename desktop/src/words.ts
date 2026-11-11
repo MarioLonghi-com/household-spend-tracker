@@ -31,6 +31,7 @@ export const MENU = {
   closeWindow: msg({ message: "Close window", comment: "Desktop app File menu item" }),
 
   about: msg`About Household Spend Tracker`,
+  licences: msg({ message: "Licences", comment: "Desktop app menu item and About dialog button: open the window with the app's licence and the third-party notices" }),
   hide: msg`Hide Household Spend Tracker`,
   hideOthers: msg({ message: "Hide others", comment: "macOS app menu item: hide every other app's windows" }),
   showAll: msg({ message: "Show all", comment: "macOS app menu item: show every app's windows again" }),
@@ -118,4 +119,13 @@ export const DIALOG = {
 export const PROMPT = {
   /** Touch ID's reason, shown by macOS after the app's name: "… is trying to open your ledger". */
   unlock: msg({ message: "open your ledger", comment: "macOS Touch ID prompt, after the app's name: '… is trying to open your ledger'" }),
+};
+
+/** The Licences window (#63): the AGPL line, the source of this version, the notices. */
+export const LICENCES = {
+  free: msg`Household Spend Tracker is free software: you can redistribute it and change it under the GNU Affero General Public License, version 3 or any later version.`,
+  source: msg({ message: "Source code for this version", comment: "Desktop app Licences window: label above the link to this version's source on GitHub" }),
+  notices: msg({ message: "Third-party notices", comment: "Desktop app Licences window: heading over the licences of the libraries the app is built on" }),
+  where: (folder: string) => msg`These notices are also in ${folder}.`,
+  missing: msg`The third-party notices did not ship with this build.`,
 };
