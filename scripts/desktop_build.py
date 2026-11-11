@@ -25,6 +25,8 @@ In order, each step's output the next one's input:
 6. **the package**, by electron-builder, into `desktop/dist`.
 
 `--from N` starts at step N, for the second run of a build being fixed.
+The Windows package carries electron-builder.yml's test identity unless the
+Microsoft Store's is given in the environment (`APPX_IDENTITY`, #63).
 Signing is not here: `desktop/scripts/sign-mas.sh` for a sandboxed run on
 this Mac (with a development profile) or for the store (with the App Store
 profile and "Apple Distribution"), then `desktop/scripts/package-mas.sh` for
@@ -39,6 +41,7 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -53,6 +56,39 @@ TARGETS = {
     "store": ["--mac", "mas", "--arm64", "-c.mac.identity=null"],
     "win": ["--win", "appx", "dir", "--x64"],
 }
+
+
+#: The Microsoft Store's package identity, environment variable to the
+#: electron-builder `appx` key it overrides (#63).
+APPX_IDENTITY = {
+    "SPENDTRACKER_APPX_IDENTITY_NAME": "identityName",
+    "SPENDTRACKER_APPX_PUBLISHER": "publisher",
+    "SPENDTRACKER_APPX_PUBLISHER_DISPLAY_NAME": "publisherDisplayName",
+}
+
+
+def _appx_identity(target: str, environ: Mapping[str, str] = os.environ) -> list[str]:
+    """The Microsoft Store's package identity, when the package is for the Store.
+
+    electron-builder.yml carries a test identity, so a build with none of these
+    set is the one `sign-msix.ps1` signs for a test install. The Store's own --
+    the package name Partner Center issued with the reserved app name, its
+    `CN=<guid>` publisher and the publisher's display name -- stay out of the
+    repository and come in through the environment, all three or none: the
+    Store refuses a package whose name is its own under another publisher,
+    with a message that names neither. Only the win target reads them.
+    """
+    if target != "win":
+        return []
+    given = {key: environ.get(name, "") for name, key in APPX_IDENTITY.items()}
+    if not any(given.values()):
+        return []
+    missing = [name for name, key in APPX_IDENTITY.items() if not given[key]]
+    if missing:
+        raise SystemExit(
+            "the Microsoft Store identity is all three variables or none; missing: " + " ".join(missing)
+        )
+    return [f"-c.appx.{key}={value}" for key, value in given.items()]
 
 
 def _npm() -> str:
@@ -114,7 +150,10 @@ def build(target: str, *, python: str, start: int = 1) -> None:
         lambda: _run("the shell", [npm, "run", "build"], DESKTOP),
         lambda: _run(
             f"the {target} package",
-            [npm, "exec", "--", "electron-builder", *TARGETS[target], *_build_number(target), "--publish", "never"],
+            [
+                npm, "exec", "--", "electron-builder", *TARGETS[target],
+                *_build_number(target), *_appx_identity(target), "--publish", "never",
+            ],
             DESKTOP,
             # Not signed with whatever identity the keychain happens to hold:
             # electron-builder signs ad hoc instead, which is what an Apple

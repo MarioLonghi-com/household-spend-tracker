@@ -13,6 +13,10 @@ a tag-only store for secrets, not a second gate -- and that environment is
 allowed on that job alone. The job that builds the app runs `npm ci` and
 must never see a secret.
 
+The Microsoft Store build (#63) is the same shape: `store-build-win` installs
+packages and holds nothing; `publish-win-store` attaches the package to the
+release, after it is public, behind the same gate.
+
 Each rule is checked against the real workflow, and then against a copy that
 breaks it, so a check that passes everything cannot pass here.
 """
@@ -26,11 +30,15 @@ import yaml
 
 WORKFLOW = pathlib.Path(__file__).resolve().parent.parent / ".github" / "workflows" / "release.yml"
 GATE = "publish"
-PUBLISHING = ("publish", "publish-image", "publish-bundle", "publish-release", "publish-mac-store")
+PUBLISHING = (
+    "publish", "publish-image", "publish-bundle", "publish-release", "publish-mac-store", "publish-win-store",
+)
+#: The store hand-offs: nothing of theirs for a release that did not go out.
+STORES = ("publish-mac-store", "publish-win-store")
 #: The environments a job may run in, and the one job each is for.
 ENVIRONMENTS = {GATE: "release", "publish-mac-store": "app-store"}
 #: Jobs that install packages, and so must hold nothing secret.
-BUILDERS = ("build", "image", "store-build")
+BUILDERS = ("build", "image", "store-build", "store-build-win")
 
 
 def _jobs() -> dict:
@@ -76,9 +84,10 @@ def problems(jobs: dict) -> list[str]:
         wanted = ENVIRONMENTS.get(name)
         if job.get("environment") != wanted:
             found.append(f"`{name}` runs in environment {job.get('environment')!r}, expected {wanted!r}")
-    # The App Store upload is not uploaded for a release that did not go out.
-    if "publish-mac-store" in jobs and not _depends_on(jobs, "publish-mac-store", "publish-release"):
-        found.append("`publish-mac-store` can upload before the release is public")
+    # A store build is not handed on for a release that did not go out.
+    for name in STORES:
+        if name in jobs and not _depends_on(jobs, name, "publish-release"):
+            found.append(f"`{name}` can upload before the release is public")
     for name in BUILDERS:
         if name in jobs and "secrets." in yaml.safe_dump(jobs[name]):
             found.append(f"`{name}` installs packages and reads a secret")
@@ -96,8 +105,9 @@ def test_a_publisher_that_stops_needing_the_gate_is_caught() -> None:
     jobs["publish-release"]["needs"] = ["build"]
     assert problems(jobs) == [
         "`publish-release` can run without `publish`'s approval",
-        # And the upload behind it loses the gate with it (#351).
+        # And the store hand-offs behind it lose the gate with it (#351, #63).
         "`publish-mac-store` can run without `publish`'s approval",
+        "`publish-win-store` can run without `publish`'s approval",
         "`publish-release` can make the release public without its zip",
     ]
 
@@ -137,6 +147,36 @@ def test_an_upload_before_the_release_is_public_is_caught() -> None:
     assert problems(jobs) == ["`publish-mac-store` can upload before the release is public"]
     jobs["publish-mac-store"]["needs"] = ["build", "store-build"]
     assert "`publish-mac-store` can run without `publish`'s approval" in problems(jobs)
+
+
+def test_a_windows_package_attached_before_the_release_is_public_is_caught() -> None:
+    jobs = copy.deepcopy(_jobs())
+    jobs["publish-win-store"]["needs"] = ["build", "store-build-win", "publish"]
+    assert problems(jobs) == ["`publish-win-store` can upload before the release is public"]
+
+
+def test_the_windows_builder_that_reads_a_secret_is_caught() -> None:
+    jobs = copy.deepcopy(_jobs())
+    jobs["store-build-win"]["env"]["SPENDTRACKER_APPX_PUBLISHER"] = "${{ secrets.MSIX_PUBLISHER }}"
+    assert problems(jobs) == ["`store-build-win` installs packages and reads a secret"]
+
+
+def test_the_windows_package_is_checked_attested_and_attached() -> None:
+    """#63: the identity and version are read back from the package, not
+    trusted from the build; what is attached is what was checked."""
+    jobs = _jobs()
+    build = jobs["store-build-win"]
+    assert build["env"]["SPENDTRACKER_APPX_IDENTITY_NAME"] == "${{ vars.MSIX_IDENTITY_NAME }}"
+    check = next(s for s in build["steps"] if s.get("name", "").startswith("the package says"))
+    assert "AppxManifest.xml" in check["run"] and "$env:VERSION.0" in check["run"]
+    for language in ("en-gb", "pt-br", "es-es", "sv-se"):
+        assert language in check["run"]
+    publish = jobs["publish-win-store"]
+    run = _run(publish)
+    assert "sha256sum -c" in run and "gh release upload" in run
+    attest = [s for s in publish["steps"] if "attest-build-provenance" in s.get("uses", "")]
+    assert [s["with"]["subject-path"] for s in attest] == ["dist/*.msix"]
+    assert "npm" not in run
 
 
 def test_an_upload_on_a_branch_is_caught() -> None:

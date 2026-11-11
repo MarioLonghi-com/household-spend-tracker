@@ -93,9 +93,16 @@ name: release
 # secrets reach nothing but a tag's run. Only a tag uploads; submitting the
 # build for review is done by a person in App Store Connect.
 #
+# And the Microsoft Store build beside it (#63). `store-build-win` builds the
+# MSIX on a Windows runner, unsigned -- the Store signs what it publishes --
+# with the Store's package identity read from three repository variables;
+# `publish-win-store`, after the release is public, attests it and attaches it
+# to the release for a person to upload in Partner Center, which this account
+# can reach in a browser only.
+#
 # Started by hand (`workflow_dispatch`) from a branch it is a dry run: it
 # builds and smoke-tests both artefacts on both platforms, checks the two
-# platform images carry the same labels, builds the Mac App Store app, and
+# platform images carry the same labels, builds both store apps, and
 # publishes nothing.
 #
 # The Python dependencies are locked with hashes (#46): `make install-prod`
@@ -1109,3 +1116,137 @@ jobs:
         run: |
           [ -n "${SIGNING_KEYCHAIN:-}" ] && security delete-keychain "$SIGNING_KEYCHAIN" || true
           rm -rf "$HOME/private_keys" "${RUNNER_TEMP}/appstore.provisionprofile"
+
+  # The Microsoft Store build (#63), beside the Mac's: the same client, the
+  # backend frozen on Windows x64 from the hashed lock, the shell, packaged as
+  # the MSIX the Store takes -- what tests.yml's desktop-app job builds and
+  # smoke-tests on Windows. Unsigned on purpose: the Store signs what it
+  # publishes, so no certificate for it exists anywhere. It carries the
+  # Store's package identity, which lives in three repository variables rather
+  # than in electron-builder.yml, whose identity is a test one:
+  #   MSIX_IDENTITY_NAME           Package/Identity/Name, as Partner Center
+  #                                issued it with the reserved app name
+  #   MSIX_PUBLISHER               Package/Identity/Publisher, the CN=<guid>
+  #   MSIX_PUBLISHER_DISPLAY_NAME  the publisher's display name
+  # A tag with them unset fails here, before anything is published; a dry run
+  # packages the test identity and says so. Like `store-build` it runs
+  # `npm ci` and holds no secret -- and a variable is not one: all three sit
+  # in the manifest of every package the Store ships. The hand-off to the
+  # release is `publish-win-store`'s.
+  store-build-win:
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      PYTHONUTF8: "1"
+      SPENDTRACKER_APPX_IDENTITY_NAME: ${{ vars.MSIX_IDENTITY_NAME }}
+      SPENDTRACKER_APPX_PUBLISHER: ${{ vars.MSIX_PUBLISHER }}
+      SPENDTRACKER_APPX_PUBLISHER_DISPLAY_NAME: ${{ vars.MSIX_PUBLISHER_DISPLAY_NAME }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: a tag carries the Store's identity
+        shell: bash
+        run: |
+          set -eu
+          if [ -z "${SPENDTRACKER_APPX_IDENTITY_NAME}${SPENDTRACKER_APPX_PUBLISHER}${SPENDTRACKER_APPX_PUBLISHER_DISPLAY_NAME}" ]; then
+            if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+              echo "the MSIX_IDENTITY_NAME, MSIX_PUBLISHER and MSIX_PUBLISHER_DISPLAY_NAME variables are not set (see the comment on this job)"
+              exit 1
+            fi
+            echo "no Store identity in the repository's variables: this dry run packages the test identity"
+          fi
+      - run: python -m pip install --require-hashes -r requirements-desktop.txt
+      - run: npm ci
+        working-directory: client
+      - run: npm ci
+        working-directory: desktop
+      - name: the Microsoft Store build, unsigned
+        run: python -m scripts.desktop_build win
+      # Read back from the package itself, by a tool that did not write it:
+      # the manifest's identity is the Store's and its version is the
+      # release's (the fourth part is the Store's, always 0), and it declares
+      # every language the app speaks, since Partner Center wants a listing
+      # for each. Then named for the release, beside its checksum.
+      - name: the package says the release's version and the Store's identity
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $package = Get-ChildItem desktop/dist -Filter *.appx | Select-Object -First 1
+          if (-not $package) { throw "no .appx in desktop/dist" }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($package.FullName)
+          try {
+            $reader = New-Object System.IO.StreamReader($zip.GetEntry("AppxManifest.xml").Open())
+            [xml]$manifest = $reader.ReadToEnd()
+            $reader.Close()
+          } finally { $zip.Dispose() }
+          $identity = $manifest.Package.Identity
+          "$($identity.Name) by $($identity.Publisher), version $($identity.Version)"
+          if ($env:GITHUB_REF_TYPE -eq "tag") {
+            if ($identity.Version -ne "$env:VERSION.0") { throw "the package says $($identity.Version), the release is $env:VERSION" }
+            if ($identity.Name -ne $env:SPENDTRACKER_APPX_IDENTITY_NAME) { throw "the package's identity is $($identity.Name), not the Store's" }
+            if ($identity.Publisher -ne $env:SPENDTRACKER_APPX_PUBLISHER) { throw "the package's publisher is not the Store's" }
+          }
+          $languages = @($manifest.Package.Resources.Resource | ForEach-Object { "$($_.Language)".ToLower() })
+          "languages: $($languages -join ', ')"
+          foreach ($wanted in "en-gb", "pt-br", "es-es", "sv-se") {
+            if ($languages -notcontains $wanted) { throw "the package does not declare $wanted" }
+          }
+          $out = Join-Path $env:RUNNER_TEMP "household-spend-tracker-$env:VERSION-microsoft-store.msix"
+          Copy-Item $package.FullName $out
+          $digest = (Get-FileHash $out -Algorithm SHA256).Hash.ToLower()
+          Set-Content -NoNewline -Path "$out.sha256" -Value "$digest  $(Split-Path $out -Leaf)`n"
+          Get-Content "$out.sha256"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: windows-store-package
+          path: ${{ runner.temp }}/*-microsoft-store.msix*
+          retention-days: 7
+          if-no-files-found: error
+
+  # Attached to the release once it is public, for a person to upload in
+  # Partner Center (#63): an Individual account gets no submission API, so
+  # this is the hand-off, not the upload. Attested like the tarball, so the
+  # package a person uploads is provably the one this run built from the tag;
+  # the Store's signature goes on top of it. After `publish-release`, as the
+  # Mac's upload is: a store build that fails holds up no release. Nobody can
+  # install what is attached -- Windows refuses an unsigned package -- so a
+  # public asset gives away nothing but the source it was built from.
+  publish-win-store:
+    needs: [build, store-build-win, publish-release]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write     # attach the package to the release
+      id-token: write     # the Sigstore certificate behind the attestation
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: windows-store-package
+          path: dist
+      - name: the package matches its checksum
+        run: cd dist && sha256sum -c ./*.msix.sha256
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-path: dist/*.msix
+      - name: attached to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          gh release upload "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --clobber dist/*.msix dist/*.msix.sha256
+          echo "upload $(ls dist/*.msix) in Partner Center: Packages, then submit"

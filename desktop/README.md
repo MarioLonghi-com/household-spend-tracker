@@ -165,6 +165,32 @@ needs a new build number, `SPENDTRACKER_STORE_BUILD=2` for the `store` build.
 `altool` finds the key as `~/private_keys/AuthKey_KEY_ID.p8`. The app's icon
 on App Store Connect comes from this build.
 
+### Uploading to the Microsoft Store
+
+**A release tag builds it by itself** (#63): `release.yml` freezes the
+backend on a Windows runner, packages the MSIX with the Store's identity
+from three repository variables (`MSIX_IDENTITY_NAME`, `MSIX_PUBLISHER`,
+`MSIX_PUBLISHER_DISPLAY_NAME`; the job fails on a tag that lacks them),
+checks the identity, the version and the languages in the package's own
+manifest, and once the release is public attests it and attaches
+`household-spend-tracker-<version>-microsoft-store.msix` to the release.
+The Store signs it, so it is unsigned and installs nowhere as it is.
+Uploading it is a person's step, in Partner Center: *Packages*, then
+submit. Partner Center takes one package per version, so a package fixed
+after certification needs a new release.
+
+By hand, the same package comes from the environment the script reads:
+
+```powershell
+$env:SPENDTRACKER_APPX_IDENTITY_NAME = "<Package/Identity/Name>"
+$env:SPENDTRACKER_APPX_PUBLISHER = "CN=<guid>"
+$env:SPENDTRACKER_APPX_PUBLISHER_DISPLAY_NAME = "<publisher display name>"
+python -m scripts.desktop_build win
+```
+
+All three or none: with none set the package carries the test identity in
+`electron-builder.yml`, for `sign-msix.ps1` and a test install.
+
 ## Words
 
 Every word the shell shows is in `src/words.ts`, as Lingui messages in the
@@ -174,7 +200,7 @@ The window tells the shell which language it activated (`client/src/lib/desktop.
 
 ## Not yet
 
-- Partner Center, the store listings' translations and submission: #63, after #321 and #58. The Mac
-  App Store build is signed, packaged and uploaded as above.
+- The store listings' translations and both submissions: #63, after #321.
+  Both store builds are made by a release tag as above.
 - Electron fuses (no `--inspect`, no `ELECTRON_RUN_AS_NODE`) go on for the
   store builds in #63; the smoke test needs them off.
