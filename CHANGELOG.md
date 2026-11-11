@@ -32,6 +32,13 @@ history this repository does not have.
 
 ## Unreleased
 
+### Fixed
+
+- The Mac App Store upload step no longer fails on altool's first answer
+  about a delivery it does not know yet: `upload-mas.sh` asks again, as it
+  was meant to, and prints altool's last answer when it runs out of patience.
+  0.16.0's build 24 was uploaded and accepted while the job went red.
+
 ## 0.16.0 — 2026-11-11
 
 **Reversible: clean** — one migration.
