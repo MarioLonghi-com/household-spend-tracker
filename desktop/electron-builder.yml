@@ -72,7 +72,8 @@ win:
       arch: x64
 
 # The identity here is a test one. The Store's comes from the name reserved in
-# Partner Center (#63) and replaces it there.
+# Partner Center (#63) and replaces it at build time, through the environment
+# scripts/desktop_build.py reads (`SPENDTRACKER_APPX_*`), never by a commit.
 appx:
   identityName: SpendTracker.Test
   publisher: CN=SpendTrackerTest
@@ -81,6 +82,11 @@ appx:
   # Must match the name reserved in Partner Center (#346).
   displayName: Household Spend Tracker
   backgroundColor: "#15705C"
+  # The languages the app speaks (#58). Partner Center asks for a Store
+  # listing in each language a package declares, which is what #63 wants.
   languages:
     - en-GB
+    - pt-BR
+    - es-ES
+    - sv-SE
   customManifestPath: appxmanifest.xml
