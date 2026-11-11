@@ -3553,10 +3553,6 @@ msgstr "El trabajo pagó {0} menos que estos gastos. Si no va a pagar el resto, 
 msgid "Leave it alone"
 msgstr "Dejarlo como está"
 
-#: ../desktop/src/words.ts
-msgid "This text, and Chromium's own notices, are in {folder}."
-msgstr "Este texto, y los avisos propios de Chromium, están en {folder}."
-
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Setup.tsx
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in."
@@ -8833,6 +8829,10 @@ msgstr "El código de recuperación con el que iniciaste sesión lo cubre, así 
 #: src/screens/Categories.tsx
 msgid "New transactions arrive blank and you choose each time. Right for a payee that is genuinely different every time."
 msgstr "Los movimientos nuevos llegan en blanco y eliges cada vez. Lo adecuado para un beneficiario que de verdad es distinto cada vez."
+
+#: ../desktop/src/words.ts
+msgid "These notices are also in {folder}."
+msgstr "Estos avisos están también en {folder}."
 
 #: src/screens/Register.tsx
 msgid "The parts you have set up have not been saved. Discarding leaves the transaction as it was."

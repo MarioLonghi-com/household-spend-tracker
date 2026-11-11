@@ -104,11 +104,9 @@ def test_the_whole_text_has_its_three_sections_and_refuses_an_empty_one():
 
 def test_the_check_refuses_a_missing_empty_or_stale_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(notices, "NOTICES", tmp_path / "THIRD-PARTY-NOTICES.txt")
-    monkeypatch.setattr(notices, "CHROMIUM", tmp_path / "LICENSES.chromium.html")
     monkeypatch.setattr(notices, "app_version", lambda: "0.15.0")
     with pytest.raises(SystemExit, match="missing or empty"):
         notices.check()
-    (tmp_path / "LICENSES.chromium.html").write_text("<html>")
     (tmp_path / "THIRD-PARTY-NOTICES.txt").write_text("")
     with pytest.raises(SystemExit, match="missing or empty"):
         notices.check()

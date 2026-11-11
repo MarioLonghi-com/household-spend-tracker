@@ -121,6 +121,6 @@ export const LICENCES = {
   free: msg`Household Spend Tracker is free software: you can redistribute it and change it under the GNU Affero General Public License, version 3 or any later version.`,
   source: msg({ message: "Source code for this version", comment: "Desktop app Licences window: label above the link to this version's source on GitHub" }),
   notices: msg({ message: "Third-party notices", comment: "Desktop app Licences window: heading over the licences of the libraries the app is built on" }),
-  where: (folder: string) => msg`This text, and Chromium's own notices, are in ${folder}.`,
+  where: (folder: string) => msg`These notices are also in ${folder}.`,
   missing: msg`The third-party notices did not ship with this build.`,
 };

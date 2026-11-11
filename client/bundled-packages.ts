@@ -17,22 +17,26 @@ import type { Plugin } from "vite";
 
 export type Bundled = { name: string; version: string; path: string };
 
-const NODE_MODULES = `${path.sep}node_modules${path.sep}`;
+const NODE_MODULES = "/node_modules/";
 
-/** The package.json nearest above a bundled module, when the module came from node_modules. */
-function packageOf(id: string): Bundled | null {
-  const file = id.split("?")[0];
+/**
+ * The package.json nearest above a bundled module, when the module came from
+ * node_modules. Module ids are forward-slash paths on every platform, Windows
+ * included, so the walk is a POSIX one; fs takes those paths anywhere.
+ */
+export function packageOf(id: string): Bundled | null {
+  const file = id.split("?")[0].replace(/\\/g, "/");
   const at = file.lastIndexOf(NODE_MODULES);
   if (file.startsWith("\0") || at === -1) return null;
-  let folder = path.dirname(file);
+  let folder = path.posix.dirname(file);
   const floor = file.slice(0, at + NODE_MODULES.length - 1);
   while (folder.length > floor.length) {
-    const manifest = path.join(folder, "package.json");
+    const manifest = path.posix.join(folder, "package.json");
     if (fs.existsSync(manifest)) {
       const read = JSON.parse(fs.readFileSync(manifest, "utf8")) as { name?: string; version?: string };
       if (read.name && read.version) return { name: read.name, version: read.version, path: folder };
     }
-    folder = path.dirname(folder);
+    folder = path.posix.dirname(folder);
   }
   return null;
 }

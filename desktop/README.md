@@ -98,8 +98,9 @@ which `scripts/third_party_notices.py` writes at build time from what ships:
 the runtime lock less what `backend.spec` excludes (`pip-licenses`), and the
 packages the client's and the shell's Vite builds bundled
 (`client/bundled-packages.ts`, then `license-checker-rseidelsohn`). Chromium's
-own `LICENSES.chromium.html` goes beside it. The build refuses to package
-without them.
+own `LICENSES.chromium.html` electron-builder keeps from the Electron
+download. The build refuses to package without the notices, and checks both
+files are in the package.
 
 ### Checks
 

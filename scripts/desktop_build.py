@@ -25,8 +25,9 @@ In order, each step's output the next one's input:
 6. **the third-party notices** (`scripts/third_party_notices.py`), from what
    steps 1, 3 and 5 bundled, into `build/` for the Licences window (#63);
 7. **the package**, by electron-builder, into `desktop/dist`. Refused without
-   the notices, and with Electron's fuses flipped on the way for a store
-   build (`desktop/scripts/fuses.cjs`);
+   the notices, with Electron's fuses flipped on the way for a store build
+   (`desktop/scripts/fuses.cjs`), and checked to carry the notices and
+   Chromium's own licence file;
 8. **the fuses, read back** from the packaged binary: a store build whose
    fuses did not take fails here, and so does a smoke-test build whose fuses
    are on, since the smoke test could not drive it.
@@ -157,6 +158,22 @@ def _package(target: str, python: str, npm: str, mode: str) -> None:
     )
 
 
+def _shipped(target: str, packaged: Path) -> None:
+    """The licence files the Licences window and the notices point at, in the package (#63).
+
+    electron-builder keeps Chromium's `LICENSES.chromium.html` from the Electron
+    download -- in Contents/Resources on a Mac, beside the executable on
+    Windows -- and the notices are an extra resource. The notices say where
+    both are, so a package without either is refused here.
+    """
+    resources = packaged / "Contents" / "Resources" if target != "win" else packaged.parent / "resources"
+    expected = [resources / "THIRD-PARTY-NOTICES.txt", (resources if target != "win" else packaged.parent) / "LICENSES.chromium.html"]
+    missing = [str(file) for file in expected if not file.is_file() or file.stat().st_size == 0]
+    if missing:
+        raise SystemExit("the package is missing, or ships empty: " + ", ".join(missing))
+    sys.stderr.write("   shipped: " + ", ".join(file.name for file in expected) + "\n")
+
+
 def build(target: str, *, python: str, start: int = 1) -> None:
     npm = _npm()
     mode = fuses(target)
@@ -175,7 +192,7 @@ def build(target: str, *, python: str, start: int = 1) -> None:
         lambda: _run("its smoke test", [python, str(DESKTOP / "smoke_backend.py"), str(executable)]),
         lambda: _run("the shell", [npm, "run", "build"], DESKTOP),
         lambda: _run("the third-party notices", [python, "-m", "scripts.third_party_notices"]),
-        lambda: _package(target, python, npm, mode),
+        lambda: (_package(target, python, npm, mode), _shipped(target, packaged)),
         lambda: _run(f"the fuses, read back ({mode})", [_node(), str(DESKTOP / "scripts" / "fuses.cjs"), "check", str(packaged), mode]),
     ]
     for number, step in enumerate(steps, start=1):

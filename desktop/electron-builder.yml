@@ -32,14 +32,13 @@ afterPack: scripts/fuses.cjs
 
 # The frozen backend, run from the install location, read-only; and the
 # third-party notices the Licences window shows (#63), written by
-# scripts/third_party_notices.py, with Chromium's own beside them.
+# scripts/third_party_notices.py. Chromium's own, LICENSES.chromium.html,
+# electron-builder keeps from the Electron download by itself.
 extraResources:
   - from: ../build/backend/spend-tracker-backend
     to: backend
   - from: ../build/THIRD-PARTY-NOTICES.txt
     to: THIRD-PARTY-NOTICES.txt
-  - from: ../build/LICENSES.chromium.html
-    to: LICENSES.chromium.html
 
 mac:
   category: public.app-category.finance

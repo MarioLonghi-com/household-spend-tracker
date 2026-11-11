@@ -17,10 +17,11 @@ shell are built: the notices name exactly what ships, read from three places.
    Babel macro plugin, so the declared graph reaches Babel and Jest, which
    the bundle does not.
 
-Electron itself is listed with the shell, and Chromium's own notices -- the
-`LICENSES.chromium.html` the Electron package carries -- are copied beside
-the text, since electron-builder puts that file in a Windows folder and not
-in a Mac app.
+Electron itself is listed with the shell. Chromium's own notices,
+`LICENSES.chromium.html`, are not copied here: electron-builder keeps the
+copy the Electron download carries, in `Contents/Resources` on a Mac and
+beside the executable on Windows, and `scripts/desktop_build.py` checks it
+is there after packaging.
 
 Refuses rather than writing a thin file: a package with no licence found, an
 empty section or a missing input stops the build here, where it can be fixed,
@@ -34,7 +35,6 @@ import ast
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -44,7 +44,6 @@ from packaging.markers import Marker
 ROOT = Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
 NOTICES = BUILD / "THIRD-PARTY-NOTICES.txt"
-CHROMIUM = BUILD / "LICENSES.chromium.html"
 RUNTIME_LOCK = ROOT / "requirements.txt"
 BACKEND_SPEC = ROOT / "desktop" / "backend.spec"
 CLIENT_BUNDLED = BUILD / "client-bundled-packages.json"
@@ -186,7 +185,8 @@ def electron_entry(licences: dict[str, dict]) -> str:
     text = licence_text(ELECTRON, known.get("licenseFile"))
     note = (
         "Electron bundles Chromium and Node.js. Their notices, and those of everything\n"
-        "they build on, are in LICENSES.chromium.html beside this file."
+        "they build on, are in LICENSES.chromium.html, shipped with the app: in its\n"
+        "Resources folder beside this file on a Mac, beside the app itself on Windows."
     )
     return entry("electron", manifest["version"], str(known.get("licenses") or ""), "https://github.com/electron/electron", text) + f"\n{note}\n"
 
@@ -216,20 +216,15 @@ def write(python: str) -> Path:
     client = node_section(bundled(CLIENT_BUNDLED), node_licences(ROOT / "client"))
     shell_licences = node_licences(ROOT / "desktop")
     shell = node_section(bundled(SHELL_BUNDLED), shell_licences) + "\n" + electron_entry(shell_licences)
-    chromium = ELECTRON / "dist" / "LICENSES.chromium.html"
-    if not chromium.exists():
-        raise Incomplete(f"{chromium} is missing: `node node_modules/electron/install.js` in desktop/ fetches it")
     BUILD.mkdir(exist_ok=True)
-    shutil.copyfile(chromium, CHROMIUM)
     NOTICES.write_text(render(app_version(), backend, client, shell), encoding="utf-8")
     return NOTICES
 
 
 def check() -> None:
     """What the packaging step asks before it bundles the notices."""
-    for file in (NOTICES, CHROMIUM):
-        if not file.exists() or file.stat().st_size == 0:
-            raise Incomplete(f"{file} is missing or empty: python -m scripts.third_party_notices first")
+    if not NOTICES.exists() or NOTICES.stat().st_size == 0:
+        raise Incomplete(f"{NOTICES} is missing or empty: python -m scripts.third_party_notices first")
     text = NOTICES.read_text(encoding="utf-8")
     for heading in ("The backend (Python)", "The web client (JavaScript)", "The desktop shell (JavaScript, Electron)"):
         if heading not in text:
