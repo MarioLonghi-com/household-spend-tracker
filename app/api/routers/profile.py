@@ -12,11 +12,11 @@ factors for a single-use grant that a privileged act elsewhere spends; see
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 
 from ... import config, db
 from ...audit.batch import batch
-from ...auth import cookies, keycheck, passkeys, stepup, tokens
+from ...auth import cookies, keycheck, passkeys, stepup, tokens, unlock
 
 # `from ...db import engine` would bind the object at import time, which is the
 # trap `routers/auth.py` carries a comment about: the test harness rebuilds the
@@ -31,6 +31,8 @@ from ...schemas import (
     AuthenticatorStatus,
     ChangePassword,
     ConfirmReenrolment,
+    DeviceUnlockStatus,
+    EnableDeviceUnlock,
     IssueAgentKey,
     PasskeyOptionsRequest,
     PasskeyOut,
@@ -60,6 +62,10 @@ keys_router = APIRouter(tags=["profile"])
 #: The authenticator: seeing, replacing and confirming it. Its own router so
 #: that the desktop, where a password is the only factor (#320), leaves it out.
 authenticator_router = APIRouter(tags=["profile"])
+
+#: Opening the desktop app with Touch ID (#432): its own router, so a server
+#: -- where no shell exists to hold the secret -- leaves it out whole.
+unlock_router = APIRouter(tags=["profile"])
 
 
 @router.post("/me/password", response_model=PasswordChanged)
@@ -183,6 +189,62 @@ def regenerate_recovery_codes(
             ip=client_ip(request),
         )
     return RecoveryCodesIssued(codes=list(codes))
+
+
+def _unlock_status(session: SessionDep, user) -> DeviceUnlockStatus:
+    row = unlock.current(session, user)
+    if row is None:
+        return DeviceUnlockStatus(enabled=False)
+    return DeviceUnlockStatus(enabled=True, method=row.method, created_at=row.created_at)
+
+
+@unlock_router.get("/me/device-unlock", response_model=DeviceUnlockStatus)
+def device_unlock_status(session: SessionDep, user: CurrentUser) -> DeviceUnlockStatus:
+    """Whether a secret stands for this person. Never the secret: only its
+    hash is stored, and the shell is the only thing that ever held it."""
+    return _unlock_status(session, user)
+
+
+@unlock_router.post("/me/device-unlock", response_model=DeviceUnlockStatus)
+def enable_device_unlock(
+    body: EnableDeviceUnlock,
+    request: Request,
+    response: Response,
+    session: SessionDep,
+    user: CurrentUser,
+) -> DeviceUnlockStatus:
+    """Turn on "Open with Touch ID": issue the secret the shell will present
+    after the prompt (#432).
+
+    The password now, like every change to how you sign in: a session cookie
+    proves this window was signed in, not that the person at the keyboard is
+    the account holder, and this hands whoever is there a way in that outlives
+    the session. Behind the step-up's rate-limit budget, as the password change
+    is.
+
+    The secret goes out **in a header, not the body** (`unlock.HEADER`): the
+    desktop shell takes it off the answer and keeps it, encrypted by the
+    operating system, and the page that asked never sees it -- the way the
+    shell keeps `Set-Cookie`. No batch: the table is not audited, like
+    `trusted_devices`, which this is the desktop's version of.
+    """
+    if body.method not in unlock.METHODS:
+        raise NotFound("no such unlock method", code="profile.unlock_method_unknown")
+    profile_service.check_current_password(
+        session, db.engine, user, body.password, ip=client_ip(request)
+    )
+    response.headers[unlock.HEADER] = unlock.issue(session, user, method=body.method)
+    return _unlock_status(session, user)
+
+
+@unlock_router.delete("/me/device-unlock", status_code=204)
+def disable_device_unlock(session: SessionDep, user: CurrentUser) -> None:
+    """Turn it off. The next launch asks for the password.
+
+    No password, for the reason revoking a key or removing a passkey asks
+    none: taking a way in away is the safe direction.
+    """
+    unlock.revoke_all_for(session, user.id)
 
 
 @router.post("/me/step-up", response_model=StepUpGranted)

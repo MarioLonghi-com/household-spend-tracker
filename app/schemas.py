@@ -2027,6 +2027,30 @@ class RecoveryCodesLeft(BaseModel):
     unused: int
 
 
+class DeviceUnlockStatus(BaseModel):
+    """Whether this person can open the desktop app after a biometric prompt
+    (#432). Never the secret: the answer to turning it on carries that in a
+    header the shell takes off (`app.auth.unlock.HEADER`)."""
+
+    enabled: bool
+    method: str | None = None
+    created_at: datetime | None = None
+
+
+class EnableDeviceUnlock(BaseModel):
+    """Turning it on asks for the password now, like every change to how you
+    sign in; `method` is how the shell will gate it ("touch_id")."""
+
+    password: str = Field(max_length=1024)
+    method: str = Field(min_length=1, max_length=16)
+
+
+class SignInWithDeviceUnlock(BaseModel):
+    """The shell, after the prompt: the secret it was issued."""
+
+    secret: str = Field(min_length=1, max_length=128)
+
+
 class ReenrolmentDone(BaseModel):
     #: Trusted browsers revoked, so the screen can say they will all ask again.
     devices_revoked: int

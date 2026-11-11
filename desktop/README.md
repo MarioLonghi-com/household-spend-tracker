@@ -31,6 +31,14 @@ reads it from `GET /api/capabilities`. The folders below keep the name
 - **The session lives in the shell's memory** (`src/cookies.ts`): Chromium
   keeps no cookie from `protocol.handle`, and a session that ends with the app
   is what "a password at every launch" asks for.
+- **Open with Touch ID** (#432, `src/unlock.ts`): on a Mac with a sensor,
+  Profile offers it, with the password. The backend then issues a secret for
+  this one purpose and keeps its hash (`app/auth/unlock.py`); the shell takes
+  the secret off that answer before the page sees it, keeps it encrypted with
+  `safeStorage` in `unlock.secret`, and at the next launch prompts for Touch
+  ID and signs in with it before the window opens. A cancelled prompt leaves
+  the password screen. Turning it off, a password change, the recovery code,
+  a restore and an account reset all end it. The password is never stored.
 
 ## Where things are
 
@@ -39,6 +47,7 @@ reads it from `GET /api/capabilities`. The folders below keep the name
 | The app | `/Applications`, read-only | `C:\Program Files\WindowsApps\…`, read-only |
 | The ledger, its logs, upgrade backups | the sandbox container's `Application Support/Spend Tracker/Ledger` | `%LOCALAPPDATA%\Spend Tracker\Ledger` |
 | The shell's settings and log | `…/Spend Tracker/shell.json`, `shell.log` | `%LOCALAPPDATA%\Spend Tracker\shell.json`, `shell.log` |
+| The Touch ID secret, encrypted (#432) | `…/Spend Tracker/unlock.secret`, only while it is on | — (Windows Hello stays open on #432) |
 | Backups | a folder the person chooses; until then `…/Spend Tracker/Backups` | `Documents\Spend Tracker Backups`, or the folder chosen |
 
 Both data folders survive an uninstall. On Windows that is because the folder

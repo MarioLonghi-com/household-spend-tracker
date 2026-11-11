@@ -248,6 +248,39 @@ class TrustedDevice(Base):
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime)
 
 
+class DeviceUnlock(Base):
+    """The secret a desktop shell holds to sign in after a biometric prompt (#432).
+
+    "Open with Touch ID" on the desktop: a convenience on top of the password,
+    never instead of it. The backend issues 256 random bits and keeps only
+    their hash, exactly as a session or a trusted device; the shell keeps the
+    value, encrypted by the operating system, and presents it only after the
+    person has passed the biometric prompt. The password itself is never
+    stored anywhere.
+
+    The analogue is :class:`TrustedDevice`: a per-computer credential that lets
+    a browser in with less, which a password change, a recovery code or an
+    account reset takes back. Unaudited for the same reason, and one row per
+    person: turning it on again replaces the row, so there is never more than
+    one secret that opens a ledger this way. No expiry -- it stands until it
+    is revoked -- so there is nothing for housekeeping to sweep.
+    """
+
+    __tablename__ = "device_unlocks"
+    __audit__ = False
+
+    #: SHA-256 of the secret the shell holds. The secret itself is never stored.
+    id_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        String(32), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    #: How the shell gates its use: "touch_id" on a Mac. Windows Hello would be
+    #: its own value, when it comes.
+    method: Mapped[str] = mapped_column(String(16), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+
 class LoginAttempt(Base, UUIDPrimaryKey):
     """Rate limiting, and a record of who tried what."""
 

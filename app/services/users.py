@@ -51,10 +51,11 @@ def set_disabled(session: Session, *, user: User, disabled: bool, by: User | Non
 
     user.disabled_at = utcnow() if disabled else None
     if disabled:
-        from ..auth import devices, sessions
+        from ..auth import devices, sessions, unlock
 
         sessions.revoke_all_for(session, user.id)
         devices.revoke_all_for(session, user.id)
+        unlock.revoke_all_for(session, user.id)
     session.flush()
     return user
 

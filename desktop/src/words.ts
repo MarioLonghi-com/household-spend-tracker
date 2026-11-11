@@ -114,3 +114,8 @@ export const DIALOG = {
 
   aboutDetail: (version: string) => msg`Version ${version}. Licensed under the GNU AGPL, version 3 or later.`,
 };
+
+export const PROMPT = {
+  /** Touch ID's reason, shown by macOS after the app's name: "… is trying to open your ledger". */
+  unlock: msg({ message: "open your ledger", comment: "macOS Touch ID prompt, after the app's name: '… is trying to open your ledger'" }),
+};

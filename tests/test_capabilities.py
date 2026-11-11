@@ -111,8 +111,8 @@ def test_the_server_profile_offers_everything_it_did(monkeypatch, tmp_path, rest
         # Passkeys stay off only because no public URL is set here, as before.
         assert offered.json() == {
             "snap": True, "agents": True, "invitations": True, "account_resets": True,
-            "passkeys": False, "second_factor": True, "password_reset_by_code": False, "self_update": True,
-            "upstream_check": True, "db_view": True, "ynab_import": True,
+            "passkeys": False, "second_factor": True, "password_reset_by_code": False, "device_unlock": False,
+            "self_update": True, "upstream_check": True, "db_view": True, "ynab_import": True,
             "product_name": "Spend Tracker",
         }
         import app.main as main
@@ -126,7 +126,7 @@ def test_the_desktop_profile_offers_only_what_needs_nobody_else(monkeypatch, tmp
     # The name the stores list it under (#346), beside the switches.
     assert offered.pop("product_name") == "Household Spend Tracker"
     assert {name for name, on in offered.items() if not on} == NETWORK_ONLY | {"passkeys"}
-    assert {name for name, on in offered.items() if on} == {"upstream_check", "ynab_import", "password_reset_by_code"}
+    assert {name for name, on in offered.items() if on} == {"upstream_check", "ynab_import", "password_reset_by_code", "device_unlock"}
 
 
 def test_a_route_left_out_answers_as_one_that_never_existed(monkeypatch, tmp_path, restore_server):

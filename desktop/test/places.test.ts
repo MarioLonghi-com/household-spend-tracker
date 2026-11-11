@@ -36,6 +36,7 @@ describe("where the desktop app keeps things (#317)", () => {
       ledger: path.join("/root", "Ledger"),
       settings: path.join("/root", "shell.json"),
       log: path.join("/root", "shell.log"),
+      unlock: path.join("/root", "unlock.secret"),
       incoming: path.join("/root", "Ledger", ".incoming"),
     });
   });

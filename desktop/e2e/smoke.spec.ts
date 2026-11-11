@@ -163,6 +163,29 @@ test("set up, add, back up, relaunch: the ledger, the language and the backups a
   await expect.poll(() => ours(backups).length, { timeout: 30_000 }).toBe(1);
   expect((await asked(app)).length).toBe(1);
 
+  // Touch ID (#432), as far as a machine with no sensor can go: turning it
+  // on hands the secret to the shell and never to the page; turning it off
+  // takes it back. Off again before the relaunch, so a Mac that *has* a
+  // sensor is not asked for a fingerprint by a test.
+  const held = () => app.evaluate(() => (globalThis as any).spendTrackerShell.unlockHeld() as boolean);
+  const canKeep = await app.evaluate(({ safeStorage }) => safeStorage.isEncryptionAvailable());
+  const turnedOn = await page.evaluate(async () => {
+    const response = await fetch("/api/me/device-unlock", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ password: "a long and entirely invented passphrase", method: "touch_id" }),
+    });
+    return { status: response.status, header: response.headers.get("x-spend-tracker-device-unlock"), text: await response.text() };
+  });
+  expect(turnedOn.status, turnedOn.text).toBe(200);
+  expect(turnedOn.header).toBeNull();
+  expect(turnedOn.text).toContain('"enabled":true');
+  expect(await held()).toBe(canKeep);
+  expect(fs.existsSync(path.join(root, "unlock.secret"))).toBe(canKeep);
+  expect((await call(page, "DELETE", "/api/me/device-unlock")).status).toBe(204);
+  expect(await held()).toBe(false);
+  expect((await call(page, "GET", "/api/me/device-unlock")).data.enabled).toBe(false);
+
   const executablePath = await app.evaluate(() => (globalThis as any).spendTrackerShell.backendExecutable());
   expect(executablePath.toLowerCase()).toContain(path.join("resources", "backend").toLowerCase());
   await app.close();

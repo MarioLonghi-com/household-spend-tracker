@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from ... import capabilities, db
 from ...audit.batch import batch
-from ...auth import cookies, keycheck, passkeys, service
+from ...auth import cookies, keycheck, passkeys, service, unlock
 from ...auth import devices as device_service
 from ...auth import sessions as session_service
 
@@ -24,6 +24,7 @@ from ...schemas import (
     RecoverWithCode,
     SignIn,
     SignInState,
+    SignInWithDeviceUnlock,
     SignInWithPasskey,
     SubmitCode,
     SubmitRecoveryCode,
@@ -38,6 +39,10 @@ router = APIRouter(tags=["auth"])
 #: so a deployment where recovery codes stand in for an authenticator instead
 #: leaves it out whole (`app.capabilities`).
 recovery_router = APIRouter(tags=["auth"])
+
+#: The desktop shell's sign-in after a biometric prompt (#432): its own
+#: router, left out whole on a server (`app.capabilities.device_unlock`).
+unlock_router = APIRouter(tags=["auth"])
 
 #: The half-finished sign-in. Named and written by `auth/cookies.py`, which
 #: owns the names and the flags of all three of this app's cookies -- there is
@@ -252,6 +257,31 @@ def sign_in_with_passkey(
     )
     cookies.set_session(response, request, result.session_value)
     return SignInState(authenticated=True, user=UserOut.model_validate(user), passkey_id=passkey.id)
+
+
+@unlock_router.post("/session/device-unlock", response_model=SignInState)
+def sign_in_with_device_unlock(
+    body: SignInWithDeviceUnlock, request: Request, response: Response, session: SessionDep
+) -> SignInState:
+    """Sign in with the secret the shell holds, after Touch ID (#432).
+
+    The whole sign-in on the desktop, as the password is: no code step and no
+    trusted device. The shell sends this itself, from its own process, before
+    the window loads, so the window boots already signed in; a cancelled
+    prompt sends nothing and the window opens on the password screen. The
+    attempt is recorded like a password sign-in (`unlock.check`).
+    """
+    user = unlock.check(session, db.engine, secret=body.secret, ip=client_ip(request))
+    result = service.complete_sign_in(
+        session,
+        user,
+        trust_this_browser=False,
+        device_cookie=device_cookie(request),
+        ip=client_ip(request),
+        user_agent=request.headers.get("user-agent"),
+    )
+    cookies.set_session(response, request, result.session_value)
+    return SignInState(authenticated=True, user=UserOut.model_validate(user))
 
 
 @router.delete("/session", status_code=204)

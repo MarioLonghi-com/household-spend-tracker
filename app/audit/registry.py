@@ -38,6 +38,9 @@ EXPECTED_EXCLUDED: frozenset[str] = frozenset(
         # auditing it would make replying to a retry demand a batch.
         "agent_replays",
         "trusted_devices",
+        # The secret a desktop shell presents after a biometric prompt (#432):
+        # a trusted device by another name, and out for the same reason.
+        "device_unlocks",
         "instance",
         # Content-addressed receipt bytes. Out of the log because the row has no
         # history worth keeping -- it is inserted once, keyed by what it
