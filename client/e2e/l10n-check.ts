@@ -146,7 +146,31 @@ export async function inspect(page: Page, english: string[]): Promise<Findings> 
       if (style.textOverflow === "ellipsis") continue;
       const clippedDown =
         (style.overflowY === "hidden" || style.overflowY === "clip") && element.scrollHeight > element.clientHeight + 1;
-      if (element.scrollWidth > element.clientWidth + 1 || clippedDown) {
+      // A right-aligned heading overflows to the left, which `scrollWidth`
+      // never counts: its text ran over the next column's unseen (#451). So a
+      // heading cell's text is measured against the cell itself.
+      // Only the text a sighted reader sees: a screen-reader-only span is
+      // clipped to a pixel and its text runs wherever it likes.
+      let spills = false;
+      if (element.tagName === "TH") {
+        const box = element.getBoundingClientRect();
+        const unseen = (node: Element | null): boolean => {
+          for (let at = node; at && at !== element.parentElement; at = at.parentElement) {
+            const look = getComputedStyle(at);
+            if (look.clip !== "auto" || look.clipPath !== "none" || look.display === "none") return true;
+          }
+          return false;
+        };
+        const words = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+        for (let node = words.nextNode(); node && !spills; node = words.nextNode()) {
+          if (!node.textContent?.trim() || unseen(node.parentElement)) continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          const text = range.getBoundingClientRect();
+          spills = text.width > 0 && (text.left < box.left - 1 || text.right > box.right + 1);
+        }
+      }
+      if (element.scrollWidth > element.clientWidth + 1 || clippedDown || spills) {
         overflowing.push(`${element.tagName.toLowerCase()}${element.className ? "." + String(element.className).split(" ")[0] : ""}: ${(element.textContent ?? "").trim().slice(0, 60)}`);
       }
     }

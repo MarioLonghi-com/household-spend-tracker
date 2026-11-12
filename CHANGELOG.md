@@ -61,6 +61,12 @@ history this repository does not have.
   the earliest transaction on every press. A household whose currencies are
   all unpublished is told so instead of fetching nothing, and a currency
   held only after the ECB stopped publishing it is listed under Not covered.
+- The column headings on the Categories screen no longer run into each
+  other (#451). The Transactions and Payees columns were too narrow for
+  their headings in Spanish, Portuguese and Swedish -- and by two pixels in
+  English -- so "Movimientos" and "Beneficiarios" overlapped. Both columns
+  are wider now, and a heading that still does not fit wraps inside its own
+  column.
 
 ### Changed
 
