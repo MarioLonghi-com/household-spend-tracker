@@ -10,6 +10,7 @@ and uids:
 |---|---|
 | `docker-desktop` | Docker Desktop 4.93 for Mac, Engine 29.8.1 |
 | `podman-machine` | Podman 6.1.3 in `podman machine` (Fedora CoreOS, rootless, SELinux enforcing) |
+| `podman-6-in-container` | Podman 6.1.3 rootful in its upstream image `quay.io/podman/stable:v6.1.3` (Fedora 45), the engine canary's setup, run privileged on arm64. Its vendor drop-in makes `journald` the default log driver with no journal running, so `logs` of a container left on the default answers no bytes (#439) |
 | `docker-engine-rootful` | Docker Engine 29.8.2 on Debian 13, rootful (API 1.40-1.56) |
 | `podman-rootful-fedora` | Podman 5.8.7 on Fedora 44, rootful, SELinux enforcing |
 | `podman-rootless-fedora` | Podman 5.8.7 on Fedora 44, rootless, SELinux enforcing |

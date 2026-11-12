@@ -105,6 +105,25 @@ history this repository does not have.
   twice at once; a refused restore no longer turns Touch ID off; and a
   backend that hangs while starting, restoring or making a backup is
   stopped and reported, where the splash used to stay up for ever.
+- Updates no longer stays stuck on "another update request is waiting or
+  running" after the updater was stopped in the middle of one (#443). A
+  prepare, a discard or an updater update it was restarted in -- or an
+  update it had taken but not begun -- left that request unsettled for good,
+  and every later Check for updates, Update or Go back was refused until
+  someone edited the update volume by hand. The updater now settles such a
+  request when it starts: a prepare as failed ("the updater restarted before
+  it finished", so Try again works), the others as not started, and one that
+  had already finished as it finished. An unfinished update or go-back is
+  still resumed from its journal, as before. The app also stops counting a
+  request as running once its record says it ended.
+- Preparing an update no longer fails with "the free disk and memory could
+  not be measured" on Podman 6 in its upstream container image (#439). That
+  Podman logs to journald by default, with no journal running, so the
+  updater's measuring container printed nothing the updater could read back.
+  Every container the updater runs for itself now logs to `json-file`, which
+  Docker and Podman both keep and read back, and a measurement that still
+  fails says why: the exit code, no output, or output that was not a
+  measurement.
 
 ## 0.16.1 — 2026-11-12
 

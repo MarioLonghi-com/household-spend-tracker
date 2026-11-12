@@ -121,6 +121,12 @@ class FakeEngine:
     stop_delay: float = 0.0
     #: Container ids whose storage is gone (#262).
     broken: set = field(default_factory=set)
+    #: The log driver a container gets when its create body names none.
+    default_log_driver: str = "json-file"
+    #: Log drivers whose output `logs` cannot read back: it answers 200 and no
+    #: bytes. Podman 6 in its own upstream image, the engine canary's, defaults
+    #: to `journald` (a vendor drop-in) with no journal to write to (#439).
+    lost_log_drivers: set = field(default_factory=set)
     lock: threading.RLock = field(default_factory=threading.RLock)
 
     def add_container(self, name: str, project: str, label: str = "com.docker.compose.project", **extra) -> str:
@@ -271,6 +277,8 @@ class FakeEngine:
             if key not in payload and key in image_cfg:
                 config[key] = image_cfg[key]
         host = copy.deepcopy(payload.get("HostConfig") or {})
+        if not (host.get("LogConfig") or {}).get("Type"):
+            host["LogConfig"] = {"Type": self.default_log_driver, "Config": None}
         mounts = []
         for bind in host.get("Binds") or []:
             source, dest, *rest = bind.split(":")
@@ -449,6 +457,9 @@ class FakeEngine:
                 self.execs[eid] = {"container": c["Id"], "cmd": cmd, "ExitCode": code, "output": out}
                 return 201, {"Id": eid}
             if method == "GET" and action == "/logs":
+                driver = ((self.inspect_of(c).get("HostConfig") or {}).get("LogConfig") or {}).get("Type")
+                if driver in self.lost_log_drivers:
+                    return 200, b""
                 return 200, c.get("_logs", b"")
             if method == "DELETE" and action is None:
                 if c["State"] == "running" and query.get("force") != "1":

@@ -70,6 +70,11 @@ STATES = (
 )
 #: What a reader shows for a state it does not know (C4).
 UNKNOWN_STATE_READS_AS = "running"
+#: The states after which nothing is in flight; the app's `SETTLED`.
+SETTLED_STATES = ("succeeded", "rolled_back", "not_started", "refused", "recovered", "left_for_operator")
+#: A record's `code` when the updater settled a request it found unfinished
+#: at start-up, with no journal to resume it by (#443).
+INTERRUPTED = "interrupted"
 
 ENGINES = ("docker-engine", "docker-desktop", "podman", "podman-machine")
 #: What the heartbeat says before an engine has been identified: the socket

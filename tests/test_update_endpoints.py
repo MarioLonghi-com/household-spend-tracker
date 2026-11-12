@@ -421,6 +421,48 @@ def test_a_second_prepare_in_flight_is_409_and_the_first_request_stands(world):
     assert _request(vol) is None
 
 
+def _recorded(vol: Volume, rid: str, state: str) -> None:
+    """The record the updater writes when a request ends, before its status."""
+    record = contract.History(
+        id=rid, kind="prepare", state=state, sentence=f"It ended {state}.", finished_at=contract.iso(time.time())
+    )
+    volume.write_json(vol.history(rid), record.to_dict())
+
+
+def test_a_status_its_own_record_already_settled_is_not_in_flight(world):
+    """#443: the updater stopped between the record and the status, which stayed `accepted`."""
+    client, vol = world["client"], world["vol"]
+    _heartbeat(vol)
+    first = client.post(f"{BASE}/prepare", json={"to_version": NEXT}, headers=HEADERS)
+    assert _take(vol).accepted
+    rid = first.json()["id"]
+    _recorded(vol, rid, "refused")
+    assert json.loads(vol.status.read_text())["state"] == "accepted"
+    assert client.get(BASE, headers=HEADERS).json()["in_flight"] is False
+
+    second = client.post(f"{BASE}/prepare", json={"to_version": LATER}, headers=HEADERS)
+    assert second.status_code == 202, second.text
+    assert _request(vol)["id"] == second.json()["id"] != rid
+    assert _request(vol)["to_version"] == LATER
+
+
+@pytest.mark.parametrize("other", ["another request's record", "its own record, needing recovery"])
+def test_a_status_with_no_settled_record_of_its_own_is_still_in_flight(world, other):
+    client, vol = world["client"], world["vol"]
+    _heartbeat(vol)
+    first = client.post(f"{BASE}/prepare", json={"to_version": NEXT}, headers=HEADERS)
+    assert _take(vol).accepted
+    rid = first.json()["id"]
+    if other == "another request's record":
+        _recorded(vol, str(uuid.uuid4()), "succeeded")
+    else:
+        _recorded(vol, rid, "needs_recovery")
+    assert client.get(BASE, headers=HEADERS).json()["in_flight"] is True
+    second = client.post(f"{BASE}/prepare", json={"to_version": LATER}, headers=HEADERS)
+    assert second.status_code == 409 and second.json()["code"] == "update.in_flight"
+    assert _request(vol) is None
+
+
 @pytest.mark.parametrize(
     ("to_version", "code"),
     [(__version__, "update.not_newer"), ("0.1.0", "update.not_newer"), ("1.0.0-rc1", "update.not_a_version")],
@@ -863,6 +905,8 @@ def test_every_request_the_app_writes_has_exactly_the_updaters_keys():
         "prepare": 1, "apply": 1, "discard": 1, "update_updater": 1, "go_back": 2,
     }  # fmt: skip
     assert updates.SETTLED | {"accepted", "running", "needs_recovery"} == set(contract.STATES)
+    # The updater settles a status by the same list the app reads it by (#443).
+    assert set(contract.SETTLED_STATES) == updates.SETTLED
     assert updates.VERSION.pattern == contract.VERSION.pattern
 
 

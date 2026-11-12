@@ -148,6 +148,13 @@ REQUEST_LABEL = f"{_LABEL_NS}.updater-request"
 LEDGER_ROLES = ("check", "drill", "restore", "measure", "find-backup", "prune")
 #: Every role a one-off may have: those, the port probe and the maintenance page.
 ONEOFF_ROLES = (*LEDGER_ROLES, "probe", "placard")
+#: The log driver every one-off is created with, whatever the engine's
+#: default: the updater reads a one-off's output back through `logs`, and an
+#: engine whose default driver keeps nothing it can read back answers that
+#: call with no bytes and a 200. Podman 6 in its upstream image defaults to
+#: `journald` with no journal running (#439). Docker writes `json-file` itself;
+#: Podman takes it as its own `k8s-file`, from 4.x on.
+ONEOFF_LOG_DRIVER = "json-file"
 #: The compose service whose restart policy `update` may change, under either scheme (S5).
 APP_SERVICE = "app"
 SERVICE_LABELS = ("com.docker.compose.service", "io.podman.compose.service")
@@ -871,6 +878,11 @@ def _guard_shape(body: dict, labels: dict, host: dict) -> None:
         raise NotAllowed(f"A one-off container is one of {', '.join(ONEOFF_ROLES)}, not {role!r}.")
     if not isinstance(labels.get(REQUEST_LABEL), str):
         raise NotAllowed("A one-off container names the request it serves.")
+    log = host.get("LogConfig")
+    if log is not None and (not isinstance(log, dict) or log.get("Type") != ONEOFF_LOG_DRIVER or log.get("Config")):
+        # Its output is read back (#439), and a driver with options of its
+        # own -- syslog's address, say -- would send it somewhere else.
+        raise NotAllowed(f"A one-off container logs to {ONEOFF_LOG_DRIVER}, with no options.")
     for bind in host.get("Binds") or []:
         if isinstance(bind, str) and _bind_source(bind).startswith(("/", ".", "~")):
             raise NotAllowed("A one-off container binds no host path.")

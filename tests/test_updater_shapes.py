@@ -366,3 +366,42 @@ def test_the_images_own_healthcheck_is_left_to_the_new_image_and_a_compose_one_i
     other = {"Test": ["CMD", "python", "-c", "import sys; sys.exit(1)"]}
     assert shapes.copy_app(prev, NEW, image_config={"Healthcheck": other})["Healthcheck"] == check
     assert shapes.copy_app(prev, NEW)["Healthcheck"] == check  # the image unknown: carried
+
+
+# --------------------------------------------------------------------------- #
+# #439: a one-off's output is kept where `logs` reads it back
+# --------------------------------------------------------------------------- #
+
+
+def test_every_one_off_names_the_log_driver_its_output_is_read_back_from():
+    """Podman 6 in its own image defaults to `journald` with no journal: left
+    on the engine's default, the measurement printed nothing anyone could read."""
+    bodies = {
+        "measure": shapes.oneoff(APP, NEW, "measure", RID, ["python"], ledger_volume="spike157_ledger", ledger_mode="ro"),
+        "drill": shapes.oneoff(APP, NEW, "drill", RID, ["python"], ledger_volume="spike157_ledger"),
+        "placard": shapes.placard(
+            APP, OLD, RID, ledger_volume="spike157_ledger", update_volume="spike157_update", sidecar_id=None
+        ),
+        "probe": shapes.port_probe(APP, NEW, RID, "host.docker.internal", 8848),
+    }
+    for role, body in bodies.items():
+        assert body["HostConfig"]["LogConfig"] == {"Type": "json-file", "Config": {}}, role
+        eng.guard_create(body, scope())
+    # The app's own copy keeps the logging it was given; it is not a one-off.
+    copied = shapes.copy_app(APP, NEW)
+    assert copied["HostConfig"].get("LogConfig") == APP["HostConfig"].get("LogConfig")
+
+
+@pytest.mark.parametrize(
+    "log",
+    [
+        {"Type": "syslog", "Config": {"syslog-address": "udp://192.0.2.10:514"}},
+        {"Type": "journald", "Config": {}},
+        {"Type": "json-file", "Config": {"max-size": "1m"}},
+        "json-file",
+    ],
+)
+def test_a_one_off_logging_anywhere_else_is_refused(log):
+    body = shapes.oneoff(APP, NEW, "measure", RID, ["python"], ledger_volume="spike157_ledger", ledger_mode="ro")
+    with pytest.raises(NotAllowed, match="logs to json-file"):
+        eng.guard_create({**body, "HostConfig": {**body["HostConfig"], "LogConfig": log}}, scope())
