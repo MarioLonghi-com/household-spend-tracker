@@ -26,7 +26,7 @@
 // server's agreement test, which runs it under plain Node.
 import { i18n } from "@lingui/core";
 import { desktop } from "./desktop";
-import { PSEUDO_LOCALE } from "./i18n";
+import { PSEUDO_LOCALE } from "./pseudoLocale";
 
 /** What the words are in until a catalog is served. */
 export const SOURCE_LANGUAGE = "en";
