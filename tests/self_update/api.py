@@ -218,7 +218,15 @@ class Engine:
             "Cmd": cmd,
             "User": user,
             "Labels": dict(labels or {}),
-            "HostConfig": {"Binds": binds or [], "NetworkMode": network, "SecurityOpt": ["label=disable"]},
+            # json-file, as the updater's own one-offs (#439): Podman 6's packaging
+            # defaults to journald, and with no journal in the engine's box a
+            # one-off's logs come back empty, so its answer could not be read.
+            "HostConfig": {
+                "Binds": binds or [],
+                "NetworkMode": network,
+                "SecurityOpt": ["label=disable"],
+                "LogConfig": {"Type": "json-file", "Config": {}},
+            },
         }
         if entrypoint is not None:
             body["Entrypoint"] = entrypoint
