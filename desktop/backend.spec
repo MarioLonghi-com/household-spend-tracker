@@ -44,6 +44,31 @@ for package in ("pypdfium2", "pypdfium2_raw", "pdfminer", "pdfplumber", "pillow_
     binaries += found_binaries
     hidden += found_hidden
 
+# What the frozen backend reports it is made of (#453). PyInstaller copies a
+# package's code but rarely its dist-info, so importlib.metadata inside the
+# freeze finds a dozen of the ~45 packages it carries. The list is written here,
+# at freeze time, from the same lock-less-excludes set the notices use, and
+# bundled as app/frozen-packages.json for app.services.platform.packages().
+import json
+import sys
+
+sys.path.insert(0, ROOT)
+from scripts.third_party_notices import frozen_packages  # noqa: E402
+
+shipped = pathlib.Path(ROOT, "build", "frozen-packages.json")
+shipped.parent.mkdir(exist_ok=True)
+shipped.write_text(
+    json.dumps(
+        frozen_packages(
+            pathlib.Path(ROOT, "requirements.txt").read_text(encoding="utf-8"),
+            pathlib.Path(SPECPATH, "backend.spec").read_text(encoding="utf-8"),  # noqa: F821
+        ),
+        indent=1,
+    ),
+    encoding="utf-8",
+)
+datas.append((str(shipped), "app"))
+
 a = Analysis(  # noqa: F821
     [os.path.join(SPECPATH, "backend_entry.py")],  # noqa: F821
     pathex=[ROOT],

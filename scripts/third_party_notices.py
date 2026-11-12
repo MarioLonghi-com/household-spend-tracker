@@ -91,6 +91,35 @@ def not_frozen(spec: str) -> set[str]:
     raise Incomplete(f"{BACKEND_SPEC} has no Analysis(excludes=[...]) to read")
 
 
+def frozen_names(lock: str, spec: str) -> list[str]:
+    """The Python packages the desktop backend ships: the lock less what the spec excludes.
+
+    One answer for both readers of it: the notices here, and the package list
+    the frozen backend reports about itself (`app/frozen-packages.json`, written
+    by `desktop/backend.spec`, #453).
+    """
+    excluded = not_frozen(spec)
+    return [name for name in runtime_names(lock) if name not in excluded]
+
+
+def frozen_packages(lock: str, spec: str) -> list[dict[str, str]]:
+    """`frozen_names`, each with its name as its metadata spells it and the version installed here.
+
+    Read from this interpreter, the one PyInstaller freezes. A locked package
+    that is not installed stops the build: the freeze would be missing it too.
+    """
+    from importlib import metadata
+
+    found = []
+    for name in frozen_names(lock, spec):
+        try:
+            dist = metadata.distribution(name)
+        except metadata.PackageNotFoundError:
+            raise Incomplete(f"{name} is locked but not installed in {sys.executable}") from None
+        found.append({"name": dist.metadata["Name"] or name, "version": dist.version})
+    return sorted(found, key=lambda one: one["name"].lower())
+
+
 def normalised(name: str) -> str:
     return re.sub(r"[-_.]+", "-", name).lower()
 
@@ -211,7 +240,7 @@ def app_version() -> str:
 
 
 def write(python: str) -> Path:
-    names = [name for name in runtime_names(RUNTIME_LOCK.read_text(encoding="utf-8")) if name not in not_frozen(BACKEND_SPEC.read_text(encoding="utf-8"))]
+    names = frozen_names(RUNTIME_LOCK.read_text(encoding="utf-8"), BACKEND_SPEC.read_text(encoding="utf-8"))
     backend = python_section(python_licences(python, names))
     client = node_section(bundled(CLIENT_BUNDLED), node_licences(ROOT / "client"))
     shell_licences = node_licences(ROOT / "desktop")

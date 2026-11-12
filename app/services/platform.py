@@ -400,13 +400,36 @@ class Package:
     version: str
 
 
+#: The desktop backend's own package list, bundled by `desktop/backend.spec`.
+FROZEN_PACKAGES = Path(__file__).resolve().parent.parent / "frozen-packages.json"
+
+
+def _frozen_packages() -> list[Package] | None:
+    try:
+        said = json.loads(FROZEN_PACKAGES.read_text(encoding="utf-8"))
+        found = [Package(name=str(one["name"]), version=str(one["version"])) for one in said]
+    except (OSError, ValueError, TypeError, KeyError):
+        return None
+    return sorted(found, key=lambda one: one.name.lower()) or None
+
+
 def packages() -> list[Package]:
     """Every distribution installed in this environment, by name and version.
 
     Read from the installed metadata rather than from `requirements.txt`: that
     file says what was locked, and this question is what is actually running --
     which is the one that matters when a dependency is the suspect.
+
+    Except in the desktop app (#453): PyInstaller bundles a package's code but
+    rarely its dist-info, so the metadata there names about a quarter of what
+    runs. The freeze writes the list it shipped instead, and that is read here.
+    A frozen build without it falls back to the metadata rather than show nothing.
     """
+    if build.frozen():
+        shipped = _frozen_packages()
+        if shipped is not None:
+            return shipped
+
     from importlib import metadata
 
     found: dict[str, str] = {}

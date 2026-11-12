@@ -118,3 +118,27 @@ def test_the_check_refuses_a_missing_empty_or_stale_file(tmp_path: Path, monkeyp
         notices.check()
     (tmp_path / "THIRD-PARTY-NOTICES.txt").write_text(notices.render("0.15.0", "a", "b", "c"))
     notices.check()
+
+
+def test_the_frozen_package_list_is_the_notices_set_with_installed_names_and_versions(monkeypatch):
+    # #453: what the desktop backend reports it runs is the set the notices name.
+    from importlib import metadata
+
+    lock = "alembic==1.20.1 \\\n    --hash=sha256:aaaa\nuvicorn==0.54.0 \\\n    --hash=sha256:bbbb\n"
+    spec = 'a = Analysis(["e.py"], excludes=["uvicorn"])\n'
+    assert notices.frozen_names(lock, spec) == ["alembic"]
+    listed = notices.frozen_packages(lock, spec)
+    assert listed == [{"name": "alembic", "version": metadata.version("alembic")}]
+
+
+def test_a_locked_package_that_is_not_installed_stops_the_freeze():
+    lock = "no-such-package-anywhere==1.0 \\\n    --hash=sha256:aaaa\n"
+    spec = 'a = Analysis(["e.py"], excludes=[])\n'
+    with pytest.raises(notices.Incomplete, match="no-such-package-anywhere"):
+        notices.frozen_packages(lock, spec)
+
+
+def test_the_spec_bundles_the_frozen_package_list_into_app():
+    spec = notices.BACKEND_SPEC.read_text(encoding="utf-8")
+    assert "frozen_packages(" in spec
+    assert 'datas.append((str(shipped), "app"))' in spec
