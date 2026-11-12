@@ -30,6 +30,18 @@ history this repository does not have.
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- The Mac App Store upload now actually waits for Apple's verdict. On the
+  macos-15 runner it used Xcode 16.4, whose altool has no `--build-status`:
+  every check printed altool's usage, so 0.16.0 and 0.16.1 each waited 30
+  minutes and went red after builds Apple had accepted. The upload step
+  now uses Xcode 26.3. `upload-mas.sh` reads altool 26's `processingState`
+  as well as the older `IMPORT-STATUS`, prints altool's first answer whole,
+  and stops before uploading when altool has no `--build-status`.
+
 ## 0.16.1 — 2026-11-12
 
 **Reversible: none** — no migration in this release. To go back to
