@@ -548,7 +548,6 @@ function Currencies({
               <tr key={row.currency}>
                 <td data-primary="true">
                   <span className="mono">{row.currency}</span> <CurrencyAccounts currency={row.currency} accounts={row.accounts} />
-                  <div className="small muted">{row.accounts.map((a) => a.name).join(", ")}</div>
                 </td>
                 <td className="small">{row.source_in_use ? sourceLabel(row.source_in_use) : "—"}</td>
                 <td className="small mono">{row.first_rate ? formatDate(row.first_rate) : "—"}</td>

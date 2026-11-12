@@ -117,6 +117,19 @@ function perCurrency(): string[] {
 }
 
 describe("the Exchange rates page", () => {
+  it("names a currency's accounts only behind its (i), not under the code (#454)", async () => {
+    mount();
+    await screen.findByRole("heading", { name: "Per currency" });
+    const table = screen.getByRole("heading", { name: "Per currency" }).closest("section")!;
+    const cells = within(table).getAllByRole("row").slice(1).map((row) => within(row).getAllByRole("cell")[0]);
+    const gbp = cells.find((cell) => cell.textContent!.startsWith("GBP"))!;
+    const sek = cells.find((cell) => cell.textContent!.startsWith("SEK"))!;
+    expect(gbp.textContent).not.toContain("GBP account");
+    expect(sek.textContent).not.toContain("SEK account");
+    fireEvent.click(within(gbp).getByRole("button", { name: "Accounts in GBP" }));
+    expect(within(gbp).getByText("GBP account")).toBeTruthy();
+  });
+
   it("says how old the rates are and what Fetch now would do, then sends the press", async () => {
     mount();
     expect(await screen.findByText(/Would fetch GBP, SEK from ECB, from 2026-11-04 to today\./)).toBeTruthy();

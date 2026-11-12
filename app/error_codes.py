@@ -508,6 +508,7 @@ REGISTRY: dict[str, Code] = {
     # -- fx, fx_manual: app/services/fx_*.py, exchange rates (#396) ---------- #
     "fx.nothing_to_fetch": Code("No source in this household's chain is fetched -- add the ECB to it first"),
     "fx.no_foreign_currency": Code("This household keeps every account in its base currency, so there is no rate to fetch"),
+    "fx.nothing_published": Code("No source in this household's chain publishes a rate it is missing -- enter those by hand"),
     "fx.range_needs_dates": Code("Refetching a range needs a first and a last date"),
     "fx.range_backwards": Code("The range starts on {since}, after it ends on {until}", ("since", "until")),
     "fx.range_in_future": Code("{until} is in the future, and no rate is published for it yet", ("until",)),

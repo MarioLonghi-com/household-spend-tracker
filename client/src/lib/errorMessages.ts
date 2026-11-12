@@ -1079,6 +1079,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "fx.no_foreign_currency": {
     message: msg({ id: "error.fx.no_foreign_currency", message: "This household keeps every account in its base currency, so there is no rate to fetch" }),
   },
+  "fx.nothing_published": {
+    message: msg({ id: "error.fx.nothing_published", message: "No source in this household's chain publishes a rate it is missing -- enter those by hand" }),
+  },
   "fx.range_needs_dates": {
     message: msg({ id: "error.fx.range_needs_dates", message: "Refetching a range needs a first and a last date" }),
   },

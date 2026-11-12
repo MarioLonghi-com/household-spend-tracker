@@ -124,6 +124,30 @@ history this repository does not have.
   Docker and Podman both keep and read back, and a measurement that still
   fails says why: the exit code, no output, or output that was not a
   measurement.
+- An exchange-rate fetch can no longer stay "running" until the app restarts
+  (#444). A "database is locked" on any of its commits, or a failure in the
+  request after it was recorded, left the fetch marked as running, and every
+  later Fetch now answered "a fetch is already running". Such a fetch now
+  ends as failed, and one nothing is working on any more shows as
+  interrupted and no longer blocks the next press.
+- Fetch now stops asking for currencies the ECB does not publish (#444). A
+  currency it has never published, or one it stopped publishing (RUB, HRK,
+  BGN and the currencies replaced by the euro) once its last published day
+  is stored, is left out of the request, so the fetch no longer starts from
+  the earliest transaction on every press. A household whose currencies are
+  all unpublished is told so instead of fetching nothing, and a currency
+  held only after the ECB stopped publishing it is listed under Not covered.
+- The column headings on the Categories screen no longer run into each
+  other (#451). The Transactions and Payees columns were too narrow for
+  their headings in Spanish, Portuguese and Swedish -- and by two pixels in
+  English -- so "Movimientos" and "Beneficiarios" overlapped. Both columns
+  are wider now, and a heading that still does not fit wraps inside its own
+  column.
+
+### Changed
+
+- The Exchange rates page no longer repeats a currency's account names under
+  its code (#454). The (i) beside the code lists them, as before.
 
 ## 0.16.1 — 2026-11-12
 

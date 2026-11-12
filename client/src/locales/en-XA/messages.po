@@ -4096,6 +4096,11 @@ msgstr ""
 msgid "error.fx.no_foreign_currency"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.fx.nothing_published"
+msgstr ""
+
 #. ECB: the European Central Bank, which publishes exchange rates
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts

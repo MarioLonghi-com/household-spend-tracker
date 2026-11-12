@@ -4096,6 +4096,11 @@ msgstr "Já há uma busca em andamento -- espere ela terminar"
 msgid "error.fx.no_foreign_currency"
 msgstr "Esta casa tem todas as contas na moeda base, então não há taxa para buscar"
 
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.fx.nothing_published"
+msgstr "Nenhuma fonte da cadeia desta casa publica uma taxa que esteja faltando -- insira-as manualmente"
+
 #. ECB: the European Central Bank, which publishes exchange rates
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
