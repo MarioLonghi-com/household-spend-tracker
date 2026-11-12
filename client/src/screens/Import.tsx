@@ -5,7 +5,7 @@
  * register until the second step.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, api } from "../lib/api";
 import { codedText, noticeText } from "../lib/noticeMessages";
@@ -506,7 +506,16 @@ export function Import({
     null,
   );
 
+  //: Which choice of file a guess belongs to, and whether an account was
+  //: picked by hand while it was being made (#445). The guess arrives after
+  //: the request; by then the file may be another one, or the person may have
+  //: chosen the account themselves, and a late answer overrode either.
+  const choosing = useRef(0);
+  const pickedByHand = useRef(false);
+
   async function chooseFile(chosen: File | null) {
+    const mine = ++choosing.current;
+    pickedByHand.current = false;
     setFile(chosen);
     setRecognised(null);
     setTagOffer(null);
@@ -518,9 +527,11 @@ export function Import({
         `/households/${household.id}/imports/recognise`,
         form,
       );
+      if (choosing.current !== mine) return;
       if (found.account_id) {
+        // Still said beside the picker, which warns when the two differ.
         setRecognised(found);
-        setAccountId(found.account_id);
+        if (!pickedByHand.current) setAccountId(found.account_id);
       } else if (found.tag && found.tag_kind) {
         setTagOffer({ kind: found.tag_kind, value: found.tag });
       }
@@ -570,6 +581,8 @@ export function Import({
       return { staged, text: await textOfUpload(file, pasted) };
     },
     onSuccess: ({ staged, text }) => {
+      // A failed import of the last preview is not about this one (#445).
+      commit.reset();
       setPreview(staged);
       setRawText(text);
       setDuplicateProblem(null);
@@ -598,6 +611,7 @@ export function Import({
     mutationFn: (entry: StagedImport) =>
       api.get<ImportPreview>(`/households/${household.id}/imports/${entry.batch_id}`),
     onSuccess: (staged, entry) => {
+      commit.reset();
       setPreview(staged);
       // The account the file was staged against, so the preview's amounts are
       // formatted in its currency rather than the household's.
@@ -710,6 +724,7 @@ export function Import({
       ),
     onSuccess: () => {
       setPreview(null);
+      choosing.current++;
       setFile(null);
       setPasted("");
       setRawText(null);
@@ -909,7 +924,13 @@ export function Import({
 
           <div className="row">
             <Field label={t`Into which account`}>
-              <select value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+              <select
+                value={accountId}
+                onChange={(e) => {
+                  pickedByHand.current = true;
+                  setAccountId(e.target.value);
+                }}
+              >
                 <option value="">{t({ message: "Choose…", comment: "Option in a dropdown on the Import screen" })}</option>
                 {(accounts.data ?? []).map((one) => (
                   <option key={one.id} value={one.id}>
@@ -1490,7 +1511,9 @@ function MemoCell({
       setEditing(false);
       onSaved(updated);
     },
-    onSettled: () => onBusy(line.id, false),
+    // Not on settling: a failed save leaves the editor open with its error,
+    // and the line is still unfinished (#445). Closing the editor -- which a
+    // success does -- is what releases it.
   });
 
   // Held open from the moment the editor appears until the save comes back, so
@@ -1640,7 +1663,9 @@ function CategoryCell({
       setUnmatched(false);
       onSaved(updated);
     },
-    onSettled: () => onBusy(line.id, false),
+    // Not on settling: a failed save leaves the editor open with its error,
+    // and the line is still unfinished (#445). Closing the editor -- which a
+    // success does -- is what releases it.
   });
 
   // Held open from the moment the editor appears until the save comes back, so

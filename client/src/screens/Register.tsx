@@ -3735,6 +3735,53 @@ export function sameFacts(a: Transaction, b: Transaction): boolean {
   );
 }
 
+/** What the transaction panel's fields hold, as typed. */
+type PanelFields = {
+  date: string;
+  payee: string;
+  outflow: string;
+  inflow: string;
+  memo: string;
+  cleared: Transaction["cleared"];
+  categoryId: string | null;
+};
+
+/**
+ * The PATCH body for what the fields say differently from `base`, and nothing
+ * else (#445). Empty when they agree, which is what "dirty" means.
+ */
+export function panelChanges(
+  base: Transaction,
+  fields: PanelFields,
+  currency: string,
+  isTransfer: boolean,
+): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+  if (fields.date !== base.date) body.date = fields.date;
+  const out = parse(fields.outflow, currency);
+  const into = parse(fields.inflow, currency);
+  const amount = out !== null ? -Math.abs(out) : into !== null ? Math.abs(into) : base.amount;
+  if (amount !== base.amount) body.amount = amount;
+  const payee = fields.payee.trim() || null;
+  if (payee !== (base.payee_name ?? null)) {
+    if (payee) body.payee_name = payee;
+    else body.clear_payee = true;
+  }
+  // Nothing about the category on a transfer leg: the server refuses one, and
+  // the field is not offered, so there is nothing to say.
+  if (!isTransfer && fields.categoryId !== (base.category_id ?? null)) {
+    if (fields.categoryId) body.category_id = fields.categoryId;
+    else body.clear_category = true;
+  }
+  const memo = fields.memo.trim() || null;
+  if (memo !== (base.memo ?? null)) {
+    if (memo) body.memo = memo;
+    else body.clear_memo = true;
+  }
+  if (fields.cleared !== base.cleared) body.cleared = fields.cleared;
+  return body;
+}
+
 export function TransactionPanel({
   txn,
   household,
@@ -3823,24 +3870,33 @@ export function TransactionPanel({
   //: One side of a transfer: no category, and the amount moves both legs.
   const isTransfer = isTransferLeg(txn);
 
+  //: What the fields hold, as of the last render. A save's answer arrives
+  //: later than the render that sent it, and has to know what was typed since.
+  const fields: PanelFields = { date, payee, outflow, inflow, memo, cleared, categoryId };
+  const live = useRef(fields);
+  live.current = fields;
+
   const client = useQueryClient();
   const save = useMutation({
-    mutationFn: () =>
-      api.patch<Transaction>(`/transactions/${txn.id}`, {
-        date,
-        amount: panelAmount,
-        payee_name: payee.trim() || null,
-        clear_payee: !payee.trim(),
-        // Nothing about the category on a transfer leg: the server refuses
-        // one, and the field below is not offered, so there is nothing to say.
-        ...(isTransfer
-          ? {}
-          : { category_id: categoryId, clear_category: categoryId === null }),
-        memo: memo.trim() || null,
-        clear_memo: !memo.trim(),
-        cleared,
-      }),
-    onSuccess: (updated) => {
+    //: Only what differs from the row as last confirmed (#445). Sending every
+    //: fact each time put back, on a date edit, the memo or category another
+    //: member had changed since this panel last heard from the server.
+    mutationFn: ({ body }: { body: Record<string, unknown>; sent: PanelFields }) =>
+      api.patch<Transaction>(`/transactions/${txn.id}`, body),
+    onSuccess: (updated, { sent }) => {
+      // A field the person has not touched since this save started takes the
+      // server's answer, which may carry somebody else's change to it. One
+      // they have typed in since keeps what they typed: it is the next save.
+      const now = live.current;
+      if (now.date === sent.date) setDate(updated.date);
+      if (now.payee === sent.payee) setPayee(updated.payee_name ?? "");
+      if (now.outflow === sent.outflow && now.inflow === sent.inflow) {
+        setOutflow(updated.amount < 0 ? toInput(updated.amount, currency) : "");
+        setInflow(updated.amount > 0 ? toInput(updated.amount, currency) : "");
+      }
+      if (now.memo === sent.memo) setMemo(updated.memo ?? "");
+      if (now.cleared === sent.cleared) setCleared(updated.cleared);
+      if (now.categoryId === sent.categoryId) setCategoryId(updated.category_id ?? null);
       setRow(updated);
       rememberSavedRow(client, householdId, updated);
       onSaved();
@@ -3866,13 +3922,11 @@ export function TransactionPanel({
   const panelAmount =
     panelOut !== null ? -Math.abs(panelOut) : panelIn !== null ? Math.abs(panelIn) : txn.amount;
 
-  const dirty =
-    date !== row.date ||
-    (payee.trim() || null) !== (row.payee_name ?? null) ||
-    panelAmount !== row.amount ||
-    (memo.trim() || null) !== (row.memo ?? null) ||
-    cleared !== row.cleared ||
-    (!isTransfer && categoryId !== (row.category_id ?? null));
+  const changed = panelChanges(row, fields, currency, isTransfer);
+  const dirty = Object.keys(changed).length > 0;
+  //: A field left while a save was in flight (#445). Nothing re-ran the save
+  //: when the first one settled, so the second edit was never sent.
+  const again = useRef(false);
 
   /**
    * Save on the way out of a field.
@@ -3891,8 +3945,41 @@ export function TransactionPanel({
    * not add up, and saving one on the way past is the one thing the service
    * refuses outright.
    */
-  function autoSave() {
-    if (dirty && !save.isPending && !locked && theirs === null) save.mutate();
+  function autoSave(closing = false) {
+    if (!dirty || theirs !== null) return;
+    // A locked row takes one edit: setting it back to cleared, alone, which is
+    // how it is unlocked.
+    if (locked && !(Object.keys(changed).length === 1 && changed.cleared && changed.cleared !== "reconciled")) {
+      return;
+    }
+    // Closing, there is no later to wait for: this goes beside the one in
+    // flight. Both carry that one's fields with the same values.
+    if (save.isPending && !closing) {
+      again.current = true;
+      return;
+    }
+    save.mutate({ body: changed, sent: fields });
+  }
+
+  // The save in flight has settled: send what was left while it was out,
+  // measured against its answer. Not after a failure -- the error is on
+  // screen, the edit is still in its field, and leaving one saves it.
+  useEffect(() => {
+    if (save.isPending || !again.current) return;
+    again.current = false;
+    if (save.isSuccess) autoSave();
+    // Runs when a save settles, with this render's fields and row.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [save.isPending]);
+
+  /**
+   * Escape, the cross and Done. Each sends what is still unsaved before the
+   * panel goes, as leaving a field would -- including an edit made while a
+   * save was in flight, which used to be dropped with the panel (#445).
+   */
+  function finish() {
+    autoSave(true);
+    onClose();
   }
 
 
@@ -3909,7 +3996,7 @@ export function TransactionPanel({
   }
 
   return (
-    <Panel title={`${formatDate(txn.date)} · ${accountName}`} onClose={onClose}>
+    <Panel title={`${formatDate(txn.date)} · ${accountName}`} onClose={finish}>
       <Problem error={save.error ?? (confirming ? null : remove.error) ?? copy.error} />
       {theirs ? (
         <div className="banner warn changed-elsewhere" role="alert">
@@ -3928,7 +4015,7 @@ export function TransactionPanel({
                 // Measured against their version from now on, and saved.
                 setRow(theirs);
                 setTheirs(null);
-                save.mutate();
+                save.mutate({ body: panelChanges(theirs, fields, currency, isTransfer), sent: fields });
               }}
             >
               <Trans>Keep my changes</Trans>
@@ -3965,7 +4052,7 @@ export function TransactionPanel({
       {/* The order is the tab order, and it is deliberate: the things usually
           being corrected come first, and the two that move money come last,
           behind a guard. */}
-      <div onBlur={autoSave}>
+      <div onBlur={() => autoSave()}>
         <Field label={t({ message: "Payee", comment: "Label of a form field on the Register screen: noun, who was paid or who paid. See GLOSSARY.md" })}>
           <Combobox
             value={payee}
@@ -3994,7 +4081,7 @@ export function TransactionPanel({
         )}
       </Field>
       <p />
-      <div onBlur={autoSave}>
+      <div onBlur={() => autoSave()}>
         <Field label={t({ message: "Memo", comment: "Label of a form field on the Register screen: noun, the free-text line of a transaction. See GLOSSARY.md" })}>
           <textarea rows={2} value={memo} onChange={(e) => setMemo(e.target.value)} />
         </Field>
@@ -4012,7 +4099,7 @@ export function TransactionPanel({
         onSaved={onSaved}
       />
 
-      <div onBlur={autoSave}>
+      <div onBlur={() => autoSave()}>
         <Field label={t({ message: "Cleared", comment: "Label of a form field on the Register screen: state, the bank has the row. See GLOSSARY.md" })}>
           <select
             value={cleared}
@@ -4032,7 +4119,7 @@ export function TransactionPanel({
       {/* Last, and guarded. Everything above is a description of the row;
           these two are the row's effect on a balance. */}
       <hr className="rule" />
-      <Guarded label={t({ message: "Date", comment: "Label on the Register screen: noun. See GLOSSARY.md" })} display={formatDate(date)} disabled={locked} onDone={autoSave}>
+      <Guarded label={t({ message: "Date", comment: "Label on the Register screen: noun. See GLOSSARY.md" })} display={formatDate(date)} disabled={locked} onDone={() => autoSave()}>
         <input
           type="date"
           value={date}
@@ -4045,7 +4132,7 @@ export function TransactionPanel({
         label={t({ message: `Amount (${currency})`, comment: "Label on the Register screen" })}
         display={format(panelAmount, currency)}
         disabled={locked || isTransfer}
-        onDone={autoSave}
+        onDone={() => autoSave()}
       >
         <div className="row">
           <Field label={t({ message: `Out (${currency})`, comment: "Label of a form field on the Register screen" })}>
@@ -4089,10 +4176,7 @@ export function TransactionPanel({
         <button
           className="primary"
           disabled={save.isPending}
-          onClick={() => {
-            autoSave();
-            onClose();
-          }}
+          onClick={finish}
         >
           <Trans comment="Button on the Register screen: finish and close">
             Done

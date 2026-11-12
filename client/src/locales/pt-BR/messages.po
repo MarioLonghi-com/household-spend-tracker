@@ -1604,6 +1604,10 @@ msgstr "Ignorar"
 msgid "Copied"
 msgstr "Copiado"
 
+#: src/screens/Profile.tsx
+msgid "Close without copying the key? It cannot be shown again."
+msgstr "Fechar sem copiar a chave? Ela não pode ser mostrada de novo."
+
 #: src/screens/Import.tsx
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr "Só este arquivo. A regra do favorecido continua como está para os próximos extratos."
@@ -7265,9 +7269,9 @@ msgstr "Avisos de terceiros"
 msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
 msgstr "Configure um novo autenticador — um celular novo, ou um que você não tem mais. O atual continua funcionando até o novo ser comprovado."
 
-#. placeholder {0}: ticked.size
-#. placeholder {1}: ticked.size
-#. placeholder {2}: ticked.size
+#. placeholder {0}: counted.length
+#. placeholder {1}: counted.length
+#. placeholder {2}: counted.length
 #: src/screens/Reconcile.tsx
 msgid "{0, plural, one {Finish and lock {1} row} other {Finish and lock {2} rows}}"
 msgstr "{0, plural, one {Concluir e bloquear {1} linha} other {Concluir e bloquear {2} linhas}}"
@@ -13781,6 +13785,10 @@ msgstr "Onde"
 #: src/screens/Payees.tsx
 msgid "No payee matches that."
 msgstr "Nenhum favorecido corresponde a isso."
+
+#: src/screens/Profile.tsx
+msgid "{held, plural, one {Close without storing the new recovery code? It cannot be shown again.} other {Close without storing the new recovery codes? They cannot be shown again.}}"
+msgstr "{held, plural, one {Fechar sem guardar o novo código de recuperação? Ele não pode ser mostrado de novo.} other {Fechar sem guardar os novos códigos de recuperação? Eles não podem ser mostrados de novo.}}"
 
 #: src/screens/Profile.tsx
 msgid "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
