@@ -38,6 +38,10 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
         "{name} is one of the newest five update backups. They are kept so an update can be undone, and the updater removes older ones itself",
     }),
   },
+  "account.opened_in_future": {
+    message: msg({ id: "error.account.opened_in_future", message: "An account cannot have been opened in the future ({date})" }),
+    dates: ["date"],
+  },
   "category.archived_default": {
     message: msg({ id: "error.category.archived_default", message: "{name} is archived, so it cannot be a default" }),
   },
@@ -707,6 +711,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "household.not_found": {
     message: msg({ id: "error.household.not_found", message: "No such household" }),
   },
+  "household.unknown_theme": {
+    message: msg({ id: "error.household.unknown_theme", message: "{theme} is not one of the colour schemes", comment: "{theme} is the key of a palette, such as moss, and stays as it is" }),
+  },
   "household.unknown_week_start": {
     message: msg({ id: "error.household.unknown_week_start", message: "{week_start} is not a day a week can start on -- use monday, sunday or saturday", comment: "monday, sunday and saturday are the API's own names and stay as they are" }),
   },
@@ -871,6 +878,12 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   },
   "setup.session_invalid": {
     message: msg({ id: "error.setup.session_invalid", message: "That setup session is not valid; start again" }),
+  },
+  "setup.category_locked": {
+    message: msg({ id: "error.setup.category_locked", message: "The Income group and Reimbursements stay: the reports rely on them", comment: "Income and Reimbursements are the names of a seeded category group and category" }),
+  },
+  "setup.category_unknown": {
+    message: msg({ id: "error.setup.category_unknown", message: "{id} is not one of the starter categories", comment: "{id} is a technical identifier such as seed.category.gifts and stays as it is" }),
   },
   "stepup.refused": {
     message: msg({ id: "error.stepup.refused", message: "That password and code do not match" }),

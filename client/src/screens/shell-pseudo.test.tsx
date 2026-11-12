@@ -89,7 +89,7 @@ describe("in en-XA, the first screens show no English", () => {
   it("setting up the instance", async () => {
     vi.mocked(api.get).mockResolvedValue({ setup_required: true, token_path: null });
     const { container } = render(withQueries(<Setup onDone={vi.fn()} />));
-    await waitFor(() => expect(container.querySelector('input[name="setup-token"]')).not.toBeNull());
+    await waitFor(() => expect(container.querySelector('input[name="language"]')).not.toBeNull());
     expect(untranslated(container)).toEqual([]);
   });
 

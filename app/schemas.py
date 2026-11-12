@@ -100,6 +100,46 @@ class SetupEnrol(BaseModel):
     code: str = Field(min_length=6, max_length=10)
 
 
+#: A BCP 47 language tag, for seeding a household's words (#268). Bounded and
+#: shaped here; one with no reviewed translations seeds English.
+SeedLocale = Annotated[
+    str | None, Field(max_length=35, pattern=r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}$")
+]
+
+
+class SetupHousehold(BaseModel):
+    """The first household, made in setup's one transaction (#458)."""
+
+    name: str = Field(min_length=1, max_length=120)
+    #: A palette key (`theming.PALETTES`); the next free one when absent.
+    colour: str | None = Field(default=None, max_length=32)
+    base_currency: str = Field(min_length=3, max_length=3)
+    date_format: Literal["YYYY-MM-DD", "DD/MM/YYYY", "MM/DD/YYYY"] = "YYYY-MM-DD"
+    week_start: Literal["monday", "sunday", "saturday"] = "monday"
+    #: The language the wizard was in: it names the starter categories, and is
+    #: stored nowhere (#268).
+    locale: SeedLocale = None
+    #: Which starter categories: the whole tree, the Essentials preset, or
+    #: only what the reports need.
+    categories: Literal["recommended", "essentials", "empty"] = "recommended"
+    #: Seed ids unticked in the tree. The Income group and Reimbursements may
+    #: not be among them (`setup.category_locked`).
+    omit: list[Annotated[str, Field(max_length=64)]] = Field(default_factory=list, max_length=64)
+
+
+class SetupAccount(BaseModel):
+    """An optional first account, made with the household (#458)."""
+
+    name: str = Field(min_length=1, max_length=120)
+    kind: Literal["current", "savings", "credit_card", "cash"] = "current"
+    #: The household's base currency when absent.
+    currency: str | None = Field(default=None, min_length=3, max_length=3)
+    #: Minor units, recorded as the account's opening-balance row.
+    opening_balance: Minor = 0
+    #: Today when absent; any past date, never the future.
+    opening_date: Date | None = None
+
+
 class SetupComplete(BaseModel):
     blob: str
     #: The owner confirms they have stored the recovery codes somewhere that is
@@ -111,6 +151,11 @@ class SetupComplete(BaseModel):
     second_step: Literal["totp", "passkey"] = "totp"
     #: With "passkey": the browser's answer, `credential.toJSON()`.
     credential: dict | None = None
+    #: The first household, in the same transaction (#458). Absent: the owner
+    #: alone, as before, and the household is made after signing in.
+    household: SetupHousehold | None = None
+    #: A first account in that household. Ignored without a household.
+    account: SetupAccount | None = None
 
 
 class PasskeyOptionsFor(BaseModel):
@@ -242,13 +287,6 @@ class PasskeyStateOut(BaseModel):
 # --------------------------------------------------------------------------- #
 
 
-#: A BCP 47 language tag, for seeding a household's words (#268). Bounded and
-#: shaped here; one with no reviewed translations seeds English.
-SeedLocale = Annotated[
-    str | None, Field(max_length=35, pattern=r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}$")
-]
-
-
 class HouseholdCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     base_currency: str = Field(default="EUR", min_length=3, max_length=3)
@@ -256,6 +294,8 @@ class HouseholdCreate(BaseModel):
     #: The language to seed its categories in (#268), sent only for a language
     #: that is served. Not stored: the seeded names are ordinary names.
     locale: SeedLocale = None
+    #: The day its weeks start on (#452); Monday, as every household had before.
+    week_start: Literal["monday", "sunday", "saturday"] = "monday"
 
 
 class LatestChangeOut(BaseModel):
@@ -1894,6 +1934,11 @@ class ResetComplete(BaseModel):
     second_step: Literal["totp", "passkey"] = "totp"
     #: With "passkey": the browser's answer, `credential.toJSON()`.
     credential: dict | None = None
+    #: The first household, in the same transaction (#458). Absent: the owner
+    #: alone, as before, and the household is made after signing in.
+    household: SetupHousehold | None = None
+    #: A first account in that household. Ignored without a household.
+    account: SetupAccount | None = None
 
 
 class ResetDone(BaseModel):

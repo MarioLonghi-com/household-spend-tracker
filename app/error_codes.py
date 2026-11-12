@@ -40,6 +40,8 @@ REGISTRY: dict[str, Code] = {
         "{name} is one of the newest five update backups. They are kept so an update can be undone, and the updater removes older ones itself",
         ("name",)
     ),
+    # -- account: app/services/accounts.py ---------------------------------- #
+    "account.opened_in_future": Code("An account cannot have been opened in the future ({date})", ("date",)),
     # -- category: app/services/categories.py ------------------------------- #
     "category.archived_default": Code("{name} is archived, so it cannot be a default", ("name",)),
     "category.choose_default": Code("Choose the category to always use"),
@@ -365,6 +367,7 @@ REGISTRY: dict[str, Code] = {
     "email.no_name": Code("{email} has no usable name before the @", ("email",)),
     # -- household, agent_key: app/services/agent_keys.py, app/api/routers/profile.py (#267) --- #
     "household.not_found": Code("No such household"),
+    "household.unknown_theme": Code("{theme} is not one of the colour schemes", ("theme",)),
     "household.unknown_week_start": Code(
         "{week_start} is not a day a week can start on -- use monday, sunday or saturday",
         ("week_start",),
@@ -431,6 +434,8 @@ REGISTRY: dict[str, Code] = {
     "setup.enrol_first": Code("Finish enrolling an authenticator first"),
     "setup.address_taken": Code("Somebody already uses that email address"),
     "setup.session_invalid": Code("That setup session is not valid; start again"),
+    "setup.category_locked": Code("The Income group and Reimbursements stay: the reports rely on them"),
+    "setup.category_unknown": Code("{id} is not one of the starter categories", ("id",)),
     # -- stepup: app/auth/stepup.py (#267) --------------------------------------- #
     "stepup.refused": Code("That password and code do not match"),
     "stepup.needed": Code("Confirm your password and authenticator code first"),

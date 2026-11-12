@@ -29,12 +29,16 @@ export function PasskeyChoice({
   body,
   made,
   onMade,
+  bare = false,
 }: {
   /** Where to ask for creation options. */
   offerPath: string;
   body: unknown;
   made: MadePasskey | null;
   onMade: (made: MadePasskey) => void;
+  /** The button and its outcome alone, for a screen that draws the choice
+   *  itself: the first-run wizard's radio pair (#458). */
+  bare?: boolean;
 }) {
   // Asked once, here rather than through the query cache: these screens are
   // shown before anybody is signed in, outside the app's query provider.
@@ -69,6 +73,24 @@ export function PasskeyChoice({
       setBusy(false);
     }
   };
+
+  const button = (
+    <>
+      <Problem error={error} />
+      {made ? (
+        <p className="small" role="status">
+          <span aria-hidden="true">✓ </span>
+          <Trans>Passkey saved on this device.</Trans>
+        </p>
+      ) : (
+        <button className="primary" type="button" disabled={busy} onClick={create}>
+          <span aria-hidden="true">🔑 </span>
+          <Trans comment="Button on setup: make a passkey. See GLOSSARY.md">Create passkey</Trans>
+        </button>
+      )}
+    </>
+  );
+  if (bare) return button;
 
   return (
     <div>

@@ -56,14 +56,34 @@ def create_household(
     base_currency: str = "EUR",
     date_format: str = "YYYY-MM-DD",
     locale: str | None = None,
+    week_start: str = "monday",
+    theme: str | None = None,
+    keep: set[str] | frozenset[str] | None = None,
 ) -> Household:
-    """Create a household. The creator is its first member."""
+    """Create a household. The creator is its first member.
+
+    ``theme`` is a palette chosen on the first-run wizard (#458); without one
+    the household opens in the next palette nobody wears. ``keep`` is the
+    starter categories to seed (`categories.seed_defaults`), all when None.
+    """
     if not name.strip():
         raise ValidationError("a household needs a name")
     currency = (base_currency or "").strip().upper()
     if not CURRENCY_CODE.fullmatch(currency):
         raise ValidationError(f"{base_currency!r} is not a three-letter currency code")
     currencies.check_new(currency)
+    if week_start not in WeekStart.__members__:
+        raise ValidationError(
+            f"{week_start!r} is not a day a week can start on -- use monday, sunday or saturday",
+            code="household.unknown_week_start",
+            params={"week_start": week_start},
+        )
+    if theme is not None and theme not in theming.BY_KEY:
+        raise ValidationError(
+            f"{theme!r} is not one of the colour schemes",
+            code="household.unknown_theme",
+            params={"theme": theme},
+        )
 
     # A new household opens in a colour nobody else is wearing. The whole point
     # of the palette is telling two ledgers apart, and a second household that
@@ -73,7 +93,8 @@ def create_household(
         name=name.strip(),
         base_currency=currency,
         date_format=date_format,
-        theme=theming.next_palette(taken),
+        week_start=WeekStart(week_start).value,
+        theme=theme or theming.next_palette(taken),
     )
     session.add(household)
     session.flush()
@@ -98,7 +119,7 @@ def create_household(
     # this module's models and the pair would import each other at load time.
     from . import categories as category_service
 
-    category_service.seed_defaults(session, household.id, locale=locale)
+    category_service.seed_defaults(session, household.id, locale=locale, keep=keep)
     session.flush()
     return household
 

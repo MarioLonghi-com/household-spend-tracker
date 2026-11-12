@@ -45,7 +45,7 @@ export default defineConfig({
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "desktop",
-      testIgnore: /(passkeys|pseudo-locale|review|locales)\.spec\.ts/,
+      testIgnore: /(passkeys|pseudo-locale|review|locales|wizard)\.spec\.ts/,
       use: {
         browserName: "chromium",
         viewport: { width: 1280, height: 800 },
@@ -55,7 +55,7 @@ export default defineConfig({
     },
     {
       name: "mobile",
-      testIgnore: /(passkeys|pseudo-locale|review|locales)\.spec\.ts/,
+      testIgnore: /(passkeys|pseudo-locale|review|locales|wizard)\.spec\.ts/,
       use: { ...devices["Pixel 5"], storageState: "./e2e/.auth/state.json" },
       dependencies: ["setup"],
     },
@@ -123,6 +123,10 @@ export default defineConfig({
     // projects carry no stored session. Their own projects, so a passkey
     // failure never skips the rest of the suite.
     { name: "passkey-setup", testMatch: /passkey\.setup\.ts/, dependencies: ["setup"] },
+    // The first-run wizard (#458): its own instances, never set up, one per
+    // test on the next port up (e2e/wizard.spec.ts), so it needs nothing
+    // from the shared one and leaves it alone.
+    { name: "wizard", testMatch: /wizard\.spec\.ts/, timeout: 90_000 },
     {
       name: "passkeys-desktop",
       testMatch: /passkeys\.spec\.ts/,
@@ -136,7 +140,9 @@ export default defineConfig({
       dependencies: ["passkey-setup"],
     },
   ],
-  webServer: {
+  // `E2E_WIZARD_ONLY=1 npx playwright test --project=wizard` runs the wizard's
+  // own instances without seeding the shared one.
+  webServer: process.env.E2E_WIZARD_ONLY ? undefined : {
     command: "./e2e/serve.sh",
     url: `http://127.0.0.1:${PORT}/api/health`,
     reuseExistingServer: false,

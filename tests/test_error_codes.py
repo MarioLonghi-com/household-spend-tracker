@@ -40,7 +40,7 @@ ROOT = Path(__file__).resolve().parent.parent
 #: `DomainError` constructions in `app/` and `statements/` that carry no code,
 #: as of #57's first wave. **Lower it** when you convert sites; the test fails
 #: if it rises.
-CODELESS = 135
+CODELESS = 133
 
 
 #: Functions that build a refusal rather than raise one, and take ``code=`` and
@@ -438,11 +438,11 @@ def test_an_unconverted_refusal_still_answers_with_detail_alone(client):
     world = _two_currencies(client)
     answer = client.post(
         f"/api/households/{world['household']['id']}/accounts",
-        json={"name": "Spare", "type": "savings", "opening_date": "2999-01-01"},
+        json={"name": "   ", "type": "savings"},
         headers=HEADERS,
     )
     assert answer.status_code == 422
-    assert answer.json() == {"detail": "an account cannot have been opened in the future"}
+    assert answer.json() == {"detail": "an account needs a name"}
 
 
 # --------------------------------------------------------------------------- #
