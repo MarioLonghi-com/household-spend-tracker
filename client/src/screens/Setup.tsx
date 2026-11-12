@@ -8,6 +8,10 @@
  * Two on the desktop (#320): no token, because only the app itself can reach
  * this, and no authenticator, because a password opens the app. You, then the
  * one recovery code that replaces a forgotten password.
+ *
+ * Step 3 offers a passkey in place of the authenticator, where passkeys can
+ * work here (#456): the server checks the browser's answer at the last step
+ * and stores it with the owner, or nothing at all.
  */
 
 import { useState } from "react";
@@ -17,6 +21,7 @@ import { api } from "../lib/api";
 import { Field, Problem } from "../components/bits";
 import type { User } from "../lib/types";
 import { RecoveryCodeSheet } from "../components/RecoveryCodes";
+import { type MadePasskey, PasskeyChoice } from "../components/PasskeyChoice";
 import { useCapabilities, useProductName } from "../lib/capabilities";
 import { Trans, useLingui } from "@lingui/react/macro";
 
@@ -62,6 +67,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
   const [started, setStarted] = useState<Started | null>(null);
   const [blob, setBlob] = useState("");
   const [code, setCode] = useState("");
+  const [passkey, setPasskey] = useState<MadePasskey | null>(null);
 
   async function run(work: () => Promise<void>) {
     setBusy(true);
@@ -102,7 +108,12 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
 
   const finish = () =>
     run(async () => {
-      const user = await api.post<User>("/setup/complete", { blob, codes_saved: true });
+      const user = await api.post<User>(
+        "/setup/complete",
+        passkey
+          ? { blob: passkey.blob, codes_saved: true, second_step: "passkey", credential: passkey.credential }
+          : { blob, codes_saved: true },
+      );
       onDone(user);
     });
 
@@ -208,8 +219,19 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
       {step === 3 && started && (
         <div className="card">
           <h2>
-            <Trans comment="Heading on the first-run setup">3. Your authenticator</Trans>
+            <Trans comment="Heading on the first-run setup">3. A second step</Trans>
           </h2>
+          <PasskeyChoice
+            offerPath="/setup/passkey/options"
+            body={{ blob }}
+            made={passkey}
+            onMade={(made) => {
+              setPasskey(made);
+              setCode("");
+              setStarted((was) => was && { ...was, secret: "", otpauth_uri: "" });
+              setStep(4);
+            }}
+          />
           <p className="muted small">
             <Trans>
               Scan this with your authenticator app, then type the six digits it shows. We check

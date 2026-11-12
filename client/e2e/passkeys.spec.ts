@@ -70,6 +70,9 @@ test("a passkey signs in, and Sign-in methods adds, renames and removes one", as
   await cdp.send("WebAuthn.removeCredential", { authenticatorId, credentialId: credential.credentialId });
 
   await page.getByRole("button", { name: "Add a passkey" }).click();
+  // The check offers the passkey first (#456); this browser no longer holds
+  // it, so the code from the authenticator, the other choice.
+  await page.getByRole("button", { name: "Use a code from your authenticator instead" }).click();
   await page.getByLabel("Your password").fill(credentials().password);
   await page.getByLabel("The six digits from your authenticator").fill(await nextCode());
   await page.getByRole("button", { name: "Continue to the passkey" }).click();

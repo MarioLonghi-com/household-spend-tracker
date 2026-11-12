@@ -24,7 +24,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { Empty, Field, Hint, Panel, Problem } from "../components/bits";
-import { stepUpToken } from "../components/StepUp";
+import { NO_PROOF, StepUpFields, stepUpReady, stepUpToken, type StepUpProof, useStepUpFactors } from "../components/StepUp";
 import { RecoveryCodeSheet } from "../components/RecoveryCodes";
 import { PasskeysSection, usePasskeys, usePasskeyState } from "./Passkeys";
 import { formatInstant } from "../lib/time";
@@ -236,11 +236,16 @@ function SignInMethods({
   const usable = (passkeys.data ?? []).filter((one) => one.usable_here).length;
   const locked = authenticator.data?.locked_by_key === true;
   const enrolled = authenticator.data?.enrolled !== false;
+  // No authenticator because a reset cleared it, or by choice because a
+  // passkey is the second step (#456): only the first reads "Cleared".
+  const cleared = authenticator.data?.cleared === true;
   const summary = !offered.second_factor
     ? t`You sign in with your password. If you forget it, your recovery code lets you choose a new one.`
-    : usable > 0
-      ? t`You sign in with a passkey, or with your password and authenticator code.`
-      : t`You sign in with your password and authenticator code.`;
+    : usable > 0 && !enrolled
+      ? t`You sign in with a passkey, or with your password and a passkey.`
+      : usable > 0
+        ? t`You sign in with a passkey, or with your password and authenticator code.`
+        : t`You sign in with your password and authenticator code.`;
 
   // Closing the recovery row, or opening another in its place, unmounts new
   // codes as surely as closing the panel does.
@@ -279,11 +284,11 @@ function SignInMethods({
         <MethodRow
           slug="authenticator"
           name={t({ message: "Authenticator", comment: "Label on the Your account panel: noun, the app that makes sign-in codes. See GLOSSARY.md" })}
-          state={!enrolled ? t({ message: "Cleared", context: "authenticator state", comment: "State of the authenticator: it was removed and has to be set up again" }) : locked ? t`Needs setting up again` : t({ message: "Set up", context: "authenticator state", comment: "State of the authenticator: it is enrolled and working. See GLOSSARY.md" })}
-          warn={locked || !enrolled}
+          state={!enrolled ? (cleared ? t({ message: "Cleared", context: "authenticator state", comment: "State of the authenticator: it was removed and has to be set up again" }) : t({ message: "Not set up", context: "authenticator state", comment: "State of the authenticator: there is none, by choice, because a passkey is the second step. See GLOSSARY.md" })) : locked ? t`Needs setting up again` : t({ message: "Set up", context: "authenticator state", comment: "State of the authenticator: it is enrolled and working. See GLOSSARY.md" })}
+          warn={locked || cleared}
           // In recovery mode (#287) this row is the one thing to do, so it
           // stays open and offers no way to close it.
-          action={locked ? undefined : t`Set up again`}
+          action={locked ? undefined : enrolled ? t`Set up again` : t({ message: "Set up", context: "authenticator action", comment: "Button on the Your account panel: verb, add an authenticator. See GLOSSARY.md" })}
           open={open === "authenticator" || locked}
           onToggle={() => toggle("authenticator")}
         >
@@ -640,36 +645,58 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
   const [code, setCode] = useState("");
   const [current, setCurrent] = useState("");
   const [grant, setGrant] = useState<string | null>(() => heldGrant(user.id));
+  // Adding one to an account whose second step is a passkey (#456): the
+  // password typed to start, kept until the passkey prompt at confirm pays
+  // the step-up with it -- or a recovery code instead, when the passkey's
+  // device is the thing that was lost.
+  const [kept, setKept] = useState("");
+  const [withRecoveryCode, setWithRecoveryCode] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  // What the confirmed act was, for the sentence after it: an addition
+  // retires nothing, a replacement signs other browsers out.
+  const [added, setAdded] = useState(false);
 
   const status = useQuery({
     queryKey: ["authenticator"],
     queryFn: () => api.get<AuthenticatorStatus>("/me/authenticator"),
   });
   const locked = status.data?.locked_by_key === true;
+  const adding = status.data?.enrolled === false;
   const spendGrant = locked && grant !== null;
+  const usePasskey = adding && !withRecoveryCode;
+  const canRemove = status.data?.enrolled === true && (status.data?.passkeys ?? 0) > 0;
 
   const start = useMutation({
     mutationFn: () => api.post<Offer>("/me/authenticator", { current_password: password }),
     onSuccess: (data) => {
       setOffer(data);
+      setKept(adding ? password : "");
       setPassword("");
     },
   });
 
   const confirm = useMutation({
-    mutationFn: () =>
+    mutationFn: async () =>
       api.post<{ devices_revoked: number; other_sessions_ended: number }>(
         "/me/authenticator/confirm",
         spendGrant
           ? { token: offer!.token, code, grant }
-          : { token: offer!.token, code, current_code: current },
+          : usePasskey
+            ? {
+                token: offer!.token,
+                code,
+                step_up_token: await stepUpToken({ password: kept, code: "", factor: "passkey" }),
+              }
+            : { token: offer!.token, code, current_code: current },
       ),
     onSuccess: () => {
+      setAdded(adding);
       dropGrant();
       setGrant(null);
       setOffer(null);
       setCode("");
       setCurrent("");
+      setKept("");
       void queries.invalidateQueries({ queryKey: ["authenticator"] });
       void queries.invalidateQueries({ queryKey: ["recovery-mode"] });
     },
@@ -683,6 +710,14 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
     },
   });
 
+  const remove = useMutation({
+    mutationFn: () => api.del<{ devices_revoked: number }>("/me/authenticator"),
+    onSuccess: () => {
+      setRemoving(false);
+      void queries.invalidateQueries({ queryKey: ["authenticator"] });
+    },
+  });
+
   if (confirm.isSuccess) {
     return (
       <section>
@@ -692,14 +727,30 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
           </h3>
         )}
         <div className="banner info">
-          <Trans>Your new authenticator is the only one that works now.</Trans>{" "}
-          {replacedText(confirm.data)}
+          {added ? (
+            <Trans>Your authenticator is set up. Your passkeys keep working too.</Trans>
+          ) : (
+            <>
+              <Trans>Your new authenticator is the only one that works now.</Trans>{" "}
+              {replacedText(confirm.data)}
+            </>
+          )}
         </div>
       </section>
     );
   }
 
-  const ready = code.trim().length >= 6 && (spendGrant || current.trim().length >= 6);
+  if (remove.isSuccess) {
+    return (
+      <section>
+        <div className="banner info">
+          <Trans>Your authenticator is removed. You sign in with your password and a passkey.</Trans>
+        </div>
+      </section>
+    );
+  }
+
+  const ready = code.trim().length >= 6 && (spendGrant || usePasskey || current.trim().length >= 6);
 
   if (offer) {
     return (
@@ -744,10 +795,17 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
               The recovery code you signed in with covers this, so no other code is asked for.
             </Trans>
           </p>
+        ) : usePasskey ? (
+          <p className="small muted">
+            <Trans>Your browser asks for your passkey when you confirm: it proves it is you.</Trans>{" "}
+            <button type="button" className="link" onClick={() => setWithRecoveryCode(true)}>
+              {t({ message: "Use a recovery code instead", comment: "Link on the Your account panel, when adding an authenticator. See GLOSSARY.md" })}
+            </button>
+          </p>
         ) : (
           <Field
             label={
-              locked ? t`One of your recovery codes` : t`A code from your current authenticator`
+              locked || adding ? t`One of your recovery codes` : t`A code from your current authenticator`
             }
             hint={
               <Hint label={t`why this is asked`}>
@@ -776,19 +834,21 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
             disabled={!ready || confirm.isPending}
             onClick={() => confirm.mutate()}
           >
-            <Trans>Confirm and replace</Trans>
+            {adding ? <Trans>Confirm and add</Trans> : <Trans>Confirm and replace</Trans>}
           </button>
           <button onClick={() => setOffer(null)}>
             <Trans comment="Button on the Your account panel">Cancel</Trans>
           </button>
         </div>
-        <p className="small muted" style={{ marginTop: 10 }}>
-          <Trans>
-            Replacing it also un-trusts every browser, including this one, and signs out every
-            other browser — they were let in on the strength of the old authenticator, and that is
-            exactly what you are replacing.
-          </Trans>
-        </p>
+        {adding ? null : (
+          <p className="small muted" style={{ marginTop: 10 }}>
+            <Trans>
+              Replacing it also un-trusts every browser, including this one, and signs out every
+              other browser — they were let in on the strength of the old authenticator, and that is
+              exactly what you are replacing.
+            </Trans>
+          </p>
+        )}
       </section>
     );
   }
@@ -811,6 +871,13 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
             ? t`The recovery code you signed in with in this tab covers it — no other code is needed.`
             : t`Have one of your recovery codes ready: it proves it is you in place of the old authenticator. (The recovery code you signed in with covers it only in the tab where you used it, while you stay signed in, and for a day.)`}
         </div>
+      ) : adding ? (
+        <p className="small muted">
+          <Trans>
+            Add an authenticator app as another second step. Your passkeys keep working, and either
+            one signs you in.
+          </Trans>
+        </p>
       ) : (
         <p className="small muted">
           <Trans>
@@ -832,8 +899,48 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
         disabled={password.length === 0 || start.isPending}
         onClick={() => start.mutate()}
       >
-        <Trans>Set up a new authenticator</Trans>
+        {adding ? <Trans>Set up an authenticator</Trans> : <Trans>Set up a new authenticator</Trans>}
       </button>
+      {canRemove && !locked ? (
+        <>
+          <hr className="rule" />
+          <Problem error={remove.error} />
+          {removing ? (
+            <>
+              <p className="small">
+                <Trans>
+                  Stop using the authenticator? You will sign in with your password and a passkey.
+                  Your recovery codes stay, and browsers you trusted will ask for a second step again.
+                </Trans>
+              </p>
+              <div className="row">
+                <button className="danger" disabled={remove.isPending} onClick={() => remove.mutate()}>
+                  <Trans>Remove the authenticator</Trans>
+                </button>
+                <button onClick={() => setRemoving(false)}>
+                  <Trans comment="Button on the Your account panel: do not remove the authenticator">Keep it</Trans>
+                </button>
+              </div>
+            </>
+          ) : (
+            <button onClick={() => setRemoving(true)}>
+              <Trans>Remove the authenticator</Trans>
+            </button>
+          )}
+        </>
+      ) : null}
+      {locked && canRemove ? (
+        <>
+          <hr className="rule" />
+          <Problem error={remove.error} />
+          <p className="small muted">
+            <Trans>Or stop using the authenticator and sign in with your passkey alone as the second step.</Trans>
+          </p>
+          <button disabled={remove.isPending} onClick={() => remove.mutate()}>
+            <Trans>Remove the authenticator</Trans>
+          </button>
+        </>
+      ) : null}
     </section>
   );
 }
@@ -866,6 +973,9 @@ export function RecoveryCodesSection({
   });
 
   const offered = useCapabilities();
+  // No authenticator: the passkey is the second step (#456), and pays for the
+  // new sheet through a step-up -- never a recovery code, by either route.
+  const withPasskey = offered.second_factor && !useStepUpFactors().code;
   const [making, setMaking] = useState(false);
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -877,7 +987,13 @@ export function RecoveryCodesSection({
   }, [held, onHeld]);
 
   const make = useMutation({
-    mutationFn: () => api.post<{ codes: string[] }>("/me/recovery-codes", { password, code }),
+    mutationFn: async () =>
+      api.post<{ codes: string[] }>(
+        "/me/recovery-codes",
+        withPasskey
+          ? { password: "", step_up_token: await stepUpToken({ password, code: "", factor: "passkey" }) }
+          : { password, code },
+      ),
     onSuccess: (made) => {
       setFresh(made.codes);
       setMaking(false);
@@ -906,7 +1022,8 @@ export function RecoveryCodesSection({
   const unused = left.data?.unused;
   // The password alone on the desktop, where it is the only factor (#320).
   const ready =
-    password.length > 0 && (!offered.second_factor || /^\d{6}$/.test(code.replace(/\s/g, "")));
+    password.length > 0 &&
+    (!offered.second_factor || withPasskey || /^\d{6}$/.test(code.replace(/\s/g, "")));
 
   return (
     <section>
@@ -919,7 +1036,9 @@ export function RecoveryCodesSection({
       {unused !== undefined ? (
         <p className={unused === 0 ? "small neg" : "small muted"}>
           {unused === 0
-            ? t`You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own.`
+            ? withPasskey
+              ? t`You have no unused recovery codes. If you lose your passkeys, you have no way back in on your own.`
+              : t`You have no unused recovery codes. If you lose your authenticator, you have no way back in on your own.`
             : plural(unused, {
                 one: `${unused} unused recovery code left.`,
                 other: `${unused} unused recovery codes left.`,
@@ -948,7 +1067,12 @@ export function RecoveryCodesSection({
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field>
-          {offered.second_factor ? (
+          {withPasskey ? (
+            <p className="small muted">
+              <Trans>Your browser asks for your passkey when you make the new codes.</Trans>
+            </p>
+          ) : null}
+          {offered.second_factor && !withPasskey ? (
           <>
           <p />
           <Field
@@ -1169,15 +1293,15 @@ export function IssueKey({
   const [mayWrite, setMayWrite] = useState(false);
   const [mayCommit, setMayCommit] = useState(false);
   const [mayEditCategories, setMayEditCategories] = useState(false);
-  const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
+  // The password and a code, or a passkey (#456): `StepUpFields` asks.
+  const [proof, setProof] = useState<StepUpProof>(NO_PROOF);
 
   const issue = useMutation({
     mutationFn: async () => {
       // Both calls in one action. A grant handed to the page and left there
       // would be a five-minute window in which the screen, not the person,
       // holds the authority.
-      const token = await stepUpToken({ password, code });
+      const token = await stepUpToken(proof);
       return api.post<{ key: AgentKey; token: string }>("/me/keys", {
         step_up_token: token,
         label,
@@ -1191,8 +1315,7 @@ export function IssueKey({
     onSuccess: (made) => onDone(made.token, made.key.label),
   });
 
-  const ready =
-    label.trim().length > 0 && householdId.length > 0 && password.length > 0 && code.trim().length >= 6;
+  const ready = label.trim().length > 0 && householdId.length > 0 && stepUpReady(proof);
 
   return (
     <div className="card" style={{ marginTop: 12 }}>
@@ -1308,29 +1431,11 @@ export function IssueKey({
       ) : null}
 
       <hr className="rule" />
-      <p className="small muted" style={{ marginTop: 0 }}>
-        <Trans>
-          A key keeps working from somewhere else long after this browser is closed, so this asks
-          for your password and a code — the same as signing in.
-        </Trans>
-      </p>
-      <Field label={t({ message: "Your password", comment: "Label of a form field on the Your account panel" })}>
-        <input
-          type="password"
-          value={password}
-          autoComplete="current-password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </Field>
-      <p />
-      <Field label={t`The six digits from your authenticator`}>
-        <input
-          value={code}
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          onChange={(e) => setCode(e.target.value)}
-        />
-      </Field>
+      <StepUpFields
+        proof={proof}
+        onChange={setProof}
+        why={t`A key keeps working from somewhere else long after this browser is closed.`}
+      />
 
       <div className="row" style={{ marginTop: 12 }}>
         <button className="primary" disabled={!ready || issue.isPending} onClick={() => issue.mutate()}>

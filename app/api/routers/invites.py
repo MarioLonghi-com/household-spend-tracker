@@ -22,6 +22,8 @@ from ...schemas import (
     InviteCreated,
     InviteOut,
     InviteState,
+    PasskeyOffer,
+    PasskeyOptionsFor,
     SetupComplete,
     SetupEnrol,
     SetupStarted,
@@ -55,9 +57,18 @@ def create_invitation(
     spent before anything is written, and spent whether or not the
     invitation is then created.
     """
-    if Role(body.role) is Role.owner:
+    factor = (
         stepup.require(db.engine, body.step_up_token, user_id=owner.id)
-    with batch(session, kind=BatchKind.admin, actor_id=owner.id):
+        if Role(body.role) is Role.owner
+        else None
+    )
+    # Which second factor paid for an owner-role link, for the audit (#456).
+    with batch(
+        session,
+        kind=BatchKind.admin,
+        actor_id=owner.id,
+        source={"step_up": factor} if factor else None,
+    ):
         invitation, token = invite_service.create(
             session,
             invited_by=owner,
@@ -135,6 +146,18 @@ def enrol(body: SetupEnrol, session: SessionDep) -> dict:
     return {"blob": setup_service.seal(confirmed)}
 
 
+@router.post("/invite/passkey/options", response_model=PasskeyOffer)
+def passkey_options(body: PasskeyOptionsFor, request: Request, session: SessionDep) -> PasskeyOffer:
+    """The same choice the first owner has (#456): a passkey in place of the
+    authenticator, under a provisional user handle sealed into the blob."""
+    blob = setup_service.unseal(body.blob)
+    if not blob.invitation_id:
+        raise Conflict("that is not an invitation", code="invite.not_an_invitation")
+    invite_service.lookup_by_id(session, blob.invitation_id)
+    offered, options = setup_service.offer_passkey(session, request, blob)
+    return PasskeyOffer(blob=setup_service.seal(offered), options=options)
+
+
 @router.post("/invite/complete", response_model=UserOut)
 def complete(
     body: SetupComplete, request: Request, response: Response, session: SessionDep
@@ -157,6 +180,12 @@ def complete(
     if not blob.invitation_id:
         raise Conflict("that is not an invitation", code="invite.not_an_invitation")
     setup_service.require_codes_saved(body.codes_saved)
+    invite_service.lookup_by_id(session, blob.invitation_id)
+    passkey = (
+        setup_service.verify_passkey(db.engine, request, blob, body.credential)
+        if body.second_step == "passkey"
+        else None
+    )
 
     try:
         user, session_value, device_value = setup_service.complete(
@@ -164,6 +193,7 @@ def complete(
             blob,
             ip=client_ip(request),
             user_agent=request.headers.get("user-agent"),
+            passkey=passkey,
         )
     except setup_service.AddressTaken:
         session.rollback()

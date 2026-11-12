@@ -43,6 +43,33 @@ history this repository does not have.
   it. Every existing household reads Monday, so no figure changes. One
   migration, `a7d3f5c20b64` — clean: adds `households.week_start`; rolling it
   back loses only the choice of day.
+- A passkey can now be your second step instead of an authenticator, on the
+  web edition (#456). An account needs its password and at least one of the
+  two; either does everything the other does. After the password, an account
+  with a passkey is offered "Use your passkey", and an account with no
+  authenticator is never asked for a code. The password-and-code check before
+  creating a key for a program, adding a passkey, making someone an owner,
+  downloading a backup with its key or installing an update takes the
+  password and a passkey too, and History says which one was used ("confirmed
+  with a passkey"). First-run setup, invitations and reset links offer a
+  passkey in place of the authenticator wherever passkeys can work. Accounts
+  that use an authenticator see no change.
+- Your account → Sign-in methods: the authenticator and passkeys are two equal
+  rows. An authenticator can be added to a passkey-only account, or removed
+  when a passkey remains; removing the last second step is refused with a
+  sentence saying why. Recovery codes belong to the account and stay when the
+  authenticator goes. The authenticator reads "Not set up" when a passkey is
+  the second step by choice, and "Cleared" only after a reset (#456).
+
+### Changed
+
+- An owner's reset of "the authenticator" is now a reset of the second step:
+  it clears the authenticator and every passkey, and the link lets the person
+  set up either. A reset of a passkey-only account always covers its second
+  step, since its passkeys go with every reset (#456).
+- A replaced `secret.key` no longer sends a passkey-only account to its
+  recovery codes, and an account with both keeps signing in with its passkey
+  while it sets up the authenticator again (#456).
 
 ### Fixed
 

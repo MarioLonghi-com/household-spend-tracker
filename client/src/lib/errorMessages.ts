@@ -214,12 +214,23 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
         "That is not a working code from your current authenticator, or an unused recovery code",
     }),
   },
+  "profile.last_second_factor": {
+    message: msg({
+      id: "error.profile.last_second_factor",
+      message:
+        "An account needs a passkey or an authenticator as its second step, and this is the last one. Add the other first.",
+      comment: "See GLOSSARY.md (passkey, authenticator, second step)",
+    }),
+  },
   "profile.needs_authenticator": {
     message: msg({
       id: "error.profile.needs_authenticator",
       message:
         "Set up an authenticator before making new recovery codes",
     }),
+  },
+  "profile.no_authenticator": {
+    message: msg({ id: "error.profile.no_authenticator", message: "You have no authenticator to remove", comment: "See GLOSSARY.md (authenticator)" }),
   },
   "profile.new_code_wrong": {
     message: msg({
@@ -669,6 +680,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "auth.authenticator_cleared": {
     message: msg({ id: "error.auth.authenticator_cleared", message: "This account's authenticator was reset, so there is no code to give. Use the reset link you were sent to enrol a new one, or ask an owner for a new link." }),
   },
+  "auth.no_authenticator": {
+    message: msg({ id: "error.auth.no_authenticator", message: "This account uses a passkey as its second step, not an authenticator. Use your passkey, or one of your recovery codes.", comment: "See GLOSSARY.md (passkey, authenticator, recovery code)" }),
+  },
   "auth.code_wrong": {
     message: msg({ id: "error.auth.code_wrong", message: "That code is not right, or has already been used" }),
   },
@@ -750,6 +764,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "passkey.already_registered": {
     message: msg({ id: "error.passkey.already_registered", message: "That passkey is already registered" }),
   },
+  "passkey.none_here": {
+    message: msg({ id: "error.passkey.none_here", message: "You have no passkey that works here", comment: "See GLOSSARY.md (passkey)" }),
+  },
   "passkey.not_found": {
     message: msg({ id: "error.passkey.not_found", message: "No such passkey" }),
   },
@@ -779,6 +796,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   },
   "password.common_and_is_email": {
     message: msg({ id: "error.password.common_and_is_email", message: "That password is one of the {count, number} most common passwords, and it cannot be your email address" }),
+  },
+  "reset.one_second_step": {
+    message: msg({ id: "error.reset.one_second_step", message: "Choose a passkey or an authenticator, not both", comment: "See GLOSSARY.md (passkey, authenticator)" }),
   },
   "reset.not_authenticator": {
     message: msg({ id: "error.reset.not_authenticator", message: "This link does not change the authenticator" }),

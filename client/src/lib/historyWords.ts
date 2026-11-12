@@ -402,6 +402,16 @@ export const HISTORY_SENTENCES: Record<string, MessageDescriptor> = {
     message: "Issued the key “{label}”",
     comment: "History: a key for a program was made. {label} is the name it was given",
   }),
+  "history.key.issued_passkey": msg({
+    id: "history.key.issued_passkey",
+    message: "Issued the key “{label}”, confirmed with a passkey",
+    comment: "History: a key for a program was made, confirmed with a passkey. {label} is its name. See GLOSSARY.md",
+  }),
+  "history.key.issued_code": msg({
+    id: "history.key.issued_code",
+    message: "Issued the key “{label}”, confirmed with a code",
+    comment: "History: a key for a program was made, confirmed with an authenticator code. {label} is its name",
+  }),
   "history.key.removed": msg({
     id: "history.key.removed",
     message: "Removed the key “{label}”",

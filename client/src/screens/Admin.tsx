@@ -630,10 +630,10 @@ function ResetSignIn({
       <Dialog title={t`Reset link for ${name}`} onClose={leave}>
         <p style={{ marginTop: 0 }}>
           {issued.password && issued.authenticator
-            ? t`${name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password and authenticator.`
+            ? t`${name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password and second step.`
             : issued.password
               ? t`${name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password.`
-              : t`${name} is signed out everywhere and cannot sign in until they follow this link. It sets a new authenticator.`}
+              : t`${name} is signed out everywhere and cannot sign in until they follow this link. It sets a new second step: a passkey or an authenticator.`}
         </p>
         {(issued.password !== password || issued.authenticator !== authenticator) && (
           <p className="small muted">
@@ -689,8 +689,8 @@ function ResetSignIn({
           onChange={(e) => setAuthenticator(e.target.checked)}
           style={{ width: "auto", marginRight: 8 }}
         />
-        <Trans>
-          Authenticator, with its recovery codes
+        <Trans comment="Label of a choice on the Admin screen: reset the authenticator and every passkey. See GLOSSARY.md">
+          Second step: authenticator and passkeys, with the recovery codes
         </Trans>
       </label>
       {chosen ? (
@@ -879,10 +879,10 @@ function PendingResets() {
         <Dialog title={t`Withdraw this reset link?`} onClose={() => setWithdrawing(null)}>
           <p style={{ marginTop: 0 }}>
             {withdrawing.password && withdrawing.authenticator
-              ? t`The link for ${withdrawing.display_name} (${withdrawing.email}) stops working at once. Their password and authenticator stays reset, so they cannot sign in until you make them a new link.`
+              ? t`The link for ${withdrawing.display_name} (${withdrawing.email}) stops working at once. Their password and second step stay reset, so they cannot sign in until you make them a new link.`
               : withdrawing.password
                 ? t`The link for ${withdrawing.display_name} (${withdrawing.email}) stops working at once. Their password stays reset, so they cannot sign in until you make them a new link.`
-                : t`The link for ${withdrawing.display_name} (${withdrawing.email}) stops working at once. Their authenticator stays reset, so they cannot sign in until you make them a new link.`}
+                : t`The link for ${withdrawing.display_name} (${withdrawing.email}) stops working at once. Their second step stays reset, so they cannot sign in until you make them a new link.`}
           </p>
           <div className="dialog-choices">
             <button

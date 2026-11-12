@@ -135,9 +135,11 @@ REGISTRY: dict[str, Code] = {
         "That is not a working code from your current authenticator, or an unused recovery "
         "code"
     ),
+    "profile.last_second_factor": Code("An account needs a passkey or an authenticator as its second step, and this is the last one. Add the other first."),
     "profile.needs_authenticator": Code(
         "Set up an authenticator before making new recovery codes"
     ),
+    "profile.no_authenticator": Code("You have no authenticator to remove"),
     "profile.new_code_wrong": Code(
         "That code is not right. Check the time on your phone and try again."
     ),
@@ -352,6 +354,7 @@ REGISTRY: dict[str, Code] = {
     "auth.too_many_from_here": Code("Too many attempts from here. Try again in {seconds, plural, one {# second} other {# seconds}}.", ("seconds",)),
     "auth.refused": Code("That email and password do not match"),
     "auth.authenticator_cleared": Code("This account's authenticator was reset, so there is no code to give. Use the reset link you were sent to enrol a new one, or ask an owner for a new link."),
+    "auth.no_authenticator": Code("This account uses a passkey as its second step, not an authenticator. Use your passkey, or one of your recovery codes."),
     "auth.code_wrong": Code("That code is not right, or has already been used"),
     "auth.recovery_code_wrong": Code("That recovery code is not right, or has already been used"),
     "auth.new_code_wrong": Code("That code is not right. Check the time on your phone and try again."),
@@ -389,6 +392,7 @@ REGISTRY: dict[str, Code] = {
     "passkey.no_user_handle": Code("Give the member a user handle first"),
     "passkey.not_registered": Code("That passkey could not be registered here. Start again."),
     "passkey.already_registered": Code("That passkey is already registered"),
+    "passkey.none_here": Code("You have no passkey that works here"),
     "passkey.not_found": Code("No such passkey"),
     "passkey.needs_name": Code("A passkey needs a name"),
     "passkey.too_many_at_once": Code("Too many sign-ins at once. Try again in a minute."),
@@ -401,6 +405,7 @@ REGISTRY: dict[str, Code] = {
     "password.too_short_and_is_email": Code("That password needs at least {min_length} characters, and it cannot be your email address", ("min_length",)),
     "password.common_and_is_email": Code("That password is one of the {count, number} most common passwords, and it cannot be your email address", ("count",)),
     # -- reset: app/services/account_resets.py, app/api/routers/account_resets.py (#267) --- #
+    "reset.one_second_step": Code("Choose a passkey or an authenticator, not both"),
     "reset.not_authenticator": Code("This link does not change the authenticator"),
     "reset.offer_expired": Code("That authenticator offer has expired; scan a new one"),
     "reset.choose_what": Code("Choose what to reset: the password, the authenticator, or both"),

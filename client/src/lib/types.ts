@@ -678,10 +678,15 @@ export interface Passkey {
 }
 
 export interface AuthenticatorStatus {
-  /** An authenticator is set up. False after a reset cleared it. */
+  /** An authenticator is set up. False after a reset cleared it, and for an
+   * account whose second step is a passkey (#456): `cleared` tells them apart. */
   enrolled: boolean;
   /** Set up, and this server's key cannot open it: recovery mode, for you. */
   locked_by_key: boolean;
+  /** Passkeys that work here (#456). */
+  passkeys: number;
+  /** No authenticator and no passkey: a reset cleared the second factors. */
+  cleared: boolean;
 }
 
 /**

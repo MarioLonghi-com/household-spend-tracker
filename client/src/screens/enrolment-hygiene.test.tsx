@@ -114,7 +114,7 @@ describe("the setup wizard", () => {
     type("Password", "correct horse battery");
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    await screen.findByText("3. Your authenticator");
+    await screen.findByText("3. A second step");
     expect(screen.getByLabelText("The six digits").getAttribute("autocomplete")).toBe(
       "one-time-code",
     );
@@ -149,7 +149,7 @@ describe("accepting an invitation", () => {
     type("Password", "correct horse battery");
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    await screen.findByText("2. Your authenticator");
+    await screen.findByText("2. A second step");
     expect(screen.getByLabelText("The six digits").getAttribute("autocomplete")).toBe(
       "one-time-code",
     );
