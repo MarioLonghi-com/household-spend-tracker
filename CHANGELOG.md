@@ -62,6 +62,11 @@ history this repository does not have.
   all unpublished is told so instead of fetching nothing, and a currency
   held only after the ECB stopped publishing it is listed under Not covered.
 
+### Changed
+
+- The Exchange rates page no longer repeats a currency's account names under
+  its code (#454). The (i) beside the code lists them, as before.
+
 ## 0.16.1 — 2026-11-12
 
 **Reversible: none** — no migration in this release. To go back to
