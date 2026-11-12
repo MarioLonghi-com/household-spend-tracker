@@ -8,6 +8,8 @@
  * - A save sends only what differs from the row as last confirmed, so a date
  *   edit does not put back a memo or category somebody else changed.
  * - Escape sends what is still unsaved rather than dropping it.
+ * - A category picked is saved then, alone, once; the options the arrows pass
+ *   over are not (#462).
  *
  * Asserted on the bodies that reached the server and on what the fields hold.
  */
@@ -24,7 +26,7 @@ vi.mock("../lib/api", () => ({
 
 import { api } from "../lib/api";
 import { TransactionPanel, panelChanges } from "./Register";
-import type { Household, Transaction } from "../lib/types";
+import type { CategoryGroup, Household, Transaction } from "../lib/types";
 
 afterEach(() => {
   cleanup();
@@ -39,6 +41,16 @@ const ROW: Transaction = {
   reimbursement: null, reimbursed_by_id: null,
 };
 
+const GROUPS: CategoryGroup[] = [
+  {
+    id: "g1", name: "Everyday", sort_order: 0,
+    categories: [
+      { id: "c1", group_id: "g1", name: "Groceries", full_name: "Everyday: Groceries", sort_order: 0, archived: false, used_by: 1 },
+      { id: "c2", group_id: "g1", name: "Travel", full_name: "Everyday: Travel", sort_order: 1, archived: false, used_by: 0 },
+    ],
+  },
+];
+
 function Harness({ onClose, start = ROW }: { onClose: () => void; start?: Transaction }) {
   const [txn] = useState(start);
   return (
@@ -50,7 +62,7 @@ function Harness({ onClose, start = ROW }: { onClose: () => void; start?: Transa
       currency="EUR"
       accountName="Current"
       payees={[]}
-      groups={[]}
+      groups={GROUPS}
       onClose={onClose}
       onChanged={() => undefined}
       onSaved={() => undefined}
@@ -80,6 +92,8 @@ function held() {
 
 const memo = () => screen.getByLabelText("Memo") as HTMLTextAreaElement;
 const cleared = () => screen.getByLabelText("Cleared") as HTMLSelectElement;
+const category = () => screen.getByLabelText("Category") as HTMLInputElement;
+const option = (name: string) => screen.getByRole("option", { name });
 const bodies = () => vi.mocked(api.patch).mock.calls.map((call) => call[1]);
 
 describe("what a panel save sends", () => {
@@ -172,5 +186,69 @@ describe("a locked row", () => {
     fireEvent.blur(cleared());
     await vi.waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
     expect(bodies()).toEqual([{ cleared: "cleared" }]);
+  });
+});
+
+describe("a category picked in the panel", () => {
+  it("is saved when it is clicked, alone and once, with no field left", async () => {
+    vi.mocked(api.patch).mockResolvedValue({ ...ROW, category_id: "c2", category_name: "Travel" });
+    mount();
+
+    fireEvent.focus(category());
+    fireEvent.mouseDown(option("Everyday: Travel"));
+    await vi.waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
+    expect(bodies()).toEqual([{ category_id: "c2" }]);
+
+    // Leaving the field afterwards commits the same choice: not a second save.
+    fireEvent.blur(category());
+    await vi.waitFor(() => expect(category().value).toBe("Everyday: Travel"));
+    expect(api.patch).toHaveBeenCalledTimes(1);
+  });
+
+  it("is not saved for each option the arrows pass over, only for the one taken", async () => {
+    vi.mocked(api.patch).mockResolvedValue({ ...ROW, category_id: "c2", category_name: "Travel" });
+    mount();
+
+    fireEvent.focus(category());
+    fireEvent.keyDown(category(), { key: "ArrowDown" });
+    fireEvent.keyDown(category(), { key: "ArrowDown" });
+    fireEvent.keyDown(category(), { key: "ArrowUp" });
+    fireEvent.keyDown(category(), { key: "ArrowDown" });
+    expect(api.patch).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(category(), { key: "Enter" });
+    await vi.waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
+    fireEvent.blur(category());
+    expect(bodies()).toEqual([{ category_id: "c2" }]);
+  });
+
+  it("is sent after a save in flight rather than beside it or not at all", async () => {
+    const answers = held();
+    mount();
+
+    fireEvent.change(memo(), { target: { value: "first" } });
+    fireEvent.blur(memo());
+    await vi.waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
+
+    fireEvent.focus(category());
+    fireEvent.mouseDown(option("Everyday: Travel"));
+    expect(api.patch).toHaveBeenCalledTimes(1);
+
+    // The first answer still carries c1: it was sent before the pick.
+    answers[0]({ ...ROW, memo: "first" });
+    await vi.waitFor(() => expect(api.patch).toHaveBeenCalledTimes(2));
+    expect(bodies()).toEqual([{ memo: "first" }, { category_id: "c2" }]);
+    expect(category().value).toBe("Everyday: Travel");
+    answers[1]({ ...ROW, memo: "first", category_id: "c2", category_name: "Travel" });
+  });
+
+  it("emptied and left clears it, once", async () => {
+    vi.mocked(api.patch).mockResolvedValue({ ...ROW, category_id: null, category_name: null });
+    mount();
+
+    fireEvent.change(category(), { target: { value: "" } });
+    fireEvent.blur(category());
+    await vi.waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1));
+    expect(bodies()).toEqual([{ clear_category: true }]);
   });
 });
