@@ -22,6 +22,22 @@ asked() {
   xcrun altool "$@" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1
 }
 
+# The processing state in an altool answer: `processingState: VALID` or
+# `Processing State: VALID` from altool 26, `IMPORT-STATUS: VALID` from the
+# older format. Empty when there is none -- still processing, or not an answer.
+state_in() {
+  printf '%s\n' "$1" |
+    sed -n -E "s/^.*(processingState|[Pp]rocessing [Ss]tate|IMPORT-STATUS)[\"']?[:=] *[\"']?([A-Z_]+).*$/\2/p" |
+    head -1
+}
+
+# `--build-status` arrived in altool 26; Xcode 16's prints its usage instead,
+# and the loop below would wait out its patience on that. Say so before the
+# upload, while a red job still means nothing went to Apple.
+has_build_status() {
+  xcrun altool --help 2>&1 | grep -q -- "--build-status"
+}
+
 wait_for() {
   tries="${ASC_WAIT_TRIES:-30}"
   while [ "$tries" -gt 0 ]; do
@@ -31,16 +47,18 @@ wait_for() {
     # `set -e` the failing substitution ended the script with no message,
     # after an upload Apple went on to accept.
     said="$(asked --build-status --delivery-id "$1")" || true
-    import="$(printf '%s\n' "$said" | sed -n 's/^.*IMPORT-STATUS: *//p' | head -1 | tr -d ' \r')"
-    case "$import" in
-      VALID)
-        printf '%s\n' "$said" | grep -E "BUILD-STATUS|IMPORT-STATUS|IS-ON-APP-STORE-CONNECT" || true
-        echo "delivery $1: VALID, on App Store Connect"
+    # The first answer goes in the log whole: 0.16.0 and 0.16.1 waited 30
+    # minutes on answers nobody saw (altool's usage text, as it turned out).
+    [ "$tries" = "${ASC_WAIT_TRIES:-30}" ] && printf '%s\n' "$said"
+    state="$(state_in "$said")"
+    case "$state" in
+      VALID | READY | COMPLETE)
+        echo "delivery $1: $state, on App Store Connect"
         return 0
         ;;
       FAILED | INVALID)
-        printf '%s\n' "$said" | sed -n '/PROCESSING-ERRORS/,/IMPORT-STATUS/p' >&2
-        echo "delivery $1: Apple refused the build while processing it" >&2
+        printf '%s\n' "$said" >&2
+        echo "delivery $1: Apple refused the build while processing it ($state)" >&2
         return 1
         ;;
     esac
@@ -50,6 +68,11 @@ wait_for() {
   printf '%s\n' "$said" | tail -5 >&2
   echo "delivery $1: still being processed; its verdict will be in App Store Connect" >&2
   return 1
+}
+
+has_build_status || {
+  echo "this altool ($(xcrun --find altool 2>/dev/null || echo 'not found')) has no --build-status; use Xcode 26 or later (DEVELOPER_DIR)" >&2
+  exit 2
 }
 
 if [ "${1:-}" = "--status" ]; then
