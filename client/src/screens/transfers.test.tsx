@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 
 /**
- * The Transfers screen (#70) and the How-import-works page (#73).
+ * The Transfers screen (#70). How import works (#73) is a help article since #460,
+ * checked in `src/help/help-panel.test.tsx`.
  *
  * The first is asserted on what it sends: "Link all" carries every strong
  * pair, a row's "Link" carries that pair alone, "Link N selected" carries the
@@ -20,7 +21,6 @@ vi.mock("../lib/api", () => ({
 
 import { api } from "../lib/api";
 import { Transfers } from "./Transfers";
-import { ImportGuide } from "./ImportGuide";
 import type { Household } from "../lib/types";
 
 afterEach(cleanup);
@@ -262,22 +262,5 @@ describe("Transfers, ticking several pairs (#126)", () => {
     // Linking the strong pairs reloads the findings under the suggestions.
     fireEvent.click(screen.getByRole("button", { name: "Link all 2" }));
     await waitFor(() => expect(ticks(table)).toEqual({ toSaver: false, toCard: false, fromCard: false, fromSaver: false }));
-  });
-});
-
-describe("How import works", () => {
-  it("names every outcome in the words the preview uses, and has nothing to press", () => {
-    const { container } = mount(<ImportGuide />);
-    const pills = [...container.querySelectorAll(".pill")].map((pill) => pill.textContent);
-    expect(pills).toEqual([
-      "New",
-      "Already have it",
-      "Already imported",
-      "Needs a look",
-      "Could not read",
-      "Not for this account",
-    ]);
-    expect(screen.queryAllByRole("button")).toEqual([]);
-    expect(screen.queryAllByRole("textbox")).toEqual([]);
   });
 });

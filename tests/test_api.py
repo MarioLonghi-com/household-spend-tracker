@@ -360,6 +360,10 @@ def _api_routes(app) -> list[APIRoute]:
 #: Path parameters that name an object rather than a household. Each one must be
 #: resolved through load_for, which joins membership.
 OBJECT_ID_PARAMS = {"account_id", "transaction_id", "payee_id", "rule_id", "batch_id"}
+#: Path parameters that name content shipped with the app, the same for every
+#: household, so there is no membership to check: a help article (#460). The
+#: route still needs `current_agent`; only the household check is not owed.
+SHIPPED_CONTENT_PARAMS = {"article_id"}
 
 
 def test_every_household_scoped_route_declares_the_check(client):
@@ -380,7 +384,7 @@ def test_every_household_scoped_route_declares_the_check(client):
             source = inspect.getsource(route.endpoint)
             if current_agent not in _dependencies_of(route):
                 offenders.append(f"{sorted(route.methods)} {route.served_path} (no current_agent)")
-            elif names and not re.search(r"_house\(|\.load\(|\.household\.id", source):
+            elif names - SHIPPED_CONTENT_PARAMS and not re.search(r"_house\(|\.load\(|\.household\.id", source):
                 offenders.append(f"{sorted(route.methods)} {route.served_path} (no household check)")
             continue
         if "household_id" in names:

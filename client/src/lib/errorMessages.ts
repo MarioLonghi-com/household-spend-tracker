@@ -708,6 +708,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "email.no_name": {
     message: msg({ id: "error.email.no_name", message: "{email} has no usable name before the @" }),
   },
+  "help.article_not_found": {
+    message: msg({ id: "error.help.article_not_found", message: "No help article has the id {id}" }),
+  },
   "household.not_found": {
     message: msg({ id: "error.household.not_found", message: "No such household" }),
   },

@@ -19,7 +19,8 @@ describe("the tab title", () => {
   it("names a page as the menu does, at every depth", () => {
     expect(pageLabel(sections, "register")).toBe("Transactions");
     expect(pageLabel(sections, "rules")).toBe("Payee Naming Rules");
-    expect(pageLabel(sections, "import-guide")).toBe("How import works");
+    // How import works is a help article since #460: no page, no menu entry.
+    expect(pageLabel(sections, "import-guide")).toBeNull();
     expect(pageLabel(sections, "reports")).toBe("Reports");
     expect(pageLabel(sections, "admin")).toBe("Admin");
   });

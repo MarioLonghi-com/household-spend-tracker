@@ -41,6 +41,7 @@ import { RowPicker } from "../components/RowPicker";
 import type { Household, Receipt } from "../lib/types";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { HelpMark } from "../help/HelpMark";
 
 type Filter = "unattached" | "attached" | "all";
 
@@ -159,7 +160,7 @@ export function Receipts({ household }: { household: Household }) {
 
   return (
     <div>
-      <h1><Trans comment="Screen title on the receipts: noun, photos or PDFs of receipts. See GLOSSARY.md">Receipts</Trans></h1>
+      <div className="screen-title"><h1><Trans comment="Screen title on the receipts: noun, photos or PDFs of receipts. See GLOSSARY.md">Receipts</Trans></h1><HelpMark /></div>
       <p className="muted small">
         <Trans>
           Anything without a transaction waits here. Photograph a receipt at the till and

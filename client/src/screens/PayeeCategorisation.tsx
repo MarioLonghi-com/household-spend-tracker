@@ -21,6 +21,7 @@ import { compareNames, formatCount } from "../lib/locale";
 import { categoryName } from "../lib/labels";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { HelpMark } from "../help/HelpMark";
 
 /** `GET /households/{id}/stats/payees`, one entry per payee with transactions. */
 export interface PayeeStat {
@@ -134,7 +135,7 @@ export function PayeeCategorisation({ household }: { household: Household }) {
           </p>
         </Panel>
       )}
-      <h1><Trans comment="Screen title on the Payee Categorisation screen. See GLOSSARY.md">Payee categorisation</Trans></h1>
+      <div className="screen-title"><h1><Trans comment="Screen title on the Payee Categorisation screen. See GLOSSARY.md">Payee categorisation</Trans></h1><HelpMark /></div>
       <p className="muted small">
         <Trans>
           What each payee has been filed under, and what a new transaction for it will be. Which

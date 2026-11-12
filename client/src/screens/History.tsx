@@ -11,6 +11,7 @@ import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { formatCount } from "../lib/locale";
 import { detailOf, fieldOf, headlineOf, summaryOf, tableOf, valueOf } from "../lib/historyWords";
+import { HelpMark } from "../help/HelpMark";
 
 
 type HistorySort = "when" | "what" | "by" | "state" | "rows";
@@ -76,7 +77,7 @@ export function History({ household }: { household: Household }) {
 
   return (
     <>
-      <h1><Trans comment="Screen title on the History screen. See GLOSSARY.md">History</Trans></h1>
+      <div className="screen-title"><h1><Trans comment="Screen title on the History screen. See GLOSSARY.md">History</Trans></h1><HelpMark /></div>
       <p className="muted small">
         <Trans>
           Everything that has changed this household, grouped by the act that changed it. An import

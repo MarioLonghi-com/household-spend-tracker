@@ -439,7 +439,8 @@ describe("the heading line", () => {
     await mount();
     const heading = screen.getByRole("heading", { level: 1 });
     expect(heading.textContent).toBe("Transactions");
-    const next = heading.nextElementSibling as HTMLElement;
+    // The heading and its help ? are one item on the line (#460).
+    const next = heading.closest(".screen-title")!.nextElementSibling as HTMLElement;
     expect(next.className).toBe("currency-toggle");
     expect(within(next).getByRole("group", { name: "Currencies shown" })).toBeTruthy();
     // And no longer in the filter line.

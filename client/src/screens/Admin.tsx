@@ -56,6 +56,7 @@ import { compareNames } from "../lib/locale";
 import { useCapabilities } from "../lib/capabilities";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { HelpMark } from "../help/HelpMark";
 
 type Section = "people" | "households" | "invitations";
 
@@ -108,7 +109,7 @@ export function Admin({ user }: { user: User }) {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1><Trans comment="Screen title on the Admin screen">Admin</Trans></h1>
+        <div className="screen-title"><h1><Trans comment="Screen title on the Admin screen">Admin</Trans></h1><HelpMark /></div>
       </div>
       <p className="muted small">
         <Trans>

@@ -31,6 +31,7 @@ import type { Account, Household, Payee, PayeeCollision } from "../lib/types";
 import { compareNames } from "../lib/locale";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { HelpMark } from "../help/HelpMark";
 
 type PayeeSort = "name" | "kind";
 type CollisionSort = "spellings" | "transactions";
@@ -97,7 +98,7 @@ export function Payees({ household }: { household: Household }) {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1><Trans comment="Screen title on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md">Payees</Trans></h1>
+        <div className="screen-title"><h1><Trans comment="Screen title on the Payees screen: noun, who was paid or who paid. See GLOSSARY.md">Payees</Trans></h1><HelpMark /></div>
         <button className="primary" onClick={() => setAdding(true)}>
           <Trans comment="Button on the Payees screen">
             Add payee

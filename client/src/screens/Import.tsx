@@ -31,6 +31,7 @@ import { asInstant } from "../lib/time";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { detectedLabel } from "../lib/labels";
+import { HelpMark } from "../help/HelpMark";
 
 /**
  * One import staged and never committed, as the queue lists it.
@@ -759,9 +760,12 @@ export function Import({
 
   return (
     <>
-      <h1>
-        <Trans>Import a statement</Trans>
-      </h1>
+      <div className="screen-title">
+        <h1>
+          <Trans>Import a statement</Trans>
+        </h1>
+        <HelpMark />
+      </div>
       {onGo ? (
         <p className="small muted" style={{ marginTop: 0 }}>
           <Trans>

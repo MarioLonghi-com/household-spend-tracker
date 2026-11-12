@@ -24,6 +24,7 @@ import type { Household } from "../lib/types";
 import type { RegisterPreset } from "./Register";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { HelpMark } from "../help/HelpMark";
 
 export type ReportKey = "income-expense" | "reimbursements" | "net-worth";
 
@@ -153,7 +154,7 @@ export function Reports({
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1><Trans comment="Screen title on the Reports screen. See GLOSSARY.md">Reports</Trans></h1>
+        <div className="screen-title"><h1><Trans comment="Screen title on the Reports screen. See GLOSSARY.md">Reports</Trans></h1><HelpMark /></div>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
@@ -239,7 +240,7 @@ export function Report({
         className="row"
         style={{ justifyContent: "space-between", gap: 16, alignItems: "baseline", marginBottom: 4 }}
       >
-        <h1>{report.label}</h1>
+        <div className="screen-title"><h1>{report.label}</h1><HelpMark /></div>
         {/* A slot a report can portal its own controls into, so something that
             belongs beside the heading can sit there without this file knowing
             what any report contains. Income vs Expense puts its currency toggle
