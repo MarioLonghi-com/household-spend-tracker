@@ -34,6 +34,11 @@ history this repository does not have.
 
 ### Fixed
 
+- The desktop app no longer quits when "Update the ledger" is chosen for an
+  update that cannot be undone. The splash, the only window open, was closed
+  before the question, so the app's quit-when-no-windows rule ended it the
+  moment the question was answered and the ledger was never updated. The
+  splash now hides behind the question and comes back for the upgrade.
 - The Mac App Store upload step no longer fails on altool's first answer
   about a delivery it does not know yet: `upload-mas.sh` asks again, as it
   was meant to, and prints altool's last answer when it runs out of patience.
