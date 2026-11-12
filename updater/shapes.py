@@ -56,6 +56,10 @@ What is carried, and the cases that needed a rule:
   reports when containers.conf makes the host's its default and then
   refuses in a create.
 
+**Every one-off names its log driver** (`ONEOFF_LOG_DRIVER`, #439): its
+output is read back through `logs`, which an engine whose default driver
+keeps nothing answers with nothing at all.
+
 A container in a Podman pod cannot be copied: a container created through
 the Docker-compatible API cannot join the pod (S19). `in_pod` says so, and
 the caller refuses with `POD_SENTENCE` before anything is stopped.
@@ -68,6 +72,7 @@ from collections.abc import Mapping, Sequence
 
 from updater.engine import (
     ONEOFF_LABEL,
+    ONEOFF_LOG_DRIVER,
     PROJECT_LABELS,
     REQUEST_LABEL,
     ROLE_LABEL,
@@ -447,6 +452,10 @@ def mounts_volume(inspect: Mapping, name: str) -> bool:
     return any(isinstance(b, str) and b.split(":", 1)[0] == name for b in binds)
 
 
+def _oneoff_log() -> dict:
+    return {"Type": ONEOFF_LOG_DRIVER, "Config": {}}
+
+
 def _oneoff_labels(app: Mapping, role: str, request_id: str) -> dict[str, str]:
     return {**project_labels(app), ONEOFF_LABEL: "True", ROLE_LABEL: role, REQUEST_LABEL: request_id}
 
@@ -483,6 +492,7 @@ def oneoff(
             "CapDrop": ["ALL"],
             "SecurityOpt": list(host.get("SecurityOpt") or ["no-new-privileges"]),
             "RestartPolicy": {"Name": "no"},
+            "LogConfig": _oneoff_log(),
         },
     }
     if cfg.get("User"):
@@ -524,6 +534,7 @@ def placard(
             "CapDrop": ["ALL"],
             "SecurityOpt": list(host.get("SecurityOpt") or ["no-new-privileges"]),
             "RestartPolicy": {"Name": "no"},
+            "LogConfig": _oneoff_log(),
         },
     }
     if cfg.get("User"):
@@ -578,6 +589,7 @@ def port_probe(app: Mapping, image: str, request_id: str, gateway: str, port: in
             "CapDrop": ["ALL"],
             "SecurityOpt": ["no-new-privileges"],
             "RestartPolicy": {"Name": "no"},
+            "LogConfig": _oneoff_log(),
         },
     }
     if cfg.get("User"):
