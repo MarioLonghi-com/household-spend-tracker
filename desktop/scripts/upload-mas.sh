@@ -25,7 +25,12 @@ asked() {
 wait_for() {
   tries="${ASC_WAIT_TRIES:-30}"
   while [ "$tries" -gt 0 ]; do
-    said="$(asked --build-status --delivery-id "$1")"
+    # altool answers non-zero while a delivery is seconds old and App Store
+    # Connect does not know it yet -- 0.16.0's first status call, 0.3 s after
+    # the upload -- and that is a reason to ask again, not to stop. Under
+    # `set -e` the failing substitution ended the script with no message,
+    # after an upload Apple went on to accept.
+    said="$(asked --build-status --delivery-id "$1")" || true
     import="$(printf '%s\n' "$said" | sed -n 's/^.*IMPORT-STATUS: *//p' | head -1 | tr -d ' \r')"
     case "$import" in
       VALID)
@@ -42,6 +47,7 @@ wait_for() {
     tries=$((tries - 1))
     [ "$tries" -gt 0 ] && sleep "${ASC_WAIT_SECONDS:-60}"
   done
+  printf '%s\n' "$said" | tail -5 >&2
   echo "delivery $1: still being processed; its verdict will be in App Store Connect" >&2
   return 1
 }

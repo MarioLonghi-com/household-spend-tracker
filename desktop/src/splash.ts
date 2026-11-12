@@ -65,6 +65,14 @@ export class Splash {
     void this.window.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(page(title, detail))}`);
   }
 
+  hide(): void {
+    if (!this.window.isDestroyed()) this.window.hide();
+  }
+
+  show(): void {
+    if (!this.window.isDestroyed()) this.window.show();
+  }
+
   close(): void {
     if (!this.window.isDestroyed()) this.window.destroy();
   }

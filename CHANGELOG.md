@@ -30,7 +30,27 @@ history this repository does not have.
 
 ---
 
-## Unreleased
+## 0.16.1 — 2026-11-12
+
+**Reversible: none** — no migration in this release. To go back to
+`0.16.0`, use *Go back to 0.16.0* under Updates, or follow *Going back after
+a successful update* in `deploy/UPGRADING.md`. From a checkout, check out
+`v0.16.0` and restart.
+
+Two fixes from 0.16.0: the desktop app can update a ledger that needs an
+update that cannot be undone, and the Mac App Store upload waits for Apple.
+
+### Fixed
+
+- The desktop app no longer quits when "Update the ledger" is chosen for an
+  update that cannot be undone. The splash, the only window open, was closed
+  before the question, so the app's quit-when-no-windows rule ended it the
+  moment the question was answered and the ledger was never updated. The
+  splash now hides behind the question and comes back for the upgrade.
+- The Mac App Store upload step no longer fails on altool's first answer
+  about a delivery it does not know yet: `upload-mas.sh` asks again, as it
+  was meant to, and prints altool's last answer when it runs out of patience.
+  0.16.0's build 24 was uploaded and accepted while the job went red.
 
 ## 0.16.0 — 2026-11-11
 
