@@ -120,6 +120,9 @@ export const HISTORY_FIELDS: Record<string, string> = {
   get base_currency() {
     return t({ message: "currency", comment: "A changed field in History's detail, lower case: a household's main currency. See GLOSSARY.md" });
   },
+  get week_start() {
+    return t({ message: "week start", comment: "A changed field in History's detail, lower case: the day a household's weeks begin on" });
+  },
   get institution() {
     return t({ message: "bank", comment: "A changed field in History's detail, lower case: the bank that holds an account. See GLOSSARY.md" });
   },

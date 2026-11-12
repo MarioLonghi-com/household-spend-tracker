@@ -362,6 +362,10 @@ REGISTRY: dict[str, Code] = {
     "email.no_name": Code("{email} has no usable name before the @", ("email",)),
     # -- household, agent_key: app/services/agent_keys.py, app/api/routers/profile.py (#267) --- #
     "household.not_found": Code("No such household"),
+    "household.unknown_week_start": Code(
+        "{week_start} is not a day a week can start on -- use monday, sunday or saturday",
+        ("week_start",),
+    ),
     "agent_key.not_found": Code("No such key"),
     "agent_key.needs_label": Code("Give the key a label, so you know what it is for"),
     "agent_key.lifetime": Code("A key can last between a day and {max_days} days", ("max_days",)),

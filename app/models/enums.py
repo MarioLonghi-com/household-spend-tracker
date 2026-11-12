@@ -447,6 +447,24 @@ class FxPolicy(enum.StrEnum):
     month_end = "month_end"
 
 
+class WeekStart(enum.StrEnum):
+    """The day a household's weeks begin on (#452).
+
+    Every value has one behaviour: it is the day a weekly total starts on, and
+    the day that week is labelled by. ``monday`` is what every household had
+    before the setting existed, and so the default.
+    """
+
+    monday = "monday"
+    sunday = "sunday"
+    saturday = "saturday"
+
+    @property
+    def sqlite_weekday(self) -> int:
+        """This day as SQLite's ``strftime('%w')`` numbers it: 0 is Sunday."""
+        return {WeekStart.sunday: 0, WeekStart.monday: 1, WeekStart.saturday: 6}[self]
+
+
 class FxFetchMode(enum.StrEnum):
     """What one press of Fetch now asks for (#396 §5.1)."""
 

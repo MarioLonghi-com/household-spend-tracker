@@ -32,6 +32,18 @@ history this repository does not have.
 
 ## Unreleased
 
+### Added
+
+- **A household chooses the first day of its week** (#452): Monday, Sunday
+  or Saturday, under *First day of the week* on the Household page, with the
+  days named in your language. Any member can change it. Weekly totals start
+  on that day and are still named by the date of their first day, so a week
+  across New Year stays whole whichever day it starts on. The agent API shows
+  `week_start` in the household descriptor and its weekly timeseries follow
+  it. Every existing household reads Monday, so no figure changes. One
+  migration, `a7d3f5c20b64` — clean: adds `households.week_start`; rolling it
+  back loses only the choice of day.
+
 ### Fixed
 
 - New recovery codes and a new key's token are no longer lost to Escape,

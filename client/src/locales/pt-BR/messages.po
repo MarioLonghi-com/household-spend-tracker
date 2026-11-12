@@ -1940,6 +1940,11 @@ msgstr "Já comprovado"
 msgid "Yes, undo it"
 msgstr "Sim, desfazer"
 
+#. Label of a form field on the household page: the day weekly totals start on
+#: src/screens/Household.tsx
+msgid "First day of the week"
+msgstr "Primeiro dia da semana"
+
 #: src/screens/Import.tsx
 msgid "Undo — add as new instead"
 msgstr "Desfazer — adicionar como nova"
@@ -4149,6 +4154,12 @@ msgstr "Essa tabela não existe no registro de auditoria"
 #: src/lib/errorMessages.ts
 msgid "error.household.not_found"
 msgstr "Essa casa não existe"
+
+#. monday, sunday and saturday are the API's own names and stay as they are
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.household.unknown_week_start"
+msgstr "{week_start} não é um dia em que a semana possa começar -- use monday, sunday ou saturday"
 
 #. force is the name of a request field
 #. js-lingui-explicit-id
@@ -7935,6 +7946,10 @@ msgstr "Saldo inicial"
 msgid "Written off — work will not pay"
 msgstr "Dada como perdida — o trabalho não vai pagar"
 
+#: src/screens/Household.tsx
+msgid "Weekly totals start on this day."
+msgstr "Os totais semanais começam neste dia."
+
 #. Column heading on the Accounts screen: noun, what sort of thing
 #. Column heading on the Payees screen: noun, what sort of thing
 #. Column name shown beside a value on phones on the Accounts screen: noun, what sort of thing
@@ -10329,6 +10344,11 @@ msgstr "Senha atual"
 msgctxt "history table"
 msgid "category group"
 msgstr "grupo de categorias"
+
+#. A changed field in History's detail, lower case: the day a household's weeks begin on
+#: src/lib/historyWords.ts
+msgid "week start"
+msgstr "início da semana"
 
 #. Where an update failed
 #: src/screens/Updates.tsx
