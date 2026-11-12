@@ -159,3 +159,133 @@ DECIMAL_SEPARATORS: dict[str, str] = {
 def decimal_separator(code: str | None) -> str | None:
     """The separator a bank in this country writes, or None if that is not settled."""
     return DECIMAL_SEPARATORS.get((code or "").strip().upper())
+
+
+# --------------------------------------------------------------------------- #
+# What the first-run wizard suggests for a country (#458)
+# --------------------------------------------------------------------------- #
+
+#: Countries sharing a currency, by ISO 4217 code. Every other country has its
+#: own, in `_OWN_CURRENCY`. Antarctica has none and is suggested nothing.
+_SHARED_CURRENCY: dict[str, str] = {
+    **dict.fromkeys(
+        (
+            "AD", "AT", "AX", "BE", "BL", "CY", "DE", "EE", "ES", "FI", "FR", "GF",
+            "GP", "GR", "HR", "IE", "IT", "LT", "LU", "LV", "MC", "ME", "MF", "MQ",
+            "MT", "NL", "PM", "PT", "RE", "SI", "SK", "SM", "TF", "VA", "YT",
+        ),
+        "EUR",
+    ),
+    **dict.fromkeys(
+        (
+            "AS", "BQ", "EC", "FM", "GU", "IO", "MH", "MP", "PR", "PW", "SV", "TC",
+            "TL", "UM", "US", "VG", "VI",
+        ),
+        "USD",
+    ),
+    **dict.fromkeys(("BJ", "BF", "CI", "GW", "ML", "NE", "SN", "TG"), "XOF"),
+    **dict.fromkeys(("CM", "CF", "TD", "CG", "GQ", "GA"), "XAF"),
+    **dict.fromkeys(("AG", "AI", "DM", "GD", "MS", "KN", "LC", "VC"), "XCD"),
+    **dict.fromkeys(("NC", "PF", "WF"), "XPF"),
+    **dict.fromkeys(("AU", "CX", "CC", "HM", "KI", "NR", "NF", "TV"), "AUD"),
+    **dict.fromkeys(("NZ", "CK", "NU", "PN", "TK"), "NZD"),
+    **dict.fromkeys(("NO", "SJ", "BV"), "NOK"),
+    **dict.fromkeys(("DK", "FO", "GL"), "DKK"),
+    **dict.fromkeys(("CH", "LI"), "CHF"),
+    **dict.fromkeys(("GB", "GG", "IM", "JE", "GS"), "GBP"),
+    **dict.fromkeys(("MA", "EH"), "MAD"),
+    **dict.fromkeys(("IL", "PS"), "ILS"),
+    **dict.fromkeys(("CW", "SX"), "XCG"),
+}
+
+#: A country whose currency is its own, by code.
+_OWN_CURRENCY: dict[str, str] = {
+    "AE": "AED", "AF": "AFN", "AL": "ALL", "AM": "AMD", "AO": "AOA", "AR": "ARS",
+    "AW": "AWG", "AZ": "AZN", "BA": "BAM", "BB": "BBD", "BD": "BDT", "BG": "BGN",
+    "BH": "BHD", "BI": "BIF", "BM": "BMD", "BN": "BND", "BO": "BOB", "BR": "BRL",
+    "BS": "BSD", "BT": "BTN", "BW": "BWP", "BY": "BYN", "BZ": "BZD", "CA": "CAD",
+    "CD": "CDF", "CL": "CLP", "CN": "CNY", "CO": "COP", "CR": "CRC", "CU": "CUP",
+    "CV": "CVE", "CZ": "CZK", "DJ": "DJF", "DO": "DOP", "DZ": "DZD", "EG": "EGP",
+    "ER": "ERN", "ET": "ETB", "FJ": "FJD", "FK": "FKP", "GE": "GEL", "GH": "GHS",
+    "GI": "GIP", "GM": "GMD", "GN": "GNF", "GT": "GTQ", "GY": "GYD", "HK": "HKD",
+    "HN": "HNL", "HT": "HTG", "HU": "HUF", "ID": "IDR", "IN": "INR", "IQ": "IQD",
+    "IR": "IRR", "IS": "ISK", "JM": "JMD", "JO": "JOD", "JP": "JPY", "KE": "KES",
+    "KG": "KGS", "KH": "KHR", "KM": "KMF", "KP": "KPW", "KR": "KRW", "KW": "KWD",
+    "KY": "KYD", "KZ": "KZT", "LA": "LAK", "LB": "LBP", "LK": "LKR", "LR": "LRD",
+    "LS": "LSL", "LY": "LYD", "MD": "MDL", "MG": "MGA", "MK": "MKD", "MM": "MMK",
+    "MN": "MNT", "MO": "MOP", "MR": "MRU", "MU": "MUR", "MV": "MVR", "MW": "MWK",
+    "MX": "MXN", "MY": "MYR", "MZ": "MZN", "NA": "NAD", "NG": "NGN", "NI": "NIO",
+    "NP": "NPR", "OM": "OMR", "PA": "PAB", "PE": "PEN", "PG": "PGK", "PH": "PHP",
+    "PK": "PKR", "PL": "PLN", "PY": "PYG", "QA": "QAR", "RO": "RON", "RS": "RSD",
+    "RU": "RUB", "RW": "RWF", "SA": "SAR", "SB": "SBD", "SC": "SCR", "SD": "SDG",
+    "SE": "SEK", "SG": "SGD", "SH": "SHP", "SL": "SLE", "SO": "SOS", "SR": "SRD",
+    "SS": "SSP", "ST": "STN", "SY": "SYP", "SZ": "SZL", "TH": "THB", "TJ": "TJS",
+    "TM": "TMT", "TN": "TND", "TO": "TOP", "TR": "TRY", "TT": "TTD", "TW": "TWD",
+    "TZ": "TZS", "UA": "UAH", "UG": "UGX", "UY": "UYU", "UZ": "UZS", "VE": "VES",
+    "VN": "VND", "VU": "VUV", "WS": "WST", "YE": "YER", "ZA": "ZAR", "ZM": "ZMW",
+    "ZW": "ZWG",
+}
+
+CURRENCY: dict[str, str] = {**_SHARED_CURRENCY, **_OWN_CURRENCY}
+
+#: Month first. Everywhere else not in `_YEAR_FIRST` writes the day first.
+_MONTH_FIRST = frozenset(("US", "AS", "GU", "MP", "PR", "UM", "VI", "FM", "MH", "PW", "PH", "BZ"))
+
+#: Year first, as the country's own standard writes a date.
+_YEAR_FIRST = frozenset(
+    ("CN", "JP", "KR", "KP", "TW", "MN", "HU", "LT", "SE", "CA", "IR", "BT", "MO", "HK")
+)
+
+#: CLDR's `firstDay`: where weeks start on Sunday or on Saturday. Everywhere
+#: else, Monday. (CLDR's one Friday, the Maldives, is offered Monday: the
+#: household setting has no Friday.)
+_SUNDAY_FIRST = frozenset(
+    (
+        "AG", "AS", "BD", "BR", "BS", "BT", "BW", "BZ", "CA", "CN", "CO", "DM", "DO",
+        "ET", "GT", "GU", "HK", "HN", "ID", "IL", "IN", "JM", "JP", "KE", "KH", "KR",
+        "LA", "MH", "MM", "MO", "MT", "MX", "MZ", "NI", "NP", "PA", "PE", "PH", "PK",
+        "PR", "PT", "PY", "SA", "SG", "SV", "TH", "TT", "TW", "UM", "US", "VE", "VI",
+        "WS", "YE", "ZA", "ZW",
+    )
+)
+_SATURDAY_FIRST = frozenset(
+    ("AE", "AF", "BH", "DJ", "DZ", "EG", "IQ", "IR", "JO", "KW", "LY", "OM", "QA", "SD", "SY")
+)
+
+
+def date_format(code: str) -> str:
+    """The household date format a country writes, among the three offered."""
+    if code in _MONTH_FIRST:
+        return "MM/DD/YYYY"
+    if code in _YEAR_FIRST:
+        return "YYYY-MM-DD"
+    return "DD/MM/YYYY"
+
+
+def week_start(code: str) -> str:
+    """The day a country's weeks start on, as `WeekStart` names it."""
+    if code in _SATURDAY_FIRST:
+        return "saturday"
+    if code in _SUNDAY_FIRST:
+        return "sunday"
+    return "monday"
+
+
+def suggestions() -> list[dict[str, str | None]]:
+    """Every country with what the region step suggests for it.
+
+    Suggestions only: each one is editable on the step, and nothing here is
+    stored -- the household keeps the currency, format and week start chosen,
+    not the country. The number format is never suggested: it follows the
+    language.
+    """
+    return [
+        {
+            "code": code,
+            "name": name,
+            "currency": CURRENCY.get(code),
+            "date_format": date_format(code),
+            "week_start": week_start(code),
+        }
+        for code, name in COUNTRIES
+    ]

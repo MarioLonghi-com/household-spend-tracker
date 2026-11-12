@@ -121,6 +121,36 @@ TREE: tuple[tuple[str, tuple[str, ...]], ...] = (
 )
 
 
+#: The Essentials preset on the first-run wizard (#458): eleven of the tree's
+#: categories, under the three groups that hold them. No new words -- ids from
+#: `TREE`, seeded in `TREE`'s order.
+ESSENTIALS: tuple[str, ...] = (
+    "seed.group.income",
+    "seed.category.salary",
+    "seed.category.other_income",
+    "seed.category.reimbursements",
+    "seed.group.bills",
+    "seed.category.rent_mortgage",
+    "seed.category.electricity",
+    "seed.category.internet",
+    "seed.category.phone",
+    "seed.group.everyday",
+    "seed.category.groceries",
+    "seed.category.eating_out",
+    "seed.category.transport",
+    "seed.category.health",
+)
+
+#: What "Start empty" keeps, and what no choice may leave out: the group and
+#: the category carrying the roles the reports read (#372).
+REQUIRED: tuple[str, ...] = (INCOME_GROUP, REIMBURSEMENT_CATEGORY)
+
+#: Every id in the tree, groups and categories.
+TREE_IDS: frozenset[str] = frozenset(
+    one for group, ids in TREE for one in (group, *ids)
+)
+
+
 def load_catalog() -> dict[str, dict[str, str]]:
     return json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
 

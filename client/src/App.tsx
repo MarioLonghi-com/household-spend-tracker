@@ -277,6 +277,10 @@ const OPENS_IN_NEW_TAB = [
   "application",
   "report-net-worth",
   "exchange-rates",
+  // Where the first-run wizard's next steps lead (#458).
+  "import",
+  "household",
+  "admin",
 ] as const;
 
 /**
@@ -290,7 +294,7 @@ const KEEPS_ITS_ADDRESS: readonly OpensInNewTab[] = ["report-net-worth", "exchan
 type OpensInNewTab = (typeof OPENS_IN_NEW_TAB)[number];
 
 /** Of those, the ones only an owner is shown -- the menu hides them too. */
-const OWNER_ONLY_OPENS: readonly OpensInNewTab[] = ["application"];
+const OWNER_ONLY_OPENS: readonly OpensInNewTab[] = ["application", "admin"];
 
 /** Where the shell opens: what `?open=` asked for, if this person may see it. */
 export function firstScreen(opened: { screen: OpensInNewTab | null }, role: User["role"]): Screen {

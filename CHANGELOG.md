@@ -34,6 +34,25 @@ history this repository does not have.
 
 ### Added
 
+- **A first-run wizard for every edition** (#458): one guided setup in the
+  browser, on the Mac and on Windows, with the steps on a rail at the side
+  (a progress bar on a phone). It starts with the language, which switches
+  the whole wizard at once and names the starter categories; then a picture
+  of how the app fits together; then the security steps (the setup token,
+  you and your password, Touch ID on a Mac that has it, a passkey or an
+  authenticator on a server, the recovery codes); then the household, its
+  country, base currency, date format and first day of the week, the starter
+  categories (Recommended, Essentials, Start empty, or Bring from YNAB, each
+  one untickable except Income and Reimbursements), and an optional first
+  account whose opening date can go back years. Nothing is saved until
+  *Create my household*, which makes the owner, the household, its categories
+  and the account together or not at all. The finish screen says where to go
+  next and, under *Technical details*, where this installation keeps its
+  data and how it is backed up and upgraded. A bank file dropped on the
+  account step opens in Import right after setup.
+- A household made from the API can be given its first day of the week as
+  it is created (#458).
+
 - **A household chooses the first day of its week** (#452): Monday, Sunday
   or Saturday, under *First day of the week* on the Household page, with the
   days named in your language. Any member can change it. Weekly totals start

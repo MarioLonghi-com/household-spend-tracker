@@ -72,6 +72,12 @@ msgstr "Hoppades över: kontot är satt till Hoppa över"
 msgid "A personal access token from your YNAB account."
 msgstr "En personlig åtkomsttoken från ditt YNAB-konto."
 
+#. Setup wizard, Categories: a preset of starter categories: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Recommended"
+msgstr "Rekommenderat"
+
 #. A changed field in History's detail, lower case. See GLOSSARY.md
 #: src/lib/historyWords.ts
 msgid "note"
@@ -162,6 +168,12 @@ msgstr "Att uppdatera från den här skärmen kräver uppdateraren, som följer 
 msgid "Your new password is set. Sign in with it and your authenticator as usual."
 msgstr "Ditt nya lösenord är sparat. Logga in med det och din autentiseringsapp som vanligt."
 
+#. Setup wizard, Second step (web): title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Add a second step"
+msgstr "Lägg till ett andra steg"
+
 #: src/screens/Register.tsx
 msgid "payee, memo, or the bank's own words"
 msgstr "mottagare, beskrivning eller bankens egna ord"
@@ -178,6 +190,12 @@ msgstr "Öppna Dropbox"
 #: src/screens/Receipts.tsx
 msgid "Send back to the inbox"
 msgstr "Skicka tillbaka till inkorgen"
+
+#. Setup wizard, Welcome & language: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "This only changes how the app talks to you on this device. You can switch later in Your account."
+msgstr "Det här ändrar bara hur appen talar till dig på den här enheten. Du kan byta senare under Ditt konto."
 
 #. Sentence on the one-time import
 #: src/screens/OneTimeImport.tsx
@@ -245,6 +263,12 @@ msgstr "Ta bort gruppen {0}?"
 msgid "while starting the new version"
 msgstr "när den nya versionen startades"
 
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Type"
+msgstr "Typ"
+
 #: src/screens/Profile.tsx
 msgid "A key lets a program — a script, an automation, an AI assistant — read and, if you allow it, add to one household on your behalf. Everything it does appears in that household's History under your name and the key's."
 msgstr "En nyckel låter ett program – ett skript, en automatisering, en AI-assistent – läsa och, om du tillåter det, lägga till i ett hushåll åt dig. Allt det gör syns i hushållets Historik under ditt och nyckelns namn."
@@ -277,6 +301,12 @@ msgstr "Till månad"
 msgid "No accounts match these filters."
 msgstr "Inga konton matchar de här filtren."
 
+#. Setup wizard, Region & formats: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "First day of the week"
+msgstr "Veckans första dag"
+
 #. Where an update failed
 #: src/screens/Updates.tsx
 msgid "while stopping the maintenance page"
@@ -307,6 +337,12 @@ msgstr "Lägg till detta i din autentiseringsapp och skriv sedan de sex siffror 
 msgid "Type"
 msgstr "Typ"
 
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Multi-currency, multi-country"
+msgstr "Flera valutor, flera länder"
+
 #. Heading in the bank filter on the Net Worth report
 #: src/screens/reports/NetWorth.tsx
 msgid "Banks"
@@ -318,9 +354,21 @@ msgstr "Banker"
 msgid "Select {0}"
 msgstr "Markera {0}"
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Invite someone"
+msgstr "Bjud in någon"
+
 #: src/lib/signInChanges.ts
 msgid "{by} reset {user}'s second step"
 msgstr "{by} återställde det andra steget för {user}"
+
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Transactions belong to accounts, which belong to a household, and can have receipts attached. They come in by hand or from a bank import, and they feed two reports: Income vs Expenses and Net worth."
+msgstr "Transaktioner hör till konton, som hör till ett hushåll, och kan ha kvitton kopplade. De kommer in för hand eller via bankimport och ger två rapporter: Inkomster och utgifter samt Nettoförmögenhet."
 
 #: src/screens/Profile.tsx
 msgid "No browsers were being trusted."
@@ -577,6 +625,12 @@ msgstr "serverns svar kunde inte läsas"
 msgid "{keptText}, so {rules} may now suggest rules from it."
 msgstr "{keptText}, så {rules} kan nu föreslå regler utifrån det."
 
+#. Setup wizard, You & password: button beside the password field: hide the typed password. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Hide"
+msgstr "Dölj"
+
 #. History headline, the kind of act: several rows changed at once
 #: src/lib/historyWords.ts
 msgid "Bulk edit"
@@ -692,6 +746,12 @@ msgstr "När"
 msgid "Between part {0} and part {1}"
 msgstr "Mellan del {0} och del {1}"
 
+#. Setup wizard, frame: link button: leave this optional step out. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Skip for now"
+msgstr "Hoppa över just nu"
+
 #: src/screens/Updates.tsx
 msgid "The app stays up throughout. Nothing in the ledger changes."
 msgstr "Appen är igång hela tiden. Ingenting i boken ändras."
@@ -753,7 +813,9 @@ msgid "This browser does not support passkeys yet."
 msgstr "Den här webbläsaren har inte stöd för lösennycklar än."
 
 #. Option in a dropdown on the Admin screen
+#. Option in a dropdown on the Admin screen
 #: src/screens/Admin.tsx
+#: src/screens/Setup.tsx
 msgid "YYYY-MM-DD"
 msgstr "ÅÅÅÅ-MM-DD"
 
@@ -874,6 +936,13 @@ msgstr "Netto – {0}"
 msgid "On a laptop"
 msgstr "På en bärbar dator"
 
+#. Setup wizard, details: row of the details; never translate the parts in backticks -- {path} is a folder on this computer
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "In the container volume `ledger`, mounted at `{path}`: the ledger `spendtracker.sqlite3` with its `-wal` and `-shm` files, `secret.key` (it encrypts the authenticator secrets), `backups/` and `logs/`."
+msgstr "I containervolymen `ledger`, monterad på `{path}`: kassaboken `spendtracker.sqlite3` med filerna `-wal` och `-shm`, `secret.key` (krypterar autentiserarnas hemligheter), `backups/` och `logs/`."
+
+#. Button on setup: make a passkey. See GLOSSARY.md
 #. Button on setup: make a passkey. See GLOSSARY.md
 #: src/components/PasskeyChoice.tsx
 msgid "Create passkey"
@@ -990,6 +1059,12 @@ msgstr "Avslutade månader."
 msgid "One part of a split"
 msgstr "En del av en uppdelning"
 
+#. Setup wizard, Recovery: shown after the recovery codes were copied to the clipboard. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Copied"
+msgstr "Kopierat"
+
 #: src/screens/reports/Reimbursements.tsx
 msgid "Each currency keeps its own figures and nothing here adds two together — the ledger stores no exchange rates. A claim repaid in another currency is listed once, with every amount in its own currency and no difference worked out between them."
 msgstr "Varje valuta behåller sina egna siffror och inget här lägger ihop två – boken lagrar inga växelkurser. Ett utlägg som betalats tillbaka i en annan valuta visas en gång, med varje belopp i sin egen valuta och utan någon uträknad skillnad mellan dem."
@@ -998,11 +1073,6 @@ msgstr "Varje valuta behåller sina egna siffror och inget här lägger ihop tv�
 #: src/screens/Updates.tsx
 msgid "This instance now runs {running}."
 msgstr "Den här instansen kör nu {running}."
-
-#. Heading on the first-run setup
-#: src/screens/Setup.tsx
-msgid "2. You"
-msgstr "2. Du"
 
 #. Column heading on the Income vs Expense report: noun, per month
 #: src/screens/reports/IncomeExpense.tsx
@@ -1013,6 +1083,12 @@ msgstr "Genomsnitt"
 #: src/screens/reports/Reimbursements.tsx
 msgid "Flagged"
 msgstr "Flaggade"
+
+#. Setup wizard, Second step (web): label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Use a passkey"
+msgstr "Använd en lösennyckel"
 
 #: src/screens/Admin.tsx
 msgid "Keep them active"
@@ -1123,6 +1199,12 @@ msgstr "Kategorin angavs på {done} rad och 1 överföringsdel hoppades över �
 #: src/screens/Receipts.tsx
 msgid "What was it for?"
 msgstr "Vad var det för?"
+
+#. Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Give each person their own login to this household."
+msgstr "Ge var och en en egen inloggning till hushållet."
 
 #: src/screens/ynab/results.tsx
 msgid "Every row was imported."
@@ -1312,6 +1394,12 @@ msgstr "En regel körs bara när ett kontoutdrag läses, så att skriva en ändr
 msgid "Choose where backups go"
 msgstr "Välj var säkerhetskopior ska sparas"
 
+#. Setup wizard, Household: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Household name"
+msgstr "Hushållets namn"
+
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
 msgid "Check the code and finish"
@@ -1485,6 +1573,12 @@ msgstr "Allt som registrerats om detta"
 msgid "(the {RULES_LISTED} largest are listed)"
 msgstr "(de {RULES_LISTED} största visas)"
 
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "What the account held on the opening date."
+msgstr "Vad kontot hade på startdatumet."
+
 #. Updates section: what happens to a setting during this update
 #: src/screens/Updates.tsx
 msgid "Stays as it is."
@@ -1518,6 +1612,12 @@ msgstr "Avstämda kontoutdrag"
 msgid "You Need A Budget: from its export file or its API."
 msgstr "You Need A Budget: från dess exportfil eller dess API."
 
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "You & password"
+msgstr "Du och ditt lösenord"
+
 #. Checkbox on the Backups screen; secret.key is a file name and stays
 #: src/screens/Backups.tsx
 msgid "Include <0>secret.key</0> in downloads"
@@ -1550,6 +1650,12 @@ msgstr "Försök igen"
 #: src/screens/Reconcile.tsx
 msgid "the closing balance"
 msgstr "utgående saldo"
+
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Transactions"
+msgstr "Transaktioner"
 
 #: src/screens/Reconcile.tsx
 msgid "Nothing left to prove on or before that date. Everything up to here is already locked."
@@ -1598,6 +1704,18 @@ msgstr "{0} kvar"
 msgid "Linked {0}."
 msgstr "Kopplade: {0}."
 
+#. Setup wizard, Welcome & language: one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "A few minutes, and you can go back to any step. First, the language you want to use."
+msgstr "Några minuter, och du kan gå tillbaka till alla steg. Först språket du vill använda."
+
+#. Setup wizard, Technical details panel: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Source code, releases and notes:"
+msgstr "Källkod, versioner och anteckningar:"
+
 #. placeholder {0}: beat?.socket ?? "?"
 #: src/screens/Updates.tsx
 msgid "The updater cannot use the container engine ({0}), so this screen cannot update the app."
@@ -1606,6 +1724,12 @@ msgstr "Uppdateraren kan inte använda containermotorn ({0}), så den här skär
 #: src/screens/Profile.tsx
 msgid "{keys, plural, one {{keys} agent key still works — revoke it below if it should stop.} other {{keys} agent keys still work — revoke them below if they should stop.}}"
 msgstr "{keys, plural, one {{keys} agentnyckel fungerar fortfarande – återkalla den nedan om den ska sluta.} other {{keys} agentnycklar fungerar fortfarande – återkalla dem nedan om de ska sluta.}}"
+
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Categories"
+msgstr "Kategorier"
 
 #: src/screens/Rules.tsx
 msgid "Call the payee"
@@ -1678,6 +1802,12 @@ msgstr "redan avdraget"
 #: src/screens/Import.tsx
 msgid "Discard the staged one"
 msgstr "Kasta den förberedda"
+
+#. Setup wizard, Second step (web): label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Create passkey"
+msgstr "Skapa lösennyckel"
 
 #. Button: replace the recovery code shown
 #. Button: replace the recovery code shown
@@ -1847,6 +1977,12 @@ msgstr "Letar…"
 msgid "One row, typed in by hand"
 msgstr "En rad, inskriven för hand"
 
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Recovery"
+msgstr "Återställning"
+
 #: src/screens/Rules.tsx
 msgid "Nothing — check you are matching what the bank wrote rather than what the register shows."
 msgstr "Inget – kontrollera att du matchar mot det banken skrev och inte mot det registret visar."
@@ -1995,6 +2131,12 @@ msgstr "Lämna båda tomma för att importera allt ({0})."
 msgid "Closed — hide it from the accounts list"
 msgstr "Avslutat – dölj det i kontolistan"
 
+#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Only what reports need"
+msgstr "Bara det rapporterna behöver"
+
 #: src/screens/Admin.tsx
 msgid "Choose what {name} sets again. They do it themselves, from a one-time link you hand over."
 msgstr "Välj vad {name} ska ställa in igen. Personen gör det själv, via en engångslänk som du lämnar över."
@@ -2011,7 +2153,6 @@ msgstr "{0} – inte en lokal fil"
 
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
-#: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 msgid "The six digits"
 msgstr "De sex siffrorna"
@@ -2047,7 +2188,6 @@ msgstr "Återställningskoden du loggade in med i den här fliken täcker det �
 #. Heading on the Your account panel: noun. See GLOSSARY.md
 #. Label of a choice on the Admin screen: noun. See GLOSSARY.md
 #. Label of a form field on the account reset page: noun. See GLOSSARY.md
-#. Label of a form field on the first-run setup: noun. See GLOSSARY.md
 #. Label of a form field on the invitation page: noun. See GLOSSARY.md
 #. Label of a form field on the sign-in page: noun. See GLOSSARY.md
 #. Label on the Your account panel: noun. See GLOSSARY.md
@@ -2055,7 +2195,6 @@ msgstr "Återställningskoden du loggade in med i den här fliken täcker det �
 #: src/screens/Admin.tsx
 #: src/screens/Profile.tsx
 #: src/screens/ResetAccount.tsx
-#: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 msgid "Password"
 msgstr "Lösenord"
@@ -2099,6 +2238,12 @@ msgstr "Den här boken öppnades senast av en nyare version av Household Spend T
 msgid "while starting the maintenance page"
 msgstr "när underhållssidan startades"
 
+#. Setup wizard, You & password: one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "This password opens your ledger."
+msgstr "Lösenordet öppnar din kassabok."
+
 #: src/lib/saveBackup.ts
 msgid "the server sent no file"
 msgstr "servern skickade ingen fil"
@@ -2135,9 +2280,22 @@ msgstr "mottagarkolumn"
 msgid "Latest 3 months"
 msgstr "Senaste 3 månaderna"
 
+#. Setup wizard, Review & finish: the final button: creates the owner, the household and everything else at once
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Create my household"
+msgstr "Skapa mitt hushåll"
+
 #: src/screens/Admin.tsx
 msgid "Make them an owner"
 msgstr "Gör personen till ägare"
+
+#. Setup wizard, Setup token (web): label. See GLOSSARY.md
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Setup token"
+msgstr "Installationsnyckel"
 
 #: src/screens/reports/NetWorth.tsx
 msgid "Net worth on {startDate}"
@@ -2161,6 +2319,12 @@ msgstr "Del {0} {1}, del {2} {3}"
 #: src/lib/labels.ts
 msgid "Skipped"
 msgstr "Överhoppad"
+
+#. Setup wizard, Household: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "On this computer only you sign in. To share a household with someone who has their own login, use the web edition."
+msgstr "På den här datorn är det bara du som loggar in. Att dela ett hushåll med någon som har egen inloggning kräver webbversionen."
 
 #: src/screens/Admin.tsx
 msgid "That is more than you chose: what was already reset for them stays reset, so the link has to set it too."
@@ -2333,6 +2497,12 @@ msgstr "Efter när utgiften skedde."
 msgid "Account"
 msgstr "Konto"
 
+#. Setup wizard, Household: a choice of who the household is for: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Your own money: your accounts, cards and savings."
+msgstr "Dina egna pengar: dina konton, kort och sparande."
+
 #: src/screens/reports/NetWorth.tsx
 msgid "Showing {asOf}, the last closed month."
 msgstr "Visar {asOf}, den senaste avslutade månaden."
@@ -2381,7 +2551,6 @@ msgid "Previous page"
 msgstr "Föregående sida"
 
 #: src/screens/AcceptInvite.tsx
-#: src/screens/Setup.tsx
 msgid "Check the code"
 msgstr "Kontrollera koden"
 
@@ -2422,6 +2591,12 @@ msgstr "Ditt lösenord är bytt och koden du använde har slutat fungera. Den h�
 msgid "Nothing recorded against this one."
 msgstr "Inget registrerat om den här."
 
+#. Setup wizard, Technical details panel: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Version"
+msgstr "Version"
+
 #. Application management: the code was built with changes not yet saved in git
 #: src/screens/ApplicationManagement.tsx
 msgid "with uncommitted changes"
@@ -2445,6 +2620,12 @@ msgstr "Inkomster och utgifter"
 #: src/screens/ExchangeRates.tsx
 msgid "Treat a rate as stale after (days)"
 msgstr "Räkna en kurs som inaktuell efter (dagar)"
+
+#. Setup wizard, You & password: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Your name"
+msgstr "Ditt namn"
 
 #: src/screens/Import.tsx
 msgid "Into which account"
@@ -2479,6 +2660,12 @@ msgstr "Luckor."
 msgid "Repaid"
 msgstr "Återbetalt"
 
+#. Setup wizard, Technical details panel: row of the Technical details panel; never translate the parts in backticks
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "The Microsoft Store updates the app. The first launch of a new version backs up the ledger, then upgrades it before opening."
+msgstr "Microsoft Store uppdaterar appen. Första starten av en ny version säkerhetskopierar kassaboken och uppgraderar den sedan innan den öppnas."
+
 #. Heading on the Income vs Expense report: noun, money that went out
 #. Headline figure on the Income vs Expense report: noun, money that went out
 #: src/screens/reports/IncomeExpense.tsx
@@ -2503,6 +2690,12 @@ msgstr "<0>{0} markerade.</0> Att ändra dem är en enda handling, så att ångr
 #: src/screens/Passkeys.tsx
 msgid "This is your last second step, so it cannot be removed. Set up an authenticator first."
 msgstr "Det här är ditt sista andra steg, så det går inte att ta bort. Ställ in en autentiseringsapp först."
+
+#. Setup wizard, First account: an account type. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Savings"
+msgstr "Sparkonto"
 
 #. Column name shown beside a value on phones on the Register screen (noun). See GLOSSARY.md
 #. Label on the Register screen (noun). See GLOSSARY.md
@@ -2563,6 +2756,12 @@ msgstr "Förra året"
 msgid "Update the updater"
 msgstr "Uppdatera uppdateraren"
 
+#. Setup wizard, frame: name of a chapter in the side rail (a group of steps). See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Review"
+msgstr "Granskning"
+
 #: src/lib/signInChanges.ts
 msgid "The server reset {user}'s password and second step"
 msgstr "Servern återställde lösenordet och det andra steget för {user}"
@@ -2583,6 +2782,12 @@ msgstr "När du byter det loggas alla andra webbläsare ut och alla betrodda gl�
 #: src/components/Receipts.tsx
 msgid "No receipt yet"
 msgstr "Inget kvitto än"
+
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Receipts"
+msgstr "Kvitton"
 
 #. Table cell on the Register screen
 #. Text on the Register screen
@@ -2663,6 +2868,12 @@ msgstr "Sparkonto"
 msgid "{0, plural, one {# change to the instance itself (people, settings)} other {# changes to the instance itself (people, settings)}}"
 msgstr "{0, plural, one {# ändring av själva instansen (personer, inställningar)} other {# ändringar av själva instansen (personer, inställningar)}}"
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite your housemates from Household."
+msgstr "Sedan: bjud in de du bor med under Hushåll."
+
 #: src/screens/Register.tsx
 msgid "A split needs at least two parts"
 msgstr "En uppdelning behöver minst två delar"
@@ -2708,6 +2919,12 @@ msgstr "Inget registrerat. Rader som skapades innan granskningsloggen fanns har 
 msgid "No rate for {missing}, so those accounts are left out of the total. "
 msgstr "Ingen kurs för {missing}, så de kontona är inte med i summan. "
 
+#. Setup wizard, Household: suggested household name; {name} is the person's name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "{name}'s money"
+msgstr "{name}s pengar"
+
 #: src/screens/Register.tsx
 msgid "Keep my changes"
 msgstr "Behåll mina ändringar"
@@ -2718,6 +2935,12 @@ msgstr "Behåll mina ändringar"
 #: src/screens/Backups.tsx
 msgid "Download {0}"
 msgstr "Ladda ner {0}"
+
+#. Setup wizard, Overview: box in the overview diagram: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Track your money through the years."
+msgstr "Följ dina pengar genom åren."
 
 #. Application management: nobody has suggested a wording yet
 #: src/screens/TranslationReview.tsx
@@ -2757,7 +2980,6 @@ msgstr "Write-ahead-logg"
 #. placeholder {0}: started.secret
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
-#: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 msgid "Can't scan? Enter this key by hand: <0>{0}</0>"
 msgstr "Går det inte att skanna? Skriv in nyckeln för hand: <0>{0}</0>"
@@ -2872,12 +3094,24 @@ msgstr "Allt ett program gör fel måste kunna ångras av en människa, och där
 msgid "Waiting to be reviewed"
 msgstr "Väntar på granskning"
 
+#. Setup wizard, Technical details panel: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Backups"
+msgstr "Säkerhetskopior"
+
 #. Heading of a group of choices on the one-time import
 #. Step name in the one-time import: which app the history comes from
 #: src/lib/labels.ts
 #: src/screens/OneTimeImport.tsx
 msgid "Source app"
 msgstr "Källapp"
+
+#. Setup wizard, Second step (web): label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "A six-digit code from an app on your phone."
+msgstr "En sexsiffrig kod från en app i telefonen."
 
 #. Label on the Reimbursements report
 #: src/screens/reports/Reimbursements.tsx
@@ -2888,6 +3122,12 @@ msgstr "Återbetalt genom {payment}"
 #: src/screens/ExchangeRates.tsx
 msgid "Rate used for monthly figures"
 msgstr "Kurs för månadssiffror"
+
+#. Setup wizard, frame: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Nothing is saved until the last step."
+msgstr "Inget sparas förrän i sista steget."
 
 #. List item on the Backups screen: conjunction between two choices
 #. Sentence on the sign-in page: conjunction between two choices
@@ -2914,6 +3154,12 @@ msgstr "Ladda ner .txt"
 msgid "On {asOf} the household held {total} across {held}, up {moved} on {start}."
 msgstr "Den {asOf} hade hushållet {total} på {held}, {moved} mer än {start}."
 
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Then bring in your statements"
+msgstr "Hämta sedan in dina kontoutdrag"
+
 #. Application management, Where the files are: the built web pages
 #: src/lib/labels.ts
 msgid "Client build"
@@ -2923,10 +3169,28 @@ msgstr "Klientbygge"
 msgid "Locking is one act, so History undoes the whole reconciliation in one click if you got the statement wrong."
 msgstr "Att låsa är en enda handling, så Historik ångrar hela avstämningen med ett klick om du tog fel kontoutdrag."
 
+#. Setup wizard, Household: suggested household name; {name} is the person's name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "{name}'s own"
+msgstr "{name}s eget"
+
 #. Title of a panel on the Transfers screen
 #: src/screens/Transfer.tsx
 msgid "Add transfer"
 msgstr "Lägg till överföring"
+
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Accounts"
+msgstr "Konton"
+
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Net worth"
+msgstr "Nettoförmögenhet"
 
 #. placeholder {0}: one.display_name
 #: src/screens/Admin.tsx
@@ -2937,6 +3201,12 @@ msgstr "Återställ inloggningen för {0}"
 #: ../desktop/src/words.ts
 msgid "Help"
 msgstr "Hjälp"
+
+#. Setup wizard, Review & finish: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "After setup the names are your own words. Changing the app language later does not rename them."
+msgstr "Efter installationen är namnen dina egna. Byter du appens språk senare byter de inte namn."
 
 #. Heading on the desktop app's sign-in page, after a new password
 #: src/screens/SignIn.tsx
@@ -3010,6 +3280,12 @@ msgstr "(arkiverad)"
 msgid "{minutes} min {rest} s"
 msgstr "{minutes} min {rest} s"
 
+#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "3 groups, 11 categories"
+msgstr "3 grupper, 11 kategorier"
+
 #: src/screens/OneTimeImport.tsx
 msgid "Which plan to import"
 msgstr "Vilken plan som ska importeras"
@@ -3052,6 +3328,18 @@ msgstr "Väntar på att uppdateraren ska ta emot begäran…"
 #: src/screens/Admin.tsx
 msgid "Changing your own role would close this screen; ask the other owner"
 msgstr "Att ändra din egen roll skulle stänga den här skärmen; be den andra ägaren"
+
+#. Setup wizard, Categories: a preset of starter categories: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Start empty"
+msgstr "Börja tomt"
+
+#. Setup wizard, You & password: title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Create your password"
+msgstr "Skapa ditt lösenord"
 
 #. Column heading on the Application management screen: noun, size of a file
 #. Column heading on the Application management screen: noun, size of a file
@@ -3220,6 +3508,12 @@ msgstr "Den länken fungerar inte"
 msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 msgstr "{0, plural, one {Även på {1} annan transaktion – samma fil, sparad en gång.} other {Även på {2} andra transaktioner – samma fil, sparad en gång.}}"
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: add another household from Household when you need one, and invite only the people it is for."
+msgstr "Sedan: lägg till ett hushåll till under Hushåll när du behöver, och bjud bara in dem det gäller."
+
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
 msgid "Payee Merge"
@@ -3248,6 +3542,19 @@ msgstr "när kroken före uppdatering kördes"
 #: src/screens/Household.tsx
 msgid "Main currency"
 msgstr "Huvudvaluta"
+
+#. Setup wizard, Household: one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "A household is one shared ledger: its accounts, transactions, categories and the people in it."
+msgstr "Ett hushåll är en delad kassabok: dess konton, transaktioner, kategorier och personerna i det."
+
+#. Setup wizard, First account: title of the step. See GLOSSARY.md
+#. Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Add your first account"
+msgstr "Lägg till ditt första konto"
 
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
@@ -3298,6 +3605,12 @@ msgstr "Kontrollera repot"
 #: src/screens/ExchangeRates.tsx
 msgid "Rates as of"
 msgstr "Kurser per"
+
+#. Setup wizard, Second step (web): one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Your password plus a passkey, or a code from an authenticator app, keeps everyone else out."
+msgstr "Lösenordet plus en lösennyckel, eller en kod från en autentiseringsapp, håller alla andra ute."
 
 #. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
 #. Tag beside a name on the Accounts screen: adjective, an account no longer in use. See GLOSSARY.md
@@ -3388,11 +3701,6 @@ msgstr "Avbryt"
 msgid "Net worth at each month end, split into its parts."
 msgstr "Nettoförmögenhet vid varje månadsslut, uppdelad i sina delar."
 
-#. Heading on the first-run setup
-#: src/screens/Setup.tsx
-msgid "3. A second step"
-msgstr "3. Ett andra steg"
-
 #: src/screens/Payees.tsx
 msgid "The one you keep is the one you choose here."
 msgstr "Den du behåller är den du väljer här."
@@ -3451,6 +3759,24 @@ msgstr "{0, plural, one {och {1} mottagare till – {2} totalt.} other {och {3} 
 #: src/screens/ApplicationManagement.tsx
 msgid "Changing the setting below writes a line into <0>all three</0>, on both sides of the change — including when you turn it <1>down</1>, which is the one that used to leave no trace at all."
 msgstr "Att ändra inställningen nedan skriver en rad i <0>alla tre</0>, på båda sidor om ändringen – även när du <1>sänker</1> den, vilket var just det fall som tidigare inte lämnade några spår alls."
+
+#. Setup wizard, Household: a choice of who the household is for: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "You pool everything: shared bills, joint and personal accounts in one place. All see the same thing."
+msgstr "Ni lägger ihop allt: gemensamma räkningar, gemensamma och egna konton på ett ställe. Alla ser samma sak."
+
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Account name"
+msgstr "Kontonamn"
+
+#. Setup wizard, Categories: title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Pick your starting categories"
+msgstr "Välj dina första kategorier"
 
 #: src/screens/Categories.tsx
 msgid "The Income group — its categories are income on Income vs Expense"
@@ -3528,6 +3854,12 @@ msgstr "Varje transaktion och varje regel som nämner <0>{0}</0> kommer i ställ
 msgid "Through the agent key {via}"
 msgstr "Via agentnyckeln {via}"
 
+#. Setup wizard, Overview: one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Everything else in the app holds them, brings them in, or adds them up."
+msgstr "Allt annat i appen rymmer dem, tar in dem eller summerar dem."
+
 #. Column heading on the Income vs Expense report: a row's amount converted into the base currency
 #: src/screens/reports/IncomeExpense.tsx
 msgid "In {currency}"
@@ -3588,6 +3920,12 @@ msgstr "Betalt den"
 msgid "Reset and make the link"
 msgstr "Återställ och skapa länken"
 
+#. Setup wizard, Recovery: one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "If you lose your phone or your password, one of these gets you back in. Each works once."
+msgstr "Tappar du mobilen eller lösenordet tar en av dessa dig tillbaka in. Varje kod fungerar en gång."
+
 #: src/screens/Receipts.tsx
 msgid "Deleting is recorded and can be put back from the History screen. The picture itself is kept for a day after nothing points at it, which is what makes that undo work."
 msgstr "Borttagningen registreras och kan tas tillbaka från skärmen Historik. Själva bilden sparas en dag efter att inget längre pekar på den, och det är det som gör att ångra fungerar."
@@ -3615,7 +3953,6 @@ msgid "Leave it alone"
 msgstr "Låt det vara"
 
 #: src/screens/AcceptInvite.tsx
-#: src/screens/Setup.tsx
 msgid "Scan this with your authenticator app, then type the six digits it shows. We check the code now, so you find out it works here rather than the next time you sign in."
 msgstr "Skanna detta med din autentiseringsapp och skriv sedan de sex siffror den visar. Vi kontrollerar koden nu, så att du vet att den fungerar här i stället för att märka det nästa gång du loggar in."
 
@@ -3732,6 +4069,12 @@ msgstr "Mönstret drog över sin tiondels sekund. En import skulle lägga det å
 msgid "Pending reimbursement"
 msgstr "Väntande ersättning"
 
+#. Setup wizard, Overview: box in the overview diagram: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Accounts in any currency, from banks in any country. Reports add it all up in your household's base currency."
+msgstr "Konton i valfri valuta, från banker i valfritt land. Rapporterna summerar allt i hushållets basvaluta."
+
 #. Heading on the Exchange rates page: one cell per month, showing which have rates
 #: src/screens/ExchangeRates.tsx
 msgid "Month by month"
@@ -3783,9 +4126,27 @@ msgstr "Ta bort kursen för {0} den {1}?"
 msgid "Download the open suggestions for <0>scripts/apply_translation_suggestions.py</0>:"
 msgstr "Ladda ner de öppna förslagen för <0>scripts/apply_translation_suggestions.py</0>:"
 
+#. Setup wizard, Recovery: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Store it away from this computer: a password manager, or on paper with your documents. We will not show it again."
+msgstr "Förvara den borta från den här datorn: i en lösenordshanterare eller på papper bland dina dokument. Vi visar den inte igen."
+
+#. Setup wizard, Review & finish: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "If something fails, nothing is kept, and you can run setup again."
+msgstr "Om något går fel sparas ingenting och du kan köra installationen igen."
+
 #: src/screens/OneTimeImport.tsx
 msgid "Close the import? Everything chosen so far will be lost."
 msgstr "Stäng importen? Allt du har valt hittills går förlorat."
+
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Income vs Expenses"
+msgstr "Inkomster och utgifter"
 
 #: src/screens/Passkeys.tsx
 msgid "The passkey prompt was closed, so nothing was added."
@@ -3799,6 +4160,12 @@ msgstr "Det stämmer"
 #: src/screens/Register.tsx
 msgid "Smaller text in the table"
 msgstr "Mindre text i tabellen"
+
+#. Setup wizard, Technical details panel: row of the Technical details panel; never translate the parts in backticks
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "The Mac App Store updates the app. The first launch of a new version backs up the ledger, then upgrades it before opening."
+msgstr "Mac App Store uppdaterar appen. Första starten av en ny version säkerhetskopierar kassaboken och uppgraderar den sedan innan den öppnas."
 
 #. Heading on the Application management screen: noun, the running program
 #: src/screens/ApplicationManagement.tsx
@@ -3908,6 +4275,11 @@ msgstr "Filen innehåller fler än {max} konton, vilket är fler än ett hushål
 #: src/lib/errorMessages.ts
 msgid "error.account_import.unknown_column"
 msgstr "Filen har en kolumn som inte känns igen: {columns}. Kolumnerna är {known} -- ladda ner mallen för att utgå från dem."
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.account.opened_in_future"
+msgstr "Ett konto kan inte ha öppnats i framtiden ({date})"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4215,6 +4587,12 @@ msgstr "Tabellen finns inte i granskningsloggen"
 #: src/lib/errorMessages.ts
 msgid "error.household.not_found"
 msgstr "Hushållet finns inte"
+
+#. {theme} is the key of a palette, such as moss, and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.household.unknown_theme"
+msgstr "{theme} är inte ett av färgschemana"
 
 #. monday, sunday and saturday are the API's own names and stay as they are
 #. js-lingui-explicit-id
@@ -4791,6 +5169,18 @@ msgstr "Någon använder redan den e-postadressen"
 #: src/lib/errorMessages.ts
 msgid "error.setup.already_done"
 msgstr "Den här instansen är redan installerad"
+
+#. Income and Reimbursements are the names of a seeded category group and category
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.category_locked"
+msgstr "Gruppen Inkomster och Ersättningar blir kvar: rapporterna bygger på dem"
+
+#. {id} is a technical identifier such as seed.category.gifts and stays as it is
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.setup.category_unknown"
+msgstr "{id} är inte en av de första kategorierna"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -5440,6 +5830,12 @@ msgstr "kurs"
 msgid "Podman {version} (podman machine)"
 msgstr "Podman {version} (podman machine)"
 
+#. Setup wizard, You & password: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Password"
+msgstr "Lösenord"
+
 #. Label on the History screen: noun or step name: what would happen, not yet done
 #: src/screens/History.tsx
 msgid "preview"
@@ -5490,6 +5886,12 @@ msgstr "Aktiv"
 #: ../desktop/src/words.ts
 msgid "Quit Household Spend Tracker"
 msgstr "Avsluta Household Spend Tracker"
+
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Second step"
+msgstr "Andra steg"
 
 #. Column heading on the Admin screen
 #. Column heading on the Admin screen
@@ -5635,6 +6037,19 @@ msgstr "Vad som går förlorat när du går tillbaka"
 msgid "Other asset"
 msgstr "Övrig tillgång"
 
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Household"
+msgstr "Hushåll"
+
+#. Setup wizard, Touch ID (Mac): label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Open with Touch ID"
+msgstr "Öppna med Touch ID"
+
 #. Heading of the Transfers screen: noun, money moved between your own accounts. See GLOSSARY.md
 #. Menu item and the name of its screen: noun, money moved between your own accounts. See GLOSSARY.md
 #. Name of a fact on the one-time import: noun, money moved between your own accounts. See GLOSSARY.md
@@ -5676,6 +6091,12 @@ msgstr "Alla konton är i {0}, så ingen rapport räknar om något."
 #: src/screens/ExchangeRates.tsx
 msgid "{0} s"
 msgstr "{0} s"
+
+#. Setup wizard, Technical details panel: row of the Technical details panel; never translate the parts in backticks
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "`{version}.0` · Microsoft Store"
+msgstr "`{version}.0` · Microsoft Store"
 
 #. Label on the receipts
 #. placeholder {0}: formatInstant(receipt.created_at)
@@ -5735,6 +6156,12 @@ msgstr "Saldo"
 msgid "Categorise {0} selected as…"
 msgstr "Kategorisera {0} markerade som…"
 
+#. Setup wizard, Region & formats: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Base currency"
+msgstr "Basvaluta"
+
 #. Sentence on the Register screen
 #. placeholder {0}: formatCount(selected.size)
 #: src/screens/Register.tsx
@@ -5749,6 +6176,12 @@ msgstr "Datakatalog"
 #: src/screens/Import.tsx
 msgid "The file itself"
 msgstr "Själva filen"
+
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: add another household from Household when you need one. On this computer only you sign in to any of them."
+msgstr "Sedan: lägg till ett hushåll till under Hushåll när du behöver. På den här datorn är det bara du som loggar in i dem."
 
 #. Button on the Admin screen: verb, let an account sign in again
 #: src/screens/Admin.tsx
@@ -6079,6 +6512,12 @@ msgstr "{0, plural, one {Radera det} other {Radera alla {1}}}"
 msgid "Change password"
 msgstr "Byt lösenord"
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Each one has its own accounts, categories and people."
+msgstr "Vart och ett har egna konton, kategorier och personer."
+
 #: src/screens/Profile.tsx
 msgid "Normally a program stages an import and you review it before anything lands in the register. This skips that."
 msgstr "Normalt förbereder ett program en import och du granskar den innan något hamnar i registret. Det här hoppar över det."
@@ -6109,6 +6548,12 @@ msgstr "Dess kategorier är inkomster i Inkomster och utgifter"
 #: src/screens/Admin.tsx
 msgid "none yet"
 msgstr "inga än"
+
+#. Setup wizard, Recovery: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Save as file"
+msgstr "Spara som fil"
 
 #. Button: move this rate source one place later in the list
 #: src/screens/ExchangeRates.tsx
@@ -6203,12 +6648,24 @@ msgstr "Skulle koppla"
 msgid "No receipts here yet."
 msgstr "Inga kvitton här än."
 
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "How they get in"
+msgstr "Hur de kommer in"
+
 #. Shown when a list is empty on the Transfers screen
 #. Shown when a list is empty on the Transfers screen
 #: src/screens/Transfers.tsx
 #: src/screens/TransferSections.tsx
 msgid "Nothing waiting."
 msgstr "Inget väntar."
+
+#. Setup wizard, Household: a choice of who the household is for: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Me and partner"
+msgstr "För oss"
 
 #: src/screens/Admin.tsx
 msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password."
@@ -6241,6 +6698,12 @@ msgstr "Alla hushåll på den här instansen, även de du inte är med i. Att g�
 #: src/lib/historyWords.ts
 msgid "Agent key"
 msgstr "Agentnyckel"
+
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Skipped — add one later from Accounts"
+msgstr "Överhoppat — lägg till ett senare under Konton"
 
 #. placeholder {0}: account.name
 #: src/screens/ynab/mapping.tsx
@@ -6286,6 +6749,12 @@ msgstr "Appen har stoppats. Väntar på att den ska komma tillbaka…"
 msgid "a new category"
 msgstr "en ny kategori"
 
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "After setup — currency not in the list"
+msgstr "Efter installationen — valutan finns inte i listan"
+
 #. Name of a fact on the Application management screen: noun, the computer it runs on
 #: src/screens/ApplicationManagement.tsx
 msgid "Machine"
@@ -6329,6 +6798,12 @@ msgstr "{others, plural, one {med {others} annan utgift} other {med {others} and
 #: src/screens/ynab/results.tsx
 msgid "Amount"
 msgstr "Belopp"
+
+#. Setup wizard, Household: a choice of who the household is for: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Just me"
+msgstr "Bara jag"
 
 #: src/screens/Import.tsx
 msgid "Fecha;Concepto;Importe\n"
@@ -7232,6 +7707,12 @@ msgstr "Redan importerad"
 msgid "Ticked here"
 msgstr "Bockat här"
 
+#. Setup wizard, Household: a choice of who the household is for: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "More than one household"
+msgstr "Fler än ett hushåll"
+
 #: src/screens/Admin.tsx
 msgid "You are a member of anything you create, whether or not you tick yourself."
 msgstr "Du är medlem i allt du skapar, oavsett om du bockar för dig själv eller inte."
@@ -7286,6 +7767,12 @@ msgstr "Använd en lösennyckel i stället"
 msgid "API key"
 msgstr "API-nyckel"
 
+#. Setup wizard, You & password: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "At least 12 characters."
+msgstr "Minst 12 tecken."
+
 #. Label of a choice on the one-time import
 #: src/screens/OneTimeImport.tsx
 msgid "Export file"
@@ -7333,9 +7820,21 @@ msgstr "Anslut"
 msgid "A six-digit code from an app on your phone."
 msgstr "En sexsiffrig kod från en app i telefonen."
 
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Start it on any date"
+msgstr "Börja vilket datum som helst"
+
 #: src/screens/Updates.tsx
 msgid "{engine} is newer than this updater ({updaterVersion}) can work with. It will try to replace itself with a newer one:"
 msgstr "{engine} är nyare än den här uppdateraren ({updaterVersion}) kan hantera. Den kommer att försöka ersätta sig själv med en nyare:"
+
+#. Setup wizard, Household: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Everyone in a household sees and can change everything in it. Anything you want to keep to yourself belongs in a household of its own. You can have more than one."
+msgstr "Alla i ett hushåll ser och kan ändra allt i det. Det du vill hålla för dig själv hör hemma i ett eget hushåll. Du kan ha flera."
 
 #. Heading on the one-time import
 #. Screen-reader name on the date range picker
@@ -7357,6 +7856,12 @@ msgstr "Del {0} ({currency})"
 #: src/screens/Transfers.tsx
 msgid "One row names the other account, or these two accounts have had transfers linked before, and neither row could be anything else — or, of the rows it could be, only this one says the same thing."
 msgstr "En rad nämner det andra kontot, eller så har de här två kontona haft överföringar kopplade tidigare, och ingen av raderna kan vara något annat – eller, av raderna det kan vara, säger bara den här samma sak."
+
+#. Setup wizard, First account: an account type. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Cash"
+msgstr "Kontanter"
 
 #. Button on the app's menu and frame: verb
 #: src/App.tsx
@@ -7414,10 +7919,22 @@ msgstr "{0, plural, one {Slutför och lås {1} rad} other {Slutför och lås {2}
 msgid "No transactions and no rates in {0} yet."
 msgstr "Inga transaktioner och inga kurser i {0} än."
 
+#. Setup wizard, Technical details panel: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Where your data is"
+msgstr "Var dina data finns"
+
 #: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
 msgid "Show a code to scan"
 msgstr "Visa en kod att skanna"
+
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Bank import"
+msgstr "Bankimport"
 
 #: src/screens/Passkeys.tsx
 msgid "Passkeys need this app opened at its HTTPS address."
@@ -7447,6 +7964,12 @@ msgstr "{waited, plural, one {Jobbet ska betala tillbaka – inte återbetalt ä
 msgid "Current account"
 msgstr "Lönekonto"
 
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "By hand"
+msgstr "För hand"
+
 #. placeholder {0}: others.map((one) => one.name).join(", ")
 #. placeholder {1}: kept.name
 #: src/screens/Payees.tsx
@@ -7459,6 +7982,12 @@ msgstr "Varje transaktion och varje regel som nämner <0>{0}</0> kommer att näm
 #: src/screens/ExchangeRates.tsx
 msgid "last change {0}{1}"
 msgstr "senast ändrade {0}{1}"
+
+#. Setup wizard, Overview: box in the overview diagram: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Track your spending, month by month."
+msgstr "Följ dina utgifter, månad för månad."
 
 #. placeholder {0}: one.display_name
 #: src/screens/Admin.tsx
@@ -7485,6 +8014,12 @@ msgstr "{text} – redigera beskrivningen"
 msgid "Changing…"
 msgstr "Ändrar…"
 
+#. Setup wizard, Household: title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Name your household"
+msgstr "Namnge ditt hushåll"
+
 #. Name of a fact on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "Started"
@@ -7504,15 +8039,16 @@ msgstr "Återställning: lösenord"
 msgid "Stored"
 msgstr "Sparade"
 
+#. Setup wizard, Technical details panel: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "For this installation. You don't need any of it to use the app."
+msgstr "För den här installationen. Du behöver inget av det här för att använda appen."
+
 #. Sentence after a refusal: how long to wait before trying again
 #: src/components/bits.tsx
 msgid "{wait, plural, one {Try again in {wait} second.} other {Try again in {wait} seconds.}}"
 msgstr "{wait, plural, one {Försök igen om {wait} sekund.} other {Försök igen om {wait} sekunder.}}"
-
-#. Screen title on the first-run setup
-#: src/screens/Setup.tsx
-msgid "Set up {productName}"
-msgstr "Ställ in {productName}"
 
 #. Column heading on the passkeys panel
 #: src/screens/Passkeys.tsx
@@ -7601,6 +8137,12 @@ msgstr "Slutför"
 msgid "Country"
 msgstr "Land"
 
+#. Setup wizard, Setup token (web): explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "The token is printed in the server log at start-up and written to the data directory. It changes on every restart until setup is finished."
+msgstr "Nyckeln skrivs i serverloggen vid start och sparas i datakatalogen. Den byts vid varje omstart tills installationen är klar."
+
 #: src/screens/Register.tsx
 msgid "filters are set"
 msgstr "filter är satta"
@@ -7655,10 +8197,6 @@ msgstr "Steg {0}:"
 msgid "Ignore {0}"
 msgstr "Ignorera {0}"
 
-#: src/screens/Setup.tsx
-msgid "If you ever forget your password, this code lets you choose a new one. It works once. Keep it somewhere other than this computer: on paper, or in a password manager."
-msgstr "Om du någon gång glömmer ditt lösenord låter den här koden dig välja ett nytt. Den fungerar en gång. Förvara den någon annanstans än på den här datorn: på papper eller i en lösenordshanterare."
-
 #: src/screens/Admin.tsx
 msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new second step: a passkey or an authenticator."
 msgstr "{name} loggas ut överallt och kan inte logga in förrän personen följer den här länken. Den ställer in ett nytt andra steg: en lösennyckel eller en autentiseringsapp."
@@ -7670,6 +8208,12 @@ msgstr "Koppla som överföring"
 #: src/screens/ynab/results.tsx
 msgid "Rules can be suggested after the first statement import: this import brought no bank text to suggest them from."
 msgstr "Regler kan föreslås efter den första importen av ett kontoutdrag: den här importen tog inte med någon banktext att föreslå dem utifrån."
+
+#. Setup wizard, frame: heading of the panel explaining the current step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "About this step"
+msgstr "Om det här steget"
 
 #. Button on the Backups screen; Drive and Dropbox are product names and stay
 #: src/screens/Backups.tsx
@@ -7688,6 +8232,12 @@ msgstr "Samla kontona per land"
 msgid "Nobody has fetched rates for this household yet."
 msgstr "Ingen har hämtat kurser för det här hushållet än."
 
+#. Setup wizard, Second step (web): label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Passkey saved on this device."
+msgstr "Lösennyckeln är sparad på den här enheten."
+
 #. Label of a form field on the one-time import
 #: src/screens/OneTimeImport.tsx
 msgid "YNAB export"
@@ -7697,6 +8247,12 @@ msgstr "YNAB-export"
 #: src/screens/ynab/mapping.tsx
 msgid "YNAB account"
 msgstr "YNAB-konto"
+
+#. Setup wizard, Overview: box in the overview diagram: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "What they give you"
+msgstr "Vad de ger dig"
 
 #. Application management, Where the files are: the database file
 #. Heading on the Application management screen
@@ -7731,6 +8287,12 @@ msgstr "Sparar…"
 #: src/screens/Categories.tsx
 msgid "Delete group"
 msgstr "Radera grupp"
+
+#. Setup wizard, Household: suggested household name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Flat bills"
+msgstr "Bostadens räkningar"
 
 #. Label on the Your account panel of the desktop app, which has one. See GLOSSARY.md
 #. Text on the sign-in page. See GLOSSARY.md
@@ -7799,6 +8361,13 @@ msgstr "Koppla loss det här kvittot?"
 msgid "Category"
 msgstr "Kategori"
 
+#. Setup wizard, frame: name of a chapter in the side rail (a group of steps). See GLOSSARY.md
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Welcome"
+msgstr "Välkommen"
+
 #. Heading on the Application management screen: reviewing the draft languages
 #: src/screens/TranslationReview.tsx
 msgid "Translations"
@@ -7812,6 +8381,12 @@ msgstr "{0, plural, one {En av dessa kan inte ångras genom att gå tillbaka til
 #: src/screens/SignIn.tsx
 msgid "You still have 1 passkey, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr "Du har fortfarande 1 lösennyckel, och en återställningskod låter dem fortsätta fungera. Om en fanns på enheten du tappade bort, ta bort den under Inloggningsmetoder i din profil – ditt namn i menyn."
+
+#. Setup wizard, Setup token (web): one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "This proves you are the person who installed this server."
+msgstr "Den visar att det är du som installerade servern."
 
 #. Column heading on the Income vs Expense report: noun, the free-text line of a transaction. See GLOSSARY.md
 #. Column heading on the Reconcile screen: noun, the free-text line of a transaction. See GLOSSARY.md
@@ -7886,8 +8461,16 @@ msgstr "Filens namn innehåller <0>{0}</0>. Spara det som filmärkning för <1>{
 msgid "The last restore did not finish"
 msgstr "Den senaste återställningen blev inte klar"
 
+#. Setup wizard, Household: a choice of who the household is for: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Only the bills you split: rent, utilities, the shared shop. Each of you keeps personal money in a household of your own."
+msgstr "Bara räkningarna ni delar: hyra, el, den gemensamma matkassen. Var och en har sina egna pengar i ett eget hushåll."
+
+#. State on the Your account panel: Touch ID unlock is turned off
 #. State on the Your account panel: Touch ID unlock is turned off
 #: src/screens/Profile.tsx
+#: src/screens/Setup.tsx
 msgctxt "unlock state"
 msgid "Off"
 msgstr "Av"
@@ -8001,6 +8584,12 @@ msgstr "En säkerhetskopia gjordes först. Det här kan ta en minut."
 msgid "Added {0} rates, {1} unchanged, {2}."
 msgstr "Lade till {0} kurser, {1} oförändrade, {2}."
 
+#. Setup wizard, Second step (web): explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "A passkey lives on your device or in your password manager and opens with Face ID, Touch ID, Windows Hello or a security key. It can't be phished. If this browser can't make one, use an authenticator app."
+msgstr "En lösennyckel finns på din enhet eller i din lösenordshanterare och öppnas med Face ID, Touch ID, Windows Hello eller en säkerhetsnyckel. Den går inte att nätfiska. Om webbläsaren inte kan skapa en, använd en autentiseringsapp."
+
 #. Headline figure on the Income vs Expense report: work expenses that have been paid back
 #. Line on the Income vs Expense report: work expenses that have been paid back
 #: src/screens/reports/IncomeExpense.tsx
@@ -8031,6 +8620,12 @@ msgstr "angiven för hand"
 #: src/screens/ExchangeRates.tsx
 msgid "No rates entered by hand."
 msgstr "Inga kurser angivna för hand."
+
+#. Setup wizard, First account: an account type. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Credit card"
+msgstr "Kreditkort"
 
 #: src/screens/SignIn.tsx
 msgid "Until you do, every sign-in will ask for another recovery code. To do it later, open your account — your name in the menu — and set up a new authenticator there. In this tab, while you stay signed in and for up to a day, the code you just used still covers it; after that, or anywhere else, it takes one more recovery code."
@@ -8139,6 +8734,12 @@ msgstr "Hur mycket som ska skrivas ned"
 msgid "Refetch {0} to {1}?"
 msgstr "Hämta {0} till {1} igen?"
 
+#. Setup wizard, Second step (web): label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Use an authenticator app"
+msgstr "Använd en autentiseringsapp"
+
 #: src/screens/TransferSections.tsx
 msgid "Waiting for the other statement"
 msgstr "Väntar på det andra kontoutdraget"
@@ -8147,13 +8748,37 @@ msgstr "Väntar på det andra kontoutdraget"
 msgid "Brought in by the <0>One-time Import</0> from {how}, reading {what}, on {when}."
 msgstr "Inhämtad av <0>Engångsimport</0> från {how}, genom att läsa {what}, den {when}."
 
+#. Setup wizard, Categories: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Setup will finish with only what reports need, then open One-time Import."
+msgstr "Installationen avslutas med bara det rapporterna behöver och öppnar sedan Engångsimport."
+
 #: src/screens/Admin.tsx
 msgid "Making them an owner…"
 msgstr "Gör hen till ägare…"
 
+#. Setup wizard, Overview: title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Transactions are the centre of everything"
+msgstr "Transaktionerna är kärnan i allt"
+
+#. Setup wizard, First account: part of the first account's summary: {date} is its opening date. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "from {date}"
+msgstr "från {date}"
+
 #: src/screens/Passkeys.tsx
 msgid "Continue to the passkey"
 msgstr "Fortsätt till lösennyckeln"
+
+#. Setup wizard, First account: one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Optional, and nothing here is final."
+msgstr "Valfritt, och inget här är slutgiltigt."
 
 #: src/screens/Register.tsx
 msgid "Select every row shown"
@@ -8198,6 +8823,12 @@ msgstr "Rader med ”Starting Balance”"
 msgid "Applied as a statement is read, so <0>CARREFOUR MADRID 4432</0> arrives as Carrefour. The bank's own words are kept on the transaction either way."
 msgstr "Tillämpas när ett kontoutdrag läses, så <0>CARREFOUR MADRID 4432</0> kommer in som Carrefour. Bankens egna ord sparas på transaktionen i vilket fall."
 
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Review & finish"
+msgstr "Granska och slutför"
+
 #. Text on the receipts
 #: src/components/Receipts.tsx
 msgid "Encoding…"
@@ -8236,6 +8867,25 @@ msgstr "Importera"
 #: src/screens/reports/NetWorth.tsx
 msgid "In its own currency"
 msgstr "I egen valuta"
+
+#. Setup wizard, Household: a choice of who the household is for: its name. See GLOSSARY.md
+#. Setup wizard, Household: suggested household name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Our family"
+msgstr "Vår familj"
+
+#. Setup wizard, You & password: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Email"
+msgstr "E-post"
+
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "You see every row before anything is saved."
+msgstr "Du ser varje rad innan något sparas."
 
 #. Label on the Payees screen
 #. placeholder {0}: kept.name
@@ -8333,11 +8983,6 @@ msgstr "kurskällor"
 msgid "Date format"
 msgstr "Datumformat"
 
-#. Button on the first-run setup
-#: src/screens/Setup.tsx
-msgid "Finish setup"
-msgstr "Slutför installationen"
-
 #: src/components/RecoveryCodes.tsx
 #: src/screens/ResetAccount.tsx
 msgid "I have stored these somewhere that is not this browser"
@@ -8346,6 +8991,12 @@ msgstr "Jag har sparat dem någon annanstans än i den här webbläsaren"
 #: src/screens/ResetAccount.tsx
 msgid "Each one works once, and they are shown only now. Your old ones no longer work. They are how you get back in if you lose your phone but still know your password."
 msgstr "Varje kod fungerar en gång, och de visas bara nu. Dina gamla fungerar inte längre. Det är så du kommer in igen om du tappar bort telefonen men fortfarande kan ditt lösenord."
+
+#. Setup wizard, Region & formats: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Country"
+msgstr "Land"
 
 #. Row heading in the update confirmation
 #: src/screens/Updates.tsx
@@ -8386,6 +9037,12 @@ msgstr "Båda, eftersom kontona har olika valutor och vi inte hittar på en väx
 msgid "Rate date"
 msgstr "Kursdatum"
 
+#. Setup wizard, First account: an account type. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Current account"
+msgstr "Lönekonto"
+
 #. Application management, Where the files are: the backups folder. See GLOSSARY.md
 #: src/lib/labels.ts
 msgid "Backups"
@@ -8412,6 +9069,12 @@ msgstr "Gick tillbaka till {target} {at}. Boken är som den var före uppdaterin
 msgid "This ledger never converts. Currency lives on the account and there is no exchange rate stored anywhere, so a figure adding {0} would be a number with nothing behind it."
 msgstr "Den här boken räknar aldrig om. Valutan hör till kontot och ingen växelkurs sparas någonstans, så en siffra som lägger ihop {0} vore ett tal utan något bakom sig."
 
+#. Setup wizard, Household: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Colour"
+msgstr "Färg"
+
 #: src/screens/Profile.tsx
 msgid "Your code stops working and a new one replaces it. Nobody is signed out."
 msgstr "Din kod slutar fungera och en ny ersätter den. Ingen loggas ut."
@@ -8431,6 +9094,12 @@ msgstr "Den här boken räknar aldrig om. Valutan hör till kontot och ingen vä
 msgid "The process answering this request."
 msgstr "Processen som svarar på den här begäran."
 
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Change it any time, add more later"
+msgstr "Ändra när du vill, lägg till fler senare"
+
 #. placeholder {0}: cell.title
 #: src/screens/reports/IncomeExpense.tsx
 msgid "What went into {0}"
@@ -8449,10 +9118,8 @@ msgstr "En ny autentiseringsapp"
 msgid "{0}. Save it into your synced Drive or Dropbox folder"
 msgstr "{0}. Spara den i din synkade Drive- eller Dropbox-mapp"
 
-#. Heading on the desktop app's first-run setup, its first of two steps
 #. Heading on the invitation page
 #: src/screens/AcceptInvite.tsx
-#: src/screens/Setup.tsx
 msgid "1. You"
 msgstr "1. Du"
 
@@ -8478,6 +9145,12 @@ msgstr "dina data"
 #: src/screens/Admin.tsx
 msgid "Owner"
 msgstr "Ägare"
+
+#. Setup wizard, Household: a choice of who the household is for: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Housemates"
+msgstr "Vi som delar bostad"
 
 #: src/screens/Accounts.tsx
 msgid "What was in the account on the day you started tracking it — usually a date in the past, the one your first statement opens with."
@@ -8528,6 +9201,12 @@ msgstr "Inte för det här kontot"
 msgid "English"
 msgstr "Engelska"
 
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Currency"
+msgstr "Valuta"
+
 #. Table cell on the receipts
 #: src/screens/Receipts.tsx
 msgid "(uploaded)"
@@ -8559,6 +9238,12 @@ msgstr "Rader i källan"
 #: src/screens/Register.tsx
 msgid "Add"
 msgstr "Lägg till"
+
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Touch ID"
+msgstr "Touch ID"
 
 #: src/App.tsx
 msgid "Only you right now"
@@ -8595,6 +9280,12 @@ msgstr "Månadsgenomsnitt"
 msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
 msgstr "Stannar på {runningUpdater}, som är nyare än uppdateraren som följer med {to}."
 
+#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Opens One-time Import next"
+msgstr "Öppnar Engångsimport sedan"
+
 #. placeholder {0}: withdrawing.display_name
 #. placeholder {1}: withdrawing.email
 #: src/screens/Admin.tsx
@@ -8629,6 +9320,12 @@ msgstr "Återaktiverad"
 msgid "{0, plural, one {{1} leg} other {{2} legs}}"
 msgstr "{0, plural, one {{1} ben} other {{2} ben}}"
 
+#. Setup wizard, Recovery: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Copy"
+msgstr "Kopiera"
+
 #: src/screens/SignIn.tsx
 msgid "One of the ten you stored when this account was set up. Each works once, and using one signs you out everywhere, forgets every trusted browser and revokes every agent key."
 msgstr "En av de tio du sparade när kontot ställdes in. Varje kod fungerar en gång, och när du använder en loggas du ut överallt, alla betrodda webbläsare glöms och alla agentnycklar återkallas."
@@ -8640,6 +9337,12 @@ msgstr "Öppna tjänsten i en ny flik:"
 #: src/screens/OneTimeImport.tsx
 msgid "YNAB personal access token"
 msgstr "Personlig åtkomsttoken för YNAB"
+
+#. Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Import a bank statement"
+msgstr "Importera ett kontoutdrag"
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "An advance not spent yet, or an overpayment"
@@ -8654,6 +9357,18 @@ msgstr "Driftstopp"
 #: src/screens/Household.tsx
 msgid "{0} not yet cleared"
 msgstr "{0} ännu ej bokförda"
+
+#. Setup wizard, Categories: a preset of starter categories: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Essentials"
+msgstr "Det viktigaste"
+
+#. Setup wizard, Categories: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Change language"
+msgstr "Byt språk"
 
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Click a transaction to open it in Transactions, in a new tab."
@@ -8882,10 +9597,22 @@ msgstr "Alla"
 msgid "a pocket's or a card product's name"
 msgstr "namnet på en sparficka eller en kortprodukt"
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite the other adults from Household."
+msgstr "Sedan: bjud in de andra vuxna under Hushåll."
+
 #. Column value on the Accounts screen: how many transactions name a suggested identifier
 #: src/screens/Accounts.tsx
 msgid "{count, plural, one {{shown} row} other {{shown} rows}}"
 msgstr "{count, plural, one {{shown} rad} other {{shown} rader}}"
+
+#. Setup wizard, Touch ID (Mac): one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Unlock the app with your fingerprint instead of typing the password."
+msgstr "Lås upp appen med fingeravtrycket i stället för att skriva lösenordet."
 
 #. History headline, the kind of act: several rows deleted at once
 #: src/lib/historyWords.ts
@@ -8932,6 +9659,12 @@ msgstr "{items, plural, one {({items} post)} other {({items} poster)}}"
 msgid "The end of the update's log"
 msgstr "Slutet av uppdateringens logg"
 
+#. Setup wizard, Technical details panel: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "About the project"
+msgstr "Om projektet"
+
 #. History headline, the kind of act: example data was added
 #: src/lib/historyWords.ts
 msgid "Demo data"
@@ -8964,6 +9697,12 @@ msgstr "Spend Tracker: återställningskod för uppdateringen från {from} till 
 #: src/screens/ExchangeRates.tsx
 msgid "Every rate fetched for these dates replaces the one stored, and past converted figures that used it change. Rates entered by hand are not touched."
 msgstr "Varje kurs som hämtas för de här datumen ersätter den sparade, och tidigare omräknade siffror som använde den ändras. Kurser angivna för hand rörs inte."
+
+#. Setup wizard, Technical details panel: row of the Technical details panel; never translate the parts in backticks
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Automatic: on the first launch of each day, on quit when something changed, and before a restore or an upgrade. Kept: every backup from today, plus the newest of each of the last 30 days and of each of the last 12 months. Until you choose a folder they go to `Backups` beside the ledger; File → Choose backups folder… moves them somewhere you can see, such as iCloud Drive. Each backup is one `.sqlite3` file, complete on its own."
+msgstr "Automatiska: vid första starten varje dag, när du avslutar om något ändrats, och före en återställning eller uppdatering. Sparas: alla från i dag, plus den senaste från var och en av de senaste 30 dagarna och de senaste 12 månaderna. Tills du väljer en mapp hamnar de i `Backups` bredvid kassaboken; Arkiv → Välj mapp för säkerhetskopior… flyttar dem dit du ser dem, till exempel iCloud Drive. Varje kopia är en fristående `.sqlite3`-fil."
 
 #: src/screens/reports/Reimbursements.tsx
 msgid "Every payment is accounted for"
@@ -9014,6 +9753,12 @@ msgstr "Gå tillbaka till {to}…"
 #: src/screens/Profile.tsx
 msgid "The recovery code you signed in with covers this, so no other code is asked for."
 msgstr "Återställningskoden du loggade in med täcker detta, så ingen annan kod behövs."
+
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Import statements from that date onward, as far back as your bank lets you download them."
+msgstr "Importera kontoutdrag från det datumet och framåt, så långt bakåt som banken låter dig ladda ner dem."
 
 #: src/screens/Categories.tsx
 msgid "New transactions arrive blank and you choose each time. Right for a payee that is genuinely different every time."
@@ -9743,6 +10488,12 @@ msgstr "Båda är en riktig transaktion i registret, avstämd och daterad den da
 msgid "C — Cleared"
 msgstr "C – Bokförd"
 
+#. Setup wizard, frame: button: go on to the next step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Continue"
+msgstr "Fortsätt"
+
 #: src/screens/Admin.tsx
 msgid "Yes, disable them"
 msgstr "Ja, inaktivera hen"
@@ -9819,6 +10570,12 @@ msgstr "Kategorier"
 msgid "The one on screen goes to the inbox, and the new file takes its place. One undo puts both back."
 msgstr "Det som visas hamnar i inkorgen, och den nya filen tar dess plats. En ångring återställer båda."
 
+#. Setup wizard, Overview: box in the overview diagram: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Every payment, deposit and transfer, each with a category."
+msgstr "Varje betalning, insättning och överföring, var och en med en kategori."
+
 #: src/screens/Accounts.tsx
 msgid "type to search — leave empty for none"
 msgstr "skriv för att söka – lämna tomt för inget"
@@ -9882,11 +10639,6 @@ msgstr "inget registrerat än"
 msgid "Suggested"
 msgstr "Föreslagen"
 
-#. Sentence on the first-run setup
-#: src/screens/Setup.tsx
-msgid "In Docker:"
-msgstr "I Docker:"
-
 #: src/screens/OneTimeImport.tsx
 msgid "How to connect"
 msgstr "Så ansluter du"
@@ -9922,18 +10674,22 @@ msgstr "Kurserna före {day} är sparade; Hämta nu fortsätter från den sista 
 msgid "You still have {0} passkeys, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr "Du har fortfarande {0} lösennycklar, och en återställningskod låter dem fortsätta fungera. Om en fanns på enheten du tappade bort, ta bort den under Inloggningsmetoder i din profil – ditt namn i menyn."
 
+#. Setup wizard, First account: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Not sure what an account held years ago? Start today with today's balance. When you import older statements, move the opening date back; the app tells you if a transaction falls before it."
+msgstr "Vet du inte vad ett konto hade för flera år sedan? Börja i dag med dagens saldo. När du importerar äldre kontoutdrag flyttar du startdatumet bakåt; appen säger till om någon transaktion hamnar före det."
+
 #: src/screens/Import.tsx
 msgid "This lands as one entry in History, so the whole import can be undone in one go."
 msgstr "Detta hamnar som en enda post i Historik, så hela importen kan ångras på en gång."
 
 #. Column heading on the Admin screen: noun, an email address
-#. Label of a form field on the first-run setup: noun, an email address
 #. Label of a form field on the invitation page: noun, an email address
 #. Label of a form field on the sign-in page: noun, an email address
 #. Label of a form field on the sign-in page: noun, an email address
 #: src/screens/AcceptInvite.tsx
 #: src/screens/Admin.tsx
-#: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 msgid "Email"
 msgstr "E-post"
@@ -9975,6 +10731,12 @@ msgstr "Visa kolumnerna för {code}"
 msgid "Numbers and names your statements already use for your accounts, read off the register. An identifier lets transfers link without asking, so a wrong one makes wrong links: nothing here is added until you say so. <0>Would link</0> is how many transfer pairs adding it would link now."
 msgstr "Nummer och namn som dina kontoutdrag redan använder för dina konton, hämtade ur registret. En identifierare låter överföringar kopplas utan att fråga, så en felaktig ger felaktiga kopplingar: inget här läggs till förrän du säger det. <0>Skulle koppla</0> är hur många överföringspar den skulle koppla nu om den lades till."
 
+#. Setup wizard, Region & formats: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "The base currency is what reports add up into; each account keeps its own currency. Week start decides where weekly totals begin. You can change all of these later in Household."
+msgstr "Basvalutan är den som rapporterna summerar i; varje konto behåller sin egen valuta. Veckans första dag avgör var veckosummorna börjar. Allt detta kan ändras senare under Hushåll."
+
 #: src/screens/Profile.tsx
 msgid "Make new codes"
 msgstr "Skapa nya koder"
@@ -10014,6 +10776,18 @@ msgstr "Används bara för summor över flera konton. Varje konto behåller sin 
 #: src/screens/Admin.tsx
 msgid "The link for {0} ({1}) stops working at once. Their second step stays reset, so they cannot sign in until you make them a new link."
 msgstr "Länken för {0} ({1}) slutar fungera direkt. Det andra steget förblir återställt, så personen kan inte logga in förrän du skapar en ny länk."
+
+#. Setup wizard, Setup token (web): name of the tabs for how the server was installed (Docker, Podman, systemd)
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "How the server runs"
+msgstr "Hur servern körs"
+
+#. Setup wizard, Overview: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Nothing on this page changes your setup. Each screen in the app explains itself when you get there."
+msgstr "Inget på den här sidan ändrar din inställning. Varje vy i appen förklarar sig själv när du kommer dit."
 
 #. Under the count of categories on the household page
 #. placeholder {0}: it.category_groups
@@ -10058,11 +10832,6 @@ msgstr "Följer enheten, som är mörk just nu."
 #: src/lib/labels.ts
 msgid "Other assets"
 msgstr "Övriga tillgångar"
-
-#. Heading on the first-run setup
-#: src/screens/Setup.tsx
-msgid "4. Recovery codes"
-msgstr "4. Återställningskoder"
 
 #: src/screens/ApplicationManagement.tsx
 msgid "Every distribution installed in this environment, with the version that is actually loaded — not what <0>requirements.txt</0> locked, which an install may not have followed. When a dependency is the suspect, this is the list that answers it."
@@ -10110,6 +10879,12 @@ msgstr "Tillbaka till inloggningen"
 msgid "Cleared — the bank has it"
 msgstr "Bokförd – banken har den"
 
+#. Setup wizard, Welcome & language: title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Let's set up your household"
+msgstr "Nu ställer vi in ditt hushåll"
+
 #. Button on the Accounts screen
 #. placeholder {0}: suggested.value
 #: src/screens/Accounts.tsx
@@ -10137,6 +10912,12 @@ msgstr "{count, plural, one {{count} överföringsdel} other {{count} överföri
 msgid "Create the link"
 msgstr "Skapa länken"
 
+#. Setup wizard, Overview: box in the overview diagram: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Type one in on any account."
+msgstr "Skriv in en på valfritt konto."
+
 #. Text on the Your account panel: verb, stops working on a date
 #. placeholder {0}: formatInstant(key.expires_at)
 #: src/screens/Profile.tsx
@@ -10151,6 +10932,12 @@ msgstr "En återställningskod kan inte användas här. Om någon annan har sett
 #: src/lib/labels.ts
 msgid "Credit card"
 msgstr "Kreditkort"
+
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Today, or the day your history should begin."
+msgstr "I dag, eller dagen då din historik ska börja."
 
 #: ../desktop/src/words.ts
 msgid "Another copy of the app has it open. Close that one, then try again."
@@ -10276,6 +11063,12 @@ msgctxt "authenticator state"
 msgid "Cleared"
 msgstr "Rensad"
 
+#. Setup wizard, Second step (web): label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "The six digits"
+msgstr "De sex siffrorna"
+
 #. placeholder {0}: formatCount(hiddenByCurrency)
 #. placeholder {1}: listText(columns)
 #. placeholder {2}: formatCount(hiddenByCurrency)
@@ -10311,6 +11104,12 @@ msgstr "Säkerhetskopior sparas tills vidare i appens egen mapp"
 msgctxt "created"
 msgid "None"
 msgstr "Inget"
+
+#. Setup wizard, Recovery: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "recovery codes"
+msgstr "återställningskoder"
 
 #. placeholder {0}: passkey.rp_id
 #: src/screens/Passkeys.tsx
@@ -10534,6 +11333,12 @@ msgstr "Byt namn på eller radera den här gruppen"
 msgid "another account"
 msgstr "ett annat konto"
 
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Everyday account"
+msgstr "Vardagskonto"
+
 #: src/screens/Profile.tsx
 msgid "Add an authenticator app as another second step. Your passkeys keep working, and either one signs you in."
 msgstr "Lägg till en autentiseringsapp som ett till andra steg. Dina lösennycklar fungerar fortfarande, och du kan logga in med vilken som helst av dem."
@@ -10559,6 +11364,12 @@ msgstr "På: körs före säkerhetskopian."
 msgid "Dark"
 msgstr "Mörkt"
 
+#. Setup wizard, Recovery: one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "If you forget your password, this is the only way back in."
+msgstr "Glömmer du lösenordet är det här enda vägen tillbaka in."
+
 #: src/App.tsx
 msgid "Ignore it and carry on"
 msgstr "Ignorera och fortsätt"
@@ -10572,11 +11383,13 @@ msgstr "Ignorera och fortsätt"
 #. Text on the app's menu and frame
 #. Text on the app's menu and frame
 #. Text on the app's menu and frame
+#. Text on the app's menu and frame
 #: src/App.tsx
 #: src/screens/Payees.tsx
 #: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/NetWorth.tsx
 #: src/screens/reports/Reimbursements.tsx
+#: src/screens/Setup.tsx
 msgid "Loading…"
 msgstr "Läser in…"
 
@@ -10605,6 +11418,12 @@ msgstr "När raden på kontoutdraget"
 #: src/screens/SignIn.tsx
 msgid "Use a code from your authenticator instead"
 msgstr "Använd en kod från autentiseringsappen i stället"
+
+#. Setup wizard, frame: button: go back one step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Back"
+msgstr "Tillbaka"
 
 #. Button on the Transfers screen: verb, leave it as it is
 #. Heading of a group of choices on the Payees screen: verb
@@ -10713,10 +11532,8 @@ msgstr "Hur beloppen räknas fram"
 msgid "decimal separator"
 msgstr "decimaltecken"
 
-#. Label of a form field on the first-run setup
 #. Label of a form field on the invitation page
 #: src/screens/AcceptInvite.tsx
-#: src/screens/Setup.tsx
 msgid "Your name"
 msgstr "Ditt namn"
 
@@ -10750,6 +11567,12 @@ msgstr "E-post (valfritt)"
 #: src/screens/Updates.tsx
 msgid "Taken after the app stops, verified, kept in the data volume."
 msgstr "Tas efter att appen har stoppats, verifieras och sparas i datavolymen."
+
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Pick the day your history should begin, even years ago, and give the balance the account had that day."
+msgstr "Välj dagen då din historik ska börja, gärna flera år bakåt, och ange saldot kontot hade den dagen."
 
 #. placeholder {0}: purging.row_count
 #: src/screens/Import.tsx
@@ -10792,6 +11615,12 @@ msgstr "hushåll"
 #: src/screens/ExchangeRates.tsx
 msgid "Fetching {codes} from {source}: {from} to {to}, {step}, of {since} to {until}."
 msgstr "Hämtar {codes} från {source}: {from} till {to}, {step}, av {since} till {until}."
+
+#. Setup wizard, You & password: button beside the password field: show the typed password. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Show"
+msgstr "Visa"
 
 #: src/screens/Import.tsx
 msgid "Where this line will land"
@@ -10846,6 +11675,12 @@ msgstr "Uppdaterad till {target} {at} på {took}."
 msgid "Owner — can administer this instance"
 msgstr "Ägare – kan administrera instansen"
 
+#. Setup wizard, You & password: under the password field: how long the password typed so far is. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "{n} characters"
+msgstr "{n} tecken"
+
 #: ../desktop/src/words.ts
 msgid "Sign in to carry on."
 msgstr "Logga in för att fortsätta."
@@ -10875,6 +11710,12 @@ msgstr "t.ex. {0}"
 #: src/screens/ApplicationManagement.tsx
 msgid "What it depends on"
 msgstr "Vad den är beroende av"
+
+#. Setup wizard, You & password: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Use a sentence you will remember: length matters more than symbols. Nobody, not even the app's author, can see it."
+msgstr "Välj en mening du kommer ihåg: längden betyder mer än specialtecken. Ingen kan se det, inte ens appens upphovsperson."
 
 #: src/screens/Profile.tsx
 msgid "One of your recovery codes"
@@ -10921,6 +11762,12 @@ msgstr "Inte samma sak – lägg till den separat"
 msgid "You sign in with a passkey, or with your password and a passkey."
 msgstr "Du loggar in med en lösennyckel, eller med ditt lösenord och en lösennyckel."
 
+#. Setup wizard, Review & finish: one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Nothing has been saved yet. This button creates everything at once."
+msgstr "Inget är sparat än. Knappen skapar allt på en gång."
+
 #: src/screens/Profile.tsx
 msgid "{usable, plural, one {{usable} passkey} other {{usable} passkeys}}"
 msgstr "{usable, plural, one {{usable} lösennyckel} other {{usable} lösennycklar}}"
@@ -10954,6 +11801,12 @@ msgstr "Håll den inkopplad och vaken tills det här är klart. Om den går i vi
 msgid "{emptyAtStart, plural, one {# account had no rows yet at the start of the range and counts as nothing until its first one. } other {# accounts had no rows yet at the start of the range and count as nothing until their first one. }}"
 msgstr "{emptyAtStart, plural, one {# konto hade inga rader ännu i periodens början och räknas som noll fram till den första. } other {# konton hade inga rader ännu i periodens början och räknas som noll fram till den första. }}"
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "A bank account, card or cash wallet."
+msgstr "Bankkonto, kort eller kontanter."
+
 #. Button on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Leave it"
@@ -10967,6 +11820,12 @@ msgstr "En återställningskod"
 #: src/screens/Register.tsx
 msgid "Hide filters"
 msgstr "Dölj filter"
+
+#. Setup wizard, Setup token (web): title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Paste the setup token"
+msgstr "Klistra in installationsnyckeln"
 
 #: src/screens/Admin.tsx
 msgid "Whoever opens an owner link can administer this instance, and stays an owner whatever you later do to your own password or authenticator."
@@ -11030,6 +11889,12 @@ msgstr "Räknar ut vad som skulle ändras…"
 msgid "Download…"
 msgstr "Ladda ned…"
 
+#. Setup wizard, Technical details panel: row of the Technical details panel; never translate the parts in backticks
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "`{version}` (build `{build}`) · Mac App Store"
+msgstr "`{version}` (bygge `{build}`) · Mac App Store"
+
 #. Application management, Where the files are: note on the Data directory row
 #: src/lib/labels.ts
 msgid "everything that is not the code"
@@ -11077,10 +11942,11 @@ msgstr "jobbutlägg"
 msgid "Your key is used only for this import. It stays in this browser tab and is never stored or logged by {productName}."
 msgstr "Din nyckel används bara för den här importen. Den stannar i den här webbläsarfliken och lagras eller loggas aldrig av {productName}."
 
-#. Heading on the desktop app's first-run setup, its second of two steps
-#: src/screens/Setup.tsx
-msgid "2. Your recovery code"
-msgstr "2. Din återställningskod"
+#. Setup wizard, Touch ID (Mac): title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Open with Touch ID?"
+msgstr "Öppna med Touch ID?"
 
 #. Desktop app dialog title after Back up now succeeded
 #: ../desktop/src/words.ts
@@ -11134,6 +12000,12 @@ msgstr "Visa en ny kod att skanna"
 #: src/screens/Register.tsx
 msgid "Out ({currency})"
 msgstr "Ut ({currency})"
+
+#. Setup wizard, Categories: one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Untick anything you will never use. You can rename, add and archive later."
+msgstr "Bocka ur det du aldrig kommer att använda. Du kan byta namn, lägga till och arkivera senare."
 
 #. Application management, Where the files are: note on the Browsable snapshot row; `/db` is an address and stays
 #: src/lib/labels.ts
@@ -11235,6 +12107,12 @@ msgstr "Inget är markerat som jobbutlägg än. Öppna en transaktion i registre
 msgid "Restore from backup…"
 msgstr "Återställ från säkerhetskopia…"
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Add another household"
+msgstr "Lägg till ett hushåll till"
+
 #: src/screens/Register.tsx
 msgid "Nothing here yet. Add a row above, or import a statement from the Import screen."
 msgstr "Inget här än. Lägg till en rad ovan, eller importera ett kontoutdrag från skärmen Importera."
@@ -11271,6 +12149,12 @@ msgstr "ge detta till kill eller lsof"
 msgid "Keep it"
 msgstr "Behåll den"
 
+#. Setup wizard, frame: name of a chapter in the side rail (a group of steps). See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Security"
+msgstr "Säkerhet"
+
 #: src/screens/Updates.tsx
 msgid "In Docker Desktop or Podman Desktop, open Containers, find <0>{name}</0> and press Start."
 msgstr "I Docker Desktop eller Podman Desktop öppnar du Containers, letar upp <0>{name}</0> och trycker på Start."
@@ -11306,6 +12190,18 @@ msgstr "Status"
 #: src/screens/reports/NetWorth.tsx
 msgid "Rates come from {sources}, the last one published on or before each date."
 msgstr "Kurserna kommer från {sources}: den senaste som publicerats på eller före varje datum."
+
+#. Setup wizard, Technical details panel: row of the Technical details panel; never translate the parts in backticks
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Nothing runs on a schedule yet. Make one from Application management → Backups, or from the compose folder: `docker compose run --rm -T -v \"$PWD/backups:/backups\" --entrypoint python app -m scripts.backup --into /backups`. Every update makes one first, inside the volume. Keep a copy of `secret.key` somewhere safe and separate: without it everyone has to pair their authenticator again. Never copy the database file by hand."
+msgstr "Inget körs på schema än. Gör en under Programhantering → Säkerhetskopior, eller från compose-mappen: `docker compose run --rm -T -v \"$PWD/backups:/backups\" --entrypoint python app -m scripts.backup --into /backups`. Varje uppdatering gör en först, inne i volymen. Spara en kopia av `secret.key` på ett säkert ställe för sig: utan den måste alla koppla sin autentiserare igen. Kopiera aldrig databasfilen för hand."
+
+#. Setup wizard, Touch ID (Mac): explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Your password still works, and is still needed after a restart. Turn this off any time in Your account."
+msgstr "Lösenordet fungerar fortfarande och behövs efter en omstart. Stäng av när du vill under Ditt konto."
 
 #. Name of a fact on the History screen: noun, one act in History, undone as a whole
 #: src/screens/History.tsx
@@ -11455,6 +12351,12 @@ msgstr "Filtren ovan släpper igenom {counted}, i {inCurrencies}."
 msgid "Reading what YNAB holds…"
 msgstr "Läser vad YNAB innehåller…"
 
+#. Setup wizard, Household: suggested household name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Our home"
+msgstr "Vårt hem"
+
 #. Scope of a key for programs: it may also change data. Lower case, inside a sentence
 #: src/screens/Profile.tsx
 msgid "write"
@@ -11496,9 +12398,27 @@ msgstr "basvaluta"
 msgid "{by} reset {user}'s password"
 msgstr "{by} återställde lösenordet för {user}"
 
+#. Setup wizard, Household: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Who is this household for?"
+msgstr "Vem är hushållet till för?"
+
+#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "5 groups, 21 categories"
+msgstr "5 grupper, 21 kategorier"
+
 #: src/screens/Profile.tsx
 msgid "You sign in with your password. If you forget it, your recovery code lets you choose a new one."
 msgstr "Du loggar in med ditt lösenord. Om du glömmer det låter din återställningskod dig välja ett nytt."
+
+#. Setup wizard, Second step (web): label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Face ID, Touch ID, Windows Hello or a security key. Recommended."
+msgstr "Face ID, Touch ID, Windows Hello eller en säkerhetsnyckel. Rekommenderas."
 
 #: src/screens/ynab/mapping.tsx
 msgid "Each YNAB account goes to one {productName} account in {currency}, to a new one, or is skipped. An account can take only one YNAB account, so one chosen on a row is not offered on the others."
@@ -11700,6 +12620,12 @@ msgstr "IBAN"
 msgid "Rate's date"
 msgstr "Kursens datum"
 
+#. Setup wizard, Technical details panel: row of the Technical details panel; never translate the parts in backticks
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Application management → Updates installs a new release through the `updater` container, after a backup. The release in use is pinned in `.env` as `SPENDTRACKER_VERSION`."
+msgstr "Programhantering → Uppdateringar installerar en ny version via containern `updater`, efter en säkerhetskopia. Versionen som används är låst i `.env` som `SPENDTRACKER_VERSION`."
+
 #. Section heading on the Net Worth report
 #: src/screens/reports/NetWorth.tsx
 msgid "Where it is held"
@@ -11771,7 +12697,9 @@ msgid "whatever is left"
 msgstr "det som blir kvar"
 
 #. State on the Your account panel: Touch ID unlock is turned on
+#. State on the Your account panel: Touch ID unlock is turned on
 #: src/screens/Profile.tsx
+#: src/screens/Setup.tsx
 msgctxt "unlock state"
 msgid "On"
 msgstr "På"
@@ -11801,6 +12729,12 @@ msgstr "Inget i den här gruppen än."
 #: src/screens/Import.tsx
 msgid "Yes, all {0} of them"
 msgstr "Ja, alla {0}"
+
+#. Setup wizard, Technical details panel: row of the Technical details panel; never translate the parts in backticks
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Automatic: on the first launch of each day, on quit when something changed, and before a restore or an upgrade. Kept: every backup from today, plus the newest of each of the last 30 days and of each of the last 12 months. They go to `Documents\\Spend Tracker Backups`; File → Choose backups folder… moves them, for example into OneDrive. Each backup is one `.sqlite3` file, complete on its own."
+msgstr "Automatiska: vid första starten varje dag, när du avslutar om något ändrats, och före en återställning eller uppdatering. Sparas: alla från i dag, plus den senaste från var och en av de senaste 30 dagarna och de senaste 12 månaderna. De hamnar i `Documents\\Spend Tracker Backups`; Arkiv → Välj mapp för säkerhetskopior… flyttar dem, till exempel till OneDrive. Varje kopia är en fristående `.sqlite3`-fil."
 
 #: src/screens/Payees.tsx
 msgid "Add a payee"
@@ -11837,6 +12771,12 @@ msgstr "Källa som används"
 #: src/components/GroupedPicker.tsx
 msgid "Nothing matches that."
 msgstr "Inget matchar."
+
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "My currency isn't here"
+msgstr "Min valuta finns inte här"
 
 #. Button on the Register screen
 #: src/screens/Register.tsx
@@ -11910,6 +12850,12 @@ msgstr "Pengarna ut, ersatta av den enda betalningen in"
 #: src/screens/Updates.tsx
 msgid "rolling back: clean"
 msgstr "återställning: ren"
+
+#. Setup wizard, Region & formats: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "This week"
+msgstr "Den här veckan"
 
 #. Label of a form field on the Rules screen
 #: src/screens/Rules.tsx
@@ -12037,6 +12983,12 @@ msgstr "Vad den är till för"
 msgid "No country set"
 msgstr "Inget land angivet"
 
+#. Setup wizard, Technical details panel: heading of a closed panel with facts about this installation. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Technical details"
+msgstr "Tekniska detaljer"
+
 #: src/screens/Profile.tsx
 msgid "Nothing has changed yet — your current authenticator keeps working until a code proves the new one pairs."
 msgstr "Inget har ändrats än – din nuvarande autentiseringsapp fortsätter fungera tills en kod visar att den nya är kopplad."
@@ -12049,6 +13001,12 @@ msgstr "Inget har ändrats än – din nuvarande autentiseringsapp fortsätter f
 #: src/screens/Reports.tsx
 msgid "Reports"
 msgstr "Rapporter"
+
+#. Setup wizard, Second step (web): label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Can't scan? Enter this key by hand:"
+msgstr "Går det inte att skanna? Skriv in nyckeln:"
 
 #: src/screens/Import.tsx
 msgid "a note for this row"
@@ -12118,6 +13076,12 @@ msgstr "Spara"
 #: src/screens/reports/NetWorth.tsx
 msgid "Every transaction on the account up to and including the date, the opening balance included. A transfer between two of your accounts moves money from one balance to the other and does not change the total; between two currencies, the total moves only by the difference in conversion."
 msgstr "Alla transaktioner på kontot till och med datumet, ingående saldo inräknat. En överföring mellan två av dina konton flyttar pengar från ett saldo till ett annat och ändrar inte summan; mellan två valutor ändras summan bara med skillnaden i omräkning."
+
+#. Setup wizard, Review & finish: title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Check and create"
+msgstr "Kontrollera och skapa"
 
 #: src/screens/Register.tsx
 msgid "One row from each account's statement, made the two sides of one transfer"
@@ -12229,6 +13193,12 @@ msgstr "Vad är det här? {label}"
 msgid "The server keeps only a hash of it, so nobody — you included — can read it back."
 msgstr "Servern sparar bara en hash av den, så ingen – inte ens du – kan läsa tillbaka den."
 
+#. Setup wizard, Categories: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Income and Reimbursements stay: the reports rely on them. Names are in your chosen language and become your own words."
+msgstr "Inkomster och Ersättningar blir kvar: rapporterna bygger på dem. Namnen är på ditt språk och blir dina egna."
+
 #: src/screens/ApplicationManagement.tsx
 msgid "the migration this database is at"
 msgstr "migreringen som databasen är på"
@@ -12285,9 +13255,20 @@ msgstr "{0, plural, one {En import förbereddes men slutfördes aldrig. Inget i 
 msgid "Browsable snapshot"
 msgstr "Bläddringsbar ögonblicksbild"
 
+#. Setup wizard, Review & finish: summary on the review step: how many categories will be created. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "{n, plural, one {# category} other {# categories}}"
+msgstr "{n, plural, one {# kategori} other {# kategorier}}"
+
+#. Setup wizard, Household: a choice of who the household is for: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Parents and children under one roof. Adults can be members; children's costs are categories, such as School or Pocket money."
+msgstr "Föräldrar och barn under samma tak. Vuxna kan vara medlemmar; barnens kostnader blir kategorier, till exempel Skola eller Veckopeng."
+
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
-#: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 msgid "At least 12 characters. Length is what matters."
 msgstr "Minst 12 tecken. Det är längden som räknas."
@@ -12478,6 +13459,12 @@ msgstr "De här ändringarna sedan dess skulle gå förlorade:"
 msgid "12,34"
 msgstr "12,34"
 
+#. Setup wizard, frame: link on the review step: go back and change this answer. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Change"
+msgstr "Ändra"
+
 #. Column heading on the fetch history: rates already stored
 #: src/screens/ExchangeRates.tsx
 msgid "Unchanged"
@@ -12507,6 +13494,12 @@ msgstr "ett negativt saldo här är pengar du är skyldig"
 msgid "Still owed"
 msgstr "Fortfarande skyldigt"
 
+#. Setup wizard, Review & finish: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Where to go next:"
+msgstr "Vart du kan gå härnäst:"
+
 #. placeholder {0}: report.pending.length
 #: src/screens/Updates.tsx
 msgid "{0, plural, =0 {No migrations will run.} one {# migration will run} other {# migrations will run}}"
@@ -12524,6 +13517,12 @@ msgstr "Slå ihop stavningar av samma namn"
 #: src/screens/Register.tsx
 msgid "What has happened to this"
 msgstr "Vad som har hänt med den här"
+
+#. Setup wizard, Categories: {lang} is a language name such as Svenska. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "The categories that reports need are created in {lang}, the language you chose on step 1."
+msgstr "Kategorierna som rapporterna behöver skapas på {lang}, språket du valde i steg 1."
 
 #: src/screens/Transfers.tsx
 msgid "Select every pair that does not share a row with another"
@@ -12615,6 +13614,7 @@ msgid "New category in {0}"
 msgstr "Ny kategori i {0}"
 
 #: src/screens/Admin.tsx
+#: src/screens/Setup.tsx
 msgid "MM/DD/YYYY"
 msgstr "MM/DD/ÅÅÅÅ"
 
@@ -12753,6 +13753,12 @@ msgstr "Den andra sidan av var och en importerades inte, så det finns inget hä
 msgid "How each foreign balance is converted."
 msgstr "Hur varje saldo i annan valuta räknas om."
 
+#. Setup wizard, Technical details panel: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Upgrading"
+msgstr "Uppdatering"
+
 #. Column heading on the Net Worth report: one part of the split (a currency, country, bank or type)
 #: src/screens/reports/NetWorth.tsx
 msgid "Part"
@@ -12789,10 +13795,22 @@ msgstr "{count, plural, one {{shown} transaktion} other {{shown} transaktioner}}
 msgid "Mark applied"
 msgstr "Markera som tillämpad"
 
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Overview"
+msgstr "Översikt"
+
 #. Screen-reader name of the right arrow on the Income vs Expense report's month map
 #: src/screens/reports/ReportGrid.tsx
 msgid "Later months"
 msgstr "Senare månader"
+
+#. Setup wizard, Region & formats: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Date format"
+msgstr "Datumformat"
 
 #: src/screens/Admin.tsx
 msgid "Close without copying? The link cannot be shown again."
@@ -12860,14 +13878,15 @@ msgstr "Den här webbläsaren har inte använts här på sistone, så det andra 
 msgid "If something goes wrong <0>during</0> this update, it rolls back by restoring the backup, and nothing is lost. If you decide <1>afterwards</1> that you want {from} back, the only way is that same backup, and everything written after the update goes with it."
 msgstr "Om något går fel <0>under</0> den här uppdateringen rullas den tillbaka genom att säkerhetskopian återställs, och ingenting går förlorat. Om du <1>efteråt</1> bestämmer dig för att du vill ha tillbaka {from} är samma säkerhetskopia det enda sättet, och allt som skrivits efter uppdateringen försvinner med den."
 
-#. placeholder {0}: tokenPath ?? t`the data directory`
-#: src/screens/Setup.tsx
-msgid "It was printed to the server log when this instance started, and written to <0>{0}</0>. It changes every time the server restarts until setup is finished."
-msgstr "Den skrevs ut i serverns logg när instansen startade och sparades i <0>{0}</0>. Den ändras varje gång servern startas om tills installationen är klar."
-
 #: src/screens/AccountImport.tsx
 msgid "Reading the file…"
 msgstr "Läser filen…"
+
+#. Setup wizard, Technical details panel: row of the Technical details panel; never translate the parts in backticks
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "`{version}` · commit `{commit}` · image `ghcr.io/mariolonghi-com/household-spend-tracker:{version}`"
+msgstr "`{version}` · commit `{commit}` · avbild `ghcr.io/mariolonghi-com/household-spend-tracker:{version}`"
 
 #: src/screens/Receipts.tsx
 msgid "Select the receipt from {when}"
@@ -12902,10 +13921,6 @@ msgstr "Visar {0} av {1} – visa fler"
 msgid "Spent"
 msgstr "Utlagt"
 
-#: src/screens/Setup.tsx
-msgid "1. The setup token"
-msgstr "1. Installationstoken"
-
 #. placeholder {0}: one.written_off_count
 #. placeholder {1}: one.written_off_count
 #. placeholder {2}: one.written_off_count
@@ -12927,6 +13942,12 @@ msgstr "Varje rad den ändrade"
 #: src/screens/Profile.tsx
 msgid "Turn off Touch ID"
 msgstr "Stäng av Touch ID"
+
+#. Setup wizard, Household: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "The colour tells your households apart if you ever keep more than one. You can invite others later from Household."
+msgstr "Färgen skiljer hushållen åt om du någon gång har fler än ett. Du kan bjuda in andra senare under Hushåll."
 
 #: src/screens/Receipts.tsx
 msgid "This receipt carries no date of its own, so the window is around when it was uploaded."
@@ -12961,6 +13982,12 @@ msgstr "via {via}"
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as a member."
 msgstr "{inviter} har bjudit in dig till {PRODUCT} som medlem."
+
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite your partner from Household."
+msgstr "Sedan: bjud in din partner under Hushåll."
 
 #. Screen-reader name of the left arrow on the Income vs Expense report's month map
 #: src/screens/reports/ReportGrid.tsx
@@ -13049,10 +14076,6 @@ msgstr "{0} kastades – inget skrevs"
 #: src/screens/Receipts.tsx
 msgid "Thumbnails"
 msgstr "Miniatyrer"
-
-#: src/screens/Setup.tsx
-msgid "the data directory"
-msgstr "datakatalogen"
 
 #: src/screens/ynab/mapping.tsx
 msgid "In {currency}, opening balance 0, opened the day before its first imported transaction."
@@ -13211,9 +14234,21 @@ msgstr "ungefärligt – {shown}"
 msgid "In"
 msgstr "In"
 
+#. Setup wizard, Overview: box in the overview diagram: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Current, savings, cards, cash…"
+msgstr "Lönekonto, sparkonto, kort, kontanter…"
+
 #: src/components/RatesAsOf.tsx
 msgid "Rates as of {asOf} · entered by hand"
 msgstr "Kurser per {asOf} · angivna för hand"
+
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Opening balance"
+msgstr "Ingående saldo"
 
 #: src/screens/Register.tsx
 msgid "Enter again to edit"
@@ -13271,6 +14306,12 @@ msgstr "Att uppdatera stoppar appen och ändrar bokens schema."
 msgid "Case does not matter. <0>Matches the pattern</0> is a full regular expression, capped at 300 characters and given a tenth of a second per row — one that runs longer is set aside for the rest of that import. Try it below before you save it."
 msgstr "Skiftläget spelar ingen roll. <0>Matchar mönstret</0> är ett fullständigt reguljärt uttryck, högst 300 tecken och med en tiondels sekund per rad – ett som tar längre tid läggs åt sidan under resten av importen. Prova det nedan innan du sparar det."
 
+#. Setup wizard, details: row of the details; never translate the parts in backticks -- {path} is a folder on this computer
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "`{path}`. The ledger is `spendtracker.sqlite3` with its `-wal` and `-shm` files. It stays there if you delete the app. File → Show ledger folder opens it."
+msgstr "`{path}`. Kassaboken är `spendtracker.sqlite3` med filerna `-wal` och `-shm`. Den ligger kvar om du raderar appen. Arkiv → Visa kassaboksmappen öppnar den."
+
 #. Income vs Expense report: how many months in the range have any transactions
 #. placeholder {0}: report.coverage.months_with_activity
 #. placeholder {1}: report.coverage.months_with_activity
@@ -13284,6 +14325,12 @@ msgstr "{0, plural, one {{1} av {2} månader har några transaktioner – en tom
 #: src/screens/Rules.tsx
 msgid "No rules yet. Add one the next time a statement gives you a name you dislike."
 msgstr "Inga regler än. Lägg till en nästa gång ett kontoutdrag ger dig ett namn du inte gillar."
+
+#. Setup wizard, Review & finish: title once setup has finished. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "You're set up"
+msgstr "Klart"
 
 #. Label of a form field on the Accounts screen
 #: src/screens/Accounts.tsx
@@ -13306,6 +14353,12 @@ msgstr "<0>{0} andra rader har samma mottagare</0> och ingen egen kategori."
 #: src/screens/ResetAccount.tsx
 msgid "Your password and your second step for {email} were reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
 msgstr "Ditt lösenord och ditt andra steg för {email} återställdes från servern den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in båda igen nedan."
+
+#. Setup wizard, Categories: a preset of starter categories: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Bring from YNAB"
+msgstr "Hämta från YNAB"
 
 #. Application management: what sql.log holds; “Verbose, with SQL” is a logging style's name
 #: src/lib/labels.ts
@@ -13343,9 +14396,21 @@ msgstr "Ändrade {done} rader och lämnade {skipped} orörda – bara pengar ut 
 msgid "Dates narrow by when the expense happened, not when it was repaid."
 msgstr "Datumen avgränsar efter när utgiften gjordes, inte när den ersattes."
 
+#. Setup wizard, Household: a choice of who the household is for: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Keep your own, and add other households for the things you share."
+msgstr "Behåll ditt eget och lägg till fler hushåll för det du delar."
+
 #: src/components/Receipts.tsx
 msgid "compressed on the device before sending"
 msgstr "komprimerad på enheten före sändning"
+
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Nothing else to do. You can add people later."
+msgstr "Inget mer att göra. Du kan lägga till personer senare."
 
 #: ../desktop/src/words.ts
 msgid "The backup is restored"
@@ -13359,6 +14424,12 @@ msgstr "Visa arkiverade"
 #: src/screens/Rules.tsx
 msgid "A rule is matched against <0>the bank’s own words</0>, not the payee you see in the register. The register may say <1>Amazon</1> while the statement said <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> — so write the rule for the second one. Open a transaction and press <3>Where did this come from?</3> to see exactly what arrived."
 msgstr "En regel matchas mot <0>bankens egna ord</0>, inte mottagaren du ser i registret. Registret kan säga <1>Amazon</1> medan kontoutdraget sa <2>COMPRA INTERNET WWW.AMAZON K513Z4FW5</2> – så skriv regeln för det senare. Öppna en transaktion och tryck på <3>Var kom det här ifrån?</3> för att se exakt vad som kom in."
+
+#. Setup wizard, Welcome & language: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Language"
+msgstr "Språk"
 
 #. Line on the Income vs Expense report: repayments from work with no expense linked to them yet
 #: src/screens/reports/IncomeExpense.tsx
@@ -13426,6 +14497,12 @@ msgstr "Ingen mottagare matchar ”{0}”."
 msgid "Restored from <0>{0}</0>."
 msgstr "Återställd från <0>{0}</0>."
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "CSV or OFX from your bank."
+msgstr "CSV eller OFX från banken."
+
 #. Column heading on the Admin screen. See GLOSSARY.md
 #. Heading on the Your account panel. See GLOSSARY.md
 #. Heading on the Your account panel. See GLOSSARY.md
@@ -13489,20 +14566,23 @@ msgstr "Du loggar in med ditt lösenord och en kod från autentiseringsappen."
 msgid "How the total is built."
 msgstr "Hur summan byggs upp."
 
+#. Setup wizard, Region & formats: one-line lead under the step title. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "We suggest a base currency and a date format from your country."
+msgstr "Vi föreslår en basvaluta och ett datumformat utifrån ditt land."
+
 #. Heading on the one-time import: noun, YNAB's coloured markers on rows
 #. Name of a fact on the one-time import: noun, YNAB's coloured markers on rows
 #: src/screens/OneTimeImport.tsx
 msgid "Flags"
 msgstr "Flaggor"
 
-#. Button on the first-run setup: go on to the next step
-#. Button on the first-run setup: go on to the next step
 #. Button on the invitation page: go on to the next step
 #. Button on the sign-in page: go on to the next step
 #. Button on the sign-in page: go on to the next step
 #. Button on the sign-in page: go on to the next step
 #: src/screens/AcceptInvite.tsx
-#: src/screens/Setup.tsx
 #: src/screens/SignIn.tsx
 msgid "Continue"
 msgstr "Fortsätt"
@@ -13537,6 +14617,12 @@ msgstr "Kortnummer"
 msgid "{hiddenByCurrency, plural, one {Every row here is in a currency the toggle is hiding. Turn one back on to see them — {hiddenByCurrency} row is waiting.} other {Every row here is in a currency the toggle is hiding. Turn one back on to see them — {hiddenByCurrency} rows are waiting.}}"
 msgstr "{hiddenByCurrency, plural, one {Alla rader här har en valuta som väljaren döljer. Slå på en igen för att se dem – {hiddenByCurrency} rad väntar.} other {Alla rader här har en valuta som väljaren döljer. Slå på en igen för att se dem – {hiddenByCurrency} rader väntar.}}"
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Then the app is set up, and you create the account from Accounts."
+msgstr "Då är appen klar och du skapar kontot under Konton."
+
 #. Text on a dropdown that picks several on the Income vs Expense report
 #. Text on a dropdown that picks several on the Register screen
 #: src/screens/Register.tsx
@@ -13548,6 +14634,12 @@ msgstr "Alla kategorier"
 #: src/components/SuggestWording.tsx
 msgid "Your wording"
 msgstr "Din formulering"
+
+#. Setup wizard, Recovery: title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Keep your recovery code"
+msgstr "Spara din återställningskod"
 
 #: src/screens/Categories.tsx
 msgid "One group is the Income group. Every other category is counted as spending, where refunds and charges net out. Ticking this moves it here from the group that has it now."
@@ -13607,6 +14699,12 @@ msgstr "Uppdaterare"
 msgid "Exchange-rate effect"
 msgstr "Växelkurseffekt"
 
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Or drop a bank file here (CSV or OFX)"
+msgstr "Eller släpp en bankfil här (CSV eller OFX)"
+
 #: src/screens/Updates.tsx
 msgid "The image is kept so you can try again."
 msgstr "Avbildningen sparas så att du kan försöka igen."
@@ -13656,10 +14754,6 @@ msgstr "Inga kategorier är markerade, inte ens Behöver kategori, så det finns
 msgid "Reset: password and second step"
 msgstr "Återställning: lösenord och andra steg"
 
-#: src/screens/Setup.tsx
-msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
-msgstr "Inget sparas förrän i sista steget. Om du stänger sidan är instansen fortfarande orörd och du kan börja om."
-
 #. Note on the Application management screen
 #: src/screens/ApplicationManagement.tsx
 msgid "this process"
@@ -13683,15 +14777,19 @@ msgid "last used {0}"
 msgstr "senast använd {0}"
 
 #. Application management, Where the files are: the setup token file. See GLOSSARY.md
-#. Label of a form field on the first-run setup. See GLOSSARY.md
 #: src/lib/labels.ts
-#: src/screens/Setup.tsx
 msgid "Setup token"
 msgstr "Installationstoken"
 
 #: src/screens/ResetAccount.tsx
 msgid "{by} reset your second step for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
 msgstr "{by} återställde ditt andra steg för {email} den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in det igen nedan."
+
+#. Setup wizard, details: row of the details; never translate the parts in backticks -- {path} is a folder on this computer
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "`{path}`. The ledger is `spendtracker.sqlite3` with its `-wal` and `-shm` files. It is not in Roaming, and it stays there if you uninstall. File → Show ledger folder opens it."
+msgstr "`{path}`. Kassaboken är `spendtracker.sqlite3` med filerna `-wal` och `-shm`. Den ligger inte i Roaming och finns kvar om du avinstallerar. Arkiv → Visa kassaboksmappen öppnar den."
 
 #. Application management: what the Verbose, with SQL logging style writes
 #: src/lib/labels.ts
@@ -13746,6 +14844,12 @@ msgstr "Kopiera länk"
 msgid "New account name for {0}"
 msgstr "Nytt kontonamn för {0}"
 
+#. Setup wizard, frame: name of a chapter in the side rail (a group of steps). See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Your household"
+msgstr "Ditt hushåll"
+
 #. placeholder {0}: formatInstant(row.started_at)
 #: src/screens/ExchangeRates.tsx
 msgid "Started by {who} at {0}. It carries on if they leave the page; each year is stored as it arrives."
@@ -13770,6 +14874,18 @@ msgstr "inte migrerad"
 #: src/screens/Profile.tsx
 msgid "A code from your current authenticator"
 msgstr "En kod från din nuvarande autentiseringsapp"
+
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "First account"
+msgstr "Första kontot"
+
+#. Setup wizard, Region & formats: title of the step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Where do you keep your money?"
+msgstr "Var har du dina pengar?"
 
 #: src/screens/ExchangeRates.tsx
 msgid "Past converted figures will change: every report converts with the new choice from its next load. The change is written to History."
@@ -13877,6 +14993,12 @@ msgstr "Per valuta"
 msgid "Go back to {to}"
 msgstr "Gå tillbaka till {to}"
 
+#. Setup wizard, frame: progress on a narrow screen: {n} is this step, {m} the number of steps. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Step {n} of {m}"
+msgstr "Steg {n} av {m}"
+
 #. Label on the Backups screen
 #: src/screens/Backups.tsx
 msgid "Downloaded."
@@ -13895,6 +15017,12 @@ msgstr "Hålls utanför loggen: {0}. Utelämnat snarare än överstjärnat – e
 #: src/screens/Import.tsx
 msgid "showing the first {0}"
 msgstr "visar de första {0}"
+
+#. Setup wizard, Overview: box in the overview diagram: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Your bank's CSV or OFX file. Rows already there are skipped."
+msgstr "Bankens CSV- eller OFX-fil. Rader som redan finns hoppas över."
 
 #. Desktop app dialog button: replace the ledger with the chosen backup
 #: ../desktop/src/words.ts
@@ -14072,6 +15200,12 @@ msgstr "Kvitton"
 msgid "Link"
 msgstr "Koppla"
 
+#. Setup wizard, Recovery: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "I have stored this somewhere other than this computer"
+msgstr "Jag har sparat den någon annanstans än på den här datorn"
+
 #: src/screens/Register.tsx
 msgid "Choose the replacement"
 msgstr "Välj ersättaren"
@@ -14132,6 +15266,12 @@ msgstr "Appen har inte kommit tillbaka än. Om datorn gick i viloläge eller Doc
 msgid "that import was discarded — nothing was written"
 msgstr "den importen kastades – inget skrevs"
 
+#. Setup wizard, frame: name of a step in the side rail and the review. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Region & formats"
+msgstr "Region och format"
+
 #: src/screens/History.tsx
 msgid "Putting it back…"
 msgstr "Lägger tillbaka…"
@@ -14189,6 +15329,12 @@ msgstr "{0, plural, one {{1} transaktion} other {{2} transaktioner}}"
 msgid "Save receipt notes"
 msgstr "Spara kvittoanteckningar"
 
+#. Setup wizard, Categories: tag beside a category that cannot be unticked. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "needed by reports"
+msgstr "används av rapporter"
+
 #: src/screens/Register.tsx
 msgid "Gather the accounts by type: checking, savings, cards…"
 msgstr "Samla kontona per typ: lönekonto, sparkonto, kort…"
@@ -14198,6 +15344,12 @@ msgstr "Samla kontona per typ: lönekonto, sparkonto, kort…"
 #: src/screens/Updates.tsx
 msgid "Prepare {0}"
 msgstr "Förbered {0}"
+
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Opening date"
+msgstr "Startdatum"
 
 #: src/screens/AccountImport.tsx
 msgid "A plain figure like <0>1234.56</0> or <1>-80.00</1> — a point for the decimals and no thousands separator. Blank for an account that starts empty."
@@ -14231,6 +15383,12 @@ msgstr "OK"
 #: src/screens/TransferSections.tsx
 msgid "Linked by history only"
 msgstr "Kopplade bara genom historiken"
+
+#. Setup wizard, Categories: # is a number of categories, {lang} a language name such as Svenska. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "{n, plural, one {The wizard creates this # category for you, in {lang}: the language you chose on step 1.} other {The wizard creates these # categories for you, in {lang}: the language you chose on step 1.}}"
+msgstr "{n, plural, one {Guiden skapar den här # kategorin åt dig, på {lang}: språket du valde i steg 1.} other {Guiden skapar de här # kategorierna åt dig, på {lang}: språket du valde i steg 1.}}"
 
 #. List item on the one-time import's results
 #. placeholder {0}: formatDate(one.opening_date)
@@ -14280,6 +15438,12 @@ msgstr "Ange en kurs"
 msgid "{0}. Share it to the Drive or Dropbox app"
 msgstr "{0}. Dela den till Drive- eller Dropbox-appen"
 
+#. Setup wizard, Region & formats: label. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Preview"
+msgstr "Förhandsvisning"
+
 #. placeholder {0}: deleting.name
 #. placeholder {1}: formatInstant(deleting.made_at)
 #. placeholder {2}: bytes(deleting.bytes)
@@ -14296,6 +15460,12 @@ msgstr "Förbereder zip-filen…"
 #: src/screens/Transfer.tsx
 msgid "Transfer"
 msgstr "För över"
+
+#. Setup wizard, frame: accessible name of the side rail listing the setup steps. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Setup steps"
+msgstr "Installationssteg"
 
 #: src/screens/Accounts.tsx
 msgid "This account started empty, so there is no opening balance row. Type a figure to add one; without a date it is dated at the account's oldest transaction."
@@ -14378,12 +15548,19 @@ msgstr "Säkerhetskopian som togs före den finns under Databas; behåll den i m
 msgid "Turn on Touch ID"
 msgstr "Slå på Touch ID"
 
+#. Setup wizard, First account: first-account step. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Rename it, move the opening date or fix the balance later, and add as many accounts as you like from Accounts."
+msgstr "Byt namn, flytta startdatumet eller rätta saldot senare, och lägg till hur många konton du vill under Konton."
+
 #. placeholder {0}: (one.captured_at ?? one.created_at).slice(0, 10)
 #: src/screens/Receipts.tsx
 msgid "Select the receipt from {0}"
 msgstr "Markera kvittot från {0}"
 
 #: src/screens/Admin.tsx
+#: src/screens/Setup.tsx
 msgid "DD/MM/YYYY"
 msgstr "DD/MM/ÅÅÅÅ"
 
@@ -14391,6 +15568,12 @@ msgstr "DD/MM/ÅÅÅÅ"
 #: src/screens/ExchangeRates.tsx
 msgid "Mode"
 msgstr "Läge"
+
+#. Setup wizard, Overview: box in the overview diagram: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "A photo or PDF, attached to its transaction."
+msgstr "Ett foto eller en PDF, kopplat till sin transaktion."
 
 #: src/screens/OneTimeImport.tsx
 msgid "You only need the *Register.csv file, not the *Plan.csv. The whole export .zip works too."

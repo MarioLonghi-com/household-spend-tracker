@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, api } from "../lib/api";
+import { takeImportFile } from "../lib/heldImport";
 import { codedText, noticeText } from "../lib/noticeMessages";
 import { format } from "../lib/money";
 import { STEP, useWindowed } from "../lib/useWindowed";
@@ -540,6 +541,20 @@ export function Import({
       // properly by "Read the file", with a reason.
     }
   }
+
+  // A bank file dropped on the first-run wizard (#458), handed over once:
+  // chosen as if it had been chosen here, with the household's one account
+  // picked when it has exactly one -- the account the wizard just made.
+  const handed = useRef(false);
+  useEffect(() => {
+    if (handed.current || !accounts.data) return;
+    handed.current = true;
+    const file = takeImportFile();
+    if (!file) return;
+    if (accounts.data.length === 1) setAccountId(accounts.data[0].id);
+    void chooseFile(file);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts.data]);
 
   // Never added by itself: the person picked the account, and says yes here.
   const answerTag = useMutation({
