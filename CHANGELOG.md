@@ -75,6 +75,24 @@ history this repository does not have.
   update check, the YNAB import) now verifies with certifi's bundle through
   one helper, `outbound.trust()`, and a test fails if a module builds a TLS
   context of its own.
+- The desktop app no longer opens an empty ledger after it was closed, or
+  the computer lost power, in the middle of a restore (#442). The restore
+  copied the backup straight onto the ledger's name, so a restore cut short
+  left no ledger, or half of one, and the next start made a new, empty one in
+  its place. The backup is now copied under a temporary name, flushed to the
+  disk and renamed into place in one step, and a mark beside the ledger says
+  a restore is under way. The next start finishes a restore that got as far
+  as the rename, puts the ledger back as it was otherwise, and says so. A
+  ledger file that is not a database stops the start and is left untouched,
+  and a second restore no longer drops the set-aside copy of the real ledger
+  that a cut-short one left. Quitting during a restore now waits for it.
+- More desktop backup and restore fixes (#442): the backup on quit is no
+  longer skipped after restoring an older ledger; two backups at once (the
+  day's first, "Back up now", the one on quit, the one before a restore) no
+  longer delete each other's copy; "Restore from backup…" cannot be started
+  twice at once; a refused restore no longer turns Touch ID off; and a
+  backend that hangs while starting, restoring or making a backup is
+  stopped and reported, where the splash used to stay up for ever.
 
 ## 0.16.1 — 2026-11-12
 

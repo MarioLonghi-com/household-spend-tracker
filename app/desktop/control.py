@@ -18,14 +18,17 @@ send a request -- can reach them. `stdio_adapter.serve_control` answers them.
 from __future__ import annotations
 
 import contextlib
-import shutil
+import secrets
 import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 
 #: Inside the data directory: private, on the ledger's own filesystem, and
-#: emptied before every backup, so a copy the shell never collected (it crashed
-#: between the two steps) is gone by the next one rather than kept forever.
+#: emptied at every start (`launch.prepare`), so a copy the shell never
+#: collected (it crashed between the two steps) is gone by the next launch
+#: rather than kept forever. Never emptied by a backup: two can overlap -- the
+#: day's first, "Back up now", the one on quit, the one before a restore --
+#: and each would delete the other's copy before the shell moved it (#442).
 OUTGOING = ".outgoing"
 
 
@@ -65,12 +68,12 @@ def backup(now: datetime | None = None) -> dict:
     from app.services import backup_bundle
 
     database = _database()
-    outgoing = config.settings.data_dir / OUTGOING
-    if outgoing.exists():
-        shutil.rmtree(outgoing)
-    private_dir(outgoing)
+    outgoing = private_dir(config.settings.data_dir / OUTGOING)
     taken = (now or datetime.now(UTC)).astimezone(UTC)
-    target = outgoing / f"spendtracker-{taken.strftime('%Y%m%dT%H%M%SZ')}.sqlite3"
+    name = f"spendtracker-{taken.strftime('%Y%m%dT%H%M%SZ')}.sqlite3"
+    # A file of its own, so two backups in the same second never share one;
+    # the shell names it `name` in the backups folder.
+    target = outgoing / f"{secrets.token_hex(8)}-{name}"
 
     # Read before the copy, so a write landing during it can only make the
     # copy newer than what the shell records, never older.
@@ -90,7 +93,7 @@ def backup(now: datetime | None = None) -> dict:
     rows = backup_bundle.counts(target)
     return {
         "path": str(target),
-        "name": target.name,
+        "name": name,
         "bytes": target.stat().st_size,
         "taken_at": taken.isoformat(),
         "revision": revision,
