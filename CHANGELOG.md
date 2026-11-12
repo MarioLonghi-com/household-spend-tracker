@@ -88,6 +88,11 @@ history this repository does not have.
   used to send every field, so changing a date put back a memo or category
   that another member had changed a moment earlier. A field you have not
   touched now takes whatever the server answers (#445).
+- A category picked in the transaction panel is saved as you pick it. It used
+  to wait until you left another field or closed the panel, so switching tab
+  or closing the browser lost it, and the list beside the panel kept the old
+  category meanwhile. Moving through the list with the arrow keys saves
+  nothing; only the one you take is saved (#462).
 - Setting a locked transaction back to cleared from its panel is saved again;
   the panel skipped every save on a locked row, the unlocking one included
   (#445).

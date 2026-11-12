@@ -2754,6 +2754,11 @@ function resolveCategory(
  * behaves one way in the register and another in the panel beside it is two
  * things to learn. What differs is only when it commits: a cell saves the row
  * on leaving the field, a form holds the choice until the form is saved.
+ *
+ * `onPick` is called once per choice: when one is taken from the list, or the
+ * field is left or Entered with text that names one -- not for each option the
+ * arrows pass over, and not again when the field is left holding the choice
+ * just taken. The transaction panel saves on it (#462).
  */
 function CategoryChooser({
   groups,
@@ -2775,8 +2780,13 @@ function CategoryChooser({
   // The row can change under the panel -- a save that came back with a
   // category a payee rule decided, or another tab. Follow it rather than
   // showing a value the transaction no longer has.
+  //: The choice last handed to `onPick`, or the value it came in with. A
+  //: taken suggestion is picked at once and the blur after it commits the
+  //: same text; saying it twice would save it twice.
+  const said = useRef(value);
   useEffect(() => {
     setTyped(all.find((one) => one.id === value)?.full_name ?? "");
+    said.current = value;
   }, [value, all]);
 
   function commit(next: string = typed) {
@@ -2786,6 +2796,8 @@ function CategoryChooser({
       return;
     }
     setUnmatched(false);
+    if (answer.id === said.current) return;
+    said.current = answer.id;
     onPick(answer.id);
   }
 
@@ -2813,6 +2825,7 @@ function CategoryChooser({
         placeholder={t`type any part`}
         aria-label={t({ message: "Category", comment: "Screen-reader name on the Register screen: noun, what a transaction was for. See GLOSSARY.md" })}
         onCommit={commit}
+        onTake={(option) => commit(option)}
         onCancel={() => setUnmatched(false)}
       />
       {unmatched ? (
@@ -3945,11 +3958,14 @@ export function TransactionPanel({
    * not add up, and saving one on the way past is the one thing the service
    * refuses outright.
    */
-  function autoSave(closing = false) {
-    if (!dirty || theirs !== null) return;
+  function autoSave(closing = false, next: PanelFields = fields) {
+    // `next` is for a change made in this same event, which the render's
+    // fields do not hold yet: a category picked (#462).
+    const body = panelChanges(row, next, currency, isTransfer);
+    if (Object.keys(body).length === 0 || theirs !== null) return;
     // A locked row takes one edit: setting it back to cleared, alone, which is
     // how it is unlocked.
-    if (locked && !(Object.keys(changed).length === 1 && changed.cleared && changed.cleared !== "reconciled")) {
+    if (locked && !(Object.keys(body).length === 1 && body.cleared && body.cleared !== "reconciled")) {
       return;
     }
     // Closing, there is no later to wait for: this goes beside the one in
@@ -3958,7 +3974,7 @@ export function TransactionPanel({
       again.current = true;
       return;
     }
-    save.mutate({ body: changed, sent: fields });
+    save.mutate({ body, sent: next });
   }
 
   // The save in flight has settled: send what was left while it was out,
@@ -4077,7 +4093,17 @@ export function TransactionPanel({
             readOnly
           />
         ) : (
-          <CategoryChooser groups={groups} value={categoryId} onPick={setCategoryId} />
+          /* Picking is the whole act, so it saves then rather than waiting
+             for the field to be left -- nothing else about the category is
+             left to type (#462). */
+          <CategoryChooser
+            groups={groups}
+            value={categoryId}
+            onPick={(id) => {
+              setCategoryId(id);
+              autoSave(false, { ...fields, categoryId: id });
+            }}
+          />
         )}
       </Field>
       <p />
