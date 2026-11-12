@@ -27,7 +27,6 @@ import platform as _platform
 import re
 import shutil
 import socket
-import ssl
 import stat as stat_module
 import sys
 import urllib.error
@@ -805,25 +804,6 @@ def published_releases(answer: object) -> list[Release]:
     return sorted(found.values(), key=lambda one: _as_numbers(one.version), reverse=True)
 
 
-def _trust() -> ssl.SSLContext:
-    """A TLS context that can actually verify GitHub on this machine.
-
-    The default context reads the *system* trust store, and the python.org
-    macOS build does not use the one macOS keeps -- so every https request from
-    it fails with `CERTIFICATE_VERIFY_FAILED: unable to get local issuer
-    certificate` until somebody runs `Install Certificates.command`. This app
-    is developed on exactly that build, so the check would have shipped looking
-    broken. `certifi` is declared in requirements.in for this (#46); when it
-    is somehow missing, the default context is still the right fallback.
-    """
-    try:
-        import certifi
-
-        return ssl.create_default_context(cafile=certifi.where())
-    except Exception:  # pragma: no cover - certifi absent or unreadable
-        return ssl.create_default_context()
-
-
 #: Thirty releases with their notes are tens of kilobytes. Anything past this
 #: is not a release list, and it is not read to find out (#225).
 UPSTREAM_MAX_BYTES = 1 << 20
@@ -884,7 +864,7 @@ def check_upstream() -> Upstream:
     try:
         # No redirect followed: GitHub's release list does not move, and a 3xx
         # is an answer from something that is not it (#219).
-        with outbound.opener(_trust()).open(
+        with outbound.opener(outbound.trust()).open(
             request, timeout=UPSTREAM_TIMEOUT_SECONDS
         ) as answer:
             body = outbound.read_within(

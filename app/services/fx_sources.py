@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import csv
 import io
-import ssl
 import urllib.error
 import urllib.request
 from collections.abc import Callable, Iterable
@@ -71,7 +70,7 @@ class Published:
 
 def _get(url: str) -> bytes:
     """The body of one GET, by the rules in `services/outbound.py`."""
-    opener = outbound.opener(ssl.create_default_context())
+    opener = outbound.opener(outbound.trust())
     # Only what the API needs. urllib's own user agent names the library and
     # its version, nothing about this instance or anybody in it.
     request = urllib.request.Request(url, headers={"Accept": "text/csv"})

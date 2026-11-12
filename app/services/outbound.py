@@ -47,6 +47,24 @@ class NoRedirects(urllib.request.HTTPRedirectHandler):
         raise urllib.error.HTTPError(req.full_url, code, "redirect refused", headers, fp)
 
 
+def trust() -> ssl.SSLContext:
+    """The TLS context every outbound request verifies with: certifi's CA bundle.
+
+    The default context reads the *system* trust store, which the python.org
+    macOS build does not use and the frozen desktop backend does not carry -- so
+    every https request from either fails with ``CERTIFICATE_VERIFY_FAILED:
+    unable to get local issuer certificate`` (#455). ``certifi`` is declared in
+    requirements.in and bundled by desktop/backend.spec for this (#46); when it
+    is somehow missing, the default context is still the right fallback.
+    """
+    try:
+        import certifi
+
+        return ssl.create_default_context(cafile=certifi.where())
+    except Exception:  # pragma: no cover - certifi absent or unreadable
+        return ssl.create_default_context()
+
+
 def opener(context: ssl.SSLContext) -> urllib.request.OpenerDirector:
     """An opener that verifies TLS with ``context`` and follows no redirect."""
     return urllib.request.build_opener(NoRedirects, urllib.request.HTTPSHandler(context=context))

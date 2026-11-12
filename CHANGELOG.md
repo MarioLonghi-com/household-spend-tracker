@@ -41,6 +41,13 @@ history this repository does not have.
   now uses Xcode 26.3. `upload-mas.sh` reads altool 26's `processingState`
   as well as the older `IMPORT-STATUS`, prints altool's first answer whole,
   and stops before uploading when altool has no `--build-status`.
+- Fetch now on the Exchange rates page works in the desktop app (#455). It
+  verified the ECB's certificate against the system trust store, which the
+  packaged backend does not carry, so every fetch failed with
+  `CERTIFICATE_VERIFY_FAILED`. Every outbound request (exchange rates, the
+  update check, the YNAB import) now verifies with certifi's bundle through
+  one helper, `outbound.trust()`, and a test fails if a module builds a TLS
+  context of its own.
 
 ## 0.16.1 — 2026-11-12
 
