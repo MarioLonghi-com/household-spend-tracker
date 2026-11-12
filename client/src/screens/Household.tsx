@@ -25,6 +25,7 @@ import { roleLabel } from "../lib/labels";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { WEEK_STARTS, formatCount, formatDate, weekdayName, type WeekStart } from "../lib/locale";
+import { HelpMark } from "../help/HelpMark";
 
 /** One currency this household keeps accounts in. Counts, never a figure. */
 interface CurrencyRows {
@@ -70,7 +71,7 @@ export function HouseholdPage({
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1>{household.name}</h1>
+        <div className="screen-title"><h1>{household.name}</h1><HelpMark /></div>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>

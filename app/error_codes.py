@@ -366,6 +366,8 @@ REGISTRY: dict[str, Code] = {
     "email.too_long": Code("That email address is too long (max {max} characters)", ("max",)),
     "email.no_name": Code("{email} has no usable name before the @", ("email",)),
     # -- household, agent_key: app/services/agent_keys.py, app/api/routers/profile.py (#267) --- #
+    # -- help: app/api/routers/agent_help.py (#460) ------------------------ #
+    "help.article_not_found": Code("No help article has the id {id}", ("id",)),
     "household.not_found": Code("No such household"),
     "household.unknown_theme": Code("{theme} is not one of the colour schemes", ("theme",)),
     "household.unknown_week_start": Code(

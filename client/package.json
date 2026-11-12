@@ -21,6 +21,7 @@
     "@lingui/core": "6.11.0",
     "@lingui/react": "6.11.0",
     "@tanstack/react-query": "^5.104.0",
+    "minisearch": "^7.2.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"

@@ -1,0 +1,60 @@
+/* ---- help (#460) ---- */
+
+/* Help, pinned above who is here and Sign out. */
+nav.side .nav-help {
+  flex: none;
+  font-size: 14px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+}
+
+/* A screen's title and the ? beside it (#460). The ? sits outside the
+   heading, so the heading's name stays the screen's name. The pair takes the
+   heading's place in a row, so the rules for a heading in a row apply to it. */
+.screen-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.screen-title > h1,
+.screen-title > h2 { min-width: 0; overflow-wrap: anywhere; }
+.row > .screen-title { flex: 0 1 auto; }
+.help-mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-bottom: 8px; /* the heading's own bottom margin, so the two centre together */
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+.help-mark:hover,
+.help-mark:focus-visible { color: var(--accent); border-color: var(--accent); }
+
+.help-panel input[type="search"] { width: 100%; }
+.help-panel h4 { margin: 16px 0 4px; font-size: 13px; color: var(--muted); }
+.help-list { list-style: none; padding: 0; margin: 0; }
+.help-list li { padding: 2px 0; }
+.help-list button.link { text-align: left; padding: 3px 0; }
+.help-back { margin-bottom: 8px; padding-left: 0; }
+
+.help-article { line-height: 1.55; }
+.help-article h3 { margin: 4px 0 10px; }
+.help-article h4 { margin: 18px 0 6px; font-size: 15px; color: inherit; }
+.help-article h5 { margin: 14px 0 4px; font-size: 14px; }
+.help-article ul,
+.help-article ol { padding-left: 22px; }
+.help-article li { margin: 4px 0; }
+.help-article button.link { padding: 0; }
+.help-article kbd {
+  font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+}

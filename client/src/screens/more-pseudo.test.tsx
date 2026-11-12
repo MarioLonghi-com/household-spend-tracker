@@ -35,8 +35,6 @@ import { History } from "./History";
 import { BackupList, SavePanel } from "./Backups";
 import { ApplicationManagement } from "./ApplicationManagement";
 import { Receipts } from "./Receipts";
-import { ImportGuide, guideFor } from "./ImportGuide";
-import { ImportGuideDocument } from "./importGuide/en";
 
 const HOUSEHOLD = {
   id: "house-1",
@@ -189,7 +187,7 @@ describe("in en-XA, the remaining screens show no English", () => {
     expect(left()).toEqual([]);
 
     // The new-rule panel, naming a payee and then taking a rail off.
-    fireEvent.click(document.querySelector("h1 + button")!);
+    fireEvent.click(document.querySelector(".screen-title + button")!);
     expect(left()).toEqual([]);
     const action = document.querySelectorAll(".panel select")[0] as HTMLSelectElement;
     fireEvent.change(action, { target: { value: "rewrite" } });
@@ -534,29 +532,5 @@ describe("in en-XA, the remaining screens show no English", () => {
     fireEvent.click(thumbs.find((one) => one.closest("tr")!.textContent!.includes("2026-03-01"))!);
     await screen.findByText("Doe");
     expect(left().filter(data)).toEqual([]);
-  });
-
-  it("the import guide: no document in this language, so the English one, marked as English", () => {
-    render(<ImportGuide />);
-    expect(left()).toEqual([]);
-    const english = document.querySelector('[lang="en"]') as HTMLElement;
-    expect(english.textContent).toContain("How import works");
-    expect(document.querySelector(".banner.info")!.textContent).not.toMatch(/^[\x20-\x7e]+$/);
-  });
-});
-
-describe("the import guide in English", () => {
-  it("is the English document exactly, with no notice and no language mark", async () => {
-    await activate("en");
-    const { container: picked } = render(<ImportGuide />);
-    const shown = picked.innerHTML;
-    cleanup();
-    const { container: direct } = render(<ImportGuideDocument />);
-    expect(shown).toBe(direct.innerHTML);
-    expect(shown).not.toContain('lang="en"');
-    expect(guideFor("en")).toBe(ImportGuideDocument);
-    expect(guideFor("en-GB")).toBe(ImportGuideDocument);
-    expect(guideFor("en-XA")).toBeUndefined();
-    expect(guideFor("sv-SE")).toBeUndefined();
   });
 });

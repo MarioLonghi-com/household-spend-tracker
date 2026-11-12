@@ -15,3 +15,15 @@ declare module "*.po" {
   import type { Messages } from "@lingui/core";
   export const messages: Messages;
 }
+
+// The help articles, compiled by `help-articles.ts` (#460): one language's
+// articles, and which screens each is about.
+declare module "virtual:help-articles/*" {
+  import type { Article } from "./help/compile";
+  const articles: Article[];
+  export default articles;
+}
+declare module "virtual:help-index" {
+  const index: Record<string, { screens: string[]; requires?: string }>;
+  export default index;
+}

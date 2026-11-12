@@ -6,7 +6,7 @@
  * wants to make one.
  */
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLedgerListener } from "./lib/ledgerListener";
 import { UpdatedNotice } from "./components/UpdatedNotice";
@@ -29,7 +29,6 @@ import { History } from "./screens/History";
 import { HouseholdPage } from "./screens/Household";
 import { ExchangeRates } from "./screens/ExchangeRates";
 import { Import } from "./screens/Import";
-import { ImportGuide } from "./screens/ImportGuide";
 import { Payees } from "./screens/Payees";
 import { PayeeCategorisation } from "./screens/PayeeCategorisation";
 import { Receipts } from "./screens/Receipts";
@@ -53,25 +52,20 @@ import { onReviewingChange, reviewing, setReviewer, TRANSLATED_LOCALES } from ".
 import { reviewAllowed } from "./lib/review";
 import { SuggestWording } from "./components/SuggestWording";
 import { Trans } from "@lingui/react/macro";
+// Every screen's name, as one list: help articles name them too (#460).
+import type { Screen } from "./lib/screens";
+import { HelpContext } from "./help/HelpMark";
 
-type Screen =
-  | "register"
-  | "accounts"
-  | "categories"
-  | "receipts"
-  | "reports"
-  | ReportScreen
-  | "household"
-  | "exchange-rates"
-  | "payees"
-  | "payee-categorisation"
-  | "transfers"
-  | "import-guide"
-  | "import"
-  | "rules"
-  | "history"
-  | "admin"
-  | "application";
+// The help panel and its search, fetched the first time somebody asks (#460):
+// neither belongs in the bundle every page load pays for.
+const HelpPanel = lazy(() => import("./help/HelpPanel"));
+
+/**
+ * Where How import works used to be a screen of its own (#73), the article it
+ * became (#460 §12). The route still exists, so whatever opened the guide --
+ * the Import screen's own link among them -- opens the article instead.
+ */
+const IMPORT_GUIDE_ARTICLE = "import-how-it-works";
 
 /**
  * The menu, as four sections.
@@ -216,9 +210,8 @@ export function menu(householdName: string, offered: Capabilities = EVERYTHING):
       ownerOnly: true,
       children: [
         { key: "history", label: t({ message: "History", comment: "Menu item and the name of its screen. See GLOSSARY.md" }) },
-        // Every member's, like History: it explains what the Import screen
-        // does, and nothing behind it is private (#73).
-        { key: "import-guide", label: t`How import works` },
+        // How import works was here (#73). It is a help article since #460,
+        // under Help at the foot of the menu, and its route opens it there.
         // Owner-only in its own right, and separately from the header: History
         // above it is every member's, and this one is about the installation
         // rather than about a ledger. Hiding it is a courtesy -- every route
@@ -619,6 +612,8 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
     setNavCollapsedState(next);
   };
   const [profileOpen, setProfileOpen] = useState(false);
+  //: The help panel, when open, and the article it opened at (#460).
+  const [help, setHelp] = useState<{ start?: string } | null>(null);
 
   const households = useQuery({
     queryKey: ["households"],
@@ -720,6 +715,12 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
 
   /** Go somewhere, and on a phone get out of the way of where you went. */
   const go = (to: Screen) => {
+    // The old How import works page is an article now (#460 §12).
+    if (to === "import-guide") {
+      setHelp({ start: IMPORT_GUIDE_ARTICLE });
+      setNavOpen(false);
+      return;
+    }
     // Going anywhere from the menu is a fresh start: a filter a report sent
     // somebody to must not come back the next time they open the register.
     setRegisterPreset(null);
@@ -857,6 +858,18 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
           })}
         </div>
 
+        {/* Help is every screen's, so it stays pinned with the way out
+            rather than scrolling away with the pages (#460). */}
+        <button
+          className="nav-help"
+          onClick={() => {
+            setNavOpen(false);
+            setHelp({});
+          }}
+        >
+          <Trans comment="Menu item: opens the help panel, where you ask how to do something">Help</Trans>
+        </button>
+
         <div className="presence">
           {others.length > 0 ? (
             <>
@@ -915,6 +928,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
             price of resets that need no step-up is that they are seen. */}
         <SignInNotice user={user} onOpen={() => go("admin")} />
         <UpdatedNotice at={refreshedAt} />
+        <HelpContext.Provider value={{ screen, open: () => setHelp({}) }}>
         <ScreenBoundary resetKey={`${screen}:${household.id}`}>
         {/* The register has an Import button of its own, and navigation lives
             here rather than in a screen. `onGo` takes the screen's name as a
@@ -968,7 +982,6 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
         {screen === "payee-categorisation" && <PayeeCategorisation household={household} />}
         {screen === "transfers" && <Transfers household={household} />}
         {screen === "history" && <History household={household} />}
-        {screen === "import-guide" && <ImportGuide />}
         {screen === "admin" && user.role === "owner" && <Admin user={user} />}
         {/* Guarded here as well as in the menu. The menu decides what is
             offered; this decides what renders, and a member who reached the
@@ -981,7 +994,19 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
           />
         )}
         </ScreenBoundary>
+        </HelpContext.Provider>
       </main>
+
+      {help && (
+        <Suspense fallback={null}>
+          <HelpPanel
+            screen={screen}
+            start={help.start}
+            onClose={() => setHelp(null)}
+            onScreen={(name) => go(name as Screen)}
+          />
+        </Suspense>
+      )}
 
       {profileOpen && (
         <Profile user={user} households={list} onClose={() => setProfileOpen(false)} />

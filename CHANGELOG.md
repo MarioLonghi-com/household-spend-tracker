@@ -34,6 +34,26 @@ history this repository does not have.
 
 ### Added
 
+- **Help: ask the app how to do something** (#460). *Help* at the foot of
+  the menu opens an "Ask how to…" panel: type a question in your own words
+  ("my employer owes me", "configuracion") and it finds the articles that
+  answer it, accents or no accents; with no question, or none that matches,
+  it lists the articles about the screen you are on. A **?** beside each
+  screen's title opens the same panel at that screen's articles. The first
+  fifteen articles cover receipts and photographing them, splitting a
+  transaction, money owed back, transfers, exchange rates, backups and
+  restoring, categories and groups, payee rules, setting up the household,
+  and importing (a statement, how a file is read, how transfers are matched,
+  account identifiers, the One-time Import). Every article is written in
+  English, Brazilian Portuguese, Spanish and Swedish, follows a change of
+  language, and works offline in the desktop app as on a server; articles
+  about something an installation does not offer, such as photographing
+  receipts on the desktop, are left out there.
+- An agent can read the same articles (#460): `GET /api/agent/v1/help` and
+  `GET /api/agent/v1/help/{id}`, with a `read` key, in the language `lang`
+  or `Accept-Language` asks for, each with its title, screens and body as
+  Markdown. Both are in the manifest.
+
 - **A first-run wizard for every edition** (#458): one guided setup in the
   browser, on the Mac and on Windows, with the steps on a rail at the side
   (a progress bar on a phone). It starts with the language, which switches
@@ -82,6 +102,10 @@ history this repository does not have.
 
 ### Changed
 
+- **How import works is now a help article**, in four languages instead
+  of English only (#460). It moved out of the Admin menu into Help, split
+  into the articles named above; the Import screen's link to it, and
+  anything else that opened the old page, opens the article.
 - An owner's reset of "the authenticator" is now a reset of the second step:
   it clears the authenticator and every passkey, and the link lets the person
   set up either. A reset of a passkey-only account always covers its second

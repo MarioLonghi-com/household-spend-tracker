@@ -263,6 +263,11 @@ msgstr "Ta bort gruppen {0}?"
 msgid "while starting the new version"
 msgstr "när den nya versionen startades"
 
+#. Button in the help panel: from an article back to the list
+#: src/help/HelpPanel.tsx
+msgid "← All articles"
+msgstr "← Alla artiklar"
+
 #. Setup wizard, First account: first-account step. See GLOSSARY.md
 #: src/screens/setup/copy.ts
 msgctxt "setup wizard"
@@ -895,6 +900,11 @@ msgstr "Inget räknas om: det finns inga växelkurser, så varje valuta behålle
 #: src/screens/Passkeys.tsx
 msgid "Rename"
 msgstr "Byt namn"
+
+#. Button in the help panel: back to the article before
+#: src/help/HelpPanel.tsx
+msgid "← Back"
+msgstr "← Tillbaka"
 
 #: src/screens/OneTimeImport.tsx
 msgid "Asking YNAB for your plans…"
@@ -2041,6 +2051,11 @@ msgstr "Inskriven för hand"
 #: src/screens/Accounts.tsx
 msgid "Each spelling a bank uses for someone in this household. A payment naming one is your own money moving, not income or spending."
 msgstr "Varje stavning en bank använder för någon i hushållet. En betalning som nämner en av dem är dina egna pengar som flyttas, inte en inkomst eller utgift."
+
+#. Title of the help panel, opened from Help in the menu
+#: src/help/HelpPanel.tsx
+msgid "Ask how to…"
+msgstr "Fråga hur…"
 
 #. Section heading on the Transfers screen: pairs the app is sure are transfers
 #: src/screens/Transfers.tsx
@@ -3198,7 +3213,9 @@ msgid "Reset sign-in for {0}"
 msgstr "Återställ inloggningen för {0}"
 
 #. Desktop app menu bar: the Help menu
+#. Menu item: opens the help panel, where you ask how to do something
 #: ../desktop/src/words.ts
+#: src/App.tsx
 msgid "Help"
 msgstr "Hjälp"
 
@@ -3320,6 +3337,10 @@ msgstr "ANDERSSON ANNA"
 #: src/screens/Profile.tsx
 msgid "{revoked, plural, one {{revoked} trusted browser will ask for a code again.} other {{revoked} trusted browsers will ask for a code again.}}"
 msgstr "{revoked, plural, one {{revoked} betrodd webbläsare kommer att fråga efter en kod igen.} other {{revoked} betrodda webbläsare kommer att fråga efter en kod igen.}}"
+
+#: src/help/HelpPanel.tsx
+msgid "Help has not been written in your language yet, so here it is in English."
+msgstr "Hjälpen är inte skriven på ditt språk än, så här är den på engelska."
 
 #: src/screens/Updates.tsx
 msgid "Waiting for the updater to take the request…"
@@ -4571,6 +4592,11 @@ msgstr "{policy} är ingen kurs för månadssiffror -- använd month_avg, month_
 #: src/lib/errorMessages.ts
 msgid "error.fx.unknown_source"
 msgstr "{source} är ingen källa för växelkurser -- använd manual, ecb eller own"
+
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.help.article_not_found"
+msgstr "Ingen hjälpartikel har id {id}"
 
 #. Batch: one act in History. See GLOSSARY.md
 #. js-lingui-explicit-id
@@ -6404,6 +6430,10 @@ msgstr "{0, plural, one {Matchar {1} rad, till exempel:} other {Matchar {2} rade
 msgid "{helping, plural, one {{helping} suggested identifier would link} other {{helping} suggested identifiers would link}}"
 msgstr "{helping, plural, one {{helping} föreslagen identifierare skulle koppla} other {{helping} föreslagna identifierare skulle koppla}}"
 
+#: src/help/HelpPanel.tsx
+msgid "Nothing matched those words. Try fewer, or other words."
+msgstr "Inget matchade de orden. Prova färre, eller andra ord."
+
 #. Label on the Register screen
 #: src/screens/Register.tsx
 msgid "Single transaction"
@@ -6824,6 +6854,10 @@ msgstr "utelämnat"
 #: src/screens/Profile.tsx
 msgid "Close: {name}"
 msgstr "Stäng: {name}"
+
+#: src/help/HelpPanel.tsx
+msgid "Help could not be loaded. Close this panel and open it again."
+msgstr "Hjälpen kunde inte läsas in. Stäng panelen och öppna den igen."
 
 #: src/screens/Transfers.tsx
 msgid "The amounts match and the dates are close, but nothing names the other account — or a row could pair with more than one. Pairs whose two descriptions say the same thing come first. Link the ones that are a transfer; mark the rest <0>Not a transfer</0> and they are not offered again."
@@ -8525,10 +8559,6 @@ msgstr "Detta sparar båda raderna som en enda handling, så att ångra den i Hi
 msgid "Note"
 msgstr "Anteckning"
 
-#: src/App.tsx
-msgid "How import works"
-msgstr "Så fungerar importen"
-
 #. A changed field in History's detail, lower case: whether the rates of your own transfers are shown
 #: src/lib/historyWords.ts
 msgid "own rates shown"
@@ -8620,6 +8650,11 @@ msgstr "angiven för hand"
 #: src/screens/ExchangeRates.tsx
 msgid "No rates entered by hand."
 msgstr "Inga kurser angivna för hand."
+
+#. Placeholder in the help panel's search box: an example question
+#: src/help/HelpPanel.tsx
+msgid "For example: split a receipt"
+msgstr "Till exempel: dela upp ett kvitto"
 
 #. Setup wizard, First account: an account type. See GLOSSARY.md
 #: src/screens/setup/copy.ts
@@ -10515,10 +10550,6 @@ msgstr "utgången"
 msgid "If you did not expect this, tell an owner of this instance before you go on."
 msgstr "Om du inte väntade dig detta, säg till en ägare av instansen innan du fortsätter."
 
-#: src/screens/ImportGuide.tsx
-msgid "This guide has not been written in your language yet, so here it is in English."
-msgstr "Den här guiden har inte skrivits på ditt språk än, så här är den på engelska."
-
 #. Text on the Transfers screen
 #. placeholder {0}: from.currency
 #: src/screens/Transfer.tsx
@@ -10828,6 +10859,11 @@ msgstr "{0} väntar på att bifogas"
 msgid "Following this device, which is dark right now."
 msgstr "Följer enheten, som är mörk just nu."
 
+#. Heading in the help panel over the articles about the screen on show
+#: src/help/HelpPanel.tsx
+msgid "About this screen"
+msgstr "Om den här skärmen"
+
 #. Heading over the other-asset accounts on the Accounts screen. See GLOSSARY.md
 #: src/lib/labels.ts
 msgid "Other assets"
@@ -10972,6 +11008,11 @@ msgstr "Ditt lösenord för {email} återställdes från servern den {when}. All
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Total expenses"
 msgstr "Summa utgifter"
+
+#. Heading in the help panel over the list of every article
+#: src/help/HelpPanel.tsx
+msgid "Every article"
+msgstr "Alla artiklar"
 
 #. Label on the Import screen
 #: src/screens/Import.tsx
@@ -11376,6 +11417,7 @@ msgstr "Ignorera och fortsätt"
 
 #. Sentence on the Income vs Expense report
 #. Sentence on the Payees screen
+#. Text in the help panel while its articles load
 #. Text on the Income vs Expense report
 #. Text on the Income vs Expense report
 #. Text on the Net Worth report
@@ -11385,6 +11427,7 @@ msgstr "Ignorera och fortsätt"
 #. Text on the app's menu and frame
 #. Text on the app's menu and frame
 #: src/App.tsx
+#: src/help/HelpPanel.tsx
 #: src/screens/Payees.tsx
 #: src/screens/reports/IncomeExpense.tsx
 #: src/screens/reports/NetWorth.tsx
@@ -13437,6 +13480,11 @@ msgstr "Den här boken räknar aldrig om. Valutan hör till kontot och ingen vä
 msgid "Keys for programs"
 msgstr "Nycklar för program"
 
+#. Screen-reader name and tooltip of the ? beside a screen's title, which opens help about it
+#: src/help/HelpMark.tsx
+msgid "Help with this screen"
+msgstr "Hjälp med den här skärmen"
+
 #. Column heading on the Reimbursements report: a work expense work will not pay; counted as your own spending. See GLOS…
 #. Label on the Register screen: a work expense work will not pay; counted as your own spending. See GLOSSARY.md
 #. Name of a figure on the Reimbursements report: a work expense work will not pay; counted as your own spending. See GL…
@@ -14688,6 +14736,11 @@ msgstr "från servern"
 #: src/screens/Categories.tsx
 msgid "Every new transaction for this payee gets a category without you choosing one. Which one depends on the setting below."
 msgstr "Varje ny transaktion för den här mottagaren får en kategori utan att du väljer en. Vilken beror på inställningen nedan."
+
+#. Label of the search box in the help panel
+#: src/help/HelpPanel.tsx
+msgid "What do you want to do?"
+msgstr "Vad vill du göra?"
 
 #. Row heading in the update confirmation
 #: src/screens/Updates.tsx

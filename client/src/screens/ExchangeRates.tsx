@@ -42,6 +42,7 @@ import {
 } from "../lib/fx";
 import type { Household } from "../lib/types";
 import { Browse, useBrowseView } from "./exchangeRates/Browse";
+import { HelpMark } from "../help/HelpMark";
 
 const count = (n: number) => formatCount(n);
 
@@ -111,9 +112,12 @@ export function ExchangeRates({ household }: { household: Household }) {
 
   return (
     <>
-      <h1>
-        <Trans comment="Title of the Exchange rates page">Exchange rates</Trans>
-      </h1>
+      <div className="screen-title">
+        <h1>
+          <Trans comment="Title of the Exchange rates page">Exchange rates</Trans>
+        </h1>
+        <HelpMark />
+      </div>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
           The ledger never converts: every amount stays in its account's currency. Reports may show

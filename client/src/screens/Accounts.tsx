@@ -34,6 +34,7 @@ import { ACCOUNT_TYPE_LABELS } from "../lib/labels";
 import { compareNames, countryName as localCountryName, formatCount } from "../lib/locale";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { HelpMark } from "../help/HelpMark";
 
 export const TYPES: { value: AccountType; label: string; owed: boolean; blurb: string }[] = [
   {
@@ -440,7 +441,7 @@ export function Accounts({
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
-        <h1><Trans comment="Screen title on the Accounts screen: noun, bank or cash accounts. See GLOSSARY.md">Accounts</Trans></h1>
+        <div className="screen-title"><h1><Trans comment="Screen title on the Accounts screen: noun, bank or cash accounts. See GLOSSARY.md">Accounts</Trans></h1><HelpMark /></div>
         <label className="small muted" style={{ flex: "0 0 auto" }}>
           <input
             type="checkbox"

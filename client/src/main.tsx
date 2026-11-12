@@ -21,6 +21,7 @@ import "./styles/shell.css";
 import "./styles/setup.css";
 import "./styles/fx-rates.css";
 import "./styles/one-time-import.css";
+import "./styles/help.css";
 
 const client = new QueryClient({
   defaultOptions: {

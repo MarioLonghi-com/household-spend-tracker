@@ -5,6 +5,7 @@ import babel from "@rolldown/plugin-babel";
 import { lingui, linguiTransformerBabelPreset } from "@lingui/vite-plugin";
 import { fileURLToPath } from "node:url";
 import { bundledPackages } from "./bundled-packages.ts";
+import { helpArticles } from "./help-articles.ts";
 
 // The client is served by FastAPI in production, out of app/static/dist. In
 // development Vite serves it and proxies the API, so cookies stay same-origin
@@ -23,6 +24,9 @@ export default defineConfig(({ mode }) => ({
     lingui(),
     babel({ presets: [linguiTransformerBabelPreset()] }),
     bundledPackages(fileURLToPath(new URL("../build/client-bundled-packages.json", import.meta.url))),
+    // The help articles (#460): Markdown in `src/help/`, compiled here into
+    // one lazily loaded chunk per language and a JSON copy for the agent API.
+    helpArticles(fileURLToPath(new URL("./src/help", import.meta.url))),
   ],
   build: {
     outDir: "../app/static/dist",

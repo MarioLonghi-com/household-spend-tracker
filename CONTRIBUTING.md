@@ -421,12 +421,16 @@ And the test that is not a test: **asserting a 200, or that a mechanism fired,
 is not asserting what it did to the data.** Four of the previous build's
 nineteen bugs hid behind exactly that.
 
-**Changed what an import does? Change the page that explains it** in the same
-commit: `client/src/screens/importGuide/en.tsx`, *Admin → How import works*
-(and the same page in any other language it has been written in).
-`tests/test_import_guide.py` fails on an outcome, a state word, a format or an
-identifier kind it does not mention -- but only a person notices a sentence
-that has stopped being true.
+**Changed what an import does? Change the articles that explain it** in the
+same commit: `client/src/help/<locale>/import-how-it-works.md` and its
+neighbours (`import-transfers`, `account-identifiers`, `one-time-import`), in
+every language, under *Help* in the app. `tests/test_import_guide.py` fails
+on an outcome, a state word, a format or an identifier kind they do not
+mention -- but only a person notices a sentence that has stopped being true.
+
+**Renamed a button? Grep the help articles for it.** An article quotes a
+label in bold exactly as the catalog has it, and
+`client/src/help/articles.test.ts` fails until the article follows (#460).
 
 **Extracted a short or ambiguous message? Give the translator a note:**
 `t({ message, comment })` or `<Trans comment="…">`, one line of English saying

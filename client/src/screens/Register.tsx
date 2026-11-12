@@ -65,6 +65,7 @@ import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { amountLang, formatCount, formatDate } from "../lib/locale";
 import { listText } from "../lib/locale";
+import { HelpMark } from "../help/HelpMark";
 
 /**
  * A register row, with the currency its amount is in.
@@ -1324,9 +1325,12 @@ export function Register({
             section is still called Register -- it holds Import and Receipts
             too -- but the page you land on should be called what you clicked
             to get there. The code keeps calling it the register. */}
-        <h1>
-          <Trans comment="Screen title on the Register screen. See GLOSSARY.md">Transactions</Trans>
-        </h1>
+        <div className="screen-title">
+          <h1>
+            <Trans comment="Screen title on the Register screen. See GLOSSARY.md">Transactions</Trans>
+          </h1>
+          <HelpMark />
+        </div>
         {/* Beside the heading rather than in the filter line (#143). It
             decides which columns the table *has*, which is a question about
             the table's shape before it is one about which rows -- and on the
