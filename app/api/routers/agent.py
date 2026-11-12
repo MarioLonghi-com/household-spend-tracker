@@ -45,6 +45,7 @@ from ...models import (
     ImportOutcome,
     Receipt,
     Transaction,
+    WeekStart,
 )
 from ...schemas import (
     AgentCategorise,
@@ -280,7 +281,11 @@ ENDPOINTS = [
     ManifestEndpoint(
         method="GET",
         path=f"{_BASE}/households/{{household_id}}/timeseries",
-        says=f"The same totals gathered by day, week or month. {_FILTERS}",
+        says=(
+            "The same totals gathered by day, week or month. A week starts on the "
+            "household's week_start (in the household descriptor; Monday unless changed) "
+            f"and is named by the date of that first day. {_FILTERS}"
+        ),
         returns="{since, until, group_by, by_currency}",
         scope="read",
     ),
@@ -539,6 +544,7 @@ def manifest(agent: CurrentAgent) -> Manifest:
             name=agent.household.name,
             base_currency=agent.household.base_currency,
             date_format=agent.household.date_format,
+            week_start=agent.household.week_start,
         ),
         key=ManifestKey(
             label=agent.key.label,
@@ -694,6 +700,7 @@ def timeseries(
             search=search,
             cleared=cleared,
             uncategorised=uncategorised,
+            week_start=WeekStart(house.week_start),
         )
     )
     _counted(request, answer)

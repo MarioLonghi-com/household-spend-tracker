@@ -31,6 +31,7 @@ const HOUSEHOLD: Household = {
   name: "Ours",
   base_currency: "EUR",
   date_format: "YYYY-MM-DD",
+  week_start: "monday",
   note: null,
   theme: "default",
   accent: null,

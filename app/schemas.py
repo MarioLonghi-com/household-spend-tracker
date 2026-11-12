@@ -246,6 +246,8 @@ class HouseholdOut(ORMModel):
     name: str
     base_currency: str
     date_format: str
+    #: The day its weeks begin on: monday, sunday or saturday (#452).
+    week_start: str = "monday"
     note: str | None = None
     theme: str
     #: The accent as it was picked. What each scheme actually shows is in
@@ -279,6 +281,9 @@ class HouseholdUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
     base_currency: str | None = Field(default=None, min_length=3, max_length=3)
     date_format: DateFormat | None = None
+    #: monday, sunday or saturday. Checked in the service, so a wrong value is
+    #: refused with a code rather than a bare 422.
+    week_start: str | None = Field(default=None, max_length=16)
     note: str | None = None
     clear_note: bool = False
     theme: str | None = None
@@ -2342,6 +2347,9 @@ class ManifestHousehold(BaseModel):
     #: endpoint here ever converts between them.
     base_currency: str
     date_format: str
+    #: The day its weeks begin on (#452). Weekly timeseries buckets start on
+    #: this day and are labelled with its date.
+    week_start: str = "monday"
 
 
 class ManifestKey(BaseModel):

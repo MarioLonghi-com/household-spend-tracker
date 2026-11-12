@@ -1,6 +1,7 @@
 /** Shapes the server sends. Kept in one file so a change is one diff. */
 
 import type { RatesStatus } from "./fx";
+import type { WeekStart } from "./locale";
 import type { Coded } from "./noticeMessages";
 
 export type Role = "owner" | "member";
@@ -62,6 +63,8 @@ export interface Household {
   name: string;
   base_currency: string;
   date_format: string;
+  /** The day its weeks begin on (#452). Weekly totals start there. */
+  week_start: WeekStart;
   note: string | null;
   /** Which palette. The colours themselves arrive resolved, in `colours`. */
   theme: string;

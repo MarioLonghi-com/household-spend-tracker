@@ -34,6 +34,7 @@ from ..models import (
     Role,
     Transaction,
     User,
+    WeekStart,
     utcnow,
 )
 
@@ -109,6 +110,7 @@ def update_household(
     name: str | None = None,
     base_currency: str | None = None,
     date_format: str | None = None,
+    week_start: str | None = None,
     note: str | None | object = UNSET,
     theme: str | None = None,
     accent: str | None | object = UNSET,
@@ -136,6 +138,15 @@ def update_household(
 
     if date_format is not None:
         household.date_format = date_format
+
+    if week_start is not None:
+        if week_start not in WeekStart.__members__:
+            raise ValidationError(
+                f"{week_start!r} is not a day a week can start on -- use monday, sunday or saturday",
+                code="household.unknown_week_start",
+                params={"week_start": week_start},
+            )
+        household.week_start = WeekStart(week_start).value
 
     if note is not UNSET:
         household.note = (note or "").strip() or None

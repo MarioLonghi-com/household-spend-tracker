@@ -91,6 +91,7 @@ FIELD_WORDS: dict[str, str] = {
     "categorisation": "categorisation",
     "default_category_id": "default category",
     "base_currency": "currency",
+    "week_start": "week start",
     "institution": "bank",
     "reimbursement": "work expense",
     "reimbursed_by_id": "reimbursed by",

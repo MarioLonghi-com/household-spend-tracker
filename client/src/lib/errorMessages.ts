@@ -693,6 +693,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "household.not_found": {
     message: msg({ id: "error.household.not_found", message: "No such household" }),
   },
+  "household.unknown_week_start": {
+    message: msg({ id: "error.household.unknown_week_start", message: "{week_start} is not a day a week can start on -- use monday, sunday or saturday", comment: "monday, sunday and saturday are the API's own names and stay as they are" }),
+  },
   "agent_key.not_found": {
     message: msg({ id: "error.agent_key.not_found", message: "No such key", comment: "A key for a program. See GLOSSARY.md (Keys for programs)" }),
   },

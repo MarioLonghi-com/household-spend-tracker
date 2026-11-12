@@ -167,6 +167,7 @@ def update_household(
             name=body.name,
             base_currency=body.base_currency,
             date_format=body.date_format,
+            week_start=body.week_start,
             note=None if body.clear_note else (body.note if body.note is not None else UNSET),
             theme=body.theme,
             accent=None if body.clear_accent else (body.accent if body.accent is not None else UNSET),
