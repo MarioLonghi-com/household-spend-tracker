@@ -30,7 +30,15 @@ history this repository does not have.
 
 ---
 
-## Unreleased
+## 0.16.1 — 2026-11-12
+
+**Reversible: none** — no migration in this release. To go back to
+`0.16.0`, use *Go back to 0.16.0* under Updates, or follow *Going back after
+a successful update* in `deploy/UPGRADING.md`. From a checkout, check out
+`v0.16.0` and restart.
+
+Two fixes from 0.16.0: the desktop app can update a ledger that needs an
+update that cannot be undone, and the Mac App Store upload waits for Apple.
 
 ### Fixed
 
