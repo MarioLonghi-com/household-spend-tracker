@@ -4087,6 +4087,11 @@ msgstr "A fetch is already running -- wait for it to finish"
 msgid "error.fx.no_foreign_currency"
 msgstr "This household keeps every account in its base currency, so there is no rate to fetch"
 
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.fx.nothing_published"
+msgstr "No source in this household's chain publishes a rate it is missing -- enter those by hand"
+
 #. ECB: the European Central Bank, which publishes exchange rates
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts

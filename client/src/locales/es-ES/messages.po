@@ -4087,6 +4087,11 @@ msgstr "Ya se están obteniendo tipos -- espera a que termine"
 msgid "error.fx.no_foreign_currency"
 msgstr "Este hogar tiene todas las cuentas en su divisa base, así que no hay ningún tipo que obtener"
 
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.fx.nothing_published"
+msgstr "Ninguna fuente de la cadena de este hogar publica un tipo que le falte -- introdúcelos a mano"
+
 #. ECB: the European Central Bank, which publishes exchange rates
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts

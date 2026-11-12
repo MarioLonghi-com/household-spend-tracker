@@ -48,6 +48,19 @@ history this repository does not have.
   update check, the YNAB import) now verifies with certifi's bundle through
   one helper, `outbound.trust()`, and a test fails if a module builds a TLS
   context of its own.
+- An exchange-rate fetch can no longer stay "running" until the app restarts
+  (#444). A "database is locked" on any of its commits, or a failure in the
+  request after it was recorded, left the fetch marked as running, and every
+  later Fetch now answered "a fetch is already running". Such a fetch now
+  ends as failed, and one nothing is working on any more shows as
+  interrupted and no longer blocks the next press.
+- Fetch now stops asking for currencies the ECB does not publish (#444). A
+  currency it has never published, or one it stopped publishing (RUB, HRK,
+  BGN and the currencies replaced by the euro) once its last published day
+  is stored, is left out of the request, so the fetch no longer starts from
+  the earliest transaction on every press. A household whose currencies are
+  all unpublished is told so instead of fetching nothing, and a currency
+  held only after the ECB stopped publishing it is listed under Not covered.
 
 ## 0.16.1 — 2026-11-12
 

@@ -4087,6 +4087,11 @@ msgstr "En hämtning pågår redan -- vänta tills den är klar"
 msgid "error.fx.no_foreign_currency"
 msgstr "Hushållet har alla konton i sin basvaluta, så det finns ingen kurs att hämta"
 
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.fx.nothing_published"
+msgstr "Ingen källa i hushållets kedja publicerar en kurs som saknas -- ange dem för hand"
+
 #. ECB: the European Central Bank, which publishes exchange rates
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts

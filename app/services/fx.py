@@ -58,7 +58,7 @@ from datetime import date as Date
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .. import money
@@ -628,11 +628,10 @@ def rates_status(
         .order_by(FxFetch.finished_at.desc(), FxFetch.started_at.desc())
         .limit(1)
     ).scalar_one_or_none()
-    running = session.execute(
-        select(func.count()).select_from(FxFetch).where(FxFetch.outcome == FxFetchOutcome.running)
-    ).scalar_one() > 0
-
+    from .fx_fetching import is_running
     from .fx_manual import last_change
+
+    running = is_running()
 
     changed_at, changed_by = last_change(session, household.id)
     return RatesStatus(
