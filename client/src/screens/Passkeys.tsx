@@ -17,7 +17,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { Field, Problem, SortHeading, sortRows, useSort } from "../components/bits";
-import { NO_PROOF, spent, stepUpReady, StepUpFields, stepUpToken, type StepUpProof } from "../components/StepUp";
+import { NO_PROOF, spent, stepUpReady, StepUpFields, stepUpToken, type StepUpProof, useStepUpFactors } from "../components/StepUp";
 import {
   createPasskey,
   forgetRecoveryReminder,
@@ -60,9 +60,19 @@ export function usePasskeyState() {
   return useQuery({ queryKey: ["passkey-state"], queryFn: passkeyState, staleTime: Infinity });
 }
 
-/** What is left to sign in with once this one is gone, for the question. */
-function whatIsLeft(passkeys: Passkey[], removing: Passkey): string {
+/** What is left to sign in with once this one is gone, for the question.
+ * `authenticator` false: the passkeys are the second step (#456), so the
+ * last one cannot go -- the server refuses it, and this says so first. */
+function whatIsLeft(passkeys: Passkey[], removing: Passkey, authenticator: boolean): string {
   const others = passkeys.filter((one) => one.id !== removing.id && one.usable_here).length;
+  if (!authenticator) {
+    return others > 0
+      ? plural(others, {
+          one: "You will still be able to sign in with your other passkey.",
+          other: `You will still be able to sign in with your other ${others} passkeys.`,
+        })
+      : t`This is your last second step, so it cannot be removed. Set up an authenticator first.`;
+  }
   return others > 0
     ? plural(others, {
         one: "You will still be able to sign in with your other passkey, or with your password and code.",
@@ -76,6 +86,8 @@ export function PasskeysSection() {
   const queries = useQueryClient();
   const listed = usePasskeys();
   const state = usePasskeyState();
+  // Whether there is an authenticator besides the passkeys (#456).
+  const authenticator = useStepUpFactors().code;
   const { sort, direction, onSort } = useSort<Column | "newest">("newest");
   const [adding, setAdding] = useState(false);
   const [proof, setProof] = useState<StepUpProof>(NO_PROOF);
@@ -219,7 +231,7 @@ export function PasskeysSection() {
             <Trans>
               Remove <strong>{removing.label}</strong>? It stops working at once.
             </Trans>{" "}
-            {removing.usable_here ? whatIsLeft(passkeys, removing) : t`It could not be used here anyway.`}
+            {removing.usable_here ? whatIsLeft(passkeys, removing, authenticator) : t`It could not be used here anyway.`}
           </p>
           <div className="row">
             <button className="danger" disabled={remove.isPending} onClick={() => remove.mutate(removing.id)}>

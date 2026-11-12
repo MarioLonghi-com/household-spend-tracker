@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from ... import capabilities, db
 from ...audit.batch import batch
-from ...auth import cookies, keycheck, passkeys, service, unlock
+from ...auth import cookies, factors, keycheck, passkeys, ratelimit, service, unlock
 from ...auth import devices as device_service
 from ...auth import sessions as session_service
 
@@ -28,6 +28,7 @@ from ...schemas import (
     SignInWithPasskey,
     SubmitCode,
     SubmitRecoveryCode,
+    SubmitSecondStepPasskey,
     UserOut,
 )
 from ...services import profile as profile_service
@@ -65,10 +66,12 @@ def sign_in(
 
     trusted = device_service.is_trusted(session, user, device_cookie(request))
     locked = keycheck.locked_by_key(user)
-    # A trusted browser skips the code, and an account whose authenticator a
-    # reset cleared has no code to skip to (#284). The reset revoked every
-    # trusted browser; this is the second line, so trust can never stand in
-    # for a factor the account no longer has.
+    # A trusted browser skips the second step, and an account whose second
+    # factors a reset cleared has no second step to skip to (#284). The reset
+    # revoked every trusted browser; this is the second line, so trust can
+    # never stand in for a factor the account no longer has. Cleared is asked
+    # of `factors`, never read off a NULL `totp_secret`, which a passkey-only
+    # account (#456) also has.
     #
     # Nor for one the server can no longer check (#287). The trust was earned
     # with an authenticator this key cannot open, and letting it through
@@ -77,11 +80,12 @@ def sign_in(
     # thirty days ran out. So the half-finished sign-in it is, and this
     # answer tells them.
     # None of this on the desktop, where the password is the only factor and
-    # this is the whole sign-in (#320). Asked of the profile, never inferred
-    # from a NULL `totp_secret`, which means "cleared by a reset" (#284).
-    if capabilities.second_factor() and (trusted is None or user.totp_secret is None or locked):
+    # this is the whole sign-in (#320).
+    second = capabilities.second_factor()
+    cleared = second and factors.cleared(session, user)
+    if second and (trusted is None or cleared or locked):
         # The browser has not passed a second factor recently. Hold the
-        # half-finished sign-in in a sealed cookie and ask for a code.
+        # half-finished sign-in in a sealed cookie and ask for one.
         # A row, not just a sealed cookie. The sealed value alone was a bearer
         # token: replayable, and portable to any browser.
         cookies.set_pending(
@@ -90,15 +94,17 @@ def sign_in(
             session_service.issue_pending(session, user, seconds=PENDING_MAX_AGE),
         )
         # In recovery mode the answer says so already (#287), and the screen
-        # asks for a recovery code without first asking for a code that
-        # cannot work. The password has just been proven, so this tells the
-        # caller nothing the code step's refusal would not; that refusal
-        # stays, as the second line for a client that never read this.
+        # asks for a recovery code -- or the passkey, when there is one --
+        # without first asking for a code that cannot work. The password has
+        # just been proven, so this tells the caller nothing the code step's
+        # refusal would not; that refusal stays, as the second line for a
+        # client that never read this.
         return SignInState(
             authenticated=False,
             needs_code=True,
             key_replaced=locked,
             detail=service.KEY_REPLACED if locked else None,
+            second_steps=_second_steps(session, user, request, locked=locked),
         )
 
     result = service.complete_sign_in(
@@ -111,6 +117,20 @@ def sign_in(
     )
     cookies.set_session(response, request, result.session_value)
     return SignInState(authenticated=True, user=UserOut.model_validate(user))
+
+
+def _second_steps(session, user: User, request: Request, *, locked: bool) -> list[str]:
+    """What this member can give as the second step, most preferred first
+    (#456): "passkey" when they have one that works here and this instance
+    offers passkeys, "code" when they have an authenticator this key opens.
+    Empty for an account a reset cleared. Said only after the right password.
+    """
+    steps = []
+    if passkeys.usable_for(session, user) and passkeys.state(request).available:
+        steps.append("passkey")
+    if user.totp_secret is not None and not locked:
+        steps.append("code")
+    return steps
 
 
 @router.get("/session/passkey/state", response_model=PasskeyStateOut)
@@ -140,6 +160,10 @@ def submit_code(
     waiting_id = session_service.peek_pending(session, pending)
     waiting = session.get(User, waiting_id) if waiting_id else None
     if waiting is not None and waiting.disabled_at is None:
+        # No authenticator at all -- passkey-only by choice, or cleared by a
+        # reset (#456, #284): said before the claim too, so the half-finished
+        # sign-in survives for the passkey or the recovery code.
+        service.refuse_without_authenticator(session, waiting)
         service.refuse_a_replaced_key(waiting)
 
     # Claiming spends it, whether or not the code below turns out to be right --
@@ -216,6 +240,64 @@ def submit_recovery_code(
         # can say so rather than leave a passkey on a lost phone to be found.
         passkeys_live=passkeys.usable_count(session, user),
     )
+
+
+@router.post("/session/second-step/options")
+def second_step_options(request: Request, session: SessionDep) -> dict:
+    """Options for a passkey as the second step after the password (#456).
+
+    Read off the half-finished sign-in this browser holds, which is peeked at
+    and not spent: the passkey's own answer spends it. The options list that
+    member's passkeys, so the browser offers only theirs -- the password has
+    been proven, so naming them tells nobody anything.
+    """
+    waiting_id = session_service.peek_pending(session, cookies.pending_value(request))
+    user = session.get(User, waiting_id) if waiting_id else None
+    if user is None or user.disabled_at is not None:
+        raise Unauthorized("start again from the sign-in page", code="auth.start_again")
+    return passkeys.member_options(session, request, user, purpose=passkeys.SECOND_STEP)
+
+
+@router.post("/session/second-step", response_model=SignInState)
+def second_step_passkey(
+    body: SubmitSecondStepPasskey, request: Request, response: Response, session: SessionDep
+) -> SignInState:
+    """Finish a password sign-in with a passkey in place of the code (#456).
+
+    The same door as `/session/code`: the half-finished sign-in is claimed
+    first and spent whatever follows, and the assertion has to be by one of
+    that member's own passkeys, with user verification, answering the
+    challenge `second_step_options` issued to them. Counted under the
+    passkey's own rate-limit budget. A trusted browser may be asked for, as a
+    code earns one.
+    """
+    passkeys.refuse_unless_available(request)
+    user_id = session_service.claim_pending(db.engine, cookies.pending_value(request))
+    user = session.get(User, user_id) if user_id else None
+    if user is None or user.disabled_at is not None:
+        raise Unauthorized("start again from the sign-in page", code="auth.start_again")
+    held = ratelimit.reserve(
+        db.engine, email_canonical=user.email_canonical, ip=client_ip(request), kind=passkeys.RATE_KIND
+    )
+    passkey = passkeys.check_member(
+        session, db.engine, request, user, credential=body.credential, purpose=passkeys.SECOND_STEP
+    )
+    if passkey is None:
+        raise Unauthorized(passkeys.REFUSED, code="passkey.refused")
+    ratelimit.release(db.engine, held)
+    result = service.complete_sign_in(
+        session,
+        user,
+        trust_this_browser=body.trust_this_browser,
+        device_cookie=device_cookie(request),
+        ip=client_ip(request),
+        user_agent=request.headers.get("user-agent"),
+    )
+    cookies.set_session(response, request, result.session_value)
+    if result.device_value:
+        cookies.set_device(response, request, result.device_value)
+    cookies.clear_pending(response, request)
+    return SignInState(authenticated=True, user=UserOut.model_validate(user), passkey_id=passkey.id)
 
 
 @router.post("/session/passkey/options")

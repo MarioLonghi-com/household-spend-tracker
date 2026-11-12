@@ -170,9 +170,9 @@ describe("the reset dialog", () => {
     expect(dialog.textContent).toContain("signed out everywhere");
 
     // Both, then one taken back off: what is sent is what is ticked.
-    fireEvent.click(within(dialog).getByRole("checkbox", { name: /^Authenticator/ }));
+    fireEvent.click(within(dialog).getByRole("checkbox", { name: /^Second step/ }));
     expect(dialog.textContent).toContain("their authenticator and recovery codes are cleared");
-    fireEvent.click(within(dialog).getByRole("checkbox", { name: /^Authenticator/ }));
+    fireEvent.click(within(dialog).getByRole("checkbox", { name: /^Second step/ }));
 
     fireEvent.click(confirm);
     await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1));
@@ -250,7 +250,7 @@ describe("the reset dialog", () => {
     await mount();
     fireEvent.click(screen.getByRole("button", { name: "Reset sign-in for Alex" }));
     const asking = screen.getByRole("dialog", { name: "Reset sign-in for Alex?" });
-    fireEvent.click(within(asking).getByRole("checkbox", { name: /^Authenticator/ }));
+    fireEvent.click(within(asking).getByRole("checkbox", { name: /^Second step/ }));
     fireEvent.click(within(asking).getByRole("button", { name: "Reset and make the link" }));
     expect((await within(asking).findByRole("alert")).textContent).toContain("the server said no");
     expect(api.post).toHaveBeenCalledWith("/admin/users/u-alex/reset", {
@@ -286,9 +286,9 @@ describe("pending reset links", () => {
     expect(bodyRows(table)[0][4]).not.toContain("expired");
 
     fireEvent.click(within(table).getByRole("button", { name: "Who" }));
-    expect(bodyRows(table).map((cells) => cells[1])).toEqual(["authenticator", "password"]);
+    expect(bodyRows(table).map((cells) => cells[1])).toEqual(["second step", "password"]);
     fireEvent.click(within(table).getByRole("button", { name: "Who" }));
-    expect(bodyRows(table).map((cells) => cells[1])).toEqual(["password", "authenticator"]);
+    expect(bodyRows(table).map((cells) => cells[1])).toEqual(["password", "second step"]);
 
     fireEvent.click(within(table).getByRole("button", { name: "Expires" }));
     expect(bodyRows(table)[0][0]).toContain("Alex");
@@ -313,7 +313,7 @@ describe("recent sign-in changes", () => {
     const rows = bodyRows(table);
     expect(rows.map((cells) => cells.slice(1))).toEqual([
       ["Made an owner", "Robin", "from the server"],
-      ["Reset: password and authenticator", "Sam", "Alex"],
+      ["Reset: password and second step", "Sam", "Alex"],
       ["Added as an owner", "Alex", "Jane"],
     ]);
 
@@ -325,11 +325,11 @@ describe("recent sign-in changes", () => {
     expect(bodyRows(table).map((cells) => cells[1])).toEqual([
       "Added as an owner",
       "Made an owner",
-      "Reset: password and authenticator",
+      "Reset: password and second step",
     ]);
     fireEvent.click(within(table).getByRole("button", { name: "What" }));
     expect(bodyRows(table).map((cells) => cells[1])).toEqual([
-      "Reset: password and authenticator",
+      "Reset: password and second step",
       "Made an owner",
       "Added as an owner",
     ]);
@@ -356,7 +356,7 @@ describe("the notice in the shell", () => {
     shell(ME, [mine, ...CHANGES]);
     const notice = await screen.findByRole("status", { name: "Recent sign-in changes" });
     expect(notice.textContent).toContain("The server made Robin an owner.");
-    expect(notice.textContent).toContain("Alex reset Sam's password and authenticator.");
+    expect(notice.textContent).toContain("Alex reset Sam's password and second step.");
     // Jane's own acts are not news to Jane.
     expect(notice.textContent).not.toContain("Jane reset Robin's");
     expect(notice.textContent).not.toContain("Jane added Alex as an owner");
@@ -455,7 +455,7 @@ describe("the notice in the shell", () => {
       served = [change({ id: 60, by_id: "u-alex", by_name: "Alex" })];
       await vi.advanceTimersByTimeAsync(NOTICE_REFRESH_MS);
       const notice = await screen.findByRole("status", { name: "Recent sign-in changes" });
-      expect(notice.textContent).toContain("Alex reset Sam's password and authenticator.");
+      expect(notice.textContent).toContain("Alex reset Sam's password and second step.");
       expect(api.get).toHaveBeenCalledTimes(2);
       expect(api.get).toHaveBeenLastCalledWith("/admin/sign-in-changes");
 

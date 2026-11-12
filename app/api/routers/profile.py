@@ -16,7 +16,7 @@ from fastapi import APIRouter, Request, Response
 
 from ... import config, db
 from ...audit.batch import batch
-from ...auth import cookies, keycheck, passkeys, stepup, tokens, unlock
+from ...auth import cookies, factors, passkeys, stepup, tokens, unlock
 
 # `from ...db import engine` would bind the object at import time, which is the
 # trap `routers/auth.py` carries a comment about: the test harness rebuilds the
@@ -28,6 +28,7 @@ from ...models import AgentKey, BatchKind, Household, Passkey
 from ...schemas import (
     AgentKeyIssued,
     AgentKeyOut,
+    AuthenticatorRemoved,
     AuthenticatorStatus,
     ChangePassword,
     ConfirmReenrolment,
@@ -98,7 +99,7 @@ def change_password(
 
 
 @authenticator_router.get("/me/authenticator", response_model=AuthenticatorStatus)
-def authenticator_status(user: CurrentUser) -> AuthenticatorStatus:
+def authenticator_status(session: SessionDep, user: CurrentUser) -> AuthenticatorStatus:
     """Whether the caller has an authenticator, and whether this server's key
     opens it (#287).
 
@@ -108,9 +109,31 @@ def authenticator_status(user: CurrentUser) -> AuthenticatorStatus:
     theirs can give. Only ever the caller -- there is no id to ask about
     anybody else. Computed on every ask, like everything in recovery mode.
     """
+    found = factors.of(session, user)
     return AuthenticatorStatus(
-        enrolled=user.totp_secret is not None, locked_by_key=keycheck.locked_by_key(user)
+        enrolled=found.authenticator,
+        locked_by_key=found.locked_by_key,
+        passkeys=found.passkeys,
+        cleared=found.cleared,
     )
+
+
+@authenticator_router.delete("/me/authenticator", response_model=AuthenticatorRemoved)
+def remove_authenticator(session: SessionDep, user: CurrentUser) -> AuthenticatorRemoved:
+    """Stop using an authenticator, when a passkey is the second step (#456).
+
+    Refused when no passkey works here: an account always keeps at least one
+    second factor (`factors.refuse_removing_last`). No step-up, for the reason
+    removing a passkey asks none: taking a way in away is the safe direction.
+
+    Recovery codes stay -- they belong to the account, not the authenticator.
+    Every trusted browser is forgotten: the ones that skip the second step
+    were let off it on the strength of whatever passed it then, and trust never
+    stands in for a factor the account no longer has.
+    """
+    with batch(session, kind=BatchKind.manual, actor_id=user.id):
+        done = profile_service.remove_authenticator(session, user)
+    return AuthenticatorRemoved(devices_revoked=done)
 
 
 @authenticator_router.post("/me/authenticator", response_model=ReenrolmentOffer)
@@ -148,6 +171,7 @@ def confirm_reenrolment(
             code=body.code,
             current_code=body.current_code,
             grant=body.grant,
+            step_up_token=body.step_up_token,
             keep_session_hash=keep,
             ip=client_ip(request),
         )
@@ -186,6 +210,7 @@ def regenerate_recovery_codes(
             user,
             password=body.password,
             code=body.code,
+            step_up_token=body.step_up_token,
             ip=client_ip(request),
         )
     return RecoveryCodesIssued(codes=list(codes))
@@ -266,9 +291,22 @@ def step_up(
         user,
         password=body.password,
         code=body.code,
+        credential=body.credential,
+        request=request,
         ip=client_ip(request),
     )
     return StepUpGranted(token=value, expires_at=expires_at)
+
+
+@router.post("/me/step-up/options")
+def step_up_passkey_options(request: Request, session: SessionDep, user: CurrentUser) -> dict:
+    """Options for a passkey in place of the code at a step-up (#456).
+
+    The member's own passkeys only, under a challenge bound to them and to a
+    step-up. Nothing is granted here: `POST /me/step-up` takes the password
+    with the browser's answer.
+    """
+    return passkeys.member_options(session, request, user, purpose=passkeys.STEP_UP)
 
 
 # --------------------------------------------------------------------------- #
@@ -325,7 +363,7 @@ def issue_key(
     The grant is spent **before** anything is written, and spent whether or not
     what follows succeeds: one grant is worth one attempt at one key.
     """
-    stepup.require(db.engine, body.step_up_token, user_id=user.id)
+    factor = stepup.require(db.engine, body.step_up_token, user_id=user.id)
 
     household = session.get(Household, body.household_id)
     if household is None:
@@ -337,8 +375,13 @@ def issue_key(
     # A batch, because `agent_keys` is audited and issuing a credential is
     # exactly the kind of act History should carry. `admin`, not a new kind:
     # BatchKind answers what was done, and this is administration.
+    # Which second factor paid for it, for History to say (#456).
     with batch(
-        session, kind=BatchKind.admin, actor_id=user.id, household_id=household.id
+        session,
+        kind=BatchKind.admin,
+        actor_id=user.id,
+        household_id=household.id,
+        source={"step_up": factor} if factor else None,
     ):
         key, token = key_service.issue(
             session,
@@ -459,5 +502,8 @@ def remove_passkey(passkey_id: str, session: SessionDep, user: CurrentUser) -> N
     (`undo.CREDENTIAL_TABLES`).
     """
     passkey = passkeys.owned(session, user, passkey_id)
+    # Never the last second factor (#456): an account without an
+    # authenticator keeps at least one passkey that works here.
+    factors.refuse_removing_last(session, user, removing=passkey)
     with batch(session, kind=BatchKind.manual, actor_id=user.id):
         session.delete(passkey)

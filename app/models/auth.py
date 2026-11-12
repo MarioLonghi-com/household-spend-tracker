@@ -60,12 +60,13 @@ class User(Base, UUIDPrimaryKey, Timestamped):
     #: hash then, the same work and the same sentence as an unknown email.
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     role: Mapped[Role] = mapped_column(EnumStr(Role, 8), default=Role.member, nullable=False)
-    #: NULL only between an account reset that cleared the authenticator and
-    #: the moment its holder enrols a new one through the link (#284). Every
-    #: way in to an account with no secret is shut: the code step refuses it,
-    #: its recovery codes were deleted with the secret, and a password alone
-    #: never yields a session. The wizard and invitations still cannot finish
-    #: without one -- `setup.complete` writes it in the same transaction.
+    #: NULL in two states that `auth/factors.py` tells apart (#456): an
+    #: account whose second step is a passkey, by choice -- it has at least one
+    #: passkey -- and one whose second factors an account reset cleared (#284),
+    #: which has no passkey either. Every way in to the second is shut until
+    #: its holder enrols one through the link: the code step refuses it, its
+    #: recovery codes were deleted, and a password alone never yields a
+    #: session. Never read this column alone to decide which it is.
     totp_secret: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
     #: The last TOTP timestep accepted for this user. Monotonic, so a code is
     #: dead the moment it is used -- even while still inside its window.

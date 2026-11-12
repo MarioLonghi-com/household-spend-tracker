@@ -14,6 +14,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { api } from "../lib/api";
 import { formatInstant } from "../lib/time";
 import { Field, Problem } from "../components/bits";
+import { type MadePasskey, PasskeyChoice } from "../components/PasskeyChoice";
 import type { ResetState } from "../lib/types";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
@@ -35,16 +36,16 @@ function resetText(state: ResetState, when: string): string {
   const both = state.password && state.authenticator;
   if (by) {
     if (both)
-      return t`${by} reset your password and your authenticator for ${email} on ${when}. Every browser that was signed in as you has been signed out. Set both again below.`;
+      return t`${by} reset your password and your second step for ${email} on ${when}. Every browser that was signed in as you has been signed out. Set both again below.`;
     return state.password
       ? t`${by} reset your password for ${email} on ${when}. Every browser that was signed in as you has been signed out. Set it again below.`
-      : t`${by} reset your authenticator for ${email} on ${when}. Every browser that was signed in as you has been signed out. Set it again below.`;
+      : t`${by} reset your second step for ${email} on ${when}. Every browser that was signed in as you has been signed out. Set it again below.`;
   }
   if (both)
-    return t`Your password and your authenticator for ${email} was reset from the server on ${when}. Every browser that was signed in as you has been signed out. Set both again below.`;
+    return t`Your password and your second step for ${email} were reset from the server on ${when}. Every browser that was signed in as you has been signed out. Set both again below.`;
   return state.password
     ? t`Your password for ${email} was reset from the server on ${when}. Every browser that was signed in as you has been signed out. Set it again below.`
-    : t`Your authenticator for ${email} was reset from the server on ${when}. Every browser that was signed in as you has been signed out. Set it again below.`;
+    : t`Your second step for ${email} was reset from the server on ${when}. Every browser that was signed in as you has been signed out. Set it again below.`;
 }
 
 export function ResetAccount({ token, onDone }: { token: string; onDone: () => void }) {
@@ -60,6 +61,8 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
   const [offer, setOffer] = useState<Offer | null>(null);
   const [code, setCode] = useState("");
   const [codes, setCodes] = useState<string[] | null>(null);
+  // A passkey in place of the authenticator (#456), checked when finishing.
+  const [passkey, setPasskey] = useState<MadePasskey | null>(null);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -96,11 +99,21 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
 
   const finish = () =>
     run(async () => {
-      const done = await api.post<{ recovery_codes: string[] }>(path, {
-        password: state?.password ? password : null,
-        blob: offer?.blob ?? null,
-        code: state?.authenticator ? code : null,
-      });
+      const done = await api.post<{ recovery_codes: string[] }>(
+        path,
+        passkey
+          ? {
+              password: state?.password ? password : null,
+              second_step: "passkey",
+              blob: passkey.blob,
+              credential: passkey.credential,
+            }
+          : {
+              password: state?.password ? password : null,
+              blob: offer?.blob ?? null,
+              code: state?.authenticator ? code : null,
+            },
+      );
       // The secret has done its job; it does not sit in state while the codes
       // are on screen (#198).
       setOffer(null);
@@ -182,7 +195,7 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
 
   const ready =
     (!state.password || password.length >= 12) &&
-    (!state.authenticator || (offer !== null && code.length >= 6));
+    (!state.authenticator || passkey !== null || (offer !== null && code.length >= 6));
 
   return (
     <div className="centred">
@@ -220,9 +233,10 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
       {state.authenticator && (
         <div className="card">
           <h2>
-            <Trans>A new authenticator</Trans>
+            <Trans>A new second step</Trans>
           </h2>
-          {offer ? (
+          <PasskeyChoice offerPath={`${path}/passkey`} body={{}} made={passkey} onMade={setPasskey} />
+          {passkey ? null : offer ? (
             <>
               <p className="muted small">
                 <Trans>
@@ -267,7 +281,7 @@ export function ResetAccount({ token, onDone }: { token: string; onDone: () => v
       )}
 
       <button className="primary" disabled={busy || !ready} onClick={finish}>
-        {state.authenticator ? t`Check the code and finish` : t`Set the password`}
+        {passkey ? t`Finish` : state.authenticator ? t`Check the code and finish` : t`Set the password`}
       </button>
     </div>
   );

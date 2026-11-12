@@ -181,6 +181,8 @@ SENTENCES: dict[str, str] = {
     "history.detail.account_import": "{count, plural, one {# account} other {# accounts}} from {file}.",
     "history.detail.keys": "{acts}.",
     "history.key.issued": "Issued the key “{label}”",
+    "history.key.issued_passkey": "Issued the key “{label}”, confirmed with a passkey",
+    "history.key.issued_code": "Issued the key “{label}”, confirmed with a code",
     "history.key.removed": "Removed the key “{label}”",
     "history.key.revoked": "Revoked the key “{label}”",
     "history.key.changed": "Changed the key “{label}”",
@@ -1066,7 +1068,7 @@ def _detail_phrase(batch: Batch, lazy: _Changes | list[Change], names: _Names) -
         return _split_detail(lazy.all(), names)
     tally = lazy.tally()
     if _about_keys(tally):
-        return _key_detail(lazy.all())
+        return _key_detail(lazy.all(), step_up=(batch.source or {}).get("step_up"))
     if _accounts_file(batch):
         return _account_import_detail(batch, tally)
 
@@ -1145,15 +1147,25 @@ def _about_keys(tally: dict[str, dict[ChangeOp, int]]) -> bool:
     return set(tally) == {"agent_keys"}
 
 
-def _key_detail(changes: list[Change]) -> dict:
-    """"Issued the key “receipt filer”" / "Revoked the key “receipt filer”"."""
+#: Which second factor paid for issuing a key (#456), as the batch's
+#: `source["step_up"]` records it (`stepup.require`), and the sentence it gets.
+_ISSUED_WITH = {"passkey": "history.key.issued_passkey", "code": "history.key.issued_code"}
+
+
+def _key_detail(changes: list[Change], *, step_up: object = None) -> dict:
+    """"Issued the key “receipt filer”" / "Revoked the key “receipt filer”".
+
+    An issue names the second factor its step-up was passed with -- "confirmed
+    with a passkey" or "with a code" (#456) -- when the batch recorded one.
+    """
+    issued = _ISSUED_WITH.get(step_up, "history.key.issued") if isinstance(step_up, str) else "history.key.issued"
     said = []
     for one in changes:
         image = one.after or one.before or {}
         label = image.get("label")
         named = _name(label) if label else _word("unknown", "")
         if one.op is ChangeOp.insert:
-            said.append(phrase("history.key.issued", label=named))
+            said.append(phrase(issued, label=named))
         elif one.op is ChangeOp.delete:
             said.append(phrase("history.key.removed", label=named))
         elif (one.before or {}).get("revoked_at") is None and image.get("revoked_at"):

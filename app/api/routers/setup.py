@@ -9,10 +9,19 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request, Response
 
+from ... import db
 from ...auth import cookies, totp
 from ...auth import setup as setup_service
 from ...errors import Conflict
-from ...schemas import SetupBegin, SetupComplete, SetupEnrol, SetupStarted, UserOut
+from ...schemas import (
+    PasskeyOffer,
+    PasskeyOptionsFor,
+    SetupBegin,
+    SetupComplete,
+    SetupEnrol,
+    SetupStarted,
+    UserOut,
+)
 from ..deps import SessionDep, client_ip
 
 router = APIRouter(tags=["setup"])
@@ -72,6 +81,23 @@ def enrol(body: SetupEnrol, session: SessionDep) -> dict:
     return {"blob": setup_service.seal(confirmed)}
 
 
+@router.post("/setup/passkey/options", response_model=PasskeyOffer)
+def passkey_options(body: PasskeyOptionsFor, request: Request, session: SessionDep) -> PasskeyOffer:
+    """A passkey in place of the authenticator (#456): creation options for
+    the owner the blob names, under a provisional user handle sealed into the
+    blob handed back. Refused, with the reason, where passkeys cannot work."""
+    if setup_service.is_configured(session):
+        raise Conflict("this instance has already been set up", code="setup.already_done")
+    blob = setup_service.unseal(body.blob)
+    if blob.invitation_id:
+        raise Conflict(
+            "that is an invitation; finish it from the link you were sent",
+            code="setup.is_an_invitation",
+        )
+    offered, options = setup_service.offer_passkey(session, request, blob)
+    return PasskeyOffer(blob=setup_service.seal(offered), options=options)
+
+
 @router.post("/setup/complete", response_model=UserOut)
 def complete(
     body: SetupComplete, request: Request, response: Response, session: SessionDep
@@ -85,11 +111,19 @@ def complete(
             code="setup.is_an_invitation",
         )
     setup_service.require_codes_saved(body.codes_saved)
+    if setup_service.is_configured(session):
+        raise Conflict("this instance has already been set up", code="setup.already_done")
+    passkey = (
+        setup_service.verify_passkey(db.engine, request, blob, body.credential)
+        if body.second_step == "passkey"
+        else None
+    )
     user, session_value, device_value = setup_service.complete(
         session,
         blob,
         ip=client_ip(request),
         user_agent=request.headers.get("user-agent"),
+        passkey=passkey,
     )
     cookies.set_session(response, request, session_value)
     cookies.set_device(response, request, device_value)

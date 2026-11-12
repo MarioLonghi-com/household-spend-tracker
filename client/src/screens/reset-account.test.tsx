@@ -45,7 +45,7 @@ describe("a reset link", () => {
     const done = vi.fn();
     render(<ResetAccount token="tok" onDone={done} />);
 
-    expect((await screen.findByText(/Jane reset your password and your authenticator/)).textContent).toContain(
+    expect((await screen.findByText(/Jane reset your password and your second step/)).textContent).toContain(
       "partner@example.com",
     );
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "a long new password" } });

@@ -45,6 +45,10 @@ msgstr "Omnämnanden"
 msgid "Suggest a better wording"
 msgstr "Föreslå en bättre formulering"
 
+#: src/components/StepUp.tsx
+msgid "{why} So this asks for your password and your passkey — the same as signing in."
+msgstr "{why} Därför frågar vi efter ditt lösenord och din lösennyckel – samma som när du loggar in."
+
 #. Button on Browse rates
 #: src/screens/exchangeRates/Browse.tsx
 msgid "Next page"
@@ -161,6 +165,10 @@ msgstr "Ditt nya lösenord är sparat. Logga in med det och din autentiseringsap
 #: src/screens/Register.tsx
 msgid "payee, memo, or the bank's own words"
 msgstr "mottagare, beskrivning eller bankens egna ord"
+
+#: src/lib/signInChanges.ts
+msgid "password and second step"
+msgstr "lösenord och andra steg"
 
 #. Label used on several screens (saveBackup)
 #: src/lib/saveBackup.ts
@@ -310,6 +318,10 @@ msgstr "Banker"
 msgid "Select {0}"
 msgstr "Markera {0}"
 
+#: src/lib/signInChanges.ts
+msgid "{by} reset {user}'s second step"
+msgstr "{by} återställde det andra steget för {user}"
+
 #: src/screens/Profile.tsx
 msgid "No browsers were being trusted."
 msgstr "Inga webbläsare var betrodda."
@@ -413,10 +425,6 @@ msgstr "Låst – avstämd mot banken, neka alla ändringar"
 msgid "Rename {0}"
 msgstr "Byt namn på {0}"
 
-#: src/screens/ResetAccount.tsx
-msgid "{by} reset your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
-msgstr "{by} återställde din autentiseringsapp för {email} den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in den igen nedan."
-
 #. placeholder {0}: confirming.user.display_name
 #. placeholder {1}: confirming.user.email
 #: src/screens/Admin.tsx
@@ -500,6 +508,10 @@ msgstr "datumkolumn"
 #: src/screens/Register.tsx
 msgid "{0, plural, one {Tick the {1} row the filter shows} other {Tick all {2} rows the filter shows}}"
 msgstr "{0, plural, one {Markera den {1} rad som filtret visar} other {Markera alla {2} rader som filtret visar}}"
+
+#: src/components/PasskeyChoice.tsx
+msgid "Passkey saved on this device."
+msgstr "Lösennyckeln är sparad på den här enheten."
 
 #. placeholder {0}: rows.data.entries.length
 #. placeholder {1}: rows.data.count
@@ -654,6 +666,10 @@ msgstr "Fler valutor"
 #: src/screens/Register.tsx
 msgid "{unloaded, plural, one {Showing {0} — {1} more row to load — show more} other {Showing {2} — {3} more rows to load — show more}}"
 msgstr "{unloaded, plural, one {Visar {0} – {1} rad till att läsa in – visa fler} other {Visar {2} – {3} rader till att läsa in – visa fler}}"
+
+#: src/screens/Profile.tsx
+msgid "Your browser asks for your passkey when you confirm: it proves it is you."
+msgstr "Webbläsaren ber om din lösennyckel när du bekräftar: den visar att det är du."
 
 #. Column heading on Application management's suggestions: when it was suggested
 #. Column heading on the Admin screen: noun, the time
@@ -858,6 +874,11 @@ msgstr "Netto – {0}"
 msgid "On a laptop"
 msgstr "På en bärbar dator"
 
+#. Button on setup: make a passkey. See GLOSSARY.md
+#: src/components/PasskeyChoice.tsx
+msgid "Create passkey"
+msgstr "Skapa lösennyckel"
+
 #. placeholder {0}: changes.length
 #: src/screens/History.tsx
 msgid "The first {0} of {count}, in the order they were changed. Undo puts back all {count}."
@@ -1005,6 +1026,10 @@ msgstr "Uppladdat"
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Nothing went into this one."
 msgstr "Inget hamnade i den här."
+
+#: src/screens/SignIn.tsx
+msgid "Use your passkey"
+msgstr "Använd din lösennyckel"
 
 #. Column heading on the Exchange rates page: how many rates are stored
 #: src/screens/ExchangeRates.tsx
@@ -1573,14 +1598,6 @@ msgstr "{0} kvar"
 msgid "Linked {0}."
 msgstr "Kopplade: {0}."
 
-#: src/lib/signInChanges.ts
-msgid "Somebody reset {user}'s password and authenticator"
-msgstr "Någon återställde lösenordet och autentiseringsappen för {user}"
-
-#: src/lib/signInChanges.ts
-msgid "password and authenticator"
-msgstr "lösenord och autentiseringsapp"
-
 #. placeholder {0}: beat?.socket ?? "?"
 #: src/screens/Updates.tsx
 msgid "The updater cannot use the container engine ({0}), so this screen cannot update the app."
@@ -1760,6 +1777,10 @@ msgstr "Pengar du är skyldig som inte är ett kort – ett bolån, ett billån,
 msgid "has a receipt"
 msgstr "har kvitto"
 
+#: src/components/PasskeyChoice.tsx
+msgid "Face ID, Touch ID, Windows Hello or a security key. Recommended."
+msgstr "Face ID, Touch ID, Windows Hello eller en säkerhetsnyckel. Rekommenderas."
+
 #: src/screens/Backups.tsx
 msgid "Drag the zip from your downloads onto that page, into the folder you keep it in."
 msgstr "Dra zip-filen från dina nedladdningar till den sidan, in i mappen där du förvarar den."
@@ -1895,6 +1916,10 @@ msgstr "Hoppades över: utanför datumintervallet"
 msgid "missing"
 msgstr "saknas"
 
+#: src/screens/Profile.tsx
+msgid "Your authenticator is set up. Your passkeys keep working too."
+msgstr "Din autentiseringsapp är inställd. Dina lösennycklar fungerar fortfarande."
+
 #: src/screens/Register.tsx
 msgid "Add a part"
 msgstr "Lägg till en del"
@@ -1987,6 +2012,11 @@ msgstr "De sex siffrorna"
 msgid "Show"
 msgstr "Visa"
 
+#. Link on the Your account panel, when adding an authenticator. See GLOSSARY.md
+#: src/screens/Profile.tsx
+msgid "Use a recovery code instead"
+msgstr "Använd en återställningskod i stället"
+
 #: src/screens/Register.tsx
 msgid "Find the payment…"
 msgstr "Hitta betalningen…"
@@ -2064,10 +2094,6 @@ msgstr "när underhållssidan startades"
 msgid "the server sent no file"
 msgstr "servern skickade ingen fil"
 
-#: src/lib/signInChanges.ts
-msgid "Somebody reset {user}'s authenticator"
-msgstr "Någon återställde autentiseringsappen för {user}"
-
 #. Column heading on the Admin screen
 #: src/screens/Admin.tsx
 msgid "Whom"
@@ -2136,7 +2162,6 @@ msgstr "Det är mer än du valde: det som redan återställts för personen för
 msgid "The fetch failed: {0}"
 msgstr "Hämtningen misslyckades: {0}"
 
-#. Label of a form field on the Your account panel
 #. Label of a form field on the Your account panel
 #. Label of a form field on the Your account panel
 #. Label of a form field on the password-and-code check
@@ -2220,10 +2245,6 @@ msgstr "Jobbutlägg – ersatt"
 msgid "Steps"
 msgstr "Steg"
 
-#: src/screens/Admin.tsx
-msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password and authenticator."
-msgstr "{name} loggas ut överallt och kan inte logga in förrän personen följer länken. Den ställer in ett nytt lösenord och en ny autentiseringsapp."
-
 #. Button after an expired recovery code was refused
 #: src/screens/Updates.tsx
 msgid "Get a new recovery code"
@@ -2262,6 +2283,11 @@ msgstr "{0, plural, one {Dess {1} rad utelämnas och listas i rapporten.} other 
 #: src/components/SuggestWording.tsx
 msgid "Keep every placeholder and tag the English has, like <0>{placeholder}</0> or <1>{tag}</1>: they are where names, numbers and links go."
 msgstr "Behåll alla platshållare och taggar som engelskan har, som <0>{placeholder}</0> eller <1>{tag}</1>: det är där namn, siffror och länkar hamnar."
+
+#. Heading on the sign-in page: the second step after the password. See GLOSSARY.md
+#: src/screens/SignIn.tsx
+msgid "Your passkey"
+msgstr "Din lösennyckel"
 
 #: src/screens/OneTimeImport.tsx
 msgid "Currency of the plan"
@@ -2375,6 +2401,10 @@ msgstr "Använd"
 msgid "facing {bearing}° {point}"
 msgstr "riktad mot {bearing}° {point}"
 
+#: src/components/StepUp.tsx
+msgid "Your browser asks for your passkey when you continue."
+msgstr "Webbläsaren ber om din lösennyckel när du fortsätter."
+
 #: src/screens/SignIn.tsx
 msgid "Your password is changed and the code you used has stopped working. This one replaces it: keep it somewhere other than this computer."
 msgstr "Ditt lösenord är bytt och koden du använde har slutat fungera. Den här ersätter den: förvara den någon annanstans än på den här datorn."
@@ -2461,6 +2491,10 @@ msgstr "Slå ihop…"
 msgid "<0>{0} selected.</0> Changing them is one act, so undo puts all of them back together."
 msgstr "<0>{0} markerade.</0> Att ändra dem är en enda handling, så att ångra återställer alla tillsammans."
 
+#: src/screens/Passkeys.tsx
+msgid "This is your last second step, so it cannot be removed. Set up an authenticator first."
+msgstr "Det här är ditt sista andra steg, så det går inte att ta bort. Ställ in en autentiseringsapp först."
+
 #. Column name shown beside a value on phones on the Register screen (noun). See GLOSSARY.md
 #. Label on the Register screen (noun). See GLOSSARY.md
 #. Screen-reader text on the Register screen (noun). See GLOSSARY.md
@@ -2520,6 +2554,10 @@ msgstr "Förra året"
 msgid "Update the updater"
 msgstr "Uppdatera uppdateraren"
 
+#: src/lib/signInChanges.ts
+msgid "The server reset {user}'s password and second step"
+msgstr "Servern återställde lösenordet och det andra steget för {user}"
+
 #: src/screens/Register.tsx
 msgid "a payment outside what the register can show"
 msgstr "en betalning utanför det registret kan visa"
@@ -2544,10 +2582,6 @@ msgstr "Inget kvitto än"
 #: src/screens/Register.tsx
 msgid "saving…"
 msgstr "sparar…"
-
-#: src/lib/signInChanges.ts
-msgid "{by} reset {user}'s password and authenticator"
-msgstr "{by} återställde lösenordet och autentiseringsappen för {user}"
 
 #. placeholder {0}: formatCount(totals.cleared.reconciled)
 #. placeholder {1}: formatCount(totals.cleared.cleared)
@@ -2628,6 +2662,11 @@ msgstr "En uppdelning behöver minst två delar"
 msgid "The backup could not be made"
 msgstr "Säkerhetskopian kunde inte skapas"
 
+#. What was reset, inside a sentence: the second step -- the authenticator and the passkeys. Lower case. See GLOSSARY.md
+#: src/lib/signInChanges.ts
+msgid "second step"
+msgstr "andra steg"
+
 #. Screen-reader name on the one-time import's mapping step
 #: src/screens/ynab/mapping.tsx
 msgid "Row colours"
@@ -2670,12 +2709,6 @@ msgstr "Behåll mina ändringar"
 #: src/screens/Backups.tsx
 msgid "Download {0}"
 msgstr "Ladda ner {0}"
-
-#. placeholder {0}: withdrawing.display_name
-#. placeholder {1}: withdrawing.email
-#: src/screens/Admin.tsx
-msgid "The link for {0} ({1}) stops working at once. Their password and authenticator stays reset, so they cannot sign in until you make them a new link."
-msgstr "Länken för {0} ({1}) slutar fungera direkt. Lösenordet och autentiseringsappen förblir återställda, så personen kan inte logga in förrän du skapar en ny länk."
 
 #. Application management: nobody has suggested a wording yet
 #: src/screens/TranslationReview.tsx
@@ -2949,6 +2982,10 @@ msgstr "Klipp ut"
 msgid "What \"≈\" means."
 msgstr "Vad \"≈\" betyder."
 
+#: src/screens/Profile.tsx
+msgid "You have no unused recovery codes. If you lose your passkeys, you have no way back in on your own."
+msgstr "Du har inga oanvända återställningskoder. Om du tappar bort dina lösennycklar kan du inte ta dig in igen på egen hand."
+
 #. Text on the Register screen
 #: src/screens/Register.tsx
 msgid "Attach receipts"
@@ -3158,6 +3195,10 @@ msgstr "varje session, betrodd webbläsare, agentnyckel och lösennyckel upphör
 msgid "{label} — {display}. Double click, or press Enter twice, to edit."
 msgstr "{label} – {display}. Dubbelklicka, eller tryck Enter två gånger, för att redigera."
 
+#: src/screens/Profile.tsx
+msgid "A key keeps working from somewhere else long after this browser is closed."
+msgstr "En nyckel fortsätter att fungera någon annanstans långt efter att den här webbläsaren har stängts."
+
 #: src/screens/AcceptInvite.tsx
 #: src/screens/ResetAccount.tsx
 msgid "That link doesn't work"
@@ -3337,6 +3378,11 @@ msgstr "Avbryt"
 #: src/screens/reports/NetWorth.tsx
 msgid "Net worth at each month end, split into its parts."
 msgstr "Nettoförmögenhet vid varje månadsslut, uppdelad i sina delar."
+
+#. Heading on the first-run setup
+#: src/screens/Setup.tsx
+msgid "3. A second step"
+msgstr "3. Ett andra steg"
 
 #: src/screens/Payees.tsx
 msgid "The one you keep is the one you choose here."
@@ -3647,10 +3693,6 @@ msgstr "Den här skärmen kunde inte visas"
 msgid "Save these rates"
 msgstr "Spara de här kurserna"
 
-#: src/lib/signInChanges.ts
-msgid "Reset: password and authenticator"
-msgstr "Återställning: lösenord och autentiseringsapp"
-
 #: src/screens/OneTimeImport.tsx
 msgid "Running the import without keeping it…"
 msgstr "Kör importen utan att behålla den…"
@@ -3694,6 +3736,10 @@ msgstr "Vad instansen gjorde: starter, schemarevisionen, städning, fel."
 #: src/screens/Household.tsx
 msgid "Pick an accent colour"
 msgstr "Välj en accentfärg"
+
+#: src/lib/signInChanges.ts
+msgid "{by} reset {user}'s password and second step"
+msgstr "{by} återställde lösenordet och det andra steget för {user}"
 
 #. Column heading on the Reimbursements report: the start of a range, or where money comes from
 #. Label of a date field: the first day of a range to fetch
@@ -3749,6 +3795,10 @@ msgstr "Mindre text i tabellen"
 #: src/screens/ApplicationManagement.tsx
 msgid "Runtime"
 msgstr "Körmiljö"
+
+#: src/screens/Admin.tsx
+msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password and second step."
+msgstr "{name} loggas ut överallt och kan inte logga in förrän personen följer länken. Den ställer in ett nytt lösenord och ett nytt andra steg."
 
 #: ../desktop/src/words.ts
 msgid "Show backups folder"
@@ -3905,6 +3955,12 @@ msgstr "Den upplåsningshemligheten stämmer inte, eller har återkallats"
 #: src/lib/errorMessages.ts
 msgid "error.auth.new_code_wrong"
 msgstr "Den koden stämmer inte. Kontrollera tiden på telefonen och försök igen."
+
+#. See GLOSSARY.md (passkey, authenticator, recovery code)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.auth.no_authenticator"
+msgstr "Det här kontot använder en lösennyckel som andra steg, inte en autentiseringsapp. Använd din lösennyckel eller en av dina återställningskoder."
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4334,6 +4390,12 @@ msgstr "En lösennyckel behöver ett namn"
 msgid "error.passkey.no_user_handle"
 msgstr "Ge medlemmen ett användarhandtag först"
 
+#. See GLOSSARY.md (passkey)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.passkey.none_here"
+msgstr "Du har ingen lösennyckel som fungerar här"
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.passkey.not_an_answer"
@@ -4465,6 +4527,12 @@ msgstr "Den ersättningen använder {reference}, och mönstret har bara {groups}
 msgid "error.profile.current_factor_refused"
 msgstr "Det är varken en giltig kod från din nuvarande autentiseringsapp eller en oanvänd återställningskod"
 
+#. See GLOSSARY.md (passkey, authenticator, second step)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.last_second_factor"
+msgstr "Ett konto behöver en lösennyckel eller en autentiseringsapp som andra steg, och det här är det sista. Lägg till det andra först."
+
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
 msgid "error.profile.needs_authenticator"
@@ -4474,6 +4542,12 @@ msgstr "Ställ in en autentiseringsapp innan du skapar nya återställningskoder
 #: src/lib/errorMessages.ts
 msgid "error.profile.new_code_wrong"
 msgstr "Den koden stämmer inte. Kontrollera tiden i telefonen och försök igen."
+
+#. See GLOSSARY.md (authenticator)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.profile.no_authenticator"
+msgstr "Du har ingen autentiseringsapp att ta bort"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -4661,6 +4735,12 @@ msgstr "Den här länken ändrar inte lösenordet"
 #: src/lib/errorMessages.ts
 msgid "error.reset.offer_expired"
 msgstr "Erbjudandet för autentiseringsappen har gått ut; skanna ett nytt"
+
+#. See GLOSSARY.md (passkey, authenticator)
+#. js-lingui-explicit-id
+#: src/lib/errorMessages.ts
+msgid "error.reset.one_second_step"
+msgstr "Välj en lösennyckel eller en autentiseringsapp, inte båda"
 
 #. js-lingui-explicit-id
 #: src/lib/errorMessages.ts
@@ -5418,6 +5498,10 @@ msgstr "vad som gör ett bra lösenord"
 msgid "All banks"
 msgstr "Alla banker"
 
+#: src/screens/Profile.tsx
+msgid "Stop using the authenticator? You will sign in with your password and a passkey. Your recovery codes stay, and browsers you trusted will ask for a second step again."
+msgstr "Sluta använda autentiseringsappen? Du loggar in med ditt lösenord och en lösennyckel. Dina återställningskoder finns kvar, och webbläsare du litade på frågar efter ett andra steg igen."
+
 #: src/screens/Register.tsx
 msgid "one part of a split; the other parts stay."
 msgstr "en del av en uppdelning; de andra delarna finns kvar."
@@ -5587,6 +5671,10 @@ msgstr "{0} av {1}"
 msgid "Page {0} of {1}"
 msgstr "Sida {0} av {1}"
 
+#: src/screens/Profile.tsx
+msgid "Confirm and add"
+msgstr "Bekräfta och lägg till"
+
 #. Column heading on the Exchange rates page: an exchange rate as entered
 #. Column heading on the Net Worth report: an exchange rate
 #. Column heading on the rates import: an exchange rate
@@ -5681,6 +5769,10 @@ msgstr "Senaste 12 månaderna"
 #: src/screens/ApplicationManagement.tsx
 msgid "Nothing written yet. The file appears the next time this instance starts."
 msgstr "Inget skrivet än. Filen dyker upp nästa gång den här instansen startar."
+
+#: src/screens/ResetAccount.tsx
+msgid "Your second step for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+msgstr "Ditt andra steg för {email} återställdes från servern den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in det igen nedan."
 
 #. Toggle on the Net Worth report: list accounts flagged closed in the tables
 #: src/screens/reports/NetWorth.tsx
@@ -5841,6 +5933,11 @@ msgstr "Kontotyp"
 #: src/screens/PayeeCategorisation.tsx
 msgid "Payee categorisation"
 msgstr "Kategorisering av mottagare"
+
+#. Heading on the invitation page
+#: src/screens/AcceptInvite.tsx
+msgid "2. A second step"
+msgstr "2. Ett andra steg"
 
 #. placeholder {0}: mine.rows
 #. placeholder {1}: mine.rows
@@ -6096,6 +6193,11 @@ msgstr "Inget väntar."
 #: src/screens/Admin.tsx
 msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new password."
 msgstr "{name} loggas ut överallt och kan inte logga in förrän hen öppnar den här länken. Den sätter ett nytt lösenord."
+
+#. Heading of a choice on setup: the second step is an authenticator app. See GLOSSARY.md
+#: src/components/PasskeyChoice.tsx
+msgid "Use an authenticator app"
+msgstr "Använd en autentiseringsapp"
 
 #. Button and list on the Exchange rates page: the household's accounts held in this currency code
 #: src/components/CurrencyAccounts.tsx
@@ -6609,6 +6711,18 @@ msgstr "Ändrade nyckeln ”{label}”"
 msgid "history.key.issued"
 msgstr "Utfärdade nyckeln ”{label}”"
 
+#. History: a key for a program was made, confirmed with an authenticator code. {label} is its name
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.key.issued_code"
+msgstr "Utfärdade nyckeln ”{label}”, bekräftad med en kod"
+
+#. History: a key for a program was made, confirmed with a passkey. {label} is its name. See GLOSSARY.md
+#. js-lingui-explicit-id
+#: src/lib/historyWords.ts
+msgid "history.key.issued_passkey"
+msgstr "Utfärdade nyckeln ”{label}”, bekräftad med en lösennyckel"
+
 #. History: a key for a program was deleted. {label} is its name
 #. js-lingui-explicit-id
 #: src/lib/historyWords.ts
@@ -6744,10 +6858,6 @@ msgstr "?"
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Each currency gets its own report. All, in {base} converts every row at your household's exchange rates before adding anything, marks each figure ≈, and names the rows it had no rate for."
 msgstr "Varje valuta får sin egen rapport. Alla, i {base} räknar om varje rad med hushållets växelkurser innan något läggs ihop, märker varje siffra med ≈ och namnger raderna som saknade kurs."
-
-#: src/lib/signInChanges.ts
-msgid "The server reset {user}'s authenticator"
-msgstr "Servern återställde autentiseringsappen för {user}"
 
 #. What the import detected: how dates are written. Lower case, inside a list
 #: src/lib/labels.ts
@@ -7083,6 +7193,10 @@ msgstr "Kom från ett kontoutdrag. Dess radnyckel är <0>{0}</0>, och det är de
 msgid "Took"
 msgstr "Tid"
 
+#: src/screens/Profile.tsx
+msgid "Your browser asks for your passkey when you make the new codes."
+msgstr "Webbläsaren ber om din lösennyckel när du skapar de nya koderna."
+
 #. Label on the household page. See GLOSSARY.md
 #: src/screens/Household.tsx
 msgid "Payee rules"
@@ -7142,6 +7256,11 @@ msgstr "Lägg till fler"
 msgid "New payee rule"
 msgstr "Ny mottagarregel"
 
+#. Link on the password-and-code check: switch to the passkey. See GLOSSARY.md
+#: src/components/StepUp.tsx
+msgid "Use a passkey instead"
+msgstr "Använd en lösennyckel i stället"
+
 #. Label of a choice on the one-time import
 #: src/screens/OneTimeImport.tsx
 msgid "API key"
@@ -7190,6 +7309,10 @@ msgstr "Inbjudningslänk"
 msgid "Connect"
 msgstr "Anslut"
 
+#: src/components/PasskeyChoice.tsx
+msgid "A six-digit code from an app on your phone."
+msgstr "En sexsiffrig kod från en app i telefonen."
+
 #: src/screens/Updates.tsx
 msgid "{engine} is newer than this updater ({updaterVersion}) can work with. It will try to replace itself with a newer one:"
 msgstr "{engine} är nyare än den här uppdateraren ({updaterVersion}) kan hantera. Den kommer att försöka ersätta sig själv med en nyare:"
@@ -7229,12 +7352,6 @@ msgstr "beloppskolumn"
 #: src/screens/ExchangeRates.tsx
 msgid "Missing only"
 msgstr "Bara saknade"
-
-#. placeholder {0}: withdrawing.display_name
-#. placeholder {1}: withdrawing.email
-#: src/screens/Admin.tsx
-msgid "The link for {0} ({1}) stops working at once. Their authenticator stays reset, so they cannot sign in until you make them a new link."
-msgstr "Länken för {0} ({1}) slutar fungera direkt. Autentiseringsappen förblir återställd, så hen kan inte logga in förrän du skapar en ny länk."
 
 #: src/screens/Register.tsx
 msgid "Category: no category needed, this is one leg of a transfer"
@@ -7377,10 +7494,6 @@ msgstr "{wait, plural, one {Försök igen om {wait} sekund.} other {Försök ige
 msgid "Set up {productName}"
 msgstr "Ställ in {productName}"
 
-#: src/screens/ResetAccount.tsx
-msgid "{by} reset your password and your authenticator for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
-msgstr "{by} återställde ditt lösenord och din autentiseringsapp för {email} den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in båda igen nedan."
-
 #. Column heading on the passkeys panel
 #: src/screens/Passkeys.tsx
 msgid "Last used"
@@ -7447,6 +7560,7 @@ msgstr "Som vanliga transaktioner."
 
 #. Button on the invitation page: finish the steps
 #: src/screens/AcceptInvite.tsx
+#: src/screens/ResetAccount.tsx
 msgid "Finish"
 msgstr "Slutför"
 
@@ -7524,6 +7638,10 @@ msgstr "Ignorera {0}"
 #: src/screens/Setup.tsx
 msgid "If you ever forget your password, this code lets you choose a new one. It works once. Keep it somewhere other than this computer: on paper, or in a password manager."
 msgstr "Om du någon gång glömmer ditt lösenord låter den här koden dig välja ett nytt. Den fungerar en gång. Förvara den någon annanstans än på den här datorn: på papper eller i en lösenordshanterare."
+
+#: src/screens/Admin.tsx
+msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new second step: a passkey or an authenticator."
+msgstr "{name} loggas ut överallt och kan inte logga in förrän personen följer den här länken. Den ställer in ett nytt andra steg: en lösennyckel eller en autentiseringsapp."
 
 #: src/screens/Register.tsx
 msgid "Link as transfer"
@@ -7898,6 +8016,11 @@ msgstr "Tills dess kommer varje inloggning att kräva en ny återställningskod.
 msgid "Setting it up takes one of your recovery codes."
 msgstr "Att ställa in den kostar en av dina återställningskoder."
 
+#. Label of a choice on the Admin screen: reset the authenticator and every passkey. See GLOSSARY.md
+#: src/screens/Admin.tsx
+msgid "Second step: authenticator and passkeys, with the recovery codes"
+msgstr "Andra steg: autentiseringsapp och lösennycklar, med återställningskoderna"
+
 #: src/screens/TransferSections.tsx
 msgid "Every link has a name or a person behind it."
 msgstr "Varje koppling har ett namn eller en person bakom sig."
@@ -7936,6 +8059,12 @@ msgstr "Avskriven – jobbet betalar inte"
 #: src/screens/Payees.tsx
 msgid "Kind"
 msgstr "Slag"
+
+#. Button on the Your account panel: verb, add an authenticator. See GLOSSARY.md
+#: src/screens/Profile.tsx
+msgctxt "authenticator action"
+msgid "Set up"
+msgstr "Ställ in"
 
 #. Column heading on the receipts
 #. Column name shown beside a value on phones on the receipts
@@ -8283,7 +8412,6 @@ msgstr "Vad som ingår i {0}"
 msgid "Uncleared — the bank has not seen this yet"
 msgstr "Ej bokförd – banken har inte sett den än"
 
-#: src/screens/ResetAccount.tsx
 #: src/screens/SignIn.tsx
 msgid "A new authenticator"
 msgstr "En ny autentiseringsapp"
@@ -8439,6 +8567,12 @@ msgstr "Månadsgenomsnitt"
 msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
 msgstr "Stannar på {runningUpdater}, som är nyare än uppdateraren som följer med {to}."
 
+#. placeholder {0}: withdrawing.display_name
+#. placeholder {1}: withdrawing.email
+#: src/screens/Admin.tsx
+msgid "The link for {0} ({1}) stops working at once. Their password and second step stay reset, so they cannot sign in until you make them a new link."
+msgstr "Länken för {0} ({1}) slutar fungera direkt. Lösenordet och det andra steget förblir återställda, så personen kan inte logga in förrän du skapar en ny länk."
+
 #: src/screens/Register.tsx
 msgid "Each currency gets its own Out and In instead, and a row only ever fills its own. Turning one off hides its rows as well as its columns — the table says how many."
 msgstr "I stället får varje valuta egna Ut och In, och en rad fyller bara i sina egna. Att stänga av en döljer både dess rader och kolumner – tabellen säger hur många."
@@ -8492,10 +8626,6 @@ msgstr "Driftstopp"
 #: src/screens/Household.tsx
 msgid "{0} not yet cleared"
 msgstr "{0} ännu ej bokförda"
-
-#: src/lib/signInChanges.ts
-msgid "The server reset {user}'s password and authenticator"
-msgstr "Servern återställde lösenordet och autentiseringsappen för {user}"
 
 #: src/screens/reports/IncomeExpense.tsx
 msgid "Click a transaction to open it in Transactions, in a new tab."
@@ -9764,11 +9894,6 @@ msgstr "Kurserna före {day} är sparade; Hämta nu fortsätter från den sista 
 msgid "You still have {0} passkeys, and a recovery code leaves them working. If one was on the device you lost, remove it in Sign-in methods on your profile — your name in the menu."
 msgstr "Du har fortfarande {0} lösennycklar, och en återställningskod låter dem fortsätta fungera. Om en fanns på enheten du tappade bort, ta bort den under Inloggningsmetoder i din profil – ditt namn i menyn."
 
-#. A sign-in change in Admin's list: the person's authenticator was reset
-#: src/lib/signInChanges.ts
-msgid "Reset: authenticator"
-msgstr "Återställning: autentiseringsapp"
-
 #: src/screens/Import.tsx
 msgid "This lands as one entry in History, so the whole import can be undone in one go."
 msgstr "Detta hamnar som en enda post i Historik, så hela importen kan ångras på en gång."
@@ -9855,6 +9980,12 @@ msgstr "varför varje valuta har egna kolumner"
 #: src/screens/Household.tsx
 msgid "Only used for totals across accounts. Each account keeps its own, and nothing in the ledger is ever converted."
 msgstr "Används bara för summor över flera konton. Varje konto behåller sin egen, och inget i boken räknas någonsin om."
+
+#. placeholder {0}: withdrawing.display_name
+#. placeholder {1}: withdrawing.email
+#: src/screens/Admin.tsx
+msgid "The link for {0} ({1}) stops working at once. Their second step stays reset, so they cannot sign in until you make them a new link."
+msgstr "Länken för {0} ({1}) slutar fungera direkt. Det andra steget förblir återställt, så personen kan inte logga in förrän du skapar en ny länk."
 
 #. Under the count of categories on the household page
 #. placeholder {0}: it.category_groups
@@ -10370,6 +10501,10 @@ msgstr "Byt namn på eller radera den här gruppen"
 msgid "another account"
 msgstr "ett annat konto"
 
+#: src/screens/Profile.tsx
+msgid "Add an authenticator app as another second step. Your passkeys keep working, and either one signs you in."
+msgstr "Lägg till en autentiseringsapp som ett till andra steg. Dina lösennycklar fungerar fortfarande, och du kan logga in med vilken som helst av dem."
+
 #. Column name for resizing the column on the Register screen: money going out
 #. Table cell on the Register screen: money going out
 #. Text on the Register screen: money going out
@@ -10432,6 +10567,12 @@ msgstr "servern svarade {0}"
 msgid "When the statement line"
 msgstr "När raden på kontoutdraget"
 
+#. Link on the password-and-code check: switch to the authenticator code. See GLOSSARY.md
+#: src/components/StepUp.tsx
+#: src/screens/SignIn.tsx
+msgid "Use a code from your authenticator instead"
+msgstr "Använd en kod från autentiseringsappen i stället"
+
 #. Button on the Transfers screen: verb, leave it as it is
 #. Heading of a group of choices on the Payees screen: verb
 #: src/screens/Payees.tsx
@@ -10452,6 +10593,10 @@ msgstr "Fem delar är max"
 #: src/screens/Profile.tsx
 msgid "The six digits from your authenticator"
 msgstr "De sex siffrorna från din autentiseringsapp"
+
+#: src/screens/Passkeys.tsx
+msgid "{others, plural, one {You will still be able to sign in with your other passkey.} other {You will still be able to sign in with your other {others} passkeys.}}"
+msgstr "{others, plural, one {Du kan fortfarande logga in med din andra lösennyckel.} other {Du kan fortfarande logga in med dina andra {others} lösennycklar.}}"
 
 #. placeholder {0}: target.txn_count
 #. placeholder {1}: formatCount(target.txn_count)
@@ -10542,10 +10687,6 @@ msgstr "decimaltecken"
 msgid "Your name"
 msgstr "Ditt namn"
 
-#: src/lib/signInChanges.ts
-msgid "{by} reset {user}'s authenticator"
-msgstr "{by} återställde autentiseringsappen för {user}"
-
 #: src/screens/ExchangeRates.tsx
 msgid "no source in the chain publishes a rate for it."
 msgstr "ingen källa i kedjan publicerar en kurs för den."
@@ -10554,6 +10695,11 @@ msgstr "ingen källa i kedjan publicerar en kurs för den."
 #: src/screens/Admin.tsx
 msgid "None yet."
 msgstr "Inga än."
+
+#. Heading of a choice on setup: the second step is a passkey. See GLOSSARY.md
+#: src/components/PasskeyChoice.tsx
+msgid "Use a passkey"
+msgstr "Använd en lösennyckel"
 
 #: src/screens/Reconcile.tsx
 msgid "The figure printed on the statement for the day it closes — what the bank says you had, not what this app thinks."
@@ -10609,10 +10755,6 @@ msgctxt "history table"
 msgid "household"
 msgstr "hushåll"
 
-#: src/screens/ResetAccount.tsx
-msgid "Your password and your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
-msgstr "Ditt lösenord och din autentiseringsapp för {email} återställdes från servern den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in båda igen nedan."
-
 #. While a fetch runs: codes, source, this request's dates, which request (4 of 12), the whole range
 #: src/screens/ExchangeRates.tsx
 msgid "Fetching {codes} from {source}: {from} to {to}, {step}, of {since} to {until}."
@@ -10622,9 +10764,17 @@ msgstr "Hämtar {codes} från {source}: {from} till {to}, {step}, av {since} til
 msgid "Where this line will land"
 msgstr "Var den här raden hamnar"
 
+#: src/lib/signInChanges.ts
+msgid "The server reset {user}'s second step"
+msgstr "Servern återställde det andra steget för {user}"
+
 #: src/screens/Passkeys.tsx
 msgid "{others, plural, one {You will still be able to sign in with your other passkey, or with your password and code.} other {You will still be able to sign in with your other {others} passkeys, or with your password and code.}}"
 msgstr "{others, plural, one {Du kan fortfarande logga in med din andra lösennyckel, eller med ditt lösenord och en kod.} other {Du kan fortfarande logga in med dina {others} andra lösennycklar, eller med ditt lösenord och en kod.}}"
+
+#: src/screens/Profile.tsx
+msgid "Your authenticator is removed. You sign in with your password and a passkey."
+msgstr "Din autentiseringsapp är borttagen. Du loggar in med ditt lösenord och en lösennyckel."
 
 #: src/screens/Rules.tsx
 msgid "Every rule of this kind gets a turn, in this order, each one working on what the last one left."
@@ -10735,6 +10885,10 @@ msgid "Not the same thing — add it separately"
 msgstr "Inte samma sak – lägg till den separat"
 
 #: src/screens/Profile.tsx
+msgid "You sign in with a passkey, or with your password and a passkey."
+msgstr "Du loggar in med en lösennyckel, eller med ditt lösenord och en lösennyckel."
+
+#: src/screens/Profile.tsx
 msgid "{usable, plural, one {{usable} passkey} other {{usable} passkeys}}"
 msgstr "{usable, plural, one {{usable} lösennyckel} other {{usable} lösennycklar}}"
 
@@ -10784,10 +10938,6 @@ msgstr "Dölj filter"
 #: src/screens/Admin.tsx
 msgid "Whoever opens an owner link can administer this instance, and stays an owner whatever you later do to your own password or authenticator."
 msgstr "Den som öppnar en ägarlänk kan administrera instansen och förblir ägare, vad du än senare gör med ditt eget lösenord eller din autentiseringsapp."
-
-#: src/screens/Admin.tsx
-msgid "Authenticator, with its recovery codes"
-msgstr "Autentiseringsapp, med dess återställningskoder"
 
 #. Option in a dropdown on the Income vs Expense report
 #. Option in a dropdown on the Net Worth report
@@ -10884,11 +11034,6 @@ msgstr "Boken som den här processen betjänar."
 #: src/screens/Admin.tsx
 msgid "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
 msgstr "En engångslänk. Rollen följer med den, så du kan ge någon ägarskap utan att någonsin ha deras lösenord."
-
-#. Heading on the invitation page
-#: src/screens/AcceptInvite.tsx
-msgid "2. Your authenticator"
-msgstr "2. Din autentiseringsapp"
 
 #. A changed field in History's detail, lower case: whether work should pay it back
 #: src/lib/historyWords.ts
@@ -11081,12 +11226,14 @@ msgstr "ge detta till kill eller lsof"
 #. Button on the Categories screen
 #. Button on the Import screen
 #. Button on the Register screen
+#. Button on the Your account panel: do not remove the authenticator
 #. Button on the passkeys panel
 #: src/screens/Admin.tsx
 #: src/screens/Backups.tsx
 #: src/screens/Categories.tsx
 #: src/screens/Import.tsx
 #: src/screens/Passkeys.tsx
+#: src/screens/Profile.tsx
 #: src/screens/Register.tsx
 msgid "Keep it"
 msgstr "Behåll den"
@@ -11710,6 +11857,10 @@ msgid "This browser hasn't been used here recently, so we need the six digits."
 msgstr "Den här webbläsaren har inte använts här nyligen, så vi behöver de sex siffrorna."
 
 #: src/screens/Profile.tsx
+msgid "Set up an authenticator"
+msgstr "Ställ in en autentiseringsapp"
+
+#: src/screens/Profile.tsx
 msgid "why this is asked"
 msgstr "varför detta efterfrågas"
 
@@ -11736,6 +11887,10 @@ msgstr "Den här texten"
 #: src/App.tsx
 msgid "{0, plural, one {{who} is here too} other {{who} are here too}}"
 msgstr "{0, plural, one {{who} är också här} other {{who} är också här}}"
+
+#: src/screens/ResetAccount.tsx
+msgid "{by} reset your password and your second step for {email} on {when}. Every browser that was signed in as you has been signed out. Set both again below."
+msgstr "{by} återställde ditt lösenord och ditt andra steg för {email} den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in båda igen nedan."
 
 #. Button on the Accounts screen: verb
 #. Button on the Register screen: verb
@@ -11964,6 +12119,10 @@ msgstr "Kopplad till"
 #: src/screens/Accounts.tsx
 msgid "Recorded as {0} on the date below."
 msgstr "Registreras som {0} på datumet nedan."
+
+#: src/screens/Profile.tsx
+msgid "Or stop using the authenticator and sign in with your passkey alone as the second step."
+msgstr "Eller sluta använda autentiseringsappen och logga in med bara din lösennyckel som andra steg."
 
 #. Label of a choice on the one-time import
 #. placeholder {0}: one.last_modified_on.slice(0, 10)
@@ -12231,6 +12390,16 @@ msgstr "Finns redan"
 msgid "Holder's name"
 msgstr "Kontohavarens namn"
 
+#: src/lib/signInChanges.ts
+msgid "Somebody reset {user}'s password and second step"
+msgstr "Någon återställde lösenordet och det andra steget för {user}"
+
+#. State of the authenticator: there is none, by choice, because a passkey is the second step. See GLOSSARY.md
+#: src/screens/Profile.tsx
+msgctxt "authenticator state"
+msgid "Not set up"
+msgstr "Inte inställd"
+
 #. Column heading on the Admin screen: noun, a date range
 #. Column heading on the one-time import's mapping step: noun, a date range
 #. Column name shown beside a value on phones on the one-time import's mapping step: noun, a date range
@@ -12398,6 +12567,10 @@ msgstr "Ingen kategorigrupp är markerad som inkomster, så varje rad räknas so
 #: src/components/SuggestWording.tsx
 msgid "Reading the messages…"
 msgstr "Läser meddelandena…"
+
+#: src/screens/SignIn.tsx
+msgid "Use your passkey instead"
+msgstr "Använd din lösennyckel i stället"
 
 #. placeholder {0}: group.name
 #: src/screens/Categories.tsx
@@ -12642,6 +12815,10 @@ msgstr "Jobbet ska betala tillbaka detta"
 msgid "The exact file your camera or scanner produced, as well. About <0>2 MB</0> per receipt, roughly 70× the space."
 msgstr "Även exakt den fil som kameran eller skannern skapade. Ungefär <0>2 MB</0> per kvitto, runt 70 gånger utrymmet."
 
+#: src/screens/SignIn.tsx
+msgid "This browser hasn't been used here recently, so the second step is your passkey."
+msgstr "Den här webbläsaren har inte använts här på sistone, så det andra steget är din lösennyckel."
+
 #: src/screens/Updates.tsx
 msgid "If something goes wrong <0>during</0> this update, it rolls back by restoring the backup, and nothing is lost. If you decide <1>afterwards</1> that you want {from} back, the only way is that same backup, and everything written after the update goes with it."
 msgstr "Om något går fel <0>under</0> den här uppdateringen rullas den tillbaka genom att säkerhetskopian återställs, och ingenting går förlorat. Om du <1>efteråt</1> bestämmer dig för att du vill ha tillbaka {from} är samma säkerhetskopia det enda sättet, och allt som skrivits efter uppdateringen försvinner med den."
@@ -12681,11 +12858,6 @@ msgstr "Just nu är det <0>{0}</0>."
 #: src/screens/Register.tsx
 msgid "Showing {0} of {1} — show more"
 msgstr "Visar {0} av {1} – visa fler"
-
-#. Heading on the first-run setup
-#: src/screens/Setup.tsx
-msgid "3. Your authenticator"
-msgstr "3. Din autentiseringsapp"
 
 #. Label on the Reimbursements report: money that went out
 #. Label on the Reimbursements report: money that went out
@@ -12826,6 +12998,11 @@ msgstr "{0}-journal"
 msgid "What work owes you, what came back, and what was written off."
 msgstr "Vad jobbet är skyldigt dig, vad som kom tillbaka och vad som skrevs av."
 
+#. A sign-in change in Admin's list: the person's authenticator and passkeys were reset. See GLOSSARY.md
+#: src/lib/signInChanges.ts
+msgid "Reset: second step"
+msgstr "Återställning: andra steg"
+
 #. placeholder {0}: entry.filename
 #: src/screens/Import.tsx
 msgid "{0} was discarded — nothing was written"
@@ -12843,6 +13020,10 @@ msgstr "datakatalogen"
 #: src/screens/ynab/mapping.tsx
 msgid "In {currency}, opening balance 0, opened the day before its first imported transaction."
 msgstr "I {currency}, ingående saldo 0, öppnat dagen före dess första importerade transaktion."
+
+#: src/screens/SignIn.tsx
+msgid "I've lost my passkey — use a recovery code"
+msgstr "Jag har tappat bort min lösennyckel – använd en återställningskod"
 
 #: src/screens/Rules.tsx
 msgid "When the bank says"
@@ -12897,11 +13078,6 @@ msgstr "Logga in med en lösennyckel"
 #: src/screens/ExchangeRates.tsx
 msgid "Every account is in {0}: there is no rate to keep."
 msgstr "Alla konton är i {0}: det finns ingen kurs att spara."
-
-#. What was reset, inside a sentence: the authenticator. Lower case. See GLOSSARY.md
-#: src/lib/signInChanges.ts
-msgid "authenticator"
-msgstr "autentiseringsapp"
 
 #: src/screens/OneTimeImport.tsx
 msgid "YNAB returned no plans for this key."
@@ -13089,6 +13265,10 @@ msgstr "datum med en transaktion och ingen kurs inom gränsen"
 #: src/screens/Import.tsx
 msgid "<0>{0} other lines have the same payee</0> and no category of their own."
 msgstr "<0>{0} andra rader har samma mottagare</0> och ingen egen kategori."
+
+#: src/screens/ResetAccount.tsx
+msgid "Your password and your second step for {email} were reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
+msgstr "Ditt lösenord och ditt andra steg för {email} återställdes från servern den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in båda igen nedan."
 
 #. Application management: what sql.log holds; “Verbose, with SQL” is a logging style's name
 #: src/lib/labels.ts
@@ -13367,6 +13547,10 @@ msgstr "namn"
 msgid "L — Locked"
 msgstr "L – Låsta"
 
+#: src/screens/Profile.tsx
+msgid "Remove the authenticator"
+msgstr "Ta bort autentiseringsappen"
+
 #: src/lib/signInChanges.ts
 #: src/screens/Admin.tsx
 msgid "from the server"
@@ -13431,6 +13615,10 @@ msgstr "Nästa start ber om Touch ID i stället för ditt lösenord. Om du avbry
 msgid "No categories are ticked, not even Needs a category, so there is nothing to show. Tick one in the categories filter, or Select all."
 msgstr "Inga kategorier är markerade, inte ens Behöver kategori, så det finns inget att visa. Markera en i kategorifiltret, eller Välj alla."
 
+#: src/lib/signInChanges.ts
+msgid "Reset: password and second step"
+msgstr "Återställning: lösenord och andra steg"
+
 #: src/screens/Setup.tsx
 msgid "Nothing is saved until the last step. If you close this page, this instance is still untouched and you can start again."
 msgstr "Inget sparas förrän i sista steget. Om du stänger sidan är instansen fortfarande orörd och du kan börja om."
@@ -13464,6 +13652,10 @@ msgstr "senast använd {0}"
 msgid "Setup token"
 msgstr "Installationstoken"
 
+#: src/screens/ResetAccount.tsx
+msgid "{by} reset your second step for {email} on {when}. Every browser that was signed in as you has been signed out. Set it again below."
+msgstr "{by} återställde ditt andra steg för {email} den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in det igen nedan."
+
 #. Application management: what the Verbose, with SQL logging style writes
 #: src/lib/labels.ts
 msgid "Verbose, plus every statement and every row it returned — which means transactions, payees and amounts written into a file in plain text. Turn it on to diagnose something and turn it off afterwards."
@@ -13494,6 +13686,10 @@ msgstr "I år"
 #: src/screens/ExchangeRates.tsx
 msgid "Columns <0>currency,date,rate</0>: a date as <1>YYYY-MM-DD</1>, or a month as <2>YYYY-MM</2>. All or none: one line with a problem keeps the whole file out. <3>Download the template</3>."
 msgstr "Kolumner <0>currency,date,rate</0>: ett datum som <1>YYYY-MM-DD</1>, eller en månad som <2>YYYY-MM</2>. Allt eller inget: en rad med ett problem håller hela filen utanför. <3>Ladda ner mallen</3>."
+
+#: src/screens/ResetAccount.tsx
+msgid "A new second step"
+msgstr "Ett nytt andra steg"
 
 #: src/screens/AccountImport.tsx
 msgid "One row per account, under the template's header row. <0>Download the template</0>, fill it in with a spreadsheet, and save it as CSV."
@@ -13549,6 +13745,10 @@ msgstr "Ställer in regeln…"
 #: src/screens/Import.tsx
 msgid "from the copy in this browser, not from the server — the file itself is not kept"
 msgstr "från kopian i den här webbläsaren, inte från servern – själva filen sparas inte"
+
+#: src/lib/signInChanges.ts
+msgid "Somebody reset {user}'s second step"
+msgstr "Någon återställde det andra steget för {user}"
 
 #: src/screens/Import.tsx
 msgid "Yes, discard it"
@@ -13782,10 +13982,6 @@ msgstr "Var"
 msgid "No payee matches that."
 msgstr "Ingen mottagare matchar det."
 
-#: src/screens/Profile.tsx
-msgid "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."
-msgstr "En nyckel fortsätter fungera någon annanstans långt efter att webbläsaren har stängts, så vi frågar efter ditt lösenord och en kod – samma som när du loggar in."
-
 #: src/screens/Register.tsx
 msgid "Smaller text, more rows on screen"
 msgstr "Mindre text, fler rader på skärmen"
@@ -13928,10 +14124,6 @@ msgstr "Tillämpa regeln för {0}"
 #: src/screens/Rules.tsx
 msgid "They were only ever the bank’s reference numbers. Leaving them is what makes a payee list that is still three hundred long afterwards."
 msgstr "De var aldrig något annat än bankens referensnummer. Att låta dem vara är det som gör att mottagarlistan fortfarande är trehundra lång efteråt."
-
-#: src/screens/Admin.tsx
-msgid "{name} is signed out everywhere and cannot sign in until they follow this link. It sets a new authenticator."
-msgstr "{name} loggas ut överallt och kan inte logga in förrän personen följer den här länken. Den ställer in en ny autentiseringsapp."
 
 #: src/screens/Reconcile.tsx
 msgid "For a credit card, type what you owe as a negative."
@@ -14178,7 +14370,3 @@ msgstr "Hemlig nyckel"
 #: src/screens/Register.tsx
 msgid "Split into {0}"
 msgstr "Dela i {0}"
-
-#: src/screens/ResetAccount.tsx
-msgid "Your authenticator for {email} was reset from the server on {when}. Every browser that was signed in as you has been signed out. Set it again below."
-msgstr "Din autentiseringsapp för {email} återställdes från servern den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in den igen nedan."

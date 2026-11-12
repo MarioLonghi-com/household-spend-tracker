@@ -12,6 +12,7 @@ import { api } from "../lib/api";
 import { Field, Problem } from "../components/bits";
 import type { InviteState, User } from "../lib/types";
 import { RecoveryCodeSheet } from "../components/RecoveryCodes";
+import { type MadePasskey, PasskeyChoice } from "../components/PasskeyChoice";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useLingui } from "@lingui/react";
@@ -56,6 +57,8 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
   const [started, setStarted] = useState<Started | null>(null);
   const [blob, setBlob] = useState("");
   const [code, setCode] = useState("");
+  // A passkey in place of the authenticator (#456), checked at the last step.
+  const [passkey, setPasskey] = useState<MadePasskey | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -109,7 +112,12 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
 
   const finish = () =>
     run(async () => {
-      const user = await api.post<User>("/invite/complete", { blob, codes_saved: true });
+      const user = await api.post<User>(
+        "/invite/complete",
+        passkey
+          ? { blob: passkey.blob, codes_saved: true, second_step: "passkey", credential: passkey.credential }
+          : { blob, codes_saved: true },
+      );
       onDone(user);
     });
 
@@ -204,8 +212,19 @@ export function AcceptInvite({ token, onDone }: { token: string; onDone: (user: 
       {step === 2 && started && (
         <div className="card">
           <h2>
-            <Trans comment="Heading on the invitation page">2. Your authenticator</Trans>
+            <Trans comment="Heading on the invitation page">2. A second step</Trans>
           </h2>
+          <PasskeyChoice
+            offerPath="/invite/passkey/options"
+            body={{ blob }}
+            made={passkey}
+            onMade={(made) => {
+              setPasskey(made);
+              setCode("");
+              setStarted((was) => was && { ...was, secret: "", otpauth_uri: "" });
+              setStep(3);
+            }}
+          />
           <p className="muted small">
             <Trans>
               Scan this with your authenticator app, then type the six digits it shows. We check

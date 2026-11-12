@@ -36,7 +36,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import StaleDataError
 
-from ..auth import crypto, passwords, tokens, totp
+from ..auth import crypto, passkeys, passwords, tokens, totp
 from ..errors import Conflict, NotFound, ValidationError
 from ..models import AccountReset, Role, User, utcnow
 from . import profile
@@ -123,6 +123,11 @@ def issue(
         # the owner replacing it has to see the account as it now is.
         _delete(session, previous, refusal=Conflict(_OVERTAKEN, code="reset.overtaken"))
     password = password or user.password_hash is None
+    # The second factors (#456): the authenticator and every passkey. A
+    # passkey-only account has no authenticator, so any reset of it covers
+    # the second factors too -- the passkeys go with every reset
+    # (`shut_every_door`), and a link that set only the password would lead
+    # to an account with no second step at all.
     authenticator = authenticator or user.totp_secret is None
 
     profile.shut_every_door(session, user)
@@ -216,6 +221,8 @@ def redeem(
     new_password: str | None,
     totp_secret: str | None,
     totp_code: str | None,
+    passkey: passkeys.Enrolled | None = None,
+    passkey_handle: str | None = None,
 ) -> list[str]:
     """Set what the link was for, spend it, and return the new recovery codes.
 
@@ -224,8 +231,12 @@ def redeem(
     proof the wizard and re-enrolment demand, so nobody leaves with a secret
     their phone never paired with -- and that code's step is burned.
 
-    Ten new recovery codes when the authenticator was reset: the old ones
-    were deleted with it. None when only the password was: the codes the
+    A link that resets the second factors takes either a new authenticator or
+    a passkey (#456): ``passkey`` is an attestation `passkeys.verify_enrolment`
+    has already checked and spent, made under ``passkey_handle``.
+
+    Ten new recovery codes when the second factors were reset: the old ones
+    were deleted with them. None when only the password was: the codes the
     person already holds still stand beside the authenticator they still have.
 
     Nothing here signs anybody in. A session needs a password *and* a second
@@ -244,7 +255,16 @@ def redeem(
         raise ValidationError("this link does not change the password", code="reset.not_password")
 
     step: int | None = None
-    if reset.authenticator:
+    if passkey is not None:
+        if not reset.authenticator:
+            raise ValidationError(
+                "this link does not change the authenticator", code="reset.not_authenticator"
+            )
+        if totp_secret:
+            raise ValidationError(
+                "choose a passkey or an authenticator, not both", code="reset.one_second_step"
+            )
+    elif reset.authenticator:
         if not totp_secret:
             raise ValidationError("enrol a new authenticator first", code="reset.enrol_first")
         step = totp.code_matches(totp_secret, totp_code or "")
@@ -261,7 +281,10 @@ def redeem(
     codes: list[str] = []
     if reset.password:
         user.password_hash = passwords.hash_password(new_password)
-    if reset.authenticator:
+    if passkey is not None:
+        passkeys.keep_enrolled(session, user, passkey, handle=passkey_handle or "")
+        codes = list(profile.replace_recovery_codes(session, user))
+    elif reset.authenticator:
         user.totp_secret = crypto.seal_totp_secret(totp_secret, user_id=user.id)
         user.totp_last_counter = step
         codes = list(profile.replace_recovery_codes(session, user))
