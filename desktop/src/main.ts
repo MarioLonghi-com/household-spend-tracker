@@ -214,8 +214,10 @@ async function open(acceptLossy = false): Promise<Backend | null> {
 }
 
 async function confirmLossy(launch: Launch): Promise<boolean> {
-  splash?.close();
-  splash = null;
+  // Hide the splash, never close it: it is the only window, and closing the
+  // last one fires `window-all-closed`, which quits the app the moment the
+  // question is answered -- "Update the ledger" then did nothing at all.
+  splash?.hide();
   const answer = await ask({
     type: "warning",
     message: say(DIALOG.lossyTitle),
@@ -225,7 +227,8 @@ async function confirmLossy(launch: Launch): Promise<boolean> {
     cancelId: 1,
   });
   if (answer.response !== 0) return false;
-  splash = new Splash(say(SPLASH.upgrading));
+  splash?.say(say(SPLASH.upgrading));
+  splash?.show();
   return true;
 }
 
