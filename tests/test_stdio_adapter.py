@@ -353,13 +353,27 @@ def test_a_backup_asked_for_by_the_shell_is_a_checked_copy_with_the_rows(tmp_pat
         assert first["changes_head"] == moved_to
         assert first["revision"] == _rows(copy, "SELECT version_num FROM alembic_version")[0][0]
 
-        # The next one empties what the shell never collected.
+        # The next one leaves the first alone: two can overlap, and each
+        # used to delete the other's copy before the shell moved it (#442).
         head, body = _ask(child, {"id": 4, "control": "backup"})
-        second = Path(json.loads(body)["path"])
-        assert list((data / ".outgoing").iterdir()) == [second]
+        made = json.loads(body)
+        second = Path(made["path"])
+        assert sorted((data / ".outgoing").iterdir()) == sorted([copy, second])
+        assert copy != second
+        assert made["name"].startswith("spendtracker-") and made["name"] != second.name
+        assert sorted(n for (n,) in _rows(copy, "SELECT name FROM households")) == ["Casa Ñandú", "Second home"]
 
         head, body = _ask(child, {"id": 5, "control": "format the disk"})
         assert head["status"] == 404
+    finally:
+        child.stdin.close()
+        child.wait(timeout=60)
+
+    # What the shell never collected is gone by the next start.
+    child = _spawn(data)
+    try:
+        assert read_message(child.stdout)[0]["event"] == "ready"
+        assert not (data / ".outgoing").exists()
     finally:
         child.stdin.close()
         child.wait(timeout=60)

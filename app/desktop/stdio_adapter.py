@@ -28,8 +28,12 @@ When the ledger needs migrating, one more comes first, so the shell can say
 `stopped` carries why: `newer` (a newer version wrote this ledger), `declined`
 (a step that cannot be undone needs the person's yes -- the shell asks, and
 starts this again with `SPENDTRACKER_ACCEPT_LOSSY=1`), `migration-failed` and
-`rows-dropped` (the backup it names is where the ledger is), or `busy` (another
-copy of the app holds this ledger).
+`rows-dropped` (the backup it names is where the ledger is), `busy` (another
+copy of the app holds this ledger), `damaged` (the ledger file is not a
+database; it is left as it is) or `restore-unfinished` (a restore was cut
+short and its set-aside ledger could not be put back). `ready` and `stopped`
+carry `recovered: "rolled-back"` when a restore was cut short and the ledger
+is the one from before it (#442), so the shell can say so.
 
 **The shell's own requests** carry `control` where a request has a method --
 `{"id": 9, "control": "backup"}` -- and are answered like any other, with a

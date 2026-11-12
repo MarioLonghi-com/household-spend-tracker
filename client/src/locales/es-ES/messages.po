@@ -7744,6 +7744,10 @@ msgstr "M — Introducido a mano"
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
 msgstr "El nombre de este archivo lleva <0>{0}</0>. ¿Guardarlo como etiqueta de archivo de <1>{1}</1>, para que su próximo extracto elija la cuenta solo?"
 
+#: ../desktop/src/words.ts
+msgid "The last restore did not finish"
+msgstr "La última restauración no terminó"
+
 #. State on the Your account panel: Touch ID unlock is turned off
 #: src/screens/Profile.tsx
 msgctxt "unlock state"
@@ -12187,6 +12191,10 @@ msgstr "invitación"
 #: src/screens/Profile.tsx
 msgid "why not a recovery code"
 msgstr "por qué no un código de recuperación"
+
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker closed before the backup was fully in place, so the ledger is as it was before the restore. Nothing was lost. You can restore the backup again."
+msgstr "Household Spend Tracker se cerró antes de que la copia de seguridad estuviera del todo en su sitio, así que el libro está como estaba antes de la restauración. No se ha perdido nada. Puedes volver a restaurar la copia de seguridad."
 
 #. Button on the Register screen
 #: src/screens/Register.tsx

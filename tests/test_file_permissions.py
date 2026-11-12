@@ -231,3 +231,30 @@ def test_a_fresh_install_from_the_image_says_nothing_about_its_placeholder(
 
     said = "\n".join(record.getMessage() for record in caplog.records)
     assert "can be read by other users" not in said
+
+
+def test_replace_private_never_leaves_a_half_written_destination(monkeypatch, tmp_path):
+    """#442: the restored ledger is copied under a temporary name and renamed
+    into place, so a copy that stops part-way leaves the old file whole."""
+    from app import permissions
+
+    old = tmp_path / "ledger.sqlite3"
+    old.write_bytes(b"old ledger " * 100)
+    new = tmp_path / "backup.sqlite3"
+    new.write_bytes(b"new ledger " * 200)
+
+    def stops_part_way(src, out, *args, **kwargs):
+        out.write(src.read(50))
+        raise OSError(28, "No space left on device")
+
+    monkeypatch.setattr(permissions.shutil, "copyfileobj", stops_part_way)
+    with pytest.raises(OSError):
+        permissions.replace_private(new, old)
+    assert old.read_bytes() == b"old ledger " * 100
+    assert not permissions.partial_of(old).exists()
+
+    monkeypatch.undo()
+    permissions.replace_private(new, old)
+    assert old.read_bytes() == b"new ledger " * 200
+    assert stat.S_IMODE(old.stat().st_mode) == 0o600 or not permissions.MODE_BITS_MEAN_ACCESS
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["backup.sqlite3", "ledger.sqlite3"]

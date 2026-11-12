@@ -155,3 +155,160 @@ def test_only_the_newest_set_aside_ledger_is_kept(desktop_ledger):
     assert left and all(name.endswith("20261013-210000") for name in left)
     # The second restore set aside what the first put in: "Before" only.
     assert _households(live.with_name("spendtracker.sqlite3.before-restore-20261013-210000")) == ["Before"]
+
+
+# --------------------------------------------------------------------------- #
+# A restore that is killed part-way (#442)
+# --------------------------------------------------------------------------- #
+
+ROOT = Path(__file__).resolve().parent.parent
+
+#: Run as its own process, so the kill is a real one: nothing after it runs,
+#: no `except` arm, no `finally`. Killed in `restore._step` at the step named,
+#: or, for "copying", half-way through writing the copy.
+_KILLED_RESTORE = """
+import os, sys
+from pathlib import Path
+from app import permissions
+from app.desktop import restore
+
+source, at = Path(sys.argv[1]), sys.argv[2]
+
+def step(name):
+    if name == at:
+        os._exit(9)
+
+def half_written(source, destination):
+    data = source.read_bytes()
+    permissions.partial_of(destination).write_bytes(data[: len(data) // 2])
+    os._exit(9)
+
+restore._step = step
+if at == "copying":
+    permissions.replace_private = half_written
+restore.restore(source)
+os._exit(0)
+"""
+
+
+def _killed_during_restore(live: Path, kept: Path, at: str) -> None:
+    import os
+    import subprocess
+    import sys
+
+    from app import instance_lock
+
+    data = live.parent
+    while data.resolve() in instance_lock._held:
+        instance_lock.release(data)
+    env = {key: value for key, value in os.environ.items() if not key.startswith("SPENDTRACKER_") and key != "DATABASE_URL"}
+    env.update(SPENDTRACKER_PROFILE="desktop", SPENDTRACKER_DATA_DIR=str(data), PYTHONPATH=str(ROOT))
+    ran = subprocess.run([sys.executable, "-c", _KILLED_RESTORE, str(kept), at], cwd=ROOT, env=env, capture_output=True, text=True, timeout=120)
+    assert ran.returncode == 9, ran.stderr
+
+
+def _left_over(live: Path) -> list[str]:
+    return sorted(p.name for p in live.parent.iterdir() if p.name.endswith((".restoring", ".partial")))
+
+
+@pytest.mark.parametrize(
+    ("at", "recovered", "households"),
+    [
+        # Marked, nothing moved yet.
+        ("marked", "rolled-back", ["After", "Before"]),
+        # The ledger set aside: no file of its name at all.
+        ("moved spendtracker.sqlite3", "rolled-back", ["After", "Before"]),
+        # Half of the backup written, under its temporary name.
+        ("copying", "rolled-back", ["After", "Before"]),
+        # The backup whole in place, the tidying not done.
+        ("replaced", "finished", ["Before"]),
+    ],
+)
+def test_the_start_after_a_killed_restore_opens_the_old_ledger_or_the_restored_one(desktop_ledger, at, recovered, households):
+    from app.desktop import launch
+
+    live, kept = desktop_ledger
+    _killed_during_restore(live, kept, at)
+    assert live.with_name(live.name + ".restoring").exists(), "the mark outlives the kill"
+
+    prepared = launch.prepare(say=lambda _line: None)
+    assert prepared.outcome == launch.READY, prepared.log
+    assert prepared.recovered == recovered
+    assert prepared.migrated == [], "never made from nothing"
+    assert _households(live) == households
+    assert _left_over(live) == []
+    asides = sorted(live.parent.glob("spendtracker.sqlite3.before-restore-*"))
+    if recovered == "finished":
+        assert [_households(one) for one in asides] == [["After", "Before"]]
+    else:
+        assert asides == []
+
+
+def test_a_ledger_an_older_version_set_aside_and_never_replaced_goes_back(desktop_ledger):
+    """No mark: what a kill left before there was one."""
+    from app.desktop import launch
+
+    live, _ = desktop_ledger
+    live.rename(live.with_name("spendtracker.sqlite3.before-restore-20261013-200000"))
+    prepared = launch.prepare(say=lambda _line: None)
+    assert (prepared.outcome, prepared.recovered, prepared.migrated) == (launch.READY, "rolled-back", [])
+    assert _households(live) == ["After", "Before"]
+    assert not list(live.parent.glob("*.before-restore-*"))
+
+
+def test_a_partly_written_ledger_stops_the_start_and_is_left_as_it_is(desktop_ledger):
+    from app.desktop import launch
+
+    live, _ = desktop_ledger
+    half = live.read_bytes()[:4096] + b"\x00" * 4096
+    live.write_bytes(half)
+    prepared = launch.prepare(say=lambda _line: None)
+    assert prepared.outcome == launch.DAMAGED
+    assert "not a readable database" in prepared.log[-1]
+    assert live.read_bytes() == half
+
+
+def test_a_restore_after_a_killed_one_keeps_the_real_ledger_aside(desktop_ledger):
+    """The second restore used to set aside the empty ledger the killed one
+    left, and drop the set-aside copy holding the real one."""
+    from app.desktop import restore
+
+    live, kept = desktop_ledger
+    _killed_during_restore(live, kept, "copying")
+    done = restore.restore(kept, now=datetime(2031, 1, 2, 3, 4, 5))
+    assert done.ok, done.reason
+    assert _households(live) == ["Before"]
+    asides = sorted(live.parent.glob("spendtracker.sqlite3.before-restore-*"))
+    assert [one.name for one in asides] == ["spendtracker.sqlite3.before-restore-20310102-030405"]
+    assert _households(asides[0]) == ["After", "Before"]
+    assert _left_over(live) == []
+
+
+def test_a_failure_inside_the_swap_puts_the_ledger_back(desktop_ledger, monkeypatch):
+    from app import permissions
+    from app.desktop import restore
+
+    live, kept = desktop_ledger
+
+    def full_disk(source, destination):
+        permissions.partial_of(destination).write_bytes(b"half")
+        raise OSError(28, "No space left on device")
+
+    monkeypatch.setattr(permissions, "replace_private", full_disk)
+    with pytest.raises(OSError):
+        restore.restore(kept)
+    assert _households(live) == ["After", "Before"]
+    assert not list(live.parent.glob("*.before-restore-*"))
+    assert _left_over(live) == []
+
+
+def test_a_second_restore_in_the_same_second_sets_aside_under_a_name_of_its_own(desktop_ledger):
+    from app.desktop import restore
+
+    live, kept = desktop_ledger
+    when = datetime(2026, 10, 13, 20, 0, 0)
+    assert restore.restore(kept, now=when).ok
+    second = restore.restore(kept, now=when)
+    assert second.ok
+    assert second.aside == ["spendtracker.sqlite3.before-restore-20261013-200000-2"]
+    assert _households(live.with_name(second.aside[0])) == ["Before"]

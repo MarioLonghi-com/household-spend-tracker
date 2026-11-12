@@ -7743,6 +7743,10 @@ msgstr ""
 msgid "This file's name carries <0>{0}</0>. Keep it as <1>{1}</1>'s file tag, so its next statement picks the account itself?"
 msgstr ""
 
+#: ../desktop/src/words.ts
+msgid "The last restore did not finish"
+msgstr ""
+
 #. State on the Your account panel: Touch ID unlock is turned off
 #: src/screens/Profile.tsx
 msgctxt "unlock state"
@@ -12180,6 +12184,10 @@ msgstr ""
 
 #: src/screens/Profile.tsx
 msgid "why not a recovery code"
+msgstr ""
+
+#: ../desktop/src/words.ts
+msgid "Household Spend Tracker closed before the backup was fully in place, so the ledger is as it was before the restore. Nothing was lost. You can restore the backup again."
 msgstr ""
 
 #. Button on the Register screen
