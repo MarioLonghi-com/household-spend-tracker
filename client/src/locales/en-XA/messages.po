@@ -1604,6 +1604,10 @@ msgstr ""
 msgid "Copied"
 msgstr ""
 
+#: src/screens/Profile.tsx
+msgid "Close without copying the key? It cannot be shown again."
+msgstr ""
+
 #: src/screens/Import.tsx
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr ""
@@ -7264,9 +7268,9 @@ msgstr ""
 msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
 msgstr ""
 
-#. placeholder {0}: ticked.size
-#. placeholder {1}: ticked.size
-#. placeholder {2}: ticked.size
+#. placeholder {0}: counted.length
+#. placeholder {1}: counted.length
+#. placeholder {2}: counted.length
 #: src/screens/Reconcile.tsx
 msgid "{0, plural, one {Finish and lock {1} row} other {Finish and lock {2} rows}}"
 msgstr ""
@@ -13769,6 +13773,10 @@ msgstr ""
 
 #: src/screens/Payees.tsx
 msgid "No payee matches that."
+msgstr ""
+
+#: src/screens/Profile.tsx
+msgid "{held, plural, one {Close without storing the new recovery code? It cannot be shown again.} other {Close without storing the new recovery codes? They cannot be shown again.}}"
 msgstr ""
 
 #: src/screens/Profile.tsx

@@ -1604,6 +1604,10 @@ msgstr "Hoppa över"
 msgid "Copied"
 msgstr "Kopierad"
 
+#: src/screens/Profile.tsx
+msgid "Close without copying the key? It cannot be shown again."
+msgstr "Stäng utan att kopiera nyckeln? Den kan inte visas igen."
+
 #: src/screens/Import.tsx
 msgid "This file only. The payee’s rule is left as it is for future statements."
 msgstr "Bara den här filen. Mottagarens regel lämnas som den är för framtida kontoutdrag."
@@ -7265,9 +7269,9 @@ msgstr "Meddelanden från tredje part"
 msgid "Set up a new authenticator — a new phone, or one you no longer have. The current one keeps working until the new one is proved."
 msgstr "Ställ in en ny autentiseringsapp – en ny telefon, eller en som du inte längre har. Den nuvarande fortsätter fungera tills den nya har bekräftats."
 
-#. placeholder {0}: ticked.size
-#. placeholder {1}: ticked.size
-#. placeholder {2}: ticked.size
+#. placeholder {0}: counted.length
+#. placeholder {1}: counted.length
+#. placeholder {2}: counted.length
 #: src/screens/Reconcile.tsx
 msgid "{0, plural, one {Finish and lock {1} row} other {Finish and lock {2} rows}}"
 msgstr "{0, plural, one {Slutför och lås {1} rad} other {Slutför och lås {2} rader}}"
@@ -13781,6 +13785,10 @@ msgstr "Var"
 #: src/screens/Payees.tsx
 msgid "No payee matches that."
 msgstr "Ingen mottagare matchar det."
+
+#: src/screens/Profile.tsx
+msgid "{held, plural, one {Close without storing the new recovery code? It cannot be shown again.} other {Close without storing the new recovery codes? They cannot be shown again.}}"
+msgstr "{held, plural, one {Stäng utan att spara den nya återställningskoden? Den kan inte visas igen.} other {Stäng utan att spara de nya återställningskoderna? De kan inte visas igen.}}"
 
 #: src/screens/Profile.tsx
 msgid "A key keeps working from somewhere else long after this browser is closed, so this asks for your password and a code — the same as signing in."

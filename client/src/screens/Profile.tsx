@@ -20,7 +20,7 @@
  * somewhere else for months, and nothing about this browser says so.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { Empty, Field, Hint, Panel, Problem } from "../components/bits";
@@ -67,8 +67,22 @@ export function Profile({
 }) {
   const { t } = useLingui();
   const offered = useCapabilities();
+  // What is on screen once and nowhere else (#445): new recovery codes, whose
+  // making already stopped the old ones, and a key's token, of which only a
+  // fingerprint is stored. Escape, the cross and the backdrop all used to
+  // unmount them without a word.
+  const [codesHeld, setCodesHeld] = useState(0);
+  const [tokenHeld, setTokenHeld] = useState(false);
+  const leave = () => {
+    if (leaveCodes(codesHeld) && leaveToken(tokenHeld)) onClose();
+  };
   return (
-    <Panel title={t({ message: "Your account", comment: "Title of a panel on the Your account panel" })} onClose={onClose} config>
+    <Panel
+      title={t({ message: "Your account", comment: "Title of a panel on the Your account panel" })}
+      onClose={leave}
+      dirty={codesHeld > 0 || tokenHeld}
+      config
+    >
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
           Signed in as <strong>{user.display_name}</strong> ({user.email}).
@@ -76,18 +90,36 @@ export function Profile({
       </p>
       <AppearanceSection />
       <hr className="rule" />
-      <SignInMethods user={user} />
+      <SignInMethods user={user} codesHeld={codesHeld} onCodesHeld={setCodesHeld} />
       {/* No agent API on the desktop, so no keys for one (#316). */}
       {offered.agents ? (
         <>
           <hr className="rule" />
-          <KeysSection households={households} />
+          <KeysSection households={households} onTokenHeld={setTokenHeld} />
         </>
       ) : null}
     </Panel>
   );
 }
 
+/**
+ * Whether new recovery codes on screen may go: none are, or the person says
+ * so. Asked the way Admin asks before a reset link goes unseen.
+ */
+function leaveCodes(held: number): boolean {
+  if (held === 0) return true;
+  return window.confirm(
+    plural(held, {
+      one: "Close without storing the new recovery code? It cannot be shown again.",
+      other: "Close without storing the new recovery codes? They cannot be shown again.",
+    }),
+  );
+}
+
+/** The same question for a key's token, shown once when the key is given. */
+function leaveToken(held: boolean): boolean {
+  return !held || window.confirm(t`Close without copying the key? It cannot be shown again.`);
+}
 
 /**
  * Light, dark, or follow the machine.
@@ -169,7 +201,16 @@ type Method = "password" | "authenticator" | "recovery" | "unlock";
  * the top changes as methods are added or removed, so it always says what
  * currently gets you in.
  */
-function SignInMethods({ user }: { user: User }) {
+function SignInMethods({
+  user,
+  codesHeld = 0,
+  onCodesHeld,
+}: {
+  user: User;
+  /** How many new recovery codes are on screen right now. */
+  codesHeld?: number;
+  onCodesHeld?: (held: number) => void;
+}) {
   const { t } = useLingui();
   const [open, setOpen] = useState<Method | null>(null);
   // The desktop has a password and one recovery code, nothing else (#320).
@@ -201,7 +242,12 @@ function SignInMethods({ user }: { user: User }) {
       ? t`You sign in with a passkey, or with your password and authenticator code.`
       : t`You sign in with your password and authenticator code.`;
 
-  const toggle = (method: Method) => setOpen((was) => (was === method ? null : method));
+  // Closing the recovery row, or opening another in its place, unmounts new
+  // codes as surely as closing the panel does.
+  const toggle = (method: Method) => {
+    if (open === "recovery" && !leaveCodes(codesHeld)) return;
+    setOpen((was) => (was === method ? null : method));
+  };
   const passkeyState = passkeys.data
     ? usable > 0
       ? plural(usable, { one: `${usable} passkey`, other: `${usable} passkeys` })
@@ -270,7 +316,7 @@ function SignInMethods({ user }: { user: User }) {
           open={open === "recovery"}
           onToggle={() => toggle("recovery")}
         >
-          <RecoveryCodesSection titled={false} />
+          <RecoveryCodesSection titled={false} onHeld={onCodesHeld} />
         </MethodRow>
       </ul>
     </section>
@@ -804,7 +850,14 @@ function AuthenticatorSection({ user, titled = true }: { user: User; titled?: bo
  * setup, and the form is gone before they appear so the code that proved it
  * does not sit next to them.
  */
-export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
+export function RecoveryCodesSection({
+  titled = true,
+  onHeld,
+}: {
+  titled?: boolean;
+  /** Told how many new codes are on screen, so closing can ask first (#445). */
+  onHeld?: (held: number) => void;
+}) {
   const { t } = useLingui();
   const queries = useQueryClient();
   const left = useQuery({
@@ -817,6 +870,11 @@ export function RecoveryCodesSection({ titled = true }: { titled?: boolean }) {
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [fresh, setFresh] = useState<string[] | null>(null);
+  const held = fresh?.length ?? 0;
+  useEffect(() => {
+    onHeld?.(held);
+    return () => onHeld?.(0);
+  }, [held, onHeld]);
 
   const make = useMutation({
     mutationFn: () => api.post<{ codes: string[] }>("/me/recovery-codes", { password, code }),
@@ -964,7 +1022,14 @@ function scopeWord(scope: string): string {
   return scope;
 }
 
-function KeysSection({ households }: { households: Household[] }) {
+function KeysSection({
+  households,
+  onTokenHeld,
+}: {
+  households: Household[];
+  /** Told whether a new key's token is on screen, so closing can ask first (#445). */
+  onTokenHeld?: (held: boolean) => void;
+}) {
   const { t } = useLingui();
   const queries = useQueryClient();
   const keys = useQuery({
@@ -974,6 +1039,11 @@ function KeysSection({ households }: { households: Household[] }) {
 
   const [issuing, setIssuing] = useState(false);
   const [fresh, setFresh] = useState<{ token: string; label: string } | null>(null);
+  const held = fresh !== null;
+  useEffect(() => {
+    onTokenHeld?.(held);
+    return () => onTokenHeld?.(false);
+  }, [held, onTokenHeld]);
 
   const revoke = useMutation({
     mutationFn: (id: string) => api.post<AgentKey>(`/me/keys/${id}/revoke`),
