@@ -56,9 +56,15 @@ was asked for, how many rates came back.
 
 - *Fetch now* asks for every date not stored yet: the first time from the
   earliest transaction in each currency, afterwards from the last stored rate.
+  It asks only for currencies the ECB publishes: one it never has is listed
+  under *Not covered* instead, and one it stopped publishing (RUB, HRK, BGN,
+  the currencies the euro replaced) is complete once its last published day
+  is stored.
 - *Refetch a range* asks for the dates you give and replaces what it fetches.
   It is for repairing a bad download.
 - One fetch runs at a time on an instance; a second press waits its turn.
+  A fetch always ends, as done or failed; one the application stopped
+  working on reads as interrupted and does not hold up the next press.
 - A failed fetch keeps every rate already stored and changes no report.
 
 **The one host contacted** is `data-api.ecb.europa.eu` (HTTPS). Allow it on a

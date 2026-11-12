@@ -236,13 +236,25 @@ def measure(kit: Kit, app: survey.App, request_id: str) -> dict:
         ledger_mode="ro",
         image_config=app.image,
     )
-    result = kit.runner.run(oneoff.name_for(app.name, "measure", request_id), body, MEASURE_SECONDS)
+    unmeasured = "Preparing failed: the free disk and memory could not be measured"
     try:
-        doc = json.loads(result.output.strip().splitlines()[-1]) if result.exit_code == 0 else None
-    except (ValueError, IndexError):
+        result = kit.runner.run(oneoff.name_for(app.name, "measure", request_id), body, MEASURE_SECONDS)
+    except oneoff.TimedOut:
+        raise PrepareFailed(f"{unmeasured}: the measurement took longer than {MEASURE_SECONDS // 60} minutes.") from None
+    if result.exit_code != 0:
+        raise PrepareFailed(f"{unmeasured}: the measuring container stopped with exit code {result.exit_code}.")
+    lines = result.output.strip().splitlines()
+    if not lines:
+        # The figures are 8.5's floors: without them nothing goes ahead (#439).
+        raise PrepareFailed(
+            f"{unmeasured}: the container engine gave back none of the measuring container's output."
+        )
+    try:
+        doc = json.loads(lines[-1])
+    except ValueError:
         doc = None
     if not isinstance(doc, dict):
-        raise PrepareFailed("Preparing failed: the free disk and memory could not be measured.")
+        raise PrepareFailed(f"{unmeasured}: the measuring container's output was not a measurement.")
     return doc
 
 

@@ -3,7 +3,8 @@
 A fresh instance has no accounts and cannot be signed into. It will do exactly
 one thing: let the person who deployed it -- proven by a token only they can
 read -- create the owner, and it will not let them finish without a working
-second factor.
+second factor: an authenticator whose code has come back, or a passkey whose
+attestation has been verified (#456).
 
 Nothing is written until the last step. Every intermediate answer travels with
 the browser in a sealed blob, so an abandoned wizard leaves the instance exactly
@@ -16,6 +17,7 @@ import hashlib
 import json
 import os
 import secrets
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -156,6 +158,12 @@ class SetupBlob:  # noqa: D101 -- documented below
     #: the rest of its drift window -- a working second factor for the account
     #: that was just created, which for `/setup/enrol` is the instance owner.
     enrolled_step: int | None = None
+    #: A passkey in place of the authenticator (#456): the provisional
+    #: WebAuthn user handle the options were made under, and the hash of the
+    #: one challenge an attestation may answer. Set by `offer_passkey`; the
+    #: newest offer replaces the last.
+    passkey_handle: str | None = None
+    passkey_challenge: str | None = None
 
 
 def seal(blob: SetupBlob) -> str:
@@ -292,12 +300,108 @@ def confirm_authenticator(blob: SetupBlob, code: str) -> SetupBlob:
     )
 
 
+def offer_passkey(session: Session, request, blob: SetupBlob) -> tuple[SetupBlob, dict]:
+    """Creation options for a passkey in place of the authenticator (#456).
+
+    Step 3's other choice. Needs the owner named first (step 2). Returns the
+    blob with the handle and the challenge sealed in, and the options.
+    Nothing is written but the challenge.
+    """
+    from . import passkeys
+
+    if blob.step < 2 or not token_needed():
+        raise ValidationError("finish enrolling an authenticator first", code="setup.enrol_first")
+    handle = blob.passkey_handle or passkeys.handle_for()
+    options, challenge = passkeys.enrolment_options(
+        session, request, handle=handle, email=blob.email, display_name=blob.display_name
+    )
+    return (
+        SetupBlob(
+            **{
+                **asdict(blob),
+                "recovery_codes": blob.recovery_codes,
+                "passkey_handle": handle,
+                "passkey_challenge": challenge,
+            }
+        ),
+        options,
+    )
+
+
+def verify_passkey(engine, request, blob: SetupBlob, credential: dict | None):
+    """The attestation answering the blob's own challenge, verified and
+    spent (#456). A forged one fails verification; a replayed one finds its
+    challenge gone; one answering another wizard's challenge is not this
+    blob's."""
+    from . import passkeys
+
+    if credential is None or not blob.passkey_handle:
+        raise ValidationError(
+            "that passkey could not be registered here. Start again.",
+            code="passkey.not_registered",
+        )
+    return passkeys.verify_enrolment(
+        engine, request, credential=credential, challenge_hash=blob.passkey_challenge
+    )
+
+
+#: The kinds the first-account step offers, as the account types they are.
+ACCOUNT_KINDS = {
+    "current": "checking",
+    "savings": "savings",
+    "credit_card": "credit_card",
+    "cash": "cash",
+}
+
+
+@dataclass(frozen=True, slots=True)
+class FirstHousehold:
+    """The first household the wizard collected (#458), and its first account."""
+
+    name: str
+    base_currency: str
+    date_format: str = "YYYY-MM-DD"
+    week_start: str = "monday"
+    theme: str | None = None
+    locale: str | None = None
+    #: Seed ids to make; None for the whole tree.
+    keep: frozenset[str] | None = None
+    account: dict | None = None
+
+
+def starter_categories(preset: str, omit: Iterable[str] = ()) -> frozenset[str]:
+    """The seed ids a preset keeps, less the ones unticked (#458).
+
+    An unticked id the preset does not hold is not an error: it is simply not
+    made. Leaving out the Income group or Reimbursements is, and
+    `categories.seed_defaults` says so with `setup.category_locked`.
+    """
+    from .. import seed_words
+
+    if preset == "essentials":
+        chosen = set(seed_words.ESSENTIALS)
+    elif preset == "empty":
+        chosen = set(seed_words.REQUIRED)
+    else:
+        chosen = set(seed_words.TREE_IDS)
+    left_out = set(omit)
+    for required in seed_words.REQUIRED:
+        if required in left_out:
+            raise ValidationError(
+                "the Income group and Reimbursements stay: the reports rely on them",
+                code="setup.category_locked",
+            )
+    return frozenset(chosen - left_out)
+
+
 def complete(
     session: Session,
     blob: SetupBlob,
     *,
     ip: str | None = None,
     user_agent: str | None = None,
+    passkey=None,
+    household: FirstHousehold | None = None,
 ) -> tuple[User, str, str]:
     """Step 5: one transaction, or nothing at all.
 
@@ -306,8 +410,21 @@ def complete(
     is recorded as one batch whose actor is the user it is creating, which works
     because ids are assigned at construction and foreign keys are deferred to
     the commit.
+
+    ``passkey`` is a verified attestation (`verify_passkey`), when the second
+    step is a passkey rather than the authenticator (#456): it is stored with
+    the person in the same transaction, and the authenticator the blob offered
+    is never written.
+
+    ``household`` is the first household the wizard collected (#458): made in
+    this same transaction, with its starter categories in the wizard's
+    language and an optional first account, so a household that fails leaves
+    no owner behind either. Not for an invitation, whose household is the
+    inviter's.
     """
-    if blob.step < 4:
+    if passkey is None and blob.step < 4:
+        raise ValidationError("finish enrolling an authenticator first", code="setup.enrol_first")
+    if passkey is not None and blob.step < 2:
         raise ValidationError("finish enrolling an authenticator first", code="setup.enrol_first")
 
     invited = blob.invitation_id is not None
@@ -334,9 +451,15 @@ def complete(
     )
     # None on the desktop, where nobody has one; sign-in there asks the
     # profile, not this column (`capabilities.second_factor`, #320).
+    # And None with a passkey in its place (#456): a passkey-only account,
+    # which `factors` tells from one a reset cleared.
     user.totp_secret = (
-        crypto.seal_totp_secret(blob.totp_secret, user_id=user.id) if blob.totp_secret else None
+        crypto.seal_totp_secret(blob.totp_secret, user_id=user.id)
+        if blob.totp_secret and passkey is None
+        else None
     )
+    if passkey is not None:
+        user.totp_last_counter = None
 
     session.execute(text("PRAGMA defer_foreign_keys=ON"))
     # own_transaction=False: this must be one transaction, so the batch cannot
@@ -346,6 +469,10 @@ def complete(
         session, kind=BatchKind.setup, actor_id=user.id, own_transaction=False
     ) as created:
         session.add(user)
+        if passkey is not None:
+            from . import passkeys
+
+            passkeys.keep_enrolled(session, user, passkey, handle=blob.passkey_handle or "")
         for code in blob.recovery_codes:
             session.add(RecoveryCode(user_id=user.id, code_hash=passwords.hash_password(code)))
         if not invited:
@@ -360,6 +487,13 @@ def complete(
         session_value = sessions.issue(session, user, ip=ip, user_agent=user_agent)
         device_value = devices.issue(session, user, label=user_agent)
         created.summary = {"users": 1, "recovery_codes": len(blob.recovery_codes)}
+        if passkey is not None:
+            created.summary["passkeys"] = 1
+        if household is not None and not invited:
+            _make_first_household(session, user, household)
+            created.summary["households"] = 1
+            if household.account is not None:
+                created.summary["accounts"] = 1
 
     session.commit()
     if not invited:
@@ -367,3 +501,36 @@ def complete(
         # usable instance rather than a fresh one with no token.
         setup_token_path().unlink(missing_ok=True)
     return user, session_value, device_value
+
+
+def _make_first_household(session: Session, user: User, wanted: FirstHousehold) -> None:
+    """The household, its categories and its first account, through the
+    services every later one goes through. Inside `complete`'s batch: any
+    refusal here undoes the owner too."""
+    from ..services import accounts as account_service
+    from ..services import households as household_service
+
+    # The user row must exist before the membership names it.
+    session.flush()
+    made = household_service.create_household(
+        session,
+        name=wanted.name,
+        creator=user,
+        base_currency=wanted.base_currency,
+        date_format=wanted.date_format,
+        locale=wanted.locale,
+        week_start=wanted.week_start,
+        theme=wanted.theme,
+        keep=wanted.keep,
+    )
+    if wanted.account is not None:
+        account = wanted.account
+        account_service.create_account(
+            session,
+            household=made,
+            name=account["name"],
+            type=ACCOUNT_KINDS[account.get("kind") or "current"],
+            currency=account.get("currency"),
+            opening_balance=account.get("opening_balance") or 0,
+            opening_date=account.get("opening_date"),
+        )

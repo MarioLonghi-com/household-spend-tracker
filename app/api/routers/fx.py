@@ -316,5 +316,12 @@ def fetch_now(
         since=body.since,
         until=body.until,
     )
-    background.add_task(fx_fetching.run, [row.id for row in rows])
-    return [FxFetchOut.model_validate(fx_dashboard.fetch_view(session, row)) for row in rows]
+    ids = [row.id for row in rows]
+    try:
+        out = [FxFetchOut.model_validate(fx_dashboard.fetch_view(session, row)) for row in rows]
+    except BaseException:
+        # The work is never handed on: close the rows and free the slot (#444).
+        fx_fetching.abandon(ids)
+        raise
+    background.add_task(fx_fetching.run, ids)
+    return out

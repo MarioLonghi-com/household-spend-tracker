@@ -26,6 +26,7 @@
 import { i18n, type Messages } from "@lingui/core";
 import { messages as english } from "../locales/en/messages.po";
 import { desktop } from "./desktop";
+import { PSEUDO_LOCALE } from "./pseudoLocale";
 
 export { i18n };
 
@@ -38,8 +39,7 @@ export const TRANSLATED_LOCALES: readonly string[] = ["pt-BR", "es-ES", "sv-SE"]
 /** What the language picker offers. One entry would mean the picker is not shown. */
 export const SERVED_LOCALES: readonly string[] = [SOURCE_LOCALE, ...TRANSLATED_LOCALES];
 
-/** Reachable by storing it, never offered: the pseudo-locale. */
-export const PSEUDO_LOCALE = "en-XA";
+export { PSEUDO_LOCALE };
 
 /** Where this device's choice of language is kept. Per device, as #48 decided. */
 export const LOCALE_KEY = "spendtracker.locale";

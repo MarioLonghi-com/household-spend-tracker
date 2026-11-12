@@ -101,7 +101,11 @@ def create_account(
 
     when = opening_date or date.today()
     if when > date.today():
-        raise ValidationError("an account cannot have been opened in the future")
+        raise ValidationError(
+            "an account cannot have been opened in the future",
+            code="account.opened_in_future",
+            params={"date": when.isoformat()},
+        )
 
     account = Account(
         household_id=household.id,
@@ -350,7 +354,11 @@ def set_opening(
     if amount is None and when is None:
         return
     if when is not None and when > date.today():
-        raise ValidationError("an account cannot have been opened in the future")
+        raise ValidationError(
+            "an account cannot have been opened in the future",
+            code="account.opened_in_future",
+            params={"date": when.isoformat()},
+        )
 
     row = _opening_row(session, account.id)
     if row is None:

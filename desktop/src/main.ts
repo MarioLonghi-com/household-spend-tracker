@@ -142,6 +142,8 @@ let live: Backend | null = null;
 let waiting: ((backend: Backend) => void)[] = [];
 /** Set while the shell itself is stopping the backend, so its exit is expected. */
 let stopping = false;
+/** The last start found a restore that never finished and put the ledger back as it was (#442). */
+let rolledBack = false;
 
 function current(): Promise<Backend> {
   return live ? Promise.resolve(live) : new Promise((resolve) => waiting.push(resolve));
@@ -197,7 +199,10 @@ function spawnBackend(extra: Record<string, string> = {}): Backend {
 async function open(acceptLossy = false): Promise<Backend | null> {
   const backend = spawnBackend(acceptLossy ? { SPENDTRACKER_ACCEPT_LOSSY: "1" } : {});
   const started = await backend.started(() => splash?.say(say(SPLASH.upgrading), say(SPLASH.upgradingDetail)));
-  if (started.kind === "ready") return backend;
+  if (started.kind === "ready") {
+    rolledBack = started.launch.recovered === "rolled-back";
+    return backend;
+  }
   stopping = true;
   await backend.stop(10_000);
   stopping = false;
@@ -376,7 +381,22 @@ async function dailyBackup(): Promise<void> {
   if (await backUp("daily")) remember({ lastDailyBackup: today });
 }
 
+/** Set from the moment "Restore from backup…" is chosen until it is over: one at a time (#442). */
+let restoring = false;
+/** The restore run itself, while it moves files: quitting waits for it rather than leave it half done. */
+let restoreRun: Promise<unknown> | null = null;
+
 async function restoreFromBackup(): Promise<void> {
+  if (restoring) return;
+  restoring = true;
+  try {
+    await restoreChosen();
+  } finally {
+    restoring = false;
+  }
+}
+
+async function restoreChosen(): Promise<void> {
   const picked = await inFolder(() =>
     pick({
       title: say(DIALOG.restorePick),
@@ -414,18 +434,26 @@ async function restoreFromBackup(): Promise<void> {
     return;
   }
 
+  // Quitting while the backup above was made: start no restore under it.
+  if (quitting) return;
   const running = live;
   live = null;
   stopping = true;
   await running?.stop();
   jar.clear();
-  // The restored ledger forgets every Touch ID secret (`app/desktop/restore.py`); so does the shell.
-  unlock.forget();
-  const restoring = spawnBackend({ SPENDTRACKER_RESTORE_FROM: copy });
-  const answer = await restoring.restored();
-  await restoring.stop(10_000);
+  const child = spawnBackend({ SPENDTRACKER_RESTORE_FROM: copy });
+  const run = child.restored().then(async (said) => {
+    await child.stop(10_000);
+    return said;
+  });
+  restoreRun = run;
+  const answer = await run;
+  restoreRun = null;
   stopping = false;
   fs.rmSync(places.incoming, { recursive: true, force: true });
+  // The restored ledger forgets every Touch ID secret (`app/desktop/restore.py`); so does the shell --
+  // unless the restore was refused, when nothing changed and Touch ID still opens the ledger it opened.
+  if (answer.kind !== "stopped") unlock.forget();
 
   window?.hide();
   splash = new Splash(say(SPLASH.opening));
@@ -435,6 +463,10 @@ async function restoreFromBackup(): Promise<void> {
     return;
   }
   adopt(next);
+  // The ledger now open is the backup's: it has been backed up at its own
+  // head, and an older one's head must not hold back the backup on quit.
+  const now = await next.control<{ changes_head: number }>("state");
+  if (now.status === 200) remember({ backedUpTo: now.data.changes_head });
   await window?.loadURL(`${ORIGIN}/`);
   window?.show();
   splash?.close();
@@ -558,6 +590,10 @@ function createWindow(): BrowserWindow {
 let quitting = false;
 
 async function shutdown(): Promise<void> {
+  // A restore moving files is let finish: the app exiting under it is what
+  // left a ledger half restored (#442). The next start finishes or undoes
+  // one that is killed anyway; this keeps it from being needed.
+  if (restoreRun) await restoreRun.catch(() => undefined);
   const backend = live;
   if (!backend?.alive) return;
   const state = await backend.control<{ changes_head: number }>("state");
@@ -596,6 +632,10 @@ async function start(): Promise<void> {
   window.on("closed", () => {
     window = null;
   });
+  if (rolledBack) {
+    rolledBack = false;
+    await ask({ type: "warning", message: say(DIALOG.restoreUndoneTitle), detail: say(DIALOG.restoreUndoneDetail), buttons: [say(BUTTON.ok)] });
+  }
   void dailyBackup();
 }
 

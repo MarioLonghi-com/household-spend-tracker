@@ -334,6 +334,7 @@ WINDOWS = {
     # fixture: (engine window, version spoken, state)
     "podman-4.9": ("1.24-1.41", "1.41", "ok"),
     "podman-machine": ("1.24-1.44", "1.44", "ok"),
+    "podman-6-in-container": ("1.24-1.44", "1.44", "ok"),
     "docker-28": ("1.24-1.51", "1.51", "ok"),
     "docker-29.0": ("1.44-1.52", "1.52", "ok"),
     "docker-desktop": ("1.40-1.56", "1.52", "ok"),

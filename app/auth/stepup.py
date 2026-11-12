@@ -46,12 +46,27 @@ Two properties are load-bearing and each has a test:
 The TOTP code is consumed through `totp.verify_and_consume`, so it is dead
 afterwards -- a step-up and a sign-in cannot share one code. That is the
 intended cost and it is the same one `check_code` already imposes.
+
+**A passkey stands in for the code** (#456). The password plus a verified
+assertion, with user verification, from one of the member's own passkeys,
+answering a challenge issued to them for a step-up (`passkeys.STEP_UP`). That
+is the sign-in bar too, and a passkey cannot be phished. An account with no
+authenticator passes every step-up this way; one with both may use either.
+The password is still checked first, and both are judged under the one
+reservation of this module's rate-limit budget.
+
+**Which factor bought a grant travels with it.** The token's first characters
+say so (`FACTOR_PREFIX`), and the token's fingerprint is what the row stores,
+so the mark cannot be changed without making the token worthless. `require`
+returns it, and an act that records a batch names it there for History
+(`source["step_up"]`). Nothing secret is in it: one word.
 """
 
 from __future__ import annotations
 
 from datetime import datetime, timedelta
 
+from fastapi import Request
 from sqlalchemy import delete, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
@@ -59,7 +74,7 @@ from sqlalchemy.orm import Session
 from .. import capabilities
 from ..errors import ProofRefused
 from ..models import StepUpGrant, User, utcnow
-from . import passwords, ratelimit, service, tokens, totp
+from . import passkeys, passwords, ratelimit, service, tokens, totp
 
 #: Long enough to read the form and press the button, and no longer. The
 #: fifteen minutes `profile.REENROL_SECONDS` allows are for installing an
@@ -77,6 +92,11 @@ KIND = "stepup"
 #: gives: which of the two was wrong is only ever useful to someone guessing.
 _REFUSAL = "that password and code do not match"
 
+#: What paid for a grant, as the first characters of its token. `require`
+#: reads it back. "password" alone on the desktop (#320).
+PASSKEY, CODE, PASSWORD = "passkey", "code", "password"
+FACTOR_PREFIX = {PASSKEY: "pk.", CODE: "cd.", PASSWORD: "pw."}
+
 
 def grant(
     session: Session,
@@ -85,39 +105,61 @@ def grant(
     *,
     password: str,
     code: str,
+    credential: dict | None = None,
+    request: Request | None = None,
     ip: str | None = None,
 ) -> tuple[str, datetime]:
     """Check both factors and return ``(value, expires_at)``.
 
+    The second factor is ``code``, or -- when ``credential`` is given -- a
+    passkey assertion answering `passkeys.member_options(purpose=STEP_UP)`
+    (#456), for which ``request`` is needed to check its origin.
+
     Only the value's hash is stored. The caller hands the value back on the act
     it is paying for.
 
-    A member the server's key cannot open (#287) is refused first, with
-    `key_replaced` and a sentence of its own, so the screen can say why: no
-    code from that authenticator can be checked, a recovery code is not taken
-    here either, and a new authenticator is set up from the profile. Not the
-    sign-in's sentence, which says to use a recovery code: whatever is typed
-    here, recovery code included, gets this same refusal. Before the limiter
-    and before the password, so nothing is counted -- and nothing about the
-    password is said, which checking it first would have done (a right one
-    would be the only way to reach this refusal). The member learns only that
-    they are in recovery mode, which `GET /me/authenticator` tells them anyway.
+    A member the server's key cannot open (#287) is refused first when they
+    offer a code, with `key_replaced` and a sentence of its own, so the screen
+    can say why: no code from that authenticator can be checked, a recovery
+    code is not taken here either, and a new authenticator is set up from the
+    profile. Not the sign-in's sentence, which says to use a recovery code:
+    whatever is typed here, recovery code included, gets this same refusal.
+    Before the limiter and before the password, so nothing is counted -- and
+    nothing about the password is said, which checking it first would have
+    done (a right one would be the only way to reach this refusal). The member
+    learns only that they are in recovery mode, which `GET /me/authenticator`
+    tells them anyway. A passkey was never sealed with the key, so a member
+    with one passes with it instead.
     """
-    service.refuse_a_replaced_key(
-        user, signed_in=True, sentence=service.KEY_REPLACED_STEP_UP
-    )
+    two_factors = capabilities.second_factor()
+    with_passkey = two_factors and credential is not None
+    if not with_passkey:
+        service.refuse_a_replaced_key(
+            user, signed_in=True, sentence=service.KEY_REPLACED_STEP_UP
+        )
     held = ratelimit.reserve(engine, email_canonical=user.email_canonical, ip=ip, kind=KIND)
 
     # Both factors are checked before either failure is reported, so the
     # refusal cannot be used to learn which one was wrong -- and the password is
     # checked first because `verify_and_consume` burns a code, and burning one
     # for a caller who does not even have the password is a free way to make
-    # somebody's authenticator useless for thirty seconds at a time.
+    # somebody's authenticator useless for thirty seconds at a time. The same
+    # for a passkey: its challenge is spent by the check.
     if not passwords.verify_password(user.password_hash, password):
         raise ProofRefused(_REFUSAL, code="stepup.refused")
+    if with_passkey:
+        if request is None or passkeys.check_member(
+            session, engine, request, user, credential=credential, purpose=passkeys.STEP_UP
+        ) is None:
+            raise ProofRefused(_REFUSAL, code="stepup.refused")
+        factor = PASSKEY
     # The password alone on the desktop, where it is the only factor (#320).
-    if capabilities.second_factor() and not totp.verify_and_consume(user, code):
-        raise ProofRefused(_REFUSAL, code="stepup.refused")
+    elif two_factors:
+        if not totp.verify_and_consume(user, code):
+            raise ProofRefused(_REFUSAL, code="stepup.refused")
+        factor = CODE
+    else:
+        factor = PASSWORD
     ratelimit.release(engine, held)
 
     # An earlier grant for this user is dropped, like `issue_pending` does. Two
@@ -129,7 +171,8 @@ def grant(
     ).scalars():
         session.delete(old)
 
-    value, id_hash = tokens.issue()
+    value = FACTOR_PREFIX[factor] + tokens.issue()[0]
+    id_hash = tokens.fingerprint(value)
     expires_at = now + timedelta(seconds=GRANT_SECONDS)
     session.add(
         StepUpGrant(id_hash=id_hash, user_id=user.id, created_at=now, expires_at=expires_at)
@@ -169,12 +212,26 @@ def claim(engine: Engine, value: str | None, *, user_id: str, now: datetime | No
     return owner_id == user_id and expires_at > (now or utcnow())
 
 
-def require(engine: Engine, value: str | None, *, user_id: str) -> None:
-    """Spend a grant or refuse the act. The shape every caller wants."""
+def factor_of(value: str) -> str | None:
+    """Which factor bought this token: `PASSKEY`, `CODE` or `PASSWORD`."""
+    for factor, prefix in FACTOR_PREFIX.items():
+        if value.startswith(prefix):
+            return factor
+    return None
+
+
+def require(engine: Engine, value: str | None, *, user_id: str) -> str | None:
+    """Spend a grant or refuse the act. The shape every caller wants.
+
+    Returns which factor bought it, for an act that records a batch to say so
+    in History (#456). A grant issued before tokens carried the mark returns
+    None.
+    """
     if not claim(engine, value, user_id=user_id):
         raise ProofRefused(
             "confirm your password and authenticator code first", code="stepup.needed"
         )
+    return factor_of(value or "")
 
 
 def drop_for(session: Session, user_id: str) -> int:

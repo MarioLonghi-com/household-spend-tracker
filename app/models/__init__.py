@@ -67,6 +67,7 @@ from .enums import (
     SortDirection,
     SuggestionStatus,
     SystemPayee,
+    WeekStart,
 )
 from .fx import FxFetch, FxManualRate, FxRate
 
@@ -77,5 +78,5 @@ __all__ = [
     "ClearedState", "EnumStr", "IdentifierKind", "Household", "HouseholdMember", "IgnoredIdentifierSuggestion", "ImportLine", "ImportOutcome",
     "Instance", "InstanceState", "Invitation", "LinkSource", "LoginAttempt", "MatchType", "NAMING_CONVENTION", "Payee", "Reconciliation",
     "Passkey", "PayeeRule", "DeviceUnlock", "PendingSignIn", "StepUpGrant", "Receipt", "ReceiptBlob", "RecoveryCode", "RegisterSort", "RegisterSource", "ReimbursementState", "ReimbursementView", "RuleAction", "SortDirection", "Role", "SuggestionStatus", "SystemPayee", "Timestamped", "Transaction", "TransferRejection", "TranslationSuggestion", "TrustedDevice",
-    "UUIDPrimaryKey", "User", "WebAuthnChallenge", "WebSession", "new_id", "utcnow",
+    "UUIDPrimaryKey", "User", "WebAuthnChallenge", "WebSession", "WeekStart", "new_id", "utcnow",
 ]

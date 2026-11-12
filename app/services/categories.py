@@ -57,7 +57,11 @@ DEFAULT_TREE: tuple[tuple[str, tuple[str, ...]], ...] = tuple(
 
 
 def seed_defaults(
-    session: Session, household_id: str, *, locale: str | None = None
+    session: Session,
+    household_id: str,
+    *,
+    locale: str | None = None,
+    keep: set[str] | frozenset[str] | None = None,
 ) -> list[Category]:
     """Give a new household something to categorise with.
 
@@ -69,9 +73,32 @@ def seed_defaults(
     language with reviewed translations; anything else is English, word by
     word (`seed_words.word`). The names are stored as ordinary names and the
     locale is stored nowhere: after this they are the household's own words.
+
+    ``keep`` is the seed ids to make, groups and categories alike, from the
+    first-run wizard's ticks (#458); None makes the whole tree, as before. A
+    group is made when it is kept or any category under it is. The Income
+    group and Reimbursements carry the roles the reports read, so a ``keep``
+    leaving either out is refused (`setup.category_locked`).
     """
+    if keep is not None:
+        unknown = sorted(set(keep) - seed_words.TREE_IDS)
+        if unknown:
+            raise ValidationError(
+                f"{unknown[0]!r} is not one of the starter categories",
+                code="setup.category_unknown",
+                params={"id": unknown[0]},
+            )
+        for required in seed_words.REQUIRED:
+            if required not in keep:
+                raise ValidationError(
+                    "the Income group and Reimbursements stay: the reports rely on them",
+                    code="setup.category_locked",
+                )
     made: list[Category] = []
-    for group_order, (group_id, ids) in enumerate(seed_words.TREE):
+    for group_order, (group_id, every) in enumerate(seed_words.TREE):
+        ids = every if keep is None else tuple(one for one in every if one in keep)
+        if keep is not None and group_id not in keep and not ids:
+            continue
         group = CategoryGroup(
             household_id=household_id,
             name=seed_words.word(group_id, locale),

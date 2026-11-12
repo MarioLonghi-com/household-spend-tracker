@@ -12,16 +12,16 @@ import { t } from "@lingui/core/macro";
 
 /** What a reset link resets, as a phrase: "password", "authenticator", or both. */
 export function switchesText(password: boolean, authenticator: boolean): string {
-  if (password && authenticator) return t`password and authenticator`;
-  return password ? t({ message: "password", comment: "What was reset, inside a sentence: the password. Lower case. See GLOSSARY.md" }) : t({ message: "authenticator", comment: "What was reset, inside a sentence: the authenticator. Lower case. See GLOSSARY.md" });
+  if (password && authenticator) return t`password and second step`;
+  return password ? t({ message: "password", comment: "What was reset, inside a sentence: the password. Lower case. See GLOSSARY.md" }) : t({ message: "second step", comment: "What was reset, inside a sentence: the second step -- the authenticator and the passkeys. Lower case. See GLOSSARY.md" });
 }
 
 /** The What column: a label, not a sentence. */
 export function whatText(change: SignInChange): string {
   switch (change.what) {
     case "reset":
-      if (change.password && change.authenticator) return t`Reset: password and authenticator`;
-      return change.password ? t({ message: "Reset: password", comment: "A sign-in change in Admin's list: the person's password was reset" }) : t({ message: "Reset: authenticator", comment: "A sign-in change in Admin's list: the person's authenticator was reset" });
+      if (change.password && change.authenticator) return t`Reset: password and second step`;
+      return change.password ? t({ message: "Reset: password", comment: "A sign-in change in Admin's list: the person's password was reset" }) : t({ message: "Reset: second step", comment: "A sign-in change in Admin's list: the person's authenticator and passkeys were reset. See GLOSSARY.md" });
     case "promoted":
       return t`Made an owner`;
     case "authenticator_replaced":
@@ -56,10 +56,10 @@ export function sentence(change: SignInChange): string {
     switch (change.what) {
       case "reset":
         if (change.password && change.authenticator)
-          return t`The server reset ${user}'s password and authenticator`;
+          return t`The server reset ${user}'s password and second step`;
         return change.password
           ? t`The server reset ${user}'s password`
-          : t`The server reset ${user}'s authenticator`;
+          : t`The server reset ${user}'s second step`;
       case "promoted":
         return t`The server made ${user} an owner`;
       case "authenticator_replaced":
@@ -74,10 +74,10 @@ export function sentence(change: SignInChange): string {
     switch (change.what) {
       case "reset":
         if (change.password && change.authenticator)
-          return t`Somebody reset ${user}'s password and authenticator`;
+          return t`Somebody reset ${user}'s password and second step`;
         return change.password
           ? t`Somebody reset ${user}'s password`
-          : t`Somebody reset ${user}'s authenticator`;
+          : t`Somebody reset ${user}'s second step`;
       case "promoted":
         return t`Somebody made ${user} an owner`;
       case "authenticator_replaced":
@@ -92,8 +92,8 @@ export function sentence(change: SignInChange): string {
   switch (change.what) {
     case "reset":
       if (change.password && change.authenticator)
-        return t`${by} reset ${user}'s password and authenticator`;
-      return change.password ? t`${by} reset ${user}'s password` : t`${by} reset ${user}'s authenticator`;
+        return t`${by} reset ${user}'s password and second step`;
+      return change.password ? t`${by} reset ${user}'s password` : t`${by} reset ${user}'s second step`;
     case "promoted":
       return t`${by} made ${user} an owner`;
     case "authenticator_replaced":

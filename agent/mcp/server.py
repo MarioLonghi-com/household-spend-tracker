@@ -87,7 +87,11 @@ def spend_summary(
 
 @mcp.tool()
 def spend_over_time(bucket: str = "month", since: str | None = None, until: str | None = None) -> str:
-    """The same totals gathered by day, week or month."""
+    """The same totals gathered by day, week or month.
+
+    A week starts on the household's `week_start` (Monday unless the household
+    changed it) and is named by the date of that first day.
+    """
     return _answer(lambda: _api.timeseries(bucket=bucket, since=since, until=until))
 
 

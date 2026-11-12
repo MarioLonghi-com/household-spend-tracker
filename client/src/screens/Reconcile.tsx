@@ -62,7 +62,7 @@ export function Reconcile({
       api.post<Reconciliation>(`/accounts/${account.id}/reconciliation`, {
         statement_date: closingDate,
         statement_balance: stated,
-        transaction_ids: [...ticked],
+        transaction_ids: counted.map((row) => row.id),
       }),
     onSuccess: onDone,
   });
@@ -97,15 +97,20 @@ export function Reconcile({
   const locked = sheet.data?.locked_balance ?? 0;
   const stated = parse(closingBalance, account.currency);
 
+  // Only ticks on rows the sheet shows count, and only they are sent (#445).
+  // The sheet is for one closing date and is refetched when the ledger moves;
+  // a tick on a row it no longer holds was counted nowhere on screen and still
+  // posted, so the screen said balanced and the server refused the rows.
+  const counted = useMemo(() => rows.filter((row) => ticked.has(row.id)), [rows, ticked]);
   const tickedTotal = useMemo(
-    () => rows.filter((row) => ticked.has(row.id)).reduce((sum, row) => sum + row.amount, 0),
-    [rows, ticked],
+    () => counted.reduce((sum, row) => sum + row.amount, 0),
+    [counted],
   );
 
   // The number the whole screen is about. Null until the bank's figure is
   // typed, because "how far out are you" has no answer before then.
   const difference = stated === null ? null : stated - (locked + tickedTotal);
-  const balanced = difference === 0 && ticked.size > 0;
+  const balanced = difference === 0 && counted.length > 0;
 
   function toggle(id: string) {
     const next = new Set(ticked);
@@ -115,7 +120,7 @@ export function Reconcile({
   }
 
   function tickEverything() {
-    setTicked(ticked.size === rows.length ? new Set() : new Set(rows.map((row) => row.id)));
+    setTicked(counted.length === rows.length ? new Set() : new Set(rows.map((row) => row.id)));
   }
 
   return (
@@ -202,7 +207,7 @@ export function Reconcile({
                   <input
                     type="checkbox"
                     aria-label={t`Tick every row`}
-                    checked={ticked.size === rows.length && rows.length > 0}
+                    checked={counted.length === rows.length && rows.length > 0}
                     onChange={tickEverything}
                     style={{ width: "auto" }}
                   />
@@ -270,9 +275,9 @@ export function Reconcile({
           onClick={() => finish.mutate()}
           title={balanced ? "" : t`The difference has to be zero first`}
         >
-          {plural(ticked.size, {
-            one: `Finish and lock ${ticked.size} row`,
-            other: `Finish and lock ${ticked.size} rows`,
+          {plural(counted.length, {
+            one: `Finish and lock ${counted.length} row`,
+            other: `Finish and lock ${counted.length} rows`,
           })}
         </button>
         <button onClick={onClose}><Trans comment="Button on the Reconcile screen">Not now</Trans></button>

@@ -132,9 +132,16 @@ def set_role(user_id: str, body: SetRole, session: SessionDep, owner: OwnerOnly)
     direction, as revoking a key is.
     """
     user = user_service.get_user(session, user_id)
+    factor = None
     if Role(body.role) is Role.owner and user.role is not Role.owner:
-        stepup.require(db.engine, body.step_up_token, user_id=owner.id)
-    with batch(session, kind=BatchKind.admin, actor_id=owner.id):
+        factor = stepup.require(db.engine, body.step_up_token, user_id=owner.id)
+    # Which second factor paid for making an owner, for the audit (#456).
+    with batch(
+        session,
+        kind=BatchKind.admin,
+        actor_id=owner.id,
+        source={"step_up": factor} if factor else None,
+    ):
         user_service.set_role(session, user=user, role=Role(body.role), by=owner)
     return _user_out(session, user, _memberships(session))
 

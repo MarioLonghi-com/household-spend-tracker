@@ -104,7 +104,8 @@ or any host path other than the socket and the compose directory the updater
 itself was started with (plus the pre-update hook's directory, on a server
 that set one up).
 
-The step-up an owner gives to *Update* (password and code) protects the
+The step-up an owner gives to *Update* (the password, then a passkey or an
+authenticator code, #456) protects the
 owner's intent, not the machine: none of the updater's guarantees depends on
 the app having checked anything.
 
@@ -198,7 +199,9 @@ points. `make upgrade-check` prints the one it resolved.
 
 Losing `secret.key` loses no data, and on its own it signs nobody out:
 sessions and trusted devices are random values checked by database lookup,
-not signed tokens. What it costs is every authenticator. The app runs in
+not signed tokens. What it costs is every authenticator; passkeys are not
+sealed with it, so a member whose second step is a passkey signs in and
+steps up as before (#456). The app runs in
 **recovery mode** ([TROUBLESHOOTING](deploy/TROUBLESHOOTING.md#4-secretkey-is-lost-or-wrong)),
 and every member the key cannot open signs in with one of their recovery
 codes -- a trusted browser does not skip that -- and sets up a new

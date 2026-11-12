@@ -13,6 +13,7 @@ one ledger must open nothing in the other.
 from __future__ import annotations
 
 import importlib
+import sys
 from pathlib import Path
 
 import pytest
@@ -94,7 +95,12 @@ def test_setup_asks_for_no_token_and_no_authenticator(monkeypatch, tmp_path, res
     data = tmp_path / "ledger"
     with _boot(monkeypatch, data, profile="desktop") as client:
         state = client.get("/api/setup/state").json()
-        assert state == {"setup_required": True, "token_needed": False, "token_path": None}
+        assert {key: state[key] for key in ("setup_required", "token_needed", "token_path")} == {
+            "setup_required": True, "token_needed": False, "token_path": None
+        }
+        # The first-run wizard's facts (#458): this installation is the desktop app.
+        assert state["install"]["edition"] == {"darwin": "mac", "win32": "windows"}.get(sys.platform, "desktop")
+        assert state["install"]["data_dir"] == str(data)
         assert not (data / "setup-token").exists(), "no token is written or logged"
 
         body = _setup(client, "jane@example.test")
@@ -105,6 +111,58 @@ def test_setup_asks_for_no_token_and_no_authenticator(monkeypatch, tmp_path, res
         _hash, totp_secret, codes = _stored("jane@example.test")
         assert totp_secret is None
         assert codes == [False]
+
+
+def test_desktop_setup_makes_the_first_household_and_account_with_no_second_step(
+    monkeypatch, tmp_path, restore_server
+):
+    """The first-run wizard on the desktop (#458): no token, no second step,
+    and the household, its Spanish categories and a back-dated account made
+    with the owner in the one request."""
+    import app.db as db
+    from app.models import Account, Category, Household, Transaction
+
+    with _boot(monkeypatch, tmp_path / "ledger", profile="desktop") as client:
+        started = client.post(
+            "/api/setup/begin",
+            json={"token": "", "email": "jane@example.test", "display_name": "Jane", "password": PASSWORD},
+            headers=HEADERS,
+        )
+        assert started.status_code == 200, started.text
+        done = client.post(
+            "/api/setup/complete",
+            json={
+                "blob": started.json()["blob"],
+                "codes_saved": True,
+                "household": {
+                    "name": "Nuestra casa",
+                    "base_currency": "EUR",
+                    "date_format": "DD/MM/YYYY",
+                    "week_start": "monday",
+                    "locale": "es-ES",
+                    "categories": "empty",
+                },
+                "account": {
+                    "name": "Efectivo",
+                    "kind": "cash",
+                    "currency": "USD",
+                    "opening_balance": 2500,
+                    "opening_date": "2024-02-29",
+                },
+            },
+            headers=HEADERS,
+        )
+        assert done.status_code == 200, done.text
+        with db.SessionLocal() as session:
+            household = session.execute(select(Household)).scalar_one()
+            assert (household.name, household.base_currency, household.date_format) == (
+                "Nuestra casa", "EUR", "DD/MM/YYYY"
+            )
+            assert [one.name for one in session.execute(select(Category)).scalars()] == ["Reembolsos"]
+            account = session.execute(select(Account)).scalar_one()
+            assert (account.name, account.type.value, account.currency) == ("Efectivo", "cash", "USD")
+            row = session.execute(select(Transaction)).scalar_one()
+            assert (row.date.isoformat(), row.amount) == ("2024-02-29", 2500)
 
 
 def test_a_password_alone_signs_in_and_a_wrong_one_does_not(monkeypatch, tmp_path, restore_server):

@@ -11,6 +11,9 @@ What one press does:
 1. Takes the remote sources in the household's chain (the ECB in v1) and the
    currencies it holds, base excluded -- plus the base itself when the
    source quotes against another currency, because a cross rate needs both.
+   A currency the source has never published is left out, and so is one it
+   stopped publishing once its last published day is stored (#444): asking
+   again would bring back nothing, on every press, forever.
 2. Asks each source for every missing date: from the last stored rate, or the
    first time from the earliest transaction in that currency, up to today.
    *Refetch a range* asks for the dates given instead, and overwrites.
@@ -31,6 +34,12 @@ to the page: it carries on when whoever pressed leaves or signs out, and any
 member who opens the page sees it running, who started it and how far it has
 got. A fetch the process did not finish -- a restart mid-fetch -- is marked
 failed, "interrupted", at the next boot.
+
+**A fetch row always ends** (#444). Any error in the work, a "database is
+locked" on one of its commits included, marks the row failed. If even that
+cannot be written, the row is only `running` while this process is working
+on it: the slot is what says a fetch runs, not the row, so a row left behind
+reads as interrupted and the next press records it so.
 
 A failed fetch keeps the rates already stored and never touches a report.
 """
@@ -72,9 +81,36 @@ RETENTION = timedelta(days=90)
 #: What a fetch row says when the process stopped under it.
 INTERRUPTED = "interrupted: the application stopped before the fetch finished"
 
-#: Held from the press until the background work ends, by whichever thread
-#: that is. A plain `Lock`, which any thread may release.
-_RUNNING = threading.Lock()
+#: What a fetch row says when nothing is working on it any more, but it was
+#: never marked: the work could not write its own failure, or the request that
+#: started it failed before handing it on.
+ABANDONED = "interrupted: the fetch stopped without recording how it ended"
+
+#: How long a press's rows may wait for :func:`run` to pick them up. Past
+#: this the request that wrote them is taken to have failed before handing
+#: them on, and the next press may take the slot.
+HANDOFF_SECONDS = 60.0
+
+#: The pauses between attempts to record a failure, in seconds -- each
+#: attempt also waits out SQLite's own busy timeout.
+FAIL_RETRIES: tuple[float, ...] = (0.5, 2.0, 5.0)
+
+
+@dataclass(slots=True)
+class _Claim:
+    """The instance's one slot, taken by a press and freed when its work ends."""
+
+    ids: tuple[str, ...]
+    at: float
+    begun: bool = False
+
+    def abandoned(self) -> bool:
+        return not self.begun and time.monotonic() - self.at > HANDOFF_SECONDS
+
+
+#: Guards :data:`_claim`. Held only to read or swap it, never across work.
+_GUARD = threading.Lock()
+_claim: _Claim | None = None
 
 #: The currency each remote source quotes against.
 QUOTES: dict[FxSource, str] = {FxSource.ecb: "EUR"}
@@ -190,31 +226,106 @@ def plan(
     plans: list[Plan] = []
     for source in remote:
         quote = QUOTES[source]
-        wanted = sorted((set(held) | {base}) - {quote})
+        # Only what the source publishes (#444). The base is asked for only
+        # when a held currency can be crossed through it.
+        published = [code for code in held if publishes(source, code)]
+        if not published:
+            continue
+        wanted = sorted((set(published) | {base}) - {quote})
+        wanted = [code for code in wanted if publishes(source, code)]
         if mode is FxFetchMode.range:
-            plans.append(Plan(source, mode, wanted, since, until))  # type: ignore[arg-type]
+            asked = [code for code in wanted if not _ended_before(source, code, since)]  # type: ignore[arg-type]
+            if asked:
+                plans.append(Plan(source, mode, asked, since, until))  # type: ignore[arg-type]
             continue
         last = _last_stored(session, source, quote, wanted)
         foreign_first = min((first_seen[c] for c in held if c in first_seen), default=None)
-        starts: list[Date] = []
+        asked, starts = [], []
         for code in wanted:
             if code in last:
-                starts.append(last[code])
+                # Stored up to the source's last publication: nothing more
+                # will come, so it is complete.
+                if not _ended_before(source, code, last[code] + timedelta(days=1)):
+                    asked.append(code)
+                    starts.append(last[code])
             else:
                 first = first_seen.get(code) if code in held else foreign_first
-                starts.append(first or today - timedelta(days=household.fx_stale_days))
-        start = min(min(starts), today)
-        plans.append(Plan(source, mode, wanted, start, today))
+                first = first or today - timedelta(days=household.fx_stale_days)
+                if not _ended_before(source, code, first):
+                    asked.append(code)
+                    starts.append(first)
+        if asked:
+            plans.append(Plan(source, mode, asked, min(min(starts), today), today))
+    if not plans:
+        raise ValidationError(
+            "no source in this household's chain publishes a rate it is missing -- enter those by hand",
+            code="fx.nothing_published",
+        )
     return plans
 
 
-def is_running(session: Session) -> bool:
-    return (
-        session.execute(
-            select(func.count()).select_from(FxFetch).where(FxFetch.outcome == FxFetchOutcome.running)
-        ).scalar_one()
-        > 0
-    )
+def publishes(source: FxSource, code: str) -> bool:
+    """Whether ``source`` has ever published a rate for ``code``."""
+    if source is FxSource.ecb:
+        return fx_sources.publishes(code)
+    return False  # pragma: no cover - every remote FxSource is named above
+
+
+def _ended_before(source: FxSource, code: str, day: Date) -> bool:
+    """Whether ``source`` stopped publishing ``code`` before ``day``."""
+    end = fx_sources.last_published(code) if source is FxSource.ecb else None
+    return end is not None and end < day
+
+
+def live_ids() -> frozenset[str]:
+    """The fetch rows this process is working on, or about to."""
+    with _GUARD:
+        if _claim is None or _claim.abandoned():
+            return frozenset()
+        return frozenset(_claim.ids)
+
+
+def is_running() -> bool:
+    """A fetch is running on this instance, whoever pressed it."""
+    return bool(live_ids())
+
+
+def shown(row: FxFetch, live: frozenset[str] | None = None) -> tuple[FxFetchOutcome, str | None]:
+    """The outcome and error a fetch row is shown with.
+
+    A `running` row nothing is working on is shown as what it is, failed and
+    interrupted; the next press stores that.
+    """
+    if row.outcome is FxFetchOutcome.running and row.id not in (live_ids() if live is None else live):
+        return FxFetchOutcome.failed, ABANDONED
+    return row.outcome, row.error
+
+
+def _take_slot() -> _Claim:
+    global _claim
+    with _GUARD:
+        if _claim is not None and not _claim.abandoned():
+            raise Conflict("a fetch is already running -- wait for it to finish", code="fx.fetch_running")
+        _claim = _Claim(ids=(), at=time.monotonic())
+        return _claim
+
+
+def _free_slot(claim: _Claim) -> None:
+    global _claim
+    with _GUARD:
+        if _claim is claim:
+            _claim = None
+
+
+def _close_abandoned(session: Session) -> int:
+    """Mark failed every `running` row nothing works on. Called holding the slot,
+    so that is all of them. `fx_fetches` is not audited, so a bulk update."""
+    live = live_ids()
+    return session.execute(
+        update(FxFetch)  # audit-exempt: fx_fetches is not audited
+        .where(FxFetch.outcome == FxFetchOutcome.running, FxFetch.id.not_in(live))
+        .values(outcome=FxFetchOutcome.failed, error=ABANDONED, finished_at=utcnow())
+    ).rowcount or 0
 
 
 def start(
@@ -230,14 +341,14 @@ def start(
 
     Writes one `running` row per source and commits, so the page's first poll
     sees it. The caller hands the ids to :func:`run` off the request; the slot
-    is released when that finishes, or here if anything before it fails.
+    is released when that finishes, here if anything before it fails, or by
+    :func:`abandon` if the caller fails before handing them on.
     """
     plans = plan(session, household, mode=mode, since=since, until=until)
-    if not _RUNNING.acquire(blocking=False):
-        raise Conflict("a fetch is already running -- wait for it to finish", code="fx.fetch_running")
+    claim = _take_slot()
     try:
-        if is_running(session):
-            raise Conflict("a fetch is already running -- wait for it to finish", code="fx.fetch_running")
+        if closed := _close_abandoned(session):
+            log.warning("exchange rates: %d fetch(es) left running with nothing working on them, marked failed", closed)
         rows = [
             FxFetch(
                 household_id=household.id,
@@ -255,10 +366,35 @@ def start(
         ]
         session.add_all(rows)
         session.commit()
+        ids = tuple(row.id for row in rows)
+        with _GUARD:
+            claim.ids = ids
         return rows
     except BaseException:
-        _RUNNING.release()
+        session.rollback()
+        _free_slot(claim)
         raise
+
+
+def abandon(fetch_ids: list[str], error: str = ABANDONED) -> None:
+    """The request that started these failed before handing them to :func:`run`.
+
+    Marks them failed and frees the slot. Its own session, because the
+    request's may be the thing that failed. Never raises.
+    """
+    from ..db import session_scope
+
+    with _GUARD:
+        claim = _claim if _claim is not None and _claim.ids == tuple(fetch_ids) else None
+    try:
+        for fetch_id in fetch_ids:
+            with session_scope() as session:
+                _fail(session, fetch_id, error)
+    except Exception:  # pragma: no cover - defensive; the slot is freed below
+        log.exception("could not record an abandoned exchange-rate fetch")
+    finally:
+        if claim is not None:
+            _free_slot(claim)
 
 
 def run(fetch_ids: list[str], *, get=None) -> None:
@@ -268,14 +404,49 @@ def run(fetch_ids: list[str], *, get=None) -> None:
     """
     from ..db import session_scope
 
+    with _GUARD:
+        claim = _claim
+        if claim is None or claim.ids != tuple(fetch_ids):
+            # Taken over after HANDOFF_SECONDS: the next press closed these.
+            log.warning("exchange rates: a fetch began after its slot was given up, skipped")
+            return
+        claim.begun = True
     try:
         for fetch_id in fetch_ids:
             with session_scope() as session:
                 _one(session, fetch_id, get=get)
-    except Exception:  # pragma: no cover - defensive; `_one` records its own failures
+    except Exception:
         log.exception("an exchange-rate fetch failed outside its own record")
     finally:
-        _RUNNING.release()
+        _free_slot(claim)
+
+
+def _fail(session: Session, fetch_id: str, error: str) -> FxFetch | None:
+    """Mark a fetch failed, from whatever state the session is in.
+
+    Tried again after each of :data:`FAIL_RETRIES`, because the error being
+    recorded may be the database being locked. Returns the row, or None if it
+    could not be written -- then the row reads as interrupted once the slot is
+    free (:func:`shown`), and the next press stores that.
+    """
+    for wait in (*FAIL_RETRIES, None):
+        try:
+            session.rollback()
+            row = session.get(FxFetch, fetch_id)
+            if row is None:
+                return None
+            if row.outcome is FxFetchOutcome.running:
+                row.outcome = FxFetchOutcome.failed
+                row.error = error
+                row.finished_at = utcnow()
+                session.commit()
+            return row
+        except Exception:
+            log.exception("could not record that exchange-rate fetch %s failed", fetch_id)
+            if wait is None:
+                return None
+            time.sleep(wait)
+    return None  # pragma: no cover - the loop returns
 
 
 def _one(session: Session, fetch_id: str, *, get=None) -> None:
@@ -284,12 +455,37 @@ def _one(session: Session, fetch_id: str, *, get=None) -> None:
     Before each request the row says which dates are in flight, and is
     committed, so a member polling the page sees it. After each, the year's
     rates and the row's counts are committed together. A failure rolls back
-    only the year it was on, and leaves its dates on the row.
+    only the year it was on, and leaves its dates on the row. Whatever raises
+    -- a commit as much as a request -- the row ends failed (#444).
     """
     fetch = session.get(FxFetch, fetch_id)
     if fetch is None or fetch.outcome is not FxFetchOutcome.running:
         return
     began = time.monotonic()
+    try:
+        _years(session, fetch, get=get)
+    except Exception as exc:
+        log.exception("exchange-rate fetch %s failed", fetch_id)
+        fetch = _fail(session, fetch_id, f"the fetch stopped on an error: {type(exc).__name__}")
+        if fetch is None:
+            return
+    log.info(
+        "exchange rates: %s %s in %.1f s, %d of %d requests, %d added, %d unchanged%s",
+        fetch.source.value,
+        fetch.outcome.value,
+        time.monotonic() - began,
+        fetch.chunks_done,
+        fetch.chunks_total,
+        fetch.rates_added,
+        fetch.rates_unchanged,
+        f" ({fetch.error})" if fetch.error else "",
+    )
+
+
+def _years(session: Session, fetch: FxFetch, *, get=None) -> None:
+    """The work of :func:`_one`. Records a source's failure itself; anything
+    else that raises is for the caller to record."""
+    fetch_id = fetch.id
     spans = chunks(fetch.requested_since, fetch.requested_until)
     fetch.chunks_total = len(spans)
     overwrite = fetch.mode is FxFetchMode.range
@@ -334,17 +530,6 @@ def _one(session: Session, fetch_id: str, *, get=None) -> None:
         fetch.chunk_since = fetch.chunk_until = None
     fetch.finished_at = utcnow()
     session.commit()
-    log.info(
-        "exchange rates: %s %s in %.1f s, %d of %d requests, %d added, %d unchanged%s",
-        fetch.source.value,
-        fetch.outcome.value,
-        time.monotonic() - began,
-        fetch.chunks_done,
-        fetch.chunks_total,
-        fetch.rates_added,
-        fetch.rates_unchanged,
-        f" ({fetch.error})" if fetch.error else "",
-    )
 
 
 def store(

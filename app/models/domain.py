@@ -60,6 +60,10 @@ class Household(Base, UUIDPrimaryKey, Timestamped):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     base_currency: Mapped[str] = mapped_column(String(3), default="EUR", nullable=False)
     date_format: Mapped[str] = mapped_column(String(32), default="YYYY-MM-DD", nullable=False)
+    #: The day its weeks begin on: a `WeekStart` value (#452). Weekly totals
+    #: start there and are labelled by its date. Monday, which every
+    #: household had before this was a setting.
+    week_start: Mapped[str] = mapped_column(String(16), default="monday", nullable=False)
     note: Mapped[str | None] = mapped_column(Text)
     #: Which colour scheme this household wears. Two households in one browser
     #: look identical otherwise, and that is how a statement lands in the wrong

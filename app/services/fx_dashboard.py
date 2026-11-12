@@ -182,6 +182,7 @@ def fetch_view(session: Session, row: FxFetch) -> FetchView:
     duration = None
     if row.finished_at is not None:
         duration = int((row.finished_at - row.started_at).total_seconds() * 1000)
+    outcome, error = fx_fetching.shown(row)
     return FetchView(
         id=row.id,
         source=row.source.value,
@@ -191,10 +192,10 @@ def fetch_view(session: Session, row: FxFetch) -> FetchView:
         currencies=list(row.currencies or []),
         started_at=row.started_at,
         finished_at=row.finished_at,
-        outcome=row.outcome.value,
+        outcome=outcome.value,
         rates_added=row.rates_added,
         rates_unchanged=row.rates_unchanged,
-        error=row.error,
+        error=error,
         started_by=fx._name(session, row.started_by_id),
         duration_ms=duration,
         chunks_total=row.chunks_total,
@@ -267,10 +268,14 @@ def status(session: Session, household: Household, *, today: Date | None = None)
                 months.append(MonthCell(month=month.strftime("%Y-%m"), state=state))
 
         is_iso = code in iso.ASSIGNED
+        # A source that stopped publishing before the household's first row
+        # in the currency has nothing for it either (#444).
+        ended = fx_sources.last_published(code)
         publishes = (
-            (FxSource.ecb in rates.chain and code in fx_sources.ECB_PUBLISHES)
-            or any(series)
-        )
+            FxSource.ecb in rates.chain
+            and fx_sources.publishes(code)
+            and (ended is None or not txn_dates or txn_dates[0] <= ended)
+        ) or any(series)
         if latest is None:
             row_status = "not_covered"
         elif latest.stale:

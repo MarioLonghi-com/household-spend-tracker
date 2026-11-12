@@ -26,6 +26,7 @@
 // server's agreement test, which runs it under plain Node.
 import { i18n } from "@lingui/core";
 import { desktop } from "./desktop";
+import { PSEUDO_LOCALE } from "./pseudoLocale";
 
 /** What the words are in until a catalog is served. */
 export const SOURCE_LANGUAGE = "en";
@@ -131,6 +132,44 @@ export function dateTimeFormat(
   locale: string = formatLocale(),
 ): Intl.DateTimeFormat {
   return cached(dateTimeFormats, locale, options, () => new Intl.DateTimeFormat(locale, options));
+}
+
+/** The days a household's weeks may start on (#452), as the server names them. */
+export const WEEK_STARTS = ["monday", "sunday", "saturday"] as const;
+export type WeekStart = (typeof WEEK_STARTS)[number];
+
+// A known date on each day, at noon UTC so no time zone moves it a day.
+const A_DAY_THAT_IS: Record<WeekStart, number> = {
+  monday: Date.UTC(2024, 0, 1, 12),
+  sunday: Date.UTC(2023, 11, 31, 12),
+  saturday: Date.UTC(2023, 11, 30, 12),
+};
+
+/**
+ * A day of the week named in the language the words are in, by `Intl` rather
+ * than by a catalog: every browser already knows "domingo" and "lördag".
+ * Capitalised, because it stands alone in a list.
+ *
+ * `lang` is set when the name is not in that language -- under the
+ * pseudo-locale, which `Intl` does not speak, it is English and says so, the
+ * way a guide not yet written in a language is marked.
+ */
+export function weekdayName(day: WeekStart): { name: string; lang: string | undefined } {
+  const wanted = uiLanguage();
+  const format = (language: string) =>
+    dateTimeFormat({ weekday: "long", timeZone: "UTC" }, language).format(A_DAY_THAT_IS[day]);
+  let language = wanted === PSEUDO_LOCALE ? SOURCE_LANGUAGE : wanted;
+  let name: string;
+  try {
+    name = format(language);
+  } catch {
+    language = SOURCE_LANGUAGE;
+    name = format(language);
+  }
+  return {
+    name: name.charAt(0).toLocaleUpperCase(language) + name.slice(1),
+    lang: language === wanted ? undefined : language,
+  };
 }
 
 /**

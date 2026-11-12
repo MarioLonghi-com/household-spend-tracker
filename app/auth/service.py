@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from ..errors import ProofRefused, Unauthorized
 from ..models import RecoveryCode, User, utcnow
 from ..services import agent_keys
-from . import devices, email_canonical, keycheck, passwords, ratelimit, sessions, totp, unlock
+from . import devices, email_canonical, factors, keycheck, passwords, ratelimit, sessions, totp, unlock
 
 #: One sentence for every way a sign-in can fail on the first step. Saying
 #: "no such account" would confirm which addresses exist.
@@ -26,6 +26,14 @@ _REFUSAL = "that email and password do not match"
 AUTHENTICATOR_CLEARED = (
     "this account's authenticator was reset, so there is no code to give. "
     "Use the reset link you were sent to enrol a new one, or ask an owner for a new link."
+)
+
+#: The code step, for an account with no authenticator by choice: a passkey
+#: is its second step (#456). Said, like the sentence above, only after the
+#: right password, and the sign-in's first answer offers the passkey already.
+NO_AUTHENTICATOR = (
+    "this account uses a passkey as its second step, not an authenticator. "
+    "Use your passkey, or one of your recovery codes."
 )
 
 #: The code step, for a member whose authenticator this server's key cannot
@@ -146,6 +154,20 @@ def refuse_a_replaced_key(
         raise refusal(sentence, fields={"key_replaced": True})
 
 
+def refuse_without_authenticator(session: Session, user: User) -> None:
+    """No code can be right for an account with no authenticator: say why.
+
+    Cleared by a reset (#284), or passkey-only by choice (#456) -- told apart
+    by `factors`, never by the NULL column alone. Before the limiter: there
+    is nothing to guess.
+    """
+    if user.totp_secret is not None:
+        return
+    if factors.cleared(session, user):
+        raise Unauthorized(AUTHENTICATOR_CLEARED, code="auth.authenticator_cleared")
+    raise Unauthorized(NO_AUTHENTICATOR, code="auth.no_authenticator")
+
+
 def check_code(session: Session, engine, user: User, code: str, *, ip: str | None) -> None:
     """Step two, when the browser is not already trusted.
 
@@ -157,9 +179,12 @@ def check_code(session: Session, engine, user: User, code: str, *, ip: str | Non
     So is a member the server's key cannot open (`refuse_a_replaced_key`).
     The router asks that before it spends the half-finished sign-in; this is
     the second line, for any other caller.
+
+    An account with no authenticator *by choice* -- a passkey is its second
+    step (#456) -- is refused as well, with its own sentence: not "cleared by
+    a reset", which it is not (`factors`).
     """
-    if user.totp_secret is None:
-        raise Unauthorized(AUTHENTICATOR_CLEARED, code="auth.authenticator_cleared")
+    refuse_without_authenticator(session, user)
     refuse_a_replaced_key(user)
     held = ratelimit.reserve(engine, email_canonical=user.email_canonical, ip=ip, kind="totp")
     if not totp.verify_and_consume(user, code):
@@ -228,9 +253,11 @@ def redeem_recovery_code(session: Session, engine, user: User, code: str, *, ip:
     to no household, so a household's History does not list it -- the keys
     screen, which keeps dead keys on purpose, is where they show.
     """
-    if user.totp_secret is None:
-        # Reset (#284): its codes were deleted with the secret, so say why
-        # rather than "that code is not right" ten times over.
+    if factors.cleared(session, user):
+        # Reset (#284): its codes were deleted with the second factors, so say
+        # why rather than "that code is not right" ten times over. A
+        # passkey-only account (#456) keeps its codes: they belong to the
+        # account, not to the authenticator.
         raise Unauthorized(AUTHENTICATOR_CLEARED, code="auth.authenticator_cleared")
     held = ratelimit.reserve(engine, email_canonical=user.email_canonical, ip=ip, kind="recovery")
     matched = match_recovery_code(session, user, code)

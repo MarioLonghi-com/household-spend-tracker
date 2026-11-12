@@ -115,3 +115,57 @@ def test_check_upstream_still_reads_a_real_release_list(monkeypatch):
         answer = platform_service.check_upstream()
     assert (answer.problem, answer.latest, answer.newer) == (None, "99.1.0", True)
     assert [one.version for one in answer.releases] == ["99.1.0"]
+
+
+# --- The trust store (#455) -------------------------------------------------
+#
+# The packaged desktop backend carries no system CA bundle, so a bare
+# ``ssl.create_default_context()`` verifies nothing and every https fetch fails
+# with CERTIFICATE_VERIFY_FAILED. Each outbound request takes its context from
+# ``outbound.trust()``, which loads certifi's bundle.
+
+
+def test_the_trust_store_holds_certificate_authorities():
+    import certifi
+
+    from app.services import outbound
+
+    loaded = outbound.trust().get_ca_certs()
+    assert len(loaded) > 50
+    with open(certifi.where(), encoding="ascii") as bundle:
+        assert len(loaded) == bundle.read().count("BEGIN CERTIFICATE")
+
+
+def test_no_outbound_request_builds_a_context_of_its_own():
+    """Only outbound.py may call create_default_context; everyone else asks it."""
+    from pathlib import Path
+
+    app = Path(__file__).resolve().parent.parent / "app"
+    callers = sorted(
+        str(path.relative_to(app))
+        for path in app.rglob("*.py")
+        if "create_default_context(" in path.read_text(encoding="utf-8")
+    )
+    assert callers == ["services/outbound.py"]
+
+
+def test_the_exchange_rate_fetch_verifies_with_the_trust_store(monkeypatch):
+    """Before #455 Fetch now used the bare default context, so it alone failed."""
+    import ssl
+
+    from app.services import fx_sources, outbound
+
+    used: list[ssl.SSLContext] = []
+    real_opener = outbound.opener
+
+    def recording(context):
+        used.append(context)
+        return real_opener(context)
+
+    marker = outbound.trust()
+    monkeypatch.setattr(outbound, "trust", lambda: marker)
+    monkeypatch.setattr(outbound, "opener", recording)
+    with local_server(body(b"KEY,TIME_PERIOD,OBS_VALUE\n")) as (server, asked):
+        fx_sources._get(f"{server}/rates")
+    assert len(asked) == 1
+    assert used == [marker]
