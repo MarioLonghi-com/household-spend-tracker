@@ -338,14 +338,29 @@ def in_flight(now: float | None = None) -> bool:
 
     A `request.json` the updater has not yet taken; a `status.json` whose
     state is not settled; or a heartbeat that says busy.
+
+    A status is not in flight when its request's `history/<id>.json` already
+    says it settled (#443): the updater writes the record first and the
+    status after it, so an updater that stops between the two -- or a
+    handover that records an `update_updater` for the updater it replaced --
+    leaves a status that would otherwise refuse every request for good. An
+    updater of this release rewrites such a status when it starts; this is
+    for one that does not.
     """
     if os.path.lexists(root() / "request.json"):
         return True
     current = status()
-    if current is not None and current.state not in SETTLED:
+    if current is not None and current.state not in SETTLED and not _recorded_as_settled(current.id):
         return True
     beat = heartbeat(now)
     return bool(beat and beat.fresh and beat.busy)
+
+
+def _recorded_as_settled(request_id: str | None) -> bool:
+    if not is_uuid4(request_id):
+        return False
+    record = read_json(root() / "history" / f"{request_id}.json")
+    return record is not None and record.get("state") in SETTLED
 
 
 @dataclass(frozen=True)

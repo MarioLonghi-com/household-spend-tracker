@@ -24,6 +24,19 @@ their journals.
 `update_updater` (C2) runs `prepare.updater_only` and then the handover; only
 the pin's updater line changes.
 
+**A status nothing will settle (#443).** Only a journal is resumed, and only
+an apply or a go-back keeps one. A prepare, a discard or an `update_updater`
+the updater was stopped in -- or an apply taken and stopped before its
+journal began, or any request stopped between its record and its status --
+would leave `status.json` saying `accepted` or `running` for good, and the
+app refuses every request while it does. So once the journals are resumed,
+`settle_status` looks at it: a request with a record has its status
+rewritten from the record; one with an unfinished journal, or a handover of
+its own, is left to those; anything else is recorded as interrupted -- a
+prepare `refused`, the rest `not_started`, the code `interrupted` -- unless a
+prepare got as far as its report, which makes it `succeeded`. The files and
+states are protocol 1's, so an app of any release reads the result.
+
 **A container whose storage a power cut took (#262)** makes the engine fail
 every full listing it is in. Before anything else at startup, while that is
 so, the updater force-removes the one-offs of each unfinished apply that are
@@ -239,7 +252,83 @@ class Service:
         except eng.EngineUnavailable:
             self.resume_pending = True
         handover.flush()
+        if not self.resume_pending:
+            with contextlib.suppress(OSError, ValueError, volume.UnsafeFile):
+                self.settle_status()
         return outcomes
+
+    def settle_status(self) -> str | None:
+        """#443: `status.json` names a request nothing is running any more; settle it.
+
+        Called with every journal resumed, by the current updater, before it
+        takes a request: nothing of this updater's can still be running then.
+        Returns the state the status was settled to, or None when it was left.
+        """
+        doc = volume.read_own_json(self.vol.status)
+        view = contract.read_status(doc)
+        if view is None or view.state in contract.SETTLED_STATES or not contract.is_uuid4(view.id):
+            return None
+        rid = str(view.id)
+        record = volume.read_own_json(self.vol.history(rid))
+        if record is not None:
+            # Stopped between the record and the status, or a record the
+            # handover wrote for the updater it replaced: the record decides.
+            state = record.get("state")
+            if state not in contract.STATES or state == view.state:
+                return None
+            sentence = record.get("sentence")
+            status = contract.Status(
+                id=rid,
+                kind=view.kind or str(record.get("kind") or ""),
+                state=state,
+                updated_at=contract.iso(self.kit.clock.now()),
+                sentences=tuple([*view.sentences, *([sentence] if isinstance(sentence, str) else [])][-20:]),
+            )
+            volume.write_json(self.vol.status, status.to_dict())
+            return state
+        if os.path.lexists(self.vol.journal(rid)) or os.path.lexists(self.vol.handover(rid, "request")):
+            # An apply or go-back the journal still has (recovery's, when the
+            # resume could not finish it), or a handover's own record to write.
+            return None
+        state, sentence = self._interrupted(view.kind, rid)
+        records = Records(self.vol, rid, view.kind or "request", self.kit.clock)
+        records.sentences = list(view.sentences)
+        records.finish(state, sentence, requested_by=self._requested_by(rid), code=contract.INTERRUPTED)
+        return state
+
+    def _interrupted(self, kind: str | None, rid: str) -> tuple[str, str]:
+        """The record of a request the updater was stopped in, with no journal of it."""
+        if kind == "prepare":
+            report = volume.read_own_json(self.vol.prepared(rid))
+            if report is not None and isinstance(report.get("to_version"), str):
+                # P7 wrote the report; only the record was missing.
+                return "succeeded", f"Prepared {report['to_version']}."
+            return "refused", "Preparing failed: the updater restarted before it finished."
+        if kind == "apply":
+            return "not_started", "Not started: the updater restarted before the update began."
+        if kind == "go_back":
+            return "not_started", "Not started: the updater restarted before going back began."
+        if kind == "update_updater":
+            return (
+                "not_started",
+                f"The updater stayed on {self.kit.site.me.version}: it restarted before the handover began.",
+            )
+        if kind == "discard":
+            return (
+                "not_started",
+                "The updater restarted before the prepared update was discarded. "
+                "Discard it again if it is still offered.",
+            )
+        return "not_started", "The updater restarted before this request finished."
+
+    def _requested_by(self, rid: str) -> str | None:
+        """Who asked, from the request intake kept, when it says so plainly."""
+        try:
+            raw = volume.read_own_json(self.vol.taken(rid))
+        except (OSError, ValueError, volume.UnsafeFile):
+            return None
+        by = (raw or {}).get("requested_by")
+        return by if isinstance(by, str) and 0 < len(by) <= contract.REQUESTED_BY_MAX else None
 
     def tick(self) -> intake.Outcome | None:
         self.kit.clock.tick()
