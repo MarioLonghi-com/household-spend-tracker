@@ -50,6 +50,14 @@ mac:
   hardenedRuntime: true
   entitlements: entitlements/mac.plist
   entitlementsInherit: entitlements/mac.inherit.plist
+  # Export compliance, answered once here instead of in App Store Connect for
+  # every build: the app uses only exempt encryption -- HTTPS, the OS's own,
+  # and standard algorithms protecting the person's own data (Mario,
+  # 2026-11-13). Without it a build waits in App Store Connect for the
+  # question to be answered, and the release job's status wait with it.
+  # The `mas` target inherits this; package-mas.sh refuses an app without it.
+  extendInfo:
+    ITSAppUsesNonExemptEncryption: false
 
 # The Mac App Store build. electron-builder makes it unsigned; the sandbox
 # entitlements, the provisioning profile and the inside-out signing are

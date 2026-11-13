@@ -30,6 +30,16 @@ history this repository does not have.
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- The Mac App Store build now declares its export compliance itself (it
+  uses only exempt encryption), so App Store Connect no longer holds each
+  build until the encryption question is answered by hand, and the release
+  job no longer waits on that (0.17.0's did). `package-mas.sh` refuses an
+  app without the declaration.
+
 ## 0.17.0 — 2026-11-13
 
 **Reversible: clean** — one migration.
