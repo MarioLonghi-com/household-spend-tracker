@@ -59,6 +59,7 @@ U8 = {
     "podman-4.3": ("podman", True, False, "too_old", "4.3.1", "1.41", "1.24-1.41"),
     "podman-4.9": ("podman", False, False, "ok", "4.9.4", "1.41", "1.24-1.41"),
     "podman-machine": ("podman-machine", True, True, "ok", "6.1.3", "1.44", "1.24-1.44"),
+    "podman-6-in-container": ("podman", False, False, "ok", "6.1.3", "1.44", "1.24-1.44"),
     "podman-rootful-fedora": ("podman", False, True, "ok", "5.8.7", "1.44", "1.24-1.44"),
     "podman-rootless-fedora": ("podman", True, True, "ok", "5.8.7", "1.44", "1.24-1.44"),
 }  # fmt: skip
@@ -89,7 +90,7 @@ def test_u8_each_engine_has_a_not_root_rule_with_the_volume_group(name):
 
 
 def test_the_hand_written_fixtures_say_so_and_the_recorded_ones_do_not():
-    recorded = {"docker-desktop", "podman-machine", "docker-engine-rootful", "podman-rootful-fedora", "podman-rootless-fedora"}
+    recorded = {"docker-desktop", "podman-machine", "podman-6-in-container", "docker-engine-rootful", "podman-rootful-fedora", "podman-rootless-fedora"}
     readme = (ENGINES / "README.md").read_text()
     for folder in U8:
         assert f"`{folder}`" in readme

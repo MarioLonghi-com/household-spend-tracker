@@ -40,6 +40,7 @@ import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { formatCount } from "../lib/locale";
 import { logStreamBlurb, logStyleWords, placeWords } from "../lib/labels";
+import { HelpMark } from "../help/HelpMark";
 
 // --------------------------------------------------------------------------- //
 // What the server sends. `InstanceOut` and friends in `app/schemas.py`.
@@ -231,7 +232,7 @@ export function ApplicationManagement({
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1><Trans comment="Screen title on the Application management screen. See GLOSSARY.md">Application management</Trans></h1>
+        <div className="screen-title"><h1><Trans comment="Screen title on the Application management screen. See GLOSSARY.md">Application management</Trans></h1><HelpMark /></div>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>

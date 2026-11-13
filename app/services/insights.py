@@ -41,6 +41,7 @@ from ..models import (
     ClearedState,
     Payee,
     Transaction,
+    WeekStart,
 )
 from . import transactions as txn_service
 
@@ -66,10 +67,12 @@ class Bucket(enum.StrEnum):
 _BUCKET_FORMAT = {Bucket.day: "%Y-%m-%d", Bucket.month: "%Y-%m"}
 
 
-def _bucket_label(bucket: Bucket):
+def _bucket_label(bucket: Bucket, week_start: WeekStart = WeekStart.monday):
     """The column expression a timeseries gathers by.
 
-    A week is labelled with the **date of its Monday**, not with a week number.
+    A week starts on the household's `week_start` (#452) and is labelled with
+    the **date of that first day**, not with a week number. The history below
+    is from when every week started on Monday; the reasoning holds for any day.
     `%Y-W%W` was both: `%W` counts weeks from the first Monday of the calendar
     year, and pairing it with `%Y` is not ISO week numbering -- so a Monday-to-
     Sunday week straddling 1 January was cut in half. 29 Dec 2025 to 4 Jan 2026
@@ -81,12 +84,14 @@ def _bucket_label(bucket: Bucket):
     adjacent weeks cannot collide -- which they could, since `2026-W00` is a
     partial week sitting next to a full `2026-W01`.
 
-    `%w` is 0 for Sunday, so `(%w + 6) % 7` is days since Monday.
+    `%w` is 0 for Sunday, so `(%w + 7 - start) % 7` is days since the first
+    day, `start` being that day's own `%w`: `(%w + 6) % 7` for Monday.
     """
     if bucket is not Bucket.week:
         return func.strftime(_BUCKET_FORMAT[bucket], Transaction.date)
-    days_since_monday = (func.strftime("%w", Transaction.date) + 6) % 7
-    return func.date(Transaction.date, "-" + func.cast(days_since_monday, String) + " days")
+    shift = 7 - week_start.sqlite_weekday
+    days_since_start = (func.strftime("%w", Transaction.date) + shift) % 7
+    return func.date(Transaction.date, "-" + func.cast(days_since_start, String) + " days")
 
 
 @dataclass(frozen=True, slots=True)
@@ -235,8 +240,12 @@ def timeseries(
     search: str | None = None,
     cleared: ClearedState | None = None,
     uncategorised: bool = False,
+    week_start: WeekStart = WeekStart.monday,
 ) -> dict[str, CurrencyTotals]:
-    """The same arithmetic, gathered by time instead of by thing."""
+    """The same arithmetic, gathered by time instead of by thing.
+
+    `week_start` is the household's (#452); it only matters for weeks.
+    """
     base = txn_service.filtered(
         household_id,
         account_id=account_id,
@@ -246,7 +255,7 @@ def timeseries(
         cleared=cleared,
         uncategorised=uncategorised,
     )
-    label = _bucket_label(bucket)
+    label = _bucket_label(bucket, week_start)
 
     stmt = (
         select(

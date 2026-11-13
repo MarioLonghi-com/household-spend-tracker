@@ -1,6 +1,7 @@
 /** Shapes the server sends. Kept in one file so a change is one diff. */
 
 import type { RatesStatus } from "./fx";
+import type { WeekStart } from "./locale";
 import type { Coded } from "./noticeMessages";
 
 export type Role = "owner" | "member";
@@ -62,6 +63,8 @@ export interface Household {
   name: string;
   base_currency: string;
   date_format: string;
+  /** The day its weeks begin on (#452). Weekly totals start there. */
+  week_start: WeekStart;
   note: string | null;
   /** Which palette. The colours themselves arrive resolved, in `colours`. */
   theme: string;
@@ -675,10 +678,15 @@ export interface Passkey {
 }
 
 export interface AuthenticatorStatus {
-  /** An authenticator is set up. False after a reset cleared it. */
+  /** An authenticator is set up. False after a reset cleared it, and for an
+   * account whose second step is a passkey (#456): `cleared` tells them apart. */
   enrolled: boolean;
   /** Set up, and this server's key cannot open it: recovery mode, for you. */
   locked_by_key: boolean;
+  /** Passkeys that work here (#456). */
+  passkeys: number;
+  /** No authenticator and no passkey: a reset cleared the second factors. */
+  cleared: boolean;
 }
 
 /**

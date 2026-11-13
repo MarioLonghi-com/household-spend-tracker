@@ -25,7 +25,19 @@ from sqlalchemy import select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from ..auth import crypto, devices, keycheck, passwords, ratelimit, sessions, stepup, tokens, totp, unlock
+from ..auth import (
+    crypto,
+    devices,
+    factors,
+    keycheck,
+    passwords,
+    ratelimit,
+    sessions,
+    stepup,
+    tokens,
+    totp,
+    unlock,
+)
 from ..auth import service as auth_service
 from ..errors import ProofRefused, ValidationError
 from ..models import RecoveryCode, User, utcnow
@@ -307,6 +319,7 @@ def complete_reenrolment(
     code: str,
     current_code: str | None = None,
     grant: str | None = None,
+    step_up_token: str | None = None,
     keep_session_hash: str | None = None,
     ip: str | None = None,
 ) -> ReenrolmentResult:
@@ -354,14 +367,26 @@ def complete_reenrolment(
 
     if grant is not None:
         _honour_key_recovery_grant(user, grant, session_hash=keep_session_hash)
+    elif step_up_token is not None:
+        # The password and a second factor, proved within five minutes and
+        # spent here (#456): how a passkey-only account adds an authenticator,
+        # as it adds a passkey -- and how an account with both, in recovery
+        # mode, replaces the one the key cannot open with its passkey.
+        stepup.require(engine, step_up_token, user_id=user.id)
     else:
         _prove_current_factor(session, engine, user, current_code or "", ip=ip)
 
+    adding = user.totp_secret is None
     user.totp_secret = crypto.seal_totp_secret(pending.secret, user_id=user.id)
     # Burn the proving code, exactly as enrolment does: a code that has been
     # used is dead, and the counter is what enforces it. Never backwards -- the
     # current authenticator's code may just have moved it past `step`.
     user.totp_last_counter = max(step, user.totp_last_counter or step)
+    if adding:
+        # Adding one to a passkey-only account (#456) retires nothing, so it
+        # signs nobody out: every browser and grant stood on the passkey, and
+        # still does.
+        return ReenrolmentResult(devices_revoked=0, sessions_ended=0)
     revoked = devices.revoke_all_for(session, user.id)
     ended = sessions.revoke_all_for(session, user.id, except_hash=keep_session_hash)
     sessions.drop_pending_for(session, user.id)
@@ -375,7 +400,14 @@ _REGENERATE_REFUSAL = "that password and authenticator code do not prove it is y
 
 
 def regenerate_recovery_codes(
-    session: Session, engine: Engine, user: User, *, password: str, code: str, ip: str | None
+    session: Session,
+    engine: Engine,
+    user: User,
+    *,
+    password: str,
+    code: str,
+    ip: str | None,
+    step_up_token: str | None = None,
 ) -> tuple[str, ...]:
     """Replace every recovery code the member has with ten new ones (#289).
 
@@ -406,10 +438,20 @@ def regenerate_recovery_codes(
     deliberate act from a browser the person holds, like changing a password,
     and replaces nothing the other credentials stood on.
 
+    A **step-up grant** may stand in for the password and the code (#456):
+    it was bought with the password and a passkey or a code, within five
+    minutes, and is spent here. That is how a passkey-only account, which has
+    no code to give, replaces its sheet. A recovery code buys no grant, so the
+    rule above holds by this route too.
+
     Call inside a batch. Returns the new codes, to be shown once.
     """
     from .. import capabilities
     from ..auth.setup import recovery_code_count
+
+    if step_up_token is not None:
+        stepup.require(engine, step_up_token, user_id=user.id)
+        return _new_sheet(session, user, recovery_code_count())
 
     two_factors = capabilities.second_factor()
     if two_factors and user.totp_secret is None:
@@ -433,14 +475,43 @@ def regenerate_recovery_codes(
     if two_factors and not totp.verify_and_consume(user, candidate):
         raise ProofRefused(_REGENERATE_REFUSAL, code="profile.regenerate_refused")
     ratelimit.release(engine, held)
+    return _new_sheet(session, user, recovery_code_count())
 
+
+def _new_sheet(session: Session, user: User, count: int) -> tuple[str, ...]:
     for old in session.scalars(select(RecoveryCode).where(RecoveryCode.user_id == user.id)):
         session.delete(old)
-    codes = tuple(secrets.token_hex(5) for _ in range(recovery_code_count()))
+    codes = tuple(secrets.token_hex(5) for _ in range(count))
     for one in codes:
         session.add(RecoveryCode(user_id=user.id, code_hash=passwords.hash_password(one)))
     session.flush()
     return codes
+
+
+def remove_authenticator(session: Session, user: User) -> int:
+    """Stop using the authenticator; a passkey is the second step from now on
+    (#456). Returns how many trusted browsers were forgotten.
+
+    Refused unless a passkey works here (`factors.refuse_removing_last`).
+    The recovery codes stay: they belong to the account. Every trusted browser
+    goes -- it skipped the second step on the strength of whatever passed it,
+    quite possibly this authenticator -- and so do half-finished sign-ins,
+    which were one code away from a session. Sessions and agent keys stay:
+    removing a factor takes nothing from anybody holding the other.
+
+    Call inside a batch: `users` is audited.
+    """
+    if user.totp_secret is None:
+        raise ValidationError(
+            "you have no authenticator to remove", code="profile.no_authenticator"
+        )
+    factors.refuse_removing_last(session, user)
+    user.totp_secret = None
+    user.totp_last_counter = None
+    revoked = devices.revoke_all_for(session, user.id)
+    sessions.drop_pending_for(session, user.id)
+    session.flush()
+    return revoked
 
 
 @dataclass(frozen=True, slots=True)

@@ -56,41 +56,43 @@ afterEach(() => {
 });
 
 describe("the setup wizard", () => {
+  // The whole walk, edition by edition, is in screens/setup-wizard.test.tsx (#458).
   it("on the desktop: you, then one recovery code, and no token or authenticator", async () => {
     setCapabilities(DESKTOP);
     vi.mocked(api.get).mockResolvedValue({ setup_required: true, token_needed: false, token_path: null });
     vi.mocked(api.post).mockImplementation(async (path: string) => {
       if (path === "/setup/begin") return { blob: "b1", otpauth_uri: null, secret: null, recovery_codes: ["c0ffee1234"] };
-      if (path === "/setup/complete") return JANE;
       throw new Error(`unexpected ${path}`);
     });
-    const done = vi.fn();
-    wrap(<Setup onDone={done} />);
+    wrap(<Setup onDone={vi.fn()} />);
 
-    expect(screen.getByRole("heading", { name: "1. You" })).toBeTruthy();
+    await screen.findByRole("heading", { name: "Let's set up your household" });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await screen.findByRole("heading", { name: "Create your password" });
     expect(screen.queryByLabelText("Setup token")).toBeNull();
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "jane@example.test" } });
     fireEvent.change(screen.getByLabelText("Your name"), { target: { value: "Jane" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "a sufficiently long password" } });
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    await screen.findByRole("heading", { name: "2. Your recovery code" });
+    // Straight to the one code: no second step on this computer.
+    await screen.findByRole("heading", { name: "Keep your recovery code" });
     expect(screen.getByText("c0ffee1234")).toBeTruthy();
-    fireEvent.click(screen.getByLabelText("I have stored it somewhere that is not this computer"));
-    fireEvent.click(screen.getByRole("button", { name: "Finish setup" }));
-    await vi.waitFor(() => expect(done).toHaveBeenCalledWith(JANE));
-
+    expect(screen.getByText("If you forget your password, this is the only way back in.")).toBeTruthy();
     expect(posted()).toEqual([
       ["/setup/begin", { token: "", email: "jane@example.test", display_name: "Jane", password: "a sufficiently long password" }],
-      ["/setup/complete", { blob: "b1", codes_saved: true }],
     ]);
   });
 
-  it("on a server: the token comes first, as it always has", () => {
+  it("on a server: the token comes first after the welcome, as it always has", async () => {
     setCapabilities(EVERYTHING);
     vi.mocked(api.get).mockResolvedValue({ setup_required: true, token_needed: true, token_path: "/data/setup-token" });
     wrap(<Setup onDone={vi.fn()} />);
-    expect(screen.getByRole("heading", { name: "1. The setup token" })).toBeTruthy();
+    await screen.findByRole("heading", { name: "Let's set up your household" });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await screen.findByRole("heading", { name: "Paste the setup token" });
     expect(screen.getByLabelText("Setup token")).toBeTruthy();
   });
 });

@@ -60,6 +60,12 @@ interface SignInState {
   passkeys_live?: number;
   /** Only after a passkey sign-in: which one, for "this device" (#47 §3). */
   passkey_id?: string | null;
+  /**
+   * Only with `needs_code` (#456): what this member can give as the second
+   * step, preferred first -- "passkey" and/or "code". A passkey-only account
+   * is never offered the code.
+   */
+  second_steps?: string[];
 }
 
 interface Offer {
@@ -91,6 +97,10 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
   const [trust, setTrust] = useState(true);
   const [needsCode, setNeedsCode] = useState(false);
   const [useRecovery, setUseRecovery] = useState(false);
+  // The second step's choices after the password (#456), and whether the
+  // passkey is the one on screen.
+  const [steps, setSteps] = useState<string[]>([]);
+  const [passkeyStep, setPasskeyStep] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   // A recovery code that revoked keys holds the screen long enough to say so:
@@ -157,6 +167,27 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
     };
     // Once, on arrival. `run` and `withPasskey` only read setters.
   }, []);
+
+  /** The second step after the password, with a passkey (#456). */
+  const secondStepPasskey = () =>
+    run(async () => {
+      const options = await api.post<unknown>("/session/second-step/options", {});
+      let credential: unknown;
+      try {
+        credential = await getPasskey(options);
+      } catch (problem) {
+        if (wasDismissed(problem)) return;
+        throw problem;
+      }
+      const state = await api.post<SignInState>("/session/second-step", {
+        credential,
+        trust_this_browser: trust,
+      });
+      if (state.authenticated && state.user) {
+        if (state.passkey_id) rememberThisDevice(state.passkey_id);
+        finish(state.user, 0);
+      }
+    });
 
   /** The button: one prompt, now, instead of waiting in the email field. */
   const passkeyNow = () =>
@@ -236,7 +267,13 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
         finish(state.user, state.keys_revoked ?? 0, state.passkeys_live ?? 0);
       } else if (state.needs_code) {
         setNeedsCode(true);
-        if (state.key_replaced) {
+        const offeredSteps = state.second_steps ?? [];
+        setSteps(offeredSteps);
+        // The passkey first when there is one (#456); with it, even a member
+        // the server's key cannot open signs in without a recovery code.
+        if (offeredSteps[0] === "passkey") {
+          setPasskeyStep(true);
+        } else if (state.key_replaced) {
           toRecoveryCode(
             state.detail ??
               t`This server's secret key has been replaced. Use one of your recovery codes.`,
@@ -450,6 +487,53 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
               </>
             )}
           </>
+        ) : passkeyStep && !useRecovery ? (
+          <>
+            <h2>{t({ message: "Your passkey", comment: "Heading on the sign-in page: the second step after the password. See GLOSSARY.md" })}</h2>
+            <p className="muted small">
+              <Trans>This browser hasn't been used here recently, so the second step is your passkey.</Trans>
+            </p>
+            <label className="small">
+              <input
+                type="checkbox"
+                checked={trust}
+                onChange={(e) => setTrust(e.target.checked)}
+                style={{ width: "auto", marginRight: 8 }}
+              />
+              <Trans>Don't ask on this browser for 30 days</Trans>
+            </label>
+            <p />
+            <button className="primary" type="button" disabled={busy} onClick={secondStepPasskey} autoFocus>
+              <Trans>Use your passkey</Trans>
+            </button>
+            <p />
+            {steps.includes("code") && (
+              <>
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() => {
+                    setPasskeyStep(false);
+                    setError(null);
+                  }}
+                >
+                  <Trans>Use a code from your authenticator instead</Trans>
+                </button>
+                <p />
+              </>
+            )}
+            <button
+              type="button"
+              className="link"
+              onClick={() => {
+                setUseRecovery(true);
+                setCode("");
+                setError(null);
+              }}
+            >
+              <Trans>I've lost my passkey — use a recovery code</Trans>
+            </button>
+          </>
         ) : (
           <>
             <h2>{useRecovery ? t`A recovery code` : t({ message: "Your authenticator", comment: "Heading on the sign-in page" })}</h2>
@@ -493,8 +577,27 @@ export function SignIn({ onDone }: { onDone: (user: User) => void }) {
             <button className="primary" type="submit" disabled={busy || code.length < 6}>
               <Trans comment="Button on the sign-in page: go on to the next step">Continue</Trans>
             </button>
-            {/* Not after the key was replaced: no code from it can work here. */}
-            {!replaced && (
+            {/* Back to the passkey, when there is one (#456). */}
+            {steps.includes("passkey") && (
+              <>
+                <p />
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() => {
+                    setUseRecovery(false);
+                    setPasskeyStep(true);
+                    setCode("");
+                    setError(null);
+                  }}
+                >
+                  <Trans>Use your passkey instead</Trans>
+                </button>
+              </>
+            )}
+            {/* Not after the key was replaced: no code from it can work here.
+                Nor for an account with no authenticator (#456). */}
+            {!replaced && (steps.length === 0 || steps.includes("code")) && (
               <>
                 <p />
                 <button

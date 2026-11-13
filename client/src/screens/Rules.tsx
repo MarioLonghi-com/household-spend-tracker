@@ -17,6 +17,7 @@ import type {
 import { plural, t } from "@lingui/core/macro";
 import { Plural, Trans } from "@lingui/react/macro";
 import { formatCount } from "../lib/locale";
+import { HelpMark } from "../help/HelpMark";
 
 type RuleSort = "pattern" | "match" | "payee" | "priority" | "enabled";
 
@@ -117,7 +118,7 @@ export function Rules({ household }: { household: Household }) {
         <ReapplyPanel household={household} onClose={() => setTidying(false)} onDone={refresh} />
       )}
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
-        <h1><Trans>Payee naming rules</Trans></h1>
+        <div className="screen-title"><h1><Trans>Payee naming rules</Trans></h1><HelpMark /></div>
         <button className="primary" onClick={() => setAdding(true)}>
           <Trans>
             Add a rule

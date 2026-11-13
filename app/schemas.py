@@ -100,11 +100,76 @@ class SetupEnrol(BaseModel):
     code: str = Field(min_length=6, max_length=10)
 
 
+#: A BCP 47 language tag, for seeding a household's words (#268). Bounded and
+#: shaped here; one with no reviewed translations seeds English.
+SeedLocale = Annotated[
+    str | None, Field(max_length=35, pattern=r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}$")
+]
+
+
+class SetupHousehold(BaseModel):
+    """The first household, made in setup's one transaction (#458)."""
+
+    name: str = Field(min_length=1, max_length=120)
+    #: A palette key (`theming.PALETTES`); the next free one when absent.
+    colour: str | None = Field(default=None, max_length=32)
+    base_currency: str = Field(min_length=3, max_length=3)
+    date_format: Literal["YYYY-MM-DD", "DD/MM/YYYY", "MM/DD/YYYY"] = "YYYY-MM-DD"
+    week_start: Literal["monday", "sunday", "saturday"] = "monday"
+    #: The language the wizard was in: it names the starter categories, and is
+    #: stored nowhere (#268).
+    locale: SeedLocale = None
+    #: Which starter categories: the whole tree, the Essentials preset, or
+    #: only what the reports need.
+    categories: Literal["recommended", "essentials", "empty"] = "recommended"
+    #: Seed ids unticked in the tree. The Income group and Reimbursements may
+    #: not be among them (`setup.category_locked`).
+    omit: list[Annotated[str, Field(max_length=64)]] = Field(default_factory=list, max_length=64)
+
+
+class SetupAccount(BaseModel):
+    """An optional first account, made with the household (#458)."""
+
+    name: str = Field(min_length=1, max_length=120)
+    kind: Literal["current", "savings", "credit_card", "cash"] = "current"
+    #: The household's base currency when absent.
+    currency: str | None = Field(default=None, min_length=3, max_length=3)
+    #: Minor units, recorded as the account's opening-balance row.
+    opening_balance: Minor = 0
+    #: Today when absent; any past date, never the future.
+    opening_date: Date | None = None
+
+
 class SetupComplete(BaseModel):
     blob: str
     #: The owner confirms they have stored the recovery codes somewhere that is
     #: not this browser.
     codes_saved: bool = False
+    #: "totp" (the default): the authenticator `/setup/enrol` proved.
+    #: "passkey" (#456): a passkey in its place, answering the options
+    #: `/setup/passkey/options` sealed into this blob.
+    second_step: Literal["totp", "passkey"] = "totp"
+    #: With "passkey": the browser's answer, `credential.toJSON()`.
+    credential: dict | None = None
+    #: The first household, in the same transaction (#458). Absent: the owner
+    #: alone, as before, and the household is made after signing in.
+    household: SetupHousehold | None = None
+    #: A first account in that household. Ignored without a household.
+    account: SetupAccount | None = None
+
+
+class PasskeyOptionsFor(BaseModel):
+    """Ask for creation options for an account not yet written (#456)."""
+
+    blob: str
+
+
+class PasskeyOffer(BaseModel):
+    """Creation options for a passkey, and the sealed blob that binds the
+    challenge to this wizard, invitation or reset link (#456)."""
+
+    blob: str
+    options: dict
 
 
 class SetupStarted(BaseModel):
@@ -156,6 +221,13 @@ class SignInWithPasskey(BaseModel):
     credential: dict
 
 
+class SubmitSecondStepPasskey(BaseModel):
+    """A passkey as the second step after the password (#456)."""
+
+    credential: dict
+    trust_this_browser: bool = True
+
+
 class SignInState(BaseModel):
     """Where the sign-in has got to."""
 
@@ -186,6 +258,11 @@ class SignInState(BaseModel):
     #: Only after a passkey sign-in: which passkey it was, so Sign-in methods
     #: can mark it "this device" (#47 §3). The member's own id, nobody else's.
     passkey_id: str | None = None
+    #: Only with `needs_code`, after the right password (#456): what this
+    #: member can give as the second step, most preferred first -- "passkey"
+    #: and/or "code". A passkey-only account is never offered the code; an
+    #: empty list is an account a reset cleared.
+    second_steps: list[str] = []
 
 
 class PasskeyStateOut(BaseModel):
@@ -210,13 +287,6 @@ class PasskeyStateOut(BaseModel):
 # --------------------------------------------------------------------------- #
 
 
-#: A BCP 47 language tag, for seeding a household's words (#268). Bounded and
-#: shaped here; one with no reviewed translations seeds English.
-SeedLocale = Annotated[
-    str | None, Field(max_length=35, pattern=r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}$")
-]
-
-
 class HouseholdCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     base_currency: str = Field(default="EUR", min_length=3, max_length=3)
@@ -224,6 +294,8 @@ class HouseholdCreate(BaseModel):
     #: The language to seed its categories in (#268), sent only for a language
     #: that is served. Not stored: the seeded names are ordinary names.
     locale: SeedLocale = None
+    #: The day its weeks start on (#452); Monday, as every household had before.
+    week_start: Literal["monday", "sunday", "saturday"] = "monday"
 
 
 class LatestChangeOut(BaseModel):
@@ -246,6 +318,8 @@ class HouseholdOut(ORMModel):
     name: str
     base_currency: str
     date_format: str
+    #: The day its weeks begin on: monday, sunday or saturday (#452).
+    week_start: str = "monday"
     note: str | None = None
     theme: str
     #: The accent as it was picked. What each scheme actually shows is in
@@ -279,6 +353,9 @@ class HouseholdUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
     base_currency: str | None = Field(default=None, min_length=3, max_length=3)
     date_format: DateFormat | None = None
+    #: monday, sunday or saturday. Checked in the service, so a wrong value is
+    #: refused with a code rather than a bare 422.
+    week_start: str | None = Field(default=None, max_length=16)
     note: str | None = None
     clear_note: bool = False
     theme: str | None = None
@@ -1849,9 +1926,19 @@ class ResetComplete(BaseModel):
     #: Bounded like every other password field; the rule itself is
     #: `passwords.complaints`.
     password: str | None = Field(default=None, max_length=1024)
-    #: `ResetAuthenticator.blob`, handed back.
+    #: `ResetAuthenticator.blob` -- or `PasskeyOffer.blob` -- handed back.
     blob: str | None = None
     code: str | None = Field(default=None, max_length=10)
+    #: "totp" (the default) or "passkey" (#456): which second step this link
+    #: is followed with, when it resets the second factors.
+    second_step: Literal["totp", "passkey"] = "totp"
+    #: With "passkey": the browser's answer, `credential.toJSON()`.
+    credential: dict | None = None
+    #: The first household, in the same transaction (#458). Absent: the owner
+    #: alone, as before, and the household is made after signing in.
+    household: SetupHousehold | None = None
+    #: A first account in that household. Ignored without a household.
+    account: SetupAccount | None = None
 
 
 class ResetDone(BaseModel):
@@ -1949,12 +2036,26 @@ class AuthenticatorStatus(BaseModel):
     member does not already know about themselves.
     """
 
-    #: An authenticator is set up. False after a reset cleared it (#284).
+    #: An authenticator is set up. False after a reset cleared it (#284), and
+    #: for a passkey-only account (#456) -- `cleared` tells the two apart.
     enrolled: bool
     #: Enrolled, and this server's key cannot open it: recovery mode. The
     #: profile then asks for a recovery code in place of a code from it -- or
     #: takes the grant the recovery sign-in left in this browser.
     locked_by_key: bool
+    #: Passkeys that work here (#456): what decides whether the authenticator
+    #: may be removed, and whether a step-up offers the passkey first.
+    passkeys: int = 0
+    #: No authenticator and no passkey: a reset cleared the second factors
+    #: (#284). Not set for an account that simply has no authenticator.
+    cleared: bool = False
+
+
+class AuthenticatorRemoved(BaseModel):
+    """What removing the authenticator took away besides it (#456)."""
+
+    #: Browsers that had been let off the second step, now asked again.
+    devices_revoked: int
 
 
 class StartReenrolment(BaseModel):
@@ -1979,13 +2080,18 @@ class ConfirmReenrolment(BaseModel):
     #: In place of `current_code`, in recovery mode only: the
     #: `reenrolment_grant` the recovery sign-in returned (#287).
     grant: str | None = None
+    #: In place of `current_code`: a step-up grant (#456) -- the password and
+    #: a passkey, or the password and a code -- which is how an account with
+    #: no authenticator adds one, as adding a passkey is paid for.
+    step_up_token: str | None = Field(default=None, max_length=200)
 
     @model_validator(mode="after")
     def _one_proof(self) -> ConfirmReenrolment:
-        # One or the other, and saying which is missing is a malformed
-        # request rather than a refused proof.
-        if (self.current_code is None) == (self.grant is None):
-            raise ValueError("give either current_code or grant, not both and not neither")
+        # Exactly one, and saying which is missing is a malformed request
+        # rather than a refused proof.
+        given = [one for one in (self.current_code, self.grant, self.step_up_token) if one is not None]
+        if len(given) != 1:
+            raise ValueError("give one of current_code, grant or step_up_token")
         return self
 
 
@@ -1995,6 +2101,9 @@ class StepUpRequest(BaseModel):
 
     password: str
     code: str = ""
+    #: In place of `code` (#456): the browser's answer to
+    #: `POST /me/step-up/options`, `credential.toJSON()`.
+    credential: dict | None = None
 
 
 class StepUpGranted(BaseModel):
@@ -2014,6 +2123,10 @@ class RegenerateRecoveryCodes(BaseModel):
 
     password: str = Field(max_length=1024)
     code: str = Field(default="", max_length=64)
+    #: In place of the password and code, for an account whose second step is
+    #: a passkey (#456): a step-up grant, which took the password and the
+    #: passkey. Never a recovery code, by either route.
+    step_up_token: str | None = Field(default=None, max_length=200)
 
 
 class RecoveryCodesIssued(BaseModel):
@@ -2342,6 +2455,9 @@ class ManifestHousehold(BaseModel):
     #: endpoint here ever converts between them.
     base_currency: str
     date_format: str
+    #: The day its weeks begin on (#452). Weekly timeseries buckets start on
+    #: this day and are labelled with its date.
+    week_start: str = "monday"
 
 
 class ManifestKey(BaseModel):

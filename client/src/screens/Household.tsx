@@ -24,7 +24,8 @@ import { OneTimeImport } from "./OneTimeImport";
 import { roleLabel } from "../lib/labels";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { formatCount, formatDate } from "../lib/locale";
+import { WEEK_STARTS, formatCount, formatDate, weekdayName, type WeekStart } from "../lib/locale";
+import { HelpMark } from "../help/HelpMark";
 
 /** One currency this household keeps accounts in. Counts, never a figure. */
 interface CurrencyRows {
@@ -70,7 +71,7 @@ export function HouseholdPage({
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 4 }}>
-        <h1>{household.name}</h1>
+        <div className="screen-title"><h1>{household.name}</h1><HelpMark /></div>
       </div>
       <p className="muted small" style={{ marginTop: 0 }}>
         <Trans>
@@ -252,6 +253,7 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
 
   const [name, setName] = useState(household.name);
   const [currency, setCurrency] = useState(household.base_currency);
+  const [weekStart, setWeekStart] = useState<WeekStart>(household.week_start ?? "monday");
   const [note, setNote] = useState(household.note ?? "");
   const [theme, setTheme] = useState(household.theme);
   const [accent, setAccent] = useState(household.accent ?? "");
@@ -268,6 +270,7 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
       api.patch<Household>(`/households/${household.id}`, {
         name,
         base_currency: currency,
+        week_start: weekStart,
         note: note.trim() || null,
         clear_note: !note.trim(),
         theme,
@@ -305,6 +308,17 @@ function Settings({ household, onSaved }: { household: Household; onSaved: () =>
           Only used for totals across accounts. Each account keeps its own, and nothing in the ledger
           is ever converted.
         </Trans>
+      </p>
+      <Field label={t({ message: "First day of the week", comment: "Label of a form field on the household page: the day weekly totals start on" })}>
+        <select value={weekStart} onChange={(e) => setWeekStart(e.target.value as WeekStart)}>
+          {WEEK_STARTS.map((day) => {
+            const { name, lang } = weekdayName(day);
+            return <option key={day} value={day} lang={lang}>{name}</option>;
+          })}
+        </select>
+      </Field>
+      <p className="muted small">
+        <Trans>Weekly totals start on this day.</Trans>
       </p>
       <Field label={t({ message: "Note", comment: "Label of a form field on the household page. See GLOSSARY.md" })}>
         <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} />

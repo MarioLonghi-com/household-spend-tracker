@@ -630,6 +630,15 @@ already linked: taking a link apart is unlinking, and that is a person's.
   again. A nightly job reads the eleven rows that moved, not the four thousand
   that did not.
 - **What banks call each account:** `GET $H/identifiers`.
+- **Answer "how do I…?" from the app's own help** (#460): `GET $A/help`
+  returns every article the app's Help panel shows, and `GET $A/help/{id}`
+  one, each with `title`, `screens`, `also` (other ways people ask the same
+  thing) and `markdown`, the body as written, where **bold** is a label
+  exactly as the app shows it. `lang=pt-BR` (or `Accept-Language`) picks the
+  language, English otherwise; `locale` says which you got. A household has
+  no language of its own -- each device chooses -- so ask in the language
+  the person is writing in. Quote the steps; do not invent screens the
+  articles do not name.
 
 ## Ask how much, never add it up yourself
 

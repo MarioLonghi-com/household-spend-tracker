@@ -27,7 +27,6 @@ import platform as _platform
 import re
 import shutil
 import socket
-import ssl
 import stat as stat_module
 import sys
 import urllib.error
@@ -400,13 +399,36 @@ class Package:
     version: str
 
 
+#: The desktop backend's own package list, bundled by `desktop/backend.spec`.
+FROZEN_PACKAGES = Path(__file__).resolve().parent.parent / "frozen-packages.json"
+
+
+def _frozen_packages() -> list[Package] | None:
+    try:
+        said = json.loads(FROZEN_PACKAGES.read_text(encoding="utf-8"))
+        found = [Package(name=str(one["name"]), version=str(one["version"])) for one in said]
+    except (OSError, ValueError, TypeError, KeyError):
+        return None
+    return sorted(found, key=lambda one: one.name.lower()) or None
+
+
 def packages() -> list[Package]:
     """Every distribution installed in this environment, by name and version.
 
     Read from the installed metadata rather than from `requirements.txt`: that
     file says what was locked, and this question is what is actually running --
     which is the one that matters when a dependency is the suspect.
+
+    Except in the desktop app (#453): PyInstaller bundles a package's code but
+    rarely its dist-info, so the metadata there names about a quarter of what
+    runs. The freeze writes the list it shipped instead, and that is read here.
+    A frozen build without it falls back to the metadata rather than show nothing.
     """
+    if build.frozen():
+        shipped = _frozen_packages()
+        if shipped is not None:
+            return shipped
+
     from importlib import metadata
 
     found: dict[str, str] = {}
@@ -805,25 +827,6 @@ def published_releases(answer: object) -> list[Release]:
     return sorted(found.values(), key=lambda one: _as_numbers(one.version), reverse=True)
 
 
-def _trust() -> ssl.SSLContext:
-    """A TLS context that can actually verify GitHub on this machine.
-
-    The default context reads the *system* trust store, and the python.org
-    macOS build does not use the one macOS keeps -- so every https request from
-    it fails with `CERTIFICATE_VERIFY_FAILED: unable to get local issuer
-    certificate` until somebody runs `Install Certificates.command`. This app
-    is developed on exactly that build, so the check would have shipped looking
-    broken. `certifi` is declared in requirements.in for this (#46); when it
-    is somehow missing, the default context is still the right fallback.
-    """
-    try:
-        import certifi
-
-        return ssl.create_default_context(cafile=certifi.where())
-    except Exception:  # pragma: no cover - certifi absent or unreadable
-        return ssl.create_default_context()
-
-
 #: Thirty releases with their notes are tens of kilobytes. Anything past this
 #: is not a release list, and it is not read to find out (#225).
 UPSTREAM_MAX_BYTES = 1 << 20
@@ -884,7 +887,7 @@ def check_upstream() -> Upstream:
     try:
         # No redirect followed: GitHub's release list does not move, and a 3xx
         # is an answer from something that is not it (#219).
-        with outbound.opener(_trust()).open(
+        with outbound.opener(outbound.trust()).open(
             request, timeout=UPSTREAM_TIMEOUT_SECONDS
         ) as answer:
             body = outbound.read_within(

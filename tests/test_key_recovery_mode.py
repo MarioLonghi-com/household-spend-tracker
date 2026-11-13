@@ -770,7 +770,7 @@ def test_a_grant_put_off_at_sign_in_is_spent_later_from_the_profile(client, monk
     grant = _recover(owner, OWNER, PASSWORD, world["recovery_codes"][0])["reenrolment_grant"]
     partner = _browser(client)
     _recover(partner, PARTNER, PARTNER_PASSWORD, PARTNER_CODES[0])
-    both = {"enrolled": True, "locked_by_key": True}
+    both = {"enrolled": True, "locked_by_key": True, "passkeys": 0, "cleared": False}
     assert owner.get("/api/me/authenticator").json() == both
     assert partner.get("/api/me/authenticator").json() == both
 
@@ -779,7 +779,12 @@ def test_a_grant_put_off_at_sign_in_is_spent_later_from_the_profile(client, monk
     assert done.status_code == 200, done.text
     assert _unused_codes(world["owner_id"]) == 9
 
-    assert owner.get("/api/me/authenticator").json() == {"enrolled": True, "locked_by_key": False}
+    assert owner.get("/api/me/authenticator").json() == {
+        "enrolled": True,
+        "locked_by_key": False,
+        "passkeys": 0,
+        "cleared": False,
+    }
     assert partner.get("/api/me/authenticator").json() == both
     assert _sealed(world["partner_id"]) == partner_before
     assert _unused_codes(world["partner_id"]) == len(PARTNER_CODES) - 1
@@ -790,6 +795,8 @@ def test_the_authenticator_status_is_only_for_somebody_signed_in(client):
     assert client.get("/api/me/authenticator").json() == {
         "enrolled": True,
         "locked_by_key": False,
+        "passkeys": 0,
+        "cleared": False,
     }
     client.cookies.clear()
     assert client.get("/api/me/authenticator").status_code == 401

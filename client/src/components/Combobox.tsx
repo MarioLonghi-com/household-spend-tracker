@@ -55,6 +55,7 @@ export function Combobox({
   autoFocus,
   inputRef,
   onCommit,
+  onTake,
   onCancel,
   browse = false,
   limit = MAX_SUGGESTIONS,
@@ -82,6 +83,13 @@ export function Combobox({
    * than guess from the label (#19). Callers that only want the text ignore it.
    */
   onCommit?: (value: string, taken?: number) => void;
+  /**
+   * A suggestion taken from the list -- clicked, or Enter or Tab on the one
+   * the arrows are on. Moving through the list with the arrows is not taking
+   * one. For a caller where choosing is the whole act and should not wait for
+   * the field to be left (#462); the blur that follows still calls `onCommit`.
+   */
+  onTake?: (value: string, taken: number) => void;
   /** Escape with the list already shut. */
   onCancel?: () => void;
   /**
@@ -140,6 +148,7 @@ export function Combobox({
     onChange(option);
     setOpen(false);
     setActive(-1);
+    onTake?.(option, at);
   };
 
   function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {

@@ -104,9 +104,7 @@ def get(token: str, path: str) -> dict:
 
 def _open(request: urllib.request.Request):
     """The one place a request leaves: TLS verified, no redirect followed."""
-    from ..platform import _trust
-
-    return outbound.opener(_trust()).open(request, timeout=TIMEOUT_SECONDS)
+    return outbound.opener(outbound.trust()).open(request, timeout=TIMEOUT_SECONDS)
 
 
 def _plan(plan_id: str) -> str:

@@ -87,7 +87,11 @@ def spend_summary(
 
 @mcp.tool()
 def spend_over_time(bucket: str = "month", since: str | None = None, until: str | None = None) -> str:
-    """The same totals gathered by day, week or month."""
+    """The same totals gathered by day, week or month.
+
+    A week starts on the household's `week_start` (Monday unless the household
+    changed it) and is named by the date of that first day.
+    """
     return _answer(lambda: _api.timeseries(bucket=bucket, since=since, until=until))
 
 
@@ -335,6 +339,18 @@ def observed_fx(pair: str | None = None, since: str | None = None, until: str | 
     between currencies (pair like "EUR/GBP"). Rates are decimal strings. Use
     them to convert in your answer, and say which rate and date you used."""
     return _answer(lambda: _api.fx_observed(pair=pair, since=since, until=until))
+
+
+@mcp.tool()
+def how_to(article_id: str | None = None, lang: str | None = None) -> str:
+    """The app's own help articles: how to do something in it, step by step.
+    Without article_id, every article (id, title, other phrasings in `also`,
+    body as Markdown); with one, that article. lang is a language tag such as
+    pt-BR; English otherwise. Answer a "how do I...?" from these, and quote a
+    **bold** label exactly, since it is what the app shows."""
+    if article_id:
+        return _answer(lambda: _api.help_article(article_id, lang=lang))
+    return _answer(lambda: _api.help_articles(lang=lang))
 
 
 if __name__ == "__main__":

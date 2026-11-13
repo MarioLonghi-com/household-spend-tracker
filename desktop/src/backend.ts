@@ -27,6 +27,8 @@ export type Launch = {
   backup?: string | null;
   dropped?: string[];
   log?: string[];
+  /** `rolled-back` when the last restore did not finish and the ledger is the one from before it (#442). */
+  recovered?: string | null;
 };
 
 /** What `app.desktop.restore.restore` said. */
@@ -59,6 +61,14 @@ export type Spawned = {
 
 /** How much of standard error a dialog can show. */
 const KEEP_SAID = 16 * 1024;
+
+/**
+ * How long the backend may stay silent (#442). A start that says nothing --
+ * neither `upgrading` nor an answer -- within a minute is stuck, not slow;
+ * once it says `upgrading`, a large ledger may take as long as it takes. A
+ * restore copies one file; a control request makes one backup.
+ */
+export const PATIENCE = { start: 60_000, restore: 10 * 60_000, control: 5 * 60_000 };
 
 export class Backend {
   private readonly child: ChildProcessWithoutNullStreams;
@@ -137,43 +147,76 @@ export class Backend {
    * How the start went. `upgrading` is told the number of steps when an
    * existing ledger is being migrated, before the answer.
    */
-  started(upgrading: (steps: number) => void = () => undefined): Promise<Started> {
+  started(upgrading: (steps: number) => void = () => undefined, patience = PATIENCE.start): Promise<Started> {
     return new Promise((resolve) => {
+      // Answered as "died" when it stays silent: the caller stops it, which
+      // kills it, and says why rather than leave the splash up for ever.
+      let timer: NodeJS.Timeout | undefined = setTimeout(() => resolve(this.silent(patience)), patience);
+      const settle = (started: Started) => {
+        clearTimeout(timer);
+        resolve(started);
+      };
       this.events.push((head) => {
-        if (head.event === "upgrading") upgrading(Number(head.steps) || 0);
-        else if (head.event === "ready") resolve({ kind: "ready", launch: head.launch as Launch });
-        else if (head.event === "stopped") resolve({ kind: "stopped", launch: head.launch as Launch });
+        if (head.event === "upgrading") {
+          clearTimeout(timer);
+          timer = undefined;
+          upgrading(Number(head.steps) || 0);
+        } else if (head.event === "ready") settle({ kind: "ready", launch: head.launch as Launch });
+        else if (head.event === "stopped") settle({ kind: "stopped", launch: head.launch as Launch });
       });
-      void this.exited.then((code) => resolve({ kind: "died", code, said: this.said }));
+      void this.exited.then((code) => settle({ kind: "died", code, said: this.said }));
     });
   }
 
   /** The answer of a run started with `SPENDTRACKER_RESTORE_FROM`. */
-  restored(): Promise<RestoreAnswer> {
+  restored(patience = PATIENCE.restore): Promise<RestoreAnswer> {
     return new Promise((resolve) => {
+      const timer = setTimeout(() => resolve(this.silent(patience)), patience);
+      const settle = (answer: RestoreAnswer) => {
+        clearTimeout(timer);
+        resolve(answer);
+      };
       this.events.push((head) => {
         const restore = head.restore as RestoreReport;
-        if (head.event === "restored") resolve({ kind: "restored", restore });
-        else if (head.event === "stopped") resolve({ kind: "stopped", restore });
+        if (head.event === "restored") settle({ kind: "restored", restore });
+        else if (head.event === "stopped") settle({ kind: "stopped", restore });
       });
-      void this.exited.then((code) => resolve({ kind: "died", code, said: this.said }));
+      void this.exited.then((code) => settle({ kind: "died", code, said: this.said }));
     });
   }
 
-  /** One request; null when the backend is gone before it answered. */
-  send(head: Omit<Head, "id">, body: Buffer = Buffer.alloc(0)): Promise<Message | null> {
+  private silent(patience: number): { kind: "died"; code: null; said: string } {
+    return { kind: "died", code: null, said: `${this.said}\nshell: the backend said nothing for ${patience / 1000} s, so it was stopped` };
+  }
+
+  /**
+   * One request; null when the backend is gone before it answered, or has
+   * not answered within `patience` milliseconds (none by default: a page's
+   * import may take as long as it takes).
+   */
+  send(head: Omit<Head, "id">, body: Buffer = Buffer.alloc(0), patience?: number): Promise<Message | null> {
     if (!this.running) return Promise.resolve(null);
     const id = this.next++;
     return new Promise((resolve) => {
-      this.pending.set(id, resolve);
+      const timer =
+        patience === undefined
+          ? undefined
+          : setTimeout(() => {
+              this.pending.delete(id);
+              resolve(null);
+            }, patience);
+      this.pending.set(id, (message) => {
+        clearTimeout(timer);
+        resolve(message);
+      });
       this.child.stdin.write(encode({ ...head, id }, body));
     });
   }
 
   /** One of the shell's own requests (`app/desktop/control.py`). */
-  async control<T>(name: string): Promise<{ status: number; data: T }> {
-    const answer = await this.send({ control: name });
-    if (answer === null) return { status: 0, data: { detail: "the backend is not running" } as T };
+  async control<T>(name: string, patience = PATIENCE.control): Promise<{ status: number; data: T }> {
+    const answer = await this.send({ control: name }, Buffer.alloc(0), patience);
+    if (answer === null) return { status: 0, data: { detail: "the backend is not running, or did not answer" } as T };
     return { status: Number(answer.head.status), data: JSON.parse(answer.body.toString("utf8")) as T };
   }
 

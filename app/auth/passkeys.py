@@ -186,6 +186,16 @@ CHALLENGE_SECONDS = 5 * 60
 
 REGISTER = "register"
 SIGN_IN = "sign_in"
+#: A passkey as the second step after a password (#456), for the member the
+#: half-finished sign-in names. Bound to that member, unlike `SIGN_IN`.
+SECOND_STEP = "second_step"
+#: A passkey standing in for the code at a step-up (#456).
+STEP_UP = "step_up"
+#: A passkey made before its account exists -- the setup wizard, an
+#: invitation, a reset link (#456). Nobody is signed in, so the challenge
+#: belongs to no member; it is bound instead to the sealed blob that carries
+#: its hash (`enrolment_options`, `verify_enrolment`).
+ENROL = "enrol"
 
 
 def _challenge_hash(challenge: bytes) -> str:
@@ -367,6 +377,49 @@ def challenge_of(credential: dict) -> bytes:
         raise ValidationError("that is not a passkey answer", code="passkey.not_an_answer") from exc
 
 
+def _verify_registration(request: Request, credential: dict, challenge: bytes):
+    """`webauthn`'s check of an attestation against a challenge already spent."""
+    try:
+        return webauthn.verify_registration_response(
+            credential=credential,
+            expected_challenge=challenge,
+            expected_rp_id=config.settings.rp_id,
+            expected_origin=expected_origins(request),
+            require_user_verification=True,
+        )
+    except (WebAuthnException, ValueError, KeyError, TypeError) as exc:
+        raise ValidationError(_NOT_REGISTERED, code="passkey.not_registered") from exc
+
+
+def _store(
+    session: Session, user_id: str, verified, credential: dict, label: str | None
+) -> Passkey:
+    """Keep a verified registration as this member's passkey. In a batch."""
+    credential_id = bytes_to_base64url(verified.credential_id)
+    if session.execute(
+        select(Passkey.id).where(Passkey.credential_id == credential_id)
+    ).first():
+        raise Conflict("that passkey is already registered", code="passkey.already_registered")
+
+    transports = (credential.get("response") or {}).get("transports")
+    passkey = Passkey(
+        user_id=user_id,
+        credential_id=credential_id,
+        public_key=verified.credential_public_key,
+        sign_count=verified.sign_count,
+        transports=_transports(transports),
+        label=_clean_label(label) or default_label(verified.aaguid),
+        rp_id=config.settings.rp_id,
+        aaguid=verified.aaguid,
+        backup_eligible=verified.credential_device_type == CredentialDeviceType.MULTI_DEVICE,
+        backed_up=verified.credential_backed_up,
+        created_at=utcnow(),
+    )
+    session.add(passkey)
+    session.flush()
+    return passkey
+
+
 def register(
     session: Session,
     engine: Engine,
@@ -382,43 +435,98 @@ def register(
     one attempt. The caller holds a batch.
     """
     refuse_unless_available(request)
-    settings = config.settings
     if not claim_challenge(engine, challenge_of(credential), purpose=REGISTER, user_id=user.id):
         raise ValidationError(_NOT_REGISTERED, code="passkey.not_registered")
-    try:
-        verified = webauthn.verify_registration_response(
-            credential=credential,
-            expected_challenge=challenge_of(credential),
-            expected_rp_id=settings.rp_id,
-            expected_origin=expected_origins(request),
-            require_user_verification=True,
-        )
-    except (WebAuthnException, ValueError, KeyError, TypeError) as exc:
-        raise ValidationError(_NOT_REGISTERED, code="passkey.not_registered") from exc
+    verified = _verify_registration(request, credential, challenge_of(credential))
+    return _store(session, user.id, verified, credential, label)
 
-    credential_id = bytes_to_base64url(verified.credential_id)
-    if session.execute(
-        select(Passkey.id).where(Passkey.credential_id == credential_id)
-    ).first():
-        raise Conflict("that passkey is already registered", code="passkey.already_registered")
 
-    transports = (credential.get("response") or {}).get("transports")
-    passkey = Passkey(
-        user_id=user.id,
-        credential_id=credential_id,
-        public_key=verified.credential_public_key,
-        sign_count=verified.sign_count,
-        transports=_transports(transports),
-        label=_clean_label(label) or default_label(verified.aaguid),
+# --------------------------------------------------------------------------- #
+# A passkey made before its account exists (#456)
+# --------------------------------------------------------------------------- #
+
+
+def handle_for(user: User | None = None) -> str:
+    """A WebAuthn user handle, base64url, to travel in a sealed blob until the
+    account it belongs to is written (#456): the member's own when they
+    already have one -- a reset keeps it -- or a fresh one."""
+    if user is not None and user.webauthn_user_handle is not None:
+        return bytes_to_base64url(user.webauthn_user_handle)
+    return bytes_to_base64url(secrets.token_bytes(32))
+
+
+def enrolment_options(
+    session: Session,
+    request: Request,
+    *,
+    handle: str,
+    email: str,
+    display_name: str,
+) -> tuple[dict, str]:
+    """Creation options for a member who has no row yet: the setup wizard, an
+    invitation, a reset link (#456). Returns ``(options, challenge_hash)``.
+
+    The same requirements as `registration_options` -- discoverable,
+    user-verifying -- under the provisional ``handle`` the caller's sealed
+    blob carries. The challenge belongs to nobody (`ENROL`), so the caller
+    seals its hash into the blob it hands back: `verify_enrolment` takes only
+    the challenge that blob names, so a challenge issued to one wizard is no
+    use to another.
+    """
+    refuse_unless_available(request)
+    settings = config.settings
+    challenge = issue_challenge(session, purpose=ENROL, user_id=None)
+    options = webauthn.generate_registration_options(
         rp_id=settings.rp_id,
-        aaguid=verified.aaguid,
-        backup_eligible=verified.credential_device_type == CredentialDeviceType.MULTI_DEVICE,
-        backed_up=verified.credential_backed_up,
-        created_at=utcnow(),
+        rp_name=settings.app_name,
+        user_id=base64url_to_bytes(handle),
+        user_name=email,
+        user_display_name=display_name,
+        challenge=challenge,
+        timeout=CHALLENGE_SECONDS * 1000,
+        authenticator_selection=AuthenticatorSelectionCriteria(
+            resident_key=ResidentKeyRequirement.REQUIRED,
+            user_verification=UserVerificationRequirement.REQUIRED,
+        ),
     )
-    session.add(passkey)
-    session.flush()
-    return passkey
+    return json.loads(webauthn.options_to_json(options)), _challenge_hash(challenge)
+
+
+@dataclass(frozen=True, slots=True)
+class Enrolled:
+    """A verified attestation, waiting for the account it will belong to."""
+
+    verified: object
+    credential: dict
+
+
+def verify_enrolment(
+    engine: Engine, request: Request, *, credential: dict, challenge_hash: str | None
+) -> Enrolled:
+    """Check an attestation answering `enrolment_options`. Writes no passkey.
+
+    The challenge it signed must be the one the caller's blob names, and is
+    spent here whatever follows: a replayed attestation finds it gone, and a
+    forged one fails `webauthn`'s verification. One sentence for every way it
+    can be wrong, as `register` has.
+    """
+    refuse_unless_available(request)
+    challenge = challenge_of(credential)
+    if not challenge_hash or not secrets.compare_digest(
+        _challenge_hash(challenge), challenge_hash
+    ):
+        raise ValidationError(_NOT_REGISTERED, code="passkey.not_registered")
+    if not claim_challenge(engine, challenge, purpose=ENROL, user_id=None):
+        raise ValidationError(_NOT_REGISTERED, code="passkey.not_registered")
+    return Enrolled(verified=_verify_registration(request, credential, challenge), credential=credential)
+
+
+def keep_enrolled(session: Session, user: User, enrolled: Enrolled, *, handle: str) -> Passkey:
+    """Store a verified enrolment as ``user``'s passkey, with the handle it
+    was made under. In the caller's batch, beside the account it belongs to."""
+    if user.webauthn_user_handle is None:
+        user.webauthn_user_handle = base64url_to_bytes(handle)
+    return _store(session, user.id, enrolled.verified, enrolled.credential, None)
 
 
 def _transports(said: object) -> list[str] | None:
@@ -607,36 +715,131 @@ def verify_sign_in(
     if not spent or passkey is None or user is None or passkey.rp_id != settings.rp_id:
         raise Unauthorized(REFUSED, code="passkey.refused")
 
-    # The authenticator's own claim about whose credential this is, when it
-    # makes one, has to agree with the row: `webauthn` does not compare it.
+    verified = _verify_assertion(request, credential, challenge, passkey, user)
+    if verified is None:
+        raise Unauthorized(REFUSED, code="passkey.refused")
+    ratelimit.release(engine, held)
+    _note_use(session, passkey, verified)
+    return user, passkey
+
+
+def _verify_assertion(request: Request, credential: dict, challenge: bytes, passkey: Passkey, user: User):
+    """`webauthn`'s check of an assertion by ``passkey``, or None.
+
+    The authenticator's own claim about whose credential this is, when it
+    makes one, has to agree with the row: `webauthn` does not compare it.
+    """
     handle = (credential.get("response") or {}).get("userHandle")
     if handle:
         try:
             said = base64url_to_bytes(handle)
-        except (ValueError, TypeError) as exc:
-            raise Unauthorized(REFUSED, code="passkey.refused") from exc
+        except (ValueError, TypeError):
+            return None
         if said != user.webauthn_user_handle:
-            raise Unauthorized(REFUSED, code="passkey.refused")
-
+            return None
     try:
-        verified = webauthn.verify_authentication_response(
+        return webauthn.verify_authentication_response(
             credential=credential,
             expected_challenge=challenge,
-            expected_rp_id=settings.rp_id,
+            expected_rp_id=config.settings.rp_id,
             expected_origin=expected_origins(request),
             credential_public_key=passkey.public_key,
             credential_current_sign_count=passkey.sign_count,
             require_user_verification=True,
         )
-    except (WebAuthnException, ValueError, KeyError, TypeError) as exc:
-        raise Unauthorized(REFUSED, code="passkey.refused") from exc
-    ratelimit.release(engine, held)
+    except (WebAuthnException, ValueError, KeyError, TypeError):
+        return None
 
+
+def _note_use(session: Session, passkey: Passkey, verified, *, flush: bool = True) -> None:
+    """The new counter, the time and the backed-up flag. All three are
+    redacted from the audit log, so this needs no batch.
+
+    ``flush=False`` leaves the write to the request's own commit: a caller
+    that still has to release its rate-limit reservation on its own
+    connection must not be holding SQLite's write lock when it does."""
     passkey.sign_count = verified.new_sign_count
     passkey.last_used_at = utcnow()
     passkey.backed_up = verified.credential_backed_up
-    session.flush()
-    return user, passkey
+    if flush:
+        session.flush()
+
+
+# --------------------------------------------------------------------------- #
+# A passkey as the second factor, for a member already named (#456)
+# --------------------------------------------------------------------------- #
+
+
+def usable_for(session: Session, user: User) -> list[Passkey]:
+    """This member's passkeys that work on this instance."""
+    return list(
+        session.execute(
+            select(Passkey).where(
+                Passkey.user_id == user.id, Passkey.rp_id == config.settings.rp_id
+            )
+        ).scalars()
+    )
+
+
+def member_options(session: Session, request: Request, user: User, *, purpose: str) -> dict:
+    """Options for `navigator.credentials.get()` for one known member: the
+    second step after their password, or a step-up (#456).
+
+    Unlike `sign_in_options` the member is known -- they have given their
+    password, or are signed in -- so `allowCredentials` lists their passkeys
+    here and the browser offers only those. The challenge is bound to them and
+    to ``purpose``, so it is no use to anybody else or to another ceremony. A
+    member with none here is refused with a sentence of their own.
+    """
+    refuse_unless_available(request)
+    mine = usable_for(session, user)
+    if not mine:
+        raise Conflict(
+            "you have no passkey that works here", code="passkey.none_here"
+        )
+    options = webauthn.generate_authentication_options(
+        rp_id=config.settings.rp_id,
+        challenge=issue_challenge(session, purpose=purpose, user_id=user.id),
+        timeout=CHALLENGE_SECONDS * 1000,
+        allow_credentials=[
+            PublicKeyCredentialDescriptor(id=base64url_to_bytes(one.credential_id)) for one in mine
+        ],
+        user_verification=UserVerificationRequirement.REQUIRED,
+    )
+    return json.loads(webauthn.options_to_json(options))
+
+
+def check_member(
+    session: Session, engine: Engine, request: Request, user: User, *, credential: dict, purpose: str
+) -> Passkey | None:
+    """Is this a verified assertion, with user verification, by one of
+    ``user``'s passkeys, answering a challenge issued to them for ``purpose``?
+
+    The passkey, or None for every way it is not -- the caller words the
+    refusal and owns the rate limit. The challenge is spent first, whatever
+    follows. A passkey made for another host, or somebody else's, is a no.
+    """
+    refuse_unless_available(request)
+    if not isinstance(credential, dict):
+        return None
+    try:
+        challenge = challenge_of(credential)
+    except ValidationError:
+        return None
+    if not claim_challenge(engine, challenge, purpose=purpose, user_id=user.id):
+        return None
+    passkey, owner = _presented(session, credential)
+    if passkey is None or owner is None or owner.id != user.id:
+        return None
+    if passkey.rp_id != config.settings.rp_id:
+        return None
+    verified = _verify_assertion(request, credential, challenge, passkey, user)
+    if verified is None:
+        return None
+    # Not flushed: the caller releases its rate-limit reservation next, on
+    # its own connection, and the request's commit writes this.
+    _note_use(session, passkey, verified, flush=False)
+    return passkey
 
 
 def usable_count(session: Session, user: User) -> int:

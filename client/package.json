@@ -1,7 +1,7 @@
 {
   "name": "household-spend-tracker-client",
   "private": true,
-  "version": "0.16.1",
+  "version": "0.17.0",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "engines": {
@@ -21,6 +21,7 @@
     "@lingui/core": "6.11.0",
     "@lingui/react": "6.11.0",
     "@tanstack/react-query": "^5.104.0",
+    "minisearch": "^7.2.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"

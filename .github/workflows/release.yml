@@ -1108,6 +1108,11 @@ jobs:
       - name: uploaded, and accepted by Apple
         env:
           VERSION: ${{ needs.build.outputs.version }}
+          # altool's --build-status, which the wait for Apple's verdict asks,
+          # is Xcode 26's; the image's default 16.4 prints its usage instead,
+          # and 0.16.0 and 0.16.1 each waited 30 minutes on that. Pinned, as
+          # the image keeps several (runner-images, macos-15-arm64).
+          DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
           ASC_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
         run: desktop/scripts/upload-mas.sh "${RUNNER_TEMP}/household-spend-tracker-${VERSION}.pkg"

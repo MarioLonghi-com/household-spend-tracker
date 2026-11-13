@@ -195,6 +195,47 @@ def test_row_6_short_memory_points_at_the_podman_machine(tmp_path):
         assert pulls(w) == []
 
 
+def test_prepare_on_podman_6_in_its_own_image_reads_the_measurement_back(tmp_path):
+    """#439: Podman 6.1.3 in `quay.io/podman/stable`, the engine canary's, as recorded.
+
+    Its vendor drop-in makes `journald` the default log driver, and inside the
+    container no journal runs: `logs` answers 200 with no bytes. A one-off
+    names `json-file`, which Podman keeps as `k8s-file` and reads back.
+    """
+    with World(tmp_path, engine="podman", fixture="podman-6-in-container") as w:
+        w.fake.default_log_driver = "journald"
+        w.fake.lost_log_drivers = {"journald"}
+        service = w.service()
+        service.startup()
+        report = w.prepared(service)
+        assert report["to_version"] == B and report["sizes"]
+        assert roles_created(w) == ["measure", "check"]
+        assert all(c.body["HostConfig"]["LogConfig"] == {"Type": "json-file", "Config": {}} for c in creates(w))
+
+
+def test_a_measurement_the_engine_kept_no_output_of_is_refused_and_says_so(tmp_path):
+    with World(tmp_path, engine="podman", fixture="podman-6-in-container") as w:
+        w.fake.lost_log_drivers = {"json-file"}
+        record = _refused_prepare(w)
+        assert record["sentence"] == (
+            "Preparing failed: the free disk and memory could not be measured: "
+            "the container engine gave back none of the measuring container's output."
+        )
+        assert roles_created(w) == ["measure"] and pulls(w) == []
+
+
+def test_a_measurement_that_fails_names_its_exit_code(world, monkeypatch):
+    def fails(self, fake, c, cmd, version):
+        fake.finish(c, 1, "", "Traceback: no /proc/meminfo\n")
+
+    monkeypatch.setattr(World, "_measure", fails)
+    record = _refused_prepare(world)
+    assert record["sentence"] == (
+        "Preparing failed: the free disk and memory could not be measured: "
+        "the measuring container stopped with exit code 1."
+    )
+
+
 def test_a_release_that_is_not_published_is_refused(world):
     world.published.discard(C)
     record = _refused_prepare(world, to=C)

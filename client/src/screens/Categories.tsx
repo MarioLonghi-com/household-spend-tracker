@@ -27,6 +27,7 @@ import { compareNames } from "../lib/locale";
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { formatCount } from "../lib/locale";
+import { HelpMark } from "../help/HelpMark";
 
 /**
  * One line of a breakdown from `/stats/…`: what it is, and how many rows carry it.
@@ -152,7 +153,7 @@ export function Categories({ household }: { household: Household }) {
   return (
     <>
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
-        <h1><Trans comment="Screen title on the Categories screen. See GLOSSARY.md">Categories</Trans></h1>
+        <div className="screen-title"><h1><Trans comment="Screen title on the Categories screen. See GLOSSARY.md">Categories</Trans></h1><HelpMark /></div>
         <label className="small muted" style={{ flex: "0 0 auto" }}>
           <input
             type="checkbox"

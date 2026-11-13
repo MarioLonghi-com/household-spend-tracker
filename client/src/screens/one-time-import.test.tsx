@@ -35,6 +35,7 @@ const HOME: Household = {
   name: "Home",
   base_currency: "GBP",
   date_format: "YYYY-MM-DD",
+  week_start: "monday",
   note: null,
   theme: "default",
   accent: null,

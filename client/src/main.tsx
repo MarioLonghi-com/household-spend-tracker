@@ -18,8 +18,10 @@ import "./styles/reimbursements.css";
 import "./styles/report-nw.css";
 import "./styles/import.css";
 import "./styles/shell.css";
+import "./styles/setup.css";
 import "./styles/fx-rates.css";
 import "./styles/one-time-import.css";
+import "./styles/help.css";
 
 const client = new QueryClient({
   defaultOptions: {

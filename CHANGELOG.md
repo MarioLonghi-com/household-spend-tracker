@@ -30,6 +30,214 @@ history this repository does not have.
 
 ---
 
+## 0.17.0 — 2026-11-13
+
+**Reversible: clean** — one migration.
+
+- `a7d3f5c20b64` — clean: adds `households.week_start` (#452). Rolling it
+  back drops the column and loses only the choice of day: every household's
+  weeks go back to starting on Monday.
+
+To go back to `0.16.1`, use *Go back to 0.16.1* under Updates, or follow
+*Going back after a successful update* in `deploy/UPGRADING.md`.
+
+A first-run wizard for every edition (#458), a passkey as the second step
+(#456), a household's first day of the week (#452) and an in-app Help panel
+with articles in all four languages (#460). Fixes for a restore cut short on
+the desktop (#442), an updater stuck after a crash (#443) or on Podman 6
+(#439), an exchange-rate fetch stuck on running (#444), and edits lost in the
+transaction panel and elsewhere (#445, #462).
+
+### Added
+
+- **Help: ask the app how to do something** (#460). *Help* at the foot of
+  the menu opens an "Ask how to…" panel: type a question in your own words
+  ("my employer owes me", "configuracion") and it finds the articles that
+  answer it, accents or no accents; with no question, or none that matches,
+  it lists the articles about the screen you are on. A **?** beside each
+  screen's title opens the same panel at that screen's articles. The first
+  fifteen articles cover receipts and photographing them, splitting a
+  transaction, money owed back, transfers, exchange rates, backups and
+  restoring, categories and groups, payee rules, setting up the household,
+  and importing (a statement, how a file is read, how transfers are matched,
+  account identifiers, the One-time Import). Every article is written in
+  English, Brazilian Portuguese, Spanish and Swedish, follows a change of
+  language, and works offline in the desktop app as on a server; articles
+  about something an installation does not offer, such as photographing
+  receipts on the desktop, are left out there.
+- An agent can read the same articles (#460): `GET /api/agent/v1/help` and
+  `GET /api/agent/v1/help/{id}`, with a `read` key, in the language `lang`
+  or `Accept-Language` asks for, each with its title, screens and body as
+  Markdown. Both are in the manifest.
+
+- **A first-run wizard for every edition** (#458): one guided setup in the
+  browser, on the Mac and on Windows, with the steps on a rail at the side
+  (a progress bar on a phone). It starts with the language, which switches
+  the whole wizard at once and names the starter categories; then a picture
+  of how the app fits together; then the security steps (the setup token,
+  you and your password, Touch ID on a Mac that has it, a passkey or an
+  authenticator on a server, the recovery codes); then the household, its
+  country, base currency, date format and first day of the week, the starter
+  categories (Recommended, Essentials, Start empty, or Bring from YNAB, each
+  one untickable except Income and Reimbursements), and an optional first
+  account whose opening date can go back years. Nothing is saved until
+  *Create my household*, which makes the owner, the household, its categories
+  and the account together or not at all. The finish screen says where to go
+  next and, under *Technical details*, where this installation keeps its
+  data and how it is backed up and upgraded. A bank file dropped on the
+  account step opens in Import right after setup.
+- A household made from the API can be given its first day of the week as
+  it is created (#458).
+
+- **A household chooses the first day of its week** (#452): Monday, Sunday
+  or Saturday, under *First day of the week* on the Household page, with the
+  days named in your language. Any member can change it. Weekly totals start
+  on that day and are still named by the date of their first day, so a week
+  across New Year stays whole whichever day it starts on. The agent API shows
+  `week_start` in the household descriptor and its weekly timeseries follow
+  it. Every existing household reads Monday, so no figure changes. One
+  migration, `a7d3f5c20b64` — clean: adds `households.week_start`; rolling it
+  back loses only the choice of day.
+- A passkey can now be your second step instead of an authenticator, on the
+  web edition (#456). An account needs its password and at least one of the
+  two; either does everything the other does. After the password, an account
+  with a passkey is offered "Use your passkey", and an account with no
+  authenticator is never asked for a code. The password-and-code check before
+  creating a key for a program, adding a passkey, making someone an owner,
+  downloading a backup with its key or installing an update takes the
+  password and a passkey too, and History says which one was used ("confirmed
+  with a passkey"). First-run setup, invitations and reset links offer a
+  passkey in place of the authenticator wherever passkeys can work. Accounts
+  that use an authenticator see no change.
+- Your account → Sign-in methods: the authenticator and passkeys are two equal
+  rows. An authenticator can be added to a passkey-only account, or removed
+  when a passkey remains; removing the last second step is refused with a
+  sentence saying why. Recovery codes belong to the account and stay when the
+  authenticator goes. The authenticator reads "Not set up" when a passkey is
+  the second step by choice, and "Cleared" only after a reset (#456).
+
+### Changed
+
+- **How import works is now a help article**, in four languages instead
+  of English only (#460). It moved out of the Admin menu into Help, split
+  into the articles named above; the Import screen's link to it, and
+  anything else that opened the old page, opens the article.
+- An owner's reset of "the authenticator" is now a reset of the second step:
+  it clears the authenticator and every passkey, and the link lets the person
+  set up either. A reset of a passkey-only account always covers its second
+  step, since its passkeys go with every reset (#456).
+- A replaced `secret.key` no longer sends a passkey-only account to its
+  recovery codes, and an account with both keeps signing in with its passkey
+  while it sets up the authenticator again (#456).
+
+- The Exchange rates page no longer repeats a currency's account names under
+  its code (#454). The (i) beside the code lists them, as before.
+
+### Fixed
+
+- New recovery codes and a new key's token are no longer lost to Escape,
+  the panel's cross or a click outside it. Making codes stops the old ones, so
+  closing used to leave you with none you could read. Your account now asks
+  "Close without storing the new recovery codes?" (or "...copying the key?")
+  first, closing the recovery row asks the same, and a click outside does
+  nothing while they are on screen (#445).
+- The transaction panel no longer drops an edit made while the previous one
+  was still saving: it is sent as soon as that save comes back, and the
+  answer to the first save no longer puts the old value back in the field
+  you had already changed. Escape and the cross now save what is unsaved,
+  the way Done does, instead of discarding it (#445).
+- A save from the transaction panel sends only the fields you changed. It
+  used to send every field, so changing a date put back a memo or category
+  that another member had changed a moment earlier. A field you have not
+  touched now takes whatever the server answers (#445).
+- A category picked in the transaction panel is saved as you pick it. It used
+  to wait until you left another field or closed the panel, so switching tab
+  or closing the browser lost it, and the list beside the panel kept the old
+  category meanwhile. Moving through the list with the arrow keys saves
+  nothing; only the one you take is saved (#462).
+- Setting a locked transaction back to cleared from its panel is saved again;
+  the panel skipped every save on a locked row, the unlocking one included
+  (#445).
+- On Import, the account guessed from a file no longer overrides an account
+  you picked by hand while the guess was being made, and a guess for a file
+  you have since replaced is ignored (#445).
+- On Import, a line whose category or memo failed to save keeps "Import these"
+  held until that line is finished, as it is while you are editing it, and a
+  failed import is no longer shown over the next file you read (#445).
+- Reconcile counts and sends only ticks on rows the worksheet shows. A tick on
+  a row that had since left the sheet was still sent, so the screen could say
+  balanced while the server refused the rows (#445).
+- The Mac App Store upload now actually waits for Apple's verdict. On the
+  macos-15 runner it used Xcode 16.4, whose altool has no `--build-status`:
+  every check printed altool's usage, so 0.16.0 and 0.16.1 each waited 30
+  minutes and went red after builds Apple had accepted. The upload step
+  now uses Xcode 26.3. `upload-mas.sh` reads altool 26's `processingState`
+  as well as the older `IMPORT-STATUS`, prints altool's first answer whole,
+  and stops before uploading when altool has no `--build-status`.
+- Fetch now on the Exchange rates page works in the desktop app (#455). It
+  verified the ECB's certificate against the system trust store, which the
+  packaged backend does not carry, so every fetch failed with
+  `CERTIFICATE_VERIFY_FAILED`. Every outbound request (exchange rates, the
+  update check, the YNAB import) now verifies with certifi's bundle through
+  one helper, `outbound.trust()`, and a test fails if a module builds a TLS
+  context of its own.
+- The desktop app no longer opens an empty ledger after it was closed, or
+  the computer lost power, in the middle of a restore (#442). The restore
+  copied the backup straight onto the ledger's name, so a restore cut short
+  left no ledger, or half of one, and the next start made a new, empty one in
+  its place. The backup is now copied under a temporary name, flushed to the
+  disk and renamed into place in one step, and a mark beside the ledger says
+  a restore is under way. The next start finishes a restore that got as far
+  as the rename, puts the ledger back as it was otherwise, and says so. A
+  ledger file that is not a database stops the start and is left untouched,
+  and a second restore no longer drops the set-aside copy of the real ledger
+  that a cut-short one left. Quitting during a restore now waits for it.
+- More desktop backup and restore fixes (#442): the backup on quit is no
+  longer skipped after restoring an older ledger; two backups at once (the
+  day's first, "Back up now", the one on quit, the one before a restore) no
+  longer delete each other's copy; "Restore from backup…" cannot be started
+  twice at once; a refused restore no longer turns Touch ID off; and a
+  backend that hangs while starting, restoring or making a backup is
+  stopped and reported, where the splash used to stay up for ever.
+- Updates no longer stays stuck on "another update request is waiting or
+  running" after the updater was stopped in the middle of one (#443). A
+  prepare, a discard or an updater update it was restarted in -- or an
+  update it had taken but not begun -- left that request unsettled for good,
+  and every later Check for updates, Update or Go back was refused until
+  someone edited the update volume by hand. The updater now settles such a
+  request when it starts: a prepare as failed ("the updater restarted before
+  it finished", so Try again works), the others as not started, and one that
+  had already finished as it finished. An unfinished update or go-back is
+  still resumed from its journal, as before. The app also stops counting a
+  request as running once its record says it ended.
+- Preparing an update no longer fails with "the free disk and memory could
+  not be measured" on Podman 6 in its upstream container image (#439). That
+  Podman logs to journald by default, with no journal running, so the
+  updater's measuring container printed nothing the updater could read back.
+  Every container the updater runs for itself now logs to `json-file`, which
+  Docker and Podman both keep and read back, and a measurement that still
+  fails says why: the exit code, no output, or output that was not a
+  measurement.
+- An exchange-rate fetch can no longer stay "running" until the app restarts
+  (#444). A "database is locked" on any of its commits, or a failure in the
+  request after it was recorded, left the fetch marked as running, and every
+  later Fetch now answered "a fetch is already running". Such a fetch now
+  ends as failed, and one nothing is working on any more shows as
+  interrupted and no longer blocks the next press.
+- Fetch now stops asking for currencies the ECB does not publish (#444). A
+  currency it has never published, or one it stopped publishing (RUB, HRK,
+  BGN and the currencies replaced by the euro) once its last published day
+  is stored, is left out of the request, so the fetch no longer starts from
+  the earliest transaction on every press. A household whose currencies are
+  all unpublished is told so instead of fetching nothing, and a currency
+  held only after the ECB stopped publishing it is listed under Not covered.
+- The column headings on the Categories screen no longer run into each
+  other (#451). The Transactions and Payees columns were too narrow for
+  their headings in Spanish, Portuguese and Swedish -- and by two pixels in
+  English -- so "Movimientos" and "Beneficiarios" overlapped. Both columns
+  are wider now, and a heading that still does not fit wraps inside its own
+  column.
+
 ## 0.16.1 — 2026-11-12
 
 **Reversible: none** — no migration in this release. To go back to

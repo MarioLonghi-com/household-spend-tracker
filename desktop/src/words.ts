@@ -108,6 +108,8 @@ export const DIALOG = {
   restoredDetail: msg`Sign in to carry on.`,
   notRestoredTitle: msg`This backup was not restored`,
   notRestoredNewer: msg`It was made by a newer version of Household Spend Tracker. Update this one first. Nothing was changed.`,
+  restoreUndoneTitle: msg`The last restore did not finish`,
+  restoreUndoneDetail: msg`Household Spend Tracker closed before the backup was fully in place, so the ledger is as it was before the restore. Nothing was lost. You can restore the backup again.`,
 
   chooseFolderTitle: msg`Choose where backups go`,
   askFolderTitle: msg`Backups are kept inside the app's own folder for now`,

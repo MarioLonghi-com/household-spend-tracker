@@ -95,7 +95,9 @@ function type(label: string, value: string) {
 
 describe("the setup wizard", () => {
   it("drops the secret once the code verifies, and hints every field", async () => {
-    vi.mocked(api.get).mockResolvedValue({ setup_required: true, token_path: null });
+    vi.mocked(api.get).mockImplementation((path: string) =>
+      Promise.resolve(path === "/setup/state" ? { setup_required: true, token_path: null } : { available: false }),
+    );
     const client = new QueryClient();
     const { container } = render(
       <QueryClientProvider client={client}>
@@ -103,6 +105,10 @@ describe("the setup wizard", () => {
       </QueryClientProvider>,
     );
 
+    await screen.findByRole("heading", { name: "Let's set up your household" });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await screen.findByRole("heading", { name: "Paste the setup token" });
     expect(screen.getByLabelText("Setup token").getAttribute("autocomplete")).toBe("off");
     type("Setup token", "token");
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
@@ -114,15 +120,15 @@ describe("the setup wizard", () => {
     type("Password", "correct horse battery");
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    await screen.findByText("3. Your authenticator");
+    await screen.findByRole("heading", { name: "Add a second step" });
     expect(screen.getByLabelText("The six digits").getAttribute("autocomplete")).toBe(
       "one-time-code",
     );
     expect(everythingHeld(container)).toContain(SECRET);
 
     type("The six digits", "123456");
-    fireEvent.click(screen.getByRole("button", { name: "Check the code" }));
-    await screen.findByText("4. Recovery codes");
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await screen.findByRole("heading", { name: "Keep your recovery code" });
 
     expect(screen.getByText("aaaa-bbbb")).toBeTruthy();
     const held = everythingHeld(container);
@@ -149,7 +155,7 @@ describe("accepting an invitation", () => {
     type("Password", "correct horse battery");
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    await screen.findByText("2. Your authenticator");
+    await screen.findByText("2. A second step");
     expect(screen.getByLabelText("The six digits").getAttribute("autocomplete")).toBe(
       "one-time-code",
     );

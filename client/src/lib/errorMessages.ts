@@ -38,6 +38,10 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
         "{name} is one of the newest five update backups. They are kept so an update can be undone, and the updater removes older ones itself",
     }),
   },
+  "account.opened_in_future": {
+    message: msg({ id: "error.account.opened_in_future", message: "An account cannot have been opened in the future ({date})" }),
+    dates: ["date"],
+  },
   "category.archived_default": {
     message: msg({ id: "error.category.archived_default", message: "{name} is archived, so it cannot be a default" }),
   },
@@ -214,12 +218,23 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
         "That is not a working code from your current authenticator, or an unused recovery code",
     }),
   },
+  "profile.last_second_factor": {
+    message: msg({
+      id: "error.profile.last_second_factor",
+      message:
+        "An account needs a passkey or an authenticator as its second step, and this is the last one. Add the other first.",
+      comment: "See GLOSSARY.md (passkey, authenticator, second step)",
+    }),
+  },
   "profile.needs_authenticator": {
     message: msg({
       id: "error.profile.needs_authenticator",
       message:
         "Set up an authenticator before making new recovery codes",
     }),
+  },
+  "profile.no_authenticator": {
+    message: msg({ id: "error.profile.no_authenticator", message: "You have no authenticator to remove", comment: "See GLOSSARY.md (authenticator)" }),
   },
   "profile.new_code_wrong": {
     message: msg({
@@ -669,6 +684,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "auth.authenticator_cleared": {
     message: msg({ id: "error.auth.authenticator_cleared", message: "This account's authenticator was reset, so there is no code to give. Use the reset link you were sent to enrol a new one, or ask an owner for a new link." }),
   },
+  "auth.no_authenticator": {
+    message: msg({ id: "error.auth.no_authenticator", message: "This account uses a passkey as its second step, not an authenticator. Use your passkey, or one of your recovery codes.", comment: "See GLOSSARY.md (passkey, authenticator, recovery code)" }),
+  },
   "auth.code_wrong": {
     message: msg({ id: "error.auth.code_wrong", message: "That code is not right, or has already been used" }),
   },
@@ -690,8 +708,17 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "email.no_name": {
     message: msg({ id: "error.email.no_name", message: "{email} has no usable name before the @" }),
   },
+  "help.article_not_found": {
+    message: msg({ id: "error.help.article_not_found", message: "No help article has the id {id}" }),
+  },
   "household.not_found": {
     message: msg({ id: "error.household.not_found", message: "No such household" }),
+  },
+  "household.unknown_theme": {
+    message: msg({ id: "error.household.unknown_theme", message: "{theme} is not one of the colour schemes", comment: "{theme} is the key of a palette, such as moss, and stays as it is" }),
+  },
+  "household.unknown_week_start": {
+    message: msg({ id: "error.household.unknown_week_start", message: "{week_start} is not a day a week can start on -- use monday, sunday or saturday", comment: "monday, sunday and saturday are the API's own names and stay as they are" }),
   },
   "agent_key.not_found": {
     message: msg({ id: "error.agent_key.not_found", message: "No such key", comment: "A key for a program. See GLOSSARY.md (Keys for programs)" }),
@@ -747,6 +774,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   "passkey.already_registered": {
     message: msg({ id: "error.passkey.already_registered", message: "That passkey is already registered" }),
   },
+  "passkey.none_here": {
+    message: msg({ id: "error.passkey.none_here", message: "You have no passkey that works here", comment: "See GLOSSARY.md (passkey)" }),
+  },
   "passkey.not_found": {
     message: msg({ id: "error.passkey.not_found", message: "No such passkey" }),
   },
@@ -776,6 +806,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   },
   "password.common_and_is_email": {
     message: msg({ id: "error.password.common_and_is_email", message: "That password is one of the {count, number} most common passwords, and it cannot be your email address" }),
+  },
+  "reset.one_second_step": {
+    message: msg({ id: "error.reset.one_second_step", message: "Choose a passkey or an authenticator, not both", comment: "See GLOSSARY.md (passkey, authenticator)" }),
   },
   "reset.not_authenticator": {
     message: msg({ id: "error.reset.not_authenticator", message: "This link does not change the authenticator" }),
@@ -848,6 +881,12 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   },
   "setup.session_invalid": {
     message: msg({ id: "error.setup.session_invalid", message: "That setup session is not valid; start again" }),
+  },
+  "setup.category_locked": {
+    message: msg({ id: "error.setup.category_locked", message: "The Income group and Reimbursements stay: the reports rely on them", comment: "Income and Reimbursements are the names of a seeded category group and category" }),
+  },
+  "setup.category_unknown": {
+    message: msg({ id: "error.setup.category_unknown", message: "{id} is not one of the starter categories", comment: "{id} is a technical identifier such as seed.category.gifts and stays as it is" }),
   },
   "stepup.refused": {
     message: msg({ id: "error.stepup.refused", message: "That password and code do not match" }),
@@ -1075,6 +1114,9 @@ export const ERROR_MESSAGES: Record<string, ErrorMessage> = {
   },
   "fx.no_foreign_currency": {
     message: msg({ id: "error.fx.no_foreign_currency", message: "This household keeps every account in its base currency, so there is no rate to fetch" }),
+  },
+  "fx.nothing_published": {
+    message: msg({ id: "error.fx.nothing_published", message: "No source in this household's chain publishes a rate it is missing -- enter those by hand" }),
   },
   "fx.range_needs_dates": {
     message: msg({ id: "error.fx.range_needs_dates", message: "Refetching a range needs a first and a last date" }),

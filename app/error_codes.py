@@ -40,6 +40,8 @@ REGISTRY: dict[str, Code] = {
         "{name} is one of the newest five update backups. They are kept so an update can be undone, and the updater removes older ones itself",
         ("name",)
     ),
+    # -- account: app/services/accounts.py ---------------------------------- #
+    "account.opened_in_future": Code("An account cannot have been opened in the future ({date})", ("date",)),
     # -- category: app/services/categories.py ------------------------------- #
     "category.archived_default": Code("{name} is archived, so it cannot be a default", ("name",)),
     "category.choose_default": Code("Choose the category to always use"),
@@ -135,9 +137,11 @@ REGISTRY: dict[str, Code] = {
         "That is not a working code from your current authenticator, or an unused recovery "
         "code"
     ),
+    "profile.last_second_factor": Code("An account needs a passkey or an authenticator as its second step, and this is the last one. Add the other first."),
     "profile.needs_authenticator": Code(
         "Set up an authenticator before making new recovery codes"
     ),
+    "profile.no_authenticator": Code("You have no authenticator to remove"),
     "profile.new_code_wrong": Code(
         "That code is not right. Check the time on your phone and try again."
     ),
@@ -352,6 +356,7 @@ REGISTRY: dict[str, Code] = {
     "auth.too_many_from_here": Code("Too many attempts from here. Try again in {seconds, plural, one {# second} other {# seconds}}.", ("seconds",)),
     "auth.refused": Code("That email and password do not match"),
     "auth.authenticator_cleared": Code("This account's authenticator was reset, so there is no code to give. Use the reset link you were sent to enrol a new one, or ask an owner for a new link."),
+    "auth.no_authenticator": Code("This account uses a passkey as its second step, not an authenticator. Use your passkey, or one of your recovery codes."),
     "auth.code_wrong": Code("That code is not right, or has already been used"),
     "auth.recovery_code_wrong": Code("That recovery code is not right, or has already been used"),
     "auth.new_code_wrong": Code("That code is not right. Check the time on your phone and try again."),
@@ -361,7 +366,14 @@ REGISTRY: dict[str, Code] = {
     "email.too_long": Code("That email address is too long (max {max} characters)", ("max",)),
     "email.no_name": Code("{email} has no usable name before the @", ("email",)),
     # -- household, agent_key: app/services/agent_keys.py, app/api/routers/profile.py (#267) --- #
+    # -- help: app/api/routers/agent_help.py (#460) ------------------------ #
+    "help.article_not_found": Code("No help article has the id {id}", ("id",)),
     "household.not_found": Code("No such household"),
+    "household.unknown_theme": Code("{theme} is not one of the colour schemes", ("theme",)),
+    "household.unknown_week_start": Code(
+        "{week_start} is not a day a week can start on -- use monday, sunday or saturday",
+        ("week_start",),
+    ),
     "agent_key.not_found": Code("No such key"),
     "agent_key.needs_label": Code("Give the key a label, so you know what it is for"),
     "agent_key.lifetime": Code("A key can last between a day and {max_days} days", ("max_days",)),
@@ -385,6 +397,7 @@ REGISTRY: dict[str, Code] = {
     "passkey.no_user_handle": Code("Give the member a user handle first"),
     "passkey.not_registered": Code("That passkey could not be registered here. Start again."),
     "passkey.already_registered": Code("That passkey is already registered"),
+    "passkey.none_here": Code("You have no passkey that works here"),
     "passkey.not_found": Code("No such passkey"),
     "passkey.needs_name": Code("A passkey needs a name"),
     "passkey.too_many_at_once": Code("Too many sign-ins at once. Try again in a minute."),
@@ -397,6 +410,7 @@ REGISTRY: dict[str, Code] = {
     "password.too_short_and_is_email": Code("That password needs at least {min_length} characters, and it cannot be your email address", ("min_length",)),
     "password.common_and_is_email": Code("That password is one of the {count, number} most common passwords, and it cannot be your email address", ("count",)),
     # -- reset: app/services/account_resets.py, app/api/routers/account_resets.py (#267) --- #
+    "reset.one_second_step": Code("Choose a passkey or an authenticator, not both"),
     "reset.not_authenticator": Code("This link does not change the authenticator"),
     "reset.offer_expired": Code("That authenticator offer has expired; scan a new one"),
     "reset.choose_what": Code("Choose what to reset: the password, the authenticator, or both"),
@@ -422,6 +436,8 @@ REGISTRY: dict[str, Code] = {
     "setup.enrol_first": Code("Finish enrolling an authenticator first"),
     "setup.address_taken": Code("Somebody already uses that email address"),
     "setup.session_invalid": Code("That setup session is not valid; start again"),
+    "setup.category_locked": Code("The Income group and Reimbursements stay: the reports rely on them"),
+    "setup.category_unknown": Code("{id} is not one of the starter categories", ("id",)),
     # -- stepup: app/auth/stepup.py (#267) --------------------------------------- #
     "stepup.refused": Code("That password and code do not match"),
     "stepup.needed": Code("Confirm your password and authenticator code first"),
@@ -504,6 +520,7 @@ REGISTRY: dict[str, Code] = {
     # -- fx, fx_manual: app/services/fx_*.py, exchange rates (#396) ---------- #
     "fx.nothing_to_fetch": Code("No source in this household's chain is fetched -- add the ECB to it first"),
     "fx.no_foreign_currency": Code("This household keeps every account in its base currency, so there is no rate to fetch"),
+    "fx.nothing_published": Code("No source in this household's chain publishes a rate it is missing -- enter those by hand"),
     "fx.range_needs_dates": Code("Refetching a range needs a first and a last date"),
     "fx.range_backwards": Code("The range starts on {since}, after it ends on {until}", ("since", "until")),
     "fx.range_in_future": Code("{until} is in the future, and no rate is published for it yet", ("until",)),

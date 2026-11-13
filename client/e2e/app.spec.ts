@@ -639,6 +639,10 @@ test("the accounts filter opens over the register, not under the sidebar", async
   await page.getByRole("button", { name: "All accounts" }).click();
   const pop = page.getByRole("group", { name: "All accounts" });
   await expect(pop).toBeVisible();
+  // On a phone the list can reach below the window (#460's ? made the heading
+  // a line taller), and `elementFromPoint` answers nothing for a point off
+  // screen. A person scrolls to it; so does the test.
+  await pop.scrollIntoViewIfNeeded();
 
   const box = (await pop.boundingBox())!;
   const content = (await page.locator("main.content").boundingBox())!;

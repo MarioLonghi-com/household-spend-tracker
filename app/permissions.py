@@ -103,6 +103,50 @@ def copy_private(source: Path, destination: Path) -> None:
     os.utime(destination, ns=(seen.st_atime_ns, seen.st_mtime_ns))
 
 
+def sync_dir(directory: Path) -> None:
+    """Make a rename in `directory` survive a power cut. A directory cannot be
+    opened for this on Windows, where NTFS journals the rename itself."""
+    if os.name == "nt":
+        return
+    fd = os.open(directory, os.O_RDONLY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def partial_of(destination: Path) -> Path:
+    """Where `replace_private` writes before the rename: beside the
+    destination, on the same filesystem, so the rename is atomic."""
+    return destination.with_name(f".{destination.name}.partial")
+
+
+def replace_private(source: Path, destination: Path) -> None:
+    """`copy_private`, but the destination is never half written (#442).
+
+    The copy goes to a temporary name beside it, is flushed to the disk, and
+    is renamed over the destination in one step, and the rename is flushed
+    too. A process killed at any point leaves either the old destination (or
+    none) and a `.partial` to delete, or the whole new one -- never a file of
+    the right name holding part of the copy.
+    """
+    partial = partial_of(destination)
+    try:
+        fd = os.open(partial, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, PRIVATE_FILE)
+        with os.fdopen(fd, "wb") as out, source.open("rb") as src:
+            shutil.copyfileobj(src, out)
+            out.flush()
+            os.fsync(out.fileno())
+        partial.chmod(PRIVATE_FILE)
+        seen = source.stat()
+        os.utime(partial, ns=(seen.st_atime_ns, seen.st_mtime_ns))
+        os.replace(partial, destination)
+    except BaseException:
+        partial.unlink(missing_ok=True)
+        raise
+    sync_dir(destination.parent)
+
+
 #: The empty file the image puts in the data directory so that the directory
 #: survives the image build as a directory (the Dockerfile says why). Every
 #: volume initialised from an image before #279 holds it at 0644, it holds

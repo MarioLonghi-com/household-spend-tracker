@@ -297,11 +297,11 @@ def test_fetch_now_stores_the_rates_and_records_who_asked(client, world, no_netw
 
 def test_a_second_press_while_one_runs_is_409_and_writes_nothing(client, world):
     h = world["house"]
-    assert fx_fetching._RUNNING.acquire(blocking=False)
+    claim = fx_fetching._take_slot()
     try:
         answer = client.post(f"/api/households/{h}/fx/fetch", json={}, headers=HEADERS)
     finally:
-        fx_fetching._RUNNING.release()
+        fx_fetching._free_slot(claim)
     assert answer.status_code == 409
     assert answer.json()["code"] == "fx.fetch_running"
     assert _count(client, FxFetch) == 0
@@ -368,7 +368,11 @@ def test_a_fetch_left_running_by_a_stopped_process_is_failed_at_the_next_boot(cl
             )
         )
         s.commit()
-    assert client.get(f"/api/households/{h}/fx/status").json()["running"] is True
+    # Nothing in this process works on it, so it is not shown running (#444).
+    before = client.get(f"/api/households/{h}/fx/status").json()
+    assert before["running"] is False
+    assert before["running_fetches"] == []
+    assert (before["history"][0]["outcome"], before["history"][0]["error"]) == ("failed", fx_fetching.ABANDONED)
 
     assert fx_fetching.mark_interrupted(_engine(client)) == 1
 

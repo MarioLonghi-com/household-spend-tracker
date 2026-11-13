@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import importlib
 import os
+import re
 import stat
 from pathlib import Path
 
@@ -209,7 +210,10 @@ def test_an_empty_placeholder_is_not_named_but_one_with_content_is(
 
     said = "\n".join(record.getMessage() for record in caplog.records)
     assert "2 path(s) in the data directory can be read by other users" in said
-    named = {line.strip() for line in said.splitlines() if line.startswith("    0")}
+    # A mode, two spaces, a path. Not just "a line starting with 0": the boot
+    # also logs the setup token indented the same way, and one token in
+    # sixty-four starts with a 0 (macOS leg, dev 64797c2).
+    named = {line.strip() for line in said.splitlines() if re.match(r"    0[0-7]{3}  /", line)}
     assert named == {f"0644  {stuffed}", f"0664  {old_log}"}
     # Not reported is not changed: its mode is the owner's to keep.
     assert stat.S_IMODE(placeholder.stat().st_mode) == 0o644
@@ -231,3 +235,30 @@ def test_a_fresh_install_from_the_image_says_nothing_about_its_placeholder(
 
     said = "\n".join(record.getMessage() for record in caplog.records)
     assert "can be read by other users" not in said
+
+
+def test_replace_private_never_leaves_a_half_written_destination(monkeypatch, tmp_path):
+    """#442: the restored ledger is copied under a temporary name and renamed
+    into place, so a copy that stops part-way leaves the old file whole."""
+    from app import permissions
+
+    old = tmp_path / "ledger.sqlite3"
+    old.write_bytes(b"old ledger " * 100)
+    new = tmp_path / "backup.sqlite3"
+    new.write_bytes(b"new ledger " * 200)
+
+    def stops_part_way(src, out, *args, **kwargs):
+        out.write(src.read(50))
+        raise OSError(28, "No space left on device")
+
+    monkeypatch.setattr(permissions.shutil, "copyfileobj", stops_part_way)
+    with pytest.raises(OSError):
+        permissions.replace_private(new, old)
+    assert old.read_bytes() == b"old ledger " * 100
+    assert not permissions.partial_of(old).exists()
+
+    monkeypatch.undo()
+    permissions.replace_private(new, old)
+    assert old.read_bytes() == b"new ledger " * 200
+    assert stat.S_IMODE(old.stat().st_mode) == 0o600 or not permissions.MODE_BITS_MEAN_ACCESS
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["backup.sqlite3", "ledger.sqlite3"]

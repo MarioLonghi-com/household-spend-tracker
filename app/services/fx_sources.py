@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import csv
 import io
-import ssl
 import urllib.error
 import urllib.request
 from collections.abc import Callable, Iterable
@@ -45,14 +44,40 @@ ANSWER_SECONDS = 120.0
 SOCKET_TIMEOUT = 30.0
 
 #: The currencies the ECB publishes a reference rate for today, and the ones it
-#: published until they were replaced or suspended (its history stays). For
-#: the dashboard's "Not covered" list only: a fetch asks for whatever the
-#: household holds, and a code the ECB does not know simply comes back empty.
+#: published until they were replaced or suspended (its history stays). A
+#: fetch asks only for these (#444): a code the ECB does not know comes back
+#: empty, so asking for it again on every press never stores anything.
 ECB_CURRENT = frozenset(
     ["USD", "JPY", "CZK", "DKK", "GBP", "HUF", "PLN", "RON", "SEK", "CHF", "ISK", "NOK", "TRY", "AUD", "BRL", "CAD", "CNY", "HKD", "IDR", "ILS", "INR", "KRW", "MXN", "MYR", "NZD", "PHP", "SGD", "THB", "ZAR"]
 )
 ECB_HISTORICAL = frozenset(["BGN", "HRK", "RUB", "CYP", "EEK", "LTL", "LVL", "MTL", "SIT", "SKK"])
 ECB_PUBLISHES = ECB_CURRENT | ECB_HISTORICAL | {"EUR"}
+
+#: The last day the ECB published each of :data:`ECB_HISTORICAL`, as its API
+#: answers ``lastNObservations=1`` (checked 2026-11-12). Nothing comes after
+#: it, so a series stored up to this day is complete (#444).
+ECB_LAST_PUBLISHED: dict[str, Date] = {
+    "BGN": Date(2025, 12, 31),
+    "HRK": Date(2022, 12, 30),
+    "RUB": Date(2022, 3, 1),
+    "CYP": Date(2007, 12, 31),
+    "EEK": Date(2010, 12, 31),
+    "LTL": Date(2014, 12, 31),
+    "LVL": Date(2013, 12, 31),
+    "MTL": Date(2007, 12, 31),
+    "SIT": Date(2006, 12, 29),
+    "SKK": Date(2008, 12, 31),
+}
+
+
+def publishes(code: str) -> bool:
+    """Whether the ECB has ever published a reference rate for ``code``."""
+    return code.upper() in ECB_PUBLISHES
+
+
+def last_published(code: str) -> Date | None:
+    """The ECB's last rate for ``code``, or None while it still publishes one."""
+    return ECB_LAST_PUBLISHED.get(code.upper())
 
 
 class SourceError(Exception):
@@ -71,7 +96,7 @@ class Published:
 
 def _get(url: str) -> bytes:
     """The body of one GET, by the rules in `services/outbound.py`."""
-    opener = outbound.opener(ssl.create_default_context())
+    opener = outbound.opener(outbound.trust())
     # Only what the API needs. urllib's own user agent names the library and
     # its version, nothing about this instance or anybody in it.
     request = urllib.request.Request(url, headers={"Accept": "text/csv"})
@@ -105,6 +130,10 @@ def fetch_ecb(
     try:
         body = (get or _get)(url)
     except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            # SDMX's "no results found". The ECB answers an empty 200 for a
+            # range with no publication day today; a 404 means the same.
+            return []
         raise SourceError(f"the ECB answered {exc.code} {exc.reason}".strip()) from exc
     except urllib.error.URLError as exc:
         raise SourceError(f"could not reach {ECB_HOST}: {exc.reason}") from exc

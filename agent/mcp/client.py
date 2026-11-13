@@ -217,6 +217,16 @@ class SpendTracker:
         """The rates the household actually got on its own currency transfers."""
         return self._get(self._house("fx/observed"), **params)
 
+    # -- the app's own help (#460) ------------------------------------------ #
+
+    def help_articles(self, lang: str | None = None) -> dict:
+        """Every help article the app ships, in one language."""
+        return self._get(f"/api/agent/v{API_VERSION}/help", lang=lang)
+
+    def help_article(self, article_id: str, lang: str | None = None) -> dict:
+        """One help article by its id."""
+        return self._get(f"/api/agent/v{API_VERSION}/help/{article_id}", lang=lang)
+
     # -- matching: stories 1 and 3 ----------------------------------------- #
 
     def match(self, queries: list[dict], *, limit: int = 5) -> dict:

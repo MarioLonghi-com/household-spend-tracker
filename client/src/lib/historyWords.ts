@@ -120,6 +120,9 @@ export const HISTORY_FIELDS: Record<string, string> = {
   get base_currency() {
     return t({ message: "currency", comment: "A changed field in History's detail, lower case: a household's main currency. See GLOSSARY.md" });
   },
+  get week_start() {
+    return t({ message: "week start", comment: "A changed field in History's detail, lower case: the day a household's weeks begin on" });
+  },
   get institution() {
     return t({ message: "bank", comment: "A changed field in History's detail, lower case: the bank that holds an account. See GLOSSARY.md" });
   },
@@ -398,6 +401,16 @@ export const HISTORY_SENTENCES: Record<string, MessageDescriptor> = {
     id: "history.key.issued",
     message: "Issued the key “{label}”",
     comment: "History: a key for a program was made. {label} is the name it was given",
+  }),
+  "history.key.issued_passkey": msg({
+    id: "history.key.issued_passkey",
+    message: "Issued the key “{label}”, confirmed with a passkey",
+    comment: "History: a key for a program was made, confirmed with a passkey. {label} is its name. See GLOSSARY.md",
+  }),
+  "history.key.issued_code": msg({
+    id: "history.key.issued_code",
+    message: "Issued the key “{label}”, confirmed with a code",
+    comment: "History: a key for a program was made, confirmed with an authenticator code. {label} is its name",
   }),
   "history.key.removed": msg({
     id: "history.key.removed",

@@ -19,6 +19,7 @@ import { formatDate } from "../lib/locale";
 import { plural, t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
+import { HelpMark } from "../help/HelpMark";
 
 export interface Leg {
   id: string;
@@ -286,9 +287,12 @@ export function Transfers({ household }: { household: Household }) {
   return (
     <>
       <div className="card">
-        <h2>
-          <Trans comment="Heading of the Transfers screen: noun, money moved between your own accounts. See GLOSSARY.md">Transfers</Trans>
-        </h2>
+        <div className="screen-title">
+          <h2>
+            <Trans comment="Heading of the Transfers screen: noun, money moved between your own accounts. See GLOSSARY.md">Transfers</Trans>
+          </h2>
+          <HelpMark />
+        </div>
         <p className="muted small">
           <Trans>
             A transfer between two of your accounts shows up twice — once in each bank's

@@ -19,8 +19,16 @@
    its own beside it. Same selectors and the same breakpoint as the rules they
    replace, so the two agree rather than fight. */
 @media (min-width: 640px) {
-  table.fixed-columns .col-usage { width: 8em; }
-  table.fixed-columns .col-payees { width: 6em; }
+  /* Wide enough for the longest heading a served language gives them, with
+     its sort arrow: "Transaktioner" and "Beneficiarios" are thirteen letters
+     in capitals (#451). At 8em and 6em they ran past their columns into each
+     other -- right-aligned, so a heading spilled left over its neighbour --
+     and even English "Transactions" was two pixels over. */
+  table.fixed-columns .col-usage { width: 10em; }
+  table.fixed-columns .col-payees { width: 10em; }
+  /* A fixed column does not grow for its heading, so a longer one in a future
+     language wraps inside its own column rather than over the next. */
+  table.fixed-columns th.sortable > button { white-space: normal; overflow-wrap: anywhere; }
 }
 
 
