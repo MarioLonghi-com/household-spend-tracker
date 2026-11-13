@@ -142,7 +142,7 @@ def test_no_outbound_request_builds_a_context_of_its_own():
 
     app = Path(__file__).resolve().parent.parent / "app"
     callers = sorted(
-        str(path.relative_to(app))
+        path.relative_to(app).as_posix()
         for path in app.rglob("*.py")
         if "create_default_context(" in path.read_text(encoding="utf-8")
     )
