@@ -30,6 +30,19 @@ history this repository does not have.
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- First-run wizard: on the *Household* step each choice's radio sits to the
+  left of its title again, instead of centred on a line of its own above it;
+  the step title no longer wears a thick focus ring when the wizard moves to
+  it; and *About this step* no longer runs off the right edge of a
+  1000-pixel window; where the window is too narrow for it beside the step,
+  it moves under the step. The notes that said to invite people, or to add
+  another household, "from Household" now say *Admin*, where both are, in
+  all four languages (#470).
+
 ## 0.17.0 — 2026-11-13
 
 **Reversible: clean** — one migration.

@@ -16,9 +16,10 @@ import { totp } from "./helpers";
  * its own server on a fresh data directory, on `E2E_WIZARD_PORT` (the
  * suite's port plus one unless named), and stops it afterwards.
  *
- * Three runs: the whole wizard in Swedish, whose labels are the longest, with
- * a back-dated account; one that skips the account; and one at 360 px, the
- * narrow layout.
+ * Four runs: the whole wizard in Swedish, whose labels are the longest, with
+ * a back-dated account; one that skips the account; one at 360 px, the
+ * narrow layout; and one at 1000 x 700, the desktop app's smallest window,
+ * that measures the cards and the side column (#470).
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -89,6 +90,38 @@ async function security(page: Page, words: { cont: string; stored: string }) {
   await next(page, words.cont);
   await page.getByLabel(words.stored).check();
   await next(page, words.cont);
+}
+
+/**
+ * Each radio card's radio and its title start on the same line, the radio to
+ * the left (#470), and the step's title wears no focus ring after a click.
+ */
+async function cardsAreRows(page: Page): Promise<void> {
+  const cards = await page.locator(".wizard-choices .wizard-choice-head").evaluateAll((heads) =>
+    heads.map((head) => {
+      const radio = head.querySelector("input[type=radio]")!.getBoundingClientRect();
+      const title = head.querySelector("strong")!.getBoundingClientRect();
+      return { radioTop: radio.top, radioRight: radio.right, radioBottom: radio.bottom, titleTop: title.top, titleLeft: title.left, titleBottom: title.bottom };
+    }),
+  );
+  expect(cards.length).toBeGreaterThan(0);
+  for (const card of cards) {
+    // Beside it, not above it: the radio overlaps the title's first line.
+    expect(card.radioRight).toBeLessThanOrEqual(card.titleLeft);
+    expect(card.radioTop).toBeLessThan(card.titleBottom);
+    expect(card.radioBottom).toBeGreaterThan(card.titleTop);
+  }
+}
+
+/** Nothing on the page reaches past the window's right edge, the side column included. */
+async function nothingWider(page: Page): Promise<void> {
+  const past = await page.evaluate(() =>
+    [...document.querySelectorAll(".wizard *")]
+      .filter((one) => one.getBoundingClientRect().right > window.innerWidth + 0.5)
+      .map((one) => `${one.tagName}.${one.className}`),
+  );
+  expect(past).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
 }
 
 /** A select by its label alone: a select's accessible name also holds its options. */
@@ -179,6 +212,23 @@ test.describe("the first-run wizard, in English", () => {
   });
 });
 
+test.describe("the first-run wizard at the desktop app's smallest window", () => {
+  test.use({ locale: "en-US", viewport: { width: 1000, height: 700 } });
+
+  test("radio cards, the step title and the side column fit 1000 x 700", async ({ page }) => {
+    await page.goto(BASE);
+    await security(page, { cont: "Continue", stored: "I have stored this somewhere other than this computer" });
+    const title = page.getByRole("heading", { name: "Name your household" });
+    await expect(title).toBeVisible();
+    await expect(title).toBeFocused();
+    expect(await title.evaluate((one) => getComputedStyle(one).outlineStyle)).toBe("none");
+    await cardsAreRows(page);
+    const about = page.locator(".wizard-about");
+    await expect(about).toContainText("You can invite others later from Admin.");
+    await nothingWider(page);
+  });
+});
+
 test.describe("the first-run wizard on a phone", () => {
   test.use({ locale: "pt-BR", viewport: { width: 360, height: 740 } });
 
@@ -190,8 +240,8 @@ test.describe("the first-run wizard on a phone", () => {
     await security(page, { cont: "Continuar", stored: "Guardei isto em outro lugar além deste computador" });
     await expect(page.locator(".wizard-progress")).toContainText("Passo 7 de 11");
     await expect(page.locator(".wizard-progress")).toContainText("Sua casa · Casa");
-    const wide = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
-    expect(wide).toBe(false);
+    await cardsAreRows(page);
+    await nothingWider(page);
     await next(page, "Continuar");
     await next(page, "Continuar");
     await next(page, "Continuar");

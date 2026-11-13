@@ -23,6 +23,7 @@ import { EVERYTHING, setCapabilities, type Capabilities } from "../lib/capabilit
 import { activate } from "../lib/i18n";
 import type { User } from "../lib/types";
 import { Setup, type SetupState } from "./Setup";
+import { wizardCopy } from "./setup/copy";
 import {
   canJump,
   categoryChoice,
@@ -225,6 +226,7 @@ describe("the wizard on a server", () => {
     answer(STATE);
     wrap(<Setup onDone={vi.fn()} />);
     await screen.findByRole("heading", { name: "Let's set up your household" });
+    expect(radioCardsAreRows()).toBe(4);
     cont();
     cont();
 
@@ -250,6 +252,7 @@ describe("the wizard on a server", () => {
 
     await screen.findByRole("heading", { name: "Add a second step" });
     expect(screen.queryByText("Use a passkey")).toBeNull();
+    expect(radioCardsAreRows()).toBe(1);
     expect(continueEnabled()).toBe(false);
     type("The six digits", "123456");
     cont();
@@ -267,6 +270,31 @@ describe("the wizard on a server", () => {
   });
 });
 
+/**
+ * Every radio card on screen has the shape whose radio sits beside its title
+ * (#470): the radio is the first thing in a `.wizard-choice-head` row, the
+ * title the first thing beside it, and no card is both a row and a `.block`
+ * column -- `.block`'s column won, and the radio sat centred above the title.
+ */
+function radioCardsAreRows(): number {
+  const radios = [...document.querySelectorAll<HTMLInputElement>(".wizard-choices input[type=radio]")];
+  for (const radio of radios) {
+    const row = radio.parentElement!;
+    expect(row.firstElementChild).toBe(radio);
+    if (radio.name === "language") {
+      // One line: the language's own name and its tag.
+      expect(row.className.split(" ")).toContain("wizard-choice");
+      continue;
+    }
+    expect(row.className.split(" ")).toContain("wizard-choice-head");
+    expect(row.className.split(" ")).not.toContain("block");
+    const beside = radio.nextElementSibling!;
+    expect(beside.firstElementChild?.tagName).toBe("STRONG");
+  }
+  expect(document.querySelectorAll(".wizard-choice.block.wizard-choice-head")).toHaveLength(0);
+  return radios.length;
+}
+
 /** From the welcome to the household step, on the desktop. */
 async function toHousehold() {
   await screen.findByRole("heading", { name: "Let's set up your household" });
@@ -283,6 +311,27 @@ async function toHousehold() {
   cont();
   await screen.findByRole("heading", { name: "Name your household" });
 }
+
+describe("the household step's cards and notes (#470)", () => {
+  it("puts each radio beside its title, and sends invitations and households to Admin", async () => {
+    setCapabilities(DESKTOP);
+    answer({ ...STATE, token_needed: false, token_path: null, install: { ...STATE.install!, edition: "windows" } });
+    wrap(<Setup onDone={vi.fn()} />);
+    await toHousehold();
+    expect(radioCardsAreRows()).toBe(5);
+    const about = document.querySelector(".wizard-about")!;
+    expect(about.textContent).toContain("You can invite others later from Admin.");
+    expect(about.textContent).not.toContain("from Household");
+    fireEvent.click(screen.getByLabelText(/More than one household/));
+    expect(screen.getByText(/Next: add another household from Admin when you need one\. On this computer/)).toBeTruthy();
+  });
+
+  it("on a server, each shared choice's next step points at Admin", () => {
+    const c = wizardCopy();
+    expect([c.sc_couple_n, c.sc_both_n, c.sc_family_n, c.sc_flat_n, c.i_household].every((one) => one.includes("from Admin"))).toBe(true);
+    expect([c.sc_couple_n, c.sc_both_n, c.sc_both_nd, c.sc_family_n, c.sc_flat_n, c.i_household].some((one) => one.includes("from Household"))).toBe(false);
+  });
+});
 
 describe("the wizard on the desktop", () => {
   it("makes the household, its categories and a back-dated account in one request", async () => {

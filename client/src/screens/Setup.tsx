@@ -698,7 +698,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
             {SCENARIOS.map((one) => {
               const shown = scenarioWords(c, one, name, !web);
               return (
-                <label key={one} className={`wizard-choice block wizard-choice-head ${scenario === one ? "chosen" : ""}`}>
+                <label key={one} className={`wizard-choice wizard-choice-head ${scenario === one ? "chosen" : ""}`}>
                   <input type="radio" name="scenario" checked={scenario === one} onChange={() => setScenario(one)} />
                   <span>
                     <strong>{shown.label}</strong>

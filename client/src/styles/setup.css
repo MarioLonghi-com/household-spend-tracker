@@ -12,9 +12,13 @@
 .wizard-body { display: flex; flex-direction: column; gap: 20px; }
 .wizard-form { min-width: 0; }
 .wizard-form h1 { overflow-wrap: anywhere; }
-.wizard-form h1:focus:not(:focus-visible) { outline: none; }
+/* The title takes focus on every step so a screen reader starts there (#470).
+   It is `tabindex="-1"`: Tab never lands on it, so a ring would only ever
+   mark focus a script moved -- and Chromium draws one whenever the control
+   that had focus was a text field, which is most steps. */
+.wizard-form h1[tabindex="-1"]:focus { outline: none; }
 .wizard-lead { color: var(--muted); }
-.wizard-about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+.wizard-about { min-width: 0; overflow-wrap: anywhere; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
 .wizard-about h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
 
 .wizard-progress { margin-bottom: 14px; }
@@ -23,16 +27,25 @@
 .wizard-bar > span { display: block; height: 100%; background: var(--accent); }
 
 @container (min-width: 760px) {
-  .wizard { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+  /* `minmax(0, 1fr)`, not `1fr`: a bare `1fr` never shrinks below the step's
+     widest unbreakable content, and the grid then pushed "About this step"
+     past the window's right edge (#470). */
+  .wizard { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
   .wizard-rail {
     display: flex; flex-direction: column; gap: 14px;
     background: var(--surface-2); padding: 20px 14px; border-right: 1px solid var(--line);
   }
   .wizard-progress { display: none; }
-  .wizard-main { padding: 32px 28px; }
+  .wizard-main { padding: 32px 28px; min-width: 0; }
+}
+/* "About this step" sits beside the step only where the step keeps a
+   reasonable width too; a narrower window folds it under the step, as on a
+   phone. Asked of the main column itself, so the rail's width counts. */
+.wizard-main { container: wizard-main / inline-size; }
+@container wizard-main (min-width: 700px) {
   .wizard-body { flex-direction: row; align-items: flex-start; gap: 28px; }
   .wizard-form { flex: 1 1 auto; }
-  .wizard-about { flex: 0 0 230px; background: none; border: 0; padding: 4px 0 0; }
+  .wizard-about { flex: 0 1 230px; background: none; border: 0; padding: 4px 0 0; }
 }
 
 .wizard-product { font-weight: 700; }
@@ -61,9 +74,13 @@
 .wizard-choices { border: 0; padding: 0; margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px; }
 .wizard-choices legend { font-weight: 600; margin-bottom: 6px; padding: 0; }
 .wizard-choice { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-.wizard-choice.block { flex-direction: column; align-items: stretch; }
-.wizard-choice-head { display: flex; flex-direction: row; gap: 10px; align-items: flex-start; }
-.wizard-choice.block { gap: 10px; }
+/* A card holding more than its radio line (the second step's QR code, its
+   passkey button) stacks a `.wizard-choice-head` over the rest. A card that is
+   only a radio line is the head itself, and never `.block`: `.block`'s column
+   used to win over the head's row and centre the radio above its title (#470). */
+.wizard-choice.block { flex-direction: column; align-items: stretch; gap: 10px; }
+.wizard-choice-head,
+.wizard-choice.wizard-choice-head { display: flex; flex-direction: row; gap: 10px; align-items: flex-start; }
 .wizard-choice.chosen { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .wizard-choice input[type="radio"] { width: auto; flex: none; margin-top: 3px; }
 .wizard-choice .mono { margin-left: auto; }

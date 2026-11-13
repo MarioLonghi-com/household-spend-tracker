@@ -1796,6 +1796,12 @@ msgstr "Name"
 msgid "Dismiss without copying? The link cannot be shown again."
 msgstr "Dismiss without copying? The link cannot be shown again."
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: add another household from Admin when you need one. On this computer only you sign in to any of them."
+msgstr "Next: add another household from Admin when you need one. On this computer only you sign in to any of them."
+
 #: src/screens/ynab/results.tsx
 msgid "Already in the ledger"
 msgstr "Already in the ledger"
@@ -2883,12 +2889,6 @@ msgstr "Savings"
 msgid "{0, plural, one {# change to the instance itself (people, settings)} other {# changes to the instance itself (people, settings)}}"
 msgstr "{0, plural, one {# change to the instance itself (people, settings)} other {# changes to the instance itself (people, settings)}}"
 
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: invite your housemates from Household."
-msgstr "Next: invite your housemates from Household."
-
 #: src/screens/Register.tsx
 msgid "A split needs at least two parts"
 msgstr "A split needs at least two parts"
@@ -3528,12 +3528,6 @@ msgstr "That link doesn't work"
 #: src/screens/Register.tsx
 msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 msgstr "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
-
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: add another household from Household when you need one, and invite only the people it is for."
-msgstr "Next: add another household from Household when you need one, and invite only the people it is for."
 
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
@@ -6203,12 +6197,6 @@ msgstr "Data directory"
 msgid "The file itself"
 msgstr "The file itself"
 
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: add another household from Household when you need one. On this computer only you sign in to any of them."
-msgstr "Next: add another household from Household when you need one. On this computer only you sign in to any of them."
-
 #. Button on the Admin screen: verb, let an account sign in again
 #: src/screens/Admin.tsx
 msgid "Re-enable"
@@ -6510,6 +6498,12 @@ msgstr "No accounts are ticked, so there is nothing to show. Tick one in the acc
 #: src/screens/Admin.tsx
 msgid "fills in the acceptance screen"
 msgstr "fills in the acceptance screen"
+
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite your partner from Admin."
+msgstr "Next: invite your partner from Admin."
 
 #. Net Worth explanation, point 2
 #: src/screens/reports/NetWorth.tsx
@@ -9632,12 +9626,6 @@ msgstr "All"
 msgid "a pocket's or a card product's name"
 msgstr "a pocket's or a card product's name"
 
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: invite the other adults from Household."
-msgstr "Next: invite the other adults from Household."
-
 #. Column value on the Accounts screen: how many transactions name a suggested identifier
 #: src/screens/Accounts.tsx
 msgid "{count, plural, one {{shown} row} other {{shown} rows}}"
@@ -11087,6 +11075,12 @@ msgstr "This instance is running {0}."
 msgid "No, just this one"
 msgstr "No, just this one"
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: add another household from Admin when you need one, and invite only the people it is for."
+msgstr "Next: add another household from Admin when you need one, and invite only the people it is for."
+
 #. What kind of row changed, lower case, singular, in History beside its id
 #: src/lib/historyWords.ts
 msgctxt "history table"
@@ -11325,6 +11319,12 @@ msgstr "category group"
 #: src/lib/historyWords.ts
 msgid "week start"
 msgstr "week start"
+
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite the other adults from Admin."
+msgstr "Next: invite the other adults from Admin."
 
 #. Where an update failed
 #: src/screens/Updates.tsx
@@ -11714,6 +11714,12 @@ msgstr "Schema"
 msgid "Updated to {target} at {at} in {took}."
 msgstr "Updated to {target} at {at} in {took}."
 
+#. Setup wizard, Household: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "The colour tells your households apart if you ever keep more than one. You can invite others later from Admin."
+msgstr "The colour tells your households apart if you ever keep more than one. You can invite others later from Admin."
+
 #: src/screens/Admin.tsx
 msgid "Owner — can administer this instance"
 msgstr "Owner — can administer this instance"
@@ -11975,6 +11981,12 @@ msgstr "The ledger this process is serving."
 #: src/screens/Admin.tsx
 msgid "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
 msgstr "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
+
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite your housemates from Admin."
+msgstr "Next: invite your housemates from Admin."
 
 #. A changed field in History's detail, lower case: whether work should pay it back
 #: src/lib/historyWords.ts
@@ -13991,12 +14003,6 @@ msgstr "Every row it changed"
 msgid "Turn off Touch ID"
 msgstr "Turn off Touch ID"
 
-#. Setup wizard, Household: explanation in the "About this step" panel. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "The colour tells your households apart if you ever keep more than one. You can invite others later from Household."
-msgstr "The colour tells your households apart if you ever keep more than one. You can invite others later from Household."
-
 #: src/screens/Receipts.tsx
 msgid "This receipt carries no date of its own, so the window is around when it was uploaded."
 msgstr "This receipt carries no date of its own, so the window is around when it was uploaded."
@@ -14030,12 +14036,6 @@ msgstr "via {via}"
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as a member."
 msgstr "{inviter} invited you to {PRODUCT} as a member."
-
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: invite your partner from Household."
-msgstr "Next: invite your partner from Household."
 
 #. Screen-reader name of the left arrow on the Income vs Expense report's month map
 #: src/screens/reports/ReportGrid.tsx
