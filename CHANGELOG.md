@@ -30,7 +30,23 @@ history this repository does not have.
 
 ---
 
-## Unreleased
+## 0.17.0 — 2026-11-13
+
+**Reversible: clean** — one migration.
+
+- `a7d3f5c20b64` — clean: adds `households.week_start` (#452). Rolling it
+  back drops the column and loses only the choice of day: every household's
+  weeks go back to starting on Monday.
+
+To go back to `0.16.1`, use *Go back to 0.16.1* under Updates, or follow
+*Going back after a successful update* in `deploy/UPGRADING.md`.
+
+A first-run wizard for every edition (#458), a passkey as the second step
+(#456), a household's first day of the week (#452) and an in-app Help panel
+with articles in all four languages (#460). Fixes for a restore cut short on
+the desktop (#442), an updater stuck after a crash (#443) or on Podman 6
+(#439), an exchange-rate fetch stuck on running (#444), and edits lost in the
+transaction panel and elsewhere (#445, #462).
 
 ### Added
 
@@ -113,6 +129,9 @@ history this repository does not have.
 - A replaced `secret.key` no longer sends a passkey-only account to its
   recovery codes, and an account with both keeps signing in with its passkey
   while it sets up the authenticator again (#456).
+
+- The Exchange rates page no longer repeats a currency's account names under
+  its code (#454). The (i) beside the code lists them, as before.
 
 ### Fixed
 
@@ -218,11 +237,6 @@ history this repository does not have.
   English -- so "Movimientos" and "Beneficiarios" overlapped. Both columns
   are wider now, and a heading that still does not fit wraps inside its own
   column.
-
-### Changed
-
-- The Exchange rates page no longer repeats a currency's account names under
-  its code (#454). The (i) beside the code lists them, as before.
 
 ## 0.16.1 — 2026-11-12
 
