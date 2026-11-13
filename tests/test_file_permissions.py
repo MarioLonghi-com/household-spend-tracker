@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import importlib
 import os
+import re
 import stat
 from pathlib import Path
 
@@ -209,7 +210,10 @@ def test_an_empty_placeholder_is_not_named_but_one_with_content_is(
 
     said = "\n".join(record.getMessage() for record in caplog.records)
     assert "2 path(s) in the data directory can be read by other users" in said
-    named = {line.strip() for line in said.splitlines() if line.startswith("    0")}
+    # A mode, two spaces, a path. Not just "a line starting with 0": the boot
+    # also logs the setup token indented the same way, and one token in
+    # sixty-four starts with a 0 (macOS leg, dev 64797c2).
+    named = {line.strip() for line in said.splitlines() if re.match(r"    0[0-7]{3}  /", line)}
     assert named == {f"0644  {stuffed}", f"0664  {old_log}"}
     # Not reported is not changed: its mode is the owner's to keep.
     assert stat.S_IMODE(placeholder.stat().st_mode) == 0o644
