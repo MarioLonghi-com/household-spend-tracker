@@ -30,7 +30,15 @@ history this repository does not have.
 
 ---
 
-## Unreleased
+## 0.17.1 — 2026-11-13
+
+**Reversible: none** — no migration in this release. To go back to
+`0.17.0`, use *Go back to 0.17.0* under Updates, or follow *Going back after
+a successful update* in `deploy/UPGRADING.md`. From a checkout, check out
+`v0.17.0` and restart.
+
+Fixes to 0.17.0's first-run wizard (#470, #471), and the Mac build declares
+its export compliance so App Store Connect no longer holds it.
 
 ### Fixed
 
