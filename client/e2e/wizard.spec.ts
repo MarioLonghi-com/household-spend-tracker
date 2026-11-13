@@ -16,10 +16,14 @@ import { totp } from "./helpers";
  * its own server on a fresh data directory, on `E2E_WIZARD_PORT` (the
  * suite's port plus one unless named), and stops it afterwards.
  *
- * Four runs: the whole wizard in Swedish, whose labels are the longest, with
+ * Five runs: the whole wizard in Swedish, whose labels are the longest, with
  * a back-dated account; one that skips the account; one at 360 px, the
- * narrow layout; and one at 1000 x 700, the desktop app's smallest window,
- * that measures the cards and the side column (#470).
+ * narrow layout; one at 1000 x 700, the desktop app's smallest window, that
+ * measures the radio cards and the side column (#470) and takes the
+ * starter-category choice for data from another app through to One-time
+ * Import (#471); and one on a wide window, where the category cards are
+ * still two by two: the wizard caps its width, and four across would break
+ * "Recommended" in two.
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -111,6 +115,36 @@ async function cardsAreRows(page: Page): Promise<void> {
     expect(card.radioTop).toBeLessThan(card.titleBottom);
     expect(card.radioBottom).toBeGreaterThan(card.titleTop);
   }
+}
+
+/**
+ * The four starter-category cards are one even grid (#471): `across` to a row,
+ * every row full -- never three and one -- and in each row the cards share a
+ * top, a height and a width, and their names and descriptions start level.
+ */
+async function presetsAreEven(page: Page, across: number): Promise<void> {
+  const cards = await page.locator(".wizard-presets > .wizard-preset").evaluateAll((all) =>
+    all.map((card) => {
+      const box = card.getBoundingClientRect();
+      const name = card.querySelector("strong")!.getBoundingClientRect();
+      const text = card.querySelector("span")!.getBoundingClientRect();
+      return { top: box.top, left: box.left, width: box.width, height: box.height, name: name.top, text: text.top };
+    }),
+  );
+  expect(cards).toHaveLength(4);
+  const rows = new Map<number, typeof cards>();
+  for (const card of cards) rows.set(Math.round(card.top), [...(rows.get(Math.round(card.top)) ?? []), card]);
+  expect([...rows.values()].map((row) => row.length)).toEqual(Array(4 / across).fill(across));
+  for (const row of rows.values()) {
+    for (const card of row) {
+      expect(Math.abs(card.height - row[0].height)).toBeLessThan(1);
+      expect(Math.abs(card.width - row[0].width)).toBeLessThan(1);
+      expect(Math.abs(card.name - row[0].name)).toBeLessThan(1);
+      expect(Math.abs(card.text - row[0].text)).toBeLessThan(1);
+    }
+  }
+  // Every card is as wide as the others, whichever row it is on.
+  expect(Math.max(...cards.map((one) => one.width)) - Math.min(...cards.map((one) => one.width))).toBeLessThan(1);
 }
 
 /** Nothing on the page reaches past the window's right edge, the side column included. */
@@ -226,6 +260,44 @@ test.describe("the first-run wizard at the desktop app's smallest window", () =>
     const about = page.locator(".wizard-about");
     await expect(about).toContainText("You can invite others later from Admin.");
     await nothingWider(page);
+    await next(page, "Continue");
+    await next(page, "Continue");
+
+    // #471: two by two at this width, and the import choice makes only what
+    // reports need, then lands on One-time Import, open.
+    await expect(page.getByRole("heading", { name: "Pick your starting categories" })).toBeVisible();
+    await presetsAreEven(page, 2);
+    await page.getByRole("button", { name: /I'll bring my data from another app/ }).click();
+    await presetsAreEven(page, 2);
+    await nothingWider(page);
+    await next(page, "Continue");
+    await next(page, "Skip for now");
+    await expect(page.getByText("I'll bring my data from another app · Opens One-time Import next")).toBeVisible();
+    await next(page, "Create my household");
+    await expect(page.getByRole("heading", { name: "You're set up" })).toBeVisible();
+
+    const [household] = await api<Household[]>(page, "/households");
+    const groups = await api<{ name: string; categories: { name: string }[] }[]>(page, `/households/${household.id}/categories`);
+    expect(groups.map((group) => [group.name, group.categories.map((one) => one.name)])).toEqual([["Income", ["Reimbursements"]]]);
+
+    await next(page, "Bring your data from another app");
+    await expect(page.getByRole("dialog", { name: "One-time Import" })).toBeVisible();
+    await expect(page.locator("#one-time-import")).toBeAttached();
+  });
+
+});
+
+test.describe("the first-run wizard on a wide window", () => {
+  test.use({ locale: "en-US", viewport: { width: 1440, height: 900 } });
+
+  test("the category cards stay an even two by two", async ({ page }) => {
+    await page.goto(BASE);
+    await security(page, { cont: "Continue", stored: "I have stored this somewhere other than this computer" });
+    await next(page, "Continue");
+    await next(page, "Continue");
+    await expect(page.getByRole("heading", { name: "Pick your starting categories" })).toBeVisible();
+    await presetsAreEven(page, 2);
+    await nothingWider(page);
   });
 });
 
@@ -244,6 +316,9 @@ test.describe("the first-run wizard on a phone", () => {
     await nothingWider(page);
     await next(page, "Continuar");
     await next(page, "Continuar");
+    await expect(page.getByRole("heading", { name: "Escolha as categorias iniciais" })).toBeVisible();
+    await presetsAreEven(page, 1);
+    await nothingWider(page);
     await next(page, "Continuar");
     await next(page, "Pular por enquanto");
     await next(page, "Criar minha casa");

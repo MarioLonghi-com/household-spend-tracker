@@ -7671,6 +7671,12 @@ msgstr ""
 msgid "Would fetch {0} from {1}, from {2} to today."
 msgstr ""
 
+#. Setup wizard, Categories: label; Import is the menu's statement import screen. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Setup will finish with only what reports need, then open Import."
+msgstr ""
+
 #. Sentence on the Register screen
 #: src/screens/Register.tsx
 msgid "a statement"
@@ -9308,7 +9314,7 @@ msgstr ""
 msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
 msgstr ""
 
-#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#. Setup wizard, Review & finish: what setup opens after the data-from-another-app choice. See GLOSSARY.md
 #: src/screens/setup/copy.ts
 msgctxt "setup wizard"
 msgid "Opens One-time Import next"
@@ -11164,6 +11170,12 @@ msgstr ""
 msgid "Not now"
 msgstr ""
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Bring your data from another app"
+msgstr ""
+
 #. Link on Application management: download every language's suggestions as one JSON file
 #: src/screens/TranslationReview.tsx
 msgid "All languages (JSON)"
@@ -11337,6 +11349,12 @@ msgstr ""
 #. Updates section, followed by a button to update the updater. See GLOSSARY.md
 #: src/screens/Updates.tsx
 msgid "A newer updater ({version}) is available:"
+msgstr ""
+
+#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "No starter categories: your categories come with the import."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -11726,6 +11744,12 @@ msgstr ""
 
 #: ../desktop/src/words.ts
 msgid "Sign in to carry on."
+msgstr ""
+
+#. Setup wizard, Review & finish: a next step on the finish screen: its description; "it" is the other app. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Import a CSV or OFX file exported from it."
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -13026,6 +13050,12 @@ msgstr ""
 msgid "What is it for"
 msgstr ""
 
+#. Setup wizard, Review: what setup opens next; Import is the menu's statement import screen. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Opens Import next"
+msgstr ""
+
 #. Net Worth report: the accounts that do not say which country they are in
 #. Net Worth report: the accounts that do not say which country they are in
 #: src/screens/reports/NetWorth.tsx
@@ -13732,6 +13762,12 @@ msgstr ""
 msgid "U — Uncleared"
 msgstr ""
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "One-time Import, on the Household page."
+msgstr ""
+
 #. Label on the Your account panel of the desktop app, on a Mac with Touch ID
 #: src/screens/Profile.tsx
 msgid "Open with Touch ID"
@@ -14391,12 +14427,6 @@ msgstr ""
 msgid "Your password and your second step for {email} were reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
 msgstr ""
 
-#. Setup wizard, Categories: a preset of starter categories: its name. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Bring from YNAB"
-msgstr ""
-
 #. Application management: what sql.log holds; “Verbose, with SQL” is a logging style's name
 #: src/lib/labels.ts
 msgid "Only written at the “Verbose, with SQL” style, and it holds the ledger in plain text. Its own file so the other two stay safe to share."
@@ -14482,6 +14512,12 @@ msgstr ""
 #. Column heading on the Admin screen: noun, the person
 #: src/screens/Admin.tsx
 msgid "Who"
+msgstr ""
+
+#. Setup wizard, Categories: a preset: its name; the history comes from the app used before. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "I'll bring my data from another app"
 msgstr ""
 
 #: src/screens/Rules.tsx

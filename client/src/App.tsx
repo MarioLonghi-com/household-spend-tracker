@@ -324,13 +324,18 @@ export function openedAt(): {
 
 /**
  * A section of the opened screen to scroll to, from the address's `#`: only
- * `#updates`, and only with `?open=application`. The Updating panel asks for
- * it once the app is back, so the outcome is on screen without scrolling; a
- * visit from the menu never carries it. Reads and changes nothing, like
- * `openedAt`.
+ * `#updates` with `?open=application`, and `#one-time-import` with
+ * `?open=household`. The Updating panel asks for the first once the app is
+ * back, so the outcome is on screen without scrolling; the first-run wizard
+ * asks for the second when the data is to come from another app, and the
+ * Household page scrolls to One-time Import and opens it (#471). A visit from
+ * the menu never carries either. Reads and changes nothing, like `openedAt`.
  */
-export function sectionAt(opened: { screen: OpensInNewTab | null }): "updates" | null {
-  return opened.screen === "application" && window.location.hash === "#updates" ? "updates" : null;
+export function sectionAt(opened: { screen: OpensInNewTab | null }): "updates" | "one-time-import" | null {
+  const hash = window.location.hash;
+  if (opened.screen === "application" && hash === "#updates") return "updates";
+  if (opened.screen === "household" && hash === "#one-time-import") return "one-time-import";
+  return null;
 }
 
 /** Once a screen has been opened from `?open=`, the address goes back to `/`. */
@@ -975,6 +980,8 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
             // The name and the colour are worn by the shell, so a save here has
             // to reach the list this component is holding.
             onChanged={() => households.refetch()}
+            section={section === "one-time-import" ? section : null}
+            onSectionShown={() => setSection(null)}
           />
         )}
         {screen === "import" && <Import household={household} onGo={(to) => go(to as Screen)} />}
@@ -988,7 +995,7 @@ function Signedin({ user, onSignedOut }: { user: User; onSignedOut: () => void }
             name some other way gets nothing rather than a screen of 403s. */}
         {screen === "application" && user.role === "owner" && (
           <ApplicationManagement
-            section={section}
+            section={section === "updates" ? section : null}
             onSectionShown={() => setSection(null)}
             household={household}
           />

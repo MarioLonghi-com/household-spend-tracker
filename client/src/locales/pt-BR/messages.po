@@ -7672,6 +7672,12 @@ msgstr "Novos códigos gerados. Todos os códigos anteriores, usados ou não, de
 msgid "Would fetch {0} from {1}, from {2} to today."
 msgstr "Buscaria {0} em {1}, de {2} até hoje."
 
+#. Setup wizard, Categories: label; Import is the menu's statement import screen. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Setup will finish with only what reports need, then open Import."
+msgstr "A configuração termina só com o que os relatórios precisam e abre Importar."
+
 #. Sentence on the Register screen
 #: src/screens/Register.tsx
 msgid "a statement"
@@ -9309,7 +9315,7 @@ msgstr "Média mensal"
 msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
 msgstr "Continua em {runningUpdater}, que é mais novo que o atualizador que vem com {to}."
 
-#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#. Setup wizard, Review & finish: what setup opens after the data-from-another-app choice. See GLOSSARY.md
 #: src/screens/setup/copy.ts
 msgctxt "setup wizard"
 msgid "Opens One-time Import next"
@@ -11170,6 +11176,12 @@ msgstr "Atualizar só o atualizador"
 msgid "Not now"
 msgstr "Agora não"
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Bring your data from another app"
+msgstr "Traga os seus dados de outro app"
+
 #. Link on Application management: download every language's suggestions as one JSON file
 #: src/screens/TranslationReview.tsx
 msgid "All languages (JSON)"
@@ -11344,6 +11356,12 @@ msgstr "Nada a sugerir."
 #: src/screens/Updates.tsx
 msgid "A newer updater ({version}) is available:"
 msgstr "Há um atualizador mais novo ({version}) disponível:"
+
+#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "No starter categories: your categories come with the import."
+msgstr "Sem categorias iniciais: as suas categorias vêm com a importação."
 
 #: src/screens/Register.tsx
 msgid "Table text size"
@@ -11733,6 +11751,12 @@ msgstr "{n} caracteres"
 #: ../desktop/src/words.ts
 msgid "Sign in to carry on."
 msgstr "Entre para continuar."
+
+#. Setup wizard, Review & finish: a next step on the finish screen: its description; "it" is the other app. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Import a CSV or OFX file exported from it."
+msgstr "Importe um arquivo CSV ou OFX exportado dele."
 
 #: src/screens/Rules.tsx
 msgid "It runs <0>before</0> the rules that name a payee, and hands them what is left — so one <1>COMPRA INTERNET</1> rule plus your existing <2>Amazon</2> rule covers the whole Amazon-over-Santander family. Several of these compose: each one gets a turn, in order."
@@ -13032,6 +13056,12 @@ msgstr "Taxa de fim de mês"
 msgid "What is it for"
 msgstr "Para que serve"
 
+#. Setup wizard, Review: what setup opens next; Import is the menu's statement import screen. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Opens Import next"
+msgstr "Abre Importar em seguida"
+
 #. Net Worth report: the accounts that do not say which country they are in
 #. Net Worth report: the accounts that do not say which country they are in
 #: src/screens/reports/NetWorth.tsx
@@ -13738,6 +13768,12 @@ msgstr "Buscar de novo"
 msgid "U — Uncleared"
 msgstr "U — Não compensadas"
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "One-time Import, on the Household page."
+msgstr "Importação única, na página Casa."
+
 #. Label on the Your account panel of the desktop app, on a Mac with Touch ID
 #: src/screens/Profile.tsx
 msgid "Open with Touch ID"
@@ -14402,12 +14438,6 @@ msgstr "<0>{0} outras linhas têm o mesmo favorecido</0> e nenhuma categoria pr�
 msgid "Your password and your second step for {email} were reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
 msgstr "Sua senha e sua segunda etapa para {email} foram redefinidas pelo servidor em {when}. Todos os navegadores em que você estava conectado foram desconectados. Configure as duas de novo abaixo."
 
-#. Setup wizard, Categories: a preset of starter categories: its name. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Bring from YNAB"
-msgstr "Trazer do YNAB"
-
 #. Application management: what sql.log holds; “Verbose, with SQL” is a logging style's name
 #: src/lib/labels.ts
 msgid "Only written at the “Verbose, with SQL” style, and it holds the ledger in plain text. Its own file so the other two stay safe to share."
@@ -14494,6 +14524,12 @@ msgstr "Aplicada"
 #: src/screens/Admin.tsx
 msgid "Who"
 msgstr "Quem"
+
+#. Setup wizard, Categories: a preset: its name; the history comes from the app used before. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "I'll bring my data from another app"
+msgstr "Vou trazer os meus dados de outro app"
 
 #: src/screens/Rules.tsx
 msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."

@@ -74,8 +74,12 @@ export function canJump(steps: readonly StepKey[], to: StepKey, furthest: number
 export const SCENARIOS = ["solo", "couple", "both", "family", "flat"] as const;
 export type Scenario = (typeof SCENARIOS)[number];
 
-/** What the finish screen offers next. */
-export type NextStep = "ynab" | "account" | "import" | "shared" | "invite";
+/**
+ * What the finish screen offers next. `elsewhere` is the data brought from
+ * another app (#471): One-time Import where it is offered, statement Import
+ * where it is not; `import` is a bank statement.
+ */
+export type NextStep = "elsewhere" | "account" | "import" | "shared" | "invite";
 
 /** How the first-account step ended. */
 export type AccountOutcome = "made" | "skipped" | "no_currency";
@@ -84,27 +88,43 @@ export type AccountOutcome = "made" | "skipped" | "no_currency";
  * The next steps after setup, in order: the first account when none was
  * made, a statement import, then one more that follows the scenario --
  * another household for "more than one", an invitation for the shared ones
- * where invitations exist, nothing for "just me". Bringing categories from
- * YNAB opens that import first.
+ * where invitations exist, nothing for "just me". Bringing the data from
+ * another app puts that import first; where only statement Import can take
+ * it, that one step is the statement import too, so it is not offered twice.
  */
 export function nextSteps({
   scenario,
   invitations,
   account,
-  ynab,
+  elsewhere,
+  appImport,
 }: {
   scenario: Scenario;
   invitations: boolean;
   account: AccountOutcome;
-  ynab: boolean;
+  /** "I'll bring my data from another app" was the categories' choice. */
+  elsewhere: boolean;
+  /** One-time Import is offered (`ynab_import`). */
+  appImport: boolean;
 }): NextStep[] {
   const steps: NextStep[] = [];
-  if (ynab) steps.push("ynab");
+  if (elsewhere) steps.push("elsewhere");
   if (account !== "made") steps.push("account");
-  steps.push("import");
+  if (!elsewhere || appImport) steps.push("import");
   if (scenario === "both") steps.push("shared");
   else if (scenario !== "solo" && invitations) steps.push("invite");
   return steps;
+}
+
+/**
+ * The address a next step opens the app at, read once by the shell
+ * (`App.openedAt`). The data from another app lands on the import itself:
+ * the One-time Import section of the Household page, opened, where that
+ * import is offered, and statement Import where it is not (#471).
+ */
+export function opensAt(where: NextStep, appImport: boolean): string {
+  if (where === "elsewhere") return appImport ? "/?open=household#one-time-import" : "/?open=import";
+  return { account: "/?open=accounts", import: "/?open=import", shared: "/?open=admin", invite: "/?open=admin" }[where];
 }
 
 // --------------------------------------------------------------------------- //
@@ -114,7 +134,11 @@ export function nextSteps({
 /** The starter tree as the server seeds it: group id, then its categories' ids. */
 export type Tree = readonly (readonly [string, readonly string[]])[];
 
-export type Preset = "recommended" | "essentials" | "empty" | "ynab";
+/**
+ * `elsewhere` is "I'll bring my data from another app" (#471): the categories
+ * come with the import, so it keeps only what the reports need.
+ */
+export type Preset = "recommended" | "essentials" | "empty" | "elsewhere";
 
 export interface Starter {
   tree: Tree;
@@ -123,16 +147,16 @@ export interface Starter {
   required: readonly string[];
 }
 
-/** Every id a preset ticks. YNAB keeps only what the reports need. */
+/** Every id a preset ticks. Bringing the data from another app keeps only what the reports need. */
 export function presetIds(starter: Starter, preset: Preset): Set<string> {
   if (preset === "essentials") return new Set(starter.essentials);
-  if (preset === "empty" || preset === "ynab") return new Set(starter.required);
+  if (preset === "empty" || preset === "elsewhere") return new Set(starter.required);
   return new Set(starter.tree.flatMap(([group, ids]) => [group, ...ids]));
 }
 
 /** The preset a set of ticks is exactly, or "custom". */
-export function presetOf(starter: Starter, ticked: ReadonlySet<string>, ynab: boolean): Preset | "custom" {
-  if (ynab) return "ynab";
+export function presetOf(starter: Starter, ticked: ReadonlySet<string>, elsewhere: boolean): Preset | "custom" {
+  if (elsewhere) return "elsewhere";
   for (const preset of ["recommended", "essentials", "empty"] as const) {
     const wanted = presetIds(starter, preset);
     if (wanted.size === ticked.size && [...wanted].every((id) => ticked.has(id))) return preset;

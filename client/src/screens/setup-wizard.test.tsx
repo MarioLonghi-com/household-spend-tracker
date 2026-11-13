@@ -31,6 +31,7 @@ import {
   CHAPTER_OF,
   countryFor,
   nextSteps,
+  opensAt,
   presetIds,
   presetOf,
   type Starter,
@@ -141,14 +142,29 @@ describe("the steps of each edition", () => {
 
 describe("the finish screen's next steps", () => {
   it("follow the scenario, the edition and whether an account was made", () => {
-    expect(nextSteps({ scenario: "solo", invitations: true, account: "made", ynab: false })).toEqual(["import"]);
-    expect(nextSteps({ scenario: "solo", invitations: true, account: "skipped", ynab: false })).toEqual(["account", "import"]);
-    expect(nextSteps({ scenario: "couple", invitations: true, account: "made", ynab: false })).toEqual(["import", "invite"]);
-    expect(nextSteps({ scenario: "family", invitations: false, account: "made", ynab: false })).toEqual(["import"]);
-    expect(nextSteps({ scenario: "both", invitations: false, account: "no_currency", ynab: false })).toEqual([
+    expect(nextSteps({ scenario: "solo", invitations: true, account: "made", elsewhere: false, appImport: true })).toEqual(["import"]);
+    expect(nextSteps({ scenario: "solo", invitations: true, account: "skipped", elsewhere: false, appImport: true })).toEqual(["account", "import"]);
+    expect(nextSteps({ scenario: "couple", invitations: true, account: "made", elsewhere: false, appImport: true })).toEqual(["import", "invite"]);
+    expect(nextSteps({ scenario: "family", invitations: false, account: "made", elsewhere: false, appImport: true })).toEqual(["import"]);
+    expect(nextSteps({ scenario: "both", invitations: false, account: "no_currency", elsewhere: false, appImport: true })).toEqual([
       "account", "import", "shared",
     ]);
-    expect(nextSteps({ scenario: "flat", invitations: true, account: "made", ynab: true })).toEqual(["ynab", "import", "invite"]);
+    expect(nextSteps({ scenario: "flat", invitations: true, account: "made", elsewhere: true, appImport: true })).toEqual([
+      "elsewhere", "import", "invite",
+    ]);
+    // Where only statement Import can take another app's data, that step is
+    // the import: it is not offered a second time (#471).
+    expect(nextSteps({ scenario: "flat", invitations: true, account: "skipped", elsewhere: true, appImport: false })).toEqual([
+      "elsewhere", "account", "invite",
+    ]);
+  });
+
+  it("open the import itself for the data from another app, whichever import this edition has (#471)", () => {
+    expect(opensAt("elsewhere", true)).toBe("/?open=household#one-time-import");
+    expect(opensAt("elsewhere", false)).toBe("/?open=import");
+    expect(opensAt("import", true)).toBe("/?open=import");
+    expect(opensAt("account", false)).toBe("/?open=accounts");
+    expect(opensAt("invite", true)).toBe("/?open=admin");
   });
 });
 
@@ -159,6 +175,9 @@ describe("the starter categories", () => {
     expect(presetOf(STARTER, all, false)).toBe("recommended");
     expect(categoryCount(STARTER, presetIds(STARTER, "essentials"))).toBe(3);
     expect(categoryCount(STARTER, presetIds(STARTER, "empty"))).toBe(1);
+    // From another app: exactly what the reports need, and nothing else ticked (#471).
+    expect([...presetIds(STARTER, "elsewhere")].sort()).toEqual([...STARTER.required].sort());
+    expect(presetOf(STARTER, presetIds(STARTER, "elsewhere"), true)).toBe("elsewhere");
 
     const less = toggle(STARTER, all, "seed.category.water");
     expect(presetOf(STARTER, less, false)).toBe("custom");
@@ -437,4 +456,83 @@ describe("the wizard on the desktop", () => {
     expect(screen.getByText("Then the app is set up, and you create the account from Accounts.")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Add another household" })).toBeTruthy();
   });
+});
+
+describe("the categories' cards and the data from another app (#471)", () => {
+  /** The household and region as they come, to the categories step. */
+  async function toCategories() {
+    await toHousehold();
+    cont();
+    await screen.findByRole("heading", { name: "Where do you keep your money?" });
+    cont();
+    await screen.findByRole("heading", { name: "Pick your starting categories" });
+  }
+
+  it("four cards in one grid, each a name over a description, one of them chosen", async () => {
+    setCapabilities({ ...DESKTOP, ynab_import: false });
+    answer({ ...STATE, token_needed: false, token_path: null, install: { ...STATE.install!, edition: "windows" } });
+    wrap(<Setup onDone={vi.fn()} />);
+    await toCategories();
+    const grid = document.querySelector(".wizard-presets")!;
+    const cards = [...grid.children] as HTMLButtonElement[];
+    // Always four, the import one too where One-time Import is not offered.
+    expect(cards.map((one) => one.querySelector("strong")!.textContent)).toEqual([
+      "Recommended", "Essentials", "Start empty", "I'll bring my data from another app",
+    ]);
+    for (const card of cards) {
+      expect(card.className.split(" ")).toContain("wizard-preset");
+      expect([...card.children].map((one) => one.tagName)).toEqual(["STRONG", "SPAN"]);
+    }
+    expect(cards[3].querySelector("span")!.textContent).toBe("No starter categories: your categories come with the import.");
+    expect(cards.map((one) => one.getAttribute("aria-pressed"))).toEqual(["true", "false", "false", "false"]);
+    fireEvent.click(cards[3]);
+    expect(cards.map((one) => one.className.includes("chosen"))).toEqual([false, false, false, true]);
+    expect(screen.getByText("Setup will finish with only what reports need, then open Import.")).toBeTruthy();
+  });
+
+  for (const appImport of [true, false]) {
+    it(`sends only the required categories and opens ${appImport ? "One-time Import" : "statement Import"}`, async () => {
+      setCapabilities({ ...DESKTOP, ynab_import: appImport });
+      answer({ ...STATE, token_needed: false, token_path: null, install: { ...STATE.install!, edition: "mac" } });
+      const done = vi.fn();
+      wrap(<Setup onDone={done} />);
+      await toCategories();
+      // A custom choice first, so the import card is seen to replace it.
+      fireEvent.click(screen.getByLabelText("Water"));
+      fireEvent.click(screen.getByRole("button", { name: /I'll bring my data from another app/ }));
+      expect(screen.getByText(/The categories that reports need are created in English/)).toBeTruthy();
+      expect(screen.queryByLabelText("Salary")).toBeNull();
+      cont();
+      await screen.findByRole("heading", { name: "Add your first account" });
+      fireEvent.click(screen.getByRole("button", { name: "Skip for now" }));
+
+      await screen.findByRole("heading", { name: "Check and create" });
+      const opens = appImport ? "Opens One-time Import next" : "Opens Import next";
+      expect(screen.getByText(`I'll bring my data from another app · ${opens}`)).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "Create my household" }));
+      await screen.findByRole("heading", { name: "You're set up" });
+
+      const complete = vi.mocked(api.post).mock.calls.find(([path]) => path === "/setup/complete")![1] as {
+        household: { categories: string; omit: string[] };
+      };
+      const every = STARTER.tree.flatMap(([group, ids]) => [group, ...ids]);
+      const kept = every.filter((id) => !complete.household.omit.includes(id));
+      expect(complete.household.categories).toBe("recommended");
+      expect(kept.sort()).toEqual([...STARTER.required].sort());
+
+      const next = [...document.querySelectorAll(".wizard-next li")].map((one) => one.textContent);
+      expect(next[0]).toBe(
+        appImport
+          ? "Bring your data from another appOne-time Import, on the Household page."
+          : "Bring your data from another appImport a CSV or OFX file exported from it.",
+      );
+      // Statement Import is offered once: as this step where it is the import.
+      expect(screen.queryAllByRole("button", { name: "Import a bank statement" })).toHaveLength(appImport ? 1 : 0);
+      fireEvent.click(screen.getByRole("button", { name: "Bring your data from another app" }));
+      expect(done).toHaveBeenCalledWith(ALEX);
+      expect(`${window.location.search}${window.location.hash}`).toBe(
+        appImport ? "?open=household#one-time-import" : "?open=import",
+      );
+    });
+  }
 });

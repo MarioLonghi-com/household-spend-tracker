@@ -42,6 +42,16 @@ history this repository does not have.
   it moves under the step. The notes that said to invite people, or to add
   another household, "from Household" now say *Admin*, where both are, in
   all four languages (#470).
+- First-run wizard, *Categories*: the four starting-category cards are one
+  even grid, two by two on a desktop and one per row on a phone, never three
+  and one, with the cards in a row one height and their names and
+  descriptions level; the chosen one is marked inside its own box. *Bring
+  from YNAB* is now **I'll bring my data from another app**, offered on every
+  edition: it creates only Income and Reimbursements, and after setup its
+  next step opens the import itself -- One-time Import on the Household page,
+  already open, where that import is offered, and Import otherwise -- rather
+  than just the Household page. The review's *Categories* row says which
+  one opens (#471).
 
 ## 0.17.0 — 2026-11-13
 

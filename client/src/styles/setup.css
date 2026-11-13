@@ -10,7 +10,9 @@
 .wizard-rail { display: none; }
 .wizard-main { padding: 16px; }
 .wizard-body { display: flex; flex-direction: column; gap: 20px; }
-.wizard-form { min-width: 0; }
+/* A container too, so the starter-category cards count across by the room the
+   step itself has, whatever the rail and the side column take (#471). */
+.wizard-form { min-width: 0; container: wizard-form / inline-size; }
 .wizard-form h1 { overflow-wrap: anywhere; }
 /* The title takes focus on every step so a screen reader starts there (#470).
    It is `tabindex="-1"`: Tab never lands on it, so a ring would only ever
@@ -88,7 +90,7 @@
 .wizard-rule { background: var(--surface-2); border-left: 3px solid var(--accent); padding: 10px 12px; border-radius: var(--radius); }
 .wizard-accent { color: var(--accent); }
 .wizard-pair { display: grid; grid-template-columns: 1fr; gap: 0 12px; }
-@container (min-width: 520px) { .wizard-pair { grid-template-columns: 1fr 1fr; } }
+@container wizard-main (min-width: 520px) { .wizard-pair { grid-template-columns: 1fr 1fr; } }
 
 .wizard-tabs { display: flex; gap: 4px; margin-bottom: 6px; }
 .wizard-tabs button.chosen { border-color: var(--accent); font-weight: 700; }
@@ -109,9 +111,25 @@
 .wizard-preview td { padding: 2px 8px 2px 0; }
 .wizard-preview td.num { text-align: right; font-variant-numeric: tabular-nums; }
 
-.wizard-presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px; }
-.wizard-preset { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 10px 12px; }
+/* The starter-category cards (#471): one even grid of four -- four across
+   where the step has room, two by two where it has not, one per row on a
+   phone; never three and one, which `auto-fit` made at the desktop window's
+   width. Four across needs about 150 px a card before "Recommended" no longer
+   fits on its line; the wizard's own width cap keeps the step under that
+   today, so a desktop shows two by two at every window size. Each card spans two rows of a subgrid, its name and its description,
+   so in every row of cards the names share a line, the descriptions start
+   level and the cards are one height. */
+.wizard-presets { display: grid; grid-template-columns: 1fr; column-gap: 8px; row-gap: 0; margin-bottom: 12px; }
+@container wizard-form (min-width: 420px) { .wizard-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container wizard-form (min-width: 640px) { .wizard-presets { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.wizard-preset {
+  display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 2px; align-content: start;
+  justify-items: start; text-align: left; padding: 10px 12px; margin-bottom: 8px; min-width: 0; overflow-wrap: break-word;
+}
+/* Marked inside its own box: the same 1 px border as the others plus an inset
+   ring, and a focus ring drawn inside it too, so it never grows past them. */
 .wizard-preset.chosen { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.wizard-preset:focus-visible { outline-offset: -4px; }
 .wizard-tree, .wizard-tree ul { list-style: none; margin: 0; padding: 0; }
 .wizard-tree > li { margin-bottom: 8px; }
 .wizard-tree ul { padding-left: 24px; }

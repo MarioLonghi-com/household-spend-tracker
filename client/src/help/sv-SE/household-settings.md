@@ -24,7 +24,7 @@ Stegen ligger i en list vid sidan (en förloppsindikator på mobilen). **Tillbak
 5. Spara din återställningskod: **Kopiera** eller **Spara som fil**, och kryssa sedan i **Jag har sparat den någon annanstans än på den här datorn**.
 6. Säg vem hushållet är till för (det föreslår bara ett namn) och ange **Hushållets namn** och dess **Färg**.
 7. Välj ett **Land**. Det föreslår **Basvaluta**, **Datumformat** och **Veckans första dag**, och en förhandsvisning visar resultatet.
-8. Välj första kategorier: **Rekommenderat**, **Det viktigaste**, **Börja tomt** eller **Hämta från YNAB** där det erbjuds. Kryssa ur det du aldrig kommer att använda; *Inkomster* och *Ersättningar* finns kvar, märkta **används av rapporter**.
+8. Välj första kategorier: **Rekommenderat**, **Det viktigaste**, **Börja tomt** eller **Jag tar med mina data från en annan app**, som bara skapar *Inkomster* och *Ersättningar* och öppnar importen när installationen är klar. Kryssa ur det du aldrig kommer att använda; *Inkomster* och *Ersättningar* finns kvar, märkta **används av rapporter**.
 9. Lägg om du vill till ett första konto med ett **Startdatum** (gärna flera år bakåt) och ett **Ingående saldo**, eller välj **Hoppa över just nu**. En CSV- eller OFX-fil som du släpper här öppnas i Import när installationen är klar.
 10. Gå igenom sammanfattningen, använd **Ändra** för att rätta ett svar och tryck på **Skapa mitt hushåll**.
 

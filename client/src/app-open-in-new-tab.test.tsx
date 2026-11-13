@@ -115,8 +115,22 @@ describe("the section the opened screen scrolls to", () => {
     expect(sectionAt(openedAt())).toBe("updates");
   });
 
+  it("is One-time Import on the Household page when the first-run wizard asks for it (#471)", () => {
+    window.history.replaceState(null, "", "/?open=household#one-time-import");
+    expect(sectionAt(openedAt())).toBe("one-time-import");
+  });
+
   it("is nothing without the #, on another screen, or for another #", () => {
-    for (const address of ["/?open=application", "/?open=history#updates", "/#updates", "/?open=application#logs"]) {
+    for (const address of [
+      "/?open=application",
+      "/?open=history#updates",
+      "/#updates",
+      "/?open=application#logs",
+      "/?open=household",
+      "/?open=household#updates",
+      "/?open=application#one-time-import",
+      "/#one-time-import",
+    ]) {
       window.history.replaceState(null, "", address);
       expect(sectionAt(openedAt())).toBeNull();
     }

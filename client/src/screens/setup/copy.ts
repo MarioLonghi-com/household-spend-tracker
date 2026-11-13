@@ -153,15 +153,19 @@ export function wizardCopy() {
     p_ess_d: t({ message: "3 groups, 11 categories", context: "setup wizard", comment: "Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md" }),
     p_empty: t({ message: "Start empty", context: "setup wizard", comment: "Setup wizard, Categories: a preset of starter categories: its name. See GLOSSARY.md" }),
     p_empty_d: t({ message: "Only what reports need", context: "setup wizard", comment: "Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md" }),
-    p_ynab: t({ message: "Bring from YNAB", context: "setup wizard", comment: "Setup wizard, Categories: a preset of starter categories: its name. See GLOSSARY.md" }),
-    p_ynab_d: t({ message: "Opens One-time Import next", context: "setup wizard", comment: "Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md" }),
+    // #471: one choice for any app the data comes from, not one named app.
+    p_elsewhere: t({ message: "I'll bring my data from another app", context: "setup wizard", comment: "Setup wizard, Categories: a preset: its name; the history comes from the app used before. See GLOSSARY.md" }),
+    p_elsewhere_d: t({ message: "No starter categories: your categories come with the import.", context: "setup wizard", comment: "Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md" }),
+    opens_app: t({ message: "Opens One-time Import next", context: "setup wizard", comment: "Setup wizard, Review & finish: what setup opens after the data-from-another-app choice. See GLOSSARY.md" }),
+    opens_file: t({ message: "Opens Import next", context: "setup wizard", comment: "Setup wizard, Review: what setup opens next; Import is the menu's statement import screen. See GLOSSARY.md" }),
     cat_lang: ({ n, lang }: { n: number; lang: string }) =>
       t({ message: plural(n, { one: `The wizard creates this # category for you, in ${lang}: the language you chose on step 1.`, other: `The wizard creates these # categories for you, in ${lang}: the language you chose on step 1.` }), context: "setup wizard", comment: "Setup wizard, Categories: # is a number of categories, {lang} a language name such as Svenska. See GLOSSARY.md" }),
-    cat_lang_ynab: ({ lang }: { lang: string | number }) =>
+    cat_lang_required: ({ lang }: { lang: string | number }) =>
       t({ message: `The categories that reports need are created in ${lang}, the language you chose on step 1.`, context: "setup wizard", comment: "Setup wizard, Categories: {lang} is a language name such as Svenska. See GLOSSARY.md" }),
     change_lang: t({ message: "Change language", context: "setup wizard", comment: "Setup wizard, Categories: label. See GLOSSARY.md" }),
     locked: t({ message: "needed by reports", context: "setup wizard", comment: "Setup wizard, Categories: tag beside a category that cannot be unticked. See GLOSSARY.md" }),
-    ynab_note: t({ message: "Setup will finish with only what reports need, then open One-time Import.", context: "setup wizard", comment: "Setup wizard, Categories: label. See GLOSSARY.md" }),
+    note_app: t({ message: "Setup will finish with only what reports need, then open One-time Import.", context: "setup wizard", comment: "Setup wizard, Categories: label. See GLOSSARY.md" }),
+    note_file: t({ message: "Setup will finish with only what reports need, then open Import.", context: "setup wizard", comment: "Setup wizard, Categories: label; Import is the menu's statement import screen. See GLOSSARY.md" }),
     h_account: t({ message: "Add your first account", context: "setup wizard", comment: "Setup wizard, First account: title of the step. See GLOSSARY.md" }),
     l_account: t({ message: "Optional, and nothing here is final.", context: "setup wizard", comment: "Setup wizard, First account: one-line lead under the step title. See GLOSSARY.md" }),
     i_account: t({ message: "Not sure what an account held years ago? Start today with today's balance. When you import older statements, move the opening date back; the app tells you if a transaction falls before it.", context: "setup wizard", comment: "Setup wizard, First account: explanation in the \"About this step\" panel. See GLOSSARY.md" }),
@@ -204,6 +208,9 @@ export function wizardCopy() {
     next_account_nocur: t({ message: "Then the app is set up, and you create the account from Accounts.", context: "setup wizard", comment: "Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md" }),
     next_import: t({ message: "Import a bank statement", context: "setup wizard", comment: "Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md" }),
     next_import_d: t({ message: "CSV or OFX from your bank.", context: "setup wizard", comment: "Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md" }),
+    next_elsewhere: t({ message: "Bring your data from another app", context: "setup wizard", comment: "Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md" }),
+    next_elsewhere_app: t({ message: "One-time Import, on the Household page.", context: "setup wizard", comment: "Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md" }),
+    next_elsewhere_file: t({ message: "Import a CSV or OFX file exported from it.", context: "setup wizard", comment: "Setup wizard, Review & finish: a next step on the finish screen: its description; \"it\" is the other app. See GLOSSARY.md" }),
     next_invite: t({ message: "Invite someone", context: "setup wizard", comment: "Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md" }),
     next_invite_d: t({ message: "Give each person their own login to this household.", context: "setup wizard", comment: "Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md" }),
     next_shared: t({ message: "Add another household", context: "setup wizard", comment: "Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md" }),
