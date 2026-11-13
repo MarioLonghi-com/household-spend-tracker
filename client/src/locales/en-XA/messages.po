@@ -1796,6 +1796,12 @@ msgstr ""
 msgid "Dismiss without copying? The link cannot be shown again."
 msgstr ""
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: add another household from Admin when you need one. On this computer only you sign in to any of them."
+msgstr ""
+
 #: src/screens/ynab/results.tsx
 msgid "Already in the ledger"
 msgstr ""
@@ -2883,12 +2889,6 @@ msgstr ""
 msgid "{0, plural, one {# change to the instance itself (people, settings)} other {# changes to the instance itself (people, settings)}}"
 msgstr ""
 
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: invite your housemates from Household."
-msgstr ""
-
 #: src/screens/Register.tsx
 msgid "A split needs at least two parts"
 msgstr ""
@@ -3527,12 +3527,6 @@ msgstr ""
 #. placeholder {2}: current.also_on
 #: src/screens/Register.tsx
 msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
-msgstr ""
-
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: add another household from Household when you need one, and invite only the people it is for."
 msgstr ""
 
 #. Menu item and the name of its screen. See GLOSSARY.md
@@ -6203,12 +6197,6 @@ msgstr ""
 msgid "The file itself"
 msgstr ""
 
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: add another household from Household when you need one. On this computer only you sign in to any of them."
-msgstr ""
-
 #. Button on the Admin screen: verb, let an account sign in again
 #: src/screens/Admin.tsx
 msgid "Re-enable"
@@ -6509,6 +6497,12 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "fills in the acceptance screen"
+msgstr ""
+
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite your partner from Admin."
 msgstr ""
 
 #. Net Worth explanation, point 2
@@ -7675,6 +7669,12 @@ msgstr ""
 #. placeholder {2}: formatDate(one.since)
 #: src/screens/ExchangeRates.tsx
 msgid "Would fetch {0} from {1}, from {2} to today."
+msgstr ""
+
+#. Setup wizard, Categories: label; Import is the menu's statement import screen. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Setup will finish with only what reports need, then open Import."
 msgstr ""
 
 #. Sentence on the Register screen
@@ -9314,7 +9314,7 @@ msgstr ""
 msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
 msgstr ""
 
-#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#. Setup wizard, Review & finish: what setup opens after the data-from-another-app choice. See GLOSSARY.md
 #: src/screens/setup/copy.ts
 msgctxt "setup wizard"
 msgid "Opens One-time Import next"
@@ -9629,12 +9629,6 @@ msgstr ""
 
 #: src/screens/Accounts.tsx
 msgid "a pocket's or a card product's name"
-msgstr ""
-
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: invite the other adults from Household."
 msgstr ""
 
 #. Column value on the Accounts screen: how many transactions name a suggested identifier
@@ -11081,6 +11075,12 @@ msgstr ""
 msgid "No, just this one"
 msgstr ""
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: add another household from Admin when you need one, and invite only the people it is for."
+msgstr ""
+
 #. What kind of row changed, lower case, singular, in History beside its id
 #: src/lib/historyWords.ts
 msgctxt "history table"
@@ -11168,6 +11168,12 @@ msgstr ""
 #: src/screens/Register.tsx
 #: src/screens/SignIn.tsx
 msgid "Not now"
+msgstr ""
+
+#. Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Bring your data from another app"
 msgstr ""
 
 #. Link on Application management: download every language's suggestions as one JSON file
@@ -11320,6 +11326,12 @@ msgstr ""
 msgid "week start"
 msgstr ""
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite the other adults from Admin."
+msgstr ""
+
 #. Where an update failed
 #: src/screens/Updates.tsx
 msgid "while recording the update"
@@ -11337,6 +11349,12 @@ msgstr ""
 #. Updates section, followed by a button to update the updater. See GLOSSARY.md
 #: src/screens/Updates.tsx
 msgid "A newer updater ({version}) is available:"
+msgstr ""
+
+#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "No starter categories: your categories come with the import."
 msgstr ""
 
 #: src/screens/Register.tsx
@@ -11708,6 +11726,12 @@ msgstr ""
 msgid "Updated to {target} at {at} in {took}."
 msgstr ""
 
+#. Setup wizard, Household: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "The colour tells your households apart if you ever keep more than one. You can invite others later from Admin."
+msgstr ""
+
 #: src/screens/Admin.tsx
 msgid "Owner — can administer this instance"
 msgstr ""
@@ -11720,6 +11744,12 @@ msgstr ""
 
 #: ../desktop/src/words.ts
 msgid "Sign in to carry on."
+msgstr ""
+
+#. Setup wizard, Review & finish: a next step on the finish screen: its description; "it" is the other app. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Import a CSV or OFX file exported from it."
 msgstr ""
 
 #: src/screens/Rules.tsx
@@ -11968,6 +11998,12 @@ msgstr ""
 
 #: src/screens/Admin.tsx
 msgid "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
+msgstr ""
+
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite your housemates from Admin."
 msgstr ""
 
 #. A changed field in History's detail, lower case: whether work should pay it back
@@ -13014,6 +13050,12 @@ msgstr ""
 msgid "What is it for"
 msgstr ""
 
+#. Setup wizard, Review: what setup opens next; Import is the menu's statement import screen. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Opens Import next"
+msgstr ""
+
 #. Net Worth report: the accounts that do not say which country they are in
 #. Net Worth report: the accounts that do not say which country they are in
 #: src/screens/reports/NetWorth.tsx
@@ -13720,6 +13762,12 @@ msgstr ""
 msgid "U — Uncleared"
 msgstr ""
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "One-time Import, on the Household page."
+msgstr ""
+
 #. Label on the Your account panel of the desktop app, on a Mac with Touch ID
 #: src/screens/Profile.tsx
 msgid "Open with Touch ID"
@@ -13985,12 +14033,6 @@ msgstr ""
 msgid "Turn off Touch ID"
 msgstr ""
 
-#. Setup wizard, Household: explanation in the "About this step" panel. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "The colour tells your households apart if you ever keep more than one. You can invite others later from Household."
-msgstr ""
-
 #: src/screens/Receipts.tsx
 msgid "This receipt carries no date of its own, so the window is around when it was uploaded."
 msgstr ""
@@ -14023,12 +14065,6 @@ msgstr ""
 
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as a member."
-msgstr ""
-
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: invite your partner from Household."
 msgstr ""
 
 #. Screen-reader name of the left arrow on the Income vs Expense report's month map
@@ -14391,12 +14427,6 @@ msgstr ""
 msgid "Your password and your second step for {email} were reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
 msgstr ""
 
-#. Setup wizard, Categories: a preset of starter categories: its name. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Bring from YNAB"
-msgstr ""
-
 #. Application management: what sql.log holds; “Verbose, with SQL” is a logging style's name
 #: src/lib/labels.ts
 msgid "Only written at the “Verbose, with SQL” style, and it holds the ledger in plain text. Its own file so the other two stay safe to share."
@@ -14482,6 +14512,12 @@ msgstr ""
 #. Column heading on the Admin screen: noun, the person
 #: src/screens/Admin.tsx
 msgid "Who"
+msgstr ""
+
+#. Setup wizard, Categories: a preset: its name; the history comes from the app used before. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "I'll bring my data from another app"
 msgstr ""
 
 #: src/screens/Rules.tsx

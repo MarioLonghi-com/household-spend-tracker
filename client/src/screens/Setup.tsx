@@ -57,6 +57,7 @@ import {
   type Edition,
   nextSteps,
   type NextStep,
+  opensAt,
   type Preset,
   presetIds,
   presetOf,
@@ -169,15 +170,6 @@ function kindName(c: WizardCopy, kind: AccountKind): string {
   return { current: c.t_current, savings: c.t_savings, credit_card: c.t_card, cash: c.t_cash }[kind];
 }
 
-/** The address a next step opens the app at, read once by the shell (`App.openedAt`). */
-const OPENS: Record<NextStep, string> = {
-  ynab: "/?open=household",
-  account: "/?open=accounts",
-  import: "/?open=import",
-  shared: "/?open=admin",
-  invite: "/?open=admin",
-};
-
 export function Setup({ onDone }: { onDone: (user: User) => void }) {
   const { i18n } = useLingui();
   const c = wizardCopy();
@@ -190,6 +182,8 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
   const web = offered.second_factor;
   const edition: Edition = web ? "web" : facts?.install?.edition === "mac" ? "mac" : "windows";
   const touchOffered = !web && offered.device_unlock && desktop()?.unlock === "touch_id";
+  // Where the data from another app goes: One-time Import, or statement Import.
+  const appImport = offered.ynab_import;
   const steps = useMemo(() => stepsFor(edition, touchOffered), [edition, touchOffered]);
 
   const [at, setAt] = useState(0);
@@ -227,7 +221,8 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
   const [dateFormat, setDateFormat] = useState<DateFormat>("YYYY-MM-DD");
   const [weekStart, setWeekStart] = useState<WeekStart>("monday");
   const [ticked, setTicked] = useState<Set<string> | null>(null);
-  const [ynab, setYnab] = useState(false);
+  // "I'll bring my data from another app" (#471): only the required categories.
+  const [elsewhere, setElsewhere] = useState(false);
 
   // First account
   const [accountName, setAccountName] = useState("");
@@ -349,7 +344,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
     run(async () => {
       if (!starter) return;
       const made = web && secondStep === "passkey" ? passkey : null;
-      const categories = ynab ? categoryChoice(starter, presetIds(starter, "ynab")) : categoryChoice(starter, ticks);
+      const categories = categoryChoice(starter, elsewhere ? presetIds(starter, "elsewhere") : ticks);
       const user = await api.post<User>("/setup/complete", {
         blob: made ? made.blob : blob,
         codes_saved: stored,
@@ -392,7 +387,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
 
   const open = (where: NextStep | null) => {
     if (!finished) return;
-    if (where) window.history.replaceState(null, "", OPENS[where]);
+    if (where) window.history.replaceState(null, "", opensAt(where, appImport));
     onDone(finished);
   };
 
@@ -698,7 +693,7 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
             {SCENARIOS.map((one) => {
               const shown = scenarioWords(c, one, name, !web);
               return (
-                <label key={one} className={`wizard-choice block wizard-choice-head ${scenario === one ? "chosen" : ""}`}>
+                <label key={one} className={`wizard-choice wizard-choice-head ${scenario === one ? "chosen" : ""}`}>
                   <input type="radio" name="scenario" checked={scenario === one} onChange={() => setScenario(one)} />
                   <span>
                     <strong>{shown.label}</strong>
@@ -861,14 +856,14 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
       lead = c.l_categories;
       about = c.i_categories;
       if (!starter) break;
-      const preset = presetOf(starter, ticks, ynab);
+      const preset = presetOf(starter, ticks, elsewhere);
       const count = categoryCount(starter, ticks);
       const lang = ownLanguageName(i18n.locale);
       const presets: { key: Preset; label: string; text: string }[] = [
         { key: "recommended", label: c.p_rec, text: c.p_rec_d },
         { key: "essentials", label: c.p_ess, text: c.p_ess_d },
         { key: "empty", label: c.p_empty, text: c.p_empty_d },
-        ...(offered.ynab_import ? [{ key: "ynab" as const, label: c.p_ynab, text: c.p_ynab_d }] : []),
+        { key: "elsewhere", label: c.p_elsewhere, text: c.p_elsewhere_d },
       ];
       body = (
         <>
@@ -880,23 +875,23 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
                 className={`wizard-preset ${preset === one.key ? "chosen" : ""}`}
                 aria-pressed={preset === one.key}
                 onClick={() => {
-                  setYnab(one.key === "ynab");
-                  if (one.key !== "ynab") setTicked(presetIds(starter, one.key));
+                  setElsewhere(one.key === "elsewhere");
+                  if (one.key !== "elsewhere") setTicked(presetIds(starter, one.key));
                 }}
               >
-                <strong>{one.label}</strong>
+                <strong className="wizard-preset-name">{one.label}</strong>
                 <span className="muted small">{one.text}</span>
               </button>
             ))}
           </div>
           <p className="small">
-            {ynab ? c.cat_lang_ynab({ lang }) : c.cat_lang({ n: count, lang })}{" "}
+            {elsewhere ? c.cat_lang_required({ lang }) : c.cat_lang({ n: count, lang })}{" "}
             <button type="button" className="link" onClick={() => go(0)}>
               {c.change_lang}
             </button>
           </p>
-          {ynab ? (
-            <p className="wizard-accent small">{c.ynab_note}</p>
+          {elsewhere ? (
+            <p className="wizard-accent small">{appImport ? c.note_app : c.note_file}</p>
           ) : (
             <ul className="wizard-tree">
               {starter.tree.map(([group, ids]) => (
@@ -1046,9 +1041,11 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
             scenario,
             invitations: offered.invitations,
             account: accountOutcome ?? "skipped",
-            ynab,
+            elsewhere,
+            appImport,
           })}
           noCurrency={accountOutcome === "no_currency"}
+          appImport={appImport}
           onOpen={open}
         />
       ) : (
@@ -1083,7 +1080,14 @@ export function Setup({ onDone }: { onDone: (user: User) => void }) {
       c.s_region,
       [regionName, baseCurrency, chosenDateFormat, weekdayName(chosenWeekStart).name].filter(Boolean).join(" · "),
     ]);
-    if (starter) rows.push(["categories", c.s_categories, ynab ? c.p_ynab : c.picked({ n: categoryCount(starter, ticks) })]);
+    if (starter)
+      rows.push([
+        "categories",
+        c.s_categories,
+        elsewhere
+          ? `${c.p_elsewhere} · ${appImport ? c.opens_app : c.opens_file}`
+          : c.picked({ n: categoryCount(starter, ticks) }),
+      ]);
     rows.push([
       "account",
       c.s_account,
@@ -1226,15 +1230,17 @@ function FinishedNext({
   c,
   steps,
   noCurrency,
+  appImport,
   onOpen,
 }: {
   c: WizardCopy;
   steps: NextStep[];
   noCurrency: boolean;
+  appImport: boolean;
   onOpen: (where: NextStep) => void;
 }) {
   const words: Record<NextStep, [string, string]> = {
-    ynab: [c.p_ynab, c.p_ynab_d],
+    elsewhere: [c.next_elsewhere, appImport ? c.next_elsewhere_app : c.next_elsewhere_file],
     account: [c.next_account, noCurrency ? c.next_account_nocur : c.next_account_d],
     import: [c.next_import, c.next_import_d],
     shared: [c.next_shared, c.next_shared_d],

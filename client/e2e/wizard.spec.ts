@@ -16,9 +16,14 @@ import { totp } from "./helpers";
  * its own server on a fresh data directory, on `E2E_WIZARD_PORT` (the
  * suite's port plus one unless named), and stops it afterwards.
  *
- * Three runs: the whole wizard in Swedish, whose labels are the longest, with
- * a back-dated account; one that skips the account; and one at 360 px, the
- * narrow layout.
+ * Five runs: the whole wizard in Swedish, whose labels are the longest, with
+ * a back-dated account; one that skips the account; one at 360 px, the
+ * narrow layout; one at 1000 x 700, the desktop app's smallest window, that
+ * measures the radio cards and the side column (#470) and takes the
+ * starter-category choice for data from another app through to One-time
+ * Import (#471); and one on a wide window, where the category cards are
+ * still two by two: the wizard caps its width, and four across would break
+ * "Recommended" in two.
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -89,6 +94,83 @@ async function security(page: Page, words: { cont: string; stored: string }) {
   await next(page, words.cont);
   await page.getByLabel(words.stored).check();
   await next(page, words.cont);
+}
+
+/**
+ * Each radio card's radio and its title start on the same line, the radio to
+ * the left (#470), and the step's title wears no focus ring after a click.
+ */
+// Layout is measured once per call, so each check retries until it holds: a
+// step that has just changed may still be laying out, and under the full
+// suite's load one measurement once caught it half way (0.17.1).
+async function cardsAreRows(page: Page): Promise<void> {
+  await expect(async () => cardsAreRowsNow(page)).toPass({ timeout: 5_000 });
+}
+
+async function presetsAreEven(page: Page, across: number): Promise<void> {
+  await expect(async () => presetsAreEvenNow(page, across)).toPass({ timeout: 5_000 });
+}
+
+async function nothingWider(page: Page): Promise<void> {
+  await expect(async () => nothingWiderNow(page)).toPass({ timeout: 5_000 });
+}
+
+async function cardsAreRowsNow(page: Page): Promise<void> {
+  const cards = await page.locator(".wizard-choices .wizard-choice-head").evaluateAll((heads) =>
+    heads.map((head) => {
+      const radio = head.querySelector("input[type=radio]")!.getBoundingClientRect();
+      const title = head.querySelector("strong")!.getBoundingClientRect();
+      return { radioTop: radio.top, radioRight: radio.right, radioBottom: radio.bottom, titleTop: title.top, titleLeft: title.left, titleBottom: title.bottom };
+    }),
+  );
+  expect(cards.length).toBeGreaterThan(0);
+  for (const card of cards) {
+    // Beside it, not above it: the radio overlaps the title's first line.
+    expect(card.radioRight).toBeLessThanOrEqual(card.titleLeft);
+    expect(card.radioTop).toBeLessThan(card.titleBottom);
+    expect(card.radioBottom).toBeGreaterThan(card.titleTop);
+  }
+}
+
+/**
+ * The four starter-category cards are one even grid (#471): `across` to a row,
+ * every row full -- never three and one -- and in each row the cards share a
+ * top, a height and a width, and their names and descriptions start level.
+ */
+async function presetsAreEvenNow(page: Page, across: number): Promise<void> {
+  const cards = await page.locator(".wizard-presets > .wizard-preset").evaluateAll((all) =>
+    all.map((card) => {
+      const box = card.getBoundingClientRect();
+      const name = card.querySelector("strong")!.getBoundingClientRect();
+      const text = card.querySelector("span")!.getBoundingClientRect();
+      return { top: box.top, left: box.left, width: box.width, height: box.height, name: name.top, text: text.top };
+    }),
+  );
+  expect(cards).toHaveLength(4);
+  const rows = new Map<number, typeof cards>();
+  for (const card of cards) rows.set(Math.round(card.top), [...(rows.get(Math.round(card.top)) ?? []), card]);
+  expect([...rows.values()].map((row) => row.length)).toEqual(Array(4 / across).fill(across));
+  for (const row of rows.values()) {
+    for (const card of row) {
+      expect(Math.abs(card.height - row[0].height)).toBeLessThan(1);
+      expect(Math.abs(card.width - row[0].width)).toBeLessThan(1);
+      expect(Math.abs(card.name - row[0].name)).toBeLessThan(1);
+      expect(Math.abs(card.text - row[0].text)).toBeLessThan(1);
+    }
+  }
+  // Every card is as wide as the others, whichever row it is on.
+  expect(Math.max(...cards.map((one) => one.width)) - Math.min(...cards.map((one) => one.width))).toBeLessThan(1);
+}
+
+/** Nothing on the page reaches past the window's right edge, the side column included. */
+async function nothingWiderNow(page: Page): Promise<void> {
+  const past = await page.evaluate(() =>
+    [...document.querySelectorAll(".wizard *")]
+      .filter((one) => one.getBoundingClientRect().right > window.innerWidth + 0.5)
+      .map((one) => `${one.tagName}.${one.className}`),
+  );
+  expect(past).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
 }
 
 /** A select by its label alone: a select's accessible name also holds its options. */
@@ -179,6 +261,61 @@ test.describe("the first-run wizard, in English", () => {
   });
 });
 
+test.describe("the first-run wizard at the desktop app's smallest window", () => {
+  test.use({ locale: "en-US", viewport: { width: 1000, height: 700 } });
+
+  test("radio cards, the step title and the side column fit 1000 x 700", async ({ page }) => {
+    await page.goto(BASE);
+    await security(page, { cont: "Continue", stored: "I have stored this somewhere other than this computer" });
+    const title = page.getByRole("heading", { name: "Name your household" });
+    await expect(title).toBeVisible();
+    await expect(title).toBeFocused();
+    await expect.poll(() => title.evaluate((one) => getComputedStyle(one).outlineStyle)).toBe("none");
+    await cardsAreRows(page);
+    const about = page.locator(".wizard-about");
+    await expect(about).toContainText("You can invite others later from Admin.");
+    await nothingWider(page);
+    await next(page, "Continue");
+    await next(page, "Continue");
+
+    // #471: two by two at this width, and the import choice makes only what
+    // reports need, then lands on One-time Import, open.
+    await expect(page.getByRole("heading", { name: "Pick your starting categories" })).toBeVisible();
+    await presetsAreEven(page, 2);
+    await page.getByRole("button", { name: /I'll bring my data from another app/ }).click();
+    await presetsAreEven(page, 2);
+    await nothingWider(page);
+    await next(page, "Continue");
+    await next(page, "Skip for now");
+    await expect(page.getByText("I'll bring my data from another app · Opens One-time Import next")).toBeVisible();
+    await next(page, "Create my household");
+    await expect(page.getByRole("heading", { name: "You're set up" })).toBeVisible();
+
+    const [household] = await api<Household[]>(page, "/households");
+    const groups = await api<{ name: string; categories: { name: string }[] }[]>(page, `/households/${household.id}/categories`);
+    expect(groups.map((group) => [group.name, group.categories.map((one) => one.name)])).toEqual([["Income", ["Reimbursements"]]]);
+
+    await next(page, "Bring your data from another app");
+    await expect(page.getByRole("dialog", { name: "One-time Import" })).toBeVisible();
+    await expect(page.locator("#one-time-import")).toBeAttached();
+  });
+
+});
+
+test.describe("the first-run wizard on a wide window", () => {
+  test.use({ locale: "en-US", viewport: { width: 1440, height: 900 } });
+
+  test("the category cards stay an even two by two", async ({ page }) => {
+    await page.goto(BASE);
+    await security(page, { cont: "Continue", stored: "I have stored this somewhere other than this computer" });
+    await next(page, "Continue");
+    await next(page, "Continue");
+    await expect(page.getByRole("heading", { name: "Pick your starting categories" })).toBeVisible();
+    await presetsAreEven(page, 2);
+    await nothingWider(page);
+  });
+});
+
 test.describe("the first-run wizard on a phone", () => {
   test.use({ locale: "pt-BR", viewport: { width: 360, height: 740 } });
 
@@ -190,10 +327,13 @@ test.describe("the first-run wizard on a phone", () => {
     await security(page, { cont: "Continuar", stored: "Guardei isto em outro lugar além deste computador" });
     await expect(page.locator(".wizard-progress")).toContainText("Passo 7 de 11");
     await expect(page.locator(".wizard-progress")).toContainText("Sua casa · Casa");
-    const wide = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
-    expect(wide).toBe(false);
+    await cardsAreRows(page);
+    await nothingWider(page);
     await next(page, "Continuar");
     await next(page, "Continuar");
+    await expect(page.getByRole("heading", { name: "Escolha as categorias iniciais" })).toBeVisible();
+    await presetsAreEven(page, 1);
+    await nothingWider(page);
     await next(page, "Continuar");
     await next(page, "Pular por enquanto");
     await next(page, "Criar minha casa");

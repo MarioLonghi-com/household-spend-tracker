@@ -24,7 +24,7 @@ Los pasos están en una barra lateral (una barra de progreso en el móvil). **At
 5. Guarda tu código de recuperación: **Copiar** o **Guardar en archivo**, y marca **Lo he guardado en otro sitio que no es este ordenador**.
 6. Indica para quién es el hogar (solo sirve para sugerir un nombre) y pon el **Nombre del hogar** y su **Color**.
 7. Elige un **País**. Sugiere la **Moneda base**, el **Formato de fecha** y el **Primer día de la semana**, y una vista previa muestra el resultado.
-8. Elige las categorías iniciales: **Recomendado**, **Lo esencial**, **Empezar vacío** o **Traer de YNAB** si está disponible. Desmarca lo que no vayas a usar nunca; *Ingresos* y *Reembolsos* se quedan, marcadas con **lo usan los informes**.
+8. Elige las categorías iniciales: **Recomendado**, **Lo esencial**, **Empezar vacío** o **Traeré mis datos de otra app**, que crea solo *Ingresos* y *Reembolsos* y abre la importación al terminar la configuración. Desmarca lo que no vayas a usar nunca; *Ingresos* y *Reembolsos* se quedan, marcadas con **lo usan los informes**.
 9. Si quieres, añade una primera cuenta con una **Fecha de apertura** (puede ser de hace años) y un **Saldo inicial**, o pulsa **Omitir por ahora**. Un archivo CSV u OFX que sueltes aquí se abre en Importar al terminar.
 10. Revisa el resumen, usa **Cambiar** para corregir una respuesta y pulsa **Crear mi hogar**.
 

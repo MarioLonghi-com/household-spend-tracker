@@ -24,7 +24,7 @@ The steps sit on a rail at the side (a progress bar on a phone). **Back**, or a 
 5. Keep your recovery code: **Copy** or **Save as file**, then tick **I have stored this somewhere other than this computer**.
 6. Say who the household is for (this only suggests a name), then set the **Household name** and its **Colour**.
 7. Pick a **Country**. It suggests the **Base currency**, the **Date format** and the **First day of the week**, and a preview shows the result.
-8. Choose starting categories: **Recommended**, **Essentials**, **Start empty**, or **Bring from YNAB** where it is offered. Untick anything you will never use; *Income* and *Reimbursements* stay, marked **needed by reports**.
+8. Choose starting categories: **Recommended**, **Essentials**, **Start empty**, or **I'll bring my data from another app**, which makes only *Income* and *Reimbursements* and opens the import once setup is done. Untick anything you will never use; *Income* and *Reimbursements* stay, marked **needed by reports**.
 9. Optionally add a first account with an **Opening date** (years back if you like) and an **Opening balance**, or **Skip for now**. A CSV or OFX file dropped here opens in Import once setup is done.
 10. Check the summary, use **Change** to fix an answer, and press **Create my household**.
 

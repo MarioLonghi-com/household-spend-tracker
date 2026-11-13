@@ -49,10 +49,29 @@ export const YNAB_DEVELOPER_URL = "https://app.ynab.com/settings/developer";
 
 export function OneTimeImport({
   household,
+  startOpen = false,
+  onOpened,
 }: {
   household: Household;
+  /**
+   * Scroll to the section and open the import as the page draws: the
+   * first-run wizard's way here when the data is to come from another app
+   * (#471). The menu's way leaves it closed.
+   */
+  startOpen?: boolean;
+  /** Called once it has opened that way, so a later visit does not reopen it. */
+  onOpened?: () => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(startOpen);
+  const section = useRef<HTMLElement>(null);
+  const opened = useRef(onOpened);
+  opened.current = onOpened;
+  useEffect(() => {
+    if (!startOpen) return;
+    section.current?.scrollIntoView?.({ block: "start" });
+    setOpen(true);
+    opened.current?.();
+  }, [startOpen]);
   // A stray backdrop click or Escape would otherwise drop every mapping made so far.
   const inProgress = useRef(false);
   const dismiss = () => {
@@ -61,7 +80,7 @@ export function OneTimeImport({
     setOpen(false);
   };
   return (
-    <section className="card" aria-labelledby="one-time-import-title">
+    <section className="card" id="one-time-import" ref={section} aria-labelledby="one-time-import-title">
       <h2 id="one-time-import-title" className="section-title">
         <Trans comment="Heading on the one-time import">
           One-time Import

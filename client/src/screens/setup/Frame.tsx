@@ -62,7 +62,7 @@ export function Frame({
   const heading = useRef<HTMLHeadingElement>(null);
   const step = steps[at];
   // Each step change moves focus to its title, so a screen reader starts
-  // there; `:focus:not(:focus-visible)` keeps the ring off for the mouse.
+  // there. No ring on it (`styles/setup.css`): Tab never lands on it (#470).
   const first = useRef(true);
   useEffect(() => {
     if (first.current) {
