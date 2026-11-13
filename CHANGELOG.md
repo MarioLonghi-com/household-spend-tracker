@@ -30,6 +30,42 @@ history this repository does not have.
 
 ---
 
+## 0.17.1 — 2026-11-13
+
+**Reversible: none** — no migration in this release. To go back to
+`0.17.0`, use *Go back to 0.17.0* under Updates, or follow *Going back after
+a successful update* in `deploy/UPGRADING.md`. From a checkout, check out
+`v0.17.0` and restart.
+
+Fixes to 0.17.0's first-run wizard (#470, #471), and the Mac build declares
+its export compliance so App Store Connect no longer holds it.
+
+### Fixed
+
+- First-run wizard: on the *Household* step each choice's radio sits to the
+  left of its title again, instead of centred on a line of its own above it;
+  the step title no longer wears a thick focus ring when the wizard moves to
+  it; and *About this step* no longer runs off the right edge of a
+  1000-pixel window; where the window is too narrow for it beside the step,
+  it moves under the step. The notes that said to invite people, or to add
+  another household, "from Household" now say *Admin*, where both are, in
+  all four languages (#470).
+- First-run wizard, *Categories*: the four starting-category cards are one
+  even grid, two by two on a desktop and one per row on a phone, never three
+  and one, with the cards in a row one height and their names and
+  descriptions level; the chosen one is marked inside its own box. *Bring
+  from YNAB* is now **I'll bring my data from another app**, offered on every
+  edition: it creates only Income and Reimbursements, and after setup its
+  next step opens the import itself -- One-time Import on the Household page,
+  already open, where that import is offered, and Import otherwise -- rather
+  than just the Household page. The review's *Categories* row says which
+  one opens (#471).
+- The Mac App Store build now declares its export compliance itself (it
+  uses only exempt encryption), so App Store Connect no longer holds each
+  build until the encryption question is answered by hand, and the release
+  job no longer waits on that (0.17.0's did). `package-mas.sh` refuses an
+  app without the declaration.
+
 ## 0.17.0 — 2026-11-13
 
 **Reversible: clean** — one migration.

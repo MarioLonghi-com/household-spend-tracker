@@ -1796,6 +1796,12 @@ msgstr "Namn"
 msgid "Dismiss without copying? The link cannot be shown again."
 msgstr "Stäng utan att kopiera? Länken kan inte visas igen."
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: add another household from Admin when you need one. On this computer only you sign in to any of them."
+msgstr "Sedan: lägg till ett hushåll till under Administration när du behöver. På den här datorn är det bara du som loggar in i dem."
+
 #: src/screens/ynab/results.tsx
 msgid "Already in the ledger"
 msgstr "Finns redan i boken"
@@ -2883,12 +2889,6 @@ msgstr "Sparkonto"
 msgid "{0, plural, one {# change to the instance itself (people, settings)} other {# changes to the instance itself (people, settings)}}"
 msgstr "{0, plural, one {# ändring av själva instansen (personer, inställningar)} other {# ändringar av själva instansen (personer, inställningar)}}"
 
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: invite your housemates from Household."
-msgstr "Sedan: bjud in de du bor med under Hushåll."
-
 #: src/screens/Register.tsx
 msgid "A split needs at least two parts"
 msgstr "En uppdelning behöver minst två delar"
@@ -3528,12 +3528,6 @@ msgstr "Den länken fungerar inte"
 #: src/screens/Register.tsx
 msgid "{0, plural, one {Also on {1} other transaction — the same file, stored once.} other {Also on {2} other transactions — the same file, stored once.}}"
 msgstr "{0, plural, one {Även på {1} annan transaktion – samma fil, sparad en gång.} other {Även på {2} andra transaktioner – samma fil, sparad en gång.}}"
-
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: add another household from Household when you need one, and invite only the people it is for."
-msgstr "Sedan: lägg till ett hushåll till under Hushåll när du behöver, och bjud bara in dem det gäller."
 
 #. Menu item and the name of its screen. See GLOSSARY.md
 #: src/App.tsx
@@ -6203,12 +6197,6 @@ msgstr "Datakatalog"
 msgid "The file itself"
 msgstr "Själva filen"
 
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: add another household from Household when you need one. On this computer only you sign in to any of them."
-msgstr "Sedan: lägg till ett hushåll till under Hushåll när du behöver. På den här datorn är det bara du som loggar in i dem."
-
 #. Button on the Admin screen: verb, let an account sign in again
 #: src/screens/Admin.tsx
 msgid "Re-enable"
@@ -6510,6 +6498,12 @@ msgstr "Inga konton är markerade, så det finns inget att visa. Markera ett i k
 #: src/screens/Admin.tsx
 msgid "fills in the acceptance screen"
 msgstr "fylls i på godkännandeskärmen"
+
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite your partner from Admin."
+msgstr "Sedan: bjud in din partner under Administration."
 
 #. Net Worth explanation, point 2
 #: src/screens/reports/NetWorth.tsx
@@ -7677,6 +7671,12 @@ msgstr "Nya koder skapade. Alla tidigare koder, använda eller inte, har slutat 
 #: src/screens/ExchangeRates.tsx
 msgid "Would fetch {0} from {1}, from {2} to today."
 msgstr "Skulle hämta {0} från {1}, från {2} till i dag."
+
+#. Setup wizard, Categories: label; Import is the menu's statement import screen. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Setup will finish with only what reports need, then open Import."
+msgstr "Installationen avslutas med bara det rapporterna behöver och öppnar sedan Importera."
 
 #. Sentence on the Register screen
 #: src/screens/Register.tsx
@@ -9315,7 +9315,7 @@ msgstr "Månadsgenomsnitt"
 msgid "Stays on {runningUpdater}, which is newer than the updater that ships with {to}."
 msgstr "Stannar på {runningUpdater}, som är nyare än uppdateraren som följer med {to}."
 
-#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#. Setup wizard, Review & finish: what setup opens after the data-from-another-app choice. See GLOSSARY.md
 #: src/screens/setup/copy.ts
 msgctxt "setup wizard"
 msgid "Opens One-time Import next"
@@ -9631,12 +9631,6 @@ msgstr "Alla"
 #: src/screens/Accounts.tsx
 msgid "a pocket's or a card product's name"
 msgstr "namnet på en sparficka eller en kortprodukt"
-
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: invite the other adults from Household."
-msgstr "Sedan: bjud in de andra vuxna under Hushåll."
 
 #. Column value on the Accounts screen: how many transactions name a suggested identifier
 #: src/screens/Accounts.tsx
@@ -11087,6 +11081,12 @@ msgstr "Den här instansen kör {0}."
 msgid "No, just this one"
 msgstr "Nej, bara den här"
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: add another household from Admin when you need one, and invite only the people it is for."
+msgstr "Sedan: lägg till ett hushåll till under Administration när du behöver, och bjud bara in dem det gäller."
+
 #. What kind of row changed, lower case, singular, in History beside its id
 #: src/lib/historyWords.ts
 msgctxt "history table"
@@ -11175,6 +11175,12 @@ msgstr "Uppdatera bara uppdateraren"
 #: src/screens/SignIn.tsx
 msgid "Not now"
 msgstr "Inte nu"
+
+#. Setup wizard, Review & finish: a next step on the finish screen: its name. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Bring your data from another app"
+msgstr "Ta med dina data från en annan app"
 
 #. Link on Application management: download every language's suggestions as one JSON file
 #: src/screens/TranslationReview.tsx
@@ -11326,6 +11332,12 @@ msgstr "kategorigrupp"
 msgid "week start"
 msgstr "veckans början"
 
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite the other adults from Admin."
+msgstr "Sedan: bjud in de andra vuxna under Administration."
+
 #. Where an update failed
 #: src/screens/Updates.tsx
 msgid "while recording the update"
@@ -11344,6 +11356,12 @@ msgstr "Inget att föreslå."
 #: src/screens/Updates.tsx
 msgid "A newer updater ({version}) is available:"
 msgstr "Det finns en nyare uppdaterare ({version}):"
+
+#. Setup wizard, Categories: a preset of starter categories: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "No starter categories: your categories come with the import."
+msgstr "Inga färdiga kategorier: dina kategorier följer med importen."
 
 #: src/screens/Register.tsx
 msgid "Table text size"
@@ -11714,6 +11732,12 @@ msgstr "Schema"
 msgid "Updated to {target} at {at} in {took}."
 msgstr "Uppdaterad till {target} {at} på {took}."
 
+#. Setup wizard, Household: explanation in the "About this step" panel. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "The colour tells your households apart if you ever keep more than one. You can invite others later from Admin."
+msgstr "Färgen skiljer hushållen åt om du någon gång har fler än ett. Du kan bjuda in andra senare under Administration."
+
 #: src/screens/Admin.tsx
 msgid "Owner — can administer this instance"
 msgstr "Ägare – kan administrera instansen"
@@ -11727,6 +11751,12 @@ msgstr "{n} tecken"
 #: ../desktop/src/words.ts
 msgid "Sign in to carry on."
 msgstr "Logga in för att fortsätta."
+
+#. Setup wizard, Review & finish: a next step on the finish screen: its description; "it" is the other app. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Import a CSV or OFX file exported from it."
+msgstr "Importera en CSV- eller OFX-fil som du har exporterat från den."
 
 #: src/screens/Rules.tsx
 msgid "It runs <0>before</0> the rules that name a payee, and hands them what is left — so one <1>COMPRA INTERNET</1> rule plus your existing <2>Amazon</2> rule covers the whole Amazon-over-Santander family. Several of these compose: each one gets a turn, in order."
@@ -11975,6 +12005,12 @@ msgstr "Boken som den här processen betjänar."
 #: src/screens/Admin.tsx
 msgid "A one-time link. The role travels on it, so you can hand somebody ownership without ever holding their password."
 msgstr "En engångslänk. Rollen följer med den, så du kan ge någon ägarskap utan att någonsin ha deras lösenord."
+
+#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Next: invite your housemates from Admin."
+msgstr "Sedan: bjud in de du bor med under Administration."
 
 #. A changed field in History's detail, lower case: whether work should pay it back
 #: src/lib/historyWords.ts
@@ -13020,6 +13056,12 @@ msgstr "Kurs vid månadsslut"
 msgid "What is it for"
 msgstr "Vad den är till för"
 
+#. Setup wizard, Review: what setup opens next; Import is the menu's statement import screen. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "Opens Import next"
+msgstr "Öppnar Importera sedan"
+
 #. Net Worth report: the accounts that do not say which country they are in
 #. Net Worth report: the accounts that do not say which country they are in
 #: src/screens/reports/NetWorth.tsx
@@ -13726,6 +13768,12 @@ msgstr "Hämta igen"
 msgid "U — Uncleared"
 msgstr "U – Ej bokförda"
 
+#. Setup wizard, Review & finish: a next step on the finish screen: its description. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "One-time Import, on the Household page."
+msgstr "Engångsimport, på sidan Hushåll."
+
 #. Label on the Your account panel of the desktop app, on a Mac with Touch ID
 #: src/screens/Profile.tsx
 msgid "Open with Touch ID"
@@ -13991,12 +14039,6 @@ msgstr "Varje rad den ändrade"
 msgid "Turn off Touch ID"
 msgstr "Stäng av Touch ID"
 
-#. Setup wizard, Household: explanation in the "About this step" panel. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "The colour tells your households apart if you ever keep more than one. You can invite others later from Household."
-msgstr "Färgen skiljer hushållen åt om du någon gång har fler än ett. Du kan bjuda in andra senare under Hushåll."
-
 #: src/screens/Receipts.tsx
 msgid "This receipt carries no date of its own, so the window is around when it was uploaded."
 msgstr "Det här kvittot har inget eget datum, så fönstret ligger runt när det laddades upp."
@@ -14030,12 +14072,6 @@ msgstr "via {via}"
 #: src/screens/AcceptInvite.tsx
 msgid "{inviter} invited you to {PRODUCT} as a member."
 msgstr "{inviter} har bjudit in dig till {PRODUCT} som medlem."
-
-#. Setup wizard, Household: a choice of who the household is for: what to do after setup. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Next: invite your partner from Household."
-msgstr "Sedan: bjud in din partner under Hushåll."
 
 #. Screen-reader name of the left arrow on the Income vs Expense report's month map
 #: src/screens/reports/ReportGrid.tsx
@@ -14402,12 +14438,6 @@ msgstr "<0>{0} andra rader har samma mottagare</0> och ingen egen kategori."
 msgid "Your password and your second step for {email} were reset from the server on {when}. Every browser that was signed in as you has been signed out. Set both again below."
 msgstr "Ditt lösenord och ditt andra steg för {email} återställdes från servern den {when}. Alla webbläsare där du var inloggad har loggats ut. Ställ in båda igen nedan."
 
-#. Setup wizard, Categories: a preset of starter categories: its name. See GLOSSARY.md
-#: src/screens/setup/copy.ts
-msgctxt "setup wizard"
-msgid "Bring from YNAB"
-msgstr "Hämta från YNAB"
-
 #. Application management: what sql.log holds; “Verbose, with SQL” is a logging style's name
 #: src/lib/labels.ts
 msgid "Only written at the “Verbose, with SQL” style, and it holds the ledger in plain text. Its own file so the other two stay safe to share."
@@ -14494,6 +14524,12 @@ msgstr "Tillämpad"
 #: src/screens/Admin.tsx
 msgid "Who"
 msgstr "Vem"
+
+#. Setup wizard, Categories: a preset: its name; the history comes from the app used before. See GLOSSARY.md
+#: src/screens/setup/copy.ts
+msgctxt "setup wizard"
+msgid "I'll bring my data from another app"
+msgstr "Jag tar med mina data från en annan app"
 
 #: src/screens/Rules.tsx
 msgid "Empty is the usual answer: <0>PAGO MOVIL BAR MARISOL</0> becomes <1>Bar Marisol</1>."

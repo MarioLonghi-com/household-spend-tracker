@@ -62,11 +62,21 @@ export function HouseholdPage({
   household,
   user,
   onChanged,
+  section = null,
+  onSectionShown,
 }: {
   household: Household;
   user: User;
   /** The name and the colour are in the shell, so it has to hear about a save. */
   onChanged: () => void;
+  /**
+   * `one-time-import` when the page was opened to bring the data from another
+   * app (the first-run wizard's next step, #471): One-time Import is scrolled
+   * to and opened. Null on a visit from the menu.
+   */
+  section?: "one-time-import" | null;
+  /** Called once it has been opened, so it happens once. */
+  onSectionShown?: () => void;
 }) {
   return (
     <>
@@ -82,7 +92,11 @@ export function HouseholdPage({
       <Stats household={household} />
       <Settings household={household} onSaved={onChanged} />
       <People household={household} user={user} />
-      <OneTimeImport household={household} />
+      <OneTimeImport
+        household={household}
+        startOpen={section === "one-time-import"}
+        onOpened={onSectionShown}
+      />
     </>
   );
 }

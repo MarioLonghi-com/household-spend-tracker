@@ -34,6 +34,13 @@ if xattr -r "$APP" 2>/dev/null | grep -q "com.apple.quarantine"; then
   xattr -r "$APP" | grep "com.apple.quarantine" | head -3 >&2
   exit 2
 fi
+# Export compliance is declared in the app (electron-builder.yml, mac.extendInfo):
+# without the key App Store Connect holds every build until someone answers
+# the encryption question by hand.
+if [ "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$APP/Contents/Info.plist" 2>/dev/null)" != "false" ]; then
+  echo "$APP declares no ITSAppUsesNonExemptEncryption=false: App Store Connect would hold the build for the export-compliance question" >&2
+  exit 2
+fi
 ID="$(security find-identity -v | grep "$WHO" | head -1 | awk '{print $2}')"
 [ -n "$ID" ] || { echo "no \"$WHO\" identity in the keychain" >&2; exit 2; }
 productbuild --component "$APP" /Applications --sign "$ID" "$OUT"

@@ -10,7 +10,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 vi.mock("../lib/api", () => ({
@@ -27,6 +27,7 @@ vi.mock("../lib/api", () => ({
 
 import { api } from "../lib/api";
 import { OneTimeImportNote } from "./Import";
+import { OneTimeImport } from "./OneTimeImport";
 import { Origin } from "./Register";
 import type { Household, OneTimePriorImport, TransactionOrigin } from "../lib/types";
 
@@ -160,5 +161,30 @@ describe("where a row came from", () => {
     });
     const said = await screen.findByText(/Imported from/);
     expect(said.textContent).toContain("march.csv, line 12");
+  });
+});
+
+describe("the One-time Import section opened by the first-run wizard (#471)", () => {
+  it("opens the import as the page draws, once, and says so", async () => {
+    const onOpened = vi.fn();
+    const scrolled = vi.fn();
+    const was = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = scrolled;
+    onTestFinished(() => {
+      Element.prototype.scrollIntoView = was;
+    });
+    wrap(<OneTimeImport household={HOUSEHOLD} startOpen onOpened={onOpened} />);
+    expect(await screen.findByRole("dialog", { name: "One-time Import" })).toBeTruthy();
+    expect(onOpened).toHaveBeenCalledTimes(1);
+    expect(scrolled).toHaveBeenCalledTimes(1);
+    expect((scrolled.mock.contexts[0] as HTMLElement).id).toBe("one-time-import");
+  });
+
+  it("stays closed from the menu", () => {
+    const onOpened = vi.fn();
+    wrap(<OneTimeImport household={HOUSEHOLD} onOpened={onOpened} />);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByRole("button", { name: "Start a one-time import" })).toBeTruthy();
+    expect(onOpened).not.toHaveBeenCalled();
   });
 });
