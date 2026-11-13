@@ -52,6 +52,11 @@ history this repository does not have.
   already open, where that import is offered, and Import otherwise -- rather
   than just the Household page. The review's *Categories* row says which
   one opens (#471).
+- The Mac App Store build now declares its export compliance itself (it
+  uses only exempt encryption), so App Store Connect no longer holds each
+  build until the encryption question is answered by hand, and the release
+  job no longer waits on that (0.17.0's did). `package-mas.sh` refuses an
+  app without the declaration.
 
 ## 0.17.0 — 2026-11-13
 
