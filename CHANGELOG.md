@@ -30,6 +30,15 @@ history this repository does not have.
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- The Mac App Store upload step reads Apple's answer again. Xcode 26.3's
+  altool reports `BUILD-STATUS: VALID`, which `upload-mas.sh` did not
+  recognise, so 0.17.0's and 0.17.1's release jobs waited half an hour on
+  builds Apple had accepted at once, and went red.
+
 ## 0.17.1 — 2026-11-13
 
 **Reversible: none** — no migration in this release. To go back to
