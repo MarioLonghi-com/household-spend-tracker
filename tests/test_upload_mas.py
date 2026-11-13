@@ -95,6 +95,29 @@ def test_altool_26s_processing_state_is_read(tmp_path: pathlib.Path) -> None:
     assert "Processing State: PROCESSING" in done.stdout
 
 
+def test_xcode_26_3s_build_status_is_read(tmp_path: pathlib.Path) -> None:
+    """The answer v0.17.1's run got, word for word: VALID at once, which the
+    script did not read and so waited its whole patience out."""
+    env = _fake_altool(
+        tmp_path,
+        'echo "Running altool at path \'/Applications/Xcode_26.3.app/x/altool\'..."\n'
+        'echo "= BUILD-STATUS: VALID"\n'
+        'echo "= DELIVERY-UUID: D6"',
+    )
+    done = subprocess.run(["sh", str(SCRIPT), "--status", "D6"], env=env, capture_output=True, text=True)
+    assert done.returncode == 0, done.stderr
+    assert _calls(tmp_path) == 1
+    assert "delivery D6: VALID" in done.stdout
+
+
+def test_xcode_26_3s_refusal_stops_at_once(tmp_path: pathlib.Path) -> None:
+    env = _fake_altool(tmp_path, 'echo "= BUILD-STATUS: INVALID"')
+    done = subprocess.run(["sh", str(SCRIPT), "--status", "D7"], env=env, capture_output=True, text=True)
+    assert done.returncode == 1
+    assert _calls(tmp_path) == 1
+    assert "Apple refused the build" in done.stderr
+
+
 def test_altool_26s_refusal_stops_at_once(tmp_path: pathlib.Path) -> None:
     env = _fake_altool(tmp_path, 'echo "DeliveryID \'D5\' Processing State: FAILED"')
     done = subprocess.run(["sh", str(SCRIPT), "--status", "D5"], env=env, capture_output=True, text=True)

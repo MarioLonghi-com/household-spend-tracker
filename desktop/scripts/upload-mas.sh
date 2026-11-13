@@ -22,12 +22,15 @@ asked() {
   xcrun altool "$@" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1
 }
 
-# The processing state in an altool answer: `processingState: VALID` or
-# `Processing State: VALID` from altool 26, `IMPORT-STATUS: VALID` from the
-# older format. Empty when there is none -- still processing, or not an answer.
+# The processing state in an altool answer: `= BUILD-STATUS: VALID` is what
+# Xcode 26.3's altool on the macos-15 runner prints (v0.17.1's run: VALID on
+# the first answer, then 30 minutes waited because this did not read it);
+# `processingState: VALID` or `Processing State: VALID` from other altool 26
+# builds, `IMPORT-STATUS: VALID` from the older format. Empty when there is
+# none -- still processing, or not an answer.
 state_in() {
   printf '%s\n' "$1" |
-    sed -n -E "s/^.*(processingState|[Pp]rocessing [Ss]tate|IMPORT-STATUS)[\"']?[:=] *[\"']?([A-Z_]+).*$/\2/p" |
+    sed -n -E "s/^.*(BUILD-STATUS|processingState|[Pp]rocessing [Ss]tate|IMPORT-STATUS)[\"']?[:=] *[\"']?([A-Z_]+).*$/\2/p" |
     head -1
 }
 
