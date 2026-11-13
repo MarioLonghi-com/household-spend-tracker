@@ -100,7 +100,22 @@ async function security(page: Page, words: { cont: string; stored: string }) {
  * Each radio card's radio and its title start on the same line, the radio to
  * the left (#470), and the step's title wears no focus ring after a click.
  */
+// Layout is measured once per call, so each check retries until it holds: a
+// step that has just changed may still be laying out, and under the full
+// suite's load one measurement once caught it half way (0.17.1).
 async function cardsAreRows(page: Page): Promise<void> {
+  await expect(async () => cardsAreRowsNow(page)).toPass({ timeout: 5_000 });
+}
+
+async function presetsAreEven(page: Page, across: number): Promise<void> {
+  await expect(async () => presetsAreEvenNow(page, across)).toPass({ timeout: 5_000 });
+}
+
+async function nothingWider(page: Page): Promise<void> {
+  await expect(async () => nothingWiderNow(page)).toPass({ timeout: 5_000 });
+}
+
+async function cardsAreRowsNow(page: Page): Promise<void> {
   const cards = await page.locator(".wizard-choices .wizard-choice-head").evaluateAll((heads) =>
     heads.map((head) => {
       const radio = head.querySelector("input[type=radio]")!.getBoundingClientRect();
@@ -122,7 +137,7 @@ async function cardsAreRows(page: Page): Promise<void> {
  * every row full -- never three and one -- and in each row the cards share a
  * top, a height and a width, and their names and descriptions start level.
  */
-async function presetsAreEven(page: Page, across: number): Promise<void> {
+async function presetsAreEvenNow(page: Page, across: number): Promise<void> {
   const cards = await page.locator(".wizard-presets > .wizard-preset").evaluateAll((all) =>
     all.map((card) => {
       const box = card.getBoundingClientRect();
@@ -148,7 +163,7 @@ async function presetsAreEven(page: Page, across: number): Promise<void> {
 }
 
 /** Nothing on the page reaches past the window's right edge, the side column included. */
-async function nothingWider(page: Page): Promise<void> {
+async function nothingWiderNow(page: Page): Promise<void> {
   const past = await page.evaluate(() =>
     [...document.querySelectorAll(".wizard *")]
       .filter((one) => one.getBoundingClientRect().right > window.innerWidth + 0.5)
@@ -255,7 +270,7 @@ test.describe("the first-run wizard at the desktop app's smallest window", () =>
     const title = page.getByRole("heading", { name: "Name your household" });
     await expect(title).toBeVisible();
     await expect(title).toBeFocused();
-    expect(await title.evaluate((one) => getComputedStyle(one).outlineStyle)).toBe("none");
+    await expect.poll(() => title.evaluate((one) => getComputedStyle(one).outlineStyle)).toBe("none");
     await cardsAreRows(page);
     const about = page.locator(".wizard-about");
     await expect(about).toContainText("You can invite others later from Admin.");

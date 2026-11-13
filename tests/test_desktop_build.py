@@ -48,7 +48,7 @@ def test_the_mac_build_declares_exempt_encryption() -> None:
 
     Without `ITSAppUsesNonExemptEncryption`, App Store Connect holds each build
     until someone answers the encryption question, and the release job's status
-    wait holds with it (v0.17.0). The answer is "exempt" (Mario, 2026-11-13):
+    wait holds with it (v0.17.0). The answer is "exempt" (decided 2026-11-13):
     HTTPS, the OS's own, and standard algorithms protecting the person's own
     data. The `mas` target inherits `mac`'s extendInfo, so it must not set its
     own, and package-mas.sh checks the packaged Info.plist for it.
