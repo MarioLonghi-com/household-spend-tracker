@@ -43,8 +43,8 @@ ARG PY_RUN=chainguard-run
 # from the registry's manifest endpoint and checked against the SHA-256 of the
 # index itself. The tag stays beside the digest so Dependabot knows what to
 # look up; the digest is what is pulled.
-FROM cgr.dev/chainguard/python:latest-dev@sha256:630df1be3733f7b38d1b535872904248adfe23fbea4befcb08da47cb7436ddb2 AS chainguard-dev
-FROM cgr.dev/chainguard/python:latest@sha256:8c6e0d0a587455e8a8d145e20234d5ef5a531a1c052a7b9d76b155ccc7fcded2 AS chainguard-run
+FROM cgr.dev/chainguard/python:latest-dev@sha256:e0df0ab3cb72380c82f8c5513538152e822a6d8994252663060adea9fdc450c2 AS chainguard-dev
+FROM cgr.dev/chainguard/python:latest@sha256:b969ffa5d847b5acd28bd18b12d5b6631cb69c8289f03b309e19b68608724dc6 AS chainguard-run
 
 # --------------------------------------------------------------------------- #
 # **Pinned by digest.** This stage builds the JavaScript that ships, so a tag
